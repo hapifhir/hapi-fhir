@@ -10,7 +10,7 @@ The **RepositoryValidatingInterceptor** interceptor can be used to easily add th
 
 # Benefits and Limitations
 
-For a HAPI FHIR JPA Server, the RepositoryValidatingInterceptor is a very powerful option compared to the [Request and Response Validation](/docs/interceptors/built_in_server_interceptors.html#request_and_response_validation) that is also often used for validation. 
+For a HAPI FHIR JPA Server, the RepositoryValidatingInterceptor is a very powerful addition to the [Request and Response Validation](/docs/interceptors/built_in_server_interceptors.html#request_and_response_validation) that is also often used for validation. 
 
 ## Request and Response Validation
 
@@ -19,6 +19,8 @@ The *Request and Response Validation* interceptors examine incoming HTTP payload
 * It may miss validating data that is added or modified through Java API calls as opposed to through the HTTP endpoint.
 
 * It may miss validating data that is added or modified through other interceptors
+
+* It may provide you with a validated resource in your Java API so that you can make certain reasonable assumptions - eg. a required field does not need a null check. 
 
 * It is not able to validate changes coming from operations such as FHIR Patch, since the patch itself may pass validation, but may ultimately result in modifying a resource so that it is no longer valid.
 
@@ -31,6 +33,8 @@ This means that:
 * Repository validation applies to patch operations and validates the results of the resource after a patch is applied (but before the actual results are saved, in case the outcome of the validation operation should roll the operation back)
 
 * Repository validation requires pointcuts that are thrown directly by the storage engine, meaning that it can not be used from a plain server unless the plain server code manually invokes the same pointcuts. 
+
+* Repository validation does *NOT* provide your custom pre-storage business logical layer with any guarantees of the profile as the resource has not been hit by the proper pointcut. This means that you cannot make reasonable profile assumptions in your pre-storage logic handling the resource. 
 
 # Using the Repository Validating Interceptor
 
