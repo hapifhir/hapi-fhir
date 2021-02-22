@@ -16,10 +16,12 @@ import java.util.Arrays;
 
 public abstract class BaseMdmRulesR4Test extends BaseR4Test {
 	public static final String PATIENT_GIVEN = "patient-given";
+	public static final String PATIENT_GIVEN_FIRST = "patient-given-first";
 	public static final String PATIENT_FAMILY = "patient-last";
 
 	public static final double NAME_THRESHOLD = 0.8;
 	protected MdmFieldMatchJson myGivenNameMatchField;
+	protected MdmFieldMatchJson myFirstGivenNameMatchField;
 	protected String myBothNameFields;
 	protected MdmRulesJson myMdmRulesJson;
 
@@ -36,6 +38,7 @@ public abstract class BaseMdmRulesR4Test extends BaseR4Test {
 			.setResourceType("Patient")
 			.setResourcePath("name.given")
 			.setSimilarity(new MdmSimilarityJson().setAlgorithm(MdmSimilarityEnum.COSINE).setMatchThreshold(NAME_THRESHOLD));
+
 		myBothNameFields = String.join(",", PATIENT_GIVEN, PATIENT_FAMILY);
 	}
 

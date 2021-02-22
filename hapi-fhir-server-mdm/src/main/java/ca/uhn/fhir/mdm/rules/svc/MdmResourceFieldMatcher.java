@@ -21,6 +21,7 @@ package ca.uhn.fhir.mdm.rules.svc;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.mdm.api.MdmMatchEvaluation;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
@@ -71,9 +72,9 @@ public class MdmResourceFieldMatcher {
 		validate(theLeftResource);
 		validate(theRightResource);
 
-		FhirTerser terser = myFhirContext.newTerser();
-		List<IBase> leftValues = terser.getValues(theLeftResource, myResourcePath, IBase.class);
-		List<IBase> rightValues = terser.getValues(theRightResource, myResourcePath, IBase.class);
+		IFhirPath fhirPath = myFhirContext.newFhirPath();
+		List<IBase> leftValues = fhirPath.evaluate(theLeftResource, myResourcePath, IBase.class);
+		List<IBase> rightValues = fhirPath.evaluate(theRightResource, myResourcePath, IBase.class);
 		return match(leftValues, rightValues);
 	}
 

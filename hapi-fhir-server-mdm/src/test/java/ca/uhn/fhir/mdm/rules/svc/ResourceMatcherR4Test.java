@@ -7,12 +7,15 @@ import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.mdm.rules.matcher.MdmMatcherEnum;
+import ca.uhn.fhir.util.StopWatch;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -56,8 +59,8 @@ public class ResourceMatcherR4Test extends BaseMdmRulesR4Test {
 	@Test
 	public void testMetaphoneMatchResult() {
 		MdmResourceMatcherSvc matcherSvc = buildMatcher(buildNamePhoneRules(MdmMatcherEnum.METAPHONE));
-		MdmMatchOutcome result = matcherSvc.match(myLeft, myRight);
-		assertMatchResult(MdmMatchResultEnum.MATCH, 7L, 3.0, false, false, result);
+			MdmMatchOutcome result = matcherSvc.match(myLeft, myRight);
+			assertMatchResult(MdmMatchResultEnum.MATCH, 7L, 3.0, false, false, result);
 	}
 
 	@Test

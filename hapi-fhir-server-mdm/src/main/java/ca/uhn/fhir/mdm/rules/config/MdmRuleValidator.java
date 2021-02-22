@@ -23,6 +23,7 @@ package ca.uhn.fhir.mdm.rules.config;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
@@ -33,7 +34,9 @@ import ca.uhn.fhir.mdm.rules.json.MdmSimilarityJson;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 import ca.uhn.fhir.util.FhirTerser;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,16 +54,14 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 
 	private final FhirContext myFhirContext;
 	private final ISearchParamRetriever mySearchParamRetriever;
-	private final Class<? extends IBaseResource> myPatientClass;
-	private final Class<? extends IBaseResource> myPractitionerClass;
 	private final FhirTerser myTerser;
+	private final IFhirPath myFhirPath;
 
 	@Autowired
 	public MdmRuleValidator(FhirContext theFhirContext, ISearchParamRetriever theSearchParamRetriever) {
 		myFhirContext = theFhirContext;
-		myPatientClass = theFhirContext.getResourceDefinition("Patient").getImplementingClass();
-		myPractitionerClass = theFhirContext.getResourceDefinition("Practitioner").getImplementingClass();
 		myTerser = myFhirContext.newTerser();
+		myFhirPath = myFhirContext.newFhirPath();
 		mySearchParamRetriever = theSearchParamRetriever;
 	}
 
@@ -166,12 +167,21 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 			String path = theResourceType + "." + theFieldMatch.getResourcePath();
 			myTerser.getDefinition(implementingClass, path);
 		} catch (DataFormatException | ConfigurationException | ClassCastException e) {
+			//Fallback to attempting to FHIRPath evaluate it.
+			parseFhirPath(theResourceType, theFieldMatch);
+		}
+	}
+
+	private void parseFhirPath(String theResourceType, MdmFieldMatchJson theFieldMatchJson) {
+		try {
+			myFhirPath.parse(theResourceType);
+			myFhirPath.evaluate(new Patient(), theResourceType, IBase.class);
+		} catch (Exception theE) {
 			throw new ConfigurationException("MatchField " +
-				theFieldMatch.getName() +
+				theFieldMatchJson.getName() +
 				" resourceType " +
-				theFieldMatch.getResourceType() +
-				" has invalid path '" + theFieldMatch.getResourcePath() + "'.  " +
-				e.getMessage());
+				theFieldMatchJson.getResourceType() +
+				" has invalid path '" + theFieldMatchJson.getResourcePath() + "'.  It has also failed FHIRPath evaluation");
 		}
 	}
 
