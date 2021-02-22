@@ -84,22 +84,22 @@ As of HAPI FHIR 5.3.0, the *Identify Partition for Read* hook method may return 
 
 ## Non-Partitionable Resources
 
-Some resource types can not be placed in any partition other than the DEFAULT partition. For these resource types, the partition interceptor may return `null`. A RequestPartitionId object specifying the default partition may also be returned. In this case, a partition date may optionally be included.
+Some resource types can not be placed in any partition other than the DEFAULT partition. When a resource of one of these types is being created, the *STORAGE_PARTITION_IDENTIFY_CREATE* pointcut is invoked, but the hook method must return [defaultPartition()](https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/model/RequestPartitionId.html#defaultPartition()). A partition date may optionally be included.
 
 The following resource types may not be placed in any partition except the default partition:
 
-* Subscription
+* CapabilityStatement
+* CodeSystem
+* CompartmentDefinition
+* ConceptMap
+* NamingSystem
+* OperationDefinition
+* Questionnaire
 * SearchParameter
 * StructureDefinition
-* Questionnaire
-* CapabilityStatement
-* CompartmentDefinition
-* OperationDefinition
-* ConceptMap
-* CodeSystem
-* ValueSet
-* NamingSystem
 * StructureMap
+* Subscription
+* ValueSet
 
 ## Examples
 
