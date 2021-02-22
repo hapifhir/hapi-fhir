@@ -99,22 +99,48 @@ public class SearchParamRegistryImplTest {
 	@MockBean
 	private MatchUrlService myMatchUrlService;
 
-	@Test
-	void handleInit() {
-		assertEquals(25, mySearchParamRegistry.getActiveSearchParams("Patient").size());
+	@Configuration
+	@Import(RegisteredResourceListenerFactoryConfig.class)
+	static class SpringConfig {
+		@Bean
+		FhirContext fhirContext() {
+			return ourFhirContext;
+		}
 
-		IdDt idBad = new IdDt("SearchParameter/bad");
-		when(mySearchParamProvider.read(idBad)).thenThrow(new ResourceNotFoundException("id bad"));
+		@Bean
+		ModelConfig modelConfig() {
+			ModelConfig modelConfig = new ModelConfig();
+			modelConfig.setDefaultSearchParamsCanBeOverridden(true);
+			return modelConfig;
+		}
 
-		IdDt idGood = new IdDt("SearchParameter/good");
-		SearchParameter goodSearchParam = buildSearchParameter(Enumerations.PublicationStatus.ACTIVE);
-		when(mySearchParamProvider.read(idGood)).thenReturn(goodSearchParam);
+		@Bean
+		ISearchParamRegistry searchParamRegistry() {
+			return new SearchParamRegistryImpl();
+		}
 
-		List<IIdType> idList = new ArrayList<>();
-		idList.add(idBad);
-		idList.add(idGood);
-		mySearchParamRegistry.handleInit(idList);
-		assertEquals(26, mySearchParamRegistry.getActiveSearchParams("Patient").size());
+		@Bean
+		SearchParameterCanonicalizer searchParameterCanonicalizer(FhirContext theFhirContext) {
+			return new SearchParameterCanonicalizer(theFhirContext);
+		}
+
+		@Bean
+		IResourceChangeListenerRegistry resourceChangeListenerRegistry() {
+			return new ResourceChangeListenerRegistryImpl();
+		}
+
+		@Bean
+		ResourceChangeListenerCacheRefresherImpl resourceChangeListenerCacheRefresher() {
+			return new ResourceChangeListenerCacheRefresherImpl();
+		}
+
+		@Bean
+		InMemoryResourceMatcher inMemoryResourceMatcher() {
+			InMemoryResourceMatcher retval = mock(InMemoryResourceMatcher.class);
+			when(retval.canBeEvaluatedInMemory(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
+			return retval;
+		}
+
 	}
 
 	@Nonnull
@@ -147,6 +173,24 @@ public class SearchParamRegistryImplTest {
 		myResourceChangeListenerRegistry.clearCachesForUnitTest();
 		// Empty out the searchparam registry
 		mySearchParamRegistry.resetForUnitTest();
+	}
+
+	@Test
+	void handleInit() {
+		assertEquals(25, mySearchParamRegistry.getActiveSearchParams("Patient").size());
+
+		IdDt idBad = new IdDt("SearchParameter/bad");
+		when(mySearchParamProvider.read(idBad)).thenThrow(new ResourceNotFoundException("id bad"));
+
+		IdDt idGood = new IdDt("SearchParameter/good");
+		SearchParameter goodSearchParam = buildSearchParameter(Enumerations.PublicationStatus.ACTIVE);
+		when(mySearchParamProvider.read(idGood)).thenReturn(goodSearchParam);
+
+		List<IIdType> idList = new ArrayList<>();
+		idList.add(idBad);
+		idList.add(idGood);
+		mySearchParamRegistry.handleInit(idList);
+		assertEquals(26, mySearchParamRegistry.getActiveSearchParams("Patient").size());
 	}
 
 	@Test
@@ -287,50 +331,6 @@ public class SearchParamRegistryImplTest {
 		assertEquals(1, converted.getExtensions("http://foo").size());
 		IPrimitiveType<?> value = (IPrimitiveType<?>) converted.getExtensions("http://foo").get(0).getValue();
 		assertEquals("FOO", value.getValueAsString());
-	}
-
-	@Configuration
-	@Import(RegisteredResourceListenerFactoryConfig.class)
-	static class SpringConfig {
-		@Bean
-		FhirContext fhirContext() {
-			return ourFhirContext;
-		}
-
-		@Bean
-		ModelConfig modelConfig() {
-			ModelConfig modelConfig = new ModelConfig();
-			modelConfig.setDefaultSearchParamsCanBeOverridden(true);
-			return modelConfig;
-		}
-
-		@Bean
-		ISearchParamRegistry searchParamRegistry() {
-			return new SearchParamRegistryImpl();
-		}
-
-		@Bean
-		SearchParameterCanonicalizer searchParameterCanonicalizer(FhirContext theFhirContext) {
-			return new SearchParameterCanonicalizer(theFhirContext);
-		}
-
-		@Bean
-		IResourceChangeListenerRegistry resourceChangeListenerRegistry() {
-			return new ResourceChangeListenerRegistryImpl();
-		}
-
-		@Bean
-		ResourceChangeListenerCacheRefresherImpl resourceChangeListenerCacheRefresher() {
-			return new ResourceChangeListenerCacheRefresherImpl();
-		}
-
-		@Bean
-		InMemoryResourceMatcher inMemoryResourceMatcher() {
-			InMemoryResourceMatcher retval = mock(InMemoryResourceMatcher.class);
-			when(retval.canBeEvaluatedInMemory(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
-			return retval;
-		}
-
 	}
 
 	private List<ResourceTable> resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus theStatus) {
