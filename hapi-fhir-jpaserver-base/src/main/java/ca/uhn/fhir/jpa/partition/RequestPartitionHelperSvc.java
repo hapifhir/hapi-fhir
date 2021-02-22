@@ -128,10 +128,6 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 		RequestPartitionId requestPartitionId;
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			// Handle system requests
-			if ((theRequest == null && myPartitioningBlacklist.contains(theResourceType))) {
-				return RequestPartitionId.defaultPartition();
-			}
 
 			// Interceptor call: STORAGE_PARTITION_IDENTIFY_CREATE
 			HookParams params = new HookParams()
@@ -139,6 +135,15 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 				.add(RequestDetails.class, theRequest)
 				.addIfMatchesType(ServletRequestDetails.class, theRequest);
 			requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE, params);
+
+			// Handle system requests
+			if (myPartitioningBlacklist.contains(theResourceType)) {
+				if (requestPartitionId == null) {
+					requestPartitionId = RequestPartitionId.defaultPartition();
+				} else if (!requestPartitionId.isDefaultPartition()) {
+					throw new InternalErrorException("Resources of type " + theResourceType + " must be placed in the default partition, can not store with partition: " + requestPartitionId);
+				}
+			}
 
 			String resourceName = myFhirContext.getResourceType(theResource);
 			validateSinglePartitionForCreate(requestPartitionId, resourceName, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE);
