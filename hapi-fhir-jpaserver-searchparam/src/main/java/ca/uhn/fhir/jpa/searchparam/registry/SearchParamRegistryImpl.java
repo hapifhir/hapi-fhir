@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
@@ -47,19 +48,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceChangeListener {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamRegistryImpl.class);
 	private static final int MAX_MANAGED_PARAM_COUNT = 10000;
-	private static long REFRESH_INTERVAL = DateUtils.MILLIS_PER_HOUR;
+	private static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_HOUR;
 
 	@Autowired
 	private ModelConfig myModelConfig;
@@ -74,7 +75,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	private volatile ReadOnlySearchParamCache myBuiltInSearchParams;
 	private volatile IPhoneticEncoder myPhoneticEncoder;
-	private volatile JpaSearchParamCache myJpaSearchParamCache = new JpaSearchParamCache();
+	private final JpaSearchParamCache myJpaSearchParamCache = new JpaSearchParamCache();
 	private volatile RuntimeSearchParamCache myActiveSearchParams;
 
 	@Autowired
@@ -282,7 +283,15 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	@Override
 	public void handleInit(Collection<IIdType> theResourceIds) {
-		List<IBaseResource> searchParams = theResourceIds.stream().map(id -> mySearchParamProvider.read(id)).collect(Collectors.toList());
+		List<IBaseResource> searchParams = new ArrayList<>();
+		for (IIdType id : theResourceIds) {
+			try {
+				IBaseResource searchParam = mySearchParamProvider.read(id);
+				searchParams.add(searchParam);
+			} catch (ResourceNotFoundException e) {
+				ourLog.warn("SearchParameter {} not found.  Excluding from list of active search params.", id);
+			}
+		}
 		initializeActiveSearchParams(searchParams);
 	}
 

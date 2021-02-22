@@ -17,8 +17,11 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.SearchParameter;
@@ -62,10 +65,10 @@ public class SearchParamRegistryImplTest {
 	private static final ReadOnlySearchParamCache ourBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(ourFhirContext);
 
 	public static final int TEST_SEARCH_PARAMS = 3;
-	private static List<ResourceTable> ourEntities;
-	private static ResourceVersionMap ourResourceVersionMap;
+	private static final List<ResourceTable> ourEntities;
+	private static final ResourceVersionMap ourResourceVersionMap;
 	private static int ourLastId;
-	private static int ourBuiltinPatientSearchParamCount;
+	private static final int ourBuiltinPatientSearchParamCount;
 
 	static {
 		ourEntities = new ArrayList<>();
@@ -96,48 +99,22 @@ public class SearchParamRegistryImplTest {
 	@MockBean
 	private MatchUrlService myMatchUrlService;
 
-	@Configuration
-	@Import(RegisteredResourceListenerFactoryConfig.class)
-	static class SpringConfig {
-		@Bean
-		FhirContext fhirContext() {
-			return ourFhirContext;
-		}
+	@Test
+	void handleInit() {
+		assertEquals(25, mySearchParamRegistry.getActiveSearchParams("Patient").size());
 
-		@Bean
-		ModelConfig modelConfig() {
-			ModelConfig modelConfig = new ModelConfig();
-			modelConfig.setDefaultSearchParamsCanBeOverridden(true);
-			return modelConfig;
-		}
+		IdDt idBad = new IdDt("SearchParameter/bad");
+		when(mySearchParamProvider.read(idBad)).thenThrow(new ResourceNotFoundException("id bad"));
 
-		@Bean
-		ISearchParamRegistry searchParamRegistry() {
-			return new SearchParamRegistryImpl();
-		}
+		IdDt idGood = new IdDt("SearchParameter/good");
+		SearchParameter goodSearchParam = buildSearchParameter(Enumerations.PublicationStatus.ACTIVE);
+		when(mySearchParamProvider.read(idGood)).thenReturn(goodSearchParam);
 
-		@Bean
-		SearchParameterCanonicalizer searchParameterCanonicalizer(FhirContext theFhirContext) {
-			return new SearchParameterCanonicalizer(theFhirContext);
-		}
-
-		@Bean
-		IResourceChangeListenerRegistry resourceChangeListenerRegistry() {
-			return new ResourceChangeListenerRegistryImpl();
-		}
-
-		@Bean
-		ResourceChangeListenerCacheRefresherImpl resourceChangeListenerCacheRefresher() {
-			return new ResourceChangeListenerCacheRefresherImpl();
-		}
-
-		@Bean
-		InMemoryResourceMatcher inMemoryResourceMatcher() {
-			InMemoryResourceMatcher retval = mock(InMemoryResourceMatcher.class);
-			when(retval.canBeEvaluatedInMemory(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
-			return retval;
-		}
-
+		List<IIdType> idList = new ArrayList<>();
+		idList.add(idBad);
+		idList.add(idGood);
+		mySearchParamRegistry.handleInit(idList);
+		assertEquals(26, mySearchParamRegistry.getActiveSearchParams("Patient").size());
 	}
 
 	@Nonnull
@@ -310,6 +287,50 @@ public class SearchParamRegistryImplTest {
 		assertEquals(1, converted.getExtensions("http://foo").size());
 		IPrimitiveType<?> value = (IPrimitiveType<?>) converted.getExtensions("http://foo").get(0).getValue();
 		assertEquals("FOO", value.getValueAsString());
+	}
+
+	@Configuration
+	@Import(RegisteredResourceListenerFactoryConfig.class)
+	static class SpringConfig {
+		@Bean
+		FhirContext fhirContext() {
+			return ourFhirContext;
+		}
+
+		@Bean
+		ModelConfig modelConfig() {
+			ModelConfig modelConfig = new ModelConfig();
+			modelConfig.setDefaultSearchParamsCanBeOverridden(true);
+			return modelConfig;
+		}
+
+		@Bean
+		ISearchParamRegistry searchParamRegistry() {
+			return new SearchParamRegistryImpl();
+		}
+
+		@Bean
+		SearchParameterCanonicalizer searchParameterCanonicalizer(FhirContext theFhirContext) {
+			return new SearchParameterCanonicalizer(theFhirContext);
+		}
+
+		@Bean
+		IResourceChangeListenerRegistry resourceChangeListenerRegistry() {
+			return new ResourceChangeListenerRegistryImpl();
+		}
+
+		@Bean
+		ResourceChangeListenerCacheRefresherImpl resourceChangeListenerCacheRefresher() {
+			return new ResourceChangeListenerCacheRefresherImpl();
+		}
+
+		@Bean
+		InMemoryResourceMatcher inMemoryResourceMatcher() {
+			InMemoryResourceMatcher retval = mock(InMemoryResourceMatcher.class);
+			when(retval.canBeEvaluatedInMemory(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
+			return retval;
+		}
+
 	}
 
 	private List<ResourceTable> resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus theStatus) {
