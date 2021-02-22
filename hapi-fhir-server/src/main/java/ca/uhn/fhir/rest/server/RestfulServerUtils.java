@@ -715,20 +715,23 @@ public class RestfulServerUtils {
 
 	public static IParser getNewParser(FhirContext theContext, FhirVersionEnum theForVersion, RequestDetails theRequestDetails) {
 		FhirContext context = getContextForVersion(theContext, theForVersion);
+		return getNewParser(context, theRequestDetails);
+	}
 
+	public static IParser getNewParser(FhirContext theContext, RequestDetails theRequestDetails) {
 		// Determine response encoding
 		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequestDetails).getEncoding();
 		IParser parser;
 		switch (responseEncoding) {
 			case JSON:
-				parser = context.newJsonParser();
+				parser = theContext.newJsonParser();
 				break;
 			case RDF:
-				parser = context.newRDFParser();
+				parser = theContext.newRDFParser();
 				break;
 			case XML:
 			default:
-				parser = context.newXmlParser();
+				parser = theContext.newXmlParser();
 				break;
 		}
 
@@ -1009,7 +1012,7 @@ public class RestfulServerUtils {
 			}
 		} else {
 			FhirVersionEnum forVersion = theResource.getStructureFhirVersionEnum();
-			IParser parser = getNewParser(theServer.getFhirContext(), forVersion, theRequestDetails);
+			IParser parser = getNewParser(theServer.getFhirContext(forVersion), theRequestDetails);
 			parser.encodeResourceToWriter(theResource, writer);
 		}
 

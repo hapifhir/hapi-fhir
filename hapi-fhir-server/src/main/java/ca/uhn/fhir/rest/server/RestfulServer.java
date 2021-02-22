@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
@@ -146,6 +147,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private EncodingEnum myDefaultResponseEncoding = EncodingEnum.JSON;
 	private ETagSupportEnum myETagSupport = DEFAULT_ETAG_SUPPORT;
 	private FhirContext myFhirContext;
+	private Map<FhirVersionEnum, FhirContext> myFhirContextMap = new HashMap<>();
 	private boolean myIgnoreServerParsedRequestParameters = true;
 	private String myImplementationDescription;
 	private IPagingProvider myPagingProvider;
@@ -607,6 +609,26 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	public void setFhirContext(FhirContext theFhirContext) {
 		Validate.notNull(theFhirContext, "FhirContext must not be null");
 		myFhirContext = theFhirContext;
+	}
+
+	/**
+	 * Gets a {@link FhirContext} associated with the given version and this server
+	 * in case a different version is required than that of {@link #getFhirContext()}.
+	 */
+	public FhirContext getFhirContext(FhirVersionEnum theFhirVersion) {
+		if (getFhirContext().getVersion().getVersion().equals(theFhirVersion)) {
+			return getFhirContext();
+		} else {
+			return myFhirContextMap.computeIfAbsent(theFhirVersion, FhirVersionEnum::newContext);
+		}
+	}
+
+	public void addFhirContext(FhirVersionEnum theFhirVersion, FhirContext theVersionFhirContext) {
+		myFhirContextMap.put(theFhirVersion, theVersionFhirContext);
+	}
+
+	public Map<FhirVersionEnum, FhirContext> getFhirContextMap() {
+		return myFhirContextMap;
 	}
 
 	public String getImplementationDescription() {
