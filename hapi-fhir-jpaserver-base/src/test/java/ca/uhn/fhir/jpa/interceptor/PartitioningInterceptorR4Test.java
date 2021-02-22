@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -125,8 +126,8 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		try {
 			myStructureDefinitionDao.create(sd);
 			fail();
-		} catch (InternalErrorException e) {
-			assertEquals("Resources of type StructureDefinition must be placed in the default partition, can not store with partition: RequestPartitionId[names=[FOO]]", e.getMessage());
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Resource type StructureDefinition can not be partitioned", e.getMessage());
 		}
 	}
 

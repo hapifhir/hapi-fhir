@@ -145,13 +145,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 			String resourceName = myFhirContext.getResourceType(theResource);
 			validateSinglePartitionForCreate(requestPartitionId, resourceName, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE);
 
-			RequestPartitionId retVal = validateNormalizeAndNotifyHooksForRead(requestPartitionId, theRequest);
-
-			if (nonPartitionableResource && !retVal.isDefaultPartition()) {
-				throw new InternalErrorException("Resources of type " + theResourceType + " must be placed in the default partition, can not store with partition: " + requestPartitionId);
-			}
-
-			return retVal;
+			return validateNormalizeAndNotifyHooksForRead(requestPartitionId, theRequest);
 		}
 
 		return RequestPartitionId.allPartitions();
@@ -280,7 +274,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 			(theRequestPartitionId.hasPartitionNames() && !theRequestPartitionId.getPartitionNames().contains(JpaConstants.DEFAULT_PARTITION_NAME))) {
 
 			if (myNonPartitionableResourceNames.contains(theResourceName)) {
-				String msg = myFhirContext.getLocalizer().getMessageSanitized(RequestPartitionHelperSvc.class, "blacklistedResourceTypeForPartitioning", theResourceName);
+				String msg = myFhirContext.getLocalizer().getMessageSanitized(RequestPartitionHelperSvc.class, "nonDefaultPartitionSelectedForNonPartitionable", theResourceName);
 				throw new UnprocessableEntityException(msg);
 			}
 
