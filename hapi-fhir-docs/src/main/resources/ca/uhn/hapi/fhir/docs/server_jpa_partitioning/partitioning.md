@@ -82,6 +82,25 @@ A hook against the [`Pointcut.STORAGE_PARTITION_IDENTIFY_READ`](/hapi-fhir/apido
 
 As of HAPI FHIR 5.3.0, the *Identify Partition for Read* hook method may return multiple partition names or IDs. If more than one partition is identified, the server will search in all identified partitions.  
 
+## Non-Partitionable Resources
+
+Some resource types can not be placed in any partition other than the DEFAULT partition. For these resource types, the partition interceptor may return `null`. A RequestPartitionId object specifying the default partition may also be returned. In this case, a partition date may optionally be included.
+
+The following resource types may not be placed in any partition except the default partition:
+
+* Subscription
+* SearchParameter
+* StructureDefinition
+* Questionnaire
+* CapabilityStatement
+* CompartmentDefinition
+* OperationDefinition
+* ConceptMap
+* CodeSystem
+* ValueSet
+* NamingSystem
+* StructureMap
+
 ## Examples
 
 See [Partition Interceptor Examples](./partition_interceptor_examples.html) for various samples of how partitioning interceptors can be set up.
