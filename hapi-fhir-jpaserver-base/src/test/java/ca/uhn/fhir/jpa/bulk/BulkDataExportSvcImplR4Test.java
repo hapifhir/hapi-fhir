@@ -4,6 +4,7 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
+import ca.uhn.fhir.jpa.bulk.api.GroupBulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.job.BulkExportJobParametersBuilder;
 import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
@@ -24,9 +25,11 @@ import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +81,8 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	@Autowired
 	@Qualifier("bulkExportJob")
 	private Job myBulkJob;
+
+	private String myPatientGroupIp;
 
 	@Test
 	public void testPurgeExpiredJobs() {
@@ -497,6 +502,28 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(jobInfo.getFiles().size(), equalTo(2));
 	}
 
+
+	@Test
+	public void testGroupBatchJobWorks() throws Exception {
+		createResources();
+
+		// Create a bulk job
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new GroupBulkDataExportOptions(null, Sets.newHashSet("Patient", "Observation"), null, null, myPatientGroupIp));
+
+		//Add the UUID to the job
+		BulkExportJobParametersBuilder paramBuilder = new BulkExportJobParametersBuilder()
+			.setJobUUID(jobDetails.getJobId())
+			.setReadChunkSize(10L);
+
+		JobExecution jobExecution = myBatchJobSubmitter.runJob(myBulkJob, paramBuilder.toJobParameters());
+
+		awaitJobCompletion(jobExecution);
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+
+		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getFiles().size(), equalTo(2));
+	}
+
 	@Test
 	public void testJobParametersValidatorRejectsInvalidParameters() {
 		JobParametersBuilder paramBuilder = new JobParametersBuilder().addString("jobUUID", "I'm not real!");
@@ -518,6 +545,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	private void createResources() {
+		Group group = new Group();
 		for (int i = 0; i < 10; i++) {
 			Patient patient = new Patient();
 			patient.setId("PAT" + i);
@@ -525,6 +553,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			patient.addName().setFamily("FAM" + i);
 			patient.addIdentifier().setSystem("http://mrns").setValue("PAT" + i);
 			IIdType patId = myPatientDao.update(patient).getId().toUnqualifiedVersionless();
+			group.addMember().setEntity(new Reference(patId));
 
 			Observation obs = new Observation();
 			obs.setId("OBS" + i);
@@ -533,5 +562,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			obs.getSubject().setReference(patId.getValue());
 			myObservationDao.update(obs);
 		}
+		myPatientGroupIp =  myGroupDao.create(group).getId().getValue();
+
 	}
 }

@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.JobParametersValidator;
@@ -34,10 +35,14 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.Arrays;
 import java.util.Optional;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 /**
  * This class will prevent a job from running if the UUID does not exist or is invalid.
  */
 public class BulkExportJobParameterValidator implements JobParametersValidator {
+	private static final Logger ourLog = getLogger(BulkExportJobParameterValidator.class);
+
 	@Autowired
 	private IBulkExportJobDao myBulkExportJobDao;
 	@Autowired
@@ -82,8 +87,10 @@ public class BulkExportJobParameterValidator implements JobParametersValidator {
 				if (!StringUtils.isBlank(outputFormat) && !Constants.CT_FHIR_NDJSON.equals(outputFormat)) {
 					errorBuilder.append("The only allowed format for Bulk Export is currently " + Constants.CT_FHIR_NDJSON);
 				}
+			}
 
-
+			if (theJobParameters.getString("groupId") != null) {
+				ourLog.debug("detected we are running in group mode with group id [{}]", theJobParameters.getString("groupId"));
 			}
 			return errorBuilder.toString();
 		});

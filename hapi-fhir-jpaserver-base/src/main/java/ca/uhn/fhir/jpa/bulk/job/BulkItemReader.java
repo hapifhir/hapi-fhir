@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.util.UrlUtil;
@@ -56,6 +57,13 @@ public class BulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 	Iterator<ResourcePersistentId> myPidIterator;
 	@Value("#{jobParameters['readChunkSize']}")
 	private Long READ_CHUNK_SIZE;
+	@Value("#{jobExecutionContext['jobUUID']}")
+	private String myJobUUID;
+	@Value("#{stepExecutionContext['resourceType']}")
+	private String myResourceType;
+	@Value("#{jobParameters['groupId']}")
+	private String myGroupId;
+
 	@Autowired
 	private IBulkExportJobDao myBulkExportJobDao;
 	@Autowired
@@ -64,10 +72,7 @@ public class BulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 	private FhirContext myContext;
 	@Autowired
 	private SearchBuilderFactory mySearchBuilderFactory;
-	@Value("#{jobExecutionContext['jobUUID']}")
-	private String myJobUUID;
-	@Value("#{stepExecutionContext['resourceType']}")
-	private String myResourceType;
+
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 
@@ -89,6 +94,8 @@ public class BulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 		ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, myResourceType, nextTypeClass);
 
 		SearchParameterMap map = createSearchParameterMapFromTypeFilter(jobEntity, def);
+		if (myGroupId != null) {
+		}
 
 		if (jobEntity.getSince() != null) {
 			map.setLastUpdated(new DateRangeParam(jobEntity.getSince(), null));

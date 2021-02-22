@@ -39,6 +39,9 @@ public class ResourceTypePartitioner implements Partitioner {
 	@Value("#{jobExecutionContext['jobUUID']}")
 	private String myJobUUID;
 
+	@Value("#{jobExecutionContext['groupId']}")
+	private String myGroupId;
+
 	@Autowired
 	private BulkExportDaoSvc myBulkExportDaoSvc;
 
