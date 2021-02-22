@@ -159,29 +159,36 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	}
 
 	private void validateFieldPathForType(String theResourceType, MdmFieldMatchJson theFieldMatch) {
-		ourLog.debug(" validating resource {} for {} ", theResourceType, theFieldMatch.getResourcePath());
+		ourLog.debug("Validating resource {} for {} ", theResourceType, theFieldMatch.getResourcePath());
 
-		try {
-			RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
-			Class<? extends IBaseResource> implementingClass = resourceDefinition.getImplementingClass();
-			String path = theResourceType + "." + theFieldMatch.getResourcePath();
-			myTerser.getDefinition(implementingClass, path);
-		} catch (DataFormatException | ConfigurationException | ClassCastException e) {
-			//Fallback to attempting to FHIRPath evaluate it.
-			parseFhirPath(theResourceType, theFieldMatch);
+		if (theFieldMatch.getResourcePath() == null && theFieldMatch.getFhirPath() == null) {
+			throw new ConfigurationException("MatchField [" +
+				theFieldMatch.getName() +
+					"] resourceType [" +
+					theFieldMatch.getResourceType() +
+					"] has defined neither a resourcePath or a fhirPath. You must define one of the two.");
 		}
-	}
 
-	private void parseFhirPath(String theResourceType, MdmFieldMatchJson theFieldMatchJson) {
-		try {
-			myFhirPath.parse(theResourceType);
-			myFhirPath.evaluate(new Patient(), theResourceType, IBase.class);
-		} catch (Exception theE) {
-			throw new ConfigurationException("MatchField " +
-				theFieldMatchJson.getName() +
-				" resourceType " +
-				theFieldMatchJson.getResourceType() +
-				" has invalid path '" + theFieldMatchJson.getResourcePath() + "'.  It has also failed FHIRPath evaluation");
+		if (theFieldMatch.getResourcePath() != null) {
+			try { //Try to validate the struture definition path
+				RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
+				Class<? extends IBaseResource> implementingClass = resourceDefinition.getImplementingClass();
+				String path = theResourceType + "." + theFieldMatch.getResourcePath();
+				myTerser.getDefinition(implementingClass, path);
+			} catch (DataFormatException | ConfigurationException | ClassCastException e) {
+				//Fallback to attempting to FHIRPath evaluate it.
+				throw new ConfigurationException("MatchField " +
+					theFieldMatch.getName() +
+					" resourceType " +
+					theFieldMatch.getResourceType() +
+					" has invalid path '" + theFieldMatch.getResourcePath() + "'.  " + e.getMessage());
+			}
+		} else { //Try to validate the FHIRPath
+			try {
+				myFhirPath.parse(theResourceType + "." + theFieldMatch.getFhirPath());
+			} catch (Exception e) {
+				throw new ConfigurationException("MatchField [" + theFieldMatch.getName() + "] resourceType [" + theFieldMatch.getResourceType() + "] has failed FHIRPath evaluation.  " + e.getMessage());
+			}
 		}
 	}
 

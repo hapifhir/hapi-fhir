@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 	protected MdmResourceFieldMatcher myComparator;
-	private MdmResourceFieldMatcher myFirstGivenNameComparator;
 	private Patient myJohn;
 	private Patient myJohny;
 
@@ -31,9 +30,7 @@ public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 	@BeforeEach
 	public void before() {
 		super.before();
-
 		myComparator = new MdmResourceFieldMatcher(ourFhirContext, myGivenNameMatchField, myMdmRulesJson);
-		myFirstGivenNameComparator = new MdmResourceFieldMatcher(ourFhirContext, myFirstGivenNameMatchField, myMdmRulesJson);
 		myJohn = buildJohn();
 		myJohny = buildJohny();
 	}

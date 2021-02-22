@@ -94,13 +94,13 @@ public class FhirPathResourceMatcherR4Test extends BaseMdmRulesR4Test {
 		MdmFieldMatchJson firstGivenNameMatchField = new MdmFieldMatchJson()
 			.setName(PATIENT_GIVEN_FIRST)
 			.setResourceType("Patient")
-			.setResourcePath("name.given.first()")
+			.setFhirPath("name.given.first()")
 			.setMatcher(new MdmMatcherJson().setAlgorithm(theMatcherEnum));
 
 		MdmFieldMatchJson secondGivenNameMatchField = new MdmFieldMatchJson()
 			.setName(PATIENT_GIVEN)
 			.setResourceType("Patient")
-			.setResourcePath("name.given[1]")
+			.setFhirPath("name.given[1]")
 			.setMatcher(new MdmMatcherJson().setAlgorithm(theMatcherEnum));
 
 		MdmRulesJson retval = new MdmRulesJson();

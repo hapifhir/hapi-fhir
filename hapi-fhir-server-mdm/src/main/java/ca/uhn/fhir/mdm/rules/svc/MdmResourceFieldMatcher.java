@@ -44,16 +44,20 @@ public class MdmResourceFieldMatcher {
 	private final MdmFieldMatchJson myMdmFieldMatchJson;
 	private final String myResourceType;
 	private final String myResourcePath;
+	private final String myFhirPath;
 	private final MdmRulesJson myMdmRulesJson;
 	private final String myName;
+	private final boolean myIsFhirPathExpression;
 
 	public MdmResourceFieldMatcher(FhirContext theFhirContext, MdmFieldMatchJson theMdmFieldMatchJson, MdmRulesJson theMdmRulesJson) {
 		myFhirContext = theFhirContext;
 		myMdmFieldMatchJson = theMdmFieldMatchJson;
 		myResourceType = theMdmFieldMatchJson.getResourceType();
 		myResourcePath = theMdmFieldMatchJson.getResourcePath();
+		myFhirPath = theMdmFieldMatchJson.getFhirPath();
 		myName = theMdmFieldMatchJson.getName();
 		myMdmRulesJson = theMdmRulesJson;
+		myIsFhirPathExpression = myFhirPath != null;
 	}
 
 	/**
@@ -72,9 +76,18 @@ public class MdmResourceFieldMatcher {
 		validate(theLeftResource);
 		validate(theRightResource);
 
-		IFhirPath fhirPath = myFhirContext.newFhirPath();
-		List<IBase> leftValues = fhirPath.evaluate(theLeftResource, myResourcePath, IBase.class);
-		List<IBase> rightValues = fhirPath.evaluate(theRightResource, myResourcePath, IBase.class);
+		List<IBase> leftValues;
+		List<IBase> rightValues;
+
+		if (myIsFhirPathExpression) {
+			IFhirPath fhirPath = myFhirContext.newFhirPath();
+			leftValues = fhirPath.evaluate(theLeftResource, myFhirPath, IBase.class);
+			rightValues = fhirPath.evaluate(theRightResource, myFhirPath, IBase.class);
+		} else {
+			FhirTerser fhirTerser = myFhirContext.newTerser();
+			leftValues = fhirTerser.getValues(theLeftResource, myResourcePath, IBase.class);
+			rightValues = fhirTerser.getValues(theRightResource, myResourcePath, IBase.class);
+		}
 		return match(leftValues, rightValues);
 	}
 

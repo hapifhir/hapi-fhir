@@ -44,8 +44,11 @@ public class MdmFieldMatchJson implements IModelJson {
 	@JsonProperty(value = "resourceType", required = true)
 	String myResourceType;
 
-	@JsonProperty(value = "resourcePath", required = true)
+	@JsonProperty(value = "resourcePath", required = false)
 	String myResourcePath;
+
+	@JsonProperty(value = "fhirPath", required = false)
+	String myFhirPath;
 
 	@JsonProperty(value = "matcher", required = false)
 	MdmMatcherJson myMatcher;
@@ -111,5 +114,14 @@ public class MdmFieldMatchJson implements IModelJson {
 			return mySimilarity.match(theFhirContext, theLeftValue, theRightValue);
 		}
 		throw new InternalErrorException("Field Match " + myName + " has neither a matcher nor a similarity.");
+	}
+
+	public String getFhirPath() {
+		return myFhirPath;
+	}
+
+	public MdmFieldMatchJson setFhirPath(String theFhirPath) {
+		myFhirPath = theFhirPath;
+		return this;
 	}
 }

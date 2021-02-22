@@ -21,7 +21,6 @@ public abstract class BaseMdmRulesR4Test extends BaseR4Test {
 
 	public static final double NAME_THRESHOLD = 0.8;
 	protected MdmFieldMatchJson myGivenNameMatchField;
-	protected MdmFieldMatchJson myFirstGivenNameMatchField;
 	protected String myBothNameFields;
 	protected MdmRulesJson myMdmRulesJson;
 
