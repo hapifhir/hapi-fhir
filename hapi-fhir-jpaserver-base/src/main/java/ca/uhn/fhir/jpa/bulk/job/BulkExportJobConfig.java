@@ -31,6 +31,7 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -72,6 +73,23 @@ public class BulkExportJobConfig {
 	}
 
 	@Bean
+	@Lazy
+	public Job groupBulkExportJob() {
+		return myJobBuilderFactory.get("groupBulkExportJob")
+			.validator(groupBulkJobParameterValidator())
+			.start(createBulkExportEntityStep())
+			.next(groupPartitionStep())
+			.next(closeJobStep())
+			.build();
+	}
+
+	@Bean
+	public JobParametersValidator groupBulkJobParameterValidator() {
+		return null;
+		//TODO GGG
+	}
+
+	@Bean
 	public Step createBulkExportEntityStep() {
 		return myStepBuilderFactory.get("createBulkExportEntityStep")
 			.tasklet(createBulkExportEntityTasklet())
@@ -88,6 +106,24 @@ public class BulkExportJobConfig {
 	public JobParametersValidator bulkJobParameterValidator() {
 		return new BulkExportJobParameterValidator();
 	}
+
+	@Bean
+	public Step groupBulkExportGenerateResourceFilesStep() {
+		return myStepBuilderFactory.get("groupBulkExportGenerateResourceFilesStep")
+			.<List<ResourcePersistentId>, List<IBaseResource>> chunk(100) //1000 resources per generated file, as the reader returns 10 resources at a time.
+			.reader(groupBulkItemReader())
+			.processor(myPidToIBaseResourceProcessor)
+			.writer(resourceToFileWriter())
+			.listener(bulkExportGenrateResourceFilesStepListener())
+			.build();
+	}
+
+	@Bean
+	@StepScope
+	public GroupBulkItemReader groupBulkItemReader(){
+		return new GroupBulkItemReader();
+	}
+
 
 	@Bean
 	public Step bulkExportGenerateResourceFilesStep() {
@@ -125,6 +161,14 @@ public class BulkExportJobConfig {
 		return new BulkExportGenerateResourceFilesStepListener();
 	}
 
+
+	@Bean
+	public Step groupPartitionStep() {
+		return myStepBuilderFactory.get("partitionStep")
+			.partitioner("groupBulkExportGenerateResourceFilesStep", bulkExportResourceTypePartitioner())
+			.step(groupBulkExportGenerateResourceFilesStep())
+			.build();
+	}
 	@Bean
 	public Step partitionStep() {
 		return myStepBuilderFactory.get("partitionStep")
