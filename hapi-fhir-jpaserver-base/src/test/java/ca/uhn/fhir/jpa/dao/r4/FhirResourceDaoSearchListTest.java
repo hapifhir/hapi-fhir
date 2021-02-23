@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.List;
 
+import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
@@ -34,13 +36,27 @@ public class FhirResourceDaoSearchListTest extends BaseJpaR4Test {
 		ListResource list = new ListResource();
 		list.addEntry().getItem().setReferenceElement(pid1);
 		list.addEntry().getItem().setReferenceElement(pid2);
-		IIdType listId = myListResourceDao.create(list).getId();
+		String listIdString = myListResourceDao.create(list).getId().getValue();
 
-		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		map.add("_list", new StringParam(listId.getValue()));
-		IBundleProvider bundle = myPatientDao.search(map);
-		List<IBaseResource> resources = bundle.getResources(0, 1);
-		assertThat(resources, hasSize(2));
-		// assert ids equal pid1 and pid2
+		{
+			// What we need to emulate
+			// /Patient?_has=List:item:_id=123
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			// 	public HasParam(String theTargetResourceType, String theReferenceFieldName, String theParameterName, String theParameterValue) {
+			map.add(PARAM_HAS, new HasParam("List", "item", "_id", listIdString));
+			IBundleProvider bundle = myPatientDao.search(map);
+			List<IBaseResource> resources = bundle.getResources(0, 2);
+			assertThat(resources, hasSize(2));
+		}
+
+		{
+			// The new syntax
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.add("_list", new StringParam(listIdString));
+			IBundleProvider bundle = myPatientDao.search(map);
+			List<IBaseResource> resources = bundle.getResources(0, 2);
+			assertThat(resources, hasSize(2));
+			// assert ids equal pid1 and pid2
+		}
 	}
 }

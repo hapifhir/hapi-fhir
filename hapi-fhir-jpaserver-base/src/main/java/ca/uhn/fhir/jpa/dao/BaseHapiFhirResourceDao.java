@@ -57,6 +57,7 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.dstu2.resource.ListResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
@@ -73,6 +74,7 @@ import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -120,12 +122,12 @@ import javax.annotation.PostConstruct;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -1301,7 +1303,56 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		// Notify interceptors
+		translateSearchParams(theParams);
+
+		notifySearchInterceptors(theParams, theRequest);
+
+		CacheControlDirective cacheControlDirective = new CacheControlDirective();
+		if (theRequest != null) {
+			cacheControlDirective.parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL));
+		}
+
+		RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequest(theRequest, getResourceName());
+		IBundleProvider retVal = mySearchCoordinatorSvc.registerSearch(this, theParams, getResourceName(), cacheControlDirective, theRequest, requestPartitionId);
+
+		if (retVal instanceof PersistedJpaBundleProvider) {
+			PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) retVal;
+			if (provider.getCacheStatus() == SearchCacheStatusEnum.HIT) {
+				if (theServletResponse != null && theRequest != null) {
+					String value = "HIT from " + theRequest.getFhirServerBase();
+					theServletResponse.addHeader(Constants.HEADER_X_CACHE, value);
+				}
+			}
+		}
+
+		return retVal;
+	}
+
+	private void translateSearchParams(SearchParameterMap theParams) {
+		Iterator<String> keyIterator = theParams.keySet().iterator();
+
+		// Translate _list=42 to _has=List:item:_id=42
+		while (keyIterator.hasNext()) {
+			String key = keyIterator.next();
+			if (Constants.PARAM_LIST.equals((key))) {
+				List<List<IQueryParameterType>> andOrValues = theParams.get(key);
+				// FIXME KH generalize this to properly support and and or and write tests for both
+				// FIXME KH this is a hack to test it out in theory
+				theParams.remove(key);
+				List<List<IQueryParameterType>> hasParamValues = new ArrayList<>();
+				for (List<IQueryParameterType> orValues : andOrValues) {
+					List<IQueryParameterType> orList = new ArrayList<>();
+					for (IQueryParameterType value : orValues) {
+						orList.add(new HasParam("List", ListResource.SP_ITEM, ListResource.SP_RES_ID, value.getValueAsQueryToken(null)));
+					}
+					hasParamValues.add(orList);
+				}
+				theParams.put(Constants.PARAM_HAS, hasParamValues);
+			}
+		}
+	}
+
+	private void notifySearchInterceptors(SearchParameterMap theParams, RequestDetails theRequest) {
 		if (theRequest != null) {
 			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequest, getContext(), getResourceName(), null);
 			notifyInterceptors(RestOperationTypeEnum.SEARCH_TYPE, requestDetails);
@@ -1335,26 +1386,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				theParams.setCount(theRequest.getServer().getDefaultPageSize());
 			}
 		}
-
-		CacheControlDirective cacheControlDirective = new CacheControlDirective();
-		if (theRequest != null) {
-			cacheControlDirective.parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL));
-		}
-
-		RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequest(theRequest, getResourceName());
-		IBundleProvider retVal = mySearchCoordinatorSvc.registerSearch(this, theParams, getResourceName(), cacheControlDirective, theRequest, requestPartitionId);
-
-		if (retVal instanceof PersistedJpaBundleProvider) {
-			PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) retVal;
-			if (provider.getCacheStatus() == SearchCacheStatusEnum.HIT) {
-				if (theServletResponse != null && theRequest != null) {
-					String value = "HIT from " + theRequest.getFhirServerBase();
-					theServletResponse.addHeader(Constants.HEADER_X_CACHE, value);
-				}
-			}
-		}
-
-		return retVal;
 	}
 
 	@Override
