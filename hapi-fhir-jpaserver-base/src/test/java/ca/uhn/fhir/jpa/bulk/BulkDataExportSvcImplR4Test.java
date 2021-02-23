@@ -519,23 +519,14 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	public void testGroupBatchJobWorks() throws Exception {
 		createResources();
 
-
-
 		// Create a bulk job
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new GroupBulkDataExportOptions(null, Sets.newHashSet("Immunization"), null, null, myPatientGroupId, true));
 
 
-		SearchParameterMap spm = new SearchParameterMap();
-		spm.setCount(100);
-		String tempGroupId = myPatientGroupId.toUnqualifiedVersionless().toString();
-		spm.add("_has", new HasOrListParam().add(new HasParam("Group", "member", "_id", "Group/21")));
-		spm.addRevInclude(new Include("Immunization:patient"));
-		spm.setLoadSynchronous(true);
-		IBundleProvider search = myPatientDao.search(spm);
-
 		//Add the UUID to the job
+		//TODO GGG START HERE
 		GroupBulkExportJobParametersBuilder paramBuilder = new GroupBulkExportJobParametersBuilder();
-		paramBuilder.setGroupId(myPatientGroupId.getValue());
+		paramBuilder.setGroupId(myPatientGroupId.getIdPart());
 		paramBuilder.setJobUUID(jobDetails.getJobId());
 		paramBuilder.setReadChunkSize(10L);
 
@@ -589,6 +580,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			myObservationDao.update(obs);
 
 			Immunization immunization = new Immunization();
+			immunization.setId("IMM" + i);
 			immunization.setPatient(new Reference(patId));
 			if (i % 2 == 0) {
 				CodeableConcept cc = new CodeableConcept();
@@ -599,7 +591,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 				cc.addCoding().setSystem("vaccines").setCode("COVID-19");
 				immunization.setVaccineCode(cc);
 			}
-			myImmunizationDao.create(immunization);
+			myImmunizationDao.update(immunization);
 		}
 		myPatientGroupId =  myGroupDao.create(group).getId();
 
