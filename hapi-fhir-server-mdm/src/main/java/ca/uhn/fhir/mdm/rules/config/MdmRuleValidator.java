@@ -65,7 +65,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 		if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
 			myFhirPath = myFhirContext.newFhirPath();
 		} else {
-			ourLog.warn("Skipping FHIRPath validation as DSTU2 does not support FHIR");
+			ourLog.debug("Skipping FHIRPath validation as DSTU2 does not support FHIR");
 			myFhirPath = null;
 		}
 		mySearchParamRetriever = theSearchParamRetriever;
@@ -202,7 +202,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 				if (myFhirPath != null) {
 					myFhirPath.parse(theResourceType + "." + theFieldMatch.getFhirPath());
 				} else {
-					ourLog.warn("Can't validate FHIRPath expression due to a lack of IFhirPath object.");
+					ourLog.debug("Can't validate FHIRPath expression due to a lack of IFhirPath object.");
 				}
 			} catch (Exception e) {
 				throw new ConfigurationException("MatchField [" + theFieldMatch.getName() + "] resourceType [" + theFieldMatch.getResourceType() + "] has failed FHIRPath evaluation.  " + e.getMessage());
