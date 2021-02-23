@@ -571,7 +571,10 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			patient.addName().setFamily("FAM" + i);
 			patient.addIdentifier().setSystem("http://mrns").setValue("PAT" + i);
 			IIdType patId = myPatientDao.update(patient).getId().toUnqualifiedVersionless();
-			group.addMember().setEntity(new Reference(patId));
+			//Only add half the patients to the group.
+			if (i % 2 == 0 ) {
+				group.addMember().setEntity(new Reference(patId));
+			}
 
 			Observation obs = new Observation();
 			obs.setId("OBS" + i);
