@@ -1,10 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.HasParam;
-import ca.uhn.fhir.rest.param.StringParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ListResource;
@@ -23,6 +23,8 @@ public class FhirResourceDaoSearchListTest extends BaseJpaR4Test {
 	@Autowired
 	@Qualifier("myListDaoR4")
 	protected IFhirResourceDao<ListResource> myListResourceDao;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
 
 	/**
 	 * See https://www.hl7.org/fhir/search.html#list
@@ -51,12 +53,14 @@ public class FhirResourceDaoSearchListTest extends BaseJpaR4Test {
 
 		{
 			// The new syntax
-			SearchParameterMap map = SearchParameterMap.newSynchronous();
-			map.add("_list", new StringParam(listIdString));
+			String queryString = "_list=" + listIdString;
+			SearchParameterMap map = myMatchUrlService.translateMatchUrl(queryString, myFhirCtx.getResourceDefinition("List"));
 			IBundleProvider bundle = myPatientDao.search(map);
 			List<IBaseResource> resources = bundle.getResources(0, 2);
 			assertThat(resources, hasSize(2));
 			// assert ids equal pid1 and pid2
 		}
 	}
+
+	// FIXME KH test other cases like _list=12,13&_list=14
 }
