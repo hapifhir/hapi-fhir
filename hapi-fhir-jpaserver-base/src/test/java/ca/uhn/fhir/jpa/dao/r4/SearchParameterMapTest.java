@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.test.BaseTest;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,15 @@ public class SearchParameterMapTest extends BaseTest {
 		params.add("_has", new HasParam("Observation", "subject", "identifier", "urn:system|FOO"));
 		String criteria = params.toNormalizedQueryString(myContext);
 		assertEquals(criteria, "?_has:Observation:identifier:urn:system|FOO=urn%3Asystem%7CFOO");
+	}
+
+	@Test
+	public void testGroupToImmunizationHas() {
+		SearchParameterMap params = new SearchParameterMap();
+		params.add("_has", new HasParam("Group", "member", "_id", "1000"));
+		params.addRevInclude(new Include("Immunization:patient"));
+		String criteria = params.toNormalizedQueryString(myContext);
+		assertEquals("?_has:Group:member:_id=1000&_revinclude=Immunization:patient", criteria);
 	}
 
 }

@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.GroupBulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.job.BulkExportJobParametersBuilder;
+import ca.uhn.fhir.jpa.bulk.job.GroupBulkExportJobParametersBuilder;
 import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
@@ -15,7 +16,12 @@ import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.HasOrListParam;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
@@ -24,8 +30,10 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
@@ -82,7 +90,11 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	@Qualifier("bulkExportJob")
 	private Job myBulkJob;
 
-	private String myPatientGroupIp;
+	@Autowired
+	@Qualifier("groupBulkExportJob")
+	private Job myGroupBulkJob;
+
+	private IIdType myPatientGroupId;
 
 	@Test
 	public void testPurgeExpiredJobs() {
@@ -507,15 +519,29 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	public void testGroupBatchJobWorks() throws Exception {
 		createResources();
 
+
+
 		// Create a bulk job
-		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new GroupBulkDataExportOptions(null, Sets.newHashSet("Patient", "Observation"), null, null, myPatientGroupIp));
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new GroupBulkDataExportOptions(null, Sets.newHashSet("Immunization"), null, null, myPatientGroupId, true));
+
+
+		SearchParameterMap spm = new SearchParameterMap();
+		spm.setCount(100);
+		String tempGroupId = myPatientGroupId.toUnqualifiedVersionless().toString();
+		spm.add("_has", new HasOrListParam().add(new HasParam("Group", "member", "_id", "Group/21")));
+		spm.addRevInclude(new Include("Immunization:patient"));
+		spm.setLoadSynchronous(true);
+		IBundleProvider search = myPatientDao.search(spm);
 
 		//Add the UUID to the job
-		BulkExportJobParametersBuilder paramBuilder = new BulkExportJobParametersBuilder()
-			.setJobUUID(jobDetails.getJobId())
-			.setReadChunkSize(10L);
+		GroupBulkExportJobParametersBuilder paramBuilder = new GroupBulkExportJobParametersBuilder();
+		paramBuilder.setGroupId(myPatientGroupId.getValue());
+		paramBuilder.setJobUUID(jobDetails.getJobId());
+		paramBuilder.setReadChunkSize(10L);
 
-		JobExecution jobExecution = myBatchJobSubmitter.runJob(myBulkJob, paramBuilder.toJobParameters());
+		GroupBulkExportJobParametersBuilder myBulkExportParametersBuilder = new GroupBulkExportJobParametersBuilder();
+		myBulkExportParametersBuilder.setGroupId(myPatientGroupId.getValue());
+		JobExecution jobExecution = myBatchJobSubmitter.runJob(myGroupBulkJob, paramBuilder.toJobParameters());
 
 		awaitJobCompletion(jobExecution);
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
@@ -561,8 +587,22 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			obs.setStatus(Observation.ObservationStatus.FINAL);
 			obs.getSubject().setReference(patId.getValue());
 			myObservationDao.update(obs);
+
+			Immunization immunization = new Immunization();
+			immunization.setPatient(new Reference(patId));
+			if (i % 2 == 0) {
+				CodeableConcept cc = new CodeableConcept();
+				cc.addCoding().setSystem("vaccines").setCode("Flu");
+				immunization.setVaccineCode(cc);
+			} else {
+				CodeableConcept cc = new CodeableConcept();
+				cc.addCoding().setSystem("vaccines").setCode("COVID-19");
+				immunization.setVaccineCode(cc);
+			}
+			myImmunizationDao.create(immunization);
 		}
-		myPatientGroupIp =  myGroupDao.create(group).getId().getValue();
+		myPatientGroupId =  myGroupDao.create(group).getId();
+
 
 	}
 }

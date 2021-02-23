@@ -31,18 +31,25 @@ import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
+import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Immunization;
+import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,12 +87,12 @@ public class GroupBulkItemReader implements ItemReader<List<ResourcePersistentId
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 
-	private List<Long> getGroupMembers() {
+	private List<String> getGroupMemberIds() {
 		IFhirResourceDao group = myDaoRegistry.getResourceDao("Group");
 		IBaseResource read = group.read(new IdDt(myGroupId));
 		FhirTerser fhirTerser = myContext.newTerser();
 		List<IBaseReference> values = fhirTerser.getValues(read, "Group.member", IBaseReference.class);
-		return values.stream().map(theIBaseReference -> theIBaseReference.getReferenceElement().getIdPartAsLong()).collect(Collectors.toList());
+		return values.stream().map(theIBaseReference -> theIBaseReference.getReferenceElement().getValue()).collect(Collectors.toList());
 	}
 
 	private void loadResourcePids() {
@@ -97,22 +104,26 @@ public class GroupBulkItemReader implements ItemReader<List<ResourcePersistentId
 		BulkExportJobEntity jobEntity = jobOpt.get();
 		ourLog.info("Bulk export starting generation for batch export job: {}", jobEntity);
 
-		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(myResourceType);
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao("Patient");
 
 		ourLog.info("Bulk export assembling export of type {} for job {}", myResourceType, myJobUUID);
 
-		RuntimeResourceDefinition def = myContext.getResourceDefinition(myResourceType);
+		RuntimeResourceDefinition def = myContext.getResourceDefinition("Patient");
 		Class<? extends IBaseResource> nextTypeClass = def.getImplementingClass();
 		ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, myResourceType, nextTypeClass);
 
-		SearchParameterMap map = createSearchParameterMapFromTypeFilter(jobEntity, def);
+		SearchParameterMap spm = new SearchParameterMap();
+		myGroupId = "21";
+		spm.add("_has", new HasParam("Group", "member", "_id", myGroupId));
+		spm.addRevInclude(new Include("Immunization:patient").toLocked());
 
+
+//		SearchParameterMap map = createSearchParameterMapFromTypeFilter(jobEntity, def);
 		if (jobEntity.getSince() != null) {
-			map.setLastUpdated(new DateRangeParam(jobEntity.getSince(), null));
+			spm.setLastUpdated(new DateRangeParam(jobEntity.getSince(), null));
 		}
-
-		map.setLoadSynchronous(true);
-		IResultIterator myResultIterator = sb.createQuery(map, new SearchRuntimeDetails(null, myJobUUID), null, RequestPartitionId.allPartitions());
+		spm.setLoadSynchronous(true);
+		IResultIterator myResultIterator = sb.createQuery(spm, new SearchRuntimeDetails(null, myJobUUID), null, RequestPartitionId.allPartitions());
 		List<ResourcePersistentId> myReadPids = new ArrayList<>();
 		while (myResultIterator.hasNext()) {
 			myReadPids.add(myResultIterator.next());

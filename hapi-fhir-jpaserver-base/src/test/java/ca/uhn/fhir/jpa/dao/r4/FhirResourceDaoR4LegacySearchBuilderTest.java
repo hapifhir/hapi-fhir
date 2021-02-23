@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -87,6 +88,7 @@ import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.EpisodeOfCare;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Location;
@@ -266,6 +268,32 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
 		assertEquals(1, ids.size());
 		assertThat(ids, hasItems(patientId));
+	}
+
+	@Test
+	public void testPatientHasGroupImmunization(){
+
+		Patient patient = new Patient();
+		String patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
+
+		Group group = new Group();
+		group.addMember().setEntity(new Reference(patientId));
+		Long daoMethodOutcome = myGroupDao.create(group).getId().getIdPartAsLong();
+
+		Immunization immunization = new Immunization();
+		immunization.setPatient(new Reference(patientId));
+		String immunizationId = myImmunizationDao.create(immunization).getId().toUnqualifiedVersionless().getValue();
+
+		String criteria = "?_has:Group:member:_id="+ daoMethodOutcome + "&_revinclude=Immunization:patient";
+		//TODO GGG the matchUrlService _doesnt translate rev includes!
+		SearchParameterMap searchParameterMap = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
+		searchParameterMap.addRevInclude(new Include("Immunization:patient").toLocked());
+		searchParameterMap.setLoadSynchronous(true);
+
+		IBundleProvider search = myPatientDao.search(searchParameterMap);
+		List<String> strings = toUnqualifiedVersionlessIdValues(search);
+		assertThat(strings, hasItems(patientId, immunizationId));
+
 	}
 
 	@Test
