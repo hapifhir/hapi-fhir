@@ -65,6 +65,7 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -524,7 +525,6 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 
 		//Add the UUID to the job
-		//TODO GGG START HERE
 		GroupBulkExportJobParametersBuilder paramBuilder = new GroupBulkExportJobParametersBuilder();
 		paramBuilder.setGroupId(myPatientGroupId.getIdPart());
 		paramBuilder.setJobUUID(jobDetails.getJobId());
@@ -538,7 +538,8 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 
 		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
-		assertThat(jobInfo.getFiles().size(), equalTo(2));
+		assertThat(jobInfo.getFiles().size(), equalTo(1));
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
 	}
 
 	@Test

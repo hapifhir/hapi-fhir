@@ -42,6 +42,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -64,6 +65,7 @@ import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -71,6 +73,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.UrlUtil.escapeUrlParam;
 import static ca.uhn.fhir.util.UrlUtil.escapeUrlParams;
+import static org.apache.commons.lang3.StringUtils.contains;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
@@ -102,6 +105,10 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	@Qualifier("bulkExportJob")
 	private org.springframework.batch.core.Job myBulkExportJob;
 
+	@Autowired
+	@Qualifier("groupBulkExportJob")
+	private org.springframework.batch.core.Job myGroupBulkExportJob;
+
 	private final int myRetentionPeriod = (int) (2 * DateUtils.MILLIS_PER_HOUR);
 
 	/**
@@ -125,10 +132,12 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			return;
 		}
 
-		String jobUuid = jobToProcessOpt.get().getJobId();
+		BulkExportJobEntity bulkExportJobEntity = jobToProcessOpt.get();
 
+		String jobUuid = bulkExportJobEntity.getJobId();
+		boolean isForGroupExport = containsGroupId(bulkExportJobEntity.getRequest());
 		try {
-			processJob(jobUuid);
+				processJob(jobUuid, isForGroupExport);
 		} catch (Exception e) {
 			ourLog.error("Failure while preparing bulk export extract", e);
 			myTxTemplate.execute(t -> {
@@ -143,6 +152,15 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			});
 		}
 
+	}
+	private boolean containsGroupId(String theRequestString) {
+		Map<String, String[]> stringMap = UrlUtil.parseQueryString(theRequestString);
+		String[] strings = stringMap.get(JpaConstants.PARAM_EXPORT_GROUP_ID);
+		if (strings != null && strings.length > 0) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 
@@ -193,21 +211,23 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	}
 
-	private void processJob(String theJobUuid) {
+	private void processJob(String theJobUuid, boolean theIsGroupRequest) {
 		JobParameters parameters = new JobParametersBuilder()
 			.addString("jobUUID", theJobUuid)
-			.addLong("readChunkSize", READ_CHUNK_SIZE)
-			.toJobParameters();
+			.addLong("readChunkSize", READ_CHUNK_SIZE).toJobParameters();
 
 		ourLog.info("Submitting bulk export job {} to job scheduler", theJobUuid);
 
 		try {
-			myJobSubmitter.runJob(myBulkExportJob, parameters);
+			if (theIsGroupRequest) {
+				myJobSubmitter.runJob(myGroupBulkExportJob, parameters);
+			} else {
+				myJobSubmitter.runJob(myBulkExportJob, parameters);
+			}
 		} catch (JobParametersInvalidException theE) {
 			ourLog.error("Unable to start job with UUID: {}, the parameters are invalid. {}", theJobUuid, theE.getMessage());
 		}
 	}
-
 
 	@SuppressWarnings("unchecked")
 	private IFhirResourceDao<IBaseBinary> getBinaryDao() {

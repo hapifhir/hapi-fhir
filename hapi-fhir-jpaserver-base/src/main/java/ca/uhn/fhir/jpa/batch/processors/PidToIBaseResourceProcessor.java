@@ -58,7 +58,8 @@ public class PidToIBaseResourceProcessor implements ItemProcessor<List<ResourceP
 
 	@Override
 	public List<IBaseResource> process(List<ResourcePersistentId> theResourcePersistentId) {
-
+		String collect = theResourcePersistentId.stream().map(pid -> pid.getId().toString()).collect(Collectors.joining(","));
+		ourLog.info("Processing pids {}" + collect);
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(myResourceType);
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(myResourceType).getImplementingClass();
 
@@ -66,7 +67,7 @@ public class PidToIBaseResourceProcessor implements ItemProcessor<List<ResourceP
 		List<IBaseResource> outgoing = new ArrayList<>();
 		sb.loadResourcesByPid(theResourcePersistentId, Collections.emptyList(), outgoing, false, null);
 
-		ourLog.trace("Loaded resources: {}", outgoing.stream().map(t->t.getIdElement().getValue()).collect(Collectors.joining(", ")));
+		ourLog.warn("Loaded resources: {}", outgoing.stream().map(t->t.getIdElement().getValue()).collect(Collectors.joining(", ")));
 
 		return outgoing;
 

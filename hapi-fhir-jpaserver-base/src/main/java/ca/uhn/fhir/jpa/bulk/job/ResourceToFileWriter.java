@@ -64,7 +64,7 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 	private Long myBulkExportCollectionEntityId;
 
 	@Value("#{stepExecutionContext['resourceType']}")
-	private String myReosurceType;
+	private String myResourceType;
 
 	private IFhirResourceDao<IBaseBinary> myBinaryDao;
 
@@ -116,6 +116,8 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 		int count = 0;
 		for (List<IBaseResource> resourceList : theList) {
 			for (IBaseResource nextFileResource : resourceList) {
+				System.out.println("ZOOP");
+				System.out.println(myParser.setPrettyPrint(true).encodeResourceToString(nextFileResource));
 				myParser.encodeResourceToWriter(nextFileResource, myWriter);
 				myWriter.append("\n");
 				count++;
@@ -124,7 +126,7 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 
 		Optional<IIdType> createdId = flushToFiles();
 		if (createdId.isPresent()) {
-			ourLog.info("Created {} resources for bulk export file containing {} resources of type {} ", count, createdId.get().toUnqualifiedVersionless().getValue(), myReosurceType);
+			ourLog.info("Created {} resources for bulk export file containing {} resources of type {} ", count, createdId.get().toUnqualifiedVersionless().getValue(), myResourceType);
 		}
 	}
 }
