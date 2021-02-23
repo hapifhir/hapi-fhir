@@ -144,7 +144,7 @@ public interface ITestDataBuilder {
 		return createResource("Organization", theModifiers);
 	}
 
-	default IIdType createResource(String theResourceType, Consumer<IBaseResource>[] theModifiers) {
+	default IIdType createResource(String theResourceType, Consumer<IBaseResource>... theModifiers) {
 		IBaseResource resource = buildResource(theResourceType, theModifiers);
 
 		if (isNotBlank(resource.getIdElement().getValue())) {

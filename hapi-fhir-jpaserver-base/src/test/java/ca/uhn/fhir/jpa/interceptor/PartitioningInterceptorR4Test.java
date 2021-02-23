@@ -10,10 +10,13 @@ import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.interceptor.ex.PartitionInterceptorReadAllPartitions;
 import ca.uhn.fhir.jpa.interceptor.ex.PartitionInterceptorReadPartitionsBasedOnScopes;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +24,7 @@ import org.apache.commons.lang3.Validate;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -81,6 +85,51 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 	}
 
+
+	@Test
+	public void testCreateNonPartionableResourceWithPartitionDate() {
+		myPartitionInterceptor.addCreatePartition(RequestPartitionId.defaultPartition(LocalDate.of(2021, 2, 22)));
+
+		StructureDefinition sd = new StructureDefinition();
+		sd.setUrl("http://foo");
+		myStructureDefinitionDao.create(sd);
+
+		runInTransaction(()->{
+			List<ResourceTable> resources = myResourceTableDao.findAll();
+			assertEquals(1, resources.size());
+			assertEquals(null, resources.get(0).getPartitionId().getPartitionId());
+			assertEquals(22, resources.get(0).getPartitionId().getPartitionDate().getDayOfMonth());
+		});
+	}
+
+	@Test
+	public void testCreateNonPartionableResourceWithNullPartitionReturned() {
+		myPartitionInterceptor.addCreatePartition(null);
+
+		StructureDefinition sd = new StructureDefinition();
+		sd.setUrl("http://foo");
+		myStructureDefinitionDao.create(sd);
+
+		runInTransaction(()->{
+			List<ResourceTable> resources = myResourceTableDao.findAll();
+			assertEquals(1, resources.size());
+			assertEquals(null, resources.get(0).getPartitionId());
+		});
+	}
+
+	@Test
+	public void testCreateNonPartionableResourceWithDisallowedPartitionReturned() {
+		myPartitionInterceptor.addCreatePartition(RequestPartitionId.fromPartitionName("FOO"));
+
+		StructureDefinition sd = new StructureDefinition();
+		sd.setUrl("http://foo");
+		try {
+			myStructureDefinitionDao.create(sd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Resource type StructureDefinition can not be partitioned", e.getMessage());
+		}
+	}
 
 	/**
 	 * Should fail if no interceptor is registered for the READ pointcut
