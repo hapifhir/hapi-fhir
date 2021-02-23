@@ -524,14 +524,11 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new GroupBulkDataExportOptions(null, Sets.newHashSet("Immunization"), null, null, myPatientGroupId, true));
 
 
-		//Add the UUID to the job
 		GroupBulkExportJobParametersBuilder paramBuilder = new GroupBulkExportJobParametersBuilder();
 		paramBuilder.setGroupId(myPatientGroupId.getIdPart());
 		paramBuilder.setJobUUID(jobDetails.getJobId());
 		paramBuilder.setReadChunkSize(10L);
 
-		GroupBulkExportJobParametersBuilder myBulkExportParametersBuilder = new GroupBulkExportJobParametersBuilder();
-		myBulkExportParametersBuilder.setGroupId(myPatientGroupId.getValue());
 		JobExecution jobExecution = myBatchJobSubmitter.runJob(myGroupBulkJob, paramBuilder.toJobParameters());
 
 		awaitJobCompletion(jobExecution);
@@ -540,14 +537,28 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
 		assertThat(jobInfo.getFiles().size(), equalTo(1));
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
+
+		// Iterate over the files
+		Binary nextBinary = myBinaryDao.read(jobInfo.getFiles().get(0).getResourceId());
+		assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
+		String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
+		ourLog.info("Next contents for type {}:\n{}", nextBinary.getResourceType(), nextContents);
+
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
+		assertThat(nextContents, is(containsString("IMM0")));
+		assertThat(nextContents, is(containsString("IMM2")));
+		assertThat(nextContents, is(containsString("IMM4")));
+		assertThat(nextContents, is(containsString("IMM6")));
+		assertThat(nextContents, is(containsString("IMM8")));
 	}
+
 
 	@Test
 	public void testJobParametersValidatorRejectsInvalidParameters() {
 		JobParametersBuilder paramBuilder = new JobParametersBuilder().addString("jobUUID", "I'm not real!");
 		try {
 			myBatchJobSubmitter.runJob(myBulkJob, paramBuilder.toJobParameters());
-			fail("Should have had invalid parameter execption!");
+		fail("Should have had invalid parameter execption!");
 		} catch (JobParametersInvalidException e) {
 			// good
 		}
