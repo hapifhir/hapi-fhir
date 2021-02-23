@@ -22,6 +22,7 @@ package ca.uhn.fhir.mdm.rules.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.mdm.api.MdmConstants;
@@ -61,7 +62,12 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	public MdmRuleValidator(FhirContext theFhirContext, ISearchParamRetriever theSearchParamRetriever) {
 		myFhirContext = theFhirContext;
 		myTerser = myFhirContext.newTerser();
-		myFhirPath = myFhirContext.newFhirPath();
+		if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+			myFhirPath = myFhirContext.newFhirPath();
+		} else {
+			ourLog.warn("Skipping FHIRPath validation as DSTU2 does not support FHIR");
+			myFhirPath = null;
+		}
 		mySearchParamRetriever = theSearchParamRetriever;
 	}
 
@@ -193,7 +199,11 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 			}
 		} else { //Try to validate the FHIRPath
 			try {
-				myFhirPath.parse(theResourceType + "." + theFieldMatch.getFhirPath());
+				if (myFhirPath != null) {
+					myFhirPath.parse(theResourceType + "." + theFieldMatch.getFhirPath());
+				} else {
+					ourLog.warn("Can't validate FHIRPath expression due to a lack of IFhirPath object.");
+				}
 			} catch (Exception e) {
 				throw new ConfigurationException("MatchField [" + theFieldMatch.getName() + "] resourceType [" + theFieldMatch.getResourceType() + "] has failed FHIRPath evaluation.  " + e.getMessage());
 			}
