@@ -30,7 +30,6 @@ public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 	@BeforeEach
 	public void before() {
 		super.before();
-
 		myComparator = new MdmResourceFieldMatcher(ourFhirContext, myGivenNameMatchField, myMdmRulesJson);
 		myJohn = buildJohn();
 		myJohny = buildJohny();
@@ -88,22 +87,6 @@ public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("Expecting resource type Patient got resource type Encounter", e.getMessage());
-		}
-	}
-
-	@Test
-	public void testBadPath() {
-		try {
-			MdmFieldMatchJson matchField = new MdmFieldMatchJson()
-				.setName("patient-foo")
-				.setResourceType("Patient")
-				.setResourcePath("foo")
-				.setSimilarity(new MdmSimilarityJson().setAlgorithm(MdmSimilarityEnum.COSINE).setMatchThreshold(NAME_THRESHOLD));
-			MdmResourceFieldMatcher comparator = new MdmResourceFieldMatcher(ourFhirContext, matchField, myMdmRulesJson);
-			comparator.match(myJohn, myJohny);
-			fail();
-		} catch (DataFormatException e) {
-			assertThat(e.getMessage(), startsWith("Unknown child name 'foo' in element Patient"));
 		}
 	}
 
