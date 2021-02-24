@@ -46,6 +46,10 @@ import java.util.List;
  */
 @Configuration
 public class BulkExportJobConfig {
+	public static final String JOB_UUID_PARAMETER = "jobUUID";
+	public static final String READ_CHUNK_PARAMETER = "readChunkSize";
+	public static final String GROUP_ID_PARAMETER = "groupId";
+	public static final String RESOURCE_TYPES_PARAMETER = "resourceTypes";
 
 	@Autowired
 	private StepBuilderFactory myStepBuilderFactory;
@@ -77,6 +81,7 @@ public class BulkExportJobConfig {
 	public Job groupBulkExportJob() {
 		return myJobBuilderFactory.get("groupBulkExportJob")
 			.validator(groupBulkJobParameterValidator())
+			.validator(bulkJobParameterValidator())
 			.start(createBulkExportEntityStep())
 			.next(groupPartitionStep())
 			.next(closeJobStep())
@@ -84,9 +89,8 @@ public class BulkExportJobConfig {
 	}
 
 	@Bean
-	public JobParametersValidator groupBulkJobParameterValidator() {
-		return null;
-		//TODO GGG
+	public GroupIdPresentValidator groupBulkJobParameterValidator() {
+		return new GroupIdPresentValidator();
 	}
 
 	@Bean

@@ -189,8 +189,6 @@ public class BulkDataExportProvider {
 		@IdParam IIdType theIdParam,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
-		@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
-		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theTypeFilter,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_MDM, min = 0, max = 1, typeName = "boolean") IPrimitiveType<Boolean> theMdm,
 		ServletRequestDetails theRequestDetails
 	) {
@@ -208,15 +206,10 @@ public class BulkDataExportProvider {
 			resourceTypes = ArrayUtil.commaSeparatedListToCleanSet(theType.getValueAsString());
 		}
 
-		Date since = null;
-		if (theSince != null) {
-			since = theSince.getValue();
-		}
-
+		//TODO GGG eventually, we will support these things. 
 		Set<String> filters = null;
-		if (theTypeFilter != null) {
-			filters = ArrayUtil.commaSeparatedListToCleanSet(theTypeFilter.getValueAsString());
-		}
+		Date since = null;
+
 		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(new GroupBulkDataExportOptions(outputFormat, resourceTypes, since, filters, theIdParam, theMdm.getValue()));
 
 		String serverBase = getServerBase(theRequestDetails);

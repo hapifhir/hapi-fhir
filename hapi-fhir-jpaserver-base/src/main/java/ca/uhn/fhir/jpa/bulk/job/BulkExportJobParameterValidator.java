@@ -57,11 +57,11 @@ public class BulkExportJobParameterValidator implements JobParametersValidator {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		String errorMessage = txTemplate.execute(tx -> {
 			StringBuilder errorBuilder = new StringBuilder();
-			Long readChunkSize = theJobParameters.getLong("readChunkSize");
+			Long readChunkSize = theJobParameters.getLong(BulkExportJobConfig.READ_CHUNK_PARAMETER);
 			if (readChunkSize == null || readChunkSize < 1) {
 				errorBuilder.append("There must be a valid number for readChunkSize, which is at least 1. ");
 			}
-			String jobUUID = theJobParameters.getString("jobUUID");
+			String jobUUID = theJobParameters.getString(BulkExportJobConfig.JOB_UUID_PARAMETER);
 			Optional<BulkExportJobEntity> oJob = myBulkExportJobDao.findByJobId(jobUUID);
 			if (!StringUtils.isBlank(jobUUID) && !oJob.isPresent()) {
 				errorBuilder.append("There is no persisted job that exists with UUID: " + jobUUID + ". ");
@@ -71,9 +71,9 @@ public class BulkExportJobParameterValidator implements JobParametersValidator {
 			boolean hasExistingJob = oJob.isPresent();
 			//Check for to-be-created parameters.
 			if (!hasExistingJob) {
-				String resourceTypes = theJobParameters.getString("resourceTypes");
+				String resourceTypes = theJobParameters.getString(BulkExportJobConfig.RESOURCE_TYPES_PARAMETER);
 				if (StringUtils.isBlank(resourceTypes)) {
-					errorBuilder.append("You must include [resourceTypes] as a Job Parameter");
+					errorBuilder.append("You must include [").append(BulkExportJobConfig.RESOURCE_TYPES_PARAMETER).append("] as a Job Parameter");
 				} else {
 					String[] resourceArray = resourceTypes.split(",");
 					Arrays.stream(resourceArray).filter(resourceType -> resourceType.equalsIgnoreCase("Binary"))
@@ -89,9 +89,6 @@ public class BulkExportJobParameterValidator implements JobParametersValidator {
 				}
 			}
 
-			if (theJobParameters.getString("groupId") != null) {
-				ourLog.debug("detected we are running in group mode with group id [{}]", theJobParameters.getString("groupId"));
-			}
 			return errorBuilder.toString();
 		});
 

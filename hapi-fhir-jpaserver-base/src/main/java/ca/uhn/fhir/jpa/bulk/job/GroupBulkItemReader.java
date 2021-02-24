@@ -34,7 +34,6 @@ import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.api.Include;
@@ -56,18 +55,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class GroupBulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	Iterator<ResourcePersistentId> myPidIterator;
-	@Value("#{jobParameters['readChunkSize']}")
-	private Long READ_CHUNK_SIZE;
-	@Value("#{jobExecutionContext['jobUUID']}")
-	private String myJobUUID;
+
 	@Value("#{stepExecutionContext['resourceType']}")
 	private String myResourceType;
+
+	@Value("#{jobParameters['" + BulkExportJobConfig.GROUP_ID_PARAMETER + "']}")
+	private String myGroupId;
+	@Value("#{jobParameters['"+ BulkExportJobConfig.JOB_UUID_PARAMETER+"']}")
+	private String myJobUUID;
+	@Value("#{jobParameters['" + BulkExportJobConfig.READ_CHUNK_PARAMETER + "']}")
+	private Long myReadChunkSize;
 
 	@Autowired
 	private IBulkExportJobDao myBulkExportJobDao;
@@ -92,7 +94,7 @@ public class GroupBulkItemReader implements ItemReader<List<ResourcePersistentId
 		//Fetch all the pids given the query.
 		ISearchBuilder searchBuilder = getSearchBuilder();
 
-		//Build comlex-ish _has query with a revincludes which allows lookup by group membership
+		//Build complex-ish _has query with a revincludes which allows lookup by group membership
 		SearchParameterMap searchParameterMap = getSearchParameterMap(jobEntity);
 
 		IResultIterator resultIterator = searchBuilder.createQuery(
@@ -129,9 +131,7 @@ public class GroupBulkItemReader implements ItemReader<List<ResourcePersistentId
 	@Nonnull
 	private SearchParameterMap getSearchParameterMap(BulkExportJobEntity jobEntity) {
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
-		String groupIdFromRequest = getGroupIdFromRequest(jobEntity);
-		searchParameterMap.add("_has", new HasParam("Group", "member", "_id", groupIdFromRequest));
-
+		searchParameterMap.add("_has", new HasParam("Group", "member", "_id", myGroupId));
 
 		String revIncludeString = buildRevIncludeString();
 		searchParameterMap.addRevInclude(new Include(revIncludeString).toLocked());
@@ -182,7 +182,7 @@ public class GroupBulkItemReader implements ItemReader<List<ResourcePersistentId
 		}
 		int count = 0;
 		List<ResourcePersistentId> outgoing = new ArrayList<>();
-		while (myPidIterator.hasNext() && count < READ_CHUNK_SIZE) {
+		while (myPidIterator.hasNext() && count < myReadChunkSize) {
 			outgoing.add(myPidIterator.next());
 			count += 1;
 		}
