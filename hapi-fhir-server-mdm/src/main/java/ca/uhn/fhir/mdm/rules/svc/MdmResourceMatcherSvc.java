@@ -144,7 +144,8 @@ public class MdmResourceMatcherSvc {
 		return retVal;
 	}
 
-	private boolean isValidResourceType(String theResourceType, String theFieldComparatorType) {
+
+		private boolean isValidResourceType(String theResourceType, String theFieldComparatorType) {
 		return (
 			theFieldComparatorType.equalsIgnoreCase(MdmConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE)
 			|| theFieldComparatorType.equalsIgnoreCase(theResourceType)

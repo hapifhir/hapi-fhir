@@ -1,0 +1,19 @@
+{
+	"version": "1",
+	"mdmTypes": ["Patient", "Practitioner", "Medication"],
+	"candidateSearchParams" : [],
+	"candidateFilterSearchParams" : [],
+	"matchFields" : [ {
+		"name" : "given-name",
+		"resourceType" : "Patient",
+		"resourcePath" : "name.first",
+		"fhirPath" : "name.given.first()",
+		"matcher" : {
+			"algorithm": "STRING",
+			"exact" : true
+		}
+	}],
+	"matchResultMap" : {
+		"given-name" : "POSSIBLE_MATCH"
+	}
+}

@@ -21,6 +21,7 @@ package ca.uhn.fhir.mdm.rules.svc;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.mdm.api.MdmMatchEvaluation;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
@@ -43,16 +44,20 @@ public class MdmResourceFieldMatcher {
 	private final MdmFieldMatchJson myMdmFieldMatchJson;
 	private final String myResourceType;
 	private final String myResourcePath;
+	private final String myFhirPath;
 	private final MdmRulesJson myMdmRulesJson;
 	private final String myName;
+	private final boolean myIsFhirPathExpression;
 
 	public MdmResourceFieldMatcher(FhirContext theFhirContext, MdmFieldMatchJson theMdmFieldMatchJson, MdmRulesJson theMdmRulesJson) {
 		myFhirContext = theFhirContext;
 		myMdmFieldMatchJson = theMdmFieldMatchJson;
 		myResourceType = theMdmFieldMatchJson.getResourceType();
 		myResourcePath = theMdmFieldMatchJson.getResourcePath();
+		myFhirPath = theMdmFieldMatchJson.getFhirPath();
 		myName = theMdmFieldMatchJson.getName();
 		myMdmRulesJson = theMdmRulesJson;
+		myIsFhirPathExpression = myFhirPath != null;
 	}
 
 	/**
@@ -71,9 +76,18 @@ public class MdmResourceFieldMatcher {
 		validate(theLeftResource);
 		validate(theRightResource);
 
-		FhirTerser terser = myFhirContext.newTerser();
-		List<IBase> leftValues = terser.getValues(theLeftResource, myResourcePath, IBase.class);
-		List<IBase> rightValues = terser.getValues(theRightResource, myResourcePath, IBase.class);
+		List<IBase> leftValues;
+		List<IBase> rightValues;
+
+		if (myIsFhirPathExpression) {
+			IFhirPath fhirPath = myFhirContext.newFhirPath();
+			leftValues = fhirPath.evaluate(theLeftResource, myFhirPath, IBase.class);
+			rightValues = fhirPath.evaluate(theRightResource, myFhirPath, IBase.class);
+		} else {
+			FhirTerser fhirTerser = myFhirContext.newTerser();
+			leftValues = fhirTerser.getValues(theLeftResource, myResourcePath, IBase.class);
+			rightValues = fhirTerser.getValues(theRightResource, myResourcePath, IBase.class);
+		}
 		return match(leftValues, rightValues);
 	}
 
