@@ -663,7 +663,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		Counter circularCounter = new Counter();
 		for (TermConcept next : rootConcepts.values()) {
-			long count = circularCounter.getnAdd();
+			long count = circularCounter.getThenAdd();
 			float pct = ((float) count / rootConcepts.size()) * 100.0f;
 			ourLog.info(" * Scanning for circular refs - have scanned {} / {} codes ({}%)", count, rootConcepts.size(), pct);
 			dropCircularRefs(next, new ArrayList<>(), code2concept);

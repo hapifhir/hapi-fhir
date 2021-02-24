@@ -93,7 +93,7 @@ public class BulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 		ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, myResourceType, nextTypeClass);
 
 		SearchParameterMap map = createSearchParameterMapFromTypeFilter(jobEntity, def);
-		
+
 		if (jobEntity.getSince() != null) {
 			map.setLastUpdated(new DateRangeParam(jobEntity.getSince(), null));
 		}

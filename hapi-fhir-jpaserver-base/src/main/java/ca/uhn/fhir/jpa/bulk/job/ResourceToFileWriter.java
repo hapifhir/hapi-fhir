@@ -100,7 +100,6 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 		IBaseBinary binary = BinaryUtil.newBinary(myFhirContext);
 		binary.setContentType(Constants.CT_FHIR_NDJSON);
 		binary.setContent(myOutputStream.toByteArray());
-
 		DaoMethodOutcome outcome = myBinaryDao.create(binary);
 		return outcome.getResource().getIdElement();
 	}
@@ -116,8 +115,6 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 		int count = 0;
 		for (List<IBaseResource> resourceList : theList) {
 			for (IBaseResource nextFileResource : resourceList) {
-				System.out.println("ZOOP");
-				System.out.println(myParser.setPrettyPrint(true).encodeResourceToString(nextFileResource));
 				myParser.encodeResourceToWriter(nextFileResource, myWriter);
 				myWriter.append("\n");
 				count++;

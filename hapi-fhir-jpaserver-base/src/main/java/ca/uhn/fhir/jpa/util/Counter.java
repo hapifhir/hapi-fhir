@@ -24,7 +24,7 @@ public class Counter {
 
 	private long myCount;
 
-	public long getnAdd() {
+	public long getThenAdd() {
 		return myCount++;
 	}
 

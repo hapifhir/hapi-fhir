@@ -271,32 +271,6 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testPatientHasGroupImmunization(){
-
-		Patient patient = new Patient();
-		String patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
-
-		Group group = new Group();
-		group.addMember().setEntity(new Reference(patientId));
-		myGroupDao.create(group).getId().getIdPartAsLong();
-
-		Immunization immunization = new Immunization();
-		immunization.setPatient(new Reference(patientId));
-		String immunizationId = myImmunizationDao.create(immunization).getId().toUnqualifiedVersionless().getValue();
-
-//		String criteria = "?_has:Group:member:_id="+ daoMethodOutcome + "&_revinclude=Immunization:patient";
-		String criteria = "?_revinclude=Immunization:patient";
-		//TODO GGG the matchUrlService _doesnt translate rev includes!
-		SearchParameterMap searchParameterMap = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
-		searchParameterMap.addRevInclude(new Include("Immunization:patient").toLocked());
-		searchParameterMap.setLoadSynchronous(true);
-		IBundleProvider search = myPatientDao.search(searchParameterMap);
-		List<String> strings = toUnqualifiedVersionlessIdValues(search);
-		assertThat(strings, hasItems(patientId, immunizationId));
-
-	}
-
-	@Test
 	public void testHasConditionOr() {
 		Patient patient = new Patient();
 		String patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
