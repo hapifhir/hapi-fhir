@@ -22,7 +22,9 @@ package ca.uhn.fhir.mdm.rules.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
@@ -33,7 +35,9 @@ import ca.uhn.fhir.mdm.rules.json.MdmSimilarityJson;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 import ca.uhn.fhir.util.FhirTerser;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,16 +55,19 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 
 	private final FhirContext myFhirContext;
 	private final ISearchParamRetriever mySearchParamRetriever;
-	private final Class<? extends IBaseResource> myPatientClass;
-	private final Class<? extends IBaseResource> myPractitionerClass;
 	private final FhirTerser myTerser;
+	private final IFhirPath myFhirPath;
 
 	@Autowired
 	public MdmRuleValidator(FhirContext theFhirContext, ISearchParamRetriever theSearchParamRetriever) {
 		myFhirContext = theFhirContext;
-		myPatientClass = theFhirContext.getResourceDefinition("Patient").getImplementingClass();
-		myPractitionerClass = theFhirContext.getResourceDefinition("Practitioner").getImplementingClass();
 		myTerser = myFhirContext.newTerser();
+		if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+			myFhirPath = myFhirContext.newFhirPath();
+		} else {
+			ourLog.debug("Skipping FHIRPath validation as DSTU2 does not support FHIR");
+			myFhirPath = null;
+		}
 		mySearchParamRetriever = theSearchParamRetriever;
 	}
 
@@ -158,20 +165,48 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	}
 
 	private void validateFieldPathForType(String theResourceType, MdmFieldMatchJson theFieldMatch) {
-		ourLog.debug(" validating resource {} for {} ", theResourceType, theFieldMatch.getResourcePath());
+		ourLog.debug("Validating resource {} for {} ", theResourceType, theFieldMatch.getResourcePath());
 
-		try {
-			RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
-			Class<? extends IBaseResource> implementingClass = resourceDefinition.getImplementingClass();
-			String path = theResourceType + "." + theFieldMatch.getResourcePath();
-			myTerser.getDefinition(implementingClass, path);
-		} catch (DataFormatException | ConfigurationException | ClassCastException e) {
-			throw new ConfigurationException("MatchField " +
+		if (theFieldMatch.getFhirPath() != null && theFieldMatch.getResourcePath() != null) {
+			throw new ConfigurationException("MatchField [" +
 				theFieldMatch.getName() +
-				" resourceType " +
+				"] resourceType [" +
 				theFieldMatch.getResourceType() +
-				" has invalid path '" + theFieldMatch.getResourcePath() + "'.  " +
-				e.getMessage());
+				"] has defined both a resourcePath and a fhirPath. You must define one of the two.");
+		}
+
+		if (theFieldMatch.getResourcePath() == null && theFieldMatch.getFhirPath() == null) {
+			throw new ConfigurationException("MatchField [" +
+				theFieldMatch.getName() +
+					"] resourceType [" +
+					theFieldMatch.getResourceType() +
+					"] has defined neither a resourcePath or a fhirPath. You must define one of the two.");
+		}
+
+		if (theFieldMatch.getResourcePath() != null) {
+			try { //Try to validate the struture definition path
+				RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
+				Class<? extends IBaseResource> implementingClass = resourceDefinition.getImplementingClass();
+				String path = theResourceType + "." + theFieldMatch.getResourcePath();
+				myTerser.getDefinition(implementingClass, path);
+			} catch (DataFormatException | ConfigurationException | ClassCastException e) {
+				//Fallback to attempting to FHIRPath evaluate it.
+				throw new ConfigurationException("MatchField " +
+					theFieldMatch.getName() +
+					" resourceType " +
+					theFieldMatch.getResourceType() +
+					" has invalid path '" + theFieldMatch.getResourcePath() + "'.  " + e.getMessage());
+			}
+		} else { //Try to validate the FHIRPath
+			try {
+				if (myFhirPath != null) {
+					myFhirPath.parse(theResourceType + "." + theFieldMatch.getFhirPath());
+				} else {
+					ourLog.debug("Can't validate FHIRPath expression due to a lack of IFhirPath object.");
+				}
+			} catch (Exception e) {
+				throw new ConfigurationException("MatchField [" + theFieldMatch.getName() + "] resourceType [" + theFieldMatch.getResourceType() + "] has failed FHIRPath evaluation.  " + e.getMessage());
+			}
 		}
 	}
 

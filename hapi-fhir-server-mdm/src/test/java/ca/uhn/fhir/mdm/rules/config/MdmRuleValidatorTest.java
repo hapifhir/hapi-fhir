@@ -72,6 +72,36 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 	}
 
 	@Test
+	public void testMatcherBadFhirPath() throws IOException {
+		try {
+			setMdmRuleJson("bad-rules-bad-fhirpath.json");
+			fail();
+		} catch (ConfigurationException e) {
+			assertThat(e.getMessage(), startsWith("MatchField [given-name] resourceType [Patient] has failed FHIRPath evaluation.  Error in ?? at 1, 1: The name blurst is not a valid function name"));
+		}
+	}
+
+	@Test
+	public void testBadRulesMissingBothPaths() throws IOException {
+		try {
+			setMdmRuleJson("bad-rules-no-path.json");
+			fail();
+		} catch (ConfigurationException e) {
+			assertThat(e.getMessage(), startsWith("MatchField [given-name] resourceType [Patient] has defined neither a resourcePath or a fhirPath. You must define one of the two."));
+		}
+	}
+
+	@Test
+	public void testBadRulesBothPathsFilled() throws IOException {
+		try {
+			setMdmRuleJson("bad-rules-both-paths.json");
+			fail();
+		} catch (ConfigurationException e) {
+			assertThat(e.getMessage(), startsWith("MatchField [given-name] resourceType [Patient] has defined both a resourcePath and a fhirPath. You must define one of the two."));
+		}
+	}
+
+	@Test
 	public void testMatcherBadSearchParam() throws IOException {
 		try {
 			setMdmRuleJson("bad-rules-bad-searchparam.json");
