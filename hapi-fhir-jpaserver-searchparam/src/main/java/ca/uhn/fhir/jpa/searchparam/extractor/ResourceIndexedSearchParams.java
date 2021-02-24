@@ -144,6 +144,17 @@ public final class ResourceIndexedSearchParams {
 		theEntity.setResourceLinks(myLinks);
 	}
 
+	public void updateSpnamePrefixForIndexedOnContainedResource(String spnamePrefix) {
+		updateSpnamePrefixForIndexedOnContainedResource(myNumberParams, spnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(myQuantityParams, spnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(myQuantityNormalizedParams, spnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(myDateParams, spnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(myUriParams, spnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(myTokenParams, spnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(myStringParams, spnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(myCoordsParams, spnamePrefix);
+	}
+	
 	void setUpdatedTime(Date theUpdateTime) {
 		setUpdatedTime(myStringParams, theUpdateTime);
 		setUpdatedTime(myNumberParams, theUpdateTime);
@@ -161,6 +172,14 @@ public final class ResourceIndexedSearchParams {
 		}
 	}
 
+	private void updateSpnamePrefixForIndexedOnContainedResource(Collection<? extends BaseResourceIndexedSearchParam> theParams, String spnamePrefix) {
+		
+		for (BaseResourceIndexedSearchParam param : theParams) {
+			param.setParamName(spnamePrefix + "." + param.getParamName());
+			param.calculateHashes(); // re-calculuteHashes
+		}
+	}
+	
 	public Set<String> getPopulatedResourceLinkParameters() {
 		return myPopulatedResourceLinkParameters;
 	}

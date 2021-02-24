@@ -112,6 +112,9 @@ public class SearchParamWithInlineReferencesExtractor {
 			theParams.findMissingSearchParams(myPartitionSettings, myDaoConfig.getModelConfig(), theEntity, activeSearchParams);
 		}
 
+		// FIXME DEBUG only to be deleted
+		System.out.println("theParams = " + theParams);	
+		
 		/*
 		 * If the existing resource already has links and those match links we still want, use them instead of removing them and re adding them
 		 */
