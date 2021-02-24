@@ -1336,8 +1336,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			String key = keyIterator.next();
 			if (Constants.PARAM_LIST.equals((key))) {
 				List<List<IQueryParameterType>> andOrValues = theParams.get(key);
-				// FIXME KH generalize this to properly support and and or and write tests for both
-				// FIXME KH this is a hack to test it out in theory
 				theParams.remove(key);
 				List<List<IQueryParameterType>> hasParamValues = new ArrayList<>();
 				for (List<IQueryParameterType> orValues : andOrValues) {
