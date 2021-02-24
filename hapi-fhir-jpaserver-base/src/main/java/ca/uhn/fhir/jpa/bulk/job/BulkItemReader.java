@@ -35,7 +35,6 @@ import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.util.UrlUtil;
@@ -55,14 +54,14 @@ import java.util.Optional;
 public class BulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	Iterator<ResourcePersistentId> myPidIterator;
-	@Value("#{jobParameters['readChunkSize']}")
-	private Long READ_CHUNK_SIZE;
-	@Value("#{jobExecutionContext['jobUUID']}")
-	private String myJobUUID;
+
 	@Value("#{stepExecutionContext['resourceType']}")
 	private String myResourceType;
-	@Value("#{jobParameters['groupId']}")
-	private String myGroupId;
+
+	@Value("#{jobParameters['" + BulkExportJobConfig.READ_CHUNK_PARAMETER + "']}")
+	private Long myReadChunkSize;
+	@Value("#{jobParameters['"+ BulkExportJobConfig.JOB_UUID_PARAMETER+"']}")
+	private String myJobUUID;
 
 	@Autowired
 	private IBulkExportJobDao myBulkExportJobDao;
@@ -94,9 +93,7 @@ public class BulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 		ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, myResourceType, nextTypeClass);
 
 		SearchParameterMap map = createSearchParameterMapFromTypeFilter(jobEntity, def);
-		if (myGroupId != null) {
-		}
-
+		
 		if (jobEntity.getSince() != null) {
 			map.setLastUpdated(new DateRangeParam(jobEntity.getSince(), null));
 		}
@@ -131,7 +128,7 @@ public class BulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 		}
 		int count = 0;
 		List<ResourcePersistentId> outgoing = new ArrayList<>();
-		while (myPidIterator.hasNext() && count < READ_CHUNK_SIZE) {
+		while (myPidIterator.hasNext() && count < myReadChunkSize) {
 			outgoing.add(myPidIterator.next());
 			count += 1;
 		}

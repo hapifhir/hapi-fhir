@@ -41,7 +41,6 @@ import static org.slf4j.LoggerFactory.getLogger;
  * This class will prevent a job from running if the UUID does not exist or is invalid.
  */
 public class BulkExportJobParameterValidator implements JobParametersValidator {
-	private static final Logger ourLog = getLogger(BulkExportJobParameterValidator.class);
 
 	@Autowired
 	private IBulkExportJobDao myBulkExportJobDao;
