@@ -50,9 +50,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -327,8 +329,10 @@ public class BulkDataExportProviderTest {
 		GroupBulkDataExportOptions options = myGroupBulkDataExportOptionsCaptor.getValue();
 		assertEquals(Constants.CT_FHIR_NDJSON, options.getOutputFormat());
 		assertThat(options.getResourceTypes(), containsInAnyOrder("Observation", "DiagnosticReport"));
-		assertThat(options.getSince(), notNullValue());
-		assertThat(options.getFilters(), containsInAnyOrder("Observation?code=OBSCODE", "DiagnosticReport?code=DRCODE"));
+		//TODO GGG eventually, we will support since in group exports
+		assertThat(options.getSince(), nullValue());
+		//TODO GGG eventually, we will support filters in group exports
+		assertThat(options.getFilters(), nullValue());
 		assertEquals(GROUP_ID, options.getGroupId().getValue());
 		assertTrue(options.isMdm());
 	}
