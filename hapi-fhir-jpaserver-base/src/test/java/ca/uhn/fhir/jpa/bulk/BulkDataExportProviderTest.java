@@ -310,7 +310,6 @@ public class BulkDataExportProviderTest {
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Observation, DiagnosticReport"));
 		input.addParameter(JpaConstants.PARAM_EXPORT_SINCE, now);
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType("Observation?code=OBSCODE,DiagnosticReport?code=DRCODE"));
-		input.addParameter(JpaConstants.PARAM_EXPORT_MDM, new BooleanType(true));
 
 		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 

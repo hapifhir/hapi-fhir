@@ -284,7 +284,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		if (theBulkDataExportOptions instanceof GroupBulkDataExportOptions) {
 			GroupBulkDataExportOptions groupOptions = (GroupBulkDataExportOptions) theBulkDataExportOptions;
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_GROUP_ID).append("=").append(groupOptions.getGroupId().getValue());
-			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_MDM).append("=").append(groupOptions.isMdm());
+			//TODO GGG eventually we will support this
+//			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_MDM).append("=").append(groupOptions.isMdm());
 		}
 		String request = requestBuilder.toString();
 
