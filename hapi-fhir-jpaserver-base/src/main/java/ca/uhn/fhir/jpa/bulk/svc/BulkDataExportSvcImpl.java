@@ -158,7 +158,13 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	}
 	private String getGroupIdIfPresent(String theRequestString) {
 		Map<String, String[]> stringMap = UrlUtil.parseQueryString(theRequestString);
-		return String.join(",", stringMap.get(JpaConstants.PARAM_EXPORT_GROUP_ID));
+		if (stringMap != null) {
+			String[] strings = stringMap.get(JpaConstants.PARAM_EXPORT_GROUP_ID);
+			if (strings != null) {
+				return String.join(",", strings);
+			}
+		}
+		return null;
 	}
 
 
