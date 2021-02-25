@@ -1364,8 +1364,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					if ("Period".equals(boundsType)) {
 						Date start = extractValueAsDate(myPeriodStartValueChild, bounds.get());
 						Date end = extractValueAsDate(myPeriodEndValueChild, bounds.get());
-						dates.add(start);
+						if (start != null) {
+							dates.add(start);
+						}
+						if (end != null) {
 						dates.add(end);
+						}
 					}
 				}
 			}
