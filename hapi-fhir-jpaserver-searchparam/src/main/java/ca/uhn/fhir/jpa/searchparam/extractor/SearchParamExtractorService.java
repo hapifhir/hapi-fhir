@@ -106,9 +106,9 @@ public class SearchParamExtractorService {
 		// FIXME - optional check for ModelConfig
 		// if (ModelConfig.....)
 		{
-            ResourceIndexedSearchParams containedParams = new ResourceIndexedSearchParams();
-            extractSearchIndexParametersForContainedResources(theRequestDetails, containedParams, resource, theEntity);
-            mergeParams(containedParams, theParams);
+			ResourceIndexedSearchParams containedParams = new ResourceIndexedSearchParams();
+			extractSearchIndexParametersForContainedResources(theRequestDetails, containedParams, resource, theEntity);
+			mergeParams(containedParams, theParams);
 		}
 		
 		// Do this after, because we add to strings during both string and token processing, and contained resource if any

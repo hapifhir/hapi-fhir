@@ -108,11 +108,16 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			obs.addIdentifier().setSystem("urn:system").setValue("NOLINK");
 			obs.setDevice(new Reference(devId));
 			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
-		String uri = ourServerBase + "/Patient?_has:Observation:subject:identifier=" + UrlUtil.escapeUrlParam("urn:system|FOO");
+		
+		String uri = ourServerBase + "/Observation?subject.name=SMITH&_contained=true";
+		
+		System.out.println("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertThat(ids, contains(pid0.getValue()));
+		//assertThat(ids, contains(pid0.getValue()));
 
 	}
 
