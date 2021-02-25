@@ -54,6 +54,7 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchContainedEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -1290,10 +1291,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public IBundleProvider search(final SearchParameterMap theParams, RequestDetails theRequest, HttpServletResponse theServletResponse) {
 
 		if (theRequest != null) {
-			String[] contained = theRequest.getParameters().get("_contained");
+			String[] contained = theRequest.getParameters().get(Constants.PARAM_CONTAINED);
 			if (contained != null && contained.length > 0) {
 				if (contained[0].equals("true")) {
-					// ...handle this
+					theParams.setSearchContainedMode(SearchContainedEnum.TRUE);
+					ourLog.info("Search on contained resources only");
+				} else if (contained[0].equals("both")) {
+					ourLog.warn("Search on both normal resources and contained resources are not support. set to default search on normal resources");
 				}
 			}
 		}

@@ -79,7 +79,8 @@ public class SearchParameterMap implements Serializable {
 	private boolean myLastN;
 	private Integer myLastNMax;
 	private boolean myDeleteExpunge;
-
+	private SearchContainedEnum mySearchContainedMode = SearchContainedEnum.FALSE;
+	
 	/**
 	 * Constructor
 	 */
@@ -738,4 +739,13 @@ public class SearchParameterMap implements Serializable {
 		return retVal;
 	}
 
+	public SearchContainedEnum getSearchContainedMode() {
+		return mySearchContainedMode;
+	}
+
+	public void setSearchContainedMode(SearchContainedEnum theSearchContainedMode) {
+		this.mySearchContainedMode = theSearchContainedMode;
+	}
+
+	
 }
