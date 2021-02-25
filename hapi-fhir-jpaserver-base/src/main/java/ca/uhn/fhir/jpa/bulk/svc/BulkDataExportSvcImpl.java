@@ -259,7 +259,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			throw new InvalidRequestException("Invalid output format: " + theBulkDataExportOptions.getOutputFormat());
 		}
 
-		// FIXME GGG can we encode BulkDataExportOptions as a JSON string as opposed to this request string.  Feels like it would be a more extensible encoding...
+		// TODO GGG KS can we encode BulkDataExportOptions as a JSON string as opposed to this request string.  Feels like it would be a more extensible encoding...
+		//Probably yes, but this will all need to be rebuilt when we remove this bridge entity
 		StringBuilder requestBuilder = new StringBuilder();
 		requestBuilder.append("/").append(JpaConstants.OPERATION_EXPORT);
 		requestBuilder.append("?").append(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT).append("=").append(escapeUrlParam(outputFormat));
