@@ -189,7 +189,6 @@ public class BulkDataExportProvider {
 		@IdParam IIdType theIdParam,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
-		@OperationParam(name = JpaConstants.PARAM_EXPORT_MDM, min = 0, max = 1, typeName = "boolean") IPrimitiveType<Boolean> theMdm,
 		ServletRequestDetails theRequestDetails
 	) {
 
@@ -209,8 +208,9 @@ public class BulkDataExportProvider {
 		//TODO GGG eventually, we will support these things. 
 		Set<String> filters = null;
 		Date since = null;
+		boolean theMdm = false;
 
-		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(new GroupBulkDataExportOptions(outputFormat, resourceTypes, since, filters, theIdParam, theMdm.getValue()));
+		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(new GroupBulkDataExportOptions(outputFormat, resourceTypes, since, filters, theIdParam, theMdm));
 
 		String serverBase = getServerBase(theRequestDetails);
 		String pollLocation = serverBase + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" + JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + outcome.getJobId();

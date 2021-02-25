@@ -50,6 +50,7 @@ public class BulkExportJobConfig {
 	public static final String READ_CHUNK_PARAMETER = "readChunkSize";
 	public static final String GROUP_ID_PARAMETER = "groupId";
 	public static final String RESOURCE_TYPES_PARAMETER = "resourceTypes";
+	public static final int CHUNK_SIZE = 100;
 
 	@Autowired
 	private StepBuilderFactory myStepBuilderFactory;
@@ -114,7 +115,7 @@ public class BulkExportJobConfig {
 	@Bean
 	public Step groupBulkExportGenerateResourceFilesStep() {
 		return myStepBuilderFactory.get("groupBulkExportGenerateResourceFilesStep")
-			.<List<ResourcePersistentId>, List<IBaseResource>> chunk(100) //1000 resources per generated file, as the reader returns 10 resources at a time.
+			.<List<ResourcePersistentId>, List<IBaseResource>> chunk(CHUNK_SIZE) //1000 resources per generated file, as the reader returns 10 resources at a time.
 			.reader(groupBulkItemReader())
 			.processor(myPidToIBaseResourceProcessor)
 			.writer(resourceToFileWriter())
@@ -132,7 +133,7 @@ public class BulkExportJobConfig {
 	@Bean
 	public Step bulkExportGenerateResourceFilesStep() {
 		return myStepBuilderFactory.get("bulkExportGenerateResourceFilesStep")
-			.<List<ResourcePersistentId>, List<IBaseResource>> chunk(100) //1000 resources per generated file, as the reader returns 10 resources at a time.
+			.<List<ResourcePersistentId>, List<IBaseResource>> chunk(CHUNK_SIZE) //1000 resources per generated file, as the reader returns 10 resources at a time.
 			.reader(bulkItemReader())
 			.processor(myPidToIBaseResourceProcessor)
 			.writer(resourceToFileWriter())
