@@ -188,6 +188,7 @@ public class Constants {
 	public static final String PARAM_SOURCE = "_source";
 	public static final String PARAM_SUMMARY = "_summary";
 	public static final String PARAM_TAG = "_tag";
+	public static final String PARAM_LIST = "_list";
 	public static final String PARAM_TAGS = "_tags";
 	public static final String PARAM_TEXT = "_text";
 	public static final String PARAM_VALIDATE = "_validate";
