@@ -52,6 +52,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -333,6 +334,6 @@ public class BulkDataExportProviderTest {
 		//TODO GGG eventually, we will support filters in group exports
 		assertThat(options.getFilters(), nullValue());
 		assertEquals(GROUP_ID, options.getGroupId().getValue());
-		assertTrue(options.isMdm());
+		assertFalse(options.isMdm());
 	}
 }
