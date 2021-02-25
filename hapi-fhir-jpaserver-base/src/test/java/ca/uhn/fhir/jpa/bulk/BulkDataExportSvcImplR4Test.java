@@ -16,12 +16,7 @@ import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.HasOrListParam;
-import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
@@ -30,6 +25,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.CareTeam;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
@@ -552,13 +548,49 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(nextContents, is(containsString("IMM8")));
 	}
 
+	// CareTeam has two patient references: participant and patient.  This test checks if we find the patient if participant is null but patient is not null
+	@Test
+	public void testGroupBatchJobCareTeam() throws Exception {
+		createResources();
+
+		// Create a bulk job
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new GroupBulkDataExportOptions(null, Sets.newHashSet("CareTeam"), null, null, myPatientGroupId, true));
+
+		GroupBulkExportJobParametersBuilder paramBuilder = new GroupBulkExportJobParametersBuilder();
+		paramBuilder.setGroupId(myPatientGroupId.getIdPart());
+		paramBuilder.setJobUUID(jobDetails.getJobId());
+		paramBuilder.setReadChunkSize(10L);
+
+		JobExecution jobExecution = myBatchJobSubmitter.runJob(myGroupBulkJob, paramBuilder.toJobParameters());
+
+		awaitJobCompletion(jobExecution);
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+
+		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getFiles().size(), equalTo(1));
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("CareTeam")));
+
+		// Iterate over the files
+		Binary nextBinary = myBinaryDao.read(jobInfo.getFiles().get(0).getResourceId());
+		assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
+		String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
+		ourLog.info("Next contents for type {}:\n{}", nextBinary.getResourceType(), nextContents);
+
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("CareTeam")));
+		assertThat(nextContents, is(containsString("CT0")));
+		assertThat(nextContents, is(containsString("CT2")));
+		assertThat(nextContents, is(containsString("CT4")));
+		assertThat(nextContents, is(containsString("CT6")));
+		assertThat(nextContents, is(containsString("CT8")));
+	}
+
 
 	@Test
 	public void testJobParametersValidatorRejectsInvalidParameters() {
 		JobParametersBuilder paramBuilder = new JobParametersBuilder().addString("jobUUID", "I'm not real!");
 		try {
 			myBatchJobSubmitter.runJob(myBulkJob, paramBuilder.toJobParameters());
-		fail("Should have had invalid parameter execption!");
+			fail("Should have had invalid parameter execption!");
 		} catch (JobParametersInvalidException e) {
 			// good
 		}
@@ -607,6 +639,13 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 				immunization.setVaccineCode(cc);
 			}
 			myImmunizationDao.update(immunization);
+
+			CareTeam careTeam = new CareTeam();
+			careTeam.setId("CT" + i);
+			// FIXME GGG note if you uncomment addPartipant and comment out setSubject the test passes
+//			careTeam.addParticipant().setMember(new Reference(patId));
+			careTeam.setSubject(new Reference(patId)); // This maps to the "patient" search parameter on CareTeam
+			myCareTeamDao.update(careTeam);
 		}
 		myPatientGroupId =  myGroupDao.create(group).getId();
 
