@@ -1289,6 +1289,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public IBundleProvider search(final SearchParameterMap theParams, RequestDetails theRequest, HttpServletResponse theServletResponse) {
 
+		if (theRequest != null) {
+			String[] contained = theRequest.getParameters().get("_contained");
+			if (contained != null && contained.length > 0) {
+				if (contained[0].equals("true")) {
+					// ...handle this
+				}
+			}
+		}
+
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
 			for (List<List<IQueryParameterType>> nextAnds : theParams.values()) {
 				for (List<? extends IQueryParameterType> nextOrs : nextAnds) {
