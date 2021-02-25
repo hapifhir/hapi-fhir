@@ -151,28 +151,33 @@ public class GroupBulkItemReader implements ItemReader<List<ResourcePersistentId
 	 */
 	private String buildRevIncludeString() {
 		RuntimeResourceDefinition runtimeResourceDefinition = myContext.getResourceDefinition(myResourceType);
-		List<RuntimeSearchParam> searchParams = runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
-		if (searchParams == null || searchParams.size() == 0) {
-			String errorMessage = String.format("Resource type [%s] is not eligible for Group Bulk export, as it contains no Patient compartment", myResourceType);
-			throw new IllegalArgumentException(errorMessage);
-		} else {
-			//The reason we grab the first here is that even if there _are_ multiple search params, they end up pointing to the same patient compartment.
-			//So we can safely just grab the first.
-			RuntimeSearchParam runtimeSearchParam = searchParams.get(0);
-			String includeString = runtimeResourceDefinition.getName() + ":" + runtimeSearchParam.getName();
-			return includeString;
-
+		RuntimeSearchParam patientSearchParam = runtimeResourceDefinition.getSearchParam("patient");
+		if (patientSearchParam == null) {
+			patientSearchParam = runtimeResourceDefinition.getSearchParam("subject");
+			if (patientSearchParam == null) {
+				patientSearchParam = getRuntimeSearchParamByCompartment(runtimeResourceDefinition);
+			}
 		}
+		String includeString = runtimeResourceDefinition.getName() + ":" + patientSearchParam.getName();
+		return includeString;
 	}
 
-	private String getGroupIdFromRequest(BulkExportJobEntity theJobEntity) {
-		Map<String, String[]> requestUrl = UrlUtil.parseQueryStrings(theJobEntity.getRequest());
-		String[] groupId= requestUrl.get(JpaConstants.PARAM_EXPORT_GROUP_ID);
-		if (groupId != null) {
-			return Arrays.stream(groupId).collect(Collectors.joining(","));
+	/**
+	 * Search the resource definition for a compartment named 'patient' and return its related Search Parameter.
+	 */
+	private RuntimeSearchParam getRuntimeSearchParamByCompartment(RuntimeResourceDefinition runtimeResourceDefinition) {
+		RuntimeSearchParam patientSearchParam;
+		List<RuntimeSearchParam> searchParams = runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
+		if (searchParams == null || searchParams.size() == 0) {
+			String errorMessage = String.format("Resource type [%s] is not eligible for Group Bulk export, as it contains no Patient compartment, and no `patient` or `subject` search parameter", myResourceType);
+			throw new IllegalArgumentException(errorMessage);
+		} else if (searchParams.size() == 1) {
+			patientSearchParam = searchParams.get(0);
 		} else {
-			throw new IllegalStateException("You cannot run a Group export job without a " + JpaConstants.PARAM_EXPORT_GROUP_ID + " parameter as part of the request.");
+			String errorMessage = String.format("Resource type [%s] is not eligible for Group Bulk export, as we are unable to disambiguate which patient search parameter we should be searching by.", myResourceType);
+			throw new IllegalArgumentException(errorMessage);
 		}
+		return patientSearchParam;
 	}
 
 	@Override
