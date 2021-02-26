@@ -67,11 +67,11 @@ jobs:
         inputs:
           targetType: 'inline'
           script: mkdir -p $(MAVEN_CACHE_FOLDER); pwd; ls -al $(MAVEN_CACHE_FOLDER); mkdir $(Build.ArtifactStagingDirectory)/jacoco-output; mkdir $(Build.ArtifactStagingDirectory)/test-output;
-      - task: Bash@3
-        displayName: Determine Target Modules
-        inputs:
-           targetType: 'filePath'
-           filePath: 'slice_modules.sh'
+#      - task: Bash@3
+#        displayName: Determine Target Modules
+#        inputs:
+#           targetType: 'filePath'
+#           filePath: 'slice_modules.sh'
       - task: Bash@3
         displayName: Generate Test Exclusions
         inputs:
