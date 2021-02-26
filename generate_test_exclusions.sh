@@ -29,7 +29,7 @@ for i in $tests_to_skip; do
 done
 
 counter=0;
-for i in $tests_to_skip; do
+for i in $its_to_skip; do
    echo Counter is $counter
    if [[ $counter -ne $agentNumber ]]; then
       echo "$i"\n >> $ITs_to_skip_file
