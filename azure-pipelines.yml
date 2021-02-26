@@ -76,7 +76,7 @@ jobs:
         displayName: Generate Test Exclusions
         inputs:
            targetType: 'filePath'
-           filePath: 'generate_test_exclusions.sh
+           filePath: 'generate_test_exclusions.sh'
       - task: Maven@3
         env:
           JAVA_HOME_11_X64: /usr/java/openjdk-15
