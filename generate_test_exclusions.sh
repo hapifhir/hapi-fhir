@@ -8,11 +8,13 @@ if [ -z "$agentNumber" ]; then agentNumber=1; fi
 
 echo Total agents: $totalAgents
 echo Agent Number: $agentNumber
-echo workspace is "$(Agent.BuildDirectory)"
 echo workspace2 is $AGENT_BUILDDIRECTORY
 
 tests_to_skip=$(find . -name "*Test.java" | sed -e 's#^.*src/test/java/\(.*\)\.java#\1#' | tr "/" ".")
 its_to_skip=$(find . -name "*IT.java" | sed -e 's#^.*src/test/java/\(.*\)\.java#\1#' | tr "/" "." )
+
+echo "Tests to skip $tests_to_skip"
+echo "ITs to skip $its_to_skip"
 
 tests_to_skip_filename="tests_to_skip.txt"
 ITs_to_skip_filename="ITs_to_skip.txt"
