@@ -3,14 +3,11 @@
 totalAgents=$SYSTEM_TOTALJOBSINPHASE
 agentNumber=$SYSTEM_JOBPOSITIONINPHASE
 
-totalAgents=4
-agentNumber=2
-
 if [[ $totalAgents -eq 0 ]]; then totalAgents=1; fi
 if [ -z "$agentNumber" ]; then agentNumber=1; fi
 
-echo $totalAgents
-echo $agentNumber
+echo Total agents: $totalAgents
+echo Agent Number: $agentNumber
 
 tests_to_skip=$(find . -name "*Test.java" | sed -e 's#^.*src/test/java/\(.*\)\.java#\1#' | tr "/" ".")
 its_to_skip=$(find . -name "*IT.java" | sed -e 's#^.*src/test/java/\(.*\)\.java#\1#' | tr "/" "." )
