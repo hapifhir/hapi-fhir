@@ -8,6 +8,8 @@ if [ -z "$agentNumber" ]; then agentNumber=1; fi
 
 echo Total agents: $totalAgents
 echo Agent Number: $agentNumber
+echo workspace is "$(Agent.BuildDirectory)"
+echo workspace2 is $AGENT_BUILDDIRECTORY
 
 tests_to_skip=$(find . -name "*Test.java" | sed -e 's#^.*src/test/java/\(.*\)\.java#\1#' | tr "/" ".")
 its_to_skip=$(find . -name "*IT.java" | sed -e 's#^.*src/test/java/\(.*\)\.java#\1#' | tr "/" "." )
@@ -15,12 +17,14 @@ its_to_skip=$(find . -name "*IT.java" | sed -e 's#^.*src/test/java/\(.*\)\.java#
 tests_to_skip_filename="tests_to_skip.txt"
 ITs_to_skip_filename="ITs_to_skip.txt"
 
-tests_to_skip_file=$(Pipeline.Workspace)/$tests_to_skip_filename
-ITs_to_skip_file=$(Pipeline.Workspace)/$ITs_to_skip_filename
+tests_to_skip_file=$AGENT_BUILDDIRECTORY/$tests_to_skip_filename
+ITs_to_skip_file=$AGENT_BUILDDIRECTORY/$ITs_to_skip_filename
+
+echo Absolute path of test exclusion is $tests_to_skip_file
+echo Absolute path of IT exclusion is $ITs_to_skip_file
 
 counter=0;
 for i in $tests_to_skip; do
-   echo Counter is $counter
    if [[ $counter -ne $agentNumber ]]; then
       echo "$i"\n >> $tests_to_skip_file
    fi
@@ -30,7 +34,6 @@ done
 
 counter=0;
 for i in $its_to_skip; do
-   echo Counter is $counter
    if [[ $counter -ne $agentNumber ]]; then
       echo "$i"\n >> $ITs_to_skip_file
    fi

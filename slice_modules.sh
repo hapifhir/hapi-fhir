@@ -38,5 +38,5 @@ done
 echo This agent \[\#$agentNumber\] is responsible for these modules: $modulesToTest
 
 # Set an Azure environment variable via this janky vso echo.
-# This variable represents which projects this particular agent is responsible for testing.
+# This variable represents which projects
 echo "##vso[task.setvariable variable=slicedModules]$modulesToTest"

@@ -15,36 +15,6 @@ pool:
   vmImage: 'ubuntu-latest'
 
 jobs:
-  - job: Build
-    container: maven:3-jdk-11
-    steps:
-      # Grab the previous cache
-      - task: Cache@2
-        displayName: Get Maven Cache
-        inputs:
-           key: 'maven | "$(Agent.OS)" | ./pom.xml | "4"'
-           path: $(MAVEN_CACHE_FOLDER)
-
-      # Build the project fully without tests. At the end of this job, this should be auto-stored in the cache, for future retrieval by subsequent jobs
-      - task: Maven@3
-        displayName: Build Project
-        env:
-           JAVA_HOME_11_X64: /usr/local/openjdk-11
-        inputs:
-           goals: 'clean install'
-           # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
-           options: "-P ALLMODULES,JACOCO,ERRORPRONE,CI -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -DskipTests"
-           # These are JVM options (and don't show up in the build logs)
-           mavenOptions: '-Xmx1024m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
-           jdkVersionOption: 1.11
-
-      # Store this build
-      - task: PublishPipelineArtifact@1
-        displayName: 'Store Test Output'
-        inputs:
-          targetPath: '$(Build.ArtifactStagingDirectory)/'
-#          artifactName: 'logs-$(system.jobpositioninphase)'
-
   - job: Test
     dependsOn: Build
     strategy:
