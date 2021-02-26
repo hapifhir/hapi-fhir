@@ -17,7 +17,7 @@ pool:
 jobs:
   - job: Test
     strategy:
-      parallel: 3
+      parallel: 5
     displayName: Run Tests
     timeoutInMinutes: 360
     container: maven:3-openjdk-15
