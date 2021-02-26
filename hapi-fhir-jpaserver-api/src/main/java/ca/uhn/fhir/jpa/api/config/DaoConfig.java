@@ -88,7 +88,7 @@ public class DaoConfig {
 	 * Child Configurations
 	 */
 
-	private ModelConfig myModelConfig = new ModelConfig();
+	private final ModelConfig myModelConfig = new ModelConfig();
 
 	/**
 	 * update setter javadoc if default changes
@@ -171,7 +171,7 @@ public class DaoConfig {
 	 *
 	 * @since 4.1.0
 	 */
-	private int myPreExpandValueSetsDefaultOffset = 0;
+	private final int myPreExpandValueSetsDefaultOffset = 0;
 	/**
 	 * Do not change default of {@code 1000}!
 	 *
@@ -1067,6 +1067,9 @@ public class DaoConfig {
 	 * This property can be useful in cases where replication between two servers is wanted.
 	 * Note however that references containing purely numeric IDs will not be auto-created
 	 * as they are never allowed to be client supplied in HAPI FHIR JPA.
+	 *
+	 * All placeholder resources created in this way have a meta extension
+	 * with the URL {@link HapiExtensions#EXT_RESOURCE_META_PLACEHOLDER} and the value "true".
 	 * </p>
 	 */
 	public boolean isAutoCreatePlaceholderReferenceTargets() {
@@ -1088,6 +1091,9 @@ public class DaoConfig {
 	 * This property can be useful in cases where replication between two servers is wanted.
 	 * Note however that references containing purely numeric IDs will not be auto-created
 	 * as they are never allowed to be client supplied in HAPI FHIR JPA.
+	 *
+	 * All placeholder resources created in this way have a meta extension
+	 * with the URL {@link HapiExtensions#EXT_RESOURCE_META_PLACEHOLDER} and the value "true".
 	 * </p>
 	 */
 	public void setAutoCreatePlaceholderReferenceTargets(boolean theAutoCreatePlaceholderReferenceTargets) {
