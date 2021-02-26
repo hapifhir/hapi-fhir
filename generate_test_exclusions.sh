@@ -3,8 +3,6 @@
 totalAgents=$SYSTEM_TOTALJOBSINPHASE
 agentNumber=$SYSTEM_JOBPOSITIONINPHASE
 
-totalAgents=2
-agentNumber=1
 if [[ $totalAgents -eq 0 ]]; then totalAgents=1; fi
 if [ -z "$agentNumber" ]; then agentNumber=1; fi
 
