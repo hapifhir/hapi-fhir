@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.util;
  */
 
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.HapiExtensions;
 
 public class JpaConstants {
 
@@ -193,6 +194,12 @@ public class JpaConstants {
 	 * URL for extension on a SearchParameter indicating that text values should not be indexed
 	 */
 	public static final String EXTENSION_EXT_SYSTEMDEFINED = JpaConstants.class.getName() + "_EXTENSION_EXT_SYSTEMDEFINED";
+
+	/**
+	 * Deprecated.  Please use {@link HapiExtensions#EXT_SEARCHPARAM_PHONETIC_ENCODER} instead.
+	 */
+	@Deprecated
+	public static final String EXT_SEARCHPARAM_PHONETIC_ENCODER = HapiExtensions.EXT_SEARCHPARAM_PHONETIC_ENCODER;
 
 	public static final String VALUESET_FILTER_DISPLAY = "display";
 

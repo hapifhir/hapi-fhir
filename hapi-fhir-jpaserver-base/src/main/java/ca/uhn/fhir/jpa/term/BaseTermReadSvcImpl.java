@@ -2123,7 +2123,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	private boolean isPlaceholder(MetadataResource theResource) {
-		return (theResource.getMeta().getExtensionByUrl(HapiExtensions.EXT_RESOURCE_META_PLACEHOLDER) != null);
+		return theResource.getMeta().getExtensionByUrl(HapiExtensions.EXT_RESOURCE_META_PLACEHOLDER) != null;
 	}
 
 	@Override
