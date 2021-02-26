@@ -357,6 +357,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		}
 	}
 
+	// Reproduces https://github.com/hapifhir/hapi-fhir/issues/2332
 	@Test
 	public void testInstallR4Package_AutoCreatePlaceholder() throws Exception {
 		myDaoConfig.setAllowExternalReferences(true);
@@ -367,7 +368,6 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 		List<String> resourceList = new ArrayList<>();
 		resourceList.add("ImplementationGuide");
-		// FIXME KHS rename
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-ig").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		spec.setInstallResourceTypes(resourceList);
 		PackageInstallOutcomeJson outcome = igInstaller.install(spec);

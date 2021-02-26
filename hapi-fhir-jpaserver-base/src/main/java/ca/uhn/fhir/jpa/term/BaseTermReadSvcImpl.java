@@ -656,9 +656,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			return true;
 
 		//-- token case
-		if (startsWithByWordBoundaries(theDisplay, theFilterDisplay)) return true;
-
-		return false;
+		return startsWithByWordBoundaries(theDisplay, theFilterDisplay);
 	}
 
 	private boolean startsWithByWordBoundaries(String theDisplay, String theFilterDisplay) {
@@ -2063,10 +2061,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@Override
 	@Transactional
 	public void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet) {
-		ourLog.info("Storing TermValueSet for {}", theValueSet.getIdElement().toVersionless().getValueAsString());
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
+		if (isPlaceholder(theValueSet)) {
+			ourLog.info("Not storing TermValueSet for placeholder {}", theValueSet.getIdElement().toVersionless().getValueAsString());
+			return;
+		}
+
 		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(theValueSet.getUrl(), "ValueSet has no value for ValueSet.url");
+		ourLog.info("Storing TermValueSet for {}", theValueSet.getIdElement().toVersionless().getValueAsString());
 
 		/*
 		 * Get CodeSystem and validate CodeSystemVersion
@@ -2113,6 +2116,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
+	private boolean isPlaceholder(ValueSet theValueSet) {
+		return (theValueSet.getMeta().getExtensionByUrl(HapiExtensions.EXT_RESOURCE_META_PLACEHOLDER) != null);
+	}
 
 	@Override
 	@Transactional
