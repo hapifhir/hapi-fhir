@@ -42,6 +42,11 @@ for i in $its_to_skip; do
 done
 testCount=$(cat $tests_to_skip_file | wc -l)
 itCount=$(cat $ITs_to_skip_file | wc -l)
-echo "Agent [$agentNumber] is responsible for [$testCount] tests and [$itCount] ITs"
+
+echo "TESTS"
+echo $(cat $tests_to_skip_file)
+echo "ITS"
+echo $(cat $tests_to_skip_file)
+echo "Agent [$agentNumber] is skipping [$testCount] tests and [$itCount] ITs"
 echo "##vso[task.setvariable variable=testExclusionFile]$tests_to_skip_file"
 echo "##vso[task.setvariable variable=itExclusionFile]$ITs_to_skip_file"
