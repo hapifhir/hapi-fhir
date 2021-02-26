@@ -27,7 +27,6 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 public interface IBulkDataExportSvc {
 	void buildExportFiles();
@@ -35,7 +34,7 @@ public interface IBulkDataExportSvc {
 	@Transactional(value = Transactional.TxType.NEVER)
 	void purgeExpiredFiles();
 
-	JobInfo submitJob(String theOutputFormat, Set<String> theResourceTypes, Date theSince, Set<String> theFilters);
+	JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions);
 
 	JobInfo getJobInfoOrThrowResourceNotFound(String theJobId);
 

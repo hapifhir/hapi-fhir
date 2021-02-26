@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2401
+title: "Group Bulk exports are now supported. You can export all data for a Group of Patients via the
+        `/Group/[id]/$export` endpoint for any resource type which contains a patient compartment.
+        The _typeFilter and _since criteria are currently not supported at this level, but may eventually be"
