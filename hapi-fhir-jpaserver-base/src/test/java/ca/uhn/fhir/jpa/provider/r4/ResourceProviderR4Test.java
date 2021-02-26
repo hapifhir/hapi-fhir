@@ -47,6 +47,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -157,6 +158,7 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -217,9 +219,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(SearchCoordinatorSvcImpl.DEFAULT_SYNC_SIZE);
 		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
 		mySearchCoordinatorSvcRaw.cancelAllActiveSearches();
-		myDaoConfig.getModelConfig().setNormalizedQuantitySearchNotSupported();
+        myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
-		myClient.unregisterInterceptor(myCapturingInterceptor);
+        myClient.unregisterInterceptor(myCapturingInterceptor);
 	}
 
 	@BeforeEach
@@ -797,7 +799,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			client.create().resource(resBody).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Unable to store a Bundle resource on this server with a Bundle.type value of: transaction"));
+			assertThat(e.getMessage(), containsString("Unable to store a Bundle resource on this server with a Bundle.type value of: transaction. Note that if you are trying to perform a FHIR transaction or batch operation you should POST the Bundle resource to the Base URL of the server, not to the /Bundle endpoint."));
 		}
 	}
 
@@ -2402,7 +2404,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			String respString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(respString);
 			assertEquals(412, resp.getStatusLine().getStatusCode());
-			assertThat(respString, containsString("Profile reference 'http://foo/structuredefinition/myprofile' could not be resolved, so has not been checked"));
+			assertThat(respString, containsString("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it is unknown"));
 		}
 	}
 
@@ -4085,8 +4087,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported() throws Exception {
-		
-		myDaoConfig.getModelConfig().setNormalizedQuantitySearchSupported();
+
+		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		IIdType pid0;
 		{
 			Patient patient = new Patient();
@@ -4167,8 +4169,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported_CombineUCUMOrNonUCUM() throws Exception {
-		
-		myDaoConfig.getModelConfig().setNormalizedQuantitySearchSupported();
+
+		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		IIdType pid0;
 		{
 			Patient patient = new Patient();
@@ -4222,15 +4224,85 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
-		// > 1m
-		String uri = ourServerBase + "/Observation?value-quantity=" + UrlUtil.escapeUrlParam("100|http://unitsofmeasure.org|cm,100|http://foo|cm");
-			
-		ourLog.info("uri = " + uri);
-		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		String uri;
+		List<String> ids;
+
+		// With non-normalized
+		uri = ourServerBase + "/Observation?value-quantity=" + UrlUtil.escapeUrlParam("100|http://unitsofmeasure.org|cm,100|http://foo|cm");
+		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		assertEquals(1, ids.size());
+
+		// With normalized
+		uri = ourServerBase + "/Observation?value-quantity=" + UrlUtil.escapeUrlParam("1|http://unitsofmeasure.org|m,100|http://foo|cm");
+		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertEquals(2, ids.size());
 	}
 	
 	
+	@Test
+	public void testSearchWithNormalizedQuantitySearchSupported_DegreeFahrenheit() throws Exception {
+
+		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		IIdType pid0;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			obs.setValue(new Quantity().setValueElement(new DecimalType(99.82)).setUnit("F").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("[degF]"));
+			
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			obs.setValue(new Quantity().setValueElement(new DecimalType(97.6)).setUnit("F").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("[degF]"));
+			
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+
+		{
+			// missing value
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			CodeableConcept cc = obs.getCode();
+			obs.setValue(new Quantity().setUnit("CM").setSystem("http://foo").setCode("cm"));
+								
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+
+		myCaptureQueriesListener.clear();
+		Bundle returnedBundle = myClient
+	      .search()
+		  .forResource(Observation.class)
+		   .where(Observation.VALUE_QUANTITY.withPrefix(ParamPrefixEnum.EQUAL).number("99.82").andUnits("http://unitsofmeasure.org", "[degF]"))
+		   .prettyPrint()
+		   .returnBundle(Bundle.class)
+		   .execute();
+	
+		assertEquals(1, returnedBundle.getEntry().size());
+		
+		//-- check only use original quantity table to search
+		String searchSql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true,true);
+		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
+		assertThat(searchSql, not(containsString("HFJ_SPIDX_QUANTITY_NRML")));
+	}
+
 	@Test
 	public void testSearchReusesNoParams() {
 		List<IBaseResource> resources = new ArrayList<>();
@@ -6044,8 +6116,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testUpdateWithNormalizedQuantitySearchSupported() throws Exception {
-		
-		myDaoConfig.getModelConfig().setNormalizedQuantitySearchSupported();
+
+		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		IIdType pid0;
 		{
 			Patient patient = new Patient();

@@ -27,6 +27,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
@@ -59,7 +60,8 @@ public class GoldenResourceHelper {
 	private IMdmSettings myMdmSettings;
 	@Autowired
 	private EIDHelper myEIDHelper;
-
+	@Autowired
+	private IMdmSurvivorshipService myMdmSurvivorshipService;
 
 	private final FhirContext myFhirContext;
 
@@ -71,16 +73,18 @@ public class GoldenResourceHelper {
 	/**
 	 * Creates a copy of the specified resource. This method will carry over resource EID if it exists. If it does not exist,
 	 * a randomly generated UUID EID will be created.
-	 *
-	 * @param <T>                 Supported MDM resource type (e.g. Patient, Practitioner)
+	 *  @param <T>                 Supported MDM resource type (e.g. Patient, Practitioner)
 	 * @param theIncomingResource The resource that will be used as the starting point for the MDM linking.
+	 * @param theMdmTransactionContext
 	 */
-	public <T extends IAnyResource> T createGoldenResourceFromMdmSourceResource(T theIncomingResource) {
+	public <T extends IAnyResource> T createGoldenResourceFromMdmSourceResource(T theIncomingResource, MdmTransactionContext theMdmTransactionContext) {
 		validateContextSupported();
 
 		// get a ref to the actual ID Field
 		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theIncomingResource);
 		IBaseResource newGoldenResource = resourceDefinition.newInstance();
+
+		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theIncomingResource, newGoldenResource, theMdmTransactionContext);
 
 		// hapi has 2 metamodels: for children and types
 		BaseRuntimeChildDefinition goldenResourceIdentifier = resourceDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
@@ -237,20 +241,16 @@ public class GoldenResourceHelper {
 		}
 	}
 
-	public void mergeFields(IBaseResource theFromGoldenResource, IBaseResource theToGoldenResource) {
-		//	TODO NG - Revisit when merge rules are defined
-		TerserUtil.cloneCompositeField(myFhirContext, theFromGoldenResource, theToGoldenResource, FIELD_NAME_IDENTIFIER);
+	public boolean hasIdentifier(IBaseResource theResource) {
+		return TerserUtil.hasValues(myFhirContext, theResource, FIELD_NAME_IDENTIFIER);
+	}
 
-//		switch (myFhirContext.getVersion().getVersion()) {
-//			case R4:
-//				mergeR4PersonFields(theFromGoldenResource, theToGoldenResource);
-//				break;
-//			case DSTU3:
-//				mergeDstu3PersonFields(theFromGoldenResource, theToGoldenResource);
-//				break;
-//			default:
-//				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
-//		}
+	public void mergeIndentifierFields(IBaseResource theFromGoldenResource, IBaseResource theToGoldenResource, MdmTransactionContext theMdmTransactionContext) {
+		TerserUtil.cloneCompositeField(myFhirContext, theFromGoldenResource, theToGoldenResource, FIELD_NAME_IDENTIFIER);
+	}
+
+	public void mergeNonIdentiferFields(IBaseResource theFromGoldenResource, IBaseResource theToGoldenResource, MdmTransactionContext theMdmTransactionContext) {
+		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theFromGoldenResource, theToGoldenResource, theMdmTransactionContext);
 	}
 
 	/**

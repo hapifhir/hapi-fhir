@@ -326,7 +326,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			theMethodParams[myIdParamIndex] = theRequest.getId();
 		}
 
-		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
+		Object response = invokeServerMethod(theRequest, theMethodParams);
 		if (myManualResponseMode) {
 			return null;
 		}

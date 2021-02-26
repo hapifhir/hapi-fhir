@@ -343,7 +343,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult result = val.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("ele-1: All FHIR elements must have a @value or children [hasValue() or (children().count() > id.count())]", all.get(0).getMessage());
+		assertEquals("ele-1: 'All FHIR elements must have a @value or children' failed", all.get(0).getMessage());
 	}
 
 	/**
@@ -369,7 +369,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult result = val.validateWithResult(operationDefinition);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("This property must be an Array, not a a primitive property", all.get(0).getMessage());
+		assertEquals("This property must be an Array, not a primitive property", all.get(0).getMessage());
 	}
 
 	@Test
@@ -996,7 +996,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		assertEquals(3, messages.size(), output.toString());
 		assertThat(messages.get(0).getMessage(), containsString("Element must have some content"));
 		assertThat(messages.get(1).getMessage(), containsString("Primitive types must have a value or must have child extensions"));
-		assertThat(messages.get(2).getMessage(), containsString("All FHIR elements must have a @value or children [hasValue() or (children().count() > id.count())]"));
+		assertThat(messages.get(2).getMessage(), containsString("ele-1: 'All FHIR elements must have a @value or children' failed"));
 	}
 
 	@Test
@@ -1152,7 +1152,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
 		assertEquals(1, errors.size());
-		assertEquals("Profile reference 'http://foo/structuredefinition/myprofile' could not be resolved, so has not been checked", errors.get(0).getMessage());
+		assertEquals("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it is unknown", errors.get(0).getMessage());
 		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
 	}
 
@@ -1402,7 +1402,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myVal.validateWithResult(encoded);
 
-		verify(resourceFetcher, times(15)).resolveURL(any(), anyString(), anyString());
+		verify(resourceFetcher, times(15)).resolveURL(any(), anyString(), anyString(), anyString());
 		verify(resourceFetcher, times(12)).validationPolicy(any(), anyString(), anyString());
 		verify(resourceFetcher, times(12)).fetch(any(), anyString());
 	}

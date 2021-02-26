@@ -173,7 +173,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 
 		theMethodParams[myIdIndex] = ParameterUtil.convertIdToType(requestId, myIdParameterType);
 
-		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
+		Object response = invokeServerMethod(theRequest, theMethodParams);
 		IBundleProvider retVal = toResourceList(response);
 
 

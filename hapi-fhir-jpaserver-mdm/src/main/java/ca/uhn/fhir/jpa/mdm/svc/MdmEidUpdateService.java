@@ -20,19 +20,20 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
-import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
-import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
+import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.jpa.mdm.svc.candidate.MatchedGoldenResourceCandidate;
+import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
+import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
-import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
-import ca.uhn.fhir.jpa.mdm.svc.candidate.MatchedGoldenResourceCandidate;
-import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
@@ -61,23 +62,28 @@ public class MdmEidUpdateService {
 	private MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired
 	private IMdmSettings myMdmSettings;
+	@Autowired
+	private IMdmSurvivorshipService myMdmSurvivorshipService;
 
-	void handleMdmUpdate(IAnyResource theResource, MatchedGoldenResourceCandidate theMatchedGoldenResourceCandidate, MdmTransactionContext theMdmTransactionContext) {
-		MdmUpdateContext updateContext = new MdmUpdateContext(theMatchedGoldenResourceCandidate, theResource);
+	void handleMdmUpdate(IAnyResource theTargetResource, MatchedGoldenResourceCandidate theMatchedGoldenResourceCandidate, MdmTransactionContext theMdmTransactionContext) {
+		MdmUpdateContext updateContext = new MdmUpdateContext(theMatchedGoldenResourceCandidate, theTargetResource);
+		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theTargetResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
+
 		if (updateContext.isRemainsMatchedToSameGoldenResource()) {
 			// Copy over any new external EIDs which don't already exist.
-			// TODO NG - Eventually this call will use terser to clone data in, once the surviorship rules for copying data will be confirmed
-			// myPersonHelper.updatePersonFromUpdatedEmpiTarget(updateContext.getMatchedPerson(), theResource, theEmpiTransactionContext);
 			if (!updateContext.isIncomingResourceHasAnEid() || updateContext.isHasEidsInCommon()) {
 				//update to patient that uses internal EIDs only.
-				myMdmLinkSvc.updateLink(updateContext.getMatchedGoldenResource(), theResource, theMatchedGoldenResourceCandidate.getMatchResult(), MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
+				myMdmLinkSvc.updateLink(updateContext.getMatchedGoldenResource(), theTargetResource, theMatchedGoldenResourceCandidate.getMatchResult(), MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 			} else if (!updateContext.isHasEidsInCommon()) {
-				handleNoEidsInCommon(theResource, theMatchedGoldenResourceCandidate, theMdmTransactionContext, updateContext);
+				handleNoEidsInCommon(theTargetResource, theMatchedGoldenResourceCandidate, theMdmTransactionContext, updateContext);
 			}
 		} else {
 			//This is a new linking scenario. we have to break the existing link and link to the new Golden Resource. For now, we create duplicate.
 			//updated patient has an EID that matches to a new candidate. Link them, and set the Golden Resources possible duplicates
-			linkToNewGoldenResourceAndFlagAsDuplicate(theResource, updateContext.getExistingGoldenResource(), updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
+			linkToNewGoldenResourceAndFlagAsDuplicate(theTargetResource, updateContext.getExistingGoldenResource(), updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
+
+			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theTargetResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
+			myMdmResourceDaoSvc.upsertGoldenResource(updateContext.getMatchedGoldenResource(), theMdmTransactionContext.getResourceType());
 		}
 	}
 
@@ -109,7 +115,7 @@ public class MdmEidUpdateService {
 
 	private void createNewGoldenResourceAndFlagAsDuplicate(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext, IAnyResource theOldGoldenResource) {
 		log(theMdmTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
-		IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(theResource);
+		IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(theResource, theMdmTransactionContext);
 
 		myMdmLinkSvc.updateLink(newGoldenResource, theResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 		myMdmLinkSvc.updateLink(newGoldenResource, theOldGoldenResource, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);

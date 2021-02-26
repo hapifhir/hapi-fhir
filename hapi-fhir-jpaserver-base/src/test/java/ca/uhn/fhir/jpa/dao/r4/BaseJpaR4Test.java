@@ -64,7 +64,9 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
+import ca.uhn.fhir.jpa.provider.r4.BaseJpaResourceProviderObservationR4;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
+import ca.uhn.fhir.jpa.rp.r4.ObservationResourceProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -810,7 +812,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 		Optional<ValueSet.ValueSetExpansionContainsComponent> first = stream.findFirst();
 		if (!first.isPresent()) {
-			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount);
+			String expandedValueSetString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(theValueSet);
+			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations. Outcome:\n%s", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount, expandedValueSetString);
 			fail(failureMessage);
 			return null;
 		} else {

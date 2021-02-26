@@ -153,3 +153,12 @@ local.properties
 
 # TeXlipse plugin
 .texlipse
+
+# JVM Dumps
+core.*
+javacore.*
+jitdump.*
+Snap.*
+
+# VS Code
+.vscode

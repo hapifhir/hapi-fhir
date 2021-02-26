@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
 
 import javax.annotation.Nonnull;
 import java.io.Writer;
@@ -48,7 +49,7 @@ import java.util.Set;
  * </ul>
  * </p>
  */
-public enum Pointcut {
+public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Interceptor Framework Hook:</b>
@@ -101,6 +102,45 @@ public enum Pointcut {
 		"ca.uhn.fhir.rest.client.api.IHttpRequest",
 		"ca.uhn.fhir.rest.client.api.IHttpResponse",
 		"ca.uhn.fhir.rest.client.api.IRestfulClient"
+	),
+
+	/**
+	 * <b>Server Hook:</b>
+	 * This hook is called when a server CapabilityStatement is generated for returning to a client.
+	 * <p>
+	 * This pointcut will not necessarily be invoked for every client request to the `/metadata` endpoint.
+	 * If caching of the generated CapabilityStatement is enabled, a new CapabilityStatement will be
+	 * generated periodically and this pointcut will be invoked at that time.
+	 * </p>
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * org.hl7.fhir.instance.model.api.IBaseConformance - The <code>CapabilityStatement</code> resource that will
+	 * be returned to the client by the server. Interceptors may make changes to this resource. The parameter
+	 * must be of type <code>IBaseConformance</code>, so it is the responsibility of the interceptor hook method
+	 * code to cast to the appropriate version.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to
+	 * be processed
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that
+	 * is about to be processed. This parameter is identical to the RequestDetails parameter above but will only
+	 * be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * </p>
+	 * Hook methods may an instance of a new <code>CapabilityStatement</code> resource which will replace the
+	 * one that was supplied to the interceptor, or <code>void</code> to use the original one. If the interceptor
+	 * chooses to modify the <code>CapabilityStatement</code> that was supplied to the interceptor, it is fine
+	 * for your hook method to return <code>void</code> or <code>null</code>.
+	 */
+	SERVER_CAPABILITY_STATEMENT_GENERATED(IBaseConformance.class,
+		"org.hl7.fhir.instance.model.api.IBaseConformance",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),
 
 	/**
@@ -2178,6 +2218,7 @@ public enum Pointcut {
 		this(theReturnType, new ExceptionHandlingSpec(), theParameterTypes);
 	}
 
+	@Override
 	public boolean isShouldLogAndSwallowException(@Nonnull Throwable theException) {
 		for (Class<? extends Throwable> next : myExceptionHandlingSpec.myTypesToLogAndSwallow) {
 			if (next.isAssignableFrom(theException.getClass())) {
@@ -2187,11 +2228,13 @@ public enum Pointcut {
 		return false;
 	}
 
+	@Override
 	@Nonnull
 	public Class<?> getReturnType() {
 		return myReturnType;
 	}
 
+	@Override
 	@Nonnull
 	public List<String> getParameterTypes() {
 		return myParameterTypes;

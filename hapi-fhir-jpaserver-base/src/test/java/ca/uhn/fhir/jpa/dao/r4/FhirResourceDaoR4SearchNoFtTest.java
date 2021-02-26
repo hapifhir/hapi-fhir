@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -185,8 +186,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
-	}
+        myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+    }
 
 	@BeforeEach
 	public void beforeDisableCacheReuse() {
@@ -1236,8 +1237,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testIndexNoDuplicatesQuantityWithNormalizedQuantitySearchSupported() {
-		
-		myModelConfig.setNormalizedQuantitySearchSupported();
+
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		Substance res = new Substance();
 		res.addInstance().getQuantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m").setValue(123);
 		res.addInstance().getQuantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m").setValue(123);
@@ -1245,20 +1246,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		res.addInstance().getQuantity().setSystem("http://foo2").setCode("UNIT2").setValue(1232);
 		
 		IIdType id = mySubstanceDao.create(res, mySrd).getId().toUnqualifiedVersionless();
-
-		runInTransaction(() -> {
-			Class<ResourceIndexedSearchParamQuantity> type = ResourceIndexedSearchParamQuantity.class;
-			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
-			ourLog.info(toStringMultiline(results));
-			assertEquals(2, results.size());
-		});
-		
-		runInTransaction(() -> {
-			Class<ResourceIndexedSearchParamQuantityNormalized> type = ResourceIndexedSearchParamQuantityNormalized.class;
-			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
-			ourLog.info(toStringMultiline(results));
-			assertEquals(2, results.size());
-		});
 
 		List<IIdType> actual = toUnqualifiedVersionlessIds(
 			mySubstanceDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Substance.SP_QUANTITY, new QuantityParam(null, 12300, UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm"))));
@@ -1268,26 +1255,12 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	
 	@Test
 	public void testQuantityWithNormalizedQuantitySearchSupported_InvalidUCUMCode() {
-		
-		myModelConfig.setNormalizedQuantitySearchSupported();
+
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		Substance res = new Substance();
 		res.addInstance().getQuantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("FOO").setValue(123);
 		
 		IIdType id = mySubstanceDao.create(res, mySrd).getId().toUnqualifiedVersionless();
-
-		runInTransaction(() -> {
-			Class<ResourceIndexedSearchParamQuantity> type = ResourceIndexedSearchParamQuantity.class;
-			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
-			ourLog.info(toStringMultiline(results));
-			assertEquals(1, results.size());
-		});
-		
-		runInTransaction(() -> {
-			Class<ResourceIndexedSearchParamQuantityNormalized> type = ResourceIndexedSearchParamQuantityNormalized.class;
-			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
-			ourLog.info(toStringMultiline(results));
-			assertEquals(1, results.size());
-		});
 		
 		List<IIdType> actual = toUnqualifiedVersionlessIds(
 			mySubstanceDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Substance.SP_QUANTITY, new QuantityParam(null, 123, UcumServiceUtil.UCUM_CODESYSTEM_URL, "FOO"))));
@@ -1297,27 +1270,13 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	
 	@Test
 	public void testQuantityWithNormalizedQuantitySearchSupported_NotUCUM() {
-		
-		myModelConfig.setNormalizedQuantitySearchSupported();
+
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		Substance res = new Substance();
 		res.addInstance().getQuantity().setSystem("http://bar").setCode("FOO").setValue(123);
 		
 		IIdType id = mySubstanceDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
-		runInTransaction(() -> {
-			Class<ResourceIndexedSearchParamQuantity> type = ResourceIndexedSearchParamQuantity.class;
-			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
-			ourLog.info(toStringMultiline(results));
-			assertEquals(1, results.size());
-		});
-		
-		runInTransaction(() -> {
-			Class<ResourceIndexedSearchParamQuantityNormalized> type = ResourceIndexedSearchParamQuantityNormalized.class;
-			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
-			ourLog.info(toStringMultiline(results));
-			assertEquals(1, results.size());
-		});
-		
 		List<IIdType> actual = toUnqualifiedVersionlessIds(
 			mySubstanceDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Substance.SP_QUANTITY, new QuantityParam(null, 123, "http://bar", "FOO"))));
 		assertThat(actual, contains(id));
@@ -1326,8 +1285,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	
 	@Test
 	public void testIndexNoDuplicatesQuantityWithNormalizedQuantityStorageSupported() {
-		
-		myModelConfig.setNormalizedQuantityStorageSupported();
+
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED);
 		Substance res = new Substance();
 		res.addInstance().getQuantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m").setValue(123);
 		res.addInstance().getQuantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m").setValue(123);
@@ -1335,20 +1294,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		res.addInstance().getQuantity().setSystem("http://foo2").setCode("UNIT2").setValue(1232);
 
 		IIdType id = mySubstanceDao.create(res, mySrd).getId().toUnqualifiedVersionless();
-
-		runInTransaction(() -> {
-			Class<ResourceIndexedSearchParamQuantity> type = ResourceIndexedSearchParamQuantity.class;
-			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
-			ourLog.info(toStringMultiline(results));
-			assertEquals(2, results.size());
-		});
-		
-		runInTransaction(() -> {
-			Class<ResourceIndexedSearchParamQuantityNormalized> type = ResourceIndexedSearchParamQuantityNormalized.class;
-			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
-			ourLog.info(toStringMultiline(results));
-			assertEquals(2, results.size());
-		});
 
 		List<IIdType> actual = toUnqualifiedVersionlessIds(
 			mySubstanceDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Substance.SP_QUANTITY, new QuantityParam(null, 123, UcumServiceUtil.UCUM_CODESYSTEM_URL, "m"))));
@@ -1550,6 +1495,43 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	}
 
+
+	@Test
+	public void testPeriodWithNoStart() {
+		ServiceRequest serviceRequest = new ServiceRequest();
+
+		Period period = new Period();
+		period.setEnd(new Date());
+		Timing timing = new Timing();
+		timing.setRepeat(new Timing.TimingRepeatComponent().setBounds(period));
+		serviceRequest.setOccurrence(timing);
+
+		// Should not crash
+		myServiceRequestDao.create(serviceRequest);
+
+		runInTransaction(()->{
+			assertEquals(1, myResourceIndexedSearchParamDateDao.findAll().size());
+		});
+	}
+
+	@Test
+	public void testPeriodWithNoEnd() {
+		ServiceRequest serviceRequest = new ServiceRequest();
+		
+		Period period = new Period();
+		period.setStart(new Date());
+		Timing timing = new Timing();
+		timing.setRepeat(new Timing.TimingRepeatComponent().setBounds(period));
+		serviceRequest.setOccurrence(timing);
+
+		// Should not crash
+		myServiceRequestDao.create(serviceRequest);
+
+		runInTransaction(()->{
+			assertEquals(1, myResourceIndexedSearchParamDateDao.findAll().size());
+		});
+	}
+	
 
 	@Test
 	public void testSearchByIdParamInverse() {
@@ -2753,8 +2735,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchByMoneyParamWithNormalizedQuantitySearchSupported() {
-		
-		myModelConfig.setNormalizedQuantitySearchSupported();
+
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		ChargeItem ci = new ChargeItem();
 		ci.getPriceOverride().setValue(123).setCurrency("$");
 
@@ -3119,8 +3101,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchQuantityWithNormalizedQuantitySearchSupported() {
-		
-		myModelConfig.setNormalizedQuantitySearchSupported();
+
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		Condition c1 = new Condition();
 		c1.setAbatement(new Range().setLow(new SimpleQuantity().setValue(1L)).setHigh(new SimpleQuantity().setValue(1L)));
 		String id1 = myConditionDao.create(c1).getId().toUnqualifiedVersionless().getValue();
@@ -4424,7 +4406,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			String searchQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search query:\n{}", searchQuery);
 			assertEquals(1, countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
-			assertEquals(1, countMatches(searchQuery.toLowerCase(), "t0.sp_value_low_date_ordinal >= '20200605'"), searchQuery);
+			assertEquals(1, countMatches(searchQuery.toLowerCase(), "t0.sp_value_high_date_ordinal >= '20200605'"), searchQuery);
 			assertEquals(1, countMatches(searchQuery.toLowerCase(), "t0.sp_value_low_date_ordinal <= '20200606'"), searchQuery);
 		}
 
@@ -4444,7 +4426,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertEquals(0, countMatches(searchQuery.toLowerCase(), "partition"), searchQuery);
 			assertEquals(2, countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
 			assertEquals(2, countMatches(searchQuery.toLowerCase(), "hash_identity"), searchQuery);
-			assertEquals(4, countMatches(searchQuery.toLowerCase(), "sp_value_low"), searchQuery);
+			// - query is changed 'or' is removed
+			assertEquals(2, countMatches(searchQuery.toLowerCase(), "sp_value_low"), searchQuery);
 		}
 
 		// Period search

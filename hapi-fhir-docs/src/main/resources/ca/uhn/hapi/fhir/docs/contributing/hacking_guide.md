@@ -4,11 +4,11 @@ This page contains useful information about how to get started in developing HAP
 
 # Understanding the HAPI FHIR Codebase
 
-The HAPI FHIR [Codebase](https://github.com/jamesagnew/hapi-fhir) has a number of subprojects. You will typically need to interact with several of them in order to develop HAPI, but you generally don't need all of them.
+The HAPI FHIR [Codebase](https://github.com/hapifhir/hapi-fhir) has a number of subprojects. You will typically need to interact with several of them in order to develop HAPI, but you generally don't need all of them.
 
 The following is a list of key subprojects you might open in your IDE:
 
-* [hapi-fhir-base](https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-base): This is the core library, containing the parsers, client/server frameworks, and many other features. Note that this module does not contain any model classes (e.g. the Patient model class) as these are found in "structures" projects below.
+* [hapi-fhir-base](https://github.com/hapifhir/hapi-fhir/tree/master/hapi-fhir-base): This is the core library, containing the parsers, client/server frameworks, and many other features. Note that this module does not contain any model classes (e.g. the Patient model class) as these are found in "structures" projects below.
 * hapi-fhir-structures-[version]: There are several structures projects (e.g. `hapi-fhir-structures-r4`), each of which contains model classes for a specific version of FHIR. Generally speaking you don't need to edit these projects directly, as most (but not all) of their code is generated.
 * hapi-fhir-jpaserver-base:	This module contains the JPA server.
 

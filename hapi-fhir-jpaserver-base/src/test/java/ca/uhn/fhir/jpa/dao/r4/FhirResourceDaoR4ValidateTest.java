@@ -540,7 +540,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.setSubject(new Reference("Group/ABC"));
 		oo = validateAndReturnOutcome(obs);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertEquals("Unable to find matching profile for Group/ABC (by type) among choices: ; [CanonicalType[http://hl7.org/fhir/StructureDefinition/Patient]]", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
+		assertEquals("Unable to find a match for profile Group/ABC (by type) among choices: ; [CanonicalType[http://hl7.org/fhir/StructureDefinition/Patient]]", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
 		// Target of right type
 		obs.setSubject(new Reference("Patient/DEF"));
@@ -1138,7 +1138,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			org.hl7.fhir.r4.model.OperationOutcome oo = (org.hl7.fhir.r4.model.OperationOutcome) e.getOperationOutcome();
 			String outputString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 			ourLog.info(outputString);
-			assertThat(outputString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' could not be resolved, so has not been checked"));
+			assertThat(outputString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' has not been checked because it is unknown"));
 		}
 	}
 
@@ -1174,7 +1174,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			org.hl7.fhir.r4.model.OperationOutcome oo = (org.hl7.fhir.r4.model.OperationOutcome) e.getOperationOutcome();
 			String outputString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 			ourLog.info(outputString);
-			assertThat(outputString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' could not be resolved, so has not been checked"));
+			assertThat(outputString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' has not been checked because it is unknown"));
 		}
 	}
 

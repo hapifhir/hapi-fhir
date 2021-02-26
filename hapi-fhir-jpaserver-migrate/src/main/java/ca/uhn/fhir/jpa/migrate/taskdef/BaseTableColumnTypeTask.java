@@ -23,7 +23,8 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.jetbrains.annotations.Nullable;
+
+import javax.annotation.Nullable;
 
 public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
 	private ColumnTypeEnum myColumnType;

@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.model.entity;
 
 /*
  * #%L
- * HAPI FHIR Model
+ * HAPI FHIR JPA Model
  * %%
  * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
@@ -69,7 +69,7 @@ public class ResourceIndexedSearchParamQuantity extends ResourceIndexedSearchPar
 	
 	@Column(name = "SP_VALUE", nullable = true)
 	@ScaledNumberField
-	public BigDecimal myValue;
+	public Double myValue;
 
 	public ResourceIndexedSearchParamQuantity() {
 		super();
@@ -99,11 +99,11 @@ public class ResourceIndexedSearchParamQuantity extends ResourceIndexedSearchPar
 	}
 	
 	public BigDecimal getValue() {
-		return myValue;
+		return myValue != null ? new BigDecimal(myValue) : null;
 	}
 
 	public ResourceIndexedSearchParamQuantity setValue(BigDecimal theValue) {
-		myValue = theValue;
+		myValue = theValue != null ? theValue.doubleValue() : null;
 		return this;
 	}
 	

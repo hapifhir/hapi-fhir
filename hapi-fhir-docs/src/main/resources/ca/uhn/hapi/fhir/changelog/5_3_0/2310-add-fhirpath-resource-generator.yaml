@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2310
+title: "A new utility called FHIRPathResourceGeneratorR4 has been added. This class can be used to build and populate
+  a resource model object using FHIRPath expressions. Thanks to Marcel P for the contribution!"

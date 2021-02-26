@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
@@ -342,8 +343,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private IBundleProvider searchResource(IFhirResourceDao theDao, SearchParameterMap theMap) {
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			SystemRequestDetails myRequestDetails = new SystemRequestDetails();
-			return theDao.search(theMap, myRequestDetails);
+			SystemRequestDetails requestDetails = new SystemRequestDetails();
+			requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
+			return theDao.search(theMap, requestDetails);
 		} else {
 			return theDao.search(theMap);
 		}
@@ -351,8 +353,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private void createResource(IFhirResourceDao theDao, IBaseResource theResource) {
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			SystemRequestDetails myRequestDetails = new SystemRequestDetails();
-			theDao.create(theResource, myRequestDetails);
+			SystemRequestDetails requestDetails = new SystemRequestDetails();
+			requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
+			theDao.create(theResource, requestDetails);
 		} else {
 			theDao.create(theResource);
 		}
@@ -360,8 +363,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private DaoMethodOutcome updateResource(IFhirResourceDao theDao, IBaseResource theResource) {
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			SystemRequestDetails myRequestDetails = new SystemRequestDetails();
-			return theDao.update(theResource, myRequestDetails);
+			SystemRequestDetails requestDetails = new SystemRequestDetails();
+			requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
+			return theDao.update(theResource, requestDetails);
 		} else {
 			return theDao.update(theResource);
 		}

@@ -33,15 +33,15 @@ public class FhirClientConnectionException extends BaseServerResponseException {
 	private static final long serialVersionUID = 1L;
 
 	public FhirClientConnectionException(Throwable theCause) {
-		super(0, theCause);
+		super(500, theCause);
 	}
 
 	public FhirClientConnectionException(String theMessage, Throwable theCause) {
-		super(0, theMessage, theCause);
+		super(500, theMessage, theCause);
 	}
 
 	public FhirClientConnectionException(String theMessage) {
-		super(0, theMessage);
+		super(500, theMessage);
 	}
 
 }

@@ -51,23 +51,16 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		assertLinkCount(0);
 		Patient goldenPatient = createGoldenPatient();
 		IdType sourcePatientId = goldenPatient.getIdElement().toUnqualifiedVersionless();
-		// TODO NG should be ok to remove - assertEquals(0, goldenPatient.getLink().size());
 		Patient patient = createPatient();
 
 		{
 			myMdmLinkSvc.updateLink(goldenPatient, patient, POSSIBLE_MATCH, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 			assertLinkCount(1);
-			// TODO NG should be ok to remove
-			// Patient newSourcePatient = myPatientDao.read(sourcePatientId);
-			// assertEquals(1, newSourcePatient.getLink().size());
 		}
 
 		{
 			myMdmLinkSvc.updateLink(goldenPatient, patient, MdmMatchOutcome.NO_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 			assertLinkCount(1);
-			// TODO NG should be ok to remove
-			// Patient newSourcePatient = myPatientDao.read(sourcePatientId);
-			// assertEquals(0, newSourcePatient.getLink().size());
 		}
 	}
 
@@ -129,7 +122,6 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 
 	@Test
 	public void testManualMdmLinksCannotBeModifiedBySystem() {
-//		Patient goldenPatient = createGoldenPatient(buildJaneSourcePatient());
 		Patient goldenPatient = createGoldenPatient(buildJanePatient());
 		Patient patient = createPatient(buildJanePatient());
 
@@ -144,7 +136,6 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 
 	@Test
 	public void testAutomaticallyAddedNO_MATCHMdmLinksAreNotAllowed() {
-//		Patient goldenPatient = createGoldenPatient(buildJaneSourcePatient());
 		Patient goldenPatient = createGoldenPatient(buildJanePatient());
 		Patient patient = createPatient(buildJanePatient());
 
@@ -159,7 +150,6 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 
 	@Test
 	public void testSyncDoesNotSyncNoMatchLinks() {
-//		Patient sourcePatient = createGoldenPatient(buildJaneSourcePatient());
 		Patient goldenPatient = createGoldenPatient(buildJanePatient());
 		Patient patient1 = createPatient(buildJanePatient());
 		Patient patient2 = createPatient(buildJanePatient());
@@ -171,7 +161,6 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		List<MdmLink> targets = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(goldenPatient);
 		assertFalse(targets.isEmpty());
 		assertEquals(2, targets.size());
-		// TODO NG - OK? original assertTrue(goldenPatient.hasLink());
 
 		//TODO GGG update this test once we decide what has to happen here. There is no more "syncing links"
 		//assertEquals(patient1.getIdElement().toVersionless().getValue(), sourcePatient.getLinkFirstRep().getTarget().getReference());

@@ -33,6 +33,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -80,10 +81,31 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermLoaderSvcImpl.class);
 	// FYI: Hardcoded to R4 because that's what the term svc uses internally
 	private final FhirContext myCtx = FhirContext.forR4();
+	private final ITermDeferredStorageSvc myDeferredStorageSvc;
+	private final ITermCodeSystemStorageSvc myCodeSystemStorageSvc;
+
 	@Autowired
-	private ITermDeferredStorageSvc myDeferredStorageSvc;
-	@Autowired
-	private ITermCodeSystemStorageSvc myCodeSystemStorageSvc;
+	public TermLoaderSvcImpl(ITermDeferredStorageSvc theDeferredStorageSvc, ITermCodeSystemStorageSvc theCodeSystemStorageSvc) {
+		this(theDeferredStorageSvc, theCodeSystemStorageSvc, true);
+	}
+
+	private TermLoaderSvcImpl(ITermDeferredStorageSvc theDeferredStorageSvc, ITermCodeSystemStorageSvc theCodeSystemStorageSvc, boolean theProxyCheck) {
+		if (theProxyCheck) {
+			// If these validations start failing, it likely means a cyclic dependency has been introduced into the Spring Application
+			// Context that is preventing the Spring auto-proxy bean post-processor from being able to proxy these beans.  Check
+			// for recent changes to the Spring @Configuration that may have caused this.
+			Validate.isTrue(AopUtils.isAopProxy(theDeferredStorageSvc), theDeferredStorageSvc.getClass().getName() + " is not a proxy.  @Transactional annotations will be ignored.");
+			Validate.isTrue(AopUtils.isAopProxy(theCodeSystemStorageSvc), theCodeSystemStorageSvc.getClass().getName() + " is not a proxy.  @Transactional annotations will be ignored.");
+		}
+		myDeferredStorageSvc = theDeferredStorageSvc;
+		myCodeSystemStorageSvc = theCodeSystemStorageSvc;
+
+	}
+
+	@VisibleForTesting
+	public static TermLoaderSvcImpl withoutProxyCheck(ITermDeferredStorageSvc theTermDeferredStorageSvc, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc) {
+		return new TermLoaderSvcImpl(theTermDeferredStorageSvc, theTermCodeSystemStorageSvc, false);
+	}
 
 	@Override
 	public UploadStatistics loadImgthla(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
@@ -116,8 +138,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				uploadProperties.getProperty(LOINC_PART_FILE.getCode(), LOINC_PART_FILE_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_PART_RELATED_CODE_MAPPING_FILE.getCode(), LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_RSNA_PLAYBOOK_FILE.getCode(), LOINC_RSNA_PLAYBOOK_FILE_DEFAULT.getCode()),
-				uploadProperties.getProperty(LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE.getCode(), LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode()),
-				uploadProperties.getProperty(LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE.getCode(), LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE.getCode(), LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT.getCode())
 			);
 			descriptors.verifyMandatoryFilesExist(mandatoryFilenameFragments);
@@ -131,8 +151,10 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			List<String> optionalFilenameFragments = Arrays.asList(
 				uploadProperties.getProperty(LOINC_GROUP_FILE.getCode(), LOINC_GROUP_FILE_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_GROUP_TERMS_FILE.getCode(), LOINC_GROUP_TERMS_FILE_DEFAULT.getCode()),
-				uploadProperties.getProperty(LOINC_PARENT_GROUP_FILE.getCode(), LOINC_PARENT_GROUP_FILE_DEFAULT.getCode())
-			);
+				uploadProperties.getProperty(LOINC_PARENT_GROUP_FILE.getCode(), LOINC_PARENT_GROUP_FILE_DEFAULT.getCode()),
+				uploadProperties.getProperty(LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE.getCode(), LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode()),
+				uploadProperties.getProperty(LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE.getCode(), LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode())
+				);
 			descriptors.verifyOptionalFilesExist(optionalFilenameFragments);
 
 			ourLog.info("Beginning LOINC processing");
@@ -455,11 +477,11 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		// Top 2000 codes - US
 		handler = new LoincTop2000LabResultsUsHandler(code2concept, valueSets, conceptMaps, theUploadProperties);
-		iterateOverZipFile(theDescriptors, theUploadProperties.getProperty(LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE.getCode(), LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
+		iterateOverZipFileOptional(theDescriptors, theUploadProperties.getProperty(LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE.getCode(), LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Top 2000 codes - SI
 		handler = new LoincTop2000LabResultsSiHandler(code2concept, valueSets, conceptMaps, theUploadProperties);
-		iterateOverZipFile(theDescriptors, theUploadProperties.getProperty(LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE.getCode(), LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
+		iterateOverZipFileOptional(theDescriptors, theUploadProperties.getProperty(LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE.getCode(), LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Universal lab order ValueSet
 		handler = new LoincUniversalOrderSetHandler(code2concept, valueSets, conceptMaps, theUploadProperties);
@@ -586,16 +608,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, cs, null, null);
 
 		return new UploadStatistics(code2concept.size(), target);
-	}
-
-	@VisibleForTesting
-	void setTermDeferredStorageSvc(ITermDeferredStorageSvc theDeferredStorageSvc) {
-		myDeferredStorageSvc = theDeferredStorageSvc;
-	}
-
-	@VisibleForTesting
-	void setTermCodeSystemStorageSvcForUnitTests(ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc) {
-		myCodeSystemStorageSvc = theTermCodeSystemStorageSvc;
 	}
 
 	private IIdType storeCodeSystem(RequestDetails theRequestDetails, final TermCodeSystemVersion theCodeSystemVersion, CodeSystem theCodeSystem, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {

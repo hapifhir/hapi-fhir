@@ -3,8 +3,6 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.TestUtil;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -27,8 +25,7 @@ public class TerminologyLoaderSvcImgthlaTest extends BaseLoaderTest {
 
 	@BeforeEach
 	public void before() {
-		mySvc = new TermLoaderSvcImpl();
-		mySvc.setTermCodeSystemStorageSvcForUnitTests(myTermStorageSvc);
+		mySvc = TermLoaderSvcImpl.withoutProxyCheck(null, myTermStorageSvc);
 
 		myFiles = new ZipCollectionBuilder();
 	}

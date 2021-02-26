@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>5.3.0-SNAPSHOT</version>
+		<version>5.4.0-PRE1-SNAPSHOT</version>
 		<relativePath>../../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -224,14 +224,6 @@
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
 		</dependency>
-		<!--<dependency>-->
-			<!--<groupId>com.sun.xml.bind</groupId>-->
-			<!--<artifactId>jaxb-core</artifactId>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>com.sun.xml.bind</groupId>-->
-			<!--<artifactId>jaxb-impl</artifactId>-->
-		<!--</dependency>-->
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>

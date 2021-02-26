@@ -18,15 +18,18 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.hl7.fhir.r4.model.Observation;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -57,7 +60,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith({SpringExtension.class})
+@RequiresDocker
 @Testcontainers
 public class LastNElasticsearchSvcMultipleObservationsIT {
 
@@ -70,8 +74,11 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 	private final FhirContext myFhirContext = FhirContext.forCached(FhirVersionEnum.R4);
 
+
 	@Container
 	public static ElasticsearchContainer elasticsearchContainer = TestElasticsearchContainerHelper.getEmbeddedElasticSearch();
+
+
 
 	private ElasticsearchSvcImpl elasticsearchSvc;
 
@@ -85,6 +92,11 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 			createMultiplePatientsAndObservations();
 			indexLoaded = true;
 		}
+	}
+
+	@AfterEach
+	public void after() throws IOException {
+		elasticsearchSvc.close();
 	}
 
 	@Test

@@ -28,17 +28,16 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import org.apache.commons.collections4.MultiMap;
-import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This interceptor enforces validation rules on any data saved in a HAPI FHIR JPA repository.
@@ -48,12 +47,13 @@ import java.util.List;
 @Interceptor
 public class RepositoryValidatingInterceptor {
 
-	private Multimap<String, IRepositoryValidatingRule> myRules = ArrayListMultimap.create();
+	private static final Logger ourLog = LoggerFactory.getLogger(RepositoryValidatingInterceptor.class);
+	private final Multimap<String, IRepositoryValidatingRule> myRules = ArrayListMultimap.create();
 	private FhirContext myFhirContext;
 
 	/**
 	 * Constructor
-	 *
+	 * <p>
 	 * If this constructor is used, {@link #setFhirContext(FhirContext)} and {@link #setRules(List)} must be called
 	 * manually before the interceptor is used.
 	 */
@@ -65,7 +65,7 @@ public class RepositoryValidatingInterceptor {
 	 * Constructor
 	 *
 	 * @param theFhirContext The FHIR Context (must not be <code>null</code>)
-	 * @param theRules The rule list (must not be <code>null</code>)
+	 * @param theRules       The rule list (must not be <code>null</code>)
 	 */
 	public RepositoryValidatingInterceptor(FhirContext theFhirContext, List<IRepositoryValidatingRule> theRules) {
 		setFhirContext(theFhirContext);
@@ -88,31 +88,51 @@ public class RepositoryValidatingInterceptor {
 		for (IRepositoryValidatingRule next : theRules) {
 			myRules.put(next.getResourceType(), next);
 		}
+
+		String rulesDescription = "RepositoryValidatingInterceptor has rules:\n" + describeRules();
+		ourLog.info(rulesDescription);
+
+	}
+
+	/**
+	 * Returns a multiline string describing the rules in place for this interceptor.
+	 * This is mostly intended for troubleshooting, and the format returned is only
+	 * semi-human-consumable.
+	 */
+	@Nonnull
+	public String describeRules() {
+		return " * " + myRules
+			.values()
+			.stream()
+			.distinct()
+			.map(t -> t.toString())
+			.sorted()
+			.collect(Collectors.joining("\n * "));
 	}
 
 	/**
 	 * Interceptor hook method. This method should not be called directly.
 	 */
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
-	void create(IBaseResource theResource) {
-		handle(theResource);
+	void create(RequestDetails theRequestDetails, IBaseResource theResource) {
+		handle(theRequestDetails, theResource);
 	}
 
 	/**
 	 * Interceptor hook method. This method should not be called directly.
 	 */
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
-	void update(IBaseResource theOldResource, IBaseResource theNewResource) {
-		handle(theNewResource);
+	void update(RequestDetails theRequestDetails, IBaseResource theOldResource, IBaseResource theNewResource) {
+		handle(theRequestDetails, theNewResource);
 	}
 
-	private void handle(IBaseResource theNewResource) {
+	private void handle(RequestDetails theRequestDetails, IBaseResource theNewResource) {
 		Validate.notNull(myFhirContext, "No FhirContext has been set for this interceptor of type: %s", getClass());
 
 		String resourceType = myFhirContext.getResourceType(theNewResource);
 		Collection<IRepositoryValidatingRule> rules = myRules.get(resourceType);
 		for (IRepositoryValidatingRule nextRule : rules) {
-			IRepositoryValidatingRule.RuleEvaluation outcome = nextRule.evaluate(theNewResource);
+			IRepositoryValidatingRule.RuleEvaluation outcome = nextRule.evaluate(theRequestDetails, theNewResource);
 			if (!outcome.isPasses()) {
 				handleFailure(outcome);
 			}

@@ -21,6 +21,7 @@ package ca.uhn.fhir.mdm.rules.svc;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.mdm.api.MdmMatchEvaluation;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
@@ -43,26 +44,30 @@ public class MdmResourceFieldMatcher {
 	private final MdmFieldMatchJson myMdmFieldMatchJson;
 	private final String myResourceType;
 	private final String myResourcePath;
+	private final String myFhirPath;
 	private final MdmRulesJson myMdmRulesJson;
 	private final String myName;
+	private final boolean myIsFhirPathExpression;
 
 	public MdmResourceFieldMatcher(FhirContext theFhirContext, MdmFieldMatchJson theMdmFieldMatchJson, MdmRulesJson theMdmRulesJson) {
 		myFhirContext = theFhirContext;
 		myMdmFieldMatchJson = theMdmFieldMatchJson;
 		myResourceType = theMdmFieldMatchJson.getResourceType();
 		myResourcePath = theMdmFieldMatchJson.getResourcePath();
+		myFhirPath = theMdmFieldMatchJson.getFhirPath();
 		myName = theMdmFieldMatchJson.getName();
 		myMdmRulesJson = theMdmRulesJson;
+		myIsFhirPathExpression = myFhirPath != null;
 	}
 
 	/**
 	 * Compares two {@link IBaseResource}s and determines if they match, using the algorithm defined in this object's
 	 * {@link MdmFieldMatchJson}.
-	 *
+	 * <p>
 	 * In this implementation, it determines whether a given field matches between two resources. Internally this is evaluated using FhirPath. If any of the elements of theLeftResource
 	 * match any of the elements of theRightResource, will return true. Otherwise, false.
 	 *
-	 * @param theLeftResource the first {@link IBaseResource}
+	 * @param theLeftResource  the first {@link IBaseResource}
 	 * @param theRightResource the second {@link IBaseResource}
 	 * @return A boolean indicating whether they match.
 	 */
@@ -71,21 +76,37 @@ public class MdmResourceFieldMatcher {
 		validate(theLeftResource);
 		validate(theRightResource);
 
-		FhirTerser terser = myFhirContext.newTerser();
-		List<IBase> leftValues = terser.getValues(theLeftResource, myResourcePath, IBase.class);
-		List<IBase> rightValues = terser.getValues(theRightResource, myResourcePath, IBase.class);
+		List<IBase> leftValues;
+		List<IBase> rightValues;
+
+		if (myIsFhirPathExpression) {
+			IFhirPath fhirPath = myFhirContext.newFhirPath();
+			leftValues = fhirPath.evaluate(theLeftResource, myFhirPath, IBase.class);
+			rightValues = fhirPath.evaluate(theRightResource, myFhirPath, IBase.class);
+		} else {
+			FhirTerser fhirTerser = myFhirContext.newTerser();
+			leftValues = fhirTerser.getValues(theLeftResource, myResourcePath, IBase.class);
+			rightValues = fhirTerser.getValues(theRightResource, myResourcePath, IBase.class);
+		}
 		return match(leftValues, rightValues);
 	}
 
 	@SuppressWarnings("rawtypes")
 	private MdmMatchEvaluation match(List<IBase> theLeftValues, List<IBase> theRightValues) {
 		MdmMatchEvaluation retval = new MdmMatchEvaluation(false, 0.0);
+
+		boolean isMatchingEmptyFieldValues = (theLeftValues.isEmpty() && theRightValues.isEmpty());
+		if (isMatchingEmptyFieldValues && myMdmFieldMatchJson.isMatcherSupportingEmptyFields()) {
+			return match((IBase) null, (IBase) null);
+		}
+
 		for (IBase leftValue : theLeftValues) {
 			for (IBase rightValue : theRightValues) {
 				MdmMatchEvaluation nextMatch = match(leftValue, rightValue);
 				retval = MdmMatchEvaluation.max(retval, nextMatch);
 			}
 		}
+
 		return retval;
 	}
 

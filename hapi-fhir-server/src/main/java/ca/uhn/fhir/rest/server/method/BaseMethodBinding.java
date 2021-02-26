@@ -221,12 +221,15 @@ public abstract class BaseMethodBinding<T> {
 
 	public abstract Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException;
 
-	protected final Object invokeServerMethod(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) {
+	protected final Object invokeServerMethod(RequestDetails theRequest, Object[] theMethodParams) {
 		// Handle server action interceptors
 		RestOperationTypeEnum operationType = getRestOperationType(theRequest);
 		if (operationType != null) {
+
 			ActionRequestDetails details = new ActionRequestDetails(theRequest);
 			populateActionRequestDetailsForInterceptor(theRequest, details, theMethodParams);
+
+			// Interceptor invoke: SERVER_INCOMING_REQUEST_PRE_HANDLED
 			HookParams preHandledParams = new HookParams();
 			preHandledParams.add(RestOperationTypeEnum.class, theRequest.getRestOperationType());
 			preHandledParams.add(RequestDetails.class, theRequest);
@@ -237,6 +240,7 @@ public abstract class BaseMethodBinding<T> {
 					.getInterceptorBroadcaster()
 					.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
 			}
+
 		}
 
 		// Actually invoke the method
@@ -268,7 +272,7 @@ public abstract class BaseMethodBinding<T> {
 	}
 
 	/**
-	 * Subclasses may override this method (but should also call super.{@link #populateActionRequestDetailsForInterceptor(RequestDetails, ActionRequestDetails, Object[])} to provide method specifics to the
+	 * Subclasses may override this method (but should also call super) to provide method specifics to the
 	 * interceptors.
 	 *
 	 * @param theRequestDetails The server request details

@@ -51,7 +51,7 @@ jobs:
       parallel: 3
     displayName: Run Tests
     timeoutInMinutes: 360
-    container: maven:3-jdk-11
+    container: maven:3-openjdk-15
     steps:
       - task: DockerInstaller@0
         displayName: Docker Installer
@@ -74,7 +74,7 @@ jobs:
            filePath: 'slice_modules.sh'
       - task: Maven@3
         env:
-          JAVA_HOME_11_X64: /usr/local/openjdk-11
+          JAVA_HOME_11_X64: /usr/java/openjdk-15
         inputs:
           goals: 'clean install'
           # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy

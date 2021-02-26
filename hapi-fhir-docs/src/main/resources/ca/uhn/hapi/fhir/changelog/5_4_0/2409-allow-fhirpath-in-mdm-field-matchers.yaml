@@ -1,0 +1,4 @@
+---
+type: add
+issue: 2409
+title: "In MDM matching rules, support has been added for using FHIRPath expressions instead of Resource Path expressions via the `fhirPath` field in a field matcher"

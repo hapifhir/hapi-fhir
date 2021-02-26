@@ -1,0 +1,7 @@
+{
+  "resourceType": "CapabilityStatement",
+  "software": {
+    "name": "Help I'm a Bug"
+  },
+  "fhirVersion": "4.0.1"
+}

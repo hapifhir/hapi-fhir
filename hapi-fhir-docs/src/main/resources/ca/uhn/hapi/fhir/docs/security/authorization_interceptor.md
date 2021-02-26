@@ -5,7 +5,7 @@ HAPI FHIR 1.5 introduced a new interceptor: [AuthorizationInterceptor](/apidocs/
 This interceptor can help with the complicated task of determining whether a user has the appropriate permission to perform a given task on a FHIR server. This is done by declaring a set of rules that can selectively allow (whitelist) and/or selectively block (blacklist) requests.
 
 * [AuthorizationInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/auth/AuthorizationInterceptor.html)
-* [AuthorizationInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/auth/AuthorizationInterceptor.java)
+* [AuthorizationInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/auth/AuthorizationInterceptor.java)
 
 <p class="helpInfoCalloutBox">
     AuthorizationInterceptor has been well tested, but it is impossible to predict every scenario and environment in which HAPI FHIR will be used. Use with caution, and do lots of testing! We welcome feedback and suggestions on this feature. Please get in touch if you'd like to help test, have suggestions, etc.

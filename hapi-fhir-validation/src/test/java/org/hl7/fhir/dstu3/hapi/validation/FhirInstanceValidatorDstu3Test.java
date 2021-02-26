@@ -664,6 +664,8 @@ public class FhirInstanceValidatorDstu3Test {
 					} else if (t.getMessage().contains("ValueSet as a URI SHALL start with http:// or https:// or urn:")) {
 						// Some DSTU3 structures have missing binding information
 						return false;
+					} else if (t.getMessage().contains("The valueSet reference http://www.rfc-editor.org/bcp/bcp13.txt on element")) {
+						return false;
 					} else {
 						return true;
 					}
@@ -1135,7 +1137,7 @@ public class FhirInstanceValidatorDstu3Test {
 		myInstanceVal.setValidationSupport(myValidationSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors.toString(), containsString("Profile reference 'http://foo/structuredefinition/myprofile' could not be resolved, so has not been checked"));
+		assertThat(errors.toString(), containsString("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it is unknown"));
 	}
 
 	@Test
@@ -1314,7 +1316,7 @@ public class FhirInstanceValidatorDstu3Test {
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myVal.validateWithResult(input);
 
-		verify(resourceFetcher, times(3)).resolveURL(any(), anyString(), anyString());
+		verify(resourceFetcher, times(3)).resolveURL(any(), anyString(), anyString(), anyString());
 		verify(resourceFetcher, times(4)).validationPolicy(any(), anyString(), anyString());
 		verify(resourceFetcher, times(4)).fetch(any(), anyString());
 	}
@@ -1325,7 +1327,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 		ValidationResult results = myVal.validateWithResult(input);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertEquals(1, outcome.size());
+		assertEquals(2, outcome.size());
 		assertThat(outcome.toString(), containsString("value should not start or finish with whitespace"));
 
 	}

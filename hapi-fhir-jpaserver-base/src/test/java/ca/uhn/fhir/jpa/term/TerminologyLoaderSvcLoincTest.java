@@ -22,7 +22,6 @@ import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -37,7 +36,6 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -80,9 +78,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 	@BeforeEach
 	public void before() {
-		mySvc = new TermLoaderSvcImpl();
-		mySvc.setTermCodeSystemStorageSvcForUnitTests(myTermCodeSystemStorageSvc);
-		mySvc.setTermDeferredStorageSvc(myTermDeferredStorageSvc);
+		mySvc = TermLoaderSvcImpl.withoutProxyCheck(myTermDeferredStorageSvc, myTermCodeSystemStorageSvc);
 
 		myFiles = new ZipCollectionBuilder();
 	}
@@ -100,10 +96,16 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	}
 
 	@Test
+	public void testLoadLoincWithMandatoryFilesOnly() throws Exception {
+		addLoincMandatoryFilesWithoutTop2000ToZip(myFiles);
+		verifyLoadLoinc(false);
+	}
+
+	@Test
 	public void testLoadLoincInvalidPartLinkFiles() throws IOException {
 
 		// Missing all PartLinkFiles
-		addBaseLoincMandatoryFilesToZip(myFiles);
+		addBaseLoincMandatoryFilesToZip(myFiles, true);
 		myFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
 
 		try {
@@ -136,6 +138,10 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 
 	private void verifyLoadLoinc() {
+		verifyLoadLoinc(true);
+	}
+
+	private void verifyLoadLoinc(boolean theIncludeTop2000) {
 		// Actually do the load
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
@@ -321,31 +327,33 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals("US Retroperitoneum", group.getElement().get(0).getTarget().get(0).getDisplay());
 		assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, group.getElement().get(0).getTarget().get(0).getEquivalence());
 
-		// TOP 2000 - US
-		vs = valueSets.get(LoincTop2000LabResultsUsHandler.TOP_2000_US_VS_ID);
-		assertEquals(vs.getName(), LoincTop2000LabResultsUsHandler.TOP_2000_US_VS_NAME);
-		assertEquals(vs.getUrl(), LoincTop2000LabResultsUsHandler.TOP_2000_US_VS_URI);
-		assertEquals(1, vs.getCompose().getInclude().size());
-		assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
-		assertEquals(9, vs.getCompose().getInclude().get(0).getConcept().size());
-		assertEquals("2160-0", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
-		assertEquals("Creatinine [Mass/volume] in Serum or Plasma", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
-		assertEquals("718-7", vs.getCompose().getInclude().get(0).getConcept().get(1).getCode());
-		assertEquals("Hemoglobin [Mass/volume] in Blood", vs.getCompose().getInclude().get(0).getConcept().get(1).getDisplay());
-		assertNull(vs.getVersion());
+		if (theIncludeTop2000) {
+			// TOP 2000 - US
+			vs = valueSets.get(LoincTop2000LabResultsUsHandler.TOP_2000_US_VS_ID);
+			assertEquals(vs.getName(), LoincTop2000LabResultsUsHandler.TOP_2000_US_VS_NAME);
+			assertEquals(vs.getUrl(), LoincTop2000LabResultsUsHandler.TOP_2000_US_VS_URI);
+			assertEquals(1, vs.getCompose().getInclude().size());
+			assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
+			assertEquals(9, vs.getCompose().getInclude().get(0).getConcept().size());
+			assertEquals("2160-0", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
+			assertEquals("Creatinine [Mass/volume] in Serum or Plasma", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
+			assertEquals("718-7", vs.getCompose().getInclude().get(0).getConcept().get(1).getCode());
+			assertEquals("Hemoglobin [Mass/volume] in Blood", vs.getCompose().getInclude().get(0).getConcept().get(1).getDisplay());
+			assertNull(vs.getVersion());
 
-		// TOP 2000 - SI
-		vs = valueSets.get(LoincTop2000LabResultsSiHandler.TOP_2000_SI_VS_ID);
-		assertEquals(vs.getName(), LoincTop2000LabResultsSiHandler.TOP_2000_SI_VS_NAME);
-		assertEquals(vs.getUrl(), LoincTop2000LabResultsSiHandler.TOP_2000_SI_VS_URI);
-		assertEquals(1, vs.getCompose().getInclude().size());
-		assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
-		assertEquals(9, vs.getCompose().getInclude().get(0).getConcept().size());
-		assertEquals("14682-9", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
-		assertEquals("Creatinine [Moles/volume] in Serum or Plasma", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
-		assertEquals("718-7", vs.getCompose().getInclude().get(0).getConcept().get(1).getCode());
-		assertEquals("Hemoglobin [Mass/volume] in Blood", vs.getCompose().getInclude().get(0).getConcept().get(1).getDisplay());
-		assertNull(vs.getVersion());
+			// TOP 2000 - SI
+			vs = valueSets.get(LoincTop2000LabResultsSiHandler.TOP_2000_SI_VS_ID);
+			assertEquals(vs.getName(), LoincTop2000LabResultsSiHandler.TOP_2000_SI_VS_NAME);
+			assertEquals(vs.getUrl(), LoincTop2000LabResultsSiHandler.TOP_2000_SI_VS_URI);
+			assertEquals(1, vs.getCompose().getInclude().size());
+			assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
+			assertEquals(9, vs.getCompose().getInclude().get(0).getConcept().size());
+			assertEquals("14682-9", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
+			assertEquals("Creatinine [Moles/volume] in Serum or Plasma", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
+			assertEquals("718-7", vs.getCompose().getInclude().get(0).getConcept().get(1).getCode());
+			assertEquals("Hemoglobin [Mass/volume] in Blood", vs.getCompose().getInclude().get(0).getConcept().get(1).getDisplay());
+			assertNull(vs.getVersion());
+		}
 
 		// Universal lab order VS
 		vs = valueSets.get(LoincUniversalOrderSetHandler.VS_ID_BASE);
@@ -582,29 +590,6 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	}
 
 	@Test
-	@Disabled
-	public void testLoadLoincMandatoryFilesOnly() throws IOException {
-		addLoincMandatoryFilesToZip(myFiles);
-
-		// Actually do the load
-		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
-
-		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
-		Map<String, TermConcept> concepts = extractConcepts();
-		Map<String, ValueSet> valueSets = extractValueSets();
-		Map<String, ConceptMap> conceptMaps = extractConceptMaps();
-
-		// Normal LOINC code
-		TermConcept code = concepts.get("10013-1");
-		assertEquals("10013-1", code.getCode());
-
-		// No valuesets or conceptmaps get created
-		assertThat(valueSets.keySet(), empty());
-		assertThat(conceptMaps.keySet(), empty());
-
-	}
-
-	@Test
 	public void testLoadLoincMissingMandatoryFiles() throws IOException {
 		myFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
 		myFiles.addFileZip("/loinc/", LOINC_GROUP_FILE_DEFAULT.getCode());
@@ -621,13 +606,20 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	}
 
 	public static void addLoincMandatoryFilesAndSinglePartLinkToZip(ZipCollectionBuilder theFiles) throws IOException {
-		addBaseLoincMandatoryFilesToZip(theFiles);
+		addBaseLoincMandatoryFilesToZip(theFiles, true);
 		theFiles.addFileZip("/loinc/", "loincupload_singlepartlink.properties");
 		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_DEFAULT.getCode());
 	}
 
 	public static void addLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
-		addBaseLoincMandatoryFilesToZip(theFiles);
+		addBaseLoincMandatoryFilesToZip(theFiles, true);
+		theFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
+	}
+
+	public static void addLoincMandatoryFilesWithoutTop2000ToZip(ZipCollectionBuilder theFiles) throws IOException {
+		addBaseLoincMandatoryFilesToZip(theFiles, false);
 		theFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
@@ -637,10 +629,10 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		theFiles.addFileZip("/loinc/", thePropertiesFile);
 		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
-		addBaseLoincMandatoryFilesToZip(theFiles);
+		addBaseLoincMandatoryFilesToZip(theFiles, true);
 	}
 
-	private static void addBaseLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles) throws IOException{
+	private static void addBaseLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles, Boolean theIncludeTop2000) throws IOException{
 		theFiles.addFileZip("/loinc/", LOINC_GROUP_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_GROUP_TERMS_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PARENT_GROUP_FILE_DEFAULT.getCode());
@@ -658,8 +650,10 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		theFiles.addFileZip("/loinc/", LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode());
+		if (theIncludeTop2000) {
+			theFiles.addFileZip("/loinc/", LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode());
+			theFiles.addFileZip("/loinc/", LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode());
+		}
 	}
 
 	@Test

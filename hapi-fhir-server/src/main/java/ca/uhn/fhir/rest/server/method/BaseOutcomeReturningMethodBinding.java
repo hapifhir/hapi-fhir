@@ -151,7 +151,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		 * on them
 		 */
 		MethodOutcome response;
-		Object methodReturn = invokeServerMethod(theServer, theRequest, params);
+		Object methodReturn = invokeServerMethod(theRequest, params);
 
 		if (methodReturn instanceof IBaseOperationOutcome) {
 			response = new MethodOutcome();

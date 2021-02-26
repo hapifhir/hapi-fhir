@@ -32,13 +32,13 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r5.elementmodel.Element;
 import org.hl7.fhir.r5.elementmodel.JsonParser;
+import org.hl7.fhir.r5.model.CanonicalResource;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
 import java.util.Locale;
 
 public class ValidatorResourceFetcher implements IResourceValidator.IValidatorResourceFetcher {
@@ -61,7 +61,6 @@ public class ValidatorResourceFetcher implements IResourceValidator.IValidatorRe
 	}
 
 
-	@SuppressWarnings("ConstantConditions")
 	@Override
 	public Element fetch(Object appContext, String theUrl) throws FHIRException {
 
@@ -94,18 +93,29 @@ public class ValidatorResourceFetcher implements IResourceValidator.IValidatorRe
 	}
 
 	@Override
-	public boolean resolveURL(Object appContext, String path, String url) throws IOException, FHIRException {
+	public boolean resolveURL(Object appContext, String path, String url, String type) throws FHIRException {
 		return true;
 	}
 
 	@Override
-	public byte[] fetchRaw(String url) throws IOException {
-		return new byte[0];
+	public byte[] fetchRaw(String url) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void setLocale(Locale locale) {
+	public IResourceValidator.IValidatorResourceFetcher setLocale(Locale locale) {
 		// ignore
+		return this;
+	}
+
+	@Override
+	public CanonicalResource fetchCanonicalResource(String url) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean fetchesCanonicalResource(String url) {
+		return false;
 	}
 
 }

@@ -27,6 +27,7 @@ import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
@@ -48,7 +49,7 @@ import java.util.function.Supplier;
 public class TransactionDetails {
 
 	private final Date myTransactionDate;
-	private Map<IIdType, ResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
+	private Map<String, ResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
 	private Map<String, Object> myUserData;
 	private ListMultimap<Pointcut, HookParams> myDeferredInterceptorBroadcasts;
 	private EnumSet<Pointcut> myDeferredInterceptorBroadcastPointcuts;
@@ -72,8 +73,10 @@ public class TransactionDetails {
 	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
 	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
 	 */
-	public Map<IIdType, ResourcePersistentId> getResolvedResourceIds() {
-		return myResolvedResourceIds;
+	@Nullable
+	public ResourcePersistentId getResolvedResourceId(IIdType theId) {
+		String idValue = theId.toVersionless().getValue();
+		return myResolvedResourceIds.get(idValue);
 	}
 
 	/**
@@ -88,7 +91,7 @@ public class TransactionDetails {
 		if (myResolvedResourceIds.isEmpty()) {
 			myResolvedResourceIds = new HashMap<>();
 		}
-		myResolvedResourceIds.put(theResourceId, thePersistentId);
+		myResolvedResourceIds.put(theResourceId.toVersionless().getValue(), thePersistentId);
 	}
 
 	/**
@@ -111,10 +114,11 @@ public class TransactionDetails {
 	}
 
 	/**
-	 * Gets an arbitraty object that will last the lifetime of the current transaction
+	 * Gets an arbitrary object that will last the lifetime of the current transaction
 	 *
 	 * @see #putUserData(String, Object)
 	 */
+	@SuppressWarnings("unchecked")
 	public <T> T getUserData(String theKey) {
 		if (myUserData != null) {
 			return (T) myUserData.get(theKey);
@@ -126,6 +130,7 @@ public class TransactionDetails {
 	 * Fetches the existing value in the user data map, or uses {@literal theSupplier} to create a new object and
 	 * puts that in the map, and returns it
 	 */
+	@SuppressWarnings("unchecked")
 	public <T> T getOrCreateUserData(String theKey, Supplier<T> theSupplier) {
 		T retVal = (T) getUserData(theKey);
 		if (retVal == null) {

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>5.3.0-SNAPSHOT</version>
+		<version>5.4.0-PRE1-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -107,7 +107,7 @@
 		</dependency>
 
 		<!--
-		Optional dependencies used by org.hl7.fhir.r4
+		Optional dependencies used by org.hl7.fhir.r5
 		We include these here to get the aggregate JavaDoc to work
 		-->
 		<dependency>
@@ -131,6 +131,11 @@
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.jetbrains</groupId>
+			<artifactId>annotations</artifactId>
 			<optional>true</optional>
 		</dependency>
 
@@ -181,12 +186,12 @@
 			<artifactId>thymeleaf</artifactId>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-test-utilities</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-test-utilities</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- Dependencies for Schematron -->
 		<dependency>
@@ -209,16 +214,6 @@
 			<artifactId>jaxb-api</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!--<dependency>-->
-			<!--<groupId>com.sun.xml.bind</groupId>-->
-			<!--<artifactId>jaxb-core</artifactId>-->
-			<!--<scope>test</scope>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>com.sun.xml.bind</groupId>-->
-			<!--<artifactId>jaxb-impl</artifactId>-->
-			<!--<scope>test</scope>-->
-		<!--</dependency>-->
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
@@ -344,13 +339,13 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-                        <_nouses>true</_nouses>
-                        <_removeheaders>Built-By, Include-Resource, Private-Package, Require-Capability</_removeheaders>
-                        <!-- No need to disable normal OSGi class loading
-						<Fragment-Host>
-							ca.uhn.hapi.fhir.hapi-fhir-base
-						</Fragment-Host>
-						-->
+						<_nouses>true</_nouses>
+						<_removeheaders>Built-By, Include-Resource, Private-Package, Require-Capability</_removeheaders>
+						<!-- No need to disable normal OSGi class loading
+				<Fragment-Host>
+					ca.uhn.hapi.fhir.hapi-fhir-base
+				</Fragment-Host>
+				-->
 					</instructions>
 				</configuration>
 			</plugin>
@@ -367,6 +362,11 @@
 							<groupId>com.google.guava</groupId>
 							<artifactId>guava</artifactId>
 							<version>${guava_version}</version>
+						</dependency>
+						<dependency>
+							<groupId>com.squareup.okhttp3</groupId>
+							<artifactId>okhttp</artifactId>
+							<version>${okhttp_version}</version>
 						</dependency>
 					</additionalDependencies>
 				</configuration>

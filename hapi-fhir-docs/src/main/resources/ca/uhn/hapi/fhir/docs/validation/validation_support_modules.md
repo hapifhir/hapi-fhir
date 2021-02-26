@@ -12,13 +12,13 @@ There are a several implementations of the [IValidationSupport](/hapi-fhir/apido
 
 # ValidationSupportChain
 
-[JavaDoc](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/support/ValidationSupportChain.html) / [Source](https://github.com/jamesagnew/hapi-fhir/blob/ja_20200218_validation_api_changes/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/ValidationSupportChain.java)
+[JavaDoc](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/support/ValidationSupportChain.html) / [Source](https://github.com/hapifhir/hapi-fhir/blob/ja_20200218_validation_api_changes/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/ValidationSupportChain.java)
 
 This module can be used to combine multiple implementations together so that for every request, each support class instance in the chain is tried in sequence. Note that nearly all methods in the [IValidationSupport](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/context/support/IValidationSupport.html) interface are permitted to return `null` if they are not able to service a particular method call. So for example, if a call to the [`validateCode`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/context/support/IValidationSupport.html#validateCode(ca.uhn.fhir.context.support.ValidationSupportContext,ca.uhn.fhir.context.support.ConceptValidationOptions,java.lang.String,java.lang.String,java.lang.String,java.lang.String)) method is made, the validator will try each module in the chain until one of them returns a non-null response.
 
 # DefaultProfileValidationSupport
 
-[JavaDoc](/hapi-fhir/apidocs/hapi-fhir-base/undefined/ca/uhn/fhir/context/support/DefaultProfileValidationSupport.html) / [Source](https://github.com/jamesagnew/hapi-fhir/blob/ja_20200218_validation_api_changes/hapi-fhir-base/src/main/java/ca/uhn/fhir/context/support/DefaultProfileValidationSupport.java)
+[JavaDoc](/hapi-fhir/apidocs/hapi-fhir-base/undefined/ca/uhn/fhir/context/support/DefaultProfileValidationSupport.html) / [Source](https://github.com/hapifhir/hapi-fhir/blob/ja_20200218_validation_api_changes/hapi-fhir-base/src/main/java/ca/uhn/fhir/context/support/DefaultProfileValidationSupport.java)
 
 This module supplies the built-in FHIR core structure definitions, including both FHIR resource definitions (StructureDefinition resources) and FHIR built-in vocabulary (ValueSet and CodeSystem resources).
 

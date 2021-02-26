@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2369
+title: "When using the Consent Interceptor, the `startOperation` method was not invoked for search paging requests. This
+   has been corrected. Thanks to Tue Toft Nørgård for reporting!"

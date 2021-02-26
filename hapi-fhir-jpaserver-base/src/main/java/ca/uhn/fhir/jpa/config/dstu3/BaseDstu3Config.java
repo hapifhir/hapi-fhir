@@ -12,6 +12,8 @@ import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcDstu3;
 import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcDstu3;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
@@ -116,8 +118,8 @@ public class BaseDstu3Config extends BaseConfigDstu3Plus {
 	}
 
 	@Bean
-	public ITermLoaderSvc termLoaderService() {
-		return new TermLoaderSvcImpl();
+	public ITermLoaderSvc termLoaderService(ITermDeferredStorageSvc theDeferredStorageSvc, ITermCodeSystemStorageSvc theCodeSystemStorageSvc) {
+		return new TermLoaderSvcImpl(theDeferredStorageSvc, theCodeSystemStorageSvc);
 	}
 
 	@Override

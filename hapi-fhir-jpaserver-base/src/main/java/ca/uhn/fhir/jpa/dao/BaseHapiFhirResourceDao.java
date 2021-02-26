@@ -57,6 +57,7 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.dstu2.resource.ListResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
@@ -73,6 +74,7 @@ import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -103,8 +105,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.data.domain.SliceImpl;
@@ -117,6 +117,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
@@ -126,6 +127,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -260,6 +262,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		StopWatch w = new StopWatch();
 
 		preProcessResourceForStorage(theResource);
+		preProcessResourceForStorage(theResource, theRequest, theTransactionDetails, thePerformIndexing);
 
 		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
@@ -275,7 +278,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				entity = myEntityManager.find(ResourceTable.class, pid.getId());
 				IBaseResource resource = toResource(entity, false);
 				theResource.setId(resource.getIdElement().getValue());
-				return toMethodOutcome(theRequest, entity, resource).setCreated(false);
+				return toMethodOutcome(theRequest, entity, resource).setCreated(false).setNop(true);
 			}
 		}
 
@@ -539,7 +542,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myDeleteExpungeService.expungeByResourcePids(theUrl, myResourceName, new SliceImpl<>(ResourcePersistentId.toLongList(theResourceIds)), theTheRequest);
 	}
 
-	@NotNull
+	@Nonnull
 	@Override
 	public DeleteMethodOutcome deletePidList(String theUrl, Collection<ResourcePersistentId> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest) {
 		StopWatch w = new StopWatch();
@@ -1077,7 +1080,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		// Notify interceptors
-		if (theRequest != null) {
+		if (theRequest != null && theRequest.getServer() != null) {
 			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequest, getResourceName(), theId);
 			RestOperationTypeEnum operationType = theId.hasVersionIdPart() ? RestOperationTypeEnum.VREAD : RestOperationTypeEnum.READ;
 			notifyInterceptors(operationType, requestDetails);
@@ -1128,6 +1131,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Transactional
 	public BaseHasResource readEntity(IIdType theId, RequestDetails theRequest) {
 		return readEntity(theId, true, theRequest);
+	}
+
+	@Override
+	@Transactional
+	public String getCurrentVersionId(IIdType theReferenceElement) {
+		return Long.toString(readEntity(theReferenceElement.toVersionless(), null).getVersion());
 	}
 
 	@Override
@@ -1191,13 +1200,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return entity;
 	}
 
-	@NotNull
+	@Nonnull
 	protected ResourceTable readEntityLatestVersion(IIdType theId, RequestDetails theRequestDetails) {
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, getResourceName());
 		return readEntityLatestVersion(theId, requestPartitionId);
 	}
 
-	@NotNull
+	@Nonnull
 	private ResourceTable readEntityLatestVersion(IIdType theId, @Nullable RequestPartitionId theRequestPartitionId) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
@@ -1294,39 +1303,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		// Notify interceptors
-		if (theRequest != null) {
-			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequest, getContext(), getResourceName(), null);
-			notifyInterceptors(RestOperationTypeEnum.SEARCH_TYPE, requestDetails);
+		translateSearchParams(theParams);
 
-			if (theRequest.isSubRequest()) {
-				Integer max = myDaoConfig.getMaximumSearchResultCountInTransaction();
-				if (max != null) {
-					Validate.inclusiveBetween(1, Integer.MAX_VALUE, max.intValue(), "Maximum search result count in transaction ust be a positive integer");
-					theParams.setLoadSynchronousUpTo(myDaoConfig.getMaximumSearchResultCountInTransaction());
-				}
-			}
-
-			final Integer offset = RestfulServerUtils.extractOffsetParameter(theRequest);
-			if (offset != null || !isPagingProviderDatabaseBacked(theRequest)) {
-				theParams.setLoadSynchronous(true);
-				if (offset != null) {
-					Validate.inclusiveBetween(0, Integer.MAX_VALUE, offset.intValue(), "Offset must be a positive integer");
-				}
-				theParams.setOffset(offset);
-			}
-
-			final Integer count = RestfulServerUtils.extractCountParameter(theRequest);
-			if (count != null) {
-				Integer maxPageSize = theRequest.getServer().getMaximumPageSize();
-				if (maxPageSize != null) {
-					Validate.inclusiveBetween(1, theRequest.getServer().getMaximumPageSize(), count.intValue(), "Count must be positive integer and less than " + maxPageSize);
-				}
-				theParams.setCount(count);
-			} else if (theRequest.getServer().getDefaultPageSize() != null) {
-				theParams.setCount(theRequest.getServer().getDefaultPageSize());
-			}
-		}
+		notifySearchInterceptors(theParams, theRequest);
 
 		CacheControlDirective cacheControlDirective = new CacheControlDirective();
 		if (theRequest != null) {
@@ -1347,6 +1326,64 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		return retVal;
+	}
+
+	private void translateSearchParams(SearchParameterMap theParams) {
+		Iterator<String> keyIterator = theParams.keySet().iterator();
+
+		// Translate _list=42 to _has=List:item:_id=42
+		while (keyIterator.hasNext()) {
+			String key = keyIterator.next();
+			if (Constants.PARAM_LIST.equals((key))) {
+				List<List<IQueryParameterType>> andOrValues = theParams.get(key);
+				theParams.remove(key);
+				List<List<IQueryParameterType>> hasParamValues = new ArrayList<>();
+				for (List<IQueryParameterType> orValues : andOrValues) {
+					List<IQueryParameterType> orList = new ArrayList<>();
+					for (IQueryParameterType value : orValues) {
+						orList.add(new HasParam("List", ListResource.SP_ITEM, ListResource.SP_RES_ID, value.getValueAsQueryToken(null)));
+					}
+					hasParamValues.add(orList);
+				}
+				theParams.put(Constants.PARAM_HAS, hasParamValues);
+			}
+		}
+	}
+
+	private void notifySearchInterceptors(SearchParameterMap theParams, RequestDetails theRequest) {
+		if (theRequest != null) {
+			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequest, getContext(), getResourceName(), null);
+			notifyInterceptors(RestOperationTypeEnum.SEARCH_TYPE, requestDetails);
+
+			if (theRequest.isSubRequest()) {
+				Integer max = myDaoConfig.getMaximumSearchResultCountInTransaction();
+				if (max != null) {
+					Validate.inclusiveBetween(1, Integer.MAX_VALUE, max, "Maximum search result count in transaction ust be a positive integer");
+					theParams.setLoadSynchronousUpTo(myDaoConfig.getMaximumSearchResultCountInTransaction());
+				}
+			}
+
+			final Integer offset = RestfulServerUtils.extractOffsetParameter(theRequest);
+			if (offset != null || !isPagingProviderDatabaseBacked(theRequest)) {
+				theParams.setLoadSynchronous(true);
+				if (offset != null) {
+					Validate.inclusiveBetween(0, Integer.MAX_VALUE, offset, "Offset must be a positive integer");
+				}
+				theParams.setOffset(offset);
+			}
+
+			Integer count = RestfulServerUtils.extractCountParameter(theRequest);
+			if (count != null) {
+				Integer maxPageSize = theRequest.getServer().getMaximumPageSize();
+				if (maxPageSize != null && count > maxPageSize) {
+					ourLog.info("Reducing {} from {} to {} which is the maximum allowable page size.", Constants.PARAM_COUNT, count, maxPageSize);
+					count = maxPageSize;
+				}
+				theParams.setCount(count);
+			} else if (theRequest.getServer().getDefaultPageSize() != null) {
+				theParams.setCount(theRequest.getServer().getDefaultPageSize());
+			}
+		}
 	}
 
 	@Override
@@ -1459,6 +1496,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		T resource = theResource;
 
 		preProcessResourceForStorage(resource);
+		preProcessResourceForStorage(theResource, theRequest, theTransactionDetails, thePerformIndexing);
 
 		final ResourceTable entity;
 
@@ -1529,6 +1567,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			resource.setId(entity.getIdDt().getValue());
 			DaoMethodOutcome outcome = toMethodOutcome(theRequest, entity, resource).setCreated(wasDeleted);
 			outcome.setPreviousResource(oldResource);
+			if (!outcome.isNop()) {
+				outcome.setId(outcome.getId().withVersion(Long.toString(outcome.getId().getVersionIdPartAsLong() + 1)));
+			}
 			return outcome;
 		}
 

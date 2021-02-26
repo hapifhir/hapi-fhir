@@ -20,54 +20,34 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.search.highlight.Formatter;
-import org.apache.lucene.search.highlight.Highlighter;
-import org.apache.lucene.search.highlight.Scorer;
-import org.apache.lucene.search.highlight.TextFragment;
-import org.apache.lucene.search.highlight.TokenGroup;
-import org.hibernate.search.backend.lucene.index.LuceneIndexManager;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
-import org.hibernate.search.engine.search.query.SearchQuery;
 import org.hibernate.search.mapper.orm.Search;
-import org.hibernate.search.mapper.orm.mapping.SearchMapping;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -76,20 +56,20 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FulltextSearchSvcImpl.class);
-
-	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	private EntityManager myEntityManager;
-
-	@Autowired
-	private PlatformTransactionManager myTxManager;
-
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
-
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	private EntityManager myEntityManager;
+	@Autowired
+	private PlatformTransactionManager myTxManager;
 	@Autowired
 	private IdHelperService myIdHelperService;
 
 	private Boolean ourDisabled;
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	/**
 	 * Constructor
@@ -98,28 +78,28 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		super();
 	}
 
-	private void addTextSearch(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, List<List<IQueryParameterType>> theTerms, String theFieldName, String theFieldNameEdgeNGram, String theFieldNameTextNGram){
+	private void addTextSearch(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, List<List<IQueryParameterType>> theTerms, String theFieldName, String theFieldNameEdgeNGram, String theFieldNameTextNGram) {
 		if (theTerms == null) {
 			return;
 		}
 		for (List<? extends IQueryParameterType> nextAnd : theTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
-				if (terms.size() == 1) {
-					b.must(f.phrase()
-						.field(theFieldName)
-						.boost(4.0f)
-						.matching(terms.iterator().next().toLowerCase())
-						.slop(2));
-				} else if (terms.size() > 1){
-					String joinedTerms = StringUtils.join(terms, ' ');
-					b.must(f.match().field(theFieldName).matching(joinedTerms));
-				} else {
-					ourLog.debug("No Terms found in query parameter {}", nextAnd);
-				}
+			if (terms.size() == 1) {
+				b.must(f.phrase()
+					.field(theFieldName)
+					.boost(4.0f)
+					.matching(terms.iterator().next().toLowerCase())
+					.slop(2));
+			} else if (terms.size() > 1) {
+				String joinedTerms = StringUtils.join(terms, ' ');
+				b.must(f.match().field(theFieldName).matching(joinedTerms));
+			} else {
+				ourLog.debug("No Terms found in query parameter {}", nextAnd);
 			}
 		}
+	}
 
-	@NotNull
+	@Nonnull
 	private Set<String> extractOrStringParams(List<? extends IQueryParameterType> nextAnd) {
 		Set<String> terms = new HashSet<>();
 		for (IQueryParameterType nextOr : nextAnd) {
@@ -228,11 +208,5 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	public List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams) {
 		return doSearch(theResourceName, theParams, null);
 	}
-
-	@Autowired
-	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
-
-	@Autowired
-	private PartitionSettings myPartitionSettings;
 
 }

@@ -1,0 +1,3 @@
+---
+type: add
+title: "Added support for the $evaluate-measure Operation as part of adding CQL support."

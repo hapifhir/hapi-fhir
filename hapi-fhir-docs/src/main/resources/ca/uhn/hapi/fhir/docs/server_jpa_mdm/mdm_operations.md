@@ -240,7 +240,7 @@ Use the `$mdm-update-link` operation to change the `matchResult` update of an md
             <td>String</td>
             <td>1..1</td>
             <td>
-                The id of the source resource.
+                The id of the target resource.
             </td>
         </tr>
         <tr>
@@ -318,6 +318,14 @@ This operation takes the following parameters:
                 The id of the Golden Resource to merge data into.
             </td>
         </tr>
+        <tr>
+            <td>resource</td>
+            <td>Resource</td>
+            <td>0..1</td>
+            <td>
+                Optional manually merged Golden Resource. All values except for the metadata, PID and identifiers will be copied from this resource, if it is present. If no value is specified, all fields from the resource pointed to by "fromGoldenResourceId" will be copied instead.
+            </td>
+        </tr>
     </tbody>
 </table>
 
@@ -350,9 +358,9 @@ This operation returns the merged Golden Resource (`toGoldenResourceId`).
 
 ## Querying the Patient Resource
 
-When MDM is enabled, the [$match operation](http://hl7.org/fhir/patient-operation-match.html) will be enabled on the JPA Server.
+When MDM is enabled, the [$match operation](http://hl7.org/fhir/patient-operation-match.html) will be enabled on the JPA Server for Patient and Practitioner resources.
 
-This operation allows a Patient resource to be submitted to the endpoint, and the system will attempt to find and return any Patient resources that match it according to the matching rules. The response includes a search score field that is calculated by averaging the number of matched rules against total rules checked for the Patient resource. Appropriate match grade extension is also included. 
+This operation allows a Patient or Practitioner resource to be submitted to the endpoint, and the system will attempt to find and return any Patient resources that match it according to the matching rules. The response includes a search score field that is calculated by averaging the number of matched rules against total rules checked for the Patient resource. Appropriate match grade extension is also included. 
 
 For example, the following request may be submitted:
 
@@ -420,12 +428,12 @@ Sample response for the Patient match is included below:
 
 ## Querying the Other Supported MDM Resources via `/$mdm-match`
 
-Query operations on any other supported MDM type is also allowed. This operation will find resources that match the provided parameters according to the matching rules. The response includes a search score field that is calculated by averaging the number of matched rules against total rules checked for the Patient resource. Appropriate match grade extension is also included in the response.
+Query operations on any other supported MDM type are also allowed via the server-level operation `/$mdm-match`. This operation will find resources that match the provided parameters according to the matching rules. The response includes a search score field that is calculated by averaging the number of matched rules against total rules checked for the Patient resource. Appropriate match grade extension is also included in the response.
 
-The request below may be submitted to search for `Orgaization` in case it defined as a supported MDM type:
+The request below may be submitted to search for `Organization` in case it defined as a supported MDM type:
 
 ```http
-POST /Organization/$mdm-match
+POST /$mdm-match 
 Content-Type: application/fhir+json; charset=UTF-8
 
 {
@@ -441,8 +449,9 @@ Content-Type: application/fhir+json; charset=UTF-8
     ]
 }
 ```
+MDM will respond with the appropriate resource bundle.
 
-MDM will respond with the appropriate resource bundle. 
+Note that the request goes to the root of the FHIR server, and not the `Organization` endpoint. Since this is not in the FHIR spec directly, it was decided that this would be a separate operation from the Patient/Practitioner `/$match` operation.
 
 ## Clearing MDM Links
 

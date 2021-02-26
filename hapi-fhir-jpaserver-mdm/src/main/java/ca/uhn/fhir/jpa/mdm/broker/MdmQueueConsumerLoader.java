@@ -51,7 +51,9 @@ public class MdmQueueConsumerLoader {
 	public void startListeningToMdmChannel() {
 		if (myMdmChannel == null) {
 			ChannelConsumerSettings config = new ChannelConsumerSettings();
+			
 			config.setConcurrentConsumers(myMdmSettings.getConcurrentConsumers());
+
 			myMdmChannel = myChannelFactory.getOrCreateReceiver(IMdmSettings.EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, config);
 			if (myMdmChannel == null) {
 				ourLog.error("Unable to create receiver for {}", IMdmSettings.EMPI_CHANNEL_NAME);
@@ -64,9 +66,10 @@ public class MdmQueueConsumerLoader {
 
 	@SuppressWarnings("unused")
 	@PreDestroy
-	public void stop() {
+	public void stop() throws Exception {
 		if (myMdmChannel != null) {
-			myMdmChannel.unsubscribe(myMdmMessageHandler);
+			// JMS channel needs to be destroyed to avoid dangling receivers
+			myMdmChannel.destroy();
 			ourLog.info("MDM Matching Consumer unsubscribed from Matching Channel {} with name {}", myMdmChannel.getClass().getName(), myMdmChannel.getName());
 		}
 	}

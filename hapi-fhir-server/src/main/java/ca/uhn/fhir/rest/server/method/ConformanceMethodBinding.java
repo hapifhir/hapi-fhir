@@ -39,7 +39,6 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
@@ -52,7 +51,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	 * even applicable to other bindings. It's particularly important for this
 	 * operation though, so a one-off is fine for now
 	 */
-	private final AtomicReference<IBaseResource> myCachedResponse = new AtomicReference<>();
+	private final AtomicReference<IBaseConformance> myCachedResponse = new AtomicReference<>();
 	private final AtomicLong myCachedResponseExpires = new AtomicLong(0L);
 	private long myCacheMillis = 60 * 1000;
 
@@ -103,7 +102,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 
 	@Override
 	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
-		IBaseResource conf;
+		IBaseConformance conf;
 
 		CacheControlDirective cacheControlDirective = new CacheControlDirective().parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL));
 
@@ -127,12 +126,13 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 			if (operationType != null) {
 				IServerInterceptor.ActionRequestDetails details = new IServerInterceptor.ActionRequestDetails(theRequest);
 				populateActionRequestDetailsForInterceptor(theRequest, details, theMethodParams);
-				HookParams preHandledParams = new HookParams();
-				preHandledParams.add(RestOperationTypeEnum.class, theRequest.getRestOperationType());
-				preHandledParams.add(RequestDetails.class, theRequest);
-				preHandledParams.addIfMatchesType(ServletRequestDetails.class, theRequest);
-				preHandledParams.add(IServerInterceptor.ActionRequestDetails.class, details);
+				// Interceptor hook: SERVER_INCOMING_REQUEST_PRE_HANDLED
 				if (theRequest.getInterceptorBroadcaster() != null) {
+					HookParams preHandledParams = new HookParams();
+					preHandledParams.add(RestOperationTypeEnum.class, theRequest.getRestOperationType());
+					preHandledParams.add(RequestDetails.class, theRequest);
+					preHandledParams.addIfMatchesType(ServletRequestDetails.class, theRequest);
+					preHandledParams.add(IServerInterceptor.ActionRequestDetails.class, details);
 					theRequest
 						.getInterceptorBroadcaster()
 						.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
@@ -141,8 +141,24 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 		}
 
 		if (conf == null) {
-			conf = (IBaseResource) invokeServerMethod(theServer, theRequest, theMethodParams);
+			conf = (IBaseConformance) invokeServerMethod(theRequest, theMethodParams);
 			if (myCacheMillis > 0) {
+
+				// Interceptor hook: SERVER_CAPABILITY_STATEMENT_GENERATED
+				if (theRequest.getInterceptorBroadcaster() != null) {
+					HookParams params = new HookParams();
+					params.add(IBaseConformance.class, conf);
+					params.add(RequestDetails.class, theRequest);
+					params.addIfMatchesType(ServletRequestDetails.class, theRequest);
+					IBaseConformance outcome = (IBaseConformance) theRequest
+						.getInterceptorBroadcaster()
+						.callHooksAndReturnObject(Pointcut.SERVER_CAPABILITY_STATEMENT_GENERATED, params);
+					if (outcome != null) {
+						conf = outcome;
+					}
+				}
+
+
 				myCachedResponse.set(conf);
 				myCachedResponseExpires.set(System.currentTimeMillis() + getCacheMillis());
 			}

@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.util;
 
 /*-
  * #%L
- * HAPI FHIR Model
+ * HAPI FHIR JPA Model
  * %%
  * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
@@ -30,6 +30,13 @@ import javax.annotation.Nullable;
 public class JpaInterceptorBroadcaster {
 
 	/**
+	 * Non instantiable
+	 */
+	private JpaInterceptorBroadcaster() {
+		// nothing
+	}
+
+	/**
 	 * Broadcast hooks to both the interceptor service associated with the request, as well
 	 * as the one associated with the JPA module.
 	 */
@@ -38,7 +45,7 @@ public class JpaInterceptorBroadcaster {
 		if (theInterceptorBroadcaster != null) {
 			retVal = theInterceptorBroadcaster.callHooks(thePointcut, theParams);
 		}
-		if (theRequestDetails != null && retVal) {
+		if (theRequestDetails != null && theRequestDetails.getInterceptorBroadcaster() != null && retVal) {
 			IInterceptorBroadcaster interceptorBroadcaster = theRequestDetails.getInterceptorBroadcaster();
 			interceptorBroadcaster.callHooks(thePointcut, theParams);
 		}
@@ -54,7 +61,7 @@ public class JpaInterceptorBroadcaster {
 		if (theInterceptorBroadcaster != null) {
 			retVal = theInterceptorBroadcaster.callHooksAndReturnObject(thePointcut, theParams);
 		}
-		if (theRequestDetails != null && retVal == null) {
+		if (theRequestDetails != null && theRequestDetails.getInterceptorBroadcaster() != null && retVal == null) {
 			IInterceptorBroadcaster interceptorBroadcaster = theRequestDetails.getInterceptorBroadcaster();
 			retVal = interceptorBroadcaster.callHooksAndReturnObject(thePointcut, theParams);
 		}
@@ -65,6 +72,8 @@ public class JpaInterceptorBroadcaster {
 		if (theInterceptorBroadcaster != null && theInterceptorBroadcaster.hasHooks(thePointcut)) {
 			return true;
 		}
-		return theRequestDetails != null && theRequestDetails.getInterceptorBroadcaster().hasHooks(thePointcut);
+		return theRequestDetails != null &&
+			theRequestDetails.getInterceptorBroadcaster() != null &&
+			theRequestDetails.getInterceptorBroadcaster().hasHooks(thePointcut);
 	}
 }

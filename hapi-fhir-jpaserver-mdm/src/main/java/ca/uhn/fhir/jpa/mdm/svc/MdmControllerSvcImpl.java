@@ -20,23 +20,23 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
-import ca.uhn.fhir.mdm.api.MdmLinkJson;
-import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
-import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
-import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
+import ca.uhn.fhir.mdm.api.MdmLinkJson;
+import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
 import ca.uhn.fhir.mdm.provider.MdmControllerUtil;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nullable;
 import java.util.stream.Stream;
 
 /**
@@ -44,6 +44,7 @@ import java.util.stream.Stream;
  */
 @Service
 public class MdmControllerSvcImpl implements IMdmControllerSvc {
+
 	@Autowired
 	MdmControllerHelper myMdmControllerHelper;
 	@Autowired
@@ -54,14 +55,14 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	IMdmLinkUpdaterSvc myIMdmLinkUpdaterSvc;
 
 	@Override
-	public IAnyResource mergeGoldenResources(String theFromGoldenResourceId, String theToGoldenResourceId, MdmTransactionContext theMdmTransactionContext) {
+	public IAnyResource mergeGoldenResources(String theFromGoldenResourceId, String theToGoldenResourceId, IAnyResource theManuallyMergedGoldenResource, MdmTransactionContext theMdmTransactionContext) {
 		IAnyResource fromGoldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId);
 		IAnyResource toGoldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToGoldenResourceId);
 		myMdmControllerHelper.validateMergeResources(fromGoldenResource, toGoldenResource);
 		myMdmControllerHelper.validateSameVersion(fromGoldenResource, theFromGoldenResourceId);
 		myMdmControllerHelper.validateSameVersion(toGoldenResource, theToGoldenResourceId);
 
-		return myGoldenResourceMergerSvc.mergeGoldenResources(fromGoldenResource, toGoldenResource, theMdmTransactionContext);
+		return myGoldenResourceMergerSvc.mergeGoldenResources(fromGoldenResource, theManuallyMergedGoldenResource, toGoldenResource, theMdmTransactionContext);
 	}
 
 	@Override

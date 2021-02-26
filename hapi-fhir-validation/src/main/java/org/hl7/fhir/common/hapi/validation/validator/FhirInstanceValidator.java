@@ -29,8 +29,10 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private BestPracticeWarningLevel myBestPracticeWarningLevel;
 	private IValidationSupport myValidationSupport;
 	private boolean noTerminologyChecks = false;
+	private boolean noExtensibleWarnings = false;
+	private boolean noBindingMsgSuppressed = false;
 	private volatile VersionSpecificWorkerContextWrapper myWrappedWorkerContext;
-	private boolean errorForUnknownProfiles;
+	private boolean errorForUnknownProfiles = true;
 	private boolean assumeValidRestReferences;
 	private List<String> myExtensionDomains = Collections.emptyList();
 	private IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher;
@@ -184,6 +186,34 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		noTerminologyChecks = theNoTerminologyChecks;
 	}
 
+	/**
+	 * If set to {@literal true} (default is false) no extensible warnings suppressed
+	 */
+	public boolean isNoExtensibleWarnings() {
+		return noExtensibleWarnings;
+	}
+
+	/**
+	 * If set to {@literal true} (default is false) no extensible warnings is suppressed
+	 */
+	public void setNoExtensibleWarnings(final boolean theNoExtensibleWarnings) {
+		noExtensibleWarnings = theNoExtensibleWarnings;
+	}
+
+	/**
+	 * If set to {@literal true} (default is false) no binding message is suppressed
+	 */
+	public boolean isNoBindingMsgSuppressed() {
+		return noBindingMsgSuppressed;
+	}
+
+	/**
+	 * If set to {@literal true} (default is false) no binding message is suppressed
+	 */
+	public void setNoBindingMsgSuppressed(final boolean theNoBindingMsgSuppressed) {
+		noBindingMsgSuppressed = theNoBindingMsgSuppressed;
+	}
+
 	public List<String> getExtensionDomains() {
 		return myExtensionDomains;
 	}
@@ -198,6 +228,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			.setErrorForUnknownProfiles(isErrorForUnknownProfiles())
 			.setExtensionDomains(getExtensionDomains())
 			.setNoTerminologyChecks(isNoTerminologyChecks())
+			.setNoExtensibleWarnings(isNoExtensibleWarnings())
+			.setNoBindingMsgSuppressed(isNoBindingMsgSuppressed())
 			.setValidatorResourceFetcher(getValidatorResourceFetcher())
 			.setAssumeValidRestReferences(isAssumeValidRestReferences())
 			.validate(wrappedWorkerContext, theValidationCtx);

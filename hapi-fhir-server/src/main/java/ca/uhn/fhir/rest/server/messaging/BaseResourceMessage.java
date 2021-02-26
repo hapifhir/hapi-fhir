@@ -43,6 +43,9 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 	@JsonProperty("transactionId")
 	private String myTransactionId;
 
+	@JsonProperty("mediaType")
+	private String myMediaType;
+
 	/**
 	 * Returns an attribute stored in this message.
 	 * <p>
@@ -143,6 +146,14 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 	 */
 	public void setTransactionId(String theTransactionId) {
 		myTransactionId = theTransactionId;
+	}
+
+	public String getMediaType() {
+		return myMediaType;
+	}
+
+	public void setMediaType(String theMediaType) {
+		myMediaType = theMediaType;
 	}
 
 	public enum OperationTypeEnum {
