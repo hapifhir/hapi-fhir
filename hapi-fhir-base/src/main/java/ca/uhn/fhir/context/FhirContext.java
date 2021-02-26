@@ -32,6 +32,7 @@ import org.apache.jena.riot.Lang;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -103,7 +104,7 @@ public class FhirContext {
 	private AddProfileTagEnum myAddProfileTagWhenEncoding = AddProfileTagEnum.ONLY_FOR_CUSTOM;
 	private volatile Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myClassToElementDefinition = Collections.emptyMap();
 	private ArrayList<Class<? extends IBase>> myCustomTypes;
-	private Map<String, Class<? extends IBaseResource>> myDefaultTypeForProfile = new HashMap<>();
+	private final Map<String, Class<? extends IBaseResource>> myDefaultTypeForProfile = new HashMap<>();
 	private volatile Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = Collections.emptyMap();
 	private volatile boolean myInitialized;
 	private volatile boolean myInitializing = false;
@@ -114,8 +115,8 @@ public class FhirContext {
 	private volatile INarrativeGenerator myNarrativeGenerator;
 	private volatile IParserErrorHandler myParserErrorHandler = new LenientErrorHandler();
 	private ParserOptions myParserOptions = new ParserOptions();
-	private Set<PerformanceOptionsEnum> myPerformanceOptions = new HashSet<>();
-	private Collection<Class<? extends IBaseResource>> myResourceTypesToScan;
+	private final Set<PerformanceOptionsEnum> myPerformanceOptions = new HashSet<>();
+	private final Collection<Class<? extends IBaseResource>> myResourceTypesToScan;
 	private volatile IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 	private IValidationSupport myValidationSupport;
@@ -1066,4 +1067,10 @@ public class FhirContext {
 		return retVal;
 	}
 
+	// TODO KHS add the other primitive types
+	public IPrimitiveType<Boolean> getPrimitiveBoolean(Boolean theValue) {
+		IPrimitiveType<Boolean> retval = (IPrimitiveType<Boolean>) getElementDefinition("boolean").newInstance();
+		retval.setValue(theValue);
+		return retval;
+	}
 }

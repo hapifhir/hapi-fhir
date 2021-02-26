@@ -127,6 +127,7 @@ import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
@@ -656,9 +657,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			return true;
 
 		//-- token case
-		if (startsWithByWordBoundaries(theDisplay, theFilterDisplay)) return true;
-
-		return false;
+		return startsWithByWordBoundaries(theDisplay, theFilterDisplay);
 	}
 
 	private boolean startsWithByWordBoundaries(String theDisplay, String theFilterDisplay) {
@@ -1770,10 +1769,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@Override
 	@Transactional
 	public void storeTermConceptMapAndChildren(ResourceTable theResourceTable, ConceptMap theConceptMap) {
-		ourLog.debug("Storing TermConceptMap for {}", theConceptMap.getIdElement().toVersionless().getValueAsString());
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
+		if (isPlaceholder(theConceptMap)) {
+			ourLog.info("Not storing TermConceptMap for placeholder {}", theConceptMap.getIdElement().toVersionless().getValueAsString());
+			return;
+		}
+
 		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(theConceptMap.getUrl(), "ConceptMap has no value for ConceptMap.url");
+		ourLog.info("Storing TermConceptMap for {}", theConceptMap.getIdElement().toVersionless().getValueAsString());
 
 		TermConceptMap termConceptMap = new TermConceptMap();
 		termConceptMap.setResource(theResourceTable);
@@ -2063,10 +2067,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@Override
 	@Transactional
 	public void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet) {
-		ourLog.info("Storing TermValueSet for {}", theValueSet.getIdElement().toVersionless().getValueAsString());
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
+		if (isPlaceholder(theValueSet)) {
+			ourLog.info("Not storing TermValueSet for placeholder {}", theValueSet.getIdElement().toVersionless().getValueAsString());
+			return;
+		}
+
 		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(theValueSet.getUrl(), "ValueSet has no value for ValueSet.url");
+		ourLog.info("Storing TermValueSet for {}", theValueSet.getIdElement().toVersionless().getValueAsString());
 
 		/*
 		 * Get CodeSystem and validate CodeSystemVersion
@@ -2113,6 +2122,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
+	private boolean isPlaceholder(MetadataResource theResource) {
+		return theResource.getMeta().getExtensionByUrl(HapiExtensions.EXT_RESOURCE_META_PLACEHOLDER) != null;
+	}
 
 	@Override
 	@Transactional

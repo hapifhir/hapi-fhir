@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2332
+title: "All created placeholder resources now have a meta extension with the url http://hapifhir.io/fhir/StructureDefinition/resource-meta-placeholder
+ and the value 'true'.  Also, terminology storage is now skipped for placeholder ValueSet and ConceptMap resources."

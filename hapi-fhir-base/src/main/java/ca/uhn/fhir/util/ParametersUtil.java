@@ -80,10 +80,7 @@ public class ParametersUtil {
 					.filter(t -> t instanceof IPrimitiveType<?>)
 					.map(t -> ((IPrimitiveType<?>) t))
 					.findFirst();
-				if (!nameValue.isPresent() || !theParameterName.equals(nameValue.get().getValueAsString())) {
-					return false;
-				}
-				return true;
+				return nameValue.isPresent() && theParameterName.equals(nameValue.get().getValueAsString());
 			})
 			.collect(Collectors.toList());
 
@@ -227,9 +224,7 @@ public class ParametersUtil {
 
 	@SuppressWarnings("unchecked")
 	public static void addParameterToParametersBoolean(FhirContext theCtx, IBaseParameters theParameters, String theName, boolean theValue) {
-		IPrimitiveType<Boolean> value = (IPrimitiveType<Boolean>) theCtx.getElementDefinition("boolean").newInstance();
-		value.setValue(theValue);
-		addParameterToParameters(theCtx, theParameters, theName, value);
+		addParameterToParameters(theCtx, theParameters, theName, theCtx.getPrimitiveBoolean(theValue));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -310,10 +305,7 @@ public class ParametersUtil {
 	}
 
 	public static void addPartBoolean(FhirContext theContext, IBase theParameter, String theName, Boolean theValue) {
-		IPrimitiveType<Boolean> value = (IPrimitiveType<Boolean>) theContext.getElementDefinition("boolean").newInstance();
-		value.setValue(theValue);
-
-		addPart(theContext, theParameter, theName, value);
+		addPart(theContext, theParameter, theName, theContext.getPrimitiveBoolean(theValue));
 	}
 
 	public static void addPartDecimal(FhirContext theContext, IBase theParameter, String theName, Double theValue) {

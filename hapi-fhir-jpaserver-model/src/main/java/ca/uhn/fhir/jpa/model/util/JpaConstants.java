@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.util;
  */
 
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.HapiExtensions;
 
 public class JpaConstants {
 
@@ -195,9 +196,11 @@ public class JpaConstants {
 	public static final String EXTENSION_EXT_SYSTEMDEFINED = JpaConstants.class.getName() + "_EXTENSION_EXT_SYSTEMDEFINED";
 
 	/**
-	 * URL for extension on a Phonetic String SearchParameter indicating that text values should be phonetically indexed with the named encoder
+	 * Deprecated.  Please use {@link HapiExtensions#EXT_SEARCHPARAM_PHONETIC_ENCODER} instead.
 	 */
-	public static final String EXT_SEARCHPARAM_PHONETIC_ENCODER = "http://hapifhir.io/fhir/StructureDefinition/searchparameter-phonetic-encoder";
+	@Deprecated
+	public static final String EXT_SEARCHPARAM_PHONETIC_ENCODER = HapiExtensions.EXT_SEARCHPARAM_PHONETIC_ENCODER;
+
 	public static final String VALUESET_FILTER_DISPLAY = "display";
 
 	/**
