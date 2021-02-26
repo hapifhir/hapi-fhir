@@ -334,7 +334,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		// Fetch the job again
 		status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 		assertEquals(BulkJobStatusEnum.COMPLETE, status.getStatus());
-		assertEquals(2, status.getFiles().size());
+		assertEquals(5, status.getFiles().size());
 
 		// Iterate over the files
 		for (IBulkDataExportSvc.FileEntry next : status.getFiles()) {
@@ -342,17 +342,24 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
 			String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
 			ourLog.info("Next contents for type {}:\n{}", next.getResourceType(), nextContents);
-
 			if ("Patient".equals(next.getResourceType())) {
 				assertThat(nextContents, containsString("\"value\":\"PAT0\""));
 				assertEquals(10, nextContents.split("\n").length);
 			} else if ("Observation".equals(next.getResourceType())) {
 				assertThat(nextContents, containsString("\"subject\":{\"reference\":\"Patient/PAT0\"}}\n"));
 				assertEquals(10, nextContents.split("\n").length);
+			}else if ("Immunization".equals(next.getResourceType())) {
+				assertThat(nextContents, containsString("\"patient\":{\"reference\":\"Patient/PAT0\"}}\n"));
+				assertEquals(10, nextContents.split("\n").length);
+			} else if ("CareTeam".equals(next.getResourceType())) {
+				assertThat(nextContents, containsString("\"id\":\"CT0\""));
+				assertEquals(10, nextContents.split("\n").length);
+			} else if ("Group".equals(next.getResourceType())) {
+				assertThat(nextContents, containsString("\"id\":\"G0\""));
+				assertEquals(1, nextContents.split("\n").length);
 			} else {
-				fail(next.getResourceType());
+				fail();
 			}
-
 		}
 	}
 
@@ -607,6 +614,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 	private void createResources() {
 		Group group = new Group();
+		group.setId("G0");
 		for (int i = 0; i < 10; i++) {
 			Patient patient = new Patient();
 			patient.setId("PAT" + i);
@@ -642,12 +650,10 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 			CareTeam careTeam = new CareTeam();
 			careTeam.setId("CT" + i);
-			// FIXME GGG note if you uncomment addPartipant and comment out setSubject the test passes
-//			careTeam.addParticipant().setMember(new Reference(patId));
 			careTeam.setSubject(new Reference(patId)); // This maps to the "patient" search parameter on CareTeam
 			myCareTeamDao.update(careTeam);
 		}
-		myPatientGroupId =  myGroupDao.create(group).getId();
+		myPatientGroupId =  myGroupDao.update(group).getId();
 
 
 	}

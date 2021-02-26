@@ -63,10 +63,9 @@ public class GroupBulkItemReader implements ItemReader<List<ResourcePersistentId
 
 	@Value("#{stepExecutionContext['resourceType']}")
 	private String myResourceType;
-
 	@Value("#{jobParameters['" + BulkExportJobConfig.GROUP_ID_PARAMETER + "']}")
 	private String myGroupId;
-	@Value("#{jobParameters['"+ BulkExportJobConfig.JOB_UUID_PARAMETER+"']}")
+	@Value("#{jobExecutionContext['"+ BulkExportJobConfig.JOB_UUID_PARAMETER+"']}")
 	private String myJobUUID;
 	@Value("#{jobParameters['" + BulkExportJobConfig.READ_CHUNK_PARAMETER + "']}")
 	private Long myReadChunkSize;

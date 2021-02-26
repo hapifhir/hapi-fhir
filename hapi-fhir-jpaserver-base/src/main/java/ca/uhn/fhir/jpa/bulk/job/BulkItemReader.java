@@ -55,13 +55,13 @@ public class BulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	Iterator<ResourcePersistentId> myPidIterator;
 
-	@Value("#{stepExecutionContext['resourceType']}")
-	private String myResourceType;
 
 	@Value("#{jobParameters['" + BulkExportJobConfig.READ_CHUNK_PARAMETER + "']}")
 	private Long myReadChunkSize;
-	@Value("#{jobParameters['"+ BulkExportJobConfig.JOB_UUID_PARAMETER+"']}")
+	@Value("#{jobExecutionContext['"+ BulkExportJobConfig.JOB_UUID_PARAMETER+"']}")
 	private String myJobUUID;
+	@Value("#{stepExecutionContext['resourceType']}")
+	private String myResourceType;
 
 	@Autowired
 	private IBulkExportJobDao myBulkExportJobDao;

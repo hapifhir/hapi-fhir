@@ -46,8 +46,8 @@ public class CreateBulkExportEntityTasklet implements Tasklet {
 		Map<String, Object> jobParameters = theChunkContext.getStepContext().getJobParameters();
 
 		//We can leave early if they provided us with an existing job.
-		if (jobParameters.containsKey("jobUUID")) {
-			addUUIDToJobContext(theChunkContext, (String)jobParameters.get("jobUUID"));
+		if (jobParameters.containsKey(BulkExportJobConfig.JOB_UUID_PARAMETER)) {
+			addUUIDToJobContext(theChunkContext, (String)jobParameters.get(BulkExportJobConfig.JOB_UUID_PARAMETER));
 			return RepeatStatus.FINISHED;
 		} else {
 			String resourceTypes = (String)jobParameters.get("resourceTypes");
@@ -79,6 +79,6 @@ public class CreateBulkExportEntityTasklet implements Tasklet {
 			.getStepExecution()
 			.getJobExecution()
 			.getExecutionContext()
-			.putString("jobUUID", theJobUUID);
+			.putString(BulkExportJobConfig.JOB_UUID_PARAMETER, theJobUUID);
 	}
 }
