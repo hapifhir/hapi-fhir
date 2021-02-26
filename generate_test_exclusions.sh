@@ -3,6 +3,8 @@
 totalAgents=$SYSTEM_TOTALJOBSINPHASE
 agentNumber=$SYSTEM_JOBPOSITIONINPHASE
 
+totalAgents=2
+agentNumber=1
 if [[ $totalAgents -eq 0 ]]; then totalAgents=1; fi
 if [ -z "$agentNumber" ]; then agentNumber=1; fi
 
@@ -28,7 +30,7 @@ echo Absolute path of IT exclusion is $ITs_to_skip_file
 counter=0;
 for i in $tests_to_skip; do
    if [[ $counter -ne $agentNumber ]]; then
-      echo "$i"\n >> $tests_to_skip_file
+      echo "$i" >> $tests_to_skip_file
    fi
    counter=$((counter+1))
    if [[ $counter -gt $totalAgents ]]; then counter=1; fi
@@ -37,7 +39,7 @@ done
 counter=0;
 for i in $its_to_skip; do
    if [[ $counter -ne $agentNumber ]]; then
-      echo "$i"\n >> $ITs_to_skip_file
+      echo "$i" >> $ITs_to_skip_file
    fi
    counter=$((counter+1))
    if [[ $counter -gt $totalAgents ]]; then counter=1; fi
@@ -46,9 +48,9 @@ testCount=$(cat $tests_to_skip_file | wc -l)
 itCount=$(cat $ITs_to_skip_file | wc -l)
 
 echo "TESTS"
-echo $(cat $tests_to_skip_file)
+cat $tests_to_skip_file
 echo "ITS"
-echo $(cat $tests_to_skip_file)
+cat $tests_to_skip_file
 echo "Agent [$agentNumber] is skipping [$testCount] tests and [$itCount] ITs"
 echo "##vso[task.setvariable variable=testExclusionFile]$tests_to_skip_file"
 echo "##vso[task.setvariable variable=itExclusionFile]$ITs_to_skip_file"
