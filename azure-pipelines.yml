@@ -16,7 +16,6 @@ pool:
 
 jobs:
   - job: Test
-    dependsOn: Build
     strategy:
       parallel: 3
     displayName: Run Tests
