@@ -25,7 +25,7 @@ ITs_to_skip_file=$AGENT_BUILDDIRECTORY/$ITs_to_skip_filename
 echo Absolute path of test exclusion is $tests_to_skip_file
 echo Absolute path of IT exclusion is $ITs_to_skip_file
 
-counter=0;
+counter=1;
 for i in $tests_to_skip; do
    if [[ $counter -ne $agentNumber ]]; then
       echo "$i" >> $tests_to_skip_file
@@ -34,7 +34,7 @@ for i in $tests_to_skip; do
    if [[ $counter -gt $totalAgents ]]; then counter=1; fi
 done
 
-counter=0;
+counter=1;
 for i in $its_to_skip; do
    if [[ $counter -ne $agentNumber ]]; then
       echo "$i" >> $ITs_to_skip_file
