@@ -67,11 +67,6 @@ jobs:
         inputs:
           targetType: 'inline'
           script: mkdir -p $(MAVEN_CACHE_FOLDER); pwd; ls -al $(MAVEN_CACHE_FOLDER); mkdir $(Build.ArtifactStagingDirectory)/jacoco-output; mkdir $(Build.ArtifactStagingDirectory)/test-output;
-#      - task: Bash@3
-#        displayName: Determine Target Modules
-#        inputs:
-#           targetType: 'filePath'
-#           filePath: 'slice_modules.sh'
       - task: Bash@3
         displayName: Generate Test Exclusions
         inputs:
@@ -83,7 +78,7 @@ jobs:
         inputs:
           goals: 'clean install'
           # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
-          options: "-P ALLMODULES,JACOCO,CI,ERRORPRONE -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -pl :$(slicedModules) -Dsurefire.excludesFile=$(testExclusionFile) -Dfailsafe.excludesFile=$(itExclusionFile)"
+          options: "-P ALLMODULES,JACOCO,CI,ERRORPRONE -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -Dsurefire.excludesFile=$(testExclusionFile) -Dfailsafe.excludesFile=$(itExclusionFile)"
           # These are JVM options (and don't show up in the build logs)
           mavenOptions: '-Xmx1024m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
           jdkVersionOption: 1.11
