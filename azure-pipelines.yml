@@ -72,6 +72,11 @@ jobs:
         inputs:
            targetType: 'filePath'
            filePath: 'slice_modules.sh'
+      - task: Bash@3
+        displayName: Generate Test Exclusions
+        inputs:
+           targetType: 'filePath'
+           filePath: 'generate_test_exclusions.sh
       - task: Maven@3
         env:
           JAVA_HOME_11_X64: /usr/java/openjdk-15
