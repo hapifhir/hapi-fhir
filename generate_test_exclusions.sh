@@ -48,7 +48,7 @@ itCount=$(cat $ITs_to_skip_file | wc -l)
 echo "TESTS"
 cat $tests_to_skip_file
 echo "ITS"
-cat $tests_to_skip_file
+cat $ITs_to_skip_file
 echo "Agent [$agentNumber] is skipping [$testCount] tests and [$itCount] ITs"
 echo "##vso[task.setvariable variable=testExclusionFile]$tests_to_skip_file"
 echo "##vso[task.setvariable variable=itExclusionFile]$ITs_to_skip_file"
