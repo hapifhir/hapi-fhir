@@ -25,7 +25,10 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
+import ca.uhn.fhir.jpa.bulk.api.GroupBulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.bulk.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
@@ -40,6 +43,8 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -60,8 +65,10 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -69,13 +76,14 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.UrlUtil.escapeUrlParam;
 import static ca.uhn.fhir.util.UrlUtil.escapeUrlParams;
+import static org.apache.commons.lang3.StringUtils.contains;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	private static final Long READ_CHUNK_SIZE = 10L;
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportSvcImpl.class);
-	private int myReuseBulkExportForMillis = (int) (60 * DateUtils.MILLIS_PER_MINUTE);
+	private final int myReuseBulkExportForMillis = (int) (60 * DateUtils.MILLIS_PER_MINUTE);
 
 	@Autowired
 	private IBulkExportJobDao myBulkExportJobDao;
@@ -100,7 +108,11 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	@Qualifier("bulkExportJob")
 	private org.springframework.batch.core.Job myBulkExportJob;
 
-	private int myRetentionPeriod = (int) (2 * DateUtils.MILLIS_PER_HOUR);
+	@Autowired
+	@Qualifier("groupBulkExportJob")
+	private org.springframework.batch.core.Job myGroupBulkExportJob;
+
+	private final int myRetentionPeriod = (int) (2 * DateUtils.MILLIS_PER_HOUR);
 
 	/**
 	 * This method is called by the scheduler to run a pass of the
@@ -123,10 +135,12 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			return;
 		}
 
-		String jobUuid = jobToProcessOpt.get().getJobId();
+		BulkExportJobEntity bulkExportJobEntity = jobToProcessOpt.get();
 
+		String jobUuid = bulkExportJobEntity.getJobId();
+		String theGroupId = getGroupIdIfPresent(bulkExportJobEntity.getRequest());
 		try {
-			processJob(jobUuid);
+				processJob(jobUuid, theGroupId);
 		} catch (Exception e) {
 			ourLog.error("Failure while preparing bulk export extract", e);
 			myTxTemplate.execute(t -> {
@@ -141,6 +155,16 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			});
 		}
 
+	}
+	private String getGroupIdIfPresent(String theRequestString) {
+		Map<String, String[]> stringMap = UrlUtil.parseQueryString(theRequestString);
+		if (stringMap != null) {
+			String[] strings = stringMap.get(JpaConstants.PARAM_EXPORT_GROUP_ID);
+			if (strings != null) {
+				return String.join(",", strings);
+			}
+		}
+		return null;
 	}
 
 
@@ -191,21 +215,24 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	}
 
-	private void processJob(String theJobUuid) {
-		JobParameters parameters = new JobParametersBuilder()
-			.addString("jobUUID", theJobUuid)
-			.addLong("readChunkSize", READ_CHUNK_SIZE)
-			.toJobParameters();
+	private void processJob(String theJobUuid, String theGroupId) {
+		JobParametersBuilder parameters = new JobParametersBuilder()
+			.addString(BulkExportJobConfig.JOB_UUID_PARAMETER, theJobUuid)
+			.addLong(BulkExportJobConfig.READ_CHUNK_PARAMETER, READ_CHUNK_SIZE);
 
 		ourLog.info("Submitting bulk export job {} to job scheduler", theJobUuid);
 
 		try {
-			myJobSubmitter.runJob(myBulkExportJob, parameters);
+			if (!StringUtils.isBlank(theGroupId)) {
+				parameters.addString(BulkExportJobConfig.GROUP_ID_PARAMETER, theGroupId);
+				myJobSubmitter.runJob(myGroupBulkExportJob, parameters.toJobParameters());
+			} else {
+				myJobSubmitter.runJob(myBulkExportJob, parameters.toJobParameters());
+			}
 		} catch (JobParametersInvalidException theE) {
 			ourLog.error("Unable to start job with UUID: {}, the parameters are invalid. {}", theJobUuid, theE.getMessage());
 		}
 	}
-
 
 	@SuppressWarnings("unchecked")
 	private IFhirResourceDao<IBaseBinary> getBinaryDao() {
@@ -229,28 +256,36 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	@Transactional
 	@Override
-	public JobInfo submitJob(String theOutputFormat, Set<String> theResourceTypes, Date theSince, Set<String> theFilters) {
+	public JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions) {
 		String outputFormat = Constants.CT_FHIR_NDJSON;
-		if (isNotBlank(theOutputFormat)) {
-			outputFormat = theOutputFormat;
+		if (isNotBlank(theBulkDataExportOptions.getOutputFormat())) {
+			outputFormat = theBulkDataExportOptions.getOutputFormat();
 		}
 		if (!Constants.CTS_NDJSON.contains(outputFormat)) {
-			throw new InvalidRequestException("Invalid output format: " + theOutputFormat);
+			throw new InvalidRequestException("Invalid output format: " + theBulkDataExportOptions.getOutputFormat());
 		}
 
+		// TODO GGG KS can we encode BulkDataExportOptions as a JSON string as opposed to this request string.  Feels like it would be a more extensible encoding...
+		//Probably yes, but this will all need to be rebuilt when we remove this bridge entity
 		StringBuilder requestBuilder = new StringBuilder();
 		requestBuilder.append("/").append(JpaConstants.OPERATION_EXPORT);
 		requestBuilder.append("?").append(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT).append("=").append(escapeUrlParam(outputFormat));
-		Set<String> resourceTypes = theResourceTypes;
+		Set<String> resourceTypes = theBulkDataExportOptions.getResourceTypes();
 		if (resourceTypes != null) {
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE).append("=").append(String.join(",", escapeUrlParams(resourceTypes)));
 		}
-		Date since = theSince;
+		Date since = theBulkDataExportOptions.getSince();
 		if (since != null) {
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_SINCE).append("=").append(new InstantType(since).setTimeZoneZulu(true).getValueAsString());
 		}
-		if (theFilters != null && theFilters.size() > 0) {
-			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE_FILTER).append("=").append(String.join(",", escapeUrlParams(theFilters)));
+		if (theBulkDataExportOptions.getFilters() != null && theBulkDataExportOptions.getFilters().size() > 0) {
+			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE_FILTER).append("=").append(String.join(",", escapeUrlParams(theBulkDataExportOptions.getFilters())));
+		}
+		if (theBulkDataExportOptions instanceof GroupBulkDataExportOptions) {
+			GroupBulkDataExportOptions groupOptions = (GroupBulkDataExportOptions) theBulkDataExportOptions;
+			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_GROUP_ID).append("=").append(groupOptions.getGroupId().getValue());
+			//TODO GGG eventually we will support this
+//			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_MDM).append("=").append(groupOptions.isMdm());
 		}
 		String request = requestBuilder.toString();
 
@@ -291,7 +326,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 		// Validate types
 		validateTypes(resourceTypes);
-		validateTypeFilters(theFilters, resourceTypes);
+		validateTypeFilters(theBulkDataExportOptions.getFilters(), resourceTypes);
 
 		updateExpiry(job);
 		myBulkExportJobDao.save(job);

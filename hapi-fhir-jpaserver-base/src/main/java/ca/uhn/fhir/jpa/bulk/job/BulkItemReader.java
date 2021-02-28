@@ -54,8 +54,15 @@ import java.util.Optional;
 public class BulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	Iterator<ResourcePersistentId> myPidIterator;
-	@Value("#{jobParameters['readChunkSize']}")
-	private Long READ_CHUNK_SIZE;
+
+
+	@Value("#{jobParameters['" + BulkExportJobConfig.READ_CHUNK_PARAMETER + "']}")
+	private Long myReadChunkSize;
+	@Value("#{jobExecutionContext['"+ BulkExportJobConfig.JOB_UUID_PARAMETER+"']}")
+	private String myJobUUID;
+	@Value("#{stepExecutionContext['resourceType']}")
+	private String myResourceType;
+
 	@Autowired
 	private IBulkExportJobDao myBulkExportJobDao;
 	@Autowired
@@ -64,10 +71,7 @@ public class BulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 	private FhirContext myContext;
 	@Autowired
 	private SearchBuilderFactory mySearchBuilderFactory;
-	@Value("#{jobExecutionContext['jobUUID']}")
-	private String myJobUUID;
-	@Value("#{stepExecutionContext['resourceType']}")
-	private String myResourceType;
+
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 
@@ -124,7 +128,7 @@ public class BulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 		}
 		int count = 0;
 		List<ResourcePersistentId> outgoing = new ArrayList<>();
-		while (myPidIterator.hasNext() && count < READ_CHUNK_SIZE) {
+		while (myPidIterator.hasNext() && count < myReadChunkSize) {
 			outgoing.add(myPidIterator.next());
 			count += 1;
 		}

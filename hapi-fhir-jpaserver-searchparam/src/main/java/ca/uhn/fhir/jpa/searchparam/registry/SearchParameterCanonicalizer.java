@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -431,7 +430,7 @@ public class SearchParameterCanonicalizer {
 				String nextUrl = next.getUrl();
 				if (isNotBlank(nextUrl)) {
 					theRuntimeSearchParam.addExtension(nextUrl, next);
-					if (JpaConstants.EXT_SEARCHPARAM_PHONETIC_ENCODER.equals(nextUrl)) {
+					if (HapiExtensions.EXT_SEARCHPARAM_PHONETIC_ENCODER.equals(nextUrl)) {
 						setEncoder(theRuntimeSearchParam, next.getValue());
 					}
 				}

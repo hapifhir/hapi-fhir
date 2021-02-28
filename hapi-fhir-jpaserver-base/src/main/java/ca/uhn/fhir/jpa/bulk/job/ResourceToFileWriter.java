@@ -64,7 +64,7 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 	private Long myBulkExportCollectionEntityId;
 
 	@Value("#{stepExecutionContext['resourceType']}")
-	private String myReosurceType;
+	private String myResourceType;
 
 	private IFhirResourceDao<IBaseBinary> myBinaryDao;
 
@@ -100,7 +100,6 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 		IBaseBinary binary = BinaryUtil.newBinary(myFhirContext);
 		binary.setContentType(Constants.CT_FHIR_NDJSON);
 		binary.setContent(myOutputStream.toByteArray());
-
 		DaoMethodOutcome outcome = myBinaryDao.create(binary);
 		return outcome.getResource().getIdElement();
 	}
@@ -124,7 +123,7 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 
 		Optional<IIdType> createdId = flushToFiles();
 		if (createdId.isPresent()) {
-			ourLog.info("Created {} resources for bulk export file containing {} resources of type {} ", count, createdId.get().toUnqualifiedVersionless().getValue(), myReosurceType);
+			ourLog.info("Created {} resources for bulk export file containing {} resources of type {} ", count, createdId.get().toUnqualifiedVersionless().getValue(), myResourceType);
 		}
 	}
 }
