@@ -59,6 +59,12 @@ public class Constants {
 	 */
 	public static final String CT_FHIR_JSON_NEW = "application/fhir+json";
 	public static final String CT_FHIR_XML = "application/xml+fhir";
+
+	/**
+	 * Special Conformance Formats that don't follow normal mediatype rules
+	 */
+	public static final String CT_JSON_RAW = "json";
+	public static final String CT_XML_RAW = "xml";
 	/**
 	 * The FHIR MimeType for XML encoding in FHIR DSTU3+
 	 */

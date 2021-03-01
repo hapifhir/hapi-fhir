@@ -184,6 +184,8 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
 		retVal.getSoftware().setVersion(configuration.getServerVersion());
 		retVal.addFormat(Constants.CT_FHIR_XML_NEW);
 		retVal.addFormat(Constants.CT_FHIR_JSON_NEW);
+		retVal.addFormat(Constants.CT_JSON_RAW);
+		retVal.addFormat(Constants.CT_XML_RAW);
 		retVal.setStatus(PublicationStatus.ACTIVE);
 
 		CapabilityStatementRestComponent rest = retVal.addRest();
