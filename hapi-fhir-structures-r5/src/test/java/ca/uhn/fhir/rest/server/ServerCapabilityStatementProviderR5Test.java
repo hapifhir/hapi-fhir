@@ -6,6 +6,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -42,17 +43,20 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
@@ -196,6 +200,26 @@ public class ServerCapabilityStatementProviderR5Test {
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
 		assertThat(conf, containsString("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYINSTANCE.toCode() + "\"/></interaction>"));
 	}
+
+	@Test
+	public void testFormatIncludesSpecialNonMediaTypeFormats() throws ServletException {
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new SearchProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+		CapabilityStatement serverConformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+
+		List<String> formatCodes = serverConformance.getFormat().stream().map(c -> c.getCode()).collect(Collectors.toList());;
+
+		assertThat(formatCodes, hasItem(Constants.FORMAT_XML));
+		assertThat(formatCodes, hasItem(Constants.FORMAT_JSON));
+		assertThat(formatCodes, hasItem(Constants.CT_FHIR_JSON_NEW));
+		assertThat(formatCodes, hasItem(Constants.CT_FHIR_XML_NEW));
+	}
+
 
 	@Test
 	public void testMultiOptionalDocumentation() throws Exception {

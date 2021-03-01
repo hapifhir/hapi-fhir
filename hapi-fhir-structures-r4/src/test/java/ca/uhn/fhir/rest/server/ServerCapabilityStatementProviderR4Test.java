@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.annotation.Validate;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -40,6 +41,7 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.collect.Lists;
+import org.eclipse.jetty.server.Server;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.rest.server.ServerCapabilityStatementProvider;
 import org.hl7.fhir.r4.model.Bundle;
@@ -67,6 +69,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -79,6 +82,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
@@ -523,6 +527,26 @@ public class ServerCapabilityStatementProviderR4Test {
 		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
 		assertThat(conf, containsString("<type value=\"token\"/>"));
 
+	}
+
+
+	@Test
+	public void testFormatIncludesSpecialNonMediaTypeFormats() throws ServletException {
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new SearchProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+		CapabilityStatement serverConformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+
+		List<String> formatCodes = serverConformance.getFormat().stream().map(c -> c.getCode()).collect(Collectors.toList());
+
+		assertThat(formatCodes, hasItem(Constants.FORMAT_XML));
+		assertThat(formatCodes, hasItem(Constants.FORMAT_JSON));
+		assertThat(formatCodes, hasItem(Constants.CT_FHIR_JSON_NEW));
+		assertThat(formatCodes, hasItem(Constants.CT_FHIR_XML_NEW));
 	}
 
 	/**
