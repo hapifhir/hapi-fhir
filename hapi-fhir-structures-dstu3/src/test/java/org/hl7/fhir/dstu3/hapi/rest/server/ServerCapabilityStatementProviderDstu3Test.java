@@ -189,9 +189,9 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		List<String> formatCodes = serverConformance.getFormat().stream().map(c -> c.asStringValue()).collect(Collectors.toList());;
 
-		assertThat(formatCodes, hasItem(ca.uhn.fhir.rest.api.Constants.CT_JSON_RAW));
-		assertThat(formatCodes, hasItem(ca.uhn.fhir.rest.api.Constants.CT_XML_RAW));
-		assertThat(formatCodes, hasItem(ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW));
+		assertThat(formatCodes, hasItem(Constants.FORMAT_XML));
+		assertThat(formatCodes, hasItem(Constants.FORMAT_JSON));
+		assertThat(formatCodes, hasItem(Constants.CT_FHIR_JSON_NEW));
 		assertThat(formatCodes, hasItem(Constants.CT_FHIR_XML_NEW));
 	}
 
