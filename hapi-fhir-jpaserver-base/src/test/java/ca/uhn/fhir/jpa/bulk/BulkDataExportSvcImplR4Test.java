@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.GroupBulkDataExportOptions;
@@ -12,10 +13,15 @@ import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
+import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
+import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
+import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.UrlUtil;
@@ -601,7 +607,48 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		} catch (JobParametersInvalidException e) {
 			// good
 		}
+	}
 
+	@Test
+	public void testMdmExpansionWorksForGroupExportOnMatchedPatients() throws JobParametersInvalidException {
+		createResources();
+
+		// Create a bulk job
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new GroupBulkDataExportOptions(null, Sets.newHashSet("Immunization"), null, null, myPatientGroupId, true));
+
+		GroupBulkExportJobParametersBuilder paramBuilder = new GroupBulkExportJobParametersBuilder();
+		paramBuilder.setGroupId(myPatientGroupId.getIdPart());
+		paramBuilder.setMdm(true);
+		paramBuilder.setJobUUID(jobDetails.getJobId());
+		paramBuilder.setReadChunkSize(10L);
+
+		JobExecution jobExecution = myBatchJobSubmitter.runJob(myGroupBulkJob, paramBuilder.toJobParameters());
+
+		awaitJobCompletion(jobExecution);
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+
+		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getFiles().size(), equalTo(1));
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
+
+		// Iterate over the files
+		Binary nextBinary = myBinaryDao.read(jobInfo.getFiles().get(0).getResourceId());
+		assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
+		String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
+		ourLog.info("Next contents for type {}:\n{}", nextBinary.getResourceType(), nextContents);
+
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
+		assertThat(nextContents, is(containsString("IMM0")));
+		assertThat(nextContents, is(containsString("IMM2")));
+		assertThat(nextContents, is(containsString("IMM4")));
+		assertThat(nextContents, is(containsString("IMM6")));
+		assertThat(nextContents, is(containsString("IMM8")));
+		assertThat(nextContents, is(containsString("IMM1")));
+		assertThat(nextContents, is(containsString("IMM3")));
+		assertThat(nextContents, is(containsString("IMM5")));
+		assertThat(nextContents, is(containsString("IMM7")));
+		assertThat(nextContents, is(containsString("IMM9")));
+		assertThat(nextContents, is(containsString("IMM999")));
 	}
 
 	private void awaitJobCompletion(JobExecution theJobExecution) {
@@ -615,46 +662,95 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	private void createResources() {
 		Group group = new Group();
 		group.setId("G0");
+
+		//Manually create a golden record
+		Patient goldenPatient = new Patient();
+		goldenPatient.setId("PAT999");
+		DaoMethodOutcome g1Outcome = myPatientDao.update(goldenPatient);
+		Long goldenPid = myIdHelperService.getPidOrNull(g1Outcome.getResource());
+
+		//Create our golden records' data.
+		createObservationWithIndex(999, g1Outcome.getId());
+		createImmunizationWithIndex(999, g1Outcome.getId());
+		createCareTeamWithIndex(999, g1Outcome.getId());
+
+		//Lets create an observation and an immunization for our golden patient.
+
 		for (int i = 0; i < 10; i++) {
-			Patient patient = new Patient();
-			patient.setId("PAT" + i);
-			patient.setGender(i % 2 == 0 ? Enumerations.AdministrativeGender.MALE : Enumerations.AdministrativeGender.FEMALE);
-			patient.addName().setFamily("FAM" + i);
-			patient.addIdentifier().setSystem("http://mrns").setValue("PAT" + i);
-			IIdType patId = myPatientDao.update(patient).getId().toUnqualifiedVersionless();
+			DaoMethodOutcome patientOutcome = createPatientWithIndex(i);
+			IIdType patId = patientOutcome.getId().toUnqualifiedVersionless();
+			Long sourcePid = myIdHelperService.getPidOrNull(patientOutcome.getResource());
+
+			//Link the patient to the golden resource
+			linkToGoldenResource(goldenPid, sourcePid);
+			
 			//Only add half the patients to the group.
 			if (i % 2 == 0 ) {
 				group.addMember().setEntity(new Reference(patId));
 			}
 
-			Observation obs = new Observation();
-			obs.setId("OBS" + i);
-			obs.addIdentifier().setSystem("SYS").setValue("VAL" + i);
-			obs.setStatus(Observation.ObservationStatus.FINAL);
-			obs.getSubject().setReference(patId.getValue());
-			myObservationDao.update(obs);
-
-			Immunization immunization = new Immunization();
-			immunization.setId("IMM" + i);
-			immunization.setPatient(new Reference(patId));
-			if (i % 2 == 0) {
-				CodeableConcept cc = new CodeableConcept();
-				cc.addCoding().setSystem("vaccines").setCode("Flu");
-				immunization.setVaccineCode(cc);
-			} else {
-				CodeableConcept cc = new CodeableConcept();
-				cc.addCoding().setSystem("vaccines").setCode("COVID-19");
-				immunization.setVaccineCode(cc);
-			}
-			myImmunizationDao.update(immunization);
-
-			CareTeam careTeam = new CareTeam();
-			careTeam.setId("CT" + i);
-			careTeam.setSubject(new Reference(patId)); // This maps to the "patient" search parameter on CareTeam
-			myCareTeamDao.update(careTeam);
+			//Create data
+			createObservationWithIndex(i, patId);
+			createImmunizationWithIndex(i, patId);
+			createCareTeamWithIndex(i, patId);
 		}
 		myPatientGroupId =  myGroupDao.update(group).getId();
+	}
 
+	private DaoMethodOutcome createPatientWithIndex(int i) {
+		Patient patient = new Patient();
+		patient.setId("PAT" + i);
+		patient.setGender(i % 2 == 0 ? Enumerations.AdministrativeGender.MALE : Enumerations.AdministrativeGender.FEMALE);
+		patient.addName().setFamily("FAM" + i);
+		patient.addIdentifier().setSystem("http://mrns").setValue("PAT" + i);
+		DaoMethodOutcome patientOutcome = myPatientDao.update(patient);
+		return patientOutcome;
+	}
 
+	private void createCareTeamWithIndex(int i, IIdType patId) {
+		CareTeam careTeam = new CareTeam();
+		careTeam.setId("CT" + i);
+		careTeam.setSubject(new Reference(patId)); // This maps to the "patient" search parameter on CareTeam
+		myCareTeamDao.update(careTeam);
+	}
+
+	private void createImmunizationWithIndex(int i, IIdType patId) {
+		Immunization immunization = new Immunization();
+		immunization.setId("IMM" + i);
+		immunization.setPatient(new Reference(patId));
+		if (i % 2 == 0) {
+			CodeableConcept cc = new CodeableConcept();
+			cc.addCoding().setSystem("vaccines").setCode("Flu");
+			immunization.setVaccineCode(cc);
+		} else {
+			CodeableConcept cc = new CodeableConcept();
+			cc.addCoding().setSystem("vaccines").setCode("COVID-19");
+			immunization.setVaccineCode(cc);
+		}
+		myImmunizationDao.update(immunization);
+	}
+
+	private void createObservationWithIndex(int i, IIdType patId) {
+		Observation obs = new Observation();
+		obs.setId("OBS" + i);
+		obs.addIdentifier().setSystem("SYS").setValue("VAL" + i);
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		obs.getSubject().setReference(patId.getValue());
+		myObservationDao.update(obs);
+	}
+
+	public void linkToGoldenResource(Long theGoldenPid, Long theSourcePid) {
+		MdmLink mdmLink = new MdmLink();
+		mdmLink.setCreated(new Date());
+		mdmLink.setMdmSourceType("Patient");
+		mdmLink.setGoldenResourcePid(theGoldenPid);
+		mdmLink.setSourcePid(theSourcePid);
+		mdmLink.setMatchResult(MdmMatchResultEnum.MATCH);
+		mdmLink.setHadToCreateNewGoldenResource(false);
+		mdmLink.setEidMatch(false);
+		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
+		mdmLink.setUpdated(new Date());
+		mdmLink.setVersion("1");
+		myMdmLinkDao.save(mdmLink);
 	}
 }
