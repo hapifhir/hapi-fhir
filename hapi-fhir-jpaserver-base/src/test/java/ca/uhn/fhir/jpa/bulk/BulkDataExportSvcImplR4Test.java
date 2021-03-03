@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.bulk;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.GroupBulkDataExportOptions;
@@ -89,11 +90,11 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	private JobExplorer myJobExplorer;
 
 	@Autowired
-	@Qualifier("bulkExportJob")
+	@Qualifier(BatchJobsConfig.BULK_EXPORT_JOB_NAME)
 	private Job myBulkJob;
 
 	@Autowired
-	@Qualifier("groupBulkExportJob")
+	@Qualifier(BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME)
 	private Job myGroupBulkJob;
 
 	private IIdType myPatientGroupId;
@@ -490,7 +491,8 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	public void awaitAllBulkJobCompletions() {
-		List<JobInstance> bulkExport = myJobExplorer.findJobInstancesByJobName("bulkExportJob", 0, 100);
+		List<JobInstance> bulkExport = myJobExplorer.findJobInstancesByJobName(BatchJobsConfig.BULK_EXPORT_JOB_NAME, 0, 100);
+		bulkExport.addAll(myJobExplorer.findJobInstancesByJobName(BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME, 0, 100));
 		if (bulkExport.isEmpty()) {
 			fail("There are no bulk export jobs running!");
 		}
@@ -615,16 +617,11 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		// Create a bulk job
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new GroupBulkDataExportOptions(null, Sets.newHashSet("Immunization", "Observation"), null, null, myPatientGroupId, true));
 
-		GroupBulkExportJobParametersBuilder paramBuilder = new GroupBulkExportJobParametersBuilder();
-		paramBuilder.setGroupId(myPatientGroupId.getIdPart());
-		paramBuilder.setMdm(true);
-		paramBuilder.setJobUUID(jobDetails.getJobId());
-		paramBuilder.setReadChunkSize(10L);
+		myBulkDataExportSvc.buildExportFiles();
+		awaitAllBulkJobCompletions();
 
-		JobExecution jobExecution = myBatchJobSubmitter.runJob(myGroupBulkJob, paramBuilder.toJobParameters());
-
-		awaitJobCompletion(jobExecution);
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Observation,Immunization&_groupId=" + myPatientGroupId +"&_mdm=true", jobInfo.getRequest());
 
 		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
 		assertThat(jobInfo.getFiles().size(), equalTo(2));

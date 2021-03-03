@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.bulk.job;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.processors.PidToIBaseResourceProcessor;
 import ca.uhn.fhir.jpa.bulk.svc.BulkExportDaoSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -46,6 +47,7 @@ import java.util.List;
  */
 @Configuration
 public class BulkExportJobConfig {
+
 	public static final String JOB_UUID_PARAMETER = "jobUUID";
 	public static final String READ_CHUNK_PARAMETER = "readChunkSize";
 	public static final String EXPAND_MDM_PARAMETER = "expandMdm";
@@ -70,7 +72,7 @@ public class BulkExportJobConfig {
 	@Bean
 	@Lazy
 	public Job bulkExportJob() {
-		return myJobBuilderFactory.get("bulkExportJob")
+		return myJobBuilderFactory.get(BatchJobsConfig.BULK_EXPORT_JOB_NAME)
 			.validator(bulkJobParameterValidator())
 			.start(createBulkExportEntityStep())
 			.next(partitionStep())
@@ -81,7 +83,7 @@ public class BulkExportJobConfig {
 	@Bean
 	@Lazy
 	public Job groupBulkExportJob() {
-		return myJobBuilderFactory.get("groupBulkExportJob")
+		return myJobBuilderFactory.get(BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME)
 			.validator(groupBulkJobParameterValidator())
 			.validator(bulkJobParameterValidator())
 			.start(createBulkExportEntityStep())
