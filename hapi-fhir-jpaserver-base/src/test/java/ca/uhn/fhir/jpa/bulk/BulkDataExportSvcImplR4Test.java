@@ -68,6 +68,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -614,7 +615,74 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		createResources();
 
 		// Create a bulk job
-		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new GroupBulkDataExportOptions(null, Sets.newHashSet("Immunization"), null, null, myPatientGroupId, true));
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new GroupBulkDataExportOptions(null, Sets.newHashSet("Immunization", "Observation"), null, null, myPatientGroupId, true));
+
+		GroupBulkExportJobParametersBuilder paramBuilder = new GroupBulkExportJobParametersBuilder();
+		paramBuilder.setGroupId(myPatientGroupId.getIdPart());
+		paramBuilder.setMdm(true);
+		paramBuilder.setJobUUID(jobDetails.getJobId());
+		paramBuilder.setReadChunkSize(10L);
+
+		JobExecution jobExecution = myBatchJobSubmitter.runJob(myGroupBulkJob, paramBuilder.toJobParameters());
+
+		awaitJobCompletion(jobExecution);
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+
+		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getFiles().size(), equalTo(2));
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
+
+		// Check immunization Content
+		Binary immunizationExportContent = myBinaryDao.read(jobInfo.getFiles().get(0).getResourceId());
+		assertEquals(Constants.CT_FHIR_NDJSON, immunizationExportContent.getContentType());
+		String nextContents = new String(immunizationExportContent.getContent(), Constants.CHARSET_UTF8);
+		ourLog.info("Next contents for type {}:\n{}", immunizationExportContent.getResourceType(), nextContents);
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
+		assertThat(nextContents, is(containsString("IMM0")));
+		assertThat(nextContents, is(containsString("IMM2")));
+		assertThat(nextContents, is(containsString("IMM4")));
+		assertThat(nextContents, is(containsString("IMM6")));
+		assertThat(nextContents, is(containsString("IMM8")));
+		assertThat(nextContents, is(containsString("IMM1")));
+		assertThat(nextContents, is(containsString("IMM3")));
+		assertThat(nextContents, is(containsString("IMM5")));
+		assertThat(nextContents, is(containsString("IMM7")));
+		assertThat(nextContents, is(containsString("IMM9")));
+		assertThat(nextContents, is(containsString("IMM999")));
+
+
+		//Check Observation Content
+		Binary observationExportContent = myBinaryDao.read(jobInfo.getFiles().get(1).getResourceId());
+		assertEquals(Constants.CT_FHIR_NDJSON, observationExportContent.getContentType());
+		nextContents = new String(observationExportContent.getContent(), Constants.CHARSET_UTF8);
+		ourLog.info("Next contents for type {}:\n{}", observationExportContent.getResourceType(), nextContents);
+		assertThat(jobInfo.getFiles().get(1).getResourceType(), is(equalTo("Observation")));
+		assertThat(nextContents, is(containsString("OBS0")));
+		assertThat(nextContents, is(containsString("OBS2")));
+		assertThat(nextContents, is(containsString("OBS4")));
+		assertThat(nextContents, is(containsString("OBS6")));
+		assertThat(nextContents, is(containsString("OBS8")));
+		assertThat(nextContents, is(containsString("OBS1")));
+		assertThat(nextContents, is(containsString("OBS3")));
+		assertThat(nextContents, is(containsString("OBS5")));
+		assertThat(nextContents, is(containsString("OBS7")));
+		assertThat(nextContents, is(containsString("OBS9")));
+		assertThat(nextContents, is(containsString("OBS999")));
+
+		//Ensure that we didn't over-include into non-group-members data.
+		assertThat(nextContents, is(not(containsString("OBS1000"))));
+	}
+
+	@Test
+	public void testGroupBulkExportSupportsTypeFilters() throws JobParametersInvalidException {
+		createResources();
+		Set<String> filters = new HashSet<>();
+
+		//Only get COVID-19 vaccinations
+		filters.add("Immunization?vaccine-code=vaccines|COVID-19");
+
+		GroupBulkDataExportOptions groupBulkDataExportOptions = new GroupBulkDataExportOptions(null, Sets.newHashSet("Immunization"), null, filters, myPatientGroupId, true );
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(groupBulkDataExportOptions);
 
 		GroupBulkExportJobParametersBuilder paramBuilder = new GroupBulkExportJobParametersBuilder();
 		paramBuilder.setGroupId(myPatientGroupId.getIdPart());
@@ -631,24 +699,21 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(jobInfo.getFiles().size(), equalTo(1));
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
 
-		// Iterate over the files
-		Binary nextBinary = myBinaryDao.read(jobInfo.getFiles().get(0).getResourceId());
-		assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
-		String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
-		ourLog.info("Next contents for type {}:\n{}", nextBinary.getResourceType(), nextContents);
+		// Check immunization Content
+		Binary immunizationExportContent = myBinaryDao.read(jobInfo.getFiles().get(0).getResourceId());
+		assertEquals(Constants.CT_FHIR_NDJSON, immunizationExportContent.getContentType());
+		String nextContents = new String(immunizationExportContent.getContent(), Constants.CHARSET_UTF8);
+		ourLog.info("Next contents for type {}:\n{}", immunizationExportContent.getResourceType(), nextContents);
 
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
-		assertThat(nextContents, is(containsString("IMM0")));
-		assertThat(nextContents, is(containsString("IMM2")));
-		assertThat(nextContents, is(containsString("IMM4")));
-		assertThat(nextContents, is(containsString("IMM6")));
-		assertThat(nextContents, is(containsString("IMM8")));
 		assertThat(nextContents, is(containsString("IMM1")));
 		assertThat(nextContents, is(containsString("IMM3")));
 		assertThat(nextContents, is(containsString("IMM5")));
 		assertThat(nextContents, is(containsString("IMM7")));
 		assertThat(nextContents, is(containsString("IMM9")));
 		assertThat(nextContents, is(containsString("IMM999")));
+
+		assertThat(nextContents, is(not(containsString("Flu"))));
 	}
 
 	private void awaitJobCompletion(JobExecution theJobExecution) {
@@ -683,7 +748,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 			//Link the patient to the golden resource
 			linkToGoldenResource(goldenPid, sourcePid);
-			
+
 			//Only add half the patients to the group.
 			if (i % 2 == 0 ) {
 				group.addMember().setEntity(new Reference(patId));
@@ -695,6 +760,24 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			createCareTeamWithIndex(i, patId);
 		}
 		myPatientGroupId =  myGroupDao.update(group).getId();
+
+		//Manually create a golden record
+		Patient goldenPatient2 = new Patient();
+		goldenPatient2.setId("PAT888");
+		DaoMethodOutcome g2Outcome = myPatientDao.update(goldenPatient2);
+		Long goldenPid2 = myIdHelperService.getPidOrNull(g2Outcome.getResource());
+
+		//Create some nongroup patients MDM linked to a different golden resource. They shouldnt be included in the query.
+		for (int i = 1000; i < 1005; i++) {
+			DaoMethodOutcome patientOutcome = createPatientWithIndex(i);
+			IIdType patId = patientOutcome.getId().toUnqualifiedVersionless();
+			Long sourcePid = myIdHelperService.getPidOrNull(patientOutcome.getResource());
+			linkToGoldenResource(goldenPid2, sourcePid);
+			createObservationWithIndex(i, patId);
+			createImmunizationWithIndex(i, patId);
+			createCareTeamWithIndex(i, patId);
+		}
+
 	}
 
 	private DaoMethodOutcome createPatientWithIndex(int i) {
