@@ -929,6 +929,51 @@ public class JsonParserR4Test extends BaseTest {
 	}
 
 
+
+	/**
+	 * Ensure that a contained bundle doesn't cause a crash
+	 */
+	@Test
+	public void testParseAndEncodePreservesContainedResourceOrder() {
+		String auditEvent = "{\n" +
+			"  \"resourceType\": \"AuditEvent\",\n" +
+			"  \"contained\": [ {\n" +
+			"    \"resourceType\": \"Observation\",\n" +
+			"    \"id\": \"A\",\n" +
+			"    \"identifier\": [ {\n" +
+			"      \"value\": \"A\"\n" +
+			"    } ]\n" +
+			"  }, {\n" +
+			"    \"resourceType\": \"Observation\",\n" +
+			"    \"id\": \"B\",\n" +
+			"    \"identifier\": [ {\n" +
+			"      \"value\": \"B\"\n" +
+			"    } ]\n" +
+			"  } ],\n" +
+			"  \"entity\": [ {\n" +
+			"    \"what\": {\n" +
+			"      \"reference\": \"#B\"\n" +
+			"    }\n" +
+			"  }, {\n" +
+			"    \"what\": {\n" +
+			"      \"reference\": \"#A\"\n" +
+			"    }\n" +
+			"  } ]\n" +
+			"}";
+
+		ourLog.info("Input: {}", auditEvent);
+		AuditEvent ae = ourCtx.newJsonParser().parseResource(AuditEvent.class, auditEvent);
+		assertEquals("#A", ae.getContained().get(0).getId());
+		assertEquals("#B", ae.getContained().get(1).getId());
+		assertEquals("#B", ae.getEntity().get(0).getWhat().getReference());
+		assertEquals("#A", ae.getEntity().get(1).getWhat().getReference());
+
+		String serialized = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(ae);
+		assertEquals(auditEvent, serialized);
+
+	}
+
+
 	@DatatypeDef(
 		name = "UnknownPrimitiveType"
 	)

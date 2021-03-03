@@ -888,7 +888,6 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	}
 
 	private boolean isEncodeExtension(CompositeChildElement theParent, EncodeContext theEncodeContext, boolean theContainedResource, IBase theElement) {
-//		theEncodeContext.pushPath("extension", false);
 		BaseRuntimeElementDefinition<?> runtimeElementDefinition = myContext.getElementDefinition(theElement.getClass());
 		boolean retVal = true;
 		if (runtimeElementDefinition instanceof BaseRuntimeElementCompositeDefinition) {
@@ -897,7 +896,6 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			CompositeChildElement c = new CompositeChildElement(theParent, childDef, theEncodeContext);
 			retVal = c.shouldBeEncoded(theContainedResource);
 		}
-//		theEncodeContext.popPath();
 		return retVal;
 	}
 
@@ -916,37 +914,6 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 		return object.getAsArray();
 	}
-
-	// private JsonObject parse(Reader theReader) {
-	//
-	// PushbackReader pbr = new PushbackReader(theReader);
-	// JsonObject object;
-	// try {
-	// while(true) {
-	// int nextInt;
-	// nextInt = pbr.read();
-	// if (nextInt == -1) {
-	// throw new DataFormatException("Did not find any content to parse");
-	// }
-	// if (nextInt == '{') {
-	// pbr.unread('{');
-	// break;
-	// }
-	// if (Character.isWhitespace(nextInt)) {
-	// continue;
-	// }
-	// throw new DataFormatException("Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char)nextInt + "' (must be '{')");
-	// }
-	//
-	// Gson gson = newGson();
-	//
-	// object = gson.fromJson(pbr, JsonObject.class);
-	// } catch (Exception e) {
-	// throw new DataFormatException("Failed to parse JSON content, error was: " + e.getMessage(), e);
-	// }
-	//
-	// return object;
-	// }
 
 	private void parseAlternates(JsonLikeValue theAlternateVal, ParserState<?> theState, String theElementName, String theAlternateName) {
 		if (theAlternateVal == null || theAlternateVal.isNull()) {

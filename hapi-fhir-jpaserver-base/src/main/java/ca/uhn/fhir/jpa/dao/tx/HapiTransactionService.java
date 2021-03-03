@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,16 @@ public class HapiTransactionService {
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
 	private TransactionTemplate myTxTemplate;
+
+	@VisibleForTesting
+	public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBroadcaster) {
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
+
+	@VisibleForTesting
+	public void setTransactionManager(PlatformTransactionManager theTransactionManager) {
+		myTransactionManager = theTransactionManager;
+	}
 
 	@PostConstruct
 	public void start() {

@@ -71,6 +71,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Modifier;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -262,8 +263,9 @@ public abstract class BaseParser implements IParser {
 					if (!nextId.startsWith("#")) {
 						nextId = '#' + nextId;
 					}
-					contained.getExistingIdToContainedResource().put(nextId, next);
+					next.getId().setValue(nextId);
 				}
+				contained.addContained(next);
 			}
 		} else if (theResource instanceof IDomainResource) {
 			List<? extends IAnyResource> containedResources = ((IDomainResource) theResource).getContained();
@@ -273,13 +275,15 @@ public abstract class BaseParser implements IParser {
 					if (!nextId.startsWith("#")) {
 						nextId = '#' + nextId;
 					}
-					contained.getExistingIdToContainedResource().put(nextId, next);
+					next.getIdElement().setValue(nextId);
 				}
+				contained.addContained(next);
 			}
 		}
 
+		// FIXME: make configurable
 		containResourcesForEncoding(contained, theResource, theResource);
-		contained.assignIdsToContainedResources();
+//		contained.assignIdsToContainedResources();
 		myContainedResources = contained;
 
 	}
@@ -1378,21 +1382,19 @@ public abstract class BaseParser implements IParser {
 				return;
 			}
 
-			IIdType newId;
-			if (theResource.getIdElement().isLocal()) {
-				newId = theResource.getIdElement();
-			} else {
-				newId = null;
+			IIdType newId = theResource.getIdElement();
+			if (isBlank(newId.getValue())) {
+				newId.setValue("#" + myNextContainedId++);
 			}
 
 			getResourceToIdMap().put(theResource, newId);
-			getResourceList().add(theResource);
+			getOrCreateResourceList().add(theResource);
 		}
 
 		public void addContained(IIdType theId, IBaseResource theResource) {
 			if (!getResourceToIdMap().containsKey(theResource)) {
 				getResourceToIdMap().put(theResource, theId);
-				getResourceList().add(theResource);
+				getOrCreateResourceList().add(theResource);
 			}
 		}
 
@@ -1400,7 +1402,7 @@ public abstract class BaseParser implements IParser {
 			if (getResourceToIdMap() == null) {
 				return Collections.emptyList();
 			}
-			return getResourceList();
+			return getOrCreateResourceList();
 		}
 
 		public IIdType getResourceId(IBaseResource theNext) {
@@ -1410,7 +1412,7 @@ public abstract class BaseParser implements IParser {
 			return getResourceToIdMap().get(theNext);
 		}
 
-		private List<IBaseResource> getResourceList() {
+		private List<IBaseResource> getOrCreateResourceList() {
 			if (myResourceList == null) {
 				myResourceList = new ArrayList<>();
 			}
@@ -1437,7 +1439,7 @@ public abstract class BaseParser implements IParser {
 
 		public void assignIdsToContainedResources() {
 
-			if (getResourceList() != null) {
+			if (!getContainedResources().isEmpty()) {
 
 				/*
 				 * The idea with the code block below:
@@ -1453,14 +1455,14 @@ public abstract class BaseParser implements IParser {
 				Set<String> ids = new HashSet<>();
 
 				// Gather any user assigned IDs
-				for (IBaseResource nextResource : getResourceList()) {
+				for (IBaseResource nextResource : getContainedResources()) {
 					if (getResourceToIdMap().get(nextResource) != null) {
 						ids.add(getResourceToIdMap().get(nextResource).getValue());
 					}
 				}
 
 				// Automatically assign IDs to the rest
-				for (IBaseResource nextResource : getResourceList()) {
+				for (IBaseResource nextResource : getContainedResources()) {
 
 					while (getResourceToIdMap().get(nextResource) == null) {
 						String nextCandidate = "#" + myNextContainedId;

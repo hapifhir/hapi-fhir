@@ -148,6 +148,11 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		ourLog.debug("Refreshed search parameter cache in {}ms", sw.getMillis());
 	}
 
+	@VisibleForTesting
+	public void setFhirContext(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+	}
+
 	private ReadOnlySearchParamCache getBuiltInSearchParams() {
 		if (myBuiltInSearchParams == null) {
 			myBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(myFhirContext);
@@ -160,6 +165,11 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 			Map<String, RuntimeSearchParam> map = theSearchParams.getSearchParamMap(resourceName);
 			map.entrySet().removeIf(entry -> entry.getValue().getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
 		}
+	}
+
+	@VisibleForTesting
+	public void setModelConfig(ModelConfig theModelConfig) {
+		myModelConfig = theModelConfig;
 	}
 
 	private long overrideBuiltinSearchParamsWithActiveJpaSearchParams(RuntimeSearchParamCache theSearchParamCache, Collection<IBaseResource> theSearchParams) {
@@ -226,6 +236,11 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	@Override
 	public ResourceChangeResult refreshCacheIfNecessary() {
 		return myResourceChangeListenerCache.refreshCacheIfNecessary();
+	}
+
+	@VisibleForTesting
+	public void setResourceChangeListenerRegistry(IResourceChangeListenerRegistry theResourceChangeListenerRegistry) {
+		myResourceChangeListenerRegistry = theResourceChangeListenerRegistry;
 	}
 
 	@PostConstruct

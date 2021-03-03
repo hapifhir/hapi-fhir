@@ -47,6 +47,7 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.StringUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -532,12 +533,22 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	protected abstract IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath);
 
+	@VisibleForTesting
+	public void setContext(FhirContext theContext) {
+		myContext = theContext;
+	}
+
 	protected FhirContext getContext() {
 		return myContext;
 	}
 
 	protected ModelConfig getModelConfig() {
 		return myModelConfig;
+	}
+
+	@VisibleForTesting
+	public void setSearchParamRegistry(ISearchParamRegistry theSearchParamRegistry) {
+		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
 	private Collection<RuntimeSearchParam> getSearchParams(IBaseResource theResource) {
@@ -642,6 +653,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
 			}
 		}
+	}
+
+	@VisibleForTesting
+	public void setModelConfig(ModelConfig theModelConfig) {
+		myModelConfig = theModelConfig;
 	}
 
 	protected boolean shouldIndexTextComponentOfToken(RuntimeSearchParam theSearchParam) {
@@ -1018,6 +1034,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		if (nextEntity != null) {
 			theParams.add(nextEntity);
 		}
+	}
+
+	@VisibleForTesting
+	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	private ResourceIndexedSearchParamToken createTokenIndexIfNotBlank(String theResourceType, RuntimeSearchParam theSearchParam, String theSystem, String theValue) {

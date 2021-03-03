@@ -11,7 +11,6 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
@@ -65,7 +64,6 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
-import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
@@ -237,6 +235,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private IPartitionLookupSvc myPartitionLookupSvc;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
+	@Autowired(required = false)
+	private IFulltextSearchSvc myFulltextSearchSvc;
+
+	@VisibleForTesting
+	public void setSearchParamPresenceSvc(ISearchParamPresenceSvc theSearchParamPresenceSvc) {
+		mySearchParamPresenceSvc = theSearchParamPresenceSvc;
+	}
 
 	@Override
 	protected IInterceptorBroadcaster getInterceptorBroadcaster() {
@@ -498,14 +503,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		if (theResource != null) {
-			List<BaseResourceReferenceDt> refs = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, BaseResourceReferenceDt.class);
-			for (BaseResourceReferenceDt nextRef : refs) {
-				if (nextRef.getReference().isEmpty() == false) {
-					if (nextRef.getReference().hasVersionIdPart()) {
-						nextRef.setReference(nextRef.getReference().toUnqualifiedVersionless());
-					}
-				}
-			}
+			// FIXME: make configurable
+//			List<BaseResourceReferenceDt> refs = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, BaseResourceReferenceDt.class);
+//			for (BaseResourceReferenceDt nextRef : refs) {
+//				if (nextRef.getReference().isEmpty() == false) {
+//					if (nextRef.getReference().hasVersionIdPart()) {
+//						nextRef.setReference(nextRef.getReference().toUnqualifiedVersionless());
+//					}
+//				}
+//			}
 		}
 
 		byte[] bytes;
@@ -988,6 +994,26 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return updateEntity(theRequest, null, entity, updateTime, true, true, theTransactionDetails, false, true);
 	}
 
+	@VisibleForTesting
+	public void setEntityManager(EntityManager theEntityManager) {
+		myEntityManager = theEntityManager;
+	}
+
+	@VisibleForTesting
+	public void setSearchParamWithInlineReferencesExtractor(SearchParamWithInlineReferencesExtractor theSearchParamWithInlineReferencesExtractor) {
+		mySearchParamWithInlineReferencesExtractor = theSearchParamWithInlineReferencesExtractor;
+	}
+
+	@VisibleForTesting
+	public void setResourceHistoryTableDao(IResourceHistoryTableDao theResourceHistoryTableDao) {
+		myResourceHistoryTableDao = theResourceHistoryTableDao;
+	}
+
+	@VisibleForTesting
+	public void setDaoSearchParamSynchronizer(DaoSearchParamSynchronizer theDaoSearchParamSynchronizer) {
+		myDaoSearchParamSynchronizer = theDaoSearchParamSynchronizer;
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public ResourceTable updateEntity(RequestDetails theRequest, final IBaseResource theResource, IBasePersistedResource
@@ -1059,10 +1085,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					newParams.populateResourceTableSearchParamsPresentFlags(entity);
 					entity.setIndexStatus(INDEX_STATUS_INDEXED);
 				}
-				populateFullTextFields(myContext, theResource, entity);
+
+				if (myFulltextSearchSvc != null && !myFulltextSearchSvc.isDisabled()) {
+					populateFullTextFields(myContext, theResource, entity);
+				}
+
 			} else {
 
-				changed = populateResourceIntoEntity(theRequest, theResource, entity, false);
+				// FIXME: what is this needed for?
+				changed = null;
+//				changed = populateResourceIntoEntity(theRequest, theResource, entity, false);
 
 				entity.setUpdated(theTransactionDetails.getTransactionDate());
 				entity.setIndexStatus(null);
@@ -1071,7 +1103,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		}
 
-		if (!changed.isChanged() && !theForceUpdate && myConfig.isSuppressUpdatesWithNoChange()) {
+		if (changed != null && !changed.isChanged() && !theForceUpdate && myConfig.isSuppressUpdatesWithNoChange()) {
 			ourLog.debug("Resource {} has not changed", entity.getIdDt().toUnqualified().getValue());
 			if (theResource != null) {
 				updateResourceMetadata(entity, theResource);
@@ -1323,7 +1355,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 	}
 
-	private void validateChildReferences(IBase theElement, String thePath) {
+	private void validateChildReferenceTargetTypes(IBase theElement, String thePath) {
 		if (theElement == null) {
 			return;
 		}
@@ -1343,7 +1375,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			String newPath = thePath + "." + nextChildDef.getElementName();
 
 			for (IBase nextChild : values) {
-				validateChildReferences(nextChild, newPath);
+				validateChildReferenceTargetTypes(nextChild, newPath);
 			}
 
 			if (nextChildDef instanceof RuntimeChildResourceDefinition) {
@@ -1426,8 +1458,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			throw new UnprocessableEntityException("Resource contains the 'subsetted' tag, and must not be stored as it may contain a subset of available data");
 		}
 
-		String resName = getContext().getResourceType(theResource);
-		validateChildReferences(theResource, resName);
+		if (getConfig().isEnforceReferenceTargetTypes()) {
+			String resName = getContext().getResourceType(theResource);
+			validateChildReferenceTargetTypes(theResource, resName);
+		}
 
 		validateMetaCount(totalMetaCount);
 

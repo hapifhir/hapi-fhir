@@ -98,6 +98,7 @@ public class ModelConfig {
 	private Set<String> myAutoVersionReferenceAtPaths = Collections.emptySet();
 	private Map<String, Set<String>> myTypeToAutoVersionReferenceAtPaths = Collections.emptyMap();
 	private boolean myRespectVersionsForSearchIncludes;
+	private boolean myNormalizeResourcesBeforeSearchParamExtraction;
 
 	/**
 	 * Constructor
@@ -729,8 +730,30 @@ public class ModelConfig {
 	public void setRespectVersionsForSearchIncludes(boolean theRespectVersionsForSearchIncludes) {
 		myRespectVersionsForSearchIncludes = theRespectVersionsForSearchIncludes;
 	}
-	
-	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
+
+	/**
+	 * If enabled, a serialize/parse operation is performed on resources before we extract search parameters.
+	 * This is useful if resources are provided to the DAO layer programatically (as opposed to through
+	 * standard parsing via the HTTP layer) and use contained resources. The default is <code>false</code>.
+	 *
+	 * @since 5.4.0
+	 */
+    public boolean isNormalizeResourcesBeforeSearchParamExtraction() {
+        return myNormalizeResourcesBeforeSearchParamExtraction;
+    }
+
+	/**
+	 * If enabled, a serialize/parse operation is performed on resources before we extract search parameters.
+	 * This is useful if resources are provided to the DAO layer programatically (as opposed to through
+	 * standard parsing via the HTTP layer) and use contained resources. The default is <code>false</code>.
+	 *
+	 * @since 5.4.0
+	 */
+    public void setNormalizeResourcesBeforeSearchParamExtraction(boolean theNormalizeResourcesBeforeSearchParamExtraction) {
+        myNormalizeResourcesBeforeSearchParamExtraction = theNormalizeResourcesBeforeSearchParamExtraction;
+    }
+
+    private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");
 
 		int starIdx = theUrl.indexOf('*');
