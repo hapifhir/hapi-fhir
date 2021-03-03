@@ -13,13 +13,11 @@ import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
-import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.jpa.entity.MdmLink;
-import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.rest.api.Constants;
@@ -298,10 +296,10 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 			if ("Patient".equals(next.getResourceType())) {
 				assertThat(nextContents, containsString("\"value\":\"PAT1\"}"));
-				assertEquals(5, nextContents.split("\n").length); // Only female patients
+				assertEquals(7, nextContents.split("\n").length); // Only female patients
 			} else if ("Observation".equals(next.getResourceType())) {
 				assertThat(nextContents, containsString("\"subject\":{\"reference\":\"Patient/PAT0\"}}\n"));
-				assertEquals(10, nextContents.split("\n").length);
+				assertEquals(16, nextContents.split("\n").length);
 			} else {
 				fail(next.getResourceType());
 			}
@@ -351,16 +349,16 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			ourLog.info("Next contents for type {}:\n{}", next.getResourceType(), nextContents);
 			if ("Patient".equals(next.getResourceType())) {
 				assertThat(nextContents, containsString("\"value\":\"PAT0\""));
-				assertEquals(10, nextContents.split("\n").length);
+				assertEquals(17, nextContents.split("\n").length);
 			} else if ("Observation".equals(next.getResourceType())) {
 				assertThat(nextContents, containsString("\"subject\":{\"reference\":\"Patient/PAT0\"}}\n"));
-				assertEquals(10, nextContents.split("\n").length);
+				assertEquals(16, nextContents.split("\n").length);
 			}else if ("Immunization".equals(next.getResourceType())) {
 				assertThat(nextContents, containsString("\"patient\":{\"reference\":\"Patient/PAT0\"}}\n"));
-				assertEquals(10, nextContents.split("\n").length);
+				assertEquals(16, nextContents.split("\n").length);
 			} else if ("CareTeam".equals(next.getResourceType())) {
 				assertThat(nextContents, containsString("\"id\":\"CT0\""));
-				assertEquals(10, nextContents.split("\n").length);
+				assertEquals(16, nextContents.split("\n").length);
 			} else if ("Group".equals(next.getResourceType())) {
 				assertThat(nextContents, containsString("\"id\":\"G0\""));
 				assertEquals(1, nextContents.split("\n").length);
@@ -761,7 +759,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		}
 		myPatientGroupId =  myGroupDao.update(group).getId();
 
-		//Manually create a golden record
+		//Manually create another golden record
 		Patient goldenPatient2 = new Patient();
 		goldenPatient2.setId("PAT888");
 		DaoMethodOutcome g2Outcome = myPatientDao.update(goldenPatient2);
@@ -777,7 +775,6 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			createImmunizationWithIndex(i, patId);
 			createCareTeamWithIndex(i, patId);
 		}
-
 	}
 
 	private DaoMethodOutcome createPatientWithIndex(int i) {
