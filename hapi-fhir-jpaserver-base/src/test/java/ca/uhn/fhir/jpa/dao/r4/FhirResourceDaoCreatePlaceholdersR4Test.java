@@ -268,9 +268,10 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testCreatePlaceholderWithMatchUrl_IdentifierNotCopiedByDefault() {
+	public void testCreatePlaceholderWithMatchUrl_IdentifierNotCopied() {
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
 		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(false);
 
 		Observation obsToCreate = new Observation();
 		obsToCreate.setStatus(ObservationStatus.FINAL);
@@ -288,7 +289,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 	// FIXME: DM 2021-03-04 - This test fails; placeholder identifier isn't populated by default.
 	@Test
-	public void testCreatePlaceholderWithMatchUrl_PopulateIdentifierSetToDefault_WithUpdateToTarget() {
+	public void testCreatePlaceholderWithMatchUrl_IdentifierCopiedByDefault_WithUpdateToTarget() {
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
 		myDaoConfig.setAllowInlineMatchUrlReferences(true);
 
@@ -338,10 +339,9 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testCreatePlaceholderWithMatchUrl_IdentifierCopied_NotPreExisting() {
+	public void testCreatePlaceholderWithMatchUrl_IdentifierCopiedByDefault_NotPreExisting() {
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
 		myDaoConfig.setAllowInlineMatchUrlReferences(true);
-		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
 
 		Observation obsToCreate = new Observation();
 		obsToCreate.setStatus(ObservationStatus.FINAL);
@@ -363,7 +363,6 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 	public void testCreatePlaceholderWithMatchUrl_IdentifierNotCopiedBecauseNoFieldMatches() {
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
 		myDaoConfig.setAllowInlineMatchUrlReferences(true);
-		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
 		myDaoConfig.setBundleTypesAllowedForStorage(Sets.newHashSet(""));
 
 		AuditEvent eventToCreate = new AuditEvent();
@@ -382,7 +381,6 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 	public void testCreatePlaceholderWithMatchUrl_PreExisting() {
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
 		myDaoConfig.setAllowInlineMatchUrlReferences(true);
-		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
 
 		Patient patient = new Patient();
 		patient.setId("ABC");

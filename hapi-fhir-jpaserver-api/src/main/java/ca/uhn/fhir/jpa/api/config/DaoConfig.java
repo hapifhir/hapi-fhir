@@ -186,9 +186,11 @@ public class DaoConfig {
 	private int myPreExpandValueSetsMaxCount = 1000;
 
 	/**
+	 * Do not change default of {@code true}!
+	 *
 	 * @since 4.2.0
 	 */
-	private boolean myPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets;
+	private boolean myPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets = true;
 
 	/**
 	 * @since 5.0.0
@@ -1102,7 +1104,7 @@ public class DaoConfig {
 
 	/**
 	 * When {@link #setAutoCreatePlaceholderReferenceTargets(boolean)} is enabled, if this
-	 * setting is set to <code>true</code> (default is <code>false</code>) and the source
+	 * setting is set to <code>true</code> (default is <code>true</code>) and the source
 	 * reference has an identifier populated, the identifier will be copied to the target
 	 * resource.
 	 * <p>
@@ -1144,6 +1146,41 @@ public class DaoConfig {
 	 *   }
 	 * }
 	 * </pre>
+	 * <p>
+	 * Note that the default for this setting was previously <code>false</code>, and was changed to <code>true</code>
+	 * in 5.4.0 with consideration to the following:
+	 * </p>
+	 * <pre>
+	 * CP = Auto-Create Placeholder Reference Targets
+	 * PI = Populate Identifier in Auto-Created Placeholder Reference Targets
+	 *
+	 * CP | PI
+	 * -------
+	 *  F | F  <- PI=F is ignored
+	 *  F | T  <- PI=T is ignored
+	 *  T | F  <- resources may reference placeholder reference targets that are never updated : (
+	 *  T | T  <- placeholder reference targets can be updated : )
+	 * </pre>
+	 * <p>
+	 * Where CP=T and PI=F, the following could happen:
+	 * </p>
+	 * <ol>
+	 *    <li>
+	 *       Resource instance A is created with a reference to resource instance B. B is a placeholder reference target
+	 *       without an identifier.
+	 *    </li>
+	 *    <li>
+	 * 	   Resource instance C is conditionally created using a match URL. It is not matched to B although these
+	 * 	   resources represent the same entity.
+	 *    </li>
+	 *    <li>
+	 *       A continues to reference placeholder B, and does not reference populated C.
+	 *    </li>
+	 * </ol>
+	 * <p>
+	 * There may be cases where configuring this setting to <code>false</code> would be appropriate; however, these are
+	 * exceptional cases that should be opt-in.
+	 * </p>
 	 *
 	 * @since 4.2.0
 	 */
@@ -1153,7 +1190,7 @@ public class DaoConfig {
 
 	/**
 	 * When {@link #setAutoCreatePlaceholderReferenceTargets(boolean)} is enabled, if this
-	 * setting is set to <code>true</code> (default is <code>false</code>) and the source
+	 * setting is set to <code>true</code> (default is <code>true</code>) and the source
 	 * reference has an identifier populated, the identifier will be copied to the target
 	 * resource.
 	 * <p>
@@ -1195,6 +1232,41 @@ public class DaoConfig {
 	 *   }
 	 * }
 	 * </pre>
+	 * <p>
+	 * Note that the default for this setting was previously <code>false</code>, and was changed to <code>true</code>
+	 * in 5.4.0 with consideration to the following:
+	 * </p>
+	 * <pre>
+	 * CP = Auto-Create Placeholder Reference Targets
+	 * PI = Populate Identifier in Auto-Created Placeholder Reference Targets
+	 *
+	 * CP | PI
+	 * -------
+	 *  F | F  <- PI=F is ignored
+	 *  F | T  <- PI=T is ignored
+	 *  T | F  <- resources may reference placeholder reference targets that are never updated : (
+	 *  T | T  <- placeholder reference targets can be updated : )
+	 * </pre>
+	 * <p>
+	 * Where CP=T and PI=F, the following could happen:
+	 * </p>
+	 * <ol>
+	 *    <li>
+	 *       Resource instance A is created with a reference to resource instance B. B is a placeholder reference target
+	 *       without an identifier.
+	 *    </li>
+	 *    <li>
+	 * 	   Resource instance C is conditionally created using a match URL. It is not matched to B although these
+	 * 	   resources represent the same entity.
+	 *    </li>
+	 *    <li>
+	 *       A continues to reference placeholder B, and does not reference populated C.
+	 *    </li>
+	 * </ol>
+	 * <p>
+	 * There may be cases where configuring this setting to <code>false</code> would be appropriate; however, these are
+	 * exceptional cases that should be opt-in.
+	 * </p>
 	 *
 	 * @since 4.2.0
 	 */
