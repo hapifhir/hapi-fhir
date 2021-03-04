@@ -359,13 +359,9 @@ public class QueryStack {
 		return predicateBuilder.combineWithRequestPartitionIdPredicate(theRequestPartitionId, ComboCondition.or(codePredicates.toArray(new Condition[0])));
 	}
 
-	public Condition createPredicateDate(@Nullable DbColumn theSourceJoinColumn,
-													 String theResourceName,
-													 String theSpnamePrefix,
-													 RuntimeSearchParam theSearchParam,
-													 List<? extends IQueryParameterType> theList,
-													 SearchFilterParser.CompareOperation theOperation,
-													 RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateDate(@Nullable DbColumn theSourceJoinColumn, String theResourceName,
+			String theSpnamePrefix, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theList,
+			SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 
 		String paramName = getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
 	
@@ -565,7 +561,6 @@ public class QueryStack {
 			List<String> paths = join.createResourceLinkPaths(targetResourceType, paramReference);
 			Condition typePredicate = BinaryCondition.equalTo(join.getColumnTargetResourceType(), mySqlBuilder.generatePlaceholder(theResourceType));
 			Condition pathPredicate = toEqualToOrInPredicate(join.getColumnSourcePath(), mySqlBuilder.generatePlaceholders(paths));
-			// TODO : review support _has with contained search?
 			Condition linkedPredicate = searchForIdsWithAndOr(join.getColumnSrcResourceId(), targetResourceType, parameterName, Collections.singletonList(orValues), theRequest, theRequestPartitionId, SearchContainedEnum.FALSE);
 			andPredicates.add(toAndPredicate(partitionPredicate, pathPredicate, typePredicate, linkedPredicate));
 		}
@@ -611,13 +606,9 @@ public class QueryStack {
 		return toAndPredicate(predicates);
 	}
 
-	public Condition createPredicateNumber(@Nullable DbColumn theSourceJoinColumn,
-														String theResourceName,
-														String theSpnamePrefix,
-														RuntimeSearchParam theSearchParam,
-														List<? extends IQueryParameterType> theList,
-														SearchFilterParser.CompareOperation theOperation,
-														RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateNumber(@Nullable DbColumn theSourceJoinColumn, String theResourceName,
+			String theSpnamePrefix, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theList,
+			SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 
 		String paramName = getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
 
@@ -656,13 +647,9 @@ public class QueryStack {
 		return join.combineWithRequestPartitionIdPredicate(theRequestPartitionId, ComboCondition.or(codePredicates.toArray(new Condition[0])));
 	}
 
-	public Condition createPredicateQuantity(@Nullable DbColumn theSourceJoinColumn,
-														  String theResourceName,
-														  String theSpnamePrefix,
-														  RuntimeSearchParam theSearchParam,
-														  List<? extends IQueryParameterType> theList,
-														  SearchFilterParser.CompareOperation theOperation,
-														  RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateQuantity(@Nullable DbColumn theSourceJoinColumn, String theResourceName,
+			String theSpnamePrefix, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theList,
+			SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 
 		String paramName = getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
 
@@ -873,13 +860,9 @@ public class QueryStack {
 		return toOrPredicate(orPredicates);
 	}
 
-	public Condition createPredicateString(@Nullable DbColumn theSourceJoinColumn,
-														String theResourceName,
-			                                            String theSpnamePrefix,
-														RuntimeSearchParam theSearchParam,
-														List<? extends IQueryParameterType> theList,
-														SearchFilterParser.CompareOperation theOperation,
-														RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateString(@Nullable DbColumn theSourceJoinColumn, String theResourceName,
+			String theSpnamePrefix, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theList,
+			SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 
 		String paramName = getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
 		
@@ -987,13 +970,9 @@ public class QueryStack {
 		return toAndPredicate(andPredicates);
 	}
 
-	public Condition createPredicateToken(@Nullable DbColumn theSourceJoinColumn,
-													  String theResourceName,
-													  String theSpnamePrefix,
-													  RuntimeSearchParam theSearchParam,
-													  List<? extends IQueryParameterType> theList,
-													  SearchFilterParser.CompareOperation theOperation,
-													  RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateToken(@Nullable DbColumn theSourceJoinColumn, String theResourceName,
+			String theSpnamePrefix, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theList,
+			SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 
 		List<IQueryParameterType> tokens = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
@@ -1045,14 +1024,10 @@ public class QueryStack {
 		return join.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 	}
 
-	public Condition createPredicateUri(@Nullable DbColumn theSourceJoinColumn,
-													String theResourceName,
-													String theSpnamePrefix,
-													RuntimeSearchParam theSearchParam,
-													List<? extends IQueryParameterType> theList,
-													SearchFilterParser.CompareOperation theOperation,
-													RequestDetails theRequestDetails,
-													RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateUri(@Nullable DbColumn theSourceJoinColumn, String theResourceName,
+			String theSpnamePrefix, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theList,
+			SearchFilterParser.CompareOperation theOperation, RequestDetails theRequestDetails,
+			RequestPartitionId theRequestPartitionId) {
 
 		String paramName = getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
 		

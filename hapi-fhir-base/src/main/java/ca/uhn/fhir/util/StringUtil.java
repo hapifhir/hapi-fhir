@@ -112,7 +112,7 @@ public class StringUtil {
 	 *  
 	 *  e.g. reasonReference to reason-reference
 	 *  
-	 * @param    the camalCase String need to change. e.g. reasonReference
+	 * @param    the camelCase String need to change. e.g. reasonReference
 	 * @return   the lower case string with  hyphen '-' e.g. reason-reference
 	 */
 	public static String camelCaseToLowerHyphen(final String theString) {
