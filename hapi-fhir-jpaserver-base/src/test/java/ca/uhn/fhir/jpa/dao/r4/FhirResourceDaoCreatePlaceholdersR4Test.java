@@ -177,7 +177,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertEquals("Patient/999999999999999", outcome.getResources(0,1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
-	// FIXME: DM 2021-03-04 - This test fails; extension isn't being created correctly
+	// FIXME: DM 2021-03-04 - This test fails; extension isn't being created correctly.
 	@Test
 	public void testCreatePlaceholderExtension_WithUpdateToTarget() {
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
@@ -222,7 +222,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertNull(extension);
 	}
 
-	// FIXME: DM 2021-03-04 - This test fails; extension isn't being created correctly; probably shouldn't be in meta
+	// FIXME: DM 2021-03-04 - This test fails; extension isn't being created correctly; probably shouldn't be in meta.
 	@Test
 	public void testCreatePlaceholderMetaExtension_WithUpdateToTarget() {
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
@@ -286,7 +286,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertEquals(0, patient.getIdentifier().size());
 	}
 
-	// FIXME: DM 2021-03-04 - This test fails; placeholder identifier isn't populated by default
+	// FIXME: DM 2021-03-04 - This test fails; placeholder identifier isn't populated by default.
 	@Test
 	public void testCreatePlaceholderWithMatchUrl_PopulateIdentifierSetToDefault_WithUpdateToTarget() {
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
