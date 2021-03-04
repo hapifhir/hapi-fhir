@@ -187,7 +187,7 @@ public class JpaConstants {
 	/**
 	 * The [id] of the group when $export is called on /Group/[id]/$export
 	 */
-	public static final Object PARAM_EXPORT_GROUP_ID = "_groupId";
+	public static final String PARAM_EXPORT_GROUP_ID = "_groupId";
 
 	/**
 	 * Whether mdm should be performed on group export items to expand the group items to linked items before performing the export
