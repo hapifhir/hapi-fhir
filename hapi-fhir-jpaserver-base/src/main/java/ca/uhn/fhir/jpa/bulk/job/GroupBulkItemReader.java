@@ -203,7 +203,7 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	private RuntimeSearchParam validateSearchParameters(SearchParameterMap expandedSpMap) {
 		RuntimeSearchParam runtimeSearchParam = getPatientSearchParam();
 		if (expandedSpMap.get(runtimeSearchParam.getName()) != null) {
-			throw new IllegalArgumentException(String.format("Group Bulk Export manually modifies the Search Parameter called [{}], so you may not include this search parameter in your _typeFilter!", runtimeSearchParam.getName()));
+			throw new IllegalArgumentException(String.format("Group Bulk Export manually modifies the Search Parameter called [%s], so you may not include this search parameter in your _typeFilter!", runtimeSearchParam.getName()));
 		}
 		return runtimeSearchParam;
 	}
