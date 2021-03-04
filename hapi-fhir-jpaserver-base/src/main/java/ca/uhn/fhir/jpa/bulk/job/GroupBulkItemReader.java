@@ -69,7 +69,7 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 
 	@Value("#{jobParameters['" + BulkExportJobConfig.GROUP_ID_PARAMETER + "']}")
 	private String myGroupId;
-	@Value("#{jobParameters['" + BulkExportJobConfig.EXPAND_MDM_PARAMETER+ "'] ?:false}")
+	@Value("#{jobParameters['" + BulkExportJobConfig.EXPAND_MDM_PARAMETER+ "'] ?: false}")
 	private boolean myMdmEnabled;
 
 	@Autowired
