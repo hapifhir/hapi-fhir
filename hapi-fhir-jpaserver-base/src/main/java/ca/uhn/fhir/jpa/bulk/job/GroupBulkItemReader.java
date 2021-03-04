@@ -173,7 +173,6 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 		return expandedIds;
 	}
 
-
 	private void queryResourceTypeWithReferencesToPatients(List<ResourcePersistentId> myReadPids, List<String> idChunk) {
 		//Build SP map
 		//First, inject the _typeFilters and _since from the export job
@@ -198,58 +197,14 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	private void filterSearchByResourceIds(List<String> idChunk, SearchParameterMap expandedSpMap) {
 		ReferenceOrListParam orList =  new ReferenceOrListParam();
 		idChunk.forEach(id -> orList.add(new ReferenceParam(id)));
-		expandedSpMap.add(getPatientSearchParam().getName(), orList);
+		expandedSpMap.add(getPatientSearchParamForCurrentResourceType().getName(), orList);
 	}
 
 	private RuntimeSearchParam validateSearchParameters(SearchParameterMap expandedSpMap) {
-		RuntimeSearchParam runtimeSearchParam = getPatientSearchParam();
+		RuntimeSearchParam runtimeSearchParam = getPatientSearchParamForCurrentResourceType();
 		if (expandedSpMap.get(runtimeSearchParam.getName()) != null) {
 			throw new IllegalArgumentException(String.format("Group Bulk Export manually modifies the Search Parameter called [%s], so you may not include this search parameter in your _typeFilter!", runtimeSearchParam.getName()));
 		}
 		return runtimeSearchParam;
-	}
-
-	/**
-	 * Given the resource type, fetch its patient-based search parameter name
-	 * 1. Attempt to find one called 'patient'
-	 * 2. If that fails, find one called 'subject'
-	 * 3. If that fails, find find by Patient Compartment.
-	 *    3.1 If that returns >1 result, throw an error
-	 *    3.2 If that returns 1 result, return it
-	 */
-	private RuntimeSearchParam getPatientSearchParam() {
-		if (myPatientSearchParam == null) {
-			RuntimeResourceDefinition runtimeResourceDefinition = myContext.getResourceDefinition(myResourceType);
-			myPatientSearchParam = runtimeResourceDefinition.getSearchParam("patient");
-			if (myPatientSearchParam == null) {
-				myPatientSearchParam = runtimeResourceDefinition.getSearchParam("subject");
-				if (myPatientSearchParam == null) {
-					myPatientSearchParam = getRuntimeSearchParamByCompartment(runtimeResourceDefinition);
-					if (myPatientSearchParam == null) {
-						String errorMessage = String.format("[%s] has  no search parameters that are for patients, so it is invalid for Group Bulk Export!", myResourceType);
-						throw new IllegalArgumentException(errorMessage);
-					}
-				}
-			}
-		}
-		return myPatientSearchParam;
-	}
-
-	/**
-	 * Search the resource definition for a compartment named 'patient' and return its related Search Parameter.
-	 */
-	private RuntimeSearchParam getRuntimeSearchParamByCompartment(RuntimeResourceDefinition runtimeResourceDefinition) {
-		RuntimeSearchParam patientSearchParam;
-		List<RuntimeSearchParam> searchParams = runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
-		if (searchParams == null || searchParams.size() == 0) {
-			String errorMessage = String.format("Resource type [%s] is not eligible for Group Bulk export, as it contains no Patient compartment, and no `patient` or `subject` search parameter", myResourceType);
-			throw new IllegalArgumentException(errorMessage);
-		} else if (searchParams.size() == 1) {
-			patientSearchParam = searchParams.get(0);
-		} else {
-			String errorMessage = String.format("Resource type [%s] is not eligible for Group Bulk export, as we are unable to disambiguate which patient search parameter we should be searching by.", myResourceType);
-			throw new IllegalArgumentException(errorMessage);
-		}
-		return patientSearchParam;
 	}
 }

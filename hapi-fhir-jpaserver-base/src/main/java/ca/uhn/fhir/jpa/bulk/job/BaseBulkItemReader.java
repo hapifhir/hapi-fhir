@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.bulk.job;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch.log.Logs;
@@ -53,6 +54,7 @@ public abstract class BaseBulkItemReader implements ItemReader<List<ResourcePers
 	private RuntimeResourceDefinition myResourceDefinition;
 
 	private Iterator<ResourcePersistentId> myPidIterator;
+	private RuntimeSearchParam myPatientSearchParam;
 
 	/**
 	 * Get and cache an ISearchBuilder for the given resource type this partition is responsible for.
@@ -136,5 +138,49 @@ public abstract class BaseBulkItemReader implements ItemReader<List<ResourcePers
 
 		return outgoing.size() == 0 ? null : outgoing;
 
+	}
+
+	/**
+	 * Given the resource type, fetch its patient-based search parameter name
+	 * 1. Attempt to find one called 'patient'
+	 * 2. If that fails, find one called 'subject'
+	 * 3. If that fails, find find by Patient Compartment.
+	 *    3.1 If that returns >1 result, throw an error
+	 *    3.2 If that returns 1 result, return it
+	 */
+	protected RuntimeSearchParam getPatientSearchParamForCurrentResourceType() {
+		if (myPatientSearchParam == null) {
+			RuntimeResourceDefinition runtimeResourceDefinition = myContext.getResourceDefinition(myResourceType);
+			myPatientSearchParam = runtimeResourceDefinition.getSearchParam("patient");
+			if (myPatientSearchParam == null) {
+				myPatientSearchParam = runtimeResourceDefinition.getSearchParam("subject");
+				if (myPatientSearchParam == null) {
+					myPatientSearchParam = getRuntimeSearchParamByCompartment(runtimeResourceDefinition);
+					if (myPatientSearchParam == null) {
+						String errorMessage = String.format("[%s] has  no search parameters that are for patients, so it is invalid for Group Bulk Export!", myResourceType);
+						throw new IllegalArgumentException(errorMessage);
+					}
+				}
+			}
+		}
+		return myPatientSearchParam;
+	}
+
+	/**
+	 * Search the resource definition for a compartment named 'patient' and return its related Search Parameter.
+	 */
+	protected RuntimeSearchParam getRuntimeSearchParamByCompartment(RuntimeResourceDefinition runtimeResourceDefinition) {
+		RuntimeSearchParam patientSearchParam;
+		List<RuntimeSearchParam> searchParams = runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
+		if (searchParams == null || searchParams.size() == 0) {
+			String errorMessage = String.format("Resource type [%s] is not eligible for Group Bulk export, as it contains no Patient compartment, and no `patient` or `subject` search parameter", myResourceType);
+			throw new IllegalArgumentException(errorMessage);
+		} else if (searchParams.size() == 1) {
+			patientSearchParam = searchParams.get(0);
+		} else {
+			String errorMessage = String.format("Resource type [%s] is not eligible for Group Bulk export, as we are unable to disambiguate which patient search parameter we should be searching by.", myResourceType);
+			throw new IllegalArgumentException(errorMessage);
+		}
+		return patientSearchParam;
 	}
 }
