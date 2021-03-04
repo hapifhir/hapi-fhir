@@ -65,11 +65,12 @@ import java.util.stream.Collectors;
  */
 public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+	public static final int QUERY_CHUNK_SIZE = 100;
 
 	@Value("#{jobParameters['" + BulkExportJobConfig.GROUP_ID_PARAMETER + "']}")
 	private String myGroupId;
 	@Value("#{jobParameters['" + BulkExportJobConfig.EXPAND_MDM_PARAMETER+ "']}")
-	private String myMdmEnabled;
+	private boolean myMdmEnabled;
 
 	@Autowired
 	private IdHelperService myIdHelperService;
@@ -96,7 +97,7 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 		//Next, let's search for the target resources, with their correct patient references, chunked.
 		//The results will be jammed into myReadPids
 		QueryChunker<String> queryChunker = new QueryChunker<>();
-		queryChunker.chunk(new ArrayList<>(expandedMemberResourceIds), 100, (idChunk) -> {
+		queryChunker.chunk(new ArrayList<>(expandedMemberResourceIds), QUERY_CHUNK_SIZE, (idChunk) -> {
 			queryResourceTypeWithReferencesToPatients(myReadPids, idChunk);
 		});
 
@@ -118,7 +119,7 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 		List<Long> pidsOrThrowException = myIdHelperService.getPidsOrThrowException(ids);
 		patientPidsToExport.addAll(pidsOrThrowException);
 
-		if (Boolean.parseBoolean(myMdmEnabled)) {
+		if (myMdmEnabled) {
 			IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId));
 			Long pidOrNull = myIdHelperService.getPidOrNull(group);
 			List<List<Long>> lists = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
@@ -156,7 +157,7 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 		Long pidOrNull = myIdHelperService.getPidOrNull(group);
 
 		//Attempt to perform MDM Expansion of membership
-		if (Boolean.parseBoolean(myMdmEnabled)) {
+		if (myMdmEnabled) {
 			List<List<Long>> goldenPidTargetPidTuple = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
 			//Now lets translate these pids into resource IDs
 			Set<Long> uniquePids = new HashSet<>();
