@@ -67,7 +67,8 @@ public class TestJpaR4Config extends BaseJavaConfigR4 {
 		BasicDataSource retVal = new BasicDataSource();
 
 		retVal.setDriver(new org.h2.Driver());
-		retVal.setUrl("jdbc:h2:mem:testdb_r4");
+//		retVal.setUrl("jdbc:h2:mem:testdb_r4");
+		retVal.setUrl("jdbc:h2:file:./testdb_r4;create=true");
 		retVal.setMaxWaitMillis(10000);
 		retVal.setUsername("");
 		retVal.setPassword("");

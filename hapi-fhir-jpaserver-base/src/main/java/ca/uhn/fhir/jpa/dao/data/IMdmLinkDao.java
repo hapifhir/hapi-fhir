@@ -52,6 +52,9 @@ public interface IMdmLinkDao extends JpaRepository<MdmLink, Long> {
 			"SELECT ml.myGoldenResourcePid FROM MdmLink ml " +
 			"INNER JOIN ResourceLink hrl " +
 			"ON hrl.myTargetResourcePid=ml.mySourcePid " +
-			"AND hrl.mySourceResourcePid=:groupPid)")
+			"AND hrl.mySourceResourcePid=:groupPid " +
+			"AND hrl.mySourcePath='Group.member.entity' " +
+			"AND hrl.myTargetResourceType='Patient'" +
+		")")
 	List<List<Long>> expandPidsFromGroupPidGivenMatchResult(@Param("groupPid") Long theGroupPid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 }
