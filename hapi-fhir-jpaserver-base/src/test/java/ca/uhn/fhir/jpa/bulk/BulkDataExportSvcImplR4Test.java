@@ -610,6 +610,32 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		}
 	}
 
+
+	@Test
+	public void testMdmExpansionSuccessfullyExtractsPatients() throws JobParametersInvalidException {
+		createResources();
+
+		// Create a bulk job
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new GroupBulkDataExportOptions(null, Sets.newHashSet("Patient"), null, null, myPatientGroupId, true));
+
+		myBulkDataExportSvc.buildExportFiles();
+		awaitAllBulkJobCompletions();
+
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getFiles().size(), equalTo(1));
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Patient")));
+
+		Binary patientExportContent = myBinaryDao.read(jobInfo.getFiles().get(0).getResourceId());
+		assertEquals(Constants.CT_FHIR_NDJSON, patientExportContent.getContentType());
+		String nextContents = new String(patientExportContent.getContent(), Constants.CHARSET_UTF8);
+		ourLog.info("Next contents for type {}:\n{}", patientExportContent.getResourceType(), nextContents);
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Patient")));
+
+		//Output contains The entire group, plus the Mdm expansion, plus the golden resource
+		assertEquals(11, nextContents.split("\n").length);
+	}
+
 	@Test
 	public void testMdmExpansionWorksForGroupExportOnMatchedPatients() throws JobParametersInvalidException {
 		createResources();

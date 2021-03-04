@@ -40,7 +40,7 @@ public interface IMdmLinkDao extends JpaRepository<MdmLink, Long> {
 	@Query("DELETE FROM MdmLink f WHERE (myGoldenResourcePid = :pid OR mySourcePid = :pid) AND myMatchResult <> :matchResult")
 	int deleteWithAnyReferenceToPidAndMatchResultNot(@Param("pid") Long thePid, @Param("matchResult") MdmMatchResultEnum theMatchResult);
 
-	@Query("SELECT f.mySourcePid FROM MdmLink f WHERE f.myMatchResult=:matchResult AND f.myGoldenResourcePid IN (:pids)")
+	@Query("SELECT f.myGoldenResourcePid, f.mySourcePid FROM MdmLink f WHERE f.myMatchResult=:matchResult AND f.myGoldenResourcePid IN (:pids)")
 	List<Long> expandGoldenResourcePids(@Param("pids")List<Long> theGoldenResourcePids, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
 	@Query("SELECT f.myGoldenResourcePid FROM MdmLink f WHERE f.mySourcePid IN (:pids)")

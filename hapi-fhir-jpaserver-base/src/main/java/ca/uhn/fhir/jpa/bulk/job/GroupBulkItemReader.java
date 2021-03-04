@@ -37,7 +37,9 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +82,11 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	Iterator<ResourcePersistentId> getResourcePidIterator() {
 		List<ResourcePersistentId> myReadPids = new ArrayList<>();
 
+		//Short circuit out if we detect we are attempting to extract patients
+		if (myResourceType.equalsIgnoreCase("Patient")) {
+			return getExpandedPatientIterator();
+		}
+
 		//First lets expand the group so we get a list of all patient IDs of the group, and MDM-matched patient IDs of the group.
 		Set<String> expandedMemberResourceIds = expandAllPatientPidsFromGroup();
 		if (ourLog.isDebugEnabled()) {
@@ -100,6 +107,31 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	}
 
 	/**
+	 * In case we are doing a Group Bulk Export and resourceType `Patient` is requested, we can just return the group members,
+	 * possibly expanded by MDM, and don't have to go and fetch other resource DAOs.
+	 */
+	private Iterator<ResourcePersistentId> getExpandedPatientIterator() {
+		Set<Long> patientPidsToExport = new HashSet<>();
+		//This gets all member pids
+		List<String> members = getMembers();
+		List<IIdType> ids = members.stream().map(member -> new IdDt("Patient/" + member)).collect(Collectors.toList());
+		List<Long> pidsOrThrowException = myIdHelperService.getPidsOrThrowException(ids);
+		patientPidsToExport.addAll(pidsOrThrowException);
+
+		if (Boolean.parseBoolean(myMdmEnabled)) {
+			IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId));
+			Long pidOrNull = myIdHelperService.getPidOrNull(group);
+			List<List<Long>> lists = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
+			lists.forEach(patientPidsToExport::addAll);
+		}
+		List<ResourcePersistentId> resourcePersistentIds = patientPidsToExport
+			.stream()
+			.map(ResourcePersistentId::new)
+			.collect(Collectors.toList());
+		return resourcePersistentIds.iterator();
+	}
+
+	/**
 	 * Given the local myGroupId, read this group, and find all members' patient references.
 	 * @return A list of strings representing the Patient IDs of the members (e.g. ["P1", "P2", "P3"]
 	 */
@@ -108,6 +140,8 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 		List<IPrimitiveType> evaluate = myContext.newFhirPath().evaluate(group, "member.entity.reference", IPrimitiveType.class);
 		return  evaluate.stream().map(IPrimitiveType::getValueAsString).collect(Collectors.toList());
 	}
+
+
 
 	/**
 	 * Given the local myGroupId, perform an expansion to retrieve all resource IDs of member patients.
@@ -122,7 +156,7 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 		Long pidOrNull = myIdHelperService.getPidOrNull(group);
 
 		//Attempt to perform MDM Expansion of membership
-		if (Boolean.valueOf(myMdmEnabled)) {
+		if (Boolean.parseBoolean(myMdmEnabled)) {
 			List<List<Long>> goldenPidTargetPidTuple = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
 			//Now lets translate these pids into resource IDs
 			Set<Long> uniquePids = new HashSet<>();
