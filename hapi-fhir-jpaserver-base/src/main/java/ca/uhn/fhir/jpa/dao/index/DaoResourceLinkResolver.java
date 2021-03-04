@@ -110,6 +110,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		return resolvedResource;
 	}
 
+	// FIXME: DM 2021-03-04 - This is where placeholder reference targets are handled.
 	/**
 	 * @param theIdToAssignToPlaceholder If specified, the placeholder resource created will be given a specific ID
 	 */
@@ -123,6 +124,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 			@SuppressWarnings("unchecked")
 			T newResource = (T) missingResourceDef.newInstance();
 
+			// FIXME: DM 2021-03-04 - This is where the placeholder extension is added; should be in resource body instead of meta?
 			IBaseMetaType meta = newResource.getMeta();
 			if (meta instanceof IBaseHasExtensions) {
 				IBaseExtension<?, ?> extension = ((IBaseHasExtensions) meta).addExtension();
