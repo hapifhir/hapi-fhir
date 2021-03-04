@@ -8,12 +8,14 @@ public class BulkDataExportOptions {
 	private final Set<String> myResourceTypes;
 	private final Date mySince;
 	private final Set<String> myFilters;
+	private boolean mySystemLevel;
 
-	public BulkDataExportOptions(String theOutputFormat, Set<String> theResourceTypes, Date theSince, Set<String> theFilters) {
+	public BulkDataExportOptions(String theOutputFormat, Set<String> theResourceTypes, Date theSince, Set<String> theFilters, boolean theSystemLevel) {
 		myOutputFormat = theOutputFormat;
 		myResourceTypes = theResourceTypes;
 		mySince = theSince;
 		myFilters = theFilters;
+		mySystemLevel = theSystemLevel;
 	}
 
 	public String getOutputFormat() {
@@ -30,5 +32,9 @@ public class BulkDataExportOptions {
 
 	public Set<String> getFilters() {
 		return myFilters;
+	}
+
+	public boolean isSystemLevel() {
+		return mySystemLevel;
 	}
 }

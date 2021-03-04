@@ -97,6 +97,10 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	@Qualifier(BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME)
 	private Job myGroupBulkJob;
 
+	@Autowired
+	@Qualifier(BatchJobsConfig.PATIENT_BULK_EXPORT_JOB_NAME)
+	private Job myPatientBulkJob;
+
 	private IIdType myPatientGroupId;
 
 	@Test
@@ -562,6 +566,58 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(nextContents, is(containsString("IMM8")));
 	}
 
+	@Test
+	public void testPatientLevelExportWorks() throws JobParametersInvalidException {
+		createResources();
+
+		// Create a bulk job
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(null, Sets.newHashSet("Immunization", "Observation"), null, null, false));
+
+		GroupBulkExportJobParametersBuilder paramBuilder = new GroupBulkExportJobParametersBuilder();
+		paramBuilder.setGroupId(myPatientGroupId.getIdPart());
+		paramBuilder.setJobUUID(jobDetails.getJobId());
+		paramBuilder.setReadChunkSize(10L);
+
+		JobExecution jobExecution = myBatchJobSubmitter.runJob(myPatientBulkJob, paramBuilder.toJobParameters());
+
+		awaitJobCompletion(jobExecution);
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+
+		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getFiles().size(), equalTo(1));
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
+
+		// Iterate over the files
+		Binary nextBinary = myBinaryDao.read(jobInfo.getFiles().get(0).getResourceId());
+		assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
+		String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
+		ourLog.info("Next contents for type {}:\n{}", nextBinary.getResourceType(), nextContents);
+
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
+		assertThat(nextContents, is(containsString("IMM0")));
+		assertThat(nextContents, is(containsString("IMM1")));
+		assertThat(nextContents, is(containsString("IMM2")));
+		assertThat(nextContents, is(containsString("IMM3")));
+		assertThat(nextContents, is(containsString("IMM4")));
+		assertThat(nextContents, is(containsString("IMM5")));
+		assertThat(nextContents, is(containsString("IMM6")));
+		assertThat(nextContents, is(containsString("IMM7")));
+		assertThat(nextContents, is(containsString("IMM8")));
+		assertThat(nextContents, is(containsString("IMM9")));
+		assertThat(nextContents, is(containsString("IMM999")));
+
+		assertThat(nextContents, is(not(containsString("IMM2000"))));
+		assertThat(nextContents, is(not(containsString("IMM2001"))));
+		assertThat(nextContents, is(not(containsString("IMM2002"))));
+		assertThat(nextContents, is(not(containsString("IMM2003"))));
+		assertThat(nextContents, is(not(containsString("IMM2004"))));
+		assertThat(nextContents, is(not(containsString("IMM2005"))));
+
+	}
+
+
+	}
+
 	// CareTeam has two patient references: participant and patient.  This test checks if we find the patient if participant is null but patient is not null
 	@Test
 	public void testGroupBatchJobCareTeam() throws Exception {
@@ -789,15 +845,24 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		Long goldenPid2 = myIdHelperService.getPidOrNull(g2Outcome.getResource());
 
 		//Create some nongroup patients MDM linked to a different golden resource. They shouldnt be included in the query.
-		for (int i = 1000; i < 1005; i++) {
-			DaoMethodOutcome patientOutcome = createPatientWithIndex(i);
+		for (int i = 0; i < 5; i++) {
+			int index = 1000 + i;
+			DaoMethodOutcome patientOutcome = createPatientWithIndex(index);
 			IIdType patId = patientOutcome.getId().toUnqualifiedVersionless();
 			Long sourcePid = myIdHelperService.getPidOrNull(patientOutcome.getResource());
 			linkToGoldenResource(goldenPid2, sourcePid);
-			createObservationWithIndex(i, patId);
-			createImmunizationWithIndex(i, patId);
-			createCareTeamWithIndex(i, patId);
+			createObservationWithIndex(index, patId);
+			createImmunizationWithIndex(index, patId);
+			createCareTeamWithIndex(index, patId);
 		}
+
+		//Create some Observations and immunizations which have _no subjects!_ These will be exlucded from the Patient level export.
+		for (int i = 0; i < 10; i++) {
+			int index = 2000 + i;
+			createObservationWithIndex(index, null);
+			createImmunizationWithIndex(index, null);
+		}
+
 	}
 
 	private DaoMethodOutcome createPatientWithIndex(int i) {
@@ -820,7 +885,9 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	private void createImmunizationWithIndex(int i, IIdType patId) {
 		Immunization immunization = new Immunization();
 		immunization.setId("IMM" + i);
-		immunization.setPatient(new Reference(patId));
+		if (patId != null ) {
+			immunization.setPatient(new Reference(patId));
+		}
 		if (i % 2 == 0) {
 			CodeableConcept cc = new CodeableConcept();
 			cc.addCoding().setSystem("vaccines").setCode("Flu");
@@ -838,7 +905,9 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		obs.setId("OBS" + i);
 		obs.addIdentifier().setSystem("SYS").setValue("VAL" + i);
 		obs.setStatus(Observation.ObservationStatus.FINAL);
-		obs.getSubject().setReference(patId.getValue());
+		if (patId != null) {
+			obs.getSubject().setReference(patId.getValue());
+		}
 		myObservationDao.update(obs);
 	}
 

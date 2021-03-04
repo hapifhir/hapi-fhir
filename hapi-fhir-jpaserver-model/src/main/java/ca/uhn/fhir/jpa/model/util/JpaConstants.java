@@ -195,6 +195,11 @@ public class JpaConstants {
 	public static final String PARAM_EXPORT_MDM = "_mdm";
 
 	/**
+	 * Whether the Export is for System level or Patient Level.
+	 */
+	public static final String PARAM_EXPORT_SYSTEM_LEVEL = "_system";
+
+	/**
 	 * Parameter for delete to indicate the deleted resources should also be expunged
 	 */
 

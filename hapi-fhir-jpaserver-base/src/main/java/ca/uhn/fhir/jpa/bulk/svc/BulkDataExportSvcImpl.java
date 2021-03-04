@@ -49,6 +49,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.InstantType;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
@@ -229,12 +230,18 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			if (isGroupBulkJob(theBulkExportJobEntity)) {
 				enhanceBulkParametersWithGroupParameters(theBulkExportJobEntity, parameters);
 				myJobSubmitter.runJob(myGroupBulkExportJob, parameters.toJobParameters());
+			} else if (isPatientBulkJob(theBulkExportJobEntity)) {
+				myJobSubmitter.runJob(myPatientBulkExportJob, parameters.toJobParameters());
 			} else {
 				myJobSubmitter.runJob(myBulkExportJob, parameters.toJobParameters());
 			}
 		} catch (JobParametersInvalidException theE) {
 			ourLog.error("Unable to start job with UUID: {}, the parameters are invalid. {}", theJobUuid, theE.getMessage());
 		}
+	}
+
+	private boolean isPatientBulkJob(BulkExportJobEntity theBulkExportJobEntity) {
+		//TODO GGG
 	}
 
 	private void enhanceBulkParametersWithGroupParameters(BulkExportJobEntity theBulkExportJobEntity, JobParametersBuilder theParameters) {
@@ -282,7 +289,14 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		// TODO GGG KS can we encode BulkDataExportOptions as a JSON string as opposed to this request string.  Feels like it would be a more extensible encoding...
 		//Probably yes, but this will all need to be rebuilt when we remove this bridge entity
 		StringBuilder requestBuilder = new StringBuilder();
-		requestBuilder.append("/").append(JpaConstants.OPERATION_EXPORT);
+		requestBuilder.append("/");
+
+		//Prefix the export url with Group/[id]/
+		if (theBulkDataExportOptions instanceof GroupBulkDataExportOptions) {
+			requestBuilder.append(((GroupBulkDataExportOptions)theBulkDataExportOptions).getGroupId()).append("/");
+		}
+
+		requestBuilder.append(JpaConstants.OPERATION_EXPORT);
 		requestBuilder.append("?").append(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT).append("=").append(escapeUrlParam(outputFormat));
 		Set<String> resourceTypes = theBulkDataExportOptions.getResourceTypes();
 		if (resourceTypes != null) {
@@ -300,6 +314,9 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_GROUP_ID).append("=").append(groupOptions.getGroupId().getValue());
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_MDM).append("=").append(groupOptions.isMdm());
 		}
+
+		requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_SYSTEM_LEVEL).append("=").append(theBulkDataExportOptions.isSystemLevel());
+
 		String request = requestBuilder.toString();
 
 		Date cutoff = DateUtils.addMilliseconds(new Date(), -myReuseBulkExportForMillis);
