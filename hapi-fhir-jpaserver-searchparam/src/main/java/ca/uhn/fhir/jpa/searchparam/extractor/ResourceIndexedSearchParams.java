@@ -42,9 +42,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Streams;
+
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -57,7 +55,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.compare;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -144,15 +142,15 @@ public final class ResourceIndexedSearchParams {
 		theEntity.setResourceLinks(myLinks);
 	}
 
-	public void updateSpnamePrefixForIndexedOnContainedResource(String spnamePrefix) {
-		updateSpnamePrefixForIndexedOnContainedResource(myNumberParams, spnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(myQuantityParams, spnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(myQuantityNormalizedParams, spnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(myDateParams, spnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(myUriParams, spnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(myTokenParams, spnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(myStringParams, spnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(myCoordsParams, spnamePrefix);
+	public void updateSpnamePrefixForIndexedOnContainedResource(String theSpnamePrefix) {
+		updateSpnamePrefixForIndexedOnContainedResource(myNumberParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(myQuantityParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(myQuantityNormalizedParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(myDateParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(myUriParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(myTokenParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(myStringParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(myCoordsParams, theSpnamePrefix);
 	}
 	
 	void setUpdatedTime(Date theUpdateTime) {
@@ -172,10 +170,10 @@ public final class ResourceIndexedSearchParams {
 		}
 	}
 
-	private void updateSpnamePrefixForIndexedOnContainedResource(Collection<? extends BaseResourceIndexedSearchParam> theParams, String spnamePrefix) {
+	private void updateSpnamePrefixForIndexedOnContainedResource(Collection<? extends BaseResourceIndexedSearchParam> theParams, @Nonnull String theSpnamePrefix) {
 		
 		for (BaseResourceIndexedSearchParam param : theParams) {
-			param.setParamName(spnamePrefix + "." + param.getParamName());
+			param.setParamName(theSpnamePrefix + "." + param.getParamName());
 			param.calculateHashes(); // re-calculuteHashes
 		}
 	}

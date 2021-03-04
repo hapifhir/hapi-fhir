@@ -54,6 +54,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+import ca.uhn.fhir.util.StringUtil;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
@@ -103,9 +104,7 @@ public class SearchParamExtractorService {
 		extractSearchIndexParameters(theRequestDetails, normalParams, resource, theEntity);
 		mergeParams(normalParams, theParams);
 
-		// FIXME - optional check for ModelConfig
-		// if (ModelConfig.....)
-		{
+		if (myModelConfig.isIndexOnContainedResources()) {
 			ResourceIndexedSearchParams containedParams = new ResourceIndexedSearchParams();
 			extractSearchIndexParametersForContainedResources(theRequestDetails, containedParams, resource, theEntity);
 			mergeParams(containedParams, theParams);
@@ -131,19 +130,26 @@ public class SearchParamExtractorService {
 
 		// 3. for each reference, find it's contained resource, create the search indexes
 		String spnamePrefix = null;
+		String referenceName = null;
 		ResourceIndexedSearchParams currParams;
 		for (ResourceReferenceInfo reference : references) {
 			
 			// 3.1 found the referenced contained resource
 			IBaseResource containedResource = findContainedResource(containedResources, reference.getResourceReference());
 			if (containedResource != null) {
-				//System.out.println("containedResource = " + myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(containedResource));
 				
-				spnamePrefix = reference.getName();
+				referenceName = reference.getName();
+				spnamePrefix = referenceName;
+				// e.g. for the referanceName participant.individual, keep first part participant
+				// since participant is the search parameter
+				int refNameIdx = referenceName.indexOf('.');
+				if (refNameIdx != -1) {
+					spnamePrefix = referenceName.substring(0, refNameIdx);
+				} 
+				
+				spnamePrefix = StringUtil.camelCaseToLowerHyphen(spnamePrefix);
+				
 				currParams = new ResourceIndexedSearchParams();
-				
-				// FIXME: debug only, to be removed
-				System.out.println("spnamePrefix = " + spnamePrefix);
 				
 				// skip blank if any
 				if (isBlank(spnamePrefix))
