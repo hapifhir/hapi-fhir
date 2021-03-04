@@ -7,7 +7,6 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AuditEvent;
@@ -18,16 +17,15 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.startsWith;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings({"ConstantConditions"})
@@ -173,6 +171,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertEquals("Patient/999999999999999", outcome.getResources(0,1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
+	// FIXME: DM 2021-03-04 - These ARE the tests you're looking for.
 	@Test
 	public void testCreatePlaceholderWithMatchUrl_IdentifierNotCopiedByDefault() {
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
@@ -197,6 +196,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 	public void testCreatePlaceholderWithMatchUrl_IdentifierCopied_NotPreExisting() {
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
 		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		// FIXME: DM - 2021-03-04 - Whaaat?! This is configurable. Awesome. What's the default?
 		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
 
 		Observation obsToCreate = new Observation();
