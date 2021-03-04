@@ -7,9 +7,12 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Sets;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AuditEvent;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
@@ -26,6 +29,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings({"ConstantConditions"})
@@ -171,7 +177,96 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertEquals("Patient/999999999999999", outcome.getResources(0,1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
-	// FIXME: DM 2021-03-04 - These ARE the tests you're looking for.
+	// FIXME: DM 2021-03-04 - This test fails; extension isn't being created correctly
+	@Test
+	public void testCreatePlaceholderExtension_WithUpdateToTarget() {
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+
+		// Create an Observation that references a Patient
+		Observation obsToCreate = new Observation();
+		obsToCreate.setStatus(ObservationStatus.FINAL);
+		obsToCreate.getSubject().setReference("Patient/AAA");
+		IIdType id = myObservationDao.create(obsToCreate, mySrd).getId();
+
+		// Read the Observation
+		Observation createdObs = myObservationDao.read(id);
+		ourLog.info("\nObservation created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+
+		/*
+		 * Read the placeholder Patient referenced by the Observation
+		 * Placeholder extension should exist and be true
+		 */
+		Patient placeholderPat = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
+		IIdType placeholderPatId = placeholderPat.getIdElement();
+		ourLog.info("\nPlaceholder Patient created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
+		assertEquals(0, placeholderPat.getIdentifier().size());
+		Extension extension = placeholderPat.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER);
+		assertNotNull(extension);
+		assertTrue(extension.hasValue());
+		assertTrue(((BooleanType) extension.getValue()).booleanValue());
+
+		// Update the Patient
+		Patient patToUpdate = new Patient();
+		patToUpdate.setId("Patient/AAA");
+		patToUpdate.addIdentifier().setSystem("http://foo").setValue("123");
+		IIdType updatedPatId = myPatientDao.update(patToUpdate).getId();
+
+		/*
+		 * Read the updated Patient
+		 * Placeholder extension should not exist
+		 */
+		Patient updatedPat = myPatientDao.read(updatedPatId);
+		ourLog.info("\nUpdated Patient:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedPat));
+		assertEquals(1, updatedPat.getIdentifier().size());
+		extension = updatedPat.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER);
+		assertNull(extension);
+	}
+
+	// FIXME: DM 2021-03-04 - This test fails; extension isn't being created correctly; probably shouldn't be in meta
+	@Test
+	public void testCreatePlaceholderMetaExtension_WithUpdateToTarget() {
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+
+		// Create an Observation that references a Patient
+		Observation obsToCreate = new Observation();
+		obsToCreate.setStatus(ObservationStatus.FINAL);
+		obsToCreate.getSubject().setReference("Patient/AAA");
+		IIdType id = myObservationDao.create(obsToCreate, mySrd).getId();
+
+		// Read the Observation
+		Observation createdObs = myObservationDao.read(id);
+		ourLog.info("\nObservation created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+
+		/*
+		 * Read the placeholder Patient referenced by the Observation
+		 * Placeholder extension should exist and be true
+		 */
+		Patient placeholderPat = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
+		IIdType placeholderPatId = placeholderPat.getIdElement();
+		ourLog.info("\nPlaceholder Patient created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
+		assertEquals(0, placeholderPat.getIdentifier().size());
+		Extension extension = placeholderPat.getMeta().getExtensionByUrl(HapiExtensions.EXT_RESOURCE_META_PLACEHOLDER);
+		assertNotNull(extension);
+		assertTrue(extension.hasValue());
+		assertTrue(((BooleanType) extension.getValue()).booleanValue());
+
+		// Update the Patient
+		Patient patToUpdate = new Patient();
+		patToUpdate.setId("Patient/AAA");
+		patToUpdate.addIdentifier().setSystem("http://foo").setValue("123");
+		IIdType updatedPatId = myPatientDao.update(patToUpdate).getId();
+
+		/*
+		 * Read the updated Patient
+		 * Placeholder extension should not exist
+		 */
+		Patient updatedPat = myPatientDao.read(updatedPatId);
+		ourLog.info("\nUpdated Patient:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedPat));
+		assertEquals(1, updatedPat.getIdentifier().size());
+		extension = updatedPat.getMeta().getExtensionByUrl(HapiExtensions.EXT_RESOURCE_META_PLACEHOLDER);
+		assertNull(extension);
+	}
+
 	@Test
 	public void testCreatePlaceholderWithMatchUrl_IdentifierNotCopiedByDefault() {
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
@@ -191,12 +286,61 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertEquals(0, patient.getIdentifier().size());
 	}
 
+	// FIXME: DM 2021-03-04 - This test fails; placeholder identifier isn't populated by default
+	@Test
+	public void testCreatePlaceholderWithMatchUrl_PopulateIdentifierSetToDefault_WithUpdateToTarget() {
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+
+		/*
+		 * Create an Observation that references a Patient
+		 * Reference is populated with inline match URL and includes identifier
+		 */
+		Observation obsToCreate = new Observation();
+		obsToCreate.setStatus(ObservationStatus.FINAL);
+		obsToCreate.getSubject().setReference("Patient?identifier=http://foo|123");
+		obsToCreate.getSubject().getIdentifier().setSystem("http://foo").setValue("123");
+		IIdType obsId = myObservationDao.create(obsToCreate, mySrd).getId();
+
+		// Read the Observation
+		Observation createdObs = myObservationDao.read(obsId);
+		ourLog.info("\nObservation created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+
+		/*
+		 * Read the placeholder Patient referenced by the Observation
+		 * Identifier should be populated since it was provided
+		 */
+		Patient placeholderPat = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
+		IIdType placeholderPatId = placeholderPat.getIdElement();
+		ourLog.info("\nPlaceholder Patient created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
+		assertEquals(1, placeholderPat.getIdentifier().size());
+		assertEquals(createdObs.getSubject().getReference(), placeholderPatId.toUnqualifiedVersionless().getValueAsString());
+
+		// Conditionally update a Patient with the same identifier
+		Patient patToConditionalUpdate = new Patient();
+		patToConditionalUpdate.addIdentifier().setSystem("http://foo").setValue("123");
+		patToConditionalUpdate.addName().setFamily("Simpson");
+		IIdType conditionalUpdatePatId = myPatientDao.update(patToConditionalUpdate, "Patient?identifier=http://foo|123", mySrd).getId();
+
+		// Read the conditionally updated Patient
+		Patient conditionalUpdatePat = myPatientDao.read(conditionalUpdatePatId);
+		ourLog.info("\nConditionally updated Patient:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conditionalUpdatePat));
+		assertEquals(1, conditionalUpdatePat.getIdentifier().size());
+
+		/*
+		 * Observation should reference conditionally updated Patient
+		 * ID of placeholder Patient should match ID of conditionally updated Patient
+		 */
+		createdObs = myObservationDao.read(obsId);
+		ourLog.info("\nObservation read after Patient update:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+		assertEquals(createdObs.getSubject().getReference(), conditionalUpdatePatId.toUnqualifiedVersionless().getValueAsString());
+		assertEquals(placeholderPatId.toUnqualifiedVersionless().getValueAsString(), conditionalUpdatePatId.toUnqualifiedVersionless().getValueAsString());
+	}
 
 	@Test
 	public void testCreatePlaceholderWithMatchUrl_IdentifierCopied_NotPreExisting() {
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
 		myDaoConfig.setAllowInlineMatchUrlReferences(true);
-		// FIXME: DM - 2021-03-04 - Whaaat?! This is configurable. Awesome. What's the default?
 		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
 
 		Observation obsToCreate = new Observation();

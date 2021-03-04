@@ -109,6 +109,12 @@ public class HapiExtensions {
 	/**
 	 * URL for boolean extension added to all placeholder resources
 	 */
+	public static final String EXT_RESOURCE_PLACEHOLDER = "http://hapifhir.io/fhir/StructureDefinition/resource-placeholder";
+
+	/**
+	 * URL for boolean extension added to all placeholder resources
+	 */
+	// FIXME: DM 2021-03-04 - This should probably be removed, and replaced with EXT_RESOURCE_PLACEHOLDER above
 	public static final String EXT_RESOURCE_META_PLACEHOLDER = "http://hapifhir.io/fhir/StructureDefinition/resource-meta-placeholder";
 
 
