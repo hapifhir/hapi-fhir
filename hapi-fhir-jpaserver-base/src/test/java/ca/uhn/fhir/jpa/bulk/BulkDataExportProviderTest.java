@@ -350,31 +350,32 @@ public class BulkDataExportProviderTest {
 
 		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
-			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Patient, Practitioner")
-			+ "&" + JpaConstants.PARAM_EXPORT_SINCE + "=" + UrlUtil.escapeUrlParam(now.getValueAsString())
-//			+ "&" + JpaConstants.PARAM_EXPORT_TYPE_FILTER + "=" + UrlUtil.escapeUrlParam("Patient?identifier=foo")
-//			+ "&" + JpaConstants.PARAM_EXPORT_TYPE_FILTER + "=" + UrlUtil.escapeUrlParam("Practitioner?identifier=bar")
-//			+ "&" + JpaConstants.PARAM_EXPORT_TYPE_FILTER + "=" + UrlUtil.escapeUrlParam("Patient?name=zoop");
-		+ "&" + JpaConstants.PARAM_EXPORT_TYPE_FILTER + "=" + // "MedicationRequest%3Fstatus%3Dactive,MedicationRequest%3Fstatus%3Dcompleted%26date%3Dgt2018-07-01T00%3A00%3A00Z";
-		"Immunization?patient.identifier%3DSC378274-MRN%7C009999997%2CSC378274-MRN%7C009999998%2CSC378274-MRN%7C009999999%26date%3D2020-01-02";
+			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Immunization, Observation")
+			+ "&" + JpaConstants.PARAM_EXPORT_SINCE + "=" + UrlUtil.escapeUrlParam(now.getValueAsString());
+
+		String immunizationTypeFilter1 = "Immunization?patient.identifier=SC378274-MRN|009999997,SC378274-MRN|009999998,SC378274-MRN|009999999&date=2020-01-02";
+		String immunizationTypeFilter2 = "Immunization?patient=Patient/123";
+		String observationFilter1 = "Observation?subject=Patient/123&created=ge2020-01-01";
+		StringBuilder multiValuedTypeFilterBuilder = new StringBuilder()
+			.append("&")
+			.append(JpaConstants.PARAM_EXPORT_TYPE_FILTER)
+			.append("=")
+			.append(UrlUtil.escapeUrlParam(immunizationTypeFilter1))
+			.append(",")
+			.append(UrlUtil.escapeUrlParam(immunizationTypeFilter2))
+			.append(",")
+			.append(UrlUtil.escapeUrlParam(observationFilter1));
+
+		url += multiValuedTypeFilterBuilder.toString();
 
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		ourLog.info("Request: {}", url);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response.toString());
-
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-		}
+		myClient.execute(get);
 
 		verify(myBulkDataExportSvc, times(1)).submitJob(myBulkDataExportOptionsCaptor.capture());
 		BulkDataExportOptions options = myBulkDataExportOptionsCaptor.getValue();
-		assertEquals(Constants.CT_FHIR_NDJSON, options.getOutputFormat());
-		assertThat(options.getResourceTypes(), containsInAnyOrder("Patient", "Practitioner"));
-		assertThat(options.getSince(), notNullValue());
-		assertThat(options.getFilters(), containsInAnyOrder("Patient?identifier=foo", "Practitioner?identifier=bar", "Patient?name=zoop"));
+
+		assertThat(options.getFilters(), containsInAnyOrder(immunizationTypeFilter1, immunizationTypeFilter2, observationFilter1));
 	}
 
 	@Test

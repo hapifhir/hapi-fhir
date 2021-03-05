@@ -47,12 +47,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
+
 public class BulkDataExportProvider {
+	public static final String FARM_TO_TABLE_TYPE_FILTER_REGEX = "(?:,)(?=[A-Z][a-z]+\\?)";
 
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
@@ -80,7 +82,6 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theTypeFilter,
 		ServletRequestDetails theRequestDetails
 	) {
-
 		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
 		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
 		if (prefer.getRespondAsync() == false) {
@@ -98,15 +99,9 @@ public class BulkDataExportProvider {
 		if (theSince != null) {
 			since = theSince.getValue();
 		}
+		Set<String> typeFilters = splitTypeFilters(theTypeFilter);
 
-		Set<String> filters = new HashSet<>();
-		if (theTypeFilter != null) {
-//			theTypeFilter.stream().forEach(filter -> filters.addAll(ArrayUtil.commaSeparatedListToCleanSet(filter.getValueAsString())));
-			filters = ArrayUtil.commaSeparatedListToCleanSet(theTypeFilter.getValueAsString());
-//			theTypeFilter.stream().forEach(filter -> filters.addAll(ArrayUtil.commaSeparatedListToCleanSet(filter.getValueAsString())));
-		}
-
-		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(outputFormat, resourceTypes, since, filters, true));
+		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(outputFormat, resourceTypes, since, typeFilters, true));
 
 		String serverBase = getServerBase(theRequestDetails);
 		String pollLocation = serverBase + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" + JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + outcome.getJobId();
@@ -119,6 +114,19 @@ public class BulkDataExportProvider {
 		// Successful 202 Accepted
 		response.addHeader(Constants.HEADER_CONTENT_LOCATION, pollLocation);
 		response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
+	}
+
+	private Set<String> splitTypeFilters(IPrimitiveType<String> theTypeFilter) {
+		if (theTypeFilter== null) {
+			return null;
+		}
+		String typeFilterSring = theTypeFilter.getValueAsString();
+		String[] typeFilters = typeFilterSring.split(FARM_TO_TABLE_TYPE_FILTER_REGEX);
+		if (typeFilters == null || typeFilters.length == 0) {
+			return null;
+		}
+
+		return new HashSet<>(Arrays.asList(typeFilters));
 	}
 
 	/**
@@ -213,9 +221,6 @@ public class BulkDataExportProvider {
 			resourceTypes = ArrayUtil.commaSeparatedListToCleanSet(theType.getValueAsString());
 		}
 
-		//TODO GGG eventually, we will support these things. 
-		Set<String> filters = null;
-
 		Date since = null;
 		if (theSince != null) {
 			since = theSince.getValue();
@@ -225,10 +230,9 @@ public class BulkDataExportProvider {
 		if (theMdm != null) {
 			mdm = theMdm.getValue();
 		}
-		if (theTypeFilter != null) {
-			filters = ArrayUtil.commaSeparatedListToCleanSet(theTypeFilter.getValueAsString());
-		}
-		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(new GroupBulkDataExportOptions(outputFormat, resourceTypes, since, filters, theIdParam, mdm));
+		Set<String> typeFilters = splitTypeFilters(theTypeFilter);
+
+		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(new GroupBulkDataExportOptions(outputFormat, resourceTypes, since, typeFilters, theIdParam, mdm));
 
 		String serverBase = getServerBase(theRequestDetails);
 		String pollLocation = serverBase + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" + JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + outcome.getJobId();
