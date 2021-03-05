@@ -1070,7 +1070,7 @@ public class DaoConfig {
 	 * Note however that references containing purely numeric IDs will not be auto-created
 	 * as they are never allowed to be client supplied in HAPI FHIR JPA.
 	 *
-	 * All placeholder resources created in this way have a meta extension
+	 * All placeholder resources created in this way have an extension
 	 * with the URL {@link HapiExtensions#EXT_RESOURCE_PLACEHOLDER} and the value "true".
 	 * </p>
 	 */
@@ -1094,7 +1094,7 @@ public class DaoConfig {
 	 * Note however that references containing purely numeric IDs will not be auto-created
 	 * as they are never allowed to be client supplied in HAPI FHIR JPA.
 	 *
-	 * All placeholder resources created in this way have a meta extension
+	 * All placeholder resources created in this way have an extension
 	 * with the URL {@link HapiExtensions#EXT_RESOURCE_PLACEHOLDER} and the value "true".
 	 * </p>
 	 */
