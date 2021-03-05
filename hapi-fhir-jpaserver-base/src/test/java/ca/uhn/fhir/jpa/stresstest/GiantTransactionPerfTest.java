@@ -285,12 +285,14 @@ public class GiantTransactionPerfTest {
 		requestDetails.setServletRequest(new MockServletRequest());
 
 		// Pre-warmup
-		for (int i = 0; i < 5; i++) {
+		ourLog.info("Warming up...");
+		for (int i = 0; i < 10; i++) {
 			mySystemDao.transaction(requestDetails, input);
 		}
+		ourLog.info("Done warming up");
 
 		StopWatch sw = new StopWatch();
-		for (int i = 0; i < 10000; i++) {
+		for (int i = 1; i < 10000; i++) {
 			mySystemDao.transaction(requestDetails, input);
 			if (i % 5 == 0) {
 				ourLog.info("Processed {} - {}/second", i, sw.formatThroughput(i, TimeUnit.SECONDS));

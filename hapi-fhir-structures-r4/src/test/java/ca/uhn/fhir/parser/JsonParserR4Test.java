@@ -473,8 +473,8 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 		mr = ourCtx.newJsonParser().parseResource(MedicationRequest.class, encoded);
 
-		assertEquals("#2", mr.getContained().get(0).getId());
-		assertEquals("#1", mr.getContained().get(1).getId());
+		assertEquals("#1", mr.getContained().get(0).getId());
+		assertEquals("#2", mr.getContained().get(1).getId());
 
 	}
 

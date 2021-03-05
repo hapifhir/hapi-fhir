@@ -632,16 +632,16 @@ public abstract class BaseTransactionProcessor {
 							String existingUuid = keyToUuid.get(key);
 							for (IBase nextEntry : theEntries) {
 								IBaseResource nextResource = myVersionAdapter.getResource(nextEntry);
-								for (ResourceReferenceInfo nextReference : myContext.newTerser().getAllResourceReferences(nextResource)) {
+								for (IBaseReference nextReference : myContext.newTerser().getAllPopulatedChildElementsOfType(nextResource, IBaseReference.class)) {
 									// We're interested in any references directly to the placeholder ID, but also
 									// references that have a resource target that has the placeholder ID.
-									String nextReferenceId = nextReference.getResourceReference().getReferenceElement().getValue();
-									if (isBlank(nextReferenceId) && nextReference.getResourceReference().getResource() != null) {
-										nextReferenceId = nextReference.getResourceReference().getResource().getIdElement().getValue();
+									String nextReferenceId = nextReference.getReferenceElement().getValue();
+									if (isBlank(nextReferenceId) && nextReference.getResource() != null) {
+										nextReferenceId = nextReference.getResource().getIdElement().getValue();
 									}
 									if (entryUrl.equals(nextReferenceId)) {
-										nextReference.getResourceReference().setReference(existingUuid);
-										nextReference.getResourceReference().setResource(null);
+										nextReference.setReference(existingUuid);
+										nextReference.setResource(null);
 									}
 								}
 							}
@@ -960,22 +960,21 @@ public abstract class BaseTransactionProcessor {
 				}
 
 				// URIs
-				// FIXME: make configurable
-//				Class<? extends IPrimitiveType<?>> uriType = (Class<? extends IPrimitiveType<?>>) myContext.getElementDefinition("uri").getImplementingClass();
-//				List<? extends IPrimitiveType<?>> allUris = terser.getAllPopulatedChildElementsOfType(nextResource, uriType);
-//				for (IPrimitiveType<?> nextRef : allUris) {
-//					if (nextRef instanceof IIdType) {
-//						continue; // No substitution on the resource ID itself!
-//					}
-//					IIdType nextUriString = newIdType(nextRef.getValueAsString());
-//					if (theIdSubstitutions.containsKey(nextUriString)) {
-//						IIdType newId = theIdSubstitutions.get(nextUriString);
-//						ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
-//						nextRef.setValueAsString(newId.toVersionless().getValue());
-//					} else {
-//						ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
-//					}
-//				}
+				Class<? extends IPrimitiveType<?>> uriType = (Class<? extends IPrimitiveType<?>>) myContext.getElementDefinition("uri").getImplementingClass();
+				List<? extends IPrimitiveType<?>> allUris = terser.getAllPopulatedChildElementsOfType(nextResource, uriType);
+				for (IPrimitiveType<?> nextRef : allUris) {
+					if (nextRef instanceof IIdType) {
+						continue; // No substitution on the resource ID itself!
+					}
+					IIdType nextUriString = newIdType(nextRef.getValueAsString());
+					if (theIdSubstitutions.containsKey(nextUriString)) {
+						IIdType newId = theIdSubstitutions.get(nextUriString);
+						ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
+						nextRef.setValueAsString(newId.toVersionless().getValue());
+					} else {
+						ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
+					}
+				}
 
 				IPrimitiveType<Date> deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) nextResource);
 				Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;

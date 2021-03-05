@@ -502,18 +502,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			theEntity.setResourceType(toResourceName(theResource));
 		}
 
-		if (theResource != null) {
-			// FIXME: make configurable
-//			List<BaseResourceReferenceDt> refs = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, BaseResourceReferenceDt.class);
-//			for (BaseResourceReferenceDt nextRef : refs) {
-//				if (nextRef.getReference().isEmpty() == false) {
-//					if (nextRef.getReference().hasVersionIdPart()) {
-//						nextRef.setReference(nextRef.getReference().toUnqualifiedVersionless());
-//					}
-//				}
-//			}
-		}
-
 		byte[] bytes;
 		ResourceEncodingEnum encoding;
 		boolean changed = false;

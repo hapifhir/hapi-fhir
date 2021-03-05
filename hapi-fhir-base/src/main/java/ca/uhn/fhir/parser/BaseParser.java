@@ -87,6 +87,8 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.left;
+import static org.apache.commons.lang3.StringUtils.substring;
 
 @SuppressWarnings("WeakerAccess")
 public abstract class BaseParser implements IParser {
@@ -281,9 +283,7 @@ public abstract class BaseParser implements IParser {
 			}
 		}
 
-		// FIXME: make configurable
 		containResourcesForEncoding(contained, theResource, theResource);
-//		contained.assignIdsToContainedResources();
 		myContainedResources = contained;
 
 	}
@@ -1385,6 +1385,15 @@ public abstract class BaseParser implements IParser {
 			IIdType newId = theResource.getIdElement();
 			if (isBlank(newId.getValue())) {
 				newId.setValue("#" + myNextContainedId++);
+			} else {
+				// Avoid auto-assigned contained IDs colliding with pre-existing ones
+				String idPart = newId.getValue();
+				if (substring(idPart, 0, 1).equals("#")) {
+					idPart = idPart.substring(1);
+					if (StringUtils.isNumeric(idPart)) {
+						myNextContainedId = Long.parseLong(idPart) + 1;
+					}
+				}
 			}
 
 			getResourceToIdMap().put(theResource, newId);
