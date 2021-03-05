@@ -20,11 +20,12 @@ package ca.uhn.fhir.cql.dstu3.helper;
  * #L%
  */
 
-import ca.uhn.fhir.cql.common.evaluation.LibraryLoader;
 import ca.uhn.fhir.cql.common.provider.LibraryResolutionProvider;
-import ca.uhn.fhir.cql.common.provider.LibrarySourceProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.LibraryManager;
+import ca.uhn.fhir.cql.common.provider.LibraryContentProvider;
+
+import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.elm.execution.Library;
@@ -36,11 +37,13 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.opencds.cqf.cql.evaluator.cql2elm.model.CacheAwareModelManager;
-import org.opencds.cqf.cql.evaluator.engine.execution.PrivateCachingLibraryLoaderDecorator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDecorator;
+import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -48,22 +51,24 @@ public class LibraryHelper {
 	private static final Logger ourLog = LoggerFactory.getLogger(LibraryHelper.class);
 
 	private final Map<org.hl7.elm.r1.VersionedIdentifier, Model> modelCache;
+	private Map<VersionedIdentifier, Library> libraryCache;
+	private CqlTranslatorOptions translatorOptions; 
 
-	public LibraryHelper(Map<org.hl7.elm.r1.VersionedIdentifier, Model> modelCache) {
+
+	public LibraryHelper(Map<org.hl7.elm.r1.VersionedIdentifier, Model> modelCache, Map<VersionedIdentifier, Library> libraryCache, CqlTranslatorOptions translatorOptions) {
 		this.modelCache = modelCache;
+		this.libraryCache = libraryCache;
+		this.translatorOptions = translatorOptions;
 	}
 
 	public org.opencds.cqf.cql.engine.execution.LibraryLoader createLibraryLoader(
 		LibraryResolutionProvider<org.hl7.fhir.dstu3.model.Library> provider) {
 		ModelManager modelManager = new CacheAwareModelManager(this.modelCache);
-		LibraryManager libraryManager = new LibraryManager(modelManager);
-		libraryManager.getLibrarySourceLoader().clearProviders();
 
-		libraryManager.getLibrarySourceLoader().registerProvider(
-			new LibrarySourceProvider<org.hl7.fhir.dstu3.model.Library, Attachment>(
-				provider, x -> x.getContent(), x -> x.getContentType(), x -> x.getData()));
+		List<org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider> contentProviders = Collections.singletonList(new LibraryContentProvider<org.hl7.fhir.dstu3.model.Library, Attachment>(
+			provider, x -> x.getContent(), x -> x.getContentType(), x -> x.getData()));
 
-		return new PrivateCachingLibraryLoaderDecorator(new LibraryLoader(libraryManager, modelManager));
+		return new CacheAwareLibraryLoaderDecorator(new TranslatingLibraryLoader(modelManager, contentProviders, translatorOptions), libraryCache);
 	}
 
 	public List<Library> loadLibraries(Measure measure,
