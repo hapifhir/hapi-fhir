@@ -357,9 +357,6 @@ public class NpmR4Test extends BaseJpaR4Test {
 		}
 	}
 
-	// FIXME: DM 2021-03-04 - This test is meant to validate that placeholder ValueSets are not created.
-	// FIXME: DM 2021-03-04 - This test or a new test should probably validate that placeholder ConceptMaps are also not created.
-	// FIXME: DM 2021-03-04 - This test does not validate that placeholder resources are created with a EXT_RESOURCE_META_PLACEHOLDER extension.
 	// Reproduces https://github.com/hapifhir/hapi-fhir/issues/2332
 	@Test
 	public void testInstallR4Package_AutoCreatePlaceholder() throws Exception {

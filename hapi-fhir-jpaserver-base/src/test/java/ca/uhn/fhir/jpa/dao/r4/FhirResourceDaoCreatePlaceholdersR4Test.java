@@ -287,7 +287,6 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertEquals(0, patient.getIdentifier().size());
 	}
 
-	// FIXME: DM 2021-03-04 - This test fails; placeholder identifier isn't populated by default.
 	@Test
 	public void testCreatePlaceholderWithMatchUrl_IdentifierCopiedByDefault_WithUpdateToTarget() {
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
