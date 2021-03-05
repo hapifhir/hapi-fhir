@@ -28,7 +28,9 @@ import org.springframework.context.annotation.Import;
 //When you define a new batch job, add it here.
 @Import({
 	CommonBatchJobConfig.class,
-	BulkExportJobConfig.class,})
+	BulkExportJobConfig.class
+})
 public class BatchJobsConfig {
-	//Empty config, as this is just an aggregator for all the various batch jobs defined around the system.
+	public static final String BULK_EXPORT_JOB_NAME = "bulkExportJob";
+	public static final String GROUP_BULK_EXPORT_JOB_NAME = "groupBulkExportJob";
 }

@@ -49,6 +49,8 @@ import java.util.concurrent.TimeUnit;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -306,11 +308,14 @@ public class BulkDataExportProviderTest {
 
 		InstantType now = InstantType.now();
 
+
 		Parameters input = new Parameters();
+		StringType obsTypeFilter = new StringType("Observation?code=OBSCODE,DiagnosticReport?code=DRCODE");
 		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Observation, DiagnosticReport"));
 		input.addParameter(JpaConstants.PARAM_EXPORT_SINCE, now);
-		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType("Observation?code=OBSCODE,DiagnosticReport?code=DRCODE"));
+		input.addParameter(JpaConstants.PARAM_EXPORT_MDM, true);
+		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, obsTypeFilter);
 
 		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
@@ -329,11 +334,9 @@ public class BulkDataExportProviderTest {
 		GroupBulkDataExportOptions options = myGroupBulkDataExportOptionsCaptor.getValue();
 		assertEquals(Constants.CT_FHIR_NDJSON, options.getOutputFormat());
 		assertThat(options.getResourceTypes(), containsInAnyOrder("Observation", "DiagnosticReport"));
-		//TODO GGG eventually, we will support since in group exports
-		assertThat(options.getSince(), nullValue());
-		//TODO GGG eventually, we will support filters in group exports
-		assertThat(options.getFilters(), nullValue());
+		assertThat(options.getSince(), notNullValue());
+		assertThat(options.getFilters(), notNullValue());
 		assertEquals(GROUP_ID, options.getGroupId().getValue());
-		assertFalse(options.isMdm());
+		assertThat(options.isMdm(), is(equalTo(true)));
 	}
 }

@@ -73,11 +73,9 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		return new CircularQueueCaptureQueriesListener();
 	}
 
-
 	@Bean
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource() {
-
 
 			@Override
 			public Connection getConnection() {
