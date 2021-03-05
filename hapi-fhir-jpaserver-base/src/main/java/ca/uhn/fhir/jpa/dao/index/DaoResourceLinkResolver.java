@@ -146,7 +146,6 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		return Optional.ofNullable(valueOf);
 	}
 
-	// FIXME: DM 2021-03-04 - Should we issue a warning if the identifier isn't available?
 	private <T extends IBaseResource> void tryToCopyIdentifierFromReferenceToTargetResource(IBaseReference theSourceReference, RuntimeResourceDefinition theTargetResourceDef, T theTargetResource) {
 		boolean referenceHasIdentifier = theSourceReference.hasIdentifier();
 		if (referenceHasIdentifier) {
