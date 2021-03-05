@@ -1,0 +1,5 @@
+---
+type: change
+issue: 2446
+title: "DaoConfig setting for [Populate Identifier In Auto Created Placeholder Reference Targets](https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-jpaserver-api/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(boolean))
+   now defaults to `true`."
