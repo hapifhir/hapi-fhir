@@ -87,6 +87,7 @@ public abstract class BaseBulkItemReader implements ItemReader<List<ResourcePers
 		Map<String, String[]> requestUrl = UrlUtil.parseQueryStrings(jobEntity.getRequest());
 		String[] typeFilters = requestUrl.get(JpaConstants.PARAM_EXPORT_TYPE_FILTER);
 		if (typeFilters != null) {
+			//TODO GGG START HERE
 			Optional<String> filter = Arrays.stream(typeFilters).filter(t -> t.startsWith(myResourceType + "?")).findFirst();
 			if (filter.isPresent()) {
 				String matchUrl = filter.get();

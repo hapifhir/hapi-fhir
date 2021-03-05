@@ -48,6 +48,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class BulkDataExportProvider {
@@ -75,7 +77,7 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
-		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") IPrimitiveType<String> theTypeFilter,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theTypeFilter,
 		ServletRequestDetails theRequestDetails
 	) {
 
@@ -97,9 +99,11 @@ public class BulkDataExportProvider {
 			since = theSince.getValue();
 		}
 
-		Set<String> filters = null;
+		Set<String> filters = new HashSet<>();
 		if (theTypeFilter != null) {
+//			theTypeFilter.stream().forEach(filter -> filters.addAll(ArrayUtil.commaSeparatedListToCleanSet(filter.getValueAsString())));
 			filters = ArrayUtil.commaSeparatedListToCleanSet(theTypeFilter.getValueAsString());
+//			theTypeFilter.stream().forEach(filter -> filters.addAll(ArrayUtil.commaSeparatedListToCleanSet(filter.getValueAsString())));
 		}
 
 		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(outputFormat, resourceTypes, since, filters, true));

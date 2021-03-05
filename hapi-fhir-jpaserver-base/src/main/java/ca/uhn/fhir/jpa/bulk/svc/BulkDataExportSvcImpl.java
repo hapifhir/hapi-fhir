@@ -312,7 +312,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_SINCE).append("=").append(new InstantType(since).setTimeZoneZulu(true).getValueAsString());
 		}
 		if (theBulkDataExportOptions.getFilters() != null && theBulkDataExportOptions.getFilters().size() > 0) {
-			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE_FILTER).append("=").append(String.join(",", escapeUrlParams(theBulkDataExportOptions.getFilters())));
+			theBulkDataExportOptions.getFilters().stream()
+				.forEach(filter -> requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE_FILTER).append("=").append(escapeUrlParam(filter)));
 		}
 		if (theBulkDataExportOptions instanceof GroupBulkDataExportOptions) {
 			GroupBulkDataExportOptions groupOptions = (GroupBulkDataExportOptions) theBulkDataExportOptions;
