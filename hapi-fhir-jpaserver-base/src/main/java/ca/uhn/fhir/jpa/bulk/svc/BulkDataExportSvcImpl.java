@@ -114,6 +114,10 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	@Qualifier(BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME)
 	private org.springframework.batch.core.Job myGroupBulkExportJob;
 
+	@Autowired
+	@Qualifier(BatchJobsConfig.PATIENT_BULK_EXPORT_JOB_NAME)
+	private org.springframework.batch.core.Job myPatientBulkExportJob;
+
 	private final int myRetentionPeriod = (int) (2 * DateUtils.MILLIS_PER_HOUR);
 
 	/**
@@ -242,6 +246,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	private boolean isPatientBulkJob(BulkExportJobEntity theBulkExportJobEntity) {
 		//TODO GGG
+		return true;
 	}
 
 	private void enhanceBulkParametersWithGroupParameters(BulkExportJobEntity theBulkExportJobEntity, JobParametersBuilder theParameters) {

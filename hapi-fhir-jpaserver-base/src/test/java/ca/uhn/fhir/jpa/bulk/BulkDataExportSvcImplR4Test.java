@@ -159,7 +159,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	@Test
 	public void testSubmit_InvalidOutputFormat() {
 		try {
-			myBulkDataExportSvc.submitJob(new BulkDataExportOptions(Constants.CT_FHIR_JSON_NEW, Sets.newHashSet("Patient", "Observation"), null, null));
+			myBulkDataExportSvc.submitJob(new BulkDataExportOptions(Constants.CT_FHIR_JSON_NEW, Sets.newHashSet("Patient", "Observation"), null, null, true));
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Invalid output format: application/fhir+json", e.getMessage());
@@ -169,7 +169,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	@Test
 	public void testSubmit_OnlyBinarySelected() {
 		try {
-			myBulkDataExportSvc.submitJob(new BulkDataExportOptions(Constants.CT_FHIR_JSON_NEW, Sets.newHashSet("Binary"), null, null));
+			myBulkDataExportSvc.submitJob(new BulkDataExportOptions(Constants.CT_FHIR_JSON_NEW, Sets.newHashSet("Binary"), null, null, true));
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Invalid output format: application/fhir+json", e.getMessage());
@@ -179,7 +179,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	@Test
 	public void testSubmit_InvalidResourceTypes() {
 		try {
-			myBulkDataExportSvc.submitJob(new BulkDataExportOptions(Constants.CT_FHIR_NDJSON, Sets.newHashSet("Patient", "FOO"), null, null));
+			myBulkDataExportSvc.submitJob(new BulkDataExportOptions(Constants.CT_FHIR_NDJSON, Sets.newHashSet("Patient", "FOO"), null, null, true));
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Unknown or unsupported resource type: FOO", e.getMessage());
@@ -189,7 +189,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	@Test
 	public void testSubmit_MultipleTypeFiltersForSameType() {
 		try {
-			myBulkDataExportSvc.submitJob(new BulkDataExportOptions(Constants.CT_FHIR_NDJSON, Sets.newHashSet("Patient"), null, Sets.newHashSet("Patient?name=a", "Patient?active=true")));
+			myBulkDataExportSvc.submitJob(new BulkDataExportOptions(Constants.CT_FHIR_NDJSON, Sets.newHashSet("Patient"), null, Sets.newHashSet("Patient?name=a", "Patient?active=true"), true));
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Invalid _typeFilter value \"Patient?name=a\". Multiple filters found for type Patient", e.getMessage());
@@ -199,7 +199,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	@Test
 	public void testSubmit_TypeFilterForNonSelectedType() {
 		try {
-			myBulkDataExportSvc.submitJob(new BulkDataExportOptions(Constants.CT_FHIR_NDJSON, Sets.newHashSet("Patient"), null, Sets.newHashSet("Observation?code=123")));
+			myBulkDataExportSvc.submitJob(new BulkDataExportOptions(Constants.CT_FHIR_NDJSON, Sets.newHashSet("Patient"), null, Sets.newHashSet("Observation?code=123"), true));
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Invalid _typeFilter value \"Observation?code=123\". Resource type does not appear in _type list", e.getMessage());
@@ -209,7 +209,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	@Test
 	public void testSubmit_TypeFilterInvalid() {
 		try {
-			myBulkDataExportSvc.submitJob(new BulkDataExportOptions(Constants.CT_FHIR_NDJSON, Sets.newHashSet("Patient"), null, Sets.newHashSet("Hello")));
+			myBulkDataExportSvc.submitJob(new BulkDataExportOptions(Constants.CT_FHIR_NDJSON, Sets.newHashSet("Patient"), null, Sets.newHashSet("Hello"), true));
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Invalid _typeFilter value \"Hello\". Must be in the form [ResourceType]?[params]", e.getMessage());
@@ -220,11 +220,11 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	public void testSubmit_ReusesExisting() {
 
 		// Submit
-		IBulkDataExportSvc.JobInfo jobDetails1 = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(null, Sets.newHashSet("Patient", "Observation"), null, null));
+		IBulkDataExportSvc.JobInfo jobDetails1 = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(null, Sets.newHashSet("Patient", "Observation"), null, null, true));
 		assertNotNull(jobDetails1.getJobId());
 
 		// Submit again
-		IBulkDataExportSvc.JobInfo jobDetails2 = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(null, Sets.newHashSet("Patient", "Observation"), null, null));
+		IBulkDataExportSvc.JobInfo jobDetails2 = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(null, Sets.newHashSet("Patient", "Observation"), null, null, true));
 		assertNotNull(jobDetails2.getJobId());
 
 		assertEquals(jobDetails1.getJobId(), jobDetails2.getJobId());
@@ -245,7 +245,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			createResources();
 
 			// Create a bulk job
-			IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(null, Sets.newHashSet("Patient"), null, null));
+			IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(null, Sets.newHashSet("Patient"), null, null, true));
 			assertNotNull(jobDetails.getJobId());
 
 			// Check the status
@@ -275,7 +275,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		createResources();
 
 		// Create a bulk job
-		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(null, Sets.newHashSet("Patient", "Observation"), null, Sets.newHashSet(TEST_FILTER)));
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(null, Sets.newHashSet("Patient", "Observation"), null, Sets.newHashSet(TEST_FILTER), true));
 		assertNotNull(jobDetails.getJobId());
 
 		// Check the status
@@ -328,7 +328,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		myBinaryDao.create(b);
 
 		// Create a bulk job
-		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(null, null, null, null));
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(null, null, null, null, true));
 		assertNotNull(jobDetails.getJobId());
 
 		// Check the status
@@ -382,7 +382,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		// Create a bulk job
 		HashSet<String> types = Sets.newHashSet("Patient");
 		Set<String> typeFilters = Sets.newHashSet("Patient?_has:Observation:patient:identifier=SYS|VAL3");
-		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(null, types, null, typeFilters));
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(null, types, null, typeFilters, true));
 		assertNotNull(jobDetails.getJobId());
 
 		// Check the status
@@ -434,7 +434,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		}
 
 		// Create a bulk job
-		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(null, Sets.newHashSet("Patient", "Observation"), cutoff.getValue(), null));
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(null, Sets.newHashSet("Patient", "Observation"), cutoff.getValue(), null, true));
 		assertNotNull(jobDetails.getJobId());
 
 		// Check the status
@@ -513,7 +513,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		createResources();
 
 		// Create a bulk job
-		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(null, Sets.newHashSet("Patient", "Observation"), null, null));
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(null, Sets.newHashSet("Patient", "Observation"), null, null, true));
 
 		//Add the UUID to the job
 		BulkExportJobParametersBuilder paramBuilder = new BulkExportJobParametersBuilder()
@@ -584,7 +584,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 
 		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
-		assertThat(jobInfo.getFiles().size(), equalTo(1));
+		assertThat(jobInfo.getFiles().size(), equalTo(2));
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
 
 		// Iterate over the files
@@ -612,9 +612,6 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(nextContents, is(not(containsString("IMM2003"))));
 		assertThat(nextContents, is(not(containsString("IMM2004"))));
 		assertThat(nextContents, is(not(containsString("IMM2005"))));
-
-	}
-
 
 	}
 

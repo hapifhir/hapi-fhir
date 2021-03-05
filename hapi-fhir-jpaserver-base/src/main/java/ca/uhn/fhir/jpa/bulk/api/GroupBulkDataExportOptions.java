@@ -10,7 +10,7 @@ public class GroupBulkDataExportOptions extends BulkDataExportOptions {
 	private final boolean myMdm;
 
 	public GroupBulkDataExportOptions(String theOutputFormat, Set<String> theResourceTypes, Date theSince, Set<String> theFilters, IIdType theGroupId, boolean theMdm) {
-		super(theOutputFormat, theResourceTypes, theSince, theFilters);
+		super(theOutputFormat, theResourceTypes, theSince, theFilters, false);
 		myGroupId = theGroupId;
 		myMdm = theMdm;
 	}

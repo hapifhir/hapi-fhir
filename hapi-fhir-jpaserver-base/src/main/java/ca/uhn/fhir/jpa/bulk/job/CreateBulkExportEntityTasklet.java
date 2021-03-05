@@ -66,7 +66,7 @@ public class CreateBulkExportEntityTasklet implements Tasklet {
 				outputFormat = Constants.CT_FHIR_NDJSON;
 			}
 
-			IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(outputFormat, resourceTypeSet, since, filterSet));
+			IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(outputFormat, resourceTypeSet, since, filterSet, true));
 
 			addUUIDToJobContext(theChunkContext, jobInfo.getJobId());
 			return RepeatStatus.FINISHED;

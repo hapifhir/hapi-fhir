@@ -95,7 +95,7 @@ public class BulkExportJobConfig {
 	@Bean
 	@Lazy
 	public Job patientBulkExportJob() {
-		return myJobBuilderFactory.get(BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME)
+		return myJobBuilderFactory.get(BatchJobsConfig.PATIENT_BULK_EXPORT_JOB_NAME)
 			.validator(bulkJobParameterValidator())
 			.start(createBulkExportEntityStep())
 			.next(patientPartitionStep())
@@ -126,6 +126,7 @@ public class BulkExportJobConfig {
 		return new BulkExportJobParameterValidator();
 	}
 
+	//Writers
 	@Bean
 	public Step groupBulkExportGenerateResourceFilesStep() {
 		return myStepBuilderFactory.get("groupBulkExportGenerateResourceFilesStep")
@@ -138,17 +139,20 @@ public class BulkExportJobConfig {
 	}
 
 	@Bean
-	@StepScope
-	public GroupBulkItemReader groupBulkItemReader(){
-		return new GroupBulkItemReader();
-	}
-
-
-	@Bean
 	public Step bulkExportGenerateResourceFilesStep() {
 		return myStepBuilderFactory.get("bulkExportGenerateResourceFilesStep")
 			.<List<ResourcePersistentId>, List<IBaseResource>> chunk(CHUNK_SIZE) //1000 resources per generated file, as the reader returns 10 resources at a time.
 			.reader(bulkItemReader())
+			.processor(myPidToIBaseResourceProcessor)
+			.writer(resourceToFileWriter())
+			.listener(bulkExportGenerateResourceFilesStepListener())
+			.build();
+	}
+	@Bean
+	public Step patientBulkExportGenerateResourceFilesStep() {
+		return myStepBuilderFactory.get("patientBulkExportGenerateResourceFilesStep")
+			.<List<ResourcePersistentId>, List<IBaseResource>> chunk(CHUNK_SIZE) //1000 resources per generated file, as the reader returns 10 resources at a time.
+			.reader(patientBulkItemReader())
 			.processor(myPidToIBaseResourceProcessor)
 			.writer(resourceToFileWriter())
 			.listener(bulkExportGenerateResourceFilesStepListener())
@@ -204,15 +208,11 @@ public class BulkExportJobConfig {
 			.build();
 	}
 
+
 	@Bean
-	public Step patientBulkExportGenerateResourceFilesStep() {
-		return myStepBuilderFactory.get("patientBulkExportGenerateResourceFilesStep")
-			.<List<ResourcePersistentId>, List<IBaseResource>> chunk(CHUNK_SIZE) //1000 resources per generated file, as the reader returns 10 resources at a time.
-			.reader(patientBulkItemReader())
-			.processor(myPidToIBaseResourceProcessor)
-			.writer(resourceToFileWriter())
-			.listener(bulkExportGenerateResourceFilesStepListener())
-			.build();
+	@StepScope
+	public GroupBulkItemReader groupBulkItemReader(){
+		return new GroupBulkItemReader();
 	}
 
 	@Bean
@@ -235,7 +235,7 @@ public class BulkExportJobConfig {
 
 	@Bean
 	@StepScope
-	public ItemWriter<List<IBaseResource>> resourceToFileWriter() {
+	public ResourceToFileWriter resourceToFileWriter() {
 		return new ResourceToFileWriter();
 	}
 

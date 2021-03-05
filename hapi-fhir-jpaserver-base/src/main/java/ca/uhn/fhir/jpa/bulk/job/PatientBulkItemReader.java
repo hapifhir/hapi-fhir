@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.slf4j.Logger;
 import org.springframework.batch.item.ItemReader;
@@ -71,7 +72,7 @@ public class PatientBulkItemReader extends BaseBulkItemReader implements ItemRea
 		if (!myResourceType.equalsIgnoreCase("Patient")) {
 			//Now that we have our basic built Bulk Export SP map, we inject the condition that the resources returned
 			//must have a patient= or subject= reference set.
-			map.add(patientSearchParam, new StringParam().setMissing(false));
+			map.add(patientSearchParam, new ReferenceParam().setMissing(true));
 		}
 
 		ISearchBuilder sb = getSearchBuilderForLocalResourceType();
