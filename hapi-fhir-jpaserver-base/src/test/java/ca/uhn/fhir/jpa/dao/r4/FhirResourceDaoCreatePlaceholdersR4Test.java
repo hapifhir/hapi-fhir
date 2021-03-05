@@ -177,7 +177,6 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertEquals("Patient/999999999999999", outcome.getResources(0,1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
-	// FIXME: DM 2021-03-04 - This test fails; extension isn't being created correctly.
 	@Test
 	public void testCreatePlaceholderExtension_WithUpdateToTarget() {
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
@@ -201,7 +200,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		ourLog.info("\nPlaceholder Patient created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
 		assertEquals(0, placeholderPat.getIdentifier().size());
 		Extension extension = placeholderPat.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER);
-		assertNotNull(extension); // FIXME: DM 2021-03-04 - This assertion fails for now.
+		assertNotNull(extension);
 		assertTrue(extension.hasValue());
 		assertTrue(((BooleanType) extension.getValue()).booleanValue());
 

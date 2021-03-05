@@ -1071,7 +1071,7 @@ public class DaoConfig {
 	 * as they are never allowed to be client supplied in HAPI FHIR JPA.
 	 *
 	 * All placeholder resources created in this way have a meta extension
-	 * with the URL {@link HapiExtensions#EXT_RESOURCE_META_PLACEHOLDER} and the value "true".
+	 * with the URL {@link HapiExtensions#EXT_RESOURCE_PLACEHOLDER} and the value "true".
 	 * </p>
 	 */
 	public boolean isAutoCreatePlaceholderReferenceTargets() {
@@ -1095,7 +1095,7 @@ public class DaoConfig {
 	 * as they are never allowed to be client supplied in HAPI FHIR JPA.
 	 *
 	 * All placeholder resources created in this way have a meta extension
-	 * with the URL {@link HapiExtensions#EXT_RESOURCE_META_PLACEHOLDER} and the value "true".
+	 * with the URL {@link HapiExtensions#EXT_RESOURCE_PLACEHOLDER} and the value "true".
 	 * </p>
 	 */
 	public void setAutoCreatePlaceholderReferenceTargets(boolean theAutoCreatePlaceholderReferenceTargets) {
