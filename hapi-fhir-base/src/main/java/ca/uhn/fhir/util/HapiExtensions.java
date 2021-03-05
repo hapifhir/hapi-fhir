@@ -112,14 +112,6 @@ public class HapiExtensions {
 	public static final String EXT_RESOURCE_PLACEHOLDER = "http://hapifhir.io/fhir/StructureDefinition/resource-placeholder";
 
 	/**
-	 * URL for boolean extension added to all placeholder resources
-	 *
-	 * @deprecated Deprecated in 5.4.0 in favour of {@link HapiExtensions#EXT_RESOURCE_PLACEHOLDER}
-	 */
-	public static final String EXT_RESOURCE_META_PLACEHOLDER = "http://hapifhir.io/fhir/StructureDefinition/resource-meta-placeholder";
-
-
-	/**
 	 * Non instantiable
 	 */
 	private HapiExtensions() {
