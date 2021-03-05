@@ -110,7 +110,6 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		return resolvedResource;
 	}
 
-	// FIXME: DM 2021-03-04 - This is where placeholder reference targets are handled.
 	/**
 	 * @param theIdToAssignToPlaceholder If specified, the placeholder resource created will be given a specific ID
 	 */
@@ -150,7 +149,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		return Optional.ofNullable(valueOf);
 	}
 
-	// FIXME: DM 2021-03-04 - Should we throw an error if the identifier isn't available? Otherwise we get a placeholder with no identifier.
+	// FIXME: DM 2021-03-04 - Should we issue a warning if the identifier isn't available?
 	private <T extends IBaseResource> void tryToCopyIdentifierFromReferenceToTargetResource(IBaseReference theSourceReference, RuntimeResourceDefinition theTargetResourceDef, T theTargetResource) {
 		boolean referenceHasIdentifier = theSourceReference.hasIdentifier();
 		if (referenceHasIdentifier) {

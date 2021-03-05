@@ -119,15 +119,17 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
@@ -2122,9 +2124,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
-	private boolean isPlaceholder(MetadataResource theResource) {
-		// FIXME: DM 2021-03-04 - We should probably check if this extension exists and the value is true.
-		return theResource.getMeta().getExtensionByUrl(HapiExtensions.EXT_RESOURCE_META_PLACEHOLDER) != null;
+	private boolean isPlaceholder(DomainResource theResource) {
+		boolean retVal = false;
+		Extension extension = theResource.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER);
+		if (extension != null && extension.hasValue() && extension.getValue() instanceof BooleanType) {
+			retVal = ((BooleanType) extension.getValue()).booleanValue();
+		}
+		return retVal;
 	}
 
 	@Override
