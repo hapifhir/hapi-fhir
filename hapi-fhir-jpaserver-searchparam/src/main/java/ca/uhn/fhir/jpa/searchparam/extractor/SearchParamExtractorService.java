@@ -120,58 +120,45 @@ public class SearchParamExtractorService {
 	}
 
 	private void extractSearchIndexParametersForContainedResources(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ResourceTable theEntity) {		
+		
 		FhirTerser terser = myContext.newTerser();
 
-		// 1. get all references
-		List<ResourceReferenceInfo> references = terser.getAllResourceReferences(theResource);
-
-		// 2. get all contained resources
+		// 1. get all contained resources
 		Collection<IBaseResource> containedResources = terser.getAllEmbeddedResources(theResource, false);
 
-		// 3. for each reference, find it's contained resource, create the search indexes
+		// 2. Find referenced search parameters
+		ISearchParamExtractor.SearchParamSet<PathAndRef> referencedSearchParamSet = mySearchParamExtractor.extractResourceLinks(theResource, true);
+		
 		String spnamePrefix = null;
-		String referenceName = null;
 		ResourceIndexedSearchParams currParams;
-		for (ResourceReferenceInfo reference : references) {
+		// 3. for each referenced search parameter, create an index
+		for (PathAndRef nextPathAndRef : referencedSearchParamSet) {
 			
-			// 3.1 found the referenced contained resource
-			IBaseResource containedResource = findContainedResource(containedResources, reference.getResourceReference());
-			if (containedResource != null) {
-				
-				referenceName = reference.getName();
-				spnamePrefix = referenceName;
-				// e.g. for the referanceName participant.individual, keep first part participant
-				// since participant is the search parameter
-				int refNameIdx = referenceName.indexOf('.');
-				if (refNameIdx != -1) {
-					spnamePrefix = referenceName.substring(0, refNameIdx);
-				} 
-				
-				spnamePrefix = StringUtil.camelCaseToLowerHyphen(spnamePrefix);
-				
-				currParams = new ResourceIndexedSearchParams();
-				
-				// skip blank if any
-				if (isBlank(spnamePrefix))
-					continue;
-				
-				// skip nested contained resource
-				if (spnamePrefix.contains("contained"))
-					continue;
-				
-				// 3.2 create indexes for the current contained resource
-				extractSearchIndexParameters(theRequestDetails, currParams, containedResource, theEntity);
-				
-				// 3.3 added reference name as a prefix for the contained resource if any
-				// e.g. for Observation.subject contained reference
-				// the SP_NAME = subject.family
-				currParams.updateSpnamePrefixForIndexedOnContainedResource(spnamePrefix);
-				
-				// 3.4 merge to the mainParams
-				// NOTE: the spname prefix is different for different reference
-				mergeParams(currParams, theParams); 
-			}
-		}		
+			// 3.1 get the search parameter name as spname prefix
+			spnamePrefix = nextPathAndRef.getSearchParamName();
+			
+			if (spnamePrefix == null || nextPathAndRef.getRef() == null)
+				continue;
+			
+			// 3.2 find the contained resource
+			IBaseResource containedResource = findContainedResource(containedResources, nextPathAndRef.getRef());
+			if (containedResource == null)
+				continue;
+			
+			currParams = new ResourceIndexedSearchParams();
+			
+			// 3.3 create indexes for the current contained resource
+			extractSearchIndexParameters(theRequestDetails, currParams, containedResource, theEntity);
+			
+			// 3.4 added reference name as a prefix for the contained resource if any
+			// e.g. for Observation.subject contained reference
+			// the SP_NAME = subject.family
+			currParams.updateSpnamePrefixForIndexedOnContainedResource(spnamePrefix);
+			
+			// 3.5 merge to the mainParams
+			// NOTE: the spname prefix is different
+			mergeParams(currParams, theParams); 
+		}
 	}
 	
 	private IBaseResource findContainedResource(Collection<IBaseResource> resources, IBaseReference reference) {
@@ -278,7 +265,7 @@ public class SearchParamExtractorService {
 	private void extractResourceLinks(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference, RequestDetails theRequest) {
 		String resourceName = myContext.getResourceType(theResource);
 
-		ISearchParamExtractor.SearchParamSet<PathAndRef> refs = mySearchParamExtractor.extractResourceLinks(theResource);
+		ISearchParamExtractor.SearchParamSet<PathAndRef> refs = mySearchParamExtractor.extractResourceLinks(theResource, false);
 		SearchParamExtractorService.handleWarnings(theRequest, myInterceptorBroadcaster, refs);
 
 		for (PathAndRef nextPathAndRef : refs) {

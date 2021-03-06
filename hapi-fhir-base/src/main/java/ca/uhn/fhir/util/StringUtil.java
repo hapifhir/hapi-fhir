@@ -24,8 +24,6 @@ import java.io.CharArrayWriter;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class StringUtil {
 
@@ -107,34 +105,4 @@ public class StringUtil {
 		return theString.substring(0, theString.offsetByCodePoints(0, theCodePointCount));
 	}
 
-	/**
-	 *  CamelCase string to the lower case string with hyphen '-'
-	 *  
-	 *  e.g. reasonReference to reason-reference
-	 *  
-	 * @param    the camelCase String need to change. e.g. reasonReference
-	 * @return   the lower case string with  hyphen '-' e.g. reason-reference
-	 */
-	public static String camelCaseToLowerHyphen(final String theString) {
-
-		if (theString == null || theString.length() == 0)
-			return theString;
-		
-		int len = theString.length();
-		
-		char[] result = new char[len*2]; // if all uppercase, the maxlen is x2
-		
-		char ch;
-		for (int i=0,j=0; i<len; i++) {
-			ch = theString.charAt(i);
-			if (Character.isUpperCase(ch)) {
-				result[j++] = '-';
-				result[j++] = Character.toLowerCase(ch);
-			} else {
-				result[j++] = ch;
-			}
-		}
-		
-		return (new String(result)).trim();
-	}
 }

@@ -171,7 +171,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 			assertEquals(3L, i.longValue());
 
 			i = myEntityManager
-					.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myParamName = 'managing-organization.name' AND s.myResourceType = 'Patient'", Long.class)
+					.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myParamName = 'organization.name' AND s.myResourceType = 'Patient'", Long.class)
 					.getSingleResult();
 		    assertEquals(1L, i.longValue());
 		});

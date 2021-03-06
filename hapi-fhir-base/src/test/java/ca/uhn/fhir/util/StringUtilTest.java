@@ -64,15 +64,4 @@ public class StringUtilTest {
 		assertEquals("a/a", StringUtil.chompCharacter("a/a////", '/'));
 	}
 
-	@Test
-	public void testCamelCaseToLowerHyphen() {
-		assertEquals(null, StringUtil.camelCaseToLowerHyphen(null));
-		assertEquals("", StringUtil.camelCaseToLowerHyphen(""));
-		assertEquals("hello", StringUtil.camelCaseToLowerHyphen("hello"));
-		assertEquals("hello-world", StringUtil.camelCaseToLowerHyphen("helloWorld"));
-		assertEquals("-this is -hello-world!", StringUtil.camelCaseToLowerHyphen("This is HelloWorld!"));
-		assertEquals("hello-world", StringUtil.camelCaseToLowerHyphen("hello-world"));
-		assertEquals("-h-e-l-l-o", StringUtil.camelCaseToLowerHyphen("HELLO"));
-
-	}
 }
