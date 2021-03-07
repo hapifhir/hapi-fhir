@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.GroupBulkDataExportOptions;
@@ -105,11 +106,11 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	private IBatchJobSubmitter myJobSubmitter;
 
 	@Autowired
-	@Qualifier("bulkExportJob")
+	@Qualifier(BatchJobsConfig.BULK_EXPORT_JOB_NAME)
 	private org.springframework.batch.core.Job myBulkExportJob;
 
 	@Autowired
-	@Qualifier("groupBulkExportJob")
+	@Qualifier(BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME)
 	private org.springframework.batch.core.Job myGroupBulkExportJob;
 
 	private final int myRetentionPeriod = (int) (2 * DateUtils.MILLIS_PER_HOUR);
@@ -138,9 +139,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		BulkExportJobEntity bulkExportJobEntity = jobToProcessOpt.get();
 
 		String jobUuid = bulkExportJobEntity.getJobId();
-		String theGroupId = getGroupIdIfPresent(bulkExportJobEntity.getRequest());
 		try {
-				processJob(jobUuid, theGroupId);
+				processJob(bulkExportJobEntity);
 		} catch (Exception e) {
 			ourLog.error("Failure while preparing bulk export extract", e);
 			myTxTemplate.execute(t -> {
@@ -156,15 +156,17 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		}
 
 	}
-	private String getGroupIdIfPresent(String theRequestString) {
+
+	private String getQueryParameterIfPresent(String theRequestString, String theParameter) {
 		Map<String, String[]> stringMap = UrlUtil.parseQueryString(theRequestString);
 		if (stringMap != null) {
-			String[] strings = stringMap.get(JpaConstants.PARAM_EXPORT_GROUP_ID);
+			String[] strings = stringMap.get(theParameter);
 			if (strings != null) {
 				return String.join(",", strings);
 			}
 		}
 		return null;
+
 	}
 
 
@@ -215,7 +217,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	}
 
-	private void processJob(String theJobUuid, String theGroupId) {
+	private void processJob(BulkExportJobEntity theBulkExportJobEntity) {
+		String theJobUuid = theBulkExportJobEntity.getJobId();
 		JobParametersBuilder parameters = new JobParametersBuilder()
 			.addString(BulkExportJobConfig.JOB_UUID_PARAMETER, theJobUuid)
 			.addLong(BulkExportJobConfig.READ_CHUNK_PARAMETER, READ_CHUNK_SIZE);
@@ -223,8 +226,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		ourLog.info("Submitting bulk export job {} to job scheduler", theJobUuid);
 
 		try {
-			if (!StringUtils.isBlank(theGroupId)) {
-				parameters.addString(BulkExportJobConfig.GROUP_ID_PARAMETER, theGroupId);
+			if (isGroupBulkJob(theBulkExportJobEntity)) {
+				enhanceBulkParametersWithGroupParameters(theBulkExportJobEntity, parameters);
 				myJobSubmitter.runJob(myGroupBulkExportJob, parameters.toJobParameters());
 			} else {
 				myJobSubmitter.runJob(myBulkExportJob, parameters.toJobParameters());
@@ -232,6 +235,17 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		} catch (JobParametersInvalidException theE) {
 			ourLog.error("Unable to start job with UUID: {}, the parameters are invalid. {}", theJobUuid, theE.getMessage());
 		}
+	}
+
+	private void enhanceBulkParametersWithGroupParameters(BulkExportJobEntity theBulkExportJobEntity, JobParametersBuilder theParameters) {
+		String theGroupId = getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_GROUP_ID);
+		String expandMdm  = getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_MDM);
+		theParameters.addString(BulkExportJobConfig.GROUP_ID_PARAMETER, theGroupId);
+		theParameters.addString(BulkExportJobConfig.EXPAND_MDM_PARAMETER, expandMdm);
+	}
+
+	private boolean isGroupBulkJob(BulkExportJobEntity theBulkExportJobEntity) {
+		return getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_GROUP_ID) != null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -284,8 +298,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		if (theBulkDataExportOptions instanceof GroupBulkDataExportOptions) {
 			GroupBulkDataExportOptions groupOptions = (GroupBulkDataExportOptions) theBulkDataExportOptions;
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_GROUP_ID).append("=").append(groupOptions.getGroupId().getValue());
-			//TODO GGG eventually we will support this
-//			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_MDM).append("=").append(groupOptions.isMdm());
+			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_MDM).append("=").append(groupOptions.isMdm());
 		}
 		String request = requestBuilder.toString();
 

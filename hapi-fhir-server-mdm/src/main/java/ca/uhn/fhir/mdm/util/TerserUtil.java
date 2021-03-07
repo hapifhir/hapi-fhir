@@ -28,6 +28,7 @@ import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -38,8 +39,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.mdm.util.GoldenResourceHelper.FIELD_NAME_IDENTIFIER;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public final class TerserUtil {
+	private static final Logger ourLog = getLogger(TerserUtil.class);
 
 	public static final Collection<String> IDS_AND_META_EXCLUDES =
 		Collections.unmodifiableSet(Stream.of("id", "identifier", "meta").collect(Collectors.toSet()));
@@ -104,6 +107,23 @@ public final class TerserUtil {
 			return false;
 		}
 		return !(resourceIdentifier.getAccessor().getValues(theResource).isEmpty());
+	}
+	/**
+	 * get the Values of a specified field.
+	 *
+	 * @param theFhirContext Context holding resource definition
+	 * @param theResource    Resource to check if the specified field is set
+	 * @param theFieldName   name of the field to check
+	 * @return Returns true if field exists and has any values set, and false otherwise
+	 */
+	public static List<IBase> getValues(FhirContext theFhirContext, IBaseResource theResource, String theFieldName) {
+		RuntimeResourceDefinition resourceDefinition = theFhirContext.getResourceDefinition(theResource);
+		BaseRuntimeChildDefinition resourceIdentifier = resourceDefinition.getChildByName(theFieldName);
+		if (resourceIdentifier == null) {
+			ourLog.info("There is no field named {} in Resource {}", theFieldName, resourceDefinition.getName());
+			return null;
+		}
+		return resourceIdentifier.getAccessor().getValues(theResource);
 	}
 
 	/**

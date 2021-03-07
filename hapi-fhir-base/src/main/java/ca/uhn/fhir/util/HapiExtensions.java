@@ -109,8 +109,7 @@ public class HapiExtensions {
 	/**
 	 * URL for boolean extension added to all placeholder resources
 	 */
-	public static final String EXT_RESOURCE_META_PLACEHOLDER = "http://hapifhir.io/fhir/StructureDefinition/resource-meta-placeholder";
-
+	public static final String EXT_RESOURCE_PLACEHOLDER = "http://hapifhir.io/fhir/StructureDefinition/resource-placeholder";
 
 	/**
 	 * Non instantiable
