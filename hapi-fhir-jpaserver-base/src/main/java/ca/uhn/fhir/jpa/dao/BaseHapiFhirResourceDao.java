@@ -1148,12 +1148,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(requestPartitionId, getResourceName(), theId.getIdPart());
 		BaseHasResource entity = myEntityManager.find(ResourceTable.class, pid.getIdAsLong());
 
-		if (entity == null) {
-			throw new ResourceNotFoundException(theId);
-		}
-
 		// Verify that the resource is for the correct partition
-		if (!requestPartitionId.isAllPartitions()) {
+		if (entity != null && !requestPartitionId.isAllPartitions()) {
 			if (entity.getPartitionId() != null && entity.getPartitionId().getPartitionId() != null) {
 				if (!requestPartitionId.hasPartitionId(entity.getPartitionId().getPartitionId())) {
 					ourLog.debug("Performing a read for PartitionId={} but entity has partition: {}", requestPartitionId, entity.getPartitionId());
@@ -1166,6 +1162,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					entity = null;
 				}
 			}
+		}
+
+		if (entity == null) {
+			throw new ResourceNotFoundException(theId);
 		}
 
 		if (theId.hasVersionIdPart()) {
