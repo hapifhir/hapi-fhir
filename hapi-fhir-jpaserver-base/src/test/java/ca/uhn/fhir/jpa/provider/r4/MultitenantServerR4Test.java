@@ -119,6 +119,21 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 
 	@Test
+	public void testCreateAndRead_NonPartitionableResource_DefaultTenant() {
+
+		// Create patients
+
+		IIdType idA = createResource("NamingSystem", withTenant(JpaConstants.DEFAULT_PARTITION_NAME), withStatus("draft"));
+
+		runInTransaction(() -> {
+			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
+			assertNull(resourceTable.getPartitionId());
+		});
+
+	}
+
+
+	@Test
 	public void testCreate_InvalidTenant() {
 
 		myTenantClientInterceptor.setTenantId("TENANT-ZZZ");

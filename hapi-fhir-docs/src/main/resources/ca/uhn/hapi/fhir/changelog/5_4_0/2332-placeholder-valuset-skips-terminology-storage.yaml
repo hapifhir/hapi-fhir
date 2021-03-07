@@ -1,0 +1,4 @@
+---
+type: add
+issue: 2332
+title: "Terminology storage is now skipped for placeholder ValueSet and ConceptMap resources."

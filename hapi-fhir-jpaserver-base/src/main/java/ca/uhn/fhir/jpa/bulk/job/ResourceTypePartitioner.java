@@ -60,7 +60,7 @@ public class ResourceTypePartitioner implements Partitioner {
 
 				// The worker step needs to know which parent job it is processing for, and which collection entity it will be
 				// attaching its results to.
-				context.putString("jobUUID", myJobUUID);
+				context.putString(BulkExportJobConfig.JOB_UUID_PARAMETER, myJobUUID);
 				context.putLong("bulkExportCollectionEntityId", collectionEntityId);
 
 				// Name the partition based on the resource type

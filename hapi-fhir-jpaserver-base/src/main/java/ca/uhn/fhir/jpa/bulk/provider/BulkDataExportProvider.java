@@ -21,9 +21,12 @@ package ca.uhn.fhir.jpa.bulk.provider;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
+import ca.uhn.fhir.jpa.bulk.api.GroupBulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.Constants;
@@ -37,6 +40,7 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,7 +102,7 @@ public class BulkDataExportProvider {
 			filters = ArrayUtil.commaSeparatedListToCleanSet(theTypeFilter.getValueAsString());
 		}
 
-		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(outputFormat, resourceTypes, since, filters);
+		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(outputFormat, resourceTypes, since, filters));
 
 		String serverBase = getServerBase(theRequestDetails);
 		String pollLocation = serverBase + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" + JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + outcome.getJobId();
@@ -177,4 +181,61 @@ public class BulkDataExportProvider {
 		return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest(), "/");
 	}
 
+	/**
+	 * Group/Id/$export
+	 */
+	@Operation(name = JpaConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Group")
+	public void groupExport(
+		@IdParam IIdType theIdParam,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theTypeFilter,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_MDM, min = 0, max = 1, typeName = "boolean") IPrimitiveType<Boolean> theMdm,
+
+		ServletRequestDetails theRequestDetails
+	) {
+
+		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
+		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
+		if (prefer.getRespondAsync() == false) {
+			throw new InvalidRequestException("Must request async processing for $export");
+		}
+
+		String outputFormat = theOutputFormat != null ? theOutputFormat.getValueAsString() : null;
+
+		Set<String> resourceTypes = null;
+		if (theType != null) {
+			resourceTypes = ArrayUtil.commaSeparatedListToCleanSet(theType.getValueAsString());
+		}
+
+		//TODO GGG eventually, we will support these things. 
+		Set<String> filters = null;
+
+		Date since = null;
+		if (theSince != null) {
+			since = theSince.getValue();
+		}
+
+		boolean mdm = false;
+		if (theMdm != null) {
+			mdm = theMdm.getValue();
+		}
+		if (theTypeFilter != null) {
+			filters = ArrayUtil.commaSeparatedListToCleanSet(theTypeFilter.getValueAsString());
+		}
+		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(new GroupBulkDataExportOptions(outputFormat, resourceTypes, since, filters, theIdParam, mdm));
+
+		String serverBase = getServerBase(theRequestDetails);
+		String pollLocation = serverBase + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" + JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + outcome.getJobId();
+
+		HttpServletResponse response = theRequestDetails.getServletResponse();
+
+		// Add standard headers
+		theRequestDetails.getServer().addHeadersToResponse(response);
+
+		// Successful 202 Accepted
+		response.addHeader(Constants.HEADER_CONTENT_LOCATION, pollLocation);
+		response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
+	}
 }

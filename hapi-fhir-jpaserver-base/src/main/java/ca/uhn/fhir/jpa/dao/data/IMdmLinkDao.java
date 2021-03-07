@@ -28,6 +28,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface IMdmLinkDao extends JpaRepository<MdmLink, Long> {
 	@Modifying
@@ -37,4 +39,16 @@ public interface IMdmLinkDao extends JpaRepository<MdmLink, Long> {
 	@Modifying
 	@Query("DELETE FROM MdmLink f WHERE (myGoldenResourcePid = :pid OR mySourcePid = :pid) AND myMatchResult <> :matchResult")
 	int deleteWithAnyReferenceToPidAndMatchResultNot(@Param("pid") Long thePid, @Param("matchResult") MdmMatchResultEnum theMatchResult);
+
+	@Query("SELECT ml2.myGoldenResourcePid, ml2.mySourcePid FROM MdmLink ml2 " +
+		"WHERE ml2.myMatchResult=:matchResult " +
+		"AND ml2.myGoldenResourcePid IN (" +
+			"SELECT ml.myGoldenResourcePid FROM MdmLink ml " +
+			"INNER JOIN ResourceLink hrl " +
+			"ON hrl.myTargetResourcePid=ml.mySourcePid " +
+			"AND hrl.mySourceResourcePid=:groupPid " +
+			"AND hrl.mySourcePath='Group.member.entity' " +
+			"AND hrl.myTargetResourceType='Patient'" +
+		")")
+	List<List<Long>> expandPidsFromGroupPidGivenMatchResult(@Param("groupPid") Long theGroupPid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 }

@@ -66,7 +66,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		retVal.setWebsocketContextPath("/websocketR4");
 		retVal.setAllowContainsSearches(true);
 		retVal.setAllowMultipleDelete(true);
-		retVal.setAllowInlineMatchUrlReferences(true);
+		retVal.setAllowInlineMatchUrlReferences(false);
 		retVal.setAllowExternalReferences(true);
 		retVal.getTreatBaseUrlsAsLocal().add("http://hapi.fhir.org/baseR4");
 		retVal.getTreatBaseUrlsAsLocal().add("https://hapi.fhir.org/baseR4");

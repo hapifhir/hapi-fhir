@@ -74,7 +74,9 @@ If a composite parameter is being searched on, the parameter takes a "left" and 
 
 ## Search - By plain URL
 
-You can also perform a search using a String URL, instead of using the fluent method calls to build the URL. This can be useful if you have a URL you retrieved from somewhere else that you want to use as a search.
+You can also perform a search using a String URL, instead of using the fluent method calls to build the URL.
+
+This can be useful if you have a URL you retrieved from somewhere else that you want to use as a search. This can also be useful if you need to make a search that isn't presently supported by one of the existing fluent methods (e.g. reverse chaining with `_has`).
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|searchUrl}}

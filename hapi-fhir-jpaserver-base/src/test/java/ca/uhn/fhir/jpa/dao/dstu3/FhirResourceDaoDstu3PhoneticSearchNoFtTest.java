@@ -4,12 +4,11 @@ import ca.uhn.fhir.context.phonetic.ApacheEncoder;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.util.HapiExtensions;
 import org.apache.commons.codec.language.Soundex;
-import org.aspectj.lang.annotation.Before;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.SearchParameter;
@@ -126,7 +125,7 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 //		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.PHONETIC);
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		searchParameter.addExtension()
-			.setUrl(JpaConstants.EXT_SEARCHPARAM_PHONETIC_ENCODER)
+			.setUrl(HapiExtensions.EXT_SEARCHPARAM_PHONETIC_ENCODER)
 			.setValue(new StringType(theEncoder.name()));
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.create(searchParameter, mySrd).getId().toUnqualifiedVersionless();
