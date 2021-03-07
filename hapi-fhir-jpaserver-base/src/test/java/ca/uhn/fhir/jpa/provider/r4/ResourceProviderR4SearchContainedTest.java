@@ -22,9 +22,11 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.RiskAssessment;
 import org.hl7.fhir.r4.model.RiskAssessment.RiskAssessmentStatus;
 import org.junit.jupiter.api.AfterEach;
@@ -826,9 +828,9 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 		assertEquals(3L, oids.size());
 
 	}
-	/*
+	
 	@Test
-	public void testContainedSearchUnSupportedSeachType() throws Exception {
+	public void testUpdateContainedResource() throws Exception {
 		
 		IIdType oid1;
 		
@@ -836,42 +838,130 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			Patient p = new Patient();
 			p.setId("patient1");
 			p.addName().setFamily("Smith").addGiven("John");
-			p.getBirthDateElement().setValueAsString("2000-01-01");
-
-			CarePlan carePlan = new CarePlan();
-			carePlan.setId("carePlan1");
-			carePlan.setStatus(CarePlanStatus.ACTIVE);
-			carePlan.setIntent(CarePlanIntent.ORDER);
-			carePlan.getSubject().setReference("#patient1");
-			carePlan.addInstantiatesUri("http://www.hl7.com");
 			
 			Observation obs = new Observation();
 			obs.getCode().setText("Observation 1");
 			obs.getContained().add(p);
 			obs.getSubject().setReference("#patient1");
-			obs.getContained().add(carePlan);
-			obs.getBasedOnFirstRep().setReference("#carePlan1");
-			
 			
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 			
 			Observation createdObs = myObservationDao.read(oid1);
+		
+			//-- changed the last name to Doe
+			List<Resource> containedResources = createdObs.getContained();
 			
-			ourLog.info("Output: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+			for (Resource res : containedResources) {
+				if (res instanceof Patient) {
+					Patient p1 = (Patient)res;
+					HumanName name = p1.getNameFirstRep();
+					name.setFamily("Doe");
+					break;
+				}
+			}
+			
+			// -- update
+			oid1 = myObservationDao.update(createdObs, mySrd).getId().toUnqualifiedVersionless();
+		}
+				
+		{
+			Patient p = new Patient();
+			p.setId("patient1");
+			p.addName().setFamily("Doe").addGiven("Jane");
+			
+			Observation obs = new Observation();
+			obs.getCode().setText("Observation 2");
+			obs.getContained().add(p);
+			obs.getSubject().setReference("#patient1");
+			
+			myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
-		String uri = ourServerBase + "/Observation?based-on.instantiates-uri=http://www.hl7.com&_contained=true";
-		
-		HttpGet get = new HttpGet(uri);
-		
-		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
-			fail();			
-		} catch (Exception e) {
+		{
+			Patient p = new Patient();
+			p.setId("patient1");
+			p.addName().setFamily("Jones").addGiven("Peter");
+			
+			Observation obs = new Observation();
+			obs.getCode().setText("Observation 2");
+			obs.getContained().add(p);
+			obs.getSubject().setReference("#patient1");
+			
+			myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
+		
+		
+		//-- No Obs with Patient Smith
+		String uri = ourServerBase + "/Observation?subject.family=Smith&_contained=true";
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		
+		assertEquals(0L, oids.size());
+		
+		//-- Two Obs with Patient Doe
+		uri = ourServerBase + "/Observation?subject.family=Doe&_contained=true";
+		oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		
+		assertEquals(2L, oids.size());
+	}
+
 	
-	}*/
+	@Test
+	public void testDeleteContainedResource() throws Exception {
+		
+		IIdType oid1;
+		
+		{
+			Patient p1 = new Patient();
+			p1.setId("patient1");
+			p1.addName().setFamily("Smith").addGiven("John");
+
+			Patient p2 = new Patient();
+			p2.setId("patient2");
+			p2.addName().setFamily("Doe").addGiven("Jane");
+
+			Observation obs = new Observation();
+			obs.getCode().setText("Observation 1");
+			obs.getContained().add(p1);
+			obs.getSubject().setReference("#patient1");
+			
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+			
+			// -- remove contained resource
+			obs.getContained().remove(p1);
+			// -- add new contained resource
+			obs.getContained().add(p2);
+			obs.getSubject().setReference("#patient2");
+						
+			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+
+			// -- update
+			oid1 = myObservationDao.update(obs, mySrd).getId().toUnqualifiedVersionless();
+			
+			Observation updatedObs = myObservationDao.read(oid1);
+			
+			ourLog.info("Output: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedObs));
+		}
+				
+		//-- No Obs with Patient Smith
+		String uri = ourServerBase + "/Observation?subject.family=Smith&_contained=true";
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		
+		assertEquals(0L, oids.size());
+		
+		//-- 1 Obs with Patient Doe
+		uri = ourServerBase + "/Observation?subject.family=Doe&_contained=true";
+		oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		
+		assertEquals(1L, oids.size());
+		assertThat(oids, contains(oid1.getValue()));
+
+	}
 	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
 		List<String> ids;
 		HttpGet get = new HttpGet(uri);
