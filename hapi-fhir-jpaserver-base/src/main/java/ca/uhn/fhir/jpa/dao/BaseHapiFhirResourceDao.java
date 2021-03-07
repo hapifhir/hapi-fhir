@@ -1149,7 +1149,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		BaseHasResource entity = myEntityManager.find(ResourceTable.class, pid.getIdAsLong());
 
 		// Verify that the resource is for the correct partition
-		if (!requestPartitionId.isAllPartitions()) {
+		if (entity != null && !requestPartitionId.isAllPartitions()) {
 			if (entity.getPartitionId() != null && entity.getPartitionId().getPartitionId() != null) {
 				if (!requestPartitionId.hasPartitionId(entity.getPartitionId().getPartitionId())) {
 					ourLog.debug("Performing a read for PartitionId={} but entity has partition: {}", requestPartitionId, entity.getPartitionId());

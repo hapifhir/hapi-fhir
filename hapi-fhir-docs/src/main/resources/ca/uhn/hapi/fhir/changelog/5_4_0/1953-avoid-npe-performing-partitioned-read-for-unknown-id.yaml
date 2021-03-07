@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1953
+title: "A crash was fixed when performing a FHIR read on a partitioned server, where the requested ID is not known. Thanks
+   to Umberto Cappellini for reporting!"
