@@ -1,0 +1,2 @@
+The tests for AddressHelper, StandardizingInterceptor, AddressValidatingInterceptor, FieldValidatingInterceptor
+and TerserUtils are in "hapi-fhir-structures-r4" to avoid issues with dependencies.

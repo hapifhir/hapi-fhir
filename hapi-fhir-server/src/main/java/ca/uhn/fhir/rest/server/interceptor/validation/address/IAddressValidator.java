@@ -1,0 +1,41 @@
+package ca.uhn.fhir.rest.server.interceptor.validation.address;
+
+import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.instance.model.api.IBase;
+
+/**
+ * Contract for validating addresses.
+ */
+public interface IAddressValidator {
+
+	/**
+	 * URL for validation results that should be placed on addresses
+	 */
+	public static final String ADDRESS_VALIDATION_EXTENSION_URL = "https://hapifhir.org/AddressValidation/";
+
+	/**
+	 * Extension value confirming that address can be considered valid (it exists and can be traced to the building)
+	 */
+	public static final String EXT_VALUE_VALID = "valid";
+
+	/**
+	 * Extension value confirming that address is invalid (doesn't exist)
+	 */
+	public static final String EXT_VALUE_INVALID = "invalid";
+
+	/**
+	 * Extension value indicating that address validation was attempted but could not complete successfully
+	 */
+	public static final String EXT_UNABLE_TO_VALIDATE = "not-validated";
+
+	/**
+	 * Validates address against a service
+	 *
+	 * @param theAddress     Address to be validated
+	 * @param theFhirContext Current FHIR context
+	 * @return Returns true in case address represents a valid
+	 * @throws AddressValidationException AddressValidationException is thrown in case validation can not be completed successfully.
+	 */
+	AddressValidationResult isValid(IBase theAddress, FhirContext theFhirContext) throws AddressValidationException;
+
+}
