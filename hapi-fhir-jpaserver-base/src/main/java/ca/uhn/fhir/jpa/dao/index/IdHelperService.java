@@ -381,7 +381,6 @@ public class IdHelperService {
 	}
 
 	public Map<Long, Optional<String>> translatePidsToForcedIds(Set<Long> thePids) {
-
 		Map<Long, Optional<String>> retVal = new HashMap<>(myMemoryCacheService.getAllPresent(MemoryCacheService.CacheEnum.FORCED_ID, thePids));
 
 		List<Long> remainingPids = thePids
@@ -432,6 +431,12 @@ public class IdHelperService {
 		List<IIdType> ids = Collections.singletonList(theId);
 		List<ResourcePersistentId> resourcePersistentIds = this.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), ids);
 		return resourcePersistentIds.get(0).getIdAsLong();
+	}
+
+	@Nonnull
+	public List<Long> getPidsOrThrowException(List<IIdType> theIds) {
+		List<ResourcePersistentId> resourcePersistentIds = this.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), theIds);
+		return resourcePersistentIds.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
 	}
 
 	@Nonnull

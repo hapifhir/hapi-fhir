@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.GroupBulkDataExportOptions;
@@ -16,6 +18,9 @@ import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
+import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.UrlUtil;
@@ -62,6 +67,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -84,11 +90,11 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	private JobExplorer myJobExplorer;
 
 	@Autowired
-	@Qualifier("bulkExportJob")
+	@Qualifier(BatchJobsConfig.BULK_EXPORT_JOB_NAME)
 	private Job myBulkJob;
 
 	@Autowired
-	@Qualifier("groupBulkExportJob")
+	@Qualifier(BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME)
 	private Job myGroupBulkJob;
 
 	private IIdType myPatientGroupId;
@@ -291,10 +297,10 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 			if ("Patient".equals(next.getResourceType())) {
 				assertThat(nextContents, containsString("\"value\":\"PAT1\"}"));
-				assertEquals(5, nextContents.split("\n").length); // Only female patients
+				assertEquals(7, nextContents.split("\n").length); // Only female patients
 			} else if ("Observation".equals(next.getResourceType())) {
 				assertThat(nextContents, containsString("\"subject\":{\"reference\":\"Patient/PAT0\"}}\n"));
-				assertEquals(10, nextContents.split("\n").length);
+				assertEquals(16, nextContents.split("\n").length);
 			} else {
 				fail(next.getResourceType());
 			}
@@ -344,16 +350,16 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			ourLog.info("Next contents for type {}:\n{}", next.getResourceType(), nextContents);
 			if ("Patient".equals(next.getResourceType())) {
 				assertThat(nextContents, containsString("\"value\":\"PAT0\""));
-				assertEquals(10, nextContents.split("\n").length);
+				assertEquals(17, nextContents.split("\n").length);
 			} else if ("Observation".equals(next.getResourceType())) {
 				assertThat(nextContents, containsString("\"subject\":{\"reference\":\"Patient/PAT0\"}}\n"));
-				assertEquals(10, nextContents.split("\n").length);
+				assertEquals(16, nextContents.split("\n").length);
 			}else if ("Immunization".equals(next.getResourceType())) {
 				assertThat(nextContents, containsString("\"patient\":{\"reference\":\"Patient/PAT0\"}}\n"));
-				assertEquals(10, nextContents.split("\n").length);
+				assertEquals(16, nextContents.split("\n").length);
 			} else if ("CareTeam".equals(next.getResourceType())) {
 				assertThat(nextContents, containsString("\"id\":\"CT0\""));
-				assertEquals(10, nextContents.split("\n").length);
+				assertEquals(16, nextContents.split("\n").length);
 			} else if ("Group".equals(next.getResourceType())) {
 				assertThat(nextContents, containsString("\"id\":\"G0\""));
 				assertEquals(1, nextContents.split("\n").length);
@@ -485,7 +491,8 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	public void awaitAllBulkJobCompletions() {
-		List<JobInstance> bulkExport = myJobExplorer.findJobInstancesByJobName("bulkExportJob", 0, 100);
+		List<JobInstance> bulkExport = myJobExplorer.findJobInstancesByJobName(BatchJobsConfig.BULK_EXPORT_JOB_NAME, 0, 100);
+		bulkExport.addAll(myJobExplorer.findJobInstancesByJobName(BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME, 0, 100));
 		if (bulkExport.isEmpty()) {
 			fail("There are no bulk export jobs running!");
 		}
@@ -601,7 +608,133 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		} catch (JobParametersInvalidException e) {
 			// good
 		}
+	}
 
+
+	@Test
+	public void testMdmExpansionSuccessfullyExtractsPatients() throws JobParametersInvalidException {
+		createResources();
+
+		// Create a bulk job
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new GroupBulkDataExportOptions(null, Sets.newHashSet("Patient"), null, null, myPatientGroupId, true));
+
+		myBulkDataExportSvc.buildExportFiles();
+		awaitAllBulkJobCompletions();
+
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getFiles().size(), equalTo(1));
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Patient")));
+
+		Binary patientExportContent = myBinaryDao.read(jobInfo.getFiles().get(0).getResourceId());
+		assertEquals(Constants.CT_FHIR_NDJSON, patientExportContent.getContentType());
+		String nextContents = new String(patientExportContent.getContent(), Constants.CHARSET_UTF8);
+		ourLog.info("Next contents for type {}:\n{}", patientExportContent.getResourceType(), nextContents);
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Patient")));
+
+		//Output contains The entire group, plus the Mdm expansion, plus the golden resource
+		assertEquals(11, nextContents.split("\n").length);
+	}
+
+	@Test
+	public void testMdmExpansionWorksForGroupExportOnMatchedPatients() throws JobParametersInvalidException {
+		createResources();
+
+		// Create a bulk job
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(new GroupBulkDataExportOptions(null, Sets.newHashSet("Immunization", "Observation"), null, null, myPatientGroupId, true));
+
+		myBulkDataExportSvc.buildExportFiles();
+		awaitAllBulkJobCompletions();
+
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Observation,Immunization&_groupId=" + myPatientGroupId +"&_mdm=true", jobInfo.getRequest());
+
+		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getFiles().size(), equalTo(2));
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
+
+		// Check immunization Content
+		Binary immunizationExportContent = myBinaryDao.read(jobInfo.getFiles().get(0).getResourceId());
+		assertEquals(Constants.CT_FHIR_NDJSON, immunizationExportContent.getContentType());
+		String nextContents = new String(immunizationExportContent.getContent(), Constants.CHARSET_UTF8);
+		ourLog.info("Next contents for type {}:\n{}", immunizationExportContent.getResourceType(), nextContents);
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
+		assertThat(nextContents, is(containsString("IMM0")));
+		assertThat(nextContents, is(containsString("IMM2")));
+		assertThat(nextContents, is(containsString("IMM4")));
+		assertThat(nextContents, is(containsString("IMM6")));
+		assertThat(nextContents, is(containsString("IMM8")));
+		assertThat(nextContents, is(containsString("IMM1")));
+		assertThat(nextContents, is(containsString("IMM3")));
+		assertThat(nextContents, is(containsString("IMM5")));
+		assertThat(nextContents, is(containsString("IMM7")));
+		assertThat(nextContents, is(containsString("IMM9")));
+		assertThat(nextContents, is(containsString("IMM999")));
+
+
+		//Check Observation Content
+		Binary observationExportContent = myBinaryDao.read(jobInfo.getFiles().get(1).getResourceId());
+		assertEquals(Constants.CT_FHIR_NDJSON, observationExportContent.getContentType());
+		nextContents = new String(observationExportContent.getContent(), Constants.CHARSET_UTF8);
+		ourLog.info("Next contents for type {}:\n{}", observationExportContent.getResourceType(), nextContents);
+		assertThat(jobInfo.getFiles().get(1).getResourceType(), is(equalTo("Observation")));
+		assertThat(nextContents, is(containsString("OBS0")));
+		assertThat(nextContents, is(containsString("OBS2")));
+		assertThat(nextContents, is(containsString("OBS4")));
+		assertThat(nextContents, is(containsString("OBS6")));
+		assertThat(nextContents, is(containsString("OBS8")));
+		assertThat(nextContents, is(containsString("OBS1")));
+		assertThat(nextContents, is(containsString("OBS3")));
+		assertThat(nextContents, is(containsString("OBS5")));
+		assertThat(nextContents, is(containsString("OBS7")));
+		assertThat(nextContents, is(containsString("OBS9")));
+		assertThat(nextContents, is(containsString("OBS999")));
+
+		//Ensure that we didn't over-include into non-group-members data.
+		assertThat(nextContents, is(not(containsString("OBS1000"))));
+	}
+
+	@Test
+	public void testGroupBulkExportSupportsTypeFilters() throws JobParametersInvalidException {
+		createResources();
+		Set<String> filters = new HashSet<>();
+
+		//Only get COVID-19 vaccinations
+		filters.add("Immunization?vaccine-code=vaccines|COVID-19");
+
+		GroupBulkDataExportOptions groupBulkDataExportOptions = new GroupBulkDataExportOptions(null, Sets.newHashSet("Immunization"), null, filters, myPatientGroupId, true );
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(groupBulkDataExportOptions);
+
+		GroupBulkExportJobParametersBuilder paramBuilder = new GroupBulkExportJobParametersBuilder();
+		paramBuilder.setGroupId(myPatientGroupId.getIdPart());
+		paramBuilder.setMdm(true);
+		paramBuilder.setJobUUID(jobDetails.getJobId());
+		paramBuilder.setReadChunkSize(10L);
+
+		JobExecution jobExecution = myBatchJobSubmitter.runJob(myGroupBulkJob, paramBuilder.toJobParameters());
+
+		awaitJobCompletion(jobExecution);
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+
+		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getFiles().size(), equalTo(1));
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
+
+		// Check immunization Content
+		Binary immunizationExportContent = myBinaryDao.read(jobInfo.getFiles().get(0).getResourceId());
+		assertEquals(Constants.CT_FHIR_NDJSON, immunizationExportContent.getContentType());
+		String nextContents = new String(immunizationExportContent.getContent(), Constants.CHARSET_UTF8);
+		ourLog.info("Next contents for type {}:\n{}", immunizationExportContent.getResourceType(), nextContents);
+
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
+		assertThat(nextContents, is(containsString("IMM1")));
+		assertThat(nextContents, is(containsString("IMM3")));
+		assertThat(nextContents, is(containsString("IMM5")));
+		assertThat(nextContents, is(containsString("IMM7")));
+		assertThat(nextContents, is(containsString("IMM9")));
+		assertThat(nextContents, is(containsString("IMM999")));
+
+		assertThat(nextContents, is(not(containsString("Flu"))));
 	}
 
 	private void awaitJobCompletion(JobExecution theJobExecution) {
@@ -615,46 +748,112 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	private void createResources() {
 		Group group = new Group();
 		group.setId("G0");
+
+		//Manually create a golden record
+		Patient goldenPatient = new Patient();
+		goldenPatient.setId("PAT999");
+		DaoMethodOutcome g1Outcome = myPatientDao.update(goldenPatient);
+		Long goldenPid = myIdHelperService.getPidOrNull(g1Outcome.getResource());
+
+		//Create our golden records' data.
+		createObservationWithIndex(999, g1Outcome.getId());
+		createImmunizationWithIndex(999, g1Outcome.getId());
+		createCareTeamWithIndex(999, g1Outcome.getId());
+
+		//Lets create an observation and an immunization for our golden patient.
+
 		for (int i = 0; i < 10; i++) {
-			Patient patient = new Patient();
-			patient.setId("PAT" + i);
-			patient.setGender(i % 2 == 0 ? Enumerations.AdministrativeGender.MALE : Enumerations.AdministrativeGender.FEMALE);
-			patient.addName().setFamily("FAM" + i);
-			patient.addIdentifier().setSystem("http://mrns").setValue("PAT" + i);
-			IIdType patId = myPatientDao.update(patient).getId().toUnqualifiedVersionless();
+			DaoMethodOutcome patientOutcome = createPatientWithIndex(i);
+			IIdType patId = patientOutcome.getId().toUnqualifiedVersionless();
+			Long sourcePid = myIdHelperService.getPidOrNull(patientOutcome.getResource());
+
+			//Link the patient to the golden resource
+			linkToGoldenResource(goldenPid, sourcePid);
+
 			//Only add half the patients to the group.
 			if (i % 2 == 0 ) {
 				group.addMember().setEntity(new Reference(patId));
 			}
 
-			Observation obs = new Observation();
-			obs.setId("OBS" + i);
-			obs.addIdentifier().setSystem("SYS").setValue("VAL" + i);
-			obs.setStatus(Observation.ObservationStatus.FINAL);
-			obs.getSubject().setReference(patId.getValue());
-			myObservationDao.update(obs);
-
-			Immunization immunization = new Immunization();
-			immunization.setId("IMM" + i);
-			immunization.setPatient(new Reference(patId));
-			if (i % 2 == 0) {
-				CodeableConcept cc = new CodeableConcept();
-				cc.addCoding().setSystem("vaccines").setCode("Flu");
-				immunization.setVaccineCode(cc);
-			} else {
-				CodeableConcept cc = new CodeableConcept();
-				cc.addCoding().setSystem("vaccines").setCode("COVID-19");
-				immunization.setVaccineCode(cc);
-			}
-			myImmunizationDao.update(immunization);
-
-			CareTeam careTeam = new CareTeam();
-			careTeam.setId("CT" + i);
-			careTeam.setSubject(new Reference(patId)); // This maps to the "patient" search parameter on CareTeam
-			myCareTeamDao.update(careTeam);
+			//Create data
+			createObservationWithIndex(i, patId);
+			createImmunizationWithIndex(i, patId);
+			createCareTeamWithIndex(i, patId);
 		}
 		myPatientGroupId =  myGroupDao.update(group).getId();
 
+		//Manually create another golden record
+		Patient goldenPatient2 = new Patient();
+		goldenPatient2.setId("PAT888");
+		DaoMethodOutcome g2Outcome = myPatientDao.update(goldenPatient2);
+		Long goldenPid2 = myIdHelperService.getPidOrNull(g2Outcome.getResource());
 
+		//Create some nongroup patients MDM linked to a different golden resource. They shouldnt be included in the query.
+		for (int i = 1000; i < 1005; i++) {
+			DaoMethodOutcome patientOutcome = createPatientWithIndex(i);
+			IIdType patId = patientOutcome.getId().toUnqualifiedVersionless();
+			Long sourcePid = myIdHelperService.getPidOrNull(patientOutcome.getResource());
+			linkToGoldenResource(goldenPid2, sourcePid);
+			createObservationWithIndex(i, patId);
+			createImmunizationWithIndex(i, patId);
+			createCareTeamWithIndex(i, patId);
+		}
+	}
+
+	private DaoMethodOutcome createPatientWithIndex(int i) {
+		Patient patient = new Patient();
+		patient.setId("PAT" + i);
+		patient.setGender(i % 2 == 0 ? Enumerations.AdministrativeGender.MALE : Enumerations.AdministrativeGender.FEMALE);
+		patient.addName().setFamily("FAM" + i);
+		patient.addIdentifier().setSystem("http://mrns").setValue("PAT" + i);
+		DaoMethodOutcome patientOutcome = myPatientDao.update(patient);
+		return patientOutcome;
+	}
+
+	private void createCareTeamWithIndex(int i, IIdType patId) {
+		CareTeam careTeam = new CareTeam();
+		careTeam.setId("CT" + i);
+		careTeam.setSubject(new Reference(patId)); // This maps to the "patient" search parameter on CareTeam
+		myCareTeamDao.update(careTeam);
+	}
+
+	private void createImmunizationWithIndex(int i, IIdType patId) {
+		Immunization immunization = new Immunization();
+		immunization.setId("IMM" + i);
+		immunization.setPatient(new Reference(patId));
+		if (i % 2 == 0) {
+			CodeableConcept cc = new CodeableConcept();
+			cc.addCoding().setSystem("vaccines").setCode("Flu");
+			immunization.setVaccineCode(cc);
+		} else {
+			CodeableConcept cc = new CodeableConcept();
+			cc.addCoding().setSystem("vaccines").setCode("COVID-19");
+			immunization.setVaccineCode(cc);
+		}
+		myImmunizationDao.update(immunization);
+	}
+
+	private void createObservationWithIndex(int i, IIdType patId) {
+		Observation obs = new Observation();
+		obs.setId("OBS" + i);
+		obs.addIdentifier().setSystem("SYS").setValue("VAL" + i);
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		obs.getSubject().setReference(patId.getValue());
+		myObservationDao.update(obs);
+	}
+
+	public void linkToGoldenResource(Long theGoldenPid, Long theSourcePid) {
+		MdmLink mdmLink = new MdmLink();
+		mdmLink.setCreated(new Date());
+		mdmLink.setMdmSourceType("Patient");
+		mdmLink.setGoldenResourcePid(theGoldenPid);
+		mdmLink.setSourcePid(theSourcePid);
+		mdmLink.setMatchResult(MdmMatchResultEnum.MATCH);
+		mdmLink.setHadToCreateNewGoldenResource(false);
+		mdmLink.setEidMatch(false);
+		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
+		mdmLink.setUpdated(new Date());
+		mdmLink.setVersion("1");
+		myMdmLinkDao.save(mdmLink);
 	}
 }

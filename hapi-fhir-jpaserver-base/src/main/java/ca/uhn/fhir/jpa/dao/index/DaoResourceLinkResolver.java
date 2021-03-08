@@ -41,7 +41,6 @@ import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -123,10 +122,9 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 			@SuppressWarnings("unchecked")
 			T newResource = (T) missingResourceDef.newInstance();
 
-			IBaseMetaType meta = newResource.getMeta();
-			if (meta instanceof IBaseHasExtensions) {
-				IBaseExtension<?, ?> extension = ((IBaseHasExtensions) meta).addExtension();
-				extension.setUrl(HapiExtensions.EXT_RESOURCE_META_PLACEHOLDER);
+			if (newResource instanceof IBaseHasExtensions) {
+				IBaseExtension<?, ?> extension = ((IBaseHasExtensions) newResource).addExtension();
+				extension.setUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER);
 				extension.setValue(myContext.getPrimitiveBoolean(true));
 			}
 
