@@ -232,7 +232,7 @@ public abstract class BaseParser implements IParser {
 			IBaseResource resource = next.getResource();
 			if (resource != null) {
 				if (resource.getIdElement().isEmpty() || resource.getIdElement().isLocal()) {
-					if (theContained.getResourceId(resource) != null) {
+					if (theContained.getResourceToIdMap().containsKey(resource)) {
 						// Prevent infinite recursion if there are circular loops in the contained resources
 						continue;
 					}
