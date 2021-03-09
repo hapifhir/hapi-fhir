@@ -1101,8 +1101,7 @@ public class FhirTerser {
 					continue;
 				}
 
-				// FIXME: needed?
-//				containResourcesForEncoding(theContained, resource, theOptions);
+			}
 			}
 
 		}
