@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.api;
 
 /*
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
