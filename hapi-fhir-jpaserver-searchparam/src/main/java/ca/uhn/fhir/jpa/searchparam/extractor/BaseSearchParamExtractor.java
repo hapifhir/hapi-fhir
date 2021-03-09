@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.StringUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -954,6 +955,21 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		SearchParamSet<T> retVal = new SearchParamSet<>();
 
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
+
+		boolean havePathWithResolveExpression = false;
+		for (RuntimeSearchParam nextSpDef : searchParams) {
+			if (nextSpDef.getParamType() != theSearchParamType) {
+				continue;
+			}
+			if (nextSpDef.getPath().contains("resolve")) {
+				havePathWithResolveExpression = true;
+				break;
+			}
+		}
+		if (havePathWithResolveExpression) {
+			myContext.newTerser().containResources(theResource, FhirTerser.OptionsEnum.MODIFY_RESOURCE, FhirTerser.OptionsEnum.CACHE_RESULTS);
+		}
+
 		for (RuntimeSearchParam nextSpDef : searchParams) {
 			if (nextSpDef.getParamType() != theSearchParamType) {
 				continue;

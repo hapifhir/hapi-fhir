@@ -13,14 +13,15 @@ import ca.uhn.fhir.context.RuntimeExtensionDtDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IIdentifiableElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseElement;
@@ -29,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -36,10 +38,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -47,6 +53,7 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.substring;
 
 /*
  * #%L
@@ -71,7 +78,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class FhirTerser {
 
 	private static final Pattern COMPARTMENT_MATCHER_PATH = Pattern.compile("([a-zA-Z.]+)\\.where\\(resolve\\(\\) is ([a-zA-Z]+)\\)");
-	private FhirContext myContext;
+	private static final EnumSet<OptionsEnum> EMPTY_OPTION_SET = EnumSet.noneOf(OptionsEnum.class);
+	private final FhirContext myContext;
 
 	public FhirTerser(FhirContext theContext) {
 		super();
@@ -1056,6 +1064,240 @@ public class FhirTerser {
 			}
 
 		});
+	}
+
+	private void containResourcesForEncoding(ContainedResources theContained, IBaseResource theResource, EnumSet<OptionsEnum> theOptions) {
+		List<IBaseReference> allReferences = getAllPopulatedChildElementsOfType(theResource, IBaseReference.class);
+		for (IBaseReference next : allReferences) {
+			IBaseResource resource = next.getResource();
+			if (resource == null && next.getReferenceElement().isLocal()) {
+				if (theContained.hasExistingIdToContainedResource()) {
+					IBaseResource potentialTarget = theContained.getExistingIdToContainedResource().remove(next.getReferenceElement().getValue());
+					if (potentialTarget != null) {
+						theContained.addContained(next.getReferenceElement(), potentialTarget);
+						containResourcesForEncoding(theContained, potentialTarget, theOptions);
+					}
+				}
+			}
+		}
+
+		for (IBaseReference next : allReferences) {
+			IBaseResource resource = next.getResource();
+			if (resource != null) {
+				if (resource.getIdElement().isEmpty() || resource.getIdElement().isLocal()) {
+					if (theContained.getResourceId(resource) != null) {
+						// Prevent infinite recursion if there are circular loops in the contained resources
+						continue;
+					}
+					IIdType id = theContained.addContained(resource);
+					if (theOptions.contains(OptionsEnum.MODIFY_RESOURCE)) {
+						getContainedResourceList(theResource).add(resource);
+						next.setReference(id.getValue());
+					}
+					if (resource.getIdElement().isLocal() && theContained.hasExistingIdToContainedResource()) {
+						theContained.getExistingIdToContainedResource().remove(resource.getIdElement().getValue());
+					}
+				} else {
+					continue;
+				}
+
+				// FIXME: needed?
+//				containResourcesForEncoding(theContained, resource, theOptions);
+			}
+
+		}
+
+	}
+
+	private static final String USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED = FhirTerser.class.getName() + "_CONTAIN_RESOURCES_COMPLETED";
+
+	public ContainedResources containResources(IBaseResource theResource, OptionsEnum... theOptions) {
+		EnumSet<OptionsEnum> options = toOptionSet(theOptions);
+
+		if (options.contains(OptionsEnum.CACHE_RESULTS)) {
+			Object cachedValue = theResource.getUserData(USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED);
+			if (cachedValue != null) {
+				return (ContainedResources) cachedValue;
+			}
+		}
+
+		ContainedResources contained = new ContainedResources();
+
+		List<? extends IBaseResource> containedResources = getContainedResourceList(theResource);
+		for (IBaseResource next : containedResources) {
+			String nextId = next.getIdElement().getValue();
+			if (StringUtils.isNotBlank(nextId)) {
+				if (!nextId.startsWith("#")) {
+					nextId = '#' + nextId;
+				}
+				next.getIdElement().setValue(nextId);
+			}
+			contained.addContained(next);
+		}
+
+		containResourcesForEncoding(contained, theResource, options);
+
+		if (options.contains(OptionsEnum.CACHE_RESULTS)) {
+			theResource.setUserData(USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED, contained);
+		}
+
+		return contained;
+	}
+
+	private EnumSet<OptionsEnum> toOptionSet(OptionsEnum[] theOptions) {
+		EnumSet<OptionsEnum> options;
+		if (theOptions == null || theOptions.length == 0) {
+			options = EMPTY_OPTION_SET;
+		} else {
+			options = EnumSet.of(theOptions[0], theOptions);
+		}
+		return options;
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T extends IBaseResource> List<T> getContainedResourceList(T theResource) {
+		List<T> containedResources = Collections.emptyList();
+		if (theResource instanceof IResource) {
+			containedResources = (List<T>) ((IResource) theResource).getContained().getContainedResources();
+		} else if (theResource instanceof IDomainResource) {
+			containedResources = (List<T>) ((IDomainResource) theResource).getContained();
+		}
+		return containedResources;
+	}
+
+
+	public static class ContainedResources {
+		private long myNextContainedId = 1;
+
+		private List<IBaseResource> myResourceList;
+		private IdentityHashMap<IBaseResource, IIdType> myResourceToIdMap;
+		private Map<String, IBaseResource> myExistingIdToContainedResourceMap;
+
+		public Map<String, IBaseResource> getExistingIdToContainedResource() {
+			if (myExistingIdToContainedResourceMap == null) {
+				myExistingIdToContainedResourceMap = new HashMap<>();
+			}
+			return myExistingIdToContainedResourceMap;
+		}
+
+		public IIdType addContained(IBaseResource theResource) {
+			IIdType existing = getResourceToIdMap().get(theResource);
+			if (existing != null) {
+				return existing;
+			}
+
+			IIdType newId = theResource.getIdElement();
+			if (isBlank(newId.getValue())) {
+				newId.setValue("#" + myNextContainedId++);
+			} else {
+				// Avoid auto-assigned contained IDs colliding with pre-existing ones
+				String idPart = newId.getValue();
+				if (substring(idPart, 0, 1).equals("#")) {
+					idPart = idPart.substring(1);
+					if (StringUtils.isNumeric(idPart)) {
+						myNextContainedId = Long.parseLong(idPart) + 1;
+					}
+				}
+			}
+
+			getResourceToIdMap().put(theResource, newId);
+			getOrCreateResourceList().add(theResource);
+			return newId;
+		}
+
+		public void addContained(IIdType theId, IBaseResource theResource) {
+			if (!getResourceToIdMap().containsKey(theResource)) {
+				getResourceToIdMap().put(theResource, theId);
+				getOrCreateResourceList().add(theResource);
+			}
+		}
+
+		public List<IBaseResource> getContainedResources() {
+			if (getResourceToIdMap() == null) {
+				return Collections.emptyList();
+			}
+			return getOrCreateResourceList();
+		}
+
+		public IIdType getResourceId(IBaseResource theNext) {
+			if (getResourceToIdMap() == null) {
+				return null;
+			}
+			return getResourceToIdMap().get(theNext);
+		}
+
+		private List<IBaseResource> getOrCreateResourceList() {
+			if (myResourceList == null) {
+				myResourceList = new ArrayList<>();
+			}
+			return myResourceList;
+		}
+
+		private IdentityHashMap<IBaseResource, IIdType> getResourceToIdMap() {
+			if (myResourceToIdMap == null) {
+				myResourceToIdMap = new IdentityHashMap<>();
+			}
+			return myResourceToIdMap;
+		}
+
+		public boolean isEmpty() {
+			if (myResourceToIdMap == null) {
+				return true;
+			}
+			return myResourceToIdMap.isEmpty();
+		}
+
+		public boolean hasExistingIdToContainedResource() {
+			return myExistingIdToContainedResourceMap != null;
+		}
+
+		public void assignIdsToContainedResources() {
+
+			if (!getContainedResources().isEmpty()) {
+
+				/*
+				 * The idea with the code block below:
+				 *
+				 * We want to preserve any IDs that were user-assigned, so that if it's really
+				 * important to someone that their contained resource have the ID of #FOO
+				 * or #1 we will keep that.
+				 *
+				 * For any contained resources where no ID was assigned by the user, we
+				 * want to manually create an ID but make sure we don't reuse an existing ID.
+				 */
+
+				Set<String> ids = new HashSet<>();
+
+				// Gather any user assigned IDs
+				for (IBaseResource nextResource : getContainedResources()) {
+					if (getResourceToIdMap().get(nextResource) != null) {
+						ids.add(getResourceToIdMap().get(nextResource).getValue());
+					}
+				}
+
+				// Automatically assign IDs to the rest
+				for (IBaseResource nextResource : getContainedResources()) {
+
+					while (getResourceToIdMap().get(nextResource) == null) {
+						String nextCandidate = "#" + myNextContainedId;
+						myNextContainedId++;
+						if (!ids.add(nextCandidate)) {
+							continue;
+						}
+
+						getResourceToIdMap().put(nextResource, new IdDt(nextCandidate));
+					}
+
+				}
+
+			}
+
+		}
+	}
+
+	public enum OptionsEnum {
+		MODIFY_RESOURCE,
+		CACHE_RESULTS
 	}
 
 }

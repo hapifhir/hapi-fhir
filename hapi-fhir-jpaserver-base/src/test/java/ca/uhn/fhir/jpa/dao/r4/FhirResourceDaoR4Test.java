@@ -94,6 +94,7 @@ import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Quantity.QuantityComparator;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -294,6 +295,28 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong()), not(greaterThan(0)));
 		});
 	}
+
+	// FIXME: add changelog
+	@Test
+	public void testStoreReferenceFromContainedToContainer() {
+		Patient patient = new Patient();
+		patient.setActive(true);
+
+		Provenance provenance = new Provenance();
+		provenance.setId("#1");
+		provenance.addTarget().setReference("#");
+		patient.getContained().add(provenance);
+
+		IIdType id = myPatientDao.create(patient).getId();
+
+		patient = myPatientDao.read(id);
+		assertEquals(1, patient.getContained().size());
+
+		provenance = (Provenance) patient.getContained().get(0);
+		assertEquals("#1", provenance.getId());
+		assertEquals("#", provenance.getTargetFirstRep().getReference());
+	}
+
 
 	@Test
 	public void testTermConceptReindexingDoesntDuplicateData() {

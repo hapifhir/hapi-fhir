@@ -2,10 +2,7 @@ package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.StopWatch;
@@ -22,7 +19,6 @@ import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.DocumentReference;
-import org.hl7.fhir.r4.model.Dosage;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Medication;
@@ -39,7 +35,6 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
-import org.hl7.fhir.r4.model.UuidType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Disabled;
@@ -927,7 +922,6 @@ public class JsonParserR4Test extends BaseTest {
 		String auditEventAsString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(ae);
 		assertEquals(auditEvent, auditEventAsString);
 	}
-
 
 
 	/**

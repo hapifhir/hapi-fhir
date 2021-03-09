@@ -1095,14 +1095,18 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 				.stream()
 				.filter(t -> t.getParamName().equals("medicationadministration-ingredient-medication"))
 				.collect(Collectors.toList());
-			ourLog.info("Tokens: {}", tokens);
+			ourLog.info("Tokens:\n * {}", tokens.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
 			assertEquals(1, tokens.size(), tokens.toString());
+			assertEquals(false, tokens.get(0).isMissing());
 
 		});
 
-		SearchParameterMap map = new SearchParameterMap();
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add("medicationadministration-ingredient-medication", new TokenParam("system","code"));
-		assertEquals(1, myMedicationAdministrationDao.search(map).size().intValue());
+		myCaptureQueriesListener.clear();
+		IBundleProvider search = myMedicationAdministrationDao.search(map);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(1, search.sizeOrThrowNpe());
 
 	}
 
