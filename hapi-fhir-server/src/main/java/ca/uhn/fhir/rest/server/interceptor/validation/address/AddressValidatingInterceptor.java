@@ -25,7 +25,7 @@ public class AddressValidatingInterceptor extends ServerOperationInterceptorAdap
 	public static final String ADDRESS_TYPE_NAME = "Address";
 	public static final String PROPERTY_VALIDATOR_CLASS = "validator.class";
 
-	public static final String ADDRESS_VALIDATION_DISABLED_HEADER = "CDR-Address-Validation-Disabled";
+	public static final String ADDRESS_VALIDATION_DISABLED_HEADER = "HAPI-Address-Validation-Disabled";
 
 	private ExtensionHelper myExtensionHelper = new ExtensionHelper();
 

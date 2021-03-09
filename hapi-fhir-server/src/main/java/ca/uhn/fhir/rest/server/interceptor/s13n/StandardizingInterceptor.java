@@ -32,7 +32,7 @@ public class StandardizingInterceptor extends ServerOperationInterceptorAdapter 
 		NAME_FAMILY, NAME_GIVEN, EMAIL, TITLE, PHONE, TEXT;
 	}
 
-	public static final String STANDARDIZATION_DISABLED_HEADER = "CDR-Standardization-Disabled";
+	public static final String STANDARDIZATION_DISABLED_HEADER = "HAPI-Standardization-Disabled";
 
 	private static final Logger ourLog = LoggerFactory.getLogger(StandardizingInterceptor.class);
 

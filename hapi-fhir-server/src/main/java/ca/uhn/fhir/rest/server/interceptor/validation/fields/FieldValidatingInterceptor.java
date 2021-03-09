@@ -22,7 +22,7 @@ public class FieldValidatingInterceptor extends ServerOperationInterceptorAdapte
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FieldValidatingInterceptor.class);
 
-	public static final String VALIDATION_DISABLED_HEADER = "CDR-Field-Validation-Disabled";
+	public static final String VALIDATION_DISABLED_HEADER = "HAPI-Field-Validation-Disabled";
 
 	private IAddressValidator myAddressValidator;
 
