@@ -77,6 +77,7 @@ public class TestR5Config extends BaseJavaConfigR5 {
 		retVal.setExpungeEnabled(true);
 		retVal.setFilterParameterEnabled(true);
 		retVal.setDefaultSearchParamsCanBeOverridden(false);
+		retVal.getModelConfig().setIndexOnContainedResources(true);
 		return retVal;
 	}
 

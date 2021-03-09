@@ -734,8 +734,8 @@ public class ModelConfig {
 	
 	
 	/**
-	 * Should indexed on the contained resources, it could be searched by <code>_contained=true</code>
-	 * This may have performance impacts
+	 * Should indexing and searching on contained resources be enabled on this server.
+	 * This may have performance impacts, and should be enabled only if it is needed. Default is <code>false</code>.
 	 * 
 	 * @since 5.4.0
 	 */
@@ -744,9 +744,9 @@ public class ModelConfig {
 	}
 	
 	/**
-	 * Should indexed on the contained resources, it could be searched by <code>_contained=true</code>
-	 * This may have performance impacts
-	 * 
+	 * Should indexing and searching on contained resources be enabled on this server.
+	 * This may have performance impacts, and should be enabled only if it is needed. Default is <code>false</code>.
+	 *
 	 * @since 5.4.0
 	 */
 	public void setIndexOnContainedResources(boolean theIndexOnContainedResources) {

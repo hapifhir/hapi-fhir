@@ -54,7 +54,7 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.jpa.searchparam.SearchContainedEnum;
+import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -1292,16 +1292,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public IBundleProvider search(final SearchParameterMap theParams, RequestDetails theRequest, HttpServletResponse theServletResponse) {
 
-		if (theRequest != null) {
-			String[] contained = theRequest.getParameters().get(Constants.PARAM_CONTAINED);
-			if (contained != null && contained.length > 0) {
-				if (contained[0].equals("true")) {
-					theParams.setSearchContainedMode(SearchContainedEnum.TRUE);
-					ourLog.info("Search on contained resources only");
-				} else if (contained[0].equals("both")) {
-					ourLog.warn("Search on both normal resources and contained resources are not support. set to default search on normal resources");
-				}
-			}
+		if (theParams.getSearchContainedMode() == SearchContainedModeEnum.BOTH) {
+			throw new MethodNotAllowedException("Contained mode 'both' is not currently supported");
+		}
+		if (theParams.getSearchContainedMode() != SearchContainedModeEnum.FALSE && !myModelConfig.isIndexOnContainedResources()) {
+			throw new MethodNotAllowedException("Searching with _contained mode enabled is not enabled on this server");
 		}
 
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {

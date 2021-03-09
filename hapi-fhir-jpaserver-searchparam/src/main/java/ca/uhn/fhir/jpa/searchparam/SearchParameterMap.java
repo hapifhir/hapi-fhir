@@ -6,6 +6,7 @@ import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -79,7 +80,7 @@ public class SearchParameterMap implements Serializable {
 	private boolean myLastN;
 	private Integer myLastNMax;
 	private boolean myDeleteExpunge;
-	private SearchContainedEnum mySearchContainedMode = SearchContainedEnum.FALSE;
+	private SearchContainedModeEnum mySearchContainedMode = SearchContainedModeEnum.FALSE;
 	
 	/**
 	 * Constructor
@@ -735,12 +736,16 @@ public class SearchParameterMap implements Serializable {
 		return retVal;
 	}
 
-	public SearchContainedEnum getSearchContainedMode() {
+	public SearchContainedModeEnum getSearchContainedMode() {
 		return mySearchContainedMode;
 	}
 
-	public void setSearchContainedMode(SearchContainedEnum theSearchContainedMode) {
-		this.mySearchContainedMode = theSearchContainedMode;
+	public void setSearchContainedMode(SearchContainedModeEnum theSearchContainedMode) {
+		if (theSearchContainedMode == null) {
+			mySearchContainedMode = SearchContainedModeEnum.FALSE;
+		} else {
+			this.mySearchContainedMode = theSearchContainedMode;
+		}
 	}
 
 	

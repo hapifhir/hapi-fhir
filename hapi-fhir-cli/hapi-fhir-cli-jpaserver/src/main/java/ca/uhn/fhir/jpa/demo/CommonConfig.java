@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.dialect.H2Dialect;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
@@ -49,9 +48,6 @@ public class CommonConfig {
 	@Bean
 	public DaoConfig daoConfig() {
 		DaoConfig retVal = new DaoConfig();
-		retVal.setSubscriptionEnabled(true);
-		retVal.setSubscriptionPollDelay(5000);
-		retVal.setSubscriptionPurgeInactiveAfterMillis(DateUtils.MILLIS_PER_HOUR);
 		retVal.setAllowMultipleDelete(true);
 		return retVal;
 	}

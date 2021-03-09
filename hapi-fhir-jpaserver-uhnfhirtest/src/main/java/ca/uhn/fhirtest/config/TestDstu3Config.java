@@ -77,6 +77,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		retVal.setExpungeEnabled(true);
 		retVal.setFilterParameterEnabled(true);
 		retVal.setDefaultSearchParamsCanBeOverridden(false);
+		retVal.getModelConfig().setIndexOnContainedResources(true);
 		return retVal;
 	}
 

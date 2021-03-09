@@ -59,9 +59,6 @@ public class FhirServerConfig extends BaseJavaConfigDstu2 {
 	@Bean
 	public DaoConfig daoConfig() {
 		DaoConfig retVal = new DaoConfig();
-		retVal.setSubscriptionEnabled(true);
-		retVal.setSubscriptionPollDelay(5000);
-		retVal.setSubscriptionPurgeInactiveAfterMillis(DateUtils.MILLIS_PER_HOUR);
 		retVal.setAllowMultipleDelete(true);
 		return retVal;
 	}
@@ -79,7 +76,6 @@ public class FhirServerConfig extends BaseJavaConfigDstu2 {
 
 	/**
 	 * Do some fancy logging to create a nice access log that has details about each incoming request.
-	 * @return
 	 */
 	public LoggingInterceptor loggingInterceptor() {
 		LoggingInterceptor retVal = new LoggingInterceptor();

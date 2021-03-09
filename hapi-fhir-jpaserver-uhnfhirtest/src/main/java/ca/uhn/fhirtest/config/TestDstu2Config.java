@@ -79,6 +79,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		retVal.setWebsocketContextPath("/");
 		retVal.setFilterParameterEnabled(true);
 		retVal.setDefaultSearchParamsCanBeOverridden(false);
+		retVal.getModelConfig().setIndexOnContainedResources(true);
 		return retVal;
 	}
 

@@ -52,7 +52,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.SearchContainedEnum;
+import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.SourceParam;
@@ -561,7 +561,7 @@ public class QueryStack {
 			List<String> paths = join.createResourceLinkPaths(targetResourceType, paramReference);
 			Condition typePredicate = BinaryCondition.equalTo(join.getColumnTargetResourceType(), mySqlBuilder.generatePlaceholder(theResourceType));
 			Condition pathPredicate = toEqualToOrInPredicate(join.getColumnSourcePath(), mySqlBuilder.generatePlaceholders(paths));
-			Condition linkedPredicate = searchForIdsWithAndOr(join.getColumnSrcResourceId(), targetResourceType, parameterName, Collections.singletonList(orValues), theRequest, theRequestPartitionId, SearchContainedEnum.FALSE);
+			Condition linkedPredicate = searchForIdsWithAndOr(join.getColumnSrcResourceId(), targetResourceType, parameterName, Collections.singletonList(orValues), theRequest, theRequestPartitionId, SearchContainedModeEnum.FALSE);
 			andPredicates.add(toAndPredicate(partitionPredicate, pathPredicate, typePredicate, linkedPredicate));
 		}
 
@@ -1046,7 +1046,7 @@ public class QueryStack {
 	}
 
 	@Nullable
-	public Condition searchForIdsWithAndOr(@Nullable DbColumn theSourceJoinColumn, String theResourceName, String theParamName, List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest, RequestPartitionId theRequestPartitionId, SearchContainedEnum theSearchContainedMode) {
+	public Condition searchForIdsWithAndOr(@Nullable DbColumn theSourceJoinColumn, String theResourceName, String theParamName, List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest, RequestPartitionId theRequestPartitionId, SearchContainedModeEnum theSearchContainedMode) {
 
 		if (theAndOrParams.isEmpty()) {
 			return null;
@@ -1108,7 +1108,7 @@ public class QueryStack {
 							break;
 						case REFERENCE:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								if (theSearchContainedMode.equals(SearchContainedEnum.TRUE)) 
+								if (theSearchContainedMode.equals(SearchContainedModeEnum.TRUE))
 									andPredicates.add(createPredicateReferenceForContainedResource(theSourceJoinColumn, theResourceName, theParamName, nextParamDef, nextAnd, null, theRequest, theRequestPartitionId));
 								else 	
 									andPredicates.add(createPredicateReference(theSourceJoinColumn, theResourceName, theParamName, nextAnd, null, theRequest, theRequestPartitionId));

@@ -7,7 +7,12 @@ import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.EventDefinition;
+import org.hl7.fhir.r4.model.Expression;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Subscription;
+import org.hl7.fhir.r4.model.TriggerDefinition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -36,6 +41,7 @@ import java.util.List;
  * 6. Execute the 'sendObservation' test
  * 7. Look in the 'attachWebSocket' terminal execution and wait for your ping with the subscription id
  */
+
 /**
  * Ignored because this feature isn't implemented yet
  */
@@ -75,15 +81,6 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
-	}
-
-	@Override
-	@BeforeEach
-	public void before() throws Exception {
-		super.before();
-
-		myDaoConfig.setSubscriptionEnabled(true);
-
 	}
 
 	@Test

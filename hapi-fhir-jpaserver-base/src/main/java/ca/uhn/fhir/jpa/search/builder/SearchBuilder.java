@@ -60,7 +60,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
-import ca.uhn.fhir.jpa.searchparam.SearchContainedEnum;
+import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
@@ -216,7 +216,7 @@ public class SearchBuilder implements ISearchBuilder {
 			attemptCompositeUniqueSpProcessing(theQueryStack, theParams, theRequest);
 		}
 
-		SearchContainedEnum searchContainedMode = theParams.getSearchContainedMode();
+		SearchContainedModeEnum searchContainedMode = theParams.getSearchContainedMode();
 		
 		// Handle each parameter
 		List<String> paramNames = new ArrayList<>(myParams.keySet());
