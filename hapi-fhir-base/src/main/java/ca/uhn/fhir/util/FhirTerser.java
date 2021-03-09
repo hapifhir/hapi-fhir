@@ -1102,7 +1102,6 @@ public class FhirTerser {
 				}
 
 			}
-			}
 
 		}
 
