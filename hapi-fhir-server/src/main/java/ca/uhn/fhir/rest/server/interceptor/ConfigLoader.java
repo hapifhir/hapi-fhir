@@ -24,7 +24,7 @@ public class ConfigLoader {
 			theResourcePath = theResourcePath.substring(CLASSPATH_PREFIX.length());
 		}
 		return ClasspathUtil.loadResource(theResourcePath);
-//		FIXME the code below seems to be failing in the build server...
+		
 //		try {
 //			URL url = ResourceUtils.getURL(theResourcePath);
 //			File file = ResourceUtils.getFile(url);
