@@ -98,6 +98,8 @@ public class ModelConfig {
 	private Set<String> myAutoVersionReferenceAtPaths = Collections.emptySet();
 	private Map<String, Set<String>> myTypeToAutoVersionReferenceAtPaths = Collections.emptyMap();
 	private boolean myRespectVersionsForSearchIncludes;
+	
+	private boolean myIndexOnContainedResources = false;
 
 	/**
 	 * Constructor
@@ -728,6 +730,27 @@ public class ModelConfig {
 	 */
 	public void setRespectVersionsForSearchIncludes(boolean theRespectVersionsForSearchIncludes) {
 		myRespectVersionsForSearchIncludes = theRespectVersionsForSearchIncludes;
+	}
+	
+	
+	/**
+	 * Should indexed on the contained resources, it could be searched by <code>_contained=true</code>
+	 * This may have performance impacts
+	 * 
+	 * @since 5.4.0
+	 */
+	public boolean isIndexOnContainedResources() {
+		return myIndexOnContainedResources;
+	}
+	
+	/**
+	 * Should indexed on the contained resources, it could be searched by <code>_contained=true</code>
+	 * This may have performance impacts
+	 * 
+	 * @since 5.4.0
+	 */
+	public void setIndexOnContainedResources(boolean theIndexOnContainedResources) {
+		myIndexOnContainedResources = theIndexOnContainedResources;
 	}
 	
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {

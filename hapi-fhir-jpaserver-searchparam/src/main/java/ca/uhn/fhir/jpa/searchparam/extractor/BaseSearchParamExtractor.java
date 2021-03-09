@@ -171,9 +171,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@Override
-	public SearchParamSet<PathAndRef> extractResourceLinks(IBaseResource theResource) {
+	public SearchParamSet<PathAndRef> extractResourceLinks(IBaseResource theResource, boolean theWantLocalReferences) {
 		IExtractor<PathAndRef> extractor = createReferenceExtractor();
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.REFERENCE);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.REFERENCE, theWantLocalReferences);
 	}
 
 	private IExtractor<PathAndRef> createReferenceExtractor() {
@@ -231,7 +231,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	private List<String> extractReferenceParamsAsQueryTokens(RuntimeSearchParam theSearchParam, IBaseResource theResource, IExtractor<PathAndRef> theExtractor) {
 		SearchParamSet<PathAndRef> params = new SearchParamSet<>();
-		extractSearchParam(theSearchParam, theResource, theExtractor, params);
+		extractSearchParam(theSearchParam, theResource, theExtractor, params, false);
 		return refsToStringList(params);
 	}
 
@@ -244,7 +244,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	private <T extends BaseResourceIndexedSearchParam> List<String> extractParamsAsQueryTokens(RuntimeSearchParam theSearchParam, IBaseResource theResource, IExtractor<T> theExtractor) {
 		SearchParamSet<T> params = new SearchParamSet<>();
-		extractSearchParam(theSearchParam, theResource, theExtractor, params);
+		extractSearchParam(theSearchParam, theResource, theExtractor, params, false);
 		return toStringList(params);
 	}
 
@@ -257,14 +257,14 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@Override
 	public SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource) {
 		IExtractor<BaseResourceIndexedSearchParam> extractor = createTokenExtractor(theResource);
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.TOKEN);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.TOKEN, false);
 	}
 
 	@Override
 	public SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource, RuntimeSearchParam theSearchParam) {
 		IExtractor<BaseResourceIndexedSearchParam> extractor = createTokenExtractor(theResource);
 		SearchParamSet<BaseResourceIndexedSearchParam> setToPopulate = new SearchParamSet<>();
-		extractSearchParam(theSearchParam, theResource, extractor, setToPopulate);
+		extractSearchParam(theSearchParam, theResource, extractor, setToPopulate, false);
 		return setToPopulate;
 	}
 
@@ -293,11 +293,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	public SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamSpecial(IBaseResource theResource) {
 		String resourceTypeName = toRootTypeName(theResource);
 		IExtractor<BaseResourceIndexedSearchParam> extractor = createSpecialExtractor(resourceTypeName);
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.SPECIAL);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.SPECIAL, false);
 	}
 
 	private IExtractor<BaseResourceIndexedSearchParam> createSpecialExtractor(String theResourceTypeName) {
-		return (params, searchParam, value, path) -> {
+		return (params, searchParam, value, path, theWantLocalReferences) -> {
 			if (COORDS_INDEX_PATHS.contains(path)) {
 				addCoords_Position(theResourceTypeName, params, searchParam, value);
 			}
@@ -311,11 +311,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource) {
 		IExtractor<ResourceIndexedSearchParamUri> extractor = createUriExtractor(theResource);
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.URI);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.URI, false);
 	}
 
 	private IExtractor<ResourceIndexedSearchParamUri> createUriExtractor(IBaseResource theResource) {
-		return (params, searchParam, value, path) -> {
+		return (params, searchParam, value, path, theWantLocalReferences) -> {
 			String nextType = toRootTypeName(value);
 			String resourceType = toRootTypeName(theResource);
 			switch (nextType) {
@@ -336,7 +336,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource) {
 		IExtractor<ResourceIndexedSearchParamDate> extractor = createDateExtractor(theResource);
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.DATE);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.DATE, false);
 	}
 
 	private IExtractor<ResourceIndexedSearchParamDate> createDateExtractor(IBaseResource theResource) {
@@ -346,17 +346,17 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@Override
 	public Date extractDateFromResource(IBase theValue, String thePath) {
 		DateExtractor extractor = new DateExtractor("DateType");
-		return extractor.get(theValue, thePath).getValueHigh();
+		return extractor.get(theValue, thePath, false).getValueHigh();
 	}
 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource) {
 		IExtractor<ResourceIndexedSearchParamNumber> extractor = createNumberExtractor(theResource);
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.NUMBER);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.NUMBER, false);
 	}
 
 	private IExtractor<ResourceIndexedSearchParamNumber> createNumberExtractor(IBaseResource theResource) {
-		return (params, searchParam, value, path) -> {
+		return (params, searchParam, value, path, theWantLocalReferences) -> {
 			String nextType = toRootTypeName(value);
 			String resourceType = toRootTypeName(theResource);
 			switch (nextType) {
@@ -384,18 +384,18 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource) {
 		IExtractor<ResourceIndexedSearchParamQuantity> extractor = createQuantityExtractor(theResource);
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.QUANTITY);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.QUANTITY, false);
 	}
 
 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamQuantityNormalized> extractSearchParamQuantityNormalized(IBaseResource theResource) {
 		IExtractor<ResourceIndexedSearchParamQuantityNormalized> extractor = createQuantityNormalizedExtractor(theResource);
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.QUANTITY);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.QUANTITY, false);
 	}
 
 	private IExtractor<ResourceIndexedSearchParamQuantity> createQuantityExtractor(IBaseResource theResource) {
-		return (params, searchParam, value, path) -> {
+		return (params, searchParam, value, path, theWantLocalReferences) -> {
 			if (value.getClass().equals(myLocationPositionDefinition.getImplementingClass())) {
 				return;
 			}
@@ -421,7 +421,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	private IExtractor<ResourceIndexedSearchParamQuantityNormalized> createQuantityNormalizedExtractor(IBaseResource theResource) {
 
-		return (params, searchParam, value, path) -> {
+		return (params, searchParam, value, path, theWantLocalReferences) -> {
 			if (value.getClass().equals(myLocationPositionDefinition.getImplementingClass())) {
 				return;
 			}
@@ -449,11 +449,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	public SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource) {
 		IExtractor<ResourceIndexedSearchParamString> extractor = createStringExtractor(theResource);
 
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.STRING);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.STRING, false);
 	}
 
 	private IExtractor<ResourceIndexedSearchParamString> createStringExtractor(IBaseResource theResource) {
-		return (params, searchParam, value, path) -> {
+		return (params, searchParam, value, path, theWantLocalReferences) -> {
 			String resourceType = toRootTypeName(theResource);
 
 			if (value instanceof IPrimitiveType) {
@@ -934,7 +934,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	}
 
-	private <T> SearchParamSet<T> extractSearchParams(IBaseResource theResource, IExtractor<T> theExtractor, RestSearchParameterTypeEnum theSearchParamType) {
+	private <T> SearchParamSet<T> extractSearchParams(IBaseResource theResource, IExtractor<T> theExtractor, RestSearchParameterTypeEnum theSearchParamType, boolean theWantLocalReferences) {
 		SearchParamSet<T> retVal = new SearchParamSet<>();
 
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
@@ -943,12 +943,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				continue;
 			}
 
-			extractSearchParam(nextSpDef, theResource, theExtractor, retVal);
+			extractSearchParam(nextSpDef, theResource, theExtractor, retVal, theWantLocalReferences);
 		}
 		return retVal;
 	}
 
-	private <T> void extractSearchParam(RuntimeSearchParam theSearchParameterDef, IBaseResource theResource, IExtractor<T> theExtractor, SearchParamSet<T> theSetToPopulate) {
+	private <T> void extractSearchParam(RuntimeSearchParam theSearchParameterDef, IBaseResource theResource, IExtractor<T> theExtractor, SearchParamSet<T> theSetToPopulate, boolean theWantLocalReferences) {
 		String nextPathUnsplit = theSearchParameterDef.getPath();
 		if (isBlank(nextPathUnsplit)) {
 			return;
@@ -961,7 +961,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				if (nextObject != null) {
 					String typeName = toRootTypeName(nextObject);
 					if (!myIgnoredForSearchDatatypes.contains(typeName)) {
-						theExtractor.extract(theSetToPopulate, theSearchParameterDef, nextObject, nextPath);
+						theExtractor.extract(theSetToPopulate, theSearchParameterDef, nextObject, nextPath, theWantLocalReferences);
 					}
 				}
 			}
@@ -1181,7 +1181,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@FunctionalInterface
 	private interface IExtractor<T> {
 
-		void extract(SearchParamSet<T> theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath);
+		void extract(SearchParamSet<T> theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath, boolean theWantLocalReferences);
 
 	}
 
@@ -1196,9 +1196,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 
 		@Override
-		public void extract(SearchParamSet<T> theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath) {
-			myExtractor0.extract(theParams, theSearchParam, theValue, thePath);
-			myExtractor1.extract(theParams, theSearchParam, theValue, thePath);
+		public void extract(SearchParamSet<T> theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath, boolean theWantLocalReferences) {
+			myExtractor0.extract(theParams, theSearchParam, theValue, thePath, theWantLocalReferences);
+			myExtractor1.extract(theParams, theSearchParam, theValue, thePath, theWantLocalReferences);
 		}
 	}
 
@@ -1207,7 +1207,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		private PathAndRef myPathAndRef = null;
 
 		@Override
-		public void extract(SearchParamSet<PathAndRef> theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath) {
+		public void extract(SearchParamSet<PathAndRef> theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath, boolean theWantLocalReferences) {
 			if (theValue instanceof IBaseResource) {
 				return;
 			}
@@ -1257,10 +1257,13 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					}
 
 					if (nextId == null ||
-						nextId.isEmpty() ||
-						nextId.getValue().startsWith("#") ||
-						nextId.getValue().startsWith("urn:")) {
-						return;
+							nextId.isEmpty() ||
+							nextId.getValue().startsWith("urn:")) {
+							return;
+					}
+					if (!theWantLocalReferences) {
+						if (nextId.getValue().startsWith("#"))
+							return;
 					}
 
 					myPathAndRef = new PathAndRef(theSearchParam.getName(), thePath, valueRef, false);
@@ -1275,7 +1278,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		public PathAndRef get(IBase theValue, String thePath) {
 			extract(new SearchParamSet<>(),
 				new RuntimeSearchParam(null, null, "Reference", null, null, null, null, null, null, null),
-				theValue, thePath);
+				theValue, thePath, false);
 			return myPathAndRef;
 		}
 	}
@@ -1294,7 +1297,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 
 		@Override
-		public void extract(SearchParamSet theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath) {
+		public void extract(SearchParamSet theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath, boolean theWantLocalReferences) {
 			String nextType = toRootTypeName(theValue);
 			switch (nextType) {
 				case "date":
@@ -1389,10 +1392,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 		}
 
-		public ResourceIndexedSearchParamDate get(IBase theValue, String thePath) {
+		public ResourceIndexedSearchParamDate get(IBase theValue, String thePath, boolean theWantLocalReferences) {
 			extract(new SearchParamSet<>(),
 				new RuntimeSearchParam(null, null, "date", null, null, null, null, null, null, null),
-				theValue, thePath);
+				theValue, thePath, theWantLocalReferences);
 			return myIndexedSearchParamDate;
 		}
 	}
@@ -1407,7 +1410,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 
 		@Override
-		public void extract(SearchParamSet<BaseResourceIndexedSearchParam> params, RuntimeSearchParam searchParam, IBase value, String path) {
+		public void extract(SearchParamSet<BaseResourceIndexedSearchParam> params, RuntimeSearchParam searchParam, IBase value, String path, boolean theWantLocalReferences) {
 
 			// DSTU3+
 			if (value instanceof IBaseEnumeration<?>) {
