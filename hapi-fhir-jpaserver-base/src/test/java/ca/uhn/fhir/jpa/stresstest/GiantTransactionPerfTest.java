@@ -41,6 +41,7 @@ import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import com.google.common.collect.Lists;
 import org.hamcrest.Matchers;
 import org.hibernate.Session;
+import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -686,7 +687,7 @@ public class GiantTransactionPerfTest {
 
 		@Override
 		public <T> T unwrap(Class<T> cls) {
-			if (cls.equals(Session.class)) {
+			if (cls.equals(SessionImpl.class)) {
 				return null;
 			}
 			throw new UnsupportedOperationException();

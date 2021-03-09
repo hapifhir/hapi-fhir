@@ -1095,7 +1095,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		}
 
-		if (changed != null && !changed.isChanged() && !theForceUpdate && myConfig.isSuppressUpdatesWithNoChange()) {
+		if (thePerformIndexing && changed != null && !changed.isChanged() && !theForceUpdate && myConfig.isSuppressUpdatesWithNoChange()) {
 			ourLog.debug("Resource {} has not changed", entity.getIdDt().toUnqualified().getValue());
 			if (theResource != null) {
 				updateResourceMetadata(entity, theResource);

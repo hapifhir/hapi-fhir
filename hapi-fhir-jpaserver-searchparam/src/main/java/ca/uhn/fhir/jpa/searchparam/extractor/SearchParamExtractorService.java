@@ -287,6 +287,10 @@ public class SearchParamExtractorService {
 			nextId = nextReference.getResource().getIdElement();
 		}
 
+		if (myContext.getParserOptions().isStripVersionsFromReferences() && !myContext.getParserOptions().getDontStripVersionsFromReferencesAtPaths().contains(thePathAndRef.getPath()) && nextId.hasVersionIdPart()) {
+			nextId = nextId.toVersionless();
+		}
+
 		theParams.myPopulatedResourceLinkParameters.add(thePathAndRef.getSearchParamName());
 
 		boolean canonical = thePathAndRef.isCanonical();

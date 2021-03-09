@@ -296,7 +296,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		});
 	}
 
-	// FIXME: add changelog
 	@Test
 	public void testStoreReferenceFromContainedToContainer() {
 		Patient patient = new Patient();
@@ -307,14 +306,26 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		provenance.addTarget().setReference("#");
 		patient.getContained().add(provenance);
 
+		Observation observation = new Observation();
+		observation.setId("#2");
+		observation.getSubject().setReference("#");
+		patient.getContained().add(observation);
+
 		IIdType id = myPatientDao.create(patient).getId();
 
 		patient = myPatientDao.read(id);
-		assertEquals(1, patient.getContained().size());
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		assertEquals(2, patient.getContained().size());
 
 		provenance = (Provenance) patient.getContained().get(0);
 		assertEquals("#1", provenance.getId());
 		assertEquals("#", provenance.getTargetFirstRep().getReference());
+
+		observation = (Observation) patient.getContained().get(1);
+		assertEquals("#2", observation.getId());
+		assertEquals("#", observation.getSubject().getReference());
 	}
 
 

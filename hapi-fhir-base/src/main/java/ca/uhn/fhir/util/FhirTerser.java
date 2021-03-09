@@ -79,6 +79,7 @@ public class FhirTerser {
 
 	private static final Pattern COMPARTMENT_MATCHER_PATH = Pattern.compile("([a-zA-Z.]+)\\.where\\(resolve\\(\\) is ([a-zA-Z]+)\\)");
 	private static final EnumSet<OptionsEnum> EMPTY_OPTION_SET = EnumSet.noneOf(OptionsEnum.class);
+	private static final String USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED = FhirTerser.class.getName() + "_CONTAIN_RESOURCES_COMPLETED";
 	private final FhirContext myContext;
 
 	public FhirTerser(FhirContext theContext) {
@@ -319,7 +320,6 @@ public class FhirTerser {
 	public <T extends IBase> Optional<T> getSingleValue(IBase theTarget, String thePath, Class<T> theWantedType) {
 		return Optional.ofNullable(getSingleValueOrNull(theTarget, thePath, theWantedType));
 	}
-
 
 	private <T extends IBase> List<T> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, IBase theCurrentObj, List<String> theSubList, Class<T> theWantedClass) {
 		return getValues(theCurrentDef, theCurrentObj, theSubList, theWantedClass, false, false);
@@ -1109,12 +1109,17 @@ public class FhirTerser {
 
 	}
 
-	private static final String USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED = FhirTerser.class.getName() + "_CONTAIN_RESOURCES_COMPLETED";
-
+	/**
+	 * Iterate through the whole resource and identify any contained resources. Optionally this method
+	 * can also assign IDs and modify references where the resource link has been specified but not the
+	 * reference text.
+	 *
+	 * @since 5.4.0
+	 */
 	public ContainedResources containResources(IBaseResource theResource, OptionsEnum... theOptions) {
 		EnumSet<OptionsEnum> options = toOptionSet(theOptions);
 
-		if (options.contains(OptionsEnum.CACHE_RESULTS)) {
+		if (options.contains(OptionsEnum.STORE_AND_REUSE_RESULTS)) {
 			Object cachedValue = theResource.getUserData(USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED);
 			if (cachedValue != null) {
 				return (ContainedResources) cachedValue;
@@ -1137,7 +1142,7 @@ public class FhirTerser {
 
 		containResourcesForEncoding(contained, theResource, options);
 
-		if (options.contains(OptionsEnum.CACHE_RESULTS)) {
+		if (options.contains(OptionsEnum.STORE_AND_REUSE_RESULTS)) {
 			theResource.setUserData(USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED, contained);
 		}
 
@@ -1165,6 +1170,21 @@ public class FhirTerser {
 		return containedResources;
 	}
 
+
+	public enum OptionsEnum {
+
+		/**
+		 * Should we modify the resource in the case that contained resource IDs are assigned
+		 * during a {@link #containResources(IBaseResource, OptionsEnum...)} pass.
+		 */
+		MODIFY_RESOURCE,
+
+		/**
+		 * Store the results of the operation in the resource metadata and reuse them if
+		 * subsequent calls are made.
+		 */
+		STORE_AND_REUSE_RESULTS
+	}
 
 	public static class ContainedResources {
 		private long myNextContainedId = 1;
@@ -1293,11 +1313,6 @@ public class FhirTerser {
 			}
 
 		}
-	}
-
-	public enum OptionsEnum {
-		MODIFY_RESOURCE,
-		CACHE_RESULTS
 	}
 
 }

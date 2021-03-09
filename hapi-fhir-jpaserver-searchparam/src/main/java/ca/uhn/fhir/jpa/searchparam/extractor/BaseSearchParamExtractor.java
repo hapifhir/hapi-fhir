@@ -957,7 +957,29 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
 
-		boolean havePathWithResolveExpression = false;
+		cleanUpContainedResourceReferences(theResource, theSearchParamType, searchParams);
+
+		for (RuntimeSearchParam nextSpDef : searchParams) {
+			if (nextSpDef.getParamType() != theSearchParamType) {
+				continue;
+			}
+
+			extractSearchParam(nextSpDef, theResource, theExtractor, retVal, theWantLocalReferences);
+		}
+		return retVal;
+	}
+
+	/**
+	 * HAPI FHIR Reference objects (e.g. {@link org.hl7.fhir.r4.model.Reference}) can hold references either by text
+	 * (e.g. "#3") or by resource (e.g. "new Reference(patientInstance)"). The FHIRPath evaluator only understands the
+	 * first way, so if there is any chance of the FHIRPath evaluator needing to descend across references, we
+	 * have to assign values to those references before indexing.
+	 *
+	 * Doing this cleanup isn't hugely expensive, but it's not completely free either so we only do it
+	 * if we think there's actually a chance
+	 */
+	private void cleanUpContainedResourceReferences(IBaseResource theResource, RestSearchParameterTypeEnum theSearchParamType, Collection<RuntimeSearchParam> searchParams) {
+		boolean havePathWithResolveExpression = myModelConfig.isIndexOnContainedResources();
 		for (RuntimeSearchParam nextSpDef : searchParams) {
 			if (nextSpDef.getParamType() != theSearchParamType) {
 				continue;
@@ -968,17 +990,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 		}
 		if (havePathWithResolveExpression) {
-			myContext.newTerser().containResources(theResource, FhirTerser.OptionsEnum.MODIFY_RESOURCE, FhirTerser.OptionsEnum.CACHE_RESULTS);
+			myContext.newTerser().containResources(theResource, FhirTerser.OptionsEnum.MODIFY_RESOURCE, FhirTerser.OptionsEnum.STORE_AND_REUSE_RESULTS);
 		}
-
-		for (RuntimeSearchParam nextSpDef : searchParams) {
-			if (nextSpDef.getParamType() != theSearchParamType) {
-				continue;
-			}
-
-			extractSearchParam(nextSpDef, theResource, theExtractor, retVal, theWantLocalReferences);
-		}
-		return retVal;
 	}
 
 	private <T> void extractSearchParam(RuntimeSearchParam theSearchParameterDef, IBaseResource theResource, IExtractor<T> theExtractor, SearchParamSet<T> theSetToPopulate, boolean theWantLocalReferences) {

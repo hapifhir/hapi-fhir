@@ -33,6 +33,9 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
 public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ContainedTest.class);
 
@@ -65,6 +68,8 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		ourLog.info("Output: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
 		
 		runInTransaction(()->{
+			ourLog.info("String indexes:\n * {}", myResourceIndexedSearchParamStringDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+
 			Long i = myEntityManager
 				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myParamName = 'subject.family' AND s.myResourceType = 'Observation'", Long.class)
 				.getSingleResult();
