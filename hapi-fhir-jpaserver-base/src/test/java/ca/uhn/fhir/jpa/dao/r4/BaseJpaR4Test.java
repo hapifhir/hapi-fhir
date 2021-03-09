@@ -162,6 +162,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -542,12 +543,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		runInTransaction(() -> {
 			SearchSession searchSession  = Search.session(myEntityManager);
 			searchSession.workspace(ResourceTable.class).purge();
-//			searchSession.workspace(ResourceIndexedSearchParamString.class).purge();
 			searchSession.indexingPlan().execute();
 		});
 
 		myDaoConfig.setSchedulingDisabled(true);
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 	}
 
 	@AfterEach

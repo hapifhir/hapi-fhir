@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.bulk.job;
  * #L%
  */
 
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.log.Logs;
@@ -39,7 +38,6 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -176,7 +174,7 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	private void queryResourceTypeWithReferencesToPatients(List<ResourcePersistentId> myReadPids, List<String> idChunk) {
 		//Build SP map
 		//First, inject the _typeFilters and _since from the export job
-		SearchParameterMap expandedSpMap = createSearchParameterMapForJob();
+		SearchParameterMap expandedSpMap = createSearchParameterMapsForResourceType();
 
 		//Since we are in a bulk job, we have to ensure the user didn't jam in a patient search param, since we need to manually set that.
 		validateSearchParameters(expandedSpMap);

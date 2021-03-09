@@ -1,21 +1,52 @@
 package ca.uhn.fhir.jpa.bulk.api;
 
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import java.util.Date;
 import java.util.Set;
 
 public class BulkDataExportOptions {
-	private final String myOutputFormat;
-	private final Set<String> myResourceTypes;
-	private final Date mySince;
-	private final Set<String> myFilters;
-	private boolean mySystemLevel;
+	public BulkDataExportOptions() {
 
-	public BulkDataExportOptions(String theOutputFormat, Set<String> theResourceTypes, Date theSince, Set<String> theFilters, boolean theSystemLevel) {
+	}
+
+	public enum ExportStyle {
+		PATIENT,
+		GROUP,
+		SYSTEM
+	}
+	private String myOutputFormat;
+	private Set<String> myResourceTypes;
+	private Date mySince;
+	private Set<String> myFilters;
+	private ExportStyle myExportStyle;
+	private boolean myExpandMdm;
+	private IIdType myGroupId;
+
+
+
+	public void setOutputFormat(String theOutputFormat) {
 		myOutputFormat = theOutputFormat;
+	}
+
+	public void setResourceTypes(Set<String> theResourceTypes) {
 		myResourceTypes = theResourceTypes;
+	}
+
+	public void setSince(Date theSince) {
 		mySince = theSince;
+	}
+
+	public void setFilters(Set<String> theFilters) {
 		myFilters = theFilters;
-		mySystemLevel = theSystemLevel;
+	}
+
+	public ExportStyle getExportStyle() {
+		return myExportStyle;
+	}
+
+	public void setExportStyle(ExportStyle theExportStyle) {
+		myExportStyle = theExportStyle;
 	}
 
 	public String getOutputFormat() {
@@ -34,7 +65,19 @@ public class BulkDataExportOptions {
 		return myFilters;
 	}
 
-	public boolean isSystemLevel() {
-		return mySystemLevel;
+	public boolean isExpandMdm() {
+		return myExpandMdm;
+	}
+
+	public void setExpandMdm(boolean theExpandMdm) {
+		myExpandMdm = theExpandMdm;
+	}
+
+	public IIdType getGroupId() {
+		return myGroupId;
+	}
+
+	public void setGroupId(IIdType theGroupId) {
+		myGroupId = theGroupId;
 	}
 }

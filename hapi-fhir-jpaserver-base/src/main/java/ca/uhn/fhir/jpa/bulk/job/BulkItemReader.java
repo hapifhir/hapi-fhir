@@ -20,30 +20,18 @@ package ca.uhn.fhir.jpa.bulk.job;
  * #L%
  */
 
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
-import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.util.UrlUtil;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * Basic Bulk Export implementation which simply reads all type filters and applies them, along with the _since param
@@ -58,7 +46,7 @@ public class BulkItemReader extends BaseBulkItemReader {
 		ourLog.info("Bulk export assembling export of type {} for job {}", myResourceType, myJobUUID);
 
 
-		SearchParameterMap map = createSearchParameterMapForJob();
+		SearchParameterMap map = createSearchParameterMapsForResourceType();
 		ISearchBuilder sb = getSearchBuilderForLocalResourceType();
 		IResultIterator myResultIterator = sb.createQuery(map, new SearchRuntimeDetails(null, myJobUUID), null, RequestPartitionId.allPartitions());
 

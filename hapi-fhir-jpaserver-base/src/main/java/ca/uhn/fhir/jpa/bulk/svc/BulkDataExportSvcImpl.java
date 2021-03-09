@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
-import ca.uhn.fhir.jpa.bulk.api.GroupBulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
@@ -45,16 +44,13 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.UrlUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.InstantType;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +63,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
@@ -78,7 +73,6 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.UrlUtil.escapeUrlParam;
 import static ca.uhn.fhir.util.UrlUtil.escapeUrlParams;
-import static org.apache.commons.lang3.StringUtils.contains;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
@@ -245,8 +239,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	}
 
 	private boolean isPatientBulkJob(BulkExportJobEntity theBulkExportJobEntity) {
-		//TODO GGG
-		return true;
+		return theBulkExportJobEntity.getRequest().startsWith("/Patient/");
 	}
 
 	private void enhanceBulkParametersWithGroupParameters(BulkExportJobEntity theBulkExportJobEntity, JobParametersBuilder theParameters) {
@@ -257,7 +250,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	}
 
 	private boolean isGroupBulkJob(BulkExportJobEntity theBulkExportJobEntity) {
-		return getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_GROUP_ID) != null;
+		String queryParameterIfPresent = getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_GROUP_ID);
+		return queryParameterIfPresent != null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -296,10 +290,13 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		StringBuilder requestBuilder = new StringBuilder();
 		requestBuilder.append("/");
 
-		//Prefix the export url with Group/[id]/
-		if (theBulkDataExportOptions instanceof GroupBulkDataExportOptions) {
-			requestBuilder.append(((GroupBulkDataExportOptions)theBulkDataExportOptions).getGroupId()).append("/");
+		//Prefix the export url with Group/[id]/ or /Patient/ depending on what type of request it is.
+		if (theBulkDataExportOptions.getExportStyle().equals(BulkDataExportOptions.ExportStyle.GROUP)) {
+			requestBuilder.append(theBulkDataExportOptions.getGroupId().toVersionless()).append("/");
+		} else if (theBulkDataExportOptions.getExportStyle().equals(BulkDataExportOptions.ExportStyle.PATIENT)) {
+			requestBuilder.append("Patient/");
 		}
+
 
 		requestBuilder.append(JpaConstants.OPERATION_EXPORT);
 		requestBuilder.append("?").append(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT).append("=").append(escapeUrlParam(outputFormat));
@@ -315,13 +312,13 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			theBulkDataExportOptions.getFilters().stream()
 				.forEach(filter -> requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE_FILTER).append("=").append(escapeUrlParam(filter)));
 		}
-		if (theBulkDataExportOptions instanceof GroupBulkDataExportOptions) {
-			GroupBulkDataExportOptions groupOptions = (GroupBulkDataExportOptions) theBulkDataExportOptions;
-			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_GROUP_ID).append("=").append(groupOptions.getGroupId().getValue());
-			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_MDM).append("=").append(groupOptions.isMdm());
+
+		if (theBulkDataExportOptions.getExportStyle().equals(BulkDataExportOptions.ExportStyle.GROUP)) {
+			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_GROUP_ID).append("=").append(theBulkDataExportOptions.getGroupId().getValue());
+			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_MDM).append("=").append(theBulkDataExportOptions.isExpandMdm());
 		}
 
-		requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_SYSTEM_LEVEL).append("=").append(theBulkDataExportOptions.isSystemLevel());
+
 
 		String request = requestBuilder.toString();
 
@@ -399,7 +396,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 				}
 				String resourceType = next.substring(0, next.indexOf("?"));
 				if (!theResourceTypes.contains(resourceType)) {
-					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Resource type does not appear in " + JpaConstants.PARAM_EXPORT_TYPE + " list");
+					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Resource type does not appear in " + JpaConstants.PARAM_EXPORT_TYPE+ " list");
 				}
 				if (!types.add(resourceType)) {
 					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Multiple filters found for type " + resourceType);

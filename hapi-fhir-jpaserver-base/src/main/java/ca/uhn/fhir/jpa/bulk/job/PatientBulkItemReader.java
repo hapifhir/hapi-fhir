@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.bulk.job;
  * #L%
  */
 
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
@@ -30,9 +30,9 @@ import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringParam;
 import org.slf4j.Logger;
 import org.springframework.batch.item.ItemReader;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -46,6 +46,9 @@ import java.util.List;
  * 2. Search for anything that has `patient-compartment-search-param:missing=false`
  */
 public class PatientBulkItemReader extends BaseBulkItemReader implements ItemReader<List<ResourcePersistentId>> {
+	@Autowired
+	private DaoConfig myDaoConfig;
+
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 
@@ -56,12 +59,19 @@ public class PatientBulkItemReader extends BaseBulkItemReader implements ItemRea
 		}
 		return runtimeSearchParam;
 	}
+
 	@Override
 	Iterator<ResourcePersistentId> getResourcePidIterator() {
+		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
+			String errorMessage = "You attempted to start a Patient Bulk Export, but the system has `Index Missing Fields` disabled. It must be enabled for Patient Bulk Export";
+			ourLog.error(errorMessage);
+			throw new IllegalStateException(errorMessage);
+		}
+
 		List<ResourcePersistentId> myReadPids = new ArrayList<>();
 
 		//use _typeFilter and _since and all those fancy bits and bobs to generate our basic SP map.
-		SearchParameterMap map = createSearchParameterMapForJob();
+		SearchParameterMap map = createSearchParameterMapsForResourceType();
 
 		String patientSearchParam = getPatientSearchParamForCurrentResourceType().getName();
 
@@ -72,7 +82,7 @@ public class PatientBulkItemReader extends BaseBulkItemReader implements ItemRea
 		if (!myResourceType.equalsIgnoreCase("Patient")) {
 			//Now that we have our basic built Bulk Export SP map, we inject the condition that the resources returned
 			//must have a patient= or subject= reference set.
-			map.add(patientSearchParam, new ReferenceParam().setMissing(true));
+			map.add(patientSearchParam, new ReferenceParam().setMissing(false));
 		}
 
 		ISearchBuilder sb = getSearchBuilderForLocalResourceType();

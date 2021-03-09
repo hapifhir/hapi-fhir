@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public abstract class BaseBulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -80,25 +81,26 @@ public abstract class BaseBulkItemReader implements ItemReader<List<ResourcePers
 
 	abstract Iterator<ResourcePersistentId> getResourcePidIterator();
 
-	protected SearchParameterMap createSearchParameterMapForJob() {
+	protected List<SearchParameterMap> createSearchParameterMapsForResourceType() {
 		BulkExportJobEntity jobEntity = getJobEntity();
 		RuntimeResourceDefinition theDef = getResourceDefinition();
-		SearchParameterMap map = new SearchParameterMap();
 		Map<String, String[]> requestUrl = UrlUtil.parseQueryStrings(jobEntity.getRequest());
 		String[] typeFilters = requestUrl.get(JpaConstants.PARAM_EXPORT_TYPE_FILTER);
 		if (typeFilters != null) {
-			//TODO GGG START HERE
-			Optional<String> filter = Arrays.stream(typeFilters).filter(t -> t.startsWith(myResourceType + "?")).findFirst();
-			if (filter.isPresent()) {
-				String matchUrl = filter.get();
-				map = myMatchUrlService.translateMatchUrl(matchUrl, theDef);
-			}
+			List<SearchParameterMap> maps = Arrays.stream(typeFilters)
+				.filter(typeFilter -> typeFilter.startsWith(myResourceType + "?"))
+				.map(filter -> buildSearchParameterMapForTypeFilter(filter, theDef))
+				.collect(Collectors.toList());
+			return maps;
 		}
-		if (jobEntity.getSince() != null) {
-			map.setLastUpdated(new DateRangeParam(jobEntity.getSince(), null));
+	}
+	public SearchParameterMap buildSearchParameterMapForTypeFilter(String theFilter, RuntimeResourceDefinition theDef) {
+		SearchParameterMap searchParameterMap = myMatchUrlService.translateMatchUrl(theFilter, theDef);
+		if (getJobEntity().getSince() != null) {
+			searchParameterMap.setLastUpdated(new DateRangeParam(getJobEntity().getSince(), null));
 		}
-		map.setLoadSynchronous(true);
-		return map;
+		searchParameterMap.setLoadSynchronous(true);
+
 	}
 
 	protected RuntimeResourceDefinition getResourceDefinition() {
