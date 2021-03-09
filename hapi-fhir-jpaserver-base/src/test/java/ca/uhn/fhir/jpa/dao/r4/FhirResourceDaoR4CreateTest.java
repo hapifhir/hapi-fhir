@@ -306,13 +306,17 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		o.getMeta().addTag("http://foo", "bar", "FOOBAR");
 		p.getManagingOrganization().setResource(o);
 
-		ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info("Input: {}", encoded);
+		assertThat(encoded, containsString("#1"));
 
 		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		p = myPatientDao.read(id);
 
-		ourLog.info("Output: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+		encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info("Output: {}", encoded);
+		assertThat(encoded, containsString("#1"));
 
 		Organization org = (Organization) p.getManagingOrganization().getResource();
 		assertEquals("#1", org.getId());

@@ -787,7 +787,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Lookup the two existing IDs to make sure they are legit
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());

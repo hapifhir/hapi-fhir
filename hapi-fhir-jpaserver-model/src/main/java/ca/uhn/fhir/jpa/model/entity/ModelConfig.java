@@ -98,7 +98,6 @@ public class ModelConfig {
 	private Set<String> myAutoVersionReferenceAtPaths = Collections.emptySet();
 	private Map<String, Set<String>> myTypeToAutoVersionReferenceAtPaths = Collections.emptyMap();
 	private boolean myRespectVersionsForSearchIncludes;
-	
 	private boolean myIndexOnContainedResources = false;
 
 	/**
@@ -731,8 +730,7 @@ public class ModelConfig {
 	public void setRespectVersionsForSearchIncludes(boolean theRespectVersionsForSearchIncludes) {
 		myRespectVersionsForSearchIncludes = theRespectVersionsForSearchIncludes;
 	}
-	
-	
+
 	/**
 	 * Should indexing and searching on contained resources be enabled on this server.
 	 * This may have performance impacts, and should be enabled only if it is needed. Default is <code>false</code>.
