@@ -497,7 +497,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	/**
 	 * Returns true if the resource has changed (either the contents or the tags)
 	 */
-	protected EncodedResource populateResourceIntoEntity(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, boolean theUpdateHash) {
+	protected EncodedResource populateResourceIntoEntity(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, boolean thePerformIndexing) {
 		if (theEntity.getResourceType() == null) {
 			theEntity.setResourceType(toResourceName(theResource));
 		}
@@ -508,19 +508,26 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		if (theEntity.getDeleted() == null) {
 
-			encoding = myConfig.getResourceEncoding();
-			Set<String> excludeElements = ResourceMetaParams.EXCLUDE_ELEMENTS_IN_ENCODED;
-			theEntity.setFhirVersion(myContext.getVersion().getVersion());
+			if (thePerformIndexing) {
 
-			bytes = encodeResource(theResource, encoding, excludeElements, myContext);
+				encoding = myConfig.getResourceEncoding();
+				Set<String> excludeElements = ResourceMetaParams.EXCLUDE_ELEMENTS_IN_ENCODED;
+				theEntity.setFhirVersion(myContext.getVersion().getVersion());
 
-			if (theUpdateHash) {
+				bytes = encodeResource(theResource, encoding, excludeElements, myContext);
+
 				HashFunction sha256 = Hashing.sha256();
 				String hashSha256 = sha256.hashBytes(bytes).toString();
 				if (hashSha256.equals(theEntity.getHashSha256()) == false) {
 					changed = true;
 				}
 				theEntity.setHashSha256(hashSha256);
+
+			} else {
+
+				encoding = null;
+				bytes = null;
+
 			}
 
 			Set<ResourceTag> allDefs = new HashSet<>();
@@ -537,11 +544,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				String profile = def.getResourceProfile("");
 				if (isNotBlank(profile)) {
 					TagDefinition profileDef = getTagOrNull(TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null);
-					if (def != null) {
-						ResourceTag tag = theEntity.addTag(profileDef);
-						allDefs.add(tag);
-						theEntity.setHasTags(true);
-					}
+
+					ResourceTag tag = theEntity.addTag(profileDef);
+					allDefs.add(tag);
+					theEntity.setHasTags(true);
 				}
 			}
 
@@ -574,7 +580,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			encoding = ResourceEncodingEnum.DEL;
 		}
 
-		if (changed == false) {
+		if (thePerformIndexing && changed == false) {
 			if (theEntity.getId() == null) {
 				changed = true;
 			} else {
@@ -1080,9 +1086,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			} else {
 
-				// FIXME: what is this needed for?
-				changed = null;
-//				changed = populateResourceIntoEntity(theRequest, theResource, entity, false);
+				changed = populateResourceIntoEntity(theRequest, theResource, entity, false);
 
 				entity.setUpdated(theTransactionDetails.getTransactionDate());
 				entity.setIndexStatus(null);
