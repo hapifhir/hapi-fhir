@@ -42,6 +42,11 @@ public class AddressValidatingInterceptor extends ServerOperationInterceptorAdap
 		start(myProperties);
 	}
 
+	public AddressValidatingInterceptor(Properties theProperties) {
+		super();
+		start(theProperties);
+	}
+
 	public void start(Properties theProperties) {
 		if (!theProperties.containsKey(PROPERTY_VALIDATOR_CLASS)) {
 			ourLog.info("Address validator class is not defined. Validation is disabled");
