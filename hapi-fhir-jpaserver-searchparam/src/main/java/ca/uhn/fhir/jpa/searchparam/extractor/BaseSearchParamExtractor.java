@@ -83,6 +83,7 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -961,7 +962,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			if (nextSpDef.getParamType() != theSearchParamType) {
 				continue;
 			}
-			if (nextSpDef.getPath().contains("resolve")) {
+			if (defaultString(nextSpDef.getPath()).contains("resolve")) {
 				havePathWithResolveExpression = true;
 				break;
 			}

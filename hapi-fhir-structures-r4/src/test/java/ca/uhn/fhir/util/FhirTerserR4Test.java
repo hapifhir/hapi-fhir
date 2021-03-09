@@ -90,8 +90,7 @@ public class FhirTerserR4Test {
 	}
 
 	@Test
-	public void testContaine
-	dResourcesWithModify_DoubleLink() {
+	public void testContainedResourcesWithModify_DoubleLink() {
 		Substance ingredient = new Substance();
 		ingredient.getCode().addCoding().setSystem("system").setCode("code");
 
@@ -108,7 +107,7 @@ public class FhirTerserR4Test {
 		assertEquals(ResourceType.Medication, medAdmin.getContained().get(0).getResourceType());
 		assertEquals(ResourceType.Substance, medAdmin.getContained().get(1).getResourceType());
 		assertEquals("#1", medAdmin.getMedicationReference().getReference());
-		assertEquals("#2", ((Medication)(medAdmin.getContained().get(1))).getIngredientFirstRep().getItemReference().getReference());
+		assertEquals("#2", ((Medication)(medAdmin.getContained().get(0))).getIngredientFirstRep().getItemReference().getReference());
 
 	}
 
