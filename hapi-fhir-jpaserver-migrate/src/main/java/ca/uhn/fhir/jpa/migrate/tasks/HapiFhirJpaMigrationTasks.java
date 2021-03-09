@@ -71,9 +71,23 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init501(); // 20200514 - 20200515
 		init510(); // 20200516 - 20201028
 		init520(); // 20201029 -
-		init530();
+		init530(); 
+		init540(); // 20210218 - 
 	}
 
+	private void init540() {
+		
+		Builder version = forVersion(VersionEnum.V5_4_0);
+		
+		//-- add index on HFJ_SPIDX_DATE
+	    version.onTable("HFJ_SPIDX_DATE").addIndex("20210309.1", "IDX_SP_DATE_HASH_HIGH")
+	        .unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_HIGH");
+	    
+		//-- add index on HFJ_FORCED_ID
+	    version.onTable("HFJ_FORCED_ID").addIndex("20210309.2", "IDX_FORCEID_FID")
+	        .unique(false).withColumns("FORCED_ID");   
+	}
+	
 	private void init530() {
 		Builder version = forVersion(VersionEnum.V5_3_0);
 	
@@ -126,14 +140,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// HFJ_RES_LINK
 		version.onTable("HFJ_RES_LINK")
 			.addColumn("20210126.1", "TARGET_RESOURCE_VERSION").nullable().type(ColumnTypeEnum.LONG);
-		
-		//-- add index on HFJ_SPIDX_DATE
-	    version.onTable("HFJ_SPIDX_DATE").addIndex("20210214.1", "IDX_SP_DATE_HASH_HIGH")
-	        .unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_HIGH");
-	    
-		//-- add index on HFJ_FORCED_ID
-	    version.onTable("HFJ_FORCED_ID").addIndex("20210214.2", "IDX_FORCEID_FID")
-	        .unique(false).withColumns("FORCED_ID");
+
 	}
 
 	protected void init520() {
