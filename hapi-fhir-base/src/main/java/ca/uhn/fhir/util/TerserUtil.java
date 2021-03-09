@@ -218,6 +218,13 @@ public final class TerserUtil {
 		mergeFields(theTerser, theResource, childDefinition, theFromFieldValues, theToFieldValues);
 	}
 
+	public static void setFieldByFhirPath(FhirContext theFhirContext, FhirTerser theTerser, String theFhirPath, IBaseResource theResource, IBase theValue) {
+		List<IBase> theFromFieldValues = theTerser.getValues(theResource, theFhirPath, true, false);
+		for (IBase theFromFieldValue : theFromFieldValues) {
+			theTerser.cloneInto(theFromFieldValue, theValue, true);
+		}
+	}
+
 	private static void replaceField(IBaseResource theFrom, IBaseResource theTo, BaseRuntimeChildDefinition childDefinition) {
 		childDefinition.getAccessor().getFirstValueOrNull(theFrom).ifPresent(v -> {
 				childDefinition.getMutator().setValue(theTo, v);

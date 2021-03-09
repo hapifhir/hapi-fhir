@@ -30,10 +30,22 @@ public class TerserUtilHelper {
 		myResource = theResource;
 	}
 
+	/**
+	 * Sets string field at the specified FHIR path
+	 *
+	 * @param theField The FHIR Path to set the values at
+	 * @param theValue The string value to be set
+	 * @return Returns current instance
+	 */
 	public TerserUtilHelper setField(String theField, String theValue) {
-		IBase value = TerserUtil.newElement(myContext, "string", theValue);
-		TerserUtil.setField(myContext, getTerser(), theField, myResource, value);
+		IBase value = newStringElement(theValue);
+		TerserUtil.setFieldByFhirPath(myContext, getTerser(), theField, myResource, value);
 		return this;
+	}
+
+	protected IBase newStringElement(String theValue) {
+		IBase value = TerserUtil.newElement(myContext, "string", theValue);
+		return value;
 	}
 
 	public List<IBase> getFieldValues(String theField) {
@@ -64,6 +76,10 @@ public class TerserUtilHelper {
 	 */
 	public RuntimeResourceDefinition getResourceDefinition() {
 		return myContext.getResourceDefinition(myResource);
+	}
+
+	public IBase newElement(String theElementName) {
+		return TerserUtil.newElement(myContext, theElementName);
 	}
 
 	public FhirContext getContext() {

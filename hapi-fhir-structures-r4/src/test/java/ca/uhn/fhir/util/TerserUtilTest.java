@@ -37,20 +37,20 @@ class TerserUtilTest {
 
 	@Test
 	void testCloneEidIntoResourceViaHelper() {
-		TerserUtilHelper idHelper = TerserUtilHelper.newHelper(ourFhirContext, "Identifier");
-		idHelper
-			.setField("system", "http://org.com/sys")
-			.setField("value", "123");
-
 		TerserUtilHelper p1Helper = TerserUtilHelper.newHelper(ourFhirContext, "Patient");
-		p1Helper.setField("identifier", idHelper.getResource());
+		p1Helper.setField("identifier.system", "http://org.com/sys");
+		p1Helper.setField("identifier.value", "123");
 
 		TerserUtilHelper p2Helper = TerserUtilHelper.newHelper(ourFhirContext, "Patient");
 		RuntimeResourceDefinition definition = p1Helper.getResourceDefinition();
-		TerserUtil.cloneEidIntoResource(ourFhirContext, definition.getChildByName("identifier"), idHelper.getResource(), p2Helper.getResource());
+		TerserUtil.cloneEidIntoResource(ourFhirContext, definition.getChildByName("identifier"), p1Helper.getResource(), p2Helper.getResource());
 
 		assertEquals(1, p2Helper.getFieldValues("identifier").size());
-		assertEquals(p1Helper.getFieldValues("identifier").get(0), p2Helper.getFieldValues("identifier").get(0));
+
+		Identifier id1 = (Identifier) p1Helper.getFieldValues("identifier").get(0);
+		Identifier id2 = (Identifier) p2Helper.getFieldValues("identifier").get(0);
+		assertTrue(id1.equalsDeep(id2));
+		assertFalse(id1.equals(id2));
 	}
 
 	@Test
