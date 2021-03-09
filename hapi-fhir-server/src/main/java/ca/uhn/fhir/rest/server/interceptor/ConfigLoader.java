@@ -2,29 +2,24 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.util.ClasspathUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.ResourceUtils;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.URL;
 import java.util.Properties;
 
 public class ConfigLoader {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ConfigLoader.class);
-	public static final String CLASSPATH_PREFIX = "classpath:";
+	public static final String CLASSPATH = "classpath:";
 
 	public static String loadResourceContent(String theResourcePath) {
-		if(theResourcePath.startsWith(CLASSPATH_PREFIX)) {
-			theResourcePath = theResourcePath.substring(CLASSPATH_PREFIX.length());
+		if(theResourcePath.startsWith(CLASSPATH)) {
+			theResourcePath = theResourcePath.substring(CLASSPATH.length());
 		}
 		return ClasspathUtil.loadResource(theResourcePath);
-		
+
 //		try {
 //			URL url = ResourceUtils.getURL(theResourcePath);
 //			File file = ResourceUtils.getFile(url);
