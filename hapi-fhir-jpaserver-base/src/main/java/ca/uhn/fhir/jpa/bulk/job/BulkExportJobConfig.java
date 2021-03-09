@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.bulk.job;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.processors.PidToIBaseResourceProcessor;
 import ca.uhn.fhir.jpa.bulk.svc.BulkExportDaoSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -31,6 +32,7 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -45,6 +47,13 @@ import java.util.List;
  */
 @Configuration
 public class BulkExportJobConfig {
+
+	public static final String JOB_UUID_PARAMETER = "jobUUID";
+	public static final String READ_CHUNK_PARAMETER = "readChunkSize";
+	public static final String EXPAND_MDM_PARAMETER = "expandMdm";
+	public static final String GROUP_ID_PARAMETER = "groupId";
+	public static final String RESOURCE_TYPES_PARAMETER = "resourceTypes";
+	public static final int CHUNK_SIZE = 100;
 
 	@Autowired
 	private StepBuilderFactory myStepBuilderFactory;
@@ -63,12 +72,29 @@ public class BulkExportJobConfig {
 	@Bean
 	@Lazy
 	public Job bulkExportJob() {
-		return myJobBuilderFactory.get("bulkExportJob")
+		return myJobBuilderFactory.get(BatchJobsConfig.BULK_EXPORT_JOB_NAME)
 			.validator(bulkJobParameterValidator())
 			.start(createBulkExportEntityStep())
 			.next(partitionStep())
 			.next(closeJobStep())
 			.build();
+	}
+
+	@Bean
+	@Lazy
+	public Job groupBulkExportJob() {
+		return myJobBuilderFactory.get(BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME)
+			.validator(groupBulkJobParameterValidator())
+			.validator(bulkJobParameterValidator())
+			.start(createBulkExportEntityStep())
+			.next(groupPartitionStep())
+			.next(closeJobStep())
+			.build();
+	}
+
+	@Bean
+	public GroupIdPresentValidator groupBulkJobParameterValidator() {
+		return new GroupIdPresentValidator();
 	}
 
 	@Bean
@@ -90,9 +116,27 @@ public class BulkExportJobConfig {
 	}
 
 	@Bean
+	public Step groupBulkExportGenerateResourceFilesStep() {
+		return myStepBuilderFactory.get("groupBulkExportGenerateResourceFilesStep")
+			.<List<ResourcePersistentId>, List<IBaseResource>> chunk(CHUNK_SIZE) //1000 resources per generated file, as the reader returns 10 resources at a time.
+			.reader(groupBulkItemReader())
+			.processor(myPidToIBaseResourceProcessor)
+			.writer(resourceToFileWriter())
+			.listener(bulkExportGenrateResourceFilesStepListener())
+			.build();
+	}
+
+	@Bean
+	@StepScope
+	public GroupBulkItemReader groupBulkItemReader(){
+		return new GroupBulkItemReader();
+	}
+
+
+	@Bean
 	public Step bulkExportGenerateResourceFilesStep() {
 		return myStepBuilderFactory.get("bulkExportGenerateResourceFilesStep")
-			.<List<ResourcePersistentId>, List<IBaseResource>> chunk(100) //1000 resources per generated file, as the reader returns 10 resources at a time.
+			.<List<ResourcePersistentId>, List<IBaseResource>> chunk(CHUNK_SIZE) //1000 resources per generated file, as the reader returns 10 resources at a time.
 			.reader(bulkItemReader())
 			.processor(myPidToIBaseResourceProcessor)
 			.writer(resourceToFileWriter())
@@ -125,6 +169,14 @@ public class BulkExportJobConfig {
 		return new BulkExportGenerateResourceFilesStepListener();
 	}
 
+
+	@Bean
+	public Step groupPartitionStep() {
+		return myStepBuilderFactory.get("partitionStep")
+			.partitioner("groupBulkExportGenerateResourceFilesStep", bulkExportResourceTypePartitioner())
+			.step(groupBulkExportGenerateResourceFilesStep())
+			.build();
+	}
 	@Bean
 	public Step partitionStep() {
 		return myStepBuilderFactory.get("partitionStep")

@@ -99,6 +99,7 @@ public class ModelConfig {
 	private Map<String, Set<String>> myTypeToAutoVersionReferenceAtPaths = Collections.emptyMap();
 	private boolean myRespectVersionsForSearchIncludes;
 	private boolean myNormalizeResourcesBeforeSearchParamExtraction;
+	private boolean myIndexOnContainedResources = false;
 
 	/**
 	 * Constructor
@@ -753,7 +754,29 @@ public class ModelConfig {
         myNormalizeResourcesBeforeSearchParamExtraction = theNormalizeResourcesBeforeSearchParamExtraction;
     }
 
-    private static void validateTreatBaseUrlsAsLocal(String theUrl) {
+	
+	
+	/**
+	 * Should indexed on the contained resources, it could be searched by <code>_contained=true</code>
+	 * This may have performance impacts
+	 * 
+	 * @since 5.4.0
+	 */
+	public boolean isIndexOnContainedResources() {
+		return myIndexOnContainedResources;
+	}
+	
+	/**
+	 * Should indexed on the contained resources, it could be searched by <code>_contained=true</code>
+	 * This may have performance impacts
+	 * 
+	 * @since 5.4.0
+	 */
+	public void setIndexOnContainedResources(boolean theIndexOnContainedResources) {
+		myIndexOnContainedResources = theIndexOnContainedResources;
+	}
+	
+	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");
 
 		int starIdx = theUrl.indexOf('*');

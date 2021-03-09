@@ -64,7 +64,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		try {
 			int insertionCount;
 			int updateCount;
-			SessionImpl session = (SessionImpl) myEntityManager.unwrap(Session.class);
+			SessionImpl session = myEntityManager.unwrap(SessionImpl.class);
 			if (session != null) {
 				insertionCount = session.getActionQueue().numberOfInsertions();
 				updateCount = session.getActionQueue().numberOfUpdates();

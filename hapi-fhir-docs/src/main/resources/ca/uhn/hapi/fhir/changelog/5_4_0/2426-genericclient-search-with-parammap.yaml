@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2426
+title: "When using the Generic Client, search invocations where the parameters are supplied
+  using `.where(Map)` did not include search modifiers such as `:exact` in the search
+  URL. Thanks to GitHub user @granadacoder for reporting this issue!"

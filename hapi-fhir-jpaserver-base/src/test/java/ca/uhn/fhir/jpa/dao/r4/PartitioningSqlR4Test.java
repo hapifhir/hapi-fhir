@@ -975,6 +975,58 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		}
 	}
 
+
+	@Test
+	public void testRead_PidId_UnknownResourceId() {
+		// Read in specific Partition
+		{
+			addReadPartition(1);
+			try {
+				myPatientDao.read(new IdType("Patient/1"), mySrd);
+				fail();
+			} catch (ResourceNotFoundException e) {
+				// expected
+			}
+		}
+
+		// Read in null Partition
+		{
+			addReadDefaultPartition();
+			try {
+				myPatientDao.read(new IdType("Patient/1"), mySrd);
+				fail();
+			} catch (ResourceNotFoundException e) {
+				// expected
+			}
+		}
+	}
+
+	@Test
+	public void testRead_PidId_ResourceIdOnlyExistsInDifferentPartition() {
+		IIdType id = createPatient(withPartition(2), withActiveTrue());
+		// Read in specific Partition
+		{
+			addReadPartition(1);
+			try {
+				myPatientDao.read(id, mySrd);
+				fail();
+			} catch (ResourceNotFoundException e) {
+				// expected
+			}
+		}
+
+		// Read in null Partition
+		{
+			addReadDefaultPartition();
+			try {
+				myPatientDao.read(id, mySrd);
+				fail();
+			} catch (ResourceNotFoundException e) {
+				// expected
+			}
+		}
+	}
+
 	@Test
 	public void testRead_ForcedId_SpecificPartition() {
 		IIdType patientIdNull = createPatient(withPutPartition(null), withActiveTrue(), withId("NULL"));

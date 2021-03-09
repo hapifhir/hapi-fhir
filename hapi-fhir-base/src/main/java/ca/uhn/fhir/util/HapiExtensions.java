@@ -102,6 +102,16 @@ public class HapiExtensions {
 	public static final String EXT_SP_UNIQUE = "http://hapifhir.io/fhir/StructureDefinition/sp-unique";
 
 	/**
+	 * URL for extension on a Phonetic String SearchParameter indicating that text values should be phonetically indexed with the named encoder
+	 */
+	public static final String EXT_SEARCHPARAM_PHONETIC_ENCODER = "http://hapifhir.io/fhir/StructureDefinition/searchparameter-phonetic-encoder";
+
+	/**
+	 * URL for boolean extension added to all placeholder resources
+	 */
+	public static final String EXT_RESOURCE_PLACEHOLDER = "http://hapifhir.io/fhir/StructureDefinition/resource-placeholder";
+
+	/**
 	 * Non instantiable
 	 */
 	private HapiExtensions() {
