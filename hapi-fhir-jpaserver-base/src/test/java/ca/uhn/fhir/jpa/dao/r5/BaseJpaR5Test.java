@@ -480,7 +480,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 
 	@BeforeEach
 	public void beforeResetConfig() {
-		myDaoConfig.setHardTagListLimit(1000);
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 	}
 
