@@ -39,6 +39,7 @@ import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -613,10 +614,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
 
 		// Iterate over the files
-		Binary nextBinary = myBinaryDao.read(jobInfo.getFiles().get(0).getResourceId());
-		assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
-		String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
-		ourLog.info("Next contents for type {}:\n{}", nextBinary.getResourceType(), nextContents);
+		String nextContents = getBinaryContents(jobInfo, 0);
 
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
 		assertThat(nextContents, is(containsString("IMM0")));
@@ -652,10 +650,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
 
 		// Iterate over the files
-		Binary nextBinary = myBinaryDao.read(jobInfo.getFiles().get(0).getResourceId());
-		assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
-		String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
-		ourLog.info("Next contents for type {}:\n{}", nextBinary.getResourceType(), nextContents);
+		String nextContents = getBinaryContents(jobInfo, 0);
 
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
 		assertThat(nextContents, is(containsString("IMM0")));
@@ -695,16 +690,9 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		// Create a bulk job
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
 
-//		GroupBulkExportJobParametersBuilder paramBuilder = new GroupBulkExportJobParametersBuilder();
-//		paramBuilder.setGroupId(myPatientGroupId.getIdPart());
-//		paramBuilder.setJobUUID(jobDetails.getJobId());
-//		paramBuilder.setReadChunkSize(10L);
-//
-//		JobExecution jobExecution = myBatchJobSubmitter.runJob(myGroupBulkJob, paramBuilder.toJobParameters());
 		myBulkDataExportSvc.buildExportFiles();
-
 		awaitAllBulkJobCompletions();
-//		awaitJobCompletion(jobExecution);
+
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 
 		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
@@ -712,10 +700,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("CareTeam")));
 
 		// Iterate over the files
-		Binary nextBinary = myBinaryDao.read(jobInfo.getFiles().get(0).getResourceId());
-		assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
-		String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
-		ourLog.info("Next contents for type {}:\n{}", nextBinary.getResourceType(), nextContents);
+		String nextContents = getBinaryContents(jobInfo, 0);
 
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("CareTeam")));
 		assertThat(nextContents, is(containsString("CT0")));
@@ -731,10 +716,91 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		JobParametersBuilder paramBuilder = new JobParametersBuilder().addString("jobUUID", "I'm not real!");
 		try {
 			myBatchJobSubmitter.runJob(myBulkJob, paramBuilder.toJobParameters());
-			fail("Should have had invalid parameter execption!");
+			fail("Should have had invalid parameter exception!");
 		} catch (JobParametersInvalidException e) {
 			// good
 		}
+	}
+
+	@Test
+	public void testSystemExportWithMultipleTypeFilters() {
+		createResources();
+
+		// Create a bulk job
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(Sets.newHashSet("Immunization"));
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+		options.setFilters(Sets.newHashSet("Immunization?vaccine-code=Flu", "Immunization?patient=Patient/PAT1"));
+
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(options);
+		myBulkDataExportSvc.buildExportFiles();
+		awaitAllBulkJobCompletions();
+
+
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+
+		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getFiles().size(), equalTo(1));
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
+
+		// Iterate over the files
+		String nextContents = getBinaryContents(jobInfo, 0);
+
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
+		//These are the COVID-19 entries
+		assertThat(nextContents, is(containsString("IMM0")));
+		assertThat(nextContents, is(containsString("IMM2")));
+		assertThat(nextContents, is(containsString("IMM4")));
+		assertThat(nextContents, is(containsString("IMM6")));
+		assertThat(nextContents, is(containsString("IMM8")));
+
+		//This is the entry for the one referencing patient/1
+		assertThat(nextContents, is(containsString("IMM1")));
+	}
+
+	@Test
+	public void testGroupExportWithMultipleTypeFilters() {
+		createResources();
+
+		// Create a bulk job
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(Sets.newHashSet("Observation"));
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		options.setGroupId(myPatientGroupId);
+		options.setExpandMdm(false);
+		options.setFilters(Sets.newHashSet("Observation?identifier=VAL0,VAL2", "Observation?identifer=VAL4"));
+
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(options);
+		myBulkDataExportSvc.buildExportFiles();
+		awaitAllBulkJobCompletions();
+
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+
+		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getFiles().size(), equalTo(1));
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Observation")));
+		String nextContents = getBinaryContents(jobInfo, 0);
+
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
+		//These are the COVID-19 entries
+		assertThat(nextContents, is(containsString("IMM0")));
+		assertThat(nextContents, is(containsString("IMM2")));
+		assertThat(nextContents, is(containsString("IMM4")));
+		assertThat(nextContents, is(containsString("IMM6")));
+		assertThat(nextContents, is(containsString("IMM8")));
+
+		//This is the entry for the one referencing patient/1
+		assertThat(nextContents, is(containsString("IMM1")));
+	}
+
+	@NotNull
+	public String getBinaryContents(IBulkDataExportSvc.JobInfo theJobInfo, int theIndex) {
+		// Iterate over the files
+		Binary nextBinary = myBinaryDao.read(theJobInfo.getFiles().get(theIndex).getResourceId());
+		assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
+		String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
+		ourLog.info("Next contents for type {}:\n{}", nextBinary.getResourceType(), nextContents);
+		return nextContents;
 	}
 
 
@@ -761,10 +827,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(jobInfo.getFiles().size(), equalTo(1));
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Patient")));
 
-		Binary patientExportContent = myBinaryDao.read(jobInfo.getFiles().get(0).getResourceId());
-		assertEquals(Constants.CT_FHIR_NDJSON, patientExportContent.getContentType());
-		String nextContents = new String(patientExportContent.getContent(), Constants.CHARSET_UTF8);
-		ourLog.info("Next contents for type {}:\n{}", patientExportContent.getResourceType(), nextContents);
+		String nextContents = getBinaryContents(jobInfo, 0);
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Patient")));
 
 		//Output contains The entire group, plus the Mdm expansion, plus the golden resource
@@ -797,10 +860,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
 
 		// Check immunization Content
-		Binary immunizationExportContent = myBinaryDao.read(jobInfo.getFiles().get(0).getResourceId());
-		assertEquals(Constants.CT_FHIR_NDJSON, immunizationExportContent.getContentType());
-		String nextContents = new String(immunizationExportContent.getContent(), Constants.CHARSET_UTF8);
-		ourLog.info("Next contents for type {}:\n{}", immunizationExportContent.getResourceType(), nextContents);
+		String nextContents = getBinaryContents(jobInfo, 0);
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
 		assertThat(nextContents, is(containsString("IMM0")));
 		assertThat(nextContents, is(containsString("IMM2")));
@@ -865,12 +925,8 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
 
 		// Check immunization Content
-		Binary immunizationExportContent = myBinaryDao.read(jobInfo.getFiles().get(0).getResourceId());
-		assertEquals(Constants.CT_FHIR_NDJSON, immunizationExportContent.getContentType());
-		String nextContents = new String(immunizationExportContent.getContent(), Constants.CHARSET_UTF8);
-		ourLog.info("Next contents for type {}:\n{}", immunizationExportContent.getResourceType(), nextContents);
+		String nextContents = getBinaryContents(jobInfo, 0);
 
-		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
 		assertThat(nextContents, is(containsString("IMM1")));
 		assertThat(nextContents, is(containsString("IMM3")));
 		assertThat(nextContents, is(containsString("IMM5")));

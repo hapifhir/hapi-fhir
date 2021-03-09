@@ -71,27 +71,28 @@ public class PatientBulkItemReader extends BaseBulkItemReader implements ItemRea
 		List<ResourcePersistentId> myReadPids = new ArrayList<>();
 
 		//use _typeFilter and _since and all those fancy bits and bobs to generate our basic SP map.
-		SearchParameterMap map = createSearchParameterMapsForResourceType();
+		List<SearchParameterMap> maps = createSearchParameterMapsForResourceType();
 
 		String patientSearchParam = getPatientSearchParamForCurrentResourceType().getName();
 
-		//Ensure users did not monkey with the patient compartment search parameter.
-		validateSearchParameters(map);
+		for (SearchParameterMap map: maps) {
+			//Ensure users did not monkey with the patient compartment search parameter.
+			validateSearchParameters(map);
+			//Skip adding the parameter querying for patient= if we are in fact querying the patient resource type.
+			if (!myResourceType.equalsIgnoreCase("Patient")) {
+				//Now that we have our basic built Bulk Export SP map, we inject the condition that the resources returned
+				//must have a patient= or subject= reference set.
+				map.add(patientSearchParam, new ReferenceParam().setMissing(false));
+			}
 
-		//Skip adding the parameter querying for patient= if we are in fact querying the patient resource type.
-		if (!myResourceType.equalsIgnoreCase("Patient")) {
-			//Now that we have our basic built Bulk Export SP map, we inject the condition that the resources returned
-			//must have a patient= or subject= reference set.
-			map.add(patientSearchParam, new ReferenceParam().setMissing(false));
+			ourLog.debug("About to execute query {}", map.toNormalizedQueryString(myContext));
+			ISearchBuilder sb = getSearchBuilderForLocalResourceType();
+			IResultIterator myResultIterator = sb.createQuery(map, new SearchRuntimeDetails(null, myJobUUID), null, RequestPartitionId.allPartitions());
+
+			while (myResultIterator.hasNext()) {
+				myReadPids.add(myResultIterator.next());
+			}
 		}
-
-		ISearchBuilder sb = getSearchBuilderForLocalResourceType();
-		IResultIterator myResultIterator = sb.createQuery(map, new SearchRuntimeDetails(null, myJobUUID), null, RequestPartitionId.allPartitions());
-
-		while (myResultIterator.hasNext()) {
-			myReadPids.add(myResultIterator.next());
-		}
-
 		return myReadPids.iterator();
 	}
 

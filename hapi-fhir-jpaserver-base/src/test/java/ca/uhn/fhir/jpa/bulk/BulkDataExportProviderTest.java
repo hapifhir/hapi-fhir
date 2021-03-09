@@ -337,7 +337,6 @@ public class BulkDataExportProviderTest {
 
 	@Test
 	public void testInitiateWithGetAndMultipleTypeFilters() throws IOException {
-		//TODO GGG FIX ME
 		IBulkDataExportSvc.JobInfo jobInfo = new IBulkDataExportSvc.JobInfo()
 			.setJobId(A_JOB_ID);
 		when(myBulkDataExportSvc.submitJob(any())).thenReturn(jobInfo);
@@ -385,9 +384,8 @@ public class BulkDataExportProviderTest {
 
 		Parameters input = new Parameters();
 		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
-		input.addParameter(JpaConstants.PARAM_EXPORT_STYLE, new StringType("Patient, Practitioner"));
-		input.addParameter(JpaConstants.PARAM_EXPORT_SINCE, now);
-		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType("Patient?identifier=foo"));
+		input.addParameter(JpaConstants.PARAM_EXPORT_STYLE, new StringType("Patient"));
+		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType("Patient?gender=male,Patient?gender=female"));
 
 		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
@@ -406,9 +404,8 @@ public class BulkDataExportProviderTest {
 		verify(myBulkDataExportSvc, times(1)).submitJob(myBulkDataExportOptionsCaptor.capture());
 		BulkDataExportOptions options = myBulkDataExportOptionsCaptor.getValue();
 		assertEquals(Constants.CT_FHIR_NDJSON, options.getOutputFormat());
-		assertThat(options.getResourceTypes(), containsInAnyOrder("Patient", "Practitioner"));
-		assertThat(options.getSince(), notNullValue());
-		assertThat(options.getFilters(), containsInAnyOrder("Patient?identifier=foo"));
+		assertThat(options.getResourceTypes(), containsInAnyOrder("Patient"));
+		assertThat(options.getFilters(), containsInAnyOrder("Patient?gender=male", "Patient?gender=female"));
 	}
 
 	@Test
@@ -447,5 +444,4 @@ public class BulkDataExportProviderTest {
 		assertThat(options.getSince(), notNullValue());
 		assertThat(options.getFilters(), containsInAnyOrder("Immunization?vaccine-code=foo"));
 	}
-
 }

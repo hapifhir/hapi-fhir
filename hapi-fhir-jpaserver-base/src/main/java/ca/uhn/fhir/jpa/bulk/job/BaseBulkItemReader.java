@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -92,15 +93,24 @@ public abstract class BaseBulkItemReader implements ItemReader<List<ResourcePers
 				.map(filter -> buildSearchParameterMapForTypeFilter(filter, theDef))
 				.collect(Collectors.toList());
 			return maps;
+		} else {
+			SearchParameterMap map = new SearchParameterMap();
+			enhanceSearchParameterMapWithCommonParameters(map);
+			return Collections.singletonList(map);
 		}
 	}
+
+	private void enhanceSearchParameterMapWithCommonParameters(SearchParameterMap map) {
+		map.setLoadSynchronous(true);
+		if (getJobEntity().getSince() != null) {
+			map.setLastUpdated(new DateRangeParam(getJobEntity().getSince(), null));
+		}
+	}
+
 	public SearchParameterMap buildSearchParameterMapForTypeFilter(String theFilter, RuntimeResourceDefinition theDef) {
 		SearchParameterMap searchParameterMap = myMatchUrlService.translateMatchUrl(theFilter, theDef);
-		if (getJobEntity().getSince() != null) {
-			searchParameterMap.setLastUpdated(new DateRangeParam(getJobEntity().getSince(), null));
-		}
-		searchParameterMap.setLoadSynchronous(true);
-
+		enhanceSearchParameterMapWithCommonParameters(searchParameterMap);
+		return searchParameterMap;
 	}
 
 	protected RuntimeResourceDefinition getResourceDefinition() {

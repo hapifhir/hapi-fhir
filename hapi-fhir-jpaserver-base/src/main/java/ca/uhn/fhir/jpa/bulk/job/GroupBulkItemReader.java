@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryChunker;
@@ -79,7 +80,7 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 
 	@Override
 	Iterator<ResourcePersistentId> getResourcePidIterator() {
-		List<ResourcePersistentId> myReadPids = new ArrayList<>();
+		Set<ResourcePersistentId> myReadPids = new HashSet<>();
 
 		//Short circuit out if we detect we are attempting to extract patients
 		if (myResourceType.equalsIgnoreCase("Patient")) {
@@ -171,24 +172,26 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 		return expandedIds;
 	}
 
-	private void queryResourceTypeWithReferencesToPatients(List<ResourcePersistentId> myReadPids, List<String> idChunk) {
+	private void queryResourceTypeWithReferencesToPatients(Set<ResourcePersistentId> myReadPids, List<String> idChunk) {
 		//Build SP map
 		//First, inject the _typeFilters and _since from the export job
-		SearchParameterMap expandedSpMap = createSearchParameterMapsForResourceType();
+		List<SearchParameterMap> expandedSpMaps = createSearchParameterMapsForResourceType();
+		for (SearchParameterMap expandedSpMap: expandedSpMaps) {
 
-		//Since we are in a bulk job, we have to ensure the user didn't jam in a patient search param, since we need to manually set that.
-		validateSearchParameters(expandedSpMap);
+			//Since we are in a bulk job, we have to ensure the user didn't jam in a patient search param, since we need to manually set that.
+			validateSearchParameters(expandedSpMap);
 
-		// Now, further filter the query with patient references defined by the chunk of IDs we have.
-		filterSearchByResourceIds(idChunk, expandedSpMap);
+			// Now, further filter the query with patient references defined by the chunk of IDs we have.
+			filterSearchByResourceIds(idChunk, expandedSpMap);
 
-		// Fetch and cache a search builder for this resource type
-		ISearchBuilder searchBuilder = getSearchBuilderForLocalResourceType();
+			// Fetch and cache a search builder for this resource type
+			ISearchBuilder searchBuilder = getSearchBuilderForLocalResourceType();
 
-		//Execute query and all found pids to our local iterator.
-		IResultIterator resultIterator = searchBuilder.createQuery(expandedSpMap, new SearchRuntimeDetails(null, myJobUUID), null, RequestPartitionId.allPartitions());
-		while (resultIterator.hasNext()) {
-			myReadPids.add(resultIterator.next());
+			//Execute query and all found pids to our local iterator.
+			IResultIterator resultIterator = searchBuilder.createQuery(expandedSpMap, new SearchRuntimeDetails(null, myJobUUID), null, RequestPartitionId.allPartitions());
+			while (resultIterator.hasNext()) {
+				myReadPids.add(resultIterator.next());
+			}
 		}
 	}
 

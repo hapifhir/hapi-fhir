@@ -389,7 +389,6 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	public void validateTypeFilters(Set<String> theTheFilters, Set<String> theResourceTypes) {
 		if (theTheFilters != null) {
-			Set<String> types = new HashSet<>();
 			for (String next : theTheFilters) {
 				if (!next.contains("?")) {
 					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Must be in the form [ResourceType]?[params]");
@@ -397,9 +396,6 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 				String resourceType = next.substring(0, next.indexOf("?"));
 				if (!theResourceTypes.contains(resourceType)) {
 					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Resource type does not appear in " + JpaConstants.PARAM_EXPORT_TYPE+ " list");
-				}
-				if (!types.add(resourceType)) {
-					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Multiple filters found for type " + resourceType);
 				}
 			}
 		}
