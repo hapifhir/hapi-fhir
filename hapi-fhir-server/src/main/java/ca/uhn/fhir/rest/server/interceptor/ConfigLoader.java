@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import ca.uhn.fhir.util.ClasspathUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -16,15 +17,21 @@ import java.util.Properties;
 public class ConfigLoader {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ConfigLoader.class);
+	public static final String CLASSPATH_PREFIX = "classpath:";
 
 	public static String loadResourceContent(String theResourcePath) {
-		try {
-			URL url = ResourceUtils.getURL(theResourcePath);
-			File file = ResourceUtils.getFile(url);
-			return IOUtils.toString(new FileReader(file));
-		} catch (Exception e) {
-			throw new RuntimeException(String.format("Unable to load resource %s", theResourcePath), e);
+		if(theResourcePath.startsWith(CLASSPATH_PREFIX)) {
+			theResourcePath = theResourcePath.substring(CLASSPATH_PREFIX.length());
 		}
+		return ClasspathUtil.loadResource(theResourcePath);
+//		FIXME the code below seems to be failing in the build server...
+//		try {
+//			URL url = ResourceUtils.getURL(theResourcePath);
+//			File file = ResourceUtils.getFile(url);
+//			return IOUtils.toString(new FileReader(file));
+//		} catch (Exception e) {
+//			throw new RuntimeException(String.format("Unable to load resource %s", theResourcePath), e);
+//		}
 	}
 
 	public static Properties loadProperties(String theResourcePath) {
