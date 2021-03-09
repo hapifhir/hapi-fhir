@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Address.AddressUse;
@@ -27,7 +26,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import ca.uhn.fhir.jpa.searchparam.SearchContainedEnum;
+import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -75,7 +74,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		map = new SearchParameterMap();
 		map.add("subject", new ReferenceParam("name", "Smith"));
-		map.setSearchContainedMode(SearchContainedEnum.TRUE);
+		map.setSearchContainedMode(SearchContainedModeEnum.TRUE);
 		
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id)));
 	}
@@ -111,7 +110,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		map = new SearchParameterMap();
 		map.add("subject", new ReferenceParam("name", "Smith"));
-		map.setSearchContainedMode(SearchContainedEnum.TRUE);
+		map.setSearchContainedMode(SearchContainedModeEnum.TRUE);
 		
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id)));
 	}
@@ -180,7 +179,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		map = new SearchParameterMap();
 		map.add("general-practitioner", new ReferenceParam("family", "Smith"));
-		map.setSearchContainedMode(SearchContainedEnum.TRUE);
+		map.setSearchContainedMode(SearchContainedModeEnum.TRUE);
 		
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), containsInAnyOrder(toValues(id)));
 	}
@@ -265,7 +264,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		map = new SearchParameterMap();
 		map.add("based-on", new ReferenceParam("authored", "2021-02-23"));
-		map.setSearchContainedMode(SearchContainedEnum.TRUE);
+		map.setSearchContainedMode(SearchContainedModeEnum.TRUE);
 		
 		assertThat(toUnqualifiedVersionlessIdValues(myEncounterDao.search(map)), containsInAnyOrder(toValues(id)));
 	}
@@ -277,7 +276,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		map = new SearchParameterMap();
 		map.add("subject", new ReferenceParam("near", "toronto"));
-		map.setSearchContainedMode(SearchContainedEnum.TRUE);
+		map.setSearchContainedMode(SearchContainedModeEnum.TRUE);
 		
 		try {
 			IBundleProvider outcome = myObservationDao.search(map);
@@ -296,7 +295,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		map = new SearchParameterMap();
 		map.add("subject", new ReferenceParam("marital-status", "M"));
-		map.setSearchContainedMode(SearchContainedEnum.TRUE);
+		map.setSearchContainedMode(SearchContainedModeEnum.TRUE);
 		
 		try {
 			IBundleProvider outcome = myObservationDao.search(map);

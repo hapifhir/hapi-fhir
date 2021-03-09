@@ -118,11 +118,6 @@ public class DaoConfig {
 	 * update setter javadoc if default changes
 	 */
 	private Integer myFetchSizeDefaultMaximum = null;
-	private int myHardTagListLimit = 1000;
-	/**
-	 * update setter javadoc if default changes
-	 */
-	private boolean myIndexContainedResources = true;
 	private int myMaximumExpansionSize = DEFAULT_MAX_EXPANSION_SIZE;
 	private Integer myMaximumSearchResultCountInTransaction = DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION;
 
@@ -209,9 +204,6 @@ public class DaoConfig {
 	 * Constructor
 	 */
 	public DaoConfig() {
-		setSubscriptionEnabled(true);
-		setSubscriptionPollDelay(0);
-		setSubscriptionPurgeInactiveAfterMillis(Long.MAX_VALUE);
 		setMarkResourcesForReindexingUponSearchParameterChange(true);
 		setReindexThreadCount(Runtime.getRuntime().availableProcessors());
 		setExpungeThreadCount(Runtime.getRuntime().availableProcessors());
@@ -578,20 +570,6 @@ public class DaoConfig {
 	 */
 	public void setFetchSizeDefaultMaximum(Integer theFetchSizeDefaultMaximum) {
 		myFetchSizeDefaultMaximum = theFetchSizeDefaultMaximum;
-	}
-
-	/**
-	 * Gets the maximum number of results to return in a GetTags query (DSTU1 only)
-	 */
-	public int getHardTagListLimit() {
-		return myHardTagListLimit;
-	}
-
-	/**
-	 * Gets the maximum number of results to return in a GetTags query (DSTU1 only)
-	 */
-	public void setHardTagListLimit(int theHardTagListLimit) {
-		myHardTagListLimit = theHardTagListLimit;
 	}
 
 	/**
@@ -1443,22 +1421,6 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Should contained IDs be indexed the same way that non-contained IDs are (default is
-	 * <code>true</code>)
-	 */
-	public boolean isIndexContainedResources() {
-		return myIndexContainedResources;
-	}
-
-	/**
-	 * Should contained IDs be indexed the same way that non-contained IDs are (default is
-	 * <code>true</code>)
-	 */
-	public void setIndexContainedResources(boolean theIndexContainedResources) {
-		myIndexContainedResources = theIndexContainedResources;
-	}
-
-	/**
 	 * Should resources be marked as needing reindexing when a
 	 * SearchParameter resource is added or changed. This should generally
 	 * be true (which is the default)
@@ -1589,62 +1551,6 @@ public class DaoConfig {
 	 */
 	public void setValidateSearchParameterExpressionsOnSave(boolean theValidateSearchParameterExpressionsOnSave) {
 		myValidateSearchParameterExpressionsOnSave = theValidateSearchParameterExpressionsOnSave;
-	}
-
-	/**
-	 * Do not call this method, it exists only for legacy reasons. It
-	 * will be removed in a future version. Configure the page size on your
-	 * paging provider instead.
-	 *
-	 * @deprecated This method does not do anything. Configure the page size on your
-	 * paging provider instead. Deprecated in HAPI FHIR 2.3 (Jan 2017)
-	 */
-	@Deprecated
-	public void setHardSearchLimit(int theHardSearchLimit) {
-		// this method does nothing
-	}
-
-	/**
-	 * This is the maximum number of resources that will be added to a single page of returned resources. Because of
-	 * includes with wildcards and other possibilities it is possible for a client to make requests that include very
-	 * large amounts of data, so this hard limit can be imposed to prevent runaway requests.
-	 *
-	 * @deprecated Deprecated in HAPI FHIR 3.2.0 as this method doesn't actually do anything
-	 */
-	@Deprecated
-	public void setIncludeLimit(@SuppressWarnings("unused") int theIncludeLimit) {
-		// nothing
-	}
-
-	/**
-	 * @deprecated As of HAPI FHIR 3.0.0, subscriptions no longer use polling for
-	 * detecting changes, so this setting has no effect
-	 */
-	@Deprecated
-	public void setSubscriptionEnabled(boolean theSubscriptionEnabled) {
-		// nothing
-	}
-
-	/**
-	 * @deprecated As of HAPI FHIR 3.0.0, subscriptions no longer use polling for
-	 * detecting changes, so this setting has no effect
-	 */
-	@Deprecated
-	public void setSubscriptionPollDelay(long theSubscriptionPollDelay) {
-		// ignore
-	}
-
-	/**
-	 * @deprecated As of HAPI FHIR 3.0.0, subscriptions no longer use polling for
-	 * detecting changes, so this setting has no effect
-	 */
-	@Deprecated
-	public void setSubscriptionPurgeInactiveAfterMillis(Long theMillis) {
-		// ignore
-	}
-
-	public void setSubscriptionPurgeInactiveAfterSeconds(int theSeconds) {
-		setSubscriptionPurgeInactiveAfterMillis(theSeconds * DateUtils.MILLIS_PER_SECOND);
 	}
 
 	/**

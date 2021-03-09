@@ -131,6 +131,8 @@ public class MethodUtil {
 				param = new SummaryEnumParameter();
 			} else if (parameterType.equals(PatchTypeEnum.class)) {
 				param = new PatchTypeParameter();
+			} else if (parameterType.equals(SearchContainedModeEnum.class)) {
+				param = new SearchContainedModeParameter();
 			} else if (parameterType.equals(SearchTotalModeEnum.class)) {
 				param = new SearchTotalModeParameter();
 			} else {

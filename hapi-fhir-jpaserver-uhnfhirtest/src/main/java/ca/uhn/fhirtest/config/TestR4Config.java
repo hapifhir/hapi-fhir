@@ -78,6 +78,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		retVal.setExpungeEnabled(true);
 		retVal.setFilterParameterEnabled(true);
 		retVal.setDefaultSearchParamsCanBeOverridden(false);
+		retVal.getModelConfig().setIndexOnContainedResources(true);
 		return retVal;
 	}
 
