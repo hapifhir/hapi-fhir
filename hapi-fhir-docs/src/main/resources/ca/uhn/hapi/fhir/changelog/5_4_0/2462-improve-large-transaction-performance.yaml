@@ -5,4 +5,5 @@ title: "Several optimizations have been made to the JPA server transaction proce
    improved performance, particularly when processing large transaction Bundles, such as transactions
    containing many entries, or transactions containing very large entries:
 * An unnecessary SQL UPDATE clause has been removed after it was determined to be redundant
-* Automatic generation of IDs for contained resources has been optimized"
+* Automatic generation of IDs for contained resources has been optimized
+* A parse/serialize pass previously used to normalize contained resources has been reworked to no longer be necessary"

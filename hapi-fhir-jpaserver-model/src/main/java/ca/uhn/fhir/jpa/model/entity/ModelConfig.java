@@ -98,7 +98,6 @@ public class ModelConfig {
 	private Set<String> myAutoVersionReferenceAtPaths = Collections.emptySet();
 	private Map<String, Set<String>> myTypeToAutoVersionReferenceAtPaths = Collections.emptyMap();
 	private boolean myRespectVersionsForSearchIncludes;
-	private boolean myNormalizeResourcesBeforeSearchParamExtraction;
 	private boolean myIndexOnContainedResources = false;
 
 	/**
@@ -732,30 +731,6 @@ public class ModelConfig {
 		myRespectVersionsForSearchIncludes = theRespectVersionsForSearchIncludes;
 	}
 
-	/**
-	 * If enabled, a serialize/parse operation is performed on resources before we extract search parameters.
-	 * This is useful if resources are provided to the DAO layer programatically (as opposed to through
-	 * standard parsing via the HTTP layer) and use contained resources. The default is <code>false</code>.
-	 *
-	 * @since 5.4.0
-	 */
-    public boolean isNormalizeResourcesBeforeSearchParamExtraction() {
-        return myNormalizeResourcesBeforeSearchParamExtraction;
-    }
-
-	/**
-	 * If enabled, a serialize/parse operation is performed on resources before we extract search parameters.
-	 * This is useful if resources are provided to the DAO layer programatically (as opposed to through
-	 * standard parsing via the HTTP layer) and use contained resources. The default is <code>false</code>.
-	 *
-	 * @since 5.4.0
-	 */
-    public void setNormalizeResourcesBeforeSearchParamExtraction(boolean theNormalizeResourcesBeforeSearchParamExtraction) {
-        myNormalizeResourcesBeforeSearchParamExtraction = theNormalizeResourcesBeforeSearchParamExtraction;
-    }
-
-	
-	
 	/**
 	 * Should indexed on the contained resources, it could be searched by <code>_contained=true</code>
 	 * This may have performance impacts

@@ -99,16 +99,15 @@ public class SearchParamExtractorService {
 	 * a given resource type, it extracts the associated indexes and populates {@literal theParams}.
 	 */
 	public void extractFromResource(RequestPartitionId theRequestPartitionId, RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference) {
-		IBaseResource resource = normalizeResource(theResource);
 
 		// All search parameter types except Reference
 		ResourceIndexedSearchParams normalParams = new ResourceIndexedSearchParams();
-		extractSearchIndexParameters(theRequestDetails, normalParams, resource, theEntity);
+		extractSearchIndexParameters(theRequestDetails, normalParams, theResource, theEntity);
 		mergeParams(normalParams, theParams);
 
 		if (myModelConfig.isIndexOnContainedResources()) {
 			ResourceIndexedSearchParams containedParams = new ResourceIndexedSearchParams();
-			extractSearchIndexParametersForContainedResources(theRequestDetails, containedParams, resource, theEntity);
+			extractSearchIndexParametersForContainedResources(theRequestDetails, containedParams, theResource, theEntity);
 			mergeParams(containedParams, theParams);
 		}
 		
@@ -116,7 +115,7 @@ public class SearchParamExtractorService {
 		populateResourceTables(theParams, theEntity);
 		
 		// Reference search parameters
-		extractResourceLinks(theRequestPartitionId, theParams, theEntity, resource, theTransactionDetails, theFailOnInvalidReference, theRequestDetails);
+		extractResourceLinks(theRequestPartitionId, theParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference, theRequestDetails);
 
 		theParams.setUpdatedTime(theTransactionDetails.getTransactionDate());
 	}
@@ -252,23 +251,6 @@ public class SearchParamExtractorService {
 		populateResourceTable(theParams.myTokenParams, theEntity);
 		populateResourceTable(theParams.myStringParams, theEntity);
 		populateResourceTable(theParams.myCoordsParams, theEntity);
-	}
-
-	/**
-	 * This is a bit hacky, but if someone has manually populated a resource (ie. my working directly with the model
-	 * as opposed to by parsing a serialized instance) it's possible that they have put in contained resources
-	 * using {@link IBaseReference#setResource(IBaseResource)}, and those contained resources have not yet
-	 * ended up in the Resource.contained array, meaning that FHIRPath expressions won't be able to find them.
-	 * <p>
-	 * As a result, we to a serialize-and-parse to normalize the object. This really only affects people who
-	 * are calling the JPA DAOs directly, but there are a few of those...
-	 */
-	private IBaseResource normalizeResource(IBaseResource theResource) {
-		if (myModelConfig.isNormalizeResourcesBeforeSearchParamExtraction()) {
-			IParser parser = myContext.newJsonParser().setPrettyPrint(false);
-			theResource = parser.parseResource(parser.encodeResourceToString(theResource));
-		}
-		return theResource;
 	}
 
 	@VisibleForTesting
