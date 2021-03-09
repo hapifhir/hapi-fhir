@@ -38,6 +38,9 @@ public interface IBaseQuery<T extends IBaseQuery<?>> {
 
 	/**
 	 * Add a set of search parameters to the query.
+	 *
+	 * Note that the entries of the map are extracted immediately upon invoking this method. Changes made to the
+	 * map afterward will not be reflected in the actual search.
 	 */
 	T where(Map<String, List<IQueryParameterType>> theCriterion);
 

@@ -4,13 +4,13 @@
 
 ### Where can I ask questions or get help?
 
-Please see [this page](https://github.com/jamesagnew/hapi-fhir/wiki/Getting-Help) in the HAPI FHIR Wiki for information on getting help.
+Please see [this page](https://github.com/hapifhir/hapi-fhir/wiki/Getting-Help) in the HAPI FHIR Wiki for information on getting help.
 
 # Using HAPI FHIR
 
 ### What JDK version does HAPI support?
 
-See the [HAPI FHIR Versions](/docs/introduction/versions.html) page for information on the current minimum Java version required in order to use HAPI FHIR.
+See the [HAPI FHIR Versions](/docs/getting_started/versions.html) page for information on the current minimum Java version required in order to use HAPI FHIR.
 
 # JPA Server
 

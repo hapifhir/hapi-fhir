@@ -79,7 +79,8 @@ public class SearchParameterMap implements Serializable {
 	private boolean myLastN;
 	private Integer myLastNMax;
 	private boolean myDeleteExpunge;
-
+	private SearchContainedEnum mySearchContainedMode = SearchContainedEnum.FALSE;
+	
 	/**
 	 * Constructor
 	 */
@@ -413,10 +414,6 @@ public class SearchParameterMap implements Serializable {
 				IQueryParameterType firstValue = nextValuesAnd.get(0);
 				b.append(UrlUtil.escapeUrlParam(nextKey));
 
-				if (nextKey.equals(Constants.PARAM_HAS)) {
-					b.append(':');
-				}
-
 				if (firstValue.getMissing() != null) {
 					b.append(Constants.PARAMQUALIFIER_MISSING);
 					b.append('=');
@@ -738,4 +735,13 @@ public class SearchParameterMap implements Serializable {
 		return retVal;
 	}
 
+	public SearchContainedEnum getSearchContainedMode() {
+		return mySearchContainedMode;
+	}
+
+	public void setSearchContainedMode(SearchContainedEnum theSearchContainedMode) {
+		this.mySearchContainedMode = theSearchContainedMode;
+	}
+
+	
 }

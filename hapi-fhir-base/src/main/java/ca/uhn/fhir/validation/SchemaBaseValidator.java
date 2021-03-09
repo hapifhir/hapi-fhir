@@ -88,7 +88,7 @@ public class SchemaBaseValidator implements IValidatorModule {
 
 			try {
 				/*
-				 * See https://github.com/jamesagnew/hapi-fhir/issues/339
+				 * See https://github.com/hapifhir/hapi-fhir/issues/339
 				 * https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing
 				 */
 				validator.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
@@ -128,7 +128,7 @@ public class SchemaBaseValidator implements IValidatorModule {
 			try {
 				try {
 					/*
-					 * See https://github.com/jamesagnew/hapi-fhir/issues/339
+					 * See https://github.com/hapifhir/hapi-fhir/issues/339
 					 * https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing
 					 */
 					schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");

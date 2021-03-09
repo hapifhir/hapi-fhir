@@ -48,7 +48,11 @@ public class BulkExportGenerateResourceFilesStepListener implements StepExecutio
 	@Override
 	public ExitStatus afterStep(StepExecution theStepExecution) {
 		if (theStepExecution.getExitStatus().getExitCode().equals(ExitStatus.FAILED.getExitCode())) {
-			String jobUuid = theStepExecution.getJobExecution().getJobParameters().getString("jobUUID");
+			//Try to fetch it from the parameters first, and if it doesn't exist, fetch it from the context.
+			String jobUuid = theStepExecution.getJobExecution().getJobParameters().getString(BulkExportJobConfig.JOB_UUID_PARAMETER);
+			if (jobUuid == null) {
+				jobUuid = theStepExecution.getJobExecution().getExecutionContext().getString(BulkExportJobConfig.JOB_UUID_PARAMETER);
+			}
 			assert isNotBlank(jobUuid);
 			String exitDescription = theStepExecution.getExitStatus().getExitDescription();
 			myBulkExportDaoSvc.setJobToStatus(jobUuid, BulkJobStatusEnum.ERROR, exitDescription);

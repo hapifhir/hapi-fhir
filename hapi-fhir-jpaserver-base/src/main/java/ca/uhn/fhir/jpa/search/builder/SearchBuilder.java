@@ -60,6 +60,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
+import ca.uhn.fhir.jpa.searchparam.SearchContainedEnum;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
@@ -91,7 +92,6 @@ import com.healthmarketscience.sqlbuilder.Condition;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -216,6 +216,8 @@ public class SearchBuilder implements ISearchBuilder {
 			attemptCompositeUniqueSpProcessing(theQueryStack, theParams, theRequest);
 		}
 
+		SearchContainedEnum searchContainedMode = theParams.getSearchContainedMode();
+		
 		// Handle each parameter
 		List<String> paramNames = new ArrayList<>(myParams.keySet());
 		for (String nextParamName : paramNames) {
@@ -224,7 +226,7 @@ public class SearchBuilder implements ISearchBuilder {
 				continue;
 			}
 			List<List<IQueryParameterType>> andOrParams = myParams.get(nextParamName);
-			Condition predicate = theQueryStack.searchForIdsWithAndOr(null, myResourceName, nextParamName, andOrParams, theRequest, myRequestPartitionId);
+			Condition predicate = theQueryStack.searchForIdsWithAndOr(null, myResourceName, nextParamName, andOrParams, theRequest, myRequestPartitionId, searchContainedMode);
 			if (predicate != null) {
 				theSearchSqlBuilder.addPredicate(predicate);
 			}

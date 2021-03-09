@@ -49,6 +49,7 @@ import java.util.concurrent.TimeUnit;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -85,11 +86,12 @@ public class ServerMimetypeR4Test {
 			String content = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			CapabilityStatement conf = ourCtx.newXmlParser().parseResource(CapabilityStatement.class, content);
 			List<String> strings = toStrings(conf.getFormat());
-			assertThat(strings, contains(Constants.CT_FHIR_XML_NEW, Constants.CT_FHIR_JSON_NEW));
+			assertThat(strings, hasItems(Constants.CT_FHIR_XML_NEW, Constants.CT_FHIR_JSON_NEW, Constants.FORMAT_XML, Constants.FORMAT_JSON));
 		} finally {
 			status.close();
 		}
 	}
+
 
 	@Test
 	public void testCreateWithJsonLegacyNoAcceptHeader() throws Exception {

@@ -103,8 +103,9 @@ public class ValidatorResourceFetcher implements IResourceValidator.IValidatorRe
 	}
 
 	@Override
-	public void setLocale(Locale locale) {
+	public IResourceValidator.IValidatorResourceFetcher setLocale(Locale locale) {
 		// ignore
+		return this;
 	}
 
 	@Override

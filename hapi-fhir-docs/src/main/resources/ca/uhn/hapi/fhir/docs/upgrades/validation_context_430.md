@@ -8,7 +8,7 @@ Previously, a number of `IValidationSupport` interfaces existed. These interface
 
 These have all been replaced with a single interface that is intended to be used for all versions of FHIR:
 
-* [ca.uhn.fhir.context.support.IContextValidationSupport](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-base/src/main/java/ca/uhn/fhir/context/support/IContextValidationSupport.java)
+* [ca.uhn.fhir.context.support.IContextValidationSupport](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-base/src/main/java/ca/uhn/fhir/context/support/IContextValidationSupport.java)
 
 This also means that the following classes (which previously existing in multiple packages) have been replaced with a single version supporting multiple FHIR versions. You will need to adjust package names:
 

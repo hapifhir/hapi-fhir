@@ -284,7 +284,7 @@ public class SearchParamExtractorR4Test {
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Encounter", "location");
 		assertNotNull(param);
-		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(enc);
+		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(enc, false);
 		assertEquals(1, links.size());
 		assertEquals("location", links.iterator().next().getSearchParamName());
 		assertEquals("Encounter.location.location", links.iterator().next().getPath());
@@ -299,7 +299,7 @@ public class SearchParamExtractorR4Test {
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Consent", Consent.SP_SOURCE_REFERENCE);
 		assertNotNull(param);
-		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(consent);
+		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(consent, false);
 		assertEquals(1, links.size());
 		assertEquals("Consent.source", links.iterator().next().getPath());
 		assertEquals("Consent/999", ((Reference) links.iterator().next().getRef()).getReference());
@@ -334,7 +334,7 @@ public class SearchParamExtractorR4Test {
 		patient.addExtension("http://patext", new Reference("Organization/AAA"));
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
-		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(patient);
+		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(patient, false);
 		assertEquals(1, links.size());
 
 	}

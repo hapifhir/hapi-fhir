@@ -32,7 +32,7 @@ Please see [Smile CDR][Link-SmileCDR] for information on commercial support.
 [Link-AzurePipelinesSnapshot]: https://dev.azure.com/hapifhir/HAPI%20FHIR/_build?definitionId=3
 [Link-MavenCentral]: http://search.maven.org/#search|ga|1|ca.uhn.hapi.fhir
 [Link-CodeCov]: https://codecov.io/gh/hapifhir/hapi-fhir
-[Link-wiki]: https://github.com/jamesagnew/hapi-fhir/wiki/Getting-Help
+[Link-wiki]: https://github.com/hapifhir/hapi-fhir/wiki/Getting-Help
 [Link-SmileCDR]: https://smilecdr.com
 [Link-License]: https://hapifhir.io/hapi-fhir/license.html
 

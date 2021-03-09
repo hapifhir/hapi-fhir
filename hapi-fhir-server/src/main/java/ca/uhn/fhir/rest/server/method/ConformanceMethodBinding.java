@@ -148,6 +148,8 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 				if (theRequest.getInterceptorBroadcaster() != null) {
 					HookParams params = new HookParams();
 					params.add(IBaseConformance.class, conf);
+					params.add(RequestDetails.class, theRequest);
+					params.addIfMatchesType(ServletRequestDetails.class, theRequest);
 					IBaseConformance outcome = (IBaseConformance) theRequest
 						.getInterceptorBroadcaster()
 						.callHooksAndReturnObject(Pointcut.SERVER_CAPABILITY_STATEMENT_GENERATED, params);

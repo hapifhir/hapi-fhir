@@ -227,6 +227,11 @@ public class RequestPartitionId {
 	}
 
 	@Nonnull
+	public static RequestPartitionId defaultPartition(@Nullable LocalDate thePartitionDate) {
+		return fromPartitionIds(Collections.singletonList(null), thePartitionDate);
+	}
+
+	@Nonnull
 	public static RequestPartitionId fromPartitionId(@Nullable Integer thePartitionId) {
 		return fromPartitionIds(Collections.singletonList(thePartitionId));
 	}
@@ -238,7 +243,12 @@ public class RequestPartitionId {
 
 	@Nonnull
 	public static RequestPartitionId fromPartitionIds(@Nonnull Collection<Integer> thePartitionIds) {
-		return new RequestPartitionId(null, toListOrNull(thePartitionIds), null);
+		return fromPartitionIds(thePartitionIds, null);
+	}
+
+	@Nonnull
+	public static RequestPartitionId fromPartitionIds(@Nonnull Collection<Integer> thePartitionIds, @Nullable LocalDate thePartitionDate) {
+		return new RequestPartitionId(null, toListOrNull(thePartitionIds), thePartitionDate);
 	}
 
 	@Nonnull

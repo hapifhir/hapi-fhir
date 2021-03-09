@@ -1,6 +1,6 @@
 # Downloading/Importing HAPI FHIR
 
-If you are developing applications in Java, the easiest way to use HAPI FHIR is to use a build system which handles dependency management automatically. The two most common such systems are [Apache Maven](http://maven.apache.org) and [Gradle](https://gradle.org/). These systems will automatically download "dependency" libraries and add them to your classpath. If you are **not** using one of these systems, you can still manually download the latest release of HAPI by looking in the [GitHub Release Section](https://github.com/jamesagnew/hapi-fhir/releases).
+If you are developing applications in Java, the easiest way to use HAPI FHIR is to use a build system which handles dependency management automatically. The two most common such systems are [Apache Maven](http://maven.apache.org) and [Gradle](https://gradle.org/). These systems will automatically download "dependency" libraries and add them to your classpath. If you are **not** using one of these systems, you can still manually download the latest release of HAPI by looking in the [GitHub Release Section](https://github.com/hapifhir/hapi-fhir/releases).
 
 
 # Maven Users

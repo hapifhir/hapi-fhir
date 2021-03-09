@@ -5,7 +5,7 @@ This page describes how to extend and constrain the FHIR data model for your own
 # Extensions
 
 <p class="doc_info_bubble">
-Note on FHIR Versions: Because of the differences in the way the structures work between DSTU2 and DSTU3, we have provided two versions of many of the examples on this page. See the <a href="/hapi-fhir/docs/introduction/versions.html">FHIR Versions</a> page for more information on FHIR version support in HAPI FHIR.
+Note on FHIR Versions: Because of the differences in the way the structures work between DSTU2 and DSTU3, we have provided two versions of many of the examples on this page. See the <a href="/hapi-fhir/docs/getting_started/versions.html">FHIR Versions</a> page for more information on FHIR version support in HAPI FHIR.
 </p>
 
 Extensions are a key part of the FHIR specification, providing a standardized way of placing additional data in a resource.

@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
+import ca.uhn.fhir.jpa.bulk.api.GroupBulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
@@ -25,6 +27,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -41,16 +44,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -61,20 +68,18 @@ public class BulkDataExportProviderTest {
 
 	private static final String A_JOB_ID = "0000000-AAAAAA";
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportProviderTest.class);
+	private static final String GROUP_ID = "Group/G2401";
+	private static final String G_JOB_ID = "0000000-GGGGGG";
 	private Server myServer;
-	private FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R4);
+	private final FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R4);
 	private int myPort;
 	@Mock
 	private IBulkDataExportSvc myBulkDataExportSvc;
 	private CloseableHttpClient myClient;
 	@Captor
-	private ArgumentCaptor<String> myOutputFormatCaptor;
+	private ArgumentCaptor<BulkDataExportOptions> myBulkDataExportOptionsCaptor;
 	@Captor
-	private ArgumentCaptor<Set<String>> myResourceTypesCaptor;
-	@Captor
-	private ArgumentCaptor<Date> mySinceCaptor;
-	@Captor
-	private ArgumentCaptor<Set<String>> myFiltersCaptor;
+	private ArgumentCaptor<GroupBulkDataExportOptions> myGroupBulkDataExportOptionsCaptor;
 
 	@AfterEach
 	public void after() throws Exception {
@@ -111,7 +116,7 @@ public class BulkDataExportProviderTest {
 
 		IBulkDataExportSvc.JobInfo jobInfo = new IBulkDataExportSvc.JobInfo()
 			.setJobId(A_JOB_ID);
-		when(myBulkDataExportSvc.submitJob(any(), any(), any(), any())).thenReturn(jobInfo);
+		when(myBulkDataExportSvc.submitJob(any())).thenReturn(jobInfo);
 
 		InstantType now = InstantType.now();
 
@@ -135,12 +140,12 @@ public class BulkDataExportProviderTest {
 			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		}
 
-		verify(myBulkDataExportSvc, times(1)).submitJob(myOutputFormatCaptor.capture(), myResourceTypesCaptor.capture(), mySinceCaptor.capture(), myFiltersCaptor.capture());
-		assertEquals(Constants.CT_FHIR_NDJSON, myOutputFormatCaptor.getValue());
-		assertThat(myResourceTypesCaptor.getValue(), containsInAnyOrder("Patient", "Practitioner"));
-		assertThat(mySinceCaptor.getValue(), notNullValue());
-		assertThat(myFiltersCaptor.getValue(), containsInAnyOrder("Patient?identifier=foo"));
-
+		verify(myBulkDataExportSvc, times(1)).submitJob(myBulkDataExportOptionsCaptor.capture());
+		BulkDataExportOptions options = myBulkDataExportOptionsCaptor.getValue();
+		assertEquals(Constants.CT_FHIR_NDJSON, options.getOutputFormat());
+		assertThat(options.getResourceTypes(), containsInAnyOrder("Patient", "Practitioner"));
+		assertThat(options.getSince(), notNullValue());
+		assertThat(options.getFilters(), containsInAnyOrder("Patient?identifier=foo"));
 	}
 
 	@Test
@@ -148,7 +153,7 @@ public class BulkDataExportProviderTest {
 
 		IBulkDataExportSvc.JobInfo jobInfo = new IBulkDataExportSvc.JobInfo()
 			.setJobId(A_JOB_ID);
-		when(myBulkDataExportSvc.submitJob(any(), any(), any(), any())).thenReturn(jobInfo);
+		when(myBulkDataExportSvc.submitJob(any())).thenReturn(jobInfo);
 
 		InstantType now = InstantType.now();
 
@@ -169,12 +174,12 @@ public class BulkDataExportProviderTest {
 			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		}
 
-		verify(myBulkDataExportSvc, times(1)).submitJob(myOutputFormatCaptor.capture(), myResourceTypesCaptor.capture(), mySinceCaptor.capture(), myFiltersCaptor.capture());
-		assertEquals(Constants.CT_FHIR_NDJSON, myOutputFormatCaptor.getValue());
-		assertThat(myResourceTypesCaptor.getValue(), containsInAnyOrder("Patient", "Practitioner"));
-		assertThat(mySinceCaptor.getValue(), notNullValue());
-		assertThat(myFiltersCaptor.getValue(), containsInAnyOrder("Patient?identifier=foo"));
-
+		verify(myBulkDataExportSvc, times(1)).submitJob(myBulkDataExportOptionsCaptor.capture());
+		BulkDataExportOptions options = myBulkDataExportOptionsCaptor.getValue();
+		assertEquals(Constants.CT_FHIR_NDJSON, options.getOutputFormat());
+		assertThat(options.getResourceTypes(), containsInAnyOrder("Patient", "Practitioner"));
+		assertThat(options.getSince(), notNullValue());
+		assertThat(options.getFilters(), containsInAnyOrder("Patient?identifier=foo"));
 	}
 
 	@Test
@@ -286,5 +291,52 @@ public class BulkDataExportProviderTest {
 
 	}
 
+	/**
+	 * Group export tests
+	 * See https://build.fhir.org/ig/HL7/us-bulk-data/
+	 * <p>
+	 * GET [fhir base]/Group/[id]/$export
+	 * <p>
+	 * FHIR Operation to obtain data on all patients listed in a single FHIR Group Resource.
+	 */
 
+	@Test
+	public void testSuccessfulInitiateGroupBulkRequest_Post() throws IOException {
+
+		IBulkDataExportSvc.JobInfo jobInfo = new IBulkDataExportSvc.JobInfo().setJobId(G_JOB_ID);
+		when(myBulkDataExportSvc.submitJob(any())).thenReturn(jobInfo);
+
+		InstantType now = InstantType.now();
+
+
+		Parameters input = new Parameters();
+		StringType obsTypeFilter = new StringType("Observation?code=OBSCODE,DiagnosticReport?code=DRCODE");
+		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
+		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Observation, DiagnosticReport"));
+		input.addParameter(JpaConstants.PARAM_EXPORT_SINCE, now);
+		input.addParameter(JpaConstants.PARAM_EXPORT_MDM, true);
+		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, obsTypeFilter);
+
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+
+		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + GROUP_ID + "/" + JpaConstants.OPERATION_EXPORT);
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.setEntity(new ResourceEntity(myCtx, input));
+		ourLog.info("Request: {}", post);
+		try (CloseableHttpResponse response = myClient.execute(post)) {
+			ourLog.info("Response: {}", response.toString());
+			assertEquals(202, response.getStatusLine().getStatusCode());
+			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
+			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + G_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+		}
+
+		verify(myBulkDataExportSvc, times(1)).submitJob(myGroupBulkDataExportOptionsCaptor.capture());
+		GroupBulkDataExportOptions options = myGroupBulkDataExportOptionsCaptor.getValue();
+		assertEquals(Constants.CT_FHIR_NDJSON, options.getOutputFormat());
+		assertThat(options.getResourceTypes(), containsInAnyOrder("Observation", "DiagnosticReport"));
+		assertThat(options.getSince(), notNullValue());
+		assertThat(options.getFilters(), notNullValue());
+		assertEquals(GROUP_ID, options.getGroupId().getValue());
+		assertThat(options.isMdm(), is(equalTo(true)));
+	}
 }

@@ -4,7 +4,7 @@
     <parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>5.3.0-SNAPSHOT</version>
+		<version>5.4.0-PRE1-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -37,31 +37,7 @@
 							</signature>
 						</configuration>
 					</execution>
-					<!-- 
-					<execution>
-						<id>check-android-api</id>
-						<phase>test</phase>
-						<inherited>true</inherited>
-						<goals>
-							<goal>check</goal>
-						</goals>
-						<configuration>
-							<signature>
-								<groupId>net.sf.androidscents.signature</groupId>
-								<artifactId>android-api-level-21</artifactId>
-								<version>5.0.1_r2</version>
-  							</signature>
-						</configuration>
-					</execution>
-					-->
 				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>org.ow2.asm</groupId>
-						<artifactId>asm-all</artifactId>
-						<version>5.0.4</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.basepom.maven</groupId>

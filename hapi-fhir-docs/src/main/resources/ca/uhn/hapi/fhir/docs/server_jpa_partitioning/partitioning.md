@@ -82,6 +82,25 @@ A hook against the [`Pointcut.STORAGE_PARTITION_IDENTIFY_READ`](/hapi-fhir/apido
 
 As of HAPI FHIR 5.3.0, the *Identify Partition for Read* hook method may return multiple partition names or IDs. If more than one partition is identified, the server will search in all identified partitions.  
 
+## Non-Partitionable Resources
+
+Some resource types can not be placed in any partition other than the DEFAULT partition. When a resource of one of these types is being created, the *STORAGE_PARTITION_IDENTIFY_CREATE* pointcut is invoked, but the hook method must return [defaultPartition()](https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/model/RequestPartitionId.html#defaultPartition()). A partition date may optionally be included.
+
+The following resource types may not be placed in any partition except the default partition:
+
+* CapabilityStatement
+* CodeSystem
+* CompartmentDefinition
+* ConceptMap
+* NamingSystem
+* OperationDefinition
+* Questionnaire
+* SearchParameter
+* StructureDefinition
+* StructureMap
+* Subscription
+* ValueSet
+
 ## Examples
 
 See [Partition Interceptor Examples](./partition_interceptor_examples.html) for various samples of how partitioning interceptors can be set up.
@@ -123,16 +142,25 @@ Partitioning is a relatively new feature in HAPI FHIR (added in HAPI FHIR 5.0.0)
 
 None of the limitations listed here are considered permanent. Over time the HAPI FHIR team is hoping to make all of these features partition aware.
 
+* **The following ResourceTypes may not be partitioned**: The following resources must be placed in the default partition:
+   * CapabilityStatement
+   * CodeSystem
+   * CompartmentDefinition
+   * ConceptMap
+   * NamingSystem
+   * OperationDefinition
+   * Questionnaire
+   * SearchParameter
+   * StructureDefinition
+   * StructureMap
+   * Subscription
+   * ValueSet
+
 * **Server Capability Statement is not partition aware**: The server creates and exposes a single server capability statement, covering all partitions. This can be misleading when partitioning us used as a multitenancy strategy. 
 
 * **Subscriptions may not be partitioned**: All subscriptions must be placed in the default partition, and subscribers will receive deliveries for any matching resources from all partitions.
 
-* **Conformance resources may not be partitioned**: The following resources must be placed in the default partition, and will be shared for any validation activities across all partitions:
-   * StructureDefinition
-   * Questionnaire
-   * ValueSet
-   * CodeSystem
-   * ConceptMap
+* **Conformance resources may not be partitioned**: Conformance resources must be placed in the default partition, and will be shared for any validation activities across all partitions.
 
 * **Search Parameters are not partitioned**: There is only one set of SearchParameter resources for the entire system, and any search parameters will apply to resources in all partitions. All SearchParameter resources must be stored in the default partition.
 

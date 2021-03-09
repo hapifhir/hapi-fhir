@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.bulk.job;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.StringUtils;
@@ -45,8 +46,8 @@ public class CreateBulkExportEntityTasklet implements Tasklet {
 		Map<String, Object> jobParameters = theChunkContext.getStepContext().getJobParameters();
 
 		//We can leave early if they provided us with an existing job.
-		if (jobParameters.containsKey("jobUUID")) {
-			addUUIDToJobContext(theChunkContext, (String)jobParameters.get("jobUUID"));
+		if (jobParameters.containsKey(BulkExportJobConfig.JOB_UUID_PARAMETER)) {
+			addUUIDToJobContext(theChunkContext, (String)jobParameters.get(BulkExportJobConfig.JOB_UUID_PARAMETER));
 			return RepeatStatus.FINISHED;
 		} else {
 			String resourceTypes = (String)jobParameters.get("resourceTypes");
@@ -60,12 +61,12 @@ public class CreateBulkExportEntityTasklet implements Tasklet {
 			}
 			Set<String> resourceTypeSet = Arrays.stream(resourceTypes.split(",")).collect(Collectors.toSet());
 
-			String outputFormat = (String)jobParameters.get("outputFormat");
+			String outputFormat = (String) jobParameters.get("outputFormat");
 			if (StringUtils.isBlank(outputFormat)) {
 				outputFormat = Constants.CT_FHIR_NDJSON;
 			}
 
-			IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.submitJob(outputFormat, resourceTypeSet, since, filterSet);
+			IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(outputFormat, resourceTypeSet, since, filterSet));
 
 			addUUIDToJobContext(theChunkContext, jobInfo.getJobId());
 			return RepeatStatus.FINISHED;
@@ -78,6 +79,6 @@ public class CreateBulkExportEntityTasklet implements Tasklet {
 			.getStepExecution()
 			.getJobExecution()
 			.getExecutionContext()
-			.putString("jobUUID", theJobUUID);
+			.putString(BulkExportJobConfig.JOB_UUID_PARAMETER, theJobUUID);
 	}
 }

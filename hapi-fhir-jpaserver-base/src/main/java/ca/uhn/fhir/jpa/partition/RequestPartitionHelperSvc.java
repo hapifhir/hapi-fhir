@@ -50,7 +50,7 @@ import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.hasHooks;
 
 public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
-	private final HashSet<Object> myPartitioningBlacklist;
+	private final HashSet<Object> myNonPartitionableResourceNames;
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -62,25 +62,25 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	private PartitionSettings myPartitionSettings;
 
 	public RequestPartitionHelperSvc() {
-		myPartitioningBlacklist = new HashSet<>();
+		myNonPartitionableResourceNames = new HashSet<>();
 
 		// Infrastructure
-		myPartitioningBlacklist.add("Subscription");
-		myPartitioningBlacklist.add("SearchParameter");
+		myNonPartitionableResourceNames.add("Subscription");
+		myNonPartitionableResourceNames.add("SearchParameter");
 
 		// Validation and Conformance
-		myPartitioningBlacklist.add("StructureDefinition");
-		myPartitioningBlacklist.add("Questionnaire");
-		myPartitioningBlacklist.add("CapabilityStatement");
-		myPartitioningBlacklist.add("CompartmentDefinition");
-		myPartitioningBlacklist.add("OperationDefinition");
+		myNonPartitionableResourceNames.add("StructureDefinition");
+		myNonPartitionableResourceNames.add("Questionnaire");
+		myNonPartitionableResourceNames.add("CapabilityStatement");
+		myNonPartitionableResourceNames.add("CompartmentDefinition");
+		myNonPartitionableResourceNames.add("OperationDefinition");
 
 		// Terminology
-		myPartitioningBlacklist.add("ConceptMap");
-		myPartitioningBlacklist.add("CodeSystem");
-		myPartitioningBlacklist.add("ValueSet");
-		myPartitioningBlacklist.add("NamingSystem");
-		myPartitioningBlacklist.add("StructureMap");
+		myNonPartitionableResourceNames.add("ConceptMap");
+		myNonPartitionableResourceNames.add("CodeSystem");
+		myNonPartitionableResourceNames.add("ValueSet");
+		myNonPartitionableResourceNames.add("NamingSystem");
+		myNonPartitionableResourceNames.add("StructureMap");
 
 	}
 
@@ -97,7 +97,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			// Handle system requests
-			if ((theRequest == null && myPartitioningBlacklist.contains(theResourceType))) {
+			if ((theRequest == null && myNonPartitionableResourceNames.contains(theResourceType))) {
 				return RequestPartitionId.defaultPartition();
 			}
 
@@ -128,10 +128,6 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 		RequestPartitionId requestPartitionId;
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			// Handle system requests
-			if ((theRequest == null && myPartitioningBlacklist.contains(theResourceType))) {
-				return RequestPartitionId.defaultPartition();
-			}
 
 			// Interceptor call: STORAGE_PARTITION_IDENTIFY_CREATE
 			HookParams params = new HookParams()
@@ -139,6 +135,12 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 				.add(RequestDetails.class, theRequest)
 				.addIfMatchesType(ServletRequestDetails.class, theRequest);
 			requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE, params);
+
+			// Handle system requests
+			boolean nonPartitionableResource = myNonPartitionableResourceNames.contains(theResourceType);
+			if (nonPartitionableResource && requestPartitionId == null) {
+				requestPartitionId = RequestPartitionId.defaultPartition();
+			}
 
 			String resourceName = myFhirContext.getResourceType(theResource);
 			validateSinglePartitionForCreate(requestPartitionId, resourceName, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE);
@@ -271,8 +273,8 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 		if ((theRequestPartitionId.hasPartitionIds() && !theRequestPartitionId.getPartitionIds().contains(null)) ||
 			(theRequestPartitionId.hasPartitionNames() && !theRequestPartitionId.getPartitionNames().contains(JpaConstants.DEFAULT_PARTITION_NAME))) {
 
-			if (myPartitioningBlacklist.contains(theResourceName)) {
-				String msg = myFhirContext.getLocalizer().getMessageSanitized(RequestPartitionHelperSvc.class, "blacklistedResourceTypeForPartitioning", theResourceName);
+			if (myNonPartitionableResourceNames.contains(theResourceName)) {
+				String msg = myFhirContext.getLocalizer().getMessageSanitized(RequestPartitionHelperSvc.class, "nonDefaultPartitionSelectedForNonPartitionable", theResourceName);
 				throw new UnprocessableEntityException(msg);
 			}
 
