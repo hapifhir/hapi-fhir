@@ -30,6 +30,7 @@ import java.util.Optional;
 public final class MdmResourceUtil {
 
 	private MdmResourceUtil() {
+
 	}
 
 	/**

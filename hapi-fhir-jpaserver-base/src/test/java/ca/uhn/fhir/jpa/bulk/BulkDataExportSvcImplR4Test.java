@@ -992,14 +992,11 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		boolean allMatch = Stream.of(jobInfo, jobInfo1, jobInfo2, jobInfo3, jobInfo4).allMatch(job -> job.getJobId().equals(initialJobId));
 		assertTrue(allMatch);
 
-		BulkDataExportOptions options2 = new BulkDataExportOptions();
-		options2.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
-		options2.setResourceTypes(Sets.newHashSet("Procedure"));
-		IBulkDataExportSvc.JobInfo jobInfo5 = myBulkDataExportSvc.submitJob(options2, false);
-		IBulkDataExportSvc.JobInfo jobInfo6 = myBulkDataExportSvc.submitJob(options2, false);
-		IBulkDataExportSvc.JobInfo jobInfo7 = myBulkDataExportSvc.submitJob(options2, false);
-		IBulkDataExportSvc.JobInfo jobInfo8 = myBulkDataExportSvc.submitJob(options2, false);
-		IBulkDataExportSvc.JobInfo jobInfo9 = myBulkDataExportSvc.submitJob(options2, false);
+		IBulkDataExportSvc.JobInfo jobInfo5 = myBulkDataExportSvc.submitJob(options, false);
+		IBulkDataExportSvc.JobInfo jobInfo6 = myBulkDataExportSvc.submitJob(options, false);
+		IBulkDataExportSvc.JobInfo jobInfo7 = myBulkDataExportSvc.submitJob(options, false);
+		IBulkDataExportSvc.JobInfo jobInfo8 = myBulkDataExportSvc.submitJob(options, false);
+		IBulkDataExportSvc.JobInfo jobInfo9 = myBulkDataExportSvc.submitJob(options, false);
 
 		//First non-cached should retrieve new ID.
 		assertThat(initialJobId, is(not(equalTo(jobInfo5.getJobId()))));
@@ -1009,6 +1006,11 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		ourLog.info("ZOOP {}", String.join(", ", jobIds));
 		Set<String> uniqueJobIds = new HashSet<>(jobIds);
 		assertEquals(uniqueJobIds.size(), jobIds.size());
+
+		//Now if we create another one and ask for the cache, we should get the most-recently-insert entry.
+		IBulkDataExportSvc.JobInfo jobInfo10 = myBulkDataExportSvc.submitJob(options, true);
+		assertThat(jobInfo10.getJobId(), is(equalTo(jobInfo9.getJobId())));
+
 	}
 
 	private void awaitJobCompletion(JobExecution theJobExecution) {
