@@ -186,7 +186,7 @@ public abstract class BaseBulkItemReader implements ItemReader<List<ResourcePers
 		RuntimeSearchParam patientSearchParam;
 		List<RuntimeSearchParam> searchParams = runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
 		if (searchParams == null || searchParams.size() == 0) {
-			String errorMessage = String.format("Resource type [%s] is not eligible for Group Bulk export, as it contains no Patient compartment, and no `patient` or `subject` search parameter", myResourceType);
+			String errorMessage = String.format("Resource type [%s] is not eligible for this type of export, as it contains no Patient compartment, and no `patient` or `subject` search parameter", myResourceType);
 			throw new IllegalArgumentException(errorMessage);
 		} else if (searchParams.size() == 1) {
 			patientSearchParam = searchParams.get(0);

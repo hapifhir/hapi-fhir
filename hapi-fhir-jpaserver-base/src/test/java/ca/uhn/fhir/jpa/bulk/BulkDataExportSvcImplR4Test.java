@@ -936,17 +936,42 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testPatientExportWithNoTypesWorks() {
+	public void testAllExportStylesWorkWithNullResourceTypes() {
+		createResources();
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 		// Create a bulk job
 		BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
 		bulkDataExportOptions.setOutputFormat(null);
-		bulkDataExportOptions.setResourceTypes(Sets.newHashSet(myFhirCtx.getResourceTypes());
+		bulkDataExportOptions.setResourceTypes(null);
 		bulkDataExportOptions.setSince(null);
 		bulkDataExportOptions.setFilters(null);
 		bulkDataExportOptions.setGroupId(myPatientGroupId);
 		bulkDataExportOptions.setExpandMdm(true);
 		bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+
+		//Patient-style
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
+		myBulkDataExportSvc.buildExportFiles();
+		awaitAllBulkJobCompletions();
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+		assertThat(jobInfo.getStatus(), is(equalTo(BulkJobStatusEnum.COMPLETE)));
+
+		//Group-style
+		bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		bulkDataExportOptions.setGroupId(myPatientGroupId);
+		jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
+		myBulkDataExportSvc.buildExportFiles();
+		awaitAllBulkJobCompletions();
+		jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+		assertThat(jobInfo.getStatus(), is(equalTo(BulkJobStatusEnum.COMPLETE)));
+
+		//System-style
+		bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+		jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
+		myBulkDataExportSvc.buildExportFiles();
+		awaitAllBulkJobCompletions();
+		jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+		assertThat(jobInfo.getStatus(), is(equalTo(BulkJobStatusEnum.COMPLETE)));
 	}
 
 	private void awaitJobCompletion(JobExecution theJobExecution) {

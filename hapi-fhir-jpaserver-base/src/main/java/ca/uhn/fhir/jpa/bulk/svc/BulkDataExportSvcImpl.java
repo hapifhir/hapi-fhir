@@ -21,6 +21,9 @@ package ca.uhn.fhir.jpa.bulk.svc;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
@@ -40,12 +43,16 @@ import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.quartz.JobExecutionContext;
@@ -64,13 +71,16 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions.ExportStyle.GROUP;
+import static ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions.ExportStyle.PATIENT;
+import static ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions.ExportStyle.SYSTEM;
 import static ca.uhn.fhir.util.UrlUtil.escapeUrlParam;
 import static ca.uhn.fhir.util.UrlUtil.escapeUrlParams;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -111,6 +121,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	@Autowired
 	@Qualifier(BatchJobsConfig.PATIENT_BULK_EXPORT_JOB_NAME)
 	private org.springframework.batch.core.Job myPatientBulkExportJob;
+
+	private Set<String> myCompartmentResources;
 
 	private final int myRetentionPeriod = (int) (2 * DateUtils.MILLIS_PER_HOUR);
 
@@ -291,9 +303,9 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		requestBuilder.append("/");
 
 		//Prefix the export url with Group/[id]/ or /Patient/ depending on what type of request it is.
-		if (theBulkDataExportOptions.getExportStyle().equals(BulkDataExportOptions.ExportStyle.GROUP)) {
+		if (theBulkDataExportOptions.getExportStyle().equals(GROUP)) {
 			requestBuilder.append(theBulkDataExportOptions.getGroupId().toVersionless()).append("/");
-		} else if (theBulkDataExportOptions.getExportStyle().equals(BulkDataExportOptions.ExportStyle.PATIENT)) {
+		} else if (theBulkDataExportOptions.getExportStyle().equals(PATIENT)) {
 			requestBuilder.append("Patient/");
 		}
 
@@ -313,7 +325,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 				.forEach(filter -> requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE_FILTER).append("=").append(escapeUrlParam(filter)));
 		}
 
-		if (theBulkDataExportOptions.getExportStyle().equals(BulkDataExportOptions.ExportStyle.GROUP)) {
+		if (theBulkDataExportOptions.getExportStyle().equals(GROUP)) {
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_GROUP_ID).append("=").append(theBulkDataExportOptions.getGroupId().getValue());
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_MDM).append("=").append(theBulkDataExportOptions.isExpandMdm());
 		}
@@ -338,7 +350,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			// This is probably not a useful default, but having the default be "download the whole
 			// server" seems like a risky default too. We'll deal with that by having the default involve
 			// only returning a small time span
-			resourceTypes = myContext.getResourceTypes();
+			resourceTypes = getAllowedResourceTypesForBulkExportStyle(theBulkDataExportOptions.getExportStyle());
 			if (since == null) {
 				since = DateUtils.addDays(new Date(), -1);
 			}
@@ -435,6 +447,35 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		}
 
 		return retVal;
+	}
+
+	@Override
+	public Set<String> getPatientCompartmentResources() {
+		if (myCompartmentResources == null) {
+			myCompartmentResources = myContext.getResourceTypes().stream()
+				.filter(this::resourceTypeIsInPatientCompartment)
+				.collect(Collectors.toSet());
+		}
+		return myCompartmentResources;
+	}
+
+	/**
+	 * Return true if any search parameter in the resource can point at a patient, false otherwise
+	 */
+	private boolean resourceTypeIsInPatientCompartment(String theResourceType) {
+		RuntimeResourceDefinition runtimeResourceDefinition = myContext.getResourceDefinition(theResourceType);
+		List<RuntimeSearchParam> searchParams = runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
+		return searchParams != null && searchParams.size() >= 1;
+	}
+
+	public Set<String> getAllowedResourceTypesForBulkExportStyle(BulkDataExportOptions.ExportStyle theExportStyle) {
+		if (theExportStyle.equals(SYSTEM)) {
+			return myContext.getResourceTypes();
+		} else if (theExportStyle.equals(GROUP) || theExportStyle.equals(PATIENT)) {
+			return getPatientCompartmentResources();
+		} else {
+			return null;
+		}
 	}
 
 	private IIdType toId(String theResourceId) {

@@ -55,7 +55,7 @@ public class PatientBulkItemReader extends BaseBulkItemReader implements ItemRea
 	private RuntimeSearchParam validateSearchParameters(SearchParameterMap expandedSpMap) {
 		RuntimeSearchParam runtimeSearchParam = getPatientSearchParamForCurrentResourceType();
 		if (expandedSpMap.get(runtimeSearchParam.getName()) != null) {
-			throw new IllegalArgumentException(String.format("Group Bulk Export manually modifies the Search Parameter called [%s], so you may not include this search parameter in your _typeFilter!", runtimeSearchParam.getName()));
+			throw new IllegalArgumentException(String.format("Patient Bulk Export manually modifies the Search Parameter called [%s], so you may not include this search parameter in your _typeFilter!", runtimeSearchParam.getName()));
 		}
 		return runtimeSearchParam;
 	}
@@ -74,7 +74,6 @@ public class PatientBulkItemReader extends BaseBulkItemReader implements ItemRea
 		List<SearchParameterMap> maps = createSearchParameterMapsForResourceType();
 
 		String patientSearchParam = getPatientSearchParamForCurrentResourceType().getName();
-
 		for (SearchParameterMap map: maps) {
 			//Ensure users did not monkey with the patient compartment search parameter.
 			validateSearchParameters(map);
