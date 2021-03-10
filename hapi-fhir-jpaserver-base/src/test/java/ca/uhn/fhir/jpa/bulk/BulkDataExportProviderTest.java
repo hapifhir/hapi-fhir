@@ -373,6 +373,26 @@ public class BulkDataExportProviderTest {
 		assertThat(options.getFilters(), containsInAnyOrder(immunizationTypeFilter1, immunizationTypeFilter2, observationFilter1));
 	}
 
+
+	@Test
+	public void testInitiateGroupExportWithInvalidResourceTypesFails() throws IOException {
+		IBulkDataExportSvc.JobInfo jobInfo = new IBulkDataExportSvc.JobInfo()
+			.setJobId(A_JOB_ID);
+		when(myBulkDataExportSvc.submitJob(any())).thenReturn(jobInfo);
+
+		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT
+			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
+			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("StructureDefinition");
+
+		HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		myClient.execute(get);
+
+		verify(myBulkDataExportSvc, times(1)).submitJob(myBulkDataExportOptionsCaptor.capture());
+		BulkDataExportOptions options = myBulkDataExportOptionsCaptor.getValue();
+
+	}
+
 	@Test
 	public void testInitiateWithPostAndMultipleTypeFilters() throws IOException {
 
@@ -419,7 +439,7 @@ public class BulkDataExportProviderTest {
 
 		Parameters input = new Parameters();
 		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
-		input.addParameter(JpaConstants.PARAM_EXPORT_STYLE, new StringType("Immunization, Observation"));
+		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Immunization, Observation"));
 		input.addParameter(JpaConstants.PARAM_EXPORT_SINCE, now);
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType("Immunization?vaccine-code=foo"));
 

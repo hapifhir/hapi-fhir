@@ -50,7 +50,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 public class BulkDataExportProvider {
@@ -109,8 +111,19 @@ public class BulkDataExportProvider {
 	) {
 		validatePreferAsyncHeader(theRequestDetails);
 		BulkDataExportOptions bulkDataExportOptions = buildGroupBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theIdParam, theMdm);
+		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
 		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
 		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
+	}
+
+	private void validateResourceTypesAllContainPatientSearchParams(Set<String> theResourceTypes) {
+		List<String> badResourceTypes = theResourceTypes.stream()
+			.filter(resourceType -> !myBulkDataExportSvc.getPatientCompartmentResources().contains(resourceType))
+			.collect(Collectors.toList());
+
+		if (!badResourceTypes.isEmpty()) {
+			throw new IllegalArgumentException(String.format("Resource types [] are invalid for this type of export, as they do not contain search parameters that refer to patients.", String.join(",", badResourceTypes)));
+		}
 	}
 
 	/**
