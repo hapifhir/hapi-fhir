@@ -544,7 +544,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		});
 
 		myDaoConfig.setSchedulingDisabled(true);
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 	}
 
 	@AfterEach
