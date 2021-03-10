@@ -97,6 +97,7 @@ import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.text.WordUtils;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -222,9 +223,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return create(theResource, theIfNoneExist, true, new TransactionDetails(), theRequestDetails);
 	}
 
+	@VisibleForTesting
+	public void setTransactionService(HapiTransactionService theTransactionService) {
+		myTransactionService = theTransactionService;
+	}
+
 	@Override
 	public DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, @Nonnull TransactionDetails theTransactionDetails, RequestDetails theRequestDetails) {
 		return myTransactionService.execute(theRequestDetails, tx -> doCreateForPost(theResource, theIfNoneExist, thePerformIndexing, theTransactionDetails, theRequestDetails));
+	}
+
+	@VisibleForTesting
+	public void setRequestPartitionHelperService(IRequestPartitionHelperSvc theRequestPartitionHelperService) {
+		myRequestPartitionHelperService = theRequestPartitionHelperService;
 	}
 
 	/**
@@ -1707,6 +1718,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			// Note- Throw a HAPI FHIR exception here so that hibernate doesn't try to translate it into a database exception
 			throw new InvalidRequestException("Incorrect resource type (" + theId.getResourceType() + ") for this DAO, wanted: " + myResourceName);
 		}
+	}
+
+	@VisibleForTesting
+	public void setDaoConfig(DaoConfig theDaoConfig) {
+		myDaoConfig = theDaoConfig;
 	}
 
 	private static class IdChecker implements IValidatorModule {

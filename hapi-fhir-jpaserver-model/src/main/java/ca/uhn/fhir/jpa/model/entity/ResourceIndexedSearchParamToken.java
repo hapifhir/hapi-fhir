@@ -257,6 +257,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		b.append("hashIdentity", myHashIdentity);
 		b.append("hashSystem", myHashSystem);
 		b.append("hashValue", myHashValue);
+		b.append("hashSysAndValue", myHashSystemAndValue);
 		return b.build();
 	}
 
