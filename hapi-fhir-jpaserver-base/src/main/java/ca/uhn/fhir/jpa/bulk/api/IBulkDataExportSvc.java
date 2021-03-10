@@ -37,6 +37,8 @@ public interface IBulkDataExportSvc {
 
 	JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions);
 
+	JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions, Boolean useCache);
+
 	JobInfo getJobInfoOrThrowResourceNotFound(String theJobId);
 
 	/**

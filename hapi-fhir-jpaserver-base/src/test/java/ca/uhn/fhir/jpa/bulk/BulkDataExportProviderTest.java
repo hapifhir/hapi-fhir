@@ -56,6 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
@@ -77,6 +78,8 @@ public class BulkDataExportProviderTest {
 	private CloseableHttpClient myClient;
 	@Captor
 	private ArgumentCaptor<BulkDataExportOptions> myBulkDataExportOptionsCaptor;
+	@Captor
+	private ArgumentCaptor<Boolean> myBooleanArgumentCaptor;
 
 	@AfterEach
 	public void after() throws Exception {
@@ -337,6 +340,43 @@ public class BulkDataExportProviderTest {
 	}
 
 	@Test
+	public void testSuccessfulInitiateGroupBulkRequest_Get() throws IOException {
+
+		IBulkDataExportSvc.JobInfo jobInfo = new IBulkDataExportSvc.JobInfo().setJobId(G_JOB_ID);
+		when(myBulkDataExportSvc.submitJob(any())).thenReturn(jobInfo);
+		when(myBulkDataExportSvc.getPatientCompartmentResources()).thenReturn(Sets.newHashSet("Patient", "Practitioner"));
+
+		InstantType now = InstantType.now();
+
+		String url = "http://localhost:" + myPort + "/" + GROUP_ID + "/"  + JpaConstants.OPERATION_EXPORT
+			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
+			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Patient, Practitioner")
+			+ "&" + JpaConstants.PARAM_EXPORT_SINCE + "=" + UrlUtil.escapeUrlParam(now.getValueAsString())
+			+ "&" + JpaConstants.PARAM_EXPORT_TYPE_FILTER + "=" + UrlUtil.escapeUrlParam("Patient?identifier=foo|bar")
+			+ "&" + JpaConstants.PARAM_EXPORT_MDM+ "=true";
+
+		HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		ourLog.info("Request: {}", url);
+		try (CloseableHttpResponse response = myClient.execute(get)) {
+			ourLog.info("Response: {}", response.toString());
+
+			assertEquals(202, response.getStatusLine().getStatusCode());
+			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
+			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + G_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+		}
+
+		verify(myBulkDataExportSvc, times(1)).submitJob(myBulkDataExportOptionsCaptor.capture());
+		BulkDataExportOptions options = myBulkDataExportOptionsCaptor.getValue();
+		assertEquals(Constants.CT_FHIR_NDJSON, options.getOutputFormat());
+		assertThat(options.getResourceTypes(), containsInAnyOrder("Patient", "Practitioner"));
+		assertThat(options.getSince(), notNullValue());
+		assertThat(options.getFilters(), notNullValue());
+		assertEquals(GROUP_ID, options.getGroupId().getValue());
+		assertThat(options.isExpandMdm(), is(equalTo(true)));
+	}
+
+	@Test
 	public void testInitiateWithGetAndMultipleTypeFilters() throws IOException {
 		IBulkDataExportSvc.JobInfo jobInfo = new IBulkDataExportSvc.JobInfo()
 			.setJobId(A_JOB_ID);
@@ -461,4 +501,34 @@ public class BulkDataExportProviderTest {
 		assertThat(options.getSince(), notNullValue());
 		assertThat(options.getFilters(), containsInAnyOrder("Immunization?vaccine-code=foo"));
 	}
+
+	@Test
+	public void testProviderProcessesNoCacheHeader() throws IOException {
+		IBulkDataExportSvc.JobInfo jobInfo = new IBulkDataExportSvc.JobInfo()
+			.setJobId(A_JOB_ID);
+		when(myBulkDataExportSvc.submitJob(any(), anyBoolean())).thenReturn(jobInfo);
+
+
+		Parameters input = new Parameters();
+		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
+		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Patient, Practitioner"));
+
+		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT);
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE);
+		post.setEntity(new ResourceEntity(myCtx, input));
+		ourLog.info("Request: {}", post);
+		try (CloseableHttpResponse response = myClient.execute(post)) {
+			ourLog.info("Response: {}", response.toString());
+			assertEquals(202, response.getStatusLine().getStatusCode());
+			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
+			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+		}
+
+
+		verify(myBulkDataExportSvc).submitJob(myBulkDataExportOptionsCaptor.capture(), myBooleanArgumentCaptor.capture());
+		Boolean usedCache = myBooleanArgumentCaptor.getValue();
+		assertThat(usedCache, is(equalTo(false)));
+	}
+
 }

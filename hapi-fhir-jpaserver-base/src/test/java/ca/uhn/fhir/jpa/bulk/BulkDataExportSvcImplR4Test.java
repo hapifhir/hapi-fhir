@@ -61,6 +61,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -70,6 +71,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
@@ -972,6 +974,41 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		awaitAllBulkJobCompletions();
 		jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 		assertThat(jobInfo.getStatus(), is(equalTo(BulkJobStatusEnum.COMPLETE)));
+	}
+
+	@Test
+	public void testCacheSettingIsRespectedWhenCreatingNewJobs() {
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+		options.setResourceTypes(Sets.newHashSet("Procedure"));
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.submitJob(options, true);
+		IBulkDataExportSvc.JobInfo jobInfo1 = myBulkDataExportSvc.submitJob(options, true);
+		IBulkDataExportSvc.JobInfo jobInfo2 = myBulkDataExportSvc.submitJob(options, true);
+		IBulkDataExportSvc.JobInfo jobInfo3 = myBulkDataExportSvc.submitJob(options, true);
+		IBulkDataExportSvc.JobInfo jobInfo4 = myBulkDataExportSvc.submitJob(options, true);
+
+		//Cached should have all identical Job IDs.
+		String initialJobId = jobInfo.getJobId();
+		boolean allMatch = Stream.of(jobInfo, jobInfo1, jobInfo2, jobInfo3, jobInfo4).allMatch(job -> job.getJobId().equals(initialJobId));
+		assertTrue(allMatch);
+
+		BulkDataExportOptions options2 = new BulkDataExportOptions();
+		options2.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+		options2.setResourceTypes(Sets.newHashSet("Procedure"));
+		IBulkDataExportSvc.JobInfo jobInfo5 = myBulkDataExportSvc.submitJob(options2, false);
+		IBulkDataExportSvc.JobInfo jobInfo6 = myBulkDataExportSvc.submitJob(options2, false);
+		IBulkDataExportSvc.JobInfo jobInfo7 = myBulkDataExportSvc.submitJob(options2, false);
+		IBulkDataExportSvc.JobInfo jobInfo8 = myBulkDataExportSvc.submitJob(options2, false);
+		IBulkDataExportSvc.JobInfo jobInfo9 = myBulkDataExportSvc.submitJob(options2, false);
+
+		//First non-cached should retrieve new ID.
+		assertThat(initialJobId, is(not(equalTo(jobInfo5.getJobId()))));
+
+		//Non-cached should all have unique IDs
+		List<String> jobIds = Stream.of(jobInfo5, jobInfo6, jobInfo7, jobInfo8, jobInfo9).map(IBulkDataExportSvc.JobInfo::getJobId).collect(Collectors.toList());
+		ourLog.info("ZOOP {}", String.join(", ", jobIds));
+		Set<String> uniqueJobIds = new HashSet<>(jobIds);
+		assertEquals(uniqueJobIds.size(), jobIds.size());
 	}
 
 	private void awaitJobCompletion(JobExecution theJobExecution) {

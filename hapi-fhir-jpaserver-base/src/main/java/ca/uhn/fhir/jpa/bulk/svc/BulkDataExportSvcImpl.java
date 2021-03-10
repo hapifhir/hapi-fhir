@@ -289,6 +289,12 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	@Transactional
 	@Override
 	public JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions) {
+		return submitJob(theBulkDataExportOptions, true);
+	}
+
+	@Transactional
+	@Override
+	public JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions, Boolean useCache) {
 		String outputFormat = Constants.CT_FHIR_NDJSON;
 		if (isNotBlank(theBulkDataExportOptions.getOutputFormat())) {
 			outputFormat = theBulkDataExportOptions.getOutputFormat();
@@ -333,11 +339,15 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 		String request = requestBuilder.toString();
 
-		Date cutoff = DateUtils.addMilliseconds(new Date(), -myReuseBulkExportForMillis);
-		Pageable page = PageRequest.of(0, 10);
-		Slice<BulkExportJobEntity> existing = myBulkExportJobDao.findExistingJob(page, request, cutoff, BulkJobStatusEnum.ERROR);
-		if (!existing.isEmpty()) {
-			return toSubmittedJobInfo(existing.iterator().next());
+
+		//If we are using the cache, then attempt to retrieve a matching job based on the Request String, otherwise just make a new one.
+		if (useCache) {
+			Date cutoff = DateUtils.addMilliseconds(new Date(), -myReuseBulkExportForMillis);
+			Pageable page = PageRequest.of(0, 10);
+			Slice<BulkExportJobEntity> existing = myBulkExportJobDao.findExistingJob(page, request, cutoff, BulkJobStatusEnum.ERROR);
+			if (!existing.isEmpty()) {
+				return toSubmittedJobInfo(existing.iterator().next());
+			}
 		}
 
 		if (resourceTypes != null && resourceTypes.contains("Binary")) {

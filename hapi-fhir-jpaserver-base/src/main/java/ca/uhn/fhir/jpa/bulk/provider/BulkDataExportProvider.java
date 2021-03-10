@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -44,6 +45,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import sun.misc.Cache;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -89,8 +91,14 @@ public class BulkDataExportProvider {
 	) {
 		validatePreferAsyncHeader(theRequestDetails);
 		BulkDataExportOptions bulkDataExportOptions = buildSystemBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter);
-		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
+		Boolean useCache = shouldUseCache(theRequestDetails);
+		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, useCache);
 		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
+	}
+
+	private boolean shouldUseCache(ServletRequestDetails theRequestDetails) {
+		CacheControlDirective cacheControlDirective = new CacheControlDirective().parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL));
+		return !cacheControlDirective.isNoCache();
 	}
 
 	private String getServerBase(ServletRequestDetails theRequestDetails) {
@@ -120,7 +128,7 @@ public class BulkDataExportProvider {
 		validatePreferAsyncHeader(theRequestDetails);
 		BulkDataExportOptions bulkDataExportOptions = buildGroupBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theIdParam, theMdm);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
-		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
+		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails));
 		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
 	}
 
@@ -148,7 +156,7 @@ public class BulkDataExportProvider {
 		myBulkDataExportSvc.getPatientCompartmentResources();
 		validatePreferAsyncHeader(theRequestDetails);
 		BulkDataExportOptions bulkDataExportOptions = buildPatientBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter);
-		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
+		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails));
 		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
 	}
 
