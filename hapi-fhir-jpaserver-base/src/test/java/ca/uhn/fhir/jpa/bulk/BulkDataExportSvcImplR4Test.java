@@ -39,7 +39,6 @@ import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -793,7 +792,6 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(nextContents, is(containsString("IMM1")));
 	}
 
-	@NotNull
 	public String getBinaryContents(IBulkDataExportSvc.JobInfo theJobInfo, int theIndex) {
 		// Iterate over the files
 		Binary nextBinary = myBinaryDao.read(theJobInfo.getFiles().get(theIndex).getResourceId());
@@ -937,6 +935,20 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(nextContents, is(not(containsString("Flu"))));
 	}
 
+	@Test
+	public void testPatientExportWithNoTypesWorks() {
+		// Create a bulk job
+		BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
+		bulkDataExportOptions.setOutputFormat(null);
+		bulkDataExportOptions.setResourceTypes(Sets.newHashSet(myFhirCtx.getResourceTypes());
+		bulkDataExportOptions.setSince(null);
+		bulkDataExportOptions.setFilters(null);
+		bulkDataExportOptions.setGroupId(myPatientGroupId);
+		bulkDataExportOptions.setExpandMdm(true);
+		bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
+	}
+
 	private void awaitJobCompletion(JobExecution theJobExecution) {
 		await().atMost(120, TimeUnit.SECONDS).until(() -> {
 			JobExecution jobExecution = myJobExplorer.getJobExecution(theJobExecution.getId());
@@ -959,8 +971,6 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		createObservationWithIndex(999, g1Outcome.getId());
 		createImmunizationWithIndex(999, g1Outcome.getId());
 		createCareTeamWithIndex(999, g1Outcome.getId());
-
-		//Lets create an observation and an immunization for our golden patient.
 
 		for (int i = 0; i < 10; i++) {
 			DaoMethodOutcome patientOutcome = createPatientWithIndex(i);
