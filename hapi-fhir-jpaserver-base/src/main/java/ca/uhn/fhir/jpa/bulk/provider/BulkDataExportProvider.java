@@ -43,6 +43,7 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.InstantType;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletResponse;
@@ -54,9 +55,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 
 public class BulkDataExportProvider {
 	public static final String FARM_TO_TABLE_TYPE_FILTER_REGEX = "(?:,)(?=[A-Z][a-z]+\\?)";
+	private static final Logger ourLog = getLogger(BulkDataExportProvider.class);
 
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
@@ -90,8 +94,6 @@ public class BulkDataExportProvider {
 		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
 	}
 
-
-
 	private String getServerBase(ServletRequestDetails theRequestDetails) {
 		return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest(), "/");
 	}
@@ -109,6 +111,13 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_MDM, min = 0, max = 1, typeName = "boolean") IPrimitiveType<Boolean> theMdm,
 		ServletRequestDetails theRequestDetails
 	) {
+		ourLog.debug("Received Group Bulk Export Request for Group {}", theIdParam);
+		ourLog.debug("_type={}", theIdParam);
+		ourLog.debug("_since={}", theSince);
+		ourLog.debug("_typeFilter={}", theTypeFilter);
+		ourLog.debug("_mdm=", theMdm);
+
+
 		validatePreferAsyncHeader(theRequestDetails);
 		BulkDataExportOptions bulkDataExportOptions = buildGroupBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theIdParam, theMdm);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());

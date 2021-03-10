@@ -1015,6 +1015,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			createImmunizationWithIndex(i, patId);
 			createCareTeamWithIndex(i, patId);
 		}
+
 		myPatientGroupId =  myGroupDao.update(group).getId();
 
 		//Manually create another golden record

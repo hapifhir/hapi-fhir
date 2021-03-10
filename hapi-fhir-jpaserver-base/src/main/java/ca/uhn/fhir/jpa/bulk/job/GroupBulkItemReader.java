@@ -76,8 +76,6 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
 
-	private RuntimeSearchParam myPatientSearchParam;
-
 	@Override
 	Iterator<ResourcePersistentId> getResourcePidIterator() {
 		Set<ResourcePersistentId> myReadPids = new HashSet<>();
@@ -112,7 +110,6 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	 */
 	private Iterator<ResourcePersistentId> getExpandedPatientIterator() {
 		Set<Long> patientPidsToExport = new HashSet<>();
-		//This gets all member pids
 		List<String> members = getMembers();
 		List<IIdType> ids = members.stream().map(member -> new IdDt("Patient/" + member)).collect(Collectors.toList());
 		List<Long> pidsOrThrowException = myIdHelperService.getPidsOrThrowException(ids);
@@ -161,8 +158,15 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 			//Now lets translate these pids into resource IDs
 			Set<Long> uniquePids = new HashSet<>();
 			goldenPidTargetPidTuple.forEach(uniquePids::addAll);
-			Map<Long, Optional<String>> longOptionalMap = myIdHelperService.translatePidsToForcedIds(uniquePids);
-			expandedIds = longOptionalMap.values().stream().map(Optional::get).collect(Collectors.toSet());
+
+			Map<Long, Optional<String>> pidToForcedIdMap = myIdHelperService.translatePidsToForcedIds(uniquePids);
+
+			//If the result of the translation is an empty optional, it means there is no forced id, and we can use the PID as the resource ID.
+			Set<String> resolvedResourceIds = pidToForcedIdMap.entrySet().stream()
+				.map(entry -> entry.getValue().isPresent() ? entry.getValue().get() : entry.getKey().toString())
+				.collect(Collectors.toSet());
+
+			expandedIds.addAll(resolvedResourceIds);
 		}
 
 		//Now manually add the members of the group (its possible even with mdm expansion that some members dont have MDM matches,
