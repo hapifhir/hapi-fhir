@@ -54,6 +54,7 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -1149,7 +1150,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		BaseHasResource entity = myEntityManager.find(ResourceTable.class, pid.getIdAsLong());
 
 		// Verify that the resource is for the correct partition
-		if (!requestPartitionId.isAllPartitions()) {
+		if (entity != null && !requestPartitionId.isAllPartitions()) {
 			if (entity.getPartitionId() != null && entity.getPartitionId().getPartitionId() != null) {
 				if (!requestPartitionId.hasPartitionId(entity.getPartitionId().getPartitionId())) {
 					ourLog.debug("Performing a read for PartitionId={} but entity has partition: {}", requestPartitionId, entity.getPartitionId());
@@ -1290,6 +1291,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Transactional(propagation = Propagation.SUPPORTS)
 	@Override
 	public IBundleProvider search(final SearchParameterMap theParams, RequestDetails theRequest, HttpServletResponse theServletResponse) {
+
+		if (theParams.getSearchContainedMode() == SearchContainedModeEnum.BOTH) {
+			throw new MethodNotAllowedException("Contained mode 'both' is not currently supported");
+		}
+		if (theParams.getSearchContainedMode() != SearchContainedModeEnum.FALSE && !myModelConfig.isIndexOnContainedResources()) {
+			throw new MethodNotAllowedException("Searching with _contained mode enabled is not enabled on this server");
+		}
 
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
 			for (List<List<IQueryParameterType>> nextAnds : theParams.values()) {

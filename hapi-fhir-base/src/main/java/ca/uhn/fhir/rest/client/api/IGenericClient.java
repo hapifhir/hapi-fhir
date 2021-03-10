@@ -174,7 +174,7 @@ public interface IGenericClient extends IRestfulClient {
 	void unregisterInterceptor(Object theInterceptor);
 
 	/**
-	 * Fluent method for the "update" operation, which performs a logical delete on a server resource
+	 * Fluent method for the "update" operation, which updates a resource instance on the server
 	 */
 	IUpdate update();
 

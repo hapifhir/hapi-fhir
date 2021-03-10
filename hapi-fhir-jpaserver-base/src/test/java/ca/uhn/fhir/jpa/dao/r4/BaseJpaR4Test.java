@@ -477,7 +477,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	private IValidationSupport myJpaValidationSupportChainR4;
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
-	private List<Object> mySystemInterceptors;
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
 	@Autowired
@@ -525,8 +524,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@BeforeEach
 	public void beforeCreateInterceptor() {
-		mySystemInterceptors = myInterceptorRegistry.getAllRegisteredInterceptors();
-
 		myInterceptor = mock(IServerInterceptor.class);
 
 		myPerformanceTracingLoggingInterceptor = new PerformanceTracingLoggingInterceptor();
@@ -558,9 +555,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@BeforeEach
 	public void beforeResetConfig() {
-		myDaoConfig.setHardSearchLimit(1000);
-		myDaoConfig.setHardTagListLimit(1000);
-		myDaoConfig.setIncludeLimit(2000);
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 		myValidationSettings.setLocalReferenceValidationDefaultPolicy(new ValidationSettings().getLocalReferenceValidationDefaultPolicy());
 	}

@@ -148,13 +148,6 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
 	}
 
-	@BeforeEach
-	public void beforeResetConfig() {
-		myDaoConfig.setHardSearchLimit(1000);
-		myDaoConfig.setHardTagListLimit(1000);
-		myDaoConfig.setIncludeLimit(2000);
-	}
-
 	@Override
 	protected PlatformTransactionManager getTxManager() {
 		return myTxManager;
@@ -171,7 +164,7 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 
 		Organization org = new Organization();
 		org.setName(methodName);
-		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
+		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(ca.uhn.fhir.rest.api.Constants.PARAM_CONTENT, new StringParam(methodName));
@@ -189,7 +182,7 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 
 		Organization org = new Organization();
 		org.setName(methodName);
-		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
+		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Organization.SP_NAME, new StringParam(methodName));

@@ -9,7 +9,12 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,8 +25,8 @@ import java.net.URI;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 
 /**
  * Adds a FHIR subscription with criteria through the rest interface. Then creates a websocket with the id of the
@@ -70,9 +75,6 @@ public class WebsocketWithSubscriptionIdDstu3Test extends BaseResourceProviderDs
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-
-		myDaoConfig.setSubscriptionEnabled(true);
-		myDaoConfig.setSubscriptionPollDelay(0L);
 
 		mySubscriptionTestUtil.registerWebSocketInterceptor();
 
