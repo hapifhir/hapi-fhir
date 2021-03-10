@@ -195,11 +195,6 @@ public class JpaConstants {
 	public static final String PARAM_EXPORT_MDM = "_mdm";
 
 	/**
-	 * the Type of the export
-	 */
-	public static final String PARAM_EXPORT_STYLE = "_exportStyle";
-
-	/**
 	 * Parameter for delete to indicate the deleted resources should also be expunged
 	 */
 

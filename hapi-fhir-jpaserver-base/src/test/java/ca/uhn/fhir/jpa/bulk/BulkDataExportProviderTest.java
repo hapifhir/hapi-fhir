@@ -16,6 +16,7 @@ import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
+import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -118,7 +119,7 @@ public class BulkDataExportProviderTest {
 
 		Parameters input = new Parameters();
 		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
-		input.addParameter(JpaConstants.PARAM_EXPORT_STYLE, new StringType("Patient, Practitioner"));
+		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Patient, Practitioner"));
 		input.addParameter(JpaConstants.PARAM_EXPORT_SINCE, now);
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType("Patient?identifier=foo"));
 
@@ -155,7 +156,7 @@ public class BulkDataExportProviderTest {
 
 		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
-			+ "&" + JpaConstants.PARAM_EXPORT_STYLE + "=" + UrlUtil.escapeUrlParam("Patient, Practitioner")
+			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Patient, Practitioner")
 			+ "&" + JpaConstants.PARAM_EXPORT_SINCE + "=" + UrlUtil.escapeUrlParam(now.getValueAsString())
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE_FILTER + "=" + UrlUtil.escapeUrlParam("Patient?identifier=foo");
 
@@ -307,7 +308,7 @@ public class BulkDataExportProviderTest {
 		Parameters input = new Parameters();
 		StringType obsTypeFilter = new StringType("Observation?code=OBSCODE,DiagnosticReport?code=DRCODE");
 		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
-		input.addParameter(JpaConstants.PARAM_EXPORT_STYLE, new StringType("Observation, DiagnosticReport"));
+		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Observation, DiagnosticReport"));
 		input.addParameter(JpaConstants.PARAM_EXPORT_SINCE, now);
 		input.addParameter(JpaConstants.PARAM_EXPORT_MDM, true);
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, obsTypeFilter);
@@ -345,7 +346,7 @@ public class BulkDataExportProviderTest {
 
 		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
-			+ "&" + JpaConstants.PARAM_EXPORT_STYLE + "=" + UrlUtil.escapeUrlParam("Immunization, Observation")
+			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Immunization, Observation")
 			+ "&" + JpaConstants.PARAM_EXPORT_SINCE + "=" + UrlUtil.escapeUrlParam(now.getValueAsString());
 
 		String immunizationTypeFilter1 = "Immunization?patient.identifier=SC378274-MRN|009999997,SC378274-MRN|009999998,SC378274-MRN|009999999&date=2020-01-02";
@@ -376,21 +377,18 @@ public class BulkDataExportProviderTest {
 
 	@Test
 	public void testInitiateGroupExportWithInvalidResourceTypesFails() throws IOException {
-		IBulkDataExportSvc.JobInfo jobInfo = new IBulkDataExportSvc.JobInfo()
-			.setJobId(A_JOB_ID);
-		when(myBulkDataExportSvc.submitJob(any())).thenReturn(jobInfo);
-
-		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT
+		when (myBulkDataExportSvc.getPatientCompartmentResources()).thenReturn(Sets.newHashSet("Observation"));
+		String url = "http://localhost:" + myPort + "/" + "Group/123/" +JpaConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
-			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("StructureDefinition");
+			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("StructureDefinition,Observation");
 
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		myClient.execute(get);
+		CloseableHttpResponse execute = myClient.execute(get);
+		String responseBody = IOUtils.toString(execute.getEntity().getContent());
 
-		verify(myBulkDataExportSvc, times(1)).submitJob(myBulkDataExportOptionsCaptor.capture());
-		BulkDataExportOptions options = myBulkDataExportOptionsCaptor.getValue();
-
+		assertThat(execute.getStatusLine().getStatusCode(), is(equalTo(400)));
+		assertThat(responseBody, is(containsString("Resource types [StructureDefinition] are invalid for this type of export, as they do not contain search parameters that refer to patients.")));
 	}
 
 	@Test
@@ -404,7 +402,7 @@ public class BulkDataExportProviderTest {
 
 		Parameters input = new Parameters();
 		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
-		input.addParameter(JpaConstants.PARAM_EXPORT_STYLE, new StringType("Patient"));
+		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Patient"));
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType("Patient?gender=male,Patient?gender=female"));
 
 		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
@@ -430,7 +428,6 @@ public class BulkDataExportProviderTest {
 
 	@Test
 	public void testInitiatePatientExportRequest() throws IOException {
-
 		IBulkDataExportSvc.JobInfo jobInfo = new IBulkDataExportSvc.JobInfo()
 			.setJobId(A_JOB_ID);
 		when(myBulkDataExportSvc.submitJob(any())).thenReturn(jobInfo);

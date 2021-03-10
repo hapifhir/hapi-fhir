@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.bulk.provider;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.model.BulkExportResponseJson;
@@ -83,7 +82,7 @@ public class BulkDataExportProvider {
 	@Operation(name = JpaConstants.OPERATION_EXPORT, global = false /* set to true once we can handle this */, manualResponse = true, idempotent = true)
 	public void export(
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
-		@OperationParam(name = JpaConstants.PARAM_EXPORT_STYLE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theTypeFilter,
 		ServletRequestDetails theRequestDetails
@@ -105,7 +104,7 @@ public class BulkDataExportProvider {
 	public void groupExport(
 		@IdParam IIdType theIdParam,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
-		@OperationParam(name = JpaConstants.PARAM_EXPORT_STYLE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theTypeFilter,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_MDM, min = 0, max = 1, typeName = "boolean") IPrimitiveType<Boolean> theMdm,
@@ -131,7 +130,7 @@ public class BulkDataExportProvider {
 			.collect(Collectors.toList());
 
 		if (!badResourceTypes.isEmpty()) {
-			throw new IllegalArgumentException(String.format("Resource types [] are invalid for this type of export, as they do not contain search parameters that refer to patients.", String.join(",", badResourceTypes)));
+			throw new InvalidRequestException(String.format("Resource types [%s] are invalid for this type of export, as they do not contain search parameters that refer to patients.", String.join(",", badResourceTypes)));
 		}
 	}
 
@@ -141,7 +140,7 @@ public class BulkDataExportProvider {
 	@Operation(name = JpaConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Patient")
 	public void patientExport(
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
-		@OperationParam(name = JpaConstants.PARAM_EXPORT_STYLE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theTypeFilter,
 		ServletRequestDetails theRequestDetails
