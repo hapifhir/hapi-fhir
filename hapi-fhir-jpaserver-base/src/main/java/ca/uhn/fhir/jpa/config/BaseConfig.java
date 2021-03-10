@@ -151,6 +151,7 @@ import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import java.util.Date;
 
 /*
@@ -199,6 +200,29 @@ public abstract class BaseConfig {
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
+	/**
+	 * Subclasses may override this method to provide settings such as search coordinator pool sizes.
+	 */
+	@PostConstruct
+	public void initSettings() {}
+
+	private Integer searchCoordCorePoolSize = 20;
+	private Integer searchCoordMaxPoolSize = 100;
+	private Integer searchCoordQueueCapacity = 200;
+
+	public void setSearchCoordCorePoolSize(Integer searchCoordCorePoolSize) {
+		this.searchCoordCorePoolSize = searchCoordCorePoolSize;
+	}
+
+	public void setSearchCoordMaxPoolSize(Integer searchCoordMaxPoolSize) {
+		this.searchCoordMaxPoolSize = searchCoordMaxPoolSize;
+	}
+
+	public void setSearchCoordQueueCapacity(Integer searchCoordQueueCapacity) {
+		this.searchCoordQueueCapacity = searchCoordQueueCapacity;
+	}
+
 
 	@Bean
 	public BatchConfigurer batchConfigurer() {
@@ -316,6 +340,9 @@ public abstract class BaseConfig {
 	public ThreadPoolTaskExecutor searchCoordinatorThreadFactory() {
 		final ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
 		threadPoolTaskExecutor.setThreadNamePrefix("search_coord_");
+		threadPoolTaskExecutor.setCorePoolSize(searchCoordCorePoolSize);
+		threadPoolTaskExecutor.setMaxPoolSize(searchCoordMaxPoolSize);
+		threadPoolTaskExecutor.setQueueCapacity(searchCoordQueueCapacity);
 		threadPoolTaskExecutor.initialize();
 		return threadPoolTaskExecutor;
 	}
