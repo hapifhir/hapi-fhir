@@ -61,7 +61,7 @@ public interface ISearchParamExtractor {
 
 	SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource);
 
-	SearchParamSet<PathAndRef> extractResourceLinks(IBaseResource theResource);
+	SearchParamSet<PathAndRef> extractResourceLinks(IBaseResource theResource, boolean theWantLocalReferences);
 
 	String[] split(String theExpression);
 

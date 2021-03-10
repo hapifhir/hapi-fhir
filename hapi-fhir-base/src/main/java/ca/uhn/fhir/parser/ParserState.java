@@ -1149,7 +1149,7 @@ class ParserState<T> {
 			for (IBaseReference nextRef : myLocalReferences) {
 				String ref = nextRef.getReferenceElement().getValue();
 				if (isNotBlank(ref)) {
-					if (ref.startsWith("#")) {
+					if (ref.startsWith("#") && ref.length() > 1) {
 						IBaseResource target = myContainedResources.get(ref);
 						if (target != null) {
 							ourLog.debug("Resource contains local ref {}", ref);
@@ -1186,12 +1186,6 @@ class ParserState<T> {
 			myMutator = theMutator;
 			assert theResourceType == null || IResource.class.isAssignableFrom(theResourceType);
 		}
-
-		// @Override
-		// public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
-		// super.enteringNewElement(theNamespaceUri, theLocalPart);
-		// populateTarget();
-		// }
 
 		@Override
 		protected void populateTarget() {

@@ -44,7 +44,6 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class RuleBuilder implements IAuthRuleBuilder {
 
-	private static final String[] EMPTY_STRING_ARRAY = new String[0];
 	private static final ConcurrentHashMap<Class<? extends IBaseResource>, String> ourTypeToName = new ConcurrentHashMap<>();
 	private ArrayList<IAuthRule> myRules;
 	private IAuthRuleBuilderRule myAllow;
@@ -144,7 +143,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		@Override
 		public IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId forTenantIds(String... theTenantIds) {
-			return forTenantIds(Arrays.asList(defaultIfNull(theTenantIds, EMPTY_STRING_ARRAY)));
+			return forTenantIds(Arrays.asList(defaultIfNull(theTenantIds, Constants.EMPTY_STRING_ARRAY)));
 		}
 
 		@Override
@@ -162,7 +161,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		@Override
 		public IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId notForTenantIds(String... theTenantIds) {
-			return notForTenantIds(Arrays.asList(defaultIfNull(theTenantIds, EMPTY_STRING_ARRAY)));
+			return notForTenantIds(Arrays.asList(defaultIfNull(theTenantIds, Constants.EMPTY_STRING_ARRAY)));
 		}
 
 		@Override

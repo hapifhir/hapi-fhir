@@ -94,6 +94,7 @@ import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Quantity.QuantityComparator;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -294,6 +295,39 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong()), not(greaterThan(0)));
 		});
 	}
+
+	@Test
+	public void testStoreReferenceFromContainedToContainer() {
+		Patient patient = new Patient();
+		patient.setActive(true);
+
+		Provenance provenance = new Provenance();
+		provenance.setId("#1");
+		provenance.addTarget().setReference("#");
+		patient.getContained().add(provenance);
+
+		Observation observation = new Observation();
+		observation.setId("#2");
+		observation.getSubject().setReference("#");
+		patient.getContained().add(observation);
+
+		IIdType id = myPatientDao.create(patient).getId();
+
+		patient = myPatientDao.read(id);
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		assertEquals(2, patient.getContained().size());
+
+		provenance = (Provenance) patient.getContained().get(0);
+		assertEquals("#1", provenance.getId());
+		assertEquals("#", provenance.getTargetFirstRep().getReference());
+
+		observation = (Observation) patient.getContained().get(1);
+		assertEquals("#2", observation.getId());
+		assertEquals("#", observation.getSubject().getReference());
+	}
+
 
 	@Test
 	public void testTermConceptReindexingDoesntDuplicateData() {

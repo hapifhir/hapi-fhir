@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
+import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 
 public class ${className}ResourceProvider extends 
 ## We have specialized base classes for RPs that handle certain resource types. These
@@ -138,7 +139,9 @@ public class ${className}ResourceProvider extends
 
 			SummaryEnum theSummaryMode,
 
-			SearchTotalModeEnum theSearchTotalMode
+			SearchTotalModeEnum theSearchTotalMode,
+
+			SearchContainedModeEnum theSearchContainedMode
 
 			) {
 		startRequest(theServletRequest);
@@ -165,6 +168,7 @@ public class ${className}ResourceProvider extends
 			paramMap.setOffset(theOffset);
 			paramMap.setSummaryMode(theSummaryMode);
 			paramMap.setSearchTotalMode(theSearchTotalMode);
+			paramMap.setSearchContainedMode(theSearchContainedMode);
 
 			getDao().translateRawParameters(theAdditionalRawParams, paramMap);
 

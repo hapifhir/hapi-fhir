@@ -26,6 +26,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 	@AfterEach
 	public void afterEach() {
 		myFhirCtx.getParserOptions().setStripVersionsFromReferences(true);
+		myFhirCtx.getParserOptions().getDontStripVersionsFromReferencesAtPaths().clear();
 		myDaoConfig.setDeleteEnabled(new DaoConfig().isDeleteEnabled());
 		myModelConfig.setRespectVersionsForSearchIncludes(new ModelConfig().isRespectVersionsForSearchIncludes());
 		myModelConfig.setAutoVersionReferenceAtPaths(new ModelConfig().getAutoVersionReferenceAtPaths());
@@ -456,6 +457,10 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		Observation observation = new Observation();
 		observation.getSubject().setReference(patientId.withVersion("1").getValue());
 		IIdType observationId = myObservationDao.create(observation).getId().toUnqualified();
+
+		// Read the observation back
+		observation = myObservationDao.read(observationId);
+		assertEquals(patientId.toVersionless().getValue(), observation.getSubject().getReference());
 
 		// Search - Non Synchronous for *
 		{

@@ -396,9 +396,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
 	@BeforeEach
 	public void beforeResetConfig() {
-		myDaoConfig.setHardSearchLimit(1000);
-		myDaoConfig.setHardTagListLimit(1000);
-		myDaoConfig.setIncludeLimit(2000);
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 	}
 

@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2441
+title: "Support has been added to the JPA server for indexing and searching using the `_contained` parameter, which
+   allows searching using chained parameters that chain into contained resources. This feature is disabled by default
+   but can be enabled via a setting on the ModelConfig object."
