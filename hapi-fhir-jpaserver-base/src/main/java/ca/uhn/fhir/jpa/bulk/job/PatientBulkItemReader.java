@@ -77,10 +77,9 @@ public class PatientBulkItemReader extends BaseBulkItemReader implements ItemRea
 		for (SearchParameterMap map: maps) {
 			//Ensure users did not monkey with the patient compartment search parameter.
 			validateSearchParameters(map);
+
 			//Skip adding the parameter querying for patient= if we are in fact querying the patient resource type.
 			if (!myResourceType.equalsIgnoreCase("Patient")) {
-				//Now that we have our basic built Bulk Export SP map, we inject the condition that the resources returned
-				//must have a patient= or subject= reference set.
 				map.add(patientSearchParam, new ReferenceParam().setMissing(false));
 			}
 

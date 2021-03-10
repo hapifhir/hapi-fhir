@@ -254,6 +254,10 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		return theBulkExportJobEntity.getRequest().startsWith("/Patient/");
 	}
 
+	private boolean isGroupBulkJob(BulkExportJobEntity theBulkExportJobEntity) {
+		return theBulkExportJobEntity.getRequest().startsWith("/Group/");
+	}
+
 	private void enhanceBulkParametersWithGroupParameters(BulkExportJobEntity theBulkExportJobEntity, JobParametersBuilder theParameters) {
 		String theGroupId = getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_GROUP_ID);
 		String expandMdm  = getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_MDM);
@@ -261,10 +265,6 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		theParameters.addString(BulkExportJobConfig.EXPAND_MDM_PARAMETER, expandMdm);
 	}
 
-	private boolean isGroupBulkJob(BulkExportJobEntity theBulkExportJobEntity) {
-		String queryParameterIfPresent = getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_GROUP_ID);
-		return queryParameterIfPresent != null;
-	}
 
 	@SuppressWarnings("unchecked")
 	private IFhirResourceDao<IBaseBinary> getBinaryDao() {
@@ -308,7 +308,6 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		} else if (theBulkDataExportOptions.getExportStyle().equals(PATIENT)) {
 			requestBuilder.append("Patient/");
 		}
-
 
 		requestBuilder.append(JpaConstants.OPERATION_EXPORT);
 		requestBuilder.append("?").append(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT).append("=").append(escapeUrlParam(outputFormat));
@@ -474,7 +473,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		} else if (theExportStyle.equals(GROUP) || theExportStyle.equals(PATIENT)) {
 			return getPatientCompartmentResources();
 		} else {
-			return null;
+			return throw new IllegalArgumentException(String.format("HAPI FHIR does not recognize a Bulk Export request of type: %s", theExportStyle));
 		}
 	}
 

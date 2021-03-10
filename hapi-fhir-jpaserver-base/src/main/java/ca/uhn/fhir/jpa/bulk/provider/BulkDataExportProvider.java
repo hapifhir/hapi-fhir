@@ -60,8 +60,6 @@ public class BulkDataExportProvider {
 	private IBulkDataExportSvc myBulkDataExportSvc;
 	@Autowired
 	private FhirContext myFhirContext;
-	@Autowired
-	private DaoConfig myDaoConfig;
 
 	@VisibleForTesting
 	public void setFhirContextForUnitTest(FhirContext theFhirContext) {
