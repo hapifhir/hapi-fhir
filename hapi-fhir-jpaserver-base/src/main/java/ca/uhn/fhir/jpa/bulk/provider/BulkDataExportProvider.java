@@ -152,9 +152,9 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theTypeFilter,
 		ServletRequestDetails theRequestDetails
 	) {
-		myBulkDataExportSvc.getPatientCompartmentResources();
 		validatePreferAsyncHeader(theRequestDetails);
 		BulkDataExportOptions bulkDataExportOptions = buildPatientBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter);
+		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
 		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails));
 		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
 	}
