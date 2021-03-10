@@ -55,6 +55,7 @@ import java.util.Date;
 	// We previously had an index called IDX_SP_DATE - Dont reuse
 	@Index(name = "IDX_SP_DATE_HASH", columnList = "HASH_IDENTITY,SP_VALUE_LOW,SP_VALUE_HIGH"),
 	@Index(name = "IDX_SP_DATE_HASH_LOW", columnList = "HASH_IDENTITY,SP_VALUE_LOW"),
+	@Index(name = "IDX_SP_DATE_HASH_HIGH", columnList = "HASH_IDENTITY,SP_VALUE_HIGH"),
 	@Index(name = "IDX_SP_DATE_ORD_HASH", columnList = "HASH_IDENTITY,SP_VALUE_LOW_DATE_ORDINAL,SP_VALUE_HIGH_DATE_ORDINAL"),
 	@Index(name = "IDX_SP_DATE_ORD_HASH_LOW", columnList = "HASH_IDENTITY,SP_VALUE_LOW_DATE_ORDINAL"),
 	@Index(name = "IDX_SP_DATE_RESID", columnList = "RES_ID"),
