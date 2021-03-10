@@ -1079,7 +1079,6 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			createObservationWithIndex(index, null);
 			createImmunizationWithIndex(index, null);
 		}
-
 	}
 
 	private DaoMethodOutcome createPatientWithIndex(int i) {

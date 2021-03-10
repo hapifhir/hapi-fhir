@@ -45,7 +45,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import sun.misc.Cache;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
