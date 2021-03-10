@@ -473,7 +473,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		} else if (theExportStyle.equals(GROUP) || theExportStyle.equals(PATIENT)) {
 			return getPatientCompartmentResources();
 		} else {
-			return throw new IllegalArgumentException(String.format("HAPI FHIR does not recognize a Bulk Export request of type: %s", theExportStyle));
+			throw new IllegalArgumentException(String.format("HAPI FHIR does not recognize a Bulk Export request of type: %s", theExportStyle));
 		}
 	}
 
