@@ -204,21 +204,6 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSubmit_MultipleTypeFiltersForSameType() {
-		try {
-			BulkDataExportOptions options = new BulkDataExportOptions();
-			options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-			options.setResourceTypes(Sets.newHashSet("Patient"));
-			options.setFilters(Sets.newHashSet("Patient?name=a", "Patient?active=true"));
-			options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
-			myBulkDataExportSvc.submitJob(options);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("Invalid _typeFilter value \"Patient?name=a\". Multiple filters found for type Patient", e.getMessage());
-		}
-	}
-
-	@Test
 	public void testSubmit_TypeFilterForNonSelectedType() {
 		try {
 			BulkDataExportOptions options = new BulkDataExportOptions();
@@ -318,6 +303,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		options.setResourceTypes(Sets.newHashSet("Patient", "Observation"));
 		options.setFilters(Sets.newHashSet(TEST_FILTER));
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(options);
 		assertNotNull(jobDetails.getJobId());
 
@@ -769,7 +755,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		options.setGroupId(myPatientGroupId);
 		options.setExpandMdm(false);
-		options.setFilters(Sets.newHashSet("Observation?identifier=VAL0,VAL2", "Observation?identifer=VAL4"));
+		options.setFilters(Sets.newHashSet("Observation?identifier=VAL0,VAL2", "Observation?identifier=VAL4"));
 
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(options);
 		myBulkDataExportSvc.buildExportFiles();
@@ -782,16 +768,11 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Observation")));
 		String nextContents = getBinaryContents(jobInfo, 0);
 
-		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
-		//These are the COVID-19 entries
-		assertThat(nextContents, is(containsString("IMM0")));
-		assertThat(nextContents, is(containsString("IMM2")));
-		assertThat(nextContents, is(containsString("IMM4")));
-		assertThat(nextContents, is(containsString("IMM6")));
-		assertThat(nextContents, is(containsString("IMM8")));
-
-		//This is the entry for the one referencing patient/1
-		assertThat(nextContents, is(containsString("IMM1")));
+		//These are the Observation entries
+		assertThat(nextContents, is(containsString("OBS0")));
+		assertThat(nextContents, is(containsString("OBS2")));
+		assertThat(nextContents, is(containsString("OBS4")));
+		assertEquals(3, nextContents.split("\n").length);
 	}
 
 	public String getBinaryContents(IBulkDataExportSvc.JobInfo theJobInfo, int theIndex) {

@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
+import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -107,17 +108,22 @@ public abstract class BaseBulkItemReader implements ItemReader<List<ResourcePers
 		RuntimeResourceDefinition theDef = getResourceDefinition();
 		Map<String, String[]> requestUrl = UrlUtil.parseQueryStrings(jobEntity.getRequest());
 		String[] typeFilters = requestUrl.get(JpaConstants.PARAM_EXPORT_TYPE_FILTER);
+		List<SearchParameterMap> spMaps = null;
 		if (typeFilters != null) {
-			List<SearchParameterMap> maps = Arrays.stream(typeFilters)
+			spMaps = Arrays.stream(typeFilters)
 				.filter(typeFilter -> typeFilter.startsWith(myResourceType + "?"))
 				.map(filter -> buildSearchParameterMapForTypeFilter(filter, theDef))
 				.collect(Collectors.toList());
-			return maps;
-		} else {
-			SearchParameterMap map = new SearchParameterMap();
-			enhanceSearchParameterMapWithCommonParameters(map);
-			return Collections.singletonList(map);
 		}
+
+		//None of the _typeFilters applied to the current resource type, so just make a simple one.
+		if (spMaps == null || spMaps.isEmpty()) {
+			SearchParameterMap defaultMap = new SearchParameterMap();
+			enhanceSearchParameterMapWithCommonParameters(defaultMap);
+			spMaps = Collections.singletonList(defaultMap);
+		}
+
+		return spMaps;
 	}
 
 	private void enhanceSearchParameterMapWithCommonParameters(SearchParameterMap map) {
