@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.bulk.job;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
 import ca.uhn.fhir.rest.api.Constants;
 import org.springframework.batch.core.JobParametersBuilder;
 
@@ -63,6 +64,10 @@ public class BulkExportJobParametersBuilder extends JobParametersBuilder {
 	}
 	public BulkExportJobParametersBuilder setReadChunkSize(Long theReadChunkSize) {
 		this.addLong("readChunkSize", theReadChunkSize);
+		return this;
+	}
+	public BulkExportJobParametersBuilder setExportStyle(BulkDataExportOptions.ExportStyle theExportStyle) {
+		this.addString("exportStyle", theExportStyle.name());
 		return this;
 	}
 }

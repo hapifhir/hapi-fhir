@@ -50,6 +50,7 @@ public class SearchParameterUtil {
 		return retVal;
 	}
 
+
 	@Nullable
 	public static String getCode(FhirContext theContext, IBaseResource theResource) {
 		return getStringChild(theContext, theResource, "code");

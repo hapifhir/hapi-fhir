@@ -27,6 +27,7 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 public interface IBulkDataExportSvc {
 	void buildExportFiles();
@@ -36,7 +37,14 @@ public interface IBulkDataExportSvc {
 
 	JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions);
 
+	JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions, Boolean useCache);
+
 	JobInfo getJobInfoOrThrowResourceNotFound(String theJobId);
+
+	/**
+	 * Return a set of all resource types which contain search parameters which have Patient as a target.
+	 */
+	Set<String> getPatientCompartmentResources();
 
 	void cancelAndPurgeAllJobs();
 

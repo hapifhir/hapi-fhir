@@ -22,13 +22,13 @@ package ca.uhn.fhir.jpa.bulk.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
-import ca.uhn.fhir.jpa.bulk.api.GroupBulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -43,14 +43,24 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.InstantType;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.slf4j.LoggerFactory.getLogger;
+
 
 public class BulkDataExportProvider {
+	public static final String FARM_TO_TABLE_TYPE_FILTER_REGEX = "(?:,)(?=[A-Z][a-z]+\\?)";
+	private static final Logger ourLog = getLogger(BulkDataExportProvider.class);
 
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
@@ -78,43 +88,75 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theTypeFilter,
 		ServletRequestDetails theRequestDetails
 	) {
+		validatePreferAsyncHeader(theRequestDetails);
+		BulkDataExportOptions bulkDataExportOptions = buildSystemBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter);
+		Boolean useCache = shouldUseCache(theRequestDetails);
+		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, useCache);
+		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
+	}
 
-		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
-		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
-		if (prefer.getRespondAsync() == false) {
-			throw new InvalidRequestException("Must request async processing for $export");
+	private boolean shouldUseCache(ServletRequestDetails theRequestDetails) {
+		CacheControlDirective cacheControlDirective = new CacheControlDirective().parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL));
+		return !cacheControlDirective.isNoCache();
+	}
+
+	private String getServerBase(ServletRequestDetails theRequestDetails) {
+		return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest(), "/");
+	}
+
+	/**
+	 * Group/Id/$export
+	 */
+	@Operation(name = JpaConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Group")
+	public void groupExport(
+		@IdParam IIdType theIdParam,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theTypeFilter,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_MDM, min = 0, max = 1, typeName = "boolean") IPrimitiveType<Boolean> theMdm,
+		ServletRequestDetails theRequestDetails
+	) {
+		ourLog.debug("Received Group Bulk Export Request for Group {}", theIdParam);
+		ourLog.debug("_type={}", theIdParam);
+		ourLog.debug("_since={}", theSince);
+		ourLog.debug("_typeFilter={}", theTypeFilter);
+		ourLog.debug("_mdm=", theMdm);
+
+
+		validatePreferAsyncHeader(theRequestDetails);
+		BulkDataExportOptions bulkDataExportOptions = buildGroupBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theIdParam, theMdm);
+		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
+		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails));
+		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
+	}
+
+	private void validateResourceTypesAllContainPatientSearchParams(Set<String> theResourceTypes) {
+		List<String> badResourceTypes = theResourceTypes.stream()
+			.filter(resourceType -> !myBulkDataExportSvc.getPatientCompartmentResources().contains(resourceType))
+			.collect(Collectors.toList());
+
+		if (!badResourceTypes.isEmpty()) {
+			throw new InvalidRequestException(String.format("Resource types [%s] are invalid for this type of export, as they do not contain search parameters that refer to patients.", String.join(",", badResourceTypes)));
 		}
+	}
 
-		String outputFormat = theOutputFormat != null ? theOutputFormat.getValueAsString() : null;
-
-		Set<String> resourceTypes = null;
-		if (theType != null) {
-			resourceTypes = ArrayUtil.commaSeparatedListToCleanSet(theType.getValueAsString());
-		}
-
-		Date since = null;
-		if (theSince != null) {
-			since = theSince.getValue();
-		}
-
-		Set<String> filters = null;
-		if (theTypeFilter != null) {
-			filters = ArrayUtil.commaSeparatedListToCleanSet(theTypeFilter.getValueAsString());
-		}
-
-		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(outputFormat, resourceTypes, since, filters));
-
-		String serverBase = getServerBase(theRequestDetails);
-		String pollLocation = serverBase + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" + JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + outcome.getJobId();
-
-		HttpServletResponse response = theRequestDetails.getServletResponse();
-
-		// Add standard headers
-		theRequestDetails.getServer().addHeadersToResponse(response);
-
-		// Successful 202 Accepted
-		response.addHeader(Constants.HEADER_CONTENT_LOCATION, pollLocation);
-		response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
+	/**
+	 * Patient/$export
+	 */
+	@Operation(name = JpaConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Patient")
+	public void patientExport(
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theTypeFilter,
+		ServletRequestDetails theRequestDetails
+	) {
+		validatePreferAsyncHeader(theRequestDetails);
+		BulkDataExportOptions bulkDataExportOptions = buildPatientBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter);
+		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
+		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails));
+		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
 	}
 
 	/**
@@ -171,37 +213,31 @@ public class BulkDataExportProvider {
 				OperationOutcomeUtil.addIssue(myFhirContext, oo, "error", status.getStatusMessage(), null, null);
 				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(oo, response.getWriter());
 				response.getWriter().close();
-
 		}
-
-
 	}
 
-	private String getServerBase(ServletRequestDetails theRequestDetails) {
-		return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest(), "/");
+	private BulkDataExportOptions buildSystemBulkExportOptions(IPrimitiveType<String> theOutputFormat, IPrimitiveType<String> theType, IPrimitiveType<Date> theSince, IPrimitiveType<String> theTypeFilter) {
+		return buildBulkDataExportOptions(theOutputFormat, theType, theSince, theTypeFilter, BulkDataExportOptions.ExportStyle.SYSTEM);
 	}
 
-	/**
-	 * Group/Id/$export
-	 */
-	@Operation(name = JpaConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Group")
-	public void groupExport(
-		@IdParam IIdType theIdParam,
-		@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
-		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
-		@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
-		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theTypeFilter,
-		@OperationParam(name = JpaConstants.PARAM_EXPORT_MDM, min = 0, max = 1, typeName = "boolean") IPrimitiveType<Boolean> theMdm,
+	private BulkDataExportOptions buildGroupBulkExportOptions(IPrimitiveType<String> theOutputFormat, IPrimitiveType<String> theType, IPrimitiveType<Date> theSince, IPrimitiveType<String> theTypeFilter, IIdType theGroupId, IPrimitiveType<Boolean> theExpandMdm) {
+		BulkDataExportOptions bulkDataExportOptions = buildBulkDataExportOptions(theOutputFormat, theType, theSince, theTypeFilter, BulkDataExportOptions.ExportStyle.GROUP);
+		bulkDataExportOptions.setGroupId(theGroupId);
 
-		ServletRequestDetails theRequestDetails
-	) {
-
-		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
-		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
-		if (prefer.getRespondAsync() == false) {
-			throw new InvalidRequestException("Must request async processing for $export");
+		boolean mdm = false;
+		if (theExpandMdm != null) {
+			mdm = theExpandMdm.getValue();
 		}
+		bulkDataExportOptions.setExpandMdm(mdm);
 
+		return bulkDataExportOptions;
+	}
+
+	private BulkDataExportOptions buildPatientBulkExportOptions(IPrimitiveType<String> theOutputFormat, IPrimitiveType<String> theType, IPrimitiveType<Date> theSince, IPrimitiveType<String> theTypeFilter) {
+		return buildBulkDataExportOptions(theOutputFormat, theType, theSince, theTypeFilter, BulkDataExportOptions.ExportStyle.PATIENT);
+	}
+
+	private BulkDataExportOptions buildBulkDataExportOptions(IPrimitiveType<String> theOutputFormat, IPrimitiveType<String> theType, IPrimitiveType<Date> theSince, IPrimitiveType<String> theTypeFilter, BulkDataExportOptions.ExportStyle theExportStyle) {
 		String outputFormat = theOutputFormat != null ? theOutputFormat.getValueAsString() : null;
 
 		Set<String> resourceTypes = null;
@@ -209,25 +245,25 @@ public class BulkDataExportProvider {
 			resourceTypes = ArrayUtil.commaSeparatedListToCleanSet(theType.getValueAsString());
 		}
 
-		//TODO GGG eventually, we will support these things. 
-		Set<String> filters = null;
-
 		Date since = null;
 		if (theSince != null) {
 			since = theSince.getValue();
 		}
 
-		boolean mdm = false;
-		if (theMdm != null) {
-			mdm = theMdm.getValue();
-		}
-		if (theTypeFilter != null) {
-			filters = ArrayUtil.commaSeparatedListToCleanSet(theTypeFilter.getValueAsString());
-		}
-		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(new GroupBulkDataExportOptions(outputFormat, resourceTypes, since, filters, theIdParam, mdm));
+		Set<String> typeFilters = splitTypeFilters(theTypeFilter);
 
+		BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
+		bulkDataExportOptions.setFilters(typeFilters);
+		bulkDataExportOptions.setExportStyle(theExportStyle);
+		bulkDataExportOptions.setSince(since);
+		bulkDataExportOptions.setResourceTypes(resourceTypes);
+		bulkDataExportOptions.setOutputFormat(outputFormat);
+		return bulkDataExportOptions;
+	}
+
+	public void writePollingLocationToResponseHeaders(ServletRequestDetails theRequestDetails, IBulkDataExportSvc.JobInfo theOutcome) {
 		String serverBase = getServerBase(theRequestDetails);
-		String pollLocation = serverBase + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" + JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + outcome.getJobId();
+		String pollLocation = serverBase + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" + JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + theOutcome.getJobId();
 
 		HttpServletResponse response = theRequestDetails.getServletResponse();
 
@@ -238,4 +274,26 @@ public class BulkDataExportProvider {
 		response.addHeader(Constants.HEADER_CONTENT_LOCATION, pollLocation);
 		response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
 	}
+
+	private void validatePreferAsyncHeader(ServletRequestDetails theRequestDetails) {
+		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
+		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
+		if (prefer.getRespondAsync() == false) {
+			throw new InvalidRequestException("Must request async processing for $export");
+		}
+	}
+
+	private Set<String> splitTypeFilters(IPrimitiveType<String> theTypeFilter) {
+		if (theTypeFilter== null) {
+			return null;
+		}
+		String typeFilterSring = theTypeFilter.getValueAsString();
+		String[] typeFilters = typeFilterSring.split(FARM_TO_TABLE_TYPE_FILTER_REGEX);
+		if (typeFilters == null || typeFilters.length == 0) {
+			return null;
+		}
+
+		return new HashSet<>(Arrays.asList(typeFilters));
+	}
+
 }

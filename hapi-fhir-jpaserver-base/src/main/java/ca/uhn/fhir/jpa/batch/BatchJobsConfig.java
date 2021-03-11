@@ -33,4 +33,5 @@ import org.springframework.context.annotation.Import;
 public class BatchJobsConfig {
 	public static final String BULK_EXPORT_JOB_NAME = "bulkExportJob";
 	public static final String GROUP_BULK_EXPORT_JOB_NAME = "groupBulkExportJob";
+	public static final String PATIENT_BULK_EXPORT_JOB_NAME = "patientBulkExportJob";
 }
