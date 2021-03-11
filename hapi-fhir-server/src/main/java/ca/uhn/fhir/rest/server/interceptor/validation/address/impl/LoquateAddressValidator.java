@@ -86,7 +86,10 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 		theResult.setValid(isValid(theMatch));
 
 		ourLog.debug("Address validation flag {}", theResult.isValid());
-		theResult.setValidatedAddressString(theMatch.get("Address").asText());
+		JsonNode addressNode = theMatch.get("Address");
+		if (addressNode != null) {
+			theResult.setValidatedAddressString(addressNode.asText());
+		}
 
 		ourLog.debug("Validated address string {}", theResult.getValidatedAddressString());
 		theResult.setValidatedAddress(toAddress(theMatch, theFhirContext));
@@ -137,7 +140,11 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 
 	private boolean isDuplicate(String theAddressLine, JsonNode theMatch) {
 		for (String s : DUPLICATE_FIELDS_IN_ADDRESS_LINES) {
-			theAddressLine = theAddressLine.replaceAll(theMatch.get(s).asText(""), "");
+			JsonNode node = theMatch.get(s);
+			if (node == null) {
+				continue;
+			}
+			theAddressLine = theAddressLine.replaceAll(node.asText(), "");
 		}
 		return theAddressLine.trim().isEmpty();
 	}

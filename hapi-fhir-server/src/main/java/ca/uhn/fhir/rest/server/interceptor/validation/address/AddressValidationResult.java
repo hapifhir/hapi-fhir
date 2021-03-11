@@ -72,4 +72,14 @@ public class AddressValidationResult {
 	public void setRawResponse(String theRawResponse) {
 		this.myRawResponse = theRawResponse;
 	}
+
+	@Override
+	public String toString() {
+		return
+			"  isValid=" + myIsValid +
+			", validatedAddressString='" + myValidatedAddressString + '\'' +
+			", validationResults=" + myValidationResults + '\'' +
+			", rawResponse='" + myRawResponse + '\'' +
+			", myValidatedAddress='" + myValidatedAddress + '\'';
+	}
 }
