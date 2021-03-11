@@ -27,17 +27,10 @@ class StandardizingInterceptorTest {
 			"\t\t\"Person.name.given\" : \"NAME_GIVEN\",\n" +
 			"\t\t\"Person.telecom.where(system='phone').value\" : \"PHONE\"\n" +
 			"\t\t},\n" +
-			"\t\"*\" : {\n" +
-			"\t\t\"telecom.where(system='email').value\" : \"EMAIL\"\n" +
-			"\t},\n" +
 			"\t\"Patient\" : {\n" +
 			"\t\t\"name.given\" : \"NAME_GIVEN\",\n" +
 			"\t\t\"telecom.where(system='phone').value\" : \"PHONE\"\n" +
-			"\t\t},\n" +
-			"\t\"*\" : {\n" +
-			"\t\t\"telecom.where(system='email').value\" : \"EMAIL\"\n" +
-			"\t}\n" +
-			"\n" +
+			"\t\t}\n" +
 			"}";
 
 	private static FhirContext ourCtx = FhirContext.forR4();
@@ -74,20 +67,7 @@ class StandardizingInterceptorTest {
 
 		myInterceptor.resourcePreUpdate(myRequestDetails, null, p);
 
-		assertEquals("email@email.com", p.getTelecom().get(0).getValue());
+		assertEquals(" Email@email.com", p.getTelecom().get(0).getValue(), "Expected email to remain the same");
 		assertEquals("123-456-7890", p.getTelecom().get(1).getValue());
 	}
-
-	@Test
-	public void testUniversalOtherTypes() throws Exception {
-		Patient p = new Patient();
-		p.addName().setFamily("FAM").addGiven("GIV");
-		p.addTelecom().setSystem(ContactPoint.ContactPointSystem.EMAIL).setValue("  Test@TEST.com  ");
-
-		myInterceptor.resourcePreUpdate(myRequestDetails, null, p);
-
-		assertEquals("Giv FAM", p.getName().get(0).getNameAsSingleString());
-		assertEquals("test@test.com", p.getTelecom().get(0).getValue());
-	}
-
 }

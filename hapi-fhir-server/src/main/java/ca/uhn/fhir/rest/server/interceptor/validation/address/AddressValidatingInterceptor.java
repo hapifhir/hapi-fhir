@@ -23,10 +23,12 @@ package ca.uhn.fhir.rest.server.interceptor.validation.address;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ConfigLoader;
-import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
-import ca.uhn.fhir.rest.server.interceptor.validation.helpers.ExtensionHelper;
+import ca.uhn.fhir.util.ExtensionUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -38,7 +40,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-public class AddressValidatingInterceptor extends ServerOperationInterceptorAdapter {
+@Interceptor
+public class AddressValidatingInterceptor {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddressValidatingInterceptor.class);
 
@@ -46,8 +49,6 @@ public class AddressValidatingInterceptor extends ServerOperationInterceptorAdap
 	public static final String PROPERTY_VALIDATOR_CLASS = "validator.class";
 
 	public static final String ADDRESS_VALIDATION_DISABLED_HEADER = "HAPI-Address-Validation-Disabled";
-
-	private ExtensionHelper myExtensionHelper = new ExtensionHelper();
 
 	private IAddressValidator myAddressValidator;
 
@@ -92,13 +93,13 @@ public class AddressValidatingInterceptor extends ServerOperationInterceptorAdap
 		}
 	}
 
-	@Override
+	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void resourcePreCreate(RequestDetails theRequest, IBaseResource theResource) {
 		ourLog.debug("Validating address on for create {}, {}", theResource, theRequest);
 		handleRequest(theRequest, theResource);
 	}
 
-	@Override
+	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
 	public void resourcePreUpdate(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
 		ourLog.debug("Validating address on for update {}, {}, {}", theOldResource, theNewResource, theRequest);
 		handleRequest(theRequest, theNewResource);
@@ -117,8 +118,8 @@ public class AddressValidatingInterceptor extends ServerOperationInterceptorAdap
 		getAddresses(theResource, ctx)
 			.stream()
 			.filter(a -> {
-				return !myExtensionHelper.hasExtension(a, IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL) ||
-					myExtensionHelper.hasExtension(a, IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL, IAddressValidator.EXT_UNABLE_TO_VALIDATE);
+				return !ExtensionUtil.hasExtension(a, IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL) ||
+					ExtensionUtil.hasExtension(a, IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL, IAddressValidator.EXT_UNABLE_TO_VALIDATE);
 			})
 			.forEach(a -> validateAddress(a, ctx));
 	}
@@ -128,11 +129,11 @@ public class AddressValidatingInterceptor extends ServerOperationInterceptorAdap
 			AddressValidationResult validationResult = getAddressValidator().isValid(theAddress, theFhirContext);
 			ourLog.debug("Validated address {}", validationResult);
 
-			myExtensionHelper.setValue(theAddress, IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL,
-				validationResult.isValid() ? IAddressValidator.EXT_VALUE_VALID : IAddressValidator.EXT_VALUE_INVALID, theFhirContext);
+			ExtensionUtil.setExtension(theFhirContext, theAddress, IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL,
+				validationResult.isValid() ? IAddressValidator.EXT_VALUE_VALID : IAddressValidator.EXT_VALUE_INVALID);
 		} catch (Exception ex) {
 			ourLog.warn("Unable to validate address", ex);
-			myExtensionHelper.setValue(theAddress, IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL, IAddressValidator.EXT_UNABLE_TO_VALIDATE, theFhirContext);
+			ExtensionUtil.setExtension(theFhirContext, theAddress, IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL, IAddressValidator.EXT_UNABLE_TO_VALIDATE);
 		}
 	}
 

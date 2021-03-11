@@ -22,6 +22,9 @@ package ca.uhn.fhir.rest.server.interceptor.validation.fields;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ConfigLoader;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
@@ -34,7 +37,8 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 
-public class FieldValidatingInterceptor extends ServerOperationInterceptorAdapter {
+@Interceptor
+public class FieldValidatingInterceptor {
 
 	public enum ValidatorType {
 		EMAIL;
@@ -56,15 +60,15 @@ public class FieldValidatingInterceptor extends ServerOperationInterceptorAdapte
 		myConfig = ConfigLoader.loadJson("classpath:field-validation-rules.json", Map.class);
 	}
 
-	@Override
+	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void resourcePreCreate(RequestDetails theRequest, IBaseResource theResource) {
-		ourLog.debug("Validating address on for create {}, {}", theResource, theRequest);
+		ourLog.debug("Validating address on create for resource {} / request {}", theResource, theRequest);
 		handleRequest(theRequest, theResource);
 	}
 
-	@Override
+	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
 	public void resourcePreUpdate(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
-		ourLog.debug("Validating address on for update {}, {}, {}", theOldResource, theNewResource, theRequest);
+		ourLog.debug("Validating address on update for resource {} / old resource {} / request {}", theOldResource, theNewResource, theRequest);
 		handleRequest(theRequest, theNewResource);
 	}
 

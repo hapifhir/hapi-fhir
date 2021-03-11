@@ -21,7 +21,7 @@ package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
  */
 
 /**
- * Standardizes phone numbers to fit 123-456-7890 patter.
+ * Standardizes phone numbers to fit 123-456-7890 pattern.
  */
 public class PhoneStandardizer implements IStandardizer {
 

@@ -19,13 +19,13 @@ class AddressHelperTest {
 		HumanName name = new HumanName();
 		name.setFamily("Test");
 
-		final AddressHelper helper = new AddressHelper(name, null);
+		final AddressHelper helper = new AddressHelper(null, name);
 		assertThrows(IllegalStateException.class, () -> {
 			helper.getCountry();
 		});
 
 		assertThrows(IllegalArgumentException.class, () -> {
-			new AddressHelper(new StringType("this will blow up"), null);
+			new AddressHelper(null, new StringType("this will blow up"));
 		});
 	}
 
@@ -34,7 +34,7 @@ class AddressHelperTest {
 		Address a = new Address();
 		a.setCountry("Test");
 
-		AddressHelper helper = new AddressHelper(a, null);
+		AddressHelper helper = new AddressHelper(null, a);
 		assertEquals("Test", helper.getCountry());
 	}
 
@@ -43,7 +43,7 @@ class AddressHelperTest {
 		Address a = new Address();
 		a.setCity("Hammer");
 
-		AddressHelper helper = new AddressHelper(a, null);
+		AddressHelper helper = new AddressHelper(null, a);
 		helper.setDelimiter("; ");
 		assertEquals("Hammer", helper.getParts());
 
@@ -58,7 +58,7 @@ class AddressHelperTest {
 		a.addLine("Unit 10");
 		a.setCity("Hammer");
 
-		AddressHelper helper = new AddressHelper(a, null);
+		AddressHelper helper = new AddressHelper(null, a);
 		assertEquals("Unit 10", helper.getLine());
 
 		a.addLine("100 Main St.");
@@ -69,7 +69,7 @@ class AddressHelperTest {
 	void testSetFields() {
 		Address a = new Address();
 
-		AddressHelper helper = new AddressHelper(a, ourContext);
+		AddressHelper helper = new AddressHelper(ourContext, a);
 		helper.addLine("Line 1").addLine("Line 2");
 		helper.setCity("Hammer");
 		helper.setState("State");

@@ -23,9 +23,11 @@ package ca.uhn.fhir.rest.server.interceptor.s13n;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ConfigLoader;
-import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.rest.server.interceptor.s13n.standardizers.EmailStandardizer;
 import ca.uhn.fhir.rest.server.interceptor.s13n.standardizers.FirstNameStandardizer;
 import ca.uhn.fhir.rest.server.interceptor.s13n.standardizers.IStandardizer;
@@ -43,7 +45,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class StandardizingInterceptor extends ServerOperationInterceptorAdapter {
+@Interceptor
+public class StandardizingInterceptor {
 
 	/**
 	 * Pre-defined standardizers
@@ -85,13 +88,13 @@ public class StandardizingInterceptor extends ServerOperationInterceptorAdapter 
 		ourLog.info("Initialized standardizers {}", myStandardizers);
 	}
 
-	@Override
+	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void resourcePreCreate(RequestDetails theRequest, IBaseResource theResource) {
 		ourLog.debug("Standardizing on pre-create for - {}, {}", theRequest, theResource);
 		standardize(theRequest, theResource);
 	}
 
-	@Override
+	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
 	public void resourcePreUpdate(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
 		ourLog.debug("Standardizing on pre-update for - {}, {}, {}", theRequest, theOldResource, theNewResource);
 		standardize(theRequest, theNewResource);
@@ -166,7 +169,7 @@ public class StandardizingInterceptor extends ServerOperationInterceptorAdapter 
 	}
 
 	private boolean appliesToResource(String theResourceFromConfig, String theActualResourceType) {
-		return theResourceFromConfig.equals("*") || theResourceFromConfig.equals(theActualResourceType);
+		return theResourceFromConfig.equals(theActualResourceType);
 	}
 
 	public Map<String, Map<String, String>> getConfig() {

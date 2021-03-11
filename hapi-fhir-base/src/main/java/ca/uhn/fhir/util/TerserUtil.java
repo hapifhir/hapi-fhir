@@ -464,7 +464,6 @@ public final class TerserUtil {
 		return (T) def.newInstance();
 	}
 
-
 	/**
 	 * Creates a new resource definition.
 	 *

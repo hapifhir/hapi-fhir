@@ -253,7 +253,7 @@ A sample configuration file can be found below:
 }
 ```
 
-Standardization can be disabled for a given request by providing ```HAPI-Standardization-Disabled``` request header.
+Standardization can be disabled for a given request by providing ```HAPI-Standardization-Disabled: *``` request header. Header value can be any string, it is the presence of the header that disables the s13n.
 
 
 # Validation: Address Validation
@@ -262,7 +262,7 @@ Standardization can be disabled for a given request by providing ```HAPI-Standar
 
 This interceptor is configured in ```address-validation.properties``` file that should be made available on the classpath. This file must contain ```validator.class``` property, which defines a fully qualified class implementing ```ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator``` interface. The specified implementation must provide service-specific logic for validating an Address instance. An example implementation can be found in ```ca.uhn.fhir.rest.server.interceptor.validation.address.impl.LoquateAddressValidator``` class which validates addresses by using Loquate Data Cleanse service.
 
-Address validation can be disabled for a given request by providing ```HAPI-Address-Validation-Disabled``` request header.
+Address validation can be disabled for a given request by providing ```HAPI-Address-Validation-Disabled: *``` request header. Header value can be any string, it is the presence of the header that disables the validation.
 
 # Validation: Field-Level Validation
 
@@ -275,4 +275,4 @@ Address validation can be disabled for a given request by providing ```HAPI-Addr
 }
 ```
 
-Field validation can be disabled for a given request by providing ```HAPI-Field-Validation-Disabled``` request header.
+Field validation can be disabled for a given request by providing ```HAPI-Field-Validation-Disabled: *``` request header. Header value can be any string, it is the presence of the header that disables the validation. 

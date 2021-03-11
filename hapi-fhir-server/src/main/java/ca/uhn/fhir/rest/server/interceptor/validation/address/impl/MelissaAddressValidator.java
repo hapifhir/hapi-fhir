@@ -60,7 +60,7 @@ public class MelissaAddressValidator extends BaseRestfulValidator {
 	}
 
 	protected Map<String, String> getRequestParams(IBase theAddress) {
-		AddressHelper helper = new AddressHelper(theAddress, null);
+		AddressHelper helper = new AddressHelper(null, theAddress);
 
 		Map<String, String> requestParams = new HashMap<>();
 		requestParams.put("t", UUID.randomUUID().toString());

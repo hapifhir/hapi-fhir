@@ -1,24 +1,4 @@
-package ca.uhn.fhir.rest.server.interceptor.validation.helpers;
-
-/*-
- * #%L
- * HAPI FHIR - Server Framework
- * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
+package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +9,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class BaseHelper {
+/**
+ * Helper class for handling updates of the instances that support property modification via <code>setProperty</code>
+ * and <code>getProperty</code> methods.
+ */
+public class PropertyModifyingHelper {
 
 	public static final String GET_PROPERTY_METHOD_NAME = "getProperty";
 	public static final String SET_PROPERTY_METHOD_NAME = "setProperty";
@@ -41,7 +25,13 @@ public class BaseHelper {
 
 	private FhirContext myFhirContext;
 
-	public BaseHelper(IBase theBase, FhirContext theFhirContext) {
+	/**
+	 * Creates a new instance initializing the dependencies.
+	 *
+	 * @param theFhirContext FHIR context holding the resource definitions
+	 * @param theBase        The base class to set properties on
+	 */
+	public PropertyModifyingHelper(FhirContext theFhirContext, IBase theBase) {
 		if (findGetPropertyMethod(theBase) == null) {
 			throw new IllegalArgumentException("Specified base instance does not support property retrieval.");
 		}
@@ -49,6 +39,14 @@ public class BaseHelper {
 		myFhirContext = theFhirContext;
 	}
 
+	/**
+	 * Gets the method with the specified name and parameter types.
+	 *
+	 * @param theObject       Non-null instance to get the method from
+	 * @param theMethodName   Name of the method to get
+	 * @param theParamClasses Parameters types that method parameters should be assignable as
+	 * @return Returns the method with the given name and parameters or null if it can't be found
+	 */
 	protected Method getMethod(Object theObject, String theMethodName, Class... theParamClasses) {
 		for (Method m : theObject.getClass().getDeclaredMethods()) {
 			if (m.getName().equals(theMethodName)) {
@@ -69,6 +67,12 @@ public class BaseHelper {
 		return null;
 	}
 
+	/**
+	 * Gets all non-blank fields as a single string joined with the delimiter provided by {@link #getDelimiter()}
+	 *
+	 * @param theFiledNames Field names to retrieve values for
+	 * @return Returns all specified non-blank fileds as a single string.
+	 */
 	public String getFields(String... theFiledNames) {
 		return Arrays.stream(theFiledNames)
 			.map(this::get)
@@ -110,11 +114,10 @@ public class BaseHelper {
 	}
 
 	/**
-	 * Gets property with the specified name from the provided base class.
+	 * Gets property values with the specified name from the provided base class.
 	 *
 	 * @param thePropertyName Name of the property to get
-	 * @return Returns property value converted to string. In case of multiple values, they are joined with the
-	 * specified delimiter.
+	 * @return Returns property values converted to string.
 	 */
 	public List<String> getMultiple(String thePropertyName) {
 		Method getPropertyMethod = findGetPropertyMethod(myBase);
@@ -139,14 +142,29 @@ public class BaseHelper {
 		return getMethod(theAddress, SET_PROPERTY_METHOD_NAME, theParamClasses);
 	}
 
+	/**
+	 * Gets the delimiter used when concatenating multiple field values
+	 *
+	 * @return Returns the delimiter
+	 */
 	public String getDelimiter() {
 		return myDelimiter;
 	}
 
+	/**
+	 * Sets the delimiter used when concatenating multiple field values
+	 *
+	 * @param theDelimiter The delimiter to set
+	 */
 	public void setDelimiter(String theDelimiter) {
 		this.myDelimiter = theDelimiter;
 	}
 
+	/**
+	 * Gets the base instance that this helper operates on
+	 *
+	 * @return Returns the base instance
+	 */
 	public IBase getBase() {
 		return myBase;
 	}

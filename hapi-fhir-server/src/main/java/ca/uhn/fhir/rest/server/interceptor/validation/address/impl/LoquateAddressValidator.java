@@ -109,7 +109,7 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 	protected IBase toAddress(JsonNode match, FhirContext theFhirContext) {
 		IBase addressBase = theFhirContext.getElementDefinition("Address").newInstance();
 
-		AddressHelper helper = new AddressHelper(addressBase, theFhirContext);
+		AddressHelper helper = new AddressHelper(theFhirContext, addressBase);
 		helper.setText(getString(match, "Address"));
 
 		String str = getString(match, "Address1");
@@ -192,7 +192,7 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 	}
 
 	protected ObjectNode toJsonNode(IBase theAddress, ObjectMapper mapper, FhirContext theFhirContext) {
-		AddressHelper helper = new AddressHelper(theAddress, theFhirContext);
+		AddressHelper helper = new AddressHelper(theFhirContext, theAddress);
 		ObjectNode addressNode = mapper.createObjectNode();
 
 		int count = 1;

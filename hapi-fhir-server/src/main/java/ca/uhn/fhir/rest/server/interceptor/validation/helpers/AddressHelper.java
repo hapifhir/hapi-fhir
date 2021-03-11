@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.interceptor.validation.helpers;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.PropertyModifyingHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
 /**
  * Helper class for working with FHIR Address element
  */
-public class AddressHelper extends BaseHelper {
+public class AddressHelper extends PropertyModifyingHelper {
 
 	public static final String FIELD_LINE = "line";
 	public static final String FIELD_CITY = "city";
@@ -46,8 +47,8 @@ public class AddressHelper extends BaseHelper {
 
 	public static final String[] ADDRESS_PARTS = {FIELD_CITY, FIELD_DISTRICT, FIELD_STATE, FIELD_POSTAL};
 
-	public AddressHelper(IBase theBase, FhirContext theFhirContext) {
-		super(theBase, theFhirContext);
+	public AddressHelper(FhirContext theFhirContext, IBase theBase) {
+		super(theFhirContext, theBase);
 	}
 
 	public String getCountry() {
