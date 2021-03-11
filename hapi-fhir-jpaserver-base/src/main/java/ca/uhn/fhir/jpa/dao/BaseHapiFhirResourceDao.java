@@ -1056,13 +1056,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	@Transactional
 	public T readByPid(ResourcePersistentId thePid) {
+		return readByPid(thePid, false);
+	}
+
+	@Override
+	@Transactional
+	public T readByPid(ResourcePersistentId thePid, boolean theDeletedOk) {
 		StopWatch w = new StopWatch();
 
 		Optional<ResourceTable> entity = myResourceTableDao.findById(thePid.getIdAsLong());
 		if (!entity.isPresent()) {
 			throw new ResourceNotFoundException("No resource found with PID " + thePid);
 		}
-		if (entity.get().getDeleted() != null) {
+		if (entity.get().getDeleted() != null && !theDeletedOk) {
 			throw createResourceGoneException(entity.get());
 		}
 

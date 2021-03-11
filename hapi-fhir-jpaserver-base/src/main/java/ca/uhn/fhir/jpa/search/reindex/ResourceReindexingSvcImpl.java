@@ -561,7 +561,8 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 
 						IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceTable.getResourceType());
 						long expectedVersion = resourceTable.getVersion();
-						IBaseResource resource = dao.readByPid(new ResourcePersistentId(resourceTable.getId()));
+						IBaseResource resource = dao.readByPid(new ResourcePersistentId(resourceTable.getId()), true);
+
 						if (resource == null) {
 							throw new InternalErrorException("Could not find resource version " + resourceTable.getIdDt().toUnqualified().getValue() + " in database");
 						}
