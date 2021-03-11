@@ -39,14 +39,6 @@ public class ConfigLoader {
 			theResourcePath = theResourcePath.substring(CLASSPATH.length());
 		}
 		return ClasspathUtil.loadResource(theResourcePath);
-
-//		try {
-//			URL url = ResourceUtils.getURL(theResourcePath);
-//			File file = ResourceUtils.getFile(url);
-//			return IOUtils.toString(new FileReader(file));
-//		} catch (Exception e) {
-//			throw new RuntimeException(String.format("Unable to load resource %s", theResourcePath), e);
-//		}
 	}
 
 	public static Properties loadProperties(String theResourcePath) {
