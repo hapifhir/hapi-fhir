@@ -115,7 +115,7 @@ public final class TerserUtil {
 	}
 
 	/**
-	 * Clones specified composite field (collection). Composite field values must confirm to the collections
+	 * Clones specified composite field (collection). Composite field values must conform to the collections
 	 * contract.
 	 *
 	 * @param theFrom Resource to clone the specified filed from
