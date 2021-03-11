@@ -119,7 +119,7 @@ public final class TerserUtil {
 	 * contract.
 	 *
 	 * @param theFrom Resource to clone the specified field from
-	 * @param theTo   Resource to clone the specified filed to
+	 * @param theTo   Resource to clone the specified field to
 	 * @param field   Field name to be copied
 	 */
 	public static void cloneCompositeField(FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo, String field) {
