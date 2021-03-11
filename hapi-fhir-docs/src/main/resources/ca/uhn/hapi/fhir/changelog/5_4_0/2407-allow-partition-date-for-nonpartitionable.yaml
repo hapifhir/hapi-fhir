@@ -1,0 +1,7 @@
+---
+type: add
+issue: 2407
+title: "When using the JPA server in partitioned mode with a partition interceptor, the interceptor is now called even for
+   resource types that can not be placed in a non-default partition (e.g. SearchParameter, CodeSystem, etc.). The interceptor
+   may return null or default in this case, but can include a non-null partition date if needed."
+backport: 5.3.1
