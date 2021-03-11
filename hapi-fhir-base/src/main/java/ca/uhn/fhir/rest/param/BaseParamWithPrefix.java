@@ -56,6 +56,10 @@ public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam
 			offset++;
 		}
 
+		if (offset > 0 && theString.length() == offset) {
+			throw new DataFormatException("Invalid date/time format: \"" + theString + "\"");
+		}
+
 		String prefix = theString.substring(0, offset);
 		if (!isBlank(prefix)) {
 		

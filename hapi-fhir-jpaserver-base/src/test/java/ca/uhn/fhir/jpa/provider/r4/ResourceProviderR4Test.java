@@ -334,6 +334,32 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testSearchWithDateInvalid() throws IOException {
+		HttpGet get = new HttpGet(ourServerBase + "/Condition?onset-date=junk");
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
+			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+			assertThat(output, containsString("Invalid date/time format: &quot;junk&quot;"));
+			assertEquals(400, resp.getStatusLine().getStatusCode());
+		}
+
+		 get = new HttpGet(ourServerBase + "/Condition?onset-date=ge");
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
+			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+			assertThat(output, containsString("Invalid date/time format: &quot;ge&quot;"));
+			assertEquals(400, resp.getStatusLine().getStatusCode());
+		}
+
+		 get = new HttpGet(ourServerBase + "/Condition?onset-date=" + UrlUtil.escapeUrlParam(">"));
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
+			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+			assertThat(output, containsString("Invalid date/time format: &quot;&gt;&quot;"));
+			assertEquals(400, resp.getStatusLine().getStatusCode());
+		}
+
+	}
+
+
+	@Test
 	public void testSearchWithSlashes() {
 		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(10, 50, 10000));
 
