@@ -128,11 +128,6 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 		RequestPartitionId requestPartitionId;
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			// Handle system requests
-			if ((theRequest == null && myNonPartitionableResourceNames.contains(theResourceType))) {
-				return RequestPartitionId.defaultPartition();
-			}
-
 			// Interceptor call: STORAGE_PARTITION_IDENTIFY_CREATE
 			HookParams params = new HookParams()
 				.add(IBaseResource.class, theResource)
