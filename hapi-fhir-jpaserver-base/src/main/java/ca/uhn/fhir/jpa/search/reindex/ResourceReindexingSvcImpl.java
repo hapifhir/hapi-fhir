@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -560,7 +561,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 
 						IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceTable.getResourceType());
 						long expectedVersion = resourceTable.getVersion();
-						IBaseResource resource = dao.read(resourceTable.getIdDt().toVersionless(), null, true);
+						IBaseResource resource = dao.readByPid(new ResourcePersistentId(resourceTable.getId()));
 						if (resource == null) {
 							throw new InternalErrorException("Could not find resource version " + resourceTable.getIdDt().toUnqualified().getValue() + " in database");
 						}
