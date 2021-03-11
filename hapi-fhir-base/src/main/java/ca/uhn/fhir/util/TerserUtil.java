@@ -41,7 +41,7 @@ import java.util.stream.Stream;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public final class TerserUtil {
-	
+
 	private static final Logger ourLog = getLogger(TerserUtil.class);
 
 	public static final String FIELD_NAME_IDENTIFIER = "identifier";
@@ -118,15 +118,18 @@ public final class TerserUtil {
 	 * Clones specified composite field (collection). Composite field values must conform to the collections
 	 * contract.
 	 *
-	 * @param theFrom Resource to clone the specified field from
-	 * @param theTo   Resource to clone the specified field to
-	 * @param field   Field name to be copied
+	 * @param theFrom  Resource to clone the specified field from
+	 * @param theTo    Resource to clone the specified field to
+	 * @param theField Field name to be copied
 	 */
-	public static void cloneCompositeField(FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo, String field) {
+	public static void cloneCompositeField(FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo, String theField) {
 		FhirTerser terser = theFhirContext.newTerser();
 
 		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theFrom);
-		BaseRuntimeChildDefinition childDefinition = definition.getChildByName(field);
+		BaseRuntimeChildDefinition childDefinition = definition.getChildByName(theField);
+		if (childDefinition == null) {
+			throw new IllegalArgumentException(String.format("Unable to find child definition %s in %s", theField, theFrom));
+		}
 
 		List<IBase> theFromFieldValues = childDefinition.getAccessor().getValues(theFrom);
 		List<IBase> theToFieldValues = childDefinition.getAccessor().getValues(theTo);
@@ -136,7 +139,7 @@ public final class TerserUtil {
 				continue;
 			}
 
-			IBase newFieldValue = childDefinition.getChildByName(field).newInstance();
+			IBase newFieldValue = childDefinition.getChildByName(theField).newInstance();
 			terser.cloneInto(theFromFieldValue, newFieldValue, true);
 
 			try {
@@ -176,10 +179,27 @@ public final class TerserUtil {
 		});
 	}
 
+	/**
+	 * Merges all fields on the provided instance. <code>theTo</code> will contain a union of all values from <code>theFrom</code>
+	 * instance and <code>theTo</code> instance.
+	 *
+	 * @param theFhirContext Context holding resource definition
+	 * @param theFrom        The resource to merge the fields from
+	 * @param theTo          The resource to merge the fields into
+	 */
 	public static void mergeAllFields(FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo) {
 		mergeFields(theFhirContext, theFrom, theTo, INCLUDE_ALL);
 	}
 
+	/**
+	 * Replaces all fields that test positive by the given inclusion strategy. <code>theTo</code> will contain a copy of the
+	 * values from <code>theFrom</code> instance.
+	 *
+	 * @param theFhirContext    Context holding resource definition
+	 * @param theFrom           The resource to merge the fields from
+	 * @param theTo             The resource to merge the fields into
+	 * @param inclusionStrategy Inclusion strategy that checks if a given field should be replaced by checking {@link Predicate#test(Object)}
+	 */
 	public static void replaceFields(FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo, Predicate<String> inclusionStrategy) {
 		FhirTerser terser = theFhirContext.newTerser();
 
@@ -193,15 +213,33 @@ public final class TerserUtil {
 		}
 	}
 
+	/**
+	 * Checks if the field exists on the resource
+	 *
+	 * @param theFhirContext Context holding resource definition
+	 * @param theFieldName   Name of the field to check
+	 * @param theInstance    Resource instance to check
+	 * @return Returns true if resource definition has a child with the specified name and false otherwise
+	 */
 	public static boolean fieldExists(FhirContext theFhirContext, String theFieldName, IBaseResource theInstance) {
 		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theInstance);
 		return definition.getChildByName(theFieldName) != null;
 	}
 
+	/**
+	 * Replaces the specified fields on <code>theTo</code> resource with the value from <code>theFrom</code> resource.
+	 *
+	 * @param theFhirContext Context holding resource definition
+	 * @param theFrom        The resource to replace the field from
+	 * @param theTo          The resource to replace the field on
+	 */
 	public static void replaceField(FhirContext theFhirContext, String theFieldName, IBaseResource theFrom, IBaseResource theTo) {
 		replaceField(theFhirContext, theFhirContext.newTerser(), theFieldName, theFrom, theTo);
 	}
 
+	/**
+	 * @deprecated Use {@link #replaceField(FhirContext, String, IBaseResource, IBaseResource)} instead
+	 */
 	public static void replaceField(FhirContext theFhirContext, FhirTerser theTerser, String theFieldName, IBaseResource theFrom, IBaseResource theTo) {
 		replaceField(theFrom, theTo, getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theFrom));
 	}
@@ -209,7 +247,7 @@ public final class TerserUtil {
 	/**
 	 * Clears the specified field on the resource provided
 	 *
-	 * @param theFhirContext
+	 * @param theFhirContext Context holding resource definition
 	 * @param theFieldName
 	 * @param theResource
 	 */
@@ -223,11 +261,11 @@ public final class TerserUtil {
 	 * in case of multiple cardinality. Use {@link #clearField(FhirContext, FhirTerser, String, IBaseResource, IBase...)}
 	 * to remove values before setting
 	 *
-	 * @param theFhirContext
-	 * @param theTerser
-	 * @param theFieldName
-	 * @param theResource
-	 * @param theValues
+	 * @param theFhirContext Context holding resource definition
+	 * @param theTerser      Terser to be used when cloning field values
+	 * @param theFieldName   Child field name of the resource to set
+	 * @param theResource    The resource to set the values on
+	 * @param theValues      The values to set on the resource child field name
 	 */
 	public static void setField(FhirContext theFhirContext, FhirTerser theTerser, String theFieldName, IBaseResource theResource, IBase... theValues) {
 		BaseRuntimeChildDefinition childDefinition = getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theResource);
@@ -238,11 +276,31 @@ public final class TerserUtil {
 		mergeFields(theTerser, theResource, childDefinition, theFromFieldValues, theToFieldValues);
 	}
 
-	public static void setFieldByFhirPath(FhirContext theFhirContext, FhirTerser theTerser, String theFhirPath, IBaseResource theResource, IBase theValue) {
+	/**
+	 * Sets the specified value at the FHIR path provided.
+	 *
+	 * @param theTerser   The terser that should be used for cloning the field value.
+	 * @param theFhirPath The FHIR path to set the field at
+	 * @param theResource The resource on which the value should be set
+	 * @param theValue    The value to set
+	 */
+	public static void setFieldByFhirPath(FhirTerser theTerser, String theFhirPath, IBaseResource theResource, IBase theValue) {
 		List<IBase> theFromFieldValues = theTerser.getValues(theResource, theFhirPath, true, false);
 		for (IBase theFromFieldValue : theFromFieldValues) {
 			theTerser.cloneInto(theFromFieldValue, theValue, true);
 		}
+	}
+
+	/**
+	 * Sets the specified value at the FHIR path provided.
+	 *
+	 * @param theFhirContext Context holding resource definition
+	 * @param theFhirPath    The FHIR path to set the field at
+	 * @param theResource    The resource on which the value should be set
+	 * @param theValue       The value to set
+	 */
+	public static void setFieldByFhirPath(FhirContext theFhirContext, String theFhirPath, IBaseResource theResource, IBase theValue) {
+		setFieldByFhirPath(theFhirContext.newTerser(), theFhirPath, theResource, theValue);
 	}
 
 	private static void replaceField(IBaseResource theFrom, IBaseResource theTo, BaseRuntimeChildDefinition childDefinition) {
@@ -252,10 +310,28 @@ public final class TerserUtil {
 		);
 	}
 
+	/**
+	 * Merges values of all fields except for "identifier" and "meta" from <code>theFrom</code> resource to
+	 * <code>theTo</code> resource. Fields values are compared via the equalsDeep method, or via object identity if this
+	 * method is not available.
+	 *
+	 * @param theFhirContext Context holding resource definition
+	 * @param theFrom        Resource to merge the specified field from
+	 * @param theTo          Resource to merge the specified field into
+	 */
 	public static void mergeFieldsExceptIdAndMeta(FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo) {
 		mergeFields(theFhirContext, theFrom, theTo, EXCLUDE_IDS_AND_META);
 	}
 
+	/**
+	 * Merges values of all field from <code>theFrom</code> resource to <code>theTo</code> resource. Fields
+	 * values are compared via the equalsDeep method, or via object identity if this method is not available.
+	 *
+	 * @param theFhirContext    Context holding resource definition
+	 * @param theFrom           Resource to merge the specified field from
+	 * @param theTo             Resource to merge the specified field into
+	 * @param inclusionStrategy Predicate to test which fields should be merged
+	 */
 	public static void mergeFields(FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo, Predicate<String> inclusionStrategy) {
 		FhirTerser terser = theFhirContext.newTerser();
 
@@ -273,27 +349,27 @@ public final class TerserUtil {
 	}
 
 	/**
-	 * Merges value of the specified field from theFrom resource to theTo resource. Fields values are compared via
-	 * the equalsDeep method, or via object identity if this method is not available.
+	 * Merges value of the specified field from <code>theFrom</code> resource to <code>theTo</code> resource. Fields
+	 * values are compared via the equalsDeep method, or via object identity if this method is not available.
 	 *
-	 * @param theFhirContext
-	 * @param theFieldName
-	 * @param theFrom
-	 * @param theTo
+	 * @param theFhirContext Context holding resource definition
+	 * @param theFieldName   Name of the child filed to merge
+	 * @param theFrom        Resource to merge the specified field from
+	 * @param theTo          Resource to merge the specified field into
 	 */
 	public static void mergeField(FhirContext theFhirContext, String theFieldName, IBaseResource theFrom, IBaseResource theTo) {
 		mergeField(theFhirContext, theFhirContext.newTerser(), theFieldName, theFrom, theTo);
 	}
 
 	/**
-	 * Merges value of the specified field from theFrom resource to theTo resource. Fields values are compared via
-	 * the equalsDeep method, or via object identity if this method is not available.
+	 * Merges value of the specified field from <code>theFrom</code> resource to <code>theTo</code> resource. Fields
+	 * values are compared via the equalsDeep method, or via object identity if this method is not available.
 	 *
-	 * @param theFhirContext
-	 * @param theTerser
-	 * @param theFieldName
-	 * @param theFrom
-	 * @param theTo
+	 * @param theFhirContext Context holding resource definition
+	 * @param theTerser      Terser to be used when cloning the field values
+	 * @param theFieldName   Name of the child filed to merge
+	 * @param theFrom        Resource to merge the specified field from
+	 * @param theTo          Resource to merge the specified field into
 	 */
 	public static void mergeField(FhirContext theFhirContext, FhirTerser theTerser, String theFieldName, IBaseResource theFrom, IBaseResource theTo) {
 		BaseRuntimeChildDefinition childDefinition = getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theFrom);
@@ -331,6 +407,14 @@ public final class TerserUtil {
 		}
 	}
 
+	/**
+	 * Clones the specified resource.
+	 *
+	 * @param theFhirContext Context holding resource definition
+	 * @param theInstance    The instance to be cloned
+	 * @param <T>            Base resource type
+	 * @return Returns a cloned instance
+	 */
 	public static <T extends IBaseResource> T clone(FhirContext theFhirContext, T theInstance) {
 		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theInstance.getClass());
 		T retVal = (T) definition.newInstance();
@@ -340,21 +424,56 @@ public final class TerserUtil {
 		return retVal;
 	}
 
+	/**
+	 * Creates a new element instance
+	 *
+	 * @param theFhirContext Context holding resource definition
+	 * @param theElementType Element type name
+	 * @param <T>            Base element type
+	 * @return Returns a new instance of the element
+	 */
 	public static <T extends IBase> T newElement(FhirContext theFhirContext, String theElementType) {
 		BaseRuntimeElementDefinition def = theFhirContext.getElementDefinition(theElementType);
 		return (T) def.newInstance();
 	}
 
+	/**
+	 * Creates a new element instance
+	 *
+	 * @param theFhirContext      Context holding resource definition
+	 * @param theElementType      Element type name
+	 * @param theConstructorParam Initialization parameter for the element
+	 * @param <T>                 Base element type
+	 * @return Returns a new instance of the element with the specified initial value
+	 */
 	public static <T extends IBase> T newElement(FhirContext theFhirContext, String theElementType, Object theConstructorParam) {
 		BaseRuntimeElementDefinition def = theFhirContext.getElementDefinition(theElementType);
 		return (T) def.newInstance(theConstructorParam);
 	}
 
+	/**
+	 * Creates a new resource definition.
+	 *
+	 * @param theFhirContext  Context holding resource definition
+	 * @param theResourceName Name of the resource in the context
+	 * @param <T>             Type of the resource
+	 * @return Returns a new instance of the resource
+	 */
 	public static <T extends IBase> T newResource(FhirContext theFhirContext, String theResourceName) {
 		RuntimeResourceDefinition def = theFhirContext.getResourceDefinition(theResourceName);
 		return (T) def.newInstance();
 	}
 
+
+	/**
+	 * Creates a new resource definition.
+	 *
+	 * @param theFhirContext      Context holding resource definition
+	 * @param theResourceName     Name of the resource in the context
+	 * @param theConstructorParam Initialization parameter for the new instance
+	 * @param <T>                 Type of the resource
+	 * @return Returns a new instance of the resource
+	 */
 	public static <T extends IBase> T newResource(FhirContext theFhirContext, String theResourceName, Object theConstructorParam) {
 		RuntimeResourceDefinition def = theFhirContext.getResourceDefinition(theResourceName);
 		return (T) def.newInstance(theConstructorParam);

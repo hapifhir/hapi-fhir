@@ -1,9 +1,9 @@
 package ca.uhn.fhir.rest.server.interceptor.validation.address.impl;
 
 import ca.uhn.fhir.context.FhirContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationException;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationResult;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hl7.fhir.r4.model.Address;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

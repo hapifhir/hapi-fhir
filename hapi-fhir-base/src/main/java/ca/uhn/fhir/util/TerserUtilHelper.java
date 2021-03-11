@@ -28,22 +28,44 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import java.util.List;
 
 /**
- * Wrapper class holding context-related instances, and the resource being operated on.
+ * Wrapper class holding context-related instances, and the resource being operated on. Sample use case is
+ *
+ * <pre>{@code
+ * TerserUtilHelper helper = TerserUtilHelper.newHelper(ourFhirContext, "Patient");
+ * helper.setField("identifier.system", "http://org.com/sys");
+ * helper.setField("identifier.value", "123");
+ * ...
+ * Patient patient = helper.getResource();
+ * }</pre>
  */
 public class TerserUtilHelper {
 
-	public static TerserUtilHelper newHelper(FhirContext theFhirContext, String theResource) {
-		return newHelper(theFhirContext, (IBaseResource) TerserUtil.newResource(theFhirContext, theResource));
+	/**
+	 * Factory method for creating a new instance of the wrapper
+	 *
+	 * @param theFhirContext  FHIR Context to be used for all further operations
+	 * @param theResourceName Name of the resource type
+	 * @return Returns a new helper instance
+	 */
+	public static TerserUtilHelper newHelper(FhirContext theFhirContext, String theResourceName) {
+		return newHelper(theFhirContext, (IBaseResource) TerserUtil.newResource(theFhirContext, theResourceName));
 	}
 
+	/**
+	 * Factory method for creating a new instance of the wrapper
+	 *
+	 * @param theFhirContext FHIR Context to be used for all further operations
+	 * @param theResource    The resource to operate on
+	 * @return Returns a new helper instance
+	 */
 	public static TerserUtilHelper newHelper(FhirContext theFhirContext, IBaseResource theResource) {
 		TerserUtilHelper retVal = new TerserUtilHelper(theFhirContext, theResource);
 		return retVal;
 	}
 
-	FhirContext myContext;
-	FhirTerser myTerser;
-	IBaseResource myResource;
+	private FhirContext myContext;
+	private FhirTerser myTerser;
+	private IBaseResource myResource;
 
 	protected TerserUtilHelper(FhirContext theFhirContext, IBaseResource theResource) {
 		myContext = theFhirContext;
@@ -59,7 +81,7 @@ public class TerserUtilHelper {
 	 */
 	public TerserUtilHelper setField(String theField, String theValue) {
 		IBase value = newStringElement(theValue);
-		TerserUtil.setFieldByFhirPath(myContext, getTerser(), theField, myResource, value);
+		TerserUtil.setFieldByFhirPath(getTerser(), theField, myResource, value);
 		return this;
 	}
 
@@ -68,10 +90,21 @@ public class TerserUtilHelper {
 		return value;
 	}
 
+	/**
+	 * Gets values of the specified field.
+	 *
+	 * @param theField The field to get values from
+	 * @return Returns a collection of values containing values or null if the spefied field doesn't exist
+	 */
 	public List<IBase> getFieldValues(String theField) {
 		return TerserUtil.getValues(myContext, myResource, theField);
 	}
 
+	/**
+	 * Gets the terser instance, creating one if necessary.
+	 *
+	 * @return Returns the terser
+	 */
 	public FhirTerser getTerser() {
 		if (myTerser == null) {
 			myTerser = myContext.newTerser();
@@ -98,10 +131,21 @@ public class TerserUtilHelper {
 		return myContext.getResourceDefinition(myResource);
 	}
 
+	/**
+	 * Creates a new element
+	 *
+	 * @param theElementName Name of the element to create
+	 * @return Returns a new element
+	 */
 	public IBase newElement(String theElementName) {
 		return TerserUtil.newElement(myContext, theElementName);
 	}
 
+	/**
+	 * Gets context holding resource definition.
+	 *
+	 * @return Returns the current FHIR context.
+	 */
 	public FhirContext getContext() {
 		return myContext;
 	}
