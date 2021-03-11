@@ -44,6 +44,55 @@ public class XmlParserR4Test extends BaseTest {
 		return c;
 	}
 
+
+	/**
+	 * Ensure that a contained bundle doesn't cause a crash
+	 */
+	@Test
+	public void testParseAndEncodePreservesContainedResourceOrder() {
+		String auditEvent = "<AuditEvent xmlns=\"http://hl7.org/fhir\">\n" +
+			"   <contained>\n" +
+			"      <Observation xmlns=\"http://hl7.org/fhir\">\n" +
+			"         <id value=\"A\"/>\n" +
+			"         <identifier>\n" +
+			"            <value value=\"A\"/>\n" +
+			"         </identifier>\n" +
+			"      </Observation>\n" +
+			"   </contained>\n" +
+			"   <contained>\n" +
+			"      <Observation xmlns=\"http://hl7.org/fhir\">\n" +
+			"         <id value=\"B\"/>\n" +
+			"         <identifier>\n" +
+			"            <value value=\"B\"/>\n" +
+			"         </identifier>\n" +
+			"      </Observation>\n" +
+			"   </contained>\n" +
+			"   <entity>\n" +
+			"      <what>\n" +
+			"         <reference value=\"#B\"/>\n" +
+			"      </what>\n" +
+			"   </entity>\n" +
+			"   <entity>\n" +
+			"      <what>\n" +
+			"         <reference value=\"#A\"/>\n" +
+			"      </what>\n" +
+			"   </entity>\n" +
+			"</AuditEvent>";
+
+		ourLog.info("Input: {}", auditEvent);
+		AuditEvent ae = ourCtx.newXmlParser().parseResource(AuditEvent.class, auditEvent);
+		assertEquals("#A", ae.getContained().get(0).getId());
+		assertEquals("#B", ae.getContained().get(1).getId());
+		assertEquals("#B", ae.getEntity().get(0).getWhat().getReference());
+		assertEquals("#A", ae.getEntity().get(1).getWhat().getReference());
+
+		String serialized = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(ae);
+		assertEquals(auditEvent, serialized);
+
+	}
+
+
+
 	/**
 	 * See #402 section.text is overwritten by composition.text
 	 */

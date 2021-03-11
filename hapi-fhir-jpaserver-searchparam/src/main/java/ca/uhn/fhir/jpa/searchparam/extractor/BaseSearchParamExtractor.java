@@ -45,8 +45,10 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.StringUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -81,6 +83,7 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -532,12 +535,22 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	protected abstract IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath);
 
+	@VisibleForTesting
+	public void setContext(FhirContext theContext) {
+		myContext = theContext;
+	}
+
 	protected FhirContext getContext() {
 		return myContext;
 	}
 
 	protected ModelConfig getModelConfig() {
 		return myModelConfig;
+	}
+
+	@VisibleForTesting
+	public void setSearchParamRegistry(ISearchParamRegistry theSearchParamRegistry) {
+		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
 	private Collection<RuntimeSearchParam> getSearchParams(IBaseResource theResource) {
@@ -642,6 +655,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
 			}
 		}
+	}
+
+	@VisibleForTesting
+	public void setModelConfig(ModelConfig theModelConfig) {
+		myModelConfig = theModelConfig;
 	}
 
 	protected boolean shouldIndexTextComponentOfToken(RuntimeSearchParam theSearchParam) {
@@ -938,6 +956,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		SearchParamSet<T> retVal = new SearchParamSet<>();
 
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
+
+		cleanUpContainedResourceReferences(theResource, theSearchParamType, searchParams);
+
 		for (RuntimeSearchParam nextSpDef : searchParams) {
 			if (nextSpDef.getParamType() != theSearchParamType) {
 				continue;
@@ -946,6 +967,31 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			extractSearchParam(nextSpDef, theResource, theExtractor, retVal, theWantLocalReferences);
 		}
 		return retVal;
+	}
+
+	/**
+	 * HAPI FHIR Reference objects (e.g. {@link org.hl7.fhir.r4.model.Reference}) can hold references either by text
+	 * (e.g. "#3") or by resource (e.g. "new Reference(patientInstance)"). The FHIRPath evaluator only understands the
+	 * first way, so if there is any chance of the FHIRPath evaluator needing to descend across references, we
+	 * have to assign values to those references before indexing.
+	 *
+	 * Doing this cleanup isn't hugely expensive, but it's not completely free either so we only do it
+	 * if we think there's actually a chance
+	 */
+	private void cleanUpContainedResourceReferences(IBaseResource theResource, RestSearchParameterTypeEnum theSearchParamType, Collection<RuntimeSearchParam> searchParams) {
+		boolean havePathWithResolveExpression = myModelConfig.isIndexOnContainedResources();
+		for (RuntimeSearchParam nextSpDef : searchParams) {
+			if (nextSpDef.getParamType() != theSearchParamType) {
+				continue;
+			}
+			if (defaultString(nextSpDef.getPath()).contains("resolve")) {
+				havePathWithResolveExpression = true;
+				break;
+			}
+		}
+		if (havePathWithResolveExpression) {
+			myContext.newTerser().containResources(theResource, FhirTerser.OptionsEnum.MODIFY_RESOURCE, FhirTerser.OptionsEnum.STORE_AND_REUSE_RESULTS);
+		}
 	}
 
 	private <T> void extractSearchParam(RuntimeSearchParam theSearchParameterDef, IBaseResource theResource, IExtractor<T> theExtractor, SearchParamSet<T> theSetToPopulate, boolean theWantLocalReferences) {
@@ -1018,6 +1064,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		if (nextEntity != null) {
 			theParams.add(nextEntity);
 		}
+	}
+
+	@VisibleForTesting
+	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	private ResourceIndexedSearchParamToken createTokenIndexIfNotBlank(String theResourceType, RuntimeSearchParam theSearchParam, String theSystem, String theValue) {

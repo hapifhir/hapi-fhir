@@ -56,9 +56,6 @@ public class XmlParser extends BaseParser {
 
 	static final String FHIR_NS = "http://hl7.org/fhir";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParser.class);
-
-	// private static final Set<String> RESOURCE_NAMESPACES;
-	private FhirContext myContext;
 	private boolean myPrettyPrint;
 
 	/**
@@ -69,7 +66,6 @@ public class XmlParser extends BaseParser {
 	 */
 	public XmlParser(FhirContext theContext, IParserErrorHandler theParserErrorHandler) {
 		super(theContext, theParserErrorHandler);
-		myContext = theContext;
 	}
 
 	private XMLEventReader createStreamReader(Reader theReader) {
@@ -295,7 +291,7 @@ public class XmlParser extends BaseParser {
 				}
 				case RESOURCE: {
 					IBaseResource resource = (IBaseResource) theElement;
-					String resourceName = myContext.getResourceType(resource);
+					String resourceName = getContext().getResourceType(resource);
 					if (!super.shouldEncodeResource(resourceName)) {
 						break;
 					}
@@ -354,9 +350,9 @@ public class XmlParser extends BaseParser {
 
 			if (nextChild instanceof RuntimeChildNarrativeDefinition) {
 				Optional<IBase> narr = nextChild.getAccessor().getFirstValueOrNull(theElement);
-				INarrativeGenerator gen = myContext.getNarrativeGenerator();
+				INarrativeGenerator gen = getContext().getNarrativeGenerator();
 				if (gen != null && narr.isPresent() == false) {
-					gen.populateResourceNarrative(myContext, theResource);
+					gen.populateResourceNarrative(getContext(), theResource);
 				}
 
 				narr = nextChild.getAccessor().getFirstValueOrNull(theElement);
@@ -490,13 +486,13 @@ public class XmlParser extends BaseParser {
 	}
 
 	private void encodeResourceToXmlStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, boolean theContainedResource, IIdType theResourceId, EncodeContext theEncodeContext) throws XMLStreamException {
-		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
+		RuntimeResourceDefinition resDef = getContext().getResourceDefinition(theResource);
 		if (resDef == null) {
 			throw new ConfigurationException("Unknown resource type: " + theResource.getClass());
 		}
 
 		if (!theContainedResource) {
-			super.containResourcesForEncoding(theResource);
+			setContainedResources(getContext().newTerser().containResources(theResource));
 		}
 
 		theEventWriter.writeStartElement(resDef.getName());
@@ -615,11 +611,11 @@ public class XmlParser extends BaseParser {
 
 			if (next.getValue() != null) {
 				IBaseDatatype value = next.getValue();
-				RuntimeChildUndeclaredExtensionDefinition extDef = myContext.getRuntimeChildUndeclaredExtensionDefinition();
+				RuntimeChildUndeclaredExtensionDefinition extDef = getContext().getRuntimeChildUndeclaredExtensionDefinition();
 				String childName = extDef.getChildNameByDatatype(value.getClass());
 				BaseRuntimeElementDefinition<?> childDef;
 				if (childName == null) {
-					childDef = myContext.getElementDefinition(value.getClass());
+					childDef = getContext().getElementDefinition(value.getClass());
 					if (childDef == null) {
 						throw new ConfigurationException("Unable to encode extension, unrecognized child element type: " + value.getClass().getCanonicalName());
 					}
@@ -749,7 +745,7 @@ public class XmlParser extends BaseParser {
 	}
 
 	private <T extends IBaseResource> T parseResource(Class<T> theResourceType, XMLEventReader theStreamReader) {
-		ParserState<T> parserState = ParserState.getPreResourceInstance(this, theResourceType, myContext, false, getErrorHandler());
+		ParserState<T> parserState = ParserState.getPreResourceInstance(this, theResourceType, getContext(), false, getErrorHandler());
 		return doXmlLoop(theStreamReader, parserState);
 	}
 

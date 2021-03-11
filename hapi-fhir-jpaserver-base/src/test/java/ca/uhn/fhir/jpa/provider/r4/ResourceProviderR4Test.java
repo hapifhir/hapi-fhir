@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.matchesPattern;
@@ -47,7 +48,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
+import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -849,6 +852,72 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+
+	@Test
+	public void testCreateAndReadBackResourceWithContainedReferenceToContainer() {
+		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+
+		String input = "{\n" +
+			"  \"resourceType\": \"Organization\",\n" +
+			"  \"id\": \"1\",\n" +
+			"  \"meta\": {\n" +
+			"    \"tag\": [\n" +
+			"      {\n" +
+			"        \"system\": \"https://blah.org/deployment\",\n" +
+			"        \"code\": \"e69414dd-b5c2-462d-bcfd-9d04d6b16596\",\n" +
+			"        \"display\": \"DEPLOYMENT\"\n" +
+			"      },\n" +
+			"      {\n" +
+			"        \"system\": \"https://blah.org/region\",\n" +
+			"        \"code\": \"b47d7a5b-b159-4bed-a8f8-3258e6603adb\",\n" +
+			"        \"display\": \"REGION\"\n" +
+			"      },\n" +
+			"      {\n" +
+			"        \"system\": \"https://blah.org/provider\",\n" +
+			"        \"code\": \"28c30004-0333-40cf-9e7f-3f9e080930bd\",\n" +
+			"        \"display\": \"PROVIDER\"\n" +
+			"      }\n" +
+			"    ]\n" +
+			"  },\n" +
+			"  \"contained\": [\n" +
+			"    {\n" +
+			"      \"resourceType\": \"Location\",\n" +
+			"      \"id\": \"2\",\n" +
+			"      \"position\": {\n" +
+			"        \"longitude\": 51.443238301454289,\n" +
+			"        \"latitude\": 7.34196905697293\n" +
+			"      },\n" +
+			"      \"managingOrganization\": {\n" +
+			"        \"reference\": \"#\"\n" +
+			"      }\n" +
+			"    }\n" +
+			"  ],\n" +
+			"  \"type\": [\n" +
+			"    {\n" +
+			"      \"coding\": [\n" +
+			"        {\n" +
+			"          \"system\": \"https://blah.org/fmc/OrganizationType\",\n" +
+			"          \"code\": \"CLINIC\",\n" +
+			"          \"display\": \"Clinic\"\n" +
+			"        }\n" +
+			"      ]\n" +
+			"    }\n" +
+			"  ],\n" +
+			"  \"name\": \"testOrg\"\n" +
+			"}";
+
+		Organization org = myFhirCtx.newJsonParser().parseResource(Organization.class, input);
+		IIdType id = myOrganizationDao.create(org).getId();
+		org = myOrganizationDao.read(id);
+
+		String output = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(org);
+		ourLog.info(output);
+
+		Location loc = (Location) org.getContained().get(0);
+		assertEquals("#", loc.getManagingOrganization().getReference());
+	}
+
+
 	@Test
 	public void testCountParam() {
 		List<IBaseResource> resources = new ArrayList<>();
@@ -857,7 +926,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			org.setName("rpr4_testCountParam_01");
 			resources.add(org);
 		}
-		myClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
+		List<IBaseResource> outcome = myClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
+
+		runInTransaction(()->{
+			assertEquals(100, myResourceTableDao.count());
+		});
 
 		Bundle found = myClient
 			.search()

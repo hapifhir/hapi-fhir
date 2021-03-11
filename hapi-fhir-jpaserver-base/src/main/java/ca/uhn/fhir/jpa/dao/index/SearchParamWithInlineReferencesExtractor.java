@@ -47,6 +47,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -94,6 +95,21 @@ public class SearchParamWithInlineReferencesExtractor {
 	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+
+	@VisibleForTesting
+	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
+	}
+
+	@VisibleForTesting
+	public void setSearchParamExtractorService(SearchParamExtractorService theSearchParamExtractorService) {
+		mySearchParamExtractorService = theSearchParamExtractorService;
+	}
+
+	@VisibleForTesting
+	public void setSearchParamRegistry(ISearchParamRegistry theSearchParamRegistry) {
+		mySearchParamRegistry = theSearchParamRegistry;
+	}
 
 	public void populateFromResource(ResourceIndexedSearchParams theParams, TransactionDetails theTransactionDetails, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest) {
 		extractInlineReferences(theResource, theRequest);
@@ -214,6 +230,16 @@ public class SearchParamWithInlineReferencesExtractor {
 	}
 
 
+	@VisibleForTesting
+	public void setDaoConfig(DaoConfig theDaoConfig) {
+		myDaoConfig = theDaoConfig;
+	}
+
+	@VisibleForTesting
+	public void setContext(FhirContext theContext) {
+		myContext = theContext;
+	}
+
 	/**
 	 * Handle references within the resource that are match URLs, for example references like "Patient?identifier=foo". These match URLs are resolved and replaced with the ID of the
 	 * matching resource.
@@ -274,6 +300,11 @@ public class SearchParamWithInlineReferencesExtractor {
 				nextRef.setReference(newId.getValue());
 			}
 		}
+	}
+
+	@VisibleForTesting
+	public void setDaoSearchParamSynchronizer(DaoSearchParamSynchronizer theDaoSearchParamSynchronizer) {
+		myDaoSearchParamSynchronizer = theDaoSearchParamSynchronizer;
 	}
 
 	public void storeCompositeStringUniques(ResourceIndexedSearchParams theParams, ResourceTable theEntity, ResourceIndexedSearchParams existingParams) {

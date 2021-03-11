@@ -74,10 +74,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchParamExtractorService {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamExtractorService.class);
-
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
-
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
@@ -91,22 +89,25 @@ public class SearchParamExtractorService {
 	@Autowired(required = false)
 	private IResourceLinkResolver myResourceLinkResolver;
 
+	@VisibleForTesting
+	public void setSearchParamExtractor(ISearchParamExtractor theSearchParamExtractor) {
+		mySearchParamExtractor = theSearchParamExtractor;
+	}
 
 	/**
 	 * This method is responsible for scanning a resource for all of the search parameter instances. I.e. for all search parameters defined for
 	 * a given resource type, it extracts the associated indexes and populates {@literal theParams}.
 	 */
 	public void extractFromResource(RequestPartitionId theRequestPartitionId, RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference) {
-		IBaseResource resource = normalizeResource(theResource);
 
 		// All search parameter types except Reference
 		ResourceIndexedSearchParams normalParams = new ResourceIndexedSearchParams();
-		extractSearchIndexParameters(theRequestDetails, normalParams, resource, theEntity);
+		extractSearchIndexParameters(theRequestDetails, normalParams, theResource, theEntity);
 		mergeParams(normalParams, theParams);
 
 		if (myModelConfig.isIndexOnContainedResources()) {
 			ResourceIndexedSearchParams containedParams = new ResourceIndexedSearchParams();
-			extractSearchIndexParametersForContainedResources(theRequestDetails, containedParams, resource, theEntity);
+			extractSearchIndexParametersForContainedResources(theRequestDetails, containedParams, theResource, theEntity);
 			mergeParams(containedParams, theParams);
 		}
 		
@@ -114,9 +115,14 @@ public class SearchParamExtractorService {
 		populateResourceTables(theParams, theEntity);
 		
 		// Reference search parameters
-		extractResourceLinks(theRequestPartitionId, theParams, theEntity, resource, theTransactionDetails, theFailOnInvalidReference, theRequestDetails);
+		extractResourceLinks(theRequestPartitionId, theParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference, theRequestDetails);
 
 		theParams.setUpdatedTime(theTransactionDetails.getTransactionDate());
+	}
+
+	@VisibleForTesting
+	public void setModelConfig(ModelConfig theModelConfig) {
+		myModelConfig = theModelConfig;
 	}
 
 	private void extractSearchIndexParametersForContainedResources(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ResourceTable theEntity) {		
@@ -182,7 +188,7 @@ public class SearchParamExtractorService {
 	}
 	
 	private void extractSearchIndexParameters(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ResourceTable theEntity) {
-		
+
 		// Strings
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> strings = extractSearchParamStrings(theResource);
 		handleWarnings(theRequestDetails, myInterceptorBroadcaster, strings);
@@ -203,7 +209,7 @@ public class SearchParamExtractorService {
 			handleWarnings(theRequestDetails, myInterceptorBroadcaster, quantitiesNormalized);
 			theParams.myQuantityNormalizedParams.addAll(quantitiesNormalized);
 		}
-		
+
 		// Dates
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = extractSearchParamDates(theResource);
 		handleWarnings(theRequestDetails, myInterceptorBroadcaster, dates);
@@ -247,19 +253,9 @@ public class SearchParamExtractorService {
 		populateResourceTable(theParams.myCoordsParams, theEntity);
 	}
 
-	/**
-	 * This is a bit hacky, but if someone has manually populated a resource (ie. my working directly with the model
-	 * as opposed to by parsing a serialized instance) it's possible that they have put in contained resources
-	 * using {@link IBaseReference#setResource(IBaseResource)}, and those contained resources have not yet
-	 * ended up in the Resource.contained array, meaning that FHIRPath expressions won't be able to find them.
-	 *
-	 * As a result, we to a serialize-and-parse to normalize the object. This really only affects people who
-	 * are calling the JPA DAOs directly, but there are a few of those...
-	 */
-	private IBaseResource normalizeResource(IBaseResource theResource) {
-		IParser parser = myContext.newJsonParser().setPrettyPrint(false);
-		theResource = parser.parseResource(parser.encodeResourceToString(theResource));
-		return theResource;
+	@VisibleForTesting
+	public void setContext(FhirContext theContext) {
+		myContext = theContext;
 	}
 
 	private void extractResourceLinks(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference, RequestDetails theRequest) {
@@ -289,6 +285,10 @@ public class SearchParamExtractorService {
 		 */
 		if (nextId.isEmpty() && nextReference.getResource() != null) {
 			nextId = nextReference.getResource().getIdElement();
+		}
+
+		if (myContext.getParserOptions().isStripVersionsFromReferences() && !myContext.getParserOptions().getDontStripVersionsFromReferencesAtPaths().contains(thePathAndRef.getPath()) && nextId.hasVersionIdPart()) {
+			nextId = nextId.toVersionless();
 		}
 
 		theParams.myPopulatedResourceLinkParameters.add(thePathAndRef.getSearchParamName());
@@ -431,24 +431,6 @@ public class SearchParamExtractorService {
 		return ResourceLink.forLocalReference(nextPathAndRef.getPath(), theEntity, targetResourceType, targetResourcePid, targetResourceIdPart, theUpdateTime, targetVersion);
 	}
 
-
-	static void handleWarnings(RequestDetails theRequestDetails, IInterceptorBroadcaster theInterceptorBroadcaster, ISearchParamExtractor.SearchParamSet<?> theSearchParamSet) {
-		if (theSearchParamSet.getWarnings().isEmpty()) {
-			return;
-		}
-
-		// If extraction generated any warnings, broadcast an error
-		for (String next : theSearchParamSet.getWarnings()) {
-			StorageProcessingMessage messageHolder = new StorageProcessingMessage();
-			messageHolder.setMessage(next);
-			HookParams params = new HookParams()
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-				.add(StorageProcessingMessage.class, messageHolder);
-			JpaInterceptorBroadcaster.doCallHooks(theInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_WARNING, params);
-		}
-	}
-
 	private void populateResourceTable(Collection<? extends BaseResourceIndexedSearchParam> theParams, ResourceTable theResourceTable) {
 		for (BaseResourceIndexedSearchParam next : theParams) {
 			if (next.getResourcePid() == null) {
@@ -497,6 +479,23 @@ public class SearchParamExtractorService {
 	@Nonnull
 	public List<String> extractParamValuesAsStrings(RuntimeSearchParam theActiveSearchParam, IBaseResource theResource) {
 		return mySearchParamExtractor.extractParamValuesAsStrings(theActiveSearchParam, theResource);
+	}
+
+	static void handleWarnings(RequestDetails theRequestDetails, IInterceptorBroadcaster theInterceptorBroadcaster, ISearchParamExtractor.SearchParamSet<?> theSearchParamSet) {
+		if (theSearchParamSet.getWarnings().isEmpty()) {
+			return;
+		}
+
+		// If extraction generated any warnings, broadcast an error
+		for (String next : theSearchParamSet.getWarnings()) {
+			StorageProcessingMessage messageHolder = new StorageProcessingMessage();
+			messageHolder.setMessage(next);
+			HookParams params = new HookParams()
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+				.add(StorageProcessingMessage.class, messageHolder);
+			JpaInterceptorBroadcaster.doCallHooks(theInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_WARNING, params);
+		}
 	}
 }
 

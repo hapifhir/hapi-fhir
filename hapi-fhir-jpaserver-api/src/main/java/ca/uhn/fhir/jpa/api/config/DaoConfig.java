@@ -608,6 +608,11 @@ public class DaoConfig {
 	 * <code>_sort</code> parameter on searches): If the server is configured
 	 * to not index missing field.
 	 * </p>
+	 * <p>
+	 * The following index may need to be added into the indexed tables such as <code>HFJ_SPIDX_TOKEN</code> 
+	 * to improve the search performance while <code>:missing</code> is enabled.
+	 * <code>RES_TYPE, SP_NAME, SP_MISSING</code>
+	 * </p>
 	 */
 	public void setIndexMissingFields(IndexEnabledEnum theIndexMissingFields) {
 		Validate.notNull(theIndexMissingFields, "theIndexMissingFields must not be null");

@@ -31,6 +31,7 @@ import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
@@ -48,6 +49,7 @@ import javax.persistence.UniqueConstraint;
 	 * - IDX_FORCEDID_TYPE_RESID
 	 * so don't reuse these names
 	 */
+	@Index(name = "IDX_FORCEID_FID", columnList = "FORCED_ID")
 })
 public class ForcedId extends BasePartitionable {
 

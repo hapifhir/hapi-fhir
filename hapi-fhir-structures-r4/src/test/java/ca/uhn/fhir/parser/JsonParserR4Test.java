@@ -2,10 +2,7 @@ package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.StopWatch;
@@ -22,7 +19,6 @@ import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.DocumentReference;
-import org.hl7.fhir.r4.model.Dosage;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Medication;
@@ -39,7 +35,6 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
-import org.hl7.fhir.r4.model.UuidType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Disabled;
@@ -473,8 +468,8 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 		mr = ourCtx.newJsonParser().parseResource(MedicationRequest.class, encoded);
 
-		assertEquals("#2", mr.getContained().get(0).getId());
-		assertEquals("#1", mr.getContained().get(1).getId());
+		assertEquals("#1", mr.getContained().get(0).getId());
+		assertEquals("#2", mr.getContained().get(1).getId());
 
 	}
 
@@ -926,6 +921,50 @@ public class JsonParserR4Test extends BaseTest {
 		AuditEvent ae = ourCtx.newJsonParser().parseResource(AuditEvent.class, auditEvent);
 		String auditEventAsString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(ae);
 		assertEquals(auditEvent, auditEventAsString);
+	}
+
+
+	/**
+	 * Ensure that a contained bundle doesn't cause a crash
+	 */
+	@Test
+	public void testParseAndEncodePreservesContainedResourceOrder() {
+		String auditEvent = "{\n" +
+			"  \"resourceType\": \"AuditEvent\",\n" +
+			"  \"contained\": [ {\n" +
+			"    \"resourceType\": \"Observation\",\n" +
+			"    \"id\": \"A\",\n" +
+			"    \"identifier\": [ {\n" +
+			"      \"value\": \"A\"\n" +
+			"    } ]\n" +
+			"  }, {\n" +
+			"    \"resourceType\": \"Observation\",\n" +
+			"    \"id\": \"B\",\n" +
+			"    \"identifier\": [ {\n" +
+			"      \"value\": \"B\"\n" +
+			"    } ]\n" +
+			"  } ],\n" +
+			"  \"entity\": [ {\n" +
+			"    \"what\": {\n" +
+			"      \"reference\": \"#B\"\n" +
+			"    }\n" +
+			"  }, {\n" +
+			"    \"what\": {\n" +
+			"      \"reference\": \"#A\"\n" +
+			"    }\n" +
+			"  } ]\n" +
+			"}";
+
+		ourLog.info("Input: {}", auditEvent);
+		AuditEvent ae = ourCtx.newJsonParser().parseResource(AuditEvent.class, auditEvent);
+		assertEquals("#A", ae.getContained().get(0).getId());
+		assertEquals("#B", ae.getContained().get(1).getId());
+		assertEquals("#B", ae.getEntity().get(0).getWhat().getReference());
+		assertEquals("#A", ae.getEntity().get(1).getWhat().getReference());
+
+		String serialized = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(ae);
+		assertEquals(auditEvent, serialized);
+
 	}
 
 

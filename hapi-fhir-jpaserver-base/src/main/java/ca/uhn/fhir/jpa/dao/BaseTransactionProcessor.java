@@ -69,6 +69,7 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
@@ -278,6 +279,16 @@ public abstract class BaseTransactionProcessor {
 		}
 	}
 
+	@VisibleForTesting
+	public void setVersionAdapter(ITransactionProcessorVersionAdapter theVersionAdapter) {
+		myVersionAdapter = theVersionAdapter;
+	}
+
+	@VisibleForTesting
+	public void setTxManager(PlatformTransactionManager theTxManager) {
+		myTxManager = theTxManager;
+	}
+
 	private IBaseBundle batch(final RequestDetails theRequestDetails, IBaseBundle theRequest) {
 		ourLog.info("Beginning batch with {} resources", myVersionAdapter.getEntries(theRequest).size());
 		long start = System.currentTimeMillis();
@@ -333,6 +344,11 @@ public abstract class BaseTransactionProcessor {
 		ourLog.info("Batch completed in {}ms", new Object[]{delay});
 
 		return resp;
+	}
+
+	@VisibleForTesting
+	public void setHapiTransactionService(HapiTransactionService theHapiTransactionService) {
+		myHapiTransactionService = theHapiTransactionService;
 	}
 
 	private IBaseBundle processTransaction(final RequestDetails theRequestDetails, final IBaseBundle theRequest, final String theActionName) {
@@ -549,6 +565,10 @@ public abstract class BaseTransactionProcessor {
 		return myContext.getVersion().newIdType().setValue(theValue);
 	}
 
+	@VisibleForTesting
+	public void setModelConfig(ModelConfig theModelConfig) {
+		myModelConfig = theModelConfig;
+	}
 
 	private Map<IBase, IBasePersistedResource> doTransactionWriteOperations(final RequestDetails theRequest, String theActionName, TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
 																									Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder, List<IBase> theEntries, StopWatch theTransactionStopWatch) {
@@ -612,16 +632,16 @@ public abstract class BaseTransactionProcessor {
 							String existingUuid = keyToUuid.get(key);
 							for (IBase nextEntry : theEntries) {
 								IBaseResource nextResource = myVersionAdapter.getResource(nextEntry);
-								for (ResourceReferenceInfo nextReference : myContext.newTerser().getAllResourceReferences(nextResource)) {
+								for (IBaseReference nextReference : myContext.newTerser().getAllPopulatedChildElementsOfType(nextResource, IBaseReference.class)) {
 									// We're interested in any references directly to the placeholder ID, but also
 									// references that have a resource target that has the placeholder ID.
-									String nextReferenceId = nextReference.getResourceReference().getReferenceElement().getValue();
-									if (isBlank(nextReferenceId) && nextReference.getResourceReference().getResource() != null) {
-										nextReferenceId = nextReference.getResourceReference().getResource().getIdElement().getValue();
+									String nextReferenceId = nextReference.getReferenceElement().getValue();
+									if (isBlank(nextReferenceId) && nextReference.getResource() != null) {
+										nextReferenceId = nextReference.getResource().getIdElement().getValue();
 									}
 									if (entryUrl.equals(nextReferenceId)) {
-										nextReference.getResourceReference().setReference(existingUuid);
-										nextReference.getResourceReference().setResource(null);
+										nextReference.setReference(existingUuid);
+										nextReference.setResource(null);
 									}
 								}
 							}
@@ -923,7 +943,6 @@ public abstract class BaseTransactionProcessor {
 						IIdType newId = theIdSubstitutions.get(nextId);
 						ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
 						if (referencesToVersion.contains(resourceReference)) {
-							DaoMethodOutcome outcome = theIdToPersistedOutcome.get(newId);
 							resourceReference.setReference(newId.getValue());
 						} else {
 							resourceReference.setReference(newId.toVersionless().getValue());
@@ -1042,6 +1061,11 @@ public abstract class BaseTransactionProcessor {
 		return newIdType(theToResourceName, theIdPart, null);
 	}
 
+	@VisibleForTesting
+	public void setDaoRegistry(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
+	}
+
 	private IFhirResourceDao getDaoOrThrowException(Class<? extends IBaseResource> theClass) {
 		IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDaoOrNull(theClass);
 		if (dao == null) {
@@ -1111,6 +1135,11 @@ public abstract class BaseTransactionProcessor {
 			}
 		}
 		return null;
+	}
+
+	@VisibleForTesting
+	public void setDaoConfig(DaoConfig theDaoConfig) {
+		myDaoConfig = theDaoConfig;
 	}
 
 	public interface ITransactionProcessorVersionAdapter<BUNDLE extends IBaseBundle, BUNDLEENTRY extends IBase> {

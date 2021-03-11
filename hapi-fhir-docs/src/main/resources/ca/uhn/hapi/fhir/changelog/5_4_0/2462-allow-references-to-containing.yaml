@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2462
+title: "References from a contained resource to the containing resource are now possible in the JPA server."

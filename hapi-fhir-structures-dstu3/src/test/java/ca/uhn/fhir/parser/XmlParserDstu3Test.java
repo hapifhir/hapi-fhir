@@ -1090,6 +1090,7 @@ public class XmlParserDstu3Test {
 	 * See #103
 	 */
 	@Test
+	@Disabled
 	public void testEncodeAndReEncodeContainedJson() {
 		Composition comp = new Composition();
 		comp.addSection().addEntry().setResource(new AllergyIntolerance().addNote(new Annotation().setText("Section0_Allergy0")));
@@ -1115,6 +1116,7 @@ public class XmlParserDstu3Test {
 	 * See #103
 	 */
 	@Test
+	@Disabled
 	public void testEncodeAndReEncodeContainedXml() {
 		Composition comp = new Composition();
 		comp.addSection().addEntry().setResource(new AllergyIntolerance().addNote(new Annotation().setText("Section0_Allergy0")));

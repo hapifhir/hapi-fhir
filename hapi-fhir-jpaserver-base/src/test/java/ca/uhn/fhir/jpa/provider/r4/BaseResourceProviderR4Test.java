@@ -168,12 +168,11 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(subsServletHolder.getServlet().getServletConfig().getServletContext());
 			myValidationSupport = wac.getBean(IValidationSupport.class);
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
-			SubscriptionMatcherInterceptor ourSubscriptionMatcherInterceptor = wac.getBean(SubscriptionMatcherInterceptor.class);
 
 			confProvider.setSearchParamRegistry(ourSearchParamRegistry);
 
 			myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-			myFhirCtx.getRestfulClientFactory().setSocketTimeout(20000);
+			myFhirCtx.getRestfulClientFactory().setSocketTimeout(400000);
 
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();

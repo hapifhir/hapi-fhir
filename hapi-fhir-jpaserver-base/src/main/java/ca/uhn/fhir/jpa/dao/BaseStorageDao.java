@@ -54,6 +54,7 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -88,6 +89,11 @@ public abstract class BaseStorageDao {
 	protected DaoRegistry myDaoRegistry;
 	@Autowired
 	protected ModelConfig myModelConfig;
+
+	@VisibleForTesting
+	public void setSearchParamRegistry(ISearchParamRegistry theSearchParamRegistry) {
+		mySearchParamRegistry = theSearchParamRegistry;
+	}
 
 	/**
 	 * May be overridden by subclasses to validate resources prior to storage
@@ -176,7 +182,7 @@ public abstract class BaseStorageDao {
 
 	/**
 	 * Handle {@link ModelConfig#getAutoVersionReferenceAtPaths() auto-populate-versions}
-	 *
+	 * <p>
 	 * We only do this if thePerformIndexing is true because if it's false, that means
 	 * we're in a FHIR transaction during the first phase of write operation processing,
 	 * meaning that the versions of other resources may not have need updated yet. For example
@@ -184,7 +190,7 @@ public abstract class BaseStorageDao {
 	 * is also being updated in the same transaction, during the first "no index" phase,
 	 * the Patient will not yet have its version number incremented, so it would be wrong
 	 * to use that value. During the second phase it is correct.
-	 *
+	 * <p>
 	 * Also note that {@link BaseTransactionProcessor} also has code to do auto-versioning
 	 * and it is the one that takes care of the placeholder IDs. Look for the other caller of
 	 * {@link #extractReferencesToAutoVersion(FhirContext, ModelConfig, IBaseResource)}

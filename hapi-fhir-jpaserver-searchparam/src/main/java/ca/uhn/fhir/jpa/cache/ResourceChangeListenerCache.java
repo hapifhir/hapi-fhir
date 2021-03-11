@@ -134,6 +134,11 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 		return retval;
 	}
 
+	@VisibleForTesting
+	public void setResourceChangeListenerCacheRefresher(IResourceChangeListenerCacheRefresher theResourceChangeListenerCacheRefresher) {
+		myResourceChangeListenerCacheRefresher = theResourceChangeListenerCacheRefresher;
+	}
+
 	private ResourceChangeResult refreshCacheAndNotifyListenersWithRetry() {
 		Retrier<ResourceChangeResult> refreshCacheRetrier = new Retrier<>(() -> {
 			synchronized (this) {

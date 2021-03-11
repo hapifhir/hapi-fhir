@@ -103,6 +103,21 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 		return retval;
 	}
 
+	@VisibleForTesting
+	public void setSchedulerService(ISchedulerService theSchedulerService) {
+		mySchedulerService = theSchedulerService;
+	}
+
+	@VisibleForTesting
+	public void setResourceChangeListenerRegistry(ResourceChangeListenerRegistryImpl theResourceChangeListenerRegistry) {
+		myResourceChangeListenerRegistry = theResourceChangeListenerRegistry;
+	}
+
+	@VisibleForTesting
+	public void setResourceVersionSvc(IResourceVersionSvc theResourceVersionSvc) {
+		myResourceVersionSvc = theResourceVersionSvc;
+	}
+
 	@Override
 	public ResourceChangeResult refreshCacheAndNotifyListener(IResourceChangeListenerCache theCache) {
 		ResourceChangeResult retVal = new ResourceChangeResult();
