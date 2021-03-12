@@ -89,10 +89,16 @@ class LoquateAddressValidatorTest {
 	@Test
 	public void testRequestBody() {
 		try {
-			assertEquals(REQUEST, myValidator.getRequestBody(ourCtx, getAddress()));
+			assertEquals(clear(REQUEST), clear(myValidator.getRequestBody(ourCtx, getAddress())));
 		} catch (JsonProcessingException e) {
 			fail();
 		}
+	}
+
+	private String clear(String theString) {
+		theString = theString.replaceAll("\n", "");
+		theString = theString.replaceAll("\r", "");
+		return theString.trim();
 	}
 
 	@Test
