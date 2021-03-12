@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -20,8 +21,10 @@ import ca.uhn.fhir.rest.server.interceptor.consent.DelegatingConsentService;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.IOUtils;
@@ -551,6 +554,10 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("2"))).execute();
 		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.FEMALE).addName(new HumanName().setFamily("3"))).execute();
 
+		runInTransaction(()->{
+			assertEquals(3, myResourceTableDao.count());
+		});
+
 		Bundle response = myClient.search().forResource(Patient.class).count(1).returnBundle(Bundle.class).execute();
 		String searchId = response.getId();
 
@@ -562,6 +569,20 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		response = myClient.loadPage().next(response).execute();
 		assertEquals(1, response.getEntry().size());
 		assertNull(response.getTotalElement().getValue());
+
+		StopWatch sw = new StopWatch();
+		while(true) {
+			SearchStatusEnum status = runInTransaction(() -> {
+				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException());
+				return search.getStatus();
+			});
+			if (status == SearchStatusEnum.FINISHED) {
+				break;
+			}
+			if (sw.getMillis() > 60000) {
+				fail("Status is still " + status);
+			}
+		}
 
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException());

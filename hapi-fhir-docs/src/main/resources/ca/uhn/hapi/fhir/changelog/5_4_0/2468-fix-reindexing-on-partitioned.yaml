@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2468
+title: "Running a manual reindex of data failed on a partitioned server with an interceptor error. This has been
+   corrected. Thanks to Ajay Shekar for reporting!"

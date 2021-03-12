@@ -137,6 +137,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends BaseHapiFhirDao<T> implements IFhirResourceDao<T> {
@@ -1055,13 +1056,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	@Transactional
 	public T readByPid(ResourcePersistentId thePid) {
+		return readByPid(thePid, false);
+	}
+
+	@Override
+	@Transactional
+	public T readByPid(ResourcePersistentId thePid, boolean theDeletedOk) {
 		StopWatch w = new StopWatch();
 
 		Optional<ResourceTable> entity = myResourceTableDao.findById(thePid.getIdAsLong());
 		if (!entity.isPresent()) {
 			throw new ResourceNotFoundException("No resource found with PID " + thePid);
 		}
-		if (entity.get().getDeleted() != null) {
+		if (entity.get().getDeleted() != null && !theDeletedOk) {
 			throw createResourceGoneException(entity.get());
 		}
 
@@ -1495,7 +1502,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "missingBody");
 			throw new InvalidRequestException(msg);
 		}
-		assert theResource.getIdElement().hasIdPart() || isNotBlank(theMatchUrl);
+		if (!theResource.getIdElement().hasIdPart() && isBlank(theMatchUrl)) {
+			String type = myFhirContext.getResourceType(theResource);
+			String msg = myFhirContext.getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "updateWithNoId", type);
+			throw new InvalidRequestException(msg);
+		}
 
 		/*
 		 * Resource updates will modify/update the version of the resource with the new version. This is generally helpful,
