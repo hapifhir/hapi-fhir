@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -250,9 +251,9 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		when(myDaoRegistry.getResourceDao(eq(Patient.class))).thenReturn(myResourceDao);
 		when(myDaoRegistry.getResourceDao(eq("Observation"))).thenReturn(myResourceDao);
 		when(myDaoRegistry.getResourceDao(eq(Observation.class))).thenReturn(myResourceDao);
-		when(myResourceDao.read(any(), any(), anyBoolean())).thenAnswer(t->{
-			IIdType id = (IIdType) t.getArguments()[0];
-			return resources.get(id.getIdPartAsLong().intValue());
+		when(myResourceDao.readByPid(any(), anyBoolean())).thenAnswer(t->{
+			int idx = t.getArgument(0, ResourcePersistentId.class).getIdAsLong().intValue();
+			return resources.get(idx);
 		});
 
 
@@ -297,7 +298,7 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		when(myDaoRegistry.getResourceDao(eq(Patient.class))).thenReturn(myResourceDao);
 		when(myDaoRegistry.getResourceDao(eq("Observation"))).thenReturn(myResourceDao);
 		when(myDaoRegistry.getResourceDao(eq(Observation.class))).thenReturn(myResourceDao);
-		when(myResourceDao.read(any(), any(), anyBoolean())).thenReturn(null);
+		when(myResourceDao.readByPid(any(), anyBoolean())).thenReturn(null);
 
 
 		int count = mySvc.forceReindexingPass();
@@ -360,9 +361,9 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		when(myDaoRegistry.getResourceDao(eq(Patient.class))).thenReturn(myResourceDao);
 		when(myDaoRegistry.getResourceDao(eq("Observation"))).thenReturn(myResourceDao);
 		when(myDaoRegistry.getResourceDao(eq(Observation.class))).thenReturn(myResourceDao);
-		when(myResourceDao.read(any(), any(), anyBoolean())).thenAnswer(t->{
-			IIdType id = (IIdType) t.getArguments()[0];
-			return resources.get(id.getIdPartAsLong().intValue());
+		when(myResourceDao.readByPid(any(), anyBoolean())).thenAnswer(t->{
+			int idx = t.getArgument(0, ResourcePersistentId.class).getIdAsLong().intValue();
+			return resources.get(idx);
 		});
 	}
 
