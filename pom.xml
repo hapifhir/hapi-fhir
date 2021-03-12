@@ -832,6 +832,7 @@
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
+		<elasticsearch-client.version>7.11.2</elasticsearch-client.version>
 	</properties>
 
 	<dependencyManagement>
@@ -1499,7 +1500,7 @@
 			<dependency>
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-high-level-client</artifactId>
-				<version>7.10.2</version>
+				<version>${elasticsearch-client.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
