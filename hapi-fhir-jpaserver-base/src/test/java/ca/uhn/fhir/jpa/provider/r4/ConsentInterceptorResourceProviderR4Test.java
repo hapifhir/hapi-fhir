@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -565,6 +566,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException());
+			assertEquals(SearchStatusEnum.FINISHED, search.getStatus());
 			assertEquals(3, search.getNumFound());
 			assertEquals(1, search.getNumBlocked());
 			assertEquals(2, search.getTotalCount());
