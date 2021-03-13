@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -11,6 +12,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.HapiExtensions;
+import com.github.dockerjava.api.model.ResourceVersion;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -95,6 +97,39 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 			} catch (Exception e) {
 				ourLog.info("Future produced exception: {}", e.toString());
 				throw new AssertionError("Failed with message: " + e.toString(), e);
+			}
+		}
+
+		// Make sure we saved the object
+		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		assertEquals(true, patient.getActive());
+
+	}
+
+	@Test
+	public void testCreateWithClientAssignedId_SystemRequest() throws InterruptedException {
+		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
+
+		List<Future<?>> futures = new ArrayList<>();
+		for (int i = 0; i < 5; i++) {
+			Patient p = new Patient();
+			p.setId("ABC");
+			p.setActive(true);
+			p.addIdentifier().setValue("VAL" + i);
+			Runnable task = () -> myPatientDao.update(p, new SystemRequestDetails());
+			Future<?> future = myExecutor.submit(task);
+			futures.add(future);
+		}
+
+		// Look for failures
+		for (Future<?> next : futures) {
+			try {
+				next.get();
+				ourLog.info("Future produced success");
+			} catch (ExecutionException e) {
+				ourLog.info("Future produced exception: {}", e.toString());
+				assertEquals(ResourceVersionConflictException.class, e.getCause().getClass());
 			}
 		}
 
