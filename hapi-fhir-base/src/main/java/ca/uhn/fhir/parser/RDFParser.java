@@ -300,7 +300,7 @@ public class RDFParser extends BaseParser {
 
 							String propertyName = constructPredicateName(resource, childDefinition, childName, parentElement);
 							if (element != null) {
-								XSDDatatype dataType = getXSDDataTypeForFhirType(element.fhirType());
+								XSDDatatype dataType = getXSDDataTypeForFhirType(element.fhirType(), encodedValue);
 								rdfResource.addProperty(rdfModel.createProperty(propertyName), this.createFhirValueBlankNode(rdfModel, encodedValue, dataType, cardinalityIndex));
 							}
 						}
@@ -314,7 +314,7 @@ public class RDFParser extends BaseParser {
 					if (value != null || !hasNoExtensions(pd)) {
 						if (value != null) {
 							String propertyName = constructPredicateName(resource, childDefinition, childName, parentElement);
-							XSDDatatype dataType = getXSDDataTypeForFhirType(pd.fhirType());
+							XSDDatatype dataType = getXSDDataTypeForFhirType(pd.fhirType(), value);
 							Resource valueResource = this.createFhirValueBlankNode(rdfModel, value, dataType, cardinalityIndex);
 							if (!hasNoExtensions(pd)) {
 								IBaseHasExtensions hasExtension = (IBaseHasExtensions)pd;
@@ -411,7 +411,7 @@ public class RDFParser extends BaseParser {
 	 * @param fhirType hapi field type
 	 * @return XSDDatatype value
 	 */
-	private XSDDatatype getXSDDataTypeForFhirType(String fhirType) {
+	private XSDDatatype getXSDDataTypeForFhirType(String fhirType, String value) {
 		switch (fhirType) {
 			case "boolean":
 				return XSDDatatype.XSDboolean;
@@ -423,7 +423,16 @@ public class RDFParser extends BaseParser {
 				return XSDDatatype.XSDdate;
 			case "dateTime":
 			case "instant":
-				return XSDDatatype.XSDdateTime;
+				switch (value.length()) { // assumes valid lexical value
+					case 4:
+						return XSDDatatype.XSDgYear;
+					case 7:
+						return XSDDatatype.XSDgYearMonth;
+					case 10:
+						return XSDDatatype.XSDdate;
+					default:
+						return XSDDatatype.XSDdateTime;
+				}
 			case "code":
 			case "string":
 			default:
