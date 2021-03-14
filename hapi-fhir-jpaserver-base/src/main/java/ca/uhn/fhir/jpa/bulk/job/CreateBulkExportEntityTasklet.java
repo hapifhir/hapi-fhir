@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.bulk.job;
 
 import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.batch.core.StepContribution;
@@ -66,7 +67,20 @@ public class CreateBulkExportEntityTasklet implements Tasklet {
 				outputFormat = Constants.CT_FHIR_NDJSON;
 			}
 
-			IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(outputFormat, resourceTypeSet, since, filterSet));
+			BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
+			bulkDataExportOptions.setOutputFormat(outputFormat);
+			bulkDataExportOptions.setResourceTypes(resourceTypeSet);
+			bulkDataExportOptions.setSince(since);
+			bulkDataExportOptions.setFilters(filterSet);
+			//Set export style
+			String exportStyle = (String)jobParameters.get("exportStyle");
+			bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.valueOf(exportStyle));
+
+			//Set group id if present
+			String groupId = (String)jobParameters.get("groupId");
+			bulkDataExportOptions.setGroupId(new IdDt(groupId));
+
+			IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
 
 			addUUIDToJobContext(theChunkContext, jobInfo.getJobId());
 			return RepeatStatus.FINISHED;

@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.bulk.job;
  * #L%
  */
 
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.log.Logs;
@@ -28,6 +27,7 @@ import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryChunker;
@@ -39,7 +39,6 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,11 +76,9 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
 
-	private RuntimeSearchParam myPatientSearchParam;
-
 	@Override
 	Iterator<ResourcePersistentId> getResourcePidIterator() {
-		List<ResourcePersistentId> myReadPids = new ArrayList<>();
+		Set<ResourcePersistentId> myReadPids = new HashSet<>();
 
 		//Short circuit out if we detect we are attempting to extract patients
 		if (myResourceType.equalsIgnoreCase("Patient")) {
@@ -113,7 +110,6 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	 */
 	private Iterator<ResourcePersistentId> getExpandedPatientIterator() {
 		Set<Long> patientPidsToExport = new HashSet<>();
-		//This gets all member pids
 		List<String> members = getMembers();
 		List<IIdType> ids = members.stream().map(member -> new IdDt("Patient/" + member)).collect(Collectors.toList());
 		List<Long> pidsOrThrowException = myIdHelperService.getPidsOrThrowException(ids);
@@ -162,8 +158,15 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 			//Now lets translate these pids into resource IDs
 			Set<Long> uniquePids = new HashSet<>();
 			goldenPidTargetPidTuple.forEach(uniquePids::addAll);
-			Map<Long, Optional<String>> longOptionalMap = myIdHelperService.translatePidsToForcedIds(uniquePids);
-			expandedIds = longOptionalMap.values().stream().map(Optional::get).collect(Collectors.toSet());
+
+			Map<Long, Optional<String>> pidToForcedIdMap = myIdHelperService.translatePidsToForcedIds(uniquePids);
+
+			//If the result of the translation is an empty optional, it means there is no forced id, and we can use the PID as the resource ID.
+			Set<String> resolvedResourceIds = pidToForcedIdMap.entrySet().stream()
+				.map(entry -> entry.getValue().isPresent() ? entry.getValue().get() : entry.getKey().toString())
+				.collect(Collectors.toSet());
+
+			expandedIds.addAll(resolvedResourceIds);
 		}
 
 		//Now manually add the members of the group (its possible even with mdm expansion that some members dont have MDM matches,
@@ -173,83 +176,40 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 		return expandedIds;
 	}
 
-
-	private void queryResourceTypeWithReferencesToPatients(List<ResourcePersistentId> myReadPids, List<String> idChunk) {
+	private void queryResourceTypeWithReferencesToPatients(Set<ResourcePersistentId> myReadPids, List<String> idChunk) {
 		//Build SP map
 		//First, inject the _typeFilters and _since from the export job
-		SearchParameterMap expandedSpMap = createSearchParameterMapForJob();
+		List<SearchParameterMap> expandedSpMaps = createSearchParameterMapsForResourceType();
+		for (SearchParameterMap expandedSpMap: expandedSpMaps) {
 
-		//Since we are in a bulk job, we have to ensure the user didn't jam in a patient search param, since we need to manually set that.
-		validateSearchParameters(expandedSpMap);
+			//Since we are in a bulk job, we have to ensure the user didn't jam in a patient search param, since we need to manually set that.
+			validateSearchParameters(expandedSpMap);
 
-		// Now, further filter the query with patient references defined by the chunk of IDs we have.
-		filterSearchByResourceIds(idChunk, expandedSpMap);
+			// Now, further filter the query with patient references defined by the chunk of IDs we have.
+			filterSearchByResourceIds(idChunk, expandedSpMap);
 
-		// Fetch and cache a search builder for this resource type
-		ISearchBuilder searchBuilder = getSearchBuilderForLocalResourceType();
+			// Fetch and cache a search builder for this resource type
+			ISearchBuilder searchBuilder = getSearchBuilderForLocalResourceType();
 
-		//Execute query and all found pids to our local iterator.
-		IResultIterator resultIterator = searchBuilder.createQuery(expandedSpMap, new SearchRuntimeDetails(null, myJobUUID), null, RequestPartitionId.allPartitions());
-		while (resultIterator.hasNext()) {
-			myReadPids.add(resultIterator.next());
+			//Execute query and all found pids to our local iterator.
+			IResultIterator resultIterator = searchBuilder.createQuery(expandedSpMap, new SearchRuntimeDetails(null, myJobUUID), null, RequestPartitionId.allPartitions());
+			while (resultIterator.hasNext()) {
+				myReadPids.add(resultIterator.next());
+			}
 		}
 	}
 
 	private void filterSearchByResourceIds(List<String> idChunk, SearchParameterMap expandedSpMap) {
 		ReferenceOrListParam orList =  new ReferenceOrListParam();
 		idChunk.forEach(id -> orList.add(new ReferenceParam(id)));
-		expandedSpMap.add(getPatientSearchParam().getName(), orList);
+		expandedSpMap.add(getPatientSearchParamForCurrentResourceType().getName(), orList);
 	}
 
 	private RuntimeSearchParam validateSearchParameters(SearchParameterMap expandedSpMap) {
-		RuntimeSearchParam runtimeSearchParam = getPatientSearchParam();
+		RuntimeSearchParam runtimeSearchParam = getPatientSearchParamForCurrentResourceType();
 		if (expandedSpMap.get(runtimeSearchParam.getName()) != null) {
 			throw new IllegalArgumentException(String.format("Group Bulk Export manually modifies the Search Parameter called [%s], so you may not include this search parameter in your _typeFilter!", runtimeSearchParam.getName()));
 		}
 		return runtimeSearchParam;
-	}
-
-	/**
-	 * Given the resource type, fetch its patient-based search parameter name
-	 * 1. Attempt to find one called 'patient'
-	 * 2. If that fails, find one called 'subject'
-	 * 3. If that fails, find find by Patient Compartment.
-	 *    3.1 If that returns >1 result, throw an error
-	 *    3.2 If that returns 1 result, return it
-	 */
-	private RuntimeSearchParam getPatientSearchParam() {
-		if (myPatientSearchParam == null) {
-			RuntimeResourceDefinition runtimeResourceDefinition = myContext.getResourceDefinition(myResourceType);
-			myPatientSearchParam = runtimeResourceDefinition.getSearchParam("patient");
-			if (myPatientSearchParam == null) {
-				myPatientSearchParam = runtimeResourceDefinition.getSearchParam("subject");
-				if (myPatientSearchParam == null) {
-					myPatientSearchParam = getRuntimeSearchParamByCompartment(runtimeResourceDefinition);
-					if (myPatientSearchParam == null) {
-						String errorMessage = String.format("[%s] has  no search parameters that are for patients, so it is invalid for Group Bulk Export!", myResourceType);
-						throw new IllegalArgumentException(errorMessage);
-					}
-				}
-			}
-		}
-		return myPatientSearchParam;
-	}
-
-	/**
-	 * Search the resource definition for a compartment named 'patient' and return its related Search Parameter.
-	 */
-	private RuntimeSearchParam getRuntimeSearchParamByCompartment(RuntimeResourceDefinition runtimeResourceDefinition) {
-		RuntimeSearchParam patientSearchParam;
-		List<RuntimeSearchParam> searchParams = runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
-		if (searchParams == null || searchParams.size() == 0) {
-			String errorMessage = String.format("Resource type [%s] is not eligible for Group Bulk export, as it contains no Patient compartment, and no `patient` or `subject` search parameter", myResourceType);
-			throw new IllegalArgumentException(errorMessage);
-		} else if (searchParams.size() == 1) {
-			patientSearchParam = searchParams.get(0);
-		} else {
-			String errorMessage = String.format("Resource type [%s] is not eligible for Group Bulk export, as we are unable to disambiguate which patient search parameter we should be searching by.", myResourceType);
-			throw new IllegalArgumentException(errorMessage);
-		}
-		return patientSearchParam;
 	}
 }

@@ -587,6 +587,17 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testUpdateWithoutId() {
+
+		Patient p = new Patient();
+		try {
+			myPatientDao.update(p);
+		} catch (InvalidRequestException e) {
+			assertEquals("Can not update resource of type Patient as it has no ID", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testUpdateConditionalByLastUpdatedWithWrongTimezone() throws Exception {
 		TimeZone def = TimeZone.getDefault();
 		try {

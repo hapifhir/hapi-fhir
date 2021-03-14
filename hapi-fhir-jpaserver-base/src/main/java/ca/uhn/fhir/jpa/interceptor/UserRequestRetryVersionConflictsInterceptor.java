@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 
+import java.util.List;
 import java.util.StringTokenizer;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -36,8 +37,8 @@ import static org.apache.commons.lang3.StringUtils.trim;
  * if present, it will instruct the server to automatically retry JPA server operations that would have
  * otherwise failed with a {@link ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException} (HTTP 409).
  * <p>
- *    The format of the header is:<br/>
- *    <code>X-Retry-On-Version-Conflict: retry; max-retries=100</code>
+ * The format of the header is:<br/>
+ * <code>X-Retry-On-Version-Conflict: retry; max-retries=100</code>
  * </p>
  */
 @Interceptor
@@ -52,25 +53,28 @@ public class UserRequestRetryVersionConflictsInterceptor {
 		ResourceVersionConflictResolutionStrategy retVal = new ResourceVersionConflictResolutionStrategy();
 
 		if (theRequestDetails != null) {
-			for (String headerValue : theRequestDetails.getHeaders(HEADER_NAME)) {
-				if (isNotBlank(headerValue)) {
+			List<String> headers = theRequestDetails.getHeaders(HEADER_NAME);
+			if (headers != null) {
+				for (String headerValue : headers) {
+					if (isNotBlank(headerValue)) {
 
-					StringTokenizer tok = new StringTokenizer(headerValue, ";");
-					while (tok.hasMoreTokens()) {
-						String next = trim(tok.nextToken());
-						if (next.equals(RETRY)) {
-							retVal.setRetry(true);
-						} else if (next.startsWith(MAX_RETRIES + "=")) {
+						StringTokenizer tok = new StringTokenizer(headerValue, ";");
+						while (tok.hasMoreTokens()) {
+							String next = trim(tok.nextToken());
+							if (next.equals(RETRY)) {
+								retVal.setRetry(true);
+							} else if (next.startsWith(MAX_RETRIES + "=")) {
 
-							String val = trim(next.substring((MAX_RETRIES + "=").length()));
-							int maxRetries = Integer.parseInt(val);
-							maxRetries = Math.min(100, maxRetries);
-							retVal.setMaxRetries(maxRetries);
+								String val = trim(next.substring((MAX_RETRIES + "=").length()));
+								int maxRetries = Integer.parseInt(val);
+								maxRetries = Math.min(100, maxRetries);
+								retVal.setMaxRetries(maxRetries);
+
+							}
 
 						}
 
 					}
-
 				}
 			}
 		}
