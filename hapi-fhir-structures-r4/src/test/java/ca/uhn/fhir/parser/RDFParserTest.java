@@ -1,3 +1,23 @@
+/** test ca.uhn.fhir.parser
+ * This parses the FHIR JSON examples and round-trips them through RDF.
+ * See testRDFRoundTrip() for details.
+ *
+ * editors:
+ * - Eric Prud'hommeaux <eric@w3.org>
+ *
+ * TODO:
+ * - Consider sharing the FHIR JSON examples in
+ *   ../../../../../resources/rdf-test-input/ with other HAPI tests and move to
+ *   resources/examples/JSON.
+ * - Add FHIR RDF examples and validate graph isomorphism with examples/RDF (or
+ *   examples/Turtle).
+ *
+ * see also:
+ *   ../../../../../../../../hapi-fhir-base/src/main/java/ca/uhn/fhir/parser/RDFParser.java
+ * run test:
+ *   hapi-fhir/hapi-fhir-structures-r4$ mvn -Dtest=ca.uhn.fhir.parser.RDFParserTest test
+ */
+
 package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
