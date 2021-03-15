@@ -12,14 +12,12 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.HapiExtensions;
-import com.github.dockerjava.api.model.ResourceVersion;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
@@ -131,6 +129,39 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 				ourLog.info("Future produced exception: {}", e.toString());
 				assertEquals(ResourceVersionConflictException.class, e.getCause().getClass());
 			}
+		}
+
+		// Make sure we saved the object
+		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		assertEquals(true, patient.getActive());
+
+	}
+
+	@Test
+	public void testCreateWithClientAssignedId_SystemRequestContainingRetryDirective() throws InterruptedException, ExecutionException {
+		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
+
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		UserRequestRetryVersionConflictsInterceptor.addRetryHeader(requestDetails, 10);
+
+		List<Future<?>> futures = new ArrayList<>();
+		for (int i = 0; i < 5; i++) {
+			Patient p = new Patient();
+			p.setId("ABC");
+			p.setActive(true);
+			p.addIdentifier().setValue("VAL" + i);
+			Runnable task = () -> {
+				myPatientDao.update(p, requestDetails);
+			};
+			Future<?> future = myExecutor.submit(task);
+			futures.add(future);
+		}
+
+		// Should not fail
+		for (Future<?> next : futures) {
+			next.get();
+			ourLog.info("Future produced success");
 		}
 
 		// Make sure we saved the object
@@ -422,7 +453,6 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		assertEquals("6", patient.getMeta().getVersionId());
 
 	}
-
 
 
 	@Test

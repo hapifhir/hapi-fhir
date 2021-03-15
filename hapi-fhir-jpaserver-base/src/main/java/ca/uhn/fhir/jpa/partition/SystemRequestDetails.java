@@ -33,12 +33,19 @@ import ca.uhn.fhir.rest.server.ElementsSupportEnum;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * A default RequestDetails implementation that can be used for system calls to
@@ -50,6 +57,8 @@ public class SystemRequestDetails extends RequestDetails {
 	public SystemRequestDetails() {
 		super(new MyInterceptorBroadcaster());
 	}
+
+	private ListMultimap<String, String> myHeaders;
 
 	public SystemRequestDetails(IInterceptorBroadcaster theInterceptorBroadcaster) {
 		super(theInterceptorBroadcaster);
@@ -72,13 +81,30 @@ public class SystemRequestDetails extends RequestDetails {
 
 	@Override
 	public String getHeader(String name) {
-		return null;
+		List<String> headers = getHeaders(name);
+		if (headers.isEmpty()) {
+			return null;
+		} else {
+			return headers.get(0);
+		}
 	}
 
 	@Override
 	public List<String> getHeaders(String name) {
-		return null;
+		ListMultimap<String, String> headers = myHeaders;
+		if (headers == null) {
+			headers = ImmutableListMultimap.of();
+		}
+		return headers.get(name);
 	}
+
+	public void addHeader(String theName, String theValue) {
+		if (myHeaders == null) {
+			myHeaders = ArrayListMultimap.create();
+		}
+		myHeaders.put(theName, theValue);
+	}
+
 
 	@Override
 	public Object getAttribute(String theAttributeName) {
