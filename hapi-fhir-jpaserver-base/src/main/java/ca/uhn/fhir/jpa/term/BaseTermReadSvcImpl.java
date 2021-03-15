@@ -62,6 +62,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptPropertyTypeEnum;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptView;
+import ca.uhn.fhir.jpa.entity.TermValueSetConceptViewOracle;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
@@ -244,7 +245,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 	@Autowired
-	private ITermValueSetConceptViewDao myTermValueSetConceptViewDao;
+	private ITermValueSetConceptViewDao<TermValueSetConceptView> myTermValueSetConceptViewDao;
+	@Autowired
+	private ITermValueSetConceptViewDao<TermValueSetConceptViewOracle> myTermValueSetConceptViewOracleDao;
 	@Autowired
 	private ISchedulerService mySchedulerService;
 	@Autowired(required = false)
@@ -530,6 +533,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		expandConcepts(theAccumulator, termValueSet, theFilter, theAdd);
 	}
 
+	private boolean isOracleDialect(){
+		return myHibernatePropertiesProvider.getDialect() instanceof org.hibernate.dialect.Oracle12cDialect;
+	}
 
 	private void expandConcepts(IValueSetConceptAccumulator theAccumulator, TermValueSet theTermValueSet, ExpansionFilter theFilter, boolean theAdd) {
 		Integer offset = theAccumulator.getSkipCountRemaining();
@@ -542,19 +548,22 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		int conceptsExpanded = 0;
 		int designationsExpanded = 0;
 		int toIndex = offset + count;
-
+		ITermValueSetConceptViewDao theTermValueSetConceptViewDao = myTermValueSetConceptViewDao;
+		if(isOracleDialect()) {
+			theTermValueSetConceptViewDao = myTermValueSetConceptViewOracleDao;
+		}
 		Collection<TermValueSetConceptView> conceptViews;
 		boolean wasFilteredResult = false;
 		String filterDisplayValue = null;
 		if (!theFilter.getFilters().isEmpty() && JpaConstants.VALUESET_FILTER_DISPLAY.equals(theFilter.getFilters().get(0).getProperty()) && theFilter.getFilters().get(0).getOp() == ValueSet.FilterOperator.EQUAL) {
 			filterDisplayValue = lowerCase(theFilter.getFilters().get(0).getValue().replace("%", "[%]"));
 			String displayValue = "%" + lowerCase(filterDisplayValue) + "%";
-			conceptViews = myTermValueSetConceptViewDao.findByTermValueSetId(theTermValueSet.getId(), displayValue);
+			conceptViews = theTermValueSetConceptViewDao.findByTermValueSetId(theTermValueSet.getId(), displayValue);
 			wasFilteredResult = true;
 		} else {
 			// TODO JA HS: I'm pretty sure we are overfetching here.  test says offset 3, count 4, but we are fetching index 3 -> 10 here, grabbing 7 concepts.
 			//Specifically this test testExpandInline_IncludePreExpandedValueSetByUri_FilterOnDisplay_LeftMatch_SelectRange
-			conceptViews = myTermValueSetConceptViewDao.findByTermValueSetId(offset, toIndex, theTermValueSet.getId());
+			conceptViews = theTermValueSetConceptViewDao.findByTermValueSetId(offset, toIndex, theTermValueSet.getId());
 			theAccumulator.consumeSkipCount(offset);
 			if (theAdd) {
 				theAccumulator.incrementOrDecrementTotalConcepts(true, theTermValueSet.getTotalConcepts().intValue());
