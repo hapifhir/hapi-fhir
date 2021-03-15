@@ -75,6 +75,7 @@ public class FieldValidatingInterceptor {
 	protected void handleRequest(RequestDetails theRequest, IBaseResource theResource) {
 		if (!theRequest.getHeaders(VALIDATION_DISABLED_HEADER).isEmpty()) {
 			ourLog.debug("Address validation is disabled for this request via header");
+			return;
 		}
 
 		FhirContext ctx = theRequest.getFhirContext();

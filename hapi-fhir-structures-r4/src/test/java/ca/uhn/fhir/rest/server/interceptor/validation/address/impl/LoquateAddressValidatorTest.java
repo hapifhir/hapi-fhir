@@ -38,6 +38,14 @@ class LoquateAddressValidatorTest {
 		"  } ]\n" +
 		"}";
 
+	private static final String RESPONSE_INVALID = "[\n" +
+		"  {\n" +
+		"    \"Input\": {\n" +
+		"      \"Address\": \"\"\n" +
+		"    }\n" +
+		"  }\n" +
+		"]";
+
 	private static final String RESPONSE_INVALID_ADDRESS = "[\n" +
 		"  {\n" +
 		"    \"Input\": {\n" +
@@ -84,6 +92,25 @@ class LoquateAddressValidatorTest {
 		myProperties = new Properties();
 		myProperties.setProperty(LoquateAddressValidator.PROPERTY_SERVICE_KEY, "MY_KEY");
 		myValidator = new LoquateAddressValidator(myProperties);
+	}
+
+	@Test
+	public void testInvalidInit() {
+		try {
+			new LoquateAddressValidator(new Properties());
+			fail();
+		} catch (Exception e) {
+		}
+	}
+
+	@Test
+	public void testInvalidAddressValidationResponse() throws Exception {
+		try {
+			AddressValidationResult res = myValidator.getValidationResult(new AddressValidationResult(),
+				new ObjectMapper().readTree(RESPONSE_INVALID), ourCtx);
+			fail();
+		} catch (AddressValidationException e) {
+		}
 	}
 
 	@Test

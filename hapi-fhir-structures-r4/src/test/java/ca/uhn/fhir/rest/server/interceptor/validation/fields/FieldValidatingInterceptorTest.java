@@ -8,7 +8,12 @@ import org.hl7.fhir.r4.model.Person;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+
+import static ca.uhn.fhir.rest.server.interceptor.s13n.StandardizingInterceptor.STANDARDIZATION_DISABLED_HEADER;
+import static ca.uhn.fhir.rest.server.interceptor.validation.fields.FieldValidatingInterceptor.VALIDATION_DISABLED_HEADER;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +31,18 @@ class FieldValidatingInterceptorTest {
 	@BeforeEach
 	public void init() throws Exception {
 		myInterceptor = new FieldValidatingInterceptor();
+	}
+
+	@Test
+	public void testDisablingValidationViaHeader() {
+		RequestDetails request = newRequestDetails();
+		when(request.getHeaders(eq(VALIDATION_DISABLED_HEADER))).thenReturn(Arrays.asList(new String[]{"True"}));
+
+		Person person = new Person();
+		person.addTelecom().setSystem(ContactPoint.ContactPointSystem.EMAIL).setValue("EMAIL");
+
+		myInterceptor.handleRequest(request, person);
+		assertEquals("EMAIL", person.getTelecom().get(0).getValue());
 	}
 
 	@Test
@@ -47,6 +64,16 @@ class FieldValidatingInterceptorTest {
 
 		try {
 			myInterceptor.handleRequest(newRequestDetails(), person);
+			fail();
+		} catch (Exception e) {
+		}
+	}
+
+	@Test
+	public void testCustomInvalidValidation() {
+		myInterceptor.getConfig().put("telecom.where(system='phone').value", "ClassThatDoesntExist");
+		try {
+			myInterceptor.handleRequest(newRequestDetails(), new Person());
 			fail();
 		} catch (Exception e) {
 		}
