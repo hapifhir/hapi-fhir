@@ -29,12 +29,12 @@ import java.util.List;
  * #L%
  */
 
-public interface ITermValueSetConceptViewDao extends JpaRepository<TermValueSetConceptView, Long> {
+public interface ITermValueSetConceptViewDao <T extends TermValueSetConceptView> extends JpaRepository<T, Long> {
 
 	@Query("SELECT v FROM TermValueSetConceptView v WHERE v.myConceptValueSetPid = :pid AND v.myConceptOrder >= :from AND v.myConceptOrder < :to ORDER BY v.myConceptOrder")
-	List<TermValueSetConceptView> findByTermValueSetId(@Param("from") int theFrom, @Param("to") int theTo, @Param("pid") Long theValueSetId);
+	List<T> findByTermValueSetId(@Param("from") int theFrom, @Param("to") int theTo, @Param("pid") Long theValueSetId);
 
 	@Query("SELECT v FROM TermValueSetConceptView v WHERE v.myConceptValueSetPid = :pid AND LOWER(v.myConceptDisplay) LIKE :display ORDER BY v.myConceptOrder")
-	List<TermValueSetConceptView> findByTermValueSetId(@Param("pid") Long theValueSetId, @Param("display") String theDisplay);
+	List<T> findByTermValueSetId(@Param("pid") Long theValueSetId, @Param("display") String theDisplay);
 
 }
