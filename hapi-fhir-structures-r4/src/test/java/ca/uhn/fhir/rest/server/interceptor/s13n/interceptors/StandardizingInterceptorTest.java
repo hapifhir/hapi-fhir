@@ -38,6 +38,7 @@ class StandardizingInterceptorTest {
 			"\t\t\"telecom.where(system='phone').value\" : \"PHONE\"\n" +
 			"\t\t}\n" +
 			"}";
+	
 	private static final String BAD_CONFIG = "{ \"Person\" : { \"Person.name.family\" : \"org.nonexistent.Standardizer\"}}";
 
 	private static FhirContext ourCtx = FhirContext.forR4();
