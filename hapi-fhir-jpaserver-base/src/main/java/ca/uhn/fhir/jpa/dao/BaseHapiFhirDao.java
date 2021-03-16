@@ -511,7 +511,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			if (thePerformIndexing) {
 
 				encoding = myConfig.getResourceEncoding();
-				Set<String> excludeElements = ResourceMetaParams.EXCLUDE_ELEMENTS_IN_ENCODED;
+
+				String resourceType = theEntity.getResourceType();
+
+				Set<String> excludeElements = new HashSet<>();
+				excludeElements.add("id");
+				excludeElements.add(resourceType + ".meta.profile");
+				excludeElements.add(resourceType + ".meta.tag");
+				excludeElements.add(resourceType + ".meta.security");
+				excludeElements.add(resourceType + ".meta.versionId");
+				excludeElements.add(resourceType + ".meta.lastUpdated");
+				excludeElements.add(resourceType + ".meta.source");
+
 				theEntity.setFhirVersion(myContext.getVersion().getVersion());
 
 				bytes = encodeResource(theResource, encoding, excludeElements, myContext);
