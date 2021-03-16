@@ -514,14 +514,27 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 				String resourceType = theEntity.getResourceType();
 
-				Set<String> excludeElements = new HashSet<>();
+				List<String> excludeElements = new ArrayList<>(8);
 				excludeElements.add("id");
-				excludeElements.add(resourceType + ".meta.profile");
-				excludeElements.add(resourceType + ".meta.tag");
-				excludeElements.add(resourceType + ".meta.security");
-				excludeElements.add(resourceType + ".meta.versionId");
-				excludeElements.add(resourceType + ".meta.lastUpdated");
-				excludeElements.add(resourceType + ".meta.source");
+
+				IBaseMetaType meta = theResource.getMeta();
+				boolean hasExtensions = false;
+				if (meta instanceof IBaseHasExtensions) {
+					if (((IBaseHasExtensions) meta).getExtension().isEmpty()) {
+						hasExtensions = true;
+					}
+				}
+				if (!hasExtensions) {
+					excludeElements.add(resourceType + ".meta.profile");
+					excludeElements.add(resourceType + ".meta.tag");
+					excludeElements.add(resourceType + ".meta.security");
+					excludeElements.add(resourceType + ".meta.versionId");
+					excludeElements.add(resourceType + ".meta.lastUpdated");
+					excludeElements.add(resourceType + ".meta.source");
+				} else {
+					excludeElements.add(resourceType + ".meta");
+				}
+
 
 				theEntity.setFhirVersion(myContext.getVersion().getVersion());
 
@@ -1541,7 +1554,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return resourceText;
 	}
 
-	public static byte[] encodeResource(IBaseResource theResource, ResourceEncodingEnum theEncoding, Set<String> theExcludeElements, FhirContext theContext) {
+	public static byte[] encodeResource(IBaseResource theResource, ResourceEncodingEnum theEncoding, List<String> theExcludeElements, FhirContext theContext) {
 		byte[] bytes;
 		IParser parser = theEncoding.newParser(theContext);
 		parser.setDontEncodeElements(theExcludeElements);
