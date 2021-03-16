@@ -1,6 +1,7 @@
 package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 
@@ -20,5 +21,18 @@ class ExtensionUtilTest {
 		assertFalse(ExtensionUtil.hasExtension(p1, EXT_URL));
 		ExtensionUtil.setExtension(ourFhirContext, p1, EXT_URL, "value");
 		assertTrue(ExtensionUtil.hasExtension(p1, EXT_URL));
+	}
+
+	@Test
+	void testExtensionTypesWork() {
+		Patient p1 = new Patient();
+		assertFalse(ExtensionUtil.hasExtension(p1, EXT_URL));
+		ExtensionUtil.setExtension(ourFhirContext, p1, EXT_URL, "integer", "1");
+
+		assertTrue(ExtensionUtil.hasExtension(p1, EXT_URL));
+		assertEquals(1, ExtensionUtil.getExtensions(p1, EXT_URL).size());
+
+		IBaseDatatype ext = ExtensionUtil.getExtension(p1, EXT_URL).getValue();
+		assertEquals("1", ext.toString());
 	}
 }

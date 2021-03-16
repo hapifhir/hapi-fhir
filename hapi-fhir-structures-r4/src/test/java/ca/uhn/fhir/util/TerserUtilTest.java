@@ -3,10 +3,14 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
+
+import java.util.GregorianCalendar;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -51,6 +55,21 @@ class TerserUtilTest {
 		Identifier id2 = (Identifier) p2Helper.getFieldValues("identifier").get(0);
 		assertTrue(id1.equalsDeep(id2));
 		assertFalse(id1.equals(id2));
+	}
+
+	@Test
+	void testSetFieldsViaHelper() {
+		TerserUtilHelper p1Helper = TerserUtilHelper.newHelper(ourFhirContext, "Patient");
+		p1Helper.setField("active", "boolean", "true");
+		p1Helper.setField("birthDate", "date", "1999-01-01");
+		p1Helper.setField("gender", "code", "male");
+
+		Patient p = p1Helper.getResource();
+		assertTrue(p.getActive());
+		assertEquals(Enumerations.AdministrativeGender.MALE, p.getGender());
+
+		DateType check = TerserUtil.newElement(ourFhirContext, "date", "1999-01-01");
+		assertEquals(check.getValue(), p.getBirthDate());
 	}
 
 	@Test

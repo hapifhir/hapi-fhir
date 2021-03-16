@@ -287,7 +287,7 @@ public final class TerserUtil {
 	public static void setFieldByFhirPath(FhirTerser theTerser, String theFhirPath, IBaseResource theResource, IBase theValue) {
 		List<IBase> theFromFieldValues = theTerser.getValues(theResource, theFhirPath, true, false);
 		for (IBase theFromFieldValue : theFromFieldValues) {
-			theTerser.cloneInto(theFromFieldValue, theValue, true);
+			theTerser.cloneInto(theValue, theFromFieldValue, true);
 		}
 	}
 

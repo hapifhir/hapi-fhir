@@ -27,6 +27,9 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * Utility for modifying with extensions in a FHIR version-independent approach.
  */
@@ -42,7 +45,7 @@ public class ExtensionUtil {
 	 */
 	public static IBaseExtension<?, ?> getOrCreateExtension(IBase theBase, String theUrl) {
 		IBaseHasExtensions baseHasExtensions = validateExtensionSupport(theBase);
-		IBaseExtension extension = getExtensionByUrl(baseHasExtensions, theUrl);
+		IBaseExtension extension = getExtension(baseHasExtensions, theUrl);
 		if (extension == null) {
 			extension = baseHasExtensions.addExtension();
 			extension.setUrl(theUrl);
@@ -72,7 +75,7 @@ public class ExtensionUtil {
 			return false;
 		}
 
-		return getExtensionByUrl(baseHasExtensions, theExtensionUrl) != null;
+		return getExtension(baseHasExtensions, theExtensionUrl) != null;
 	}
 
 	/**
@@ -86,14 +89,21 @@ public class ExtensionUtil {
 		if (!hasExtension(theBase, theExtensionUrl)) {
 			return false;
 		}
-		IBaseDatatype value = getExtensionByUrl((IBaseHasExtensions) theBase, theExtensionUrl).getValue();
+		IBaseDatatype value = getExtension((IBaseHasExtensions) theBase, theExtensionUrl).getValue();
 		if (value == null) {
 			return theExtensionValue == null;
 		}
 		return value.toString().equals(theExtensionValue);
 	}
 
-	private static IBaseExtension<?, ?> getExtensionByUrl(IBaseHasExtensions theBase, String theExtensionUrl) {
+	/**
+	 * Gets the first extension with the specified URL
+	 *
+	 * @param theBase         The resource to get the extension for
+	 * @param theExtensionUrl URL of the extension to get. Must be non-null
+	 * @return Returns the first available extension with the specified URL, or null if such extension doesn't exist
+	 */
+	public static IBaseExtension<?, ?> getExtension(IBaseHasExtensions theBase, String theExtensionUrl) {
 		return theBase.getExtension()
 			.stream()
 			.filter(e -> theExtensionUrl.equals(e.getUrl()))
@@ -102,18 +112,44 @@ public class ExtensionUtil {
 	}
 
 	/**
-	 * Sets value of the extension
+	 * Gets all extensions with the specified URL
+	 *
+	 * @param theBase         The resource to get the extension for
+	 * @param theExtensionUrl URL of the extension to get. Must be non-null
+	 * @return Returns all extension with the specified URL, or an empty list if such extensions do not exist
+	 */
+	public static List<IBaseExtension<?, ?>> getExtensions(IBaseHasExtensions theBase, String theExtensionUrl) {
+		return theBase.getExtension()
+			.stream()
+			.filter(e -> theExtensionUrl.equals(e.getUrl()))
+			.collect(Collectors.toList());
+	}
+
+	/**
+	 * Sets value of the extension as a string
 	 *
 	 * @param theExtension   The extension to set the value on
 	 * @param theValue       The value to set
 	 * @param theFhirContext The context containing FHIR resource definitions
 	 */
 	public static void setExtension(FhirContext theFhirContext, IBaseExtension theExtension, String theValue) {
-		theExtension.setValue(TerserUtil.newElement(theFhirContext, "string", theValue));
+		setExtension(theFhirContext, theExtension, "string", theValue);
 	}
 
 	/**
-	 * Sets or replaces existing extension with the specified value
+	 * Sets value of the extension
+	 *
+	 * @param theExtension     The extension to set the value on
+	 * @param theExtensionType Element type of the extension
+	 * @param theValue         The value to set
+	 * @param theFhirContext   The context containing FHIR resource definitions
+	 */
+	public static void setExtension(FhirContext theFhirContext, IBaseExtension theExtension, String theExtensionType, String theValue) {
+		theExtension.setValue(TerserUtil.newElement(theFhirContext, theExtensionType, theValue));
+	}
+
+	/**
+	 * Sets or replaces existing extension with the specified value as a string
 	 *
 	 * @param theBase        The resource to update extension on
 	 * @param theUrl         Extension URL
@@ -121,6 +157,20 @@ public class ExtensionUtil {
 	 * @param theFhirContext The context containing FHIR resource definitions
 	 */
 	public static void setExtension(FhirContext theFhirContext, IBase theBase, String theUrl, String theValue) {
+		IBaseExtension ext = getOrCreateExtension(theBase, theUrl);
+		setExtension(theFhirContext, ext, theValue);
+	}
+
+	/**
+	 * Sets or replaces existing extension with the specified value
+	 *
+	 * @param theBase        The resource to update extension on
+	 * @param theUrl         Extension URL
+	 * @param theValueType   Type of the value to set in the extension
+	 * @param theValue       Extension value
+	 * @param theFhirContext The context containing FHIR resource definitions
+	 */
+	public static void setExtension(FhirContext theFhirContext, IBase theBase, String theUrl, String theValueType, String theValue) {
 		IBaseExtension ext = getOrCreateExtension(theBase, theUrl);
 		setExtension(theFhirContext, ext, theValue);
 	}
