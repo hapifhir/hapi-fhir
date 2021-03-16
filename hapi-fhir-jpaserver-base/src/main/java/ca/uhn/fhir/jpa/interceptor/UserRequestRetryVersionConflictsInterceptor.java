@@ -24,7 +24,9 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.apache.commons.lang3.Validate;
 
 import java.util.List;
 import java.util.StringTokenizer;
@@ -83,4 +85,12 @@ public class UserRequestRetryVersionConflictsInterceptor {
 	}
 
 
+	/**
+	 * Convenience method to add a retry header to a system request
+	 */
+	public static void addRetryHeader(SystemRequestDetails theRequestDetails, int theMaxRetries) {
+		Validate.inclusiveBetween(1, Integer.MAX_VALUE, theMaxRetries, "Max retries must be > 0");
+		String value = RETRY + "; " + MAX_RETRIES + "=" + theMaxRetries;
+		theRequestDetails.addHeader(HEADER_NAME, value);
+	}
 }
