@@ -89,10 +89,10 @@ public class TerserUtilHelper {
 	 * Sets field at the specified FHIR path
 	 *
 	 * @param theField The FHIR Path to set the values at
-	 * @param theValue The string value to be set
+	 * @param theValue The value to be set
 	 * @return Returns current instance
 	 */
-	public TerserUtilHelper setField(String theField, String theFieldType, String theValue) {
+	public TerserUtilHelper setField(String theField, String theFieldType, Object theValue) {
 		IBase value = newElement(theFieldType, theValue);
 		TerserUtil.setFieldByFhirPath(getTerser(), theField, myResource, value);
 		return this;
@@ -102,7 +102,7 @@ public class TerserUtilHelper {
 		return newElement("string", theValue);
 	}
 
-	protected IBase newElement(String theElementType, String theValue) {
+	protected IBase newElement(String theElementType, Object theValue) {
 		IBase value = TerserUtil.newElement(myContext, theElementType, theValue);
 		return value;
 	}
