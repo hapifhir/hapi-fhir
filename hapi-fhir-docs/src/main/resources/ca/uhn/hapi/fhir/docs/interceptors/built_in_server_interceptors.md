@@ -227,3 +227,52 @@ The UserRequestRetryVersionConflictsInterceptor allows clients to request that t
 # JPA Server: Validate Data Being Stored
 
 The RepositoryValidatingInterceptor can be used to enforce validation rules on data stored in a HAPI FHIR JPA Repository. See [Repository Validating Interceptor](/docs/validation/repository_validating_interceptor.html) for more information. 
+
+
+# Data Standardization
+
+```StandardizingInterceptor``` handles data standardization (s13n) requirements. This interceptor applies standardization rules on all FHIR primitives as configured in the ```s13n.json``` file that should be made available on the classpath. This file contains FHIRPath definitions together with the standardizers that should be applied to that path. It comes with six per-build standardizers: NAME_FAMILY, NAME_GIVEN, EMAIL, TITLE, PHONE and TEXT. Custom standardizers can be developed by implementing ```ca.uhn.fhir.rest.server.interceptor.s13n.standardizers.IStandardizer``` interface.
+
+A sample configuration file can be found below:
+
+```json
+{
+	"Person" : {
+		"Person.name.family" : "NAME_FAMILY",
+		"Person.name.given" : "NAME_GIVEN",
+		"Person.telecom.where(system='phone').value" : "PHONE"
+	},
+	"Patient" : {
+		"name.family" : "NAME_FAMILY",
+		"name.given" : "NAME_GIVEN",
+		"telecom.where(system='phone').value" : "PHONE"
+	},
+	"*" : {
+		"telecom.where(system='email').value" : "org.example.s13n.MyCustomStandardizer"
+	}
+}
+```
+
+Standardization can be disabled for a given request by providing ```HAPI-Standardization-Disabled: *``` request header. Header value can be any string, it is the presence of the header that disables the s13n.
+
+
+# Validation: Address Validation
+
+```AddressValidatingInterceptor``` takes care of validation of addresses on all incoming resources through a 3rd party address validation service. Before a resource containing an Address field is stored, this interceptor invokes address validation service and then stores validation results as an extension on the address with ```https://hapifhir.org/AddressValidation/``` URL.
+
+This interceptor is configured in ```address-validation.properties``` file that should be made available on the classpath. This file must contain ```validator.class``` property, which defines a fully qualified class implementing ```ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator``` interface. The specified implementation must provide service-specific logic for validating an Address instance. An example implementation can be found in ```ca.uhn.fhir.rest.server.interceptor.validation.address.impl.LoquateAddressValidator``` class which validates addresses by using Loquate Data Cleanse service.
+
+Address validation can be disabled for a given request by providing ```HAPI-Address-Validation-Disabled: *``` request header. Header value can be any string, it is the presence of the header that disables the validation.
+
+# Validation: Field-Level Validation
+
+```FieldValidatingInterceptor``` allows validating primitive fields on various FHIR resources. It expects validation rules to be provided via ```field-validation-rules.json``` file that should be available on the classpath. JSON in this file defines a mapping of FHIRPath expressions to validators that should be applied to those fields. Custom validators that implement ```ca.uhn.fhir.rest.server.interceptor.validation.fields.IValidator``` interface can be provided.
+
+```json
+{
+	"telecom.where(system='email').value" : "EMAIL",
+   "telecom.where(system='phone').value" : "org.example.validation.MyCustomValidator"
+}
+```
+
+Field validation can be disabled for a given request by providing ```HAPI-Field-Validation-Disabled: *``` request header. Header value can be any string, it is the presence of the header that disables the validation. 
