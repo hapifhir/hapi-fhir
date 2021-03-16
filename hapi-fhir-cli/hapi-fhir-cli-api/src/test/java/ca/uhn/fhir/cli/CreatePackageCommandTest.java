@@ -154,7 +154,10 @@ public class CreatePackageCommandTest extends BaseTest {
 
 		String expectedPackageJson = "{\n" +
 			"  \"name\": \"com.example.ig\",\n" +
-			"  \"version\": \"1.0.1\"\n" +
+			"  \"version\": \"1.0.1\",\n" +
+			"  \"fhirVersions\": [\n" +
+			"    \"4.0.1\"\n" +
+			"  ]\n" +
 			"}";
 		assertEquals(expectedPackageJson, packageJsonContents);
 
