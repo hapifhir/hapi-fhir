@@ -6,7 +6,7 @@
 	"matchFields" : [ {
 		"name" : "Organization-extension",
 		"resourceType" : "Organization",
-		"resourcePath" : "identifier",
+		"fhirPath" : "identifier[1]",
 		"matcher" : {
 			"algorithm": "EXTENSION_ANY_ORDER"
 		}
