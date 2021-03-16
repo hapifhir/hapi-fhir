@@ -45,9 +45,14 @@ class TerserUtilTest {
 		p1Helper.setField("identifier.system", "http://org.com/sys");
 		p1Helper.setField("identifier.value", "123");
 
+		Patient p1 = p1Helper.getResource();
+		assertEquals(1, p1.getIdentifier().size());
+
 		TerserUtilHelper p2Helper = TerserUtilHelper.newHelper(ourFhirContext, "Patient");
 		RuntimeResourceDefinition definition = p1Helper.getResourceDefinition();
-		TerserUtil.cloneEidIntoResource(ourFhirContext, definition.getChildByName("identifier"), p1Helper.getResource(), p2Helper.getResource());
+
+		TerserUtil.cloneEidIntoResource(ourFhirContext, definition.getChildByName("identifier"),
+			p1.getIdentifier().get(0), p2Helper.getResource());
 
 		assertEquals(1, p2Helper.getFieldValues("identifier").size());
 
