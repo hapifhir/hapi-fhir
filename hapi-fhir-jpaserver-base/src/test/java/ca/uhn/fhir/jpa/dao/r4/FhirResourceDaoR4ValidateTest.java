@@ -46,6 +46,7 @@ import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
@@ -73,9 +74,12 @@ import org.springframework.transaction.PlatformTransactionManager;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -670,8 +674,26 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertEquals("The code 123 is not valid in the system https://bb", oo.getIssue().get(0).getDiagnostics());
 	}
 
+	@Test
+	public void testValidateWithFragmentCodeSystem_NoDirectBinding() throws IOException {
+		myCodeSystemDao.create(loadResourceFromClasspath(CodeSystem.class, "/r4/fragment/codesystem.json"));
 
+		Location location = new Location();
+		location.getPhysicalType().addCoding()
+			.setSystem("http://example.com/codesystem")
+			.setCode("foo")
+			.setDisplay("Foo Code");
 
+		MethodOutcome outcome = myLocationDao.validate(location, null, null, null, ValidationModeEnum.CREATE, null, null);
+
+		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
+		String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+		ourLog.info(ooString);
+
+		assertThat(ooString, containsString("Unknown code in fragment CodeSystem 'http://example.com/codesystem#foo'"));
+
+		assertThat(oo.getIssue().stream().map(t->t.getSeverity().toCode()).collect(Collectors.toList()), contains("warning", "warning"));
+	}
 
 
 	/**
@@ -680,7 +702,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	 * We should generate a warning if a code can't be found but the codesystem is a fragment
 	 */
 	@Test
-	public void testValidateWithFragmentCodeSystem() throws IOException {
+	public void testValidateWithFragmentCodeSystem_WithDirectBinding() throws IOException {
 		myStructureDefinitionDao.create(loadResourceFromClasspath(StructureDefinition.class, "/r4/fragment/structuredefinition.json"));
 		myCodeSystemDao.create(loadResourceFromClasspath(CodeSystem.class, "/r4/fragment/codesystem.json"));
 		myValueSetDao.create(loadResourceFromClasspath(ValueSet.class, "/r4/fragment/valueset.json"));
