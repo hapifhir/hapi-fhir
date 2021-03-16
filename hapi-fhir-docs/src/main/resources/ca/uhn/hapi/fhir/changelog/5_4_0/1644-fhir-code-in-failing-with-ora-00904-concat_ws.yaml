@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 1644
+title: "support Oracle specific syntax when using a TermValueSetConceptView"

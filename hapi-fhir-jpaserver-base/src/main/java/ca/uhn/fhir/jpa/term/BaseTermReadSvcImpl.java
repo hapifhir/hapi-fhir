@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptViewDao;
+import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptViewOracleDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -62,6 +63,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptPropertyTypeEnum;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptView;
+import ca.uhn.fhir.jpa.entity.TermValueSetConceptViewOracle;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
@@ -242,6 +244,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private PlatformTransactionManager myTxManager;
 	@Autowired
 	private ITermValueSetConceptViewDao myTermValueSetConceptViewDao;
+	@Autowired
+	private ITermValueSetConceptViewOracleDao myTermValueSetConceptViewOracleDao;
 	@Autowired
 	private ISchedulerService mySchedulerService;
 	@Autowired(required = false)
@@ -524,11 +528,126 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		 */
 		String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "valueSetExpandedUsingPreExpansion");
 		theAccumulator.addMessage(msg);
-		expandConcepts(theAccumulator, termValueSet, theFilter, theAdd);
+		if (isOracleDialect()) {
+			expandConceptsOracle(theAccumulator, termValueSet, theFilter, theAdd);
+		}
+		else {
+			expandConcepts(theAccumulator, termValueSet, theFilter, theAdd);
+		}
 	}
 
+	private boolean isOracleDialect(){
+		return myHibernatePropertiesProvider.getDialect() instanceof org.hibernate.dialect.Oracle12cDialect;
+	}
+
+	private void expandConceptsOracle(IValueSetConceptAccumulator theAccumulator, TermValueSet theTermValueSet, ExpansionFilter theFilter, boolean theAdd) {
+		// Literal copy paste from expandConcepts but tailored for Oracle since we can't reliably extend the DAO and hibernate classes
+		Integer offset = theAccumulator.getSkipCountRemaining();
+		offset = ObjectUtils.defaultIfNull(offset, 0);
+		offset = Math.min(offset, theTermValueSet.getTotalConcepts().intValue());
+
+		Integer count = theAccumulator.getCapacityRemaining();
+		count = defaultIfNull(count, myDaoConfig.getMaximumExpansionSize());
+
+		int conceptsExpanded = 0;
+		int designationsExpanded = 0;
+		int toIndex = offset + count;
+
+		Collection<TermValueSetConceptViewOracle> conceptViews;
+		boolean wasFilteredResult = false;
+		String filterDisplayValue = null;
+		if (!theFilter.getFilters().isEmpty() && JpaConstants.VALUESET_FILTER_DISPLAY.equals(theFilter.getFilters().get(0).getProperty()) && theFilter.getFilters().get(0).getOp() == ValueSet.FilterOperator.EQUAL) {
+			filterDisplayValue = lowerCase(theFilter.getFilters().get(0).getValue().replace("%", "[%]"));
+			String displayValue = "%" + lowerCase(filterDisplayValue) + "%";
+			conceptViews = myTermValueSetConceptViewOracleDao.findByTermValueSetId(theTermValueSet.getId(), displayValue);
+			wasFilteredResult = true;
+		} else {
+			// TODO JA HS: I'm pretty sure we are overfetching here.  test says offset 3, count 4, but we are fetching index 3 -> 10 here, grabbing 7 concepts.
+			//Specifically this test testExpandInline_IncludePreExpandedValueSetByUri_FilterOnDisplay_LeftMatch_SelectRange
+			conceptViews = myTermValueSetConceptViewOracleDao.findByTermValueSetId(offset, toIndex, theTermValueSet.getId());
+			theAccumulator.consumeSkipCount(offset);
+			if (theAdd) {
+				theAccumulator.incrementOrDecrementTotalConcepts(true, theTermValueSet.getTotalConcepts().intValue());
+			}
+		}
+
+		if (conceptViews.isEmpty()) {
+			logConceptsExpanded("No concepts to expand. ", theTermValueSet, conceptsExpanded);
+			return;
+		}
+
+		Map<Long, FhirVersionIndependentConcept> pidToConcept = new LinkedHashMap<>();
+		ArrayListMultimap<Long, TermConceptDesignation> pidToDesignations = ArrayListMultimap.create();
+
+		for (TermValueSetConceptViewOracle conceptView : conceptViews) {
+
+			String system = conceptView.getConceptSystemUrl();
+			String code = conceptView.getConceptCode();
+			String display = conceptView.getConceptDisplay();
+
+			//-- this is quick solution, may need to revisit
+			if (!applyFilter(display, filterDisplayValue))
+				continue;
+
+			Long conceptPid = conceptView.getConceptPid();
+			if (!pidToConcept.containsKey(conceptPid)) {
+				FhirVersionIndependentConcept concept = new FhirVersionIndependentConcept(system, code, display);
+				pidToConcept.put(conceptPid, concept);
+			}
+
+			// TODO: DM 2019-08-17 - Implement includeDesignations parameter for $expand operation to designations optional.
+			if (conceptView.getDesignationPid() != null) {
+				TermConceptDesignation designation = new TermConceptDesignation();
+				designation.setUseSystem(conceptView.getDesignationUseSystem());
+				designation.setUseCode(conceptView.getDesignationUseCode());
+				designation.setUseDisplay(conceptView.getDesignationUseDisplay());
+				designation.setValue(conceptView.getDesignationVal());
+				designation.setLanguage(conceptView.getDesignationLang());
+				pidToDesignations.put(conceptPid, designation);
+
+				if (++designationsExpanded % 250 == 0) {
+					logDesignationsExpanded("Expansion of designations in progress. ", theTermValueSet, designationsExpanded);
+				}
+			}
+
+			if (++conceptsExpanded % 250 == 0) {
+				logConceptsExpanded("Expansion of concepts in progress. ", theTermValueSet, conceptsExpanded);
+			}
+		}
+
+		for (Long nextPid : pidToConcept.keySet()) {
+			FhirVersionIndependentConcept concept = pidToConcept.get(nextPid);
+			List<TermConceptDesignation> designations = pidToDesignations.get(nextPid);
+			String system = concept.getSystem();
+			String code = concept.getCode();
+			String display = concept.getDisplay();
+
+			if (theAdd) {
+				if (theAccumulator.getCapacityRemaining() != null) {
+					if (theAccumulator.getCapacityRemaining() == 0) {
+						break;
+					}
+				}
+
+				theAccumulator.includeConceptWithDesignations(system, code, display, designations);
+			} else {
+				boolean removed = theAccumulator.excludeConcept(system, code);
+				if (removed) {
+					theAccumulator.incrementOrDecrementTotalConcepts(false, 1);
+				}
+			}
+		}
+
+		if (wasFilteredResult && theAdd) {
+			theAccumulator.incrementOrDecrementTotalConcepts(true, pidToConcept.size());
+		}
+
+		logDesignationsExpanded("Finished expanding designations. ", theTermValueSet, designationsExpanded);
+		logConceptsExpanded("Finished expanding concepts. ", theTermValueSet, conceptsExpanded);
+	}
 
 	private void expandConcepts(IValueSetConceptAccumulator theAccumulator, TermValueSet theTermValueSet, ExpansionFilter theFilter, boolean theAdd) {
+		// NOTE: if you modifiy the logic here, look to `expandConceptsOracle` and see if your new code applies to its copy pasted sibling
 		Integer offset = theAccumulator.getSkipCountRemaining();
 		offset = ObjectUtils.defaultIfNull(offset, 0);
 		offset = Math.min(offset, theTermValueSet.getTotalConcepts().intValue());
@@ -541,6 +660,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		int toIndex = offset + count;
 
 		Collection<TermValueSetConceptView> conceptViews;
+		Collection<TermValueSetConceptViewOracle> conceptViewsOracle;
 		boolean wasFilteredResult = false;
 		String filterDisplayValue = null;
 		if (!theFilter.getFilters().isEmpty() && JpaConstants.VALUESET_FILTER_DISPLAY.equals(theFilter.getFilters().get(0).getProperty()) && theFilter.getFilters().get(0).getOp() == ValueSet.FilterOperator.EQUAL) {
