@@ -404,6 +404,14 @@ The following algorithms are currently supported:
             <td>If an optional "identifierSystem" is provided, then the identifiers only match when they belong to that system</td>
         </tr>     
         <tr>
+            <td>EXTENSION_ANY_ORDER</td>
+            <td>matcher</td>
+            <td>
+               Matches when at least one system and value extension pair are identical.
+            </td>
+            <td>If an optional "identifierSystem" is provided, then the extensions only match when they belong to that system</td>
+        </tr>
+        <tr>
             <td>EMPTY_FIELD</td>
             <td>matcher</td>
             <td>

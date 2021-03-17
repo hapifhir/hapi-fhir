@@ -23,9 +23,12 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseDecimalDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -175,4 +178,13 @@ public class ExtensionUtil {
 		setExtension(theFhirContext, ext, theValue);
 	}
 
+	/**
+	 * Compares two extensions, returns true if they have the same value and url
+	 * @param leftExtension
+	 * @param rightExtension
+	 * @return Result of the comparison
+	 */
+	public static boolean equals(IBaseExtension leftExtension, IBaseExtension rightExtension){
+		return TerserUtil.equals(leftExtension, rightExtension);
+	}
 }

@@ -30,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -157,6 +158,30 @@ public final class TerserUtil {
 		});
 	}
 
+	public static boolean equals(IBase theItem1, IBase theItem2){
+		Method method = null;
+		for (Method m : theItem1.getClass().getDeclaredMethods()) {
+			if (m.getName().equals("equalsDeep")) {
+				method = m;
+				break;
+			}
+		}
+		final Method m = method;
+
+		return equals(theItem1, theItem2, m);
+	}
+
+	public static boolean equals(IBase theItem1, IBase theItem2, Method m) {
+		if (m != null) {
+			try {
+				return (Boolean) m.invoke(theItem1, theItem2);
+			} catch (Exception e) {
+				throw new RuntimeException("Unable to compare equality via equalsDeep", e);
+			}
+		}
+		return theItem1.equals(theItem2);
+	}
+
 	private static boolean contains(IBase theItem, List<IBase> theItems) {
 		Method method = null;
 		for (Method m : theItem.getClass().getDeclaredMethods()) {
@@ -168,14 +193,7 @@ public final class TerserUtil {
 
 		final Method m = method;
 		return theItems.stream().anyMatch(i -> {
-			if (m != null) {
-				try {
-					return (Boolean) m.invoke(theItem, i);
-				} catch (Exception e) {
-					throw new RuntimeException("Unable to compare equality via equalsDeep", e);
-				}
-			}
-			return theItem.equals(i);
+			return equals(i, theItem, m);
 		});
 	}
 

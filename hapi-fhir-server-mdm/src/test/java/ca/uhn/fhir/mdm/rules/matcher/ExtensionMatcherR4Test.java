@@ -1,6 +1,7 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
 
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
@@ -70,4 +71,17 @@ public class ExtensionMatcherR4Test extends BaseMatcherR4Test {
 		assertTrue(MdmMatcherEnum.EXTENSION_ANY_ORDER.match(ourFhirContext, patient1, patient2, false, "asd"));
 		assertFalse(MdmMatcherEnum.EXTENSION_ANY_ORDER.match(ourFhirContext, patient1, patient2, false, "url1"));
 	}
+
+	@Test
+	public void testPatientWithoutIntExtension(){
+		Patient patient1 = new Patient();
+		Patient patient2 = new Patient();
+
+		patient1.addExtension("asd", new IntegerType(123));
+		patient2.addExtension("asd", new IntegerType(123));
+
+		assertTrue(MdmMatcherEnum.EXTENSION_ANY_ORDER.match(ourFhirContext, patient1, patient2, false, null));
+	}
+
+
 }
