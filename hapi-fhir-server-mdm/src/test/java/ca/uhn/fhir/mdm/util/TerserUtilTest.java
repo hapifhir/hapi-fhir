@@ -42,6 +42,9 @@ class TerserUtilTest extends BaseR4Test {
 	@Test
 	void testCloneFields() {
 		Patient p1 = buildJohny();
+		p1.addName().addGiven("Sigizmund");
+		p1.setId("Patient/22");
+
 		Patient p2 = new Patient();
 
 		TerserUtil.mergeFieldsExceptIdAndMeta(ourFhirContext, p1, p2);
@@ -54,7 +57,7 @@ class TerserUtilTest extends BaseR4Test {
 	}
 
 	@Test
-	void testCloneWithNonPrimitves() {
+	void testCloneWithNonPrimitives() {
 		Patient p1 = new Patient();
 		Patient p2 = new Patient();
 
