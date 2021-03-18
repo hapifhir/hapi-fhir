@@ -51,7 +51,6 @@ import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
-import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.LogicalReferenceHelper;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
@@ -96,6 +95,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -511,10 +511,63 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			if (thePerformIndexing) {
 
 				encoding = myConfig.getResourceEncoding();
-				Set<String> excludeElements = ResourceMetaParams.EXCLUDE_ELEMENTS_IN_ENCODED;
+
+				String resourceType = theEntity.getResourceType();
+
+				List<String> excludeElements = new ArrayList<>(8);
+				excludeElements.add("id");
+
+				IBaseMetaType meta = theResource.getMeta();
+				boolean hasExtensions = false;
+				IBaseExtension<?,?> sourceExtension = null;
+				if (meta instanceof IBaseHasExtensions) {
+					List<? extends IBaseExtension<?, ?>> extensions = ((IBaseHasExtensions) meta).getExtension();
+					if (!extensions.isEmpty()) {
+						hasExtensions = true;
+
+						/*
+						 * FHIR DSTU3 did not have the Resource.meta.source field, so we use a
+						 * custom HAPI FHIR extension in Resource.meta to store that field. However,
+						 * we put the value for that field in a separate table so we don't want to serialize
+						 * it into the stored BLOB. Therefore: remove it from the resource temporarily
+						 * and restore it afterward.
+						 */
+						if (myFhirContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU3)) {
+							for (int i = 0; i < extensions.size(); i++) {
+								if (extensions.get(i).getUrl().equals(HapiExtensions.EXT_META_SOURCE)) {
+									sourceExtension = extensions.remove(i);
+									i--;
+								}
+							}
+						}
+
+					}
+				}
+				if (hasExtensions) {
+					excludeElements.add(resourceType + ".meta.profile");
+					excludeElements.add(resourceType + ".meta.tag");
+					excludeElements.add(resourceType + ".meta.security");
+					excludeElements.add(resourceType + ".meta.versionId");
+					excludeElements.add(resourceType + ".meta.lastUpdated");
+					excludeElements.add(resourceType + ".meta.source");
+				} else {
+					/*
+					 * If there are no extensions in the meta element, we can just exclude the
+					 * whole meta element, which avoids adding an empty "meta":{}
+					 * from showing up in the serialized JSON.
+					 */
+					excludeElements.add(resourceType + ".meta");
+				}
+
 				theEntity.setFhirVersion(myContext.getVersion().getVersion());
 
 				bytes = encodeResource(theResource, encoding, excludeElements, myContext);
+
+				if (sourceExtension != null) {
+					IBaseExtension<?, ?> newSourceExtension = ((IBaseHasExtensions) meta).addExtension();
+					newSourceExtension.setUrl(sourceExtension.getUrl());
+					newSourceExtension.setValue(sourceExtension.getValue());
+				}
 
 				HashFunction sha256 = Hashing.sha256();
 				String hashSha256 = sha256.hashBytes(bytes).toString();
@@ -1530,7 +1583,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return resourceText;
 	}
 
-	public static byte[] encodeResource(IBaseResource theResource, ResourceEncodingEnum theEncoding, Set<String> theExcludeElements, FhirContext theContext) {
+	public static byte[] encodeResource(IBaseResource theResource, ResourceEncodingEnum theEncoding, List<String> theExcludeElements, FhirContext theContext) {
 		byte[] bytes;
 		IParser parser = theEncoding.newParser(theContext);
 		parser.setDontEncodeElements(theExcludeElements);

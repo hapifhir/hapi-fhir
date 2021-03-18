@@ -131,7 +131,7 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@Override
-	public IParser setDontEncodeElements(Set<String> theDontEncodeElements) {
+	public IParser setDontEncodeElements(Collection<String> theDontEncodeElements) {
 		if (theDontEncodeElements == null || theDontEncodeElements.isEmpty()) {
 			myDontEncodeElements = null;
 		} else {
