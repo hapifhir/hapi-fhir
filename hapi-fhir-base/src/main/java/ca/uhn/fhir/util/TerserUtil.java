@@ -158,15 +158,19 @@ public final class TerserUtil {
 		});
 	}
 
-	public static boolean equals(IBase theItem1, IBase theItem2){
+	private static Method getMethod(IBase item){
 		Method method = null;
-		for (Method m : theItem1.getClass().getDeclaredMethods()) {
+		for (Method m : item.getClass().getDeclaredMethods()) {
 			if (m.getName().equals("equalsDeep")) {
 				method = m;
 				break;
 			}
 		}
-		final Method m = method;
+		return method;
+	}
+
+	public static boolean equals(IBase theItem1, IBase theItem2){
+		final Method m = getMethod(theItem1);
 
 		return equals(theItem1, theItem2, m);
 	}
@@ -183,18 +187,8 @@ public final class TerserUtil {
 	}
 
 	private static boolean contains(IBase theItem, List<IBase> theItems) {
-		Method method = null;
-		for (Method m : theItem.getClass().getDeclaredMethods()) {
-			if (m.getName().equals("equalsDeep")) {
-				method = m;
-				break;
-			}
-		}
-
-		final Method m = method;
-		return theItems.stream().anyMatch(i -> {
-			return equals(i, theItem, m);
-		});
+		final Method m = getMethod(theItem);
+		return theItems.stream().anyMatch(i -> equals(i, theItem, m));
 	}
 
 	/**
