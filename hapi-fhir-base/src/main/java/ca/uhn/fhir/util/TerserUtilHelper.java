@@ -108,13 +108,33 @@ public class TerserUtilHelper {
 	}
 
 	/**
-	 * Gets values of the specified field.
+	 * Gets values for the specified child field.
 	 *
 	 * @param theField The field to get values from
-	 * @return Returns a collection of values containing values or null if the specified field doesn't exist
+	 * @return Returns a list of retrieved values or null if the specified field doesn't exist
 	 */
 	public List<IBase> getFieldValues(String theField) {
 		return TerserUtil.getValues(myContext, myResource, theField);
+	}
+
+	/**
+	 * Gets values for the specified field values by FHIRPath.
+	 *
+	 * @param theFhirPath The FHIR path expression to get the values from
+	 * @return Returns a collection of values or null if the specified field doesn't exist
+	 */
+	public List<IBase> getFieldValuesByFhirPath(String theFhirPath) {
+		return TerserUtil.getFieldByFhirPath(myContext, theFhirPath, myResource);
+	}
+
+	/**
+	 * Gets first available value for the specified field values by FHIRPath.
+	 *
+	 * @param theFhirPath The FHIR path expression to get the values from
+	 * @return Returns the value or null if the specified field doesn't exist or is empty
+	 */
+	public IBase getFieldValueByFhirPath(String theFhirPath) {
+		return TerserUtil.getFirstFieldByFhirPath(myContext, theFhirPath, myResource);
 	}
 
 	/**

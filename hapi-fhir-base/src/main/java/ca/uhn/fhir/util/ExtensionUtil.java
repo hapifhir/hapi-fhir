@@ -27,6 +27,7 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -49,6 +50,34 @@ public class ExtensionUtil {
 		IBaseExtension extension = getExtension(baseHasExtensions, theUrl);
 		if (extension == null) {
 			extension = baseHasExtensions.addExtension();
+			extension.setUrl(theUrl);
+		}
+		return extension;
+	}
+
+	/**
+	 * Returns an new empty extension.
+	 *
+	 * @param theBase Base resource to add the extension to
+	 * @return Returns a new extension
+	 * @throws IllegalArgumentException IllegalArgumentException is thrown in case resource doesn't support extensions
+	 */
+	public static IBaseExtension<?, ?> addExtension(IBase theBase) {
+		return addExtension(theBase, null);
+	}
+
+	/**
+	 * Returns an extension with the specified URL
+	 *
+	 * @param theBase Base resource to add the extension to
+	 * @param theUrl  URL for the extension
+	 * @return Returns a new extension with the specified URL.
+	 * @throws IllegalArgumentException IllegalArgumentException is thrown in case resource doesn't support extensions
+	 */
+	public static IBaseExtension<?, ?> addExtension(IBase theBase, String theUrl) {
+		IBaseHasExtensions baseHasExtensions = validateExtensionSupport(theBase);
+		IBaseExtension extension = baseHasExtensions.addExtension();
+		if (theUrl != null) {
 			extension.setUrl(theUrl);
 		}
 		return extension;
@@ -105,10 +134,15 @@ public class ExtensionUtil {
 	 * @return Returns the first available extension with the specified URL, or null if such extension doesn't exist
 	 */
 	public static IBaseExtension<?, ?> getExtension(IBase theBase, String theExtensionUrl) {
-		return validateExtensionSupport(theBase)
-			.getExtension()
+		Predicate<IBaseExtension> filter;
+		if (theExtensionUrl == null) {
+			filter = (e -> true);
+		} else {
+			filter = (e -> theExtensionUrl.equals(e.getUrl()));
+		}
+
+		return getExtensions(theBase, filter)
 			.stream()
-			.filter(e -> theExtensionUrl.equals(e.getUrl()))
 			.findFirst()
 			.orElse(null);
 	}
@@ -129,10 +163,21 @@ public class ExtensionUtil {
 	}
 
 	/**
-	 * Gets all extensions with the specified URL
+	 * Removes all extensions.
 	 *
-	 * @param theBase The resource to get the extension for
-	 * @return Returns all extension with the specified URL, or an empty list if such extensions do not exist
+	 * @param theBase The resource to clear the extension for
+	 * @return Returns all extension that were removed
+	 */
+	public static List<IBaseExtension<?, ?>> clearExtensions(IBase theBase) {
+		return clearExtensions(theBase, (e -> true));
+	}
+
+	/**
+	 * Removes all extensions that match the specified predicate
+	 *
+	 * @param theBase   The base object to clear the extension for
+	 * @param theFilter Defines which extensions should be cleared
+	 * @return Returns all extension that were removed
 	 */
 	public static List<IBaseExtension<?, ?>> clearExtensions(IBase theBase, Predicate<? super IBaseExtension> theFilter) {
 		List<IBaseExtension<?, ?>> retVal = getExtensions(theBase, theFilter);

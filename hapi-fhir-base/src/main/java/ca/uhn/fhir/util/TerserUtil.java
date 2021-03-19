@@ -334,11 +334,11 @@ public final class TerserUtil {
 		setFieldByFhirPath(theFhirContext.newTerser(), theFhirPath, theResource, theValue);
 	}
 
-	public static List<IBase> getFieldByFhirPath(FhirContext theFhirContext, String theFhirPath, IBaseResource theResource) {
+	public static List<IBase> getFieldByFhirPath(FhirContext theFhirContext, String theFhirPath, IBase theResource) {
 		return theFhirContext.newTerser().getValues(theResource, theFhirPath, false, false);
 	}
 
-	public static IBase getFirstFieldByFhirPath(FhirContext theFhirContext, String theFhirPath, IBaseResource theResource) {
+	public static IBase getFirstFieldByFhirPath(FhirContext theFhirContext, String theFhirPath, IBase theResource) {
 		List<IBase> values = getFieldByFhirPath(theFhirContext, theFhirPath, theResource);
 		if (values == null || values.isEmpty()) {
 			return null;
