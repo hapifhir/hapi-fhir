@@ -22,13 +22,16 @@ package ca.uhn.fhir.jpa.api.model;
 
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.UriType;
 
 public class TranslationMatch {
 	private Coding myConcept;
-	private CodeType myEquivalence;
+	private Enumerations.ConceptMapEquivalence myEquivalence;
 	private UriType mySource;
+	private String myValueSet;
+	private String mySystemVersion;
 
 	public TranslationMatch() {
 		super();
@@ -42,11 +45,11 @@ public class TranslationMatch {
 		myConcept = theConcept;
 	}
 
-	public CodeType getEquivalence() {
+	public Enumerations.ConceptMapEquivalence getEquivalence() {
 		return myEquivalence;
 	}
 
-	public void setEquivalence(CodeType theEquivalence) {
+	public void setEquivalence(Enumerations.ConceptMapEquivalence theEquivalence) {
 		myEquivalence = theEquivalence;
 	}
 
@@ -60,7 +63,7 @@ public class TranslationMatch {
 
 	public void toParameterParts(ParametersParameterComponent theParam) {
 		if (myEquivalence != null) {
-			theParam.addPart().setName("equivalence").setValue(myEquivalence);
+			theParam.addPart().setName("equivalence").setValue(new CodeType(myEquivalence.toCode()));
 		}
 
 		if (myConcept != null) {
@@ -70,5 +73,26 @@ public class TranslationMatch {
 		if (mySource != null) {
 			theParam.addPart().setName("source").setValue(mySource);
 		}
+	}
+
+	public String getSystemVersion() {
+		return mySystemVersion;
+	}
+
+	public String getValueSet() {
+		return myValueSet;
+	}
+
+	// FIXME: remove
+	public String getConceptMapUrl() {
+		return mySource.getValueAsString();
+	}
+
+	public void setValueSet(String theValueSet) {
+		myValueSet = theValueSet;
+	}
+
+	public void setSystemVersion(String theSystemVersion) {
+		mySystemVersion = theSystemVersion;
 	}
 }

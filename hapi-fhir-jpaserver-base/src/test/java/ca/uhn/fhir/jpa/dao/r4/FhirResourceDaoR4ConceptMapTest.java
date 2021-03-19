@@ -33,6 +33,8 @@ import ca.uhn.fhir.jpa.api.model.TranslationRequest;
 import ca.uhn.fhir.jpa.api.model.TranslationResult;
 import ca.uhn.fhir.jpa.entity.TermConceptMap;
 
+import javax.annotation.Nonnull;
+
 public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4ConceptMapTest.class);
 
@@ -50,7 +52,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				TranslationRequest translationRequest = new TranslationRequest();
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL)
@@ -73,7 +75,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				// <editor-fold desc="Map one source code to multiple target codes">
 				TranslationRequest translationRequest = new TranslationRequest();
 				translationRequest.getCodeableConcept().addCoding()
@@ -89,7 +91,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(2, translationResult.getMatches().size());
 
 				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				Coding concept = translationMatch.getConcept();
 				assertEquals("56789", concept.getCode());
 				assertEquals("Target Code 56789", concept.getDisplay());
@@ -99,7 +101,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
 				translationMatch = translationResult.getMatches().get(1);
-				assertEquals(ConceptMapEquivalence.WIDER.toCode(), translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
 				concept = translationMatch.getConcept();
 				assertEquals("67890", concept.getCode());
 				assertEquals("Target Code 67890", concept.getDisplay());
@@ -120,7 +122,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				// <editor-fold desc="Map one source code to one target code">
 				TranslationRequest translationRequest = new TranslationRequest();
 				translationRequest.getCodeableConcept().addCoding()
@@ -136,7 +138,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(1, translationResult.getMatches().size());
 
 				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				Coding concept = translationMatch.getConcept();
 				assertEquals("34567", concept.getCode());
 				assertEquals("Target Code 34567", concept.getDisplay());
@@ -157,7 +159,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				// <editor-fold desc="Attempt to map unknown source code">
 				TranslationRequest translationRequest = new TranslationRequest();
 				translationRequest.getCodeableConcept().addCoding()
@@ -184,7 +186,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -201,7 +203,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(3, translationResult.getMatches().size());
 
 				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				Coding concept = translationMatch.getConcept();
 				assertEquals("34567", concept.getCode());
 				assertEquals("Target Code 34567", concept.getDisplay());
@@ -211,7 +213,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
 				translationMatch = translationResult.getMatches().get(1);
-				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				concept = translationMatch.getConcept();
 				assertEquals("56789", concept.getCode());
 				assertEquals("Target Code 56789", concept.getDisplay());
@@ -221,7 +223,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
 				translationMatch = translationResult.getMatches().get(2);
-				assertEquals(ConceptMapEquivalence.WIDER.toCode(), translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
 				concept = translationMatch.getConcept();
 				assertEquals("67890", concept.getCode());
 				assertEquals("Target Code 67890", concept.getDisplay());
@@ -241,7 +243,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -262,7 +264,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(1, translationResult.getMatches().size());
 
 				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				Coding concept = translationMatch.getConcept();
 				assertEquals("34567", concept.getCode());
 				assertEquals("Target Code 34567", concept.getDisplay());
@@ -282,7 +284,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -303,7 +305,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(2, translationResult.getMatches().size());
 
 				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				Coding concept = translationMatch.getConcept();
 				assertEquals("56789", concept.getCode());
 				assertEquals("Target Code 56789", concept.getDisplay());
@@ -313,7 +315,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
 				translationMatch = translationResult.getMatches().get(1);
-				assertEquals(ConceptMapEquivalence.WIDER.toCode(), translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
 				concept = translationMatch.getConcept();
 				assertEquals("67890", concept.getCode());
 				assertEquals("Target Code 67890", concept.getDisplay());
@@ -333,7 +335,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -352,7 +354,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(3, translationResult.getMatches().size());
 
 				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				Coding concept = translationMatch.getConcept();
 				assertEquals("34567", concept.getCode());
 				assertEquals("Target Code 34567", concept.getDisplay());
@@ -362,7 +364,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
 				translationMatch = translationResult.getMatches().get(1);
-				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				concept = translationMatch.getConcept();
 				assertEquals("56789", concept.getCode());
 				assertEquals("Target Code 56789", concept.getDisplay());
@@ -372,7 +374,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
 				translationMatch = translationResult.getMatches().get(2);
-				assertEquals(ConceptMapEquivalence.WIDER.toCode(), translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
 				concept = translationMatch.getConcept();
 				assertEquals("67890", concept.getCode());
 				assertEquals("Target Code 67890", concept.getDisplay());
@@ -392,7 +394,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -413,7 +415,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(1, translationResult.getMatches().size());
 
 				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				Coding concept = translationMatch.getConcept();
 				assertEquals("34567", concept.getCode());
 				assertEquals("Target Code 34567", concept.getDisplay());
@@ -433,7 +435,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -454,7 +456,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(2, translationResult.getMatches().size());
 
 				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				Coding concept = translationMatch.getConcept();
 				assertEquals("56789", concept.getCode());
 				assertEquals("Target Code 56789", concept.getDisplay());
@@ -464,7 +466,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
 				translationMatch = translationResult.getMatches().get(1);
-				assertEquals(ConceptMapEquivalence.WIDER.toCode(), translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
 				concept = translationMatch.getConcept();
 				assertEquals("67890", concept.getCode());
 				assertEquals("Target Code 67890", concept.getDisplay());
@@ -484,7 +486,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -503,7 +505,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(3, translationResult.getMatches().size());
 
 				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				Coding concept = translationMatch.getConcept();
 				assertEquals("34567", concept.getCode());
 				assertEquals("Target Code 34567", concept.getDisplay());
@@ -513,7 +515,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
 				translationMatch = translationResult.getMatches().get(1);
-				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				concept = translationMatch.getConcept();
 				assertEquals("56789", concept.getCode());
 				assertEquals("Target Code 56789", concept.getDisplay());
@@ -523,7 +525,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
 				translationMatch = translationResult.getMatches().get(2);
-				assertEquals(ConceptMapEquivalence.WIDER.toCode(), translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
 				concept = translationMatch.getConcept();
 				assertEquals("67890", concept.getCode());
 				assertEquals("Target Code 67890", concept.getDisplay());
@@ -543,7 +545,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -562,7 +564,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(3, translationResult.getMatches().size());
 
 				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				Coding concept = translationMatch.getConcept();
 				assertEquals("34567", concept.getCode());
 				assertEquals("Target Code 34567", concept.getDisplay());
@@ -572,7 +574,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
 				translationMatch = translationResult.getMatches().get(1);
-				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				concept = translationMatch.getConcept();
 				assertEquals("56789", concept.getCode());
 				assertEquals("Target Code 56789", concept.getDisplay());
@@ -582,7 +584,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
 				translationMatch = translationResult.getMatches().get(2);
-				assertEquals(ConceptMapEquivalence.WIDER.toCode(), translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
 				concept = translationMatch.getConcept();
 				assertEquals("67890", concept.getCode());
 				assertEquals("Target Code 67890", concept.getDisplay());
@@ -602,7 +604,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -625,7 +627,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(1, translationResult.getMatches().size());
 
 				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals("narrower", translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.NARROWER, translationMatch.getEquivalence());
 				Coding concept = translationMatch.getConcept();
 				assertEquals("78901", concept.getCode());
 				assertEquals("Source Code 78901", concept.getDisplay());
@@ -645,7 +647,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -675,7 +677,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("Version 3", concept.getVersion());
 				assertFalse(concept.getUserSelected());
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
-				assertEquals("wider", translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
 			}
 		});
 	}
@@ -688,7 +690,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				// <editor-fold desc="Attempt to map unknown source code">
 				TranslationRequest translationRequest = new TranslationRequest();
 				translationRequest.getCodeableConcept().addCoding()
@@ -716,7 +718,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -735,7 +737,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(2, translationResult.getMatches().size());
 
 				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals("equal", translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				Coding concept = translationMatch.getConcept();
 				assertEquals("12345", concept.getCode());
 				assertEquals("Source Code 12345", concept.getDisplay());
@@ -745,7 +747,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
 				translationMatch = translationResult.getMatches().get(1);
-				assertEquals("narrower", translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.NARROWER, translationMatch.getEquivalence());
 				concept = translationMatch.getConcept();
 				assertEquals("78901", concept.getCode());
 				assertEquals("Source Code 78901", concept.getDisplay());
@@ -765,7 +767,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -788,7 +790,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(1, translationResult.getMatches().size());
 
 				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals("equal", translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				Coding concept = translationMatch.getConcept();
 				assertEquals("12345", concept.getCode());
 				assertEquals("Source Code 12345", concept.getDisplay());
@@ -808,7 +810,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -831,7 +833,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(1, translationResult.getMatches().size());
 
 				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals("narrower", translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.NARROWER, translationMatch.getEquivalence());
 				Coding concept = translationMatch.getConcept();
 				assertEquals("78901", concept.getCode());
 				assertEquals("Source Code 78901", concept.getDisplay());
@@ -851,7 +853,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -872,7 +874,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(2, translationResult.getMatches().size());
 
 				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals("equal", translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				Coding concept = translationMatch.getConcept();
 				assertEquals("12345", concept.getCode());
 				assertEquals("Source Code 12345", concept.getDisplay());
@@ -882,7 +884,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
 				translationMatch = translationResult.getMatches().get(1);
-				assertEquals("narrower", translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.NARROWER, translationMatch.getEquivalence());
 				concept = translationMatch.getConcept();
 				assertEquals("78901", concept.getCode());
 				assertEquals("Source Code 78901", concept.getDisplay());
@@ -902,7 +904,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -925,7 +927,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(2, translationResult.getMatches().size());
 
 				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals("equal", translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				Coding concept = translationMatch.getConcept();
 				assertEquals("12345", concept.getCode());
 				assertEquals("Source Code 12345", concept.getDisplay());
@@ -935,7 +937,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
 				translationMatch = translationResult.getMatches().get(1);
-				assertEquals("narrower", translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.NARROWER, translationMatch.getEquivalence());
 				concept = translationMatch.getConcept();
 				assertEquals("78901", concept.getCode());
 				assertEquals("Source Code 78901", concept.getDisplay());
@@ -955,7 +957,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -976,7 +978,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(2, translationResult.getMatches().size());
 
 				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals("equal", translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				Coding concept = translationMatch.getConcept();
 				assertEquals("12345", concept.getCode());
 				assertEquals("Source Code 12345", concept.getDisplay());
@@ -986,7 +988,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
 				translationMatch = translationResult.getMatches().get(1);
-				assertEquals("narrower", translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.NARROWER, translationMatch.getEquivalence());
 				concept = translationMatch.getConcept();
 				assertEquals("78901", concept.getCode());
 				assertEquals("Source Code 78901", concept.getDisplay());
@@ -1006,7 +1008,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -1027,7 +1029,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(2, translationResult.getMatches().size());
 
 				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals("equal", translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				Coding concept = translationMatch.getConcept();
 				assertEquals("12345", concept.getCode());
 				assertEquals("Source Code 12345", concept.getDisplay());
@@ -1037,7 +1039,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
 
 				translationMatch = translationResult.getMatches().get(1);
-				assertEquals("narrower", translationMatch.getEquivalence().getCode());
+				assertEquals(ConceptMapEquivalence.NARROWER, translationMatch.getEquivalence());
 				concept = translationMatch.getConcept();
 				assertEquals("78901", concept.getCode());
 				assertEquals("Source Code 78901", concept.getDisplay());
@@ -1081,10 +1083,10 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 			assertEquals(1, translationResult.getMatches().size());
 
 			TranslationMatch translationMatch = translationResult.getMatches().get(0);
-			assertEquals("equal", translationMatch.getEquivalence().getCode());
+			assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 			Coding concept = translationMatch.getConcept();
 			assertEquals("target1", concept.getCode());
-			assertEquals(null, concept.getDisplay());
+			assertNull(concept.getDisplay());
 			assertEquals("http://target", concept.getSystem());
 		});
 
@@ -1126,10 +1128,10 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 			assertEquals(1, translationResult.getMatches().size());
 
 			TranslationMatch translationMatch = translationResult.getMatches().get(0);
-			assertEquals("equal", translationMatch.getEquivalence().getCode());
+			assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 			Coding concept = translationMatch.getConcept();
 			assertEquals("target1", concept.getCode());
-			assertEquals(null, concept.getDisplay());
+			assertNull(concept.getDisplay());
 			assertEquals("http://target", concept.getSystem());
 		});
 

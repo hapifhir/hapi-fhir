@@ -35,7 +35,6 @@ public class TranslationResult {
 
 	public TranslationResult() {
 		super();
-
 		myMatches = new ArrayList<>();
 	}
 
@@ -45,10 +44,6 @@ public class TranslationResult {
 
 	public void setMatches(List<TranslationMatch> theMatches) {
 		myMatches = theMatches;
-	}
-
-	public boolean addMatch(TranslationMatch theMatch) {
-		return myMatches.add(theMatch);
 	}
 
 	public StringType getMessage() {
@@ -84,5 +79,13 @@ public class TranslationResult {
 		}
 
 		return retVal;
+	}
+
+	public int size() {
+		return getMatches().size();
+	}
+
+	public boolean isEmpty() {
+		return getMatches().isEmpty();
 	}
 }

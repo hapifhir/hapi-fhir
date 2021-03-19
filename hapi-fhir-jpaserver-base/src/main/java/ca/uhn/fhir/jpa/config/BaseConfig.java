@@ -119,6 +119,8 @@ import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
+import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
+import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.validation.JpaResourceLoader;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
@@ -334,6 +336,11 @@ public abstract class BaseConfig {
 	@Bean
 	public ISearchResultCacheSvc searchResultCacheSvc() {
 		return new DatabaseSearchResultCacheSvcImpl();
+	}
+
+	@Bean
+	public ITermConceptMappingSvc termConceptMappingSvc() {
+		return new TermConceptMappingSvcImpl();
 	}
 
 	@Bean
