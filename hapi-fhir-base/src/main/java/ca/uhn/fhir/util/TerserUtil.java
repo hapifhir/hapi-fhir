@@ -97,12 +97,12 @@ public final class TerserUtil {
 	}
 
 	/**
-	 * get the Values of a specified field.
+	 * Gets all values of the specified field.
 	 *
 	 * @param theFhirContext Context holding resource definition
 	 * @param theResource    Resource to check if the specified field is set
 	 * @param theFieldName   name of the field to check
-	 * @return Returns true if field exists and has any values set, and false otherwise
+	 * @return Returns all values for the specified field or null if field with the provided name doesn't exist
 	 */
 	public static List<IBase> getValues(FhirContext theFhirContext, IBaseResource theResource, String theFieldName) {
 		RuntimeResourceDefinition resourceDefinition = theFhirContext.getResourceDefinition(theResource);
@@ -112,6 +112,23 @@ public final class TerserUtil {
 			return null;
 		}
 		return resourceIdentifier.getAccessor().getValues(theResource);
+	}
+
+	/**
+	 * Gets the first available value for the specified field.
+	 *
+	 * @param theFhirContext Context holding resource definition
+	 * @param theResource    Resource to check if the specified field is set
+	 * @param theFieldName   name of the field to check
+	 * @return Returns the first value for the specified field or null if field with the provided name doesn't exist or
+	 * has no values
+	 */
+	public static IBase getValue(FhirContext theFhirContext, IBaseResource theResource, String theFieldName) {
+		List<IBase> values = getValues(theFhirContext, theResource, theFieldName);
+		if (values == null || values.isEmpty()) {
+			return null;
+		}
+		return values.get(0);
 	}
 
 	/**
@@ -262,6 +279,20 @@ public final class TerserUtil {
 	 * to remove values before setting
 	 *
 	 * @param theFhirContext Context holding resource definition
+	 * @param theFieldName   Child field name of the resource to set
+	 * @param theResource    The resource to set the values on
+	 * @param theValues      The values to set on the resource child field name
+	 */
+	public static void setField(FhirContext theFhirContext, String theFieldName, IBaseResource theResource, IBase... theValues) {
+		setField(theFhirContext, theFhirContext.newTerser(), theFieldName, theResource, theValues);
+	}
+
+	/**
+	 * Sets the provided field with the given values. This method will add to the collection of existing field values
+	 * in case of multiple cardinality. Use {@link #clearField(FhirContext, FhirTerser, String, IBaseResource, IBase...)}
+	 * to remove values before setting
+	 *
+	 * @param theFhirContext Context holding resource definition
 	 * @param theTerser      Terser to be used when cloning field values
 	 * @param theFieldName   Child field name of the resource to set
 	 * @param theResource    The resource to set the values on
@@ -301,6 +332,18 @@ public final class TerserUtil {
 	 */
 	public static void setFieldByFhirPath(FhirContext theFhirContext, String theFhirPath, IBaseResource theResource, IBase theValue) {
 		setFieldByFhirPath(theFhirContext.newTerser(), theFhirPath, theResource, theValue);
+	}
+
+	public static List<IBase> getFieldByFhirPath(FhirContext theFhirContext, String theFhirPath, IBaseResource theResource) {
+		return theFhirContext.newTerser().getValues(theResource, theFhirPath, false, false);
+	}
+
+	public static IBase getFirstFieldByFhirPath(FhirContext theFhirContext, String theFhirPath, IBaseResource theResource) {
+		List<IBase> values = getFieldByFhirPath(theFhirContext, theFhirPath, theResource);
+		if (values == null || values.isEmpty()) {
+			return null;
+		}
+		return values.get(0);
 	}
 
 	private static void replaceField(IBaseResource theFrom, IBaseResource theTo, BaseRuntimeChildDefinition childDefinition) {

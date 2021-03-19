@@ -28,6 +28,7 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -103,12 +104,42 @@ public class ExtensionUtil {
 	 * @param theExtensionUrl URL of the extension to get. Must be non-null
 	 * @return Returns the first available extension with the specified URL, or null if such extension doesn't exist
 	 */
-	public static IBaseExtension<?, ?> getExtension(IBaseHasExtensions theBase, String theExtensionUrl) {
-		return theBase.getExtension()
+	public static IBaseExtension<?, ?> getExtension(IBase theBase, String theExtensionUrl) {
+		return validateExtensionSupport(theBase)
+			.getExtension()
 			.stream()
 			.filter(e -> theExtensionUrl.equals(e.getUrl()))
 			.findFirst()
 			.orElse(null);
+	}
+
+	/**
+	 * Gets all extensions that match the specified filter predicate
+	 *
+	 * @param theBase   The resource to get the extension for
+	 * @param theFilter Predicate to match the extension against
+	 * @return Returns all extension with the specified URL, or an empty list if such extensions do not exist
+	 */
+	public static List<IBaseExtension<?, ?>> getExtensions(IBase theBase, Predicate<? super IBaseExtension> theFilter) {
+		return validateExtensionSupport(theBase)
+			.getExtension()
+			.stream()
+			.filter(theFilter)
+			.collect(Collectors.toList());
+	}
+
+	/**
+	 * Gets all extensions with the specified URL
+	 *
+	 * @param theBase The resource to get the extension for
+	 * @return Returns all extension with the specified URL, or an empty list if such extensions do not exist
+	 */
+	public static List<IBaseExtension<?, ?>> clearExtensions(IBase theBase, Predicate<? super IBaseExtension> theFilter) {
+		List<IBaseExtension<?, ?>> retVal = getExtensions(theBase, theFilter);
+		validateExtensionSupport(theBase)
+			.getExtension()
+			.removeIf(theFilter);
+		return retVal;
 	}
 
 	/**
@@ -119,10 +150,8 @@ public class ExtensionUtil {
 	 * @return Returns all extension with the specified URL, or an empty list if such extensions do not exist
 	 */
 	public static List<IBaseExtension<?, ?>> getExtensions(IBaseHasExtensions theBase, String theExtensionUrl) {
-		return theBase.getExtension()
-			.stream()
-			.filter(e -> theExtensionUrl.equals(e.getUrl()))
-			.collect(Collectors.toList());
+		Predicate<IBaseExtension> urlEqualityPredicate = e -> theExtensionUrl.equals(e.getUrl());
+		return getExtensions(theBase, urlEqualityPredicate);
 	}
 
 	/**

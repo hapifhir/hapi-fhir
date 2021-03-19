@@ -111,10 +111,25 @@ public class TerserUtilHelper {
 	 * Gets values of the specified field.
 	 *
 	 * @param theField The field to get values from
-	 * @return Returns a collection of values containing values or null if the spefied field doesn't exist
+	 * @return Returns a collection of values containing values or null if the specified field doesn't exist
 	 */
 	public List<IBase> getFieldValues(String theField) {
 		return TerserUtil.getValues(myContext, myResource, theField);
+	}
+
+	/**
+	 * Gets first available values of the specified field.
+	 *
+	 * @param theField The field to get values from
+	 * @return Returns the first available value for the field name or null if the
+	 * specified field doesn't exist or has no values
+	 */
+	public IBase getFieldValue(String theField) {
+		List<IBase> values = getFieldValues(theField);
+		if (values == null || values.isEmpty()) {
+			return null;
+		}
+		return values.get(0);
 	}
 
 	/**

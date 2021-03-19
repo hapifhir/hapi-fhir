@@ -57,9 +57,11 @@ class TerserUtilTest {
 		assertEquals(1, p2Helper.getFieldValues("identifier").size());
 
 		Identifier id1 = (Identifier) p1Helper.getFieldValues("identifier").get(0);
-		Identifier id2 = (Identifier) p2Helper.getFieldValues("identifier").get(0);
+		Identifier id2 = (Identifier) p2Helper.getFieldValue("identifier");
 		assertTrue(id1.equalsDeep(id2));
 		assertFalse(id1.equals(id2));
+
+		assertNull(p2Helper.getFieldValue("address"));
 	}
 
 	@Test
