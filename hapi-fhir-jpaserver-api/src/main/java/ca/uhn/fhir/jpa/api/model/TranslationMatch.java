@@ -26,23 +26,42 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.UriType;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public class TranslationMatch {
-	private Coding myConcept;
+	private String mySystem;
+	private String myCode;
+	private String myDisplay;
 	private Enumerations.ConceptMapEquivalence myEquivalence;
-	private UriType mySource;
+	private String myConceptMapUrl;
 	private String myValueSet;
 	private String mySystemVersion;
-
 	public TranslationMatch() {
 		super();
 	}
 
-	public Coding getConcept() {
-		return myConcept;
+	public String getSystem() {
+		return mySystem;
 	}
 
-	public void setConcept(Coding theConcept) {
-		myConcept = theConcept;
+	public void setSystem(String theSystem) {
+		mySystem = theSystem;
+	}
+
+	public String getCode() {
+		return myCode;
+	}
+
+	public void setCode(String theCode) {
+		myCode = theCode;
+	}
+
+	public String getDisplay() {
+		return myDisplay;
+	}
+
+	public void setDisplay(String theDisplay) {
+		myDisplay = theDisplay;
 	}
 
 	public Enumerations.ConceptMapEquivalence getEquivalence() {
@@ -53,12 +72,13 @@ public class TranslationMatch {
 		myEquivalence = theEquivalence;
 	}
 
-	public UriType getSource() {
-		return mySource;
+	// FIXME: remove
+	public String getConceptMapUrl_() {
+		return getConceptMapUrl();
 	}
 
-	public void setSource(UriType theSource) {
-		mySource = theSource;
+	public void setConceptMapUrl(String theConceptMapUrl) {
+		myConceptMapUrl = theConceptMapUrl;
 	}
 
 	public void toParameterParts(ParametersParameterComponent theParam) {
@@ -66,12 +86,12 @@ public class TranslationMatch {
 			theParam.addPart().setName("equivalence").setValue(new CodeType(myEquivalence.toCode()));
 		}
 
-		if (myConcept != null) {
-			theParam.addPart().setName("concept").setValue(myConcept);
+		if (isNotBlank(getSystem()) || isNotBlank(getCode()) || isNotBlank(getDisplay())) {
+			theParam.addPart().setName("concept").setValue(new Coding(getSystem(), getCode(), getDisplay()));
 		}
 
-		if (mySource != null) {
-			theParam.addPart().setName("source").setValue(mySource);
+		if (isNotBlank(getConceptMapUrl_())) {
+			theParam.addPart().setName("source").setValue(new UriType(getConceptMapUrl_()));
 		}
 	}
 
@@ -79,20 +99,24 @@ public class TranslationMatch {
 		return mySystemVersion;
 	}
 
-	public String getValueSet() {
-		return myValueSet;
+	public void setSystemVersion(String theSystemVersion) {
+		mySystemVersion = theSystemVersion;
 	}
 
-	// FIXME: remove
-	public String getConceptMapUrl() {
-		return mySource.getValueAsString();
+	public String getValueSet() {
+		return myValueSet;
 	}
 
 	public void setValueSet(String theValueSet) {
 		myValueSet = theValueSet;
 	}
 
-	public void setSystemVersion(String theSystemVersion) {
-		mySystemVersion = theSystemVersion;
+	public String getConceptMapUrl() {
+		return myConceptMapUrl;
+	}
+
+	// FIXME: remove
+	public String getVersion() {
+		return getSystemVersion();
 	}
 }

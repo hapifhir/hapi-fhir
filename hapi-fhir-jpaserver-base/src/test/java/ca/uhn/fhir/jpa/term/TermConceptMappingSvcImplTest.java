@@ -83,9 +83,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("target(0):\n" + target.toString());
 
-				assertEquals("56789", target.getConcept().getCode());
-				assertEquals("Target Code 56789", target.getConcept().getDisplay());
-				assertEquals(CS_URL_3, target.getConcept().getSystem());
+				assertEquals("56789", target.getCode());
+				assertEquals("Target Code 56789", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
 				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
@@ -95,9 +95,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("target(1):\n" + target.toString());
 
-				assertEquals("67890", target.getConcept().getCode());
-				assertEquals("Target Code 67890", target.getConcept().getDisplay());
-				assertEquals(CS_URL_3, target.getConcept().getSystem());
+				assertEquals("67890", target.getCode());
+				assertEquals("Target Code 67890", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
 				assertEquals(Enumerations.ConceptMapEquivalence.WIDER, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
@@ -137,9 +137,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("ConceptMap.group.element.target:\n" + target.toString());
 
-				assertEquals("34567", target.getConcept().getCode());
-				assertEquals("Target Code 34567", target.getConcept().getDisplay());
-				assertEquals(CS_URL_2, target.getConcept().getSystem());
+				assertEquals("34567", target.getCode());
+				assertEquals("Target Code 34567", target.getDisplay());
+				assertEquals(CS_URL_2, target.getSystem());
 				assertEquals("Version 2", target.getSystemVersion());
 				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
@@ -204,7 +204,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 		TranslationResult resp = myConceptMappingSvc.translate(translationRequest);
 		assertEquals(1, resp.size());
-		assertEquals("34567", resp.getMatches().get(0).getConcept().getCode());
+		assertEquals("34567", resp.getMatches().get(0).getCode());
 	}
 
 	@Test
@@ -234,9 +234,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("target(0):\n" + target.toString());
 
-				assertEquals("34567", target.getConcept().getCode());
-				assertEquals("Target Code 34567", target.getConcept().getDisplay());
-				assertEquals(CS_URL_2, target.getConcept().getSystem());
+				assertEquals("34567", target.getCode());
+				assertEquals("Target Code 34567", target.getDisplay());
+				assertEquals(CS_URL_2, target.getSystem());
 				assertEquals("Version 2", target.getSystemVersion());
 				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
@@ -246,9 +246,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("target(1):\n" + target.toString());
 
-				assertEquals("56789", target.getConcept().getCode());
-				assertEquals("Target Code 56789", target.getConcept().getDisplay());
-				assertEquals(CS_URL_3, target.getConcept().getSystem());
+				assertEquals("56789", target.getCode());
+				assertEquals("Target Code 56789", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
 				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
@@ -258,9 +258,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("target(2):\n" + target.toString());
 
-				assertEquals("67890", target.getConcept().getCode());
-				assertEquals("Target Code 67890", target.getConcept().getDisplay());
-				assertEquals(CS_URL_3, target.getConcept().getSystem());
+				assertEquals("67890", target.getCode());
+				assertEquals("Target Code 67890", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
 				assertEquals(Enumerations.ConceptMapEquivalence.WIDER, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
@@ -306,9 +306,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("target:\n" + target.toString());
 
-				assertEquals("34567", target.getConcept().getCode());
-				assertEquals("Target Code 34567", target.getConcept().getDisplay());
-				assertEquals(CS_URL_2, target.getConcept().getSystem());
+				assertEquals("34567", target.getCode());
+				assertEquals("Target Code 34567", target.getDisplay());
+				assertEquals(CS_URL_2, target.getSystem());
 				assertEquals("Version 2", target.getSystemVersion());
 				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
@@ -354,9 +354,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("target(0):\n" + target.toString());
 
-				assertEquals("56789", target.getConcept().getCode());
-				assertEquals("Target Code 56789", target.getConcept().getDisplay());
-				assertEquals(CS_URL_3, target.getConcept().getSystem());
+				assertEquals("56789", target.getCode());
+				assertEquals("Target Code 56789", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
 				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
@@ -366,9 +366,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("target(1):\n" + target.toString());
 
-				assertEquals("67890", target.getConcept().getCode());
-				assertEquals("Target Code 67890", target.getConcept().getDisplay());
-				assertEquals(CS_URL_3, target.getConcept().getSystem());
+				assertEquals("67890", target.getCode());
+				assertEquals("Target Code 67890", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
 				assertEquals(Enumerations.ConceptMapEquivalence.WIDER, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
@@ -412,9 +412,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("target(0):\n" + target.toString());
 
-				assertEquals("34567", target.getConcept().getCode());
-				assertEquals("Target Code 34567", target.getConcept().getDisplay());
-				assertEquals(CS_URL_2, target.getConcept().getSystem());
+				assertEquals("34567", target.getCode());
+				assertEquals("Target Code 34567", target.getDisplay());
+				assertEquals(CS_URL_2, target.getSystem());
 				assertEquals("Version 2", target.getSystemVersion());
 				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
@@ -424,9 +424,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("target(1):\n" + target.toString());
 
-				assertEquals("56789", target.getConcept().getCode());
-				assertEquals("Target Code 56789", target.getConcept().getDisplay());
-				assertEquals(CS_URL_3, target.getConcept().getSystem());
+				assertEquals("56789", target.getCode());
+				assertEquals("Target Code 56789", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
 				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
@@ -436,9 +436,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("target(2):\n" + target.toString());
 
-				assertEquals("67890", target.getConcept().getCode());
-				assertEquals("Target Code 67890", target.getConcept().getDisplay());
-				assertEquals(CS_URL_3, target.getConcept().getSystem());
+				assertEquals("67890", target.getCode());
+				assertEquals("Target Code 67890", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
 				assertEquals(Enumerations.ConceptMapEquivalence.WIDER, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
@@ -484,9 +484,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("target:\n" + target.toString());
 
-				assertEquals("34567", target.getConcept().getCode());
-				assertEquals("Target Code 34567", target.getConcept().getDisplay());
-				assertEquals(CS_URL_2, target.getConcept().getSystem());
+				assertEquals("34567", target.getCode());
+				assertEquals("Target Code 34567", target.getDisplay());
+				assertEquals(CS_URL_2, target.getSystem());
 				assertEquals("Version 2", target.getSystemVersion());
 				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
@@ -532,9 +532,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("target(0):\n" + target.toString());
 
-				assertEquals("56789", target.getConcept().getCode());
-				assertEquals("Target Code 56789", target.getConcept().getDisplay());
-				assertEquals(CS_URL_3, target.getConcept().getSystem());
+				assertEquals("56789", target.getCode());
+				assertEquals("Target Code 56789", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
 				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
@@ -544,9 +544,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("target(1):\n" + target.toString());
 
-				assertEquals("67890", target.getConcept().getCode());
-				assertEquals("Target Code 67890", target.getConcept().getDisplay());
-				assertEquals(CS_URL_3, target.getConcept().getSystem());
+				assertEquals("67890", target.getCode());
+				assertEquals("Target Code 67890", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
 				assertEquals(Enumerations.ConceptMapEquivalence.WIDER, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
@@ -590,9 +590,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("target(0):\n" + target.toString());
 
-				assertEquals("34567", target.getConcept().getCode());
-				assertEquals("Target Code 34567", target.getConcept().getDisplay());
-				assertEquals(CS_URL_2, target.getConcept().getSystem());
+				assertEquals("34567", target.getCode());
+				assertEquals("Target Code 34567", target.getDisplay());
+				assertEquals(CS_URL_2, target.getSystem());
 				assertEquals("Version 2", target.getSystemVersion());
 				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
@@ -602,9 +602,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("target(1):\n" + target.toString());
 
-				assertEquals("56789", target.getConcept().getCode());
-				assertEquals("Target Code 56789", target.getConcept().getDisplay());
-				assertEquals(CS_URL_3, target.getConcept().getSystem());
+				assertEquals("56789", target.getCode());
+				assertEquals("Target Code 56789", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
 				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
@@ -614,9 +614,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("target(2):\n" + target.toString());
 
-				assertEquals("67890", target.getConcept().getCode());
-				assertEquals("Target Code 67890", target.getConcept().getDisplay());
-				assertEquals(CS_URL_3, target.getConcept().getSystem());
+				assertEquals("67890", target.getCode());
+				assertEquals("Target Code 67890", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
 				assertEquals(Enumerations.ConceptMapEquivalence.WIDER, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
@@ -660,9 +660,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("target(0):\n" + target.toString());
 
-				assertEquals("34567", target.getConcept().getCode());
-				assertEquals("Target Code 34567", target.getConcept().getDisplay());
-				assertEquals(CS_URL_2, target.getConcept().getSystem());
+				assertEquals("34567", target.getCode());
+				assertEquals("Target Code 34567", target.getDisplay());
+				assertEquals(CS_URL_2, target.getSystem());
 				assertEquals("Version 2", target.getSystemVersion());
 				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
@@ -672,9 +672,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("target(1):\n" + target.toString());
 
-				assertEquals("56789", target.getConcept().getCode());
-				assertEquals("Target Code 56789", target.getConcept().getDisplay());
-				assertEquals(CS_URL_3, target.getConcept().getSystem());
+				assertEquals("56789", target.getCode());
+				assertEquals("Target Code 56789", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
 				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
@@ -684,9 +684,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("target(2):\n" + target.toString());
 
-				assertEquals("67890", target.getConcept().getCode());
-				assertEquals("Target Code 67890", target.getConcept().getDisplay());
-				assertEquals(CS_URL_3, target.getConcept().getSystem());
+				assertEquals("67890", target.getCode());
+				assertEquals("Target Code 67890", target.getDisplay());
+				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
 				assertEquals(Enumerations.ConceptMapEquivalence.WIDER, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
@@ -734,9 +734,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("element:\n" + element.toString());
 
-				assertEquals("78901", element.getConcept().getCode());
-				assertEquals("Source Code 78901", element.getConcept().getDisplay());
-				assertEquals(CS_URL_4, element.getConcept().getSystem());
+				assertEquals("78901", element.getCode());
+				assertEquals("Source Code 78901", element.getDisplay());
+				assertEquals(CS_URL_4, element.getSystem());
 				assertEquals("Version 5", element.getSystemVersion());
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
@@ -802,9 +802,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("element:\n" + element.toString());
 
-				assertEquals("12345", element.getConcept().getCode());
-				assertEquals("Source Code 12345", element.getConcept().getDisplay());
-				assertEquals(CS_URL, element.getConcept().getSystem());
+				assertEquals("12345", element.getCode());
+				assertEquals("Source Code 12345", element.getDisplay());
+				assertEquals(CS_URL, element.getSystem());
 				assertEquals("Version 1", element.getSystemVersion());
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
@@ -813,9 +813,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("element:\n" + element.toString());
 
-				assertEquals("78901", element.getConcept().getCode());
-				assertEquals("Source Code 78901", element.getConcept().getDisplay());
-				assertEquals(CS_URL_4, element.getConcept().getSystem());
+				assertEquals("78901", element.getCode());
+				assertEquals("Source Code 78901", element.getDisplay());
+				assertEquals(CS_URL_4, element.getSystem());
 				assertEquals("Version 5", element.getSystemVersion());
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
@@ -862,9 +862,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("element:\n" + element.toString());
 
-				assertEquals("12345", element.getConcept().getCode());
-				assertEquals("Source Code 12345", element.getConcept().getDisplay());
-				assertEquals(CS_URL, element.getConcept().getSystem());
+				assertEquals("12345", element.getCode());
+				assertEquals("Source Code 12345", element.getDisplay());
+				assertEquals(CS_URL, element.getSystem());
 				assertEquals("Version 1", element.getSystemVersion());
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
@@ -911,9 +911,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("element:\n" + element.toString());
 
-				assertEquals("78901", element.getConcept().getCode());
-				assertEquals("Source Code 78901", element.getConcept().getDisplay());
-				assertEquals(CS_URL_4, element.getConcept().getSystem());
+				assertEquals("78901", element.getCode());
+				assertEquals("Source Code 78901", element.getDisplay());
+				assertEquals(CS_URL_4, element.getSystem());
 				assertEquals("Version 5", element.getSystemVersion());
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
@@ -958,9 +958,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("element:\n" + element.toString());
 
-				assertEquals("12345", element.getConcept().getCode());
-				assertEquals("Source Code 12345", element.getConcept().getDisplay());
-				assertEquals(CS_URL, element.getConcept().getSystem());
+				assertEquals("12345", element.getCode());
+				assertEquals("Source Code 12345", element.getDisplay());
+				assertEquals(CS_URL, element.getSystem());
 				assertEquals("Version 1", element.getSystemVersion());
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
@@ -969,9 +969,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("element:\n" + element.toString());
 
-				assertEquals("78901", element.getConcept().getCode());
-				assertEquals("Source Code 78901", element.getConcept().getDisplay());
-				assertEquals(CS_URL_4, element.getConcept().getSystem());
+				assertEquals("78901", element.getCode());
+				assertEquals("Source Code 78901", element.getDisplay());
+				assertEquals(CS_URL_4, element.getSystem());
 				assertEquals("Version 5", element.getSystemVersion());
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
@@ -1018,9 +1018,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("element:\n" + element.toString());
 
-				assertEquals("12345", element.getConcept().getCode());
-				assertEquals("Source Code 12345", element.getConcept().getDisplay());
-				assertEquals(CS_URL, element.getConcept().getSystem());
+				assertEquals("12345", element.getCode());
+				assertEquals("Source Code 12345", element.getDisplay());
+				assertEquals(CS_URL, element.getSystem());
 				assertEquals("Version 1", element.getSystemVersion());
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
@@ -1029,9 +1029,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("element:\n" + element.toString());
 
-				assertEquals("78901", element.getConcept().getCode());
-				assertEquals("Source Code 78901", element.getConcept().getDisplay());
-				assertEquals(CS_URL_4, element.getConcept().getSystem());
+				assertEquals("78901", element.getCode());
+				assertEquals("Source Code 78901", element.getDisplay());
+				assertEquals(CS_URL_4, element.getSystem());
 				assertEquals("Version 5", element.getSystemVersion());
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
@@ -1076,9 +1076,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("element:\n" + element.toString());
 
-				assertEquals("12345", element.getConcept().getCode());
-				assertEquals("Source Code 12345", element.getConcept().getDisplay());
-				assertEquals(CS_URL, element.getConcept().getSystem());
+				assertEquals("12345", element.getCode());
+				assertEquals("Source Code 12345", element.getDisplay());
+				assertEquals(CS_URL, element.getSystem());
 				assertEquals("Version 1", element.getSystemVersion());
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
@@ -1087,9 +1087,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("element:\n" + element.toString());
 
-				assertEquals("78901", element.getConcept().getCode());
-				assertEquals("Source Code 78901", element.getConcept().getDisplay());
-				assertEquals(CS_URL_4, element.getConcept().getSystem());
+				assertEquals("78901", element.getCode());
+				assertEquals("Source Code 78901", element.getDisplay());
+				assertEquals(CS_URL_4, element.getSystem());
 				assertEquals("Version 5", element.getSystemVersion());
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
@@ -1134,9 +1134,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("element:\n" + element.toString());
 
-				assertEquals("12345", element.getConcept().getCode());
-				assertEquals("Source Code 12345", element.getConcept().getDisplay());
-				assertEquals(CS_URL, element.getConcept().getSystem());
+				assertEquals("12345", element.getCode());
+				assertEquals("Source Code 12345", element.getDisplay());
+				assertEquals(CS_URL, element.getSystem());
 				assertEquals("Version 1", element.getSystemVersion());
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
@@ -1145,9 +1145,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("element:\n" + element.toString());
 
-				assertEquals("78901", element.getConcept().getCode());
-				assertEquals("Source Code 78901", element.getConcept().getDisplay());
-				assertEquals(CS_URL_4, element.getConcept().getSystem());
+				assertEquals("78901", element.getCode());
+				assertEquals("Source Code 78901", element.getDisplay());
+				assertEquals(CS_URL_4, element.getSystem());
 				assertEquals("Version 5", element.getSystemVersion());
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());

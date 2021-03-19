@@ -30,7 +30,7 @@ import java.util.Optional;
 public interface ITermConceptMapMappingPresenceDao extends JpaRepository<TermConceptMapMappingPresence, Long> {
 
 	@Query("SELECT cm FROM TermConceptMapMappingPresence cm WHERE cm.mySourceCodeSystemUrl = :source AND cm.mySourceCodeSystemUrl = :target")
-	Optional<TermConceptMapMappingPresence> findTermConceptMapByUrlAndVersion(@Param("source") String theSourceCodeSystemUrl, @Param("target") String theTargetCodeSystemUrl);
+	Optional<TermConceptMapMappingPresence> findBySourceAndTargetSystem(@Param("source") String theSourceCodeSystemUrl, @Param("target") String theTargetCodeSystemUrl);
 
 }
 

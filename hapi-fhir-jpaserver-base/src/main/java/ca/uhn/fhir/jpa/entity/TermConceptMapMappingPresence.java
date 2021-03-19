@@ -20,6 +20,9 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -52,16 +55,43 @@ public class TermConceptMapMappingPresence implements Serializable {
 		return mySourceCodeSystemUrl;
 	}
 
-	public void setSourceCodeSystemUrl(String theSourceCodeSystemUrl) {
+	public TermConceptMapMappingPresence setSourceCodeSystemUrl(String theSourceCodeSystemUrl) {
 		mySourceCodeSystemUrl = theSourceCodeSystemUrl;
+		return this;
 	}
 
 	public String getTargetCodeSystemUrl() {
 		return myTargetCodeSystemUrl;
 	}
 
-	public void setTargetCodeSystemUrl(String theTargetCodeSystemUrl) {
+	public TermConceptMapMappingPresence setTargetCodeSystemUrl(String theTargetCodeSystemUrl) {
 		myTargetCodeSystemUrl = theTargetCodeSystemUrl;
+		return this;
 	}
 
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) {
+			return true;
+		}
+
+		if (theO == null || getClass() != theO.getClass()) {
+			return false;
+		}
+
+		TermConceptMapMappingPresence that = (TermConceptMapMappingPresence) theO;
+
+		return new EqualsBuilder()
+			.append(getSourceCodeSystemUrl(), that.getSourceCodeSystemUrl())
+			.append(getTargetCodeSystemUrl(), that.getTargetCodeSystemUrl())
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.append(mySourceCodeSystemUrl)
+			.append(myTargetCodeSystemUrl)
+			.toHashCode();
+	}
 }

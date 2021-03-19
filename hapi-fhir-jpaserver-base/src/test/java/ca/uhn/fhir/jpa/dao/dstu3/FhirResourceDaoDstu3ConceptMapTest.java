@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.BeforeEach;
@@ -84,23 +83,19 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 
 				TranslationMatch translationMatch = translationResult.getMatches().get(0);
 				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
-				Coding concept = translationMatch.getConcept();
-				assertEquals("56789", concept.getCode());
-				assertEquals("Target Code 56789", concept.getDisplay());
-				assertEquals(CS_URL_3, concept.getSystem());
-				assertEquals("Version 4", concept.getVersion());
-				assertFalse(concept.getUserSelected());
-				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
+				assertEquals("56789", translationMatch.getCode());
+				assertEquals("Target Code 56789", translationMatch.getDisplay());
+				assertEquals(CS_URL_3, translationMatch.getSystem());
+				assertEquals("Version 4", translationMatch.getVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
 				translationMatch = translationResult.getMatches().get(1);
 				assertEquals(Enumerations.ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
-				concept = translationMatch.getConcept();
-				assertEquals("67890", concept.getCode());
-				assertEquals("Target Code 67890", concept.getDisplay());
-				assertEquals(CS_URL_3, concept.getSystem());
-				assertEquals("Version 4", concept.getVersion());
-				assertFalse(concept.getUserSelected());
-				assertEquals(CM_URL, translationMatch.getSource().getValueAsString());
+				assertEquals("67890", translationMatch.getCode());
+				assertEquals("Target Code 67890", translationMatch.getDisplay());
+				assertEquals(CS_URL_3, translationMatch.getSystem());
+				assertEquals("Version 4", translationMatch.getVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 				// </editor-fold>
 			}
 		});
