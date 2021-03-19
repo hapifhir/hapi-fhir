@@ -6,6 +6,7 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -238,5 +239,28 @@ class TerserUtilTest {
 
 		assertThat(p2.getName(), hasSize(1));
 		assertThat(p2.getName().get(0).getGiven(), hasSize(2));
+	}
+
+
+	@Test
+	void testEqualsFunction(){
+		Patient p1 = new Patient();
+		Patient p2 = new Patient();
+
+		p1.addName(new HumanName().setFamily("family").addGiven("asd"));
+		p2.addName(new HumanName().setFamily("family").addGiven("asd"));
+
+		assertTrue(TerserUtil.equals(p1, p2));
+	}
+
+	@Test
+	void testEqualsFunctionNotEqual(){
+		Patient p1 = new Patient();
+		Patient p2 = new Patient();
+
+		p1.addName(new HumanName().setFamily("family").addGiven("asd"));
+		p2.addName(new HumanName().setFamily("family").addGiven("asd1"));
+
+		assertFalse(TerserUtil.equals(p1, p2));
 	}
 }

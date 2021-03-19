@@ -47,6 +47,8 @@ public final class TerserUtil {
 
 	public static final String FIELD_NAME_IDENTIFIER = "identifier";
 
+	private static final String EQUALS_DEEP="equalsDeep";
+
 	public static final Collection<String> IDS_AND_META_EXCLUDES =
 		Collections.unmodifiableSet(Stream.of("id", "identifier", "meta").collect(Collectors.toSet()));
 
@@ -175,15 +177,19 @@ public final class TerserUtil {
 		});
 	}
 
-	public static boolean equals(IBase theItem1, IBase theItem2){
+	private static Method getMethod(IBase item, String methodName){
 		Method method = null;
-		for (Method m : theItem1.getClass().getDeclaredMethods()) {
-			if (m.getName().equals("equalsDeep")) {
+		for (Method m : item.getClass().getDeclaredMethods()) {
+			if (m.getName().equals(methodName)) {
 				method = m;
 				break;
 			}
 		}
-		final Method m = method;
+		return method;
+	}
+
+	public static boolean equals(IBase theItem1, IBase theItem2){
+		final Method m = getMethod(theItem1, EQUALS_DEEP);
 
 		return equals(theItem1, theItem2, m);
 	}
@@ -200,18 +206,8 @@ public final class TerserUtil {
 	}
 
 	private static boolean contains(IBase theItem, List<IBase> theItems) {
-		Method method = null;
-		for (Method m : theItem.getClass().getDeclaredMethods()) {
-			if (m.getName().equals("equalsDeep")) {
-				method = m;
-				break;
-			}
-		}
-
-		final Method m = method;
-		return theItems.stream().anyMatch(i -> {
-			return equals(i, theItem, m);
-		});
+		final Method m = getMethod(theItem, EQUALS_DEEP);
+		return theItems.stream().anyMatch(i -> equals(i, theItem, m));
 	}
 
 	/**

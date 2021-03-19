@@ -11,25 +11,22 @@ import java.util.List;
 public class ExtensionMatcher implements IMdmFieldMatcher{
 	@Override
 	public boolean matches(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, String theIdentifierSystem) {
-		List<? extends IBaseExtension<?, ?>> leftExtension = null;
-		List<? extends IBaseExtension<?, ?>> rightExtension = null;
-		if (theLeftBase instanceof IBaseHasExtensions && theRightBase instanceof IBaseHasExtensions){
-			leftExtension = ((IBaseHasExtensions) theLeftBase).getExtension();
-			rightExtension = ((IBaseHasExtensions) theRightBase).getExtension();
-		}
-		else{
+		if (!(theLeftBase instanceof IBaseHasExtensions && theRightBase instanceof IBaseHasExtensions)){
 			return false;
 		}
+		List<? extends IBaseExtension<?, ?>> leftExtension = ((IBaseHasExtensions) theLeftBase).getExtension();
+		List<? extends IBaseExtension<?, ?>> rightExtension = ((IBaseHasExtensions) theRightBase).getExtension();
 
 		boolean match = false;
 
+		if (theIdentifierSystem != null) {
+			leftExtension.removeIf(iBaseExtension -> !iBaseExtension.getUrl().equals(theIdentifierSystem));
+			rightExtension.removeIf(iBaseExtension -> !iBaseExtension.getUrl().equals(theIdentifierSystem));
+		}
+
 		for (IBaseExtension leftExtensionValue : leftExtension) {
-			if (leftExtensionValue.getUrl().equals(theIdentifierSystem) || theIdentifierSystem == null) {
-				for (IBaseExtension rightExtensionValue : rightExtension) {
-					if (rightExtensionValue.getUrl().equals(theIdentifierSystem) || theIdentifierSystem == null) {
-						match |= ExtensionUtil.equals(leftExtensionValue, rightExtensionValue);
-					}
-				}
+			for (IBaseExtension rightExtensionValue : rightExtension) {
+				match |= ExtensionUtil.equals(leftExtensionValue, rightExtensionValue);
 			}
 		}
 		return match;
