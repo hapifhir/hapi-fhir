@@ -33,11 +33,11 @@ import java.util.List;
 @Repository
 public interface IMdmLinkDao extends JpaRepository<MdmLink, Long> {
 	@Modifying
-	@Query("DELETE FROM MdmLink f WHERE myGoldenResourcePid = :pid OR mySourcePid = :pid")
+	@Query("DELETE FROM MdmLink f WHERE f.myGoldenResourcePid = :pid OR f.mySourcePid = :pid")
 	int deleteWithAnyReferenceToPid(@Param("pid") Long thePid);
 
 	@Modifying
-	@Query("DELETE FROM MdmLink f WHERE (myGoldenResourcePid = :pid OR mySourcePid = :pid) AND myMatchResult <> :matchResult")
+	@Query("DELETE FROM MdmLink f WHERE (f.myGoldenResourcePid = :pid OR f.mySourcePid = :pid) AND f.myMatchResult <> :matchResult")
 	int deleteWithAnyReferenceToPidAndMatchResultNot(@Param("pid") Long thePid, @Param("matchResult") MdmMatchResultEnum theMatchResult);
 
 	@Query("SELECT ml2.myGoldenResourcePid, ml2.mySourcePid FROM MdmLink ml2 " +
@@ -51,4 +51,14 @@ public interface IMdmLinkDao extends JpaRepository<MdmLink, Long> {
 			"AND hrl.myTargetResourceType='Patient'" +
 		")")
 	List<List<Long>> expandPidsFromGroupPidGivenMatchResult(@Param("groupPid") Long theGroupPid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+
+	@Query("SELECT ml.myGoldenResourcePid, ml.mySourcePid " +
+		"FROM MdmLink ml " +
+		"INNER JOIN MdmLink ml2 " +
+		"on ml.myGoldenResourcePid=ml2.myGoldenResourcePid " +
+		"WHERE ml2.mySourcePid=:sourcePid " +
+		"AND ml2.myMatchResult=:matchResult " +
+		"AND ml.myMatchResult=:matchResult")
+	List<List<Long>> expandPidsBySourcePidAndMatchResult(@Param("sourcePid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+
 }

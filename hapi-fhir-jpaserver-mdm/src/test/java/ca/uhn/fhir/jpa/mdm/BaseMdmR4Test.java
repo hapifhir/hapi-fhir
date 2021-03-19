@@ -182,7 +182,6 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		Patient patient = (Patient) outcome.getResource();
 		patient.setId(outcome.getId());
 		return patient;
-		
 	}
 
 	@Nonnull

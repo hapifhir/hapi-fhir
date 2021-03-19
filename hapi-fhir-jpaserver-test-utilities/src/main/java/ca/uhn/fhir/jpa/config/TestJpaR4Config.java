@@ -68,6 +68,7 @@ public class TestJpaR4Config extends BaseJavaConfigR4 {
 
 		retVal.setDriver(new org.h2.Driver());
 		retVal.setUrl("jdbc:h2:mem:testdb_r4");
+//		retVal.setUrl("jdbc:h2:file:/home/tadgh/smile/hapi-fhir/testdb_r4.db");
 		retVal.setMaxWaitMillis(10000);
 		retVal.setUsername("");
 		retVal.setPassword("");
