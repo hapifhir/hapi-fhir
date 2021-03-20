@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
@@ -31,27 +32,41 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	private final Cache<TranslateCodeRequest, Object> myTranslateCodeCache;
 	private final Cache<String, Object> myLookupCodeCache;
 
-
+	/**
+	 * Constuctor with default timeouts
+	 *
+	 * @param theWrap The validation support module to wrap
+	 */
 	public CachingValidationSupport(IValidationSupport theWrap) {
+		this(theWrap, CacheTimeouts.defaultValues());
+	}
+
+	/**
+	 * Constructor with configurable timeouts
+	 *
+	 * @param theWrap          The validation support module to wrap
+	 * @param theCacheTimeouts The timeouts to use
+	 */
+	public CachingValidationSupport(IValidationSupport theWrap, CacheTimeouts theCacheTimeouts) {
 		super(theWrap.getFhirContext(), theWrap);
 		myValidateCodeCache = Caffeine
 			.newBuilder()
-			.expireAfterWrite(10, TimeUnit.MINUTES)
+			.expireAfterWrite(theCacheTimeouts.getValidateCodeMillis(), TimeUnit.MILLISECONDS)
 			.maximumSize(5000)
 			.build();
 		myLookupCodeCache = Caffeine
 			.newBuilder()
-			.expireAfterWrite(10, TimeUnit.MINUTES)
-			.maximumSize(5000)
-			.build();
-		myCache = Caffeine
-			.newBuilder()
-			.expireAfterWrite(10, TimeUnit.MINUTES)
+			.expireAfterWrite(theCacheTimeouts.getLookupCodeMillis(), TimeUnit.MILLISECONDS)
 			.maximumSize(5000)
 			.build();
 		myTranslateCodeCache = Caffeine
 			.newBuilder()
-			.expireAfterWrite(10, TimeUnit.MINUTES)
+			.expireAfterWrite(theCacheTimeouts.getTranslateCodeMillis(), TimeUnit.MILLISECONDS)
+			.maximumSize(5000)
+			.build();
+		myCache = Caffeine
+			.newBuilder()
+			.expireAfterWrite(theCacheTimeouts.getMiscMillis(), TimeUnit.MILLISECONDS)
 			.maximumSize(5000)
 			.build();
 	}
@@ -130,5 +145,60 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		myLookupCodeCache.invalidateAll();
 		myCache.invalidateAll();
 		myValidateCodeCache.invalidateAll();
+	}
+
+	/**
+	 * @since 5.4.0
+	 */
+	public static class CacheTimeouts {
+
+		private long myTranslateCodeMillis;
+		private long myLookupCodeMillis;
+		private long myValidateCodeMillis;
+		private long myMiscMillis;
+
+		public long getTranslateCodeMillis() {
+			return myTranslateCodeMillis;
+		}
+
+		public CacheTimeouts setTranslateCodeMillis(long theTranslateCodeMillis) {
+			myTranslateCodeMillis = theTranslateCodeMillis;
+			return this;
+		}
+
+		public long getLookupCodeMillis() {
+			return myLookupCodeMillis;
+		}
+
+		public CacheTimeouts setLookupCodeMillis(long theLookupCodeMillis) {
+			myLookupCodeMillis = theLookupCodeMillis;
+			return this;
+		}
+
+		public long getValidateCodeMillis() {
+			return myValidateCodeMillis;
+		}
+
+		public CacheTimeouts setValidateCodeMillis(long theValidateCodeMillis) {
+			myValidateCodeMillis = theValidateCodeMillis;
+			return this;
+		}
+
+		public long getMiscMillis() {
+			return myMiscMillis;
+		}
+
+		public CacheTimeouts setMiscMillis(long theMiscMillis) {
+			myMiscMillis = theMiscMillis;
+			return this;
+		}
+
+		public static CacheTimeouts defaultValues() {
+			return new CacheTimeouts()
+				.setLookupCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
+				.setTranslateCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
+				.setValidateCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
+				.setMiscMillis(10 * DateUtils.MILLIS_PER_MINUTE);
+		}
 	}
 }

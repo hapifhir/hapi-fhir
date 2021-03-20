@@ -1,25 +1,5 @@
 package ca.uhn.fhir.jpa.term;
 
-/*-
- * #%L
- * HAPI FHIR JPA Server
- * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.model.TranslationMatch;
 import ca.uhn.fhir.jpa.api.model.TranslationQuery;
@@ -507,7 +487,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 				ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
 				try (ScrollableResultsIterator<TermConceptMapGroupElement> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults)) {
 
-					Set<TermConceptMapGroupElement> matches = new HashSet<>();
+					Set<TermConceptMapGroupElementTarget> matches = new HashSet<>();
 					while (scrollableResultsIterator.hasNext()) {
 						TermConceptMapGroupElement nextElement = scrollableResultsIterator.next();
 
@@ -518,7 +498,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 
 						if (isNotBlank(targetCode)) {
 							for (TermConceptMapGroupElementTarget next : nextElement.getConceptMapGroupElementTargets()) {
-								if (matches.add(nextElement)) {
+								if (matches.add(next)) {
 									if (isBlank(targetCodeSystem) || StringUtils.equals(targetCodeSystem, next.getSystem())) {
 										if (StringUtils.equals(targetCode, next.getCode())) {
 											TranslationMatch translationMatch = new TranslationMatch();
@@ -529,6 +509,8 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 											translationMatch.setValueSet(nextElement.getValueSet());
 											translationMatch.setSystemVersion(nextElement.getSystemVersion());
 											translationMatch.setConceptMapUrl(nextElement.getConceptMapUrl());
+											translationMatch.setEquivalence(next.getEquivalence());
+
 											elements.add(translationMatch);
 										}
 									}

@@ -656,7 +656,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertFalse(translationResult.getResult().booleanValue());
-				assertEquals("No Matches found", translationResult.getMessage().getValueAsString());
+				assertEquals("No matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(0, translationResult.getMatches().size());
 				// </editor-fold>
