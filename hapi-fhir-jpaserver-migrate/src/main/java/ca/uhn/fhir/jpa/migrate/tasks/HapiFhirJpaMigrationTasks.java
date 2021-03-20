@@ -87,13 +87,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_FORCED_ID").addIndex("20210309.2", "IDX_FORCEID_FID")
 			.unique(false).withColumns("FORCED_ID");
 
-		// Add table TRM_CONCEPT_MAP_PRESENCE
-		version.addIdGenerator("20210319.1", "SEQ_CONCEPT_MAP_PRES_PID");
-		Builder.BuilderAddTableByColumns presence = version.addTableByColumns("20210319.2", "TRM_CONCEPT_MAP_PRESENCE", "PID");
-		presence.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
-		presence.addColumn("SOURCE_CS_URL").nonNullable().type(ColumnTypeEnum.STRING, 200);
-		presence.addColumn("TARGET_CS_URL").nonNullable().type(ColumnTypeEnum.STRING, 200);
-		presence.addIndex("20210319.3", "IDX_CNCPT_MAP_PRES_ST").unique(true).withColumns("SOURCE_CS_URL", "TARGET_CS_URL");
 	}
 
 	private void init530() {

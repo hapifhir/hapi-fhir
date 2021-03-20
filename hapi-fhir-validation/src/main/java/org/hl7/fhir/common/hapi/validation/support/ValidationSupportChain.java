@@ -43,6 +43,21 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
+	public List<TranslateCodeResult> translateConcept(TranslateCodeRequest theRequest) {
+		List<TranslateCodeResult> retVal = null;
+		for (IValidationSupport next : myChain) {
+			List<TranslateCodeResult> translations = next.translateConcept(theRequest);
+			if (translations != null) {
+				if (retVal == null) {
+					retVal = new ArrayList<>();
+				}
+				retVal.addAll(translations);
+			}
+		}
+		return retVal;
+	}
+
+	@Override
 	public void invalidateCaches() {
 		for (IValidationSupport next : myChain) {
 			next.invalidateCaches();

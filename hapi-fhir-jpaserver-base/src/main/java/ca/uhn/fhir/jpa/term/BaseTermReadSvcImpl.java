@@ -29,18 +29,12 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
-import ca.uhn.fhir.jpa.api.model.TranslationQuery;
-import ca.uhn.fhir.jpa.api.model.TranslationRequest;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
-import ca.uhn.fhir.jpa.dao.data.ITermConceptMapDao;
-import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupDao;
-import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupElementDao;
-import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupElementTargetDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
@@ -51,10 +45,6 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
-import ca.uhn.fhir.jpa.entity.TermConceptMap;
-import ca.uhn.fhir.jpa.entity.TermConceptMapGroup;
-import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
-import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
@@ -72,12 +62,12 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
 import ca.uhn.fhir.jpa.util.LogicUtil;
-import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -102,8 +92,6 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.RegexpQuery;
-import org.hibernate.ScrollMode;
-import org.hibernate.ScrollableResults;
 import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
 import org.hibernate.search.backend.lucene.LuceneExtension;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
@@ -114,7 +102,6 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -126,11 +113,9 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -139,7 +124,6 @@ import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -170,7 +154,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -244,6 +227,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private ITermCodeSystemStorageSvc myConceptStorageSvc;
 	@Autowired
 	private ApplicationContext myApplicationContext;
+	@Autowired
+	private ITermConceptMappingSvc myTermConceptMappingSvc;
+
 	private volatile IValidationSupport myJpaValidationSupport;
 	private volatile IValidationSupport myValidationSupport;
 
@@ -485,13 +471,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		theAccumulator.addMessage(msg);
 		if (isOracleDialect()) {
 			expandConceptsOracle(theAccumulator, termValueSet, theFilter, theAdd);
-		}
-		else {
+		} else {
 			expandConcepts(theAccumulator, termValueSet, theFilter, theAdd);
 		}
 	}
 
-	private boolean isOracleDialect(){
+	private boolean isOracleDialect() {
 		return myHibernatePropertiesProvider.getDialect() instanceof org.hibernate.dialect.Oracle12cDialect;
 	}
 
@@ -746,7 +731,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 
 		// Allow to search by the end of the phrase.  E.g.  "working proficiency" will match "Limited working proficiency"
-		for (int start = 0; start <= tokens.size() - 1; ++ start) {
+		for (int start = 0; start <= tokens.size() - 1; ++start) {
 			for (int end = start + 1; end <= tokens.size(); ++end) {
 				String sublist = String.join(" ", tokens.subList(start, end));
 				if (startsWithIgnoreCase(sublist, theFilterDisplay))
@@ -1082,14 +1067,14 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		SearchQuery<TermConcept> termConceptsQuery = searchSession.search(TermConcept.class)
 			.where(f -> finishedQuery).toQuery();
 
-		System.out.println("About to query:" +  termConceptsQuery.queryString());
+		System.out.println("About to query:" + termConceptsQuery.queryString());
 		List<TermConcept> termConcepts = termConceptsQuery.fetchHits(theQueryIndex * maxResultsPerBatch, maxResultsPerBatch);
 
 
 		int resultsInBatch = termConcepts.size();
 		int firstResult = theQueryIndex * maxResultsPerBatch;// TODO GGG HS we lose the ability to check the index of the first result, so just best-guessing it here.
 		int delta = 0;
-		for (TermConcept concept: termConcepts) {
+		for (TermConcept concept : termConcepts) {
 			count.incrementAndGet();
 			countForBatch.incrementAndGet();
 			if (theAdd && expansionStep != null) {
@@ -1407,7 +1392,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 
-
 	private void addDisplayFilterInexact(SearchPredicateFactory f, BooleanPredicateClausesStep<?> bool, ValueSet.ConceptSetFilterComponent nextFilter) {
 		bool.must(f.phrase()
 			.field("myDisplay").boost(4.0f)
@@ -1441,7 +1425,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				addLoincFilterDescendantEqual(theSystem, f, b, theFilter);
 				break;
 			case IN:
-				addLoincFilterDescendantIn(theSystem, f,b , theFilter);
+				addLoincFilterDescendantIn(theSystem, f, b, theFilter);
 				break;
 			default:
 				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
@@ -1495,7 +1479,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		return retVal;
 	}
-
 
 
 	private void logFilteringValueOnProperty(String theValue, String theProperty) {
@@ -2022,15 +2005,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
-	static boolean isPlaceholder(DomainResource theResource) {
-		boolean retVal = false;
-		Extension extension = theResource.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER);
-		if (extension != null && extension.hasValue() && extension.getValue() instanceof BooleanType) {
-			retVal = ((BooleanType) extension.getValue()).booleanValue();
-		}
-		return retVal;
-	}
-
 	@Override
 	@Transactional
 	public IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB,
@@ -2140,7 +2114,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
-
 	private ArrayList<FhirVersionIndependentConcept> toVersionIndependentConcepts(String theSystem, Set<TermConcept> codes) {
 		ArrayList<FhirVersionIndependentConcept> retVal = new ArrayList<>(codes.size());
 		for (TermConcept next : codes) {
@@ -2148,8 +2121,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 		return retVal;
 	}
-
-
 
 	@Override
 	@Transactional
@@ -2190,7 +2161,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		return createFailureCodeValidationResult(theCodeSystem, theCode);
 	}
-
 
 	IValidationSupport.CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theValidationOptions, String theValueSetUrl, String theCodeSystem, String theCode, String theDisplay) {
 		IBaseResource valueSet = theValidationSupportContext.getRootValidationSupport().fetchValueSet(theValueSetUrl);
@@ -2492,6 +2462,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		public void execute(JobExecutionContext theContext) {
 			myTerminologySvc.preExpandDeferredValueSetsToTerminologyTables();
 		}
+	}
+
+	static boolean isPlaceholder(DomainResource theResource) {
+		boolean retVal = false;
+		Extension extension = theResource.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER);
+		if (extension != null && extension.hasValue() && extension.getValue() instanceof BooleanType) {
+			retVal = ((BooleanType) extension.getValue()).booleanValue();
+		}
+		return retVal;
 	}
 
 	/**

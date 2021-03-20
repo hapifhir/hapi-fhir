@@ -86,7 +86,7 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 				assertEquals("56789", translationMatch.getCode());
 				assertEquals("Target Code 56789", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
-				assertEquals("Version 4", translationMatch.getVersion());
+				assertEquals("Version 4", translationMatch.getSystemVersion());
 				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
 				translationMatch = translationResult.getMatches().get(1);
@@ -94,7 +94,7 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 				assertEquals("67890", translationMatch.getCode());
 				assertEquals("Target Code 67890", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
-				assertEquals("Version 4", translationMatch.getVersion());
+				assertEquals("Version 4", translationMatch.getSystemVersion());
 				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 				// </editor-fold>
 			}

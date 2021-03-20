@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.model.TranslationMatch;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
 import ca.uhn.fhir.jpa.api.model.TranslationResult;
@@ -27,6 +28,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -92,7 +95,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("56789", translationMatch.getCode());
 				assertEquals("Target Code 56789", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
-				assertEquals("Version 4", translationMatch.getVersion());
+				assertEquals("Version 4", translationMatch.getSystemVersion());
 				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
 				translationMatch = translationResult.getMatches().get(1);
@@ -100,8 +103,8 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("67890", translationMatch.getCode());
 				assertEquals("Target Code 67890", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
-				assertEquals("Version 4", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 4", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 				// </editor-fold>
 			}
 		});
@@ -135,8 +138,8 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("34567", translationMatch.getCode());
 				assertEquals("Target Code 34567", translationMatch.getDisplay());
 				assertEquals(CS_URL_2, translationMatch.getSystem());
-				assertEquals("Version 2", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 2", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 				// </editor-fold>
 			}
 		});
@@ -198,24 +201,24 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("34567", translationMatch.getCode());
 				assertEquals("Target Code 34567", translationMatch.getDisplay());
 				assertEquals(CS_URL_2, translationMatch.getSystem());
-				assertEquals("Version 2", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 2", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
 				translationMatch = translationResult.getMatches().get(1);
 				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				assertEquals("56789", translationMatch.getCode());
 				assertEquals("Target Code 56789", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
-				assertEquals("Version 4", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 4", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
 				translationMatch = translationResult.getMatches().get(2);
 				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
 				assertEquals("67890", translationMatch.getCode());
 				assertEquals("Target Code 67890", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
-				assertEquals("Version 4", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 4", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 			}
 		});
 	}
@@ -253,8 +256,8 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("34567", translationMatch.getCode());
 				assertEquals("Target Code 34567", translationMatch.getDisplay());
 				assertEquals(CS_URL_2, translationMatch.getSystem());
-				assertEquals("Version 2", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 2", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 			}
 		});
 	}
@@ -292,16 +295,16 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("56789", translationMatch.getCode());
 				assertEquals("Target Code 56789", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
-				assertEquals("Version 4", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 4", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
 				translationMatch = translationResult.getMatches().get(1);
 				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
 				assertEquals("67890", translationMatch.getCode());
 				assertEquals("Target Code 67890", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
-				assertEquals("Version 4", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 4", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 			}
 		});
 	}
@@ -337,24 +340,24 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("34567", translationMatch.getCode());
 				assertEquals("Target Code 34567", translationMatch.getDisplay());
 				assertEquals(CS_URL_2, translationMatch.getSystem());
-				assertEquals("Version 2", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 2", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
 				translationMatch = translationResult.getMatches().get(1);
 				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				assertEquals("56789", translationMatch.getCode());
 				assertEquals("Target Code 56789", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
-				assertEquals("Version 4", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 4", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
 				translationMatch = translationResult.getMatches().get(2);
 				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
 				assertEquals("67890", translationMatch.getCode());
 				assertEquals("Target Code 67890", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
-				assertEquals("Version 4", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 4", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 			}
 		});
 	}
@@ -392,8 +395,8 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("34567", translationMatch.getCode());
 				assertEquals("Target Code 34567", translationMatch.getDisplay());
 				assertEquals(CS_URL_2, translationMatch.getSystem());
-				assertEquals("Version 2", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 2", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 			}
 		});
 	}
@@ -431,16 +434,16 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("56789", translationMatch.getCode());
 				assertEquals("Target Code 56789", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
-				assertEquals("Version 4", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 4", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
 				translationMatch = translationResult.getMatches().get(1);
 				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
 				assertEquals("67890", translationMatch.getCode());
 				assertEquals("Target Code 67890", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
-				assertEquals("Version 4", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 4", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 			}
 		});
 	}
@@ -476,24 +479,24 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("34567", translationMatch.getCode());
 				assertEquals("Target Code 34567", translationMatch.getDisplay());
 				assertEquals(CS_URL_2, translationMatch.getSystem());
-				assertEquals("Version 2", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 2", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
 				translationMatch = translationResult.getMatches().get(1);
 				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				assertEquals("56789", translationMatch.getCode());
 				assertEquals("Target Code 56789", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
-				assertEquals("Version 4", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 4", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
 				translationMatch = translationResult.getMatches().get(2);
 				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
 				assertEquals("67890", translationMatch.getCode());
 				assertEquals("Target Code 67890", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
-				assertEquals("Version 4", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 4", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 			}
 		});
 	}
@@ -529,24 +532,24 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("34567", translationMatch.getCode());
 				assertEquals("Target Code 34567", translationMatch.getDisplay());
 				assertEquals(CS_URL_2, translationMatch.getSystem());
-				assertEquals("Version 2", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 2", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
 				translationMatch = translationResult.getMatches().get(1);
 				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
 				assertEquals("56789", translationMatch.getCode());
 				assertEquals("Target Code 56789", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
-				assertEquals("Version 4", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 4", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
 				translationMatch = translationResult.getMatches().get(2);
 				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
 				assertEquals("67890", translationMatch.getCode());
 				assertEquals("Target Code 67890", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
-				assertEquals("Version 4", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 4", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 			}
 		});
 	}
@@ -586,8 +589,8 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("78901", translationMatch.getCode());
 				assertEquals("Source Code 78901", translationMatch.getDisplay());
 				assertEquals(CS_URL_4, translationMatch.getSystem());
-				assertEquals("Version 5", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 5", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 			}
 		});
 	}
@@ -626,8 +629,8 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("12345", translationMatch.getCode());
 				assertEquals("Source Code 12345", translationMatch.getDisplay());
 				assertEquals(CS_URL, translationMatch.getSystem());
-				assertEquals("Version 3", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 3", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
 			}
 		});
@@ -692,16 +695,16 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("12345", translationMatch.getCode());
 				assertEquals("Source Code 12345", translationMatch.getDisplay());
 				assertEquals(CS_URL, translationMatch.getSystem());
-				assertEquals("Version 1", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 1", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
 				translationMatch = translationResult.getMatches().get(1);
 				assertEquals(ConceptMapEquivalence.NARROWER, translationMatch.getEquivalence());
 				assertEquals("78901", translationMatch.getCode());
 				assertEquals("Source Code 78901", translationMatch.getDisplay());
 				assertEquals(CS_URL_4, translationMatch.getSystem());
-				assertEquals("Version 5", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 5", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 			}
 		});
 	}
@@ -741,8 +744,8 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("12345", translationMatch.getCode());
 				assertEquals("Source Code 12345", translationMatch.getDisplay());
 				assertEquals(CS_URL, translationMatch.getSystem());
-				assertEquals("Version 1", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 1", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 			}
 		});
 	}
@@ -782,8 +785,8 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("78901", translationMatch.getCode());
 				assertEquals("Source Code 78901", translationMatch.getDisplay());
 				assertEquals(CS_URL_4, translationMatch.getSystem());
-				assertEquals("Version 5", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 5", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 			}
 		});
 	}
@@ -821,16 +824,16 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("12345", translationMatch.getCode());
 				assertEquals("Source Code 12345", translationMatch.getDisplay());
 				assertEquals(CS_URL, translationMatch.getSystem());
-				assertEquals("Version 1", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 1", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
 				translationMatch = translationResult.getMatches().get(1);
 				assertEquals(ConceptMapEquivalence.NARROWER, translationMatch.getEquivalence());
 				assertEquals("78901", translationMatch.getCode());
 				assertEquals("Source Code 78901", translationMatch.getDisplay());
 				assertEquals(CS_URL_4, translationMatch.getSystem());
-				assertEquals("Version 5", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 5", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 			}
 		});
 	}
@@ -870,16 +873,16 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("12345", translationMatch.getCode());
 				assertEquals("Source Code 12345", translationMatch.getDisplay());
 				assertEquals(CS_URL, translationMatch.getSystem());
-				assertEquals("Version 1", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 1", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
 				translationMatch = translationResult.getMatches().get(1);
 				assertEquals(ConceptMapEquivalence.NARROWER, translationMatch.getEquivalence());
 				assertEquals("78901", translationMatch.getCode());
 				assertEquals("Source Code 78901", translationMatch.getDisplay());
 				assertEquals(CS_URL_4, translationMatch.getSystem());
-				assertEquals("Version 5", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 5", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 			}
 		});
 	}
@@ -917,16 +920,16 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("12345", translationMatch.getCode());
 				assertEquals("Source Code 12345", translationMatch.getDisplay());
 				assertEquals(CS_URL, translationMatch.getSystem());
-				assertEquals("Version 1", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 1", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
 				translationMatch = translationResult.getMatches().get(1);
 				assertEquals(ConceptMapEquivalence.NARROWER, translationMatch.getEquivalence());
 				assertEquals("78901", translationMatch.getCode());
 				assertEquals("Source Code 78901", translationMatch.getDisplay());
 				assertEquals(CS_URL_4, translationMatch.getSystem());
-				assertEquals("Version 5", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 5", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 			}
 		});
 	}
@@ -964,16 +967,16 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals("12345", translationMatch.getCode());
 				assertEquals("Source Code 12345", translationMatch.getDisplay());
 				assertEquals(CS_URL, translationMatch.getSystem());
-				assertEquals("Version 1", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 1", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
 				translationMatch = translationResult.getMatches().get(1);
 				assertEquals(ConceptMapEquivalence.NARROWER, translationMatch.getEquivalence());
 				assertEquals("78901", translationMatch.getCode());
 				assertEquals("Source Code 78901", translationMatch.getDisplay());
 				assertEquals(CS_URL_4, translationMatch.getSystem());
-				assertEquals("Version 5", translationMatch.getVersion());
-								assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+				assertEquals("Version 5", translationMatch.getSystemVersion());
+				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 			}
 		});
 	}
@@ -1005,7 +1008,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 			ourLog.info("*** Done translating");
 
 			assertTrue(translationResult.getResult().booleanValue());
-			assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+			assertEquals("Matches found", translationResult.getMessage().getValueAsString());
 
 			assertEquals(1, translationResult.getMatches().size());
 
@@ -1014,10 +1017,12 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 			assertEquals("target1", translationMatch.getCode());
 			assertNull(translationMatch.getDisplay());
 			assertEquals("http://target", translationMatch.getSystem());
+
 		});
 
+		List<IValidationSupport.TranslateCodeResult> translationResults = myValidationSupport.translateConcept(new IValidationSupport.TranslateCodeRequest("http://source", "source1", "http://target"));
+		assertThat(translationResults, hasItem(new IValidationSupport.TranslateCodeResult().setCodeSystemUrl("http://target").setCode("target1")));
 	}
-
 
 	/**
 	 * Handle ConceptMaps where targets are missing, such as this one:

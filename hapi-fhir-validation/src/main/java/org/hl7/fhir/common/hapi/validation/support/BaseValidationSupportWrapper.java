@@ -99,5 +99,8 @@ public class BaseValidationSupportWrapper extends BaseValidationSupport {
 		return myWrap.validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, theDisplay, theValueSet);
 	}
 
-
+	@Override
+	public List<TranslateCodeResult> translateConcept(TranslateCodeRequest theRequest) {
+		return myWrap.translateConcept(theRequest);
+	}
 }

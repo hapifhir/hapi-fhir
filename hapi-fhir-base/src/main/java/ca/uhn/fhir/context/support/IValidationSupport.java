@@ -24,6 +24,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -268,6 +270,13 @@ public interface IValidationSupport {
 		// nothing
 	}
 
+	/**
+	 * Attempt to translate the given concept from one code system to another
+	 */
+	default List<TranslateCodeResult> translateConcept(TranslateCodeRequest theRequest) {
+		return null;
+	}
+
 
 	enum IssueSeverity {
 		/**
@@ -289,6 +298,7 @@ public interface IValidationSupport {
 	}
 
 	class ConceptDesignation {
+
 		private String myLanguage;
 		private String myUseSystem;
 		private String myUseCode;
@@ -708,6 +718,124 @@ public interface IValidationSupport {
 				.setSearchedForSystem(theSearchedForSystem)
 				.setSearchedForCode(theSearchedForCode);
 		}
+	}
+
+
+	class TranslateCodeRequest {
+		private final String mySourceSystemUrl;
+		private final String mySourceCode;
+		private final String myTargetSystemUrl;
+		private final int myHashCode;
+
+		public TranslateCodeRequest(String theSourceSystemUrl, String theSourceCode, String theTargetSystemUrl) {
+			mySourceSystemUrl = theSourceSystemUrl;
+			mySourceCode = theSourceCode;
+			myTargetSystemUrl = theTargetSystemUrl;
+
+			myHashCode = new HashCodeBuilder(17, 37)
+				.append(mySourceSystemUrl)
+				.append(mySourceCode)
+				.append(myTargetSystemUrl)
+				.toHashCode();
+		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (this == theO) {
+				return true;
+			}
+
+			if (theO == null || getClass() != theO.getClass()) {
+				return false;
+			}
+
+			TranslateCodeRequest that = (TranslateCodeRequest) theO;
+
+			return new EqualsBuilder()
+				.append(mySourceSystemUrl, that.mySourceSystemUrl)
+				.append(mySourceCode, that.mySourceCode)
+				.append(myTargetSystemUrl, that.myTargetSystemUrl)
+				.isEquals();
+		}
+
+		@Override
+		public int hashCode() {
+			return myHashCode;
+		}
+
+		public String getSourceSystemUrl() {
+			return mySourceSystemUrl;
+		}
+
+		public String getSourceCode() {
+			return mySourceCode;
+		}
+
+		public String getTargetSystemUrl() {
+			return myTargetSystemUrl;
+		}
+	}
+
+	class TranslateCodeResult {
+		private String myCodeSystemUrl;
+		private String myCode;
+		private String myDisplay;
+
+		@Override
+		public boolean equals(Object theO) {
+			if (this == theO) {
+				return true;
+			}
+
+			if (theO == null || getClass() != theO.getClass()) {
+				return false;
+			}
+
+			TranslateCodeResult that = (TranslateCodeResult) theO;
+
+			return new EqualsBuilder()
+				.append(myCodeSystemUrl, that.myCodeSystemUrl)
+				.append(myCode, that.myCode)
+				.append(myDisplay, that.myDisplay)
+				.isEquals();
+		}
+
+		@Override
+		public int hashCode() {
+			return new HashCodeBuilder(17, 37)
+				.append(myCodeSystemUrl)
+				.append(myCode)
+				.append(myDisplay)
+				.toHashCode();
+		}
+
+		public String getCodeSystemUrl() {
+			return myCodeSystemUrl;
+		}
+
+		public TranslateCodeResult setCodeSystemUrl(String theCodeSystemUrl) {
+			myCodeSystemUrl = theCodeSystemUrl;
+			return this;
+		}
+
+		public String getCode() {
+			return myCode;
+		}
+
+		public TranslateCodeResult setCode(String theCode) {
+			myCode = theCode;
+			return this;
+		}
+
+		public String getDisplay() {
+			return myDisplay;
+		}
+
+		public TranslateCodeResult setDisplay(String theDisplay) {
+			myDisplay = theDisplay;
+			return this;
+		}
+
 	}
 
 }

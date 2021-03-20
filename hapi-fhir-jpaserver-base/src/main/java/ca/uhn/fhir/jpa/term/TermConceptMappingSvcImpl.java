@@ -9,12 +9,10 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptMapDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupElementDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupElementTargetDao;
-import ca.uhn.fhir.jpa.dao.data.ITermConceptMapMappingPresenceDao;
 import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroup;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
-import ca.uhn.fhir.jpa.entity.TermConceptMapMappingPresence;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
@@ -25,16 +23,17 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UriType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,10 +53,10 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl.isPlaceholder;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -77,8 +76,6 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 	protected ITermConceptMapGroupElementDao myConceptMapGroupElementDao;
 	@Autowired
 	protected ITermConceptMapGroupElementTargetDao myConceptMapGroupElementTargetDao;
-	@Autowired
-	protected ITermConceptMapMappingPresenceDao myTermConceptMapMappingPresenceDao;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 	@Autowired
@@ -90,6 +87,33 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 	@Transactional
 	public void deleteConceptMapAndChildren(ResourceTable theResourceTable) {
 		deleteConceptMap(theResourceTable);
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myContext;
+	}
+
+	@Override
+	public List<TranslateCodeResult> translateConcept(TranslateCodeRequest theRequest) {
+
+		CodeableConcept sourceCodeableConcept = new CodeableConcept();
+		sourceCodeableConcept
+			.addCoding()
+			.setSystem(theRequest.getSourceSystemUrl())
+			.setCode(theRequest.getSourceCode());
+
+		TranslationRequest request = new TranslationRequest();
+		request.setCodeableConcept(sourceCodeableConcept);
+		request.setTargetSystem(new UriType(theRequest.getTargetSystemUrl()));
+
+		TranslationResult outcome = translate(request);
+
+		return outcome
+			.getMatches()
+			.stream()
+			.map(t -> t.toTranslateCodeResult())
+			.collect(Collectors.toList());
 	}
 
 	@Override
@@ -163,7 +187,6 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 			termConceptMap = myConceptMapDao.save(termConceptMap);
 			int codesSaved = 0;
 
-			Set<Pair<String, String>> processedSourceTargetSystemPairs = new HashSet<>();
 			if (theConceptMap.hasGroup()) {
 				TermConceptMapGroup termConceptMapGroup;
 				for (ConceptMap.ConceptMapGroupComponent group : theConceptMap.getGroup()) {
@@ -182,17 +205,6 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 					}
 					if (isBlank(groupTarget)) {
 						throw new UnprocessableEntityException("ConceptMap[url='" + theConceptMap.getUrl() + "'] contains at least one group without a value in ConceptMap.group.target");
-					}
-
-					Pair<String, String> sourceTargetPair = Pair.of(groupSource, groupTarget);
-					if (processedSourceTargetSystemPairs.add(sourceTargetPair)) {
-						Optional<TermConceptMapMappingPresence> existingPresenceEntityOpt = myTermConceptMapMappingPresenceDao.findBySourceAndTargetSystem(groupSource, groupTarget);
-						if (!existingPresenceEntityOpt.isPresent()) {
-							TermConceptMapMappingPresence presenceEntity = new TermConceptMapMappingPresence()
-								.setSourceCodeSystemUrl(groupSource)
-								.setTargetCodeSystemUrl(groupTarget);
-							myTermConceptMapMappingPresenceDao.save(presenceEntity);
-						}
 					}
 
 					termConceptMapGroup = new TermConceptMapGroup();
@@ -485,10 +497,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 						myEntityManager.detach(nextElement);
 
 						if (isNotBlank(targetCode)) {
-							for (Iterator<TermConceptMapGroupElementTarget> iter = nextElement.getConceptMapGroupElementTargets().iterator(); iter.hasNext(); ) {
-								TermConceptMapGroupElementTarget next = iter.next();
-
-
+							for (TermConceptMapGroupElementTarget next : nextElement.getConceptMapGroupElementTargets()) {
 								if (matches.add(nextElement)) {
 									if (isBlank(targetCodeSystem) || StringUtils.equals(targetCodeSystem, next.getSystem())) {
 										if (StringUtils.equals(targetCode, next.getCode())) {

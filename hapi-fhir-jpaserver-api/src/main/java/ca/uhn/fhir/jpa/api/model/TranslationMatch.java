@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.api.model;
  * #L%
  */
 
+import ca.uhn.fhir.context.support.IValidationSupport;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -36,6 +37,10 @@ public class TranslationMatch {
 	private String myConceptMapUrl;
 	private String myValueSet;
 	private String mySystemVersion;
+
+	/**
+	 * Constructor
+	 */
 	public TranslationMatch() {
 		super();
 	}
@@ -72,15 +77,6 @@ public class TranslationMatch {
 		myEquivalence = theEquivalence;
 	}
 
-	// FIXME: remove
-	public String getConceptMapUrl_() {
-		return getConceptMapUrl();
-	}
-
-	public void setConceptMapUrl(String theConceptMapUrl) {
-		myConceptMapUrl = theConceptMapUrl;
-	}
-
 	public void toParameterParts(ParametersParameterComponent theParam) {
 		if (myEquivalence != null) {
 			theParam.addPart().setName("equivalence").setValue(new CodeType(myEquivalence.toCode()));
@@ -90,8 +86,8 @@ public class TranslationMatch {
 			theParam.addPart().setName("concept").setValue(new Coding(getSystem(), getCode(), getDisplay()));
 		}
 
-		if (isNotBlank(getConceptMapUrl_())) {
-			theParam.addPart().setName("source").setValue(new UriType(getConceptMapUrl_()));
+		if (isNotBlank(getConceptMapUrl())) {
+			theParam.addPart().setName("source").setValue(new UriType(getConceptMapUrl()));
 		}
 	}
 
@@ -115,8 +111,14 @@ public class TranslationMatch {
 		return myConceptMapUrl;
 	}
 
-	// FIXME: remove
-	public String getVersion() {
-		return getSystemVersion();
+	public void setConceptMapUrl(String theConceptMapUrl) {
+		myConceptMapUrl = theConceptMapUrl;
+	}
+
+	public IValidationSupport.TranslateCodeResult toTranslateCodeResult() {
+		return new IValidationSupport.TranslateCodeResult()
+			.setCodeSystemUrl(mySystem)
+			.setCode(myCode)
+			.setDisplay(myDisplay);
 	}
 }

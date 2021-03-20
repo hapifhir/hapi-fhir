@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term.api;
 
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
 import ca.uhn.fhir.jpa.api.model.TranslationResult;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
@@ -9,7 +10,7 @@ import org.hl7.fhir.r4.model.ConceptMap;
 
 import java.util.List;
 
-public interface ITermConceptMappingSvc {
+public interface ITermConceptMappingSvc extends IValidationSupport {
 
 
 	TranslationResult translate(TranslationRequest theTranslationRequest);

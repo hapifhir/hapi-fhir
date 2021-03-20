@@ -28,6 +28,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	private static final Logger ourLog = LoggerFactory.getLogger(CachingValidationSupport.class);
 	private final Cache<String, Object> myCache;
 	private final Cache<String, Object> myValidateCodeCache;
+	private final Cache<TranslateCodeRequest, Object> myTranslateCodeCache;
 	private final Cache<String, Object> myLookupCodeCache;
 
 
@@ -44,6 +45,11 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 			.maximumSize(5000)
 			.build();
 		myCache = Caffeine
+			.newBuilder()
+			.expireAfterWrite(10, TimeUnit.MINUTES)
+			.maximumSize(5000)
+			.build();
+		myTranslateCodeCache = Caffeine
 			.newBuilder()
 			.expireAfterWrite(10, TimeUnit.MINUTES)
 			.maximumSize(5000)
@@ -88,30 +94,35 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		return loadFromCache(myLookupCodeCache, key, t -> super.lookupCode(theValidationSupportContext, theSystem, theCode));
 	}
 
+	@Override
+	public IValidationSupport.CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theValidationOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+
+		BaseRuntimeChildDefinition urlChild = myCtx.getResourceDefinition(theValueSet).getChildByName("url");
+		Optional<String> valueSetUrl = urlChild.getAccessor().getValues(theValueSet).stream().map(t -> ((IPrimitiveType<?>) t).getValueAsString()).filter(t -> isNotBlank(t)).findFirst();
+		if (valueSetUrl.isPresent()) {
+			String key = "validateCodeInValueSet " + theValidationOptions.toString() + " " + defaultString(theCodeSystem, "(null)") + " " + defaultString(theCode, "(null)") + " " + defaultString(theDisplay, "(null)") + " " + valueSetUrl.get();
+			return loadFromCache(myValidateCodeCache, key, t -> super.validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, theDisplay, theValueSet));
+		}
+
+		return super.validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, theDisplay, theValueSet);
+	}
+
+	@Override
+	public List<TranslateCodeResult> translateConcept(TranslateCodeRequest theRequest) {
+		return loadFromCache(myTranslateCodeCache, theRequest, k -> super.translateConcept(theRequest));
+	}
+
 	@SuppressWarnings("OptionalAssignedToNull")
 	@Nullable
-	private <T> T loadFromCache(Cache theCache, String theKey, Function<String, T> theLoader) {
+	private <S, T> T loadFromCache(Cache<S, Object> theCache, S theKey, Function<S, T> theLoader) {
 		ourLog.trace("Fetching from cache: {}", theKey);
 
-		Function<String, Optional<T>> loaderWrapper = key -> Optional.ofNullable(theLoader.apply(theKey));
+		Function<S, Optional<T>> loaderWrapper = key -> Optional.ofNullable(theLoader.apply(theKey));
 		Optional<T> result = (Optional<T>) theCache.get(theKey, loaderWrapper);
 		assert result != null;
 
 		return result.orElse(null);
 
-	}
-
-	@Override
-	public IValidationSupport.CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theValidationOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
-
-		BaseRuntimeChildDefinition urlChild = myCtx.getResourceDefinition(theValueSet).getChildByName("url");
-		Optional<String> valueSetUrl = urlChild.getAccessor().getValues(theValueSet).stream().map(t -> ((IPrimitiveType<?>) t).getValueAsString()).filter(t->isNotBlank(t)).findFirst();
-		if (valueSetUrl.isPresent()) {
-			String key = "validateCodeInValueSet " + theValidationOptions.toString() + " " + defaultString(theCodeSystem, "(null)") + " " + defaultString(theCode, "(null)") + " " + defaultString(theDisplay, "(null)") + " " + valueSetUrl.get();
-			return loadFromCache(myValidateCodeCache, key, t-> super.validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, theDisplay, theValueSet));
-		}
-
-		return super.validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, theDisplay, theValueSet);
 	}
 
 	@Override
