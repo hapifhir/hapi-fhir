@@ -198,7 +198,7 @@ If you wish to override the value of `Resource.meta.source` using the value	supp
 
 A common problem when implementing FHIR APIs is the challenge of how to return coded data using standard vocabularies when your source data is not modelled using these vocabularies. For example, suppose you want to implement support for an Implementation Guide that mandates the use of [LOINC](https://loinc.org) but your source data uses local/proprietary observation codes.
 
-One solution is to simply apply mappings and add them to the FHIR data you are storing in your repository as you are sotring it. This solution, often called *Mapping on the Way In*, will work but it has potential pitfalls including:
+One solution is to simply apply mappings and add them to the FHIR data you are storing in your repository as you are storing it. This solution, often called *Mapping on the Way In*, will work but it has potential pitfalls including:
 
 * All mappings must be known at the time the data is being stored.
 * If mappings change because of mistakes or new information, updating existing data is difficult.
