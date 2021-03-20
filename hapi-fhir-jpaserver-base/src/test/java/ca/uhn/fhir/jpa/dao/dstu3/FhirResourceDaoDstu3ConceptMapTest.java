@@ -77,7 +77,7 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(2, translationResult.getMatches().size());
 

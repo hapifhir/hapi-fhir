@@ -94,7 +94,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(2, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
@@ -152,7 +152,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 
@@ -197,7 +197,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertFalse(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("No matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("No Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertFalse(hasParameterByName(respParams, "match"));
 	}
@@ -230,7 +230,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(3, getNumberOfParametersByName(respParams, "match"));
 
@@ -308,7 +308,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 
@@ -361,7 +361,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(4, getNumberOfParametersByName(respParams, "match"));
 
@@ -452,7 +452,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(3, getNumberOfParametersByName(respParams, "match"));
 
@@ -531,7 +531,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 
@@ -582,7 +582,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(2, getNumberOfParametersByName(respParams, "match"));
 
@@ -647,7 +647,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 
@@ -698,7 +698,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(2, getNumberOfParametersByName(respParams, "match"));
 
@@ -761,7 +761,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(3, getNumberOfParametersByName(respParams, "match"));
 
@@ -838,7 +838,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(3, getNumberOfParametersByName(respParams, "match"));
 
@@ -949,7 +949,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
@@ -993,7 +993,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(3, getNumberOfParametersByName(respParams, "match"));
 
@@ -1074,7 +1074,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 
@@ -1120,7 +1120,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertFalse(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("No matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("No Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertFalse(hasParameterByName(respParams, "match"));
 	}
@@ -1155,7 +1155,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(2, getNumberOfParametersByName(respParams, "match"));
 
@@ -1221,7 +1221,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(2, getNumberOfParametersByName(respParams, "match"));
 
@@ -1291,7 +1291,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(4, getNumberOfParametersByName(respParams, "match"));
 
@@ -1384,7 +1384,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(2, getNumberOfParametersByName(respParams, "match"));
 
@@ -1451,7 +1451,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(2, getNumberOfParametersByName(respParams, "match"));
 
@@ -1518,7 +1518,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 
@@ -1571,7 +1571,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 
@@ -1622,7 +1622,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(2, getNumberOfParametersByName(respParams, "match"));
 
@@ -1687,7 +1687,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(2, getNumberOfParametersByName(respParams, "match"));
 
@@ -1783,7 +1783,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
@@ -1828,7 +1828,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(2, getNumberOfParametersByName(respParams, "match"));
 

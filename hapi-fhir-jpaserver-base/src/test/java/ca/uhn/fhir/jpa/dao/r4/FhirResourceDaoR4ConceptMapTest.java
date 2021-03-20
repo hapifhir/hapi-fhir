@@ -86,7 +86,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(2, translationResult.getMatches().size());
 
@@ -129,7 +129,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(1, translationResult.getMatches().size());
 
@@ -164,7 +164,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertFalse(translationResult.getResult().booleanValue());
-				assertEquals("No matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals("No Matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(0, translationResult.getMatches().size());
 				// </editor-fold>
@@ -192,7 +192,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(3, translationResult.getMatches().size());
 
@@ -247,7 +247,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(1, translationResult.getMatches().size());
 
@@ -286,7 +286,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(2, translationResult.getMatches().size());
 
@@ -331,7 +331,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(3, translationResult.getMatches().size());
 
@@ -386,7 +386,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(1, translationResult.getMatches().size());
 
@@ -425,7 +425,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(2, translationResult.getMatches().size());
 
@@ -470,7 +470,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(3, translationResult.getMatches().size());
 
@@ -523,7 +523,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(3, translationResult.getMatches().size());
 
@@ -580,7 +580,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(1, translationResult.getMatches().size());
 
@@ -621,7 +621,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(1, translationResult.getMatches().size());
 
@@ -656,7 +656,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertFalse(translationResult.getResult().booleanValue());
-				assertEquals("No matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals("No Matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(0, translationResult.getMatches().size());
 				// </editor-fold>
@@ -686,7 +686,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(2, translationResult.getMatches().size());
 
@@ -735,7 +735,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(1, translationResult.getMatches().size());
 
@@ -776,7 +776,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(1, translationResult.getMatches().size());
 
@@ -815,7 +815,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(2, translationResult.getMatches().size());
 
@@ -864,7 +864,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(2, translationResult.getMatches().size());
 
@@ -911,7 +911,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(2, translationResult.getMatches().size());
 
@@ -958,7 +958,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
 
 				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
 
 				assertEquals(2, translationResult.getMatches().size());
 
@@ -1053,7 +1053,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 			ourLog.info("*** Done translating");
 
 			assertTrue(translationResult.getResult().booleanValue());
-			assertEquals("Matches found!", translationResult.getMessage().getValueAsString());
+			assertEquals("Matches found", translationResult.getMessage().getValueAsString());
 
 			assertEquals(1, translationResult.getMatches().size());
 
