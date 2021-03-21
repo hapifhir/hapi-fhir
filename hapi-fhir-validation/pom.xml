@@ -89,7 +89,7 @@
 			<artifactId>gson</artifactId>
 		</dependency>
 
-		<!--
+		<!-- 
 		Optional dependencies from RI codebase
 		-->
 		<!--
@@ -97,7 +97,7 @@
 			<groupId>es.nitaur.markdown</groupId>
 			<artifactId>txtmark</artifactId>
 			<optional>true</optional>
-		</dependency>
+		</dependency>			
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>ST4</artifactId>
@@ -109,7 +109,7 @@
 			<optional>true</optional>
 		</dependency>
 		-->
-
+		
 		<!--
 		Optional dependencies on the various versions of FHIR
 		-->
