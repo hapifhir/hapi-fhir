@@ -1,0 +1,4 @@
+---
+type: add
+issue: 2489
+title: "Added boolean fields to enable creating warnings on unknown CS/VS instead of throwing a Validation Error."

@@ -293,7 +293,15 @@ public class ValidationSupportChain implements IValidationSupport {
 		return errorOnUnknownCodeSystem;
 	}
 
+	public void setErrorOnUnknownCodeSystem(boolean errorOnUnknownCodeSystem) {
+		this.errorOnUnknownCodeSystem = errorOnUnknownCodeSystem;
+	}
+
 	public boolean isErrorOnUnknownValueSet() {
 		return errorOnUnknownValueSet;
+	}
+
+	public void setErrorOnUnknownValueSet(boolean errorOnUnknownValueSet) {
+		this.errorOnUnknownValueSet = errorOnUnknownValueSet;
 	}
 }
