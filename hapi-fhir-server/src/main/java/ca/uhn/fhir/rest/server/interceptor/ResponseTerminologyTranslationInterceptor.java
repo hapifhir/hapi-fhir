@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResult;
+import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -152,16 +153,18 @@ public class ResponseTerminologyTranslationInterceptor extends BaseResponseTermi
 						if (!foundSystemsToCodes.containsKey(wantTargetSystem)) {
 
 							for (String code : foundSystemsToCodes.get(nextSourceSystem)) {
-								List<TranslateConceptResult> mappings = myValidationSupport.translateConcept(new IValidationSupport.TranslateCodeRequest(nextSourceSystem, code, wantTargetSystem)).getResults();
-								for (TranslateConceptResult nextMapping : mappings) {
+								TranslateConceptResults translateConceptResults = myValidationSupport.translateConcept(new IValidationSupport.TranslateCodeRequest(nextSourceSystem, code, wantTargetSystem));
+								if (translateConceptResults != null) {
+									List<TranslateConceptResult> mappings = translateConceptResults.getResults();
+									for (TranslateConceptResult nextMapping : mappings) {
 
-									IBase newCoding = createCodingFromMappingTarget(nextMapping);
+										IBase newCoding = createCodingFromMappingTarget(nextMapping);
 
-									// Add coding to existing CodeableConcept
-									myCodeableConceptCodingChild.getMutator().addValue(theElement, newCoding);
+										// Add coding to existing CodeableConcept
+										myCodeableConceptCodingChild.getMutator().addValue(theElement, newCoding);
 
+									}
 								}
-
 							}
 						}
 					}

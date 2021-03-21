@@ -86,6 +86,7 @@ public interface IValidationSupport {
 	 * @param theValueSetToExpand         The valueset that should be expanded
 	 * @return The expansion, or null
 	 */
+	@Nullable
 	default ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
 		return null;
 	}
@@ -95,6 +96,7 @@ public interface IValidationSupport {
 	 * validation support module. This method may return null if it doesn't
 	 * make sense for a given module.
 	 */
+	@Nullable
 	default List<IBaseResource> fetchAllConformanceResources() {
 		return null;
 	}
@@ -102,6 +104,7 @@ public interface IValidationSupport {
 	/**
 	 * Load and return all possible structure definitions
 	 */
+	@Nullable
 	default <T extends IBaseResource> List<T> fetchAllStructureDefinitions() {
 		return null;
 	}
@@ -112,6 +115,7 @@ public interface IValidationSupport {
 	 * @param theSystem The code system
 	 * @return The valueset (must not be null, but can be an empty ValueSet)
 	 */
+	@Nullable
 	default IBaseResource fetchCodeSystem(String theSystem) {
 		return null;
 	}
@@ -130,6 +134,7 @@ public interface IValidationSupport {
 	 * given URI can be found
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	default <T extends IBaseResource> T fetchResource(@Nullable Class<T> theClass, String theUri) {
 		Validate.notBlank(theUri, "theUri must not be null or blank");
 
@@ -163,6 +168,7 @@ public interface IValidationSupport {
 		return null;
 	}
 
+	@Nullable
 	default IBaseResource fetchStructureDefinition(String theUrl) {
 		return null;
 	}
@@ -184,6 +190,7 @@ public interface IValidationSupport {
 	/**
 	 * Fetch the given ValueSet by URL
 	 */
+	@Nullable
 	default IBaseResource fetchValueSet(String theValueSetUrl) {
 		return null;
 	}
@@ -201,6 +208,7 @@ public interface IValidationSupport {
 	 * @param theDisplay                  The display name, if it should also be validated
 	 * @return Returns a validation result object
 	 */
+	@Nullable
 	default CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return null;
 	}
@@ -218,6 +226,7 @@ public interface IValidationSupport {
 	 * @param theValueSet                 The ValueSet to validate against. Must not be null, and must be a ValueSet resource.
 	 * @return Returns a validation result object, or <code>null</code> if this validation support module can not handle this kind of request
 	 */
+	@Nullable
 	default CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		return null;
 	}
@@ -230,6 +239,7 @@ public interface IValidationSupport {
 	 * @param theSystem                   The CodeSystem URL
 	 * @param theCode                     The code
 	 */
+	@Nullable
 	default LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 		return null;
 	}
@@ -253,6 +263,7 @@ public interface IValidationSupport {
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
 	 * @return Returns null if this module does not know how to handle this request
 	 */
+	@Nullable
 	default IBaseResource generateSnapshot(ValidationSupportContext theValidationSupportContext, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
 		return null;
 	}
@@ -273,6 +284,7 @@ public interface IValidationSupport {
 	/**
 	 * Attempt to translate the given concept from one code system to another
 	 */
+	@Nullable
 	default TranslateConceptResults translateConcept(TranslateCodeRequest theRequest) {
 		return null;
 	}
