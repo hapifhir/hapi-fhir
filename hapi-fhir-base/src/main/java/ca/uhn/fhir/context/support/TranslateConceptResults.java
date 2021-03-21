@@ -2,7 +2,7 @@ package ca.uhn.fhir.context.support;
 
 /*
  * #%L
- * HAPI FHIR JPA API
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
