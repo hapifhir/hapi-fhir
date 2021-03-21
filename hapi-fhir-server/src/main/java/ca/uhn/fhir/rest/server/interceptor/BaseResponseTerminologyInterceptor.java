@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.BundleUtil;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -40,9 +41,12 @@ public class BaseResponseTerminologyInterceptor {
 	 *
 	 * @param theValidationSupport The validation support module
 	 */
-	public BaseResponseTerminologyInterceptor(IValidationSupport theValidationSupport) {
+	public BaseResponseTerminologyInterceptor(@Nonnull IValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
+		Validate.notNull(theValidationSupport, "The validation support must not be null");
+
 		myContext = theValidationSupport.getFhirContext();
+		Validate.notNull(myContext, "The validation support must not return a null context");
 	}
 
 

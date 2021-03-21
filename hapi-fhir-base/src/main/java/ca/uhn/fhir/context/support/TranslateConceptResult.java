@@ -76,8 +76,9 @@ public class TranslateConceptResult {
 		return myDisplay;
 	}
 
-	public void setDisplay(String theDisplay) {
+	public TranslateConceptResult setDisplay(String theDisplay) {
 		myDisplay = theDisplay;
+		return this;
 	}
 
 	public String getEquivalence() {
