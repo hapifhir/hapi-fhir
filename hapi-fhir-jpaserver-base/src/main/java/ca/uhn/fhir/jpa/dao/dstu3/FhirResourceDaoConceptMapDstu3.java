@@ -21,12 +21,9 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  */
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
-import ca.uhn.fhir.jpa.api.model.TranslationMatch;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
-import ca.uhn.fhir.jpa.api.model.TranslationResult;
+import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
-import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
-import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
@@ -36,17 +33,9 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.UriType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import static org.hl7.fhir.convertors.conv30_40.ConceptMap30_40.convertConceptMap;
 
@@ -55,7 +44,7 @@ public class FhirResourceDaoConceptMapDstu3 extends BaseHapiFhirResourceDao<Conc
 	private ITermConceptMappingSvc myTermConceptMappingSvc;
 
 	@Override
-	public TranslationResult translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
+	public TranslateConceptResults translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
 		if (theTranslationRequest.hasReverse() && theTranslationRequest.getReverseAsBoolean()) {
 			return myTermConceptMappingSvc.translateWithReverse(theTranslationRequest);
 		}

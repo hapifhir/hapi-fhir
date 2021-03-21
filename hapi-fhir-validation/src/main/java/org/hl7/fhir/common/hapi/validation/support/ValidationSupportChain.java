@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import org.apache.commons.lang3.Validate;
@@ -43,15 +44,25 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public List<TranslateCodeResult> translateConcept(TranslateCodeRequest theRequest) {
-		List<TranslateCodeResult> retVal = null;
+	public TranslateConceptResults translateConcept(TranslateCodeRequest theRequest) {
+		TranslateConceptResults retVal = null;
 		for (IValidationSupport next : myChain) {
-			List<TranslateCodeResult> translations = next.translateConcept(theRequest);
+			TranslateConceptResults translations = next.translateConcept(theRequest);
 			if (translations != null) {
 				if (retVal == null) {
-					retVal = new ArrayList<>();
+					retVal = new TranslateConceptResults();
 				}
-				retVal.addAll(translations);
+
+				if (retVal.getMessage() == null) {
+					retVal.setMessage(translations.getMessage());
+				}
+
+				if (translations.getResult() && !retVal.getResult()) {
+					retVal.setResult(translations.getResult());
+					retVal.setMessage(translations.getMessage());
+				}
+
+				retVal.getResults().addAll(translations.getResults());
 			}
 		}
 		return retVal;
@@ -146,7 +157,7 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
+	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
 		for (IValidationSupport next : myChain) {
 			// TODO: test if code system is supported?
 			ValueSetExpansionOutcome expanded = next.expandValueSet(theValidationSupportContext, theExpansionOptions, theValueSetToExpand);

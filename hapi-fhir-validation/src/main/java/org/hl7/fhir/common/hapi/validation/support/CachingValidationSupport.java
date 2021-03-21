@@ -3,6 +3,7 @@ package org.hl7.fhir.common.hapi.validation.support;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -123,7 +124,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	}
 
 	@Override
-	public List<TranslateCodeResult> translateConcept(TranslateCodeRequest theRequest) {
+	public TranslateConceptResults translateConcept(TranslateCodeRequest theRequest) {
 		return loadFromCache(myTranslateCodeCache, theRequest, k -> super.translateConcept(theRequest));
 	}
 

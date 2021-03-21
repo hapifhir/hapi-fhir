@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.jpa.api.model.TranslationMatch;
+import ca.uhn.fhir.context.support.TranslateConceptResult;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
-import ca.uhn.fhir.jpa.api.model.TranslationResult;
+import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroup;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
@@ -74,12 +74,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 					.setCode("12345");
 				translationRequest.setTargetSystem(new UriType(CS_URL_3));
 
-				List<TranslationMatch> targets = myConceptMappingSvc.translate(translationRequest).getMatches();
+				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 
-				TranslationMatch target = targets.get(0);
+				TranslateConceptResult target = targets.get(0);
 
 				ourLog.info("target(0):\n" + target.toString());
 
@@ -87,7 +87,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals("Target Code 56789", target.getDisplay());
 				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
 
@@ -99,12 +99,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals("Target Code 67890", target.getDisplay());
 				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.WIDER, target.getEquivalence());
+				assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
 
 				// Test caching.
-				targets = myConceptMappingSvc.translate(translationRequest).getMatches();
+				targets = myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
 				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
@@ -128,12 +128,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 					.setCode("12345");
 				translationRequest.setTargetSystem(new UriType(CS_URL_2));
 
-				List<TranslationMatch> targets = myConceptMappingSvc.translate(translationRequest).getMatches();
+				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 
-				TranslationMatch target = targets.get(0);
+				TranslateConceptResult target = targets.get(0);
 
 				ourLog.info("ConceptMap.group.element.target:\n" + target.toString());
 
@@ -141,12 +141,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals("Target Code 34567", target.getDisplay());
 				assertEquals(CS_URL_2, target.getSystem());
 				assertEquals("Version 2", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
 
 				// Test caching.
-				targets = myConceptMappingSvc.translate(translationRequest).getMatches();
+				targets = myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
 				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
@@ -170,7 +170,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 					.setCode("BOGUS");
 				translationRequest.setTargetSystem(new UriType(CS_URL_3));
 
-				List<TranslationMatch> targets = myConceptMappingSvc.translate(translationRequest).getMatches();
+				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertTrue(targets.isEmpty());
 			}
@@ -202,9 +202,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 			.addCode(CS_URL, "12345")
 			.setTargetSystem(new UriType(CS_URL_2));
 
-		TranslationResult resp = myConceptMappingSvc.translate(translationRequest);
+		TranslateConceptResults resp = myConceptMappingSvc.translate(translationRequest);
 		assertEquals(1, resp.size());
-		assertEquals("34567", resp.getMatches().get(0).getCode());
+		assertEquals("34567", resp.getResults().get(0).getCode());
 	}
 
 	@Test
@@ -225,12 +225,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				translationRequest.getCodeableConcept().addCoding()
 					.setCode("12345");
 
-				List<TranslationMatch> targets = myConceptMappingSvc.translate(translationRequest).getMatches();
+				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 
-				TranslationMatch target = targets.get(0);
+				TranslateConceptResult target = targets.get(0);
 
 				ourLog.info("target(0):\n" + target.toString());
 
@@ -238,7 +238,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals("Target Code 34567", target.getDisplay());
 				assertEquals(CS_URL_2, target.getSystem());
 				assertEquals("Version 2", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
 
@@ -250,7 +250,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals("Target Code 56789", target.getDisplay());
 				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
 
@@ -262,12 +262,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals("Target Code 67890", target.getDisplay());
 				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.WIDER, target.getEquivalence());
+				assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
 
 				// Test caching.
-				targets = myConceptMappingSvc.translate(translationRequest).getMatches();
+				targets = myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
 				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
@@ -297,12 +297,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 					.setCode("12345");
 				translationRequest.setTargetSystem(new UriType(CS_URL_2));
 
-				List<TranslationMatch> targets = myConceptMappingSvc.translate(translationRequest).getMatches();
+				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 
-				TranslationMatch target = targets.get(0);
+				TranslateConceptResult target = targets.get(0);
 
 				ourLog.info("target:\n" + target.toString());
 
@@ -310,12 +310,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals("Target Code 34567", target.getDisplay());
 				assertEquals(CS_URL_2, target.getSystem());
 				assertEquals("Version 2", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
 
 				// Test caching.
-				targets = myConceptMappingSvc.translate(translationRequest).getMatches();
+				targets = myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
 				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
@@ -345,12 +345,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 					.setCode("12345");
 				translationRequest.setTargetSystem(new UriType(CS_URL_3));
 
-				List<TranslationMatch> targets = myConceptMappingSvc.translate(translationRequest).getMatches();
+				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 
-				TranslationMatch target = targets.get(0);
+				TranslateConceptResult target = targets.get(0);
 
 				ourLog.info("target(0):\n" + target.toString());
 
@@ -358,7 +358,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals("Target Code 56789", target.getDisplay());
 				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
 
@@ -370,12 +370,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals("Target Code 67890", target.getDisplay());
 				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.WIDER, target.getEquivalence());
+				assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
 
 				// Test caching.
-				targets = myConceptMappingSvc.translate(translationRequest).getMatches();
+				targets = myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
 				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
@@ -403,12 +403,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 					.setSystem(CS_URL)
 					.setCode("12345");
 
-				List<TranslationMatch> targets = myConceptMappingSvc.translate(translationRequest).getMatches();
+				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 
-				TranslationMatch target = targets.get(0);
+				TranslateConceptResult target = targets.get(0);
 
 				ourLog.info("target(0):\n" + target.toString());
 
@@ -416,7 +416,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals("Target Code 34567", target.getDisplay());
 				assertEquals(CS_URL_2, target.getSystem());
 				assertEquals("Version 2", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
 
@@ -428,7 +428,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals("Target Code 56789", target.getDisplay());
 				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
 
@@ -440,12 +440,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals("Target Code 67890", target.getDisplay());
 				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.WIDER, target.getEquivalence());
+				assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
 
 				// Test caching.
-				targets = myConceptMappingSvc.translate(translationRequest).getMatches();
+				targets = myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
 				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
@@ -475,12 +475,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 					.setCode("12345")
 					.setVersion("Version 1");
 
-				List<TranslationMatch> targets = myConceptMappingSvc.translate(translationRequest).getMatches();
+				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 
-				TranslationMatch target = targets.get(0);
+				TranslateConceptResult target = targets.get(0);
 
 				ourLog.info("target:\n" + target.toString());
 
@@ -488,12 +488,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals("Target Code 34567", target.getDisplay());
 				assertEquals(CS_URL_2, target.getSystem());
 				assertEquals("Version 2", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
 
 				// Test caching.
-				targets = myConceptMappingSvc.translate(translationRequest).getMatches();
+				targets = myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
 				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
@@ -523,12 +523,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 					.setCode("12345")
 					.setVersion("Version 3");
 
-				List<TranslationMatch> targets = myConceptMappingSvc.translate(translationRequest).getMatches();
+				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 
-				TranslationMatch target = targets.get(0);
+				TranslateConceptResult target = targets.get(0);
 
 				ourLog.info("target(0):\n" + target.toString());
 
@@ -536,7 +536,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals("Target Code 56789", target.getDisplay());
 				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
 
@@ -548,12 +548,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals("Target Code 67890", target.getDisplay());
 				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.WIDER, target.getEquivalence());
+				assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
 
 				// Test caching.
-				targets = myConceptMappingSvc.translate(translationRequest).getMatches();
+				targets = myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
 				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
@@ -581,12 +581,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 					.setCode("12345");
 				translationRequest.setSource(new UriType(VS_URL));
 
-				List<TranslationMatch> targets = myConceptMappingSvc.translate(translationRequest).getMatches();
+				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 
-				TranslationMatch target = targets.get(0);
+				TranslateConceptResult target = targets.get(0);
 
 				ourLog.info("target(0):\n" + target.toString());
 
@@ -594,7 +594,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals("Target Code 34567", target.getDisplay());
 				assertEquals(CS_URL_2, target.getSystem());
 				assertEquals("Version 2", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
 
@@ -606,7 +606,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals("Target Code 56789", target.getDisplay());
 				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
 
@@ -618,12 +618,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals("Target Code 67890", target.getDisplay());
 				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.WIDER, target.getEquivalence());
+				assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
 
 				// Test caching.
-				targets = myConceptMappingSvc.translate(translationRequest).getMatches();
+				targets = myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
 				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
@@ -651,12 +651,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 					.setCode("12345");
 				translationRequest.setTarget(new UriType(VS_URL_2));
 
-				List<TranslationMatch> targets = myConceptMappingSvc.translate(translationRequest).getMatches();
+				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 
-				TranslationMatch target = targets.get(0);
+				TranslateConceptResult target = targets.get(0);
 
 				ourLog.info("target(0):\n" + target.toString());
 
@@ -664,7 +664,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals("Target Code 34567", target.getDisplay());
 				assertEquals(CS_URL_2, target.getSystem());
 				assertEquals("Version 2", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
 
@@ -676,7 +676,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals("Target Code 56789", target.getDisplay());
 				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
+				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
 
@@ -688,12 +688,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals("Target Code 67890", target.getDisplay());
 				assertEquals(CS_URL_3, target.getSystem());
 				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.WIDER, target.getEquivalence());
+				assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
 
 				// Test caching.
-				targets = myConceptMappingSvc.translate(translationRequest).getMatches();
+				targets = myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
 				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
@@ -725,12 +725,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				translationRequest.setTargetSystem(new UriType(CS_URL_4));
 				translationRequest.setReverse(true);
 
-				TranslationResult elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+				TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(1, elements.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
-				TranslationMatch element = elements.getMatches().get(0);
+				TranslateConceptResult element = elements.getResults().get(0);
 
 				ourLog.info("element:\n" + element.toString());
 
@@ -766,7 +766,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 					.setCode("BOGUS");
 				translationRequest.setTargetSystem(new UriType(CS_URL));
 
-				TranslationResult elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+				TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertTrue(elements.isEmpty());
 			}
@@ -793,12 +793,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 					.setCode("34567");
 				translationRequest.setReverse(true);
 
-				TranslationResult elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+				TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
-				TranslationMatch element = elements.getMatches().get(0);
+				TranslateConceptResult element = elements.getResults().get(0);
 
 				ourLog.info("element:\n" + element.toString());
 
@@ -809,7 +809,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
 
-				element = elements.getMatches().get(1);
+				element = elements.getResults().get(1);
 
 				ourLog.info("element:\n" + element.toString());
 
@@ -853,12 +853,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				translationRequest.setTargetSystem(new UriType(CS_URL));
 				translationRequest.setReverse(true);
 
-				TranslationResult elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+				TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(1, elements.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
-				TranslationMatch element = elements.getMatches().get(0);
+				TranslateConceptResult element = elements.getResults().get(0);
 
 				ourLog.info("element:\n" + element.toString());
 
@@ -902,12 +902,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				translationRequest.setTargetSystem(new UriType(CS_URL_4));
 				translationRequest.setReverse(true);
 
-				TranslationResult elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+				TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(1, elements.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
-				TranslationMatch element = elements.getMatches().get(0);
+				TranslateConceptResult element = elements.getResults().get(0);
 
 				ourLog.info("element:\n" + element.toString());
 
@@ -949,12 +949,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 					.setCode("34567");
 				translationRequest.setReverse(true);
 
-				TranslationResult elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+				TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
-				TranslationMatch element = elements.getMatches().get(0);
+				TranslateConceptResult element = elements.getResults().get(0);
 
 				ourLog.info("element:\n" + element.toString());
 
@@ -965,7 +965,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
 
-				element = elements.getMatches().get(1);
+				element = elements.getResults().get(1);
 
 				ourLog.info("element:\n" + element.toString());
 
@@ -1009,12 +1009,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 					.setVersion("Version 2");
 				translationRequest.setReverse(true);
 
-				TranslationResult elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+				TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
-				TranslationMatch element = elements.getMatches().get(0);
+				TranslateConceptResult element = elements.getResults().get(0);
 
 				ourLog.info("element:\n" + element.toString());
 
@@ -1025,7 +1025,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
 
-				element = elements.getMatches().get(1);
+				element = elements.getResults().get(1);
 
 				ourLog.info("element:\n" + element.toString());
 
@@ -1067,12 +1067,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				translationRequest.setSource(new UriType(VS_URL_2));
 				translationRequest.setReverse(true);
 
-				TranslationResult elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+				TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
-				TranslationMatch element = elements.getMatches().get(0);
+				TranslateConceptResult element = elements.getResults().get(0);
 
 				ourLog.info("element:\n" + element.toString());
 
@@ -1083,7 +1083,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
 
-				element = elements.getMatches().get(1);
+				element = elements.getResults().get(1);
 
 				ourLog.info("element:\n" + element.toString());
 
@@ -1125,12 +1125,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				translationRequest.setTarget(new UriType(VS_URL));
 				translationRequest.setReverse(true);
 
-				TranslationResult elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+				TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
-				TranslationMatch element = elements.getMatches().get(0);
+				TranslateConceptResult element = elements.getResults().get(0);
 
 				ourLog.info("element:\n" + element.toString());
 
@@ -1141,7 +1141,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
 
-				element = elements.getMatches().get(1);
+				element = elements.getResults().get(1);
 
 				ourLog.info("element:\n" + element.toString());
 

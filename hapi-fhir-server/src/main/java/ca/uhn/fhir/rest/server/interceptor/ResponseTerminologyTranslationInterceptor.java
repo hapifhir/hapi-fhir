@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.TranslateConceptResult;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -151,8 +152,8 @@ public class ResponseTerminologyTranslationInterceptor extends BaseResponseTermi
 						if (!foundSystemsToCodes.containsKey(wantTargetSystem)) {
 
 							for (String code : foundSystemsToCodes.get(nextSourceSystem)) {
-								List<IValidationSupport.TranslateCodeResult> mappings = myValidationSupport.translateConcept(new IValidationSupport.TranslateCodeRequest(nextSourceSystem, code, wantTargetSystem));
-								for (IValidationSupport.TranslateCodeResult nextMapping : mappings) {
+								List<TranslateConceptResult> mappings = myValidationSupport.translateConcept(new IValidationSupport.TranslateCodeRequest(nextSourceSystem, code, wantTargetSystem)).getResults();
+								for (TranslateConceptResult nextMapping : mappings) {
 
 									IBase newCoding = createCodingFromMappingTarget(nextMapping);
 
@@ -170,9 +171,9 @@ public class ResponseTerminologyTranslationInterceptor extends BaseResponseTermi
 
 		}
 
-		private IBase createCodingFromMappingTarget(IValidationSupport.TranslateCodeResult nextMapping) {
+		private IBase createCodingFromMappingTarget(TranslateConceptResult nextMapping) {
 			IBase newCoding = myCodingDefinitition.newInstance();
-			IPrimitiveType<?> newSystem = myUriDefinition.newInstance(nextMapping.getCodeSystemUrl());
+			IPrimitiveType<?> newSystem = myUriDefinition.newInstance(nextMapping.getSystem());
 			myCodingSystemChild.getMutator().addValue(newCoding, newSystem);
 			IPrimitiveType<?> newCode = myCodeDefinition.newInstance(nextMapping.getCode());
 			myCodingCodeChild.getMutator().addValue(newCoding, newCode);

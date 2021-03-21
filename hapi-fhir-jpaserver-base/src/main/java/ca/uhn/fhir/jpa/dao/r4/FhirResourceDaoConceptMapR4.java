@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
-import ca.uhn.fhir.jpa.api.model.TranslationResult;
+import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -40,7 +40,7 @@ public class FhirResourceDaoConceptMapR4 extends BaseHapiFhirResourceDao<Concept
 	private ITermConceptMappingSvc myTermConceptMappingSvc;
 
 	@Override
-	public TranslationResult translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
+	public TranslateConceptResults translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
 		if (theTranslationRequest.hasReverse() && theTranslationRequest.getReverseAsBoolean()) {
 			return myTermConceptMappingSvc.translateWithReverse(theTranslationRequest);
 		}

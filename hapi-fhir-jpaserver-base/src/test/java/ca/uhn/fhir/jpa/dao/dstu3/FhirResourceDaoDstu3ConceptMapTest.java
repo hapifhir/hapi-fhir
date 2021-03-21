@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import ca.uhn.fhir.jpa.api.model.TranslationMatch;
+import ca.uhn.fhir.context.support.TranslateConceptResult;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
-import ca.uhn.fhir.jpa.api.model.TranslationResult;
+import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
@@ -50,9 +50,9 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 					.setCode("12345");
 				translationRequest.setTargetSystem(new UriType(CS_URL_3));
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertFalse(translationResult.getResult().booleanValue());
+				assertFalse(translationResult.getResult());
 			}
 		});
 
@@ -74,23 +74,23 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 					.setCode("12345");
 				translationRequest.setTargetSystem(new UriType(CS_URL_3));
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
+				assertTrue(translationResult.getResult());
+				assertEquals("Matches found", translationResult.getMessage());
 
-				assertEquals(2, translationResult.getMatches().size());
+				assertEquals(2, translationResult.getResults().size());
 
-				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+				TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 				assertEquals("56789", translationMatch.getCode());
 				assertEquals("Target Code 56789", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
 				assertEquals("Version 4", translationMatch.getSystemVersion());
 				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
-				translationMatch = translationResult.getMatches().get(1);
-				assertEquals(Enumerations.ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
+				translationMatch = translationResult.getResults().get(1);
+				assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), translationMatch.getEquivalence());
 				assertEquals("67890", translationMatch.getCode());
 				assertEquals("Target Code 67890", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());

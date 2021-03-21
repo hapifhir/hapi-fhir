@@ -273,7 +273,7 @@ public interface IValidationSupport {
 	/**
 	 * Attempt to translate the given concept from one code system to another
 	 */
-	default List<TranslateCodeResult> translateConcept(TranslateCodeRequest theRequest) {
+	default TranslateConceptResults translateConcept(TranslateCodeRequest theRequest) {
 		return null;
 	}
 
@@ -776,66 +776,6 @@ public interface IValidationSupport {
 		}
 	}
 
-	class TranslateCodeResult {
-		private String myCodeSystemUrl;
-		private String myCode;
-		private String myDisplay;
 
-		@Override
-		public boolean equals(Object theO) {
-			if (this == theO) {
-				return true;
-			}
-
-			if (theO == null || getClass() != theO.getClass()) {
-				return false;
-			}
-
-			TranslateCodeResult that = (TranslateCodeResult) theO;
-
-			return new EqualsBuilder()
-				.append(myCodeSystemUrl, that.myCodeSystemUrl)
-				.append(myCode, that.myCode)
-				.append(myDisplay, that.myDisplay)
-				.isEquals();
-		}
-
-		@Override
-		public int hashCode() {
-			return new HashCodeBuilder(17, 37)
-				.append(myCodeSystemUrl)
-				.append(myCode)
-				.append(myDisplay)
-				.toHashCode();
-		}
-
-		public String getCodeSystemUrl() {
-			return myCodeSystemUrl;
-		}
-
-		public TranslateCodeResult setCodeSystemUrl(String theCodeSystemUrl) {
-			myCodeSystemUrl = theCodeSystemUrl;
-			return this;
-		}
-
-		public String getCode() {
-			return myCode;
-		}
-
-		public TranslateCodeResult setCode(String theCode) {
-			myCode = theCode;
-			return this;
-		}
-
-		public String getDisplay() {
-			return myDisplay;
-		}
-
-		public TranslateCodeResult setDisplay(String theDisplay) {
-			myDisplay = theDisplay;
-			return this;
-		}
-
-	}
 
 }

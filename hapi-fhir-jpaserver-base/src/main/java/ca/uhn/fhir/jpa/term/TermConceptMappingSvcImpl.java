@@ -21,10 +21,10 @@ package ca.uhn.fhir.jpa.term;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.model.TranslationMatch;
+import ca.uhn.fhir.context.support.TranslateConceptResult;
+import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.api.model.TranslationQuery;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
-import ca.uhn.fhir.jpa.api.model.TranslationResult;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupElementDao;
@@ -47,11 +47,12 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.slf4j.Logger;
@@ -76,7 +77,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl.isPlaceholder;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -115,7 +115,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 	}
 
 	@Override
-	public List<TranslateCodeResult> translateConcept(TranslateCodeRequest theRequest) {
+	public TranslateConceptResults translateConcept(TranslateCodeRequest theRequest) {
 
 		CodeableConcept sourceCodeableConcept = new CodeableConcept();
 		sourceCodeableConcept
@@ -127,13 +127,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 		request.setCodeableConcept(sourceCodeableConcept);
 		request.setTargetSystem(new UriType(theRequest.getTargetSystemUrl()));
 
-		TranslationResult outcome = translate(request);
-
-		return outcome
-			.getMatches()
-			.stream()
-			.map(t -> t.toTranslateCodeResult())
-			.collect(Collectors.toList());
+		return translate(request);
 	}
 
 	@Override
@@ -296,8 +290,8 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public TranslationResult translate(TranslationRequest theTranslationRequest) {
-		TranslationResult retVal = new TranslationResult();
+	public TranslateConceptResults translate(TranslationRequest theTranslationRequest) {
+		TranslateConceptResults retVal = new TranslateConceptResults();
 
 		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<TermConceptMapGroupElementTarget> query = criteriaBuilder.createQuery(TermConceptMapGroupElementTarget.class);
@@ -308,7 +302,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 		Join<TermConceptMapGroup, TermConceptMap> conceptMapJoin = groupJoin.join("myConceptMap");
 
 		List<TranslationQuery> translationQueries = theTranslationRequest.getTranslationQueries();
-		List<TranslationMatch> cachedTargets;
+		List<TranslateConceptResult> cachedTargets;
 		ArrayList<Predicate> predicates;
 		Coding coding;
 
@@ -320,7 +314,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 		for (TranslationQuery translationQuery : translationQueries) {
 			cachedTargets = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.CONCEPT_TRANSLATION, translationQuery);
 			if (cachedTargets == null) {
-				final List<TranslationMatch> targets = new ArrayList<>();
+				final List<TranslateConceptResult> targets = new ArrayList<>();
 
 				predicates = new ArrayList<>();
 
@@ -385,9 +379,9 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 						TermConceptMapGroupElementTarget next = scrollableResultsIterator.next();
 						if (matches.add(next)) {
 
-							TranslationMatch translationMatch = new TranslationMatch();
+							TranslateConceptResult translationMatch = new TranslateConceptResult();
 							if (next.getEquivalence() != null) {
-								translationMatch.setEquivalence(Enumerations.ConceptMapEquivalence.fromCode(next.getEquivalence().toCode()));
+								translationMatch.setEquivalence(next.getEquivalence().toCode());
 							}
 
 							translationMatch.setCode(next.getCode());
@@ -398,7 +392,9 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 							translationMatch.setSystemVersion(next.getSystemVersion());
 							translationMatch.setConceptMapUrl(next.getConceptMapUrl());
 
-							targets.add(translationMatch);
+							if (!targets.contains(translationMatch)) {
+								targets.add(translationMatch);
+							}
 						}
 					}
 
@@ -406,10 +402,10 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 
 				ourLastResultsFromTranslationCache = false; // For testing.
 				myMemoryCacheService.put(MemoryCacheService.CacheEnum.CONCEPT_TRANSLATION, translationQuery, targets);
-				retVal.getMatches().addAll(targets);
+				retVal.getResults().addAll(targets);
 			} else {
 				ourLastResultsFromTranslationCache = true; // For testing.
-				retVal.getMatches().addAll(cachedTargets);
+				retVal.getResults().addAll(cachedTargets);
 			}
 		}
 
@@ -419,8 +415,8 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public TranslationResult translateWithReverse(TranslationRequest theTranslationRequest) {
-		TranslationResult retVal = new TranslationResult();
+	public TranslateConceptResults translateWithReverse(TranslationRequest theTranslationRequest) {
+		TranslateConceptResults retVal = new TranslateConceptResults();
 
 		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<TermConceptMapGroupElement> query = criteriaBuilder.createQuery(TermConceptMapGroupElement.class);
@@ -431,7 +427,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 		Join<TermConceptMapGroup, TermConceptMap> conceptMapJoin = groupJoin.join("myConceptMap");
 
 		List<TranslationQuery> translationQueries = theTranslationRequest.getTranslationQueries();
-		List<TranslationMatch> cachedElements;
+		List<TranslateConceptResult> cachedElements;
 		ArrayList<Predicate> predicates;
 		Coding coding;
 
@@ -443,7 +439,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 		for (TranslationQuery translationQuery : translationQueries) {
 			cachedElements = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.CONCEPT_TRANSLATION_REVERSE, translationQuery);
 			if (cachedElements == null) {
-				final List<TranslationMatch> elements = new ArrayList<>();
+				final List<TranslateConceptResult> elements = new ArrayList<>();
 
 				predicates = new ArrayList<>();
 
@@ -521,7 +517,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 								if (matches.add(next)) {
 									if (isBlank(targetCodeSystem) || StringUtils.equals(targetCodeSystem, next.getSystem())) {
 										if (StringUtils.equals(targetCode, next.getCode())) {
-											TranslationMatch translationMatch = new TranslationMatch();
+											TranslateConceptResult translationMatch = new TranslateConceptResult();
 											translationMatch.setCode(nextElement.getCode());
 											translationMatch.setSystem(nextElement.getSystem());
 											translationMatch.setSystemVersion(nextElement.getSystemVersion());
@@ -529,9 +525,13 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 											translationMatch.setValueSet(nextElement.getValueSet());
 											translationMatch.setSystemVersion(nextElement.getSystemVersion());
 											translationMatch.setConceptMapUrl(nextElement.getConceptMapUrl());
-											translationMatch.setEquivalence(next.getEquivalence());
+											if (next.getEquivalence() != null) {
+												translationMatch.setEquivalence(next.getEquivalence().toCode());
+											}
 
-											elements.add(translationMatch);
+											if (!elements.contains(translationMatch)) {
+												elements.add(translationMatch);
+											}
 										}
 									}
 
@@ -544,10 +544,10 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 
 				ourLastResultsFromTranslationWithReverseCache = false; // For testing.
 				myMemoryCacheService.put(MemoryCacheService.CacheEnum.CONCEPT_TRANSLATION_REVERSE, translationQuery, elements);
-				retVal.getMatches().addAll(elements);
+				retVal.getResults().addAll(elements);
 			} else {
 				ourLastResultsFromTranslationWithReverseCache = true; // For testing.
-				retVal.getMatches().addAll(cachedElements);
+				retVal.getResults().addAll(cachedElements);
 			}
 		}
 
@@ -597,17 +597,17 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 		return null;
 	}
 
-	private void buildTranslationResult(TranslationResult theTranslationResult) {
+	private void buildTranslationResult(TranslateConceptResults theTranslationResult) {
 
 		String msg;
-		if (theTranslationResult.getMatches().isEmpty()) {
-			theTranslationResult.setResult(new BooleanType(false));
+		if (theTranslationResult.getResults().isEmpty()) {
+			theTranslationResult.setResult(false);
 			msg = myContext.getLocalizer().getMessage(TermConceptMappingSvcImpl.class, "noMatchesFound");
-			theTranslationResult.setMessage(new StringType(msg));
+			theTranslationResult.setMessage(msg);
 		} else {
-			theTranslationResult.setResult(new BooleanType(true));
+			theTranslationResult.setResult(true);
 			msg = myContext.getLocalizer().getMessage(TermConceptMappingSvcImpl.class, "matchesFound");
-			theTranslationResult.setMessage(new StringType(msg));
+			theTranslationResult.setMessage(msg);
 		}
 
 	}
@@ -645,4 +645,40 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 		return ourLastResultsFromTranslationWithReverseCache;
 	}
 
+	public static Parameters toParameters(TranslateConceptResults theTranslationResult) {
+		Parameters retVal = new Parameters();
+
+		retVal.addParameter().setName("result").setValue(new BooleanType(theTranslationResult.getResult()));
+
+		if (theTranslationResult.getMessage() != null) {
+			retVal.addParameter().setName("message").setValue(new StringType(theTranslationResult.getMessage()));
+		}
+
+		for (TranslateConceptResult translationMatch : theTranslationResult.getResults()) {
+			Parameters.ParametersParameterComponent matchParam = retVal.addParameter().setName("match");
+			populateTranslateMatchParts(translationMatch, matchParam);
+		}
+
+		return retVal;
+	}
+
+	private static void populateTranslateMatchParts(TranslateConceptResult theTranslationMatch, Parameters.ParametersParameterComponent theParam) {
+		if (theTranslationMatch.getEquivalence() != null) {
+			theParam.addPart().setName("equivalence").setValue(new CodeType(theTranslationMatch.getEquivalence()));
+		}
+
+		if (isNotBlank(theTranslationMatch.getSystem()) || isNotBlank(theTranslationMatch.getCode()) || isNotBlank(theTranslationMatch.getDisplay())) {
+			Coding value = new Coding(theTranslationMatch.getSystem(), theTranslationMatch.getCode(), theTranslationMatch.getDisplay());
+
+			if (isNotBlank(theTranslationMatch.getSystemVersion())) {
+				value.setVersion(theTranslationMatch.getSystemVersion());
+			}
+
+			theParam.addPart().setName("concept").setValue(value);
+		}
+
+		if (isNotBlank(theTranslationMatch.getConceptMapUrl())) {
+			theParam.addPart().setName("source").setValue(new UriType(theTranslationMatch.getConceptMapUrl()));
+		}
+	}
 }

@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.jpa.api.model.TranslationMatch;
+import ca.uhn.fhir.context.support.TranslateConceptResult;
+import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
-import ca.uhn.fhir.jpa.api.model.TranslationResult;
 import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -25,6 +25,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,9 +60,9 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 					.setCode("12345");
 				translationRequest.setTargetSystem(new UriType(CS_URL_3));
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertFalse(translationResult.getResult().booleanValue());
+				assertFalse(translationResult.getResult());
 			}
 		});
 
@@ -83,23 +84,24 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 					.setCode("12345");
 				translationRequest.setTargetSystem(new UriType(CS_URL_3));
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
+				assertTrue(translationResult.getResult());
+				assertEquals("Matches found", translationResult.getMessage());
 
-				assertEquals(2, translationResult.getMatches().size());
+				assertEquals(2, translationResult.getResults().size());
+				assertEquals(translationResult.size(), new HashSet<>(translationResult.getResults()).size());
 
-				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+				TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 				assertEquals("56789", translationMatch.getCode());
 				assertEquals("Target Code 56789", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
 				assertEquals("Version 4", translationMatch.getSystemVersion());
 				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
-				translationMatch = translationResult.getMatches().get(1);
-				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
+				translationMatch = translationResult.getResults().get(1);
+				assertEquals(ConceptMapEquivalence.WIDER.toCode(), translationMatch.getEquivalence());
 				assertEquals("67890", translationMatch.getCode());
 				assertEquals("Target Code 67890", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
@@ -126,15 +128,15 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 					.setCode("12345");
 				translationRequest.setTargetSystem(new UriType(CS_URL_2));
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
+				assertTrue(translationResult.getResult());
+				assertEquals("Matches found", translationResult.getMessage());
 
-				assertEquals(1, translationResult.getMatches().size());
+				assertEquals(1, translationResult.getResults().size());
 
-				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+				TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 				assertEquals("34567", translationMatch.getCode());
 				assertEquals("Target Code 34567", translationMatch.getDisplay());
 				assertEquals(CS_URL_2, translationMatch.getSystem());
@@ -161,12 +163,12 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 					.setCode("BOGUS");
 				translationRequest.setTargetSystem(new UriType(CS_URL_3));
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertFalse(translationResult.getResult().booleanValue());
-				assertEquals("No Matches found", translationResult.getMessage().getValueAsString());
+				assertFalse(translationResult.getResult());
+				assertEquals("No Matches found", translationResult.getMessage());
 
-				assertEquals(0, translationResult.getMatches().size());
+				assertEquals(0, translationResult.getResults().size());
 				// </editor-fold>
 			}
 		});
@@ -189,31 +191,31 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				translationRequest.getCodeableConcept().addCoding()
 					.setCode("12345");
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
+				assertTrue(translationResult.getResult());
+				assertEquals("Matches found", translationResult.getMessage());
 
-				assertEquals(3, translationResult.getMatches().size());
+				assertEquals(3, translationResult.getResults().size());
 
-				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+				TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 				assertEquals("34567", translationMatch.getCode());
 				assertEquals("Target Code 34567", translationMatch.getDisplay());
 				assertEquals(CS_URL_2, translationMatch.getSystem());
 				assertEquals("Version 2", translationMatch.getSystemVersion());
 				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
-				translationMatch = translationResult.getMatches().get(1);
-				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+				translationMatch = translationResult.getResults().get(1);
+				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 				assertEquals("56789", translationMatch.getCode());
 				assertEquals("Target Code 56789", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
 				assertEquals("Version 4", translationMatch.getSystemVersion());
 				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
-				translationMatch = translationResult.getMatches().get(2);
-				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
+				translationMatch = translationResult.getResults().get(2);
+				assertEquals(ConceptMapEquivalence.WIDER.toCode(), translationMatch.getEquivalence());
 				assertEquals("67890", translationMatch.getCode());
 				assertEquals("Target Code 67890", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
@@ -244,15 +246,15 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 					.setCode("12345");
 				translationRequest.setTargetSystem(new UriType(CS_URL_2));
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
+				assertTrue(translationResult.getResult());
+				assertEquals("Matches found", translationResult.getMessage());
 
-				assertEquals(1, translationResult.getMatches().size());
+				assertEquals(1, translationResult.getResults().size());
 
-				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+				TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 				assertEquals("34567", translationMatch.getCode());
 				assertEquals("Target Code 34567", translationMatch.getDisplay());
 				assertEquals(CS_URL_2, translationMatch.getSystem());
@@ -283,23 +285,23 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 					.setCode("12345");
 				translationRequest.setTargetSystem(new UriType(CS_URL_3));
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
+				assertTrue(translationResult.getResult());
+				assertEquals("Matches found", translationResult.getMessage());
 
-				assertEquals(2, translationResult.getMatches().size());
+				assertEquals(2, translationResult.getResults().size());
 
-				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+				TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 				assertEquals("56789", translationMatch.getCode());
 				assertEquals("Target Code 56789", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
 				assertEquals("Version 4", translationMatch.getSystemVersion());
 				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
-				translationMatch = translationResult.getMatches().get(1);
-				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
+				translationMatch = translationResult.getResults().get(1);
+				assertEquals(ConceptMapEquivalence.WIDER.toCode(), translationMatch.getEquivalence());
 				assertEquals("67890", translationMatch.getCode());
 				assertEquals("Target Code 67890", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
@@ -328,31 +330,31 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 					.setSystem(CS_URL)
 					.setCode("12345");
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
+				assertTrue(translationResult.getResult());
+				assertEquals("Matches found", translationResult.getMessage());
 
-				assertEquals(3, translationResult.getMatches().size());
+				assertEquals(3, translationResult.getResults().size());
 
-				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+				TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 				assertEquals("34567", translationMatch.getCode());
 				assertEquals("Target Code 34567", translationMatch.getDisplay());
 				assertEquals(CS_URL_2, translationMatch.getSystem());
 				assertEquals("Version 2", translationMatch.getSystemVersion());
 				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
-				translationMatch = translationResult.getMatches().get(1);
-				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+				translationMatch = translationResult.getResults().get(1);
+				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 				assertEquals("56789", translationMatch.getCode());
 				assertEquals("Target Code 56789", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
 				assertEquals("Version 4", translationMatch.getSystemVersion());
 				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
-				translationMatch = translationResult.getMatches().get(2);
-				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
+				translationMatch = translationResult.getResults().get(2);
+				assertEquals(ConceptMapEquivalence.WIDER.toCode(), translationMatch.getEquivalence());
 				assertEquals("67890", translationMatch.getCode());
 				assertEquals("Target Code 67890", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
@@ -383,15 +385,15 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 					.setCode("12345")
 					.setVersion("Version 1");
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
+				assertTrue(translationResult.getResult());
+				assertEquals("Matches found", translationResult.getMessage());
 
-				assertEquals(1, translationResult.getMatches().size());
+				assertEquals(1, translationResult.getResults().size());
 
-				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+				TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 				assertEquals("34567", translationMatch.getCode());
 				assertEquals("Target Code 34567", translationMatch.getDisplay());
 				assertEquals(CS_URL_2, translationMatch.getSystem());
@@ -422,23 +424,23 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 					.setCode("12345")
 					.setVersion("Version 3");
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
+				assertTrue(translationResult.getResult());
+				assertEquals("Matches found", translationResult.getMessage());
 
-				assertEquals(2, translationResult.getMatches().size());
+				assertEquals(2, translationResult.getResults().size());
 
-				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+				TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 				assertEquals("56789", translationMatch.getCode());
 				assertEquals("Target Code 56789", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
 				assertEquals("Version 4", translationMatch.getSystemVersion());
 				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
-				translationMatch = translationResult.getMatches().get(1);
-				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
+				translationMatch = translationResult.getResults().get(1);
+				assertEquals(ConceptMapEquivalence.WIDER.toCode(), translationMatch.getEquivalence());
 				assertEquals("67890", translationMatch.getCode());
 				assertEquals("Target Code 67890", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
@@ -467,31 +469,31 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 					.setCode("12345");
 				translationRequest.setSource(new UriType(VS_URL));
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
+				assertTrue(translationResult.getResult());
+				assertEquals("Matches found", translationResult.getMessage());
 
-				assertEquals(3, translationResult.getMatches().size());
+				assertEquals(3, translationResult.getResults().size());
 
-				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+				TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 				assertEquals("34567", translationMatch.getCode());
 				assertEquals("Target Code 34567", translationMatch.getDisplay());
 				assertEquals(CS_URL_2, translationMatch.getSystem());
 				assertEquals("Version 2", translationMatch.getSystemVersion());
 				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
-				translationMatch = translationResult.getMatches().get(1);
-				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+				translationMatch = translationResult.getResults().get(1);
+				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 				assertEquals("56789", translationMatch.getCode());
 				assertEquals("Target Code 56789", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
 				assertEquals("Version 4", translationMatch.getSystemVersion());
 				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
-				translationMatch = translationResult.getMatches().get(2);
-				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
+				translationMatch = translationResult.getResults().get(2);
+				assertEquals(ConceptMapEquivalence.WIDER.toCode(), translationMatch.getEquivalence());
 				assertEquals("67890", translationMatch.getCode());
 				assertEquals("Target Code 67890", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
@@ -520,31 +522,31 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 					.setCode("12345");
 				translationRequest.setTarget(new UriType(VS_URL_2));
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
+				assertTrue(translationResult.getResult());
+				assertEquals("Matches found", translationResult.getMessage());
 
-				assertEquals(3, translationResult.getMatches().size());
+				assertEquals(3, translationResult.getResults().size());
 
-				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+				TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 				assertEquals("34567", translationMatch.getCode());
 				assertEquals("Target Code 34567", translationMatch.getDisplay());
 				assertEquals(CS_URL_2, translationMatch.getSystem());
 				assertEquals("Version 2", translationMatch.getSystemVersion());
 				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
-				translationMatch = translationResult.getMatches().get(1);
-				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+				translationMatch = translationResult.getResults().get(1);
+				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 				assertEquals("56789", translationMatch.getCode());
 				assertEquals("Target Code 56789", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
 				assertEquals("Version 4", translationMatch.getSystemVersion());
 				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
-				translationMatch = translationResult.getMatches().get(2);
-				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
+				translationMatch = translationResult.getResults().get(2);
+				assertEquals(ConceptMapEquivalence.WIDER.toCode(), translationMatch.getEquivalence());
 				assertEquals("67890", translationMatch.getCode());
 				assertEquals("Target Code 67890", translationMatch.getDisplay());
 				assertEquals(CS_URL_3, translationMatch.getSystem());
@@ -577,15 +579,15 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				translationRequest.setTargetSystem(new UriType(CS_URL_4));
 				translationRequest.setReverse(true);
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
+				assertTrue(translationResult.getResult());
+				assertEquals("Matches found", translationResult.getMessage());
 
-				assertEquals(1, translationResult.getMatches().size());
+				assertEquals(1, translationResult.getResults().size());
 
-				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.NARROWER, translationMatch.getEquivalence());
+				TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+				assertEquals(ConceptMapEquivalence.NARROWER.toCode(), translationMatch.getEquivalence());
 				assertEquals("78901", translationMatch.getCode());
 				assertEquals("Source Code 78901", translationMatch.getDisplay());
 				assertEquals(CS_URL_4, translationMatch.getSystem());
@@ -618,20 +620,20 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				translationRequest.setTargetSystem(new UriType(CS_URL));
 				translationRequest.setReverse(true);
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
+				assertTrue(translationResult.getResult());
+				assertEquals("Matches found", translationResult.getMessage());
 
-				assertEquals(1, translationResult.getMatches().size());
+				assertEquals(1, translationResult.getResults().size());
 
-				TranslationMatch translationMatch = translationResult.getMatches().get(0);
+				TranslateConceptResult translationMatch = translationResult.getResults().get(0);
 				assertEquals("12345", translationMatch.getCode());
 				assertEquals("Source Code 12345", translationMatch.getDisplay());
 				assertEquals(CS_URL, translationMatch.getSystem());
 				assertEquals("Version 3", translationMatch.getSystemVersion());
 				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
-				assertEquals(ConceptMapEquivalence.WIDER, translationMatch.getEquivalence());
+				assertEquals(ConceptMapEquivalence.WIDER.toCode(), translationMatch.getEquivalence());
 			}
 		});
 	}
@@ -653,12 +655,12 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				translationRequest.setTargetSystem(new UriType(CS_URL));
 				translationRequest.setReverse(true);
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertFalse(translationResult.getResult().booleanValue());
-				assertEquals("No matches found", translationResult.getMessage().getValueAsString());
+				assertFalse(translationResult.getResult());
+				assertEquals("No Matches found", translationResult.getMessage());
 
-				assertEquals(0, translationResult.getMatches().size());
+				assertEquals(0, translationResult.getResults().size());
 				// </editor-fold>
 			}
 		});
@@ -683,23 +685,23 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 					.setCode("34567");
 				translationRequest.setReverse(true);
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
+				assertTrue(translationResult.getResult());
+				assertEquals("Matches found", translationResult.getMessage());
 
-				assertEquals(2, translationResult.getMatches().size());
+				assertEquals(2, translationResult.getResults().size());
 
-				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+				TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 				assertEquals("12345", translationMatch.getCode());
 				assertEquals("Source Code 12345", translationMatch.getDisplay());
 				assertEquals(CS_URL, translationMatch.getSystem());
 				assertEquals("Version 1", translationMatch.getSystemVersion());
 				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
-				translationMatch = translationResult.getMatches().get(1);
-				assertEquals(ConceptMapEquivalence.NARROWER, translationMatch.getEquivalence());
+				translationMatch = translationResult.getResults().get(1);
+				assertEquals(ConceptMapEquivalence.NARROWER.toCode(), translationMatch.getEquivalence());
 				assertEquals("78901", translationMatch.getCode());
 				assertEquals("Source Code 78901", translationMatch.getDisplay());
 				assertEquals(CS_URL_4, translationMatch.getSystem());
@@ -732,15 +734,15 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				translationRequest.setTargetSystem(new UriType(CS_URL));
 				translationRequest.setReverse(true);
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
+				assertTrue(translationResult.getResult());
+				assertEquals("Matches found", translationResult.getMessage());
 
-				assertEquals(1, translationResult.getMatches().size());
+				assertEquals(1, translationResult.getResults().size());
 
-				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+				TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 				assertEquals("12345", translationMatch.getCode());
 				assertEquals("Source Code 12345", translationMatch.getDisplay());
 				assertEquals(CS_URL, translationMatch.getSystem());
@@ -773,15 +775,15 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				translationRequest.setTargetSystem(new UriType(CS_URL_4));
 				translationRequest.setReverse(true);
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
+				assertTrue(translationResult.getResult());
+				assertEquals("Matches found", translationResult.getMessage());
 
-				assertEquals(1, translationResult.getMatches().size());
+				assertEquals(1, translationResult.getResults().size());
 
-				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.NARROWER, translationMatch.getEquivalence());
+				TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+				assertEquals(ConceptMapEquivalence.NARROWER.toCode(), translationMatch.getEquivalence());
 				assertEquals("78901", translationMatch.getCode());
 				assertEquals("Source Code 78901", translationMatch.getDisplay());
 				assertEquals(CS_URL_4, translationMatch.getSystem());
@@ -812,23 +814,23 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 					.setCode("34567");
 				translationRequest.setReverse(true);
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
+				assertTrue(translationResult.getResult());
+				assertEquals("Matches found", translationResult.getMessage());
 
-				assertEquals(2, translationResult.getMatches().size());
+				assertEquals(2, translationResult.getResults().size());
 
-				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+				TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 				assertEquals("12345", translationMatch.getCode());
 				assertEquals("Source Code 12345", translationMatch.getDisplay());
 				assertEquals(CS_URL, translationMatch.getSystem());
 				assertEquals("Version 1", translationMatch.getSystemVersion());
 				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
-				translationMatch = translationResult.getMatches().get(1);
-				assertEquals(ConceptMapEquivalence.NARROWER, translationMatch.getEquivalence());
+				translationMatch = translationResult.getResults().get(1);
+				assertEquals(ConceptMapEquivalence.NARROWER.toCode(), translationMatch.getEquivalence());
 				assertEquals("78901", translationMatch.getCode());
 				assertEquals("Source Code 78901", translationMatch.getDisplay());
 				assertEquals(CS_URL_4, translationMatch.getSystem());
@@ -861,23 +863,23 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 					.setVersion("Version 2");
 				translationRequest.setReverse(true);
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
+				assertTrue(translationResult.getResult());
+				assertEquals("Matches found", translationResult.getMessage());
 
-				assertEquals(2, translationResult.getMatches().size());
+				assertEquals(2, translationResult.getResults().size());
 
-				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+				TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 				assertEquals("12345", translationMatch.getCode());
 				assertEquals("Source Code 12345", translationMatch.getDisplay());
 				assertEquals(CS_URL, translationMatch.getSystem());
 				assertEquals("Version 1", translationMatch.getSystemVersion());
 				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
-				translationMatch = translationResult.getMatches().get(1);
-				assertEquals(ConceptMapEquivalence.NARROWER, translationMatch.getEquivalence());
+				translationMatch = translationResult.getResults().get(1);
+				assertEquals(ConceptMapEquivalence.NARROWER.toCode(), translationMatch.getEquivalence());
 				assertEquals("78901", translationMatch.getCode());
 				assertEquals("Source Code 78901", translationMatch.getDisplay());
 				assertEquals(CS_URL_4, translationMatch.getSystem());
@@ -908,23 +910,23 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				translationRequest.setSource(new UriType(VS_URL_2));
 				translationRequest.setReverse(true);
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
+				assertTrue(translationResult.getResult());
+				assertEquals("Matches found", translationResult.getMessage());
 
-				assertEquals(2, translationResult.getMatches().size());
+				assertEquals(2, translationResult.getResults().size());
 
-				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+				TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 				assertEquals("12345", translationMatch.getCode());
 				assertEquals("Source Code 12345", translationMatch.getDisplay());
 				assertEquals(CS_URL, translationMatch.getSystem());
 				assertEquals("Version 1", translationMatch.getSystemVersion());
 				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
-				translationMatch = translationResult.getMatches().get(1);
-				assertEquals(ConceptMapEquivalence.NARROWER, translationMatch.getEquivalence());
+				translationMatch = translationResult.getResults().get(1);
+				assertEquals(ConceptMapEquivalence.NARROWER.toCode(), translationMatch.getEquivalence());
 				assertEquals("78901", translationMatch.getCode());
 				assertEquals("Source Code 78901", translationMatch.getDisplay());
 				assertEquals(CS_URL_4, translationMatch.getSystem());
@@ -955,23 +957,23 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				translationRequest.setTarget(new UriType(VS_URL));
 				translationRequest.setReverse(true);
 
-				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertTrue(translationResult.getResult().booleanValue());
-				assertEquals("Matches found", translationResult.getMessage().getValueAsString());
+				assertTrue(translationResult.getResult());
+				assertEquals("Matches found", translationResult.getMessage());
 
-				assertEquals(2, translationResult.getMatches().size());
+				assertEquals(2, translationResult.getResults().size());
 
-				TranslationMatch translationMatch = translationResult.getMatches().get(0);
-				assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+				TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+				assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 				assertEquals("12345", translationMatch.getCode());
 				assertEquals("Source Code 12345", translationMatch.getDisplay());
 				assertEquals(CS_URL, translationMatch.getSystem());
 				assertEquals("Version 1", translationMatch.getSystemVersion());
 				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
-				translationMatch = translationResult.getMatches().get(1);
-				assertEquals(ConceptMapEquivalence.NARROWER, translationMatch.getEquivalence());
+				translationMatch = translationResult.getResults().get(1);
+				assertEquals(ConceptMapEquivalence.NARROWER.toCode(), translationMatch.getEquivalence());
 				assertEquals("78901", translationMatch.getCode());
 				assertEquals("Source Code 78901", translationMatch.getDisplay());
 				assertEquals(CS_URL_4, translationMatch.getSystem());
@@ -1004,24 +1006,32 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 			translationRequest.setTarget(new UriType("http://target"));
 
 			ourLog.info("*** About to translate");
-			TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+			TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 			ourLog.info("*** Done translating");
 
-			assertTrue(translationResult.getResult().booleanValue());
-			assertEquals("Matches found", translationResult.getMessage().getValueAsString());
+			assertTrue(translationResult.getResult());
+			assertEquals("Matches found", translationResult.getMessage());
 
-			assertEquals(1, translationResult.getMatches().size());
+			assertEquals(1, translationResult.getResults().size());
 
-			TranslationMatch translationMatch = translationResult.getMatches().get(0);
-			assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+			TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+			assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 			assertEquals("target1", translationMatch.getCode());
 			assertNull(translationMatch.getDisplay());
 			assertEquals("http://target", translationMatch.getSystem());
 
 		});
 
-		List<IValidationSupport.TranslateCodeResult> translationResults = myValidationSupport.translateConcept(new IValidationSupport.TranslateCodeRequest("http://source", "source1", "http://target"));
-		assertThat(translationResults, hasItem(new IValidationSupport.TranslateCodeResult().setCodeSystemUrl("http://target").setCode("target1")));
+		List<TranslateConceptResult> translationResults = myValidationSupport.translateConcept(new IValidationSupport.TranslateCodeRequest("http://source", "source1", "http://target")).getResults();
+		assertThat(translationResults.toString(), translationResults, hasItem(
+			new TranslateConceptResult()
+				.setSystem("http://target")
+				.setCode("target1")
+				.setEquivalence("equal")
+				.setConceptMapUrl("http://foo")
+				.setValueSet("http://target"))
+		);
+		assertEquals(translationResults.size(), new HashSet<>(translationResults).size());
 	}
 
 	/**
@@ -1049,16 +1059,16 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 			translationRequest.setTarget(new UriType("http://target"));
 
 			ourLog.info("*** About to translate");
-			TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+			TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 			ourLog.info("*** Done translating");
 
-			assertTrue(translationResult.getResult().booleanValue());
-			assertEquals("Matches found", translationResult.getMessage().getValueAsString());
+			assertTrue(translationResult.getResult());
+			assertEquals("Matches found", translationResult.getMessage());
 
-			assertEquals(1, translationResult.getMatches().size());
+			assertEquals(1, translationResult.getResults().size());
 
-			TranslationMatch translationMatch = translationResult.getMatches().get(0);
-			assertEquals(ConceptMapEquivalence.EQUAL, translationMatch.getEquivalence());
+			TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+			assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 			assertEquals("target1", translationMatch.getCode());
 			assertNull(translationMatch.getDisplay());
 			assertEquals("http://target", translationMatch.getSystem());
@@ -1079,9 +1089,9 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 		TranslationRequest request = new TranslationRequest();
 		request.setCodeableConcept(sourceCode);
 		request.setTargetSystem(new UriType("http://hl7.org/fhir/sid/icd-10-us"));
-		TranslationResult outcome = myConceptMapDao.translate(request, mySrd);
+		TranslateConceptResults outcome = myConceptMapDao.translate(request, mySrd);
 
-		assertEquals("S52.209A", outcome.getMatches().get(0).getCode());
+		assertEquals("S52.209A", outcome.getResults().get(0).getCode());
 	}
 
 	@Test
