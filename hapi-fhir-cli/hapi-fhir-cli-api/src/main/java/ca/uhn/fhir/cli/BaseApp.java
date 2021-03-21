@@ -20,11 +20,21 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import static org.fusesource.jansi.Ansi.ansi;
+
 import ca.uhn.fhir.util.VersionUtil;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import com.helger.commons.io.file.FileHelper;
+
+import java.io.PrintWriter;
+import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -35,15 +45,6 @@ import org.apache.commons.text.WordUtils;
 import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.AnsiConsole;
 import org.slf4j.LoggerFactory;
-
-import java.io.PrintWriter;
-import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.fusesource.jansi.Ansi.ansi;
 
 @SuppressWarnings("WeakerAccess")
 public abstract class BaseApp {
@@ -282,6 +283,7 @@ public abstract class BaseApp {
 			System.err.println("Invalid command options for command: " + command.getCommandName());
 			System.err.println("  " + ansi().fg(Ansi.Color.RED).bold() + e.getMessage());
 			System.err.println("" + ansi().fg(Ansi.Color.WHITE).boldOff());
+			e.printStackTrace();
 			logCommandUsageNoHeader(command);
 			runCleanupHookAndUnregister();
 			exitDueToException(e);

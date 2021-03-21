@@ -23,8 +23,8 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 public class ValidationSupportChain implements IValidationSupport {
 
 	private List<IValidationSupport> myChain;
-	private boolean errorOnUnknownCodeSystem = false;
-	private boolean errorOnUnknownValueSet = false;
+	private boolean errorOnUnknownCodeSystem = true;
+	private boolean errorOnUnknownValueSet = true;
 
 	/**
 	 * Constructor

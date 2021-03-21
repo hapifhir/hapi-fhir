@@ -201,6 +201,7 @@ public class CreatePackageCommand extends BaseCommand {
 
 				for (File next : files) {
 
+					ourLog.info("file: " + next.getAbsolutePath());
 					byte[] contentBytes;
 					String type;
 					try {

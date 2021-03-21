@@ -10,20 +10,25 @@
 	</parent>
 
 	<artifactId>hapi-fhir-validation</artifactId>
+	<version>5.4.0-PRE1-VALIDATE-FIX</version>
 	<packaging>bundle</packaging>
 
 	<name>HAPI FHIR - Validation</name>
+
+	<properties>
+		<hapi.version>5.4.0-PRE1-SNAPSHOT</hapi.version>
+	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>${project.version}</version>
+			<version>${hapi.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-converter</artifactId>
-			<version>${project.version}</version>
+			<version>${hapi.version}</version>
 		</dependency>
 
 		<dependency>
@@ -116,55 +121,55 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
-			<version>${project.version}</version>
+			<version>${hapi.version}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
-			<version>${project.version}</version>
+			<version>${hapi.version}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
-			<version>${project.version}</version>
+			<version>${hapi.version}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2.1</artifactId>
-			<version>${project.version}</version>
+			<version>${hapi.version}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu2.1</artifactId>
-			<version>${project.version}</version>
+			<version>${hapi.version}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu3</artifactId>
-			<version>${project.version}</version>
+			<version>${hapi.version}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
-			<version>${project.version}</version>
+			<version>${hapi.version}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r4</artifactId>
-			<version>${project.version}</version>
+			<version>${hapi.version}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-r4</artifactId>
-			<version>${project.version}</version>
+			<version>${hapi.version}</version>
 			<optional>true</optional>
 		</dependency>
 
@@ -173,12 +178,12 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r5</artifactId>
-			<version>${project.version}</version>
+			<version>${hapi.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-r5</artifactId>
-			<version>${project.version}</version>
+			<version>${hapi.version}</version>
 			<optional>true</optional>
 		</dependency>
 
@@ -191,13 +196,13 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-server</artifactId>
-			<version>${project.version}</version>
+			<version>${hapi.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-client</artifactId>
-			<version>${project.version}</version>
+			<version>${hapi.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -248,7 +253,7 @@
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-test-utilities</artifactId>
-            <version>${project.version}</version>
+            <version>${hapi.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -354,23 +359,23 @@
 						-->
 						<!--  add imports for validation resource packages -->
 						<Import-Package>
-                        	org.hl7.fhir.instance.model.profile;version="${project.version}";resolution:=optional,
-                        	org.hl7.fhir.instance.model.schema;version="${project.version}";resolution:=optional,
-                        	org.hl7.fhir.instance.model.valueset;version="${project.version}";resolution:=optional,
-                        	org.hl7.fhir.dstu2016may.model.profile;version="${project.version}";resolution:=optional,
-                        	org.hl7.fhir.dstu2016may.model.schema;version="${project.version}";resolution:=optional,
-                        	org.hl7.fhir.dstu2016may.model.valueset;version="${project.version}";resolution:=optional,
-                        	org.hl7.fhir.dstu3.model.extension;version="${project.version}";resolution:=optional,
-                        	org.hl7.fhir.dstu3.model.profile;version="${project.version}";resolution:=optional,
-                        	org.hl7.fhir.dstu3.model.schema;version="${project.version}";resolution:=optional,
-                        	org.hl7.fhir.dstu3.model.valueset;version="${project.version}";resolution:=optional,
-                        	org.hl7.fhir.r4.model.extension;version="${project.version}";resolution:=optional,
-                        	org.hl7.fhir.r4.model.profile;version="${project.version}";resolution:=optional,
-                        	org.hl7.fhir.r4.model.schema;version="${project.version}";resolution:=optional,
-                        	org.hl7.fhir.r4.model.valueset;version="${project.version}";resolution:=optional,
-                        	org.hl7.fhir.r5.model.extension;version="${project.version}";resolution:=optional,
-                        	org.hl7.fhir.r5.model.profile;version="${project.version}";resolution:=optional,
-                        	org.hl7.fhir.r5.model.valueset;version="${project.version}";resolution:=optional,
+                        	org.hl7.fhir.instance.model.profile;version="${hapi.version}";resolution:=optional,
+                        	org.hl7.fhir.instance.model.schema;version="${hapi.version}";resolution:=optional,
+                        	org.hl7.fhir.instance.model.valueset;version="${hapi.version}";resolution:=optional,
+                        	org.hl7.fhir.dstu2016may.model.profile;version="${hapi.version}";resolution:=optional,
+                        	org.hl7.fhir.dstu2016may.model.schema;version="${hapi.version}";resolution:=optional,
+                        	org.hl7.fhir.dstu2016may.model.valueset;version="${hapi.version}";resolution:=optional,
+                        	org.hl7.fhir.dstu3.model.extension;version="${hapi.version}";resolution:=optional,
+                        	org.hl7.fhir.dstu3.model.profile;version="${hapi.version}";resolution:=optional,
+                        	org.hl7.fhir.dstu3.model.schema;version="${hapi.version}";resolution:=optional,
+                        	org.hl7.fhir.dstu3.model.valueset;version="${hapi.version}";resolution:=optional,
+                        	org.hl7.fhir.r4.model.extension;version="${hapi.version}";resolution:=optional,
+                        	org.hl7.fhir.r4.model.profile;version="${hapi.version}";resolution:=optional,
+                        	org.hl7.fhir.r4.model.schema;version="${hapi.version}";resolution:=optional,
+                        	org.hl7.fhir.r4.model.valueset;version="${hapi.version}";resolution:=optional,
+                        	org.hl7.fhir.r5.model.extension;version="${hapi.version}";resolution:=optional,
+                        	org.hl7.fhir.r5.model.profile;version="${hapi.version}";resolution:=optional,
+                        	org.hl7.fhir.r5.model.valueset;version="${hapi.version}";resolution:=optional,
                         	*
 						</Import-Package>
 					</instructions>

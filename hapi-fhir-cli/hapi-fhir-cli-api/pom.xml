@@ -256,6 +256,14 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.basepom.maven</groupId>
+				<artifactId>duplicate-finder-maven-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+				<version>1.4.0</version>
+			</plugin>
 		</plugins>
 	</build>
 
