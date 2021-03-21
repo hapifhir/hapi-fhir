@@ -1324,9 +1324,9 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
 
 		param = getParametersByName(respParams, "match").get(2);
-		assertEquals(2, param.getPart().size());
+		assertEquals(3, param.getPart().size());
 		part = getPartByName(param, "equivalence");
-		assertFalse(part.hasValue());
+		assertEquals("wider", ((CodeType)part.getValue()).getCode());
 		part = getPartByName(param, "concept");
 		coding = (Coding) part.getValue();
 		assertEquals("23456", coding.getCode());

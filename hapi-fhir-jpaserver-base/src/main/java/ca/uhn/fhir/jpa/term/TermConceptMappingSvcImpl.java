@@ -115,6 +115,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 	}
 
 	@Override
+	@Transactional
 	public TranslateConceptResults translateConcept(TranslateCodeRequest theRequest) {
 
 		CodeableConcept sourceCodeableConcept = new CodeableConcept();
@@ -392,9 +393,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 							translationMatch.setSystemVersion(next.getSystemVersion());
 							translationMatch.setConceptMapUrl(next.getConceptMapUrl());
 
-							if (!targets.contains(translationMatch)) {
-								targets.add(translationMatch);
-							}
+							targets.add(translationMatch);
 						}
 					}
 
@@ -529,9 +528,11 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 												translationMatch.setEquivalence(next.getEquivalence().toCode());
 											}
 
-											if (!elements.contains(translationMatch)) {
-												elements.add(translationMatch);
+											if (alreadyContainsMapping(elements, translationMatch) || alreadyContainsMapping(retVal.getResults(), translationMatch)) {
+												continue;
 											}
+
+											elements.add(translationMatch);
 										}
 									}
 
@@ -553,6 +554,19 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 
 		buildTranslationResult(retVal);
 		return retVal;
+	}
+
+	private boolean alreadyContainsMapping(List<TranslateConceptResult> elements, TranslateConceptResult translationMatch) {
+		for (TranslateConceptResult nextExistingElement : elements) {
+			if (nextExistingElement.getSystem().equals(translationMatch.getSystem())) {
+				if (nextExistingElement.getSystemVersion().equals(translationMatch.getSystemVersion())) {
+					if (nextExistingElement.getCode().equals(translationMatch.getCode())) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	public void deleteConceptMap(ResourceTable theResourceTable) {
