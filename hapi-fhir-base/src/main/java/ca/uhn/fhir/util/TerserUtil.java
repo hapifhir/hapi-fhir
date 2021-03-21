@@ -47,7 +47,7 @@ public final class TerserUtil {
 
 	public static final String FIELD_NAME_IDENTIFIER = "identifier";
 
-	private static final String EQUALS_DEEP="equalsDeep";
+	private static final String EQUALS_DEEP = "equalsDeep";
 
 	public static final Collection<String> IDS_AND_META_EXCLUDES =
 		Collections.unmodifiableSet(Stream.of("id", "identifier", "meta").collect(Collectors.toSet()));
@@ -177,10 +177,10 @@ public final class TerserUtil {
 		});
 	}
 
-	private static Method getMethod(IBase item, String methodName){
+	private static Method getMethod(IBase theBase, String theMethodName) {
 		Method method = null;
-		for (Method m : item.getClass().getDeclaredMethods()) {
-			if (m.getName().equals(methodName)) {
+		for (Method m : theBase.getClass().getDeclaredMethods()) {
+			if (m.getName().equals(theMethodName)) {
 				method = m;
 				break;
 			}
@@ -188,18 +188,31 @@ public final class TerserUtil {
 		return method;
 	}
 
-	public static boolean equals(IBase theItem1, IBase theItem2){
-		final Method m = getMethod(theItem1, EQUALS_DEEP);
+	/**
+	 * Checks if two items are equal via {@link #EQUALS_DEEP} method
+	 *
+	 * @param theItem1 First item to compare
+	 * @param theItem2 Second item to compare
+	 * @return Returns true if they are equal and false otherwise
+	 */
+	public static boolean equals(IBase theItem1, IBase theItem2) {
+		if (theItem1 == null) {
+			return theItem2 == null;
+		}
 
+		final Method m = getMethod(theItem1, EQUALS_DEEP);
+		if (m == null) {
+			throw new IllegalArgumentException(String.format("Instance %s do not provide %s method", theItem1, EQUALS_DEEP));
+		}
 		return equals(theItem1, theItem2, m);
 	}
 
-	public static boolean equals(IBase theItem1, IBase theItem2, Method m) {
+	private static boolean equals(IBase theItem1, IBase theItem2, Method m) {
 		if (m != null) {
 			try {
 				return (Boolean) m.invoke(theItem1, theItem2);
 			} catch (Exception e) {
-				throw new RuntimeException("Unable to compare equality via equalsDeep", e);
+				throw new RuntimeException(String.format("Unable to compare equality via %s", EQUALS_DEEP), e);
 			}
 		}
 		return theItem1.equals(theItem2);
@@ -314,10 +327,20 @@ public final class TerserUtil {
 	 */
 	public static void setField(FhirContext theFhirContext, FhirTerser theTerser, String theFieldName, IBaseResource theResource, IBase... theValues) {
 		BaseRuntimeChildDefinition childDefinition = getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theResource);
-
 		List<IBase> theFromFieldValues = childDefinition.getAccessor().getValues(theResource);
+		if (theFromFieldValues.isEmpty()) {
+			for (IBase value : theValues) {
+				try {
+					childDefinition.getMutator().addValue(theResource, value);
+				} catch (UnsupportedOperationException e) {
+					ourLog.warn("Resource {} does not support multiple values, but an attempt to set {} was made. Setting the first item only", theResource, theValues);
+					childDefinition.getMutator().setValue(theResource, value);
+					break;
+				}
+			}
+			return;
+		}
 		List<IBase> theToFieldValues = Arrays.asList(theValues);
-
 		mergeFields(theTerser, theResource, childDefinition, theFromFieldValues, theToFieldValues);
 	}
 
@@ -505,6 +528,9 @@ public final class TerserUtil {
 	 */
 	public static <T extends IBase> T newElement(FhirContext theFhirContext, String theElementType, Object theConstructorParam) {
 		BaseRuntimeElementDefinition def = theFhirContext.getElementDefinition(theElementType);
+		if (def == null) {
+			throw new IllegalArgumentException(String.format("Unable to find element type definition for %s", theElementType));
+		}
 		return (T) def.newInstance(theConstructorParam);
 	}
 
