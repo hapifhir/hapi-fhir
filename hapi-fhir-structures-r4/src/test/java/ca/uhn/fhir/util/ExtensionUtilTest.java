@@ -2,7 +2,9 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -34,5 +36,41 @@ class ExtensionUtilTest {
 
 		IBaseDatatype ext = ExtensionUtil.getExtension(p1, EXT_URL).getValue();
 		assertEquals("1", ext.toString());
+	}
+
+	@Test
+	void testAddExtension() {
+		Patient p = new Patient();
+		assertNotNull(ExtensionUtil.addExtension(p));
+		assertNotNull(ExtensionUtil.addExtension(p, "myUrl"));
+
+		assertEquals(2, p.getExtension().size());
+		assertEquals("myUrl", p.getExtension().get(1).getUrl());
+	}
+
+	@Test
+	void testHasExtension() {
+		Patient p = new Patient();
+		p.addExtension("URL", new StringType("VALUE"));
+
+		assertTrue(ExtensionUtil.hasExtension(p, "URL"));
+		assertTrue(ExtensionUtil.hasExtension(p, "URL", "VALUE"));
+	}
+
+	@Test
+	void testClearExtension() {
+		Patient p = new Patient();
+		p.addExtension("URL", new StringType("VALUE"));
+		p.addExtension("URL2", new StringType("VALUE2"));
+
+		ExtensionUtil.clearExtensions(p, e -> e.getUrl().equals("URL"));
+
+		assertEquals(1, p.getExtension().size());
+		assertFalse(ExtensionUtil.hasExtension(p, "URL"));
+		assertTrue(ExtensionUtil.hasExtension(p, "URL2"));
+
+		ExtensionUtil.clearExtensions(p);
+
+		assertEquals(0, p.getExtension().size());
 	}
 }
