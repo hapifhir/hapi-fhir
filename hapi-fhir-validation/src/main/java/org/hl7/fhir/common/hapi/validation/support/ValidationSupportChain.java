@@ -1,5 +1,7 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -7,21 +9,22 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nonnull;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public class ValidationSupportChain implements IValidationSupport {
 
 	private List<IValidationSupport> myChain;
+	private boolean errorOnUnknownCodeSystem = false;
+	private boolean errorOnUnknownValueSet = false;
 
 	/**
 	 * Constructor
@@ -240,11 +243,21 @@ public class ValidationSupportChain implements IValidationSupport {
 				}
 			}
 		}
-		return null;
+		if (errorOnUnknownCodeSystem) {
+			return null;
+		} else {
+			CodeValidationResult result = new CodeValidationResult();
+			result.setSeverity(IssueSeverity.WARNING);
+			result.setMessage("CodeSystem is unknown so the code cannot be validated");
+			result.setCodeSystemName(theCodeSystem);
+			return result;
+		}
 	}
 
 	@Override
-	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext
+																			theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String
+																			theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		for (IValidationSupport next : myChain) {
 			String url = CommonCodeSystemsTerminologyService.getValueSetUrl(theValueSet);
 			if (isBlank(url) || next.isValueSetSupported(theValidationSupportContext, url)) {
@@ -254,11 +267,20 @@ public class ValidationSupportChain implements IValidationSupport {
 				}
 			}
 		}
-		return null;
+		if (errorOnUnknownValueSet) {
+			return null;
+		} else {
+			CodeValidationResult result = new CodeValidationResult();
+			result.setSeverity(IssueSeverity.WARNING);
+			result.setMessage("ValueSet is unknown so the code cannot be validated");
+			result.setCodeSystemName(theCodeSystem);
+			return result;
+		}
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(ValidationSupportContext
+													  theValidationSupportContext, String theSystem, String theCode) {
 		for (IValidationSupport next : myChain) {
 			if (next.isCodeSystemSupported(theValidationSupportContext, theSystem)) {
 				return next.lookupCode(theValidationSupportContext, theSystem, theCode);
@@ -267,5 +289,11 @@ public class ValidationSupportChain implements IValidationSupport {
 		return null;
 	}
 
+	public boolean isErrorOnUnknownCodeSystem() {
+		return errorOnUnknownCodeSystem;
+	}
 
+	public boolean isErrorOnUnknownValueSet() {
+		return errorOnUnknownValueSet;
+	}
 }
