@@ -22,8 +22,9 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
-import ca.uhn.fhir.jpa.api.model.TranslationResult;
+import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -151,10 +152,10 @@ public class BaseJpaResourceProviderConceptMapDstu3 extends JpaResourceProviderD
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoConceptMap<ConceptMap> dao = (IFhirResourceDaoConceptMap<ConceptMap>) getDao();
-			TranslationResult result = dao.translate(translationRequest, theRequestDetails);
+			TranslateConceptResults result = dao.translate(translationRequest, theRequestDetails);
 
 			// Convert from R4 to DSTU3
-			return convertParameters(result.toParameters());
+			return convertParameters(TermConceptMappingSvcImpl.toParameters(result));
 		} catch (FHIRException fe) {
 			throw new InternalErrorException(fe);
 		} finally {

@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2488
+title: "Two new server interceptors have been added that can be used to map codes and populate code display names respectively
+   using the server terminology services."

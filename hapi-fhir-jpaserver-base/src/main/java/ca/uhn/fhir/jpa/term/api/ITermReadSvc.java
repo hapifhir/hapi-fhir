@@ -91,17 +91,9 @@ public interface ITermReadSvc extends IValidationSupport {
 
 	CodeSystem fetchCanonicalCodeSystemFromCompleteContext(String theSystem);
 
-	void deleteConceptMapAndChildren(ResourceTable theResourceTable);
-
 	void deleteValueSetAndChildren(ResourceTable theResourceTable);
 
-	void storeTermConceptMapAndChildren(ResourceTable theResourceTable, ConceptMap theConceptMap);
-
 	void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet);
-
-	List<TermConceptMapGroupElementTarget> translate(TranslationRequest theTranslationRequest);
-
-	List<TermConceptMapGroupElement> translateWithReverse(TranslationRequest theTranslationRequest);
 
 	IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB);
 
