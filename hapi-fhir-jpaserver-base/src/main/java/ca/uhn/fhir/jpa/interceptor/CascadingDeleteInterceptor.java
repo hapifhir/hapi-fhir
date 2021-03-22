@@ -129,7 +129,7 @@ public class CascadingDeleteInterceptor {
 				IFhirResourceDao dao = myDaoRegistry.getResourceDao(nextSource.getResourceType());
 
 				// Interceptor call: STORAGE_CASCADE_DELETE
-				IBaseResource resource = dao.read(nextSource);
+				IBaseResource resource = dao.read(nextSource, theRequest);
 				HookParams params = new HookParams()
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest)
