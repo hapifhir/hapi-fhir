@@ -254,11 +254,11 @@ public class ExtensionUtil {
 
 	/**
 	 * Compares two extensions, returns true if they have the same value and url
-	 * @param leftExtension
-	 * @param rightExtension
+	 * @param theLeftExtension : Extension to be evaluated #1
+	 * @param theRightExtension : Extension to be evaluated #2
 	 * @return Result of the comparison
 	 */
-	public static boolean equals(IBaseExtension leftExtension, IBaseExtension rightExtension){
-		return TerserUtil.equals(leftExtension, rightExtension);
+	public static boolean equals(IBaseExtension theLeftExtension, IBaseExtension theRightExtension){
+		return TerserUtil.equals(theLeftExtension, theRightExtension);
 	}
 }

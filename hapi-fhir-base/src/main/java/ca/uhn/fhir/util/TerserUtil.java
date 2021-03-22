@@ -30,7 +30,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -47,7 +46,7 @@ public final class TerserUtil {
 
 	public static final String FIELD_NAME_IDENTIFIER = "identifier";
 
-	private static final String EQUALS_DEEP = "equalsDeep";
+	private static final String OUR_EQUALS_DEEP = "equalsDeep";
 
 	public static final Collection<String> IDS_AND_META_EXCLUDES =
 		Collections.unmodifiableSet(Stream.of("id", "identifier", "meta").collect(Collectors.toSet()));
@@ -189,7 +188,7 @@ public final class TerserUtil {
 	}
 
 	/**
-	 * Checks if two items are equal via {@link #EQUALS_DEEP} method
+	 * Checks if two items are equal via {@link #OUR_EQUALS_DEEP} method
 	 *
 	 * @param theItem1 First item to compare
 	 * @param theItem2 Second item to compare
@@ -200,27 +199,27 @@ public final class TerserUtil {
 			return theItem2 == null;
 		}
 
-		final Method m = getMethod(theItem1, EQUALS_DEEP);
-		if (m == null) {
-			throw new IllegalArgumentException(String.format("Instance %s do not provide %s method", theItem1, EQUALS_DEEP));
+		final Method method = getMethod(theItem1, OUR_EQUALS_DEEP);
+		if (method == null) {
+			throw new IllegalArgumentException(String.format("Instance %s do not provide %s method", theItem1, OUR_EQUALS_DEEP));
 		}
-		return equals(theItem1, theItem2, m);
+		return equals(theItem1, theItem2, method);
 	}
 
-	private static boolean equals(IBase theItem1, IBase theItem2, Method m) {
-		if (m != null) {
+	private static boolean equals(IBase theItem1, IBase theItem2, Method theMethod) {
+		if (theMethod != null) {
 			try {
-				return (Boolean) m.invoke(theItem1, theItem2);
+				return (Boolean) theMethod.invoke(theItem1, theItem2);
 			} catch (Exception e) {
-				throw new RuntimeException(String.format("Unable to compare equality via %s", EQUALS_DEEP), e);
+				throw new RuntimeException(String.format("Unable to compare equality via %s", OUR_EQUALS_DEEP), e);
 			}
 		}
 		return theItem1.equals(theItem2);
 	}
 
 	private static boolean contains(IBase theItem, List<IBase> theItems) {
-		final Method m = getMethod(theItem, EQUALS_DEEP);
-		return theItems.stream().anyMatch(i -> equals(i, theItem, m));
+		final Method method = getMethod(theItem, OUR_EQUALS_DEEP);
+		return theItems.stream().anyMatch(i -> equals(i, theItem, method));
 	}
 
 	/**
