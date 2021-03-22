@@ -22,8 +22,9 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
-import ca.uhn.fhir.jpa.api.model.TranslationResult;
+import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -141,8 +142,8 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoConceptMap<ConceptMap> dao = (IFhirResourceDaoConceptMap<ConceptMap>) getDao();
-			TranslationResult result = dao.translate(translationRequest, theRequestDetails);
-			return result.toParameters();
+			TranslateConceptResults result = dao.translate(translationRequest, theRequestDetails);
+			return TermConceptMappingSvcImpl.toParameters(result);
 		} finally {
 			endRequest(theServletRequest);
 		}

@@ -88,7 +88,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
@@ -170,7 +170,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);

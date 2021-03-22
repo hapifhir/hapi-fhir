@@ -21,6 +21,7 @@ package ca.uhn.hapi.fhir.docs;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.*;
@@ -222,5 +223,26 @@ public class ServletExamples {
       
    }
    // END SNIPPET: corsInterceptor
+
+
+	@WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
+	public class RestfulServerWithResponseTerminologyTranslationInterceptor extends RestfulServer {
+
+		private IValidationSupport myValidationSupport;
+
+		@Override
+		protected void initialize() throws ServletException {
+			// START SNIPPET: ResponseTerminologyTranslationInterceptor
+
+			// Create an interceptor that will map from a proprietary CodeSystem to LOINC
+			ResponseTerminologyTranslationInterceptor interceptor = new ResponseTerminologyTranslationInterceptor(myValidationSupport);
+			interceptor.addMappingSpecification("http://examplelabs.org", "http://loinc.org");
+
+			// Register the interceptor
+			registerInterceptor(interceptor);
+
+			// END SNIPPET: ResponseTerminologyTranslationInterceptor
+		}
+	}
 
 }
