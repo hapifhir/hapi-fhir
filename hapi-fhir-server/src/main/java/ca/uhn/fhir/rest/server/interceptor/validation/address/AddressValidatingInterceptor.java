@@ -129,11 +129,11 @@ public class AddressValidatingInterceptor {
 			AddressValidationResult validationResult = getAddressValidator().isValid(theAddress, theFhirContext);
 			ourLog.debug("Validated address {}", validationResult);
 
-			ExtensionUtil.setExtension(theFhirContext, theAddress, IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL,
+			ExtensionUtil.setExtensionAsString(theFhirContext, theAddress, IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL,
 				validationResult.isValid() ? IAddressValidator.EXT_VALUE_VALID : IAddressValidator.EXT_VALUE_INVALID);
 		} catch (Exception ex) {
 			ourLog.warn("Unable to validate address", ex);
-			ExtensionUtil.setExtension(theFhirContext, theAddress, IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL, IAddressValidator.EXT_UNABLE_TO_VALIDATE);
+			ExtensionUtil.setExtensionAsString(theFhirContext, theAddress, IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL, IAddressValidator.EXT_UNABLE_TO_VALIDATE);
 		}
 	}
 

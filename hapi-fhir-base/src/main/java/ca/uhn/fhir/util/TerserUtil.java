@@ -125,7 +125,7 @@ public final class TerserUtil {
 	 * @return Returns the first value for the specified field or null if field with the provided name doesn't exist or
 	 * has no values
 	 */
-	public static IBase getValue(FhirContext theFhirContext, IBaseResource theResource, String theFieldName) {
+	public static IBase getValueFirstRep(FhirContext theFhirContext, IBaseResource theResource, String theFieldName) {
 		List<IBase> values = getValues(theFhirContext, theResource, theFieldName);
 		if (values == null || values.isEmpty()) {
 			return null;

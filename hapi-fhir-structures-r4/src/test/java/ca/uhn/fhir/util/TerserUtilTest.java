@@ -2,7 +2,6 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import org.checkerframework.checker.units.qual.A;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
@@ -13,8 +12,6 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.junit.jupiter.api.Test;
-
-import java.util.GregorianCalendar;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -278,10 +275,10 @@ class TerserUtilTest {
 		Patient p1 = new Patient();
 		p1.addName().setFamily("Doe");
 
-		assertEquals("Doe", ((HumanName) TerserUtil.getValue(ourFhirContext, p1, "name")).getFamily());
+		assertEquals("Doe", ((HumanName) TerserUtil.getValueFirstRep(ourFhirContext, p1, "name")).getFamily());
 		assertFalse(TerserUtil.getValues(ourFhirContext, p1, "name").isEmpty());
 		assertNull(TerserUtil.getValues(ourFhirContext, p1, "whoaIsThatReal"));
-		assertNull(TerserUtil.getValue(ourFhirContext, p1, "whoaIsThatReal"));
+		assertNull(TerserUtil.getValueFirstRep(ourFhirContext, p1, "whoaIsThatReal"));
 	}
 
 	@Test
