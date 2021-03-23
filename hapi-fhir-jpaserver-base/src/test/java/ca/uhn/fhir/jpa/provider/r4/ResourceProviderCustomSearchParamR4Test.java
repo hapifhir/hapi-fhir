@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleUtil;
@@ -31,6 +32,7 @@ import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResource
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Patient;
@@ -54,6 +56,8 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -414,6 +418,59 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		foundResources = toUnqualifiedVersionlessIdValues(result);
 		assertThat(foundResources, contains(patId.getValue()));
 
+	}
+
+
+	@SuppressWarnings("unused")
+	@Test
+	public void testSearchWithCustomParamInvalidDateFormat() {
+
+		SearchParameter dateParameter = new SearchParameter();
+		dateParameter.setId("explanationofbenefit-service-date");
+		dateParameter.setName("ExplanationOfBenefit_ServiceDate");
+		dateParameter.setCode("service-date");
+		dateParameter.setDescription("test");
+		dateParameter.setUrl("http://integer");
+		dateParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		dateParameter.addBase("ExplanationOfBenefit");
+		dateParameter.setType(Enumerations.SearchParamType.DATE);
+		dateParameter.setExpression("ExplanationOfBenefit.billablePeriod | ExplanationOfBenefit.item.serviced as Date |  ExplanationOfBenefit.item.serviced as Period");
+		dateParameter.setXpath("f:ExplanationOfBenefit/f:billablePeriod | f:ExplanationOfBenefit/f:item/f:serviced/f:servicedDate | f:ExplanationOfBenefit/f:item/f:serviced/f:servicedPeriod");
+		dateParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+		mySearchParameterDao.update(dateParameter);
+
+		mySearchParamRegistry.forceRefresh();
+
+		IBundleProvider results;
+		List<String> foundResources;
+		Bundle result;
+
+
+		//Try with builtin SP
+		try {
+			myClient
+				.search()
+				.forResource(ExplanationOfBenefit.class)
+				.where(new StringClientParam("created").matchesExactly().value("01-01-2020"))
+				.returnBundle(Bundle.class)
+				.execute();
+
+		} catch	(Exception e) {
+			assertThat(e.getMessage(), is(equalTo("HTTP 400 Bad Request: Invalid date/time format: \"01-01-2020\"")));
+		}
+
+		//Now with custom SP
+		try {
+			myClient
+				.search()
+				.forResource(ExplanationOfBenefit.class)
+				.where(new StringClientParam("service-date").matchesExactly().value("01-01-2020"))
+				.returnBundle(Bundle.class)
+				.execute();
+
+		} catch	(Exception e) {
+			assertThat(e.getMessage(), is(equalTo("HTTP 400 Bad Request: Invalid date/time format: \"01-01-2020\"")));
+		}
 	}
 
 	/**
