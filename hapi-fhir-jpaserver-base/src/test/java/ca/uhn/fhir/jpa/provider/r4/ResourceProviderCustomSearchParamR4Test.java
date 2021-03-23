@@ -451,7 +451,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			myClient
 				.search()
 				.forResource(ExplanationOfBenefit.class)
-				.where(new StringClientParam("created").matchesExactly().value("01-01-2020"))
+				.where(new StringClientParam("created").matches().value("01-01-2020"))
 				.returnBundle(Bundle.class)
 				.execute();
 
@@ -464,7 +464,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			myClient
 				.search()
 				.forResource(ExplanationOfBenefit.class)
-				.where(new StringClientParam("service-date").matchesExactly().value("01-01-2020"))
+				.where(new StringClientParam("service-date").matches().value("01-01-2020"))
 				.returnBundle(Bundle.class)
 				.execute();
 
