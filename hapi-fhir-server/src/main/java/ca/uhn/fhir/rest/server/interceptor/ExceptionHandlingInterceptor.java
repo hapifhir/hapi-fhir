@@ -107,10 +107,7 @@ public class ExceptionHandlingInterceptor {
 	@Hook(Pointcut.SERVER_PRE_PROCESS_OUTGOING_EXCEPTION)
 	public BaseServerResponseException preProcessOutgoingException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest) throws ServletException {
 		BaseServerResponseException retVal;
-		//TODO GGG this is _not_ the fix.
-		if (theException instanceof InternalErrorException && theException.getCause().getCause() instanceof DataFormatException) {
-			retVal = new InvalidRequestException(theException.getCause().getCause());
-		} else if (theException instanceof DataFormatException) {
+		if (theException instanceof DataFormatException) {
 			// Wrapping the DataFormatException as an InvalidRequestException so that it gets sent back to the client as a 400 response.
 			retVal = new InvalidRequestException(theException);
 		} else if (!(theException instanceof BaseServerResponseException)) {
