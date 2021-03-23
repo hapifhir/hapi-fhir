@@ -58,22 +58,6 @@ public class ExtensionMatcherR4Test extends BaseMatcherR4Test {
 	}
 
 	@Test
-	public void testSpecificIdentifierSystem(){
-		Patient patient1 = new Patient();
-		Patient patient2 = new Patient();
-
-		patient1.addExtension("asd",new StringType("Patient1"));
-		patient1.addExtension("url1", new StringType("asd"));
-		patient2.addExtension("asd",new StringType("Patient1"));
-		patient2.addExtension("asdasd", new StringType("some value"));
-		patient2.addExtension("url1", new StringType("some value 123"));
-
-		assertTrue(MdmMatcherEnum.EXTENSION_ANY_ORDER.match(ourFhirContext, patient1, patient2, false, null));
-		assertTrue(MdmMatcherEnum.EXTENSION_ANY_ORDER.match(ourFhirContext, patient1, patient2, false, "asd"));
-		assertFalse(MdmMatcherEnum.EXTENSION_ANY_ORDER.match(ourFhirContext, patient1, patient2, false, "url1"));
-	}
-
-	@Test
 	public void testPatientWithoutIntExtension(){
 		Patient patient1 = new Patient();
 		Patient patient2 = new Patient();

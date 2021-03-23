@@ -19,11 +19,6 @@ public class ExtensionMatcher implements IMdmFieldMatcher{
 
 		boolean match = false;
 
-		if (theIdentifierSystem != null) {
-			leftExtension.removeIf(iBaseExtension -> !iBaseExtension.getUrl().equals(theIdentifierSystem));
-			rightExtension.removeIf(iBaseExtension -> !iBaseExtension.getUrl().equals(theIdentifierSystem));
-		}
-
 		for (IBaseExtension leftExtensionValue : leftExtension) {
 			for (IBaseExtension rightExtensionValue : rightExtension) {
 				match |= ExtensionUtil.equals(leftExtensionValue, rightExtensionValue);
