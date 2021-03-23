@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkExpandSvc;
 import ca.uhn.fhir.jpa.search.helper.SearchParamHelper;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -56,7 +57,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 @Interceptor
 public class MdmSearchExpandingInterceptorInterceptor {
-	private static final Logger ourLog = getLogger(MdmSearchExpandingInterceptorInterceptor.class);
+	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
 	private MdmLinkExpandSvc myMdmLinkExpandSvc;
@@ -67,7 +68,6 @@ public class MdmSearchExpandingInterceptorInterceptor {
 	@Autowired
 	private IdHelperService myIdHelperService;
 
-
 	@Hook(Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH)
 	public boolean hook(RequestDetails theRequestDetails, SearchParameterMap theSearchParameterMap) {
 		Map<String, String[]> parameters =theRequestDetails.getParameters();
@@ -75,11 +75,11 @@ public class MdmSearchExpandingInterceptorInterceptor {
 		if (parameters.containsKey("_mdm")) {
 			shouldExpandMdm = parameters.get("_mdm").length == 1 && parameters.get("_mdm")[0].equalsIgnoreCase("true");
 		}
-
-
 		if (shouldExpandMdm) {
+			ourLog.debug("Detected that incoming request has _mdm=true. The request was: {}", theRequestDetails.getRequestPath());
 			String resourceName = theRequestDetails.getResourceName();
 			Collection<RuntimeSearchParam> patientSearchParams = mySearchParamHelper.getPatientSearchParamsForResourceType(resourceName);
+			ourLog.debug("Resource type {} has patient search parameters [{}]", resourceName, patientSearchParams.stream().map(RuntimeSearchParam::getName).collect(Collectors.joining(", ")));
 			for (RuntimeSearchParam patientSearchParam: patientSearchParams) {
 				if (!theSearchParameterMap.containsKey(patientSearchParam.getName())) {
 					continue;

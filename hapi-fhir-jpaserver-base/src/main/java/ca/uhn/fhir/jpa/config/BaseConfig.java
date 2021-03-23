@@ -59,6 +59,7 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
+import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptorInterceptor;
 import ca.uhn.fhir.jpa.interceptor.OverridePathBasedReferentialIntegrityForDeletesInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -455,6 +456,12 @@ public abstract class BaseConfig {
 	@Lazy
 	public RequestTenantPartitionInterceptor requestTenantPartitionInterceptor() {
 		return new RequestTenantPartitionInterceptor();
+	}
+
+	@Bean
+	@Lazy
+	public MdmSearchExpandingInterceptorInterceptor mdmSearchExpandingInterceptorInterceptor() {
+		return new MdmSearchExpandingInterceptorInterceptor();
 	}
 
 	@Bean

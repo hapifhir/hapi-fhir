@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao.mdm;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -39,7 +40,7 @@ import java.util.Set;
 
 @Service
 public class MdmLinkExpandSvc {
-	private static final Logger ourLog = LoggerFactory.getLogger(MdmLinkExpandSvc.class);
+	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
@@ -54,6 +55,7 @@ public class MdmLinkExpandSvc {
 	 * @return A set of strings representing the FHIR IDs of the expanded resources.
 	 */
 	public Set<String> expandMdmBySourceResource(IBaseResource theResource) {
+		ourLog.debug("About to MDM-expand source resource {}", theResource);
 		return expandMdmBySourceResourceId(theResource.getIdElement());
 	}
 
@@ -65,6 +67,7 @@ public class MdmLinkExpandSvc {
 	 * @return A set of strings representing the FHIR ids of the expanded resources.
 	 */
 	public Set<String> expandMdmBySourceResourceId(IIdType theId) {
+		ourLog.debug("About to expand source resource with resource id {}", theId);
 		Long pidOrThrowException = myIdHelperService.getPidOrThrowException(theId);
 		return expandMdmBySourceResourcePid(pidOrThrowException);
 	}
@@ -77,11 +80,12 @@ public class MdmLinkExpandSvc {
 	 * @return A set of strings representing the FHIR ids of the expanded resources.
 	 */
 	public Set<String> expandMdmBySourceResourcePid(Long theSourceResourcePid) {
+		ourLog.debug("About to expand source resource with PID {}", theSourceResourcePid);
 		List<List<Long>> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsBySourcePidAndMatchResult(theSourceResourcePid, MdmMatchResultEnum.MATCH);
 		Set<Long> flattenedPids = new HashSet<>();
 		goldenPidSourcePidTuples.forEach(flattenedPids::addAll);
-
 		Set<String> resourceIds = myIdHelperService.translatePidsToFhirResourceIds(flattenedPids);
+		ourLog.debug("Pid {} has been expanded to [{}]", theSourceResourcePid, String.join(",", resourceIds));
 		return resourceIds;
 	}
 
