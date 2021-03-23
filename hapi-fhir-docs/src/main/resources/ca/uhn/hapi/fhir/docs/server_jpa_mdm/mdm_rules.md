@@ -407,9 +407,9 @@ The following algorithms are currently supported:
             <td>EXTENSION_ANY_ORDER</td>
             <td>matcher</td>
             <td>
-               Matches when at least one system and value extension pair are identical.
+               Matches extensions of resources in any order. Matches are made if atleast the two resources shares atleast one extensions that have the same URL and value.
             </td>
-            <td>If an optional "identifierSystem" is provided, then the extensions only match when they belong to that system</td>
+            <td></td>
         </tr>
         <tr>
             <td>EMPTY_FIELD</td>
