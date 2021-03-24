@@ -107,6 +107,12 @@ public class AddressValidatingInterceptor {
 
 	protected void handleRequest(RequestDetails theRequest, IBaseResource theResource) {
 		if (getAddressValidator() == null) {
+			ourLog.debug("Address validator is not provided - validation disabled");
+			return;
+		}
+
+		if (theRequest == null) {
+			ourLog.debug("RequestDetails is null - unable to validate address for {}", theResource);
 			return;
 		}
 
