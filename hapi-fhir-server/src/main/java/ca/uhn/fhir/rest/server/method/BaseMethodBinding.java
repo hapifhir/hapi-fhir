@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -250,6 +251,9 @@ public abstract class BaseMethodBinding<T> {
 		} catch (InvocationTargetException e) {
 			if (e.getCause() instanceof BaseServerResponseException) {
 				throw (BaseServerResponseException) e.getCause();
+			}
+			if (e.getTargetException() instanceof DataFormatException) {
+				throw (DataFormatException)e.getTargetException();
 			}
 			throw new InternalErrorException("Failed to call access method: " + e.getCause(), e);
 		} catch (Exception e) {
