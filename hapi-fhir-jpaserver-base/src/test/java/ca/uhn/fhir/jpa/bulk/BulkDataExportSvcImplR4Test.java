@@ -639,6 +639,39 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(nextContents, is(containsString("IMM6")));
 		assertThat(nextContents, is(containsString("IMM8")));
 	}
+	@Test
+	public void testGroupBatchJobMdmExpansionIdentifiesGoldenResources() throws Exception {
+		createResources();
+
+		// Create a bulk job
+		BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
+		bulkDataExportOptions.setOutputFormat(null);
+		bulkDataExportOptions.setResourceTypes(Sets.newHashSet("Immunization"));
+		bulkDataExportOptions.setSince(null);
+		bulkDataExportOptions.setFilters(null);
+		bulkDataExportOptions.setGroupId(myPatientGroupId);
+		bulkDataExportOptions.setExpandMdm(true);
+		bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
+
+
+		myBulkDataExportSvc.buildExportFiles();
+		awaitAllBulkJobCompletions();
+
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+
+		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getFiles().size(), equalTo(1));
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
+
+		// Iterate over the files
+		String nextContents = getBinaryContents(jobInfo, 0);
+
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
+
+		assertThat(nextContents, is(containsString("subject_golden_resource")));
+
+	}
 
 	@Test
 	public void testPatientLevelExportWorks() throws JobParametersInvalidException {
