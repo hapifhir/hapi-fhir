@@ -2,15 +2,15 @@ package ca.uhn.fhir.jpa.dao.mdm;
 
 import org.slf4j.Logger;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class MdmExpansionCacheSvc {
 	private static final Logger ourLog = getLogger(MdmExpansionCacheSvc.class);
 
-	private Map<String, String> mySourceToGoldenIdCache = new HashMap<>();
+	private ConcurrentHashMap<String, String> mySourceToGoldenIdCache = new ConcurrentHashMap<>();
 
 	public String getGoldenResourceId(String theSourceId) {
 		ourLog.info(buildLog("About to lookup cached resource ID " + theSourceId, true));
@@ -32,6 +32,12 @@ public class MdmExpansionCacheSvc {
 	}
 
 	public void setCacheContents(Map<String, String> theSourceResourceIdToGoldenResourceIdMap) {
-		this.mySourceToGoldenIdCache = theSourceResourceIdToGoldenResourceIdMap;
+		if (mySourceToGoldenIdCache.isEmpty()) {
+			this.mySourceToGoldenIdCache.putAll(theSourceResourceIdToGoldenResourceIdMap);
+		}
+	}
+
+	public boolean hasBeenPopulated() {
+		return !mySourceToGoldenIdCache.isEmpty();
 	}
 }

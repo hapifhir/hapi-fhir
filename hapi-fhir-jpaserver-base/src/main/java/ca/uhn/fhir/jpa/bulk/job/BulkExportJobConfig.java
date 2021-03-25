@@ -80,7 +80,7 @@ public class BulkExportJobConfig {
 
 	@Bean
 	@Lazy
-	@StepScope
+	@JobScope
 	public MdmExpansionCacheSvc mdmExpansionCacheSvc() {
 		return new MdmExpansionCacheSvc();
 	}

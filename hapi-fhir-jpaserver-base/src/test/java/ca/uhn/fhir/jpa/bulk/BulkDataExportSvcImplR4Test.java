@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.batch.processors.GoldenResourceAnnotatingProcessor;
 import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.job.BulkExportJobParametersBuilder;
@@ -646,7 +647,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		// Create a bulk job
 		BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
 		bulkDataExportOptions.setOutputFormat(null);
-		bulkDataExportOptions.setResourceTypes(Sets.newHashSet("Immunization"));
+		bulkDataExportOptions.setResourceTypes(Sets.newHashSet("Immunization", "Observation", "Patient"));
 		bulkDataExportOptions.setSince(null);
 		bulkDataExportOptions.setFilters(null);
 		bulkDataExportOptions.setGroupId(myPatientGroupId);
@@ -654,22 +655,28 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
 
-
 		myBulkDataExportSvc.buildExportFiles();
 		awaitAllBulkJobCompletions();
 
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 
 		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
-		assertThat(jobInfo.getFiles().size(), equalTo(1));
+		assertThat(jobInfo.getFiles().size(), equalTo(3));
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
 
 		// Iterate over the files
+
 		String nextContents = getBinaryContents(jobInfo, 0);
-
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
+		assertThat(nextContents, is(containsString(GoldenResourceAnnotatingProcessor.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL)));
 
-		assertThat(nextContents, is(containsString("subject_golden_resource")));
+		nextContents = getBinaryContents(jobInfo, 1);
+		assertThat(jobInfo.getFiles().get(1).getResourceType(), is(equalTo("Observation")));
+		assertThat(nextContents, is(containsString(GoldenResourceAnnotatingProcessor.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL)));
+
+		nextContents = getBinaryContents(jobInfo, 2);
+		assertThat(jobInfo.getFiles().get(2).getResourceType(), is(equalTo("Patient")));
+		assertThat(nextContents, is(containsString(GoldenResourceAnnotatingProcessor.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL)));
 
 	}
 
