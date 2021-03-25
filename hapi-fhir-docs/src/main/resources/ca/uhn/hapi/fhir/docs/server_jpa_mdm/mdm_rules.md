@@ -407,7 +407,7 @@ The following algorithms are currently supported:
             <td>EXTENSION_ANY_ORDER</td>
             <td>matcher</td>
             <td>
-               Matches extensions of resources in any order. Matches are made if atleast the two resources shares atleast one extensions that have the same URL and value.
+               Matches extensions of resources in any order. Matches are made if both resources share at least one extensions that have the same URL and value.
             </td>
             <td></td>
         </tr>
