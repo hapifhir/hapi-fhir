@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2505
+title: "An incorrect path caused the select2 library to fail to load in the HAPI FHIR testpage overlay
+   modue. Thanks to Ari Ruotsalainen for reporting!"
