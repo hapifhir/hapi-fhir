@@ -20,11 +20,12 @@ package ca.uhn.fhir.rest.client.interceptor;
  * #L%
  */
 
-import org.apache.commons.lang3.Validate;
-
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.client.api.*;
+import ca.uhn.fhir.rest.client.api.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.util.CoverageIgnore;
+import org.apache.commons.lang3.Validate;
 
 /**
  * HTTP interceptor to be used for adding HTTP Authorization using "bearer tokens" to requests. Bearer tokens are used for protocols such as OAUTH2 (see the
@@ -57,7 +58,7 @@ public class BearerTokenAuthInterceptor implements IClientInterceptor {
 	 *           The bearer token to use (must not be null)
 	 */
 	public BearerTokenAuthInterceptor(String theToken) {
-		Validate.notNull("theToken must not be null");
+		Validate.notNull(theToken, "theToken must not be null");
 		myToken = theToken;
 	}
 
