@@ -27,7 +27,7 @@ import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryChunker;
@@ -45,6 +45,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -75,6 +77,8 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	private IdHelperService myIdHelperService;
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
+	@Autowired
+	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
 
 	@Override
 	Iterator<ResourcePersistentId> getResourcePidIterator() {
@@ -119,6 +123,7 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 			IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId));
 			Long pidOrNull = myIdHelperService.getPidOrNull(group);
 			List<List<Long>> lists = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
+
 			lists.forEach(patientPidsToExport::addAll);
 		}
 		List<ResourcePersistentId> resourcePersistentIds = patientPidsToExport
@@ -154,12 +159,43 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 
 		//Attempt to perform MDM Expansion of membership
 		if (myMdmEnabled) {
-			List<List<Long>> goldenPidTargetPidTuple = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
+			List<List<Long>> goldenPidTargetPidTuples = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
 			//Now lets translate these pids into resource IDs
-			Set<Long> uniquePids = new HashSet<>();
-			goldenPidTargetPidTuple.forEach(uniquePids::addAll);
 
+			System.out.println("ZOOPER");
+			goldenPidTargetPidTuples.stream()
+				.map(Object::toString)
+				.forEach(list -> System.out.println(String.join(", ", list)));
+			Set<Long> uniquePids = new HashSet<>();
+			goldenPidTargetPidTuples.forEach(uniquePids::addAll);
 			Map<Long, Optional<String>> pidToForcedIdMap = myIdHelperService.translatePidsToForcedIds(uniquePids);
+
+			Map<Long, Set<Long>> goldenResourceToSourcePidMap = new HashMap<>();
+			for (List<Long> goldenPidTargetPidTuple : goldenPidTargetPidTuples) {
+				Long goldenPid = goldenPidTargetPidTuple.get(0);
+				Long sourcePid = goldenPidTargetPidTuple.get(1);
+
+				if(!goldenResourceToSourcePidMap.containsKey(goldenPid)) {
+					goldenResourceToSourcePidMap.put(goldenPid, new HashSet<>());
+				}
+				goldenResourceToSourcePidMap.get(goldenPid).add(sourcePid);
+			}
+			Map<String, String> sourceResourceIdToGoldenResourceIdMap = new HashMap<>();
+
+			goldenResourceToSourcePidMap.entrySet()
+				.forEach(entry -> {
+					Long key = entry.getKey();
+					String goldenResourceId = myIdHelperService.translatePidIdToForcedId(new ResourcePersistentId(key)).orElse(key.toString());
+
+					Map<Long, Optional<String>> pidsToForcedIds = myIdHelperService.translatePidsToForcedIds(entry.getValue());
+					Set<String> sourceResourceIds = pidsToForcedIds.entrySet().stream()
+						.map(ent -> ent.getValue().isPresent() ? ent.getValue().get() : ent.getKey().toString())
+						.collect(Collectors.toSet());
+
+					sourceResourceIds
+						.forEach(sourceResourceId -> sourceResourceIdToGoldenResourceIdMap.put(sourceResourceId, goldenResourceId));
+				});
+			myMdmExpansionCacheSvc.setCacheContents(sourceResourceIdToGoldenResourceIdMap);
 
 			//If the result of the translation is an empty optional, it means there is no forced id, and we can use the PID as the resource ID.
 			Set<String> resolvedResourceIds = pidToForcedIdMap.entrySet().stream()

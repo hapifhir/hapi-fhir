@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -189,37 +190,8 @@ public abstract class BaseBulkItemReader implements ItemReader<List<ResourcePers
 	 */
 	protected RuntimeSearchParam getPatientSearchParamForCurrentResourceType() {
 		if (myPatientSearchParam == null) {
-			RuntimeResourceDefinition runtimeResourceDefinition = myContext.getResourceDefinition(myResourceType);
-			myPatientSearchParam = runtimeResourceDefinition.getSearchParam("patient");
-			if (myPatientSearchParam == null) {
-				myPatientSearchParam = runtimeResourceDefinition.getSearchParam("subject");
-				if (myPatientSearchParam == null) {
-					myPatientSearchParam = getRuntimeSearchParamByCompartment(runtimeResourceDefinition);
-					if (myPatientSearchParam == null) {
-						String errorMessage = String.format("[%s] has  no search parameters that are for patients, so it is invalid for Group Bulk Export!", myResourceType);
-						throw new IllegalArgumentException(errorMessage);
-					}
-				}
-			}
+			myPatientSearchParam =  SearchParameterUtil.getPatientSearchParamForResourceType(myContext, myResourceType);
 		}
 		return myPatientSearchParam;
-	}
-
-	/**
-	 * Search the resource definition for a compartment named 'patient' and return its related Search Parameter.
-	 */
-	protected RuntimeSearchParam getRuntimeSearchParamByCompartment(RuntimeResourceDefinition runtimeResourceDefinition) {
-		RuntimeSearchParam patientSearchParam;
-		List<RuntimeSearchParam> searchParams = runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
-		if (searchParams == null || searchParams.size() == 0) {
-			String errorMessage = String.format("Resource type [%s] is not eligible for this type of export, as it contains no Patient compartment, and no `patient` or `subject` search parameter", myResourceType);
-			throw new IllegalArgumentException(errorMessage);
-		} else if (searchParams.size() == 1) {
-			patientSearchParam = searchParams.get(0);
-		} else {
-			String errorMessage = String.format("Resource type [%s] is not eligible for Group Bulk export, as we are unable to disambiguate which patient search parameter we should be searching by.", myResourceType);
-			throw new IllegalArgumentException(errorMessage);
-		}
-		return patientSearchParam;
 	}
 }

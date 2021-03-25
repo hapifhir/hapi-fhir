@@ -21,8 +21,10 @@ package ca.uhn.fhir.jpa.bulk.job;
  */
 
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
+import ca.uhn.fhir.jpa.batch.processors.GoldenResourceAnnotatingProcessor;
 import ca.uhn.fhir.jpa.batch.processors.PidToIBaseResourceProcessor;
 import ca.uhn.fhir.jpa.bulk.svc.BulkExportDaoSvc;
+import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.batch.core.Job;
@@ -32,13 +34,16 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.support.CompositeItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -64,10 +69,22 @@ public class BulkExportJobConfig {
 	@Autowired
 	private PidToIBaseResourceProcessor myPidToIBaseResourceProcessor;
 
+	@Autowired
+	private GoldenResourceAnnotatingProcessor myGoldenResourceAnnotatingProcessor;
+
 	@Bean
 	public BulkExportDaoSvc bulkExportDaoSvc() {
 		return new BulkExportDaoSvc();
 	}
+
+
+	@Bean
+	@Lazy
+	@StepScope
+	public MdmExpansionCacheSvc mdmExpansionCacheSvc() {
+		return new MdmExpansionCacheSvc();
+	}
+
 
 	@Bean
 	@Lazy
@@ -78,6 +95,18 @@ public class BulkExportJobConfig {
 			.next(partitionStep())
 			.next(closeJobStep())
 			.build();
+	}
+
+	@Bean
+	@Lazy
+	@StepScope
+	public CompositeItemProcessor<List<ResourcePersistentId>, List<IBaseResource>> inflateResourceThenAnnotateWithGoldenResourceProcessor() {
+		CompositeItemProcessor processor = new CompositeItemProcessor<>();
+		ArrayList<ItemProcessor> delegates = new ArrayList<>();
+		delegates.add(myPidToIBaseResourceProcessor);
+		delegates.add(myGoldenResourceAnnotatingProcessor);
+		processor.setDelegates(delegates);
+		return processor;
 	}
 
 	@Bean
@@ -132,7 +161,9 @@ public class BulkExportJobConfig {
 		return myStepBuilderFactory.get("groupBulkExportGenerateResourceFilesStep")
 			.<List<ResourcePersistentId>, List<IBaseResource>> chunk(CHUNK_SIZE) //1000 resources per generated file, as the reader returns 10 resources at a time.
 			.reader(groupBulkItemReader())
-			.processor(myPidToIBaseResourceProcessor)
+//			.processor(myPidToIBaseResourceProcessor)
+//			.processor(myGoldenResourceAnnotatingProcessor)
+			.processor(inflateResourceThenAnnotateWithGoldenResourceProcessor())
 			.writer(resourceToFileWriter())
 			.listener(bulkExportGenerateResourceFilesStepListener())
 			.build();
