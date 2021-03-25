@@ -83,6 +83,7 @@ public class BearerTokenAuthInterceptor implements IClientInterceptor {
 	 * Sets the bearer token to use
 	 */
 	public void setToken(String theToken) {
+		Validate.notNull(theToken, "theToken must not be null");
 		myToken = theToken;
 	}
 
