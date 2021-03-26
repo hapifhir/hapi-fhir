@@ -70,6 +70,14 @@ public class FhirTerserR4Test {
 	private FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R4);
 
 	@Test
+	public void testAddElement() {
+		Patient patient = new Patient();
+		IBase family = myCtx.newTerser().addElement("Patient.name.family");
+
+	}
+
+
+	@Test
 	public void testContainResourcesWithModify() {
 
 		MedicationRequest mr = new MedicationRequest();

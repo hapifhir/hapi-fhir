@@ -671,10 +671,8 @@ public class FhirTerser {
 
 		parts.add(thePath.substring(currentStart));
 
-		if (theElementDef instanceof RuntimeResourceDefinition) {
-			if (parts.size() > 0 && parts.get(0).equals(theElementDef.getName())) {
-				parts = parts.subList(1, parts.size());
-			}
+		if (parts.size() > 0 && parts.get(0).equals(theElementDef.getName())) {
+			parts = parts.subList(1, parts.size());
 		}
 
 		if (parts.size() < 1) {
@@ -1166,6 +1164,35 @@ public class FhirTerser {
 			containedResources = (List<T>) ((IDomainResource) theResource).getContained();
 		}
 		return containedResources;
+	}
+
+	/**
+	 * Adds and returns a new element at the given path within the given structure. The paths used here
+	 * are <b>not FHIRPath expressions</b> but instead just simple dot-separated path expressions.
+	 * <p>
+	 * Only the last entry in the path is always created, existing repetitions of elements before
+	 * the final dot are returned if they exists (although they are created if they do not). For example,
+	 * given the path <code>Patient.name.given</code>, a new repetition of <code>given</code> is always
+	 * added to the first (index 0) repetition of the name. If an index-0 repetition of <code>name</code>
+	 * already exists, it is added to. If one does not exist, it if created and then added to.
+	 * </p>
+	 *
+	 * @param theTarget The element to add to. This will often be a {@link IBaseResource resource}
+	 *                  instance, but does not need to be.
+	 * @param thePath The path.
+	 * @return The newly added element
+	 */
+	public <T extends IBase> T addElement(IBase theTarget, String thePath) {
+		BaseRuntimeElementCompositeDefinition<?> def = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(theTarget.getClass());
+		List<String> parts = parsePath(def, thePath);
+
+		for (String nextPart : parts) {
+			boolean lastPart = nextPart == parts.get(parts.size() - 1);
+
+
+		}
+
+		return null;
 	}
 
 
