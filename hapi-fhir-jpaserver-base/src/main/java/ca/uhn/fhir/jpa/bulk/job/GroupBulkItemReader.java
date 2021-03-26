@@ -237,10 +237,6 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 		return expandedIds;
 	}
 
-	private void populateMdmResourceCacheIfNeeded(Map<Long, Set<Long>> goldenResourceToSourcePidMap) {
-
-	}
-
 	private void queryResourceTypeWithReferencesToPatients(Set<ResourcePersistentId> myReadPids, List<String> idChunk) {
 		//Build SP map
 		//First, inject the _typeFilters and _since from the export job

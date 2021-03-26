@@ -21,6 +21,13 @@ public class MdmExpansionCacheSvc {
 
 	private final ConcurrentHashMap<String, String> mySourceToGoldenIdCache = new ConcurrentHashMap<>();
 
+	/**
+	 * Lookup a given resource's golden resource ID in the cache. Note that if you pass this function the resource ID of a
+	 * golden resource, it will just return itself.
+	 *
+	 * @param theSourceId the resource ID of the source resource ,e.g. PAT123
+	 * @return the resource ID of the associated golden resource.
+	 */
 	public String getGoldenResourceId(String theSourceId) {
 		ourLog.debug(buildLogMessage("About to lookup cached resource ID " + theSourceId));
 		String goldenResourceId = mySourceToGoldenIdCache.get(theSourceId);
