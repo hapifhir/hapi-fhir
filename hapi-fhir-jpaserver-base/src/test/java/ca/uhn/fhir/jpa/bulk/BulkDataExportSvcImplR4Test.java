@@ -1052,7 +1052,6 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		//Non-cached should all have unique IDs
 		List<String> jobIds = Stream.of(jobInfo5, jobInfo6, jobInfo7, jobInfo8, jobInfo9).map(IBulkDataExportSvc.JobInfo::getJobId).collect(Collectors.toList());
-		ourLog.info("ZOOP {}", String.join(", ", jobIds));
 		Set<String> uniqueJobIds = new HashSet<>(jobIds);
 		assertEquals(uniqueJobIds.size(), jobIds.size());
 

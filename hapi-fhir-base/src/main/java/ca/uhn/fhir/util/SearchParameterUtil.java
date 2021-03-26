@@ -32,6 +32,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class SearchParameterUtil {
 
@@ -59,27 +60,29 @@ public class SearchParameterUtil {
 	 *    3.1 If that returns >1 result, throw an error
 	 *    3.2 If that returns 1 result, return it
 	 */
-	public static RuntimeSearchParam getPatientSearchParamForResourceType(FhirContext theFhirContext, String theResourceType) {
+	public static Optional<RuntimeSearchParam> getOnlyPatientSearchParamForResourceType(FhirContext theFhirContext, String theResourceType) {
 		RuntimeSearchParam myPatientSearchParam = null;
 		RuntimeResourceDefinition runtimeResourceDefinition = theFhirContext.getResourceDefinition(theResourceType);
 		myPatientSearchParam = runtimeResourceDefinition.getSearchParam("patient");
 		if (myPatientSearchParam == null) {
 			myPatientSearchParam = runtimeResourceDefinition.getSearchParam("subject");
 			if (myPatientSearchParam == null) {
-				myPatientSearchParam = getRuntimeSearchParamByCompartment(runtimeResourceDefinition);
-				if (myPatientSearchParam == null) {
-					String errorMessage = String.format("[%s] has  no search parameters that are for patients, so it is invalid for Group Bulk Export!", theResourceType);
-					throw new IllegalArgumentException(errorMessage);
-				}
+				myPatientSearchParam = getOnlyPatientCompartmentRuntimeSearchParam(runtimeResourceDefinition);
 			}
 		}
-		return myPatientSearchParam;
+		return Optional.ofNullable(myPatientSearchParam);
 	}
+
 
 	/**
 	 * Search the resource definition for a compartment named 'patient' and return its related Search Parameter.
 	 */
-	public static RuntimeSearchParam getRuntimeSearchParamByCompartment(RuntimeResourceDefinition runtimeResourceDefinition) {
+	public static RuntimeSearchParam getOnlyPatientCompartmentRuntimeSearchParam(FhirContext theFhirContext, String theResourceType) {
+		RuntimeResourceDefinition resourceDefinition = theFhirContext.getResourceDefinition(theResourceType);
+		return getOnlyPatientCompartmentRuntimeSearchParam(resourceDefinition);
+	}
+
+	public static RuntimeSearchParam getOnlyPatientCompartmentRuntimeSearchParam(RuntimeResourceDefinition runtimeResourceDefinition) {
 		RuntimeSearchParam patientSearchParam;
 		List<RuntimeSearchParam> searchParams = runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
 		if (searchParams == null || searchParams.size() == 0) {
@@ -88,11 +91,21 @@ public class SearchParameterUtil {
 		} else if (searchParams.size() == 1) {
 			patientSearchParam = searchParams.get(0);
 		} else {
-			String errorMessage = String.format("Resource type [%s] is not eligible for Group Bulk export, as we are unable to disambiguate which patient search parameter we should be searching by.", runtimeResourceDefinition.getId());
+			String errorMessage = String.format("Resource type %s has more than one Search Param which references a patient compartment. We are unable to disambiguate which patient search parameter we should be searching by.", runtimeResourceDefinition.getId());
 			throw new IllegalArgumentException(errorMessage);
 		}
 		return patientSearchParam;
+	}
 
+	public static List<RuntimeSearchParam> getAllPatientCompartmentRuntimeSearchParams(FhirContext theFhirContext, String theResourceType) {
+		RuntimeResourceDefinition runtimeResourceDefinition = theFhirContext.getResourceDefinition(theResourceType);
+		return getAllPatientCompartmentRuntimeSearchParams(runtimeResourceDefinition);
+
+	}
+
+	private static List<RuntimeSearchParam> getAllPatientCompartmentRuntimeSearchParams(RuntimeResourceDefinition theRuntimeResourceDefinition) {
+		List<RuntimeSearchParam> patient = theRuntimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
+		return patient;
 	}
 
 

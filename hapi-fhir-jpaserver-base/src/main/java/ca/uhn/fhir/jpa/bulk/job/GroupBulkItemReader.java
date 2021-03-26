@@ -112,23 +112,70 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	 * possibly expanded by MDM, and don't have to go and fetch other resource DAOs.
 	 */
 	private Iterator<ResourcePersistentId> getExpandedPatientIterator() {
-		Set<Long> patientPidsToExport = new HashSet<>();
 		List<String> members = getMembers();
 		List<IIdType> ids = members.stream().map(member -> new IdDt("Patient/" + member)).collect(Collectors.toList());
 		List<Long> pidsOrThrowException = myIdHelperService.getPidsOrThrowException(ids);
-		patientPidsToExport.addAll(pidsOrThrowException);
+		Set<Long> patientPidsToExport = new HashSet<>(pidsOrThrowException);
 
 		if (myMdmEnabled) {
 			IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId));
 			Long pidOrNull = myIdHelperService.getPidOrNull(group);
-			List<List<Long>> lists = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
-			lists.forEach(patientPidsToExport::addAll);
+			List<List<Long>> goldenPidSourcePidTuple = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
+			goldenPidSourcePidTuple.forEach(patientPidsToExport::addAll);
+			populateMdmResourceCache(goldenPidSourcePidTuple);
 		}
 		List<ResourcePersistentId> resourcePersistentIds = patientPidsToExport
 			.stream()
 			.map(ResourcePersistentId::new)
 			.collect(Collectors.toList());
 		return resourcePersistentIds.iterator();
+	}
+
+	/**
+	 * @param thePidTuples
+	 */
+	private void populateMdmResourceCache(List<List<Long>> thePidTuples) {
+		if (myMdmExpansionCacheSvc.hasBeenPopulated()) {
+			return;
+		}
+		//First, convert this zipped set of tuples to a map of
+		//{
+		//   patient/gold-1 -> [patient/1, patient/2]
+		//   patient/gold-2 -> [patient/3, patient/4]
+		//}
+		Map<Long, Set<Long>> goldenResourceToSourcePidMap = new HashMap<>();
+		for (List<Long> goldenPidTargetPidTuple : thePidTuples) {
+			Long goldenPid = goldenPidTargetPidTuple.get(0);
+			Long sourcePid = goldenPidTargetPidTuple.get(1);
+
+			if(!goldenResourceToSourcePidMap.containsKey(goldenPid)) {
+				goldenResourceToSourcePidMap.put(goldenPid, new HashSet<>());
+			}
+			goldenResourceToSourcePidMap.get(goldenPid).add(sourcePid);
+		}
+
+		//Next, lets convert it to an inverted index for fast lookup
+		// {
+		//   patient/1 -> patient/gold-1
+		//   patient/2 -> patient/gold-1
+		//   patient/3 -> patient/gold-2
+		//   patient/4 -> patient/gold-2
+		// }
+		Map<String, String> sourceResourceIdToGoldenResourceIdMap = new HashMap<>();
+		goldenResourceToSourcePidMap.forEach((key, value) -> {
+			String goldenResourceId = myIdHelperService.translatePidIdToForcedId(new ResourcePersistentId(key)).orElse(key.toString());
+			Map<Long, Optional<String>> pidsToForcedIds = myIdHelperService.translatePidsToForcedIds(value);
+
+			Set<String> sourceResourceIds = pidsToForcedIds.entrySet().stream()
+				.map(ent -> ent.getValue().isPresent() ? ent.getValue().get() : ent.getKey().toString())
+				.collect(Collectors.toSet());
+
+			sourceResourceIds
+				.forEach(sourceResourceId -> sourceResourceIdToGoldenResourceIdMap.put(sourceResourceId, goldenResourceId));
+		});
+
+		//Now that we have built our cached expansion, store it.
+		myMdmExpansionCacheSvc.setCacheContents(sourceResourceIdToGoldenResourceIdMap);
 	}
 
 	/**
@@ -173,8 +220,7 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 				}
 				goldenResourceToSourcePidMap.get(goldenPid).add(sourcePid);
 			}
-			populateMdmResourceCacheIfNeeded(goldenResourceToSourcePidMap);
-
+			populateMdmResourceCache(goldenPidTargetPidTuples);
 
 			//If the result of the translation is an empty optional, it means there is no forced id, and we can use the PID as the resource ID.
 			Set<String> resolvedResourceIds = pidToForcedIdMap.entrySet().stream()
@@ -192,25 +238,7 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	}
 
 	private void populateMdmResourceCacheIfNeeded(Map<Long, Set<Long>> goldenResourceToSourcePidMap) {
-		if (myMdmExpansionCacheSvc.hasBeenPopulated()) {
-			return;
-		}
-		Map<String, String> sourceResourceIdToGoldenResourceIdMap = new HashMap<>();
 
-		goldenResourceToSourcePidMap.entrySet()
-			.forEach(entry -> {
-				Long key = entry.getKey();
-				String goldenResourceId = myIdHelperService.translatePidIdToForcedId(new ResourcePersistentId(key)).orElse(key.toString());
-
-				Map<Long, Optional<String>> pidsToForcedIds = myIdHelperService.translatePidsToForcedIds(entry.getValue());
-				Set<String> sourceResourceIds = pidsToForcedIds.entrySet().stream()
-					.map(ent -> ent.getValue().isPresent() ? ent.getValue().get() : ent.getKey().toString())
-					.collect(Collectors.toSet());
-
-				sourceResourceIds
-					.forEach(sourceResourceId -> sourceResourceIdToGoldenResourceIdMap.put(sourceResourceId, goldenResourceId));
-			});
-		myMdmExpansionCacheSvc.setCacheContents(sourceResourceIdToGoldenResourceIdMap);
 	}
 
 	private void queryResourceTypeWithReferencesToPatients(Set<ResourcePersistentId> myReadPids, List<String> idChunk) {

@@ -180,17 +180,14 @@ public abstract class BaseBulkItemReader implements ItemReader<List<ResourcePers
 
 	}
 
-	/**
-	 * Given the resource type, fetch its patient-based search parameter name
-	 * 1. Attempt to find one called 'patient'
-	 * 2. If that fails, find one called 'subject'
-	 * 3. If that fails, find find by Patient Compartment.
-	 *    3.1 If that returns >1 result, throw an error
-	 *    3.2 If that returns 1 result, return it
-	 */
 	protected RuntimeSearchParam getPatientSearchParamForCurrentResourceType() {
 		if (myPatientSearchParam == null) {
-			myPatientSearchParam =  SearchParameterUtil.getPatientSearchParamForResourceType(myContext, myResourceType);
+			Optional<RuntimeSearchParam> onlyPatientSearchParamForResourceType = SearchParameterUtil.getOnlyPatientSearchParamForResourceType(myContext, myResourceType);
+			if (onlyPatientSearchParamForResourceType.isPresent()) {
+				myPatientSearchParam = onlyPatientSearchParamForResourceType.get();
+			} else {
+
+			}
 		}
 		return myPatientSearchParam;
 	}

@@ -41,7 +41,8 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Reusable Item Processor which converts ResourcePersistentIds to their IBaseResources
+ * Reusable Item Processor which attaches an extension to any outgoing resource. This extension will contain a resource
+ * reference to the golden resource patient of the given resources' patient. (e.g. Observation.subject, Immunization.patient, etc)
  */
 public class GoldenResourceAnnotatingProcessor implements ItemProcessor<List<IBaseResource>, List<IBaseResource>> {
 	 private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -59,25 +60,40 @@ public class GoldenResourceAnnotatingProcessor implements ItemProcessor<List<IBa
 	@Value("#{jobParameters['" + BulkExportJobConfig.EXPAND_MDM_PARAMETER+ "'] ?: false}")
 	private boolean myMdmEnabled;
 
+
 	private RuntimeSearchParam myRuntimeSearchParam;
+
 	private String myPatientFhirPath;
+
 	private IFhirPath myFhirPath;
+
+	private void populateRuntimeSearchParam() {
+		Optional<RuntimeSearchParam> oPatientSearchParam= SearchParameterUtil.getOnlyPatientSearchParamForResourceType(myContext, myResourceType);
+		if (!oPatientSearchParam.isPresent()) {
+			String errorMessage = String.format("[%s] has  no search parameters that are for patients, so it is invalid for Group Bulk Export!", myResourceType);
+			throw new IllegalArgumentException(errorMessage);
+		} else {
+			myRuntimeSearchParam = oPatientSearchParam.get();
+		}
+	}
 
 	@Override
 	public List<IBaseResource> process(List<IBaseResource> theIBaseResources) throws Exception {
+		//If MDM expansion is enabled, add this magic new extension, otherwise, return the resource as is.
 		if (myMdmEnabled) {
 			if (myRuntimeSearchParam == null) {
-				myRuntimeSearchParam = SearchParameterUtil.getPatientSearchParamForResourceType(myContext, myResourceType);
+				populateRuntimeSearchParam();
 			}
-			String path = runtimeSearchParamFhirPath();
-			theIBaseResources.forEach(iBaseResource -> annotateClinicalResourceWithRelatedGoldenResourcePatient(path, iBaseResource));
+			if (myPatientFhirPath == null) {
+				populatePatientFhirPath();
+			}
+			theIBaseResources.forEach(this::annotateClinicalResourceWithRelatedGoldenResourcePatient);
 		}
-
 		return theIBaseResources;
 	}
 
-	private void annotateClinicalResourceWithRelatedGoldenResourcePatient(String path, IBaseResource iBaseResource) {
-		Optional<String> patientReference = getPatientReference(path, iBaseResource);
+	private void annotateClinicalResourceWithRelatedGoldenResourcePatient(IBaseResource iBaseResource) {
+		Optional<String> patientReference = getPatientReference(iBaseResource);
 		if (patientReference.isPresent()) {
 			addGoldenResourceExtension(iBaseResource, patientReference.get());
 		} else {
@@ -85,26 +101,24 @@ public class GoldenResourceAnnotatingProcessor implements ItemProcessor<List<IBa
 		}
 	}
 
-	private Optional<String> getPatientReference(String path, IBaseResource iBaseResource) {
+	private Optional<String> getPatientReference(IBaseResource iBaseResource) {
 		//In the case of patient, we will just use the raw ID.
 		if (myResourceType.equalsIgnoreCase("Patient")) {
 			return Optional.of(iBaseResource.getIdElement().getIdPart());
 		//Otherwise, we will perform evaluation of the fhirPath.
 		} else {
-			Optional<IBaseReference> optionalReference = getFhirParser().evaluateFirst(iBaseResource, path, IBaseReference.class);
+			Optional<IBaseReference> optionalReference = getFhirParser().evaluateFirst(iBaseResource, myPatientFhirPath, IBaseReference.class);
 			return optionalReference.map(theIBaseReference -> theIBaseReference.getReferenceElement().getIdPart());
 		}
 	}
 
 	private void addGoldenResourceExtension(IBaseResource iBaseResource, String sourceResourceId) {
 		String goldenResourceId = myMdmExpansionCacheSvc.getGoldenResourceId(sourceResourceId);
+		IBaseExtension<?, ?> extension = ExtensionUtil.getOrCreateExtension(iBaseResource, ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL);
 		if (!StringUtils.isBlank(goldenResourceId)) {
-			IBaseExtension<?, ?> extension = ExtensionUtil.getOrCreateExtension(iBaseResource, ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL);
 			ExtensionUtil.setExtension(myContext, extension, "reference", prefixPatient(goldenResourceId));
 		} else {
-			IBaseExtension<?, ?> extension = ExtensionUtil.getOrCreateExtension(iBaseResource, "failed-to-associated-golden-id");
-			ExtensionUtil.setExtension(myContext, extension, "string", myMdmExpansionCacheSvc.buildLog("not working!", true));
-
+			ExtensionUtil.setExtension(myContext, extension, "string", "This patient has no matched golden resource.");
 		}
 	}
 
@@ -119,12 +133,12 @@ public class GoldenResourceAnnotatingProcessor implements ItemProcessor<List<IBa
 		return myFhirPath;
 	}
 
-	private String runtimeSearchParamFhirPath() {
+	private String populatePatientFhirPath() {
 		if (myPatientFhirPath == null) {
-			myRuntimeSearchParam = SearchParameterUtil.getPatientSearchParamForResourceType(myContext, myResourceType);
 			myPatientFhirPath = myRuntimeSearchParam.getPath();
-			//Yes this is a stupid hack, but by default this runtime search param will return stuff like
-			// Observation.subject.where(resolve() is Patient) which unfortunately our FHIRpath evaluator doesn't play nicely with.
+			// GGG: Yes this is a stupid hack, but by default this runtime search param will return stuff like
+			// Observation.subject.where(resolve() is Patient) which unfortunately our FHIRpath evaluator doesn't play nicely with
+			// our FHIRPath evaluator.
 			if (myPatientFhirPath.contains(".where")) {
 				myPatientFhirPath = myPatientFhirPath.substring(0, myPatientFhirPath.indexOf(".where"));
 			}
