@@ -101,6 +101,10 @@ public class GoldenResourceAnnotatingProcessor implements ItemProcessor<List<IBa
 		if (!StringUtils.isBlank(goldenResourceId)) {
 			IBaseExtension<?, ?> extension = ExtensionUtil.getOrCreateExtension(iBaseResource, ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL);
 			ExtensionUtil.setExtension(myContext, extension, "reference", prefixPatient(goldenResourceId));
+		} else {
+			IBaseExtension<?, ?> extension = ExtensionUtil.getOrCreateExtension(iBaseResource, "failed-to-associated-golden-id");
+			ExtensionUtil.setExtension(myContext, extension, "string", myMdmExpansionCacheSvc.buildLog("not working!", true));
+
 		}
 	}
 

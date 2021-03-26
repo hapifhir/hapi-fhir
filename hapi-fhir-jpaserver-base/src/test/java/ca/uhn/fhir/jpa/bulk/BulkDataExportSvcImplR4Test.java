@@ -677,7 +677,6 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		nextContents = getBinaryContents(jobInfo, 2);
 		assertThat(jobInfo.getFiles().get(2).getResourceType(), is(equalTo("Patient")));
 		assertThat(nextContents, is(containsString(GoldenResourceAnnotatingProcessor.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL)));
-
 	}
 
 	@Test
