@@ -63,9 +63,6 @@ public class GoldenResourceAnnotatingProcessor implements ItemProcessor<List<IBa
 	private String myPatientFhirPath;
 	private IFhirPath myFhirPath;
 
-
-
-
 	@Override
 	public List<IBaseResource> process(List<IBaseResource> theIBaseResources) throws Exception {
 		if (myMdmEnabled) {
