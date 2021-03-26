@@ -41,7 +41,7 @@ public class MdmExpansionCacheSvc {
 		return goldenResourceId;
 	}
 
-	public String buildLogMessage(String theMessage) {
+	private String buildLogMessage(String theMessage) {
 		return buildLogMessage(theMessage, false);
 	}
 
@@ -66,12 +66,21 @@ public class MdmExpansionCacheSvc {
 
 	}
 
+	/**
+	 * Populate the cache
+	 *
+	 * @param theSourceResourceIdToGoldenResourceIdMap the source ID -> golden ID map to populate the cache with.
+	 */
 	public void setCacheContents(Map<String, String> theSourceResourceIdToGoldenResourceIdMap) {
 		if (mySourceToGoldenIdCache.isEmpty()) {
 			this.mySourceToGoldenIdCache.putAll(theSourceResourceIdToGoldenResourceIdMap);
 		}
 	}
 
+	/**
+	 * Since this cache is used at @JobScope, we can skip a whole whack of expansions happening by simply checking
+	 * if one of our child steps has populated the cache yet. .
+	 */
 	public boolean hasBeenPopulated() {
 		return !mySourceToGoldenIdCache.isEmpty();
 	}
