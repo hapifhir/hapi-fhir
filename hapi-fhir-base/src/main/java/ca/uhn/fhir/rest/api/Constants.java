@@ -200,6 +200,7 @@ public class Constants {
 	public static final String PARAMQUALIFIER_STRING_CONTAINS = ":contains";
 	public static final String PARAMQUALIFIER_STRING_EXACT = ":exact";
 	public static final String PARAMQUALIFIER_TOKEN_TEXT = ":text";
+	public static final String PARAMQUALIFIER_MDM = ":mdm";
 	public static final int STATUS_HTTP_200_OK = 200;
 	public static final int STATUS_HTTP_201_CREATED = 201;
 	public static final int STATUS_HTTP_204_NO_CONTENT = 204;

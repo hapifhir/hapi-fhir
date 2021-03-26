@@ -307,6 +307,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		ourLog.debug("Registering new search {}", searchUuid);
 
+		// Interceptor call: STORAGE_PRESEARCH_REGISTERED
+		HookParams params = new HookParams()
+			.add(ICachedSearchDetails.class, search)
+			.add(RequestDetails.class, theRequestDetails)
+			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+			.add(SearchParameterMap.class, theParams);
+		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(theResourceType).getImplementingClass();
 		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(theCallingDao, theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
@@ -382,13 +389,15 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	private PersistedJpaSearchFirstPageBundleProvider submitSearch(IDao theCallingDao, SearchParameterMap theParams, String theResourceType, RequestDetails theRequestDetails, String theSearchUuid, ISearchBuilder theSb, String theQueryString, RequestPartitionId theRequestPartitionId) {
 		StopWatch w = new StopWatch();
 		Search search = new Search();
+		//TODO GGG MOVE THIS POPULATE AND ALSO THE HOOK CALL HIGHER UP IN THE STACK.
 		populateSearchEntity(theParams, theResourceType, theSearchUuid, theQueryString, search, theRequestPartitionId);
 
 		// Interceptor call: STORAGE_PRESEARCH_REGISTERED
 		HookParams params = new HookParams()
 			.add(ICachedSearchDetails.class, search)
 			.add(RequestDetails.class, theRequestDetails)
-			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+			.add(SearchParameterMap.class, theParams);
 		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
 
 		SearchTask task = new SearchTask(search, theCallingDao, theParams, theResourceType, theRequestDetails, theRequestPartitionId);

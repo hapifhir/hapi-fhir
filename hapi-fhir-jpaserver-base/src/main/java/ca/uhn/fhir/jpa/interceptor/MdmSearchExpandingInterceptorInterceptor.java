@@ -35,6 +35,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.Validate;
@@ -62,44 +63,21 @@ public class MdmSearchExpandingInterceptorInterceptor {
 	@Autowired
 	private MdmLinkExpandSvc myMdmLinkExpandSvc;
 	@Autowired
-	private SearchParamHelper mySearchParamHelper;
-	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
 	private IdHelperService myIdHelperService;
 
-	@Hook(Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH)
-	public boolean hook(RequestDetails theRequestDetails, SearchParameterMap theSearchParameterMap) {
-		Map<String, String[]> parameters =theRequestDetails.getParameters();
-		boolean shouldExpandMdm = false;
-		if (parameters.containsKey("_mdm")) {
-			shouldExpandMdm = parameters.get("_mdm").length == 1 && parameters.get("_mdm")[0].equalsIgnoreCase("true");
-		}
-		if (shouldExpandMdm) {
-			ourLog.debug("Detected that incoming request has _mdm=true. The request was: {}", theRequestDetails.getRequestPath());
-			String resourceName = theRequestDetails.getResourceName();
-			Collection<RuntimeSearchParam> patientSearchParams = mySearchParamHelper.getPatientSearchParamsForResourceType(resourceName);
-			ourLog.debug("Resource type {} has patient search parameters [{}]", resourceName, patientSearchParams.stream().map(RuntimeSearchParam::getName).collect(Collectors.joining(", ")));
-			for (RuntimeSearchParam patientSearchParam: patientSearchParams) {
-				if (!theSearchParameterMap.containsKey(patientSearchParam.getName())) {
-					continue;
-				}
-				List<List<IQueryParameterType>> lists = theSearchParameterMap.get(patientSearchParam.getName());
-				for (List<IQueryParameterType> list : lists) {
-					List<IQueryParameterType> toAdd = new ArrayList<>();
-					for (IQueryParameterType paramVal : list) {
-						if (!paramVal.getMissing() && paramVal.getQueryParameterQualifier().equalsIgnoreCase("equals")){
-							String valueAsQueryToken = paramVal.getValueAsQueryToken(myFhirContext);
-							Long pidOrThrowException = myIdHelperService.getPidOrThrowException(new IdDt(valueAsQueryToken));
-							Set<String> expandedIds= myMdmLinkExpandSvc.expandMdmBySourceResourcePid(pidOrThrowException);
-							ourLog.info("Expanded to resource ids: [{}]", String.join(",", expandedIds));
-							toAdd.addAll(expandedIds.stream().map(StringParam::new).collect(Collectors.toList()));
-						}
-					}
-					list.addAll(toAdd);
-				}
-			}
-		}
-		return true;
+	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
+	public void hook(RequestDetails theRequestDetails, SearchParameterMap theSearchParameterMap) {
+		System.out.println("zoop");
+		theSearchParameterMap.values().stream()
+			.flatMap(Collection::stream)
+			.filter(queryParam -> queryParam instanceof ReferenceParam)
+			.filter(referenceParam -> ((ReferenceParam) referenceParam).isMdmExpand())
+			.map(untypedParam -> (ReferenceParam)untypedParam)
+			.forEach(mdmReferenceParam -> {
+				System.out.println("zoop");
+				System.out.println(mdmReferenceParam.toString());
+			});
 	}
 }

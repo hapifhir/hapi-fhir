@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -41,6 +42,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	private String myBaseUrl;
 	private String myValue;
 	private String myIdPart;
+	private Boolean myMdmExpand;
 
 	/**
 	 * Constructor
@@ -121,6 +123,11 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 
 	@Override
 	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
+		if (Constants.PARAMQUALIFIER_MDM.equals(theQualifier)) {
+			myMdmExpand = true;
+			theQualifier = "";
+			//TODO GGG i probably have to deal with chaining here? like refusing the mdm qualifier if i can detect its chained?
+		}
 		String q = theQualifier;
 		if (isNotBlank(q)) {
 			if (q.startsWith(":")) {
@@ -166,6 +173,14 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 		return myBaseUrl;
 	}
 
+	public boolean isMdmExpand() {
+		return myMdmExpand != null && myMdmExpand;
+	}
+
+	public ReferenceParam setMdmExpand(boolean theMdmExpand) {
+		myMdmExpand = theMdmExpand;
+		return this;
+	}
 
 	public String getChain() {
 		return myChain;

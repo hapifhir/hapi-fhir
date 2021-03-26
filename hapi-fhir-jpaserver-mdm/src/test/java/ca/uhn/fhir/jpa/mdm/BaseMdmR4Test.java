@@ -44,6 +44,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -95,6 +96,8 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	protected IFhirResourceDao<Medication> myMedicationDao;
 	@Autowired
 	protected IFhirResourceDao<Practitioner> myPractitionerDao;
+	@Autowired
+	protected IFhirResourceDao<Observation> myObservationDao;
 	@Autowired
 	protected MdmResourceMatcherSvc myMdmResourceMatcherSvc;
 	@Autowired

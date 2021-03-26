@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
+import ca.uhn.fhir.jpa.dao.mdm.MdmLinkExpandSvc;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderCoords;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderDate;
@@ -459,9 +460,13 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	@Lazy
 	public MdmSearchExpandingInterceptorInterceptor mdmSearchExpandingInterceptorInterceptor() {
 		return new MdmSearchExpandingInterceptorInterceptor();
+	}
+
+	@Bean
+	public MdmLinkExpandSvc myMdmLinkExpandSvc() {
+		return new MdmLinkExpandSvc();
 	}
 
 	@Bean
