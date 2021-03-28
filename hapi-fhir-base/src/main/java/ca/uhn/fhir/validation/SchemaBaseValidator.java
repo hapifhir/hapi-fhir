@@ -94,7 +94,7 @@ public class SchemaBaseValidator implements IValidatorModule {
 				validator.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
 				validator.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
 			} catch (SAXNotRecognizedException ex) {
-				ourLog.warn("Jaxp 1.5 Support not found.", ex);
+				ourLog.debug("Jaxp 1.5 Support not found.", ex);
 			}
 
 			validator.validate(new StreamSource(new StringReader(encodedResource)));

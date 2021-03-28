@@ -20,20 +20,19 @@ package ca.uhn.fhir.rest.api;
  * #L%
  */
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 
 /**
- * Represents values for "return" value as provided in the the <a href="https://tools.ietf.org/html/rfc7240#section-4.2">HTTP Prefer header</a>.
+ * Represents values for "handling" value as provided in the the <a href="http://hl7.org/fhir/search.html">FHIR Search Spec</a>.
  */
-public enum PreferReturnEnum {
+public enum PreferHandlingEnum {
 
-	REPRESENTATION(Constants.HEADER_PREFER_RETURN_REPRESENTATION), MINIMAL(Constants.HEADER_PREFER_RETURN_MINIMAL), OPERATION_OUTCOME(Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
+	STRICT(Constants.HEADER_PREFER_HANDLING_STRICT), LENIENT(Constants.HEADER_PREFER_HANDLING_LENIENT);
 
-	private static HashMap<String, PreferReturnEnum> ourValues;
+	private static HashMap<String, PreferHandlingEnum> ourValues;
 	private String myHeaderValue;
 
-	PreferReturnEnum(String theHeaderValue) {
+	PreferHandlingEnum(String theHeaderValue) {
 		myHeaderValue = theHeaderValue;
 	}
 
@@ -41,11 +40,10 @@ public enum PreferReturnEnum {
 		return myHeaderValue;
 	}
 
-	@Nullable
-	public static PreferReturnEnum fromHeaderValue(String theHeaderValue) {
+	public static PreferHandlingEnum fromHeaderValue(String theHeaderValue) {
 		if (ourValues == null) {
-			HashMap<String, PreferReturnEnum> values = new HashMap<>();
-			for (PreferReturnEnum next : PreferReturnEnum.values()) {
+			HashMap<String, PreferHandlingEnum> values = new HashMap<>();
+			for (PreferHandlingEnum next : PreferHandlingEnum.values()) {
 				values.put(next.getHeaderValue(), next);
 			}
 			ourValues = values;
