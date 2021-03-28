@@ -28,10 +28,13 @@ import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.DatatypeUtil;
+import ca.uhn.fhir.util.ExtensionUtil;
+import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.apache.commons.lang3.EnumUtils;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.SearchParameter;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -47,8 +50,10 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -74,10 +79,8 @@ public class SearchParameterCanonicalizer {
 				retVal = canonicalizeSearchParameterDstu3((org.hl7.fhir.dstu3.model.SearchParameter) theSearchParameter);
 				break;
 			case R4:
-				retVal = canonicalizeSearchParameterR4((org.hl7.fhir.r4.model.SearchParameter) theSearchParameter);
-				break;
 			case R5:
-				retVal = canonicalizeSearchParameterR5((org.hl7.fhir.r5.model.SearchParameter) theSearchParameter);
+				retVal = canonicalizeSearchParameterR4Plus((org.hl7.fhir.r4.model.SearchParameter) theSearchParameter);
 				break;
 			case DSTU2_HL7ORG:
 			case DSTU2_1:
@@ -161,7 +164,7 @@ public class SearchParameterCanonicalizer {
 
 		List<JpaRuntimeSearchParam.Component> components = Collections.emptyList();
 		Collection<? extends IPrimitiveType<String>> base = Collections.singletonList(theNextSp.getBaseElement());
-		return new JpaRuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, base);
+		return new JpaRuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, toStrings(base));
 	}
 
 	private JpaRuntimeSearchParam canonicalizeSearchParameterDstu3(org.hl7.fhir.dstu3.model.SearchParameter theNextSp) {
@@ -244,66 +247,63 @@ public class SearchParameterCanonicalizer {
 			components.add(new JpaRuntimeSearchParam.Component(next.getExpression(), next.getDefinition()));
 		}
 
-		return new JpaRuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, theNextSp.getBase());
+		return new JpaRuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, toStrings(theNextSp.getBase()));
 	}
 
-	private JpaRuntimeSearchParam canonicalizeSearchParameterR4(org.hl7.fhir.r4.model.SearchParameter theNextSp) {
-		String name = theNextSp.getCode();
-		String description = theNextSp.getDescription();
-		String path = theNextSp.getExpression();
+	private JpaRuntimeSearchParam canonicalizeSearchParameterR4Plus(IBaseResource theNextSp) {
+		FhirTerser terser = myFhirContext.newTerser();
+		String name = terser.getSinglePrimitiveValueOrNull(theNextSp, "code");
+		String description = terser.getSinglePrimitiveValueOrNull(theNextSp, "description");
+		String path = terser.getSinglePrimitiveValueOrNull(theNextSp, "expression");
+		List<String> base = terser.getValues(theNextSp, "base", IPrimitiveType.class).stream().map(t -> t.getValueAsString()).collect(Collectors.toList());
+
 		RestSearchParameterTypeEnum paramType = null;
 		RuntimeSearchParam.RuntimeSearchParamStatusEnum status = null;
-		switch (theNextSp.getType()) {
-			case COMPOSITE:
+		switch (terser.getSinglePrimitiveValue(theNextSp, "type").orElse("")) {
+			case "composite":
 				paramType = RestSearchParameterTypeEnum.COMPOSITE;
 				break;
-			case DATE:
+			case "date":
 				paramType = RestSearchParameterTypeEnum.DATE;
 				break;
-			case NUMBER:
+			case "number":
 				paramType = RestSearchParameterTypeEnum.NUMBER;
 				break;
-			case QUANTITY:
+			case "quantity":
 				paramType = RestSearchParameterTypeEnum.QUANTITY;
 				break;
-			case REFERENCE:
+			case "reference":
 				paramType = RestSearchParameterTypeEnum.REFERENCE;
 				break;
-			case STRING:
+			case "string":
 				paramType = RestSearchParameterTypeEnum.STRING;
 				break;
-			case TOKEN:
+			case "token":
 				paramType = RestSearchParameterTypeEnum.TOKEN;
 				break;
-			case URI:
+			case "uri":
 				paramType = RestSearchParameterTypeEnum.URI;
 				break;
-			case SPECIAL:
+			case "special":
 				paramType = RestSearchParameterTypeEnum.SPECIAL;
 				break;
-			case NULL:
+		}
+		switch (terser.getSinglePrimitiveValue(theNextSp, "status").orElse("")) {
+			case "active":
+				status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE;
+				break;
+			case "draft":
+				status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.DRAFT;
+				break;
+			case "retired":
+				status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.RETIRED;
+				break;
+			case "unknown":
+				status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.UNKNOWN;
 				break;
 		}
-		if (theNextSp.getStatus() != null) {
-			switch (theNextSp.getStatus()) {
-				case ACTIVE:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE;
-					break;
-				case DRAFT:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.DRAFT;
-					break;
-				case RETIRED:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.RETIRED;
-					break;
-				case UNKNOWN:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.UNKNOWN;
-					break;
-				case NULL:
-					break;
-			}
-		}
 		Set<String> providesMembershipInCompartments = Collections.emptySet();
-		Set<String> targets = DatatypeUtil.toStringSet(theNextSp.getTarget());
+		Set<String> targets = terser.getValues(theNextSp, "target", IPrimitiveType.class).stream().map(t -> t.getValueAsString()).collect(Collectors.toSet());
 
 		if (isBlank(name) || isBlank(path) || paramType == null) {
 			if (paramType != RestSearchParameterTypeEnum.COMPOSITE) {
@@ -312,111 +312,24 @@ public class SearchParameterCanonicalizer {
 		}
 
 		IIdType id = theNextSp.getIdElement();
-		String uri = "";
+		String uri = terser.getSinglePrimitiveValueOrNull(theNextSp, "url");
 		boolean unique = false;
 
-		List<org.hl7.fhir.r4.model.Extension> uniqueExts = theNextSp.getExtensionsByUrl(HapiExtensions.EXT_SP_UNIQUE);
-		if (uniqueExts.size() > 0) {
-			IPrimitiveType<?> uniqueExtsValuePrimitive = uniqueExts.get(0).getValueAsPrimitive();
-			if (uniqueExtsValuePrimitive != null) {
-				if ("true".equalsIgnoreCase(uniqueExtsValuePrimitive.getValueAsString())) {
-					unique = true;
-				}
+		if (ExtensionUtil.hasExtension(theNextSp, HapiExtensions.EXT_SP_UNIQUE)) {
+			IPrimitiveType<?> value = (IPrimitiveType<?>) ExtensionUtil.getExtension((IBaseHasExtensions) theNextSp, HapiExtensions.EXT_SP_UNIQUE).getValue();
+			if ("true".equalsIgnoreCase(value.getValueAsString())) {
+				unique = true;
 			}
 		}
 
 		List<JpaRuntimeSearchParam.Component> components = new ArrayList<>();
-		for (org.hl7.fhir.r4.model.SearchParameter.SearchParameterComponentComponent next : theNextSp.getComponent()) {
-			components.add(new JpaRuntimeSearchParam.Component(next.getExpression(), new Reference(next.getDefinition())));
+		for (IBase next : terser.getValues(theNextSp, "component")) {
+			String expression = terser.getSinglePrimitiveValueOrNull(next, "expression");
+			String definition = terser.getSinglePrimitiveValueOrNull(next, "definition");
+			components.add(new JpaRuntimeSearchParam.Component(expression, new Reference(definition)));
 		}
 
-		return new JpaRuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, theNextSp.getBase());
-	}
-
-	private JpaRuntimeSearchParam canonicalizeSearchParameterR5(org.hl7.fhir.r5.model.SearchParameter theNextSp) {
-		String name = theNextSp.getCode();
-		String description = theNextSp.getDescription();
-		String path = theNextSp.getExpression();
-		RestSearchParameterTypeEnum paramType = null;
-		RuntimeSearchParam.RuntimeSearchParamStatusEnum status = null;
-		switch (theNextSp.getType()) {
-			case COMPOSITE:
-				paramType = RestSearchParameterTypeEnum.COMPOSITE;
-				break;
-			case DATE:
-				paramType = RestSearchParameterTypeEnum.DATE;
-				break;
-			case NUMBER:
-				paramType = RestSearchParameterTypeEnum.NUMBER;
-				break;
-			case QUANTITY:
-				paramType = RestSearchParameterTypeEnum.QUANTITY;
-				break;
-			case REFERENCE:
-				paramType = RestSearchParameterTypeEnum.REFERENCE;
-				break;
-			case STRING:
-				paramType = RestSearchParameterTypeEnum.STRING;
-				break;
-			case TOKEN:
-				paramType = RestSearchParameterTypeEnum.TOKEN;
-				break;
-			case URI:
-				paramType = RestSearchParameterTypeEnum.URI;
-				break;
-			case SPECIAL:
-				paramType = RestSearchParameterTypeEnum.SPECIAL;
-				break;
-			case NULL:
-				break;
-		}
-		if (theNextSp.getStatus() != null) {
-			switch (theNextSp.getStatus()) {
-				case ACTIVE:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE;
-					break;
-				case DRAFT:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.DRAFT;
-					break;
-				case RETIRED:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.RETIRED;
-					break;
-				case UNKNOWN:
-					status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.UNKNOWN;
-					break;
-				case NULL:
-					break;
-			}
-		}
-		Set<String> providesMembershipInCompartments = Collections.emptySet();
-		Set<String> targets = DatatypeUtil.toStringSet(theNextSp.getTarget());
-
-		if (isBlank(name) || isBlank(path) || paramType == null) {
-			if (paramType != RestSearchParameterTypeEnum.COMPOSITE) {
-				return null;
-			}
-		}
-
-		IIdType id = theNextSp.getIdElement();
-		String uri = "";
-		boolean unique = false;
-
-		List<org.hl7.fhir.r5.model.Extension> uniqueExts = theNextSp.getExtensionsByUrl(HapiExtensions.EXT_SP_UNIQUE);
-		if (uniqueExts.size() > 0) {
-			IPrimitiveType<?> uniqueExtsValuePrimitive = uniqueExts.get(0).getValueAsPrimitive();
-			if (uniqueExtsValuePrimitive != null) {
-				if ("true".equalsIgnoreCase(uniqueExtsValuePrimitive.getValueAsString())) {
-					unique = true;
-				}
-			}
-		}
-
-		List<JpaRuntimeSearchParam.Component> components = new ArrayList<>();
-		for (org.hl7.fhir.r5.model.SearchParameter.SearchParameterComponentComponent next : theNextSp.getComponent()) {
-			components.add(new JpaRuntimeSearchParam.Component(next.getExpression(), new org.hl7.fhir.r5.model.Reference(next.getDefinition())));
-		}
-
-		return new JpaRuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, theNextSp.getBase());
+		return new JpaRuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, base);
 	}
 
 
@@ -449,4 +362,16 @@ public class SearchParameterCanonicalizer {
 			}
 		}
 	}
+
+	private static Collection<String> toStrings(Collection<? extends IPrimitiveType<String>> theBase) {
+		HashSet<String> retVal = new HashSet<>();
+		for (IPrimitiveType<String> next : theBase) {
+			if (isNotBlank(next.getValueAsString())) {
+				retVal.add(next.getValueAsString());
+			}
+		}
+		return retVal;
+	}
+
+
 }

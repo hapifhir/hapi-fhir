@@ -55,6 +55,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public abstract class BaseMethodBinding<T> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseMethodBinding.class);
@@ -379,7 +381,11 @@ public abstract class BaseMethodBinding<T> {
 
 		Class<? extends IBaseResource> returnTypeFromAnnotation = IBaseResource.class;
 		if (read != null) {
-			returnTypeFromAnnotation = read.type();
+			if (isNotBlank(read.typeName())) {
+				returnTypeFromAnnotation = theContext.getResourceDefinition(read.typeName()).getImplementingClass();
+			} else {
+				returnTypeFromAnnotation = read.type();
+			}
 		} else if (search != null) {
 			returnTypeFromAnnotation = search.type();
 		} else if (history != null) {

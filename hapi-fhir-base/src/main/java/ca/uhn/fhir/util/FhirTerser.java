@@ -21,6 +21,7 @@ import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -34,6 +35,8 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -42,6 +45,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -315,6 +319,14 @@ public class FhirTerser {
 			return null;
 		}
 		return retVal.get(0);
+	}
+
+	public Optional<String> getSinglePrimitiveValue(IBase theTarget, String thePath) {
+		return getSingleValue(theTarget, thePath, IPrimitiveType.class).map(t->t.getValueAsString());
+	}
+
+	public String getSinglePrimitiveValueOrNull(IBase theTarget, String thePath) {
+		return getSingleValue(theTarget, thePath, IPrimitiveType.class).map(t->t.getValueAsString()).orElse(null);
 	}
 
 	public <T extends IBase> Optional<T> getSingleValue(IBase theTarget, String thePath, Class<T> theWantedType) {
@@ -1176,23 +1188,180 @@ public class FhirTerser {
 	 * added to the first (index 0) repetition of the name. If an index-0 repetition of <code>name</code>
 	 * already exists, it is added to. If one does not exist, it if created and then added to.
 	 * </p>
+	 * <p>
+	 * If the last element in the path refers to a non-repeatable element that is already present and
+	 * is not empty, a {@link DataFormatException} error will be thrown.
+	 * </p>
 	 *
 	 * @param theTarget The element to add to. This will often be a {@link IBaseResource resource}
 	 *                  instance, but does not need to be.
-	 * @param thePath The path.
+	 * @param thePath   The path.
 	 * @return The newly added element
+	 * @throws DataFormatException If the path is invalid or does not end with either a repeatable element, or
+	 *                             an element that is non-repeatable but not already populated.
 	 */
-	public <T extends IBase> T addElement(IBase theTarget, String thePath) {
-		BaseRuntimeElementCompositeDefinition<?> def = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(theTarget.getClass());
-		List<String> parts = parsePath(def, thePath);
+	@SuppressWarnings("unchecked")
+	@Nonnull
+	public <T extends IBase> T addElement(@Nonnull IBase theTarget, @Nonnull String thePath) {
+		return (T) doAddElement(theTarget, thePath, 1).get(0);
+	}
 
-		for (String nextPart : parts) {
-			boolean lastPart = nextPart == parts.get(parts.size() - 1);
-
-
+	@SuppressWarnings("unchecked")
+	private <T extends IBase> List<T> doAddElement(IBase theTarget, String thePath, int theElementsToAdd) {
+		if (theElementsToAdd == 0) {
+			return Collections.emptyList();
 		}
 
-		return null;
+		IBase target = theTarget;
+		BaseRuntimeElementCompositeDefinition<?> def = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(target.getClass());
+		List<String> parts = parsePath(def, thePath);
+
+		for (int i = 0, partsSize = parts.size(); ; i++) {
+			String nextPart = parts.get(i);
+			boolean lastPart = i == partsSize - 1;
+
+			BaseRuntimeChildDefinition nextChild = def.getChildByName(nextPart);
+			if (nextChild == null) {
+				throw new DataFormatException("Invalid path " + thePath + ": Element of type " + def.getName() + " has no child named " + nextPart + ". Valid names: " + def.getChildrenAndExtension().stream().map(t -> t.getElementName()).sorted().collect(Collectors.joining(", ")));
+			}
+
+			List<IBase> childValues = nextChild.getAccessor().getValues(target);
+			IBase childValue;
+			if (childValues.size() > 0 && !lastPart) {
+				childValue = childValues.get(0);
+			} else {
+
+				if (lastPart) {
+					if (!childValues.isEmpty()) {
+						if (theElementsToAdd == -1) {
+							return (List<T>) Collections.singletonList(childValues.get(0));
+						} else if (nextChild.getMax() == 1 && !childValues.get(0).isEmpty()) {
+							throw new DataFormatException("Element at path " + thePath + " is not repeatable and not empty");
+						}
+					}
+				}
+
+				BaseRuntimeElementDefinition<?> elementDef = nextChild.getChildByName(nextPart);
+				childValue = elementDef.newInstance(nextChild.getInstanceConstructorArguments());
+				nextChild.getMutator().addValue(target, childValue);
+
+				if (lastPart) {
+					if (theElementsToAdd == 1 || theElementsToAdd == -1) {
+						return (List<T>) Collections.singletonList(childValue);
+					} else {
+						if (nextChild.getMax() == 1) {
+							throw new DataFormatException("Can not add multiple values at path " + thePath + ": Element does not repeat");
+						}
+
+						List<T> values = (List<T>) Lists.newArrayList(childValue);
+						for (int j = 1; j < theElementsToAdd; j++) {
+							childValue = elementDef.newInstance(nextChild.getInstanceConstructorArguments());
+							nextChild.getMutator().addValue(target, childValue);
+							values.add((T) childValue);
+						}
+
+						return values;
+					}
+				}
+
+			}
+
+			target = childValue;
+
+			if (!lastPart) {
+				BaseRuntimeElementDefinition<?> nextDef = myContext.getElementDefinition(target.getClass());
+				if (!(nextDef instanceof BaseRuntimeElementCompositeDefinition)) {
+					throw new DataFormatException("Invalid path " + thePath + ": Element of type " + def.getName() + " has no child named " + nextPart + " (this is a primitive type)");
+				}
+				def = (BaseRuntimeElementCompositeDefinition<?>) nextDef;
+			}
+		}
+
+	}
+
+	/**
+	 * Adds and returns a new element at the given path within the given structure. The paths used here
+	 * are <b>not FHIRPath expressions</b> but instead just simple dot-separated path expressions.
+	 * <p>
+	 * This method follows all of the same semantics as {@link #addElement(IBase, String)} but it
+	 * requires the path to point to an element with a primitive datatype and set the value of
+	 * the datatype to the given value.
+	 * </p>
+	 *
+	 * @param theTarget The element to add to. This will often be a {@link IBaseResource resource}
+	 *                  instance, but does not need to be.
+	 * @param thePath   The path.
+	 * @param theValue  The value to set, or <code>null</code>.
+	 * @return The newly added element
+	 * @throws DataFormatException If the path is invalid or does not end with either a repeatable element, or
+	 *                             an element that is non-repeatable but not already populated.
+	 */
+	@SuppressWarnings("unchecked")
+	@Nonnull
+	public <T extends IBase> T addElement(@Nonnull IBase theTarget, @Nonnull String thePath, @Nullable String theValue) {
+		T value = (T) doAddElement(theTarget, thePath, 1).get(0);
+		if (!(value instanceof IPrimitiveType)) {
+			throw new DataFormatException("Element at path " + thePath + " is not a primitive datatype. Found: " + myContext.getElementDefinition(value.getClass()).getName());
+		}
+
+		((IPrimitiveType<?>) value).setValueAsString(theValue);
+
+		return value;
+	}
+
+
+	/**
+	 * Adds and returns a new element at the given path within the given structure. The paths used here
+	 * are <b>not FHIRPath expressions</b> but instead just simple dot-separated path expressions.
+	 * <p>
+	 * This method follows all of the same semantics as {@link #addElement(IBase, String)} but it
+	 * requires the path to point to an element with a primitive datatype and set the value of
+	 * the datatype to the given value.
+	 * </p>
+	 *
+	 * @param theTarget The element to add to. This will often be a {@link IBaseResource resource}
+	 *                  instance, but does not need to be.
+	 * @param thePath   The path.
+	 * @param theValue  The value to set, or <code>null</code>.
+	 * @return The newly added element
+	 * @throws DataFormatException If the path is invalid or does not end with either a repeatable element, or
+	 *                             an element that is non-repeatable but not already populated.
+	 */
+	@SuppressWarnings("unchecked")
+	@Nonnull
+	public <T extends IBase> T setElement(@Nonnull IBase theTarget, @Nonnull String thePath, @Nullable String theValue) {
+		T value = (T) doAddElement(theTarget, thePath, -1).get(0);
+		if (!(value instanceof IPrimitiveType)) {
+			throw new DataFormatException("Element at path " + thePath + " is not a primitive datatype. Found: " + myContext.getElementDefinition(value.getClass()).getName());
+		}
+
+		((IPrimitiveType<?>) value).setValueAsString(theValue);
+
+		return value;
+	}
+
+
+	/**
+	 * This method has the same semantics as {@link #addElement(IBase, String, String)} but adds
+	 * a collection of primitives instead of a single one.
+	 *
+	 * @param theTarget The element to add to. This will often be a {@link IBaseResource resource}
+	 *                  instance, but does not need to be.
+	 * @param thePath   The path.
+	 * @param theValues The values to set, or <code>null</code>.
+	 */
+	public void addElements(IBase theTarget, String thePath, Collection<String> theValues) {
+		List<IBase> targets = doAddElement(theTarget, thePath, theValues.size());
+		Iterator<String> valuesIter = theValues.iterator();
+		for (IBase target : targets) {
+
+			if (!(target instanceof IPrimitiveType)) {
+				throw new DataFormatException("Element at path " + thePath + " is not a primitive datatype. Found: " + myContext.getElementDefinition(target.getClass()).getName());
+			}
+
+			((IPrimitiveType<?>) target).setValueAsString(valuesIter.next());
+		}
+
 	}
 
 

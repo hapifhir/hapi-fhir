@@ -64,6 +64,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.provider.r4.BaseJpaResourceProviderObservationR4;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
@@ -199,6 +200,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	private static IValidationSupport ourJpaValidationSupportChainR4;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
+	@Autowired
+	protected IPackageInstallerSvc myPackageInstallerSvc;
 	@Autowired
 	protected ITermConceptMappingSvc myConceptMappingSvc;
 	@Autowired

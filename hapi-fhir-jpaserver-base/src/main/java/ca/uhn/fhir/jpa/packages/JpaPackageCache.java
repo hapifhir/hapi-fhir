@@ -65,6 +65,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -467,14 +468,18 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			return null;
 		} else {
 			NpmPackageVersionResourceEntity contents = slice.getContent().get(0);
-			ResourcePersistentId binaryPid = new ResourcePersistentId(contents.getResourceBinary().getId());
-			IBaseBinary binary = getBinaryDao().readByPid(binaryPid);
-			byte[] resourceContentsBytes = BinaryUtil.getOrCreateData(myCtx, binary).getValue();
-			String resourceContents = new String(resourceContentsBytes, StandardCharsets.UTF_8);
-
-			FhirContext packageContext = getFhirContext(contents.getFhirVersion());
-			return EncodingEnum.detectEncoding(resourceContents).newParser(packageContext).parseResource(resourceContents);
+			return loadPackageEntity(contents);
 		}
+	}
+
+	private IBaseResource loadPackageEntity(NpmPackageVersionResourceEntity contents) {
+		ResourcePersistentId binaryPid = new ResourcePersistentId(contents.getResourceBinary().getId());
+		IBaseBinary binary = getBinaryDao().readByPid(binaryPid);
+		byte[] resourceContentsBytes = BinaryUtil.getOrCreateData(myCtx, binary).getValue();
+		String resourceContents = new String(resourceContentsBytes, StandardCharsets.UTF_8);
+
+		FhirContext packageContext = getFhirContext(contents.getFhirVersion());
+		return EncodingEnum.detectEncoding(resourceContents).newParser(packageContext).parseResource(resourceContents);
 	}
 
 	@Override
@@ -639,6 +644,14 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		}
 
 		return retVal;
+	}
+
+	@Override
+	@Transactional
+	public List<IBaseResource> loadPackageAssetsByType(FhirVersionEnum theFhirVersion, String theResourceType) {
+//		List<NpmPackageVersionResourceEntity> outcome = myPackageVersionResourceDao.findAll();
+		Slice<NpmPackageVersionResourceEntity> outcome = myPackageVersionResourceDao.findCurrentVersionByResourceType(PageRequest.of(0, 1000), theFhirVersion, theResourceType);
+		return outcome.stream().map(t->loadPackageEntity(t)).collect(Collectors.toList());
 	}
 
 	private void deleteAndExpungeResourceBinary(IIdType theResourceBinaryId, ExpungeOptions theOptions) {

@@ -27,6 +27,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class NpmJpaValidationSupport implements IValidationSupport {
 
@@ -67,5 +68,14 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 			}
 		}
 		return null;
+	}
+
+
+	@SuppressWarnings("unchecked")
+	@Nullable
+	@Override
+	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions() {
+		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
+		return (List<T>) myHapiPackageCacheManager.loadPackageAssetsByType(fhirVersion, "StructureDefinition");
 	}
 }

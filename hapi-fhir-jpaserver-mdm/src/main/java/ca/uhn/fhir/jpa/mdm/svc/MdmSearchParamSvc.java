@@ -38,7 +38,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class MdmSearchParamSvc implements ISearchParamRetriever {
@@ -69,6 +71,11 @@ public class MdmSearchParamSvc implements ISearchParamRetriever {
 	@Override
 	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
 		return mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
+	}
+
+	@Override
+	public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
+		return mySearchParamRegistry.getActiveSearchParams(theResourceName);
 	}
 
 	/**

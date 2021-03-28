@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
+import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
@@ -19,10 +20,8 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.test.utilities.JettyUtil;
-import ca.uhn.fhir.util.TestUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -110,8 +109,9 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 			ourRestServer.registerProviders(mySystemProvider, myTerminologyUploaderProvider);
 
 			ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
+			IValidationSupport validationSupport = myAppCtx.getBean(IValidationSupport.class);
 
-			JpaConformanceProviderR5 confProvider = new JpaConformanceProviderR5(ourRestServer, mySystemDao, myDaoConfig, ourSearchParamRegistry);
+			JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(ourRestServer, mySystemDao, myDaoConfig, ourSearchParamRegistry, validationSupport);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
 			ourRestServer.setServerConformanceProvider(confProvider);
 
@@ -170,7 +170,6 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 			ourSubscriptionMatcherInterceptor = wac.getBean(SubscriptionMatcherInterceptor.class);
 
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
-			confProvider.setSearchParamRegistry(ourSearchParamRegistry);
 
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();

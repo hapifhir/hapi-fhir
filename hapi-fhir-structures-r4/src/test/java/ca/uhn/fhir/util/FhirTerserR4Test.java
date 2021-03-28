@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.parser.DataFormatException;
+import com.google.common.collect.Lists;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -67,15 +68,116 @@ import static org.mockito.Mockito.when;
 public class FhirTerserR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirTerserR4Test.class);
-	private FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R4);
+	private final FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R4);
 
 	@Test
 	public void testAddElement() {
 		Patient patient = new Patient();
-		IBase family = myCtx.newTerser().addElement("Patient.name.family");
+		IBase family = myCtx.newTerser().addElement(patient, "Patient.name.family");
+
+		assertEquals(1, patient.getName().size());
+		assertSame(family, patient.getName().get(0).getFamilyElement());
+	}
+
+	@Test
+	public void testAddElementWithValue() {
+		Patient patient = new Patient();
+		IBase family = myCtx.newTerser().addElement(patient, "Patient.name.family", "FOO");
+
+		assertEquals(1, patient.getName().size());
+		assertSame(family, patient.getName().get(0).getFamilyElement());
+		assertEquals("FOO", patient.getName().get(0).getFamilyElement().getValue());
+	}
+
+	@Test
+	public void testAddElementWithValue_NonPrimitivePath() {
+		Patient patient = new Patient();
+
+		try {
+			myCtx.newTerser().addElement(patient, "Patient.name", "FOO");
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Element at path Patient.name is not a primitive datatype. Found: HumanName", e.getMessage());
+		}
 
 	}
 
+	@Test
+	public void testAddElements_NonRepeatingPath() {
+		Patient patient = new Patient();
+
+		try {
+			myCtx.newTerser().addElements(patient, "Patient.name.family", Lists.newArrayList("FOO", "BAR"));
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Element at path Patient.name is not a primitive datatype. Found: HumanName", e.getMessage());
+		}
+
+	}
+
+	@Test
+	public void testAddElementReusesExisting() {
+		Patient patient = new Patient();
+		StringType existingFamily = patient.addName().getFamilyElement();
+		patient.addName().setFamily("FAM2");
+		patient.addName().setFamily("FAM3");
+
+		IBase family = myCtx.newTerser().addElement(patient, "Patient.name.family");
+
+		assertEquals(3, patient.getName().size());
+		assertSame(existingFamily, patient.getName().get(0).getFamilyElement());
+		assertSame(family, patient.getName().get(0).getFamilyElement());
+	}
+
+	@Test
+	public void testAddElementCantReuseExistingBecauseItIsNotEmpty() {
+		Patient patient = new Patient();
+		patient.addName().setFamily("FAM1");
+		patient.addName().setFamily("FAM2");
+		patient.addName().setFamily("FAM3");
+
+		try {
+			myCtx.newTerser().addElement(patient, "Patient.name.family");
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Element at path Patient.name.family is not repeatable and not empty", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testAddElementInvalidPath() {
+		Patient patient = new Patient();
+
+		// So much foo....
+
+		try {
+			myCtx.newTerser().addElement(patient, "foo");
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Invalid path foo: Element of type Patient has no child named foo. Valid names: active, address, birthDate, communication, contact, contained, deceased, extension, gender, generalPractitioner, id, identifier, implicitRules, language, link, managingOrganization, maritalStatus, meta, modifierExtension, multipleBirth, name, photo, telecom, text", e.getMessage());
+		}
+
+		try {
+			myCtx.newTerser().addElement(patient, "Patient.foo");
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Invalid path Patient.foo: Element of type Patient has no child named foo. Valid names: active, address, birthDate, communication, contact, contained, deceased, extension, gender, generalPractitioner, id, identifier, implicitRules, language, link, managingOrganization, maritalStatus, meta, modifierExtension, multipleBirth, name, photo, telecom, text", e.getMessage());
+		}
+
+		try {
+			myCtx.newTerser().addElement(patient, "Patient.name.foo");
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Invalid path Patient.name.foo: Element of type HumanName has no child named foo. Valid names: extension, family, given, id, period, prefix, suffix, text, use", e.getMessage());
+		}
+
+		try {
+			myCtx.newTerser().addElement(patient, "Patient.name.family.foo");
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Invalid path Patient.name.family.foo: Element of type HumanName has no child named family (this is a primitive type)", e.getMessage());
+		}
+	}
 
 	@Test
 	public void testContainResourcesWithModify() {
