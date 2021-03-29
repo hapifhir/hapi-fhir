@@ -660,7 +660,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 
 		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
-		assertThat(jobInfo.getFiles().size(), equalTo(3));
+		assertThat(jobInfo.getFiles().size(), equalTo(2));
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
 
 		//Ensure that all immunizations refer to the golden resource via extension
@@ -676,7 +676,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		//Ensure all patients are linked to their golden resource.
 		assertThat(jobInfo.getFiles().get(1).getResourceType(), is(equalTo("Patient")));
-		List<Patient> patients = readBulkExportContentsIntoResources(getBinaryContents(jobInfo, 2), Patient.class);
+		List<Patient> patients = readBulkExportContentsIntoResources(getBinaryContents(jobInfo, 1), Patient.class);
 		patients.stream()
 			.filter(patient -> patient.getIdElement().getIdPart().equals("PAT999"))
 			.forEach(patient -> {
