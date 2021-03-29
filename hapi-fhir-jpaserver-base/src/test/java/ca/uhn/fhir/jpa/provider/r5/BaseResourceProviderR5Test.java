@@ -111,6 +111,8 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 			ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
 			IValidationSupport validationSupport = myAppCtx.getBean(IValidationSupport.class);
 
+			ourSearchParamRegistry = myAppCtx.getBean(SearchParamRegistryImpl.class);
+
 			JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(ourRestServer, mySystemDao, myDaoConfig, ourSearchParamRegistry, validationSupport);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
 			ourRestServer.setServerConformanceProvider(confProvider);
@@ -166,7 +168,6 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(subsServletHolder.getServlet().getServletConfig().getServletContext());
 			myValidationSupport = wac.getBean(IValidationSupport.class);
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
-			ourSearchParamRegistry = wac.getBean(SearchParamRegistryImpl.class);
 			ourSubscriptionMatcherInterceptor = wac.getBean(SubscriptionMatcherInterceptor.class);
 
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
