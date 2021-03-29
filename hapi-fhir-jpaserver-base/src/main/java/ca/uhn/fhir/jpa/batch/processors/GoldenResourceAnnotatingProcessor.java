@@ -117,8 +117,6 @@ public class GoldenResourceAnnotatingProcessor implements ItemProcessor<List<IBa
 		IBaseExtension<?, ?> extension = ExtensionUtil.getOrCreateExtension(iBaseResource, HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL);
 		if (!StringUtils.isBlank(goldenResourceId)) {
 			ExtensionUtil.setExtension(myContext, extension, "reference", prefixPatient(goldenResourceId));
-		} else {
-			ExtensionUtil.setExtension(myContext, extension, "string", "This patient has no matched golden resource.");
 		}
 	}
 

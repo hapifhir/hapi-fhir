@@ -120,8 +120,11 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 		if (myMdmEnabled) {
 			IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId));
 			Long pidOrNull = myIdHelperService.getPidOrNull(group);
-			List<List<Long>> goldenPidSourcePidTuple = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
-			goldenPidSourcePidTuple.forEach(patientPidsToExport::addAll);
+			List<IMdmLinkDao.MdmPidTuple> goldenPidSourcePidTuple = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
+			goldenPidSourcePidTuple.forEach(tuple -> {
+				patientPidsToExport.add(tuple.getGoldenPid());
+				patientPidsToExport.add(tuple.getSourcePid());
+			});
 			populateMdmResourceCache(goldenPidSourcePidTuple);
 		}
 		List<ResourcePersistentId> resourcePersistentIds = patientPidsToExport
@@ -134,7 +137,7 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	/**
 	 * @param thePidTuples
 	 */
-	private void populateMdmResourceCache(List<List<Long>> thePidTuples) {
+	private void populateMdmResourceCache(List<IMdmLinkDao.MdmPidTuple> thePidTuples) {
 		if (myMdmExpansionCacheSvc.hasBeenPopulated()) {
 			return;
 		}
@@ -144,9 +147,9 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 		//   patient/gold-2 -> [patient/3, patient/4]
 		//}
 		Map<Long, Set<Long>> goldenResourceToSourcePidMap = new HashMap<>();
-		for (List<Long> goldenPidTargetPidTuple : thePidTuples) {
-			Long goldenPid = goldenPidTargetPidTuple.get(0);
-			Long sourcePid = goldenPidTargetPidTuple.get(1);
+		for (IMdmLinkDao.MdmPidTuple goldenPidTargetPidTuple : thePidTuples) {
+			Long goldenPid = goldenPidTargetPidTuple.getGoldenPid();
+			Long sourcePid = goldenPidTargetPidTuple.getSourcePid();
 
 			if(!goldenResourceToSourcePidMap.containsKey(goldenPid)) {
 				goldenResourceToSourcePidMap.put(goldenPid, new HashSet<>());
@@ -204,16 +207,19 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 
 		//Attempt to perform MDM Expansion of membership
 		if (myMdmEnabled) {
-			List<List<Long>> goldenPidTargetPidTuples = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
+			List<IMdmLinkDao.MdmPidTuple> goldenPidTargetPidTuples = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
 			//Now lets translate these pids into resource IDs
 			Set<Long> uniquePids = new HashSet<>();
-			goldenPidTargetPidTuples.forEach(uniquePids::addAll);
+			goldenPidTargetPidTuples.forEach(tuple -> {
+				uniquePids.add(tuple.getGoldenPid());
+				uniquePids.add(tuple.getSourcePid());
+			});
 			Map<Long, Optional<String>> pidToForcedIdMap = myIdHelperService.translatePidsToForcedIds(uniquePids);
 
 			Map<Long, Set<Long>> goldenResourceToSourcePidMap = new HashMap<>();
-			for (List<Long> goldenPidTargetPidTuple : goldenPidTargetPidTuples) {
-				Long goldenPid = goldenPidTargetPidTuple.get(0);
-				Long sourcePid = goldenPidTargetPidTuple.get(1);
+			for (IMdmLinkDao.MdmPidTuple goldenPidTargetPidTuple : goldenPidTargetPidTuples) {
+				Long goldenPid = goldenPidTargetPidTuple.getGoldenPid();
+				Long sourcePid = goldenPidTargetPidTuple.getSourcePid();
 
 				if(!goldenResourceToSourcePidMap.containsKey(goldenPid)) {
 					goldenResourceToSourcePidMap.put(goldenPid, new HashSet<>());
