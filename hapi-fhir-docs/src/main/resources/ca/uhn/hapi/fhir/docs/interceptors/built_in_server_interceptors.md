@@ -193,6 +193,54 @@ If you wish to override the value of `Resource.meta.source` using the value	supp
 * [CaptureResourceSourceFromHeaderInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/CaptureResourceSourceFromHeaderInterceptor.html)
 * [CaptureResourceSourceFromHeaderInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/CaptureResourceSourceFromHeaderInterceptor.java)
 
+
+# Terminology: Map Response Terminology
+
+A common problem when implementing FHIR APIs is the challenge of how to return coded data using standard vocabularies when your source data is not modelled using these vocabularies. For example, suppose you want to implement support for an Implementation Guide that mandates the use of [LOINC](https://loinc.org) but your source data uses local/proprietary observation codes.
+
+One solution is to simply apply mappings and add them to the FHIR data you are storing in your repository as you are storing it. This solution, often called *Mapping on the Way In*, will work but it has potential pitfalls including:
+
+* All mappings must be known at the time the data is being stored.
+* If mappings change because of mistakes or new information, updating existing data is difficult.
+
+A potentially better solution is to apply *Mapping on the Way Out*, meaning that your mappings are stored in a central spot and applied at runtime to data as it is leaving your system. HAPI FHIR supplies an interceptor called the ResponseTerminologyTranslationInterceptor that can help with this.
+
+* [ResponseTerminologyTranslationInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/ResponseTerminologyTranslationInterceptor.html)
+* [ResponseTerminologyTranslationInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/ResponseTerminologyTranslationInterceptor.java)
+
+This interceptor uses ConceptMap resources that are stored in your system, looking up mappings for CodeableConcept codings in your resources and adding them to the responses.
+
+The following code snippet shows a simple example of how to create and configure this interceptor. 
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/ServletExamples.java|ResponseTerminologyTranslationInterceptor}}
+```
+
+## Limitations
+
+The following limitations will hopefully be resolved in the future:
+
+This interceptor currently only works when registered against a RestfulServer backed by the HAPI FHIR JPA server.
+
+This interceptor only modifies responses to FHIR read/vread/search/history operations. Responses to these operations are not modified if they are found within a FHIR transaction operation.  
+
+
+# Terminology: Populate Code Display Names
+
+The HAPI FHIR ResponseTerminologyDisplayPopulationInterceptor interceptor looks for Coding elements within responses where the `Coding.system` and `Coding.code` values are populated but the `Coding.display` is not. The interceptor will attempt to resolve the correct display using the validation support module and will add it to the Coding display value if one is found.
+
+* [ResponseTerminologyDisplayPopulationInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/ResponseTerminologyDisplayPopulationInterceptor.html)
+* [ResponseTerminologyDisplayPopulationInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/ResponseTerminologyDisplayPopulationInterceptor.java)
+
+This interceptor uses ConceptMap resources that are stored in your system, looking up mappings for CodeableConcept codings in your resources and adding them to the responses.
+
+## Limitations
+
+The following limitation will hopefully be resolved in the future:
+
+This interceptor only modifies responses to FHIR read/vread/search/history operations. Responses to these operations are not modified if they are found within a FHIR transaction operation.
+
+
 # Utility: ResponseSizeCapturingInterceptor
 
 The ResponseSizeCapturingInterceptor can be used to capture the number of characters written in each HTTP FHIR response.
@@ -227,6 +275,8 @@ The UserRequestRetryVersionConflictsInterceptor allows clients to request that t
 # JPA Server: Validate Data Being Stored
 
 The RepositoryValidatingInterceptor can be used to enforce validation rules on data stored in a HAPI FHIR JPA Repository. See [Repository Validating Interceptor](/docs/validation/repository_validating_interceptor.html) for more information. 
+
+
 
 
 # Data Standardization

@@ -27,7 +27,6 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ConfigLoader;
-import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -73,6 +72,11 @@ public class FieldValidatingInterceptor {
 	}
 
 	protected void handleRequest(RequestDetails theRequest, IBaseResource theResource) {
+		if (theRequest == null) {
+			ourLog.debug("RequestDetails is null - unable to validate {}", theResource);
+			return;
+		}
+
 		if (!theRequest.getHeaders(VALIDATION_DISABLED_HEADER).isEmpty()) {
 			ourLog.debug("Address validation is disabled for this request via header");
 			return;

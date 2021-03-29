@@ -72,7 +72,12 @@
 									<td class="headerBox">
 										<div th:each="header : ${requestHeaders}">
 											<span class="headerName" th:text="${header.name} + ': '"/>
-											<span class="headerValue" th:text="${header.value}"/>
+											<span class="headerValue"
+												th:if="${not #strings.equalsIgnoreCase(header.name, 'Authorization')}"
+												th:text="${header.value}"/>
+											<span class="headerValue suppressed"
+												th:if="${#strings.equalsIgnoreCase(header.name, 'Authorization')}"
+												th:text="suppressed"/>
 										</div>
 									</td>
 								</tr>

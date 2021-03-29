@@ -567,11 +567,6 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		assertEquals(1, response.getEntry().size());
 		assertNull(response.getTotalElement().getValue());
 
-		// Load next page
-		response = myClient.loadPage().next(response).execute();
-		assertEquals(1, response.getEntry().size());
-		assertNull(response.getTotalElement().getValue());
-
 		StopWatch sw = new StopWatch();
 		while(true) {
 			SearchStatusEnum status = runInTransaction(() -> {
@@ -586,6 +581,11 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			}
 		}
 
+		// Load next page
+		response = myClient.loadPage().next(response).execute();
+		assertEquals(1, response.getEntry().size());
+		assertNull(response.getTotalElement().getValue());
+
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException());
 			assertEquals(3, search.getNumFound());
@@ -594,7 +594,12 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		});
 
 		// The paging should have ended now - but the last redacted female result is an empty existing page which should never have been there.
-		assertNull(BundleUtil.getLinkUrlOfType(myFhirCtx, response, "next"));
+		String next = BundleUtil.getLinkUrlOfType(myFhirCtx, response, "next");
+		if (next != null) {
+			response = myClient.loadPage().next(response).execute();
+			fail(myFhirCtx.newJsonParser().encodeResourceToString(response));
+		}
+
 	}
 
 	/**

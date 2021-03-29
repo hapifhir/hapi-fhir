@@ -26,6 +26,9 @@ public class InterceptorOrders {
 	public static final int RESPONSE_HIGHLIGHTER_INTERCEPTOR = 10000;
 	public static final int RESPONSE_SIZE_CAPTURING_INTERCEPTOR_COMPLETED = -1;
 
+	public static final int RESPONSE_TERMINOLOGY_TRANSLATION_INTERCEPTOR = 100;
+	public static final int RESPONSE_TERMINOLOGY_DISPLAY_POPULATION_INTERCEPTOR = 110;
+
 	/**
 	 * Non instantiable
 	 */

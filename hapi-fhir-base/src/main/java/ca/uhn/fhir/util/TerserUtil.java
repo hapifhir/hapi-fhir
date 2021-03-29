@@ -46,6 +46,8 @@ public final class TerserUtil {
 
 	public static final String FIELD_NAME_IDENTIFIER = "identifier";
 
+	private static final String EQUALS_DEEP = "equalsDeep";
+
 	public static final Collection<String> IDS_AND_META_EXCLUDES =
 		Collections.unmodifiableSet(Stream.of("id", "identifier", "meta").collect(Collectors.toSet()));
 
@@ -97,12 +99,12 @@ public final class TerserUtil {
 	}
 
 	/**
-	 * get the Values of a specified field.
+	 * Gets all values of the specified field.
 	 *
 	 * @param theFhirContext Context holding resource definition
 	 * @param theResource    Resource to check if the specified field is set
 	 * @param theFieldName   name of the field to check
-	 * @return Returns true if field exists and has any values set, and false otherwise
+	 * @return Returns all values for the specified field or null if field with the provided name doesn't exist
 	 */
 	public static List<IBase> getValues(FhirContext theFhirContext, IBaseResource theResource, String theFieldName) {
 		RuntimeResourceDefinition resourceDefinition = theFhirContext.getResourceDefinition(theResource);
@@ -112,6 +114,23 @@ public final class TerserUtil {
 			return null;
 		}
 		return resourceIdentifier.getAccessor().getValues(theResource);
+	}
+
+	/**
+	 * Gets the first available value for the specified field.
+	 *
+	 * @param theFhirContext Context holding resource definition
+	 * @param theResource    Resource to check if the specified field is set
+	 * @param theFieldName   name of the field to check
+	 * @return Returns the first value for the specified field or null if field with the provided name doesn't exist or
+	 * has no values
+	 */
+	public static IBase getValueFirstRep(FhirContext theFhirContext, IBaseResource theResource, String theFieldName) {
+		List<IBase> values = getValues(theFhirContext, theResource, theFieldName);
+		if (values == null || values.isEmpty()) {
+			return null;
+		}
+		return values.get(0);
 	}
 
 	/**
@@ -157,26 +176,50 @@ public final class TerserUtil {
 		});
 	}
 
-	private static boolean contains(IBase theItem, List<IBase> theItems) {
+	private static Method getMethod(IBase theBase, String theMethodName) {
 		Method method = null;
-		for (Method m : theItem.getClass().getDeclaredMethods()) {
-			if (m.getName().equals("equalsDeep")) {
+		for (Method m : theBase.getClass().getDeclaredMethods()) {
+			if (m.getName().equals(theMethodName)) {
 				method = m;
 				break;
 			}
 		}
+		return method;
+	}
 
-		final Method m = method;
-		return theItems.stream().anyMatch(i -> {
-			if (m != null) {
-				try {
-					return (Boolean) m.invoke(theItem, i);
-				} catch (Exception e) {
-					throw new RuntimeException("Unable to compare equality via equalsDeep", e);
-				}
+	/**
+	 * Checks if two items are equal via {@link #EQUALS_DEEP} method
+	 *
+	 * @param theItem1 First item to compare
+	 * @param theItem2 Second item to compare
+	 * @return Returns true if they are equal and false otherwise
+	 */
+	public static boolean equals(IBase theItem1, IBase theItem2) {
+		if (theItem1 == null) {
+			return theItem2 == null;
+		}
+
+		final Method method = getMethod(theItem1, EQUALS_DEEP);
+		if (method == null) {
+			throw new IllegalArgumentException(String.format("Instance %s do not provide %s method", theItem1, EQUALS_DEEP));
+		}
+		return equals(theItem1, theItem2, method);
+	}
+
+	private static boolean equals(IBase theItem1, IBase theItem2, Method theMethod) {
+		if (theMethod != null) {
+			try {
+				return (Boolean) theMethod.invoke(theItem1, theItem2);
+			} catch (Exception e) {
+				throw new RuntimeException(String.format("Unable to compare equality via %s", EQUALS_DEEP), e);
 			}
-			return theItem.equals(i);
-		});
+		}
+		return theItem1.equals(theItem2);
+	}
+
+	private static boolean contains(IBase theItem, List<IBase> theItems) {
+		final Method method = getMethod(theItem, EQUALS_DEEP);
+		return theItems.stream().anyMatch(i -> equals(i, theItem, method));
 	}
 
 	/**
@@ -262,6 +305,20 @@ public final class TerserUtil {
 	 * to remove values before setting
 	 *
 	 * @param theFhirContext Context holding resource definition
+	 * @param theFieldName   Child field name of the resource to set
+	 * @param theResource    The resource to set the values on
+	 * @param theValues      The values to set on the resource child field name
+	 */
+	public static void setField(FhirContext theFhirContext, String theFieldName, IBaseResource theResource, IBase... theValues) {
+		setField(theFhirContext, theFhirContext.newTerser(), theFieldName, theResource, theValues);
+	}
+
+	/**
+	 * Sets the provided field with the given values. This method will add to the collection of existing field values
+	 * in case of multiple cardinality. Use {@link #clearField(FhirContext, FhirTerser, String, IBaseResource, IBase...)}
+	 * to remove values before setting
+	 *
+	 * @param theFhirContext Context holding resource definition
 	 * @param theTerser      Terser to be used when cloning field values
 	 * @param theFieldName   Child field name of the resource to set
 	 * @param theResource    The resource to set the values on
@@ -269,10 +326,20 @@ public final class TerserUtil {
 	 */
 	public static void setField(FhirContext theFhirContext, FhirTerser theTerser, String theFieldName, IBaseResource theResource, IBase... theValues) {
 		BaseRuntimeChildDefinition childDefinition = getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theResource);
-
 		List<IBase> theFromFieldValues = childDefinition.getAccessor().getValues(theResource);
+		if (theFromFieldValues.isEmpty()) {
+			for (IBase value : theValues) {
+				try {
+					childDefinition.getMutator().addValue(theResource, value);
+				} catch (UnsupportedOperationException e) {
+					ourLog.warn("Resource {} does not support multiple values, but an attempt to set {} was made. Setting the first item only", theResource, theValues);
+					childDefinition.getMutator().setValue(theResource, value);
+					break;
+				}
+			}
+			return;
+		}
 		List<IBase> theToFieldValues = Arrays.asList(theValues);
-
 		mergeFields(theTerser, theResource, childDefinition, theFromFieldValues, theToFieldValues);
 	}
 
@@ -301,6 +368,18 @@ public final class TerserUtil {
 	 */
 	public static void setFieldByFhirPath(FhirContext theFhirContext, String theFhirPath, IBaseResource theResource, IBase theValue) {
 		setFieldByFhirPath(theFhirContext.newTerser(), theFhirPath, theResource, theValue);
+	}
+
+	public static List<IBase> getFieldByFhirPath(FhirContext theFhirContext, String theFhirPath, IBase theResource) {
+		return theFhirContext.newTerser().getValues(theResource, theFhirPath, false, false);
+	}
+
+	public static IBase getFirstFieldByFhirPath(FhirContext theFhirContext, String theFhirPath, IBase theResource) {
+		List<IBase> values = getFieldByFhirPath(theFhirContext, theFhirPath, theResource);
+		if (values == null || values.isEmpty()) {
+			return null;
+		}
+		return values.get(0);
 	}
 
 	private static void replaceField(IBaseResource theFrom, IBaseResource theTo, BaseRuntimeChildDefinition childDefinition) {
@@ -448,6 +527,9 @@ public final class TerserUtil {
 	 */
 	public static <T extends IBase> T newElement(FhirContext theFhirContext, String theElementType, Object theConstructorParam) {
 		BaseRuntimeElementDefinition def = theFhirContext.getElementDefinition(theElementType);
+		if (def == null) {
+			throw new IllegalArgumentException(String.format("Unable to find element type definition for %s", theElementType));
+		}
 		return (T) def.newInstance(theConstructorParam);
 	}
 

@@ -71,53 +71,54 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init501(); // 20200514 - 20200515
 		init510(); // 20200516 - 20201028
 		init520(); // 20201029 -
-		init530(); 
+		init530();
 		init540(); // 20210218 - 
 	}
 
 	private void init540() {
-		
+
 		Builder version = forVersion(VersionEnum.V5_4_0);
-		
+
 		//-- add index on HFJ_SPIDX_DATE
-	    version.onTable("HFJ_SPIDX_DATE").addIndex("20210309.1", "IDX_SP_DATE_HASH_HIGH")
-	        .unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_HIGH");
-	    
+		version.onTable("HFJ_SPIDX_DATE").addIndex("20210309.1", "IDX_SP_DATE_HASH_HIGH")
+			.unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_HIGH");
+
 		//-- add index on HFJ_FORCED_ID
-	    version.onTable("HFJ_FORCED_ID").addIndex("20210309.2", "IDX_FORCEID_FID")
-	        .unique(false).withColumns("FORCED_ID");   
+		version.onTable("HFJ_FORCED_ID").addIndex("20210309.2", "IDX_FORCEID_FID")
+			.unique(false).withColumns("FORCED_ID");
+
 	}
-	
+
 	private void init530() {
 		Builder version = forVersion(VersionEnum.V5_3_0);
-	
+
 		//-- TRM
 		version
 			.onTable("TRM_VALUESET_CONCEPT")
 			.dropIndex("20210104.1", "IDX_VS_CONCEPT_CS_CODE");
-		
-	    version
-		    .onTable("TRM_VALUESET_CONCEPT")
-		    .addIndex("20210104.2", "IDX_VS_CONCEPT_CSCD").unique(true).withColumns("VALUESET_PID", "SYSTEM_URL", "CODEVAL");
-	    
+
+		version
+			.onTable("TRM_VALUESET_CONCEPT")
+			.addIndex("20210104.2", "IDX_VS_CONCEPT_CSCD").unique(true).withColumns("VALUESET_PID", "SYSTEM_URL", "CODEVAL");
+
 		//-- Add new Table, HFJ_SPIDX_QUANTITY_NRML
 		version.addIdGenerator("20210109.1", "SEQ_SPIDX_QUANTITY_NRML");
 		Builder.BuilderAddTableByColumns pkg = version.addTableByColumns("20210109.2", "HFJ_SPIDX_QUANTITY_NRML", "SP_ID");
-		pkg.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.LONG);	
-		pkg.addColumn("RES_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 100);	
-		pkg.addColumn("SP_UPDATED").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);	
-		pkg.addColumn("SP_MISSING").nonNullable().type(ColumnTypeEnum.BOOLEAN);	
+		pkg.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
+		pkg.addColumn("RES_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		pkg.addColumn("SP_UPDATED").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		pkg.addColumn("SP_MISSING").nonNullable().type(ColumnTypeEnum.BOOLEAN);
 		pkg.addColumn("SP_NAME").nonNullable().type(ColumnTypeEnum.STRING, 100);
-		pkg.addColumn("SP_ID").nonNullable().type(ColumnTypeEnum.LONG);		
+		pkg.addColumn("SP_ID").nonNullable().type(ColumnTypeEnum.LONG);
 		pkg.addColumn("SP_SYSTEM").nullable().type(ColumnTypeEnum.STRING, 200);
 		pkg.addColumn("SP_UNITS").nullable().type(ColumnTypeEnum.STRING, 200);
 		pkg.addColumn("HASH_IDENTITY_AND_UNITS").nullable().type(ColumnTypeEnum.LONG);
 		pkg.addColumn("HASH_IDENTITY_SYS_UNITS").nullable().type(ColumnTypeEnum.LONG);
 		pkg.addColumn("HASH_IDENTITY").nullable().type(ColumnTypeEnum.LONG);
 		pkg.addColumn("SP_VALUE").nullable().type(ColumnTypeEnum.FLOAT);
-		pkg.addIndex("20210109.3", "IDX_SP_QNTY_NRML_HASH").unique(false).withColumns("HASH_IDENTITY","SP_VALUE");
-		pkg.addIndex("20210109.4", "IDX_SP_QNTY_NRML_HASH_UN").unique(false).withColumns("HASH_IDENTITY_AND_UNITS","SP_VALUE");
-		pkg.addIndex("20210109.5", "IDX_SP_QNTY_NRML_HASH_SYSUN").unique(false).withColumns("HASH_IDENTITY_SYS_UNITS","SP_VALUE");
+		pkg.addIndex("20210109.3", "IDX_SP_QNTY_NRML_HASH").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE");
+		pkg.addIndex("20210109.4", "IDX_SP_QNTY_NRML_HASH_UN").unique(false).withColumns("HASH_IDENTITY_AND_UNITS", "SP_VALUE");
+		pkg.addIndex("20210109.5", "IDX_SP_QNTY_NRML_HASH_SYSUN").unique(false).withColumns("HASH_IDENTITY_SYS_UNITS", "SP_VALUE");
 		pkg.addIndex("20210109.6", "IDX_SP_QNTY_NRML_UPDATED").unique(false).withColumns("SP_UPDATED");
 		pkg.addIndex("20210109.7", "IDX_SP_QNTY_NRML_RESID").unique(false).withColumns("RES_ID");
 
@@ -154,7 +155,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.toColumn("GOLDEN_RESOURCE_PID")
 			.references("HFJ_RESOURCE", "RES_ID");
 	}
-	
+
 	protected void init510() {
 		Builder version = forVersion(VersionEnum.V5_1_0);
 
@@ -224,7 +225,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init510_20200725();
 
 		//EMPI Target Type
-		empiLink.addColumn("20200727.1","TARGET_TYPE").nullable().type(ColumnTypeEnum.STRING, 40);
+		empiLink.addColumn("20200727.1", "TARGET_TYPE").nullable().type(ColumnTypeEnum.STRING, 40);
 
 		//ConceptMap add version for search
 		Builder.BuilderWithTableName trmConceptMap = version.onTable("TRM_CONCEPT_MAP");
@@ -1022,8 +1023,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidxUri
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.44")
 					.setColumnName("HASH_IDENTITY")
-					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(), (RequestPartitionId)null, t.getResourceType(), t.getString("SP_NAME")))
-					.addCalculator("HASH_URI", t -> ResourceIndexedSearchParamUri.calculateHashUri(new PartitionSettings(), (RequestPartitionId)null, t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_URI")))
+					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(), (RequestPartitionId) null, t.getResourceType(), t.getString("SP_NAME")))
+					.addCalculator("HASH_URI", t -> ResourceIndexedSearchParamUri.calculateHashUri(new PartitionSettings(), (RequestPartitionId) null, t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_URI")))
 				);
 		}
 
@@ -1056,7 +1057,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			Boolean present = columnToBoolean(t.get("SP_PRESENT"));
 			String resType = (String) t.get("RES_TYPE");
 			String paramName = (String) t.get("PARAM_NAME");
-			Long hash = SearchParamPresent.calculateHashPresence(new PartitionSettings(), (RequestPartitionId)null, resType, paramName, present);
+			Long hash = SearchParamPresent.calculateHashPresence(new PartitionSettings(), (RequestPartitionId) null, resType, paramName, present);
 			consolidateSearchParamPresenceIndexesTask.executeSql("HFJ_RES_PARAM_PRESENT", "update HFJ_RES_PARAM_PRESENT set HASH_PRESENCE = ? where PID = ?", hash, pid);
 		});
 		version.addTask(consolidateSearchParamPresenceIndexesTask);

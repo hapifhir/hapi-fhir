@@ -23,6 +23,7 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -31,6 +32,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class SearchParameterUtil {
 
@@ -48,6 +50,62 @@ public class SearchParameterUtil {
 		}
 
 		return retVal;
+	}
+
+	/**
+	 * Given the resource type, fetch its patient-based search parameter name
+	 * 1. Attempt to find one called 'patient'
+	 * 2. If that fails, find one called 'subject'
+	 * 3. If that fails, find find by Patient Compartment.
+	 *    3.1 If that returns >1 result, throw an error
+	 *    3.2 If that returns 1 result, return it
+	 */
+	public static Optional<RuntimeSearchParam> getOnlyPatientSearchParamForResourceType(FhirContext theFhirContext, String theResourceType) {
+		RuntimeSearchParam myPatientSearchParam = null;
+		RuntimeResourceDefinition runtimeResourceDefinition = theFhirContext.getResourceDefinition(theResourceType);
+		myPatientSearchParam = runtimeResourceDefinition.getSearchParam("patient");
+		if (myPatientSearchParam == null) {
+			myPatientSearchParam = runtimeResourceDefinition.getSearchParam("subject");
+			if (myPatientSearchParam == null) {
+				myPatientSearchParam = getOnlyPatientCompartmentRuntimeSearchParam(runtimeResourceDefinition);
+			}
+		}
+		return Optional.ofNullable(myPatientSearchParam);
+	}
+
+
+	/**
+	 * Search the resource definition for a compartment named 'patient' and return its related Search Parameter.
+	 */
+	public static RuntimeSearchParam getOnlyPatientCompartmentRuntimeSearchParam(FhirContext theFhirContext, String theResourceType) {
+		RuntimeResourceDefinition resourceDefinition = theFhirContext.getResourceDefinition(theResourceType);
+		return getOnlyPatientCompartmentRuntimeSearchParam(resourceDefinition);
+	}
+
+	public static RuntimeSearchParam getOnlyPatientCompartmentRuntimeSearchParam(RuntimeResourceDefinition runtimeResourceDefinition) {
+		RuntimeSearchParam patientSearchParam;
+		List<RuntimeSearchParam> searchParams = runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
+		if (searchParams == null || searchParams.size() == 0) {
+			String errorMessage = String.format("Resource type [%s] is not eligible for this type of export, as it contains no Patient compartment, and no `patient` or `subject` search parameter", runtimeResourceDefinition.getId());
+			throw new IllegalArgumentException(errorMessage);
+		} else if (searchParams.size() == 1) {
+			patientSearchParam = searchParams.get(0);
+		} else {
+			String errorMessage = String.format("Resource type %s has more than one Search Param which references a patient compartment. We are unable to disambiguate which patient search parameter we should be searching by.", runtimeResourceDefinition.getId());
+			throw new IllegalArgumentException(errorMessage);
+		}
+		return patientSearchParam;
+	}
+
+	public static List<RuntimeSearchParam> getAllPatientCompartmentRuntimeSearchParams(FhirContext theFhirContext, String theResourceType) {
+		RuntimeResourceDefinition runtimeResourceDefinition = theFhirContext.getResourceDefinition(theResourceType);
+		return getAllPatientCompartmentRuntimeSearchParams(runtimeResourceDefinition);
+
+	}
+
+	private static List<RuntimeSearchParam> getAllPatientCompartmentRuntimeSearchParams(RuntimeResourceDefinition theRuntimeResourceDefinition) {
+		List<RuntimeSearchParam> patient = theRuntimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
+		return patient;
 	}
 
 

@@ -27,7 +27,7 @@ import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryChunker;
@@ -36,6 +36,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import com.google.common.collect.Multimaps;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -45,6 +46,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -75,6 +77,8 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	private IdHelperService myIdHelperService;
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
+	@Autowired
+	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
 
 	@Override
 	Iterator<ResourcePersistentId> getResourcePidIterator() {
@@ -109,23 +113,65 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	 * possibly expanded by MDM, and don't have to go and fetch other resource DAOs.
 	 */
 	private Iterator<ResourcePersistentId> getExpandedPatientIterator() {
-		Set<Long> patientPidsToExport = new HashSet<>();
 		List<String> members = getMembers();
 		List<IIdType> ids = members.stream().map(member -> new IdDt("Patient/" + member)).collect(Collectors.toList());
 		List<Long> pidsOrThrowException = myIdHelperService.getPidsOrThrowException(ids);
-		patientPidsToExport.addAll(pidsOrThrowException);
+		Set<Long> patientPidsToExport = new HashSet<>(pidsOrThrowException);
 
 		if (myMdmEnabled) {
 			IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId));
 			Long pidOrNull = myIdHelperService.getPidOrNull(group);
-			List<List<Long>> lists = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
-			lists.forEach(patientPidsToExport::addAll);
+			List<IMdmLinkDao.MdmPidTuple> goldenPidSourcePidTuple = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
+			goldenPidSourcePidTuple.forEach(tuple -> {
+				patientPidsToExport.add(tuple.getGoldenPid());
+				patientPidsToExport.add(tuple.getSourcePid());
+			});
+			populateMdmResourceCache(goldenPidSourcePidTuple);
 		}
 		List<ResourcePersistentId> resourcePersistentIds = patientPidsToExport
 			.stream()
 			.map(ResourcePersistentId::new)
 			.collect(Collectors.toList());
 		return resourcePersistentIds.iterator();
+	}
+
+	/**
+	 * @param thePidTuples
+	 */
+	private void populateMdmResourceCache(List<IMdmLinkDao.MdmPidTuple> thePidTuples) {
+		if (myMdmExpansionCacheSvc.hasBeenPopulated()) {
+			return;
+		}
+		//First, convert this zipped set of tuples to a map of
+		//{
+		//   patient/gold-1 -> [patient/1, patient/2]
+		//   patient/gold-2 -> [patient/3, patient/4]
+		//}
+		Map<Long, Set<Long>> goldenResourceToSourcePidMap = new HashMap<>();
+		extract(thePidTuples, goldenResourceToSourcePidMap);
+
+		//Next, lets convert it to an inverted index for fast lookup
+		// {
+		//   patient/1 -> patient/gold-1
+		//   patient/2 -> patient/gold-1
+		//   patient/3 -> patient/gold-2
+		//   patient/4 -> patient/gold-2
+		// }
+		Map<String, String> sourceResourceIdToGoldenResourceIdMap = new HashMap<>();
+		goldenResourceToSourcePidMap.forEach((key, value) -> {
+			String goldenResourceId = myIdHelperService.translatePidIdToForcedId(new ResourcePersistentId(key)).orElse(key.toString());
+			Map<Long, Optional<String>> pidsToForcedIds = myIdHelperService.translatePidsToForcedIds(value);
+
+			Set<String> sourceResourceIds = pidsToForcedIds.entrySet().stream()
+				.map(ent -> ent.getValue().isPresent() ? ent.getValue().get() : ent.getKey().toString())
+				.collect(Collectors.toSet());
+
+			sourceResourceIds
+				.forEach(sourceResourceId -> sourceResourceIdToGoldenResourceIdMap.put(sourceResourceId, goldenResourceId));
+		});
+
+		//Now that we have built our cached expansion, store it.
+		myMdmExpansionCacheSvc.setCacheContents(sourceResourceIdToGoldenResourceIdMap);
 	}
 
 	/**
@@ -154,12 +200,18 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 
 		//Attempt to perform MDM Expansion of membership
 		if (myMdmEnabled) {
-			List<List<Long>> goldenPidTargetPidTuple = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
+			List<IMdmLinkDao.MdmPidTuple> goldenPidTargetPidTuples = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
 			//Now lets translate these pids into resource IDs
 			Set<Long> uniquePids = new HashSet<>();
-			goldenPidTargetPidTuple.forEach(uniquePids::addAll);
-
+			goldenPidTargetPidTuples.forEach(tuple -> {
+				uniquePids.add(tuple.getGoldenPid());
+				uniquePids.add(tuple.getSourcePid());
+			});
 			Map<Long, Optional<String>> pidToForcedIdMap = myIdHelperService.translatePidsToForcedIds(uniquePids);
+
+			Map<Long, Set<Long>> goldenResourceToSourcePidMap = new HashMap<>();
+			extract(goldenPidTargetPidTuples, goldenResourceToSourcePidMap);
+			populateMdmResourceCache(goldenPidTargetPidTuples);
 
 			//If the result of the translation is an empty optional, it means there is no forced id, and we can use the PID as the resource ID.
 			Set<String> resolvedResourceIds = pidToForcedIdMap.entrySet().stream()
@@ -174,6 +226,14 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 		expandedIds.addAll(getMembers());
 
 		return expandedIds;
+	}
+
+	private void extract(List<IMdmLinkDao.MdmPidTuple> theGoldenPidTargetPidTuples, Map<Long, Set<Long>> theGoldenResourceToSourcePidMap) {
+		for (IMdmLinkDao.MdmPidTuple goldenPidTargetPidTuple : theGoldenPidTargetPidTuples) {
+			Long goldenPid = goldenPidTargetPidTuple.getGoldenPid();
+			Long sourcePid = goldenPidTargetPidTuple.getSourcePid();
+			theGoldenResourceToSourcePidMap.computeIfAbsent(goldenPid, key -> new HashSet<>()).add(sourcePid);
+		}
 	}
 
 	private void queryResourceTypeWithReferencesToPatients(Set<ResourcePersistentId> myReadPids, List<String> idChunk) {

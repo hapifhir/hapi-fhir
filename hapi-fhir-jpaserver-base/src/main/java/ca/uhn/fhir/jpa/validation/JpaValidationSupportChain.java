@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.packages.NpmJpaValidationSupport;
+import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
@@ -49,6 +50,8 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	private ITermReadSvc myTerminologyService;
 	@Autowired
 	private NpmJpaValidationSupport myNpmJpaValidationSupport;
+	@Autowired
+	private ITermConceptMappingSvc myConceptMappingSvc;
 
 	public JpaValidationSupportChain(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
@@ -74,6 +77,7 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 		addValidationSupport(new InMemoryTerminologyServerValidationSupport(myFhirContext));
 		addValidationSupport(myNpmJpaValidationSupport);
 		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
+		addValidationSupport(myConceptMappingSvc);
 	}
 
 }

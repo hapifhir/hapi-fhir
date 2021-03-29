@@ -95,7 +95,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(2, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
@@ -156,7 +156,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
@@ -205,7 +205,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
@@ -255,7 +255,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
@@ -304,7 +304,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
@@ -352,7 +352,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
@@ -400,7 +400,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
@@ -446,7 +446,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertFalse(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("No matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("No Matches found", ((StringType) param.getValue()).getValueAsString());
 
 	}
 	
@@ -480,7 +480,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
@@ -525,7 +525,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
@@ -570,7 +570,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
@@ -615,7 +615,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
-		assertEquals("Matches found!", ((StringType) param.getValue()).getValueAsString());
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);

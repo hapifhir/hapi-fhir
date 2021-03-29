@@ -1,0 +1,4 @@
+---
+type: add
+issue: 2478
+title: "Added matching based on extension, when given the path to a fhir resource the matcher will take the extensions and match if the url and string value are the same"
