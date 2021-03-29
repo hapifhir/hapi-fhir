@@ -21,6 +21,7 @@ import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -29,11 +30,13 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.CareTeam;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.InstantType;
@@ -643,7 +646,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		// Create a bulk job
 		BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
 		bulkDataExportOptions.setOutputFormat(null);
-		bulkDataExportOptions.setResourceTypes(Sets.newHashSet("Immunization", "Observation", "Patient"));
+		bulkDataExportOptions.setResourceTypes(Sets.newHashSet("Immunization", "Patient"));
 		bulkDataExportOptions.setSince(null);
 		bulkDataExportOptions.setFilters(null);
 		bulkDataExportOptions.setGroupId(myPatientGroupId);
@@ -660,19 +663,36 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(jobInfo.getFiles().size(), equalTo(3));
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
 
-		// Iterate over the files
-
-		String nextContents = getBinaryContents(jobInfo, 0);
+		//Ensure that all immunizations refer to the golden resource via extension
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
-		assertThat(nextContents, is(containsString(HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL)));
+		List<Immunization> immunizations = readBulkExportContentsIntoResources(getBinaryContents(jobInfo, 0), Immunization.class);
+		immunizations
+			.stream().filter(immu -> !immu.getIdElement().getIdPart().equals("PAT999"))//Skip the golden resource
+			.forEach(immunization -> {
+				Extension extensionByUrl = immunization.getExtensionByUrl(HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL);
+				String reference = ((Reference) extensionByUrl.getValue()).getReference();
+				assertThat(reference, is(equalTo("Patient/PAT999")));
+			});
 
-		nextContents = getBinaryContents(jobInfo, 1);
-		assertThat(jobInfo.getFiles().get(1).getResourceType(), is(equalTo("Observation")));
-		assertThat(nextContents, is(containsString(HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL)));
+		//Ensure all patients are linked to their golden resource.
+		assertThat(jobInfo.getFiles().get(1).getResourceType(), is(equalTo("Patient")));
+		List<Patient> patients = readBulkExportContentsIntoResources(getBinaryContents(jobInfo, 2), Patient.class);
+		patients.stream()
+			.filter(patient -> patient.getIdElement().getIdPart().equals("PAT999"))
+			.forEach(patient -> {
+				Extension extensionByUrl = patient.getExtensionByUrl(HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL);
+				String reference = ((Reference) extensionByUrl.getValue()).getReference();
+				assertThat(reference, is(equalTo("Patient/PAT999")));
+			});
 
-		nextContents = getBinaryContents(jobInfo, 2);
-		assertThat(jobInfo.getFiles().get(2).getResourceType(), is(equalTo("Patient")));
-		assertThat(nextContents, is(containsString(HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL)));
+	}
+
+	private <T extends IBaseResource> List<T> readBulkExportContentsIntoResources(String theContents, Class<T> theClass) {
+		IParser iParser = myFhirCtx.newJsonParser();
+		return Arrays.stream(theContents.split("\n"))
+			.map(iParser::parseResource)
+			.map(theClass::cast)
+			.collect(Collectors.toList());
 	}
 
 	@Test

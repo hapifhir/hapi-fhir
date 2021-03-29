@@ -36,6 +36,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import com.google.common.collect.Multimaps;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -147,15 +148,7 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 		//   patient/gold-2 -> [patient/3, patient/4]
 		//}
 		Map<Long, Set<Long>> goldenResourceToSourcePidMap = new HashMap<>();
-		for (IMdmLinkDao.MdmPidTuple goldenPidTargetPidTuple : thePidTuples) {
-			Long goldenPid = goldenPidTargetPidTuple.getGoldenPid();
-			Long sourcePid = goldenPidTargetPidTuple.getSourcePid();
-
-			if(!goldenResourceToSourcePidMap.containsKey(goldenPid)) {
-				goldenResourceToSourcePidMap.put(goldenPid, new HashSet<>());
-			}
-			goldenResourceToSourcePidMap.get(goldenPid).add(sourcePid);
-		}
+		extract(thePidTuples, goldenResourceToSourcePidMap);
 
 		//Next, lets convert it to an inverted index for fast lookup
 		// {
@@ -217,15 +210,7 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 			Map<Long, Optional<String>> pidToForcedIdMap = myIdHelperService.translatePidsToForcedIds(uniquePids);
 
 			Map<Long, Set<Long>> goldenResourceToSourcePidMap = new HashMap<>();
-			for (IMdmLinkDao.MdmPidTuple goldenPidTargetPidTuple : goldenPidTargetPidTuples) {
-				Long goldenPid = goldenPidTargetPidTuple.getGoldenPid();
-				Long sourcePid = goldenPidTargetPidTuple.getSourcePid();
-
-				if(!goldenResourceToSourcePidMap.containsKey(goldenPid)) {
-					goldenResourceToSourcePidMap.put(goldenPid, new HashSet<>());
-				}
-				goldenResourceToSourcePidMap.get(goldenPid).add(sourcePid);
-			}
+			extract(goldenPidTargetPidTuples, goldenResourceToSourcePidMap);
 			populateMdmResourceCache(goldenPidTargetPidTuples);
 
 			//If the result of the translation is an empty optional, it means there is no forced id, and we can use the PID as the resource ID.
@@ -241,6 +226,14 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 		expandedIds.addAll(getMembers());
 
 		return expandedIds;
+	}
+
+	private void extract(List<IMdmLinkDao.MdmPidTuple> theGoldenPidTargetPidTuples, Map<Long, Set<Long>> theGoldenResourceToSourcePidMap) {
+		for (IMdmLinkDao.MdmPidTuple goldenPidTargetPidTuple : theGoldenPidTargetPidTuples) {
+			Long goldenPid = goldenPidTargetPidTuple.getGoldenPid();
+			Long sourcePid = goldenPidTargetPidTuple.getSourcePid();
+			theGoldenResourceToSourcePidMap.computeIfAbsent(goldenPid, key -> new HashSet<>()).add(sourcePid);
+		}
 	}
 
 	private void queryResourceTypeWithReferencesToPatients(Set<ResourcePersistentId> myReadPids, List<String> idChunk) {

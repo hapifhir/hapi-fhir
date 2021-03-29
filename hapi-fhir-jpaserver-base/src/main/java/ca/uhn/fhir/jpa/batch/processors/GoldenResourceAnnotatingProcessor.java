@@ -97,7 +97,8 @@ public class GoldenResourceAnnotatingProcessor implements ItemProcessor<List<IBa
 		if (patientReference.isPresent()) {
 			addGoldenResourceExtension(iBaseResource, patientReference.get());
 		} else {
-			ourLog.warn("Failed to find the patient reference information for resource {}", iBaseResource);
+			ourLog.error("Failed to find the patient reference information for resource {}. This is a bug, " +
+				"as all resources which can be exported via Group Bulk Export must reference a patient.", iBaseResource);
 		}
 	}
 
