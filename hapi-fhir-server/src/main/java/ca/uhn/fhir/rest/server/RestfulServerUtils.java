@@ -796,7 +796,7 @@ public class RestfulServerUtils {
 		PreferHeader retVal = new PreferHeader();
 
 		if (isNotBlank(theValue)) {
-			StringTokenizer tok = new StringTokenizer(theValue, ";");
+			StringTokenizer tok = new StringTokenizer(theValue, ";,");
 			while (tok.hasMoreTokens()) {
 				String next = trim(tok.nextToken());
 				int eqIndex = next.indexOf('=');

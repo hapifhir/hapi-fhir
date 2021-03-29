@@ -39,8 +39,16 @@ public class RestfulServerUtilsTest{
 	}
 
 	@Test
-	public void testParseHandlingLenientAndReturnRepresentation() {
+	public void testParseHandlingLenientAndReturnRepresentation_CommaSeparatd() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null,"handling=lenient, return=representation");
+		assertEquals(PreferReturnEnum.REPRESENTATION, header.getReturn());
+		assertFalse(header.getRespondAsync());
+		assertEquals(PreferHandlingEnum.LENIENT, header.getHanding());
+	}
+
+	@Test
+	public void testParseHandlingLenientAndReturnRepresentation_SemicolonSeparatd() {
+		PreferHeader header = RestfulServerUtils.parsePreferHeader(null,"handling=lenient; return=representation");
 		assertEquals(PreferReturnEnum.REPRESENTATION, header.getReturn());
 		assertFalse(header.getRespondAsync());
 		assertEquals(PreferHandlingEnum.LENIENT, header.getHanding());
