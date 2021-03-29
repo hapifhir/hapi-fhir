@@ -112,7 +112,7 @@ public interface IValidationSupport {
 	}
 
 	/**
-	 * Load and return all possible structure definitions
+	 * Load and return all possible structure definitions aside from resource definitions themselves
 	 */
 	@Nullable
 	default <T extends IBaseResource> List<T> fetchAllNonBaseStructureDefinitions() {

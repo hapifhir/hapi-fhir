@@ -80,7 +80,7 @@ public class SearchParameterCanonicalizer {
 				break;
 			case R4:
 			case R5:
-				retVal = canonicalizeSearchParameterR4Plus((org.hl7.fhir.r4.model.SearchParameter) theSearchParameter);
+				retVal = canonicalizeSearchParameterR4Plus(theSearchParameter);
 				break;
 			case DSTU2_HL7ORG:
 			case DSTU2_1:
