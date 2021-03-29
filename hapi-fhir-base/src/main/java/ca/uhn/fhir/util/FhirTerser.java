@@ -1237,6 +1237,8 @@ public class FhirTerser {
 							return (List<T>) Collections.singletonList(childValues.get(0));
 						} else if (nextChild.getMax() == 1 && !childValues.get(0).isEmpty()) {
 							throw new DataFormatException("Element at path " + thePath + " is not repeatable and not empty");
+						} else if (nextChild.getMax() == 1 && childValues.get(0).isEmpty()) {
+							return (List<T>) Collections.singletonList(childValues.get(0));
 						}
 					}
 				}

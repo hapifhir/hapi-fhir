@@ -110,7 +110,7 @@ public class FhirTerserR4Test {
 			myCtx.newTerser().addElements(patient, "Patient.name.family", Lists.newArrayList("FOO", "BAR"));
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Element at path Patient.name is not a primitive datatype. Found: HumanName", e.getMessage());
+			assertEquals("Can not add multiple values at path Patient.name.family: Element does not repeat", e.getMessage());
 		}
 
 	}
@@ -125,7 +125,7 @@ public class FhirTerserR4Test {
 		IBase family = myCtx.newTerser().addElement(patient, "Patient.name.family");
 
 		assertEquals(3, patient.getName().size());
-		assertSame(existingFamily, patient.getName().get(0).getFamilyElement());
+		assertTrue(existingFamily == patient.getName().get(0).getFamilyElement());
 		assertSame(family, patient.getName().get(0).getFamilyElement());
 	}
 
