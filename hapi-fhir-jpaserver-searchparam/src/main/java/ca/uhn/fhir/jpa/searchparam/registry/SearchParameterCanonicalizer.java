@@ -315,11 +315,16 @@ public class SearchParameterCanonicalizer {
 		String uri = terser.getSinglePrimitiveValueOrNull(theNextSp, "url");
 		boolean unique = false;
 
-		if (ExtensionUtil.hasExtension(theNextSp, HapiExtensions.EXT_SP_UNIQUE)) {
-			IPrimitiveType<?> value = (IPrimitiveType<?>) ExtensionUtil.getExtension((IBaseHasExtensions) theNextSp, HapiExtensions.EXT_SP_UNIQUE).getValue();
-			if ("true".equalsIgnoreCase(value.getValueAsString())) {
-				unique = true;
-			}
+		String value = ((IBaseHasExtensions) theNextSp).getExtension()
+			.stream()
+			.filter(e -> HapiExtensions.EXT_SP_UNIQUE.equals(e.getUrl()))
+			.filter(t->t.getValue() instanceof IPrimitiveType)
+			.map(t->(IPrimitiveType<?>)t.getValue())
+			.map(t->t.getValueAsString())
+			.findFirst()
+			.orElse("");
+		if ("true".equalsIgnoreCase(value)) {
+			unique = true;
 		}
 
 		List<JpaRuntimeSearchParam.Component> components = new ArrayList<>();
