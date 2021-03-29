@@ -21,6 +21,4 @@ public class TestElasticsearchContainerHelper {
 
 		return new ElasticsearchContainer(ELASTICSEARCH_IMAGE)
 			.withStartupTimeout(Duration.of(300, SECONDS));
-	}
-
 }
