@@ -541,7 +541,6 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
-		ourLog.info("zoop");
 		ourLog.info(resp);
 
 		assertThat(resp, is(containsStringIgnoringCase("<code value=\"M\"/>")));
