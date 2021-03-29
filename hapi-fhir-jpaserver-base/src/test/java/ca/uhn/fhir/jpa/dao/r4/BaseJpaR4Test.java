@@ -94,6 +94,8 @@ import ca.uhn.fhir.rest.server.BasePagingProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
+import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.ResourceUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
@@ -594,13 +596,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	}
 
 	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
-		InputStream stream = FhirResourceDaoDstu2SearchNoFtTest.class.getResourceAsStream(resourceName);
-		if (stream == null) {
-			fail("Unable to load resource: " + resourceName);
-		}
-		String string = IOUtils.toString(stream, "UTF-8");
-		IParser newJsonParser = EncodingEnum.detectEncodingNoDefault(string).newParser(myFhirCtx);
-		return newJsonParser.parseResource(type, string);
+		return ClasspathUtil.loadResource(myFhirCtx, type, resourceName);
 	}
 
 	protected void validate(IBaseResource theResource) {

@@ -6,6 +6,8 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -17,7 +19,9 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItems;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ServerCapabilityStatementR4Test extends BaseResourceProviderR4Test {
+public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProviderR4Test {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(ServerCapabilityStatementProviderJpaR4Test.class);
 
 	@Test
 	public void testCorrectResourcesReflected() {
@@ -66,6 +70,22 @@ public class ServerCapabilityStatementR4Test extends BaseResourceProviderR4Test 
 		assertThat(supportedProfiles.toString(), supportedProfiles, containsInAnyOrder(
 			"http://fhir.kids-first.io/StructureDefinition/kfdrc-patient",
 			"http://fhir.kids-first.io/StructureDefinition/kfdrc-patient-no-phi"
+		));
+	}
+
+	/**
+	 * Universal profiles like vitalsigns should not be excluded
+	 */
+	@Test
+	public void testRegisteredProfilesReflected_Universal() throws IOException {
+		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/r4/r4-create-structuredefinition-vital-signs.json");
+		ourLog.info("Stored SD to ID: {}", myStructureDefinitionDao.update(sd).getId());
+
+		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
+
+		List<String> supportedProfiles = findSupportedProfiles(cs, "Observation");
+		assertThat(supportedProfiles.toString(), supportedProfiles, containsInAnyOrder(
+			"http://hl7.org/fhir/StructureDefinition/vitalsigns"
 		));
 	}
 

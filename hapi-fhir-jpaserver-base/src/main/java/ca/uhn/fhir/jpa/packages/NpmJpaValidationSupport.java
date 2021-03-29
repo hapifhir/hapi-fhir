@@ -78,4 +78,5 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
 		return (List<T>) myHapiPackageCacheManager.loadPackageAssetsByType(fhirVersion, "StructureDefinition");
 	}
+
 }

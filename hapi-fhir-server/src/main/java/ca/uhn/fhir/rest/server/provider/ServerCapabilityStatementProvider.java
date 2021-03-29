@@ -49,6 +49,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -381,15 +382,16 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	private TreeMultimap<String, String> getSupportedProfileMultimap(FhirTerser terser) {
 		TreeMultimap<String, String> resourceTypeToSupportedProfiles = TreeMultimap.create();
 		if (myValidationSupport != null) {
-			List<IBaseResource> allStructureDefinitions = myValidationSupport.fetchAllStructureDefinitions();
+			List<IBaseResource> allStructureDefinitions = myValidationSupport.fetchAllNonBaseStructureDefinitions();
 			if (allStructureDefinitions != null) {
 				for (IBaseResource next : allStructureDefinitions) {
 					String kind = terser.getSinglePrimitiveValueOrNull(next, "kind");
 					String url = terser.getSinglePrimitiveValueOrNull(next, "url");
+					String baseDefinition = defaultString(terser.getSinglePrimitiveValueOrNull(next, "baseDefinition"));
 					if ("resource".equals(kind) && isNotBlank(url)) {
 
-						// Don't declare support for the base profiles, that's not useful
-						if (url.startsWith("http://hl7.org/fhir/StructureDefinition")) {
+						// Don't include the base resource definitions in the supported profile list - This isn't helpful
+						if (baseDefinition.equals("http://hl7.org/fhir/StructureDefinition/DomainResource") || baseDefinition.equals("http://hl7.org/fhir/StructureDefinition/Resource")) {
 							continue;
 						}
 
