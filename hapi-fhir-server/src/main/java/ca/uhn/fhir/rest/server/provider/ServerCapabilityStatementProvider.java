@@ -54,9 +54,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
- * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
+ * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2015 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
