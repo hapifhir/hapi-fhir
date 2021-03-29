@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.bulk.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.util.ExtensionUtil;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -46,7 +47,6 @@ import java.util.Optional;
  */
 public class GoldenResourceAnnotatingProcessor implements ItemProcessor<List<IBaseResource>, List<IBaseResource>> {
 	 private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
-	public static final String ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL = "https://hapifhir.org/associated-patient-golden-resource/";
 
 	@Value("#{stepExecutionContext['resourceType']}")
 	private String myResourceType;
@@ -114,7 +114,7 @@ public class GoldenResourceAnnotatingProcessor implements ItemProcessor<List<IBa
 
 	private void addGoldenResourceExtension(IBaseResource iBaseResource, String sourceResourceId) {
 		String goldenResourceId = myMdmExpansionCacheSvc.getGoldenResourceId(sourceResourceId);
-		IBaseExtension<?, ?> extension = ExtensionUtil.getOrCreateExtension(iBaseResource, ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL);
+		IBaseExtension<?, ?> extension = ExtensionUtil.getOrCreateExtension(iBaseResource, HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL);
 		if (!StringUtils.isBlank(goldenResourceId)) {
 			ExtensionUtil.setExtension(myContext, extension, "reference", prefixPatient(goldenResourceId));
 		} else {

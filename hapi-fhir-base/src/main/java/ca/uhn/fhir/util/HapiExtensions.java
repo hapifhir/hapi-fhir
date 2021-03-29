@@ -112,6 +112,11 @@ public class HapiExtensions {
 	public static final String EXT_RESOURCE_PLACEHOLDER = "http://hapifhir.io/fhir/StructureDefinition/resource-placeholder";
 
 	/**
+	 * URL for extension in a Group Bulk Export which identifies the golden patient of a given exported resource.
+	 */
+    public static final String ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL = "https://hapifhir.org/associated-patient-golden-resource/";
+
+    /**
 	 * Non instantiable
 	 */
 	private HapiExtensions() {

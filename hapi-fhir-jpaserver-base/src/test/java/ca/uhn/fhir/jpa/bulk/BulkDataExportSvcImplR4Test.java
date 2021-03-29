@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
-import ca.uhn.fhir.jpa.batch.processors.GoldenResourceAnnotatingProcessor;
 import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.job.BulkExportJobParametersBuilder;
@@ -20,12 +19,11 @@ import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.jpa.entity.MdmLink;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
@@ -40,7 +38,6 @@ import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
@@ -56,7 +53,6 @@ import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -668,15 +664,15 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		String nextContents = getBinaryContents(jobInfo, 0);
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
-		assertThat(nextContents, is(containsString(GoldenResourceAnnotatingProcessor.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL)));
+		assertThat(nextContents, is(containsString(HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL)));
 
 		nextContents = getBinaryContents(jobInfo, 1);
 		assertThat(jobInfo.getFiles().get(1).getResourceType(), is(equalTo("Observation")));
-		assertThat(nextContents, is(containsString(GoldenResourceAnnotatingProcessor.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL)));
+		assertThat(nextContents, is(containsString(HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL)));
 
 		nextContents = getBinaryContents(jobInfo, 2);
 		assertThat(jobInfo.getFiles().get(2).getResourceType(), is(equalTo("Patient")));
-		assertThat(nextContents, is(containsString(GoldenResourceAnnotatingProcessor.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL)));
+		assertThat(nextContents, is(containsString(HapiExtensions.ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL)));
 	}
 
 	@Test
