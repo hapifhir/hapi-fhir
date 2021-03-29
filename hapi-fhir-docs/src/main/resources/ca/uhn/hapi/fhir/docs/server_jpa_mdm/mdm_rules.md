@@ -404,6 +404,14 @@ The following algorithms are currently supported:
             <td>If an optional "identifierSystem" is provided, then the identifiers only match when they belong to that system</td>
         </tr>     
         <tr>
+            <td>EXTENSION_ANY_ORDER</td>
+            <td>matcher</td>
+            <td>
+               Matches extensions of resources in any order. Matches are made if both resources share at least one extensions that have the same URL and value.
+            </td>
+            <td></td>
+        </tr>
+        <tr>
             <td>EMPTY_FIELD</td>
             <td>matcher</td>
             <td>

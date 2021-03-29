@@ -28,6 +28,7 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -45,9 +46,37 @@ public class ExtensionUtil {
 	 */
 	public static IBaseExtension<?, ?> getOrCreateExtension(IBase theBase, String theUrl) {
 		IBaseHasExtensions baseHasExtensions = validateExtensionSupport(theBase);
-		IBaseExtension extension = getExtension(baseHasExtensions, theUrl);
+		IBaseExtension extension = getExtensionByUrl(baseHasExtensions, theUrl);
 		if (extension == null) {
 			extension = baseHasExtensions.addExtension();
+			extension.setUrl(theUrl);
+		}
+		return extension;
+	}
+
+	/**
+	 * Returns an new empty extension.
+	 *
+	 * @param theBase Base resource to add the extension to
+	 * @return Returns a new extension
+	 * @throws IllegalArgumentException IllegalArgumentException is thrown in case resource doesn't support extensions
+	 */
+	public static IBaseExtension<?, ?> addExtension(IBase theBase) {
+		return addExtension(theBase, null);
+	}
+
+	/**
+	 * Returns an extension with the specified URL
+	 *
+	 * @param theBase Base resource to add the extension to
+	 * @param theUrl  URL for the extension
+	 * @return Returns a new extension with the specified URL.
+	 * @throws IllegalArgumentException IllegalArgumentException is thrown in case resource doesn't support extensions
+	 */
+	public static IBaseExtension<?, ?> addExtension(IBase theBase, String theUrl) {
+		IBaseHasExtensions baseHasExtensions = validateExtensionSupport(theBase);
+		IBaseExtension extension = baseHasExtensions.addExtension();
+		if (theUrl != null) {
 			extension.setUrl(theUrl);
 		}
 		return extension;
@@ -75,7 +104,7 @@ public class ExtensionUtil {
 			return false;
 		}
 
-		return getExtension(baseHasExtensions, theExtensionUrl) != null;
+		return getExtensionByUrl(baseHasExtensions, theExtensionUrl) != null;
 	}
 
 	/**
@@ -89,7 +118,7 @@ public class ExtensionUtil {
 		if (!hasExtension(theBase, theExtensionUrl)) {
 			return false;
 		}
-		IBaseDatatype value = getExtension((IBaseHasExtensions) theBase, theExtensionUrl).getValue();
+		IBaseDatatype value = getExtensionByUrl((IBaseHasExtensions) theBase, theExtensionUrl).getValue();
 		if (value == null) {
 			return theExtensionValue == null;
 		}
@@ -103,12 +132,69 @@ public class ExtensionUtil {
 	 * @param theExtensionUrl URL of the extension to get. Must be non-null
 	 * @return Returns the first available extension with the specified URL, or null if such extension doesn't exist
 	 */
-	public static IBaseExtension<?, ?> getExtension(IBaseHasExtensions theBase, String theExtensionUrl) {
-		return theBase.getExtension()
+	public static IBaseExtension<?, ?> getExtensionByUrl(IBase theBase, String theExtensionUrl) {
+		Predicate<IBaseExtension> filter;
+		if (theExtensionUrl == null) {
+			filter = (e -> true);
+		} else {
+			filter = (e -> theExtensionUrl.equals(e.getUrl()));
+		}
+
+		return getExtensionsMatchingPredicate(theBase, filter)
 			.stream()
-			.filter(e -> theExtensionUrl.equals(e.getUrl()))
 			.findFirst()
 			.orElse(null);
+	}
+
+	/**
+	 * Gets all extensions that match the specified filter predicate
+	 *
+	 * @param theBase   The resource to get the extension for
+	 * @param theFilter Predicate to match the extension against
+	 * @return Returns all extension with the specified URL, or an empty list if such extensions do not exist
+	 */
+	public static List<IBaseExtension<?, ?>> getExtensionsMatchingPredicate(IBase theBase, Predicate<? super IBaseExtension> theFilter) {
+		return validateExtensionSupport(theBase)
+			.getExtension()
+			.stream()
+			.filter(theFilter)
+			.collect(Collectors.toList());
+	}
+
+	/**
+	 * Removes all extensions.
+	 *
+	 * @param theBase The resource to clear the extension for
+	 * @return Returns all extension that were removed
+	 */
+	public static List<IBaseExtension<?, ?>> clearAllExtensions(IBase theBase) {
+		return clearExtensionsMatchingPredicate(theBase, (e -> true));
+	}
+
+	/**
+	 * Removes all extensions by URL.
+	 *
+	 * @param theBase The resource to clear the extension for
+	 * @param theUrl  The url to clear extensions for
+	 * @return Returns all extension that were removed
+	 */
+	public static List<IBaseExtension<?, ?>> clearExtensionsByUrl(IBase theBase, String theUrl) {
+		return clearExtensionsMatchingPredicate(theBase, (e -> theUrl.equals(e.getUrl())));
+	}
+
+	/**
+	 * Removes all extensions that match the specified predicate
+	 *
+	 * @param theBase   The base object to clear the extension for
+	 * @param theFilter Defines which extensions should be cleared
+	 * @return Returns all extension that were removed
+	 */
+	private static List<IBaseExtension<?, ?>> clearExtensionsMatchingPredicate(IBase theBase, Predicate<? super IBaseExtension> theFilter) {
+		List<IBaseExtension<?, ?>> retVal = getExtensionsMatchingPredicate(theBase, theFilter);
+		validateExtensionSupport(theBase)
+			.getExtension()
+			.removeIf(theFilter);
+		return retVal;
 	}
 
 	/**
@@ -118,11 +204,9 @@ public class ExtensionUtil {
 	 * @param theExtensionUrl URL of the extension to get. Must be non-null
 	 * @return Returns all extension with the specified URL, or an empty list if such extensions do not exist
 	 */
-	public static List<IBaseExtension<?, ?>> getExtensions(IBaseHasExtensions theBase, String theExtensionUrl) {
-		return theBase.getExtension()
-			.stream()
-			.filter(e -> theExtensionUrl.equals(e.getUrl()))
-			.collect(Collectors.toList());
+	public static List<IBaseExtension<?, ?>> getExtensionsByUrl(IBaseHasExtensions theBase, String theExtensionUrl) {
+		Predicate<IBaseExtension> urlEqualityPredicate = e -> theExtensionUrl.equals(e.getUrl());
+		return getExtensionsMatchingPredicate(theBase, urlEqualityPredicate);
 	}
 
 	/**
@@ -133,7 +217,7 @@ public class ExtensionUtil {
 	 * @param theFhirContext The context containing FHIR resource definitions
 	 */
 	public static void setExtension(FhirContext theFhirContext, IBaseExtension theExtension, String theValue) {
-		setExtension(theFhirContext, theExtension, "string", theValue);
+		setExtension(theFhirContext, theExtension, "string", (Object) theValue);
 	}
 
 	/**
@@ -144,7 +228,7 @@ public class ExtensionUtil {
 	 * @param theValue         The value to set
 	 * @param theFhirContext   The context containing FHIR resource definitions
 	 */
-	public static void setExtension(FhirContext theFhirContext, IBaseExtension theExtension, String theExtensionType, String theValue) {
+	public static void setExtension(FhirContext theFhirContext, IBaseExtension theExtension, String theExtensionType, Object theValue) {
 		theExtension.setValue(TerserUtil.newElement(theFhirContext, theExtensionType, theValue));
 	}
 
@@ -156,7 +240,7 @@ public class ExtensionUtil {
 	 * @param theValue       Extension value
 	 * @param theFhirContext The context containing FHIR resource definitions
 	 */
-	public static void setExtension(FhirContext theFhirContext, IBase theBase, String theUrl, String theValue) {
+	public static void setExtensionAsString(FhirContext theFhirContext, IBase theBase, String theUrl, String theValue) {
 		IBaseExtension ext = getOrCreateExtension(theBase, theUrl);
 		setExtension(theFhirContext, ext, theValue);
 	}
@@ -170,9 +254,19 @@ public class ExtensionUtil {
 	 * @param theValue       Extension value
 	 * @param theFhirContext The context containing FHIR resource definitions
 	 */
-	public static void setExtension(FhirContext theFhirContext, IBase theBase, String theUrl, String theValueType, String theValue) {
+	public static void setExtension(FhirContext theFhirContext, IBase theBase, String theUrl, String theValueType, Object theValue) {
 		IBaseExtension ext = getOrCreateExtension(theBase, theUrl);
-		setExtension(theFhirContext, ext, theValue);
+		setExtension(theFhirContext, ext, theValueType, theValue);
 	}
 
+	/**
+	 * Compares two extensions, returns true if they have the same value and url
+	 *
+	 * @param theLeftExtension  : Extension to be evaluated #1
+	 * @param theRightExtension : Extension to be evaluated #2
+	 * @return Result of the comparison
+	 */
+	public static boolean equals(IBaseExtension theLeftExtension, IBaseExtension theRightExtension) {
+		return TerserUtil.equals(theLeftExtension, theRightExtension);
+	}
 }

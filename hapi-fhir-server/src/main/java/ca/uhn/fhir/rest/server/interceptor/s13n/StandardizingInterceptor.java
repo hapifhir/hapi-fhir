@@ -101,6 +101,11 @@ public class StandardizingInterceptor {
 	}
 
 	private void standardize(RequestDetails theRequest, IBaseResource theResource) {
+		if (theRequest == null) {
+			ourLog.debug("RequestDetails is null - unable to standardize {}", theResource);
+			return;
+		}
+
 		if (!theRequest.getHeaders(STANDARDIZATION_DISABLED_HEADER).isEmpty()) {
 			ourLog.debug("Standardization for {} is disabled via header {}", theResource, STANDARDIZATION_DISABLED_HEADER);
 			return;
