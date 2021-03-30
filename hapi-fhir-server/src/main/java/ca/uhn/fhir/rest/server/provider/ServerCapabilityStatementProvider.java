@@ -398,15 +398,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 						String resourceType = terser.getSinglePrimitiveValueOrNull(next, "snapshot.element.path");
 						if (isBlank(resourceType)) {
-							try {
-								next = myValidationSupport.generateSnapshot(new ValidationSupportContext(myValidationSupport), next, null, null, null);
-							} catch (Exception e) {
-								ourLog.warn("Failure while generating snapshot for StructureDefinition with URL[{}] ID[{}]", url, id, e);
-								continue;
-							}
-							if (next != null) {
-								resourceType = terser.getSinglePrimitiveValueOrNull(next, "snapshot.element.path");
-							}
+							resourceType = terser.getSinglePrimitiveValueOrNull(next, "differential.element.path");
 						}
 
 						if (isNotBlank(resourceType)) {
