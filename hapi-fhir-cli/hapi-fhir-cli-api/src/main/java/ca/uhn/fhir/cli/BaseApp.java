@@ -185,7 +185,9 @@ public abstract class BaseApp {
 		loggingConfigOff();
 		validateJavaVersion();
 
-		AnsiConsole.systemInstall();
+		if (System.getProperty("unit_test") != null) {
+			AnsiConsole.systemInstall();
+		}
 
 		// log version while the logging is off
 		VersionUtil.getVersion();

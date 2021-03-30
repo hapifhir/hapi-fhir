@@ -82,7 +82,12 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 	@Primary
 	@Bean
 	public IValidationSupport validationSupportChain() {
-		return new CachingValidationSupport(jpaValidationSupportChain());
+
+		// Short timeout for code translation because TermConceptMappingSvcImpl has its own caching
+		CachingValidationSupport.CacheTimeouts cacheTimeouts = CachingValidationSupport.CacheTimeouts.defaultValues()
+			.setTranslateCodeMillis(1000);
+
+		return new CachingValidationSupport(jpaValidationSupportChain(), cacheTimeouts);
 	}
 
 	@Bean(name = "myInstanceValidator")

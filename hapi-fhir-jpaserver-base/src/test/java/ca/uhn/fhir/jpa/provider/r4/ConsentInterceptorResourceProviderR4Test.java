@@ -64,7 +64,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
@@ -565,11 +567,6 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		assertEquals(1, response.getEntry().size());
 		assertNull(response.getTotalElement().getValue());
 
-		// Load next page
-		response = myClient.loadPage().next(response).execute();
-		assertEquals(1, response.getEntry().size());
-		assertNull(response.getTotalElement().getValue());
-
 		StopWatch sw = new StopWatch();
 		while(true) {
 			SearchStatusEnum status = runInTransaction(() -> {
@@ -584,6 +581,11 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			}
 		}
 
+		// Load next page
+		response = myClient.loadPage().next(response).execute();
+		assertEquals(1, response.getEntry().size());
+		assertNull(response.getTotalElement().getValue());
+
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException());
 			assertEquals(3, search.getNumFound());
@@ -592,7 +594,12 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		});
 
 		// The paging should have ended now - but the last redacted female result is an empty existing page which should never have been there.
-		assertNull(BundleUtil.getLinkUrlOfType(myFhirCtx, response, "next"));
+		String next = BundleUtil.getLinkUrlOfType(myFhirCtx, response, "next");
+		if (next != null) {
+			response = myClient.loadPage().next(response).execute();
+			fail(myFhirCtx.newJsonParser().encodeResourceToString(response));
+		}
+
 	}
 
 	/**
@@ -621,6 +628,12 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		// The paging should have ended now - but the last redacted female result is an empty existing page which should never have been there.
 		assertNotNull(BundleUtil.getLinkUrlOfType(myFhirCtx, response, "next"));
+
+		await()
+			.until(
+				()->mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException()).getStatus(),
+				equalTo(SearchStatusEnum.FINISHED)
+			);
 
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException());

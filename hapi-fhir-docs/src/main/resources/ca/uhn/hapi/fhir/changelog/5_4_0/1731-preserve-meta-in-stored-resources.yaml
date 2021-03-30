@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 1731
+title: "When storing resources in the JPA server, extensions in `Resource.meta` were not preserved, nor were
+   any contents in `Bundle.entry.resource.meta`. Both of these things are now correctly persisted and
+   returned. Thanks to Sean McIlvenna for reporting!"

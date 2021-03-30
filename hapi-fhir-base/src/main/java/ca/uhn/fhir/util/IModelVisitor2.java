@@ -32,7 +32,7 @@ import java.util.List;
  * THIS API IS EXPERIMENTAL IN HAPI FHIR - USE WITH CAUTION AS THE PUBLISHED API MAY
  * CHANGE
  *
- * @see FhirTerser#visit(IBaseResource, IModelVisitor2)
+ * @see FhirTerser#visit(IBase, IModelVisitor2)
  */
 public interface IModelVisitor2 {
 

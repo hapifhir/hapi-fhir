@@ -57,7 +57,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Override
-	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
+	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
 
 		org.hl7.fhir.r5.model.ValueSet expansionR5 = expandValueSetToCanonical(theValidationSupportContext, theValueSetToExpand, null, null);
 		if (expansionR5 == null) {

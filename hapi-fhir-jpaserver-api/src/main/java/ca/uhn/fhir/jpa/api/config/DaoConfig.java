@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -93,6 +94,7 @@ public class DaoConfig {
 	/**
 	 * update setter javadoc if default changes
 	 */
+	@Nonnull
 	private Long myTranslationCachesExpireAfterWriteInMinutes = DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES;
 	/**
 	 * update setter javadoc if default changes
@@ -884,6 +886,7 @@ public class DaoConfig {
 	 * Specifies the duration in minutes for which values will be retained after being
 	 * written to the terminology translation cache. Defaults to 60.
 	 */
+	@Nonnull
 	public Long getTranslationCachesExpireAfterWriteInMinutes() {
 		return myTranslationCachesExpireAfterWriteInMinutes;
 	}

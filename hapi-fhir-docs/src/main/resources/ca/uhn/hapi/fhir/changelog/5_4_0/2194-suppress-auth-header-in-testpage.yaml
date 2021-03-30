@@ -1,0 +1,5 @@
+---
+type: security
+issue: 2194
+title: "The Testpage Overlay now suppresses authorization headers from the output headers. Thanks
+  to Tuomo Ala-Vannesluoma for the pull request!"

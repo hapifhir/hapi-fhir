@@ -132,12 +132,14 @@ public class BulkDataExportProvider {
 	}
 
 	private void validateResourceTypesAllContainPatientSearchParams(Set<String> theResourceTypes) {
-		List<String> badResourceTypes = theResourceTypes.stream()
-			.filter(resourceType -> !myBulkDataExportSvc.getPatientCompartmentResources().contains(resourceType))
-			.collect(Collectors.toList());
+		if (theResourceTypes != null) {
+			List<String> badResourceTypes = theResourceTypes.stream()
+				.filter(resourceType -> !myBulkDataExportSvc.getPatientCompartmentResources().contains(resourceType))
+				.collect(Collectors.toList());
 
-		if (!badResourceTypes.isEmpty()) {
-			throw new InvalidRequestException(String.format("Resource types [%s] are invalid for this type of export, as they do not contain search parameters that refer to patients.", String.join(",", badResourceTypes)));
+			if (!badResourceTypes.isEmpty()) {
+				throw new InvalidRequestException(String.format("Resource types [%s] are invalid for this type of export, as they do not contain search parameters that refer to patients.", String.join(",", badResourceTypes)));
+			}
 		}
 	}
 

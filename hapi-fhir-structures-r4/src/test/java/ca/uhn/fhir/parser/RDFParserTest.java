@@ -74,15 +74,6 @@ public class RDFParserTest extends BaseTest {
 		fhirSchema = GenParser.parseSchema(schemaFile, Collections.emptyList());
 	}
 
-	// If we can't round-trip JSON, we skip the Turtle round-trip test.
-	private static ArrayList<String> jsonRoundTripErrors = new ArrayList<String>();
-	@AfterAll
-	static void reportJsonRoundTripErrors() {
-		System.out.println(jsonRoundTripErrors.size() + " tests disqualified because of JSON round-trip errors");
-		for (String e : jsonRoundTripErrors)
-			System.out.println(e);
-	}
-
 	/**
 	 * This test method has a method source for each JSON file in the resources/rdf-test-input directory (see #getInputFiles).
 	 * Each input file is expected to be a JSON representation of an R4 FHIR resource.
@@ -106,34 +97,20 @@ public class RDFParserTest extends BaseTest {
 		String turtleString = serializeRdf(ourCtx, referenceResource);
 		validateRdf(turtleString, referenceFileName, referenceResource);
 
-		// If we can round-trip JSON
-		IBaseResource viaJsonResource = parseJson(new ByteArrayInputStream(referenceJson.getBytes()));
-		if (((Base)viaJsonResource).equalsDeep((Base)referenceResource)) {
+		// Parse RDF content as resource
+		IBaseResource viaTurtleResource = parseRdf(ourCtx, new StringReader(turtleString));
+		assertNotNull(viaTurtleResource);
 
-			// Parse RDF content as resource
-			IBaseResource viaTurtleResource = parseRdf(ourCtx, new StringReader(turtleString));
-			assertNotNull(viaTurtleResource);
-
-			// Compare original JSON-based resource against RDF-based resource
-			String viaTurtleJson = serializeJson(ourCtx, viaTurtleResource);
-			if (!((Base)viaTurtleResource).equalsDeep((Base)referenceResource)) {
-				String failMessage = referenceFileName + ": failed to round-trip Turtle ";
-				if (referenceJson.equals(viaTurtleJson))
-					throw new Error(failMessage
-						+ "\nttl: " + turtleString
-						+ "\nexp: " + referenceJson);
-				else
-					assertEquals(referenceJson, viaTurtleJson, failMessage + "\nttl: " + turtleString);
-			}
-		} else {
-			String gotString = serializeJson(ourCtx, viaJsonResource);
-			String skipMessage = referenceFileName + ": failed to round-trip JSON" +
-				(referenceJson.equals(gotString)
-					? "\ngot: " + gotString + "\nexp: " + referenceJson
-					: "\nsome inequality not visible in: " + referenceJson);
-			System.out.println(referenceFileName + " skipped");
-			// Specific messages are printed at end of run.
-			jsonRoundTripErrors.add(skipMessage);
+		// Compare original JSON-based resource against RDF-based resource
+		String viaTurtleJson = serializeJson(ourCtx, viaTurtleResource);
+		if (!((Base)viaTurtleResource).equalsDeep((Base)referenceResource)) {
+			String failMessage = referenceFileName + ": failed to round-trip Turtle ";
+			if (referenceJson.equals(viaTurtleJson))
+				throw new Error(failMessage
+					+ "\nttl: " + turtleString
+					+ "\nexp: " + referenceJson);
+			else
+				assertEquals(referenceJson, viaTurtleJson, failMessage + "\nttl: " + turtleString);
 		}
 	}
 

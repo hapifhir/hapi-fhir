@@ -193,6 +193,54 @@ If you wish to override the value of `Resource.meta.source` using the value	supp
 * [CaptureResourceSourceFromHeaderInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/CaptureResourceSourceFromHeaderInterceptor.html)
 * [CaptureResourceSourceFromHeaderInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/CaptureResourceSourceFromHeaderInterceptor.java)
 
+
+# Terminology: Map Response Terminology
+
+A common problem when implementing FHIR APIs is the challenge of how to return coded data using standard vocabularies when your source data is not modelled using these vocabularies. For example, suppose you want to implement support for an Implementation Guide that mandates the use of [LOINC](https://loinc.org) but your source data uses local/proprietary observation codes.
+
+One solution is to simply apply mappings and add them to the FHIR data you are storing in your repository as you are storing it. This solution, often called *Mapping on the Way In*, will work but it has potential pitfalls including:
+
+* All mappings must be known at the time the data is being stored.
+* If mappings change because of mistakes or new information, updating existing data is difficult.
+
+A potentially better solution is to apply *Mapping on the Way Out*, meaning that your mappings are stored in a central spot and applied at runtime to data as it is leaving your system. HAPI FHIR supplies an interceptor called the ResponseTerminologyTranslationInterceptor that can help with this.
+
+* [ResponseTerminologyTranslationInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/ResponseTerminologyTranslationInterceptor.html)
+* [ResponseTerminologyTranslationInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/ResponseTerminologyTranslationInterceptor.java)
+
+This interceptor uses ConceptMap resources that are stored in your system, looking up mappings for CodeableConcept codings in your resources and adding them to the responses.
+
+The following code snippet shows a simple example of how to create and configure this interceptor. 
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/ServletExamples.java|ResponseTerminologyTranslationInterceptor}}
+```
+
+## Limitations
+
+The following limitations will hopefully be resolved in the future:
+
+This interceptor currently only works when registered against a RestfulServer backed by the HAPI FHIR JPA server.
+
+This interceptor only modifies responses to FHIR read/vread/search/history operations. Responses to these operations are not modified if they are found within a FHIR transaction operation.  
+
+
+# Terminology: Populate Code Display Names
+
+The HAPI FHIR ResponseTerminologyDisplayPopulationInterceptor interceptor looks for Coding elements within responses where the `Coding.system` and `Coding.code` values are populated but the `Coding.display` is not. The interceptor will attempt to resolve the correct display using the validation support module and will add it to the Coding display value if one is found.
+
+* [ResponseTerminologyDisplayPopulationInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/ResponseTerminologyDisplayPopulationInterceptor.html)
+* [ResponseTerminologyDisplayPopulationInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/ResponseTerminologyDisplayPopulationInterceptor.java)
+
+This interceptor uses ConceptMap resources that are stored in your system, looking up mappings for CodeableConcept codings in your resources and adding them to the responses.
+
+## Limitations
+
+The following limitation will hopefully be resolved in the future:
+
+This interceptor only modifies responses to FHIR read/vread/search/history operations. Responses to these operations are not modified if they are found within a FHIR transaction operation.
+
+
 # Utility: ResponseSizeCapturingInterceptor
 
 The ResponseSizeCapturingInterceptor can be used to capture the number of characters written in each HTTP FHIR response.
@@ -227,3 +275,54 @@ The UserRequestRetryVersionConflictsInterceptor allows clients to request that t
 # JPA Server: Validate Data Being Stored
 
 The RepositoryValidatingInterceptor can be used to enforce validation rules on data stored in a HAPI FHIR JPA Repository. See [Repository Validating Interceptor](/docs/validation/repository_validating_interceptor.html) for more information. 
+
+
+
+
+# Data Standardization
+
+```StandardizingInterceptor``` handles data standardization (s13n) requirements. This interceptor applies standardization rules on all FHIR primitives as configured in the ```s13n.json``` file that should be made available on the classpath. This file contains FHIRPath definitions together with the standardizers that should be applied to that path. It comes with six per-build standardizers: NAME_FAMILY, NAME_GIVEN, EMAIL, TITLE, PHONE and TEXT. Custom standardizers can be developed by implementing ```ca.uhn.fhir.rest.server.interceptor.s13n.standardizers.IStandardizer``` interface.
+
+A sample configuration file can be found below:
+
+```json
+{
+	"Person" : {
+		"Person.name.family" : "NAME_FAMILY",
+		"Person.name.given" : "NAME_GIVEN",
+		"Person.telecom.where(system='phone').value" : "PHONE"
+	},
+	"Patient" : {
+		"name.family" : "NAME_FAMILY",
+		"name.given" : "NAME_GIVEN",
+		"telecom.where(system='phone').value" : "PHONE"
+	},
+	"*" : {
+		"telecom.where(system='email').value" : "org.example.s13n.MyCustomStandardizer"
+	}
+}
+```
+
+Standardization can be disabled for a given request by providing ```HAPI-Standardization-Disabled: *``` request header. Header value can be any string, it is the presence of the header that disables the s13n.
+
+
+# Validation: Address Validation
+
+```AddressValidatingInterceptor``` takes care of validation of addresses on all incoming resources through a 3rd party address validation service. Before a resource containing an Address field is stored, this interceptor invokes address validation service and then stores validation results as an extension on the address with ```https://hapifhir.org/AddressValidation/``` URL.
+
+This interceptor is configured in ```address-validation.properties``` file that should be made available on the classpath. This file must contain ```validator.class``` property, which defines a fully qualified class implementing ```ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator``` interface. The specified implementation must provide service-specific logic for validating an Address instance. An example implementation can be found in ```ca.uhn.fhir.rest.server.interceptor.validation.address.impl.LoquateAddressValidator``` class which validates addresses by using Loquate Data Cleanse service.
+
+Address validation can be disabled for a given request by providing ```HAPI-Address-Validation-Disabled: *``` request header. Header value can be any string, it is the presence of the header that disables the validation.
+
+# Validation: Field-Level Validation
+
+```FieldValidatingInterceptor``` allows validating primitive fields on various FHIR resources. It expects validation rules to be provided via ```field-validation-rules.json``` file that should be available on the classpath. JSON in this file defines a mapping of FHIRPath expressions to validators that should be applied to those fields. Custom validators that implement ```ca.uhn.fhir.rest.server.interceptor.validation.fields.IValidator``` interface can be provided.
+
+```json
+{
+	"telecom.where(system='email').value" : "EMAIL",
+   "telecom.where(system='phone').value" : "org.example.validation.MyCustomValidator"
+}
+```
+
+Field validation can be disabled for a given request by providing ```HAPI-Field-Validation-Disabled: *``` request header. Header value can be any string, it is the presence of the header that disables the validation. 

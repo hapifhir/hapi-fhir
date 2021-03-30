@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2479
+title: "the create-package command of the HAPI FHIR CLI was not correctly adding the `fhirVersions` section to the generated package.json. This has been fixed"

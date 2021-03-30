@@ -148,6 +148,7 @@ public class BulkDataExportProviderTest {
 		assertThat(options.getFilters(), containsInAnyOrder("Patient?identifier=foo"));
 	}
 
+
 	@Test
 	public void testSuccessfulInitiateBulkRequest_Get() throws IOException {
 
@@ -430,6 +431,22 @@ public class BulkDataExportProviderTest {
 
 		assertThat(execute.getStatusLine().getStatusCode(), is(equalTo(400)));
 		assertThat(responseBody, is(containsString("Resource types [StructureDefinition] are invalid for this type of export, as they do not contain search parameters that refer to patients.")));
+	}
+
+	@Test
+	public void testInitiateGroupExportWithNoResourceTypes() throws IOException {
+		IBulkDataExportSvc.JobInfo jobInfo = new IBulkDataExportSvc.JobInfo()
+			.setJobId(A_JOB_ID);
+		when(myBulkDataExportSvc.submitJob(any(), any())).thenReturn(jobInfo);
+
+		String url = "http://localhost:" + myPort + "/" + "Group/123/" +JpaConstants.OPERATION_EXPORT
+			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON);;
+
+		HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		CloseableHttpResponse execute = myClient.execute(get);
+
+		assertThat(execute.getStatusLine().getStatusCode(), is(equalTo(202)));
 	}
 
 	@Test
