@@ -117,6 +117,15 @@ public class SearchPreferHandlingInterceptor {
 				continue;
 			}
 
+			// Strip modifiers and chains
+			for (int i = 0; i < paramName.length(); i++) {
+				char nextChar = paramName.charAt(i);
+				if (nextChar == '.' || nextChar == ':') {
+					paramName = paramName.substring(0, i);
+					break;
+				}
+			}
+
 			RuntimeSearchParam activeSearchParam = searchParamRetriever.getActiveSearchParam(resourceName, paramName);
 			if (activeSearchParam == null) {
 
