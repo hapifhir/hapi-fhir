@@ -20,35 +20,22 @@ package ca.uhn.fhir.jpa.interceptor;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkExpandSvc;
-import ca.uhn.fhir.jpa.search.helper.SearchParamHelper;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.log.Logs;
-import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.util.ClasspathUtil;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -62,24 +49,35 @@ public class MdmSearchExpandingInterceptorInterceptor {
 
 	@Autowired
 	private MdmLinkExpandSvc myMdmLinkExpandSvc;
-	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
-	private IdHelperService myIdHelperService;
 
 	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
-	public void hook(RequestDetails theRequestDetails, SearchParameterMap theSearchParameterMap) {
-		System.out.println("zoop");
-		theSearchParameterMap.values().stream()
-			.flatMap(Collection::stream)
-			.flatMap(Collection::stream)
-			.filter(param -> param instanceof ReferenceParam)
-			.map(untypedParam -> (ReferenceParam)untypedParam)
-			.filter(ReferenceParam::isMdmExpand)
-			.forEach(mdmReferenceParam -> {
-				Set<String> strings = myMdmLinkExpandSvc.expandMdmBySourceResourceId(new IdDt(mdmReferenceParam.getValue()));
-				System.out.println(String.join(",", strings));
-				//TODO in AM, start here with a test that actually has an expansion to expand against.
-			});
+	public void hook(SearchParameterMap theSearchParameterMap) {
+		for (List<List<IQueryParameterType>> andList : theSearchParameterMap.values()) {
+			for (List<IQueryParameterType> orList : andList) {
+				expandAnyReferenceParameters(orList);
+			}
+		}
+	}
+
+	/**
+	 * If a Parameter is a reference parameter, and it has been set to expand MDM, perform the expansion.
+	 */
+	private void expandAnyReferenceParameters(List<IQueryParameterType> orList) {
+		List<IQueryParameterType> toRemove = new ArrayList<>();
+		List<IQueryParameterType> toAdd = new ArrayList<>();
+		for (IQueryParameterType iQueryParameterType : orList) {
+			if (iQueryParameterType instanceof ReferenceParam) {
+				ReferenceParam refParam = (ReferenceParam) iQueryParameterType;
+				if (refParam.isMdmExpand()) {
+					Set<String> strings = myMdmLinkExpandSvc.expandMdmBySourceResourceId(new IdDt(refParam.getValue()));
+					if (!strings.isEmpty()) {
+						toRemove.add(refParam);
+						strings.stream().map(resourceId -> new ReferenceParam(refParam.getResourceType() + "/" + resourceId)).forEach(toAdd::add);
+					}
+				}
+			}
+		}
+		orList.removeAll(toRemove);
+		orList.addAll(toAdd);
 	}
 }
