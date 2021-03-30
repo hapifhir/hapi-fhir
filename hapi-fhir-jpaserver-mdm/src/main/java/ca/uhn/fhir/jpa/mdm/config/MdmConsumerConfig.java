@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.mdm.config;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptorInterceptor;
+import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.jpa.mdm.svc.MdmSurvivorshipSvcImpl;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmExpungeSvc;
@@ -81,8 +81,8 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmSearchExpandingInterceptorInterceptor myMdmSearchExpandingInterceptorInterceptor() {
-		return new MdmSearchExpandingInterceptorInterceptor();
+    MdmSearchExpandingInterceptor myMdmSearchExpandingInterceptorInterceptor() {
+		return new MdmSearchExpandingInterceptor();
 	}
 
 	@Bean

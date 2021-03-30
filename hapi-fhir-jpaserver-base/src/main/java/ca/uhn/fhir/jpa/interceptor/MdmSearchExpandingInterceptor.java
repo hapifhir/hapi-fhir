@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.interceptor;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkExpandSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.log.Logs;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import joptsimple.internal.Strings;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -44,17 +46,22 @@ import static org.slf4j.LoggerFactory.getLogger;
  * by the HAPI FHIR Server with a static hard-coded resource.
  */
 @Interceptor
-public class MdmSearchExpandingInterceptorInterceptor {
+public class MdmSearchExpandingInterceptor {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
 	private MdmLinkExpandSvc myMdmLinkExpandSvc;
 
+	@Autowired
+	private DaoConfig myDaoConfig;
+
 	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
 	public void hook(SearchParameterMap theSearchParameterMap) {
-		for (List<List<IQueryParameterType>> andList : theSearchParameterMap.values()) {
-			for (List<IQueryParameterType> orList : andList) {
-				expandAnyReferenceParameters(orList);
+		if (myDaoConfig.isAllowMdmExpansion()) {
+			for (List<List<IQueryParameterType>> andList : theSearchParameterMap.values()) {
+				for (List<IQueryParameterType> orList : andList) {
+					expandAnyReferenceParameters(orList);
+				}
 			}
 		}
 	}
@@ -69,10 +76,12 @@ public class MdmSearchExpandingInterceptorInterceptor {
 			if (iQueryParameterType instanceof ReferenceParam) {
 				ReferenceParam refParam = (ReferenceParam) iQueryParameterType;
 				if (refParam.isMdmExpand()) {
-					Set<String> strings = myMdmLinkExpandSvc.expandMdmBySourceResourceId(new IdDt(refParam.getValue()));
-					if (!strings.isEmpty()) {
+					ourLog.debug("Found a reference parameter to expand: {}", refParam.toString());
+					Set<String> expandedResourceIds = myMdmLinkExpandSvc.expandMdmBySourceResourceId(new IdDt(refParam.getValue()));
+					if (!expandedResourceIds.isEmpty()) {
+						ourLog.debug("Parameter has been expanded to: {}", String.join(", ", expandedResourceIds));
 						toRemove.add(refParam);
-						strings.stream().map(resourceId -> new ReferenceParam(refParam.getResourceType() + "/" + resourceId)).forEach(toAdd::add);
+						expandedResourceIds.stream().map(resourceId -> new ReferenceParam(refParam.getResourceType() + "/" + resourceId)).forEach(toAdd::add);
 					}
 				}
 			}

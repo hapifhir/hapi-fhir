@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptorInterceptor;
+import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -42,7 +42,7 @@ public class MdmSubmitterInterceptorLoader {
 	@Autowired
 	private IMdmStorageInterceptor myIMdmStorageInterceptor;
 	@Autowired
-	private MdmSearchExpandingInterceptorInterceptor myMdmSearchExpandingInterceptorInterceptor;
+	private MdmSearchExpandingInterceptor myMdmSearchExpandingInterceptorInterceptor;
 	@Autowired
 	private IInterceptorService myInterceptorService;
 	@Autowired

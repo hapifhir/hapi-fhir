@@ -61,7 +61,7 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
-import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptorInterceptor;
+import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.jpa.interceptor.OverridePathBasedReferentialIntegrityForDeletesInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
@@ -476,8 +476,9 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public MdmSearchExpandingInterceptorInterceptor mdmSearchExpandingInterceptorInterceptor() {
-		return new MdmSearchExpandingInterceptorInterceptor();
+	@Lazy
+	public MdmSearchExpandingInterceptor mdmSearchExpandingInterceptorInterceptor() {
+		return new MdmSearchExpandingInterceptor();
 	}
 
 	@Bean
