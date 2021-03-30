@@ -385,6 +385,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 			List<IBaseResource> allStructureDefinitions = myValidationSupport.fetchAllNonBaseStructureDefinitions();
 			if (allStructureDefinitions != null) {
 				for (IBaseResource next : allStructureDefinitions) {
+					String id = next.getIdElement().getValue();
 					String kind = terser.getSinglePrimitiveValueOrNull(next, "kind");
 					String url = terser.getSinglePrimitiveValueOrNull(next, "url");
 					String baseDefinition = defaultString(terser.getSinglePrimitiveValueOrNull(next, "baseDefinition"));
@@ -397,7 +398,12 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 						String resourceType = terser.getSinglePrimitiveValueOrNull(next, "snapshot.element.path");
 						if (isBlank(resourceType)) {
-							next = myValidationSupport.generateSnapshot(new ValidationSupportContext(myValidationSupport), next, null, null, null);
+							try {
+								next = myValidationSupport.generateSnapshot(new ValidationSupportContext(myValidationSupport), next, null, null, null);
+							} catch (Exception e) {
+								ourLog.warn("Failure while generating snapshot for StructureDefinition with URL[{}] ID[{}]", url, id, e);
+								continue;
+							}
 							if (next != null) {
 								resourceType = terser.getSinglePrimitiveValueOrNull(next, "snapshot.element.path");
 							}

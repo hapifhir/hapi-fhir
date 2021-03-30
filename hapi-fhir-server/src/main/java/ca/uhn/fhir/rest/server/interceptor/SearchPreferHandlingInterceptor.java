@@ -82,6 +82,12 @@ public class SearchPreferHandlingInterceptor {
 			return;
 		}
 
+		String resourceName = theRequestDetails.getResourceName();
+		if (!theRequestDetails.getFhirContext().getResourceTypes().contains(resourceName)) {
+			// This is an error. Let the server handle it normally.
+			return;
+		}
+
 		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
 		PreferHandlingEnum handling = null;
 		if (isNotBlank(preferHeader)) {
