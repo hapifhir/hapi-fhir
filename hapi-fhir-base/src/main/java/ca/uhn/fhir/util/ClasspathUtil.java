@@ -61,7 +61,9 @@ public class ClasspathUtil {
 	public static InputStream loadResourceAsStream(String theClasspath) {
 		InputStream retVal = ClasspathUtil.class.getResourceAsStream(theClasspath);
 		if (retVal == null) {
-			if (!theClasspath.startsWith("/")) {
+			if (theClasspath.startsWith("/")) {
+				retVal = ClasspathUtil.class.getResourceAsStream(theClasspath.substring(1));
+			} else {
 				retVal = ClasspathUtil.class.getResourceAsStream("/" + theClasspath);
 			}
 			if (retVal == null) {

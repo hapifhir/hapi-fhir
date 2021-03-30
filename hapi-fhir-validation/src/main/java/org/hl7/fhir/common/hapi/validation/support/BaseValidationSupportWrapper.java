@@ -10,6 +10,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -37,6 +38,12 @@ public class BaseValidationSupportWrapper extends BaseValidationSupport {
 	@Override
 	public List<IBaseResource> fetchAllConformanceResources() {
 		return myWrap.fetchAllConformanceResources();
+	}
+
+	@Nullable
+	@Override
+	public <T extends IBaseResource> List<T> fetchAllNonBaseStructureDefinitions() {
+		return myWrap.fetchAllNonBaseStructureDefinitions();
 	}
 
 	@Override

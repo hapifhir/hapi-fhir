@@ -85,6 +85,12 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	}
 
 	@Override
+	public <T extends IBaseResource> List<T> fetchAllNonBaseStructureDefinitions() {
+		String key = "fetchAllNonBaseStructureDefinitions";
+		return loadFromCache(myCache, key, t -> super.fetchAllNonBaseStructureDefinitions());
+	}
+
+	@Override
 	public <T extends IBaseResource> T fetchResource(@Nullable Class<T> theClass, String theUri) {
 		return loadFromCache(myCache, "fetchResource " + theClass + " " + theUri,
 			t -> super.fetchResource(theClass, theUri));

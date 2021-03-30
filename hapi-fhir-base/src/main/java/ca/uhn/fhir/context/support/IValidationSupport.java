@@ -36,11 +36,13 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -107,6 +109,32 @@ public interface IValidationSupport {
 	@Nullable
 	default <T extends IBaseResource> List<T> fetchAllStructureDefinitions() {
 		return null;
+	}
+
+	/**
+	 * Load and return all possible structure definitions aside from resource definitions themselves
+	 */
+	@Nullable
+	default <T extends IBaseResource> List<T> fetchAllNonBaseStructureDefinitions() {
+		List<T> retVal = fetchAllStructureDefinitions();
+		if (retVal != null) {
+			List<T> newList = new ArrayList<>(retVal.size());
+			for (T next : retVal) {
+				String url = defaultString(getFhirContext().newTerser().getSinglePrimitiveValueOrNull(next, "url"));
+				if (url.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
+					String lastPart = url.substring("http://hl7.org/fhir/StructureDefinition/".length());
+					if (getFhirContext().getResourceTypes().contains(lastPart)) {
+						continue;
+					}
+				}
+
+				newList.add(next);
+			}
+
+			retVal = newList;
+		}
+
+		return retVal;
 	}
 
 	/**

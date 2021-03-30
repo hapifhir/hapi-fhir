@@ -131,6 +131,9 @@ public class Constants {
 	public static final String HEADER_LOCATION_LC = HEADER_LOCATION.toLowerCase();
 	public static final String HEADER_ORIGIN = "Origin";
 	public static final String HEADER_PREFER = "Prefer";
+	public static final String HEADER_PREFER_HANDLING = "handling";
+	public static final String HEADER_PREFER_HANDLING_STRICT = "strict";
+	public static final String HEADER_PREFER_HANDLING_LENIENT = "lenient";
 	public static final String HEADER_PREFER_RETURN = "return";
 	public static final String HEADER_PREFER_RETURN_MINIMAL = "minimal";
 	public static final String HEADER_PREFER_RETURN_REPRESENTATION = "representation";

@@ -46,7 +46,7 @@ public interface IFhirSystemDao<T, MT> extends IDao {
 
 	/**
 	 * Returns a cached count of resources using a cache that regularly
-	 * refreshes in the background. This method will never
+	 * refreshes in the background. This method will never block, and may return null if nothing is in the cache.
 	 */
 	@Nullable
 	Map<String, Long> getResourceCountsFromCache();

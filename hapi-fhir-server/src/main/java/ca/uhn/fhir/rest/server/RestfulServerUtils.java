@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.api.BundleLinks;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.PreferHandlingEnum;
 import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -795,7 +796,7 @@ public class RestfulServerUtils {
 		PreferHeader retVal = new PreferHeader();
 
 		if (isNotBlank(theValue)) {
-			StringTokenizer tok = new StringTokenizer(theValue, ";");
+			StringTokenizer tok = new StringTokenizer(theValue, ";,");
 			while (tok.hasMoreTokens()) {
 				String next = trim(tok.nextToken());
 				int eqIndex = next.indexOf('=');
@@ -812,14 +813,13 @@ public class RestfulServerUtils {
 
 				if (key.equals(Constants.HEADER_PREFER_RETURN)) {
 
-					if (value.length() < 2) {
-						continue;
-					}
-					if ('"' == value.charAt(0) && '"' == value.charAt(value.length() - 1)) {
-						value = value.substring(1, value.length() - 1);
-					}
-
+					value = cleanUpValue(value);
 					retVal.setReturn(PreferReturnEnum.fromHeaderValue(value));
+
+				} else if (key.equals(Constants.HEADER_PREFER_HANDLING)) {
+
+					value = cleanUpValue(value);
+					retVal.setHanding(PreferHandlingEnum.fromHeaderValue(value));
 
 				} else if (key.equals(Constants.HEADER_PREFER_RESPOND_ASYNC)) {
 
@@ -834,6 +834,16 @@ public class RestfulServerUtils {
 		}
 
 		return retVal;
+	}
+
+	private static String cleanUpValue(String value) {
+		if (value.length() < 2) {
+			value = "";
+		}
+		if ('"' == value.charAt(0) && '"' == value.charAt(value.length() - 1)) {
+			value = value.substring(1, value.length() - 1);
+		}
+		return value;
 	}
 
 

@@ -148,6 +148,12 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		return toList(provideStructureDefinitionMap());
 	}
 
+	@Nullable
+	@Override
+	public <T extends IBaseResource> List<T> fetchAllNonBaseStructureDefinitions() {
+		return null;
+	}
+
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {

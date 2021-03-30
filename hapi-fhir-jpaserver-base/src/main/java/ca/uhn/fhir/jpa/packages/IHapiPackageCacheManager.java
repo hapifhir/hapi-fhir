@@ -28,6 +28,7 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 
 public interface IHapiPackageCacheManager extends IPackageCacheManager {
 
@@ -42,6 +43,8 @@ public interface IHapiPackageCacheManager extends IPackageCacheManager {
 	NpmPackageSearchResultJson search(PackageSearchSpec thePackageSearchSpec);
 
 	PackageDeleteOutcomeJson uninstallPackage(String thePackageId, String theVersion);
+
+	List<IBaseResource> loadPackageAssetsByType(FhirVersionEnum theFhirVersion, String theResourceType);
 
 
 	class PackageContents {
