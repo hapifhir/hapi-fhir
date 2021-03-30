@@ -81,9 +81,12 @@ public class MdmLinkExpandSvc {
 	 */
 	public Set<String> expandMdmBySourceResourcePid(Long theSourceResourcePid) {
 		ourLog.debug("About to expand source resource with PID {}", theSourceResourcePid);
-		List<List<Long>> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsBySourcePidAndMatchResult(theSourceResourcePid, MdmMatchResultEnum.MATCH);
+		List<IMdmLinkDao.MdmPidTuple> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsBySourcePidAndMatchResult(theSourceResourcePid, MdmMatchResultEnum.MATCH);
 		Set<Long> flattenedPids = new HashSet<>();
-		goldenPidSourcePidTuples.forEach(flattenedPids::addAll);
+		goldenPidSourcePidTuples.forEach(tuple -> {
+			flattenedPids.add(tuple.getSourcePid());
+			flattenedPids.add(tuple.getGoldenPid());
+		});
 		Set<String> resourceIds = myIdHelperService.translatePidsToFhirResourceIds(flattenedPids);
 		ourLog.debug("Pid {} has been expanded to [{}]", theSourceResourcePid, String.join(",", resourceIds));
 		return resourceIds;

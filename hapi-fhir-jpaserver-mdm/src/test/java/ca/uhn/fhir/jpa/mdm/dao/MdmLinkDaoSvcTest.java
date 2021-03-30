@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.dao;
 
+import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -78,14 +79,14 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		List<Long> expectedExpandedPids = mdmLinks.stream().map(MdmLink::getSourcePid).collect(Collectors.toList());
 
 		//SUT
-		List<List<Long>> lists = myMdmLinkDao.expandPidsBySourcePidAndMatchResult(mdmLinks.get(0).getSourcePid(), MdmMatchResultEnum.MATCH);
+		List<IMdmLinkDao.MdmPidTuple> lists = myMdmLinkDao.expandPidsBySourcePidAndMatchResult(mdmLinks.get(0).getSourcePid(), MdmMatchResultEnum.MATCH);
 
 		assertThat(lists, hasSize(10));
 
 		lists.stream()
-			.forEach(pair -> {
-					assertThat(pair.get(0), is(equalTo(golden.getIdElement().getIdPartAsLong())));
-					assertThat(pair.get(1), is(in(expectedExpandedPids)));
+			.forEach(tuple -> {
+					assertThat(tuple.getGoldenPid(), is(equalTo(golden.getIdElement().getIdPartAsLong())));
+					assertThat(tuple.getSourcePid(), is(in(expectedExpandedPids)));
 				});
 	}
 

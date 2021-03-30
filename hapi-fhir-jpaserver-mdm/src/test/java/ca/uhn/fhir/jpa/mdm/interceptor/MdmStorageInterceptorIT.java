@@ -69,10 +69,9 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 	@Test
 	public void testSearchExpandingInterceptorWorks() {
-		SearchParameterMap subject = new SearchParameterMap("subject", new ReferenceParam("Patient/123").setMdmExpand(true)).setLoadSynchronous(false);
+		SearchParameterMap subject = new SearchParameterMap("subject", new ReferenceParam("Patient/123").setMdmExpand(true)).setLoadSynchronous(true);
 		myObservationDao.search(subject);
 	}
-
 
 	@Test
 	public void testDeleteGoldenResourceDeletesLinks() throws InterruptedException {

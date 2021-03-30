@@ -72,12 +72,14 @@ public class MdmSearchExpandingInterceptorInterceptor {
 		System.out.println("zoop");
 		theSearchParameterMap.values().stream()
 			.flatMap(Collection::stream)
-			.filter(queryParam -> queryParam instanceof ReferenceParam)
-			.filter(referenceParam -> ((ReferenceParam) referenceParam).isMdmExpand())
+			.flatMap(Collection::stream)
+			.filter(param -> param instanceof ReferenceParam)
 			.map(untypedParam -> (ReferenceParam)untypedParam)
+			.filter(ReferenceParam::isMdmExpand)
 			.forEach(mdmReferenceParam -> {
-				System.out.println("zoop");
-				System.out.println(mdmReferenceParam.toString());
+				Set<String> strings = myMdmLinkExpandSvc.expandMdmBySourceResourceId(new IdDt(mdmReferenceParam.getValue()));
+				System.out.println(String.join(",", strings));
+				//TODO in AM, start here with a test that actually has an expansion to expand against.
 			});
 	}
 }
