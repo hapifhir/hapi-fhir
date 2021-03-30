@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
@@ -424,7 +425,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		}
 
 		@Override
-		public void invoke(Pointcut thePointcut, HookParams theArgs) {
+		public void invoke(IPointcut thePointcut, HookParams theArgs) {
 			myHitCount.incrementAndGet();
 
 			IPreResourceAccessDetails accessDetails = theArgs.get(IPreResourceAccessDetails.class);
@@ -452,7 +453,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 
 		@Override
-		public void invoke(Pointcut thePointcut, HookParams theArgs) {
+		public void invoke(IPointcut thePointcut, HookParams theArgs) {
 			super.invoke(thePointcut, theArgs);
 
 			IPreResourceAccessDetails accessDetails = theArgs.get(IPreResourceAccessDetails.class);

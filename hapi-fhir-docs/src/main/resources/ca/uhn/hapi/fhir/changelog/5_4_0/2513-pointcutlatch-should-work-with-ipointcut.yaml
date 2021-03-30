@@ -1,0 +1,4 @@
+---
+type: change
+issue: 2513
+title: "PointCutLatch now works with IPointcut instead of Pointcut."
