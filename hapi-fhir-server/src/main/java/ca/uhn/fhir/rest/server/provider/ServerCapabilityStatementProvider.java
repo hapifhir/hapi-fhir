@@ -260,7 +260,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 					if (nextMethodBinding.isSupportsConditional()) {
 						switch (resOpCode) {
 							case CREATE:
-								terser.addElement(resource, "conditionalCreate", "true");
+								terser.setElement(resource, "conditionalCreate", "true");
 								break;
 							case DELETE:
 								if (nextMethodBinding.isSupportsConditionalMultiple()) {
@@ -270,7 +270,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 								}
 								break;
 							case UPDATE:
-								terser.addElement(resource, "conditionalUpdate", "true");
+								terser.setElement(resource, "conditionalUpdate", "true");
 								break;
 							default:
 								break;
