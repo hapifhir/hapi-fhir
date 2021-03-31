@@ -23,6 +23,7 @@ package ca.uhn.fhir.cql.dstu3.helper;
 import ca.uhn.fhir.cql.common.evaluation.LibraryLoader;
 import ca.uhn.fhir.cql.common.provider.LibraryResolutionProvider;
 import ca.uhn.fhir.cql.common.provider.LibrarySourceProvider;
+import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
@@ -37,14 +38,17 @@ import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.opencds.cqf.cql.evaluator.cql2elm.model.CacheAwareModelManager;
 import org.opencds.cqf.cql.evaluator.engine.execution.PrivateCachingLibraryLoaderDecorator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class LibraryHelper {
+	private static final Logger ourLog = LoggerFactory.getLogger(LibraryHelper.class);
 
-	private Map<org.hl7.elm.r1.VersionedIdentifier, Model> modelCache;
+	private final Map<org.hl7.elm.r1.VersionedIdentifier, Model> modelCache;
 
 	public LibraryHelper(Map<org.hl7.elm.r1.VersionedIdentifier, Model> modelCache) {
 		this.modelCache = modelCache;
@@ -64,9 +68,10 @@ public class LibraryHelper {
 	}
 
 	public List<Library> loadLibraries(Measure measure,
-															org.opencds.cqf.cql.engine.execution.LibraryLoader libraryLoader,
-															LibraryResolutionProvider<org.hl7.fhir.dstu3.model.Library> libraryResourceProvider) {
+												  org.opencds.cqf.cql.engine.execution.LibraryLoader libraryLoader,
+												  LibraryResolutionProvider<org.hl7.fhir.dstu3.model.Library> libraryResourceProvider) {
 		List<org.cqframework.cql.elm.execution.Library> libraries = new ArrayList<Library>();
+		List<String> messages = new ArrayList<>();
 
 		// load libraries
 		//TODO: if there's a bad measure argument, this blows up for an obscure error
@@ -88,15 +93,21 @@ public class LibraryHelper {
 			}
 
 			org.hl7.fhir.dstu3.model.Library library = libraryResourceProvider.resolveLibraryById(id);
-			if (library != null && isLogicLibrary(library)) {
-				libraries.add(libraryLoader
-					.load(new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion())));
+			if (library != null) {
+				if (isLogicLibrary(library)) {
+					libraries.add(libraryLoader
+						.load(new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion())));
+				} else {
+					String message = "Skipping library " + library.getId() + " is not a logic library.  Probably missing type.coding.system=\"http://hl7.org/fhir/library-type\"";
+					messages.add(message);
+					ourLog.warn(message);
+				}
 			}
 		}
 
 		if (libraries.isEmpty()) {
 			throw new IllegalArgumentException(String
-				.format("Could not load library source for libraries referenced in Measure %s.", measure.getId()));
+				.format("Could not load library source for libraries referenced in %s:\n%s", measure.getId(), StringUtils.join("\n", messages)));
 		}
 
 		VersionedIdentifier primaryLibraryId = libraries.get(0).getIdentifier();
@@ -152,8 +163,8 @@ public class LibraryHelper {
 	}
 
 	public Library resolveLibraryById(String libraryId,
-																							org.opencds.cqf.cql.engine.execution.LibraryLoader libraryLoader,
-																							LibraryResolutionProvider<org.hl7.fhir.dstu3.model.Library> libraryResourceProvider) {
+												 org.opencds.cqf.cql.engine.execution.LibraryLoader libraryLoader,
+												 LibraryResolutionProvider<org.hl7.fhir.dstu3.model.Library> libraryResourceProvider) {
 		// Library library = null;
 
 		org.hl7.fhir.dstu3.model.Library fhirLibrary = libraryResourceProvider.resolveLibraryById(libraryId);
@@ -178,8 +189,8 @@ public class LibraryHelper {
 	}
 
 	public Library resolvePrimaryLibrary(Measure measure,
-																								org.opencds.cqf.cql.engine.execution.LibraryLoader libraryLoader,
-																								LibraryResolutionProvider<org.hl7.fhir.dstu3.model.Library> libraryResourceProvider) {
+													 org.opencds.cqf.cql.engine.execution.LibraryLoader libraryLoader,
+													 LibraryResolutionProvider<org.hl7.fhir.dstu3.model.Library> libraryResourceProvider) {
 		// default is the first library reference
 		String id = measure.getLibraryFirstRep().getReferenceElement().getIdPart();
 
@@ -194,7 +205,7 @@ public class LibraryHelper {
 	}
 
 	public Library resolvePrimaryLibrary(PlanDefinition planDefinition, org.opencds.cqf.cql.engine.execution.LibraryLoader libraryLoader,
-																								LibraryResolutionProvider<org.hl7.fhir.dstu3.model.Library> libraryResourceProvider) {
+													 LibraryResolutionProvider<org.hl7.fhir.dstu3.model.Library> libraryResourceProvider) {
 		String id = planDefinition.getLibraryFirstRep().getReferenceElement().getIdPart();
 
 		Library library = resolveLibraryById(id, libraryLoader, libraryResourceProvider);

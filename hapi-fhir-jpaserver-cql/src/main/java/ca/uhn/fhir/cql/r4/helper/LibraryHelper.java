@@ -23,6 +23,7 @@ package ca.uhn.fhir.cql.r4.helper;
 import ca.uhn.fhir.cql.common.evaluation.LibraryLoader;
 import ca.uhn.fhir.cql.common.provider.LibraryResolutionProvider;
 import ca.uhn.fhir.cql.common.provider.LibrarySourceProvider;
+import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
@@ -37,6 +38,8 @@ import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.evaluator.cql2elm.model.CacheAwareModelManager;
 import org.opencds.cqf.cql.evaluator.engine.execution.PrivateCachingLibraryLoaderDecorator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,192 +49,209 @@ import java.util.Map;
  * Created by Christopher on 1/11/2017.
  */
 public class LibraryHelper {
+	private static final Logger ourLog = LoggerFactory.getLogger(LibraryHelper.class);
 
-	private Map<org.hl7.elm.r1.VersionedIdentifier, Model> modelCache;
+	private final Map<org.hl7.elm.r1.VersionedIdentifier, Model> modelCache;
 
 	public LibraryHelper(Map<org.hl7.elm.r1.VersionedIdentifier, Model> modelCache) {
 		this.modelCache = modelCache;
 	}
 
-    public org.opencds.cqf.cql.engine.execution.LibraryLoader createLibraryLoader(LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> provider) {
+	public org.opencds.cqf.cql.engine.execution.LibraryLoader createLibraryLoader(LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> provider) {
 		ModelManager modelManager = new CacheAwareModelManager(this.modelCache);
-        LibraryManager libraryManager = new LibraryManager(modelManager);
-        libraryManager.getLibrarySourceLoader().clearProviders();
+		LibraryManager libraryManager = new LibraryManager(modelManager);
+		libraryManager.getLibrarySourceLoader().clearProviders();
 
-        libraryManager.getLibrarySourceLoader().registerProvider(
-                new LibrarySourceProvider<org.hl7.fhir.r4.model.Library, Attachment>(provider,
-                        x -> x.getContent(), x -> x.getContentType(), x -> x.getData()));
+		libraryManager.getLibrarySourceLoader().registerProvider(
+			new LibrarySourceProvider<org.hl7.fhir.r4.model.Library, Attachment>(provider,
+				x -> x.getContent(), x -> x.getContentType(), x -> x.getData()));
 
-        return new PrivateCachingLibraryLoaderDecorator(new LibraryLoader(libraryManager, modelManager));
-    }
+		return new PrivateCachingLibraryLoaderDecorator(new LibraryLoader(libraryManager, modelManager));
+	}
 
-    public org.opencds.cqf.cql.engine.execution.LibraryLoader createLibraryLoader(org.cqframework.cql.cql2elm.LibrarySourceProvider provider) {
-        ModelManager modelManager = new CacheAwareModelManager(this.modelCache);
-        LibraryManager libraryManager = new LibraryManager(modelManager);
-        libraryManager.getLibrarySourceLoader().clearProviders();
+	public org.opencds.cqf.cql.engine.execution.LibraryLoader createLibraryLoader(org.cqframework.cql.cql2elm.LibrarySourceProvider provider) {
+		ModelManager modelManager = new CacheAwareModelManager(this.modelCache);
+		LibraryManager libraryManager = new LibraryManager(modelManager);
+		libraryManager.getLibrarySourceLoader().clearProviders();
 
-        libraryManager.getLibrarySourceLoader().registerProvider(provider);
+		libraryManager.getLibrarySourceLoader().registerProvider(provider);
 
-        return new PrivateCachingLibraryLoaderDecorator(new LibraryLoader(libraryManager, modelManager));
-    }
+		return new PrivateCachingLibraryLoaderDecorator(new LibraryLoader(libraryManager, modelManager));
+	}
 
-    public org.hl7.fhir.r4.model.Library resolveLibraryReference(LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> libraryResourceProvider, String reference) {
-        // Raw references to Library/libraryId or libraryId
-        if (reference.startsWith("Library/") || !reference.contains("/")) {
-            return libraryResourceProvider.resolveLibraryById(reference.replace("Library/", ""));
-        }
-        // Full url (e.g. http://hl7.org/fhir/us/Library/FHIRHelpers)
-        else if (reference.contains(("/Library/"))) {
-            return libraryResourceProvider.resolveLibraryByCanonicalUrl(reference);
-        }
+	public org.hl7.fhir.r4.model.Library resolveLibraryReference(LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> libraryResourceProvider, String reference) {
+		// Raw references to Library/libraryId or libraryId
+		if (reference.startsWith("Library/") || !reference.contains("/")) {
+			return libraryResourceProvider.resolveLibraryById(reference.replace("Library/", ""));
+		}
+		// Full url (e.g. http://hl7.org/fhir/us/Library/FHIRHelpers)
+		else if (reference.contains(("/Library/"))) {
+			return libraryResourceProvider.resolveLibraryByCanonicalUrl(reference);
+		}
 
-        return null;
-    }
+		return null;
+	}
 
-    public List<org.cqframework.cql.elm.execution.Library> loadLibraries(Measure measure,
-            org.opencds.cqf.cql.engine.execution.LibraryLoader libraryLoader,
-            LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> libraryResourceProvider) {
-        List<org.cqframework.cql.elm.execution.Library> libraries = new ArrayList<org.cqframework.cql.elm.execution.Library>();
+	public List<org.cqframework.cql.elm.execution.Library> loadLibraries(Measure measure,
+																								org.opencds.cqf.cql.engine.execution.LibraryLoader libraryLoader,
+																								LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> libraryResourceProvider) {
+		List<org.cqframework.cql.elm.execution.Library> libraries = new ArrayList<org.cqframework.cql.elm.execution.Library>();
 
-        // load libraries
-        //TODO: if there's a bad measure argument, this blows up for an obscure error
-        org.hl7.fhir.r4.model.Library primaryLibrary = null;
-        for (CanonicalType ref : measure.getLibrary()) {
-            // if library is contained in measure, load it into server
-            String id = ref.getValue(); //CanonicalHelper.getId(ref);
-            if (id.startsWith("#")) {
-                id = id.substring(1);
-                for (Resource resource : measure.getContained()) {
-                    if (resource instanceof org.hl7.fhir.r4.model.Library
-                            && resource.getIdElement().getIdPart().equals(id)) {
-                        libraryResourceProvider.update((org.hl7.fhir.r4.model.Library) resource);
-                    }
-                }
-            }
+		List<String> messages = new ArrayList<>();
 
-            // We just loaded it into the server so we can access it by Id
-            org.hl7.fhir.r4.model.Library library = resolveLibraryReference(libraryResourceProvider, id);
-            if (primaryLibrary == null) {
-                primaryLibrary = library;
-            }
+		// load libraries
+		//TODO: if there's a bad measure argument, this blows up for an obscure error
+		org.hl7.fhir.r4.model.Library primaryLibrary = null;
 
-            if (library != null && isLogicLibrary(library)) {
-                libraries.add(
-                        libraryLoader.load(new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion()))
-                );
-            }
-        }
+		List<CanonicalType> measureLibraries = measure.getLibrary();
+		if (measureLibraries.isEmpty()) {
+			String message = "No libraries found on " + measure.getId() + ".  Did you perhaps load a DSTU3 Measure onto an R4 server?";
+			messages.add(message);
+			ourLog.warn(message);
+		}
+		for (CanonicalType ref : measureLibraries) {
+			// if library is contained in measure, load it into server
+			String id = ref.getValue(); //CanonicalHelper.getId(ref);
+			if (id.startsWith("#")) {
+				id = id.substring(1);
+				for (Resource resource : measure.getContained()) {
+					if (resource instanceof org.hl7.fhir.r4.model.Library
+						&& resource.getIdElement().getIdPart().equals(id)) {
+						libraryResourceProvider.update((org.hl7.fhir.r4.model.Library) resource);
+					}
+				}
+			}
 
-        if (libraries.isEmpty()) {
-            throw new IllegalArgumentException(String
-                    .format("Could not load library source for libraries referenced in %s.", measure.getId()));
-        }
+			// We just loaded it into the server so we can access it by Id
+			org.hl7.fhir.r4.model.Library library = resolveLibraryReference(libraryResourceProvider, id);
+			if (primaryLibrary == null) {
+				primaryLibrary = library;
+			}
 
-        //VersionedIdentifier primaryLibraryId = libraries.get(0).getIdentifier();
-        //org.hl7.fhir.r4.model.Library primaryLibrary = libraryResourceProvider.resolveLibraryByName(primaryLibraryId.getId(), primaryLibraryId.getVersion());
-        for (RelatedArtifact artifact : primaryLibrary.getRelatedArtifact()) {
-            if (artifact.hasType() && artifact.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON) && artifact.hasResource()) {
-                org.hl7.fhir.r4.model.Library library = null;
-                library = resolveLibraryReference(libraryResourceProvider, artifact.getResource());
 
-                if (library != null && isLogicLibrary(library)) {
-                    libraries.add(
-                            libraryLoader.load(new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion()))
-                    );
-                }
-            }
-        }
+			if (library != null) {
+				if (isLogicLibrary(library)) {
+					libraries.add(
+						libraryLoader.load(new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion()))
+					);
+				} else {
+					String message = "Skipping library " + library.getId() + " is not a logic library.  Probably missing type.coding.system=\"http://terminology.hl7.org/CodeSystem/library-type\"";
+					messages.add(message);
+					ourLog.warn(message);
+				}
+			}
+		}
 
-        return libraries;
-    }
+		if (libraries.isEmpty()) {
+			throw new IllegalArgumentException(String
+				.format("Could not load library source for libraries referenced in %s:\n%s", measure.getId(), StringUtils.join("\n", messages)));
+		}
 
-    private boolean isLogicLibrary(org.hl7.fhir.r4.model.Library library) {
-        if (library == null) {
-            return false;
-        }
+		//VersionedIdentifier primaryLibraryId = libraries.get(0).getIdentifier();
+		//org.hl7.fhir.r4.model.Library primaryLibrary = libraryResourceProvider.resolveLibraryByName(primaryLibraryId.getId(), primaryLibraryId.getVersion());
+		for (RelatedArtifact artifact : primaryLibrary.getRelatedArtifact()) {
+			if (artifact.hasType() && artifact.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON) && artifact.hasResource()) {
+				org.hl7.fhir.r4.model.Library library = null;
+				library = resolveLibraryReference(libraryResourceProvider, artifact.getResource());
 
-        if (!library.hasType()) {
-            // If no type is specified, assume it is a logic library based on whether there is a CQL content element.
-            if (library.hasContent()) {
-                for (Attachment a : library.getContent()) {
-                    if (a.hasContentType() && (a.getContentType().equals("text/cql")
-                            || a.getContentType().equals("application/elm+xml")
-                            || a.getContentType().equals("application/elm+json"))) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
+				if (library != null && isLogicLibrary(library)) {
+					libraries.add(
+						libraryLoader.load(new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion()))
+					);
+				}
+			}
+		}
 
-        if (!library.getType().hasCoding()) {
-            return false;
-        }
+		return libraries;
+	}
 
-        for (Coding c : library.getType().getCoding()) {
-            if (c.hasSystem() && c.getSystem().equals("http://terminology.hl7.org/CodeSystem/library-type")
-                    && c.hasCode() && c.getCode().equals("logic-library")) {
-                return true;
-            }
-        }
+	private boolean isLogicLibrary(org.hl7.fhir.r4.model.Library library) {
+		if (library == null) {
+			return false;
+		}
 
-        return false;
-    }
+		if (!library.hasType()) {
+			// If no type is specified, assume it is a logic library based on whether there is a CQL content element.
+			if (library.hasContent()) {
+				for (Attachment a : library.getContent()) {
+					if (a.hasContentType() && (a.getContentType().equals("text/cql")
+						|| a.getContentType().equals("application/elm+xml")
+						|| a.getContentType().equals("application/elm+json"))) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
 
-    public Library resolveLibraryById(String libraryId,
-            org.opencds.cqf.cql.engine.execution.LibraryLoader libraryLoader,
-            LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> libraryResourceProvider) {
-        // Library library = null;
+		if (!library.getType().hasCoding()) {
+			return false;
+		}
 
-        org.hl7.fhir.r4.model.Library fhirLibrary = libraryResourceProvider.resolveLibraryById(libraryId);
-        return libraryLoader
-                .load(new VersionedIdentifier().withId(fhirLibrary.getName()).withVersion(fhirLibrary.getVersion()));
+		for (Coding c : library.getType().getCoding()) {
+			if (c.hasSystem() && c.getSystem().equals("http://terminology.hl7.org/CodeSystem/library-type")
+				&& c.hasCode() && c.getCode().equals("logic-library")) {
+				return true;
+			}
+		}
 
-        // for (Library l : libraryLoader.getLibraries()) {
-        // VersionedIdentifier vid = l.getIdentifier();
-        // if (vid.getId().equals(fhirLibrary.getName()) &&
-        // LibraryResourceHelper.compareVersions(fhirLibrary.getVersion(),
-        // vid.getVersion()) == 0) {
-        // library = l;
-        // break;
-        // }
-        // }
+		return false;
+	}
 
-        // if (library == null) {
+	public Library resolveLibraryById(String libraryId,
+												 org.opencds.cqf.cql.engine.execution.LibraryLoader libraryLoader,
+												 LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> libraryResourceProvider) {
+		// Library library = null;
 
-        // }
+		org.hl7.fhir.r4.model.Library fhirLibrary = libraryResourceProvider.resolveLibraryById(libraryId);
+		return libraryLoader
+			.load(new VersionedIdentifier().withId(fhirLibrary.getName()).withVersion(fhirLibrary.getVersion()));
 
-        // return library;
-    }
+		// for (Library l : libraryLoader.getLibraries()) {
+		// VersionedIdentifier vid = l.getIdentifier();
+		// if (vid.getId().equals(fhirLibrary.getName()) &&
+		// LibraryResourceHelper.compareVersions(fhirLibrary.getVersion(),
+		// vid.getVersion()) == 0) {
+		// library = l;
+		// break;
+		// }
+		// }
 
-    public Library resolvePrimaryLibrary(Measure measure,
-            org.opencds.cqf.cql.engine.execution.LibraryLoader libraryLoader,
-            LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> libraryResourceProvider) {
-        // default is the first library reference
-        String id = CanonicalHelper.getId(measure.getLibrary().get(0));
+		// if (library == null) {
 
-        Library library = resolveLibraryById(id, libraryLoader, libraryResourceProvider);
+		// }
 
-        if (library == null) {
-            throw new IllegalArgumentException(String.format("Could not resolve primary library for Measure/%s.",
-                    measure.getIdElement().getIdPart()));
-        }
+		// return library;
+	}
 
-        return library;
-    }
+	public Library resolvePrimaryLibrary(Measure measure,
+													 org.opencds.cqf.cql.engine.execution.LibraryLoader libraryLoader,
+													 LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> libraryResourceProvider) {
+		// default is the first library reference
+		String id = CanonicalHelper.getId(measure.getLibrary().get(0));
 
-    public Library resolvePrimaryLibrary(PlanDefinition planDefinition,
-            org.opencds.cqf.cql.engine.execution.LibraryLoader libraryLoader,
-            LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> libraryResourceProvider) {
-        String id = CanonicalHelper.getId(planDefinition.getLibrary().get(0));
+		Library library = resolveLibraryById(id, libraryLoader, libraryResourceProvider);
 
-        Library library = resolveLibraryById(id, libraryLoader, libraryResourceProvider);
+		if (library == null) {
+			throw new IllegalArgumentException(String.format("Could not resolve primary library for Measure/%s.",
+				measure.getIdElement().getIdPart()));
+		}
 
-        if (library == null) {
-            throw new IllegalArgumentException(String.format("Could not resolve primary library for PlanDefinition/%s",
-                    planDefinition.getIdElement().getIdPart()));
-        }
+		return library;
+	}
 
-        return library;
-    }
+	public Library resolvePrimaryLibrary(PlanDefinition planDefinition,
+													 org.opencds.cqf.cql.engine.execution.LibraryLoader libraryLoader,
+													 LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> libraryResourceProvider) {
+		String id = CanonicalHelper.getId(planDefinition.getLibrary().get(0));
+
+		Library library = resolveLibraryById(id, libraryLoader, libraryResourceProvider);
+
+		if (library == null) {
+			throw new IllegalArgumentException(String.format("Could not resolve primary library for PlanDefinition/%s",
+				planDefinition.getIdElement().getIdPart()));
+		}
+
+		return library;
+	}
 }
