@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2506
+title: "A new server interceptor has been added that allows servers to implement lenient search mode,
+   where unknown search parameters are ignored if an optional HTTP Prefer header is provided."

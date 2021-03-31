@@ -22,6 +22,7 @@ package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.rest.api.PreferHandlingEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.*;
@@ -244,5 +245,29 @@ public class ServletExamples {
 			// END SNIPPET: ResponseTerminologyTranslationInterceptor
 		}
 	}
+
+
+	// START SNIPPET: preferHandling
+	@WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
+	public class RestfulServerWithPreferHandling extends RestfulServer {
+
+		@Override
+		protected void initialize() throws ServletException {
+
+			// Create an interceptor
+			SearchPreferHandlingInterceptor interceptor = new SearchPreferHandlingInterceptor();
+
+			// Optionally you can change the default behaviour for when the Prefer
+			// header is not found in the request or does not have a handling
+			// directive
+			interceptor.setDefaultBehaviour(PreferHandlingEnum.LENIENT);
+
+			// Register the interceptor
+			registerInterceptor(interceptor);
+
+		}
+		// END SNIPPET: preferHandling
+	}
+
 
 }

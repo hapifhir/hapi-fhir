@@ -50,6 +50,7 @@ import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -104,6 +105,13 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		return fetchResource(myStructureDefinitionType, theUrl);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Nullable
+	@Override
+	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions() {
+		IBundleProvider search = myDaoRegistry.getResourceDao("StructureDefinition").search(new SearchParameterMap().setLoadSynchronousUpTo(1000));
+		return (List<T>) search.getResources(0, 1000);
+	}
 
 	@Override
 	@SuppressWarnings({"unchecked", "unused"})

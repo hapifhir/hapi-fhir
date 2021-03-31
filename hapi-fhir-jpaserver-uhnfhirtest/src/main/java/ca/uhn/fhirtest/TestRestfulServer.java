@@ -1,6 +1,7 @@
 package ca.uhn.fhirtest;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -9,14 +10,13 @@ import ca.uhn.fhir.jpa.bulk.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
+import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
-import ca.uhn.fhir.jpa.provider.r4.JpaConformanceProviderR4;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
-import ca.uhn.fhir.jpa.provider.r5.JpaConformanceProviderR5;
 import ca.uhn.fhir.jpa.provider.r5.JpaSystemProviderR5;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
@@ -145,7 +145,8 @@ public class TestRestfulServer extends RestfulServer {
 				providers.add(myAppCtx.getBean("mySystemProviderR4", JpaSystemProviderR4.class));
 				systemDao = myAppCtx.getBean("mySystemDaoR4", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
-				JpaConformanceProviderR4 confProvider = new JpaConformanceProviderR4(this, systemDao, myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(ISearchParamRegistry.class));
+				IValidationSupport validationSupport = myAppCtx.getBean(IValidationSupport.class);
+				JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(this, systemDao, myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(ISearchParamRegistry.class), validationSupport);
 				confProvider.setImplementationDescription(implDesc);
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
@@ -164,8 +165,8 @@ public class TestRestfulServer extends RestfulServer {
 				providers.add(myAppCtx.getBean("mySystemProviderR5", JpaSystemProviderR5.class));
 				systemDao = myAppCtx.getBean("mySystemDaoR5", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
-				JpaConformanceProviderR5 confProvider = new JpaConformanceProviderR5(this, systemDao, myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(ISearchParamRegistry.class));
-				confProvider.setImplementationDescription(implDesc);
+				IValidationSupport validationSupport = myAppCtx.getBean(IValidationSupport.class);
+				JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(this, systemDao, myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(ISearchParamRegistry.class), validationSupport);
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
