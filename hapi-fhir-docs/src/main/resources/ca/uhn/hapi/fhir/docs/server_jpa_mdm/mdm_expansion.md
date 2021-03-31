@@ -18,7 +18,7 @@ GET http://example.com:8000/Observation?subject:mdm=Patient/1
 
 This `:mdm` parameter qualifier instructs an interceptor in HAPI fhir to expand the set of resources included in the search by their MDM-matched resources. The two above HTTP requests will return the same result. 
 
-One important caveat is that chaining is currently not supported when using this prefix
+One important caveat is that chaining is currently not supported when using this prefix.
 
 ## Enabling MDM Expansion
 
