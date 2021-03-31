@@ -1,7 +1,7 @@
 # MDM Expansion
 
-Once you have MDM enabled, and you have many linked resources, it can be useful to search across all resourcess. Let's say you have the following MDM links in your database:
-```
+Once you have MDM enabled, and you have many linked resources, it can be useful to search across all linked resources. Let's say you have the following MDM links in your database:
+```bash
 Patient/1 --> Patient/3
 Patient/2 --> Patient/3
 ```
@@ -18,9 +18,11 @@ GET http://example.com:8000/Observation?subject:mdm=Patient/1
 
 This `:mdm` parameter qualifier instructs an interceptor in HAPI fhir to expand the set of resources included in the search by their MDM-matched resources. The two above HTTP requests will return the same result. 
 
+One important caveat is that chaining is currently not supported when using this prefix
+
 ## Enabling MDM Expansion
 
-On top of needing to instantiate an MDM module, you must enable in the [DaoConfig](/hapi-fhir/apidocs/hapi-fhir-jpaserver-api/ca/uhn/fhir/jpa/api/config/DaoConfig.html) bean, using the [Allow MDM Expansion](/hapi-fhir/apidocs/hapi-fhir-jpaserver-api/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setAllowMdmExpansion(boolean)) property.
+On top of needing to instantiate an MDM module, you must enable this feature in the [DaoConfig](/hapi-fhir/apidocs/hapi-fhir-jpaserver-api/ca/uhn/fhir/jpa/api/config/DaoConfig.html) bean, using the [Allow MDM Expansion](/hapi-fhir/apidocs/hapi-fhir-jpaserver-api/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setAllowMdmExpansion(boolean)) property.
 
 <div class="helpInfoCalloutBox">
 It is important to note that enabling this functionality can lead to incorrect data being returned by a request, if your MDM links are incorrect.
