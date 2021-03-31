@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>5.4.0-PRE2-SNAPSHOT</version>
+	<version>5.4.0-PRE3-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -1563,7 +1563,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.2.18</version>
+				<version>42.2.19</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>

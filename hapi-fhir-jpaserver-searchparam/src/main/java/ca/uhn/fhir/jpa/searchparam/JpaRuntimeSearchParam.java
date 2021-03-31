@@ -26,7 +26,12 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -38,20 +43,10 @@ public class JpaRuntimeSearchParam extends RuntimeSearchParam {
 	/**
 	 * Constructor
 	 */
-	public JpaRuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, boolean theUnique, List<Component> theComponents, Collection<? extends IPrimitiveType<String>> theBase) {
-		super(theId, theUri, theName, theDescription, thePath, theParamType, createCompositeList(theParamType), theProvidesMembershipInCompartments, theTargets, theStatus, toStrings(theBase));
+	public JpaRuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, boolean theUnique, List<Component> theComponents, Collection<String> theBase) {
+		super(theId, theUri, theName, theDescription, thePath, theParamType, createCompositeList(theParamType), theProvidesMembershipInCompartments, theTargets, theStatus, theBase);
 		myUnique = theUnique;
 		myComponents = Collections.unmodifiableList(theComponents);
-	}
-
-	private static Collection<String> toStrings(Collection<? extends IPrimitiveType<String>> theBase) {
-		HashSet<String> retVal = new HashSet<>();
-		for (IPrimitiveType<String> next : theBase) {
-			if (isNotBlank(next.getValueAsString())) {
-				retVal.add(next.getValueAsString());
-			}
-		}
-		return retVal;
 	}
 
 	public List<Component> getComponents() {
@@ -60,14 +55,6 @@ public class JpaRuntimeSearchParam extends RuntimeSearchParam {
 
 	public boolean isUnique() {
 		return myUnique;
-	}
-
-	private static ArrayList<RuntimeSearchParam> createCompositeList(RestSearchParameterTypeEnum theParamType) {
-		if (theParamType == RestSearchParameterTypeEnum.COMPOSITE) {
-			return new ArrayList<>();
-		} else {
-			return null;
-		}
 	}
 
 	public static class Component {
@@ -86,6 +73,14 @@ public class JpaRuntimeSearchParam extends RuntimeSearchParam {
 
 		public IBaseReference getReference() {
 			return myReference;
+		}
+	}
+
+	private static ArrayList<RuntimeSearchParam> createCompositeList(RestSearchParameterTypeEnum theParamType) {
+		if (theParamType == RestSearchParameterTypeEnum.COMPOSITE) {
+			return new ArrayList<>();
+		} else {
+			return null;
 		}
 	}
 

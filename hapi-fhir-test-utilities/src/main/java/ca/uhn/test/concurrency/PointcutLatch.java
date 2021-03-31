@@ -23,7 +23,7 @@ package ca.uhn.test.concurrency;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
-import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.api.IPointcut;
 import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -52,11 +52,12 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	private final AtomicReference<String> myCountdownLatchSetStacktrace = new AtomicReference<>();
 	private final AtomicReference<List<String>> myFailures = new AtomicReference<>();
 	private final AtomicReference<List<HookParams>> myCalledWith = new AtomicReference<>();
-	private final Pointcut myPointcut;
+	private final IPointcut myPointcut;
 	private int myDefaultTimeoutSeconds = DEFAULT_TIMEOUT_SECONDS;
 	private int myInitialCount;
 	private boolean myExactMatch;
-	public PointcutLatch(Pointcut thePointcut) {
+
+	public PointcutLatch(IPointcut thePointcut) {
 		this.myName = thePointcut.name();
 		myPointcut = thePointcut;
 	}
@@ -189,7 +190,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 
 
 	@Override
-	public void invoke(Pointcut thePointcut, HookParams theArgs) {
+	public void invoke(IPointcut thePointcut, HookParams theArgs) {
 		myLastInvoke.set(System.currentTimeMillis());
 		
 		CountDownLatch latch = myCountdownLatch.get();

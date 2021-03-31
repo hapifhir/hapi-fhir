@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.server;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -148,7 +149,7 @@ public class ServerExceptionDstu3Test {
 
 		ourServlet.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, new IAnonymousInterceptor() {
 			@Override
-			public void invoke(Pointcut thePointcut, HookParams theArgs) {
+			public void invoke(IPointcut thePointcut, HookParams theArgs) {
 				throw new NullPointerException("Hello");
 			}
 		});

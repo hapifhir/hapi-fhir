@@ -25,13 +25,13 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
+import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-public interface ISearchParamRegistry {
+public interface ISearchParamRegistry extends ISearchParamRetriever {
 
 	/**
 	 * Request that the cache be refreshed now, in the current thread
@@ -39,18 +39,11 @@ public interface ISearchParamRegistry {
 	void forceRefresh();
 
 	/**
-	 * @return Returns {@literal null} if no match
-	 */
-	RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName);
-
-	/**
 	 * @return the number of search parameter entries changed
 	 */
 	ResourceChangeResult refreshCacheIfNecessary();
 
 	ReadOnlySearchParamCache getActiveSearchParams();
-
-	Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName);
 
 	List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames);
 

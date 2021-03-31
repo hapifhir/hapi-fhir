@@ -26,9 +26,10 @@ public class PreferHeader {
 
 	private PreferReturnEnum myReturn;
 	private boolean myRespondAsync;
+	private PreferHandlingEnum myHanding;
 
-	public @Nullable
-	PreferReturnEnum getReturn() {
+	@Nullable
+	public PreferReturnEnum getReturn() {
 		return myReturn;
 	}
 
@@ -46,4 +47,12 @@ public class PreferHeader {
 		return this;
 	}
 
+	@Nullable
+	public PreferHandlingEnum getHanding() {
+		return myHanding;
+	}
+
+	public void setHanding(PreferHandlingEnum theHanding) {
+		myHanding = theHanding;
+	}
 }

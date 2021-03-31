@@ -148,27 +148,16 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	@Override
 	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 
+		if (!mightBeSearchRequest(theRequest)) {
+			return MethodMatchEnum.NONE;
+		}
+
 		if (theRequest.getId() != null && myIdParamIndex == null) {
 			ourLog.trace("Method {} doesn't match because ID is not null: {}", getMethod(), theRequest.getId());
 			return MethodMatchEnum.NONE;
 		}
-		if (theRequest.getRequestType() == RequestTypeEnum.GET && theRequest.getOperation() != null && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
-			ourLog.trace("Method {} doesn't match because request type is GET but operation is not null: {}", theRequest.getId(), theRequest.getOperation());
-			return MethodMatchEnum.NONE;
-		}
-		if (theRequest.getRequestType() == RequestTypeEnum.POST && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
-			ourLog.trace("Method {} doesn't match because request type is POST but operation is not _search: {}", theRequest.getId(), theRequest.getOperation());
-			return MethodMatchEnum.NONE;
-		}
-		if (theRequest.getRequestType() != RequestTypeEnum.GET && theRequest.getRequestType() != RequestTypeEnum.POST) {
-			ourLog.trace("Method {} doesn't match because request type is {}", getMethod(), theRequest.getRequestType());
-			return MethodMatchEnum.NONE;
-		}
 		if (!StringUtils.equals(myCompartmentName, theRequest.getCompartmentName())) {
 			ourLog.trace("Method {} doesn't match because it is for compartment {} but request is compartment {}", getMethod(), myCompartmentName, theRequest.getCompartmentName());
-			return MethodMatchEnum.NONE;
-		}
-		if (theRequest.getParameters().get(Constants.PARAM_PAGINGACTION) != null) {
 			return MethodMatchEnum.NONE;
 		}
 
@@ -269,6 +258,38 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		return retVal;
+	}
+
+	/**
+	 * Is this request a request for a normal search - Ie. not a named search, nor a compartment
+	 * search, just a plain old search.
+	 *
+	 * @since 5.4.0
+	 */
+	public static boolean isPlainSearchRequest(RequestDetails theRequest) {
+		if (theRequest.getId() != null) {
+			return false;
+		}
+		if (isNotBlank(theRequest.getCompartmentName())) {
+			return false;
+		}
+		return mightBeSearchRequest(theRequest);
+	}
+
+	private static boolean mightBeSearchRequest(RequestDetails theRequest) {
+		if (theRequest.getRequestType() == RequestTypeEnum.GET && theRequest.getOperation() != null && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
+			return false;
+		}
+		if (theRequest.getRequestType() == RequestTypeEnum.POST && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
+			return false;
+		}
+		if (theRequest.getRequestType() != RequestTypeEnum.GET && theRequest.getRequestType() != RequestTypeEnum.POST) {
+			return false;
+		}
+		if (theRequest.getParameters().get(Constants.PARAM_PAGINGACTION) != null) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override

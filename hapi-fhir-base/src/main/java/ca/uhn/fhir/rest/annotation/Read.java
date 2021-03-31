@@ -56,8 +56,17 @@ public @interface Read {
 	Class<? extends IBaseResource> type() default IBaseResource.class;
 
 	/**
+	 * This method allows the return type for this method to be specified in a
+	 * non-type-specific way, using the text name of the resource, e.g. "Patient".
+	 *
+	 * This attribute should be populate, or {@link #type()} should be, but not both.
+	 *
+	 * @since 5.4.0
+	 */
+	String typeName() default "";
+
+	/**
 	 * If set to true (default is false), this method supports vread operation as well as read
 	 */
 	boolean version() default false;
-
 }

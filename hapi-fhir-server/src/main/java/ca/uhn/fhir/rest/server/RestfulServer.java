@@ -1013,11 +1013,14 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			 * Notify interceptors about the incoming request
 			 * *************************/
 
-			HookParams preProcessedParams = new HookParams();
-			preProcessedParams.add(HttpServletRequest.class, theRequest);
-			preProcessedParams.add(HttpServletResponse.class, theResponse);
-			if (!myInterceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED, preProcessedParams)) {
-				return;
+			// Interceptor: SERVER_INCOMING_REQUEST_PRE_PROCESSED
+			if (myInterceptorService.hasHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)) {
+				HookParams preProcessedParams = new HookParams();
+				preProcessedParams.add(HttpServletRequest.class, theRequest);
+				preProcessedParams.add(HttpServletResponse.class, theResponse);
+				if (!myInterceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED, preProcessedParams)) {
+					return;
+				}
 			}
 
 			String requestPath = getRequestPath(requestFullPath, servletContextPath, servletPath);
@@ -1056,6 +1059,18 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			requestDetails.setFhirServerBase(fhirServerBase);
 			requestDetails.setCompleteUrl(completeUrl);
 
+			// Interceptor: SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED
+			if (myInterceptorService.hasHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED)) {
+				HookParams preProcessedParams = new HookParams();
+				preProcessedParams.add(HttpServletRequest.class, theRequest);
+				preProcessedParams.add(HttpServletResponse.class, theResponse);
+				preProcessedParams.add(RequestDetails.class, requestDetails);
+				preProcessedParams.add(ServletRequestDetails.class, requestDetails);
+				if (!myInterceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED, preProcessedParams)) {
+					return;
+				}
+			}
+
 			validateRequest(requestDetails);
 
 			BaseMethodBinding<?> resourceMethod = determineResourceMethod(requestDetails, requestPath);
@@ -1063,14 +1078,16 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			RestOperationTypeEnum operation = resourceMethod.getRestOperationType(requestDetails);
 			requestDetails.setRestOperationType(operation);
 
-			// Handle server interceptors
-			HookParams postProcessedParams = new HookParams();
-			postProcessedParams.add(RequestDetails.class, requestDetails);
-			postProcessedParams.add(ServletRequestDetails.class, requestDetails);
-			postProcessedParams.add(HttpServletRequest.class, theRequest);
-			postProcessedParams.add(HttpServletResponse.class, theResponse);
-			if (!myInterceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, postProcessedParams)) {
-				return;
+			// Interceptor: SERVER_INCOMING_REQUEST_POST_PROCESSED
+			if (myInterceptorService.hasHooks(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)) {
+				HookParams postProcessedParams = new HookParams();
+				postProcessedParams.add(RequestDetails.class, requestDetails);
+				postProcessedParams.add(ServletRequestDetails.class, requestDetails);
+				postProcessedParams.add(HttpServletRequest.class, theRequest);
+				postProcessedParams.add(HttpServletResponse.class, theResponse);
+				if (!myInterceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, postProcessedParams)) {
+					return;
+				}
 			}
 
 			/*
