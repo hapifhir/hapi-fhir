@@ -92,8 +92,8 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 		}
 	}
 
-	@Override
-	String doGetQueryParameterQualifier() {
+
+	private String defaultGetQueryParameterQualifier() {
 		StringBuilder b = new StringBuilder();
 		if (isNotBlank(myChain)) {
 			if (isNotBlank(getResourceType())) {
@@ -107,6 +107,10 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 			return b.toString();
 		}
 		return null;
+	}
+	@Override
+	String doGetQueryParameterQualifier() {
+		return this.myMdmExpand != null ? ":mdm" : defaultGetQueryParameterQualifier();
 	}
 
 	@Override
