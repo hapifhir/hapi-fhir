@@ -477,7 +477,7 @@ public abstract class BaseConfig {
 
 	@Bean
 	@Lazy
-	public MdmSearchExpandingInterceptor mdmSearchExpandingInterceptorInterceptor() {
+	public MdmSearchExpandingInterceptor mdmSearchExpandingInterceptor() {
 		return new MdmSearchExpandingInterceptor();
 	}
 
