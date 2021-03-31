@@ -26,9 +26,9 @@ public class FhirPathResourceMatcherR4Test extends BaseMdmRulesR4Test {
 	@BeforeEach
 	public void before() {
 		super.before();
-		when(mySearchParamRetriever.getActiveSearchParam("Patient", "birthdate")).thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Patient", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Patient", "active")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveRuntimeSearchParam("Patient", "birthdate")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveRuntimeSearchParam("Patient", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveRuntimeSearchParam("Patient", "active")).thenReturn(mock(RuntimeSearchParam.class));
 
 		{
 			myLeft = new Patient();

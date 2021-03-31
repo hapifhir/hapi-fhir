@@ -44,7 +44,7 @@ public class EIDHelperR4Test extends BaseR4Test {
 
 	@BeforeEach
 	public void before() {
-		when(mySearchParamRetriever.getActiveSearchParam("Patient", "identifier"))
+		when(mySearchParamRetriever.getActiveRuntimeSearchParam("Patient", "identifier"))
 			.thenReturn(new RuntimeSearchParam(
 				"identifier", "Description", "identifier", RestSearchParameterTypeEnum.STRING,
 				new HashSet<>(), new HashSet<>(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE

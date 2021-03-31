@@ -35,9 +35,7 @@ import ca.uhn.fhir.mdm.rules.json.MdmSimilarityJson;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 import ca.uhn.fhir.util.FhirTerser;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +88,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	}
 
 	public void validateTypeHasIdentifier(String theResourceType) {
-		if (mySearchParamRetriever.getActiveSearchParam(theResourceType, "identifier") == null) {
+		if (mySearchParamRetriever.getActiveRuntimeSearchParam(theResourceType, "identifier") == null) {
 			throw new ConfigurationException("Resource Type " + theResourceType + " is not supported, as it does not have an 'identifier' field, which is necessary for MDM workflow.");
 		}
 	}
@@ -117,7 +115,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	}
 
 	private void validateResourceSearchParam(String theFieldName, String theResourceType, String theSearchParam) {
-		if (mySearchParamRetriever.getActiveSearchParam(theResourceType, theSearchParam) == null) {
+		if (mySearchParamRetriever.getActiveRuntimeSearchParam(theResourceType, theSearchParam) == null) {
 			throw new ConfigurationException("Error in " + theFieldName + ": " + theResourceType + " does not have a search parameter called '" + theSearchParam + "'");
 		}
 	}

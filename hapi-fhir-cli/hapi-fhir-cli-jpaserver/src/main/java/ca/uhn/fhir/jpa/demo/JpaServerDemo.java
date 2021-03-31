@@ -129,7 +129,7 @@ public class JpaServerDemo extends RestfulServer {
 			IFhirSystemDao<org.hl7.fhir.dstu3.model.Bundle, org.hl7.fhir.dstu3.model.Meta> systemDao = myAppCtx
 					.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
 			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao,
-					myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(ISearchParamRegistry.class));
+					myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(ISearchParamRegistry.class).asSearchParamRetriever());
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
 		} else if (fhirVersion == FhirVersionEnum.R4) {
@@ -137,7 +137,7 @@ public class JpaServerDemo extends RestfulServer {
 					.getBean("mySystemDaoR4", IFhirSystemDao.class);
 			IValidationSupport validationSupport = myAppCtx.getBean(IValidationSupport.class);
 			JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(this, systemDao,
-					myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(ISearchParamRegistry.class), validationSupport);
+					myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(ISearchParamRegistry.class).asSearchParamRetriever(), validationSupport);
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
 		} else {

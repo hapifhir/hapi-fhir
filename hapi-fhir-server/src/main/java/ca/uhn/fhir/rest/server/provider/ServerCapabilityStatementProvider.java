@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -313,7 +312,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 					searchParamRetriever = myServer.createConfiguration();
 				}
 
-				Map<String, RuntimeSearchParam> searchParams = searchParamRetriever.getActiveSearchParams(resourceName);
+				Map<String, RuntimeSearchParam> searchParams = searchParamRetriever.getActiveRuntimeSearchParams(resourceName);
 				if (searchParams != null) {
 					for (RuntimeSearchParam next : searchParams.values()) {
 						IBase searchParam = terser.addElement(resource, "searchParam");

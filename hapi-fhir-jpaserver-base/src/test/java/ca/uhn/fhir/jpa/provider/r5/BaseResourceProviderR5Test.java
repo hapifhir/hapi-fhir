@@ -113,7 +113,7 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 
 			ourSearchParamRegistry = myAppCtx.getBean(SearchParamRegistryImpl.class);
 
-			JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(ourRestServer, mySystemDao, myDaoConfig, ourSearchParamRegistry, validationSupport);
+			JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(ourRestServer, mySystemDao, myDaoConfig, ourSearchParamRegistry.asSearchParamRetriever(), validationSupport);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
 			ourRestServer.setServerConformanceProvider(confProvider);
 

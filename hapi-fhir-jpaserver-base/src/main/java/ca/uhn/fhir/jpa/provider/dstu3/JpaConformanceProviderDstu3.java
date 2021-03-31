@@ -116,7 +116,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 
 				nextResource.getSearchParam().clear();
 				String resourceName = nextResource.getType();
-				Map<String, RuntimeSearchParam> searchParams = mySearchParamRegistry.getActiveSearchParams(resourceName);
+				Map<String, RuntimeSearchParam> searchParams = mySearchParamRegistry.getActiveRuntimeSearchParams(resourceName);
 				for (RuntimeSearchParam runtimeSp : searchParams.values()) {
 					CapabilityStatementRestResourceSearchParamComponent confSp = nextResource.addSearchParam();
 

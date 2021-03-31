@@ -29,9 +29,20 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-public interface ISearchParamRegistry extends ISearchParamRetriever {
+public interface ISearchParamRegistry {
+
+	/**
+	 * @return Returns {@literal null} if no match
+	 */
+	RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName);
+
+	/**
+	 * @return Returns all active search params for the given resource
+	 */
+	Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName);
 
 	/**
 	 * Request that the cache be refreshed now, in the current thread
@@ -74,4 +85,19 @@ public interface ISearchParamRegistry extends ISearchParamRetriever {
 	default Collection<String> getValidSearchParameterNamesIncludingMeta(String theResourceName) {
 		return getActiveSearchParams().getValidSearchParameterNamesIncludingMeta(theResourceName);
 	}
+
+	default ISearchParamRetriever asSearchParamRetriever() {
+		return new ISearchParamRetriever() {
+			@Override
+			public RuntimeSearchParam getActiveRuntimeSearchParam(String theResourceName, String theParamName) {
+				return ISearchParamRegistry.this.getActiveSearchParam(theResourceName, theParamName);
+			}
+
+			@Override
+			public Map<String, RuntimeSearchParam> getActiveRuntimeSearchParams(String theResourceName) {
+				return ISearchParamRegistry.this.getActiveSearchParams(theResourceName);
+			}
+		};
+	}
+
 }

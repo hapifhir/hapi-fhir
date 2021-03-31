@@ -360,12 +360,12 @@ public class RestfulServerConfiguration implements ISearchParamRetriever {
 	}
 
 	@Override
-	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
-		return getActiveSearchParams(theResourceName).get(theParamName);
+	public RuntimeSearchParam getActiveRuntimeSearchParam(String theResourceName, String theParamName) {
+		return getActiveRuntimeSearchParams(theResourceName).get(theParamName);
 	}
 
 	@Override
-	public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
+	public Map<String, RuntimeSearchParam> getActiveRuntimeSearchParams(String theResourceName) {
 
 		Map<String, RuntimeSearchParam> retVal = new LinkedHashMap<>();
 
