@@ -33,7 +33,6 @@ import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Measure;
-import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.evaluator.cql2elm.model.CacheAwareModelManager;
@@ -147,8 +146,6 @@ public class LibraryHelper {
 				.format("Could not load library source for libraries referenced in %s:\n%s", measure.getId(), StringUtils.join("\n", messages)));
 		}
 
-		//VersionedIdentifier primaryLibraryId = libraries.get(0).getIdentifier();
-		//org.hl7.fhir.r4.model.Library primaryLibrary = libraryResourceProvider.resolveLibraryByName(primaryLibraryId.getId(), primaryLibraryId.getVersion());
 		for (RelatedArtifact artifact : primaryLibrary.getRelatedArtifact()) {
 			if (artifact.hasType() && artifact.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON) && artifact.hasResource()) {
 				org.hl7.fhir.r4.model.Library library = null;
@@ -206,22 +203,6 @@ public class LibraryHelper {
 		org.hl7.fhir.r4.model.Library fhirLibrary = libraryResourceProvider.resolveLibraryById(libraryId);
 		return libraryLoader
 			.load(new VersionedIdentifier().withId(fhirLibrary.getName()).withVersion(fhirLibrary.getVersion()));
-
-		// for (Library l : libraryLoader.getLibraries()) {
-		// VersionedIdentifier vid = l.getIdentifier();
-		// if (vid.getId().equals(fhirLibrary.getName()) &&
-		// LibraryResourceHelper.compareVersions(fhirLibrary.getVersion(),
-		// vid.getVersion()) == 0) {
-		// library = l;
-		// break;
-		// }
-		// }
-
-		// if (library == null) {
-
-		// }
-
-		// return library;
 	}
 
 	public Library resolvePrimaryLibrary(Measure measure,
@@ -235,21 +216,6 @@ public class LibraryHelper {
 		if (library == null) {
 			throw new IllegalArgumentException(String.format("Could not resolve primary library for Measure/%s.",
 				measure.getIdElement().getIdPart()));
-		}
-
-		return library;
-	}
-
-	public Library resolvePrimaryLibrary(PlanDefinition planDefinition,
-													 org.opencds.cqf.cql.engine.execution.LibraryLoader libraryLoader,
-													 LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> libraryResourceProvider) {
-		String id = CanonicalHelper.getId(planDefinition.getLibrary().get(0));
-
-		Library library = resolveLibraryById(id, libraryLoader, libraryResourceProvider);
-
-		if (library == null) {
-			throw new IllegalArgumentException(String.format("Could not resolve primary library for PlanDefinition/%s",
-				planDefinition.getIdElement().getIdPart()));
 		}
 
 		return library;
