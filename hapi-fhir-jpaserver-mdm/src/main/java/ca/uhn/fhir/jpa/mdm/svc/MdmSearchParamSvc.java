@@ -31,7 +31,6 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +40,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 @Service
-public class MdmSearchParamSvc implements ISearchParamRetriever {
+public class MdmSearchParamSvc {
 	@Autowired
 	FhirContext myFhirContext;
 	@Autowired
@@ -66,18 +65,12 @@ public class MdmSearchParamSvc implements ISearchParamRetriever {
 		return mySearchParamExtractorService.extractParamValuesAsStrings(activeSearchParam, theResource);
 	}
 
-	@Override
-	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
-		return mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
-	}
-
 	/**
 	 * Given a source type, and a criteria string of the shape name=x&birthDate=y, generate a {@link SearchParameterMap}
 	 * that represents this query.
 	 *
 	 * @param theSourceType the resource type to execute the search on
-	 * @param theCriteria the string search criteria.
-	 *
+	 * @param theCriteria   the string search criteria.
 	 * @return the generated SearchParameterMap, or an empty one if there is no criteria.
 	 */
 	public SearchParameterMap getSearchParameterMapFromCriteria(String theSourceType, @Nullable String theCriteria) {
@@ -91,17 +84,18 @@ public class MdmSearchParamSvc implements ISearchParamRetriever {
 	}
 
 	public ISearchBuilder generateSearchBuilderForType(String theSourceType) {
-		 IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theSourceType);
-		 return mySearchBuilderFactory.newSearchBuilder(resourceDao, theSourceType, resourceDao.getResourceType());
-	 }
+		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theSourceType);
+		return mySearchBuilderFactory.newSearchBuilder(resourceDao, theSourceType, resourceDao.getResourceType());
+	}
 
 	/**
 	 * Will return true if the types match, or the search param type is '*', otherwise false.
+	 *
 	 * @param theSearchParamType
 	 * @param theResourceType
 	 * @return
 	 */
-	 public boolean searchParamTypeIsValidForResourceType(String theSearchParamType, String theResourceType) {
-		 return theSearchParamType.equalsIgnoreCase(theResourceType) || theSearchParamType.equalsIgnoreCase("*");
-	 }
+	public boolean searchParamTypeIsValidForResourceType(String theSearchParamType, String theResourceType) {
+		return theSearchParamType.equalsIgnoreCase(theResourceType) || theSearchParamType.equalsIgnoreCase("*");
+	}
 }

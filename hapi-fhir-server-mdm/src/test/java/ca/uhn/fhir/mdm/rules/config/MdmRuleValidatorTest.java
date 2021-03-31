@@ -151,6 +151,16 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 		}
 	}
 
+	@Test
+	public void testMatcherExtensionJson() throws IOException {
+		try {
+			setMdmRuleJson("rules-extension-search.json");
+		}
+		catch (ConfigurationException e){
+			fail("Unable to validate extension matcher");
+		}
+	}
+
 	private void setMdmRuleJson(String theTheS) throws IOException {
 		MdmRuleValidator mdmRuleValidator = new MdmRuleValidator(ourFhirContext, mySearchParamRetriever);
 		MdmSettings mdmSettings = new MdmSettings(mdmRuleValidator);

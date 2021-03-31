@@ -20,14 +20,13 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * #L%
  */
 
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -44,7 +43,6 @@ import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.UriType;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
@@ -55,11 +53,12 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 
 	private volatile CapabilityStatement myCachedValue;
 	private DaoConfig myDaoConfig;
-	private ISearchParamRegistry mySearchParamRegistry;
+	private ISearchParamRetriever mySearchParamRegistry;
 	private String myImplementationDescription;
 	private boolean myIncludeResourceCounts;
 	private RestfulServer myRestfulServer;
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
+
 	/**
 	 * Constructor
 	 */
@@ -73,7 +72,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 	/**
 	 * Constructor
 	 */
-	public JpaConformanceProviderDstu3(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, Meta> theSystemDao, DaoConfig theDaoConfig, ISearchParamRegistry theSearchParamRegistry) {
+	public JpaConformanceProviderDstu3(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, Meta> theSystemDao, DaoConfig theDaoConfig, ISearchParamRetriever theSearchParamRegistry) {
 		super(theRestfulServer);
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
@@ -83,7 +82,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		setIncludeResourceCounts(true);
 	}
 
-	public void setSearchParamRegistry(ISearchParamRegistry theSearchParamRegistry) {
+	public void setSearchParamRegistry(ISearchParamRetriever theSearchParamRegistry) {
 		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
@@ -117,9 +116,8 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 
 				nextResource.getSearchParam().clear();
 				String resourceName = nextResource.getType();
-				RuntimeResourceDefinition resourceDef = myRestfulServer.getFhirContext().getResourceDefinition(resourceName);
-				Collection<RuntimeSearchParam> searchParams = mySearchParamRegistry.getSearchParamsByResourceType(resourceDef);
-				for (RuntimeSearchParam runtimeSp : searchParams) {
+				Map<String, RuntimeSearchParam> searchParams = mySearchParamRegistry.getActiveSearchParams(resourceName);
+				for (RuntimeSearchParam runtimeSp : searchParams.values()) {
 					CapabilityStatementRestResourceSearchParamComponent confSp = nextResource.addSearchParam();
 
 					confSp.setName(runtimeSp.getName());

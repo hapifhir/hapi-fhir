@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2506
+title: "The server generated CapabilityStatment will now include supported Profile declarations
+  for FHIR R4+."

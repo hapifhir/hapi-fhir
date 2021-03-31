@@ -22,6 +22,7 @@ public class BatchJobConfig {
 	private StepBuilderFactory myStepBuilderFactory;
 
 
+
 	@Bean
 	public Job testJob() {
 		return myJobBuilderFactory.get("testJob")

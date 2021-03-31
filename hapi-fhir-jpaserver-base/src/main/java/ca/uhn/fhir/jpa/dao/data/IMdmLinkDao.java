@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -40,7 +41,7 @@ public interface IMdmLinkDao extends JpaRepository<MdmLink, Long> {
 	@Query("DELETE FROM MdmLink f WHERE (myGoldenResourcePid = :pid OR mySourcePid = :pid) AND myMatchResult <> :matchResult")
 	int deleteWithAnyReferenceToPidAndMatchResultNot(@Param("pid") Long thePid, @Param("matchResult") MdmMatchResultEnum theMatchResult);
 
-	@Query("SELECT ml2.myGoldenResourcePid, ml2.mySourcePid FROM MdmLink ml2 " +
+	@Query("SELECT ml2.myGoldenResourcePid as goldenPid, ml2.mySourcePid as sourcePid FROM MdmLink ml2 " +
 		"WHERE ml2.myMatchResult=:matchResult " +
 		"AND ml2.myGoldenResourcePid IN (" +
 			"SELECT ml.myGoldenResourcePid FROM MdmLink ml " +
@@ -50,5 +51,11 @@ public interface IMdmLinkDao extends JpaRepository<MdmLink, Long> {
 			"AND hrl.mySourcePath='Group.member.entity' " +
 			"AND hrl.myTargetResourceType='Patient'" +
 		")")
-	List<List<Long>> expandPidsFromGroupPidGivenMatchResult(@Param("groupPid") Long theGroupPid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+	List<MdmPidTuple> expandPidsFromGroupPidGivenMatchResult(@Param("groupPid") Long theGroupPid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+
+	interface MdmPidTuple {
+		Long getGoldenPid();
+		Long getSourcePid();
+	}
+
 }

@@ -22,9 +22,17 @@ package ca.uhn.fhir.rest.server.util;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 
+import java.util.Map;
+
 public interface ISearchParamRetriever {
 	/**
 	 * @return Returns {@literal null} if no match
 	 */
 	RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName);
+
+	/**
+	 * @return Returns all active search params for the given resource
+	 */
+	Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName);
+
 }

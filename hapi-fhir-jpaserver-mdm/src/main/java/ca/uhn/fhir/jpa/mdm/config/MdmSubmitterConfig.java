@@ -32,7 +32,7 @@ import ca.uhn.fhir.jpa.mdm.svc.MdmGoldenResourceDeletingSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmSubmitSvcImpl;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
-import ca.uhn.fhir.mdm.util.MessageHelper;
+import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -51,8 +51,8 @@ public class MdmSubmitterConfig {
 	}
 
 	@Bean
-	MdmRuleValidator mdmRuleValidator(FhirContext theFhirContext) {
-		return new MdmRuleValidator(theFhirContext, mdmSearchParamSvc());
+	MdmRuleValidator mdmRuleValidator(FhirContext theFhirContext, ISearchParamRetriever theSearchParamRetriever) {
+		return new MdmRuleValidator(theFhirContext, theSearchParamRetriever);
 	}
 
 	@Bean

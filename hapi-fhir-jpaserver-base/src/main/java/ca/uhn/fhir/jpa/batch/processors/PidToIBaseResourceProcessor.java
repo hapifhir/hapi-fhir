@@ -50,6 +50,7 @@ public class PidToIBaseResourceProcessor implements ItemProcessor<List<ResourceP
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
+
 	@Value("#{stepExecutionContext['resourceType']}")
 	private String myResourceType;
 

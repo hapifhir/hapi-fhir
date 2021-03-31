@@ -15,9 +15,12 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ValidationSupportChain implements IValidationSupport {
@@ -182,10 +185,19 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	@Override
 	public List<IBaseResource> fetchAllStructureDefinitions() {
+		return doFetchStructureDefinitions(t->t.fetchAllStructureDefinitions());
+	}
+
+	@Override
+	public List<IBaseResource> fetchAllNonBaseStructureDefinitions() {
+		return doFetchStructureDefinitions(t->t.fetchAllNonBaseStructureDefinitions());
+	}
+
+	private List<IBaseResource> doFetchStructureDefinitions(Function<IValidationSupport, List<IBaseResource>> theFunction) {
 		ArrayList<IBaseResource> retVal = new ArrayList<>();
 		Set<String> urls = new HashSet<>();
 		for (IValidationSupport nextSupport : myChain) {
-			List<IBaseResource> allStructureDefinitions = nextSupport.fetchAllStructureDefinitions();
+			List<IBaseResource> allStructureDefinitions = theFunction.apply(nextSupport);
 			if (allStructureDefinitions != null) {
 				for (IBaseResource next : allStructureDefinitions) {
 
