@@ -130,8 +130,6 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 		if (Constants.PARAMQUALIFIER_MDM.equals(theQualifier)) {
 			myMdmExpand = true;
 			theQualifier = "";
-			//TODO GGG i probably have to deal with chaining here? like refusing the mdm qualifier if i can detect its chained?
-			//TODO GGG just throw an error if they try to chain
 		}
 
 		String q = theQualifier;
