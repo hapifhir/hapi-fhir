@@ -6,11 +6,13 @@ import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -71,6 +73,22 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		myDaoConfig.setAllowMdmExpansion(true);
 		search = myObservationDao.search(searchParameterMap);
 		assertThat(search.size(), is(equalTo(4)));
+	}
+
+	@Test
+	public void testReferenceExpansionQuietlyFailsOnMissingMdmMatches() {
+		myDaoConfig.setAllowMdmExpansion(true);
+		Patient patient = buildJanePatient();
+		patient.getMeta().addTag(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_NO_MDM_MANAGED, "Don't MDM on me!");
+		DaoMethodOutcome daoMethodOutcome = myMdmHelper.doCreateResource(patient, true);
+		String id = daoMethodOutcome.getId().getIdPart();
+		createObservationWithSubject(id);
+
+		//Even though the user has NO mdm links, that should not cause a request failure.
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Observation.SP_SUBJECT, new ReferenceParam("Patient/" + id).setMdmExpand(true));
+		IBundleProvider search = myObservationDao.search(map);
+		assertThat(search.size(), is(equalTo(1)));
 	}
 
 	private Observation createObservationWithSubject(String thePatientId) {
