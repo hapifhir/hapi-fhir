@@ -21,7 +21,7 @@ import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
@@ -45,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 // TODO JA Please fix this test. Expanding FhirContext.getResourceTypes() to cover all resource types broke this test.
 @Disabled
 public class SearchParamExtractorMegaTest {
+	// TODO: JA remove unused?
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamExtractorMegaTest.class);
 
@@ -257,13 +258,11 @@ public class SearchParamExtractorMegaTest {
 			throw new UnsupportedOperationException();
 		}
 
-		@Override
 		public ResourceChangeResult refreshCacheIfNecessary() {
 			// nothing
 			return new ResourceChangeResult();
 		}
 
-		@Override
 		public ReadOnlySearchParamCache getActiveSearchParams() {
 			throw new UnsupportedOperationException();
 		}
@@ -281,12 +280,10 @@ public class SearchParamExtractorMegaTest {
 			return sps;
 		}
 
-		@Override
 		public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
 			throw new UnsupportedOperationException();
 		}
 
-		@Override
 		public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
 			throw new UnsupportedOperationException();
 		}
@@ -301,7 +298,6 @@ public class SearchParamExtractorMegaTest {
 			return null;
 		}
 
-		@Override
 		public Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef) {
 			return null;
 		}

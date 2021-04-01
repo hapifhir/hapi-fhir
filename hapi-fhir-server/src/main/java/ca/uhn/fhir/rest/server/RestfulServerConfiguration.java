@@ -28,7 +28,7 @@ import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
-import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.VersionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class RestfulServerConfiguration implements ISearchParamRetriever {
+public class RestfulServerConfiguration implements ISearchParamRegistry {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServerConfiguration.class);
 	private Collection<ResourceBinding> resourceBindings;
@@ -360,12 +360,12 @@ public class RestfulServerConfiguration implements ISearchParamRetriever {
 	}
 
 	@Override
-	public RuntimeSearchParam getActiveRuntimeSearchParam(String theResourceName, String theParamName) {
-		return getActiveRuntimeSearchParams(theResourceName).get(theParamName);
+	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
+		return getActiveSearchParams(theResourceName).get(theParamName);
 	}
 
 	@Override
-	public Map<String, RuntimeSearchParam> getActiveRuntimeSearchParams(String theResourceName) {
+	public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
 
 		Map<String, RuntimeSearchParam> retVal = new LinkedHashMap<>();
 

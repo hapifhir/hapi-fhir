@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.searchparam.registry;
+package ca.uhn.fhir.rest.server.util;
 
 /*
  * #%L
@@ -23,15 +23,11 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
-import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
-import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
-import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
+// TODO: JA remove default methods
 public interface ISearchParamRegistry {
 
 	/**
@@ -47,27 +43,22 @@ public interface ISearchParamRegistry {
 	/**
 	 * Request that the cache be refreshed now, in the current thread
 	 */
-	void forceRefresh();
+	default void forceRefresh() {
+	}
 
-	/**
-	 * @return the number of search parameter entries changed
-	 */
-	ResourceChangeResult refreshCacheIfNecessary();
-
-	ReadOnlySearchParamCache getActiveSearchParams();
-
-	List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames);
-
-	List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName);
+	;
 
 	/**
 	 * Request that the cache be refreshed at the next convenient time (in a different thread)
 	 */
-	void requestRefresh();
+	default void requestRefresh() {
+	}
 
-	RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName);
 
-	Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef);
+
+	default RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName) {
+		throw new UnsupportedOperationException();
+	}
 
 	/**
 	 * When indexing a HumanName, if a StringEncoder is set in the context, then the "phonetic" search parameter will normalize
@@ -75,7 +66,10 @@ public interface ISearchParamRegistry {
 	 *
 	 * @since 5.1.0
 	 */
-	void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder);
+	default void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {
+	}
+
+	;
 
 	/**
 	 * Returns a collection containing all of the valid active search parameters. This method is intended for
@@ -83,21 +77,8 @@ public interface ISearchParamRegistry {
 	 * such as <code>_id</code> and <code>_lastUpdated</code>.
 	 */
 	default Collection<String> getValidSearchParameterNamesIncludingMeta(String theResourceName) {
-		return getActiveSearchParams().getValidSearchParameterNamesIncludingMeta(theResourceName);
-	}
-
-	default ISearchParamRetriever asSearchParamRetriever() {
-		return new ISearchParamRetriever() {
-			@Override
-			public RuntimeSearchParam getActiveRuntimeSearchParam(String theResourceName, String theParamName) {
-				return ISearchParamRegistry.this.getActiveSearchParam(theResourceName, theParamName);
-			}
-
-			@Override
-			public Map<String, RuntimeSearchParam> getActiveRuntimeSearchParams(String theResourceName) {
-				return ISearchParamRegistry.this.getActiveSearchParams(theResourceName);
-			}
-		};
+//		return getActiveSearchParams().getValidSearchParameterNamesIncludingMeta(theResourceName);
+		throw new UnsupportedOperationException();
 	}
 
 }

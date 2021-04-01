@@ -36,7 +36,7 @@ public class SearchPreferHandlingInterceptorJpaTest extends BaseResourceProvider
 	public void before() throws Exception {
 		super.before();
 
-		mySvc = new SearchPreferHandlingInterceptor(mySearchParamRegistry.asSearchParamRetriever());
+		mySvc = new SearchPreferHandlingInterceptor(mySearchParamRegistry);
 		ourRestServer.registerInterceptor(mySvc);
 	}
 

@@ -35,7 +35,7 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
-import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nonnull;
@@ -57,7 +57,7 @@ public class SearchPreferHandlingInterceptor {
 	@Nonnull
 	private PreferHandlingEnum myDefaultBehaviour;
 	@Nullable
-	private ISearchParamRetriever mySearchParamRetriever;
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	/**
 	 * Constructor that uses the {@link RestfulServer} itself to determine
@@ -68,12 +68,12 @@ public class SearchPreferHandlingInterceptor {
 	}
 
 	/**
-	 * Constructor that uses a dedicated {@link ISearchParamRetriever} instance. This is mainly
+	 * Constructor that uses a dedicated {@link ISearchParamRegistry} instance. This is mainly
 	 * intended for the JPA server.
 	 */
-	public SearchPreferHandlingInterceptor(ISearchParamRetriever theSearchParamRetriever) {
+	public SearchPreferHandlingInterceptor(ISearchParamRegistry theSearchParamRegistry) {
 		this();
-		mySearchParamRetriever = theSearchParamRetriever;
+		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED)
@@ -105,7 +105,7 @@ public class SearchPreferHandlingInterceptor {
 
 	private void removeUnwantedParams(PreferHandlingEnum theHandling, RequestDetails theRequestDetails) {
 
-		ISearchParamRetriever searchParamRetriever = mySearchParamRetriever;
+		ISearchParamRegistry searchParamRetriever = mySearchParamRegistry;
 		if (searchParamRetriever == null) {
 			searchParamRetriever = ((RestfulServer) theRequestDetails.getServer()).createConfiguration();
 		}
@@ -126,7 +126,7 @@ public class SearchPreferHandlingInterceptor {
 				}
 			}
 
-			RuntimeSearchParam activeSearchParam = searchParamRetriever.getActiveRuntimeSearchParam(resourceName, paramName);
+			RuntimeSearchParam activeSearchParam = searchParamRetriever.getActiveSearchParam(resourceName, paramName);
 			if (activeSearchParam == null) {
 
 				if (theHandling == PreferHandlingEnum.LENIENT) {
@@ -140,7 +140,7 @@ public class SearchPreferHandlingInterceptor {
 				} else {
 
 					// Strict handling
-					List<String> allowedParams = searchParamRetriever.getActiveRuntimeSearchParams(resourceName).keySet().stream().sorted().distinct().collect(Collectors.toList());
+					List<String> allowedParams = searchParamRetriever.getActiveSearchParams(resourceName).keySet().stream().sorted().distinct().collect(Collectors.toList());
 					HapiLocalizer localizer = theRequestDetails.getFhirContext().getLocalizer();
 					String msg = localizer.getMessage("ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao.invalidSearchParameter", paramName, resourceName, allowedParams);
 					throw new InvalidRequestException(msg);

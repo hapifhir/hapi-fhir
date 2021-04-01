@@ -33,7 +33,7 @@ import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.mdm.rules.json.MdmSimilarityJson;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -52,12 +52,12 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmRuleValidator.class);
 
 	private final FhirContext myFhirContext;
-	private final ISearchParamRetriever mySearchParamRetriever;
+	private final ISearchParamRegistry mySearchParamRetriever;
 	private final FhirTerser myTerser;
 	private final IFhirPath myFhirPath;
 
 	@Autowired
-	public MdmRuleValidator(FhirContext theFhirContext, ISearchParamRetriever theSearchParamRetriever) {
+	public MdmRuleValidator(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRetriever) {
 		myFhirContext = theFhirContext;
 		myTerser = myFhirContext.newTerser();
 		if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
@@ -88,7 +88,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	}
 
 	public void validateTypeHasIdentifier(String theResourceType) {
-		if (mySearchParamRetriever.getActiveRuntimeSearchParam(theResourceType, "identifier") == null) {
+		if (mySearchParamRetriever.getActiveSearchParam(theResourceType, "identifier") == null) {
 			throw new ConfigurationException("Resource Type " + theResourceType + " is not supported, as it does not have an 'identifier' field, which is necessary for MDM workflow.");
 		}
 	}
@@ -115,7 +115,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	}
 
 	private void validateResourceSearchParam(String theFieldName, String theResourceType, String theSearchParam) {
-		if (mySearchParamRetriever.getActiveRuntimeSearchParam(theResourceType, theSearchParam) == null) {
+		if (mySearchParamRetriever.getActiveSearchParam(theResourceType, theSearchParam) == null) {
 			throw new ConfigurationException("Error in " + theFieldName + ": " + theResourceType + " does not have a search parameter called '" + theSearchParam + "'");
 		}
 	}

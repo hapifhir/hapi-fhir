@@ -23,12 +23,12 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 
 	@BeforeEach
 	public void before() {
-		when(mySearchParamRetriever.getActiveRuntimeSearchParam("Patient", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveRuntimeSearchParam("Practitioner", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveRuntimeSearchParam("Medication", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveRuntimeSearchParam("AllergyIntolerance", "identifier")).thenReturn(null);
-		when(mySearchParamRetriever.getActiveRuntimeSearchParam("Organization", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveRuntimeSearchParam("Organization", "active")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Patient", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Practitioner", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Medication", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("AllergyIntolerance", "identifier")).thenReturn(null);
+		when(mySearchParamRetriever.getActiveSearchParam("Organization", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Organization", "active")).thenReturn(mock(RuntimeSearchParam.class));
 	}
 
    @Test

@@ -18,7 +18,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.util.StringUtil;
@@ -224,6 +224,8 @@ public class SearchParamExtractorDstu3Test {
 
 	private static class MySearchParamRegistry implements ISearchParamRegistry {
 
+		// TODO: JA remove unused?
+
 		private final List<RuntimeSearchParam> myAddedSearchParams = new ArrayList<>();
 
 		public void addSearchParam(RuntimeSearchParam... theSearchParam) {
@@ -243,13 +245,11 @@ public class SearchParamExtractorDstu3Test {
 			throw new UnsupportedOperationException();
 		}
 
-		@Override
 		public ResourceChangeResult refreshCacheIfNecessary() {
 			// nothing
 			return new ResourceChangeResult();
 		}
 
-		@Override
 		public ReadOnlySearchParamCache getActiveSearchParams() {
 			throw new UnsupportedOperationException();
 		}
@@ -267,12 +267,10 @@ public class SearchParamExtractorDstu3Test {
 			return sps;
 		}
 
-		@Override
 		public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
 			throw new UnsupportedOperationException();
 		}
 
-		@Override
 		public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
 			throw new UnsupportedOperationException();
 		}
@@ -287,7 +285,6 @@ public class SearchParamExtractorDstu3Test {
 			return null;
 		}
 
-		@Override
 		public Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef) {
 			return null;
 		}

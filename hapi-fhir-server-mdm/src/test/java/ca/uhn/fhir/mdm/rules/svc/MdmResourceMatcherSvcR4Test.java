@@ -20,11 +20,11 @@ public class MdmResourceMatcherSvcR4Test extends BaseMdmRulesR4Test {
 	public void before() {
 		super.before();
 
-		when(mySearchParamRetriever.getActiveRuntimeSearchParam("Patient", "birthdate")).thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveRuntimeSearchParam("Patient", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveRuntimeSearchParam("Practitioner", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveRuntimeSearchParam("Medication", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveRuntimeSearchParam("Patient", "active")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Patient", "birthdate")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Patient", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Practitioner", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Medication", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Patient", "active")).thenReturn(mock(RuntimeSearchParam.class));
 
 		myMdmResourceMatcherSvc = buildMatcher(buildActiveBirthdateIdRules());
 
