@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -55,6 +56,17 @@ public final class TerserUtil {
 		@Override
 		public boolean test(String s) {
 			return !IDS_AND_META_EXCLUDES.contains(s);
+		}
+	};
+
+	public static final Predicate<Triple<BaseRuntimeChildDefinition, IBase, IBase>> EXCLUDE_IDS_META_AND_EMPTY = new Predicate<Triple<BaseRuntimeChildDefinition, IBase, IBase>>() {
+		@Override
+		public boolean test(Triple<BaseRuntimeChildDefinition, IBase, IBase> theTriple) {
+			if (!EXCLUDE_IDS_AND_META.test(theTriple.getLeft().getElementName())) {
+				return false;
+			}
+
+			return theTriple.getLeft().getAccessor().getValues(theTriple.getRight()).isEmpty();
 		}
 	};
 
@@ -235,20 +247,35 @@ public final class TerserUtil {
 	}
 
 	/**
-	 * Replaces all fields that test positive by the given inclusion strategy. <code>theTo</code> will contain a copy of the
+	 * Replaces all fields that have matching field names by the given inclusion strategy. <code>theTo</code> will contain a copy of the
 	 * values from <code>theFrom</code> instance.
 	 *
-	 * @param theFhirContext    Context holding resource definition
-	 * @param theFrom           The resource to merge the fields from
-	 * @param theTo             The resource to merge the fields into
-	 * @param inclusionStrategy Inclusion strategy that checks if a given field should be replaced by checking {@link Predicate#test(Object)}
+	 * @param theFhirContext        Context holding resource definition
+	 * @param theFrom               The resource to merge the fields from
+	 * @param theTo                 The resource to merge the fields into
+	 * @param theFieldNameInclusion Inclusion strategy that checks if a given field should be replaced
 	 */
-	public static void replaceFields(FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo, Predicate<String> inclusionStrategy) {
+	public static void replaceFields(FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo, Predicate<String> theFieldNameInclusion) {
+		Predicate<Triple<BaseRuntimeChildDefinition, IBase, IBase>> predicate
+			= (t) -> theFieldNameInclusion.test(t.getLeft().getElementName());
+		replaceFieldsByPredicate(theFhirContext, theFrom, theTo, predicate);
+	}
+
+	/**
+	 * Replaces empty fields on theTo resource that test positive by the given predicate. <code>theTo</code> will contain a copy of the
+	 * values from <code>theFrom</code> for which predicate tests positive.
+	 *
+	 * @param theFhirContext Context holding resource definition
+	 * @param theFrom        The resource to merge the fields from
+	 * @param theTo          The resource to merge the fields into
+	 * @param thePredicate   Predicate that checks if a given field should be replaced
+	 */
+	public static void replaceFieldsByPredicate(FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo, Predicate<Triple<BaseRuntimeChildDefinition, IBase, IBase>> thePredicate) {
 		FhirTerser terser = theFhirContext.newTerser();
 
 		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theFrom);
 		for (BaseRuntimeChildDefinition childDefinition : definition.getChildrenAndExtension()) {
-			if (!inclusionStrategy.test(childDefinition.getElementName())) {
+			if (!thePredicate.test(Triple.of(childDefinition, theFrom, theTo))) {
 				continue;
 			}
 

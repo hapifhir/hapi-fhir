@@ -77,6 +77,7 @@ class TerserUtilTest {
 		assertEquals(check.getValue(), p.getBirthDate());
 	}
 
+
 	@Test
 	void testFieldExists() {
 		assertTrue(TerserUtil.fieldExists(ourFhirContext, "identifier", TerserUtil.newResource(ourFhirContext, "Patient")));
@@ -292,6 +293,22 @@ class TerserUtilTest {
 
 		assertEquals(1, p2.getName().size());
 		assertEquals("Doe", p2.getName().get(0).getFamily());
+	}
+
+	@Test
+	public void testReplaceFieldsByPredicate() {
+		Patient p1 = new Patient();
+		p1.addName().setFamily("Doe");
+		p1.setGender(Enumerations.AdministrativeGender.MALE);
+
+		Patient p2 = new Patient();
+		p2.addName().setFamily("Smith");
+
+		TerserUtil.replaceFieldsByPredicate(ourFhirContext, p1, p2, TerserUtil.EXCLUDE_IDS_META_AND_EMPTY);
+
+		assertEquals(1, p2.getName().size());
+		assertEquals("Smith", p2.getName().get(0).getFamily());
+		assertEquals(Enumerations.AdministrativeGender.MALE, p2.getGender());
 	}
 
 	@Test
