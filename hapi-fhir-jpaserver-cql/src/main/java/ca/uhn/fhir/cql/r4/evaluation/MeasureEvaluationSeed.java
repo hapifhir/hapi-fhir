@@ -43,14 +43,14 @@ public class MeasureEvaluationSeed {
 	private Measure measure;
 	private Context context;
 	private Interval measurementPeriod;
-	private LibraryLoader libraryLoader;
-	private LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> libraryResourceProvider;
-	private EvaluationProviderFactory providerFactory;
+	private final LibraryLoader libraryLoader;
+	private final LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> libraryResourceProvider;
+	private final EvaluationProviderFactory providerFactory;
 	private DataProvider dataProvider;
-	private LibraryHelper libraryHelper;
+	private final LibraryHelper libraryHelper;
 
 	public MeasureEvaluationSeed(EvaluationProviderFactory providerFactory, LibraryLoader libraryLoader,
-			LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> libraryResourceProvider, LibraryHelper libraryHelper) {
+										  LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> libraryResourceProvider, LibraryHelper libraryHelper) {
 		this.providerFactory = providerFactory;
 		this.libraryLoader = libraryLoader;
 		this.libraryResourceProvider = libraryResourceProvider;
@@ -115,8 +115,8 @@ public class MeasureEvaluationSeed {
 
 		if (periodStart != null && periodEnd != null) {
 			// resolve the measurement period
-			measurementPeriod = new Interval(DateHelper.resolveRequestDate(periodStart), true,
-				DateHelper.resolveRequestDate(periodEnd), true);
+			measurementPeriod = new Interval(DateHelper.resolveRequestDate("periodStart", periodStart), true,
+				DateHelper.resolveRequestDate("periodEnd", periodEnd), true);
 
 			context.setParameter(null, "Measurement Period",
 				new Interval(DateTime.fromJavaDate((Date) measurementPeriod.getStart()), true,
