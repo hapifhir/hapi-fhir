@@ -32,14 +32,13 @@ import java.util.Date;
 public class DateHelper {
 
 	/**
-	 *
 	 * @param date A date String in the format YYYY-MM-DD.
 	 * @return A {@link java.util.Date} object representing the String data that was passed in.
 	 */
-    public static Date resolveRequestDate(String date) {
-		 if (StringUtils.isBlank(date)) {
-			 throw new IllegalArgumentException("date parameter cannot be blank!");
-		 }
-		 return new DateTimeType(date).getValue();
-    }
+	public static Date resolveRequestDate(String paramName, String date) {
+		if (StringUtils.isBlank(date)) {
+			throw new IllegalArgumentException(paramName + " parameter cannot be blank!");
+		}
+		return new DateTimeType(date).getValue();
+	}
 }
