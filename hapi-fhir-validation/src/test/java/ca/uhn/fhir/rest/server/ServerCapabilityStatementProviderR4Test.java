@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -45,6 +46,7 @@ import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestComponent;
@@ -54,12 +56,12 @@ import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResource
 import org.hl7.fhir.r4.model.CapabilityStatement.ConditionalDeleteStatus;
 import org.hl7.fhir.r4.model.CapabilityStatement.SystemRestfulInteraction;
 import org.hl7.fhir.r4.model.CapabilityStatement.TypeRestfulInteraction;
-import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationDefinition;
 import org.hl7.fhir.r4.model.OperationDefinition.OperationDefinitionParameterComponent;
 import org.hl7.fhir.r4.model.OperationDefinition.OperationKind;
@@ -76,6 +78,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -860,6 +863,106 @@ public class ServerCapabilityStatementProviderR4Test {
 		assertThat(patientResource.getProfile(), containsString(PATIENT_SUB));
 	}
 
+	@Test
+	public void testRevIncludes_Explicit() throws Exception {
+
+		class PatientResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<Patient> getResourceType() {
+				return Patient.class;
+			}
+
+			@Search
+			public List<Patient> search(@IncludeParam(reverse = true, allow = {"Observation:foo", "Provenance:bar"}) Set<Include> theRevIncludes) {
+				return Collections.emptyList();
+			}
+
+		}
+
+		class ObservationResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<Observation> getResourceType() {
+				return Observation.class;
+			}
+
+			@Search
+			public List<Observation> search(@OptionalParam(name = "subject") ReferenceParam theSubject) {
+				return Collections.emptyList();
+			}
+
+		}
+
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setResourceProviders(new PatientResourceProvider(), new ObservationResourceProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		sc.setRestResourceRevIncludesEnabled(true);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+
+		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+		CapabilityStatementRestResourceComponent patientResource = resources.stream()
+			.filter(resource -> "Patient".equals(resource.getType()))
+			.findFirst().get();
+		assertThat(toStrings(patientResource.getSearchRevInclude()), containsInAnyOrder("Observation:foo", "Provenance:bar"));
+	}
+
+	@Test
+	public void testRevIncludes_Inferred() throws Exception {
+
+		class PatientResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<Patient> getResourceType() {
+				return Patient.class;
+			}
+
+			@Search
+			public List<Patient> search(@IncludeParam(reverse = true) Set<Include> theRevIncludes) {
+				return Collections.emptyList();
+			}
+
+		}
+
+		class ObservationResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<Observation> getResourceType() {
+				return Observation.class;
+			}
+
+			@Search
+			public List<Observation> search(@OptionalParam(name = "subject") ReferenceParam theSubject) {
+				return Collections.emptyList();
+			}
+
+		}
+
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setResourceProviders(new PatientResourceProvider(), new ObservationResourceProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		sc.setRestResourceRevIncludesEnabled(true);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+
+		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+		CapabilityStatementRestResourceComponent patientResource = resources.stream()
+			.filter(resource -> "Patient".equals(resource.getType()))
+			.findFirst().get();
+		assertThat(toStrings(patientResource.getSearchRevInclude()), containsInAnyOrder("Observation:subject"));
+	}
+
 	private List<String> toOperationIdParts(List<CapabilityStatementRestResourceOperationComponent> theOperation) {
 		ArrayList<String> retVal = Lists.newArrayList();
 		for (CapabilityStatementRestResourceOperationComponent next : theOperation) {
@@ -876,9 +979,9 @@ public class ServerCapabilityStatementProviderR4Test {
 		return retVal;
 	}
 
-	private Set<String> toStrings(List<CodeType> theType) {
+	private static Set<String> toStrings(Collection<? extends IPrimitiveType> theType) {
 		HashSet<String> retVal = new HashSet<String>();
-		for (CodeType next : theType) {
+		for (IPrimitiveType next : theType) {
 			retVal.add(next.getValueAsString());
 		}
 		return retVal;

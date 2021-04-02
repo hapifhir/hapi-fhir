@@ -75,6 +75,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected IPartitionDao myPartitionDao;
 	ResourceCountCache myResourceCountsCache;
 	private TerminologyUploaderProvider myTerminologyUploaderProvider;
+	protected JpaCapabilityStatementProvider ourCapabilityStatementProvider;
 
 	public BaseResourceProviderR4Test() {
 		super();
@@ -153,9 +154,9 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourSearchParamRegistry = myAppCtx.getBean(SearchParamRegistryImpl.class);
 			IValidationSupport validationSupport = myAppCtx.getBean(IValidationSupport.class);
 
-			JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(ourRestServer, mySystemDao, myDaoConfig, ourSearchParamRegistry, validationSupport);
-			confProvider.setImplementationDescription("THIS IS THE DESC");
-			ourRestServer.setServerConformanceProvider(confProvider);
+			ourCapabilityStatementProvider = new JpaCapabilityStatementProvider(ourRestServer, mySystemDao, myDaoConfig, ourSearchParamRegistry, validationSupport);
+			ourCapabilityStatementProvider.setImplementationDescription("THIS IS THE DESC");
+			ourRestServer.setServerConformanceProvider(ourCapabilityStatementProvider);
 
 			server.setHandler(proxyHandler);
 			JettyUtil.startServer(server);
