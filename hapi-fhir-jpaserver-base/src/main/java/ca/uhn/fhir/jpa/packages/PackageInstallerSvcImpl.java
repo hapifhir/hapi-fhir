@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -106,6 +107,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
+	private ISearchParamRegistryController mySearchParamRegistryController;
+	@Autowired
 	private PartitionSettings myPartitionSettings;
 	/**
 	 * Constructor
@@ -175,7 +178,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					install(npmPackage, theInstallationSpec, retVal);
 
 					// If any SearchParameters were installed, let's load them right away
-					mySearchParamRegistry.refreshCacheIfNecessary();
+					mySearchParamRegistryController.refreshCacheIfNecessary();
 				}
 
 			} catch (IOException e) {

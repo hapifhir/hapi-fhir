@@ -39,7 +39,7 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 	public void testTranslateMatchUrl() {
 		RuntimeResourceDefinition resourceDef = ourCtx.getResourceDefinition(Condition.class);
 		ISearchParamRegistry searchParamRegistry = mock(ISearchParamRegistry.class);
-		when(searchParamRegistry.getSearchParamByName(any(RuntimeResourceDefinition.class), eq("patient"))).thenReturn(resourceDef.getSearchParam("patient"));
+		when(searchParamRegistry.getActiveSearchParam(any(), eq("patient"))).thenReturn(resourceDef.getSearchParam("patient"));
 		SearchParameterMap match = myMatchUrlService.translateMatchUrl("Condition?patient=304&_lastUpdated=>2011-01-01T11:12:21.0000Z", resourceDef);
 		assertEquals("2011-01-01T11:12:21.0000Z", match.getLastUpdated().getLowerBound().getValueAsString());
 		assertEquals(ReferenceParam.class, match.get("patient").get(0).get(0).getClass());

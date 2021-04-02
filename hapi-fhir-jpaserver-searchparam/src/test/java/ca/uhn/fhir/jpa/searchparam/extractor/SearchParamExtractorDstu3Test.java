@@ -16,11 +16,11 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
-import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
@@ -222,7 +222,7 @@ public class SearchParamExtractorDstu3Test {
 		assertEquals(longitude, coord.getLongitude(), 0.0);
 	}
 
-	private static class MySearchParamRegistry implements ISearchParamRegistry {
+	private static class MySearchParamRegistry implements ISearchParamRegistry, ISearchParamRegistryController {
 
 		// TODO: JA remove unused?
 
@@ -245,6 +245,7 @@ public class SearchParamExtractorDstu3Test {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public ResourceChangeResult refreshCacheIfNecessary() {
 			// nothing
 			return new ResourceChangeResult();
@@ -267,26 +268,19 @@ public class SearchParamExtractorDstu3Test {
 			return sps;
 		}
 
-		public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
+		@Override
+		public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
 			throw new UnsupportedOperationException();
 		}
 
-		public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
+		@Override
+		public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
 		public void requestRefresh() {
 			// nothing
-		}
-
-		@Override
-		public RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName) {
-			return null;
-		}
-
-		public Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef) {
-			return null;
 		}
 
 		@Override

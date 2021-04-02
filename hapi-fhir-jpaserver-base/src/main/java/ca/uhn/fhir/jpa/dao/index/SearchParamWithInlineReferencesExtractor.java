@@ -36,7 +36,6 @@ import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -148,9 +147,9 @@ public class SearchParamWithInlineReferencesExtractor {
 	private void extractCompositeStringUniques(ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
 
 		final String resourceType = theEntity.getResourceType();
-		List<JpaRuntimeSearchParam> uniqueSearchParams = mySearchParamRegistry.getActiveUniqueSearchParams(resourceType);
+		List<RuntimeSearchParam> uniqueSearchParams = mySearchParamRegistry.getActiveUniqueSearchParams(resourceType);
 
-		for (JpaRuntimeSearchParam next : uniqueSearchParams) {
+		for (RuntimeSearchParam next : uniqueSearchParams) {
 
 			List<List<String>> partsChoices = new ArrayList<>();
 

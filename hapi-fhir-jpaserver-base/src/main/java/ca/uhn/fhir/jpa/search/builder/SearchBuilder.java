@@ -55,7 +55,6 @@ import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryExecutor;
 import ca.uhn.fhir.jpa.search.builder.sql.SqlObjectFactory;
 import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
-import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
@@ -516,8 +515,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		} else {
 
-			RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceName);
-			RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theSort.getParamName());
+			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
 			if (param == null) {
 				String msg = myContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSortParameter", theSort.getParamName(), getResourceName(), mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName()));
 				throw new InvalidRequestException(msg);
@@ -835,7 +833,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 					String paramName = nextInclude.getParamName();
 					if (isNotBlank(paramName)) {
-						param = mySearchParamRegistry.getSearchParamByName(def, paramName);
+						param = mySearchParamRegistry.getActiveSearchParam(resType, paramName);
 					} else {
 						param = null;
 					}
@@ -969,7 +967,7 @@ public class SearchBuilder implements ISearchBuilder {
 		// Since we're going to remove elements below
 		theParams.values().forEach(nextAndList -> ensureSubListsAreWritable(nextAndList));
 
-		List<JpaRuntimeSearchParam> activeUniqueSearchParams = mySearchParamRegistry.getActiveUniqueSearchParams(myResourceName, theParams.keySet());
+		List<RuntimeSearchParam> activeUniqueSearchParams = mySearchParamRegistry.getActiveUniqueSearchParams(myResourceName, theParams.keySet());
 		if (activeUniqueSearchParams.size() > 0) {
 
 			StringBuilder sb = new StringBuilder();

@@ -339,8 +339,7 @@ public abstract class BaseStorageDao {
 			}
 
 			// Should not be null since the check above would have caught it
-			RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(getResourceName());
-			RuntimeSearchParam paramDef = mySearchParamRegistry.getSearchParamByName(resourceDef, qualifiedParamName.getParamName());
+			RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(getResourceName(), qualifiedParamName.getParamName());
 
 			for (String nextValue : theSource.get(nextParamName)) {
 				QualifiedParamList qualifiedParam = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(qualifiedParamName.getWholeQualifier(), nextValue);

@@ -15,13 +15,13 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
-import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Sets;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -44,7 +44,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -395,7 +394,7 @@ public class SearchParamExtractorR4Test {
 		assertEquals(2, list.size());
 	}
 
-	private static class MySearchParamRegistry implements ISearchParamRegistry {
+	private static class MySearchParamRegistry implements ISearchParamRegistry, ISearchParamRegistryController {
 
 
 		private List<RuntimeSearchParam> myExtraSearchParams = new ArrayList<>();
@@ -416,7 +415,6 @@ public class SearchParamExtractorR4Test {
 			return new ResourceChangeResult();
 		}
 
-		@Override
 		public ReadOnlySearchParamCache getActiveSearchParams() {
 			throw new UnsupportedOperationException();
 		}
@@ -441,28 +439,18 @@ public class SearchParamExtractorR4Test {
 		}
 
 		@Override
-		public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
+		public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
+		public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
 		public void requestRefresh() {
 			// nothing
-		}
-
-		@Override
-		public RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName) {
-			return null;
-		}
-
-		@Override
-		public Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef) {
-			return null;
 		}
 
 		@Override

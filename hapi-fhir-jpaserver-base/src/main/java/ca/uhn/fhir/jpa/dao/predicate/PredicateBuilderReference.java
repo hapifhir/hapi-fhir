@@ -315,9 +315,9 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			boolean isMeta = ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(chain);
 			RuntimeSearchParam param = null;
 			if (!isMeta) {
-				param = mySearchParamRegistry.getSearchParamByName(typeDef, chain);
+				param = mySearchParamRegistry.getActiveSearchParam(subResourceName, chain);
 				if (param == null) {
-					ourLog.debug("Type {} doesn't have search param {}", nextType.getSimpleName(), param);
+					ourLog.debug("Type {} doesn't have search param {}", subResourceName, param);
 					continue;
 				}
 			}
@@ -397,8 +397,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			}
 
 			if (resourceTypes.isEmpty()) {
-				RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceName);
-				RuntimeSearchParam searchParamByName = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
+				RuntimeSearchParam searchParamByName = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
 				if (searchParamByName == null) {
 					throw new InternalErrorException("Could not find parameter " + theParamName);
 				}
@@ -480,8 +479,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	}
 
 	Predicate createResourceLinkPathPredicate(String theResourceName, String theParamName, From<?, ? extends ResourceLink> from) {
-		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceName);
-		RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
+		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
 		List<String> path = param.getPathsSplit();
 
 		/*
@@ -957,20 +955,19 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				//Ensure that the name of the search param
 				// (e.g. the `code` in Patient?_has:Observation:subject:code=sys|val)
 				// exists on the target resource type.
-				RuntimeSearchParam owningParameterDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramName);
+				RuntimeSearchParam owningParameterDef = mySearchParamRegistry.getActiveSearchParam(targetResourceType, paramName);
 				if (owningParameterDef == null) {
 					throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + parameterName);
 				}
 
 				//Ensure that the name of the back-referenced search param on the target (e.g. the `subject` in Patient?_has:Observation:subject:code=sys|val)
 				//exists on the target resource.
-				owningParameterDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramReference);
+				owningParameterDef = mySearchParamRegistry.getActiveSearchParam(targetResourceType, paramReference);
 				if (owningParameterDef == null) {
 					throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + paramReference);
 				}
 
-				RuntimeSearchParam paramDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramName);
-				IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>> parsedParam = (IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>>) ParameterUtil.parseQueryParams(myContext, paramDef, paramName, parameters);
+				IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>> parsedParam = (IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>>) ParameterUtil.parseQueryParams(myContext, owningParameterDef, paramName, parameters);
 
 				for (IQueryParameterOr<IQueryParameterType> next : parsedParam.getValuesAsQueryTokens()) {
 					orValues.addAll(next.getValuesAsQueryTokens());

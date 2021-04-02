@@ -23,12 +23,10 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
-import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.DatatypeUtil;
-import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.apache.commons.lang3.EnumUtils;
@@ -70,7 +68,7 @@ public class SearchParameterCanonicalizer {
 	}
 
 	protected RuntimeSearchParam canonicalizeSearchParameter(IBaseResource theSearchParameter) {
-		JpaRuntimeSearchParam retVal;
+		RuntimeSearchParam retVal;
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU2:
 				retVal = canonicalizeSearchParameterDstu2((ca.uhn.fhir.model.dstu2.resource.SearchParameter) theSearchParameter);
@@ -92,7 +90,7 @@ public class SearchParameterCanonicalizer {
 		return retVal;
 	}
 
-	private JpaRuntimeSearchParam canonicalizeSearchParameterDstu2(ca.uhn.fhir.model.dstu2.resource.SearchParameter theNextSp) {
+	private RuntimeSearchParam canonicalizeSearchParameterDstu2(ca.uhn.fhir.model.dstu2.resource.SearchParameter theNextSp) {
 		String name = theNextSp.getCode();
 		String description = theNextSp.getDescription();
 		String path = theNextSp.getXpath();
@@ -162,12 +160,12 @@ public class SearchParameterCanonicalizer {
 			}
 		}
 
-		List<JpaRuntimeSearchParam.Component> components = Collections.emptyList();
+		List<RuntimeSearchParam.Component> components = Collections.emptyList();
 		Collection<? extends IPrimitiveType<String>> base = Collections.singletonList(theNextSp.getBaseElement());
-		return new JpaRuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, toStrings(base));
+		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, toStrings(base));
 	}
 
-	private JpaRuntimeSearchParam canonicalizeSearchParameterDstu3(org.hl7.fhir.dstu3.model.SearchParameter theNextSp) {
+	private RuntimeSearchParam canonicalizeSearchParameterDstu3(org.hl7.fhir.dstu3.model.SearchParameter theNextSp) {
 		String name = theNextSp.getCode();
 		String description = theNextSp.getDescription();
 		String path = theNextSp.getExpression();
@@ -242,15 +240,15 @@ public class SearchParameterCanonicalizer {
 			}
 		}
 
-		List<JpaRuntimeSearchParam.Component> components = new ArrayList<>();
+		List<RuntimeSearchParam.Component> components = new ArrayList<>();
 		for (SearchParameter.SearchParameterComponentComponent next : theNextSp.getComponent()) {
-			components.add(new JpaRuntimeSearchParam.Component(next.getExpression(), next.getDefinition()));
+			components.add(new RuntimeSearchParam.Component(next.getExpression(), next.getDefinition()));
 		}
 
-		return new JpaRuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, toStrings(theNextSp.getBase()));
+		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, toStrings(theNextSp.getBase()));
 	}
 
-	private JpaRuntimeSearchParam canonicalizeSearchParameterR4Plus(IBaseResource theNextSp) {
+	private RuntimeSearchParam canonicalizeSearchParameterR4Plus(IBaseResource theNextSp) {
 		FhirTerser terser = myFhirContext.newTerser();
 		String name = terser.getSinglePrimitiveValueOrNull(theNextSp, "code");
 		String description = terser.getSinglePrimitiveValueOrNull(theNextSp, "description");
@@ -318,30 +316,30 @@ public class SearchParameterCanonicalizer {
 		String value = ((IBaseHasExtensions) theNextSp).getExtension()
 			.stream()
 			.filter(e -> HapiExtensions.EXT_SP_UNIQUE.equals(e.getUrl()))
-			.filter(t->t.getValue() instanceof IPrimitiveType)
-			.map(t->(IPrimitiveType<?>)t.getValue())
-			.map(t->t.getValueAsString())
+			.filter(t -> t.getValue() instanceof IPrimitiveType)
+			.map(t -> (IPrimitiveType<?>) t.getValue())
+			.map(t -> t.getValueAsString())
 			.findFirst()
 			.orElse("");
 		if ("true".equalsIgnoreCase(value)) {
 			unique = true;
 		}
 
-		List<JpaRuntimeSearchParam.Component> components = new ArrayList<>();
+		List<RuntimeSearchParam.Component> components = new ArrayList<>();
 		for (IBase next : terser.getValues(theNextSp, "component")) {
 			String expression = terser.getSinglePrimitiveValueOrNull(next, "expression");
 			String definition = terser.getSinglePrimitiveValueOrNull(next, "definition");
-			components.add(new JpaRuntimeSearchParam.Component(expression, new Reference(definition)));
+			components.add(new RuntimeSearchParam.Component(expression, new Reference(definition)));
 		}
 
-		return new JpaRuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, base);
+		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, base);
 	}
 
 
 	/**
 	 * Extracts any extensions from the resource and populates an extension field in the
 	 */
-	protected void extractExtensions(IBaseResource theSearchParamResource, JpaRuntimeSearchParam theRuntimeSearchParam) {
+	protected void extractExtensions(IBaseResource theSearchParamResource, RuntimeSearchParam theRuntimeSearchParam) {
 		if (theSearchParamResource instanceof IBaseHasExtensions) {
 			List<? extends IBaseExtension<?, ?>> extensions = ((IBaseHasExtensions) theSearchParamResource).getExtension();
 			for (IBaseExtension<?, ?> next : extensions) {
@@ -356,7 +354,7 @@ public class SearchParameterCanonicalizer {
 		}
 	}
 
-	private void setEncoder(JpaRuntimeSearchParam theRuntimeSearchParam, IBaseDatatype theValue) {
+	private void setEncoder(RuntimeSearchParam theRuntimeSearchParam, IBaseDatatype theValue) {
 		if (theValue instanceof IPrimitiveType) {
 			String stringValue = ((IPrimitiveType<?>) theValue).getValueAsString();
 			PhoneticEncoderEnum encoderEnum = EnumUtils.getEnum(PhoneticEncoderEnum.class, stringValue);

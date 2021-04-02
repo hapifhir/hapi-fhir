@@ -61,15 +61,12 @@ public class InMemoryResourceMatcherR5Test {
 	@BeforeEach
 	public void before() {
 		RuntimeSearchParam dateSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.effective", RestSearchParameterTypeEnum.DATE, null, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
-		when(mySearchParamRegistry.getSearchParamByName(any(), eq("date"))).thenReturn(dateSearchParam);
 		when(mySearchParamRegistry.getActiveSearchParam("Observation", "date")).thenReturn(dateSearchParam);
 
 		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.code", RestSearchParameterTypeEnum.TOKEN, null, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
-		when(mySearchParamRegistry.getSearchParamByName(any(), eq("code"))).thenReturn(codeSearchParam);
 		when(mySearchParamRegistry.getActiveSearchParam("Observation", "code")).thenReturn(codeSearchParam);
 
 		RuntimeSearchParam encSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.encounter", RestSearchParameterTypeEnum.REFERENCE, null, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
-		when(mySearchParamRegistry.getSearchParamByName(any(), eq("encounter"))).thenReturn(encSearchParam);
 		when(mySearchParamRegistry.getActiveSearchParam("Observation", "encounter")).thenReturn(encSearchParam);
 
 		myObservation = new Observation();

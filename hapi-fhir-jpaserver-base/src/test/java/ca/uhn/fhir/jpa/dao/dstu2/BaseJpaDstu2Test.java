@@ -21,6 +21,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
@@ -79,6 +80,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -90,6 +92,8 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	protected ResourceCountCache myResourceCountsCache;
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	protected ISearchParamRegistryController mySearchParamRegistryController;
 	@Autowired
 	protected ApplicationContext myAppCtx;
 	@Autowired
@@ -264,7 +268,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 		if (stream == null) {
 			fail("Unable to load resource: " + resourceName);
 		}
-		String string = IOUtils.toString(stream, "UTF-8");
+		String string = IOUtils.toString(stream, StandardCharsets.UTF_8);
 		IParser newJsonParser = EncodingEnum.detectEncodingNoDefault(string).newParser(myFhirCtx);
 		return newJsonParser.parseResource(type, string);
 	}

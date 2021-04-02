@@ -31,7 +31,6 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -58,13 +57,13 @@ import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceChangeListener {
+public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceChangeListener, ISearchParamRegistryController {
 	// TODO: JA remove unused?
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamRegistryImpl.class);
 	private static final int MAX_MANAGED_PARAM_COUNT = 10000;
 	private static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_HOUR;
-
+	private final JpaSearchParamCache myJpaSearchParamCache = new JpaSearchParamCache();
 	@Autowired
 	private ModelConfig myModelConfig;
 	@Autowired
@@ -75,10 +74,8 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	private SearchParameterCanonicalizer mySearchParameterCanonicalizer;
 	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
-
 	private volatile ReadOnlySearchParamCache myBuiltInSearchParams;
 	private volatile IPhoneticEncoder myPhoneticEncoder;
-	private final JpaSearchParamCache myJpaSearchParamCache = new JpaSearchParamCache();
 	private volatile RuntimeSearchParamCache myActiveSearchParams;
 
 	@Autowired
@@ -109,11 +106,13 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		}
 	}
 
-	public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
+	@Override
+	public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
 		return myJpaSearchParamCache.getActiveUniqueSearchParams(theResourceName);
 	}
 
-	public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
+	@Override
+	public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
 		return myJpaSearchParamCache.getActiveUniqueSearchParams(theResourceName, theParamNames);
 	}
 
@@ -214,16 +213,6 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	}
 
 	@Override
-	public RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName) {
-		Map<String, RuntimeSearchParam> params = getActiveSearchParams(theResourceDef.getName());
-		return params.get(theParamName);
-	}
-
-	public Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef) {
-		return getActiveSearchParams(theResourceDef.getName()).values();
-	}
-
-	@Override
 	public void requestRefresh() {
 		myResourceChangeListenerCache.requestRefresh();
 	}
@@ -233,6 +222,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		myResourceChangeListenerCache.forceRefresh();
 	}
 
+	@Override
 	public ResourceChangeResult refreshCacheIfNecessary() {
 		return myResourceChangeListenerCache.refreshCacheIfNecessary();
 	}

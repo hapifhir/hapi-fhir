@@ -367,7 +367,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			boolean isMeta = ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(chain);
 			RuntimeSearchParam param = null;
 			if (!isMeta) {
-				param = mySearchParamRegistry.getSearchParamByName(typeDef, chain);
+				param = mySearchParamRegistry.getActiveSearchParam(nextType, chain);
 				if (param == null) {
 					ourLog.debug("Type {} doesn't have search param {}", nextType, param);
 					continue;
@@ -431,8 +431,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			}
 
 			if (resourceTypes.isEmpty()) {
-				RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(theResourceName);
-				RuntimeSearchParam searchParamByName = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
+				RuntimeSearchParam searchParamByName = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
 				if (searchParamByName == null) {
 					throw new InternalErrorException("Could not find parameter " + theParamName);
 				}
@@ -495,8 +494,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 	}
 
 	public List<String> createResourceLinkPaths(String theResourceName, String theParamName) {
-		RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(theResourceName);
-		RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
+		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
 		List<String> path = param.getPathsSplit();
 
 		/*

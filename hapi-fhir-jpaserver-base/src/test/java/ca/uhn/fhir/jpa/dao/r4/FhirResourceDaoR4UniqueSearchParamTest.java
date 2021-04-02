@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -10,7 +11,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
-import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.util.SpringObjectCaster;
@@ -705,7 +705,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		ResourceReindexingSvcImpl svc = SpringObjectCaster.getTargetObject(myResourceReindexingSvc, ResourceReindexingSvcImpl.class);
 		svc.initExecutor();
 
-		List<JpaRuntimeSearchParam> uniqueSearchParams = mySearchParamRegistry.getActiveUniqueSearchParams("Observation");
+		List<RuntimeSearchParam> uniqueSearchParams = mySearchParamRegistry.getActiveUniqueSearchParams("Observation");
 		assertEquals(0, uniqueSearchParams.size());
 
 		Patient pt1 = new Patient();
@@ -1485,7 +1485,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 	@Test
 	public void testDetectUniqueSearchParams() {
 		createUniqueBirthdateAndGenderSps();
-		List<JpaRuntimeSearchParam> params = mySearchParamRegistry.getActiveUniqueSearchParams("Patient");
+		List<RuntimeSearchParam> params = mySearchParamRegistry.getActiveUniqueSearchParams("Patient");
 
 		assertEquals(1, params.size());
 		assertEquals(params.get(0).isUnique(), true);

@@ -137,7 +137,7 @@ public class MatchUrlService {
 			} else if (nextParamName.startsWith("_")) {
 				// ignore these since they aren't search params (e.g. _sort)
 			} else {
-				RuntimeSearchParam paramDef = mySearchParamRegistry.getSearchParamByName(theResourceDefinition, nextParamName);
+				RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(theResourceDefinition.getName(), nextParamName);
 				if (paramDef == null) {
 					throw new InvalidRequestException(
 						"Failed to parse match URL[" + theMatchUrl + "] - Resource type " + theResourceDefinition.getName() + " does not have a parameter with name: " + nextParamName);

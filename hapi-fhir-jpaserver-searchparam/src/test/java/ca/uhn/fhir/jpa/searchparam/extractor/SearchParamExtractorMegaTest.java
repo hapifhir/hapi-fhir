@@ -20,9 +20,9 @@ import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -232,7 +231,7 @@ public class SearchParamExtractorMegaTest {
 
 	}
 
-	private static class MySearchParamRegistry implements ISearchParamRegistry {
+	private static class MySearchParamRegistry implements ISearchParamRegistry, ISearchParamRegistryController {
 
 		private final FhirContext myCtx;
 		private List<RuntimeSearchParam> myAddedSearchParams = new ArrayList<>();
@@ -258,6 +257,7 @@ public class SearchParamExtractorMegaTest {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public ResourceChangeResult refreshCacheIfNecessary() {
 			// nothing
 			return new ResourceChangeResult();
@@ -280,26 +280,19 @@ public class SearchParamExtractorMegaTest {
 			return sps;
 		}
 
-		public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
+		@Override
+		public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
 			throw new UnsupportedOperationException();
 		}
 
-		public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
+		@Override
+		public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
 		public void requestRefresh() {
 			// nothing
-		}
-
-		@Override
-		public RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName) {
-			return null;
-		}
-
-		public Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef) {
-			return null;
 		}
 
 		@Override

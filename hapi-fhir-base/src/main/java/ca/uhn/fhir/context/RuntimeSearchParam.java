@@ -7,6 +7,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
@@ -56,6 +57,8 @@ public class RuntimeSearchParam {
 	private final RuntimeSearchParamStatusEnum myStatus;
 	private final String myUri;
 	private final Map<String, List<IBaseExtension<?, ?>>> myExtensions = new HashMap<>();
+	private final boolean myUnique;
+	private final List<Component> myComponents;
 	private IPhoneticEncoder myPhoneticEncoder;
 
 	/**
@@ -71,6 +74,26 @@ public class RuntimeSearchParam {
 	 */
 	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, List<RuntimeSearchParam> theCompositeOf,
 									  Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, Collection<String> theBase) {
+		this(theId, theUri, theName, theDescription, thePath, theParamType, theProvidesMembershipInCompartments, theTargets, theStatus, false, null, theBase);
+	}
+
+	/**
+	 * Constructor
+	 */
+	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus) {
+		this(null, null, theName, theDescription, thePath, theParamType, null, theProvidesMembershipInCompartments, theTargets, theStatus);
+	}
+	/**
+	 * Copy constructor
+	 */
+	public RuntimeSearchParam(RuntimeSearchParam theSp) {
+		this(theSp.getId(), theSp.getUri(), theSp.getName(), theSp.getDescription(), theSp.getPath(), theSp.getParamType(), theSp.getCompositeOf(), theSp.getProvidesMembershipInCompartments(), theSp.getTargets(), theSp.getStatus(), theSp.getBase());
+	}
+
+	/**
+	 * Constructor
+	 */
+	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, boolean theUnique, List<Component> theComponents, Collection<String> theBase) {
 		super();
 
 		myId = theId;
@@ -79,7 +102,7 @@ public class RuntimeSearchParam {
 		myDescription = theDescription;
 		myPath = thePath;
 		myParamType = theParamType;
-		myCompositeOf = theCompositeOf;
+		myCompositeOf = createCompositeList(theParamType);
 		myStatus = theStatus;
 		if (theProvidesMembershipInCompartments != null && !theProvidesMembershipInCompartments.isEmpty()) {
 			myProvidesMembershipInCompartments = Collections.unmodifiableSet(theProvidesMembershipInCompartments);
@@ -104,20 +127,16 @@ public class RuntimeSearchParam {
 		} else {
 			myBase = Collections.unmodifiableSet(new HashSet<>(theBase));
 		}
+		myUnique = theUnique;
+		myComponents = Collections.unmodifiableList(theComponents);
 	}
 
-	/**
-	 * Constructor
-	 */
-	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus) {
-		this(null, null, theName, theDescription, thePath, theParamType, null, theProvidesMembershipInCompartments, theTargets, theStatus);
+	public List<Component> getComponents() {
+		return myComponents;
 	}
 
-	/**
-	 * Copy constructor
-	 */
-	public RuntimeSearchParam(RuntimeSearchParam theSp) {
-		this(theSp.getId(), theSp.getUri(), theSp.getName(), theSp.getDescription(), theSp.getPath(), theSp.getParamType(), theSp.getCompositeOf(), theSp.getProvidesMembershipInCompartments(), theSp.getTargets(), theSp.getStatus(), theSp.getBase());
+	public boolean isUnique() {
+		return myUnique;
 	}
 
 	/**
@@ -247,13 +266,6 @@ public class RuntimeSearchParam {
 		return myProvidesMembershipInCompartments;
 	}
 
-	public enum RuntimeSearchParamStatusEnum {
-		ACTIVE,
-		DRAFT,
-		RETIRED,
-		UNKNOWN
-	}
-
 	public RuntimeSearchParam setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {
 		myPhoneticEncoder = thePhoneticEncoder;
 		return this;
@@ -264,5 +276,39 @@ public class RuntimeSearchParam {
 			return theString;
 		}
 		return myPhoneticEncoder.encode(theString);
+	}
+
+	public enum RuntimeSearchParamStatusEnum {
+		ACTIVE,
+		DRAFT,
+		RETIRED,
+		UNKNOWN
+	}
+
+	public static class Component {
+		private final String myExpression;
+		private final IBaseReference myReference;
+
+		public Component(String theExpression, IBaseReference theReference) {
+			myExpression = theExpression;
+			myReference = theReference;
+
+		}
+
+		public String getExpression() {
+			return myExpression;
+		}
+
+		public IBaseReference getReference() {
+			return myReference;
+		}
+	}
+
+	private static ArrayList<RuntimeSearchParam> createCompositeList(RestSearchParameterTypeEnum theParamType) {
+		if (theParamType == RestSearchParameterTypeEnum.COMPOSITE) {
+			return new ArrayList<>();
+		} else {
+			return null;
+		}
 	}
 }
