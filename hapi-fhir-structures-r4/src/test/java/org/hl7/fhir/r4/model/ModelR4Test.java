@@ -1,6 +1,7 @@
 package org.hl7.fhir.r4.model;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,5 +30,11 @@ public class ModelR4Test {
 		}
 	}
 
+
+	@Test
+	public void testCompositeRuntimeSearchParamHasComponents() {
+		RuntimeSearchParam searchParam = ourCtx.getResourceDefinition("Observation").getSearchParam("code-value-concept");
+		assertEquals(2, searchParam.getCompositeOf().size());
+	}
 
 }

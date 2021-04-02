@@ -162,7 +162,7 @@ public class SearchParameterCanonicalizer {
 
 		List<RuntimeSearchParam.Component> components = Collections.emptyList();
 		Collection<? extends IPrimitiveType<String>> base = Collections.singletonList(theNextSp.getBaseElement());
-		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, toStrings(base));
+		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, toStrings(base), Collections.emptyList());
 	}
 
 	private RuntimeSearchParam canonicalizeSearchParameterDstu3(org.hl7.fhir.dstu3.model.SearchParameter theNextSp) {
@@ -245,7 +245,7 @@ public class SearchParameterCanonicalizer {
 			components.add(new RuntimeSearchParam.Component(next.getExpression(), next.getDefinition()));
 		}
 
-		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, toStrings(theNextSp.getBase()));
+		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, toStrings(theNextSp.getBase()), Collections.emptyList());
 	}
 
 	private RuntimeSearchParam canonicalizeSearchParameterR4Plus(IBaseResource theNextSp) {
@@ -332,7 +332,7 @@ public class SearchParameterCanonicalizer {
 			components.add(new RuntimeSearchParam.Component(expression, new Reference(definition)));
 		}
 
-		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, base);
+		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, base, Collections.emptyList());
 	}
 
 

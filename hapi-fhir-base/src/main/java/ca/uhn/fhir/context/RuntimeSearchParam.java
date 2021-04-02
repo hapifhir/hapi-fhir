@@ -74,7 +74,7 @@ public class RuntimeSearchParam {
 	 */
 	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, List<RuntimeSearchParam> theCompositeOf,
 									  Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, Collection<String> theBase) {
-		this(theId, theUri, theName, theDescription, thePath, theParamType, theProvidesMembershipInCompartments, theTargets, theStatus, false, null, theBase);
+		this(theId, theUri, theName, theDescription, thePath, theParamType, theProvidesMembershipInCompartments, theTargets, theStatus, false, Collections.emptyList(), theBase, theCompositeOf);
 	}
 
 	/**
@@ -93,7 +93,7 @@ public class RuntimeSearchParam {
 	/**
 	 * Constructor
 	 */
-	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, boolean theUnique, List<Component> theComponents, Collection<String> theBase) {
+	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, boolean theUnique, List<Component> theComponents, Collection<String> theBase, List<RuntimeSearchParam> theCompositeOf) {
 		super();
 
 		myId = theId;
@@ -102,7 +102,11 @@ public class RuntimeSearchParam {
 		myDescription = theDescription;
 		myPath = thePath;
 		myParamType = theParamType;
-		myCompositeOf = createCompositeList(theParamType);
+		if (theCompositeOf != null) {
+			myCompositeOf = theCompositeOf;
+		} else {
+			myCompositeOf = createCompositeList(theParamType);
+		}
 		myStatus = theStatus;
 		if (theProvidesMembershipInCompartments != null && !theProvidesMembershipInCompartments.isEmpty()) {
 			myProvidesMembershipInCompartments = Collections.unmodifiableSet(theProvidesMembershipInCompartments);
