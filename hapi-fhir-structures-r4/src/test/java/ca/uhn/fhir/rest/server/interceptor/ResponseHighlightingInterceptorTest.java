@@ -310,7 +310,8 @@ public class ResponseHighlightingInterceptorTest {
 
 	@Test
 	public void testForceHtmlTurtle() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/turtle");
+		String url = "http://localhost:" + ourPort + "/Patient/1?_format=html/turtle";
+		HttpGet httpGet = new HttpGet(url);
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);

@@ -28,6 +28,7 @@ import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -40,6 +41,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -138,6 +140,9 @@ public class ResponseHighlighterInterceptor {
 		boolean inValue = false;
 		boolean inQuote = false;
 		boolean inTag = false;
+		boolean inTurtleDirective = false;
+		boolean startingLineNext = true;
+		boolean startingLine = false;
 		int lineCount = 1;
 
 		for (int i = 0; i < str.length(); i++) {
@@ -150,13 +155,23 @@ public class ResponseHighlighterInterceptor {
 			char nextChar6 = (i + 5) < str.length() ? str.charAt(i + 5) : ' ';
 
 			if (nextChar == '\n') {
+				if (inTurtleDirective) {
+					theTarget.append("</span>");
+					inTurtleDirective = false;
+				}
 				lineCount++;
 				theTarget.append("</div><div id=\"line");
 				theTarget.append(lineCount);
 				theTarget.append("\" onclick=\"updateHighlightedLineTo('#L");
 				theTarget.append(lineCount);
 				theTarget.append("');\">");
+				startingLineNext = true;
 				continue;
+			} else if (startingLineNext) {
+				startingLineNext = false;
+				startingLine = true;
+			} else {
+				startingLine = false;
 			}
 
 			if (theEncodingEnum == EncodingEnum.JSON) {
@@ -217,6 +232,14 @@ public class ResponseHighlighterInterceptor {
 						i += 5;
 						inQuote = false;
 					}
+				} else if (startingLine && nextChar == '@') {
+					inTurtleDirective = true;
+					theTarget.append("<span class='hlTagName'>");
+					theTarget.append(nextChar);
+				} else if (!inTurtleDirective && (nextChar == '[' || nextChar == ']' || nextChar == ';')) {
+					theTarget.append("<span class='hlTagName'>");
+					theTarget.append(nextChar);
+					theTarget.append("</span>");
 				} else {
 					if (nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
 						if (inValue) {
@@ -388,10 +411,20 @@ public class ResponseHighlighterInterceptor {
 	@Hook(Pointcut.SERVER_CAPABILITY_STATEMENT_GENERATED)
 	public void capabilityStatementGenerated(RequestDetails theRequestDetails, IBaseConformance theCapabilityStatement) {
 		FhirTerser terser = theRequestDetails.getFhirContext().newTerser();
-		// FIXME: add these conditionally
-		terser.addElement(theCapabilityStatement, "format", Constants.FORMATS_HTML_XML);
-		terser.addElement(theCapabilityStatement, "format", Constants.FORMATS_HTML_JSON);
-		terser.addElement(theCapabilityStatement, "format", Constants.FORMATS_HTML_TTL);
+
+		Set<String> formats = terser.getValues(theCapabilityStatement, "format", IPrimitiveType.class)
+			.stream()
+			.map(t -> t.getValueAsString())
+			.collect(Collectors.toSet());
+		addFormatConditionally(theCapabilityStatement, terser, formats, Constants.CT_FHIR_JSON_NEW, Constants.FORMATS_HTML_JSON);
+		addFormatConditionally(theCapabilityStatement, terser, formats, Constants.CT_FHIR_XML_NEW, Constants.FORMATS_HTML_XML);
+		addFormatConditionally(theCapabilityStatement, terser, formats, Constants.CT_RDF_TURTLE, Constants.FORMATS_HTML_TTL);
+	}
+
+	private void addFormatConditionally(IBaseConformance theCapabilityStatement, FhirTerser terser, Set<String> formats, String wanted, String toAdd) {
+		if (formats.contains(wanted)) {
+			terser.addElement(theCapabilityStatement, "format", toAdd);
+		}
 	}
 
 
