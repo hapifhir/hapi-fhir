@@ -42,7 +42,6 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
-import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -409,7 +408,10 @@ class ModelScanner {
 				}
 
 				Collection<String> base = Collections.singletonList(theResourceDef.getName());
-				String url = "http://hl7.org/fhir/SearchParameter/" + theResourceDef.getName().toLowerCase() + "-" + searchParam.name();
+				String url;
+				if (theResourceDef.isStandardType()) {
+					url = "http://hl7.org/fhir/SearchParameter/" + theResourceDef.getName().toLowerCase() + "-" + searchParam.name();
+				}
 				RuntimeSearchParam param = new RuntimeSearchParam(null, url, searchParam.name(), searchParam.description(), searchParam.path(), paramType, providesMembershipInCompartments, toTargetList(searchParam.target()), RuntimeSearchParamStatusEnum.ACTIVE, false, components, base);
 				theResourceDef.addSearchParam(param);
 				nameToParam.put(param.getName(), param);
