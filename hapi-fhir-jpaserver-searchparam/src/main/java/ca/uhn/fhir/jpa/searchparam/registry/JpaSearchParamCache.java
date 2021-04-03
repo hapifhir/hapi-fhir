@@ -109,7 +109,7 @@ public class JpaSearchParamCache {
 
 		Set<String> haveSeen = new HashSet<>();
 		for (RuntimeSearchParam next : jpaSearchParams) {
-			if (!haveSeen.add(next.getId().toUnqualifiedVersionless().getValue())) {
+			if (next.getId() != null && !haveSeen.add(next.getId().toUnqualifiedVersionless().getValue())) {
 				continue;
 			}
 
