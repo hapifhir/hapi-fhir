@@ -143,6 +143,33 @@ public class ServerCapabilityStatementProviderR4Test {
 	}
 
 	@Test
+	public void testFormats() throws ServletException {
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setProviders(new ConditionalProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement cs = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		List<String> formats = cs
+			.getFormat()
+			.stream()
+			.map(t -> t.getCode())
+			.collect(Collectors.toList());
+		assertThat(formats.toString(), formats, containsInAnyOrder(
+			"application/fhir+xml",
+			"xml",
+			"application/fhir+json",
+			"json",
+			"application/x-turtle",
+			"ttl"
+		));
+	}
+
+
+	@Test
 	public void testConditionalOperations() throws Exception {
 
 		RestfulServer rs = new RestfulServer(myCtx);
@@ -979,14 +1006,6 @@ public class ServerCapabilityStatementProviderR4Test {
 		return retVal;
 	}
 
-	private static Set<String> toStrings(Collection<? extends IPrimitiveType> theType) {
-		HashSet<String> retVal = new HashSet<String>();
-		for (IPrimitiveType next : theType) {
-			retVal.add(next.getValueAsString());
-		}
-		return retVal;
-	}
-
 	private String validate(IBaseResource theResource) {
 		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(theResource);
 		ourLog.info("Def:\n{}", conf);
@@ -1363,6 +1382,14 @@ public class ServerCapabilityStatementProviderR4Test {
 
 	@ResourceDef(id = PATIENT_TRIPLE_SUB)
 	public static class PatientTripleSub extends PatientSubSub {
+	}
+
+	private static Set<String> toStrings(Collection<? extends IPrimitiveType> theType) {
+		HashSet<String> retVal = new HashSet<String>();
+		for (IPrimitiveType next : theType) {
+			retVal.add(next.getValueAsString());
+		}
+		return retVal;
 	}
 
 	@AfterAll

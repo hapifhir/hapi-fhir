@@ -142,23 +142,22 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 
 		if (conf == null) {
 			conf = (IBaseConformance) invokeServerMethod(theRequest, theMethodParams);
-			if (myCacheMillis > 0) {
 
-				// Interceptor hook: SERVER_CAPABILITY_STATEMENT_GENERATED
-				if (theRequest.getInterceptorBroadcaster() != null) {
-					HookParams params = new HookParams();
-					params.add(IBaseConformance.class, conf);
-					params.add(RequestDetails.class, theRequest);
-					params.addIfMatchesType(ServletRequestDetails.class, theRequest);
-					IBaseConformance outcome = (IBaseConformance) theRequest
-						.getInterceptorBroadcaster()
-						.callHooksAndReturnObject(Pointcut.SERVER_CAPABILITY_STATEMENT_GENERATED, params);
-					if (outcome != null) {
-						conf = outcome;
-					}
+			// Interceptor hook: SERVER_CAPABILITY_STATEMENT_GENERATED
+			if (theRequest.getInterceptorBroadcaster() != null) {
+				HookParams params = new HookParams();
+				params.add(IBaseConformance.class, conf);
+				params.add(RequestDetails.class, theRequest);
+				params.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				IBaseConformance outcome = (IBaseConformance) theRequest
+					.getInterceptorBroadcaster()
+					.callHooksAndReturnObject(Pointcut.SERVER_CAPABILITY_STATEMENT_GENERATED, params);
+				if (outcome != null) {
+					conf = outcome;
 				}
+			}
 
-
+			if (myCacheMillis > 0) {
 				myCachedResponse.set(conf);
 				myCachedResponseExpires.set(System.currentTimeMillis() + getCacheMillis());
 			}

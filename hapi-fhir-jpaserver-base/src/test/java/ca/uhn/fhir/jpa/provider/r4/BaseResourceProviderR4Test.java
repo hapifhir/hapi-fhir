@@ -22,6 +22,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -75,7 +76,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected IPartitionDao myPartitionDao;
 	ResourceCountCache myResourceCountsCache;
 	private TerminologyUploaderProvider myTerminologyUploaderProvider;
-	protected JpaCapabilityStatementProvider ourCapabilityStatementProvider;
+	protected static JpaCapabilityStatementProvider ourCapabilityStatementProvider;
 
 	public BaseResourceProviderR4Test() {
 		super();
@@ -157,6 +158,8 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourCapabilityStatementProvider = new JpaCapabilityStatementProvider(ourRestServer, mySystemDao, myDaoConfig, ourSearchParamRegistry, validationSupport);
 			ourCapabilityStatementProvider.setImplementationDescription("THIS IS THE DESC");
 			ourRestServer.setServerConformanceProvider(ourCapabilityStatementProvider);
+
+			ourRestServer.registerInterceptor(new ResponseHighlighterInterceptor());
 
 			server.setHandler(proxyHandler);
 			JettyUtil.startServer(server);

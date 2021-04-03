@@ -72,6 +72,28 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 		ourCapabilityStatementProvider.setRestResourceRevIncludesEnabled(ServerCapabilityStatementProvider.DEFAULT_REST_RESOURCE_REV_INCLUDES_ENABLED);
 	}
 
+
+	@Test
+	public void testFormats() {
+		CapabilityStatement cs = myClient
+			.capabilities()
+			.ofType(CapabilityStatement.class)
+			.cacheControl(CacheControlDirective.noCache())
+			.execute();
+		List<String> formats = cs
+			.getFormat()
+			.stream()
+			.map(t -> t.getCode())
+			.collect(Collectors.toList());
+		assertThat(formats.toString(), formats, containsInAnyOrder(
+			"application/fhir+xml",
+			"application/fhir+json",
+			"json",
+			"xml",
+			"html/xml",
+			"html/json"));
+	}
+
 	@Test
 	public void testCustomSearchParamsReflectedInIncludesAndRevIncludes_TargetSpecified() {
 		SearchParameter fooSp = new SearchParameter();
