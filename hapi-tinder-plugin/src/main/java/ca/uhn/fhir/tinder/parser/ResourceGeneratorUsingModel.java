@@ -70,8 +70,6 @@ public class ResourceGeneratorUsingModel extends BaseStructureParser {
 				
 				param.setName(nextSearchParam.getName());
 				param.setDescription(nextSearchParam.getDescription());
-				param.setCompositeOf(toCompositeOfStrings(nextSearchParam.getCompositeOf()));
-				param.setCompositeTypes(toCompositeOfTypes(nextSearchParam.getCompositeOf()));
 				param.setPath(nextSearchParam.getPath());
 				param.setType(nextSearchParam.getParamType().getCode());
 				

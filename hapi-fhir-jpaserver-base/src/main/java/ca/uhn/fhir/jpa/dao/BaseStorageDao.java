@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -34,6 +33,7 @@ import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
@@ -44,7 +44,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.QualifierDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -344,7 +343,7 @@ public abstract class BaseStorageDao {
 			for (String nextValue : theSource.get(nextParamName)) {
 				QualifiedParamList qualifiedParam = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(qualifiedParamName.getWholeQualifier(), nextValue);
 				List<QualifiedParamList> paramList = Collections.singletonList(qualifiedParam);
-				IQueryParameterAnd<?> parsedParam = ParameterUtil.parseQueryParams(getContext(), paramDef, nextParamName, paramList);
+				IQueryParameterAnd<?> parsedParam = JpaParamUtil.parseQueryParams(mySearchParamRegistry, getContext(), paramDef, nextParamName, paramList);
 				theTarget.add(qualifiedParamName.getParamName(), parsedParam);
 			}
 

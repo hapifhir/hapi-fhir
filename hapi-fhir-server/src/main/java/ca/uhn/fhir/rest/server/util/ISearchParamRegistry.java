@@ -20,12 +20,12 @@ package ca.uhn.fhir.rest.server.util;
  * #L%
  */
 
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.rest.api.Constants;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -96,5 +96,11 @@ public interface ISearchParamRegistry {
 		return retval;
 	}
 
-
+	/**
+	 * Fetch a SearchParameter by URL
+	 *
+	 * @return Returns <code>null</code> if it can't be found
+	 */
+	@Nullable
+	RuntimeSearchParam getActiveSearchParamByUrl(String theUrl);
 }

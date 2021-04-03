@@ -37,6 +37,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -381,6 +382,12 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 		return retVal;
 	}
 
+	@Nullable
+	@Override
+	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
+		throw new UnsupportedOperationException();
+	}
+
 	private void createRuntimeBinding(Map<String, RuntimeSearchParam> theMapToPopulate, SearchMethodBinding theSearchMethodBinding) {
 
 		List<SearchParameter> parameters = theSearchMethodBinding
@@ -422,12 +429,11 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 			String description = nextParamDescription;
 			String path = null;
 			RestSearchParameterTypeEnum type = nextParameter.getParamType();
-			List<RuntimeSearchParam> compositeOf = Collections.emptyList();
 			Set<String> providesMembershipInCompartments = Collections.emptySet();
 			Set<String> targets = Collections.emptySet();
 			RuntimeSearchParam.RuntimeSearchParamStatusEnum status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE;
 			Collection<String> base = Collections.singletonList(theSearchMethodBinding.getResourceName());
-			RuntimeSearchParam param = new RuntimeSearchParam(id, uri, nextParamName, description, path, type, compositeOf, providesMembershipInCompartments, targets, status, base);
+			RuntimeSearchParam param = new RuntimeSearchParam(id, uri, nextParamName, description, path, type, providesMembershipInCompartments, targets, status, false, null, base);
 			theMapToPopulate.put(nextParamName, param);
 
 		}

@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.util.SpringObjectCaster;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -1489,10 +1490,12 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 		assertEquals(1, params.size());
 		assertEquals(params.get(0).isUnique(), true);
-		assertEquals(2, params.get(0).getCompositeOf().size());
+		assertEquals(2, params.get(0).getComponents().size());
+
 		// Should be alphabetical order
-		assertEquals("birthdate", params.get(0).getCompositeOf().get(0).getName());
-		assertEquals("gender", params.get(0).getCompositeOf().get(1).getName());
+		List<RuntimeSearchParam> compositeParams = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, params.get(0));
+		assertEquals("birthdate", compositeParams.get(0).getName());
+		assertEquals("gender", compositeParams.get(1).getName());
 	}
 
 	@Test

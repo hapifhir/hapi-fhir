@@ -47,6 +47,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
+import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.SourceParam;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
@@ -64,7 +65,6 @@ import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.SpecialParam;
@@ -796,7 +796,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				qp = new TokenParam();
 				break;
 			case COMPOSITE:
-				List<RuntimeSearchParam> compositeOf = theParam.getCompositeOf();
+				List<RuntimeSearchParam> compositeOf = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, theParam);
 				if (compositeOf.size() != 2) {
 					throw new InternalErrorException("Parameter " + theParam.getName() + " has " + compositeOf.size() + " composite parts. Don't know how handlt this.");
 				}
@@ -967,7 +967,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 					throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + paramReference);
 				}
 
-				IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>> parsedParam = (IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>>) ParameterUtil.parseQueryParams(myContext, owningParameterDef, paramName, parameters);
+				IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>> parsedParam = (IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>>) JpaParamUtil.parseQueryParams(mySearchParamRegistry, myContext, owningParameterDef, paramName, parameters);
 
 				for (IQueryParameterOr<IQueryParameterType> next : parsedParam.getValuesAsQueryTokens()) {
 					orValues.addAll(next.getValuesAsQueryTokens());
@@ -1008,11 +1008,12 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		}
 		CompositeParam<?, ?> cp = (CompositeParam<?, ?>) or;
 
-		RuntimeSearchParam left = theParamDef.getCompositeOf().get(0);
+		List<RuntimeSearchParam> componentParams = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, theParamDef);
+		RuntimeSearchParam left = componentParams.get(0);
 		IQueryParameterType leftValue = cp.getLeftValue();
 		myQueryStack.addPredicate(createCompositeParamPart(theResourceName, myQueryStack.getRootForComposite(), left, leftValue, theRequestPartitionId));
 
-		RuntimeSearchParam right = theParamDef.getCompositeOf().get(1);
+		RuntimeSearchParam right = componentParams.get(1);
 		IQueryParameterType rightValue = cp.getRightValue();
 		myQueryStack.addPredicate(createCompositeParamPart(theResourceName, myQueryStack.getRootForComposite(), right, rightValue, theRequestPartitionId));
 

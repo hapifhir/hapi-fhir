@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -282,6 +283,12 @@ public class SearchParamExtractorMegaTest {
 
 		@Override
 		public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Nullable
+		@Override
+		public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
 			throw new UnsupportedOperationException();
 		}
 

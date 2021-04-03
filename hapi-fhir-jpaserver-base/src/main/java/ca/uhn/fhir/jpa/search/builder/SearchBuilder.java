@@ -56,6 +56,7 @@ import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryExecutor;
 import ca.uhn.fhir.jpa.search.builder.sql.SqlObjectFactory;
 import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
@@ -544,17 +545,17 @@ public class SearchBuilder implements ISearchBuilder {
 					theQueryStack.addSortOnQuantity(myResourceName, theSort.getParamName(), ascending);
 					break;
 				case COMPOSITE:
-					List<RuntimeSearchParam> compositList = param.getCompositeOf();
-					if (compositList == null) {
+					List<RuntimeSearchParam> compositeList = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, param);
+					if (compositeList == null) {
 						throw new InvalidRequestException("The composite _sort parameter " + theSort.getParamName() + " is not defined by the resource " + myResourceName);
 					}
-					if (compositList.size() != 2) {
+					if (compositeList.size() != 2) {
 						throw new InvalidRequestException("The composite _sort parameter " + theSort.getParamName()
 							+ " must have 2 composite types declared in parameter annotation, found "
-							+ compositList.size());
+							+ compositeList.size());
 					}
-					RuntimeSearchParam left = compositList.get(0);
-					RuntimeSearchParam right = compositList.get(1);
+					RuntimeSearchParam left = compositeList.get(0);
+					RuntimeSearchParam right = compositeList.get(1);
 
 					createCompositeSort(theQueryStack, myResourceName, left.getParamType(), left.getName(), ascending);
 					createCompositeSort(theQueryStack, myResourceName, right.getParamType(), right.getName(), ascending);

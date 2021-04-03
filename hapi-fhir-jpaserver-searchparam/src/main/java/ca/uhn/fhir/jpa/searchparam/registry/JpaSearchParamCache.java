@@ -28,7 +28,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +39,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaSearchParamCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaSearchParamCache.class);
@@ -93,6 +95,9 @@ public class JpaSearchParamCache {
 				if (nextCandidate.getId() != null) {
 					idToRuntimeSearchParam.put(nextCandidate.getId().toUnqualifiedVersionless().getValue(), nextCandidate);
 				}
+				if (isNotBlank(nextCandidate.getUri())) {
+					idToRuntimeSearchParam.put(nextCandidate.getUri(), nextCandidate);
+				}
 
 				RuntimeSearchParam nextCandidateCasted = nextCandidate;
 				jpaSearchParams.add(nextCandidateCasted);
@@ -113,12 +118,11 @@ public class JpaSearchParamCache {
 				continue;
 			}
 
-			Set<String> paramNames = new HashSet<>();
+			Set<String> paramNames = new TreeSet<>();
 			for (RuntimeSearchParam.Component nextComponent : next.getComponents()) {
-				String nextRef = nextComponent.getReference().getReferenceElement().toUnqualifiedVersionless().getValue();
+				String nextRef = nextComponent.getReference();
 				RuntimeSearchParam componentTarget = idToRuntimeSearchParam.get(nextRef);
 				if (componentTarget != null) {
-					next.getCompositeOf().add(componentTarget);
 					paramNames.add(componentTarget.getName());
 				} else {
 					String existingParams = idToRuntimeSearchParam
@@ -138,8 +142,7 @@ public class JpaSearchParamCache {
 				}
 			}
 
-			if (next.getCompositeOf() != null && next.isUnique()) {
-				next.getCompositeOf().sort((theO1, theO2) -> StringUtils.compare(theO1.getName(), theO2.getName()));
+			if (next.isUnique()) {
 				for (String nextBase : next.getBase()) {
 					activeParamNamesToUniqueSearchParams.computeIfAbsent(nextBase, v -> new HashMap<>());
 					activeParamNamesToUniqueSearchParams.get(nextBase).computeIfAbsent(paramNames, t -> new ArrayList<>());

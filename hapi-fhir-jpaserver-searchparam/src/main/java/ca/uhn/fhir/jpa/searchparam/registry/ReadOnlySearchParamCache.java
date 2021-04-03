@@ -34,13 +34,22 @@ public class ReadOnlySearchParamCache {
 
 	// resourceName -> searchParamName -> searchparam
 	protected final Map<String, Map<String, RuntimeSearchParam>> myMap;
+	protected final Map<String, RuntimeSearchParam> myUrlToParam;
 
+	/**
+	 * Constructor
+	 */
 	ReadOnlySearchParamCache() {
 		myMap = new HashMap<>();
+		myUrlToParam = new HashMap<>();
 	}
 
+	/**
+	 * Copy constructor
+	 */
 	private ReadOnlySearchParamCache(RuntimeSearchParamCache theRuntimeSearchParamCache) {
 		myMap = theRuntimeSearchParamCache.myMap;
+		myUrlToParam = theRuntimeSearchParamCache.myUrlToParam;
 	}
 
 	public Stream<RuntimeSearchParam> getSearchParamStream() {
@@ -57,6 +66,10 @@ public class ReadOnlySearchParamCache {
 
 	public int size() {
 		return myMap.size();
+	}
+
+	public RuntimeSearchParam getByUrl(String theUrl) {
+		return myUrlToParam.get(theUrl);
 	}
 
 	public static ReadOnlySearchParamCache fromFhirContext(FhirContext theFhirContext) {

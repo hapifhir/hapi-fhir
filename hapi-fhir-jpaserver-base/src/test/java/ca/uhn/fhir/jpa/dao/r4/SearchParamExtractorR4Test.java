@@ -37,6 +37,7 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -440,6 +441,12 @@ public class SearchParamExtractorR4Test {
 
 		@Override
 		public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Nullable
+		@Override
+		public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
 			throw new UnsupportedOperationException();
 		}
 

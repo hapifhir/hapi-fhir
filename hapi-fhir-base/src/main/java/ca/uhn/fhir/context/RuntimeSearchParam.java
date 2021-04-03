@@ -7,7 +7,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
@@ -47,7 +46,6 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public class RuntimeSearchParam {
 	private final IIdType myId;
 	private final Set<String> myBase;
-	private final List<RuntimeSearchParam> myCompositeOf;
 	private final String myDescription;
 	private final String myName;
 	private final RestSearchParameterTypeEnum myParamType;
@@ -64,36 +62,38 @@ public class RuntimeSearchParam {
 	/**
 	 * Constructor
 	 */
-	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, List<RuntimeSearchParam> theCompositeOf,
+	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType,
 									  Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus) {
-		this(theId, theUri, theName, theDescription, thePath, theParamType, theCompositeOf, theProvidesMembershipInCompartments, theTargets, theStatus, null);
+		this(theId, theUri, theName, theDescription, thePath, theParamType, theProvidesMembershipInCompartments, theTargets, theStatus, false, null, null);
 	}
 
 	/**
 	 * Constructor
 	 */
-	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, List<RuntimeSearchParam> theCompositeOf,
+	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType,
 									  Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, Collection<String> theBase) {
-		this(theId, theUri, theName, theDescription, thePath, theParamType, theProvidesMembershipInCompartments, theTargets, theStatus, false, Collections.emptyList(), theBase, theCompositeOf);
+		this(theId, theUri, theName, theDescription, thePath, theParamType, theProvidesMembershipInCompartments, theTargets, theStatus, false, Collections.emptyList(), theBase);
 	}
 
 	/**
 	 * Constructor
 	 */
+	// FIXME: who calls this?
 	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus) {
-		this(null, null, theName, theDescription, thePath, theParamType, null, theProvidesMembershipInCompartments, theTargets, theStatus);
+		this(null, null, theName, theDescription, thePath, theParamType, theProvidesMembershipInCompartments, theTargets, theStatus, false, null, null);
 	}
+
 	/**
 	 * Copy constructor
 	 */
 	public RuntimeSearchParam(RuntimeSearchParam theSp) {
-		this(theSp.getId(), theSp.getUri(), theSp.getName(), theSp.getDescription(), theSp.getPath(), theSp.getParamType(), theSp.getCompositeOf(), theSp.getProvidesMembershipInCompartments(), theSp.getTargets(), theSp.getStatus(), theSp.getBase());
+		this(theSp.getId(), theSp.getUri(), theSp.getName(), theSp.getDescription(), theSp.getPath(), theSp.getParamType(), theSp.getProvidesMembershipInCompartments(), theSp.getTargets(), theSp.getStatus(), theSp.isUnique(), theSp.getComponents(), theSp.getBase());
 	}
 
 	/**
 	 * Constructor
 	 */
-	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, boolean theUnique, List<Component> theComponents, Collection<String> theBase, List<RuntimeSearchParam> theCompositeOf) {
+	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, boolean theUnique, List<Component> theComponents, Collection<String> theBase) {
 		super();
 
 		myId = theId;
@@ -102,11 +102,6 @@ public class RuntimeSearchParam {
 		myDescription = theDescription;
 		myPath = thePath;
 		myParamType = theParamType;
-		if (theCompositeOf != null) {
-			myCompositeOf = theCompositeOf;
-		} else {
-			myCompositeOf = createCompositeList(theParamType);
-		}
 		myStatus = theStatus;
 		if (theProvidesMembershipInCompartments != null && !theProvidesMembershipInCompartments.isEmpty()) {
 			myProvidesMembershipInCompartments = Collections.unmodifiableSet(theProvidesMembershipInCompartments);
@@ -132,7 +127,11 @@ public class RuntimeSearchParam {
 			myBase = Collections.unmodifiableSet(new HashSet<>(theBase));
 		}
 		myUnique = theUnique;
-		myComponents = Collections.unmodifiableList(theComponents);
+		if (theComponents != null) {
+			myComponents = Collections.unmodifiableList(theComponents);
+		} else {
+			myComponents = Collections.emptyList();
+		}
 	}
 
 	public List<Component> getComponents() {
@@ -228,10 +227,6 @@ public class RuntimeSearchParam {
 		return myStatus;
 	}
 
-	public List<RuntimeSearchParam> getCompositeOf() {
-		return myCompositeOf;
-	}
-
 	public String getDescription() {
 		return myDescription;
 	}
@@ -291,9 +286,9 @@ public class RuntimeSearchParam {
 
 	public static class Component {
 		private final String myExpression;
-		private final IBaseReference myReference;
+		private final String myReference;
 
-		public Component(String theExpression, IBaseReference theReference) {
+		public Component(String theExpression, String theReference) {
 			myExpression = theExpression;
 			myReference = theReference;
 
@@ -303,7 +298,7 @@ public class RuntimeSearchParam {
 			return myExpression;
 		}
 
-		public IBaseReference getReference() {
+		public String getReference() {
 			return myReference;
 		}
 	}

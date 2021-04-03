@@ -46,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.ArrayList;
@@ -114,6 +115,16 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	@Override
 	public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
 		return myJpaSearchParamCache.getActiveUniqueSearchParams(theResourceName, theParamNames);
+	}
+
+	@Nullable
+	@Override
+	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
+		if (myActiveSearchParams != null) {
+			return myActiveSearchParams.getByUrl(theUrl);
+		} else {
+			return null;
+		}
 	}
 
 	private void rebuildActiveSearchParams() {
@@ -203,10 +214,9 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 				continue;
 			}
 
-			Map<String, RuntimeSearchParam> searchParamMap = theSearchParams.getSearchParamMap(nextBaseName);
 			String name = runtimeSp.getName();
+			theSearchParams.add(nextBaseName, name, runtimeSp);
 			ourLog.debug("Adding search parameter {}.{} to SearchParamRegistry", nextBaseName, StringUtils.defaultString(name, "[composite]"));
-			searchParamMap.put(name, runtimeSp);
 			retval++;
 		}
 		return retval;

@@ -34,7 +34,7 @@ public class ModelR4Test {
 	@Test
 	public void testCompositeRuntimeSearchParamHasComponents() {
 		RuntimeSearchParam searchParam = ourCtx.getResourceDefinition("Observation").getSearchParam("code-value-concept");
-		assertEquals(2, searchParam.getCompositeOf().size());
+		assertEquals(2, searchParam.getComponents().size());
 	}
 
 }

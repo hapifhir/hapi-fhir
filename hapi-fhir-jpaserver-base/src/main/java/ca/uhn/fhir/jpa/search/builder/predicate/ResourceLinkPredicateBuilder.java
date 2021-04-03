@@ -43,6 +43,7 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
+import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
@@ -556,7 +557,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 				qp = new TokenParam();
 				break;
 			case COMPOSITE:
-				List<RuntimeSearchParam> compositeOf = theParam.getCompositeOf();
+				List<RuntimeSearchParam> compositeOf = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, theParam);
 				if (compositeOf.size() != 2) {
 					throw new InternalErrorException("Parameter " + theParam.getName() + " has " + compositeOf.size() + " composite parts. Don't know how handlt this.");
 				}

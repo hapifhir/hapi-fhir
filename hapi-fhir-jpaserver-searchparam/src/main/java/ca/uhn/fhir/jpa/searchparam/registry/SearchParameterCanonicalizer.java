@@ -39,7 +39,6 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -162,7 +161,7 @@ public class SearchParameterCanonicalizer {
 
 		List<RuntimeSearchParam.Component> components = Collections.emptyList();
 		Collection<? extends IPrimitiveType<String>> base = Collections.singletonList(theNextSp.getBaseElement());
-		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, toStrings(base), Collections.emptyList());
+		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, toStrings(base));
 	}
 
 	private RuntimeSearchParam canonicalizeSearchParameterDstu3(org.hl7.fhir.dstu3.model.SearchParameter theNextSp) {
@@ -242,10 +241,10 @@ public class SearchParameterCanonicalizer {
 
 		List<RuntimeSearchParam.Component> components = new ArrayList<>();
 		for (SearchParameter.SearchParameterComponentComponent next : theNextSp.getComponent()) {
-			components.add(new RuntimeSearchParam.Component(next.getExpression(), next.getDefinition()));
+			components.add(new RuntimeSearchParam.Component(next.getExpression(), next.getDefinition().getReferenceElement().toUnqualifiedVersionless().getValue()));
 		}
 
-		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, toStrings(theNextSp.getBase()), Collections.emptyList());
+		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, toStrings(theNextSp.getBase()));
 	}
 
 	private RuntimeSearchParam canonicalizeSearchParameterR4Plus(IBaseResource theNextSp) {
@@ -329,10 +328,10 @@ public class SearchParameterCanonicalizer {
 		for (IBase next : terser.getValues(theNextSp, "component")) {
 			String expression = terser.getSinglePrimitiveValueOrNull(next, "expression");
 			String definition = terser.getSinglePrimitiveValueOrNull(next, "definition");
-			components.add(new RuntimeSearchParam.Component(expression, new Reference(definition)));
+			components.add(new RuntimeSearchParam.Component(expression, definition));
 		}
 
-		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, base, Collections.emptyList());
+		return new RuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, base);
 	}
 
 
