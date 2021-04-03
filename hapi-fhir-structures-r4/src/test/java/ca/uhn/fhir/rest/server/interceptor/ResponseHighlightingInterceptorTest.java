@@ -322,7 +322,7 @@ public class ResponseHighlightingInterceptorTest {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 		assertThat(responseContent, containsString("html"));
-		assertThat(responseContent, containsString("<span class='hlTagName'>&quot;urn:hapitest:mrns&quot;</span>"));
+		assertThat(responseContent, containsString("<span class='hlQuot'>&quot;urn:hapitest:mrns&quot;</span>"));
 		assertThat(responseContent, containsString(Constants.HEADER_REQUEST_ID));
 
 	}
