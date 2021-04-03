@@ -90,9 +90,6 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	private final IValidationSupport myValidationSupport;
 	private String myPublisher = "Not provided";
 	private boolean myRestResourceRevIncludesEnabled = DEFAULT_REST_RESOURCE_REV_INCLUDES_ENABLED;
-	private boolean myXmlSupported;
-	private boolean myJsonSupported;
-	private boolean myRdfSupported;
 
 	/**
 	 * Constructor
@@ -103,7 +100,6 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		mySearchParamRetriever = null;
 		myServerConfiguration = null;
 		myValidationSupport = null;
-		initSupport();
 	}
 
 	/**
@@ -115,7 +111,6 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		mySearchParamRetriever = null;
 		myServer = null;
 		myValidationSupport = null;
-		initSupport();
 	}
 
 	/**
@@ -127,24 +122,6 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		myServer = theRestfulServer;
 		myServerConfiguration = null;
 		myValidationSupport = theValidationSupport;
-		initSupport();
-	}
-
-	private void initSupport() {
-		myJsonSupported = tryToInitParser(() -> myContext.newJsonParser());
-		myXmlSupported = tryToInitParser(() -> myContext.newXmlParser());
-		myRdfSupported = tryToInitParser(() -> myContext.newRDFParser());
-	}
-
-	private boolean tryToInitParser(Runnable run) {
-		boolean retVal;
-		try {
-			run.run();
-			retVal = true;
-		} catch (Exception | NoClassDefFoundError e) {
-			retVal = false;
-		}
-		return retVal;
 	}
 
 	private void checkBindingForSystemOps(FhirTerser theTerser, IBase theRest, Set<String> theSystemOps, BaseMethodBinding<?> theMethodBinding) {
@@ -226,15 +203,15 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		terser.addElement(retVal, "kind", "instance");
 		terser.addElement(retVal, "software.name", configuration.getServerName());
 		terser.addElement(retVal, "software.version", configuration.getServerVersion());
-		if (myXmlSupported) {
+		if (myContext.isFormatXmlSupported()) {
 			terser.addElement(retVal, "format", Constants.CT_FHIR_XML_NEW);
 			terser.addElement(retVal, "format", Constants.FORMAT_XML);
 		}
-		if (myJsonSupported) {
+		if (myContext.isFormatJsonSupported()) {
 			terser.addElement(retVal, "format", Constants.CT_FHIR_JSON_NEW);
 			terser.addElement(retVal, "format", Constants.FORMAT_JSON);
 		}
-		if (myRdfSupported) {
+		if (myContext.isFormatRdfSupported()) {
 			terser.addElement(retVal, "format", Constants.CT_RDF_TURTLE);
 			terser.addElement(retVal, "format", Constants.FORMAT_TURTLE);
 		}

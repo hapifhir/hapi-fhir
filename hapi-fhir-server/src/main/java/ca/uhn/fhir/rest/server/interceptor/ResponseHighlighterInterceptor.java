@@ -236,17 +236,17 @@ public class ResponseHighlighterInterceptor {
 					inTurtleDirective = true;
 					theTarget.append("<span class='hlTagName'>");
 					theTarget.append(nextChar);
-				} else if (!inTurtleDirective && (nextChar == '[' || nextChar == ']' || nextChar == ';')) {
+				} else if (startingLine) {
+					inTurtleDirective = true;
 					theTarget.append("<span class='hlTagName'>");
+					theTarget.append(nextChar);
+				} else if (nextChar == '[' || nextChar == ']' || nextChar == ';' || nextChar == ':') {
+					theTarget.append("<span class='hlControl'>");
 					theTarget.append(nextChar);
 					theTarget.append("</span>");
 				} else {
 					if (nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
-						if (inValue) {
-							theTarget.append("<span class='hlQuot'>&quot;");
-						} else {
-							theTarget.append("<span class='hlTagName'>&quot;");
-						}
+						theTarget.append("<span class='hlQuot'>&quot;");
 						inQuote = true;
 						i += 5;
 					} else {
@@ -628,8 +628,6 @@ public class ResponseHighlighterInterceptor {
 			outputBuffer.append("  position: relative;\n");
 			outputBuffer.append("}");
 			outputBuffer.append(".responseBodyTableFirstColumn {");
-//			outputBuffer.append("  position: absolute;\n");
-//			outputBuffer.append("  width: 70px;\n");
 			outputBuffer.append("}");
 			outputBuffer.append(".responseBodyTableSecondColumn {");
 			outputBuffer.append("  position: absolute;\n");
@@ -675,33 +673,45 @@ public class ResponseHighlighterInterceptor {
 				outputBuffer.append("This result is being rendered in HTML for easy viewing. ");
 				outputBuffer.append("You may access this content as ");
 
-				outputBuffer.append("<a href=\"");
-				outputBuffer.append(createLinkHref(parameters, Constants.FORMAT_JSON));
-				outputBuffer.append("\">Raw JSON</a> or ");
+				if (theRequestDetails.getFhirContext().isFormatJsonSupported()) {
+					outputBuffer.append("<a href=\"");
+					outputBuffer.append(createLinkHref(parameters, Constants.FORMAT_JSON));
+					outputBuffer.append("\">Raw JSON</a> or ");
+				}
 
-				outputBuffer.append("<a href=\"");
-				outputBuffer.append(createLinkHref(parameters, Constants.FORMAT_XML));
-				outputBuffer.append("\">Raw XML</a>, ");
+				if (theRequestDetails.getFhirContext().isFormatXmlSupported()) {
+					outputBuffer.append("<a href=\"");
+					outputBuffer.append(createLinkHref(parameters, Constants.FORMAT_XML));
+					outputBuffer.append("\">Raw XML</a> or ");
+				}
 
-				outputBuffer.append("<a href=\"");
-				outputBuffer.append(createLinkHref(parameters, Constants.FORMAT_TURTLE));
-				outputBuffer.append("\">Raw Turtle</a>, ");
+				if (theRequestDetails.getFhirContext().isFormatRdfSupported()) {
+					outputBuffer.append("<a href=\"");
+					outputBuffer.append(createLinkHref(parameters, Constants.FORMAT_TURTLE));
+					outputBuffer.append("\">Raw Turtle</a> or ");
+				}
 
-				outputBuffer.append(" or view this content in ");
+				outputBuffer.append("view this content in ");
 
-				outputBuffer.append("<a href=\"");
-				outputBuffer.append(createLinkHref(parameters, Constants.FORMATS_HTML_JSON));
-				outputBuffer.append("\">HTML JSON</a> ");
+				if (theRequestDetails.getFhirContext().isFormatJsonSupported()) {
+					outputBuffer.append("<a href=\"");
+					outputBuffer.append(createLinkHref(parameters, Constants.FORMATS_HTML_JSON));
+					outputBuffer.append("\">HTML JSON</a> ");
+				}
 
-				outputBuffer.append("or ");
-				outputBuffer.append("<a href=\"");
-				outputBuffer.append(createLinkHref(parameters, Constants.FORMATS_HTML_XML));
-				outputBuffer.append("\">HTML XML</a>");
+				if (theRequestDetails.getFhirContext().isFormatXmlSupported()) {
+					outputBuffer.append("or ");
+					outputBuffer.append("<a href=\"");
+					outputBuffer.append(createLinkHref(parameters, Constants.FORMATS_HTML_XML));
+					outputBuffer.append("\">HTML XML</a> ");
+				}
 
-				outputBuffer.append("or ");
-				outputBuffer.append("<a href=\"");
-				outputBuffer.append(createLinkHref(parameters, Constants.FORMATS_HTML_TTL));
-				outputBuffer.append("\">HTML Turtle</a>");
+				if (theRequestDetails.getFhirContext().isFormatRdfSupported()) {
+					outputBuffer.append("or ");
+					outputBuffer.append("<a href=\"");
+					outputBuffer.append(createLinkHref(parameters, Constants.FORMATS_HTML_TTL));
+					outputBuffer.append("\">HTML Turtle</a> ");
+				}
 
 				outputBuffer.append(".");
 			}
