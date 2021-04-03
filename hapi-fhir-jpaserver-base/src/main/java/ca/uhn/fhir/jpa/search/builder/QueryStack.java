@@ -525,8 +525,8 @@ public class QueryStack {
 
 				//Ensure that the name of the back-referenced search param on the target (e.g. the `subject` in Patient?_has:Observation:subject:code=sys|val)
 				//exists on the target resource.
-				owningParameterDef = mySearchParamRegistry.getActiveSearchParam(targetResourceType, paramReference);
-				if (owningParameterDef == null) {
+				RuntimeSearchParam joiningParameterDef = mySearchParamRegistry.getActiveSearchParam(targetResourceType, paramReference);
+				if (joiningParameterDef == null) {
 					throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + paramReference);
 				}
 

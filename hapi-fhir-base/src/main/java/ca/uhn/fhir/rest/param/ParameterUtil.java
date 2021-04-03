@@ -121,21 +121,21 @@ public class ParameterUtil {
 
 		if (paramType == RestSearchParameterTypeEnum.COMPOSITE) {
 
-			List<RuntimeSearchParam> theCompositList = theParamDef.getCompositeOf();
+			List<RuntimeSearchParam> compositeList = theParamDef.getCompositeOf();
 
-			if (theCompositList == null) {
+			if (compositeList == null) {
 				throw new ConfigurationException("Search parameter of type " + theUnqualifiedParamName
 						+ " can be found in parameter annotation, found ");
 			}
 
-			if (theCompositList.size() != 2) {
+			if (compositeList.size() != 2) {
 				throw new ConfigurationException("Search parameter of type " + theUnqualifiedParamName
 						+ " must have 2 composite types declared in parameter annotation, found "
-						+ theCompositList.size());
+						+ compositeList.size());
 			}
 
-			RuntimeSearchParam left = theCompositList.get(0);
-			RuntimeSearchParam right = theCompositList.get(1);
+			RuntimeSearchParam left = compositeList.get(0);
+			RuntimeSearchParam right = compositeList.get(1);
 
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			CompositeAndListParam<IQueryParameterType, IQueryParameterType> cp = new CompositeAndListParam(

@@ -138,7 +138,7 @@ public class JpaSearchParamCache {
 				}
 			}
 
-			if (next.getCompositeOf() != null) {
+			if (next.getCompositeOf() != null && next.isUnique()) {
 				next.getCompositeOf().sort((theO1, theO2) -> StringUtils.compare(theO1.getName(), theO2.getName()));
 				for (String nextBase : next.getBase()) {
 					activeParamNamesToUniqueSearchParams.computeIfAbsent(nextBase, v -> new HashMap<>());
