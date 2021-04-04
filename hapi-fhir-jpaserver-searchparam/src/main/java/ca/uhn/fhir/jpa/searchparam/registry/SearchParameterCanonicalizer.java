@@ -54,6 +54,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.startsWith;
 
 @Service
 public class SearchParameterCanonicalizer {
@@ -328,6 +329,10 @@ public class SearchParameterCanonicalizer {
 		for (IBase next : terser.getValues(theNextSp, "component")) {
 			String expression = terser.getSinglePrimitiveValueOrNull(next, "expression");
 			String definition = terser.getSinglePrimitiveValueOrNull(next, "definition");
+			if (startsWith(definition, "/SearchParameter/")) {
+				definition = definition.substring(1);
+			}
+
 			components.add(new RuntimeSearchParam.Component(expression, definition));
 		}
 

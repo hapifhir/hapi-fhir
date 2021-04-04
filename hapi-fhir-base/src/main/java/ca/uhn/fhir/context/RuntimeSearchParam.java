@@ -287,6 +287,10 @@ public class RuntimeSearchParam {
 	public static class Component {
 		private final String myExpression;
 		private final String myReference;
+
+		/**
+		 * Constructor
+		 */
 		public Component(String theExpression, String theReference) {
 			myExpression = theExpression;
 			myReference = theReference;

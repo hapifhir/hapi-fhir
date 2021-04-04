@@ -130,7 +130,7 @@ public class JpaSearchParamCache {
 						.stream()
 						.sorted()
 						.collect(Collectors.joining(", "));
-					String message = "Search parameter " + next.getId().toUnqualifiedVersionless().getValue() + " refers to unknown component " + nextRef + ", ignoring this parameter (valid values: " + existingParams + ")";
+					String message = "Search parameter " + next + " refers to unknown component " + nextRef + ", ignoring this parameter (valid values: " + existingParams + ")";
 					ourLog.warn(message);
 
 					// Interceptor broadcast: JPA_PERFTRACE_WARNING
