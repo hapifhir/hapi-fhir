@@ -408,7 +408,7 @@ class ModelScanner {
 				}
 
 				Collection<String> base = Collections.singletonList(theResourceDef.getName());
-				String url;
+				String url = null;
 				if (theResourceDef.isStandardType()) {
 					url = "http://hl7.org/fhir/SearchParameter/" + theResourceDef.getName().toLowerCase() + "-" + searchParam.name();
 				}
