@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;

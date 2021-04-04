@@ -287,11 +287,18 @@ public class RuntimeSearchParam {
 	public static class Component {
 		private final String myExpression;
 		private final String myReference;
-
 		public Component(String theExpression, String theReference) {
 			myExpression = theExpression;
 			myReference = theReference;
 
+		}
+
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+				.append("expression", myExpression)
+				.append("reference", myReference)
+				.toString();
 		}
 
 		public String getExpression() {
@@ -303,11 +310,4 @@ public class RuntimeSearchParam {
 		}
 	}
 
-	private static ArrayList<RuntimeSearchParam> createCompositeList(RestSearchParameterTypeEnum theParamType) {
-		if (theParamType == RestSearchParameterTypeEnum.COMPOSITE) {
-			return new ArrayList<>();
-		} else {
-			return null;
-		}
-	}
 }

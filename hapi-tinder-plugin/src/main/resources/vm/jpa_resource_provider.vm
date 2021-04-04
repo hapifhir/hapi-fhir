@@ -103,7 +103,7 @@ public class ${className}ResourceProvider extends
 #elseif (${param.type} == 'reference' )
 			@OptionalParam(name="${param.name}", targetTypes={ #{foreach}($nextType in ${param.targetTypes}) ${nextType}.class #{if}($foreach.hasNext), #{end} #{end} } )
 			ReferenceAndListParam the${param.nameCapitalized}, 
-#elseif (${param.type} == 'composite' && ${param.compositeTypes.size()} >= 2)
+#elseif (${param.type} == 'composite')
 			@OptionalParam(name="${param.name}", compositeTypes= { ${param.compositeTypes[0]}Param.class, ${param.compositeTypes[1]}Param.class })
 			CompositeAndListParam<${param.compositeTypes[0]}Param, ${param.compositeTypes[1]}Param> the${param.nameCapitalized},
 #end
@@ -112,13 +112,11 @@ public class ${className}ResourceProvider extends
 			@RawParam
 			Map<String, List<String>> theAdditionalRawParams,
 
-#if ( $version != 'dstu' )
 			@IncludeParam(reverse=true)
 			Set<Include> theRevIncludes,
 			@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
 			@OptionalParam(name="_lastUpdated")
 			DateRangeParam theLastUpdated, 
-#end
 
 			@IncludeParam(allow= {
 #foreach ( $include in $includes )
