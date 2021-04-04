@@ -125,12 +125,7 @@ public class JpaSearchParamCache {
 				if (componentTarget != null) {
 					paramNames.add(componentTarget.getName());
 				} else {
-					String existingParams = idToRuntimeSearchParam
-						.keySet()
-						.stream()
-						.sorted()
-						.collect(Collectors.joining(", "));
-					String message = "Search parameter " + next + " refers to unknown component " + nextRef + ", ignoring this parameter (valid values: " + existingParams + ")";
+					String message = "Search parameter " + next + " refers to unknown component " + nextRef + ", ignoring this parameter";
 					ourLog.warn(message);
 
 					// Interceptor broadcast: JPA_PERFTRACE_WARNING
