@@ -7,7 +7,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.r4.model.CapabilityStatement;
@@ -19,7 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -48,9 +47,7 @@ public class CapabilityStatementCacheR4Test {
 		// Shut down the server
 		myServerExtension.shutDownServer();
 
-		threadNames = Thread.getAllStackTraces().keySet().stream().map(t -> t.getName()).filter(t -> t.startsWith(ConformanceMethodBinding.CACHE_THREAD_PREFIX)).sorted().collect(Collectors.toList());
-		assertThat(threadNames.toString(), threadNames, empty());
-
+		await().until(() -> Thread.getAllStackTraces().keySet().stream().map(t -> t.getName()).filter(t -> t.startsWith(ConformanceMethodBinding.CACHE_THREAD_PREFIX)).sorted().collect(Collectors.toList()), empty());
 	}
 
 	private static class MyCapabilityStatementProvider extends ServerCapabilityStatementProvider {
