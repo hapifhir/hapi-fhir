@@ -598,6 +598,7 @@ public class ServerCapabilityStatementProviderR5Test {
 		rsNoType.init(createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) scNoType.getServerConformance(createHttpServletRequest(), createRequestDetails(rsNoType));
+		conformance.setId("");
 		String confNoType = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(confNoType);
 
@@ -615,6 +616,7 @@ public class ServerCapabilityStatementProviderR5Test {
 		rsWithType.init(createServletConfig());
 
 		CapabilityStatement conformanceWithType = (CapabilityStatement) scWithType.getServerConformance(createHttpServletRequest(), createRequestDetails(rsWithType));
+		conformanceWithType.setId("");
 		String confWithType = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformanceWithType);
 		ourLog.info(confWithType);
 
