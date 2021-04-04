@@ -324,6 +324,10 @@ public abstract class BaseMethodBinding<T> {
 		}
 	}
 
+	public void close() {
+		// subclasses may override
+	}
+
 	@SuppressWarnings("unchecked")
 	public static BaseMethodBinding<?> bindMethod(Method theMethod, FhirContext theContext, Object theProvider) {
 		Read read = theMethod.getAnnotation(Read.class);

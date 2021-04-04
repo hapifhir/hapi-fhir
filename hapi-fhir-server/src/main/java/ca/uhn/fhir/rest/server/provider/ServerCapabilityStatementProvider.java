@@ -47,6 +47,7 @@ import java.util.Map.Entry;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -191,6 +192,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 		TreeMultimap<String, String> resourceTypeToSupportedProfiles = getSupportedProfileMultimap(terser);
 
+		terser.addElement(retVal, "id", UUID.randomUUID().toString());
 		terser.addElement(retVal, "name", "RestServer");
 		terser.addElement(retVal, "publisher", myPublisher);
 		terser.addElement(retVal, "date", conformanceDate(configuration));
