@@ -18,23 +18,35 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
+import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 /*
  * #%L
@@ -71,10 +83,10 @@ public class ResponseHighlighterInterceptor {
 	 */
 	public static final String PARAM_RAW = "_raw";
 	public static final String PARAM_RAW_TRUE = "true";
-	public static final String PARAM_TRUE = "true";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseHighlighterInterceptor.class);
 	private static final String[] PARAM_FORMAT_VALUE_JSON = new String[]{Constants.FORMAT_JSON};
 	private static final String[] PARAM_FORMAT_VALUE_XML = new String[]{Constants.FORMAT_XML};
+	private static final String[] PARAM_FORMAT_VALUE_TTL = new String[]{Constants.FORMAT_TURTLE};
 	private boolean myShowRequestHeaders = false;
 	private boolean myShowResponseHeaders = true;
 
@@ -128,6 +140,9 @@ public class ResponseHighlighterInterceptor {
 		boolean inValue = false;
 		boolean inQuote = false;
 		boolean inTag = false;
+		boolean inTurtleDirective = false;
+		boolean startingLineNext = true;
+		boolean startingLine = false;
 		int lineCount = 1;
 
 		for (int i = 0; i < str.length(); i++) {
@@ -140,13 +155,23 @@ public class ResponseHighlighterInterceptor {
 			char nextChar6 = (i + 5) < str.length() ? str.charAt(i + 5) : ' ';
 
 			if (nextChar == '\n') {
+				if (inTurtleDirective) {
+					theTarget.append("</span>");
+					inTurtleDirective = false;
+				}
 				lineCount++;
 				theTarget.append("</div><div id=\"line");
 				theTarget.append(lineCount);
 				theTarget.append("\" onclick=\"updateHighlightedLineTo('#L");
 				theTarget.append(lineCount);
 				theTarget.append("');\">");
+				startingLineNext = true;
 				continue;
+			} else if (startingLineNext) {
+				startingLineNext = false;
+				startingLine = true;
+			} else {
+				startingLine = false;
 			}
 
 			if (theEncodingEnum == EncodingEnum.JSON) {
@@ -194,7 +219,45 @@ public class ResponseHighlighterInterceptor {
 					}
 				}
 
+			} else if (theEncodingEnum == EncodingEnum.RDF) {
+
+				if (inQuote) {
+					theTarget.append(nextChar);
+					if (prevChar != '\\' && nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
+						theTarget.append("quot;</span>");
+						i += 5;
+						inQuote = false;
+					} else if (nextChar == '\\' && nextChar2 == '"') {
+						theTarget.append("quot;</span>");
+						i += 5;
+						inQuote = false;
+					}
+				} else if (startingLine && nextChar == '@') {
+					inTurtleDirective = true;
+					theTarget.append("<span class='hlTagName'>");
+					theTarget.append(nextChar);
+				} else if (startingLine) {
+					inTurtleDirective = true;
+					theTarget.append("<span class='hlTagName'>");
+					theTarget.append(nextChar);
+				} else if (nextChar == '[' || nextChar == ']' || nextChar == ';' || nextChar == ':') {
+					theTarget.append("<span class='hlControl'>");
+					theTarget.append(nextChar);
+					theTarget.append("</span>");
+				} else {
+					if (nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
+						theTarget.append("<span class='hlQuot'>&quot;");
+						inQuote = true;
+						i += 5;
+					} else {
+						theTarget.append(nextChar);
+					}
+				}
+
 			} else {
+
+				// Ok it's XML
+
 				if (inQuote) {
 					theTarget.append(nextChar);
 					if (nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
@@ -345,6 +408,26 @@ public class ResponseHighlighterInterceptor {
 		return false;
 	}
 
+	@Hook(Pointcut.SERVER_CAPABILITY_STATEMENT_GENERATED)
+	public void capabilityStatementGenerated(RequestDetails theRequestDetails, IBaseConformance theCapabilityStatement) {
+		FhirTerser terser = theRequestDetails.getFhirContext().newTerser();
+
+		Set<String> formats = terser.getValues(theCapabilityStatement, "format", IPrimitiveType.class)
+			.stream()
+			.map(t -> t.getValueAsString())
+			.collect(Collectors.toSet());
+		addFormatConditionally(theCapabilityStatement, terser, formats, Constants.CT_FHIR_JSON_NEW, Constants.FORMATS_HTML_JSON);
+		addFormatConditionally(theCapabilityStatement, terser, formats, Constants.CT_FHIR_XML_NEW, Constants.FORMATS_HTML_XML);
+		addFormatConditionally(theCapabilityStatement, terser, formats, Constants.CT_RDF_TURTLE, Constants.FORMATS_HTML_TTL);
+	}
+
+	private void addFormatConditionally(IBaseConformance theCapabilityStatement, FhirTerser terser, Set<String> formats, String wanted, String toAdd) {
+		if (formats.contains(wanted)) {
+			terser.addElement(theCapabilityStatement, "format", toAdd);
+		}
+	}
+
+
 	private boolean handleOutgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse, String theGraphqlResponse, IBaseResource theResourceResponse) {
 		/*
 		 * Request for _raw
@@ -373,6 +456,9 @@ public class ResponseHighlighterInterceptor {
 			} else if (Constants.FORMATS_HTML_JSON.equals(formatParam)) {
 				force = true;
 				theRequestDetails.addParameter(Constants.PARAM_FORMAT, PARAM_FORMAT_VALUE_JSON);
+			} else if (Constants.FORMATS_HTML_TTL.equals(formatParam)) {
+				force = true;
+				theRequestDetails.addParameter(Constants.PARAM_FORMAT, PARAM_FORMAT_VALUE_TTL);
 			} else {
 				return true;
 			}
@@ -542,8 +628,6 @@ public class ResponseHighlighterInterceptor {
 			outputBuffer.append("  position: relative;\n");
 			outputBuffer.append("}");
 			outputBuffer.append(".responseBodyTableFirstColumn {");
-//			outputBuffer.append("  position: absolute;\n");
-//			outputBuffer.append("  width: 70px;\n");
 			outputBuffer.append("}");
 			outputBuffer.append(".responseBodyTableSecondColumn {");
 			outputBuffer.append("  position: absolute;\n");
@@ -589,24 +673,47 @@ public class ResponseHighlighterInterceptor {
 				outputBuffer.append("This result is being rendered in HTML for easy viewing. ");
 				outputBuffer.append("You may access this content as ");
 
-				outputBuffer.append("<a href=\"");
-				outputBuffer.append(createLinkHref(parameters, Constants.FORMAT_JSON));
-				outputBuffer.append("\">Raw JSON</a> or ");
+				if (theRequestDetails.getFhirContext().isFormatJsonSupported()) {
+					outputBuffer.append("<a href=\"");
+					outputBuffer.append(createLinkHref(parameters, Constants.FORMAT_JSON));
+					outputBuffer.append("\">Raw JSON</a> or ");
+				}
 
-				outputBuffer.append("<a href=\"");
-				outputBuffer.append(createLinkHref(parameters, Constants.FORMAT_XML));
-				outputBuffer.append("\">Raw XML</a>, ");
+				if (theRequestDetails.getFhirContext().isFormatXmlSupported()) {
+					outputBuffer.append("<a href=\"");
+					outputBuffer.append(createLinkHref(parameters, Constants.FORMAT_XML));
+					outputBuffer.append("\">Raw XML</a> or ");
+				}
 
-				outputBuffer.append(" or view this content in ");
+				if (theRequestDetails.getFhirContext().isFormatRdfSupported()) {
+					outputBuffer.append("<a href=\"");
+					outputBuffer.append(createLinkHref(parameters, Constants.FORMAT_TURTLE));
+					outputBuffer.append("\">Raw Turtle</a> or ");
+				}
 
-				outputBuffer.append("<a href=\"");
-				outputBuffer.append(createLinkHref(parameters, Constants.FORMATS_HTML_JSON));
-				outputBuffer.append("\">HTML JSON</a> ");
+				outputBuffer.append("view this content in ");
 
-				outputBuffer.append("or ");
-				outputBuffer.append("<a href=\"");
-				outputBuffer.append(createLinkHref(parameters, Constants.FORMATS_HTML_XML));
-				outputBuffer.append("\">HTML XML</a>.");
+				if (theRequestDetails.getFhirContext().isFormatJsonSupported()) {
+					outputBuffer.append("<a href=\"");
+					outputBuffer.append(createLinkHref(parameters, Constants.FORMATS_HTML_JSON));
+					outputBuffer.append("\">HTML JSON</a> ");
+				}
+
+				if (theRequestDetails.getFhirContext().isFormatXmlSupported()) {
+					outputBuffer.append("or ");
+					outputBuffer.append("<a href=\"");
+					outputBuffer.append(createLinkHref(parameters, Constants.FORMATS_HTML_XML));
+					outputBuffer.append("\">HTML XML</a> ");
+				}
+
+				if (theRequestDetails.getFhirContext().isFormatRdfSupported()) {
+					outputBuffer.append("or ");
+					outputBuffer.append("<a href=\"");
+					outputBuffer.append(createLinkHref(parameters, Constants.FORMATS_HTML_TTL));
+					outputBuffer.append("\">HTML Turtle</a> ");
+				}
+
+				outputBuffer.append(".");
 			}
 
 			Date startTime = (Date) theServletRequest.getAttribute(RestfulServer.REQUEST_START_TIME);
@@ -680,7 +787,7 @@ public class ResponseHighlighterInterceptor {
 			outputBuffer.append("\n");
 
 			InputStream jsStream = ResponseHighlighterInterceptor.class.getResourceAsStream("ResponseHighlighter.js");
-			String jsStr = jsStream != null ? IOUtils.toString(jsStream, "UTF-8") : "console.log('ResponseHighlighterInterceptor: javascript theResource not found')";
+			String jsStr = jsStream != null ? IOUtils.toString(jsStream, StandardCharsets.UTF_8) : "console.log('ResponseHighlighterInterceptor: javascript theResource not found')";
 			jsStr = jsStr.replace("FHIR_BASE", theRequestDetails.getServerBaseForRequest());
 			outputBuffer.append("<script type=\"text/javascript\">");
 			outputBuffer.append(jsStr);
