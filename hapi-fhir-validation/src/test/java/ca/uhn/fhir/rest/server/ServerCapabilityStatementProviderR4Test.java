@@ -659,6 +659,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		rsNoType.init(createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) scNoType.getServerConformance(createHttpServletRequest(), createRequestDetails(rsNoType));
+		conformance.setId("");
 		String confNoType = validate(conformance);
 
 		RestfulServer rsWithType = new RestfulServer(myCtx) {
@@ -675,6 +676,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		rsWithType.init(createServletConfig());
 
 		CapabilityStatement conformanceWithType = (CapabilityStatement) scWithType.getServerConformance(createHttpServletRequest(), createRequestDetails(rsWithType));
+		conformanceWithType.setId("");
 		String confWithType = validate(conformanceWithType);
 
 		assertEquals(confNoType, confWithType);
