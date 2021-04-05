@@ -47,7 +47,8 @@ import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.SourceParam;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
@@ -64,7 +65,6 @@ import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.SpecialParam;
@@ -315,9 +315,9 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			boolean isMeta = ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(chain);
 			RuntimeSearchParam param = null;
 			if (!isMeta) {
-				param = mySearchParamRegistry.getSearchParamByName(typeDef, chain);
+				param = mySearchParamRegistry.getActiveSearchParam(subResourceName, chain);
 				if (param == null) {
-					ourLog.debug("Type {} doesn't have search param {}", nextType.getSimpleName(), param);
+					ourLog.debug("Type {} doesn't have search param {}", subResourceName, param);
 					continue;
 				}
 			}
@@ -397,8 +397,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			}
 
 			if (resourceTypes.isEmpty()) {
-				RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceName);
-				RuntimeSearchParam searchParamByName = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
+				RuntimeSearchParam searchParamByName = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
 				if (searchParamByName == null) {
 					throw new InternalErrorException("Could not find parameter " + theParamName);
 				}
@@ -480,8 +479,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	}
 
 	Predicate createResourceLinkPathPredicate(String theResourceName, String theParamName, From<?, ? extends ResourceLink> from) {
-		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceName);
-		RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
+		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
 		List<String> path = param.getPathsSplit();
 
 		/*
@@ -798,7 +796,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				qp = new TokenParam();
 				break;
 			case COMPOSITE:
-				List<RuntimeSearchParam> compositeOf = theParam.getCompositeOf();
+				List<RuntimeSearchParam> compositeOf = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, theParam);
 				if (compositeOf.size() != 2) {
 					throw new InternalErrorException("Parameter " + theParam.getName() + " has " + compositeOf.size() + " composite parts. Don't know how handlt this.");
 				}
@@ -957,20 +955,19 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				//Ensure that the name of the search param
 				// (e.g. the `code` in Patient?_has:Observation:subject:code=sys|val)
 				// exists on the target resource type.
-				RuntimeSearchParam owningParameterDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramName);
+				RuntimeSearchParam owningParameterDef = mySearchParamRegistry.getActiveSearchParam(targetResourceType, paramName);
 				if (owningParameterDef == null) {
 					throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + parameterName);
 				}
 
 				//Ensure that the name of the back-referenced search param on the target (e.g. the `subject` in Patient?_has:Observation:subject:code=sys|val)
 				//exists on the target resource.
-				owningParameterDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramReference);
-				if (owningParameterDef == null) {
+				RuntimeSearchParam joiningParameterDef = mySearchParamRegistry.getActiveSearchParam(targetResourceType, paramReference);
+				if (joiningParameterDef == null) {
 					throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + paramReference);
 				}
 
-				RuntimeSearchParam paramDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramName);
-				IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>> parsedParam = (IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>>) ParameterUtil.parseQueryParams(myContext, paramDef, paramName, parameters);
+				IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>> parsedParam = (IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>>) JpaParamUtil.parseQueryParams(mySearchParamRegistry, myContext, owningParameterDef, paramName, parameters);
 
 				for (IQueryParameterOr<IQueryParameterType> next : parsedParam.getValuesAsQueryTokens()) {
 					orValues.addAll(next.getValuesAsQueryTokens());
@@ -1011,11 +1008,12 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		}
 		CompositeParam<?, ?> cp = (CompositeParam<?, ?>) or;
 
-		RuntimeSearchParam left = theParamDef.getCompositeOf().get(0);
+		List<RuntimeSearchParam> componentParams = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, theParamDef);
+		RuntimeSearchParam left = componentParams.get(0);
 		IQueryParameterType leftValue = cp.getLeftValue();
 		myQueryStack.addPredicate(createCompositeParamPart(theResourceName, myQueryStack.getRootForComposite(), left, leftValue, theRequestPartitionId));
 
-		RuntimeSearchParam right = theParamDef.getCompositeOf().get(1);
+		RuntimeSearchParam right = componentParams.get(1);
 		IQueryParameterType rightValue = cp.getRightValue();
 		myQueryStack.addPredicate(createCompositeParamPart(theResourceName, myQueryStack.getRootForComposite(), right, rightValue, theRequestPartitionId));
 

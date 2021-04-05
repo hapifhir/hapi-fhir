@@ -43,8 +43,9 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
+import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -367,7 +368,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			boolean isMeta = ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(chain);
 			RuntimeSearchParam param = null;
 			if (!isMeta) {
-				param = mySearchParamRegistry.getSearchParamByName(typeDef, chain);
+				param = mySearchParamRegistry.getActiveSearchParam(nextType, chain);
 				if (param == null) {
 					ourLog.debug("Type {} doesn't have search param {}", nextType, param);
 					continue;
@@ -431,8 +432,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			}
 
 			if (resourceTypes.isEmpty()) {
-				RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(theResourceName);
-				RuntimeSearchParam searchParamByName = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
+				RuntimeSearchParam searchParamByName = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
 				if (searchParamByName == null) {
 					throw new InternalErrorException("Could not find parameter " + theParamName);
 				}
@@ -495,8 +495,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 	}
 
 	public List<String> createResourceLinkPaths(String theResourceName, String theParamName) {
-		RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(theResourceName);
-		RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
+		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
 		List<String> path = param.getPathsSplit();
 
 		/*
@@ -558,7 +557,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 				qp = new TokenParam();
 				break;
 			case COMPOSITE:
-				List<RuntimeSearchParam> compositeOf = theParam.getCompositeOf();
+				List<RuntimeSearchParam> compositeOf = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, theParam);
 				if (compositeOf.size() != 2) {
 					throw new InternalErrorException("Parameter " + theParam.getName() + " has " + compositeOf.size() + " composite parts. Don't know how handlt this.");
 				}

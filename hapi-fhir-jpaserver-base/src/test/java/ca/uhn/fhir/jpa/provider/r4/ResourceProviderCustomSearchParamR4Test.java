@@ -393,7 +393,9 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(fooSp, mySrd);
 
+		myCaptureQueriesListener.clear();
 		mySearchParamRegistry.forceRefresh();
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
 		Patient pat = new Patient();
 		pat.setGender(AdministrativeGender.MALE);

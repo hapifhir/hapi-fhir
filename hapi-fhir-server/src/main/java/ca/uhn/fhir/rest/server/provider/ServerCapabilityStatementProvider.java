@@ -26,7 +26,7 @@ import ca.uhn.fhir.rest.server.method.OperationParameter;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.FhirTerser;
 import com.google.common.collect.TreeMultimap;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -86,7 +86,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	private static final Logger ourLog = LoggerFactory.getLogger(ServerCapabilityStatementProvider.class);
 	private final FhirContext myContext;
 	private final RestfulServer myServer;
-	private final ISearchParamRetriever mySearchParamRetriever;
+	private final ISearchParamRegistry mySearchParamRegistry;
 	private final RestfulServerConfiguration myServerConfiguration;
 	private final IValidationSupport myValidationSupport;
 	private String myPublisher = "Not provided";
@@ -98,7 +98,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	public ServerCapabilityStatementProvider(RestfulServer theServer) {
 		myServer = theServer;
 		myContext = theServer.getFhirContext();
-		mySearchParamRetriever = null;
+		mySearchParamRegistry = null;
 		myServerConfiguration = null;
 		myValidationSupport = null;
 	}
@@ -109,7 +109,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	public ServerCapabilityStatementProvider(FhirContext theContext, RestfulServerConfiguration theServerConfiguration) {
 		myContext = theContext;
 		myServerConfiguration = theServerConfiguration;
-		mySearchParamRetriever = null;
+		mySearchParamRegistry = null;
 		myServer = null;
 		myValidationSupport = null;
 	}
@@ -117,9 +117,9 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	/**
 	 * Constructor
 	 */
-	public ServerCapabilityStatementProvider(RestfulServer theRestfulServer, ISearchParamRetriever theSearchParamRetriever, IValidationSupport theValidationSupport) {
+	public ServerCapabilityStatementProvider(RestfulServer theRestfulServer, ISearchParamRegistry theSearchParamRegistry, IValidationSupport theValidationSupport) {
 		myContext = theRestfulServer.getFhirContext();
-		mySearchParamRetriever = theSearchParamRetriever;
+		mySearchParamRegistry = theSearchParamRegistry;
 		myServer = theRestfulServer;
 		myServerConfiguration = null;
 		myValidationSupport = theValidationSupport;
@@ -349,16 +349,16 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 				}
 
-				ISearchParamRetriever searchParamRetriever;
-				if (mySearchParamRetriever != null) {
-					searchParamRetriever = mySearchParamRetriever;
+				ISearchParamRegistry searchParamRegistry;
+				if (mySearchParamRegistry != null) {
+					searchParamRegistry = mySearchParamRegistry;
 				} else if (myServerConfiguration != null) {
-					searchParamRetriever = myServerConfiguration;
+					searchParamRegistry = myServerConfiguration;
 				} else {
-					searchParamRetriever = myServer.createConfiguration();
+					searchParamRegistry = myServer.createConfiguration();
 				}
 
-				Map<String, RuntimeSearchParam> searchParams = searchParamRetriever.getActiveSearchParams(resourceName);
+				Map<String, RuntimeSearchParam> searchParams = searchParamRegistry.getActiveSearchParams(resourceName);
 				for (RuntimeSearchParam next : searchParams.values()) {
 					IBase searchParam = terser.addElement(resource, "searchParam");
 					terser.addElement(searchParam, "name", next.getName());
@@ -412,7 +412,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 								continue;
 							}
 
-							for (RuntimeSearchParam t : searchParamRetriever
+							for (RuntimeSearchParam t : searchParamRegistry
 								.getActiveSearchParams(nextResourceName)
 								.values()) {
 								if (t.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {

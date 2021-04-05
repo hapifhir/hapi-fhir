@@ -28,35 +28,42 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(RuntimeSearchParamCache.class);
 
 	protected RuntimeSearchParamCache() {
 	}
 
-	public static RuntimeSearchParamCache fromReadOnlySearchParmCache(ReadOnlySearchParamCache theBuiltInSearchParams) {
-		RuntimeSearchParamCache retval = new RuntimeSearchParamCache();
-		retval.putAll(theBuiltInSearchParams);
-		return retval;
-	}
-
 	public void add(String theResourceName, String theName, RuntimeSearchParam theSearchParam) {
 		getSearchParamMap(theResourceName).put(theName, theSearchParam);
+		String uri = theSearchParam.getUri();
+		if (isNotBlank(uri)) {
+			if (myUrlToParam.containsKey(uri)) {
+				ourLog.warn("Multiple search parameters have URL: {}", uri);
+			}
+			myUrlToParam.put(uri, theSearchParam);
+		}
+		if (theSearchParam.getId() != null && theSearchParam.getId().hasIdPart()) {
+			String value = theSearchParam.getId().toUnqualifiedVersionless().getValue();
+			myUrlToParam.put(value, theSearchParam);
+		}
 	}
 
 	public void remove(String theResourceName, String theName) {
-		if (!myMap.containsKey(theResourceName)) {
+		if (!myResourceNameToSpNameToSp.containsKey(theResourceName)) {
 			return;
 		}
-		myMap.get(theResourceName).remove(theName);
+		myResourceNameToSpNameToSp.get(theResourceName).remove(theName);
 	}
 
 	private void putAll(ReadOnlySearchParamCache theReadOnlySearchParamCache) {
-		Set<Map.Entry<String, Map<String, RuntimeSearchParam>>> builtInSps = theReadOnlySearchParamCache.myMap.entrySet();
+		Set<Map.Entry<String, Map<String, RuntimeSearchParam>>> builtInSps = theReadOnlySearchParamCache.myResourceNameToSpNameToSp.entrySet();
 		for (Map.Entry<String, Map<String, RuntimeSearchParam>> nextBuiltInEntry : builtInSps) {
 			for (RuntimeSearchParam nextParam : nextBuiltInEntry.getValue().values()) {
 				String nextResourceName = nextBuiltInEntry.getKey();
-				getSearchParamMap(nextResourceName).put(nextParam.getName(), nextParam);
+				add(nextResourceName, nextParam.getName(), nextParam);
 			}
 
 			ourLog.trace("Have {} built-in SPs for: {}", nextBuiltInEntry.getValue().size(), nextBuiltInEntry.getKey());
@@ -65,7 +72,7 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 
 	public RuntimeSearchParam get(String theResourceName, String theParamName) {
 		RuntimeSearchParam retVal = null;
-		Map<String, RuntimeSearchParam> params = myMap.get(theResourceName);
+		Map<String, RuntimeSearchParam> params = myResourceNameToSpNameToSp.get(theResourceName);
 		if (params != null) {
 			retVal = params.get(theParamName);
 		}
@@ -73,11 +80,17 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 	}
 
 	public Set<String> getResourceNameKeys() {
-		return myMap.keySet();
+		return myResourceNameToSpNameToSp.keySet();
 	}
 
 	@Override
 	protected Map<String, RuntimeSearchParam> getSearchParamMap(String theResourceName) {
-		return myMap.computeIfAbsent(theResourceName, k -> new HashMap<>());
+		return myResourceNameToSpNameToSp.computeIfAbsent(theResourceName, k -> new HashMap<>());
+	}
+
+	public static RuntimeSearchParamCache fromReadOnlySearchParmCache(ReadOnlySearchParamCache theBuiltInSearchParams) {
+		RuntimeSearchParamCache retval = new RuntimeSearchParamCache();
+		retval.putAll(theBuiltInSearchParams);
+		return retval;
 	}
 }
