@@ -85,7 +85,8 @@ public class Constants {
 	public static final String FORMAT_HTML = "html";
 	public static final String FORMAT_JSON = "json";
 	public static final String FORMAT_XML = "xml";
-	public static final String FORMAT_TURTLE = "text/turtle";
+	public static final String CT_RDF_TURTLE_LEGACY = "text/turtle";
+	public static final String FORMAT_TURTLE = "ttl";
 
 
 	/**
@@ -94,6 +95,7 @@ public class Constants {
 	public static final Set<String> FORMATS_HTML;
 	public static final String FORMATS_HTML_JSON = "html/json";
 	public static final String FORMATS_HTML_XML = "html/xml";
+	public static final String FORMATS_HTML_TTL = "html/turtle";
 	public static final String HEADER_ACCEPT = "Accept";
 	public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
 	public static final String HEADER_ACCEPT_VALUE_JSON_NON_LEGACY = CT_FHIR_JSON_NEW + ";q=1.0, " + CT_FHIR_JSON + ";q=0.9";

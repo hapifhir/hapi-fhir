@@ -322,14 +322,32 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				invokeDestroy(iResourceProvider);
 			}
 		}
+
 		if (myServerConformanceProvider != null) {
 			invokeDestroy(myServerConformanceProvider);
 		}
+
 		if (getPlainProviders() != null) {
 			for (Object next : getPlainProviders()) {
 				invokeDestroy(next);
 			}
 		}
+
+		if (myServerConformanceMethod != null) {
+			myServerConformanceMethod.close();
+		}
+		myResourceNameToBinding
+			.values()
+			.stream()
+			.flatMap(t->t.getMethodBindings().stream())
+			.forEach(t->t.close());
+		myGlobalBinding
+			.getMethodBindings()
+			.forEach(t->t.close());
+		myServerBinding
+			.getMethodBindings()
+			.forEach(t->t.close());
+
 	}
 
 	/**

@@ -53,7 +53,8 @@ public class ConformanceMethodBindingTest {
 		sleepAtLeast(20);
 
 		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), mock(RequestDetails.class, RETURNS_DEEP_STUBS), new Object[]{mock(HttpServletRequest.class), mock(RequestDetails.class)});
-		verify(provider, times(2)).getServerConformance(any(), any());
+
+		verify(provider, timeout(10000).times(2)).getServerConformance(any(), any());
 	}
 
 	@Test

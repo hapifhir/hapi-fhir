@@ -171,4 +171,8 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 	public RestfulServerExtension registerInterceptor(Object theInterceptor) {
 		return withServer(t -> t.getInterceptorService().registerInterceptor(theInterceptor));
 	}
+
+	public void shutDownServer() throws Exception {
+		JettyUtil.closeServer(myServer);
+	}
 }
