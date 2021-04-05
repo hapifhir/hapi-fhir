@@ -18,7 +18,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
+	 */
 
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 

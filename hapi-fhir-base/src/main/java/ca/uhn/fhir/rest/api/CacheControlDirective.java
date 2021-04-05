@@ -125,4 +125,11 @@ public class CacheControlDirective {
 
 		return this;
 	}
+
+	/**
+	 * Convenience factory method for a no-cache directivel
+	 */
+	public static CacheControlDirective noCache() {
+		return new CacheControlDirective().setNoCache(true);
+	}
 }

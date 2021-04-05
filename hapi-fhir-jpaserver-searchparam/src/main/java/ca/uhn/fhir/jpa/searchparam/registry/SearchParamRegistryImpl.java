@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.ArrayList;
@@ -94,6 +95,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		}
 	}
 
+	@Nonnull
 	@Override
 	public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
 		requiresActiveSearchParams();
@@ -132,7 +134,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		params.setLoadSynchronousUpTo(MAX_MANAGED_PARAM_COUNT);
 
 		IBundleProvider allSearchParamsBp = mySearchParamProvider.search(params);
-		int size = allSearchParamsBp.size();
+		int size = allSearchParamsBp.sizeOrThrowNpe();
 
 		ourLog.trace("Loaded {} search params from the DB", size);
 

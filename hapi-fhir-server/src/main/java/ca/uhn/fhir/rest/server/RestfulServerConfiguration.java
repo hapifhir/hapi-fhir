@@ -31,13 +31,14 @@ import ca.uhn.fhir.rest.server.method.SearchParameter;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.VersionUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -279,7 +280,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	}
 
 	public Map<String, List<BaseMethodBinding<?>>> collectMethodBindings() {
-		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = new TreeMap<String, List<BaseMethodBinding<?>>>();
+		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = new TreeMap<>();
 		for (ResourceBinding next : getResourceBindings()) {
 			String resourceName = next.getResourceName();
 			for (BaseMethodBinding<?> nextMethodBinding : next.getMethodBindings()) {
@@ -366,14 +367,15 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	}
 
 	@Override
-	public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
+	public Map<String, RuntimeSearchParam> getActiveSearchParams(@Nonnull String theResourceName) {
+		Validate.notBlank(theResourceName, "theResourceName must not be null or blank");
 
 		Map<String, RuntimeSearchParam> retVal = new LinkedHashMap<>();
 
 		collectMethodBindings()
 			.getOrDefault(theResourceName, Collections.emptyList())
 			.stream()
-			.filter(t -> t.getResourceName().equals(theResourceName))
+			.filter(t -> theResourceName.equals(t.getResourceName()))
 			.filter(t -> t instanceof SearchMethodBinding)
 			.map(t -> (SearchMethodBinding) t)
 			.filter(t -> t.getQueryName() == null)

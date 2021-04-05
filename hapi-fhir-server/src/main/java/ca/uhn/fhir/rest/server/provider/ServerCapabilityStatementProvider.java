@@ -44,8 +44,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -80,6 +82,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class ServerCapabilityStatementProvider implements IServerConformanceProvider<IBaseConformance> {
 
+	public static final boolean DEFAULT_REST_RESOURCE_REV_INCLUDES_ENABLED = true;
 	private static final Logger ourLog = LoggerFactory.getLogger(ServerCapabilityStatementProvider.class);
 	private final FhirContext myContext;
 	private final RestfulServer myServer;
@@ -87,6 +90,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	private final RestfulServerConfiguration myServerConfiguration;
 	private final IValidationSupport myValidationSupport;
 	private String myPublisher = "Not provided";
+	private boolean myRestResourceRevIncludesEnabled = DEFAULT_REST_RESOURCE_REV_INCLUDES_ENABLED;
 
 	/**
 	 * Constructor
@@ -188,6 +192,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 		TreeMultimap<String, String> resourceTypeToSupportedProfiles = getSupportedProfileMultimap(terser);
 
+		terser.addElement(retVal, "id", UUID.randomUUID().toString());
 		terser.addElement(retVal, "name", "RestServer");
 		terser.addElement(retVal, "publisher", myPublisher);
 		terser.addElement(retVal, "date", conformanceDate(configuration));
@@ -200,10 +205,18 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		terser.addElement(retVal, "kind", "instance");
 		terser.addElement(retVal, "software.name", configuration.getServerName());
 		terser.addElement(retVal, "software.version", configuration.getServerVersion());
-		terser.addElement(retVal, "format", Constants.CT_FHIR_XML_NEW);
-		terser.addElement(retVal, "format", Constants.CT_FHIR_JSON_NEW);
-		terser.addElement(retVal, "format", Constants.FORMAT_JSON);
-		terser.addElement(retVal, "format", Constants.FORMAT_XML);
+		if (myContext.isFormatXmlSupported()) {
+			terser.addElement(retVal, "format", Constants.CT_FHIR_XML_NEW);
+			terser.addElement(retVal, "format", Constants.FORMAT_XML);
+		}
+		if (myContext.isFormatJsonSupported()) {
+			terser.addElement(retVal, "format", Constants.CT_FHIR_JSON_NEW);
+			terser.addElement(retVal, "format", Constants.FORMAT_JSON);
+		}
+		if (myContext.isFormatRdfSupported()) {
+			terser.addElement(retVal, "format", Constants.CT_RDF_TURTLE);
+			terser.addElement(retVal, "format", Constants.FORMAT_TURTLE);
+		}
 		terser.addElement(retVal, "status", "active");
 
 		IBase rest = terser.addElement(retVal, "rest");
@@ -215,13 +228,25 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = configuration.collectMethodBindings();
 		Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype = configuration.getNameToSharedSupertype();
 
+		TreeMultimap<String, String> resourceNameToIncludes = TreeMultimap.create();
+		TreeMultimap<String, String> resourceNameToRevIncludes = TreeMultimap.create();
+		for (Entry<String, List<BaseMethodBinding<?>>> nextEntry : resourceToMethods.entrySet()) {
+			String resourceName = nextEntry.getKey();
+			for (BaseMethodBinding<?> nextMethod : nextEntry.getValue()) {
+				if (nextMethod instanceof SearchMethodBinding) {
+					resourceNameToIncludes.putAll(resourceName, nextMethod.getIncludes());
+					resourceNameToRevIncludes.putAll(resourceName, nextMethod.getRevIncludes());
+				}
+			}
+
+		}
+
 		for (Entry<String, List<BaseMethodBinding<?>>> nextEntry : resourceToMethods.entrySet()) {
 
+			String resourceName = nextEntry.getKey();
 			if (nextEntry.getKey().isEmpty() == false) {
 				Set<String> resourceOps = new HashSet<>();
-				Set<String> resourceIncludes = new HashSet<>();
 				IBase resource = terser.addElement(rest, "resource");
-				String resourceName = nextEntry.getKey();
 
 				postProcessRestResource(terser, resource, resourceName);
 
@@ -271,6 +296,29 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 							case UPDATE:
 								terser.setElement(resource, "conditionalUpdate", "true");
 								break;
+							case HISTORY_INSTANCE:
+							case HISTORY_SYSTEM:
+							case HISTORY_TYPE:
+							case READ:
+							case SEARCH_SYSTEM:
+							case SEARCH_TYPE:
+							case TRANSACTION:
+							case VALIDATE:
+							case VREAD:
+							case METADATA:
+							case META_ADD:
+							case META:
+							case META_DELETE:
+							case PATCH:
+							case BATCH:
+							case ADD_TAGS:
+							case DELETE_TAGS:
+							case GET_TAGS:
+							case GET_PAGE:
+							case GRAPHQL_REQUEST:
+							case EXTENDED_OPERATION_SERVER:
+							case EXTENDED_OPERATION_TYPE:
+							case EXTENDED_OPERATION_INSTANCE:
 							default:
 								break;
 						}
@@ -287,10 +335,6 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 								terser.addElement(operation, "name", methodBinding.getQueryName());
 								terser.addElement(operation, "definition", (getOperationDefinitionPrefix(theRequestDetails) + "OperationDefinition/" + queryName));
 							}
-						} else {
-
-							resourceIncludes.addAll(methodBinding.getIncludes());
-
 						}
 					} else if (nextMethodBinding instanceof OperationMethodBinding) {
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
@@ -305,52 +349,99 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 				}
 
-				ISearchParamRegistry searchParamRetriever = mySearchParamRegistry;
-				if (searchParamRetriever == null && myServerConfiguration != null) {
+				ISearchParamRetriever searchParamRetriever;
+				if (mySearchParamRetriever != null) {
+					searchParamRetriever = mySearchParamRetriever;
+				} else if (myServerConfiguration != null) {
 					searchParamRetriever = myServerConfiguration;
-				} else if (searchParamRetriever == null) {
+				} else {
 					searchParamRetriever = myServer.createConfiguration();
 				}
 
 				Map<String, RuntimeSearchParam> searchParams = searchParamRetriever.getActiveSearchParams(resourceName);
-				if (searchParams != null) {
-					for (RuntimeSearchParam next : searchParams.values()) {
-						IBase searchParam = terser.addElement(resource, "searchParam");
-						terser.addElement(searchParam, "name", next.getName());
-						terser.addElement(searchParam, "type", next.getParamType().getCode());
-						if (isNotBlank(next.getDescription())) {
-							terser.addElement(searchParam, "documentation", next.getDescription());
-						}
-
-						String spUri = next.getUri();
-						if (isBlank(spUri) && servletRequest != null) {
-							String id;
-							if (next.getId() != null) {
-								id = next.getId().toUnqualifiedVersionless().getValue();
-							} else {
-								id = resourceName + "-" + next.getName();
-							}
-							spUri = configuration.getServerAddressStrategy().determineServerBase(servletRequest.getServletContext(), servletRequest) + "/" + id;
-						}
-						if (isNotBlank(spUri)) {
-							terser.addElement(searchParam, "definition", spUri);
-						}
+				for (RuntimeSearchParam next : searchParams.values()) {
+					IBase searchParam = terser.addElement(resource, "searchParam");
+					terser.addElement(searchParam, "name", next.getName());
+					terser.addElement(searchParam, "type", next.getParamType().getCode());
+					if (isNotBlank(next.getDescription())) {
+						terser.addElement(searchParam, "documentation", next.getDescription());
 					}
 
-					if (resourceIncludes.isEmpty()) {
-						for (String nextInclude : searchParams.values().stream().filter(t -> t.getParamType() == RestSearchParameterTypeEnum.REFERENCE).map(t -> t.getName()).sorted().collect(Collectors.toList())) {
-							terser.addElement(resource, "searchInclude", nextInclude);
+					String spUri = next.getUri();
+					if (isBlank(spUri) && servletRequest != null) {
+						String id;
+						if (next.getId() != null) {
+							id = next.getId().toUnqualifiedVersionless().getValue();
+						} else {
+							id = resourceName + "-" + next.getName();
 						}
+						spUri = configuration.getServerAddressStrategy().determineServerBase(servletRequest.getServletContext(), servletRequest) + "/" + id;
 					}
-
+					if (isNotBlank(spUri)) {
+						terser.addElement(searchParam, "definition", spUri);
+					}
 				}
 
+				// Add Include to CapabilityStatement.rest.resource
+				NavigableSet<String> resourceIncludes = resourceNameToIncludes.get(resourceName);
+				if (resourceIncludes.isEmpty()) {
+					List<String> includes = searchParams
+						.values()
+						.stream()
+						.filter(t -> t.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
+						.map(t -> resourceName + ":" + t.getName())
+						.sorted()
+						.collect(Collectors.toList());
+					terser.addElement(resource, "searchInclude", "*");
+					for (String nextInclude : includes) {
+						terser.addElement(resource, "searchInclude", nextInclude);
+					}
+				} else {
+					for (String resourceInclude : resourceIncludes) {
+						terser.addElement(resource, "searchInclude", resourceInclude);
+					}
+				}
+
+				// Add RevInclude to CapabilityStatement.rest.resource
+				if (myRestResourceRevIncludesEnabled) {
+					NavigableSet<String> resourceRevIncludes = resourceNameToRevIncludes.get(resourceName);
+					if (resourceRevIncludes.isEmpty()) {
+						TreeSet<String> revIncludes = new TreeSet<>();
+						for (String nextResourceName : resourceToMethods.keySet()) {
+							if (isBlank(nextResourceName)) {
+								continue;
+							}
+
+							for (RuntimeSearchParam t : searchParamRetriever
+								.getActiveSearchParams(nextResourceName)
+								.values()) {
+								if (t.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
+									if (isNotBlank(t.getName())) {
+										boolean appropriateTarget = false;
+										if (t.getTargets().contains(resourceName) || t.getTargets().isEmpty()) {
+											appropriateTarget = true;
+										}
+
+										if (appropriateTarget) {
+											revIncludes.add(nextResourceName + ":" + t.getName());
+										}
+									}
+								}
+							}
+						}
+						for (String nextInclude : revIncludes) {
+							terser.addElement(resource, "searchRevInclude", nextInclude);
+						}
+					} else {
+						for (String resourceInclude : resourceRevIncludes) {
+							terser.addElement(resource, "searchRevInclude", resourceInclude);
+						}
+					}
+				}
+
+				// Add SupportedProfile to CapabilityStatement.rest.resource
 				for (String supportedProfile : resourceTypeToSupportedProfiles.get(resourceName)) {
 					terser.addElement(resource, "supportedProfile", supportedProfile);
-				}
-
-				for (String resourceInclude : resourceIncludes) {
-					terser.addElement(resource, "searchInclude", resourceInclude);
 				}
 
 			} else {
@@ -384,7 +475,6 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 			List<IBaseResource> allStructureDefinitions = myValidationSupport.fetchAllNonBaseStructureDefinitions();
 			if (allStructureDefinitions != null) {
 				for (IBaseResource next : allStructureDefinitions) {
-					String id = next.getIdElement().getValue();
 					String kind = terser.getSinglePrimitiveValueOrNull(next, "kind");
 					String url = terser.getSinglePrimitiveValueOrNull(next, "url");
 					String baseDefinition = defaultString(terser.getSinglePrimitiveValueOrNull(next, "baseDefinition"));
@@ -609,4 +699,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		// ignore
 	}
 
+	public void setRestResourceRevIncludesEnabled(boolean theRestResourceRevIncludesEnabled) {
+		myRestResourceRevIncludesEnabled = theRestResourceRevIncludesEnabled;
+	}
 }

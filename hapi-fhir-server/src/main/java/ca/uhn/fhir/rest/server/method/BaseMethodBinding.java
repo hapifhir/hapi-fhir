@@ -138,10 +138,21 @@ public abstract class BaseMethodBinding<T> {
 	}
 
 	public Set<String> getIncludes() {
-		Set<String> retVal = new TreeSet<String>();
+		return doGetIncludesOrRevIncludes(false);
+	}
+
+	public Set<String> getRevIncludes() {
+		return doGetIncludesOrRevIncludes(true);
+	}
+
+	private Set<String> doGetIncludesOrRevIncludes(boolean reverse) {
+		Set<String> retVal = new TreeSet<>();
 		for (IParameter next : myParameters) {
 			if (next instanceof IncludeParameter) {
-				retVal.addAll(((IncludeParameter) next).getAllow());
+				IncludeParameter includeParameter = (IncludeParameter) next;
+				if (includeParameter.isReverse() == reverse) {
+					retVal.addAll(includeParameter.getAllow());
+				}
 			}
 		}
 		return retVal;
@@ -311,6 +322,10 @@ public abstract class BaseMethodBinding<T> {
 		} else {
 			throw new InternalErrorException("Unexpected return type: " + response.getClass().getCanonicalName());
 		}
+	}
+
+	public void close() {
+		// subclasses may override
 	}
 
 	@SuppressWarnings("unchecked")
