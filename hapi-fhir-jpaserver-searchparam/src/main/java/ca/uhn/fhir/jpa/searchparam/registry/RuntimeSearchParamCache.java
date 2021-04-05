@@ -52,14 +52,14 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 	}
 
 	public void remove(String theResourceName, String theName) {
-		if (!myMap.containsKey(theResourceName)) {
+		if (!myResourceNameToSpNameToSp.containsKey(theResourceName)) {
 			return;
 		}
-		myMap.get(theResourceName).remove(theName);
+		myResourceNameToSpNameToSp.get(theResourceName).remove(theName);
 	}
 
 	private void putAll(ReadOnlySearchParamCache theReadOnlySearchParamCache) {
-		Set<Map.Entry<String, Map<String, RuntimeSearchParam>>> builtInSps = theReadOnlySearchParamCache.myMap.entrySet();
+		Set<Map.Entry<String, Map<String, RuntimeSearchParam>>> builtInSps = theReadOnlySearchParamCache.myResourceNameToSpNameToSp.entrySet();
 		for (Map.Entry<String, Map<String, RuntimeSearchParam>> nextBuiltInEntry : builtInSps) {
 			for (RuntimeSearchParam nextParam : nextBuiltInEntry.getValue().values()) {
 				String nextResourceName = nextBuiltInEntry.getKey();
@@ -72,7 +72,7 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 
 	public RuntimeSearchParam get(String theResourceName, String theParamName) {
 		RuntimeSearchParam retVal = null;
-		Map<String, RuntimeSearchParam> params = myMap.get(theResourceName);
+		Map<String, RuntimeSearchParam> params = myResourceNameToSpNameToSp.get(theResourceName);
 		if (params != null) {
 			retVal = params.get(theParamName);
 		}
@@ -80,12 +80,12 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 	}
 
 	public Set<String> getResourceNameKeys() {
-		return myMap.keySet();
+		return myResourceNameToSpNameToSp.keySet();
 	}
 
 	@Override
 	protected Map<String, RuntimeSearchParam> getSearchParamMap(String theResourceName) {
-		return myMap.computeIfAbsent(theResourceName, k -> new HashMap<>());
+		return myResourceNameToSpNameToSp.computeIfAbsent(theResourceName, k -> new HashMap<>());
 	}
 
 	public static RuntimeSearchParamCache fromReadOnlySearchParmCache(ReadOnlySearchParamCache theBuiltInSearchParams) {

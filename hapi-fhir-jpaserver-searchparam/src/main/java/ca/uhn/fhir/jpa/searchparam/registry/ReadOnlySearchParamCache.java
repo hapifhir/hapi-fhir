@@ -33,14 +33,14 @@ import java.util.stream.Stream;
 public class ReadOnlySearchParamCache {
 
 	// resourceName -> searchParamName -> searchparam
-	protected final Map<String, Map<String, RuntimeSearchParam>> myMap;
+	protected final Map<String, Map<String, RuntimeSearchParam>> myResourceNameToSpNameToSp;
 	protected final Map<String, RuntimeSearchParam> myUrlToParam;
 
 	/**
 	 * Constructor
 	 */
 	ReadOnlySearchParamCache() {
-		myMap = new HashMap<>();
+		myResourceNameToSpNameToSp = new HashMap<>();
 		myUrlToParam = new HashMap<>();
 	}
 
@@ -48,24 +48,24 @@ public class ReadOnlySearchParamCache {
 	 * Copy constructor
 	 */
 	private ReadOnlySearchParamCache(RuntimeSearchParamCache theRuntimeSearchParamCache) {
-		myMap = theRuntimeSearchParamCache.myMap;
+		myResourceNameToSpNameToSp = theRuntimeSearchParamCache.myResourceNameToSpNameToSp;
 		myUrlToParam = theRuntimeSearchParamCache.myUrlToParam;
 	}
 
 	public Stream<RuntimeSearchParam> getSearchParamStream() {
-		return myMap.values().stream().flatMap(entry -> entry.values().stream());
+		return myResourceNameToSpNameToSp.values().stream().flatMap(entry -> entry.values().stream());
 	}
 
 	protected Map<String, RuntimeSearchParam> getSearchParamMap(String theResourceName) {
-		Map<String, RuntimeSearchParam> retval = myMap.get(theResourceName);
+		Map<String, RuntimeSearchParam> retval = myResourceNameToSpNameToSp.get(theResourceName);
 		if (retval == null) {
 			return Collections.emptyMap();
 		}
-		return Collections.unmodifiableMap(myMap.get(theResourceName));
+		return Collections.unmodifiableMap(myResourceNameToSpNameToSp.get(theResourceName));
 	}
 
 	public int size() {
-		return myMap.size();
+		return myResourceNameToSpNameToSp.size();
 	}
 
 	public RuntimeSearchParam getByUrl(String theUrl) {
@@ -81,7 +81,7 @@ public class ReadOnlySearchParamCache {
 			RuntimeResourceDefinition nextResDef = theFhirContext.getResourceDefinition(resourceName);
 			String nextResourceName = nextResDef.getName();
 			HashMap<String, RuntimeSearchParam> nameToParam = new HashMap<>();
-			retval.myMap.put(nextResourceName, nameToParam);
+			retval.myResourceNameToSpNameToSp.put(nextResourceName, nameToParam);
 
 			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
 				nameToParam.put(nextSp.getName(), nextSp);
