@@ -327,7 +327,7 @@ public class SearchParamExtractorR4Test {
 	public void testExtensionContainingReference() {
 		String path = "Patient.extension('http://patext').value.as(Reference)";
 
-		RuntimeSearchParam sp = new RuntimeSearchParam("extpat", "Patient SP", path, RestSearchParameterTypeEnum.REFERENCE, new HashSet<>(), Sets.newHashSet("Patient"), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
+		RuntimeSearchParam sp = new RuntimeSearchParam(null, null, "extpat", "Patient SP", path, RestSearchParameterTypeEnum.REFERENCE, new HashSet<>(), Sets.newHashSet("Patient"), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, false, null, null);
 		mySearchParamRegistry.addSearchParam(sp);
 
 		Patient patient = new Patient();

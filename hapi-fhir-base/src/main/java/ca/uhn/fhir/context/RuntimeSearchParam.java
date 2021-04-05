@@ -63,24 +63,8 @@ public class RuntimeSearchParam {
 	 * Constructor
 	 */
 	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType,
-									  Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus) {
-		this(theId, theUri, theName, theDescription, thePath, theParamType, theProvidesMembershipInCompartments, theTargets, theStatus, false, null, null);
-	}
-
-	/**
-	 * Constructor
-	 */
-	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType,
 									  Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, Collection<String> theBase) {
 		this(theId, theUri, theName, theDescription, thePath, theParamType, theProvidesMembershipInCompartments, theTargets, theStatus, false, Collections.emptyList(), theBase);
-	}
-
-	/**
-	 * Constructor
-	 */
-	// FIXME: who calls this?
-	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus) {
-		this(null, null, theName, theDescription, thePath, theParamType, theProvidesMembershipInCompartments, theTargets, theStatus, false, null, null);
 	}
 
 	/**
