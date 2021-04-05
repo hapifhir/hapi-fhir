@@ -349,16 +349,16 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 				}
 
-				ISearchParamRetriever searchParamRetriever;
-				if (mySearchParamRetriever != null) {
-					searchParamRetriever = mySearchParamRetriever;
+				ISearchParamRegistry searchParamRegistry;
+				if (mySearchParamRegistry != null) {
+					searchParamRegistry = mySearchParamRegistry;
 				} else if (myServerConfiguration != null) {
-					searchParamRetriever = myServerConfiguration;
+					searchParamRegistry = myServerConfiguration;
 				} else {
-					searchParamRetriever = myServer.createConfiguration();
+					searchParamRegistry = myServer.createConfiguration();
 				}
 
-				Map<String, RuntimeSearchParam> searchParams = searchParamRetriever.getActiveSearchParams(resourceName);
+				Map<String, RuntimeSearchParam> searchParams = searchParamRegistry.getActiveSearchParams(resourceName);
 				for (RuntimeSearchParam next : searchParams.values()) {
 					IBase searchParam = terser.addElement(resource, "searchParam");
 					terser.addElement(searchParam, "name", next.getName());
@@ -412,7 +412,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 								continue;
 							}
 
-							for (RuntimeSearchParam t : searchParamRetriever
+							for (RuntimeSearchParam t : searchParamRegistry
 								.getActiveSearchParams(nextResourceName)
 								.values()) {
 								if (t.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
