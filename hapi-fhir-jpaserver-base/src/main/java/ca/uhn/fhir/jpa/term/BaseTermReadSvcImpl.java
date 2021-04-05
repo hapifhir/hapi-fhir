@@ -2184,11 +2184,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			retVal = createFailureCodeValidationResult(theCodeSystem, theCode, append);
 		}
 
-		if (retVal == null) {
-			String append = " - Unable to expand ValueSet[" + theValueSetUrl + "]";
-			retVal = createFailureCodeValidationResult(theCodeSystem, theCode, append);
-		}
-
 		return retVal;
 
 	}
