@@ -27,6 +27,7 @@ import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
@@ -43,6 +44,7 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -104,7 +106,8 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 
 	@Override
 	public ValueSet expand(IIdType theId, ValueSetExpansionOptions theOptions, RequestDetails theRequest) {
-		throw new UnsupportedOperationException();
+		ValueSet source = loadValueSetForExpansion(theId, theRequest);
+		return expand(source, theOptions);
 	}
 
 	@Override
@@ -184,6 +187,21 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 			valueSetIds.add(id);
 		}
 		return valueSetIds;
+	}
+
+	private ValueSet loadValueSetForExpansion(IIdType theId, RequestDetails theRequest) {
+		if (theId.getValue().startsWith("http://hl7.org/fhir/")) {
+			org.hl7.fhir.dstu2.model.ValueSet valueSet = myValidationSupport.fetchResource(org.hl7.fhir.dstu2.model.ValueSet.class, theId.getValue());
+			if (valueSet != null) {
+				return getContext().newJsonParser().parseResource(ValueSet.class, myRiCtx.newJsonParser().encodeResourceToString(valueSet));
+			}
+		}
+		BaseHasResource sourceEntity = readEntity(theId, theRequest);
+		if (sourceEntity == null) {
+			throw new ResourceNotFoundException(theId);
+		}
+		ValueSet source = (ValueSet) toResource(sourceEntity, false);
+		return source;
 	}
 
 	private IValidationSupport.LookupCodeResult lookup(List<ExpansionContains> theContains, String theSystem, String theCode) {
