@@ -75,7 +75,7 @@ public class CqlMeasureEvaluationDstu3Test extends BaseCqlDstu3Test {
 		assertNotNull("expected MeasureReport can not be null", expected);
 		assertNotNull("actual MeasureReport can not be null", actual);
 
-		String errorLocator = String.format("Measure: %s, Subject: %s", expected.getMeasure(),
+		String errorLocator = String.format("Measure: %s, Subject: %s", expected.getMeasure().getReference(),
 				expected.getPatient().getReference());
 
 		assertEquals(expected.hasGroup(), actual.hasGroup(), errorLocator);
@@ -83,10 +83,10 @@ public class CqlMeasureEvaluationDstu3Test extends BaseCqlDstu3Test {
 
 		for (MeasureReportGroupComponent mrgcExpected : expected.getGroup()) {
 			Optional<MeasureReportGroupComponent> mrgcActualOptional = actual.getGroup().stream()
-					.filter(x -> x.getId().equals(mrgcExpected.getId())).findFirst();
+					.filter(x -> x.getIdentifier() != null && x.getIdentifier().getValue().equals(mrgcExpected.getIdentifier().getValue())).findFirst();
 
-			errorLocator = String.format("Measure: %s, Subject: %s, Group: %s", expected.getMeasure(),
-					expected.getPatient().getReference(), mrgcExpected.getId());
+			errorLocator = String.format("Measure: %s, Subject: %s, Group: %s", expected.getMeasure().getReference(),
+					expected.getPatient().getReference(), mrgcExpected.getIdentifier().getValue());
 			assertTrue(errorLocator, mrgcActualOptional.isPresent());
 
 			MeasureReportGroupComponent mrgcActual = mrgcActualOptional.get();
@@ -94,7 +94,7 @@ public class CqlMeasureEvaluationDstu3Test extends BaseCqlDstu3Test {
 			if (mrgcExpected.getMeasureScore() == null) {
 				assertNull(mrgcActual.getMeasureScore(), errorLocator);
 			} else {
-				assertNotNull(mrgcActual.getMeasureScore());
+				assertNotNull(errorLocator, mrgcActual.getMeasureScore());
 				BigDecimal decimalExpected = mrgcExpected.getMeasureScore();
 				BigDecimal decimalActual = mrgcActual.getMeasureScore();
 
@@ -135,10 +135,8 @@ public class CqlMeasureEvaluationDstu3Test extends BaseCqlDstu3Test {
 		return new DateTimeType(date).getValueAsString();
 	}
 
-	// As of 2/11/2021, all the DSTU3 bundles in the Connectathon IG are out of date
-	// and can't be posted
-	// @Test
-	// public void test_EXM117_83000() throws IOException {
-	// 	this.testMeasureBundle("dstu3/connectathon/EXM117_FHIR3-8.3.000-bundle.json");
-	// }
+	@Test
+	public void test_EXM124_FHIR3_72000() throws IOException {
+		this.testMeasureBundle("dstu3/connectathon/EXM124-FHIR3-7.2.000-bundle.json");
+	}
 }
