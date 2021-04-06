@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2523
+title: "A new Validation Support Module has been added called UnknownCodeSystemWarningValidationSupport. This module
+  allows validation to produce a warning but not an error if a code being validated references
+  an unknown code system."

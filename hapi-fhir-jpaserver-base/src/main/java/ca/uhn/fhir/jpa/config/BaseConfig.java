@@ -130,6 +130,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
@@ -226,7 +227,6 @@ public abstract class BaseConfig {
 	public void setSearchCoordQueueCapacity(Integer searchCoordQueueCapacity) {
 		this.searchCoordQueueCapacity = searchCoordQueueCapacity;
 	}
-
 
 	@Bean
 	public BatchConfigurer batchConfigurer() {
@@ -832,6 +832,11 @@ public abstract class BaseConfig {
 	@Bean
 	public JpaResourceLoader jpaResourceLoader() {
 		return new JpaResourceLoader();
+	}
+
+	@Bean
+	public UnknownCodeSystemWarningValidationSupport unknownCodeSystemWarningValidationSupport() {
+		return new UnknownCodeSystemWarningValidationSupport(fhirContext());
 	}
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
