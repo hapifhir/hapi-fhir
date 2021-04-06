@@ -20,16 +20,20 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.apache.commons.io.IOUtils;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
 
 import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
+import java.io.IOException;
+import java.io.Reader;
 import java.io.Serializable;
+import java.sql.Clob;
+import java.sql.SQLException;
 
 @Entity
 @Immutable
@@ -39,26 +43,28 @@ import java.io.Serializable;
 	 * because hibernate won't allow the view the function without it, but
 	 */
 	"SELECT CONCAT_WS(' ', vsc.PID, vscd.PID) AS PID, " +
-	"       vsc.PID              AS CONCEPT_PID, " +
-	"       vsc.VALUESET_PID     AS CONCEPT_VALUESET_PID, " +
-	"       vsc.VALUESET_ORDER   AS CONCEPT_VALUESET_ORDER, " +
-	"       vsc.SYSTEM_URL       AS CONCEPT_SYSTEM_URL, " +
-	"       vsc.CODEVAL          AS CONCEPT_CODEVAL, " +
-	"       vsc.DISPLAY          AS CONCEPT_DISPLAY, " +
-	"       vscd.PID             AS DESIGNATION_PID, " +
-	"       vscd.LANG            AS DESIGNATION_LANG, " +
-	"       vscd.USE_SYSTEM      AS DESIGNATION_USE_SYSTEM, " +
-	"       vscd.USE_CODE        AS DESIGNATION_USE_CODE, " +
-	"       vscd.USE_DISPLAY     AS DESIGNATION_USE_DISPLAY, " +
-	"       vscd.VAL             AS DESIGNATION_VAL " +
-	"FROM TRM_VALUESET_CONCEPT vsc " +
-	"LEFT OUTER JOIN TRM_VALUESET_C_DESIGNATION vscd ON vsc.PID = vscd.VALUESET_CONCEPT_PID"
+		"       vsc.PID                         AS CONCEPT_PID, " +
+		"       vsc.VALUESET_PID                AS CONCEPT_VALUESET_PID, " +
+		"       vsc.VALUESET_ORDER              AS CONCEPT_VALUESET_ORDER, " +
+		"       vsc.SYSTEM_URL                  AS CONCEPT_SYSTEM_URL, " +
+		"       vsc.CODEVAL                     AS CONCEPT_CODEVAL, " +
+		"       vsc.DISPLAY                     AS CONCEPT_DISPLAY, " +
+		"       vsc.SOURCE_PID                  AS SOURCE_PID, " +
+		"       vsc.SOURCE_DIRECT_PARENT_PIDS   AS SOURCE_DIRECT_PARENT_PIDS, " +
+		"       vscd.PID                        AS DESIGNATION_PID, " +
+		"       vscd.LANG                       AS DESIGNATION_LANG, " +
+		"       vscd.USE_SYSTEM                 AS DESIGNATION_USE_SYSTEM, " +
+		"       vscd.USE_CODE                   AS DESIGNATION_USE_CODE, " +
+		"       vscd.USE_DISPLAY                AS DESIGNATION_USE_DISPLAY, " +
+		"       vscd.VAL                        AS DESIGNATION_VAL " +
+		"FROM TRM_VALUESET_CONCEPT vsc " +
+		"LEFT OUTER JOIN TRM_VALUESET_C_DESIGNATION vscd ON vsc.PID = vscd.VALUESET_CONCEPT_PID"
 )
-public class TermValueSetConceptView implements Serializable {
+public class TermValueSetConceptView implements Serializable, ITermValueSetConceptView {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@Column(name="PID", length = 1000 /* length only needed to satisfy JpaEntityTest, it's not used*/)
+	@Column(name = "PID", length = 1000 /* length only needed to satisfy JpaEntityTest, it's not used*/)
 	private String id; // still set automatically
 
 	@Column(name = "CONCEPT_PID")
@@ -97,43 +103,76 @@ public class TermValueSetConceptView implements Serializable {
 	@Column(name = "DESIGNATION_VAL", length = TermConceptDesignation.MAX_VAL_LENGTH)
 	private String myDesignationVal;
 
+	@Column(name = "SOURCE_PID", nullable = true)
+	private Long mySourceConceptPid;
 
+	@Lob
+	@Column(name = "SOURCE_DIRECT_PARENT_PIDS", nullable = true)
+	private Clob mySourceConceptDirectParentPids;
+
+	@Override
+	public Long getSourceConceptPid() {
+		return mySourceConceptPid;
+	}
+
+	@Override
+	public String getSourceConceptDirectParentPids() {
+		if (mySourceConceptDirectParentPids != null) {
+			try (Reader characterStream = mySourceConceptDirectParentPids.getCharacterStream()) {
+				return IOUtils.toString(characterStream);
+			} catch (IOException | SQLException e) {
+				throw new InternalErrorException(e);
+			}
+		}
+		return null;
+	}
+
+	@Override
 	public Long getConceptPid() {
 		return myConceptPid;
 	}
 
+	@Override
 	public String getConceptSystemUrl() {
 		return myConceptSystemUrl;
 	}
 
+	@Override
 	public String getConceptCode() {
 		return myConceptCode;
 	}
 
+	@Override
 	public String getConceptDisplay() {
 		return myConceptDisplay;
 	}
 
+	@Override
 	public Long getDesignationPid() {
 		return myDesignationPid;
 	}
 
+	@Override
 	public String getDesignationLang() {
 		return myDesignationLang;
 	}
 
+	@Override
 	public String getDesignationUseSystem() {
 		return myDesignationUseSystem;
 	}
 
+	@Override
 	public String getDesignationUseCode() {
 		return myDesignationUseCode;
 	}
 
+	@Override
 	public String getDesignationUseDisplay() {
 		return myDesignationUseDisplay;
 	}
 
+	@Override
 	public String getDesignationVal() {
 		return myDesignationVal;
 	}

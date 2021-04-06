@@ -29,9 +29,9 @@ public interface IValueSetConceptAccumulator {
 
 	void addMessage(String theMessage);
 
-	void includeConcept(String theSystem, String theCode, String theDisplay);
+	void includeConcept(String theSystem, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids);
 
-	void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, @Nullable Collection<TermConceptDesignation> theDesignations);
+	void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, @Nullable Collection<TermConceptDesignation> theDesignations, Long theSourceConceptPid, String theSourceConceptDirectParentPids);
 
 	/**
 	 * @return Returns <code>true</code> if the code was actually present and was removed
@@ -46,6 +46,10 @@ public interface IValueSetConceptAccumulator {
 	@Nullable
 	default Integer getSkipCountRemaining() {
 		return null;
+	}
+
+	default boolean isTrackingHierarchy() {
+		return true;
 	}
 
 	@Nullable
