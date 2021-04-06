@@ -60,6 +60,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest.URL_MY_VALUE_SET;
+import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -1043,29 +1044,96 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 
 	@Test
-	public void testExpandUsingHierarchy() {
+	public void testExpandUsingHierarchy_PreStored_NotPreCalculated() {
 		createLocalCs();
+		createHierarchicalVs();
 
-		myLocalVs = new ValueSet();
-		myLocalVs.setUrl(URL_MY_VALUE_SET);
-		myLocalVs
-			.getCompose()
-			.addInclude()
-			.setSystem(URL_MY_CODE_SYSTEM)
-			.addFilter()
-			.setProperty("concept")
-			.setOp(FilterOperator.ISA)
-			.setValue("A");
-		myLocalVs
-			.getCompose()
-			.addInclude()
-			.setSystem(URL_MY_CODE_SYSTEM)
-			.addConcept()
-			.setCode("A");
 		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		ValueSet expansion;
+
+		// Non-hierarchical
+		myCaptureQueriesListener.clear();
+		expansion = myClient
+			.operation()
+			.onType("ValueSet")
+			.named(JpaConstants.OPERATION_EXPAND)
+			.withParameter(Parameters.class, "url", new UrlType(URL_MY_VALUE_SET))
+			.returnResourceType(ValueSet.class)
+			.execute();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A", "AA", "AB", "AAA"));
+		assertEquals(19, myCaptureQueriesListener.getSelectQueries().size());
+		assertEquals("ValueSet \"ValueSet.url[http://example.com/my_value_set]\" has not yet been pre-expanded. Performing in-memory expansion without parameters. Current status: NOT_EXPANDED | The ValueSet is waiting to be picked up and pre-expanded by a scheduled task.", expansion.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
+
+		// Hierarchical
+		myCaptureQueriesListener.clear();
+		expansion = myClient
+			.operation()
+			.onType("ValueSet")
+			.named(JpaConstants.OPERATION_EXPAND)
+			.withParameter(Parameters.class, "url", new UrlType(URL_MY_VALUE_SET))
+			.andParameter(JpaConstants.OPERATION_EXPAND_PARAM_INCLUDE_HIERARCHY, new BooleanType("true"))
+			.returnResourceType(ValueSet.class)
+			.execute();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A"));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains()), containsInAnyOrder("AA", "AB"));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t->t.getCode().equals("AA")).findFirst().orElseThrow(()->new IllegalArgumentException()).getContains()), containsInAnyOrder("AAA"));
+		assertEquals(16, myCaptureQueriesListener.getSelectQueries().size());
+
+	}
+
+	@Test
+	public void testExpandUsingHierarchy_NotPreStored() {
+		createLocalCs();
+		createHierarchicalVs();
+		myLocalVs.setUrl(null);
+
+		ValueSet expansion;
+
+		// Non-hierarchical
+		myCaptureQueriesListener.clear();
+		expansion = myClient
+			.operation()
+			.onType("ValueSet")
+			.named(JpaConstants.OPERATION_EXPAND)
+			.withParameter(Parameters.class, "valueSet", myLocalVs)
+			.returnResourceType(ValueSet.class)
+			.execute();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A", "AA", "AB", "AAA"));
+		assertEquals(16, myCaptureQueriesListener.getSelectQueries().size());
+		assertEquals("ValueSet \"ValueSet.url[http://example.com/my_value_set]\" has not yet been pre-expanded. Performing in-memory expansion without parameters. Current status: NOT_EXPANDED | The ValueSet is waiting to be picked up and pre-expanded by a scheduled task.", expansion.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
+
+		// Hierarchical
+		myCaptureQueriesListener.clear();
+		expansion = myClient
+			.operation()
+			.onType("ValueSet")
+			.named(JpaConstants.OPERATION_EXPAND)
+			.withParameter(Parameters.class, "valueSet", myLocalVs)
+			.andParameter(JpaConstants.OPERATION_EXPAND_PARAM_INCLUDE_HIERARCHY, new BooleanType("true"))
+			.returnResourceType(ValueSet.class)
+			.execute();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A"));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains()), containsInAnyOrder("AA", "AB"));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t->t.getCode().equals("AA")).findFirst().orElseThrow(()->new IllegalArgumentException()).getContains()), containsInAnyOrder("AAA"));
+		assertEquals(16, myCaptureQueriesListener.getSelectQueries().size());
+
+	}
+
+	@Test
+	public void testExpandUsingHierarchy_PreStored_PreCalculated() {
+		createLocalCs();
+		createHierarchicalVs();
+
+		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
+
+		ValueSet expansion;
+
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		// Do a warm-up pass to precache anything that can be pre-cached
 		myClient
@@ -1086,9 +1154,9 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.returnResourceType(ValueSet.class)
 			.execute();
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
-		assertEquals(4, expansion.getExpansion().getContains().size());
 		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A", "AA", "AB", "AAA"));
 		assertEquals(3, myCaptureQueriesListener.getSelectQueries().size());
+		assertEquals("ValueSet was expanded using a pre-calculated expansion", expansion.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
 
 		// Hierarchical
 		myCaptureQueriesListener.clear();
@@ -1106,6 +1174,25 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t->t.getCode().equals("AA")).findFirst().orElseThrow(()->new IllegalArgumentException()).getContains()), containsInAnyOrder("AAA"));
 		assertEquals(3, myCaptureQueriesListener.getSelectQueries().size());
 
+	}
+
+	private void createHierarchicalVs() {
+		myLocalVs = new ValueSet();
+		myLocalVs.setUrl(URL_MY_VALUE_SET);
+		myLocalVs
+			.getCompose()
+			.addInclude()
+			.setSystem(URL_MY_CODE_SYSTEM)
+			.addFilter()
+			.setProperty("concept")
+			.setOp(FilterOperator.ISA)
+			.setValue("A");
+		myLocalVs
+			.getCompose()
+			.addInclude()
+			.setSystem(URL_MY_CODE_SYSTEM)
+			.addConcept()
+			.setCode("A");
 	}
 
 	public List<String> toDirectCodes(List<ValueSet.ValueSetExpansionContainsComponent> theContains) {
