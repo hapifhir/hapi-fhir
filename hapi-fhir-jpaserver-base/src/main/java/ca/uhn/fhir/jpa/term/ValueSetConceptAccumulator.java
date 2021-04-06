@@ -66,13 +66,13 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	}
 
 	@Override
-	public void includeConcept(String theSystem, String theCode, String theDisplay) {
-		saveConcept(theSystem, theCode, theDisplay);
+	public void includeConcept(String theSystem, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids) {
+		saveConcept(theSystem, theCode, theDisplay, theSourceConceptPid, theSourceConceptDirectParentPids);
 	}
 
 	@Override
-	public void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations) {
-		TermValueSetConcept concept = saveConcept(theSystem, theCode, theDisplay);
+	public void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations, Long theSourceConceptPid, String theSourceConceptDirectParentPids) {
+		TermValueSetConcept concept = saveConcept(theSystem, theCode, theDisplay, theSourceConceptPid, theSourceConceptDirectParentPids);
 		if (theDesignations != null) {
 			for (TermConceptDesignation designation : theDesignations) {
 				saveConceptDesignation(concept, designation);
@@ -117,7 +117,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		return false;
 	}
 
-	private TermValueSetConcept saveConcept(String theSystem, String theCode, String theDisplay) {
+	private TermValueSetConcept saveConcept(String theSystem, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids) {
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystem, "ValueSet contains a concept with no system value");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theCode, "ValueSet contains a concept with no code value");
 
@@ -135,6 +135,10 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		if (isNotBlank(theDisplay)) {
 			concept.setDisplay(theDisplay);
 		}
+
+		concept.setSourceConceptPid(theSourceConceptPid);
+		concept.setSourceConceptDirectParentPids(theSourceConceptDirectParentPids);
+
 		myValueSetConceptDao.save(concept);
 		myValueSetDao.save(myTermValueSet.incrementTotalConcepts());
 

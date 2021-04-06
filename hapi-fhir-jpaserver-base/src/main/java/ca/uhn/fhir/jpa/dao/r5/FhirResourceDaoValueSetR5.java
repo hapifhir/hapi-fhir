@@ -50,9 +50,9 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 	}
 
 	@Override
-	public ValueSet expand(IIdType theId, String theFilter, int theOffset, int theCount, RequestDetails theRequestDetails) {
+	public ValueSet expand(IIdType theId, String theFilter, ValueSetExpansionOptions theOptions, RequestDetails theRequestDetails) {
 		ValueSet source = read(theId, theRequestDetails);
-		return expand(source, theFilter, theOffset, theCount);
+		return expand(source, theFilter, theOptions);
 	}
 
 	@Override
@@ -62,9 +62,8 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 	}
 
 	@Override
-	public ValueSet expandByIdentifier(String theUri, String theFilter, int theOffset, int theCount) {
-		ValueSetExpansionOptions options = ValueSetExpansionOptions.forOffsetAndCount(theOffset, theCount);
-		org.hl7.fhir.r4.model.ValueSet canonicalOutput = myTerminologySvc.expandValueSet(options, theUri, theFilter);
+	public ValueSet expandByIdentifier(String theUri, String theFilter, ValueSetExpansionOptions theOptions) {
+		org.hl7.fhir.r4.model.ValueSet canonicalOutput = myTerminologySvc.expandValueSet(theOptions, theUri, theFilter);
 		return ValueSet40_50.convertValueSet(canonicalOutput);
 	}
 
@@ -76,10 +75,9 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 	}
 
 	@Override
-	public ValueSet expand(ValueSet theSource, String theFilter, int theOffset, int theCount) {
-		ValueSetExpansionOptions options = ValueSetExpansionOptions.forOffsetAndCount(theOffset, theCount);
+	public ValueSet expand(ValueSet theSource, String theFilter, ValueSetExpansionOptions theOptions) {
 		org.hl7.fhir.r4.model.ValueSet canonicalInput = ValueSet40_50.convertValueSet(theSource);
-		org.hl7.fhir.r4.model.ValueSet canonicalOutput = myTerminologySvc.expandValueSet(options, canonicalInput, theFilter);
+		org.hl7.fhir.r4.model.ValueSet canonicalOutput = myTerminologySvc.expandValueSet(theOptions, canonicalInput, theFilter);
 		return ValueSet40_50.convertValueSet(canonicalOutput);
 	}
 

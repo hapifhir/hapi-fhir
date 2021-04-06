@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  */
 
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProviderValueSetDstu2;
@@ -30,9 +31,11 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static ca.uhn.fhir.jpa.provider.r4.BaseJpaResourceProviderValueSetR4.createValueSetExpansionOptions;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDstu3<ValueSet> {
@@ -51,6 +54,7 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 		@OperationParam(name = "filter", min = 0, max = 1) StringType theFilter,
 		@OperationParam(name = "offset", min = 0, max = 1) IntegerType theOffset,
 		@OperationParam(name = "count", min = 0, max = 1) IntegerType theCount,
+		@OperationParam(name = JpaConstants.OPERATION_EXPAND_PARAM_INCLUDE_HIERARCHY, min = 0, max = 1, typeName = "boolean") IPrimitiveType<Boolean> theIncludeHierarchy,
 		RequestDetails theRequestDetails) {
 
 		boolean haveId = theId != null && theId.hasIdPart();
@@ -71,43 +75,22 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 			throw new InvalidRequestException("$expand must EITHER be invoked at the instance level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.");
 		}
 
-		int offset = myDaoConfig.getPreExpandValueSetsDefaultOffset();
-		if (theOffset != null && theOffset.hasValue()) {
-			if (theOffset.getValue() >= 0) {
-				offset = theOffset.getValue();
-			} else {
-				throw new InvalidRequestException("offset parameter for $expand operation must be >= 0 when specified. offset: " + theOffset.getValue());
-			}
-		}
-
-		int count = myDaoConfig.getPreExpandValueSetsDefaultCount();
-		if (theCount != null && theCount.hasValue()) {
-			if (theCount.getValue() >= 0) {
-				count = theCount.getValue();
-			} else {
-				throw new InvalidRequestException("count parameter for $expand operation must be >= 0 when specified. count: " + theCount.getValue());
-			}
-		}
-		int countMax = myDaoConfig.getPreExpandValueSetsMaxCount();
-		if (count > countMax) {
-			ourLog.warn("count parameter for $expand operation of {} exceeds maximum value of {}; using maximum value.", count, countMax);
-			count = countMax;
-		}
+		ValueSetExpansionOptions options = createValueSetExpansionOptions(myDaoConfig, theOffset, theCount, theIncludeHierarchy);
 
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> dao = (IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept>) getDao();
 			if (myDaoConfig.isPreExpandValueSets()) {
 				if (haveId) {
-					return dao.expand(theId, toFilterString(theFilter), offset, count, theRequestDetails);
+					return dao.expand(theId, toFilterString(theFilter), options, theRequestDetails);
 				} else if (haveIdentifier) {
 					if (haveValueSetVersion) {
-						return dao.expandByIdentifier(url.getValue() + "|" + theValueSetVersion.getValue(), toFilterString(theFilter), offset, count);
+						return dao.expandByIdentifier(url.getValue() + "|" + theValueSetVersion.getValue(), toFilterString(theFilter), options);
 					} else {
-						return dao.expandByIdentifier(url.getValue(), toFilterString(theFilter), offset, count);
+						return dao.expandByIdentifier(url.getValue(), toFilterString(theFilter), options);
 					}
 				} else {
-					return dao.expand(theValueSet, toFilterString(theFilter), offset, count);
+					return dao.expand(theValueSet, toFilterString(theFilter), options);
 				}
 			} else {
 				if (haveId) {

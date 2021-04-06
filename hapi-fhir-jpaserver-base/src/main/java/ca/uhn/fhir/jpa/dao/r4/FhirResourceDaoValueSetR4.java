@@ -50,9 +50,9 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 	}
 
 	@Override
-	public ValueSet expand(IIdType theId, String theFilter, int theOffset, int theCount, RequestDetails theRequestDetails) {
+	public ValueSet expand(IIdType theId, String theFilter, ValueSetExpansionOptions theOptions, RequestDetails theRequestDetails) {
 		ValueSet source = read(theId, theRequestDetails);
-		return expand(source, theFilter, theOffset, theCount);
+		return expand(source, theFilter, theOptions);
 	}
 
 	@Override
@@ -61,9 +61,8 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 	}
 
 	@Override
-	public ValueSet expandByIdentifier(String theUri, String theFilter, int theOffset, int theCount) {
-		ValueSetExpansionOptions options = ValueSetExpansionOptions.forOffsetAndCount(theOffset, theCount);
-		return myTerminologySvc.expandValueSet(options, theUri, theFilter);
+	public ValueSet expandByIdentifier(String theUri, String theFilter, ValueSetExpansionOptions theOptions) {
+		return myTerminologySvc.expandValueSet(theOptions, theUri, theFilter);
 	}
 
 	@Override
@@ -72,9 +71,8 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 	}
 
 	@Override
-	public ValueSet expand(ValueSet theSource, String theFilter, int theOffset, int theCount) {
-		ValueSetExpansionOptions options = ValueSetExpansionOptions.forOffsetAndCount(theOffset, theCount);
-		return myTerminologySvc.expandValueSet(options, theSource, theFilter);
+	public ValueSet expand(ValueSet theSource, String theFilter, ValueSetExpansionOptions theOptions) {
+		return myTerminologySvc.expandValueSet(theOptions, theSource, theFilter);
 	}
 
 	@Override

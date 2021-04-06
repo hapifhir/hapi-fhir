@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -110,12 +111,17 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 	}
 
 	@Override
-	public ValueSet expand(IIdType theId, String theFilter, int theOffset, int theCount, RequestDetails theRequest) {
+	public ValueSet expand(IIdType theId, String theFilter, ValueSetExpansionOptions theOptions, RequestDetails theRequest) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public ValueSet expand(ValueSet source, String theFilter) {
+		return expand(source, theFilter, null);
+	}
+
+	@Override
+	public ValueSet expand(ValueSet source, String theFilter, ValueSetExpansionOptions theOptions) {
 		ValueSet retVal = new ValueSet();
 		retVal.setDate(DateTimeDt.withCurrentTime());
 
@@ -148,12 +154,12 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 	}
 
 	@Override
-	public ValueSet expand(ValueSet source, String theFilter, int theOffset, int theCount) {
-		throw new UnsupportedOperationException();
+	public ValueSet expandByIdentifier(String theUri, String theFilter) {
+		return expandByIdentifier(theUri, theFilter, null);
 	}
 
 	@Override
-	public ValueSet expandByIdentifier(String theUri, String theFilter) {
+	public ValueSet expandByIdentifier(String theUri, String theFilter, ValueSetExpansionOptions theOptions) {
 		if (isBlank(theUri)) {
 			throw new InvalidRequestException("URI must not be blank or missing");
 		}
@@ -174,11 +180,6 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 		}
 
 		return expand(source, theFilter);
-	}
-
-	@Override
-	public ValueSet expandByIdentifier(String theUri, String theFilter, int theOffset, int theCount) {
-		throw new UnsupportedOperationException();
 	}
 
 	@Override

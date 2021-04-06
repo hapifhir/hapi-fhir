@@ -8,9 +8,9 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
-import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -38,6 +38,7 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
+import org.hl7.fhir.r4.model.UrlType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.FilterOperator;
@@ -53,12 +54,15 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest.URL_MY_VALUE_SET;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.is;
@@ -1035,6 +1039,79 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		createLocalVsWithIncludeConcept();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		testValidateCodeOperationByCodeAndSystemInstanceOnInstance();
+	}
+
+
+	@Test
+	public void testExpandUsingHierarchy() {
+		createLocalCs();
+
+		myLocalVs = new ValueSet();
+		myLocalVs.setUrl(URL_MY_VALUE_SET);
+		myLocalVs
+			.getCompose()
+			.addInclude()
+			.setSystem(URL_MY_CODE_SYSTEM)
+			.addFilter()
+			.setProperty("concept")
+			.setOp(FilterOperator.ISA)
+			.setValue("A");
+		myLocalVs
+			.getCompose()
+			.addInclude()
+			.setSystem(URL_MY_CODE_SYSTEM)
+			.addConcept()
+			.setCode("A");
+		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		ValueSet expansion;
+
+		// Do a warm-up pass to precache anything that can be pre-cached
+		myClient
+			.operation()
+			.onType("ValueSet")
+			.named(JpaConstants.OPERATION_EXPAND)
+			.withParameter(Parameters.class, "url", new UrlType(URL_MY_VALUE_SET))
+			.returnResourceType(ValueSet.class)
+			.execute();
+
+		// Non-hierarchical
+		myCaptureQueriesListener.clear();
+		expansion = myClient
+			.operation()
+			.onType("ValueSet")
+			.named(JpaConstants.OPERATION_EXPAND)
+			.withParameter(Parameters.class, "url", new UrlType(URL_MY_VALUE_SET))
+			.returnResourceType(ValueSet.class)
+			.execute();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		assertEquals(4, expansion.getExpansion().getContains().size());
+		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A", "AA", "AB", "AAA"));
+		assertEquals(3, myCaptureQueriesListener.getSelectQueries().size());
+
+		// Hierarchical
+		myCaptureQueriesListener.clear();
+		expansion = myClient
+			.operation()
+			.onType("ValueSet")
+			.named(JpaConstants.OPERATION_EXPAND)
+			.withParameter(Parameters.class, "url", new UrlType(URL_MY_VALUE_SET))
+			.andParameter(JpaConstants.OPERATION_EXPAND_PARAM_INCLUDE_HIERARCHY, new BooleanType("true"))
+			.returnResourceType(ValueSet.class)
+			.execute();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A"));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains()), containsInAnyOrder("AA", "AB"));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t->t.getCode().equals("AA")).findFirst().orElseThrow(()->new IllegalArgumentException()).getContains()), containsInAnyOrder("AAA"));
+		assertEquals(3, myCaptureQueriesListener.getSelectQueries().size());
+
+	}
+
+	public List<String> toDirectCodes(List<ValueSet.ValueSetExpansionContainsComponent> theContains) {
+		List<String> collect = theContains.stream().map(t -> t.getCode()).collect(Collectors.toList());
+		ourLog.info("Codes: {}", collect);
+		return collect;
 	}
 
 	private void testValidateCodeOperationByCodeAndSystemInstanceOnInstance() throws IOException {

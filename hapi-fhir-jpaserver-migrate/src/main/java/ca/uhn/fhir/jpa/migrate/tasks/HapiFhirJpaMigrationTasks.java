@@ -87,6 +87,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_FORCED_ID").addIndex("20210309.2", "IDX_FORCEID_FID")
 			.unique(false).withColumns("FORCED_ID");
 
+		//-- ValueSet Concept Fulltext Indexing
+		version.onTable("TRM_VALUESET_CONCEPT").addColumn("20210406.1", "INDEX_STATUS").nullable().type(ColumnTypeEnum.LONG);
+		version.onTable("TRM_VALUESET_CONCEPT").addColumn("20210406.2", "SOURCE_DIRECT_PARENT_PIDS").nullable().type(ColumnTypeEnum.CLOB);
+		version.onTable("TRM_VALUESET_CONCEPT").addColumn("20210406.3", "SOURCE_PID").nullable().type(ColumnTypeEnum.LONG);
 	}
 
 	private void init530() {
