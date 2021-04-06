@@ -64,7 +64,7 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByEidSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByLinkSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByExampleSvc;
-import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.validation.IResourceLoader;
 import org.slf4j.Logger;
 import org.springframework.context.annotation.Bean;
@@ -153,7 +153,7 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmRuleValidator mdmRuleValidator(FhirContext theFhirContext, ISearchParamRetriever theSearchParamRetriever) {
+	MdmRuleValidator mdmRuleValidator(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRetriever) {
 		return new MdmRuleValidator(theFhirContext, theSearchParamRetriever);
 	}
 

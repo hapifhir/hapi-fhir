@@ -28,15 +28,18 @@ import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
-import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.VersionUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -53,7 +56,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class RestfulServerConfiguration implements ISearchParamRetriever {
+public class RestfulServerConfiguration implements ISearchParamRegistry {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServerConfiguration.class);
 	private Collection<ResourceBinding> resourceBindings;
@@ -278,7 +281,7 @@ public class RestfulServerConfiguration implements ISearchParamRetriever {
 	}
 
 	public Map<String, List<BaseMethodBinding<?>>> collectMethodBindings() {
-		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = new TreeMap<String, List<BaseMethodBinding<?>>>();
+		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = new TreeMap<>();
 		for (ResourceBinding next : getResourceBindings()) {
 			String resourceName = next.getResourceName();
 			for (BaseMethodBinding<?> nextMethodBinding : next.getMethodBindings()) {
@@ -365,20 +368,27 @@ public class RestfulServerConfiguration implements ISearchParamRetriever {
 	}
 
 	@Override
-	public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
+	public Map<String, RuntimeSearchParam> getActiveSearchParams(@Nonnull String theResourceName) {
+		Validate.notBlank(theResourceName, "theResourceName must not be null or blank");
 
 		Map<String, RuntimeSearchParam> retVal = new LinkedHashMap<>();
 
 		collectMethodBindings()
 			.getOrDefault(theResourceName, Collections.emptyList())
 			.stream()
-			.filter(t -> t.getResourceName().equals(theResourceName))
+			.filter(t -> theResourceName.equals(t.getResourceName()))
 			.filter(t -> t instanceof SearchMethodBinding)
 			.map(t -> (SearchMethodBinding) t)
 			.filter(t -> t.getQueryName() == null)
 			.forEach(t -> createRuntimeBinding(retVal, t));
 
 		return retVal;
+	}
+
+	@Nullable
+	@Override
+	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
+		throw new UnsupportedOperationException();
 	}
 
 	private void createRuntimeBinding(Map<String, RuntimeSearchParam> theMapToPopulate, SearchMethodBinding theSearchMethodBinding) {
@@ -422,12 +432,11 @@ public class RestfulServerConfiguration implements ISearchParamRetriever {
 			String description = nextParamDescription;
 			String path = null;
 			RestSearchParameterTypeEnum type = nextParameter.getParamType();
-			List<RuntimeSearchParam> compositeOf = Collections.emptyList();
 			Set<String> providesMembershipInCompartments = Collections.emptySet();
 			Set<String> targets = Collections.emptySet();
 			RuntimeSearchParam.RuntimeSearchParamStatusEnum status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE;
 			Collection<String> base = Collections.singletonList(theSearchMethodBinding.getResourceName());
-			RuntimeSearchParam param = new RuntimeSearchParam(id, uri, nextParamName, description, path, type, compositeOf, providesMembershipInCompartments, targets, status, base);
+			RuntimeSearchParam param = new RuntimeSearchParam(id, uri, nextParamName, description, path, type, providesMembershipInCompartments, targets, status, false, null, base);
 			theMapToPopulate.put(nextParamName, param);
 
 		}

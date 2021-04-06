@@ -7,7 +7,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.StopWatch;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.Test;

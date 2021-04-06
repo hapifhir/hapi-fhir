@@ -394,41 +394,30 @@ class ModelScanner {
 						b.append(" provides compartment membership but is not of type 'reference'");
 						ourLog.warn(b.toString());
 						continue;
-//						throw new ConfigurationException(b.toString());
 					}
 					providesMembershipInCompartments.add(next.name());
 				}
 
+				List<RuntimeSearchParam.Component> components = null;
 				if (paramType == RestSearchParameterTypeEnum.COMPOSITE) {
-					compositeFields.put(nextField, searchParam);
-					continue;
+					components = new ArrayList<>();
+					for (String next : searchParam.compositeOf()) {
+						String ref = "http://hl7.org/fhir/SearchParameter/" + theResourceDef.getName().toLowerCase() + "-" + next;
+						components.add(new RuntimeSearchParam.Component(null, ref));
+					}
 				}
 
-
 				Collection<String> base = Collections.singletonList(theResourceDef.getName());
-				RuntimeSearchParam param = new RuntimeSearchParam(null, null, searchParam.name(), searchParam.description(), searchParam.path(), paramType, null, providesMembershipInCompartments, toTargetList(searchParam.target()), RuntimeSearchParamStatusEnum.ACTIVE, base);
+				String url = null;
+				if (theResourceDef.isStandardType()) {
+					url = "http://hl7.org/fhir/SearchParameter/" + theResourceDef.getName().toLowerCase() + "-" + searchParam.name();
+				}
+				RuntimeSearchParam param = new RuntimeSearchParam(null, url, searchParam.name(), searchParam.description(), searchParam.path(), paramType, providesMembershipInCompartments, toTargetList(searchParam.target()), RuntimeSearchParamStatusEnum.ACTIVE, false, components, base);
 				theResourceDef.addSearchParam(param);
 				nameToParam.put(param.getName(), param);
 			}
 		}
 
-		for (Entry<Field, SearchParamDefinition> nextEntry : compositeFields.entrySet()) {
-			SearchParamDefinition searchParam = nextEntry.getValue();
-
-			List<RuntimeSearchParam> compositeOf = new ArrayList<>();
-			for (String nextName : searchParam.compositeOf()) {
-				RuntimeSearchParam param = nameToParam.get(nextName);
-				if (param == null) {
-					ourLog.warn("Search parameter {}.{} declares that it is a composite with compositeOf value '{}' but that is not a valid parameter name itself. Valid values are: {}",
-						theResourceDef.getName(), searchParam.name(), nextName, nameToParam.keySet());
-					continue;
-				}
-				compositeOf.add(param);
-			}
-
-			RuntimeSearchParam param = new RuntimeSearchParam(null, null, searchParam.name(), searchParam.description(), searchParam.path(), RestSearchParameterTypeEnum.COMPOSITE, compositeOf, null, toTargetList(searchParam.target()), RuntimeSearchParamStatusEnum.ACTIVE);
-			theResourceDef.addSearchParam(param);
-		}
 	}
 
 	private Set<String> toTargetList(Class<? extends IBaseResource>[] theTarget) {

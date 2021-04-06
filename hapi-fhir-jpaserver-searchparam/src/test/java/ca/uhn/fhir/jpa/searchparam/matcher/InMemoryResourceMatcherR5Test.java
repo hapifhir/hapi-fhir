@@ -7,12 +7,12 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.r5.model.BaseDateTimeType;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.DateTimeType;
@@ -34,8 +34,6 @@ import java.util.Date;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -60,16 +58,13 @@ public class InMemoryResourceMatcherR5Test {
 
 	@BeforeEach
 	public void before() {
-		RuntimeSearchParam dateSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.effective", RestSearchParameterTypeEnum.DATE, null, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
-		when(mySearchParamRegistry.getSearchParamByName(any(), eq("date"))).thenReturn(dateSearchParam);
+		RuntimeSearchParam dateSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.effective", RestSearchParameterTypeEnum.DATE, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, false, null, null);
 		when(mySearchParamRegistry.getActiveSearchParam("Observation", "date")).thenReturn(dateSearchParam);
 
-		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.code", RestSearchParameterTypeEnum.TOKEN, null, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
-		when(mySearchParamRegistry.getSearchParamByName(any(), eq("code"))).thenReturn(codeSearchParam);
+		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.code", RestSearchParameterTypeEnum.TOKEN, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, false, null, null);
 		when(mySearchParamRegistry.getActiveSearchParam("Observation", "code")).thenReturn(codeSearchParam);
 
-		RuntimeSearchParam encSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.encounter", RestSearchParameterTypeEnum.REFERENCE, null, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
-		when(mySearchParamRegistry.getSearchParamByName(any(), eq("encounter"))).thenReturn(encSearchParam);
+		RuntimeSearchParam encSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.encounter", RestSearchParameterTypeEnum.REFERENCE, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, false, null, null);
 		when(mySearchParamRegistry.getActiveSearchParam("Observation", "encounter")).thenReturn(encSearchParam);
 
 		myObservation = new Observation();

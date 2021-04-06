@@ -5,7 +5,7 @@ import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.apache.commons.codec.language.Soundex;

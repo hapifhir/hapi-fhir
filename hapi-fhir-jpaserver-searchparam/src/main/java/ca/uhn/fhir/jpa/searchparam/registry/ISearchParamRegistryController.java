@@ -1,8 +1,8 @@
-package ca.uhn.fhir.rest.server.util;
+package ca.uhn.fhir.jpa.searchparam.registry;
 
 /*-
  * #%L
- * HAPI FHIR - Server Framework
+ * HAPI FHIR Search Parameters
  * %%
  * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
@@ -18,21 +18,12 @@ package ca.uhn.fhir.rest.server.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import ca.uhn.fhir.context.RuntimeSearchParam;
-
-import java.util.Map;
-
-public interface ISearchParamRetriever {
-	/**
-	 * @return Returns {@literal null} if no match
 	 */
-	RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName);
 
-	/**
-	 * @return Returns all active search params for the given resource
-	 */
-	Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName);
+import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
+
+public interface ISearchParamRegistryController {
+
+	ResourceChangeResult refreshCacheIfNecessary();
 
 }

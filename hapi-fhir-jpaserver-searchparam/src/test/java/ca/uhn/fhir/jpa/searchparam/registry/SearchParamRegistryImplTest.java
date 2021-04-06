@@ -21,6 +21,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -115,7 +116,7 @@ public class SearchParamRegistryImplTest {
 		}
 
 		@Bean
-		ISearchParamRegistry searchParamRegistry() {
+        ISearchParamRegistry searchParamRegistry() {
 			return new SearchParamRegistryImpl();
 		}
 

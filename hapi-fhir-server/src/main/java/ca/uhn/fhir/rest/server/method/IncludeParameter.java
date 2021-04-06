@@ -67,6 +67,10 @@ class IncludeParameter extends BaseQueryParameter {
 
 	}
 
+	public boolean isReverse() {
+		return myReverse;
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<QualifiedParamList> encode(FhirContext theContext, Object theObject) throws InternalErrorException {

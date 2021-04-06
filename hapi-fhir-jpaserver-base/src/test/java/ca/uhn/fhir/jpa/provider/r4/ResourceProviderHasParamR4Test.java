@@ -629,7 +629,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
+			ourLog.info("Response was: {}", resp);
 			Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, resp);
 			ids = toUnqualifiedVersionlessIdValues(bundle);
 		}

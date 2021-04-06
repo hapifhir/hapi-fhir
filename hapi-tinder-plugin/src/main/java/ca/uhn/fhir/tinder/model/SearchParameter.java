@@ -38,14 +38,14 @@ public class SearchParameter {
 
 	public List<String> getCompositeOf() {
 		if (myCompositeOf == null) {
-			myCompositeOf = new ArrayList<String>();
+			myCompositeOf = new ArrayList<>();
 		}
 		return myCompositeOf;
 	}
 
 	public List<String> getCompositeTypes() {
 		if (myCompositeTypes == null) {
-			myCompositeTypes = new ArrayList<String>();
+			myCompositeTypes = new ArrayList<>();
 		}
 		return myCompositeTypes;
 	}

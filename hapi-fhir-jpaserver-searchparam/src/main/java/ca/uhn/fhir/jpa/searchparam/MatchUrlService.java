@@ -24,7 +24,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
@@ -99,7 +100,7 @@ public class MatchUrlService {
 					}
 				}
 			} else if (Constants.PARAM_HAS.equals(nextParamName)) {
-				IQueryParameterAnd<?> param = ParameterUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.HAS, nextParamName, paramList);
+				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.HAS, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			} else if (Constants.PARAM_COUNT.equals(nextParamName)) {
 				if (paramList != null && paramList.size() > 0 && paramList.get(0).size() > 0) {
@@ -127,23 +128,23 @@ public class MatchUrlService {
 				type.setValuesAsQueryTokens(myContext, nextParamName, (paramList));
 				paramMap.add(nextParamName, type);
 			} else if (Constants.PARAM_SOURCE.equals(nextParamName)) {
-				IQueryParameterAnd<?> param = ParameterUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.TOKEN, nextParamName, paramList);
+				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.TOKEN, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			} else if (JpaConstants.PARAM_DELETE_EXPUNGE.equals(nextParamName)) {
 				paramMap.setDeleteExpunge(true);
 			} else if (Constants.PARAM_LIST.equals(nextParamName)) {
-				IQueryParameterAnd<?> param = ParameterUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.TOKEN, nextParamName, paramList);
+				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.TOKEN, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			} else if (nextParamName.startsWith("_")) {
 				// ignore these since they aren't search params (e.g. _sort)
 			} else {
-				RuntimeSearchParam paramDef = mySearchParamRegistry.getSearchParamByName(theResourceDefinition, nextParamName);
+				RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(theResourceDefinition.getName(), nextParamName);
 				if (paramDef == null) {
 					throw new InvalidRequestException(
 						"Failed to parse match URL[" + theMatchUrl + "] - Resource type " + theResourceDefinition.getName() + " does not have a parameter with name: " + nextParamName);
 				}
 
-				IQueryParameterAnd<?> param = ParameterUtil.parseQueryParams(myContext, paramDef, nextParamName, paramList);
+				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(mySearchParamRegistry, myContext, paramDef, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			}
 		}

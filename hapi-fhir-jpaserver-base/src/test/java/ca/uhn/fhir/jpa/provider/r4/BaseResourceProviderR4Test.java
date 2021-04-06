@@ -22,6 +22,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -34,8 +35,8 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.ContextLoader;
@@ -52,7 +53,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.slf4j.LoggerFactory.getLogger;
 
 public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
@@ -64,6 +64,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected static SearchParamRegistryImpl ourSearchParamRegistry;
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	protected static Server ourServer;
+	protected static JpaCapabilityStatementProvider ourCapabilityStatementProvider;
 	private static DatabaseBackedPagingProvider ourPagingProvider;
 	private static GenericWebApplicationContext ourWebApplicationContext;
 	protected IGenericClient myClient;
@@ -153,9 +154,9 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourSearchParamRegistry = myAppCtx.getBean(SearchParamRegistryImpl.class);
 			IValidationSupport validationSupport = myAppCtx.getBean(IValidationSupport.class);
 
-			JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(ourRestServer, mySystemDao, myDaoConfig, ourSearchParamRegistry, validationSupport);
-			confProvider.setImplementationDescription("THIS IS THE DESC");
-			ourRestServer.setServerConformanceProvider(confProvider);
+			ourCapabilityStatementProvider = new JpaCapabilityStatementProvider(ourRestServer, mySystemDao, myDaoConfig, ourSearchParamRegistry, validationSupport);
+			ourCapabilityStatementProvider.setImplementationDescription("THIS IS THE DESC");
+			ourRestServer.setServerConformanceProvider(ourCapabilityStatementProvider);
 
 			server.setHandler(proxyHandler);
 			JettyUtil.startServer(server);
@@ -179,18 +180,12 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		}
 
 		ourRestServer.setPagingProvider(ourPagingProvider);
+		ourRestServer.registerInterceptor(new ResponseHighlighterInterceptor());
 
 		myClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
 		if (shouldLogClient()) {
 			myClient.registerInterceptor(new LoggingInterceptor());
 		}
-	}
-
-	protected static void clearRestfulServer() throws Exception {
-		if (ourServer != null) {
-			JettyUtil.closeServer(ourServer);
-		}
-		ourServer = null;
 	}
 
 	protected boolean shouldLogClient() {

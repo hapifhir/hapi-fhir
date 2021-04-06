@@ -1605,7 +1605,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 			verify(interceptor, times(1)).invoke(any(), paramsCaptor.capture());
 
 			StorageProcessingMessage msg = paramsCaptor.getValue().get(StorageProcessingMessage.class);
-			assertThat(msg.getMessage(), containsString("refers to unknown component foo, ignoring this parameter"));
+			assertThat(msg.getMessage(), containsString("ignoring this parameter"));
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);

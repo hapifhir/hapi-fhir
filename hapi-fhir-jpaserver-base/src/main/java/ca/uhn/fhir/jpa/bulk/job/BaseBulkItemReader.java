@@ -67,9 +67,9 @@ public abstract class BaseBulkItemReader implements ItemReader<List<ResourcePers
 	@Autowired
 	protected FhirContext myContext;
 	@Autowired
-	private IBulkExportJobDao myBulkExportJobDao;
-	@Autowired
 	protected SearchBuilderFactory mySearchBuilderFactory;
+	@Autowired
+	private IBulkExportJobDao myBulkExportJobDao;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 
