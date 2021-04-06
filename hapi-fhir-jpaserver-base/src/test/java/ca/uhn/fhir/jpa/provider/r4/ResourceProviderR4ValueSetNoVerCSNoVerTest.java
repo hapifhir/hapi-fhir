@@ -1120,7 +1120,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A"));
 		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains()), containsInAnyOrder("AA", "AB"));
 		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t->t.getCode().equals("AA")).findFirst().orElseThrow(()->new IllegalArgumentException()).getContains()), containsInAnyOrder("AAA"));
-		assertEquals(16, myCaptureQueriesListener.getSelectQueries().size());
+		assertEquals(14, myCaptureQueriesListener.getSelectQueries().size());
 
 	}
 
