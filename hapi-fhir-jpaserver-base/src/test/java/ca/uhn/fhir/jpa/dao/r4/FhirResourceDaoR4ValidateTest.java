@@ -259,8 +259,6 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.setEffective(DateTimeType.now());
 		obs.setStatus(ObservationStatus.FINAL);
 
-		OperationOutcome oo;
-
 		// Valid code
 		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
 		try {
@@ -1704,7 +1702,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		ValueSetExpansionOptions options = ValueSetExpansionOptions.forOffsetAndCount(0, 10000);
-		ValueSet expansion = myValueSetDao.expand(id, null, options, mySrd);
+		ValueSet expansion = myValueSetDao.expand(id, options, mySrd);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
 		assertEquals(2, expansion.getExpansion().getContains().size());

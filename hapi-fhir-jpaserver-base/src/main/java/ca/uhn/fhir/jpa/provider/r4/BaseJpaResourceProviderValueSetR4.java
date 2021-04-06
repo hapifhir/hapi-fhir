@@ -76,47 +76,28 @@ public class BaseJpaResourceProviderValueSetR4 extends JpaResourceProviderR4<Val
 			throw new InvalidRequestException("$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.");
 		}
 
-		ValueSetExpansionOptions options = createValueSetExpansionOptions(myDaoConfig, theOffset, theCount, theIncludeHierarchy);
+		ValueSetExpansionOptions options = createValueSetExpansionOptions(myDaoConfig, theOffset, theCount, theIncludeHierarchy, theFilter);
 
 		startRequest(theServletRequest);
 		try {
 
 			IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> dao = (IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept>) getDao();
-			if (myDaoConfig.isPreExpandValueSets()) {
-				if (haveId) {
-					return dao.expand(theId, toFilterString(theFilter), options, theRequestDetails);
-				} else if (haveIdentifier) {
-					if (haveValueSetVersion) {
-						return dao.expandByIdentifier(theUrl.getValue() + "|" + theValueSetVersion.getValue(), toFilterString(theFilter), options);
-					} else {
-						return dao.expandByIdentifier(theUrl.getValue(), toFilterString(theFilter), options);
-					}
+			if (haveId) {
+				return dao.expand(theId, options, theRequestDetails);
+			} else if (haveIdentifier) {
+				if (haveValueSetVersion) {
+					return dao.expandByIdentifier(theUrl.getValue() + "|" + theValueSetVersion.getValue(), options);
 				} else {
-					return dao.expand(theValueSet, toFilterString(theFilter), options);
+					return dao.expandByIdentifier(theUrl.getValue(), options);
 				}
 			} else {
-				if (haveId) {
-					return dao.expand(theId, toFilterString(theFilter), theRequestDetails);
-				} else if (haveIdentifier) {
-					if (haveValueSetVersion) {
-						return dao.expandByIdentifier(theUrl.getValue() + "|" + theValueSetVersion.getValue(), toFilterString(theFilter));
-					} else {
-						return dao.expandByIdentifier(theUrl.getValue(), toFilterString(theFilter));
-					}
-				} else {
-					return dao.expand(theValueSet, toFilterString(theFilter));
-				}
+				return dao.expand(theValueSet, options);
 			}
 		} finally {
 			endRequest(theServletRequest);
 		}
 	}
 
-	private String toFilterString(StringType theFilter) {
-		return theFilter != null ? theFilter.getValue() : null;
-	}
-
-	@SuppressWarnings("unchecked")
 	@Operation(name = JpaConstants.OPERATION_VALIDATE_CODE, idempotent = true, returnParameters = {
 		@OperationParam(name = "result", type = BooleanType.class, min = 1),
 		@OperationParam(name = "message", type = StringType.class),
@@ -158,7 +139,7 @@ public class BaseJpaResourceProviderValueSetR4 extends JpaResourceProviderR4<Val
 		}
 	}
 
-	public static ValueSetExpansionOptions createValueSetExpansionOptions(DaoConfig theDaoConfig, IPrimitiveType<Integer> theOffset, IPrimitiveType<Integer> theCount, IPrimitiveType<Boolean> theIncludeHierarchy) {
+	public static ValueSetExpansionOptions createValueSetExpansionOptions(DaoConfig theDaoConfig, IPrimitiveType<Integer> theOffset, IPrimitiveType<Integer> theCount, IPrimitiveType<Boolean> theIncludeHierarchy, IPrimitiveType<String> theFilter) {
 		int offset = theDaoConfig.getPreExpandValueSetsDefaultOffset();
 		if (theOffset != null && theOffset.hasValue()) {
 			if (theOffset.getValue() >= 0) {
@@ -186,6 +167,10 @@ public class BaseJpaResourceProviderValueSetR4 extends JpaResourceProviderR4<Val
 
 		if (theIncludeHierarchy != null && Boolean.TRUE.equals(theIncludeHierarchy.getValue())) {
 			options.setIncludeHierarchy(true);
+		}
+
+		if (theFilter != null) {
+			options.setFilter(theFilter.getValue());
 		}
 
 		return options;

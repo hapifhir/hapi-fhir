@@ -29,17 +29,11 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public interface IFhirResourceDaoValueSet<T extends IBaseResource, CD, CC> extends IFhirResourceDao<T> {
 
-	T expand(IIdType theId, String theFilter, RequestDetails theRequestDetails);
+	T expand(IIdType theId, ValueSetExpansionOptions theOptions, RequestDetails theRequestDetails);
 
-	T expand(IIdType theId, String theFilter, ValueSetExpansionOptions theOptions, RequestDetails theRequestDetails);
+	T expand(T theSource, ValueSetExpansionOptions theOptions);
 
-	T expand(T theSource, String theFilter);
-
-	T expand(T theSource, String theFilter, ValueSetExpansionOptions theOptions);
-
-	T expandByIdentifier(String theUri, String theFilter);
-
-	T expandByIdentifier(String theUri, String theFilter, ValueSetExpansionOptions theOptions);
+	T expandByIdentifier(String theUri, ValueSetExpansionOptions theOptions);
 
 	void purgeCaches();
 

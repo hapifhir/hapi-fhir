@@ -33,6 +33,16 @@ public class ValueSetExpansionOptions {
 	private int myCount = 1000;
 	private int myOffset = 0;
 	private boolean myIncludeHierarchy;
+	private String myFilter;
+
+	public String getFilter() {
+		return myFilter;
+	}
+
+	public ValueSetExpansionOptions setFilter(String theFilter) {
+		myFilter = theFilter;
+		return this;
+	}
 
 	/**
 	 * The number of codes to return.

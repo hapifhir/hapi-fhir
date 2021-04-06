@@ -30,7 +30,16 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.IntegerType;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.UriType;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.servlet.http.HttpServletRequest;
@@ -39,7 +48,6 @@ import static ca.uhn.fhir.jpa.provider.r4.BaseJpaResourceProviderValueSetR4.crea
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDstu3<ValueSet> {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaResourceProviderValueSetDstu3.class);
 
 	@Operation(name = JpaConstants.OPERATION_EXPAND, idempotent = true)
 	public ValueSet expand(
@@ -75,44 +83,25 @@ public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDst
 			throw new InvalidRequestException("$expand must EITHER be invoked at the instance level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.");
 		}
 
-		ValueSetExpansionOptions options = createValueSetExpansionOptions(myDaoConfig, theOffset, theCount, theIncludeHierarchy);
+		ValueSetExpansionOptions options = createValueSetExpansionOptions(myDaoConfig, theOffset, theCount, theIncludeHierarchy, theFilter);
 
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> dao = (IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept>) getDao();
-			if (myDaoConfig.isPreExpandValueSets()) {
-				if (haveId) {
-					return dao.expand(theId, toFilterString(theFilter), options, theRequestDetails);
-				} else if (haveIdentifier) {
-					if (haveValueSetVersion) {
-						return dao.expandByIdentifier(url.getValue() + "|" + theValueSetVersion.getValue(), toFilterString(theFilter), options);
-					} else {
-						return dao.expandByIdentifier(url.getValue(), toFilterString(theFilter), options);
-					}
+			if (haveId) {
+				return dao.expand(theId, options, theRequestDetails);
+			} else if (haveIdentifier) {
+				if (haveValueSetVersion) {
+					return dao.expandByIdentifier(url.getValue() + "|" + theValueSetVersion.getValue(), options);
 				} else {
-					return dao.expand(theValueSet, toFilterString(theFilter), options);
+					return dao.expandByIdentifier(url.getValue(), options);
 				}
 			} else {
-				if (haveId) {
-					return dao.expand(theId, toFilterString(theFilter), theRequestDetails);
-				} else if (haveIdentifier) {
-					if (haveValueSetVersion) {
-						return dao.expandByIdentifier(url.getValue() + "|" + theValueSetVersion.getValue(), toFilterString(theFilter));
-					} else {
-						return dao.expandByIdentifier(url.getValue(), toFilterString(theFilter));
-					}
-				} else {
-					return dao.expand(theValueSet, toFilterString(theFilter));
-				}
+				return dao.expand(theValueSet, options);
 			}
 		} finally {
 			endRequest(theServletRequest);
 		}
-	}
-
-
-	private String toFilterString(StringType theFilter) {
-		return theFilter != null ? theFilter.getValue() : null;
 	}
 
 

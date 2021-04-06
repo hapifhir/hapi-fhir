@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -169,7 +170,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(URL_MY_CODE_SYSTEM);
 	
-		ValueSet result = myValueSetDao.expand(vs, "child");
+		ValueSet result = myValueSetDao.expand(vs, new ValueSetExpansionOptions().setFilter("child"));
 				
 		logAndValidateValueSet(result);
 
@@ -187,7 +188,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(URL_MY_CODE_SYSTEM);
 	
-		ValueSet result = myValueSetDao.expand(vs, "chi");
+		ValueSet result = myValueSetDao.expand(vs, new ValueSetExpansionOptions().setFilter("chi"));
 				
 		logAndValidateValueSet(result);
 
@@ -205,7 +206,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(URL_MY_CODE_SYSTEM);
 	
-		ValueSet result = myValueSetDao.expand(vs, "hil");
+		ValueSet result = myValueSetDao.expand(vs, new ValueSetExpansionOptions().setFilter("hil"));
 				
 		logAndValidateValueSet(result);
 

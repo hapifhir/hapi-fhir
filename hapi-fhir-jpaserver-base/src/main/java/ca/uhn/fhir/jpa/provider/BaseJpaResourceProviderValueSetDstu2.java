@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -42,7 +43,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -88,8 +88,11 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 		}
 	}
 
-	private String toFilterString(StringDt theFilter) {
-		return theFilter != null ? theFilter.getValue() : null;
+	private ValueSetExpansionOptions toFilterString(StringDt theFilter) {
+		if (theFilter != null) {
+			return ValueSetExpansionOptions.forOffsetAndCount(0, 1000).setFilter(theFilter.getValue());
+		}
+		return null;
 	}
 
 	@Operation(name = JpaConstants.OPERATION_LOOKUP, idempotent = true, returnParameters = {

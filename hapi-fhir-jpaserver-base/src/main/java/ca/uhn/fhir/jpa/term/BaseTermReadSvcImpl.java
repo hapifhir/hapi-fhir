@@ -256,7 +256,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		String directParentPids = theConcept
 			.getParents()
 			.stream()
-			.map(t->t.getParent().getId().toString())
+			.map(t -> t.getParent().getId().toString())
 			.collect(Collectors.joining(" "));
 
 		Collection<TermConceptDesignation> designations = theConcept.getDesignations();
@@ -361,10 +361,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@Override
 	@Transactional
 	public List<FhirVersionIndependentConcept> expandValueSetIntoConceptList(@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull String theValueSetCanonicalUrl) {
-		String expansionFilter = null;
 		// TODO: DM 2019-09-10 - This is problematic because an incorrect URL that matches ValueSet.id will not be found in the terminology tables but will yield a ValueSet here. Depending on the ValueSet, the expansion may time-out.
 
-		ValueSet expanded = expandValueSet(theExpansionOptions, theValueSetCanonicalUrl, expansionFilter);
+		ValueSet expanded = expandValueSet(theExpansionOptions, theValueSetCanonicalUrl);
 
 		ArrayList<FhirVersionIndependentConcept> retVal = new ArrayList<>();
 		for (ValueSet.ValueSetExpansionContainsComponent nextContains : expanded.getExpansion().getContains()) {
@@ -375,25 +374,23 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	@Override
 	@Transactional
-	public ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull String theValueSetCanonicalUrl, @Nullable String theExpansionFilter) {
+	public ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull String theValueSetCanonicalUrl) {
 		ValueSet valueSet = fetchCanonicalValueSetFromCompleteContext(theValueSetCanonicalUrl);
 		if (valueSet == null) {
 			throw new ResourceNotFoundException("Unknown ValueSet: " + UrlUtil.escapeUrlParam(theValueSetCanonicalUrl));
 		}
 
-		return expandValueSet(theExpansionOptions, valueSet, theExpansionFilter);
+		return expandValueSet(theExpansionOptions, valueSet);
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull ValueSet theValueSetToExpand) {
-		return expandValueSet(theExpansionOptions, theValueSetToExpand, (String) null);
-	}
-
-	@Override
-	@Transactional(propagation = Propagation.REQUIRED)
-	public ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull ValueSet theValueSetToExpand, @Nullable String theFilter) {
-		return expandValueSet(theExpansionOptions, theValueSetToExpand, ExpansionFilter.fromFilterString(theFilter));
+		String filter = null;
+		if (theExpansionOptions != null) {
+			filter = theExpansionOptions.getFilter();
+		}
+		return expandValueSet(theExpansionOptions, theValueSetToExpand, ExpansionFilter.fromFilterString(filter));
 	}
 
 	private ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, ExpansionFilter theFilter) {

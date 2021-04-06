@@ -226,8 +226,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		// ValueSet by ID
 		{
 			myCaptureQueriesListener.clear();
-			ValueSetExpansionOptions options = ValueSetExpansionOptions.forOffsetAndCount(0, 1000);
-			ValueSet expandedValueSet = myValueSetDao.expand(vsId, "display value 100", options, mySrd);
+			ValueSetExpansionOptions options = ValueSetExpansionOptions.forOffsetAndCount(0, 1000).setFilter("display value 100");
+			ValueSet expandedValueSet = myValueSetDao.expand(vsId, options, mySrd);
 			List<String> codes = expandedValueSet.getExpansion().getContains().stream().map(t -> t.getCode()).collect(Collectors.toList());
 			assertThat(codes.toString(), codes, containsInAnyOrder("code100", "code1000", "code1001", "code1002", "code1003", "code1004"));
 

@@ -1,16 +1,17 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -18,7 +19,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
@@ -38,7 +38,6 @@ import org.hl7.fhir.dstu3.model.ValueSet.FilterOperator;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -48,26 +47,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3TerminologyTest.class);
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
 	public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3TerminologyTest.class);
 	@Autowired
 	private CachingValidationSupport myCachingValidationSupport;
+	@Autowired
+	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
 	@AfterEach
 	public void after() {
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
-		
+
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 
@@ -138,7 +138,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		cs.getConcepts().add(parentA);
 
 		for (int i = 0; i < 450; i++) {
-			TermConcept childI = new TermConcept(cs, "subCodeA"+i).setDisplay("Sub-code A"+i);
+			TermConcept childI = new TermConcept(cs, "subCodeA" + i).setDisplay("Sub-code A" + i);
 			parentA.addChild(childI, RelationshipTypeEnum.ISA);
 		}
 
@@ -146,17 +146,14 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		cs.getConcepts().add(parentB);
 
 		for (int i = 0; i < 450; i++) {
-			TermConcept childI = new TermConcept(cs, "subCodeB"+i).setDisplay("Sub-code B"+i);
+			TermConcept childI = new TermConcept(cs, "subCodeB" + i).setDisplay("Sub-code B" + i);
 			parentB.addChild(childI, RelationshipTypeEnum.ISA);
 		}
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION" , cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 		myTermDeferredStorageSvc.saveAllDeferred();
 	}
-
-	@Autowired
-	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
 	private void createExternalCsAndLocalVs() {
 		CodeSystem codeSystem = createExternalCs();
@@ -181,17 +178,17 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 		TermConcept goodbye = new TermConcept(cs, "goodbye").setDisplay("Goodbye");
 		cs.getConcepts().add(goodbye);
-		
+
 		TermConcept dogs = new TermConcept(cs, "dogs").setDisplay("Dogs");
 		cs.getConcepts().add(dogs);
-		
+
 		TermConcept labrador = new TermConcept(cs, "labrador").setDisplay("Labrador");
 		dogs.addChild(labrador, RelationshipTypeEnum.ISA);
 
 		TermConcept beagle = new TermConcept(cs, "beagle").setDisplay("Beagle");
 		dogs.addChild(beagle, RelationshipTypeEnum.ISA);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM,"SYSTEM NAME", "SYSTEM VERSION" , cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		return codeSystem;
 	}
 
@@ -199,17 +196,17 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		//@formatter:off
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
-		codeSystem.setContent(CodeSystemContentMode.COMPLETE);		
+		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem
 			.addConcept().setCode("A").setDisplay("Code A")
-				.addConcept(new ConceptDefinitionComponent().setCode("AA").setDisplay("Code AA")
-					.addConcept(new ConceptDefinitionComponent().setCode("AAA").setDisplay("Code AAA"))
-				)
-				.addConcept(new ConceptDefinitionComponent().setCode("AB").setDisplay("Code AB"));
+			.addConcept(new ConceptDefinitionComponent().setCode("AA").setDisplay("Code AA")
+				.addConcept(new ConceptDefinitionComponent().setCode("AAA").setDisplay("Code AAA"))
+			)
+			.addConcept(new ConceptDefinitionComponent().setCode("AB").setDisplay("Code AB"));
 		codeSystem
 			.addConcept().setCode("B").setDisplay("Code B")
-				.addConcept(new ConceptDefinitionComponent().setCode("BA").setDisplay("Code BA"))
-				.addConcept(new ConceptDefinitionComponent().setCode("BB").setDisplay("Code BB"));
+			.addConcept(new ConceptDefinitionComponent().setCode("BA").setDisplay("Code BA"))
+			.addConcept(new ConceptDefinitionComponent().setCode("BB").setDisplay("Code BB"));
 		//@formatter:on
 		myCodeSystemDao.create(codeSystem, mySrd);
 
@@ -262,15 +259,15 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		//@formatter:off
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
-		codeSystem.setContent(CodeSystemContentMode.COMPLETE);		
+		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem
 			.addConcept().setCode("A").setDisplay("Code A")
-				.addConcept(new ConceptDefinitionComponent().setCode("AA").setDisplay("Code AA"))
-				.addConcept(new ConceptDefinitionComponent().setCode("AB").setDisplay("Code AB"));
+			.addConcept(new ConceptDefinitionComponent().setCode("AA").setDisplay("Code AA"))
+			.addConcept(new ConceptDefinitionComponent().setCode("AB").setDisplay("Code AB"));
 		codeSystem
 			.addConcept().setCode("B").setDisplay("Code A")
-				.addConcept(new ConceptDefinitionComponent().setCode("BA").setDisplay("Code AA"))
-				.addConcept(new ConceptDefinitionComponent().setCode("BB").setDisplay("Code AB"));
+			.addConcept(new ConceptDefinitionComponent().setCode("BA").setDisplay("Code AA"))
+			.addConcept(new ConceptDefinitionComponent().setCode("BB").setDisplay("Code AB"));
 		//@formatter:on
 
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
@@ -306,20 +303,20 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		valueSet.setUrl(URL_MY_VALUE_SET);
 		valueSet.getCompose()
 			.addInclude()
-				.setSystem(codeSystem.getUrl())
-				.addConcept(new ConceptReferenceComponent().setCode("hello"))
-				.addConcept(new ConceptReferenceComponent().setCode("goodbye"));
+			.setSystem(codeSystem.getUrl())
+			.addConcept(new ConceptReferenceComponent().setCode("hello"))
+			.addConcept(new ConceptReferenceComponent().setCode("goodbye"));
 		valueSet.getCompose()
 			.addInclude()
-				.setSystem(codeSystem.getUrl())
-				.addFilter()
-					.setProperty("concept")
-					.setOp(FilterOperator.ISA)
-					.setValue("dogs");
-				
+			.setSystem(codeSystem.getUrl())
+			.addFilter()
+			.setProperty("concept")
+			.setOp(FilterOperator.ISA)
+			.setValue("dogs");
+
 		myValueSetDao.create(valueSet, mySrd);
 
-		ValueSet result = myValueSetDao.expand(valueSet, "");
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
 		logAndValidateValueSet(result);
 
 		assertEquals(4, result.getExpansion().getTotal());
@@ -332,13 +329,13 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	@Disabled
 	@Test
 	public void testExpandWithOpEquals() {
-		
-		
-		ValueSet result = myValueSetDao.expandByIdentifier("http://hl7.org/fhir/ValueSet/doc-typecodes", "");
+
+
+		ValueSet result = myValueSetDao.expandByIdentifier("http://hl7.org/fhir/ValueSet/doc-typecodes", new ValueSetExpansionOptions().setFilter(""));
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result));
 	}
-	
-	
+
+
 	@Test
 	public void testExpandWithCodesAndDisplayFilterPartialOnFilter() {
 		CodeSystem codeSystem = createExternalCsDogs();
@@ -347,20 +344,20 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		valueSet.setUrl(URL_MY_VALUE_SET);
 		valueSet.getCompose()
 			.addInclude()
-				.setSystem(codeSystem.getUrl())
-				.addConcept(new ConceptReferenceComponent().setCode("hello"))
-				.addConcept(new ConceptReferenceComponent().setCode("goodbye"));
+			.setSystem(codeSystem.getUrl())
+			.addConcept(new ConceptReferenceComponent().setCode("hello"))
+			.addConcept(new ConceptReferenceComponent().setCode("goodbye"));
 		valueSet.getCompose()
 			.addInclude()
-				.setSystem(codeSystem.getUrl())
-				.addFilter()
-					.setProperty("concept")
-					.setOp(FilterOperator.ISA)
-					.setValue("dogs");
-				
+			.setSystem(codeSystem.getUrl())
+			.addFilter()
+			.setProperty("concept")
+			.setOp(FilterOperator.ISA)
+			.setValue("dogs");
+
 		myValueSetDao.create(valueSet, mySrd);
 
-		ValueSet result = myValueSetDao.expand(valueSet, "lab");
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter("lab"));
 		logAndValidateValueSet(result);
 
 		assertEquals(1, result.getExpansion().getTotal());
@@ -377,20 +374,20 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		valueSet.setUrl(URL_MY_VALUE_SET);
 		valueSet.getCompose()
 			.addInclude()
-				.setSystem(codeSystem.getUrl())
-				.addConcept(new ConceptReferenceComponent().setCode("hello"))
-				.addConcept(new ConceptReferenceComponent().setCode("goodbye"));
+			.setSystem(codeSystem.getUrl())
+			.addConcept(new ConceptReferenceComponent().setCode("hello"))
+			.addConcept(new ConceptReferenceComponent().setCode("goodbye"));
 		valueSet.getCompose()
 			.addInclude()
-				.setSystem(codeSystem.getUrl())
-				.addFilter()
-					.setProperty("concept")
-					.setOp(FilterOperator.ISA)
-					.setValue("dogs");
-				
+			.setSystem(codeSystem.getUrl())
+			.addFilter()
+			.setProperty("concept")
+			.setOp(FilterOperator.ISA)
+			.setValue("dogs");
+
 		myValueSetDao.create(valueSet, mySrd);
 
-		ValueSet result = myValueSetDao.expand(valueSet, "hel");
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter("hel"));
 		logAndValidateValueSet(result);
 
 		assertEquals(1, result.getExpansion().getTotal());
@@ -408,7 +405,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		valueSet.getCompose().addInclude().setSystem(codeSystem.getUrl());
 		myValueSetDao.create(valueSet, mySrd);
 
-		ValueSet result = myValueSetDao.expand(valueSet, "lab");
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter("lab"));
 		logAndValidateValueSet(result);
 
 		assertEquals(1, result.getExpansion().getTotal());
@@ -512,7 +509,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	@Test
 	public void testExpandWithIsAInExternalValueSetReindex() {
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(true);
-		
+
 		createExternalCsAndLocalVs();
 
 		// We're making sure that a reindex doesn't wipe out all of the
@@ -524,7 +521,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		myTerminologyDeferredStorageSvc.saveDeferred();
 
-		IValidationSupport.LookupCodeResult lookupResults = myCodeSystemDao.lookupCode(new StringType("childAA"), new StringType(URL_MY_CODE_SYSTEM),null, mySrd);
+		IValidationSupport.LookupCodeResult lookupResults = myCodeSystemDao.lookupCode(new StringType("childAA"), new StringType(URL_MY_CODE_SYSTEM), null, mySrd);
 		assertEquals(true, lookupResults.isFound());
 
 		ValueSet vs = new ValueSet();
@@ -569,7 +566,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 			assertEquals("Unknown CodeSystem URI \"http://example.com/my_code_systemAA\" referenced from ValueSet", e.getMessage());
 		}
 	}
-	
+
 	@Test
 	public void testExpandWithSystemAndCodesInExternalValueSet() {
 		createExternalCsAndLocalVs();
@@ -628,9 +625,9 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		valueSet.setUrl(URL_MY_VALUE_SET);
 		valueSet.getCompose()
 			.addInclude()
-				.setSystem(codeSystem.getUrl());
+			.setSystem(codeSystem.getUrl());
 
-		ValueSet result = myValueSetDao.expand(valueSet, "");
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
 		logAndValidateValueSet(result);
 
 		assertEquals(5, result.getExpansion().getTotal());
@@ -711,7 +708,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		cs.setResource(table);
 		TermConcept parentA = new TermConcept(cs, "ParentA").setDisplay("Parent A");
 		cs.getConcepts().add(parentA);
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), "http://snomed.info/sct", "Snomed CT", "SYSTEM VERSION" , cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), "http://snomed.info/sct", "Snomed CT", "SYSTEM VERSION", cs, table);
 
 		StringType code = new StringType("ParentA");
 		StringType system = new StringType("http://snomed.info/sct");
@@ -767,7 +764,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		myResourceReindexingSvc.forceReindexingPass();
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		myTerminologyDeferredStorageSvc.saveDeferred();
-		
+
 		// Again
 		myResourceReindexingSvc.markAllResourcesForReindexing();
 		myResourceReindexingSvc.forceReindexingPass();
@@ -917,7 +914,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 	}
 
-	
+
 	@Test
 	public void testSearchCodeBelowLocalCodesystem() {
 		createLocalCsAndVs();
@@ -1018,7 +1015,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		SearchParameterMap params;
 
 		ourLog.info("testSearchCodeInEmptyValueSet without status");
-		
+
 		params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(null, URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
@@ -1029,7 +1026,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		params.add(Observation.SP_CODE, new TokenParam(null, URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
 		params.add(Observation.SP_STATUS, new TokenParam(null, "final"));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
-		
+
 		ourLog.info("testSearchCodeInEmptyValueSet done");
 	}
 
@@ -1125,12 +1122,12 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		SearchParameterMap params;
 
 		ourLog.info("testSearchCodeInEmptyValueSet without status");
-		
+
 		params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(null, URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
 		try {
 			myObservationDao.search(params);
-		} catch(InvalidRequestException e) {
+		} catch (InvalidRequestException e) {
 			assertEquals("Unable to expand imported value set: Unable to find imported value set http://non_existant_VS", e.getMessage());
 		}
 

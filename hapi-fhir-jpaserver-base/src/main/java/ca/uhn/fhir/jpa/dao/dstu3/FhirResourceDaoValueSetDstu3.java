@@ -47,40 +47,21 @@ import static org.hl7.fhir.convertors.conv30_40.ValueSet30_40.convertValueSet;
 public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueSet> implements IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> {
 
 	@Override
-	public org.hl7.fhir.dstu3.model.ValueSet expand(IIdType theId, String theFilter, RequestDetails theRequestDetails) {
+	public org.hl7.fhir.dstu3.model.ValueSet expand(IIdType theId, ValueSetExpansionOptions theOptions, RequestDetails theRequestDetails) {
 		org.hl7.fhir.dstu3.model.ValueSet source = read(theId, theRequestDetails);
-		return expand(source, theFilter);
+		return expand(source, theOptions);
 	}
 
 	@Override
-	public org.hl7.fhir.dstu3.model.ValueSet expand(IIdType theId, String theFilter, ValueSetExpansionOptions theOptions, RequestDetails theRequestDetails) {
-		org.hl7.fhir.dstu3.model.ValueSet source = read(theId, theRequestDetails);
-		return expand(source, theFilter, theOptions);
-	}
-
-	@Override
-	public org.hl7.fhir.dstu3.model.ValueSet expandByIdentifier(String theUri, String theFilter) {
-		org.hl7.fhir.r4.model.ValueSet canonicalOutput = myTerminologySvc.expandValueSet(null, theUri, theFilter);
-		return ValueSet30_40.convertValueSet(canonicalOutput);
-	}
-
-	@Override
-	public org.hl7.fhir.dstu3.model.ValueSet expandByIdentifier(String theUri, String theFilter, ValueSetExpansionOptions theOptions) {
-		org.hl7.fhir.r4.model.ValueSet canonicalOutput = myTerminologySvc.expandValueSet(theOptions, theUri, theFilter);
-		return ValueSet30_40.convertValueSet(canonicalOutput);
-	}
-
-	@Override
-	public org.hl7.fhir.dstu3.model.ValueSet expand(org.hl7.fhir.dstu3.model.ValueSet theSource, String theFilter) {
+	public org.hl7.fhir.dstu3.model.ValueSet expand(org.hl7.fhir.dstu3.model.ValueSet theSource, ValueSetExpansionOptions theOptions) {
 		org.hl7.fhir.r4.model.ValueSet canonicalInput = ValueSet30_40.convertValueSet(theSource);
-		org.hl7.fhir.r4.model.ValueSet canonicalOutput = myTerminologySvc.expandValueSet(null, canonicalInput, theFilter);
+		org.hl7.fhir.r4.model.ValueSet canonicalOutput = myTerminologySvc.expandValueSet(theOptions, canonicalInput);
 		return ValueSet30_40.convertValueSet(canonicalOutput);
 	}
 
 	@Override
-	public org.hl7.fhir.dstu3.model.ValueSet expand(org.hl7.fhir.dstu3.model.ValueSet theSource, String theFilter, ValueSetExpansionOptions theOptions) {
-		org.hl7.fhir.r4.model.ValueSet canonicalInput = ValueSet30_40.convertValueSet(theSource);
-		org.hl7.fhir.r4.model.ValueSet canonicalOutput = myTerminologySvc.expandValueSet(theOptions, canonicalInput, theFilter);
+	public org.hl7.fhir.dstu3.model.ValueSet expandByIdentifier(String theUri, ValueSetExpansionOptions theOptions) {
+		org.hl7.fhir.r4.model.ValueSet canonicalOutput = myTerminologySvc.expandValueSet(theOptions, theUri);
 		return ValueSet30_40.convertValueSet(canonicalOutput);
 	}
 

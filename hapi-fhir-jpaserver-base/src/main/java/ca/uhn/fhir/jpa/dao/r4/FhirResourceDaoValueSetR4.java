@@ -44,35 +44,20 @@ import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoValueSetDstu3.vsValidateC
 public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet> implements IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> {
 
 	@Override
-	public ValueSet expand(IIdType theId, String theFilter, RequestDetails theRequestDetails) {
+	public ValueSet expand(IIdType theId, ValueSetExpansionOptions theOptions, RequestDetails theRequestDetails) {
 		ValueSet source = read(theId, theRequestDetails);
-		return expand(source, theFilter);
+		return expand(source, theOptions);
+	}
+
+
+	@Override
+	public ValueSet expandByIdentifier(String theUri, ValueSetExpansionOptions theOptions) {
+		return myTerminologySvc.expandValueSet(theOptions, theUri);
 	}
 
 	@Override
-	public ValueSet expand(IIdType theId, String theFilter, ValueSetExpansionOptions theOptions, RequestDetails theRequestDetails) {
-		ValueSet source = read(theId, theRequestDetails);
-		return expand(source, theFilter, theOptions);
-	}
-
-	@Override
-	public ValueSet expandByIdentifier(String theUri, String theFilter) {
-		return myTerminologySvc.expandValueSet(null, theUri, theFilter);
-	}
-
-	@Override
-	public ValueSet expandByIdentifier(String theUri, String theFilter, ValueSetExpansionOptions theOptions) {
-		return myTerminologySvc.expandValueSet(theOptions, theUri, theFilter);
-	}
-
-	@Override
-	public ValueSet expand(ValueSet theSource, String theFilter) {
-		return myTerminologySvc.expandValueSet(null, theSource, theFilter);
-	}
-
-	@Override
-	public ValueSet expand(ValueSet theSource, String theFilter, ValueSetExpansionOptions theOptions) {
-		return myTerminologySvc.expandValueSet(theOptions, theSource, theFilter);
+	public ValueSet expand(ValueSet theSource, ValueSetExpansionOptions theOptions) {
+		return myTerminologySvc.expandValueSet(theOptions, theSource);
 	}
 
 	@Override
@@ -103,16 +88,6 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 		}
 
 		return retVal;
-	}
-
-	public static void validateHaveExpansionOrThrowInternalErrorException(IValidationSupport.ValueSetExpansionOutcome theRetVal) {
-		if (theRetVal != null && theRetVal.getValueSet() == null) {
-			throw new InternalErrorException("Unable to expand ValueSet: " + theRetVal.getError());
-		}
-
-		if (theRetVal == null) {
-			throw new InternalErrorException("Unable to expand ValueSet");
-		}
 	}
 
 
