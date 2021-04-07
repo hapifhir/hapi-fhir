@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.provider;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,8 +95,8 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	private final Class<T> myResourceType;
 	private final FhirContext myFhirContext;
 	private final String myResourceName;
-	protected Map<String, TreeMap<Long, T>> myIdToVersionToResourceMap = Collections.synchronizedMap(new LinkedHashMap<>());
-	protected Map<String, LinkedList<T>> myIdToHistory = Collections.synchronizedMap(new LinkedHashMap<>());
+	protected Map<String, TreeMap<Long, T>> myIdToVersionToResourceMap = new LinkedHashMap<>();
+	protected Map<String, LinkedList<T>> myIdToHistory = new LinkedHashMap<>();
 	protected LinkedList<T> myTypeHistory = new LinkedList<>();
 	protected AtomicLong mySearchCount = new AtomicLong(0);
 	private long myNextId;
@@ -121,7 +121,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	/**
 	 * Clear all data held in this resource provider
 	 */
-	public void clear() {
+	public synchronized void clear() {
 		myNextId = 1;
 		myIdToVersionToResourceMap.clear();
 		myIdToHistory.clear();
@@ -131,7 +131,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	/**
 	 * Clear the counts used by {@link #getCountRead()} and other count methods
 	 */
-	public void clearCounts() {
+	public  synchronized void clearCounts() {
 		myReadCount.set(0L);
 		myUpdateCount.set(0L);
 		myCreateCount.set(0L);
@@ -140,7 +140,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	@Create
-	public MethodOutcome create(@ResourceParam T theResource, RequestDetails theRequestDetails) {
+	public synchronized MethodOutcome create(@ResourceParam T theResource, RequestDetails theRequestDetails) {
 		TransactionDetails transactionDetails = new TransactionDetails();
 
 		createInternal(theResource, theRequestDetails, transactionDetails);
@@ -158,12 +158,14 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		String idPartAsString = Long.toString(idPart);
 		Long versionIdPart = 1L;
 
+		assert !myIdToVersionToResourceMap.containsKey(idPartAsString);
+
 		IIdType id = store(theResource, idPartAsString, versionIdPart, theRequestDetails, theTransactionDetails);
 		theResource.setId(id);
 	}
 
 	@Delete
-	public MethodOutcome delete(@IdParam IIdType theId, RequestDetails theRequestDetails) {
+	public  synchronized MethodOutcome delete(@IdParam IIdType theId, RequestDetails theRequestDetails) {
 		TransactionDetails transactionDetails = new TransactionDetails();
 
 		TreeMap<Long, T> versions = myIdToVersionToResourceMap.get(theId.getIdPart());
@@ -185,7 +187,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	 * This method returns a simple operation count. This is mostly
 	 * useful for testing purposes.
 	 */
-	public long getCountCreate() {
+	public  synchronized long getCountCreate() {
 		return myCreateCount.get();
 	}
 
@@ -193,7 +195,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	 * This method returns a simple operation count. This is mostly
 	 * useful for testing purposes.
 	 */
-	public long getCountDelete() {
+	public synchronized  long getCountDelete() {
 		return myDeleteCount.get();
 	}
 
@@ -201,7 +203,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	 * This method returns a simple operation count. This is mostly
 	 * useful for testing purposes.
 	 */
-	public long getCountRead() {
+	public  synchronized long getCountRead() {
 		return myReadCount.get();
 	}
 
@@ -209,7 +211,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	 * This method returns a simple operation count. This is mostly
 	 * useful for testing purposes.
 	 */
-	public long getCountSearch() {
+	public synchronized  long getCountSearch() {
 		return mySearchCount.get();
 	}
 
@@ -217,7 +219,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	 * This method returns a simple operation count. This is mostly
 	 * useful for testing purposes.
 	 */
-	public long getCountUpdate() {
+	public  synchronized long getCountUpdate() {
 		return myUpdateCount.get();
 	}
 
@@ -226,13 +228,13 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		return myResourceType;
 	}
 
-	private synchronized TreeMap<Long, T> getVersionToResource(String theIdPart) {
+	private TreeMap<Long, T> getVersionToResource(String theIdPart) {
 		myIdToVersionToResourceMap.computeIfAbsent(theIdPart, t -> new TreeMap<>());
 		return myIdToVersionToResourceMap.get(theIdPart);
 	}
 
 	@History
-	public List<IBaseResource> historyInstance(@IdParam IIdType theId, RequestDetails theRequestDetails) {
+	public  synchronized List<IBaseResource> historyInstance(@IdParam IIdType theId, RequestDetails theRequestDetails) {
 		LinkedList<T> retVal = myIdToHistory.get(theId.getIdPart());
 		if (retVal == null) {
 			throw new ResourceNotFoundException(theId);
@@ -247,7 +249,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	@Read(version = true)
-	public T read(@IdParam IIdType theId, RequestDetails theRequestDetails) {
+	public  synchronized T read(@IdParam IIdType theId, RequestDetails theRequestDetails) {
 		TreeMap<Long, T> versions = myIdToVersionToResourceMap.get(theId.getIdPart());
 		if (versions == null || versions.isEmpty()) {
 			throw new ResourceNotFoundException(theId);
@@ -280,14 +282,14 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	@Search
-	public List<IBaseResource> searchAll(RequestDetails theRequestDetails) {
+	public  synchronized List<IBaseResource> searchAll(RequestDetails theRequestDetails) {
 		mySearchCount.incrementAndGet();
 		List<T> retVal = getAllResources();
 		return fireInterceptorsAndFilterAsNeeded(retVal, theRequestDetails);
 	}
 
 	@Nonnull
-	protected List<T> getAllResources() {
+	protected  synchronized List<T> getAllResources() {
 		List<T> retVal = new ArrayList<>();
 
 		for (TreeMap<Long, T> next : myIdToVersionToResourceMap.values()) {
@@ -303,7 +305,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	@Search
-	public List<IBaseResource> searchById(
+	public  synchronized List<IBaseResource> searchById(
 		@RequiredParam(name = "_id") TokenAndListParam theIds, RequestDetails theRequestDetails) {
 
 		List<T> retVal = new ArrayList<>();
@@ -424,7 +426,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	 * @param theConditional This is provided only so that subclasses can implement if they want
 	 */
 	@Update
-	public MethodOutcome update(
+	public  synchronized MethodOutcome update(
 		@ResourceParam T theResource,
 		@ConditionalUrlParam String theConditional,
 		RequestDetails theRequestDetails) {
@@ -472,7 +474,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	 * @param theResource The resource to store. If the resource has an ID, that ID is updated.
 	 * @return Return the ID assigned to the stored resource
 	 */
-	public IIdType store(T theResource) {
+	public  synchronized IIdType store(T theResource) {
 		if (theResource.getIdElement().hasIdPart()) {
 			updateInternal(theResource, null, new TransactionDetails());
 		} else {
@@ -486,7 +488,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	 *
 	 * @since 4.1.0
 	 */
-	public List<T> getStoredResources() {
+	public  synchronized List<T> getStoredResources() {
 		List<T> retVal = new ArrayList<>();
 		for (TreeMap<Long, T> next : myIdToVersionToResourceMap.values()) {
 			retVal.add(next.lastEntry().getValue());

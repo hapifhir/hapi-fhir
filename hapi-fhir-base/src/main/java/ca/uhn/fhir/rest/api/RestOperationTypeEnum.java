@@ -5,7 +5,7 @@ package ca.uhn.fhir.rest.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,17 +25,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 import ca.uhn.fhir.util.CoverageIgnore;
+import org.apache.commons.lang3.Validate;
+
+import javax.annotation.Nonnull;
 
 @CoverageIgnore
 public enum RestOperationTypeEnum {
 
-	ADD_TAGS("add-tags"),
+	BATCH("batch", true, false, false),
 
-	DELETE_TAGS("delete-tags"),
+	ADD_TAGS("add-tags", false, false, true),
 
-	GET_TAGS("get-tags"),
+	DELETE_TAGS("delete-tags", false, false, true),
 
-	GET_PAGE("get-page"),
+	GET_TAGS("get-tags", false, true, true),
+
+	GET_PAGE("get-page", false, false, false),
 
 	/**
 	 * <b>
@@ -43,111 +48,111 @@ public enum RestOperationTypeEnum {
 	 * change as the GraphQL interface matures
 	 * </b>
 	 */
-	GRAPHQL_REQUEST("graphql-request"),
+	GRAPHQL_REQUEST("graphql-request", false, false, false),
 
 	/**
 	 * E.g. $everything, $validate, etc.
 	 */
-	EXTENDED_OPERATION_SERVER("extended-operation-server"),
+	EXTENDED_OPERATION_SERVER("extended-operation-server", false, false, false),
 
 	/**
 	 * E.g. $everything, $validate, etc.
 	 */
-	EXTENDED_OPERATION_TYPE("extended-operation-type"),
+	EXTENDED_OPERATION_TYPE("extended-operation-type", false, false, false),
 
 	/**
 	 * E.g. $everything, $validate, etc.
 	 */
-	EXTENDED_OPERATION_INSTANCE("extended-operation-instance"),
+	EXTENDED_OPERATION_INSTANCE("extended-operation-instance", false, false, false),
 
 	/**
 	 * Code Value: <b>create</b>
 	 */
-	CREATE("create"),
+	CREATE("create", false, true, false),
 
 	/**
 	 * Code Value: <b>delete</b>
 	 */
-	DELETE("delete"),
+	DELETE("delete", false, false, true),
 
 	/**
 	 * Code Value: <b>history-instance</b>
 	 */
-	HISTORY_INSTANCE("history-instance"),
+	HISTORY_INSTANCE("history-instance", false, false, true),
 
 	/**
 	 * Code Value: <b>history-system</b>
 	 */
-	HISTORY_SYSTEM("history-system"),
+	HISTORY_SYSTEM("history-system", true, false, false),
 
 	/**
 	 * Code Value: <b>history-type</b>
 	 */
-	HISTORY_TYPE("history-type"),
+	HISTORY_TYPE("history-type", false, true, false),
 
 	/**
 	 * Code Value: <b>read</b>
 	 */
-	READ("read"),
+	READ("read", false, false, true),
 
 	/**
 	 * Code Value: <b>search-system</b>
 	 */
-	SEARCH_SYSTEM("search-system"),
+	SEARCH_SYSTEM("search-system", true, false, false),
 
 	/**
 	 * Code Value: <b>search-type</b>
 	 */
-	SEARCH_TYPE("search-type"),
+	SEARCH_TYPE("search-type", false, true, false),
 
 	/**
 	 * Code Value: <b>transaction</b>
 	 */
-	TRANSACTION("transaction"),
+	TRANSACTION("transaction", true, false, false),
 
 	/**
 	 * Code Value: <b>update</b>
 	 */
-	UPDATE("update"),
+	UPDATE("update", false, false, true),
 
 	/**
 	 * Code Value: <b>validate</b>
 	 */
-	VALIDATE("validate"),
+	VALIDATE("validate", false, true, true),
 
 	/**
 	 * Code Value: <b>vread</b>
 	 */
-	VREAD("vread"),
+	VREAD("vread", false, false, true),
 
 	/**
 	 * Load the server's metadata
 	 */
-	METADATA("metadata"), 
+	METADATA("metadata", false, false, false),
 	
 	/**
 	 * $meta-add extended operation
 	 */
-	META_ADD("$meta-add"),
+	META_ADD("$meta-add", false, false, false),
 
 	/**
 	 * $meta-add extended operation
 	 */
-	META("$meta"),
+	META("$meta", false, false, false),
 
 	/**
 	 * $meta-delete extended operation
 	 */
-	META_DELETE("$meta-delete"), 
+	META_DELETE("$meta-delete", false, false, false),
 	
 	/**
 	 * Patch operation
 	 */
-	PATCH("patch"),
+	PATCH("patch", false, false, true),
 
 	;
 
-	private static Map<String, RestOperationTypeEnum> CODE_TO_ENUM = new HashMap<String, RestOperationTypeEnum>();
+	private static final Map<String, RestOperationTypeEnum> CODE_TO_ENUM = new HashMap<String, RestOperationTypeEnum>();
 
 	/**
 	 * Identifier for this Value Set: http://hl7.org/fhir/vs/type-restful-operation
@@ -166,27 +171,45 @@ public enum RestOperationTypeEnum {
 	}
 
 	private final String myCode;
+	private final boolean mySystemLevel;
+	private final boolean myTypeLevel;
+	private final boolean myInstanceLevel;
 
 	/**
 	 * Constructor
 	 */
-	RestOperationTypeEnum(String theCode) {
+	RestOperationTypeEnum(@Nonnull String theCode, boolean theSystemLevel, boolean theTypeLevel, boolean theInstanceLevel) {
 		myCode = theCode;
+		mySystemLevel = theSystemLevel;
+		myTypeLevel = theTypeLevel;
+		myInstanceLevel = theInstanceLevel;
 	}
 
 	/**
 	 * Returns the enumerated value associated with this code
 	 */
-	public RestOperationTypeEnum forCode(String theCode) {
-		RestOperationTypeEnum retVal = CODE_TO_ENUM.get(theCode);
-		return retVal;
+	public RestOperationTypeEnum forCode(@Nonnull String theCode) {
+		Validate.notNull(theCode, "theCode must not be null");
+		return CODE_TO_ENUM.get(theCode);
 	}
 
 	/**
 	 * Returns the code associated with this enumerated value
 	 */
+	@Nonnull
 	public String getCode() {
 		return myCode;
 	}
 
+	public boolean isSystemLevel() {
+		return mySystemLevel;
+	}
+
+	public boolean isTypeLevel() {
+		return myTypeLevel;
+	}
+
+	public boolean isInstanceLevel() {
+		return myInstanceLevel;
+	}
 }

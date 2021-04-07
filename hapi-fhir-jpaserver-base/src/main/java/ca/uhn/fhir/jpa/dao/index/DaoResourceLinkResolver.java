@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.index;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,10 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -118,6 +121,12 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 
 			@SuppressWarnings("unchecked")
 			T newResource = (T) missingResourceDef.newInstance();
+
+			if (newResource instanceof IBaseHasExtensions) {
+				IBaseExtension<?, ?> extension = ((IBaseHasExtensions) newResource).addExtension();
+				extension.setUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER);
+				extension.setValue(myContext.getPrimitiveBoolean(true));
+			}
 
 			IFhirResourceDao<T> placeholderResourceDao = myDaoRegistry.getResourceDao(theType);
 			ourLog.debug("Automatically creating empty placeholder resource: {}", newResource.getIdElement().getValue());

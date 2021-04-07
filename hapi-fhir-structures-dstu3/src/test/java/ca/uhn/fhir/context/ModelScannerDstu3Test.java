@@ -13,6 +13,7 @@ import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.Binary;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -86,6 +87,15 @@ public class ModelScannerDstu3Test {
 			fail();
 		} catch (ConfigurationException e) {
 			assertEquals("Resource class[ca.uhn.fhir.context.ModelScannerDstu3Test$NoResourceDef] does not contain any valid HAPI-FHIR annotations", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testResourceWithInheritedDef() {
+		try {
+			FhirContext.forDstu3().getResourceDefinition(InheritedResourceDef.class);
+		} catch (ConfigurationException e) {
+			fail("The InheritedResourceDef class should contain a valid HAPI-FHIR annotation inherited from superclass");
 		}
 	}
 
@@ -238,11 +248,25 @@ public class ModelScannerDstu3Test {
 		}
 	}
 
-	class NoResourceDef extends Patient {
+	class NoResourceDef extends DomainResource {
 		@SearchParamDefinition(name = "foo", path = "Patient.telecom", type = "bar")
 		public static final String SP_TELECOM = "foo";
 		private static final long serialVersionUID = 1L;
 
+		@Override
+		public DomainResource copy() {
+			return null;
+		}
+
+		@Override
+		public ResourceType getResourceType() {
+			return null;
+		}
+	}
+
+	static class InheritedResourceDef extends Patient {
+		public InheritedResourceDef() {
+		}
 	}
 
 	@ResourceDef(name = "Patient")

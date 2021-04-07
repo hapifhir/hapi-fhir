@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class TransactionParameter implements IParameter {
 
 	private String createParameterTypeError(Method theMethod) {
 		return "Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + TransactionParam.class.getName()
-			+ " but is not of type List<" + IResource.class.getCanonicalName() + "> or Bundle";
+			+ " but is not of type Bundle, IBaseResource, IBaseBundle, or List<" + IResource.class.getCanonicalName() + ">";
 	}
 
 	@Override
@@ -66,10 +66,13 @@ public class TransactionParameter implements IParameter {
 			if ("Bundle".equals(def.getName())) {
 				myParamStyle = ParamStyle.RESOURCE_BUNDLE;
 				myResourceBundleType = parameterType;
-			} else {
-				throw new ConfigurationException(createParameterTypeError(theMethod));
+				return;
 			}
-		} else {
+		} else if (theParameterType.equals(IBaseResource.class) || theParameterType.equals(IBaseBundle.class)) {
+			myParamStyle = ParamStyle.RESOURCE_BUNDLE;
+			myResourceBundleType = myContext.getResourceDefinition("Bundle").getImplementingClass();
+			return;
+		} else if (theInnerCollectionType != null) {
 			if (theInnerCollectionType.equals(List.class) == false) {
 				throw new ConfigurationException(createParameterTypeError(theMethod));
 			}
@@ -77,7 +80,10 @@ public class TransactionParameter implements IParameter {
 				throw new ConfigurationException(createParameterTypeError(theMethod));
 			}
 			myParamStyle = ParamStyle.RESOURCE_LIST;
+			return;
 		}
+
+		throw new ConfigurationException(createParameterTypeError(theMethod));
 	}
 
 	@Override

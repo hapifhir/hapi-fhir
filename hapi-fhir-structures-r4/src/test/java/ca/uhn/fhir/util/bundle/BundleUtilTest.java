@@ -46,6 +46,15 @@ public class BundleUtilTest {
 	}
 
 	@Test
+	public void testSetType() {
+		Bundle b = new Bundle();
+		BundleUtil.setBundleType(ourCtx, b, "transaction");
+		assertEquals(Bundle.BundleType.TRANSACTION, b.getType());
+		assertEquals("transaction", b.getTypeElement().getValueAsString());
+	}
+
+
+	@Test
 	public void toListOfResourcesOfTypeTest() {
 		Bundle bundle = new Bundle();
 		for (int i = 0; i < 5; i++) {
@@ -56,10 +65,23 @@ public class BundleUtilTest {
 	}
 
 	@Test
-	public void testProcessEntries() {
+	public void testProcessEntriesSetRequestUrl() {
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Patient");
+
+		Consumer<ModifiableBundleEntry> consumer = e -> e.setFullUrl("http://hello/Patient/123");
+		BundleUtil.processEntries(ourCtx, bundle, consumer);
+
+		assertEquals("http://hello/Patient/123", bundle.getEntryFirstRep().getFullUrl());
+	}
+
+	@Test
+	public void testProcessEntriesSetFullUrl() {
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
 		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Observation");
+
 		Consumer<ModifiableBundleEntry> consumer = e -> e.setRequestUrl(ourCtx, e.getRequestUrl() + "?foo=bar");
 		BundleUtil.processEntries(ourCtx, bundle, consumer);
 		assertEquals("Observation?foo=bar", bundle.getEntryFirstRep().getRequest().getUrl());

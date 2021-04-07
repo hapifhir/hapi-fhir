@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public enum EncodingEnum {
 		}
 	},
 
-	RDF(Constants.CT_RDF_TURTLE, Constants.CT_RDF_TURTLE, Constants.FORMAT_TURTLE) {
+	RDF(Constants.CT_RDF_TURTLE_LEGACY, Constants.CT_RDF_TURTLE, Constants.FORMAT_TURTLE) {
 		@Override
 		public IParser newParser(FhirContext theContext) {
 			return theContext.newRDFParser();
@@ -114,6 +114,7 @@ public enum EncodingEnum {
 		ourContentTypeToEncoding.put(JSON_PLAIN_STRING, JSON);
 		ourContentTypeToEncoding.put(XML_PLAIN_STRING, XML);
 		ourContentTypeToEncoding.put(RDF_PLAIN_STRING, RDF);
+		ourContentTypeToEncoding.put(Constants.FORMAT_TURTLE, RDF);
 
 		ourContentTypeToEncodingLegacy = Collections.unmodifiableMap(ourContentTypeToEncodingLegacy);
 

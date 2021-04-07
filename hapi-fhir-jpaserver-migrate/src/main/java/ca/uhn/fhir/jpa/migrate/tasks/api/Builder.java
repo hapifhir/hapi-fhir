@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.tasks.api;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -402,7 +402,7 @@ public class Builder {
 					super(theVersion, theColumnName);
 				}
 
-				public void references(String theForeignTable, String theForeignColumn) {
+				public BuilderCompleteTask references(String theForeignTable, String theForeignColumn) {
 					AddForeignKeyTask task = new AddForeignKeyTask(myRelease, myVersion);
 					task.setTableName(myTableName);
 					task.setConstraintName(myForeignKeyName);
@@ -410,6 +410,7 @@ public class Builder {
 					task.setForeignTableName(theForeignTable);
 					task.setForeignColumnName(theForeignColumn);
 					addTask(task);
+					return new BuilderCompleteTask(task);
 				}
 			}
 		}

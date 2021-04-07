@@ -2,9 +2,9 @@ package ca.uhn.fhir.jpa.model.entity;
 
 /*
  * #%L
- * HAPI FHIR Model
+ * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,10 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.search.annotations.Analyze;
-import org.hibernate.search.annotations.Analyzer;
-import org.hibernate.search.annotations.ContainedIn;
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.Fields;
-import org.hibernate.search.annotations.Indexed;
-import org.hibernate.search.annotations.Store;
+import org.hibernate.search.engine.backend.types.Projectable;
+import org.hibernate.search.engine.backend.types.Searchable;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -51,7 +48,6 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.left;
 
 //@formatter:off
 @Embeddable
@@ -72,7 +68,6 @@ import static org.apache.commons.lang3.StringUtils.left;
 	@Index(name = "IDX_SP_STRING_UPDATED", columnList = "SP_UPDATED"),
 	@Index(name = "IDX_SP_STRING_RESID", columnList = "RES_ID")
 })
-@Indexed()
 public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchParam {
 
 	/*
@@ -89,16 +84,13 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_SPIDXSTR_RESOURCE"))
-	@ContainedIn
 	private ResourceTable myResourceTable;
 
 	@Column(name = "SP_VALUE_EXACT", length = MAX_LENGTH, nullable = true)
-	@Fields({
-		@Field(name = "myValueText", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "standardAnalyzer")),
-		@Field(name = "myValueTextEdgeNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteEdgeAnalyzer")),
-		@Field(name = "myValueTextNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteNGramAnalyzer")),
-		@Field(name = "myValueTextPhonetic", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompletePhoneticAnalyzer"))
-	})
+//	@FullTextField(name = "myValueText", searchable=Searchable.YES, projectable = Projectable.YES, analyzer = "standardAnalyzer")
+//	@FullTextField(name = "myValueTextEdgeNGram", searchable=Searchable.YES, projectable = Projectable.NO, analyzer = "autocompleteEdgeAnalyzer")
+//	@FullTextField(name = "myValueTextNGram", searchable=Searchable.YES, projectable = Projectable.NO, analyzer = "autocompleteNGramAnalyzer")
+//	@FullTextField(name = "myValueTextPhonetic", searchable=Searchable.YES, projectable = Projectable.NO, analyzer = "autocompletePhoneticAnalyzer")
 	private String myValueExact;
 
 	@Column(name = "SP_VALUE_NORMALIZED", length = MAX_LENGTH, nullable = true)
@@ -296,6 +288,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			hashPrefixLength = 0;
 		}
 
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, left(theValueNormalized, hashPrefixLength));
+		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, StringUtil.left(theValueNormalized, hashPrefixLength));
 	}
+
 }

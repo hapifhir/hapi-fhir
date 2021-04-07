@@ -4,7 +4,7 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,7 @@ package ca.uhn.fhir.cli;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.igpacks.parser.IgPackParserDstu2;
-import ca.uhn.fhir.igpacks.parser.IgPackParserDstu3;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
@@ -147,25 +144,11 @@ public class ValidateCommand extends BaseCommand {
 			localProfileResource = ca.uhn.fhir.rest.api.EncodingEnum.detectEncodingNoDefault(input).newParser(ctx).parseResource(input);
 		}
 
-		byte[] igPack = null;
-		String igpackFilename = null;
-		if (theCommandLine.hasOption("igpack")) {
-			igpackFilename = theCommandLine.getOptionValue("igpack");
-			igPack = loadFileAsByteArray(igpackFilename);
-		}
-
 		if (theCommandLine.hasOption("p")) {
 			switch (ctx.getVersion().getVersion()) {
 				case DSTU2: {
 					ValidationSupportChain validationSupport = new ValidationSupportChain(
 						new DefaultProfileValidationSupport(ctx), new InMemoryTerminologyServerValidationSupport(ctx));
-					if (igPack != null) {
-						FhirContext hl7orgCtx = FhirContext.forDstu2Hl7Org();
-						hl7orgCtx.setParserErrorHandler(new LenientErrorHandler(false));
-						IgPackParserDstu2 parser = new IgPackParserDstu2(hl7orgCtx);
-						IValidationSupport igValidationSupport = parser.parseIg(igPack, igpackFilename);
-						validationSupport.addValidationSupport(igValidationSupport);
-					}
 
 					if (theCommandLine.hasOption("r")) {
 						validationSupport.addValidationSupport((IValidationSupport) new LoadingValidationSupportDstu2());
@@ -180,11 +163,6 @@ public class ValidateCommand extends BaseCommand {
 					FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 					val.registerValidatorModule(instanceValidator);
 					ValidationSupportChain validationSupport = new ValidationSupportChain(new DefaultProfileValidationSupport(ctx), new InMemoryTerminologyServerValidationSupport(ctx));
-					if (igPack != null) {
-						IgPackParserDstu3 parser = new IgPackParserDstu3(getFhirContext());
-						IValidationSupport igValidationSupport = parser.parseIg(igPack, igpackFilename);
-						validationSupport.addValidationSupport(igValidationSupport);
-					}
 
 					if (theCommandLine.hasOption("r")) {
 						validationSupport.addValidationSupport((IValidationSupport) new LoadingValidationSupportDstu3());

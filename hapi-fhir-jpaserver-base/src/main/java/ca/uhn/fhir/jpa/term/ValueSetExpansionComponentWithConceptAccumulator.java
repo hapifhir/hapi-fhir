@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.term;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
 import ca.uhn.fhir.model.api.annotation.Block;
@@ -32,9 +31,15 @@ import org.hl7.fhir.r4.model.ValueSet;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Block()
 public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.ValueSetExpansionComponent implements IValueSetConceptAccumulator {
@@ -45,28 +50,24 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	private List<String> myMessages;
 	private int myAddedConcepts;
 	private Integer myTotalConcepts;
-
-	/**
-	 * Constructor
-	 *
-	 * @param theDaoConfig Will be used to determine the max capacity for this accumulator
-	 */
-	public ValueSetExpansionComponentWithConceptAccumulator(FhirContext theContext, DaoConfig theDaoConfig) {
-		this(theContext, theDaoConfig.getMaximumExpansionSize());
-	}
+	private Map<Long, ValueSet.ValueSetExpansionContainsComponent> mySourcePidToConcept = new HashMap<>();
+	private Map<ValueSet.ValueSetExpansionContainsComponent, String> myConceptToSourceDirectParentPids = new HashMap<>();
+	private boolean myTrackingHierarchy;
 
 	/**
 	 * Constructor
 	 *
 	 * @param theMaxCapacity The maximum number of results this accumulator will accept before throwing
 	 *                       an {@link InternalErrorException}
+	 * @param theTrackingHierarchy
 	 */
-	ValueSetExpansionComponentWithConceptAccumulator(FhirContext theContext, int theMaxCapacity) {
+	ValueSetExpansionComponentWithConceptAccumulator(FhirContext theContext, int theMaxCapacity, boolean theTrackingHierarchy) {
 		myMaxCapacity = theMaxCapacity;
 		myContext = theContext;
+		myTrackingHierarchy = theTrackingHierarchy;
 	}
 
-    @Nonnull
+	@Nonnull
 	@Override
 	public Integer getCapacityRemaining() {
 		return (myMaxCapacity - myAddedConcepts) + mySkipCountRemaining;
@@ -80,6 +81,11 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	}
 
 	@Override
+	public boolean isTrackingHierarchy() {
+		return myTrackingHierarchy;
+	}
+
+	@Override
 	public void addMessage(String theMessage) {
 		if (myMessages == null) {
 			myMessages = new ArrayList<>();
@@ -88,7 +94,7 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	}
 
 	@Override
-	public void includeConcept(String theSystem, String theCode, String theDisplay) {
+	public void includeConcept(String theSystem, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids) {
 		if (mySkipCountRemaining > 0) {
 			mySkipCountRemaining--;
 			return;
@@ -103,7 +109,7 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	}
 
 	@Override
-	public void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations) {
+	public void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations, Long theSourceConceptPid, String theSourceConceptDirectParentPids) {
 		if (mySkipCountRemaining > 0) {
 			mySkipCountRemaining--;
 			return;
@@ -112,6 +118,14 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 		incrementConceptsCount();
 
 		ValueSet.ValueSetExpansionContainsComponent contains = this.addContains();
+
+		if (theSourceConceptPid != null) {
+			mySourcePidToConcept.put(theSourceConceptPid, contains);
+		}
+		if (theSourceConceptDirectParentPids != null) {
+			myConceptToSourceDirectParentPids.put(contains, theSourceConceptDirectParentPids);
+		}
+
 		setSystemAndVersion(theSystem, contains);
 		contains.setCode(theCode);
 		contains.setDisplay(theDisplay);
@@ -214,5 +228,30 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 
 	public void setHardExpansionMaximumSize(int theHardExpansionMaximumSize) {
 		myHardExpansionMaximumSize = theHardExpansionMaximumSize;
+	}
+
+	public void applyHierarchy() {
+		for (int i = 0; i < this.getContains().size(); i++) {
+			ValueSet.ValueSetExpansionContainsComponent nextContains = this.getContains().get(i);
+
+			String directParentPidsString = myConceptToSourceDirectParentPids.get(nextContains);
+			if (isNotBlank(directParentPidsString)) {
+				List<Long> directParentPids = Arrays.stream(directParentPidsString.split(" ")).map(t -> Long.parseLong(t)).collect(Collectors.toList());
+
+				boolean firstMatch = false;
+				for (Long next : directParentPids) {
+					ValueSet.ValueSetExpansionContainsComponent parentConcept = mySourcePidToConcept.get(next);
+					if (parentConcept != null) {
+						if (!firstMatch) {
+							firstMatch = true;
+							this.getContains().remove(i);
+							i--;
+						}
+
+						parentConcept.addContains(nextContains);
+					}
+				}
+			}
+		}
 	}
 }

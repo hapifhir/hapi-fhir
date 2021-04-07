@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.api.dao;
  * #%L
  * HAPI FHIR JPA API
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public interface IFhirSystemDao<T, MT> extends IDao {
 
 	/**
 	 * Returns a cached count of resources using a cache that regularly
-	 * refreshes in the background. This method will never
+	 * refreshes in the background. This method will never block, and may return null if nothing is in the cache.
 	 */
 	@Nullable
 	Map<String, Long> getResourceCountsFromCache();

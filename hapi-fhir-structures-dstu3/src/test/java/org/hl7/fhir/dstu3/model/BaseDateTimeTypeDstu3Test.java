@@ -742,7 +742,7 @@ public class BaseDateTimeTypeDstu3Test {
 	}
 
 	/**
-	 * See HAPI #101 - https://github.com/jamesagnew/hapi-fhir/issues/101
+	 * See HAPI #101 - https://github.com/hapifhir/hapi-fhir/issues/101
 	 */
 	@Test
 	public void testPrecisionRespectedForSetValue() throws Exception {
@@ -758,7 +758,7 @@ public class BaseDateTimeTypeDstu3Test {
 	}
 
 	/**
-	 * See HAPI #101 - https://github.com/jamesagnew/hapi-fhir/issues/101
+	 * See HAPI #101 - https://github.com/hapifhir/hapi-fhir/issues/101
 	 */
 	@Test
 	public void testPrecisionRespectedForSetValueWithPrecision() throws Exception {

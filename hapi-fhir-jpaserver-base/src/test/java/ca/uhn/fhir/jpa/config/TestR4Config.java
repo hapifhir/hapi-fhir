@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
-import ca.uhn.fhir.jpa.bulk.svc.BulkExportDaoSvc;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -27,6 +26,7 @@ import java.sql.Connection;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import static ca.uhn.fhir.jpa.dao.BaseJpaTest.buildHeapLuceneHibernateSearchProperties;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
@@ -68,14 +68,8 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	}
 
 	@Bean
-	public BulkExportDaoSvc bulkExportDaoSvc() {
-		return new BulkExportDaoSvc();
-	}
-
-	@Bean
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource() {
-
 
 			@Override
 			public Connection getConnection() {
@@ -160,11 +154,8 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", H2Dialect.class.getName());
-		extraProperties.put("hibernate.search.model_mapping", ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory.class.getName());
-		extraProperties.put("hibernate.search.default.directory_provider", "local-heap");
-		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
-		extraProperties.put("hibernate.search.autoregister_listeners", "true");
-		extraProperties.put("hibernate.temp.use_jdbc_metadata_defaults","false");
+
+		extraProperties.putAll(buildHeapLuceneHibernateSearchProperties());
 
 		return extraProperties;
 	}

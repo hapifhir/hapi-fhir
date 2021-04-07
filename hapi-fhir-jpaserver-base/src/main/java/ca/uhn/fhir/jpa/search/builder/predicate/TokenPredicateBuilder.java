@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -93,11 +94,13 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 	public Condition createPredicateToken(Collection<IQueryParameterType> theParameters,
 													  String theResourceName,
+													  String theSpnamePrefix,
 													  RuntimeSearchParam theSearchParam,
 													  RequestPartitionId theRequestPartitionId) {
 		return createPredicateToken(
 			theParameters,
 			theResourceName,
+			theSpnamePrefix,
 			theSearchParam,
 			null,
 			theRequestPartitionId);
@@ -105,11 +108,15 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 	public Condition createPredicateToken(Collection<IQueryParameterType> theParameters,
 													  String theResourceName,
+													  String theSpnamePrefix,
 													  RuntimeSearchParam theSearchParam,
 													  SearchFilterParser.CompareOperation theOperation,
 													  RequestPartitionId theRequestPartitionId) {
+		
+		
 		final List<FhirVersionIndependentConcept> codes = new ArrayList<>();
-		String paramName = theSearchParam.getName();
+		
+		String paramName = QueryStack.getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
 
 		SearchFilterParser.CompareOperation operation = theOperation;
 
@@ -197,12 +204,12 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), theRequestPartitionId, theResourceName, paramName);
 			Condition hashIdentityPredicate = BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hashIdentity));
 
-			Condition hashValuePredicate = createPredicateOrList(theResourceName, theSearchParam.getName(), sortedCodesList, false);
+			Condition hashValuePredicate = createPredicateOrList(theResourceName, paramName, sortedCodesList, false);
 			predicate = toAndPredicate(hashIdentityPredicate, hashValuePredicate);
 
 		} else {
 
-			predicate = createPredicateOrList(theResourceName, theSearchParam.getName(), sortedCodesList, true);
+			predicate = createPredicateOrList(theResourceName, paramName, sortedCodesList, true);
 
 		}
 

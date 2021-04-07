@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,10 @@ import org.apache.commons.lang3.Validate;
 import java.util.LinkedHashMap;
 import java.util.UUID;
 
-public class FifoMemoryPagingProvider extends BasePagingProvider implements IPagingProvider {
+public class FifoMemoryPagingProvider extends BasePagingProvider {
 
-	private LinkedHashMap<String, IBundleProvider> myBundleProviders;
-	private int mySize;
+	private final LinkedHashMap<String, IBundleProvider> myBundleProviders;
+	private final int mySize;
 
 	public FifoMemoryPagingProvider(int theSize) {
 		Validate.isTrue(theSize > 0, "theSize must be greater than 0");

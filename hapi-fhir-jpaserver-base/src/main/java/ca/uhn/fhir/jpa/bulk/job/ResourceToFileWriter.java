@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk.job;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.bulk.job;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.bulk.svc.BulkExportDaoSvc;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
@@ -63,7 +64,7 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 	private Long myBulkExportCollectionEntityId;
 
 	@Value("#{stepExecutionContext['resourceType']}")
-	private String myReosurceType;
+	private String myResourceType;
 
 	private IFhirResourceDao<IBaseBinary> myBinaryDao;
 
@@ -99,10 +100,9 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 		IBaseBinary binary = BinaryUtil.newBinary(myFhirContext);
 		binary.setContentType(Constants.CT_FHIR_NDJSON);
 		binary.setContent(myOutputStream.toByteArray());
-
-		return myBinaryDao.create(binary).getResource().getIdElement();
+		DaoMethodOutcome outcome = myBinaryDao.create(binary);
+		return outcome.getResource().getIdElement();
 	}
-
 
 	@SuppressWarnings("unchecked")
 	private IFhirResourceDao<IBaseBinary> getBinaryDao() {
@@ -123,7 +123,7 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 
 		Optional<IIdType> createdId = flushToFiles();
 		if (createdId.isPresent()) {
-			ourLog.info("Created {} resources for bulk export file containing {} resources of type {} ", count, createdId.get().toUnqualifiedVersionless().getValue(), myReosurceType);
+			ourLog.info("Created {} resources for bulk export file containing {} resources of type {} ", count, createdId.get().toUnqualifiedVersionless().getValue(), myResourceType);
 		}
 	}
 }

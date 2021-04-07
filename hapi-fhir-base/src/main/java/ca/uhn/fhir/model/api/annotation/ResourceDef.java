@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api.annotation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.model.api.annotation;
  */
 
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -28,6 +29,7 @@ import java.lang.annotation.Target;
 /**
  * Class annotation which indicates a resource definition class
  */
+@Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value= {ElementType.TYPE})
 public @interface ResourceDef {

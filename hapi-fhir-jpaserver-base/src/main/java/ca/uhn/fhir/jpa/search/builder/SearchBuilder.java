@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.builder;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,11 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
-import ca.uhn.fhir.jpa.config.HibernateDialectProvider;
+import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
@@ -42,6 +44,8 @@ import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
@@ -51,11 +55,12 @@ import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryExecutor;
 import ca.uhn.fhir.jpa.search.builder.sql.SqlObjectFactory;
 import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
-import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
+import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
@@ -147,6 +152,8 @@ public class SearchBuilder implements ISearchBuilder {
 	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
+	private DaoRegistry myDaoRegistry;
+	@Autowired
 	private IResourceSearchViewDao myResourceSearchViewDao;
 	@Autowired
 	private FhirContext myContext;
@@ -173,7 +180,11 @@ public class SearchBuilder implements ISearchBuilder {
 	@Autowired
 	private SqlObjectFactory mySqlBuilderFactory;
 	@Autowired
-	private HibernateDialectProvider myDialectProvider;
+	private HibernatePropertiesProvider myDialectProvider;
+	@Autowired
+	private ModelConfig myModelConfig;
+
+	private boolean hasNextIteratorQuery = false;
 
 	/**
 	 * Constructor
@@ -205,6 +216,8 @@ public class SearchBuilder implements ISearchBuilder {
 			attemptCompositeUniqueSpProcessing(theQueryStack, theParams, theRequest);
 		}
 
+		SearchContainedModeEnum searchContainedMode = theParams.getSearchContainedMode();
+		
 		// Handle each parameter
 		List<String> paramNames = new ArrayList<>(myParams.keySet());
 		for (String nextParamName : paramNames) {
@@ -213,7 +226,7 @@ public class SearchBuilder implements ISearchBuilder {
 				continue;
 			}
 			List<List<IQueryParameterType>> andOrParams = myParams.get(nextParamName);
-			Condition predicate = theQueryStack.searchForIdsWithAndOr(null, myResourceName, nextParamName, andOrParams, theRequest, myRequestPartitionId);
+			Condition predicate = theQueryStack.searchForIdsWithAndOr(null, myResourceName, nextParamName, andOrParams, theRequest, myRequestPartitionId, searchContainedMode);
 			if (predicate != null) {
 				theSearchSqlBuilder.addPredicate(predicate);
 			}
@@ -424,6 +437,10 @@ public class SearchBuilder implements ISearchBuilder {
 			sqlBuilder.addPredicate(lastUpdatedPredicates);
 		}
 
+		//-- exclude the pids already in the previous iterator
+		if (hasNextIteratorQuery)
+			sqlBuilder.excludeResourceIdsPredicate(myPidSet);
+
 		/*
 		 * Sort
 		 *
@@ -435,7 +452,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 			createSort(queryStack3, sort);
 		}
-
 
 		/*
 		 * Now perform the search
@@ -500,8 +516,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		} else {
 
-			RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceName);
-			RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theSort.getParamName());
+			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
 			if (param == null) {
 				String msg = myContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSortParameter", theSort.getParamName(), getResourceName(), mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName()));
 				throw new InvalidRequestException(msg);
@@ -529,8 +544,24 @@ public class SearchBuilder implements ISearchBuilder {
 				case QUANTITY:
 					theQueryStack.addSortOnQuantity(myResourceName, theSort.getParamName(), ascending);
 					break;
-				case SPECIAL:
 				case COMPOSITE:
+					List<RuntimeSearchParam> compositeList = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, param);
+					if (compositeList == null) {
+						throw new InvalidRequestException("The composite _sort parameter " + theSort.getParamName() + " is not defined by the resource " + myResourceName);
+					}
+					if (compositeList.size() != 2) {
+						throw new InvalidRequestException("The composite _sort parameter " + theSort.getParamName()
+							+ " must have 2 composite types declared in parameter annotation, found "
+							+ compositeList.size());
+					}
+					RuntimeSearchParam left = compositeList.get(0);
+					RuntimeSearchParam right = compositeList.get(1);
+
+					createCompositeSort(theQueryStack, myResourceName, left.getParamType(), left.getName(), ascending);
+					createCompositeSort(theQueryStack, myResourceName, right.getParamType(), right.getName(), ascending);
+
+					break;
+				case SPECIAL:
 				case HAS:
 				default:
 					throw new InvalidRequestException("This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
@@ -543,37 +574,91 @@ public class SearchBuilder implements ISearchBuilder {
 
 	}
 
+	private void createCompositeSort(QueryStack theQueryStack, String theResourceName, RestSearchParameterTypeEnum theParamType, String theParamName, boolean theAscending) {
+
+		switch (theParamType) {
+			case STRING:
+				theQueryStack.addSortOnString(myResourceName, theParamName, theAscending);
+				break;
+			case DATE:
+				theQueryStack.addSortOnDate(myResourceName, theParamName, theAscending);
+				break;
+			case TOKEN:
+				theQueryStack.addSortOnToken(myResourceName, theParamName, theAscending);
+				break;
+			case QUANTITY:
+				theQueryStack.addSortOnQuantity(myResourceName, theParamName, theAscending);
+				break;
+			case NUMBER:
+			case REFERENCE:
+			case COMPOSITE:
+			case URI:
+			case HAS:
+			case SPECIAL:
+			default:
+				throw new InvalidRequestException("Don't know how to handle composite parameter with type of " + theParamType + " on _sort=" + theParamName);
+		}
+
+	}
+
 	private void doLoadPids(Collection<ResourcePersistentId> thePids, Collection<ResourcePersistentId> theIncludedPids, List<IBaseResource> theResourceListToPopulate, boolean theForHistoryOperation,
 									Map<ResourcePersistentId, Integer> thePosition) {
 
-		List<Long> myLongPersistentIds;
-		if (thePids.size() < getMaximumPageSize()) {
-			myLongPersistentIds = normalizeIdListForLastNInClause(ResourcePersistentId.toLongList(thePids));
-		} else {
-			myLongPersistentIds = ResourcePersistentId.toLongList(thePids);
+		Map<Long, Long> resourcePidToVersion = null;
+		for (ResourcePersistentId next : thePids) {
+			if (next.getVersion() != null && myModelConfig.isRespectVersionsForSearchIncludes()) {
+				if (resourcePidToVersion == null) {
+					resourcePidToVersion = new HashMap<>();
+				}
+				resourcePidToVersion.put(next.getIdAsLong(), next.getVersion());
+			}
+		}
+
+		List<Long> versionlessPids = ResourcePersistentId.toLongList(thePids);
+		if (versionlessPids.size() < getMaximumPageSize()) {
+			versionlessPids = normalizeIdListForLastNInClause(versionlessPids);
 		}
 
 		// -- get the resource from the searchView
-		Collection<ResourceSearchView> resourceSearchViewList = myResourceSearchViewDao.findByResourceIds(myLongPersistentIds);
+		Collection<ResourceSearchView> resourceSearchViewList = myResourceSearchViewDao.findByResourceIds(versionlessPids);
 
 		//-- preload all tags with tag definition if any
-		Map<ResourcePersistentId, Collection<ResourceTag>> tagMap = getResourceTagMap(resourceSearchViewList);
+		Map<Long, Collection<ResourceTag>> tagMap = getResourceTagMap(resourceSearchViewList);
 
-		ResourcePersistentId resourceId;
-		for (ResourceSearchView next : resourceSearchViewList) {
+		for (IBaseResourceEntity next : resourceSearchViewList) {
 			if (next.getDeleted() != null) {
 				continue;
 			}
 
 			Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(next.getResourceType()).getImplementingClass();
 
-			resourceId = new ResourcePersistentId(next.getId());
+			ResourcePersistentId resourceId = new ResourcePersistentId(next.getResourceId());
 
-			IBaseResource resource = myCallingDao.toResource(resourceType, next, tagMap.get(resourceId), theForHistoryOperation);
+			/*
+			 * If a specific version is requested via an include, we'll replace the current version
+			 * with the specific desired version. This is not the most efficient thing, given that
+			 * we're loading the current version and then turning around and throwing it away again.
+			 * This could be optimized and probably should be, but it's not critical given that
+			 * this only applies to includes, which don't tend to be massive in numbers.
+			 */
+			if (resourcePidToVersion != null) {
+				Long version = resourcePidToVersion.get(next.getResourceId());
+				if (version != null && !version.equals(next.getVersion())) {
+					resourceId.setVersion(version);
+					IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDao(resourceType);
+					next = dao.readEntity(next.getIdDt().withVersion(Long.toString(version)), null);
+				}
+			}
+
+			IBaseResource resource = null;
+			if (next != null) {
+				resource = myCallingDao.toResource(resourceType, next, tagMap.get(next.getId()), theForHistoryOperation);
+			}
 			if (resource == null) {
 				ourLog.warn("Unable to find resource {}/{}/_history/{} in database", next.getResourceType(), next.getIdDt().getIdPart(), next.getVersion());
 				continue;
 			}
+
 			Integer index = thePosition.get(resourceId);
 			if (index == null) {
 				ourLog.warn("Got back unexpected resource PID {}", resourceId);
@@ -598,17 +683,17 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	private Map<ResourcePersistentId, Collection<ResourceTag>> getResourceTagMap(Collection<ResourceSearchView> theResourceSearchViewList) {
+	private Map<Long, Collection<ResourceTag>> getResourceTagMap(Collection<? extends IBaseResourceEntity> theResourceSearchViewList) {
 
 		List<Long> idList = new ArrayList<>(theResourceSearchViewList.size());
 
 		//-- find all resource has tags
-		for (ResourceSearchView resource : theResourceSearchViewList) {
+		for (IBaseResourceEntity resource : theResourceSearchViewList) {
 			if (resource.isHasTags())
 				idList.add(resource.getId());
 		}
 
-		Map<ResourcePersistentId, Collection<ResourceTag>> tagMap = new HashMap<>();
+		Map<Long, Collection<ResourceTag>> tagMap = new HashMap<>();
 
 		//-- no tags
 		if (idList.size() == 0)
@@ -623,11 +708,11 @@ public class SearchBuilder implements ISearchBuilder {
 		for (ResourceTag tag : tagList) {
 
 			resourceId = new ResourcePersistentId(tag.getResourceId());
-			tagCol = tagMap.get(resourceId);
+			tagCol = tagMap.get(resourceId.getIdAsLong());
 			if (tagCol == null) {
 				tagCol = new ArrayList<>();
 				tagCol.add(tag);
-				tagMap.put(resourceId, tagCol);
+				tagMap.put(resourceId.getIdAsLong(), tagCol);
 			} else {
 				tagCol.add(tag);
 			}
@@ -671,8 +756,12 @@ public class SearchBuilder implements ISearchBuilder {
 		if (theRevIncludes == null || theRevIncludes.isEmpty()) {
 			return new HashSet<>();
 		}
-		String searchFieldName = theReverseMode ? "myTargetResourcePid" : "mySourceResourcePid";
-		String findFieldName = theReverseMode ? "mySourceResourcePid" : "myTargetResourcePid";
+		String searchPidFieldName = theReverseMode ? "myTargetResourcePid" : "mySourceResourcePid";
+		String findPidFieldName = theReverseMode ? "mySourceResourcePid" : "myTargetResourcePid";
+		String findVersionFieldName = null;
+		if (!theReverseMode && myModelConfig.isRespectVersionsForSearchIncludes()) {
+			findVersionFieldName = "myTargetResourceVersion";
+		}
 
 		List<ResourcePersistentId> nextRoundMatches = new ArrayList<>(theMatches);
 		HashSet<ResourcePersistentId> allAdded = new HashSet<>();
@@ -696,24 +785,37 @@ public class SearchBuilder implements ISearchBuilder {
 
 				boolean matchAll = "*".equals(nextInclude.getValue());
 				if (matchAll) {
-					String sql;
-					sql = "SELECT r." + findFieldName + " FROM ResourceLink r WHERE r." + searchFieldName + " IN (:target_pids) ";
+					StringBuilder sqlBuilder = new StringBuilder();
+					sqlBuilder.append("SELECT r.").append(findPidFieldName);
+					if (findVersionFieldName != null) {
+						sqlBuilder.append(", r." + findVersionFieldName);
+					}
+					sqlBuilder.append(" FROM ResourceLink r WHERE r.");
+					sqlBuilder.append(searchPidFieldName);
+					sqlBuilder.append(" IN (:target_pids)");
+					String sql = sqlBuilder.toString();
 					List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, getMaximumPageSize());
 					for (Collection<ResourcePersistentId> nextPartition : partitions) {
-						TypedQuery<Long> q = theEntityManager.createQuery(sql, Long.class);
+						TypedQuery<?> q = theEntityManager.createQuery(sql, Object[].class);
 						q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
-						List<Long> results = q.getResultList();
-						for (Long resourceLink : results) {
-							if (resourceLink == null) {
+						List<?> results = q.getResultList();
+						for (Object nextRow : results) {
+							if (nextRow == null) {
 								// This can happen if there are outgoing references which are canonical or point to
 								// other servers
 								continue;
 							}
-							if (theReverseMode) {
-								pidsToInclude.add(new ResourcePersistentId(resourceLink));
+
+							Long resourceLink;
+							Long version = null;
+							if (findVersionFieldName != null) {
+								resourceLink = (Long) ((Object[]) nextRow)[0];
+								version = (Long) ((Object[]) nextRow)[1];
 							} else {
-								pidsToInclude.add(new ResourcePersistentId(resourceLink));
+								resourceLink = (Long)nextRow;
 							}
+
+							pidsToInclude.add(new ResourcePersistentId(resourceLink, version));
 						}
 					}
 				} else {
@@ -732,7 +834,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 					String paramName = nextInclude.getParamName();
 					if (isNotBlank(paramName)) {
-						param = mySearchParamRegistry.getSearchParamByName(def, paramName);
+						param = mySearchParamRegistry.getActiveSearchParam(resType, paramName);
 					} else {
 						param = null;
 					}
@@ -748,17 +850,22 @@ public class SearchBuilder implements ISearchBuilder {
 						String sql;
 
 						boolean haveTargetTypesDefinedByParam = param.hasTargets();
+						String fieldsToLoad = "r." + findPidFieldName;
+						if (findVersionFieldName != null) {
+							fieldsToLoad += ", r." + findVersionFieldName;
+						}
+
 						if (targetResourceType != null) {
-							sql = "SELECT r." + findFieldName + " FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids) AND r.myTargetResourceType = :target_resource_type";
+							sql = "SELECT " + fieldsToLoad + " FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchPidFieldName + " IN (:target_pids) AND r.myTargetResourceType = :target_resource_type";
 						} else if (haveTargetTypesDefinedByParam) {
-							sql = "SELECT r." + findFieldName + " FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids) AND r.myTargetResourceType in (:target_resource_types)";
+							sql = "SELECT " + fieldsToLoad + " FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchPidFieldName + " IN (:target_pids) AND r.myTargetResourceType in (:target_resource_types)";
 						} else {
-							sql = "SELECT r." + findFieldName + " FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids)";
+							sql = "SELECT " + fieldsToLoad + " FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchPidFieldName + " IN (:target_pids)";
 						}
 
 						List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, getMaximumPageSize());
 						for (Collection<ResourcePersistentId> nextPartition : partitions) {
-							TypedQuery<Long> q = theEntityManager.createQuery(sql, Long.class);
+							TypedQuery<?> q = theEntityManager.createQuery(sql, Object[].class);
 							q.setParameter("src_path", nextPath);
 							q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
 							if (targetResourceType != null) {
@@ -766,10 +873,18 @@ public class SearchBuilder implements ISearchBuilder {
 							} else if (haveTargetTypesDefinedByParam) {
 								q.setParameter("target_resource_types", param.getTargets());
 							}
-							List<Long> results = q.getResultList();
-							for (Long resourceLink : results) {
+							List<?> results = q.getResultList();
+							for (Object resourceLink : results) {
 								if (resourceLink != null) {
-									pidsToInclude.add(new ResourcePersistentId(resourceLink));
+									ResourcePersistentId persistentId;
+									if (findVersionFieldName != null) {
+										persistentId = new ResourcePersistentId(((Object[])resourceLink)[0]);
+										persistentId.setVersion((Long) ((Object[])resourceLink)[1]);
+									} else {
+										persistentId = new ResourcePersistentId(resourceLink);
+									}
+									assert persistentId.getId() instanceof Long;
+									pidsToInclude.add(persistentId);
 								}
 							}
 						}
@@ -853,7 +968,7 @@ public class SearchBuilder implements ISearchBuilder {
 		// Since we're going to remove elements below
 		theParams.values().forEach(nextAndList -> ensureSubListsAreWritable(nextAndList));
 
-		List<JpaRuntimeSearchParam> activeUniqueSearchParams = mySearchParamRegistry.getActiveUniqueSearchParams(myResourceName, theParams.keySet());
+		List<RuntimeSearchParam> activeUniqueSearchParams = mySearchParamRegistry.getActiveUniqueSearchParams(myResourceName, theParams.keySet());
 		if (activeUniqueSearchParams.size() > 0) {
 
 			StringBuilder sb = new StringBuilder();
@@ -1010,6 +1125,7 @@ public class SearchBuilder implements ISearchBuilder {
 		private final boolean myHaveRawSqlHooks;
 		private final boolean myHavePerfTraceFoundIdHook;
 		private final SortSpec mySort;
+		private final Integer myOffset;
 		private boolean myFirst = true;
 		private IncludesIterator myIncludesIterator;
 		private ResourcePersistentId myNext;
@@ -1018,8 +1134,6 @@ public class SearchBuilder implements ISearchBuilder {
 		private boolean myStillNeedToFetchIncludes;
 		private int mySkipCount = 0;
 		private int myNonSkipCount = 0;
-		private final Integer myOffset;
-
 		private ArrayList<SearchQueryExecutor> myQueryList = new ArrayList<>();
 
 		private QueryIterator(SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest) {
@@ -1195,8 +1309,10 @@ public class SearchBuilder implements ISearchBuilder {
 			close();
 			if (myQueryList != null && myQueryList.size() > 0) {
 				myResultsIterator = myQueryList.remove(0);
+				hasNextIteratorQuery = true;
 			} else {
 				myResultsIterator = SearchQueryExecutor.emptyExecutor();
+				hasNextIteratorQuery = false;
 			}
 
 		}

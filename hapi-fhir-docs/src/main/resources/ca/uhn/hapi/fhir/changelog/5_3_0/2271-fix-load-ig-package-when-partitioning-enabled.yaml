@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2271
+title: "Attempts to load IG packs when partitioning was enabled, resulted in nullpointer exceptions.
+   This has now been fixed and IG packs and conformance resources will be loaded to the DEFAULT partition."

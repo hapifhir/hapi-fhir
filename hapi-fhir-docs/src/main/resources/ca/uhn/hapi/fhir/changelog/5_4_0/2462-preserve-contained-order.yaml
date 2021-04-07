@@ -1,0 +1,4 @@
+---
+type: perf
+issue: 2462
+title: "The HAPI FHIR parser will now preserve the order of contained resources across round-trip parse/serialize passes."

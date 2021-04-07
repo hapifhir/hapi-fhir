@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.cache;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,6 +101,21 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 			retval = retval.plus(entry.forceRefresh());
 		}
 		return retval;
+	}
+
+	@VisibleForTesting
+	public void setSchedulerService(ISchedulerService theSchedulerService) {
+		mySchedulerService = theSchedulerService;
+	}
+
+	@VisibleForTesting
+	public void setResourceChangeListenerRegistry(ResourceChangeListenerRegistryImpl theResourceChangeListenerRegistry) {
+		myResourceChangeListenerRegistry = theResourceChangeListenerRegistry;
+	}
+
+	@VisibleForTesting
+	public void setResourceVersionSvc(IResourceVersionSvc theResourceVersionSvc) {
+		myResourceVersionSvc = theResourceVersionSvc;
 	}
 
 	@Override

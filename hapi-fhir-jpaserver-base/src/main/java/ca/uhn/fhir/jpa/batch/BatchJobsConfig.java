@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.batch;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,10 @@ import org.springframework.context.annotation.Import;
 //When you define a new batch job, add it here.
 @Import({
 	CommonBatchJobConfig.class,
-	BulkExportJobConfig.class,})
+	BulkExportJobConfig.class
+})
 public class BatchJobsConfig {
-	//Empty config, as this is just an aggregator for all the various batch jobs defined around the system.
+	public static final String BULK_EXPORT_JOB_NAME = "bulkExportJob";
+	public static final String GROUP_BULK_EXPORT_JOB_NAME = "groupBulkExportJob";
+	public static final String PATIENT_BULK_EXPORT_JOB_NAME = "patientBulkExportJob";
 }

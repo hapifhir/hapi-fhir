@@ -4,7 +4,7 @@ package ca.uhn.fhir.util.bundle;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,15 @@ public class BundleEntryMutator {
 	private final IBase myEntry;
 	private final BaseRuntimeChildDefinition myRequestChildDef;
 	private final BaseRuntimeElementCompositeDefinition<?> myRequestChildContentsDef;
+	private final FhirContext myFhirContext;
+	private final BaseRuntimeElementCompositeDefinition<?> myEntryDefinition;
 
-	public BundleEntryMutator(IBase theEntry, BaseRuntimeChildDefinition theRequestChildDef, BaseRuntimeElementCompositeDefinition<?> theRequestChildContentsDef) {
+	public BundleEntryMutator(FhirContext theFhirContext, IBase theEntry, BaseRuntimeChildDefinition theRequestChildDef, BaseRuntimeElementCompositeDefinition<?> theChildContentsDef, BaseRuntimeElementCompositeDefinition<?> theEntryDefinition) {
+		myFhirContext = theFhirContext;
 		myEntry = theEntry;
 		myRequestChildDef = theRequestChildDef;
-		myRequestChildContentsDef = theRequestChildContentsDef;
+		myRequestChildContentsDef = theChildContentsDef;
+		myEntryDefinition = theEntryDefinition;
 	}
 
 	void setRequestUrl(FhirContext theFhirContext, String theRequestUrl) {
@@ -44,5 +48,14 @@ public class BundleEntryMutator {
 		for (IBase nextRequest : myRequestChildDef.getAccessor().getValues(myEntry)) {
 			requestUrlChildDef.getMutator().addValue(nextRequest, url);
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public void setFullUrl(String theFullUrl) {
+		IPrimitiveType<String> value = (IPrimitiveType<String>) myFhirContext.getElementDefinition("uri").newInstance();
+		value.setValue(theFullUrl);
+
+		BaseRuntimeChildDefinition fullUrlChild = myEntryDefinition.getChildByName("fullUrl");
+		fullUrlChild.getMutator().setValue(myEntry, value);
 	}
 }

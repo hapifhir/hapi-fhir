@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.util;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import org.apache.commons.lang3.Validate;
 
+import javax.annotation.Nullable;
+
 public class BaseServerCapabilityStatementProvider {
 
   private RestfulServerConfiguration myConfiguration;
@@ -39,7 +41,7 @@ public class BaseServerCapabilityStatementProvider {
   }
 
 
-  protected RestfulServerConfiguration getServerConfiguration(RequestDetails theRequestDetails) {
+  protected RestfulServerConfiguration getServerConfiguration(@Nullable RequestDetails theRequestDetails) {
     RestfulServerConfiguration retVal;
     if (theRequestDetails != null && theRequestDetails.getServer() instanceof RestfulServer) {
       retVal = ((RestfulServer) theRequestDetails.getServer()).createConfiguration();

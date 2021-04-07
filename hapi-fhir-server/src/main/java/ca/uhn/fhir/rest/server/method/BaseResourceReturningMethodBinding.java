@@ -7,9 +7,13 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.BundleLinks;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -23,7 +27,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
-import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -34,7 +37,13 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -43,7 +52,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,7 +133,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		List<IBaseResource> resourceList;
 		Integer numTotalResults = theResult.size();
 
-		if (requestOffset != null || theServer.getPagingProvider() == null) {
+		if (requestOffset != null || !theServer.canStoreSearchResults()) {
 			if (theLimit != null) {
 				numToReturn = theLimit;
 			} else {
@@ -204,31 +213,33 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			}
 		}
 
-		String serverBase = theRequest.getFhirServerBase();
-		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
+		BundleLinks links = new BundleLinks(theRequest.getFhirServerBase(), theIncludes, RestfulServerUtils.prettyPrintResponse(theServer, theRequest), theBundleType);
+		links.setSelf(theLinkSelf);
 
-		String linkPrev = null;
-		String linkNext = null;
-
-		if (theServer.getPagingProvider() == null || requestOffset != null) {
-			int myOffset = requestOffset != null ? requestOffset : 0;
+		if (requestOffset != null || !theServer.canStoreSearchResults()) {
+			int offset = requestOffset != null ? requestOffset : 0;
 			// Paging without caching
 			// We're doing requestOffset pages
-			if (numTotalResults == null || myOffset + numToReturn < numTotalResults) {
-				linkNext = (RestfulServerUtils.createOffsetPagingLink(serverBase, theRequest.getRequestPath(), theRequest.getTenantId(), myOffset + numToReturn, numToReturn, theRequest.getParameters()));
+			int requestedToReturn = numToReturn;
+			if (theServer.getPagingProvider() == null) {
+				// There is no paging provider at all, so assume we're querying up to all the results we need every time
+				requestedToReturn += offset;
 			}
-			if (myOffset > 0) {
-				int start = Math.max(0, myOffset - numToReturn);
-				linkPrev = RestfulServerUtils.createOffsetPagingLink(serverBase, theRequest.getRequestPath(), theRequest.getTenantId(), start, numToReturn, theRequest.getParameters());
+			if (numTotalResults == null || requestedToReturn < numTotalResults) {
+				links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), offset + numToReturn, numToReturn, theRequest.getParameters()));
+			}
+			if (offset > 0) {
+				int start = Math.max(0, offset - numToReturn);
+				links.setPrev(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), start, numToReturn, theRequest.getParameters()));
 			}
 		} else if (isNotBlank(theResult.getCurrentPageId())) {
 			// We're doing named pages
 			searchId = theResult.getUuid();
 			if (isNotBlank(theResult.getNextPageId())) {
-				linkNext = RestfulServerUtils.createPagingLink(theIncludes, theRequest, searchId, theResult.getNextPageId(), theRequest.getParameters(), prettyPrint, theBundleType);
+				links.setNext(RestfulServerUtils.createPagingLink(links, theRequest, searchId, theResult.getNextPageId(), theRequest.getParameters()));
 			}
 			if (isNotBlank(theResult.getPreviousPageId())) {
-				linkPrev = RestfulServerUtils.createPagingLink(theIncludes, theRequest, searchId, theResult.getPreviousPageId(), theRequest.getParameters(), prettyPrint, theBundleType);
+				links.setPrev(RestfulServerUtils.createPagingLink(links, theRequest, searchId, theResult.getPreviousPageId(), theRequest.getParameters()));
 			}
 		} else if (searchId != null) {
 			/*
@@ -239,24 +250,17 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			 */
 			if (resourceList.size() > 0) {
 				if (numTotalResults == null || theOffset + numToReturn < numTotalResults) {
-					linkNext = (RestfulServerUtils.createPagingLink(theIncludes, theRequest, searchId, theOffset + numToReturn, numToReturn, theRequest.getParameters(), prettyPrint, theBundleType));
+					links.setNext((RestfulServerUtils.createPagingLink(links, theRequest, searchId, theOffset + numToReturn, numToReturn, theRequest.getParameters())));
 				}
 				if (theOffset > 0) {
 				int start = Math.max(0, theOffset - numToReturn);
-					linkPrev = RestfulServerUtils.createPagingLink(theIncludes, theRequest, searchId, start, numToReturn, theRequest.getParameters(), prettyPrint, theBundleType);
+					links.setPrev(RestfulServerUtils.createPagingLink(links, theRequest, searchId, start, numToReturn, theRequest.getParameters()));
 				}
 			}
 		}
 
-		bundleFactory.addRootPropertiesToBundle(theResult.getUuid(), serverBase, theLinkSelf, linkPrev, linkNext, theResult.size(), theBundleType, theResult.getPublished());
-		bundleFactory.addResourcesToBundle(new ArrayList<>(resourceList), theBundleType, serverBase, theServer.getBundleInclusionRule(), theIncludes);
-
-		if (theServer.getPagingProvider() != null) {
-			int limit;
-			limit = theLimit != null ? theLimit : theServer.getPagingProvider().getDefaultPageSize();
-			limit = Math.min(limit, theServer.getPagingProvider().getMaximumPageSize());
-
-		}
+		bundleFactory.addRootPropertiesToBundle(theResult.getUuid(), links, theResult.size(), theResult.getPublished());
+		bundleFactory.addResourcesToBundle(new ArrayList<>(resourceList), theBundleType, links.serverBase, theServer.getBundleInclusionRule(), theIncludes);
 
 		return bundleFactory.getResourceBundle();
 
@@ -280,8 +284,9 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				/*
 				 * Figure out the self-link for this request
 				 */
-				String serverBase = theRequest.getServerBaseForRequest();
-				String linkSelf = RestfulServerUtils.createLinkSelf(theRequest.getFhirServerBase(), theRequest);
+
+				BundleLinks bundleLinks = new BundleLinks(theRequest.getServerBaseForRequest(), null, RestfulServerUtils.prettyPrintResponse(theServer, theRequest), getResponseBundleType());
+				bundleLinks.setSelf(RestfulServerUtils.createLinkSelf(theRequest.getFhirServerBase(), theRequest));
 
 				if (getMethodReturnType() == MethodReturnTypeEnum.BUNDLE_RESOURCE) {
 					IBaseResource resource;
@@ -300,7 +305,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 					 */
 					IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
 					bundleFactory.initializeWithBundleResource(resource);
-					bundleFactory.addRootPropertiesToBundle(null, theRequest.getFhirServerBase(), linkSelf, null, null, count, getResponseBundleType(), lastUpdated);
+					bundleFactory.addRootPropertiesToBundle(null, bundleLinks, count, lastUpdated);
 
 					responseObject = resource;
 				} else {
@@ -327,7 +332,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 					ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
 					EncodingEnum linkEncoding = theRequest.getParameters().containsKey(Constants.PARAM_FORMAT) && responseEncoding != null ? responseEncoding.getEncoding() : null;
 
-					responseObject = createBundleFromBundleProvider(theServer, theRequest, count, linkSelf, includes, result, start, getResponseBundleType(), linkEncoding, null);
+					responseObject = createBundleFromBundleProvider(theServer, theRequest, count, RestfulServerUtils.createLinkSelf(theRequest.getFhirServerBase(), theRequest), includes, result, start, getResponseBundleType(), linkEncoding, null);
 				}
 				break;
 			}

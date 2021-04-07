@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,15 @@ public class ClasspathUtil {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ClasspathUtil.class);
 
+	/**
+	 * Non instantiable
+	 */
+	private ClasspathUtil() {
+		// nothing
+	}
+
 	public static String loadResource(String theClasspath) {
-		Function<InputStream, InputStream> streamTransform = t -> t;
-		return loadResource(theClasspath, streamTransform);
+		return loadResource(theClasspath, Function.identity());
 	}
 
 	/**
@@ -55,7 +61,14 @@ public class ClasspathUtil {
 	public static InputStream loadResourceAsStream(String theClasspath) {
 		InputStream retVal = ClasspathUtil.class.getResourceAsStream(theClasspath);
 		if (retVal == null) {
-			throw new InternalErrorException("Unable to find classpath resource: " + theClasspath);
+			if (theClasspath.startsWith("/")) {
+				retVal = ClasspathUtil.class.getResourceAsStream(theClasspath.substring(1));
+			} else {
+				retVal = ClasspathUtil.class.getResourceAsStream("/" + theClasspath);
+			}
+			if (retVal == null) {
+				throw new InternalErrorException("Unable to find classpath resource: " + theClasspath);
+			}
 		}
 		return retVal;
 	}
@@ -65,17 +78,9 @@ public class ClasspathUtil {
 	 */
 	@Nonnull
 	public static String loadResource(String theClasspath, Function<InputStream, InputStream> theStreamTransform) {
-		InputStream stream = ClasspathUtil.class.getResourceAsStream(theClasspath);
-		try {
-			if (stream == null) {
-				throw new IOException("Unable to find classpath resource: " + theClasspath);
-			}
-			try {
-				InputStream newStream = theStreamTransform.apply(stream);
-				return IOUtils.toString(newStream, Charsets.UTF_8);
-			} finally {
-				stream.close();
-			}
+		try (InputStream stream = loadResourceAsStream(theClasspath)) {
+			InputStream newStream = theStreamTransform.apply(stream);
+			return IOUtils.toString(newStream, Charsets.UTF_8);
 		} catch (IOException e) {
 			throw new InternalErrorException(e);
 		}

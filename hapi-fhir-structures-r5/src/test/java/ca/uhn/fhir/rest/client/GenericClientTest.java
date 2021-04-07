@@ -436,7 +436,7 @@ public class GenericClientTest {
 				.encodedJson()
 				.execute();
 		} catch (FhirClientConnectionException e) {
-			assertEquals(0, e.getStatusCode());
+			assertEquals(500, e.getStatusCode());
 			assertThat(e.getMessage(), containsString("Failed to parse response from server when performing DELETE to URL"));
 		}
 

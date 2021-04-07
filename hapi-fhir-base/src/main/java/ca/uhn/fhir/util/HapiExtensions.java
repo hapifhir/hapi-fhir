@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,6 +102,21 @@ public class HapiExtensions {
 	public static final String EXT_SP_UNIQUE = "http://hapifhir.io/fhir/StructureDefinition/sp-unique";
 
 	/**
+	 * URL for extension on a Phonetic String SearchParameter indicating that text values should be phonetically indexed with the named encoder
+	 */
+	public static final String EXT_SEARCHPARAM_PHONETIC_ENCODER = "http://hapifhir.io/fhir/StructureDefinition/searchparameter-phonetic-encoder";
+
+	/**
+	 * URL for boolean extension added to all placeholder resources
+	 */
+	public static final String EXT_RESOURCE_PLACEHOLDER = "http://hapifhir.io/fhir/StructureDefinition/resource-placeholder";
+
+	/**
+	 * URL for extension in a Group Bulk Export which identifies the golden patient of a given exported resource.
+	 */
+    public static final String ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL = "https://hapifhir.org/associated-patient-golden-resource/";
+
+    /**
 	 * Non instantiable
 	 */
 	private HapiExtensions() {

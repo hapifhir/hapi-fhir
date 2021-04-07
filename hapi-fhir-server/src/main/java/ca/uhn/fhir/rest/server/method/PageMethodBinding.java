@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ package ca.uhn.fhir.rest.server.method;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.Constants;
@@ -36,6 +38,9 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.ReflectionUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
@@ -84,9 +89,23 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 			throw new InvalidRequestException("This server does not support paging");
 		}
 
+		// Interceptor invoke: SERVER_INCOMING_REQUEST_PRE_HANDLED
+		IServerInterceptor.ActionRequestDetails details = new IServerInterceptor.ActionRequestDetails(theRequest);
+		populateActionRequestDetailsForInterceptor(theRequest, details, ReflectionUtil.EMPTY_OBJECT_ARRAY);
+		HookParams preHandledParams = new HookParams();
+		preHandledParams.add(RestOperationTypeEnum.class, theRequest.getRestOperationType());
+		preHandledParams.add(RequestDetails.class, theRequest);
+		preHandledParams.addIfMatchesType(ServletRequestDetails.class, theRequest);
+		preHandledParams.add(IServerInterceptor.ActionRequestDetails.class, details);
+		if (theRequest.getInterceptorBroadcaster() != null) {
+			theRequest
+				.getInterceptorBroadcaster()
+				.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
+		}
+
 		Integer offsetI;
 		int start = 0;
-		IBundleProvider resultList;
+		IBundleProvider bundleProvider;
 
 		String pageId = null;
 		String[] pageIdParams = theRequest.getParameters().get(Constants.PARAM_PAGEID);
@@ -101,21 +120,21 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		if (pageId != null) {
 			// This is a page request by Search ID and Page ID
 
-			resultList = pagingProvider.retrieveResultList(theRequest, thePagingAction, pageId);
-			validateHaveBundleProvider(thePagingAction, resultList);
+			bundleProvider = pagingProvider.retrieveResultList(theRequest, thePagingAction, pageId);
+			validateHaveBundleProvider(thePagingAction, bundleProvider);
 
 		} else {
 			// This is a page request by Search ID and Offset
 
-			resultList = pagingProvider.retrieveResultList(theRequest, thePagingAction);
-			validateHaveBundleProvider(thePagingAction, resultList);
+			bundleProvider = pagingProvider.retrieveResultList(theRequest, thePagingAction);
+			validateHaveBundleProvider(thePagingAction, bundleProvider);
 
 			offsetI = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);
 			if (offsetI == null || offsetI < 0) {
 				offsetI = 0;
 			}
 
-			Integer totalNum = resultList.size();
+			Integer totalNum = bundleProvider.size();
 			start = offsetI;
 			if (totalNum != null) {
 				start = Math.min(start, totalNum);
@@ -155,7 +174,7 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 			count = pagingProvider.getMaximumPageSize();
 		}
 
-		return createBundleFromBundleProvider(theServer, theRequest, count, linkSelf, includes, resultList, start, bundleType, encodingEnum, thePagingAction);
+		return createBundleFromBundleProvider(theServer, theRequest, count, linkSelf, includes, bundleProvider, start, bundleType, encodingEnum, thePagingAction);
 	}
 
 	private void validateHaveBundleProvider(String thePagingAction, IBundleProvider theBundleProvider) {

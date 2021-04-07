@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -38,17 +39,17 @@ public interface IVersionSpecificBundleFactory {
 
 	void addResourcesToBundle(List<IBaseResource> theResult, BundleTypeEnum theBundleType, String theServerBase, BundleInclusionRule theBundleInclusionRule, Set<Include> theIncludes);
 
-	void addRootPropertiesToBundle(String theId, String theServerBase, String theLinkSelf, String theLinkPrev, String theLinkNext, Integer theTotalResults, BundleTypeEnum theBundleType, IPrimitiveType<Date> theLastUpdated);
+	void addRootPropertiesToBundle(String theId, @Nonnull BundleLinks theBundleLinks, Integer theTotalResults, IPrimitiveType<Date> theLastUpdated);
 
 	IBaseResource getResourceBundle();
 
 	/**
-	 * @deprecated This was deprecated in HAPI FHIR 4.1.0 as it provides duplicate functionality to the {@link #addRootPropertiesToBundle(String, String, String, String, String, Integer, BundleTypeEnum, IPrimitiveType)}
+	 * @deprecated This was deprecated in HAPI FHIR 4.1.0 as it provides duplicate functionality to the {@link #addRootPropertiesToBundle(String, BundleLinks, Integer, IPrimitiveType<Date>)}
 	 * and {@link #addResourcesToBundle(List, BundleTypeEnum, String, BundleInclusionRule, Set)} methods
 	 */
 	@Deprecated
 	default void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType) {
-		addRootPropertiesToBundle(null, null, null, null, null, theResult.size(), theBundleType, null);
+		addTotalResultsToBundle(theResult.size(), theBundleType);
 		addResourcesToBundle(new ArrayList<>(theResult), theBundleType, null, null, null);
 	}
 
@@ -56,4 +57,5 @@ public interface IVersionSpecificBundleFactory {
 
 	List<IBaseResource> toListOfResources();
 
+	void addTotalResultsToBundle(Integer theTotalResults, BundleTypeEnum theBundleType);
 }

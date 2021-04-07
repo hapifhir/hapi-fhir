@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * request with an {@link UnprocessableEntityException HTTP 422 Unprocessable Entity}.
  */
 @Interceptor
-public abstract class BaseValidatingInterceptor<T> {
+public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnrichingInterceptor {
 
 	/**
 	 * Default value:<br/>

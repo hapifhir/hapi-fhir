@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
+import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -14,14 +15,19 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,7 +63,8 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	@AfterEach
 	public void afterDisableExpunge() {
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
-	}
+        myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+    }
 
 	@BeforeEach
 	public void beforeEnableExpunge() {
@@ -150,11 +157,18 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		myTwoVersionObservationId = myObservationDao.create(o).getId();
 		o.setStatus(Observation.ObservationStatus.AMENDED);
 		myTwoVersionObservationId = myObservationDao.update(o).getId();
+		CodeableConcept cc = o.getCode();
+		cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+		o.setValue(new Quantity().setValueElement(new DecimalType(125.12)).setUnit("CM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm"));
 
 		o = new Observation();
 		o.setStatus(Observation.ObservationStatus.FINAL);
 		myDeletedObservationId = myObservationDao.create(o).getId();
 		myDeletedObservationId = myObservationDao.delete(myDeletedObservationId).getId();
+		cc = o.getCode();
+		cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+		o.setValue(new Quantity().setValueElement(new DecimalType(13.45)).setUnit("DM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("dm"));
+
 	}
 
 	private IFhirResourceDao<?> getDao(IIdType theId) {
@@ -387,6 +401,50 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		assertExpunged(myDeletedObservationId);
 	}
 
+	@Test
+	public void testExpungeSystemEverythingWithNormalizedQuantitySearchSupported() {
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		createStandardPatients();
+
+		mySystemDao.expunge(new ExpungeOptions()
+			.setExpungeEverything(true), null);
+
+		// Everything deleted
+		assertExpunged(myOneVersionPatientId);
+		assertExpunged(myTwoVersionPatientId.withVersion("1"));
+		assertExpunged(myTwoVersionPatientId.withVersion("2"));
+		assertExpunged(myDeletedPatientId.withVersion("1"));
+		assertExpunged(myDeletedPatientId);
+
+		// Everything deleted
+		assertExpunged(myOneVersionObservationId);
+		assertExpunged(myTwoVersionObservationId.withVersion("1"));
+		assertExpunged(myTwoVersionObservationId.withVersion("2"));
+		assertExpunged(myDeletedObservationId);
+	}
+	
+	@Test
+	public void testExpungeSystemEverythingWithNormalizedQuantityStorageSupported() {
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED);
+		createStandardPatients();
+
+		mySystemDao.expunge(new ExpungeOptions()
+			.setExpungeEverything(true), null);
+
+		// Everything deleted
+		assertExpunged(myOneVersionPatientId);
+		assertExpunged(myTwoVersionPatientId.withVersion("1"));
+		assertExpunged(myTwoVersionPatientId.withVersion("2"));
+		assertExpunged(myDeletedPatientId.withVersion("1"));
+		assertExpunged(myDeletedPatientId);
+
+		// Everything deleted
+		assertExpunged(myOneVersionObservationId);
+		assertExpunged(myTwoVersionObservationId.withVersion("1"));
+		assertExpunged(myTwoVersionObservationId.withVersion("2"));
+		assertExpunged(myDeletedObservationId);
+	}
+	
 	@Test
 	public void testExpungeTypeOldVersionsAndDeleted() {
 		createStandardPatients();

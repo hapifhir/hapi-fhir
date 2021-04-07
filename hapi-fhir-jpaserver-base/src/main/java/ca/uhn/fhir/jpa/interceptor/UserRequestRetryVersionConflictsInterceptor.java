@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.interceptor;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,11 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.apache.commons.lang3.Validate;
 
+import java.util.List;
 import java.util.StringTokenizer;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -36,8 +39,8 @@ import static org.apache.commons.lang3.StringUtils.trim;
  * if present, it will instruct the server to automatically retry JPA server operations that would have
  * otherwise failed with a {@link ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException} (HTTP 409).
  * <p>
- *    The format of the header is:<br/>
- *    <code>X-Retry-On-Version-Conflict: retry; max-retries=100</code>
+ * The format of the header is:<br/>
+ * <code>X-Retry-On-Version-Conflict: retry; max-retries=100</code>
  * </p>
  */
 @Interceptor
@@ -52,25 +55,28 @@ public class UserRequestRetryVersionConflictsInterceptor {
 		ResourceVersionConflictResolutionStrategy retVal = new ResourceVersionConflictResolutionStrategy();
 
 		if (theRequestDetails != null) {
-			for (String headerValue : theRequestDetails.getHeaders(HEADER_NAME)) {
-				if (isNotBlank(headerValue)) {
+			List<String> headers = theRequestDetails.getHeaders(HEADER_NAME);
+			if (headers != null) {
+				for (String headerValue : headers) {
+					if (isNotBlank(headerValue)) {
 
-					StringTokenizer tok = new StringTokenizer(headerValue, ";");
-					while (tok.hasMoreTokens()) {
-						String next = trim(tok.nextToken());
-						if (next.equals(RETRY)) {
-							retVal.setRetry(true);
-						} else if (next.startsWith(MAX_RETRIES + "=")) {
+						StringTokenizer tok = new StringTokenizer(headerValue, ";");
+						while (tok.hasMoreTokens()) {
+							String next = trim(tok.nextToken());
+							if (next.equals(RETRY)) {
+								retVal.setRetry(true);
+							} else if (next.startsWith(MAX_RETRIES + "=")) {
 
-							String val = trim(next.substring((MAX_RETRIES + "=").length()));
-							int maxRetries = Integer.parseInt(val);
-							maxRetries = Math.min(100, maxRetries);
-							retVal.setMaxRetries(maxRetries);
+								String val = trim(next.substring((MAX_RETRIES + "=").length()));
+								int maxRetries = Integer.parseInt(val);
+								maxRetries = Math.min(100, maxRetries);
+								retVal.setMaxRetries(maxRetries);
+
+							}
 
 						}
 
 					}
-
 				}
 			}
 		}
@@ -79,4 +85,12 @@ public class UserRequestRetryVersionConflictsInterceptor {
 	}
 
 
+	/**
+	 * Convenience method to add a retry header to a system request
+	 */
+	public static void addRetryHeader(SystemRequestDetails theRequestDetails, int theMaxRetries) {
+		Validate.inclusiveBetween(1, Integer.MAX_VALUE, theMaxRetries, "Max retries must be > 0");
+		String value = RETRY + "; " + MAX_RETRIES + "=" + theMaxRetries;
+		theRequestDetails.addHeader(HEADER_NAME, value);
+	}
 }

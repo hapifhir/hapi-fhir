@@ -8,13 +8,17 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.escape.Escaper;
 import com.google.common.net.PercentEscaper;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.message.BasicNameValuePair;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.annotation.Nonnull;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -28,13 +32,14 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.endsWith;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -300,6 +305,27 @@ public class UrlUtil {
 	}
 
 	/**
+	 * Normalizes canonical URLs for comparison. Trailing "/" is stripped,
+	 * and any version identifiers or fragment hash is removed
+	 */
+	public static String normalizeCanonicalUrlForComparison(String theUrl) {
+		String retVal;
+		try {
+			retVal = new URI(theUrl).normalize().toString();
+		} catch (URISyntaxException e) {
+			retVal = theUrl;
+		}
+		while (endsWith(retVal, "/")) {
+			retVal = retVal.substring(0, retVal.length() - 1);
+		}
+		int hashOrPipeIndex = StringUtils.indexOfAny(retVal, '#', '|');
+		if (hashOrPipeIndex != -1) {
+			retVal = retVal.substring(0, hashOrPipeIndex);
+		}
+		return retVal;
+	}
+
+	/**
 	 * Parse a URL in one of the following forms:
 	 * <ul>
 	 * <li>[Resource Type]?[Search Params]
@@ -511,6 +537,18 @@ public class UrlUtil {
 		}
 
 		parameters = URLEncodedUtils.parse((matchUrl), Constants.CHARSET_UTF8, '&');
+
+		// One issue that has happened before is people putting a "+" sign into an email address in a match URL
+		// and having that turn into a " ". Since spaces are never appropriate for email addresses, let's just
+		// assume they really meant "+".
+		for (int i = 0; i < parameters.size(); i++) {
+			NameValuePair next = parameters.get(i);
+			if (next.getName().equals("email") && next.getValue().contains(" ")) {
+				BasicNameValuePair newPair = new BasicNameValuePair(next.getName(), next.getValue().replace(' ', '+'));
+				parameters.set(i, newPair);
+			}
+		}
+
 		return parameters;
 	}
 }

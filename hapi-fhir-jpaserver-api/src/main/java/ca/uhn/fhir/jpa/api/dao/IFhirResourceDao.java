@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.api.dao;
  * #%L
  * HAPI FHIR JPA API
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,6 +168,13 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	T readByPid(ResourcePersistentId thePid);
 
 	/**
+	 * Read a resource by its internal PID
+	 */
+	default T readByPid(ResourcePersistentId thePid, boolean theDeletedOk) {
+		throw new UnsupportedOperationException();
+	}
+
+	/**
 	 * @param theRequestDetails TODO
 	 * @throws ResourceNotFoundException If the ID is not known to the server
 	 */
@@ -265,9 +272,11 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	DeleteMethodOutcome deletePidList(String theUrl, Collection<ResourcePersistentId> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest);
 
-	// /**
-	// * Invoke the everything operation
-	// */
-	// IBundleProvider everything(IIdType theId);
+	/**
+	 * Returns the current version ID for the given resource
+	 */
+    default String getCurrentVersionId(IIdType theReferenceElement) {
+    	return read(theReferenceElement.toVersionless()).getIdElement().getVersionIdPart();
+	 }
 
 }

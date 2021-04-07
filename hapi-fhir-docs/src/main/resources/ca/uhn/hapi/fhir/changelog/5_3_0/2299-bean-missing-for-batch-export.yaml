@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2299
+title: "The BulkExportDaoSvc bean was forgotten from the BaseConfig context. It has been added."

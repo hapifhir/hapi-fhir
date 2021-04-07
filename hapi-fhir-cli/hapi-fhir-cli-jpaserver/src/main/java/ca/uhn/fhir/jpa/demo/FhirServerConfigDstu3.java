@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.demo;
  * #%L
  * HAPI FHIR - Command Line Client - Server WAR
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import java.util.Properties;
  * you can use it as a config if you want to support DSTU3
  * instead of DSTU2 in your server.
  * <p>
- * See https://github.com/jamesagnew/hapi-fhir/issues/278
+ * See https://github.com/hapifhir/hapi-fhir/issues/278
  */
 @Configuration
 @EnableTransactionManagement()

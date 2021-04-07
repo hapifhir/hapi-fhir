@@ -4,7 +4,7 @@ package ca.uhn.fhir.parser;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildContainedResources;
-import ca.uhn.fhir.context.RuntimeChildDirectResource;
 import ca.uhn.fhir.context.RuntimeChildNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IIdentifiableElement;
@@ -39,16 +38,15 @@ import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.path.EncodeContextPath;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -58,7 +56,6 @@ import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -77,7 +74,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -102,7 +98,7 @@ public abstract class BaseParser implements IParser {
 
 	private static final Set<String> notEncodeForContainedResource = new HashSet<>(Arrays.asList("security", "versionId", "lastUpdated"));
 
-	private ContainedResources myContainedResources;
+	private FhirTerser.ContainedResources myContainedResources;
 	private boolean myEncodeElementsAppliesToChildResourcesOnly;
 	private FhirContext myContext;
 	private List<EncodeContextPath> myDontEncodeElements;
@@ -118,7 +114,6 @@ public abstract class BaseParser implements IParser {
 	private boolean mySummaryMode;
 	private boolean mySuppressNarratives;
 	private Set<String> myDontStripVersionsFromReferencesAtPaths;
-
 	/**
 	 * Constructor
 	 */
@@ -127,12 +122,16 @@ public abstract class BaseParser implements IParser {
 		myErrorHandler = theParserErrorHandler;
 	}
 
+	protected FhirContext getContext() {
+		return myContext;
+	}
+
 	List<EncodeContextPath> getDontEncodeElements() {
 		return myDontEncodeElements;
 	}
 
 	@Override
-	public IParser setDontEncodeElements(Set<String> theDontEncodeElements) {
+	public IParser setDontEncodeElements(Collection<String> theDontEncodeElements) {
 		if (theDontEncodeElements == null || theDontEncodeElements.isEmpty()) {
 			myDontEncodeElements = null;
 		} else {
@@ -213,156 +212,6 @@ public abstract class BaseParser implements IParser {
 		});
 	}
 
-	private void containResourcesForEncoding(ContainedResources theContained, IBaseResource theResource, IBaseResource theTarget) {
-		List<IBaseReference> allReferences = getAllBaseReferences(theResource);
-		for (IBaseReference next : allReferences) {
-			IBaseResource resource = next.getResource();
-			if (resource == null && next.getReferenceElement().isLocal()) {
-				if (theContained.hasExistingIdToContainedResource()) {
-					IBaseResource potentialTarget = theContained.getExistingIdToContainedResource().remove(next.getReferenceElement().getValue());
-					if (potentialTarget != null) {
-						theContained.addContained(next.getReferenceElement(), potentialTarget);
-						containResourcesForEncoding(theContained, potentialTarget, theTarget);
-					}
-				}
-			}
-		}
-
-		for (IBaseReference next : allReferences) {
-			IBaseResource resource = next.getResource();
-			if (resource != null) {
-				if (resource.getIdElement().isEmpty() || resource.getIdElement().isLocal()) {
-					if (theContained.getResourceId(resource) != null) {
-						// Prevent infinite recursion if there are circular loops in the contained resources
-						continue;
-					}
-					theContained.addContained(resource);
-					if (resource.getIdElement().isLocal() && theContained.hasExistingIdToContainedResource()) {
-						theContained.getExistingIdToContainedResource().remove(resource.getIdElement().getValue());
-					}
-				} else {
-					continue;
-				}
-
-				containResourcesForEncoding(theContained, resource, theTarget);
-			}
-
-		}
-
-	}
-
-	protected void containResourcesForEncoding(IBaseResource theResource) {
-		ContainedResources contained = new ContainedResources();
-
-		if (theResource instanceof IResource) {
-			List<? extends IResource> containedResources = ((IResource) theResource).getContained().getContainedResources();
-			for (IResource next : containedResources) {
-				String nextId = next.getId().getValue();
-				if (StringUtils.isNotBlank(nextId)) {
-					if (!nextId.startsWith("#")) {
-						nextId = '#' + nextId;
-					}
-					contained.getExistingIdToContainedResource().put(nextId, next);
-				}
-			}
-		} else if (theResource instanceof IDomainResource) {
-			List<? extends IAnyResource> containedResources = ((IDomainResource) theResource).getContained();
-			for (IAnyResource next : containedResources) {
-				String nextId = next.getIdElement().getValue();
-				if (StringUtils.isNotBlank(nextId)) {
-					if (!nextId.startsWith("#")) {
-						nextId = '#' + nextId;
-					}
-					contained.getExistingIdToContainedResource().put(nextId, next);
-				}
-			}
-		}
-
-		containResourcesForEncoding(contained, theResource, theResource);
-		contained.assignIdsToContainedResources();
-		myContainedResources = contained;
-
-	}
-
-	protected List<IBaseReference> getAllBaseReferences(IBaseResource theResource) {
-		final ArrayList<IBaseReference> retVal = new ArrayList<IBaseReference>();
-		findBaseReferences(retVal, theResource, myContext.getResourceDefinition(theResource));
-		return retVal;
-	}
-
-	/**
-	 * A customised traversal of the tree to find the 'top level' base references. Nested references are found via the recursive traversal
-	 * of contained resources.
-	 */
-	protected void findBaseReferences(List<IBaseReference> allElements, IBase theElement, BaseRuntimeElementDefinition<?> theDefinition) {
-		if (theElement instanceof IBaseReference) {
-			allElements.add((IBaseReference) theElement);
-		}
-
-		BaseRuntimeElementDefinition<?> def = theDefinition;
-		if (def.getChildType() == ChildTypeEnum.CONTAINED_RESOURCE_LIST) {
-			def = myContext.getElementDefinition(theElement.getClass());
-		}
-
-		switch (def.getChildType()) {
-			case ID_DATATYPE:
-			case PRIMITIVE_XHTML_HL7ORG:
-			case PRIMITIVE_XHTML:
-			case PRIMITIVE_DATATYPE:
-				// These are primitive types
-				break;
-			case RESOURCE:
-			case RESOURCE_BLOCK:
-			case COMPOSITE_DATATYPE: {
-				BaseRuntimeElementCompositeDefinition<?> childDef = (BaseRuntimeElementCompositeDefinition<?>) def;
-				for (BaseRuntimeChildDefinition nextChild : childDef.getChildrenAndExtension()) {
-
-					List<?> values = nextChild.getAccessor().getValues(theElement);
-					if (values != null) {
-						for (Object nextValueObject : values) {
-							IBase nextValue;
-							try {
-								nextValue = (IBase) nextValueObject;
-							} catch (ClassCastException e) {
-								String s = "Found instance of " + nextValueObject.getClass() + " - Did you set a field value to the incorrect type? Expected " + IBase.class.getName();
-								throw new ClassCastException(s);
-							}
-							if (nextValue == null) {
-								continue;
-							}
-							if (nextValue.isEmpty()) {
-								continue;
-							}
-							BaseRuntimeElementDefinition<?> childElementDef;
-							childElementDef = nextChild.getChildElementDefinitionByDatatype(nextValue.getClass());
-
-							if (childElementDef == null) {
-								childElementDef = myContext.getElementDefinition(nextValue.getClass());
-							}
-
-							if (nextChild instanceof RuntimeChildDirectResource) {
-								// Don't descend into embedded resources
-								if (nextValue instanceof IBaseReference) {
-									allElements.add((IBaseReference) nextValue);
-								}
-							} else {
-								findBaseReferences(allElements, nextValue, childElementDef);
-							}
-						}
-					}
-				}
-				break;
-			}
-			case CONTAINED_RESOURCES:
-				// skip contained resources when looking for resources to contain
-				break;
-			case CONTAINED_RESOURCE_LIST:
-			case EXTENSION_DECLARED:
-			case UNDECL_EXT: {
-				throw new IllegalStateException("state should not happen: " + def.getChildType());
-			}
-		}
-	}
 
 	private String determineReferenceText(IBaseReference theRef, CompositeChildElement theCompositeChildElement) {
 		IIdType ref = theRef.getReferenceElement();
@@ -529,8 +378,12 @@ public abstract class BaseParser implements IParser {
 		return elementId;
 	}
 
-	ContainedResources getContainedResources() {
+	FhirTerser.ContainedResources getContainedResources() {
 		return myContainedResources;
+	}
+
+	void setContainedResources(FhirTerser.ContainedResources theContainedResources) {
+		myContainedResources = theContainedResources;
 	}
 
 	@Override
@@ -991,7 +844,7 @@ public abstract class BaseParser implements IParser {
 
 	protected boolean shouldEncodeResourceId(IBaseResource theResource, EncodeContext theEncodeContext) {
 		boolean retVal = true;
-		if (isOmitResourceId()) {
+		if (isOmitResourceId() && theEncodeContext.getPath().size() == 1) {
 			retVal = false;
 		} else {
 			if (myDontEncodeElements != null) {
@@ -1358,126 +1211,6 @@ public abstract class BaseParser implements IParser {
 		}
 	}
 
-
-	static class ContainedResources {
-		private long myNextContainedId = 1;
-
-		private List<IBaseResource> myResourceList;
-		private IdentityHashMap<IBaseResource, IIdType> myResourceToIdMap;
-		private Map<String, IBaseResource> myExistingIdToContainedResourceMap;
-
-		public Map<String, IBaseResource> getExistingIdToContainedResource() {
-			if (myExistingIdToContainedResourceMap == null) {
-				myExistingIdToContainedResourceMap = new HashMap<>();
-			}
-			return myExistingIdToContainedResourceMap;
-		}
-
-		public void addContained(IBaseResource theResource) {
-			if (getResourceToIdMap().containsKey(theResource)) {
-				return;
-			}
-
-			IIdType newId;
-			if (theResource.getIdElement().isLocal()) {
-				newId = theResource.getIdElement();
-			} else {
-				newId = null;
-			}
-
-			getResourceToIdMap().put(theResource, newId);
-			getResourceList().add(theResource);
-		}
-
-		public void addContained(IIdType theId, IBaseResource theResource) {
-			if (!getResourceToIdMap().containsKey(theResource)) {
-				getResourceToIdMap().put(theResource, theId);
-				getResourceList().add(theResource);
-			}
-		}
-
-		public List<IBaseResource> getContainedResources() {
-			if (getResourceToIdMap() == null) {
-				return Collections.emptyList();
-			}
-			return getResourceList();
-		}
-
-		public IIdType getResourceId(IBaseResource theNext) {
-			if (getResourceToIdMap() == null) {
-				return null;
-			}
-			return getResourceToIdMap().get(theNext);
-		}
-
-		private List<IBaseResource> getResourceList() {
-			if (myResourceList == null) {
-				myResourceList = new ArrayList<>();
-			}
-			return myResourceList;
-		}
-
-		private IdentityHashMap<IBaseResource, IIdType> getResourceToIdMap() {
-			if (myResourceToIdMap == null) {
-				myResourceToIdMap = new IdentityHashMap<>();
-			}
-			return myResourceToIdMap;
-		}
-
-		public boolean isEmpty() {
-			if (myResourceToIdMap == null) {
-				return true;
-			}
-			return myResourceToIdMap.isEmpty();
-		}
-
-		public boolean hasExistingIdToContainedResource() {
-			return myExistingIdToContainedResourceMap != null;
-		}
-
-		public void assignIdsToContainedResources() {
-
-			if (getResourceList() != null) {
-
-				/*
-				 * The idea with the code block below:
-				 *
-				 * We want to preserve any IDs that were user-assigned, so that if it's really
-				 * important to someone that their contained resource have the ID of #FOO
-				 * or #1 we will keep that.
-				 *
-				 * For any contained resources where no ID was assigned by the user, we
-				 * want to manually create an ID but make sure we don't reuse an existing ID.
-				 */
-
-				Set<String> ids = new HashSet<>();
-
-				// Gather any user assigned IDs
-				for (IBaseResource nextResource : getResourceList()) {
-					if (getResourceToIdMap().get(nextResource) != null) {
-						ids.add(getResourceToIdMap().get(nextResource).getValue());
-					}
-				}
-
-				// Automatically assign IDs to the rest
-				for (IBaseResource nextResource : getResourceList()) {
-
-					while (getResourceToIdMap().get(nextResource) == null) {
-						String nextCandidate = "#" + myNextContainedId;
-						myNextContainedId++;
-						if (!ids.add(nextCandidate)) {
-							continue;
-						}
-
-						getResourceToIdMap().put(nextResource, new IdDt(nextCandidate));
-					}
-
-				}
-
-			}
-
-		}
-	}
 
 	protected static <T> List<T> extractMetadataListNotNull(IResource resource, ResourceMetadataKeyEnum<List<T>> key) {
 		List<? extends T> securityLabels = key.get(resource);

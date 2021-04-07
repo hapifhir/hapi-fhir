@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,12 +43,12 @@ import java.util.List;
 
 @Component
 @Scope("prototype")
-class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuilder {
+public class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderUri.class);
 	@Autowired
 	private IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
 
-	PredicateBuilderUri(LegacySearchBuilder theSearchBuilder) {
+	public PredicateBuilderUri(LegacySearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 

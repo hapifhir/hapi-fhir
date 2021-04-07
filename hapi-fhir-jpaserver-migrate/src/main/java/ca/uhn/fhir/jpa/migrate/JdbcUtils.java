@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -256,6 +256,10 @@ public class JdbcUtils {
 								return new ColumnType(ColumnTypeEnum.BLOB, length);
 							case Types.CLOB:
 								return new ColumnType(ColumnTypeEnum.CLOB, length);
+							case Types.DOUBLE:
+								return new ColumnType(ColumnTypeEnum.DOUBLE, length);
+							case Types.FLOAT:
+								return new ColumnType(ColumnTypeEnum.FLOAT, length);
 							default:
 								throw new IllegalArgumentException("Don't know how to handle datatype " + dataType + " for column " + theColumnName + " on table " + theTableName);
 						}

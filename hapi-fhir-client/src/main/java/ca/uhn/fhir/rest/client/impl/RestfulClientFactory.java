@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.impl;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,11 +42,11 @@ import ca.uhn.fhir.util.FhirTerser;
 public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulClientFactory.class);
 
-	private Set<String> myValidatedServerBaseUrls = Collections.synchronizedSet(new HashSet<String>());
+	private final Set<String> myValidatedServerBaseUrls = Collections.synchronizedSet(new HashSet<>());
 	private int myConnectionRequestTimeout = DEFAULT_CONNECTION_REQUEST_TIMEOUT;
 	private int myConnectTimeout = DEFAULT_CONNECT_TIMEOUT;
 	private FhirContext myContext;
-	private Map<Class<? extends IRestfulClient>, ClientInvocationHandlerFactory> myInvocationHandlers = new HashMap<>();
+	private final Map<Class<? extends IRestfulClient>, ClientInvocationHandlerFactory> myInvocationHandlers = new HashMap<>();
 	private ServerValidationModeEnum myServerValidationMode = DEFAULT_SERVER_VALIDATION_MODE;
 	private int mySocketTimeout = DEFAULT_SOCKET_TIMEOUT;
 	private String myProxyUsername;
@@ -316,7 +316,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 		String serverFhirVersionString = null;
 		Object value = t.getSingleValueOrNull(conformance, "fhirVersion");
 		if (value instanceof IPrimitiveType) {
-			serverFhirVersionString = IPrimitiveType.class.cast(value).getValueAsString();
+			serverFhirVersionString = ((IPrimitiveType<?>) value).getValueAsString();
 		}
 		FhirVersionEnum serverFhirVersionEnum = null;
 		if (StringUtils.isBlank(serverFhirVersionString)) {

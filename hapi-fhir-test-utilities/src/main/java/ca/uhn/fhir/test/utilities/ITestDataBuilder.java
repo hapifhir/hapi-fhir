@@ -4,7 +4,7 @@ package ca.uhn.fhir.test.utilities;
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,6 +132,10 @@ public interface ITestDataBuilder {
 		return createResource("Observation", theModifiers);
 	}
 
+	default IBaseResource buildPatient(Consumer<IBaseResource>... theModifiers) {
+		return buildResource("Patient", theModifiers);
+	}
+
 	default IIdType createPatient(Consumer<IBaseResource>... theModifiers) {
 		return createResource("Patient", theModifiers);
 	}
@@ -140,17 +144,22 @@ public interface ITestDataBuilder {
 		return createResource("Organization", theModifiers);
 	}
 
-	default IIdType createResource(String theResourceType, Consumer<IBaseResource>[] theModifiers) {
-		IBaseResource resource = getFhirContext().getResourceDefinition(theResourceType).newInstance();
-		for (Consumer<IBaseResource> next : theModifiers) {
-			next.accept(resource);
-		}
+	default IIdType createResource(String theResourceType, Consumer<IBaseResource>... theModifiers) {
+		IBaseResource resource = buildResource(theResourceType, theModifiers);
 
 		if (isNotBlank(resource.getIdElement().getValue())) {
 			return doUpdateResource(resource);
 		} else {
 			return doCreateResource(resource);
 		}
+	}
+
+	default IBaseResource buildResource(String theResourceType, Consumer<IBaseResource>[] theModifiers) {
+		IBaseResource resource = getFhirContext().getResourceDefinition(theResourceType).newInstance();
+		for (Consumer<IBaseResource> next : theModifiers) {
+			next.accept(resource);
+		}
+		return resource;
 	}
 
 

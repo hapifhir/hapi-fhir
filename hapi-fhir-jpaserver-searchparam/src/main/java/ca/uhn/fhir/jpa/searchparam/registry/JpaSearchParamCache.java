@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,8 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
-import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,29 +39,32 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaSearchParamCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaSearchParamCache.class);
 
-	private volatile Map<String, List<JpaRuntimeSearchParam>> myActiveUniqueSearchParams = Collections.emptyMap();
-	private volatile Map<String, Map<Set<String>, List<JpaRuntimeSearchParam>>> myActiveParamNamesToUniqueSearchParams = Collections.emptyMap();
+	private volatile Map<String, List<RuntimeSearchParam>> myActiveUniqueSearchParams = Collections.emptyMap();
+	private volatile Map<String, Map<Set<String>, List<RuntimeSearchParam>>> myActiveParamNamesToUniqueSearchParams = Collections.emptyMap();
 
-	public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
-		List<JpaRuntimeSearchParam> retval = myActiveUniqueSearchParams.get(theResourceName);
+	public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
+		List<RuntimeSearchParam> retval = myActiveUniqueSearchParams.get(theResourceName);
 		if (retval == null) {
 			retval = Collections.emptyList();
 		}
 		return retval;
 	}
 
-	public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
-		Map<Set<String>, List<JpaRuntimeSearchParam>> paramNamesToParams = myActiveParamNamesToUniqueSearchParams.get(theResourceName);
+	public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
+		Map<Set<String>, List<RuntimeSearchParam>> paramNamesToParams = myActiveParamNamesToUniqueSearchParams.get(theResourceName);
 		if (paramNamesToParams == null) {
 			return Collections.emptyList();
 		}
 
-		List<JpaRuntimeSearchParam> retVal = paramNamesToParams.get(theParamNames);
+		List<RuntimeSearchParam> retVal = paramNamesToParams.get(theParamNames);
 		if (retVal == null) {
 			retVal = Collections.emptyList();
 		}
@@ -71,18 +72,18 @@ public class JpaSearchParamCache {
 	}
 
 	void populateActiveSearchParams(IInterceptorService theInterceptorBroadcaster, IPhoneticEncoder theDefaultPhoneticEncoder, RuntimeSearchParamCache theActiveSearchParams) {
-		Map<String, List<JpaRuntimeSearchParam>> activeUniqueSearchParams = new HashMap<>();
-		Map<String, Map<Set<String>, List<JpaRuntimeSearchParam>>> activeParamNamesToUniqueSearchParams = new HashMap<>();
+		Map<String, List<RuntimeSearchParam>> activeUniqueSearchParams = new HashMap<>();
+		Map<String, Map<Set<String>, List<RuntimeSearchParam>>> activeParamNamesToUniqueSearchParams = new HashMap<>();
 
 		Map<String, RuntimeSearchParam> idToRuntimeSearchParam = new HashMap<>();
-		List<JpaRuntimeSearchParam> jpaSearchParams = new ArrayList<>();
+		List<RuntimeSearchParam> jpaSearchParams = new ArrayList<>();
 
 		/*
 		 * Loop through parameters and find JPA params
 		 */
 		for (String theResourceName : theActiveSearchParams.getResourceNameKeys()) {
 			Map<String, RuntimeSearchParam> searchParamMap = theActiveSearchParams.getSearchParamMap(theResourceName);
-			List<JpaRuntimeSearchParam> uniqueSearchParams = activeUniqueSearchParams.computeIfAbsent(theResourceName, k -> new ArrayList<>());
+			List<RuntimeSearchParam> uniqueSearchParams = activeUniqueSearchParams.computeIfAbsent(theResourceName, k -> new ArrayList<>());
 			Collection<RuntimeSearchParam> nextSearchParamsForResourceName = searchParamMap.values();
 
 			ourLog.trace("Resource {} has {} params", theResourceName, searchParamMap.size());
@@ -94,13 +95,14 @@ public class JpaSearchParamCache {
 				if (nextCandidate.getId() != null) {
 					idToRuntimeSearchParam.put(nextCandidate.getId().toUnqualifiedVersionless().getValue(), nextCandidate);
 				}
+				if (isNotBlank(nextCandidate.getUri())) {
+					idToRuntimeSearchParam.put(nextCandidate.getUri(), nextCandidate);
+				}
 
-				if (nextCandidate instanceof JpaRuntimeSearchParam) {
-					JpaRuntimeSearchParam nextCandidateCasted = (JpaRuntimeSearchParam) nextCandidate;
-					jpaSearchParams.add(nextCandidateCasted);
-					if (nextCandidateCasted.isUnique()) {
-						uniqueSearchParams.add(nextCandidateCasted);
-					}
+				RuntimeSearchParam nextCandidateCasted = nextCandidate;
+				jpaSearchParams.add(nextCandidateCasted);
+				if (nextCandidateCasted.isUnique()) {
+					uniqueSearchParams.add(nextCandidateCasted);
 				}
 
 				setPhoneticEncoder(theDefaultPhoneticEncoder, nextCandidate);
@@ -111,25 +113,19 @@ public class JpaSearchParamCache {
 		ourLog.trace("Have {} search params loaded", idToRuntimeSearchParam.size());
 
 		Set<String> haveSeen = new HashSet<>();
-		for (JpaRuntimeSearchParam next : jpaSearchParams) {
-			if (!haveSeen.add(next.getId().toUnqualifiedVersionless().getValue())) {
+		for (RuntimeSearchParam next : jpaSearchParams) {
+			if (next.getId() != null && !haveSeen.add(next.getId().toUnqualifiedVersionless().getValue())) {
 				continue;
 			}
 
-			Set<String> paramNames = new HashSet<>();
-			for (JpaRuntimeSearchParam.Component nextComponent : next.getComponents()) {
-				String nextRef = nextComponent.getReference().getReferenceElement().toUnqualifiedVersionless().getValue();
+			Set<String> paramNames = new TreeSet<>();
+			for (RuntimeSearchParam.Component nextComponent : next.getComponents()) {
+				String nextRef = nextComponent.getReference();
 				RuntimeSearchParam componentTarget = idToRuntimeSearchParam.get(nextRef);
 				if (componentTarget != null) {
-					next.getCompositeOf().add(componentTarget);
 					paramNames.add(componentTarget.getName());
 				} else {
-					String existingParams = idToRuntimeSearchParam
-						.keySet()
-						.stream()
-						.sorted()
-						.collect(Collectors.joining(", "));
-					String message = "Search parameter " + next.getId().toUnqualifiedVersionless().getValue() + " refers to unknown component " + nextRef + ", ignoring this parameter (valid values: " + existingParams + ")";
+					String message = "Search parameter " + next + " refers to unknown component " + nextRef + ", ignoring this parameter";
 					ourLog.warn(message);
 
 					// Interceptor broadcast: JPA_PERFTRACE_WARNING
@@ -141,8 +137,7 @@ public class JpaSearchParamCache {
 				}
 			}
 
-			if (next.getCompositeOf() != null) {
-				next.getCompositeOf().sort((theO1, theO2) -> StringUtils.compare(theO1.getName(), theO2.getName()));
+			if (next.isUnique()) {
 				for (String nextBase : next.getBase()) {
 					activeParamNamesToUniqueSearchParams.computeIfAbsent(nextBase, v -> new HashMap<>());
 					activeParamNamesToUniqueSearchParams.get(nextBase).computeIfAbsent(paramNames, t -> new ArrayList<>());

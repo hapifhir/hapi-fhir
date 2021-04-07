@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.impl;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -631,7 +631,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				String nextKey = nextEntry.getKey();
 				List<IQueryParameterType> nextValues = nextEntry.getValue();
 				for (IQueryParameterType nextValue : nextValues) {
-					addParam(myParams, nextKey, nextValue.getValueAsQueryToken(myContext));
+					String value = nextValue.getValueAsQueryToken(myContext);
+					String qualifier = nextValue.getQueryParameterQualifier();
+					if (isNotBlank(qualifier)) {
+						nextKey = nextKey + qualifier;
+					}
+					addParam(myParams, nextKey, value);
 				}
 			}
 			return (QUERY) this;
@@ -683,7 +688,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			OutcomeResponseHandler binding = new OutcomeResponseHandler(myPrefer);
 
-			Map<String, List<String>> params = new HashMap<String, List<String>>();
+			Map<String, List<String>> params = new HashMap<>();
 			return invoke(params, binding, invocation);
 
 		}

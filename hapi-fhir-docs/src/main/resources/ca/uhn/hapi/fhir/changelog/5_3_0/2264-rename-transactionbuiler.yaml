@@ -1,0 +1,5 @@
+---
+type: change
+issue: 2264
+title: "The experimental `TransactionBuilder` helper class has been renamed to `BundleBuilder` as it now has
+   utility methods for working with other types of Bundles too."

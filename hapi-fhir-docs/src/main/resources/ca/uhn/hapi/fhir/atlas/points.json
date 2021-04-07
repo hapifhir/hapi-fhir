@@ -349,6 +349,16 @@
 			"lat": 37.7826622,
 			"lon": -122.3983786,
 			"added": "2020-05-06"
-		}
+		},{
+			"title": "MedPlat",
+			"description": "A Comprehensive Health Platform",
+			"link": "https://argusoft.com",
+			"contactName": "Kunjan Patel",
+			"contactEmail": "kunjanp@argusoft.com",
+			"city": "Gandhinagar,India",
+			"lat": 23.2420,
+			"lon": 72.6272,
+			"added": "2021-03-17"
+}
 	]
 }

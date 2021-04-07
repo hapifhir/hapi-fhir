@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 2462
+title: "Several optimizations have been made to the JPA server transaction processor that should result in
+   improved performance, particularly when processing large transaction Bundles, such as transactions
+   containing many entries, or transactions containing very large entries."

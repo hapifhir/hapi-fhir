@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.util;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,10 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import java.util.EnumMap;
@@ -39,6 +41,9 @@ import java.util.function.Function;
  */
 public class MemoryCacheService {
 
+	@Autowired
+	private DaoConfig myDaoConfig;
+
 	private EnumMap<CacheEnum, Cache<?, ?>> myCaches;
 
 	@PostConstruct
@@ -47,7 +52,23 @@ public class MemoryCacheService {
 		myCaches = new EnumMap<>(CacheEnum.class);
 
 		for (CacheEnum next : CacheEnum.values()) {
-			Cache<Object, Object> nextCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(10000).build();
+
+			long timeoutSeconds;
+			switch (next) {
+				case CONCEPT_TRANSLATION:
+				case CONCEPT_TRANSLATION_REVERSE:
+					timeoutSeconds = myDaoConfig.getTranslationCachesExpireAfterWriteInMinutes() * 1000;
+					break;
+				case TAG_DEFINITION:
+				case PERSISTENT_ID:
+				case RESOURCE_LOOKUP:
+				case FORCED_ID:
+				default:
+					timeoutSeconds = 60;
+					break;
+			}
+
+			Cache<Object, Object> nextCache = Caffeine.newBuilder().expireAfterWrite(timeoutSeconds, TimeUnit.MINUTES).maximumSize(10000).build();
 			myCaches.put(next, nextCache);
 		}
 
@@ -85,6 +106,8 @@ public class MemoryCacheService {
 		PERSISTENT_ID,
 		RESOURCE_LOOKUP,
 		FORCED_ID,
+		CONCEPT_TRANSLATION,
+		CONCEPT_TRANSLATION_REVERSE
 
 	}
 

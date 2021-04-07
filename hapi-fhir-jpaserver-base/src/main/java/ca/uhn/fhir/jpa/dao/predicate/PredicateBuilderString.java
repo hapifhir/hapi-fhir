@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -43,8 +42,8 @@ import java.util.List;
 
 @Component
 @Scope("prototype")
-class PredicateBuilderString extends BasePredicateBuilder implements IPredicateBuilder {
-	PredicateBuilderString(LegacySearchBuilder theSearchBuilder) {
+public class PredicateBuilderString extends BasePredicateBuilder implements IPredicateBuilder {
+	public PredicateBuilderString(LegacySearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.util;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,12 @@ import java.util.function.Consumer;
 public class QueryChunker<T> {
 
 	public void chunk(List<T> theInput, Consumer<List<T>> theBatchConsumer) {
-		for (int i = 0; i < theInput.size(); i += SearchBuilder.getMaximumPageSize()) {
-			int to = i + SearchBuilder.getMaximumPageSize();
+		chunk(theInput, SearchBuilder.getMaximumPageSize(), theBatchConsumer);
+	}
+
+	public void chunk(List<T> theInput, int theChunkSize, Consumer<List<T>> theBatchConsumer ) {
+		for (int i = 0; i < theInput.size(); i += theChunkSize) {
+			int to = i + theChunkSize;
 			to = Math.min(to, theInput.size());
 			List<T> batch = theInput.subList(i, to);
 			theBatchConsumer.accept(batch);

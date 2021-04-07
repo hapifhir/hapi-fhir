@@ -2,9 +2,9 @@ package ca.uhn.fhir.jpa.model.entity;
 
 /*-
  * #%L
- * HAPI FHIR Model
+ * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,19 +20,24 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.DateTimeType;
 
+import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 // TODO: move this to ca.uhn.fhir.jpa.model.config
 public class ModelConfig {
@@ -89,12 +94,19 @@ public class ModelConfig {
 	private IPrimitiveType<Date> myPeriodIndexStartOfTime;
 	private IPrimitiveType<Date> myPeriodIndexEndOfTime;
 
+	private NormalizedQuantitySearchLevel myNormalizedQuantitySearchLevel;
+	private Set<String> myAutoVersionReferenceAtPaths = Collections.emptySet();
+	private Map<String, Set<String>> myTypeToAutoVersionReferenceAtPaths = Collections.emptyMap();
+	private boolean myRespectVersionsForSearchIncludes;
+	private boolean myIndexOnContainedResources = false;
+
 	/**
 	 * Constructor
 	 */
 	public ModelConfig() {
 		setPeriodIndexStartOfTime(new DateTimeType(DEFAULT_PERIOD_INDEX_START_OF_TIME));
 		setPeriodIndexEndOfTime(new DateTimeType(DEFAULT_PERIOD_INDEX_END_OF_TIME));
+		setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 	}
 
 	/**
@@ -265,7 +277,7 @@ public class ModelConfig {
 		}
 
 		HashSet<String> treatBaseUrlsAsLocal = new HashSet<>();
-		for (String next : ObjectUtils.defaultIfNull(theTreatBaseUrlsAsLocal, new HashSet<String>())) {
+		for (String next : defaultIfNull(theTreatBaseUrlsAsLocal, new HashSet<String>())) {
 			while (next.endsWith("/")) {
 				next = next.substring(0, next.length() - 1);
 			}
@@ -573,7 +585,172 @@ public class ModelConfig {
 		myPeriodIndexEndOfTime = thePeriodIndexEndOfTime;
 	}
 
+	/**
+	 * Toggles whether Quantity searches support value normalization when using valid UCUM coded values.
+	 *
+	 * <p>
+	 * The default value is {@link NormalizedQuantitySearchLevel#NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED} which is current behavior.
+	 * </p>
+	 * <p>
+	 * Here is the UCUM service support level
+	 *    <ul>
+	 *       <li>{@link NormalizedQuantitySearchLevel#NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED}, default, Quantity is stored in {@link ResourceIndexedSearchParamQuantity} only and it is used by searching.</li>
+	 *       <li>{@link NormalizedQuantitySearchLevel#NORMALIZED_QUANTITY_STORAGE_SUPPORTED}, Quantity is stored in both {@link ResourceIndexedSearchParamQuantity} and {@link ResourceIndexedSearchParamQuantityNormalized}, but {@link ResourceIndexedSearchParamQuantity} is used by searching.</li>
+	 *       <li>{@link NormalizedQuantitySearchLevel#NORMALIZED_QUANTITY_SEARCH_SUPPORTED}, Quantity is stored in both {@link ResourceIndexedSearchParamQuantity} and {@link ResourceIndexedSearchParamQuantityNormalized}, {@link ResourceIndexedSearchParamQuantityNormalized} is used by searching.</li>
+	 *     </ul>
+	 * </p>
+	 *
+	 * @since 5.3.0
+	 */
+	public NormalizedQuantitySearchLevel getNormalizedQuantitySearchLevel() {
+		return myNormalizedQuantitySearchLevel;
+	}
 
+	/**
+	 * Toggles whether Quantity searches support value normalization when using valid UCUM coded values.
+	 *
+	 * <p>
+	 * The default value is {@link NormalizedQuantitySearchLevel#NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED} which is current behavior.
+	 * </p>
+	 * <p>
+	 * Here is the UCUM service support level
+	 *    <ul>
+	 *       <li>{@link NormalizedQuantitySearchLevel#NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED}, default, Quantity is stored in {@link ResourceIndexedSearchParamQuantity} only and it is used by searching.</li>
+	 *       <li>{@link NormalizedQuantitySearchLevel#NORMALIZED_QUANTITY_STORAGE_SUPPORTED}, Quantity is stored in both {@link ResourceIndexedSearchParamQuantity} and {@link ResourceIndexedSearchParamQuantityNormalized}, but {@link ResourceIndexedSearchParamQuantity} is used by searching.</li>
+	 *       <li>{@link NormalizedQuantitySearchLevel#NORMALIZED_QUANTITY_SEARCH_SUPPORTED}, Quantity is stored in both {@link ResourceIndexedSearchParamQuantity} and {@link ResourceIndexedSearchParamQuantityNormalized}, {@link ResourceIndexedSearchParamQuantityNormalized} is used by searching.</li>
+	 *     </ul>
+	 * </p>
+	 *
+	 * @since 5.3.0
+	 */
+	public void setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel theNormalizedQuantitySearchLevel) {
+		myNormalizedQuantitySearchLevel = theNormalizedQuantitySearchLevel;
+	}
+
+	/**
+	 * When set with resource paths (e.g. <code>"Observation.subject"</code>), any references found at the given paths
+	 * will automatically have versions appended. The version used will be the current version of the given resource.
+	 *
+	 * @since 5.3.0
+	 */
+	public Set<String> getAutoVersionReferenceAtPaths() {
+		return myAutoVersionReferenceAtPaths;
+	}
+
+	/**
+	 * When set with resource paths (e.g. <code>"Observation.subject"</code>), any references found at the given paths
+	 * will automatically have versions appended. The version used will be the current version of the given resource.
+	 * <p>
+	 * Versions will only be added if the reference does not already have a version, so any versioned references
+	 * supplied by the client will take precedence over the automatic current version.
+	 * </p>
+	 * <p>
+	 * Note that for this setting to be useful, the {@link ParserOptions}
+	 * {@link ParserOptions#getDontStripVersionsFromReferencesAtPaths() DontStripVersionsFromReferencesAtPaths}
+	 * option must also be set.
+	 * </p>
+	 *
+	 * @param thePaths A collection of reference paths for which the versions will be appended automatically
+	 *                 when serializing, e.g. "Patient.managingOrganization" or "AuditEvent.object.reference". Note that
+	 *                 only resource name and field names with dots separating is allowed here (no repetition
+	 *                 indicators, FluentPath expressions, etc.)
+	 * @since 5.3.0
+	 */
+	public void setAutoVersionReferenceAtPaths(String... thePaths) {
+		Set<String> paths = Collections.emptySet();
+		if (thePaths != null) {
+			paths = new HashSet<>(Arrays.asList(thePaths));
+		}
+		setAutoVersionReferenceAtPaths(paths);
+	}
+
+	/**
+	 * When set with resource paths (e.g. <code>"Observation.subject"</code>), any references found at the given paths
+	 * will automatically have versions appended. The version used will be the current version of the given resource.
+	 * <p>
+	 * Versions will only be added if the reference does not already have a version, so any versioned references
+	 * supplied by the client will take precedence over the automatic current version.
+	 * </p>
+	 * <p>
+	 * Note that for this setting to be useful, the {@link ParserOptions}
+	 * {@link ParserOptions#getDontStripVersionsFromReferencesAtPaths() DontStripVersionsFromReferencesAtPaths}
+	 * option must also be set
+	 * </p>
+	 *
+	 * @param thePaths A collection of reference paths for which the versions will be appended automatically
+	 *                 when serializing, e.g. "Patient.managingOrganization" or "AuditEvent.object.reference". Note that
+	 *                 only resource name and field names with dots separating is allowed here (no repetition
+	 *                 indicators, FluentPath expressions, etc.)
+	 * @since 5.3.0
+	 */
+	public void setAutoVersionReferenceAtPaths(Set<String> thePaths) {
+		Set<String> paths = defaultIfNull(thePaths, Collections.emptySet());
+		Map<String, Set<String>> byType = new HashMap<>();
+		for (String nextPath : paths) {
+			int doxIdx = nextPath.indexOf('.');
+			Validate.isTrue(doxIdx > 0, "Invalid path for auto-version reference at path: %s", nextPath);
+			String type = nextPath.substring(0, doxIdx);
+			byType.computeIfAbsent(type, t -> new HashSet<>()).add(nextPath);
+		}
+
+
+		myAutoVersionReferenceAtPaths = paths;
+		myTypeToAutoVersionReferenceAtPaths = byType;
+	}
+
+	/**
+	 * Returns a sub-collection of {@link #getAutoVersionReferenceAtPaths()} containing only paths
+	 * for the given resource type.
+	 *
+	 * @since 5.3.0
+	 */
+	public Set<String> getAutoVersionReferenceAtPathsByResourceType(String theResourceType) {
+		Validate.notEmpty(theResourceType, "theResourceType must not be null or empty");
+		Set<String> retVal = myTypeToAutoVersionReferenceAtPaths.get(theResourceType);
+		retVal = defaultIfNull(retVal, Collections.emptySet());
+		return retVal;
+	}
+
+	/**
+	 * Should searches with <code>_include</code> respect versioned references, and pull the specific requested version.
+	 * This may have performance impacts on heavily loaded systems.
+	 *
+	 * @since 5.3.0
+	 */
+	public boolean isRespectVersionsForSearchIncludes() {
+		return myRespectVersionsForSearchIncludes;
+	}
+
+	/**
+	 * Should searches with <code>_include</code> respect versioned references, and pull the specific requested version.
+	 * This may have performance impacts on heavily loaded systems.
+	 *
+	 * @since 5.3.0
+	 */
+	public void setRespectVersionsForSearchIncludes(boolean theRespectVersionsForSearchIncludes) {
+		myRespectVersionsForSearchIncludes = theRespectVersionsForSearchIncludes;
+	}
+
+	/**
+	 * Should indexing and searching on contained resources be enabled on this server.
+	 * This may have performance impacts, and should be enabled only if it is needed. Default is <code>false</code>.
+	 * 
+	 * @since 5.4.0
+	 */
+	public boolean isIndexOnContainedResources() {
+		return myIndexOnContainedResources;
+	}
+	
+	/**
+	 * Should indexing and searching on contained resources be enabled on this server.
+	 * This may have performance impacts, and should be enabled only if it is needed. Default is <code>false</code>.
+	 *
+	 * @since 5.4.0
+	 */
+	public void setIndexOnContainedResources(boolean theIndexOnContainedResources) {
+		myIndexOnContainedResources = theIndexOnContainedResources;
+	}
+	
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");
 
@@ -585,4 +762,5 @@ public class ModelConfig {
 		}
 
 	}
+
 }

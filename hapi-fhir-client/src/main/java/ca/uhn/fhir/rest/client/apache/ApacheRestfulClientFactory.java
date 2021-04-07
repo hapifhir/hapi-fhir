@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.apache;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,8 +100,11 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 					.setProxy(myProxy)
 					.build();
 
-			HttpClientBuilder builder = HttpClients.custom().setConnectionManager(connectionManager)
-					.setDefaultRequestConfig(defaultRequestConfig).disableCookieManagement();
+			HttpClientBuilder builder = getHttpClientBuilder()
+					.useSystemProperties()
+					.setConnectionManager(connectionManager)
+					.setDefaultRequestConfig(defaultRequestConfig)
+					.disableCookieManagement();
 
 			if (myProxy != null && StringUtils.isNotBlank(getProxyUsername()) && StringUtils.isNotBlank(getProxyPassword())) {
 				CredentialsProvider credsProvider = new BasicCredentialsProvider();
@@ -116,6 +119,10 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 		}
 
 		return myHttpClient;
+	}
+
+	protected HttpClientBuilder getHttpClientBuilder() {
+		return HttpClients.custom();
 	}
 
 	@Override

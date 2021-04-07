@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.param;
 import java.math.BigDecimal;
 import java.util.List;
 
+import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -301,4 +302,22 @@ public class QuantityParam extends BaseParamWithPrefix<QuantityParam> implements
 		return b.toString();
 	}
 
+    public static QuantityParam toQuantityParam(IQueryParameterType theParam) {
+        if (theParam instanceof BaseQuantityDt) {
+            BaseQuantityDt param = (BaseQuantityDt) theParam;
+            String systemValue = param.getSystemElement().getValueAsString();
+            String unitsValue = param.getUnitsElement().getValueAsString();
+            ParamPrefixEnum cmpValue = ParamPrefixEnum.forValue(param.getComparatorElement().getValueAsString());
+            BigDecimal valueValue = param.getValueElement().getValue();
+            return new QuantityParam()
+                .setSystem(systemValue)
+                .setUnits(unitsValue)
+                .setPrefix(cmpValue)
+                .setValue(valueValue);
+        } else if (theParam instanceof QuantityParam) {
+            return (QuantityParam) theParam;
+        } else {
+            throw new IllegalArgumentException("Invalid quantity type: " + theParam.getClass());
+        }
+    }
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,9 +62,16 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	@Override
 	protected void flushSession(Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome) {
 		try {
-			SessionImpl session = (SessionImpl) myEntityManager.unwrap(Session.class);
-			int insertionCount = session.getActionQueue().numberOfInsertions();
-			int updateCount = session.getActionQueue().numberOfUpdates();
+			int insertionCount;
+			int updateCount;
+			SessionImpl session = myEntityManager.unwrap(SessionImpl.class);
+			if (session != null) {
+				insertionCount = session.getActionQueue().numberOfInsertions();
+				updateCount = session.getActionQueue().numberOfUpdates();
+			} else {
+				insertionCount = -1;
+				updateCount = -1;
+			}
 
 			StopWatch sw = new StopWatch();
 			myEntityManager.flush();

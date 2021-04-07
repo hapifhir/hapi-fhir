@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,17 +21,20 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
@@ -41,7 +44,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.QualifierDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -51,13 +53,13 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.InstantType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,6 +69,7 @@ import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -77,30 +80,90 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseStorageDao {
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseStorageDao.class);
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	protected FhirContext myFhirContext;
+	@Autowired
+	protected DaoRegistry myDaoRegistry;
+	@Autowired
+	protected ModelConfig myModelConfig;
+
+	@VisibleForTesting
+	public void setSearchParamRegistry(ISearchParamRegistry theSearchParamRegistry) {
+		mySearchParamRegistry = theSearchParamRegistry;
+	}
 
 	/**
 	 * May be overridden by subclasses to validate resources prior to storage
 	 *
 	 * @param theResource The resource that is about to be stored
+	 * @deprecated Use {@link #preProcessResourceForStorage(IBaseResource, RequestDetails, TransactionDetails, boolean)} instead
 	 */
 	protected void preProcessResourceForStorage(IBaseResource theResource) {
+		// nothing
+	}
+
+	/**
+	 * May be overridden by subclasses to validate resources prior to storage
+	 *
+	 * @param theResource The resource that is about to be stored
+	 * @since 5.3.0
+	 */
+	protected void preProcessResourceForStorage(IBaseResource theResource, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, boolean thePerformIndexing) {
+
+		verifyResourceTypeIsAppropriateForDao(theResource);
+
+		verifyResourceIdIsValid(theResource);
+
+		verifyBundleTypeIsAppropriateForStorage(theResource);
+
+		replaceAbsoluteReferencesWithRelative(theResource);
+
+		performAutoVersioning(theResource, thePerformIndexing);
+
+	}
+
+	/**
+	 * Sanity check - Is this resource the right type for this DAO?
+	 */
+	private void verifyResourceTypeIsAppropriateForDao(IBaseResource theResource) {
 		String type = getContext().getResourceType(theResource);
 		if (getResourceName() != null && !getResourceName().equals(type)) {
 			throw new InvalidRequestException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "incorrectResourceType", type, getResourceName()));
 		}
+	}
 
+	/**
+	 * Verify that the resource ID is actually valid according to FHIR's rules
+	 */
+	private void verifyResourceIdIsValid(IBaseResource theResource) {
 		if (theResource.getIdElement().hasIdPart()) {
 			if (!theResource.getIdElement().isIdPartValid()) {
 				throw new InvalidRequestException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "failedToCreateWithInvalidId", theResource.getIdElement().getIdPart()));
 			}
 		}
+	}
 
-		/*
-		 * Replace absolute references with relative ones if configured to do so
-		 */
+	/**
+	 * Verify that we're not storing a Bundle with a disallowed bundle type
+	 */
+	private void verifyBundleTypeIsAppropriateForStorage(IBaseResource theResource) {
+		if (theResource instanceof IBaseBundle) {
+			Set<String> allowedBundleTypes = getConfig().getBundleTypesAllowedForStorage();
+			String bundleType = BundleUtil.getBundleType(getContext(), (IBaseBundle) theResource);
+			bundleType = defaultString(bundleType);
+			if (!allowedBundleTypes.contains(bundleType)) {
+				String message = myFhirContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidBundleTypeForStorage", (isNotBlank(bundleType) ? bundleType : "(missing)"));
+				throw new UnprocessableEntityException(message);
+			}
+		}
+	}
+
+	/**
+	 * Replace absolute references with relative ones if configured to do so
+	 */
+	private void replaceAbsoluteReferencesWithRelative(IBaseResource theResource) {
 		if (getConfig().getTreatBaseUrlsAsLocal().isEmpty() == false) {
 			FhirTerser t = getContext().newTerser();
 			List<ResourceReferenceInfo> refs = t.getAllResourceReferences(theResource);
@@ -114,17 +177,38 @@ public abstract class BaseStorageDao {
 				}
 			}
 		}
+	}
 
-		if ("Bundle".equals(type)) {
-			Set<String> allowedBundleTypes = getConfig().getBundleTypesAllowedForStorage();
-			String bundleType = BundleUtil.getBundleType(getContext(), (IBaseBundle) theResource);
-			bundleType = defaultString(bundleType);
-			if (!allowedBundleTypes.contains(bundleType)) {
-				String message = "Unable to store a Bundle resource on this server with a Bundle.type value of: " + (isNotBlank(bundleType) ? bundleType : "(missing)");
-				throw new UnprocessableEntityException(message);
+	/**
+	 * Handle {@link ModelConfig#getAutoVersionReferenceAtPaths() auto-populate-versions}
+	 * <p>
+	 * We only do this if thePerformIndexing is true because if it's false, that means
+	 * we're in a FHIR transaction during the first phase of write operation processing,
+	 * meaning that the versions of other resources may not have need updated yet. For example
+	 * we're about to store an Observation with a reference to a Patient, and that Patient
+	 * is also being updated in the same transaction, during the first "no index" phase,
+	 * the Patient will not yet have its version number incremented, so it would be wrong
+	 * to use that value. During the second phase it is correct.
+	 * <p>
+	 * Also note that {@link BaseTransactionProcessor} also has code to do auto-versioning
+	 * and it is the one that takes care of the placeholder IDs. Look for the other caller of
+	 * {@link #extractReferencesToAutoVersion(FhirContext, ModelConfig, IBaseResource)}
+	 * to find this.
+	 */
+	private void performAutoVersioning(IBaseResource theResource, boolean thePerformIndexing) {
+		if (thePerformIndexing) {
+			Set<IBaseReference> referencesToVersion = extractReferencesToAutoVersion(myFhirContext, myModelConfig, theResource);
+			for (IBaseReference nextReference : referencesToVersion) {
+				IIdType referenceElement = nextReference.getReferenceElement();
+				if (!referenceElement.hasBaseUrl()) {
+					String resourceType = referenceElement.getResourceType();
+					IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
+					String targetVersionId = dao.getCurrentVersionId(referenceElement);
+					String newTargetReference = referenceElement.withVersion(targetVersionId).getValue();
+					nextReference.setReference(newTargetReference);
+				}
 			}
 		}
-
 	}
 
 	protected DaoMethodOutcome toMethodOutcome(RequestDetails theRequest, @Nonnull final IBasePersistedResource theEntity, @Nonnull IBaseResource theResource) {
@@ -148,7 +232,7 @@ public abstract class BaseStorageDao {
 		}
 
 		outcome.setId(id);
-		if (theEntity.isDeleted() == false) {
+		if (theEntity.getDeleted() == null) {
 			outcome.setResource(theResource);
 		}
 		outcome.setEntity(theEntity);
@@ -254,17 +338,40 @@ public abstract class BaseStorageDao {
 			}
 
 			// Should not be null since the check above would have caught it
-			RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(getResourceName());
-			RuntimeSearchParam paramDef = mySearchParamRegistry.getSearchParamByName(resourceDef, qualifiedParamName.getParamName());
+			RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(getResourceName(), qualifiedParamName.getParamName());
 
 			for (String nextValue : theSource.get(nextParamName)) {
 				QualifiedParamList qualifiedParam = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(qualifiedParamName.getWholeQualifier(), nextValue);
 				List<QualifiedParamList> paramList = Collections.singletonList(qualifiedParam);
-				IQueryParameterAnd<?> parsedParam = ParameterUtil.parseQueryParams(getContext(), paramDef, nextParamName, paramList);
+				IQueryParameterAnd<?> parsedParam = JpaParamUtil.parseQueryParams(mySearchParamRegistry, getContext(), paramDef, nextParamName, paramList);
 				theTarget.add(qualifiedParamName.getParamName(), parsedParam);
 			}
 
 		}
+	}
+
+	/**
+	 * @see ModelConfig#getAutoVersionReferenceAtPaths()
+	 */
+	@Nonnull
+	public static Set<IBaseReference> extractReferencesToAutoVersion(FhirContext theFhirContext, ModelConfig theModelConfig, IBaseResource theResource) {
+		Map<IBaseReference, Object> references = Collections.emptyMap();
+		if (!theModelConfig.getAutoVersionReferenceAtPaths().isEmpty()) {
+			String resourceName = theFhirContext.getResourceType(theResource);
+			for (String nextPath : theModelConfig.getAutoVersionReferenceAtPathsByResourceType(resourceName)) {
+				List<IBaseReference> nextReferences = theFhirContext.newTerser().getValues(theResource, nextPath, IBaseReference.class);
+				for (IBaseReference next : nextReferences) {
+					if (next.getReferenceElement().hasVersionIdPart()) {
+						continue;
+					}
+					if (references.isEmpty()) {
+						references = new IdentityHashMap<>();
+					}
+					references.put(next, null);
+				}
+			}
+		}
+		return references.keySet();
 	}
 
 }

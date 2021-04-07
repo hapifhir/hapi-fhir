@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,30 +23,53 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.rest.api.Constants;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Stream;
 
 public class ReadOnlySearchParamCache {
-	private static final Logger ourLog = LoggerFactory.getLogger(ReadOnlySearchParamCache.class);
-	// resourceName -> searchParamName -> searchparam
-	protected final Map<String, Map<String, RuntimeSearchParam>> myMap;
 
+	// resourceName -> searchParamName -> searchparam
+	protected final Map<String, Map<String, RuntimeSearchParam>> myResourceNameToSpNameToSp;
+	protected final Map<String, RuntimeSearchParam> myUrlToParam;
+
+	/**
+	 * Constructor
+	 */
 	ReadOnlySearchParamCache() {
-		myMap = new HashMap<>();
+		myResourceNameToSpNameToSp = new HashMap<>();
+		myUrlToParam = new HashMap<>();
 	}
 
+	/**
+	 * Copy constructor
+	 */
 	private ReadOnlySearchParamCache(RuntimeSearchParamCache theRuntimeSearchParamCache) {
-		myMap = theRuntimeSearchParamCache.myMap;
+		myResourceNameToSpNameToSp = theRuntimeSearchParamCache.myResourceNameToSpNameToSp;
+		myUrlToParam = theRuntimeSearchParamCache.myUrlToParam;
+	}
+
+	public Stream<RuntimeSearchParam> getSearchParamStream() {
+		return myResourceNameToSpNameToSp.values().stream().flatMap(entry -> entry.values().stream());
+	}
+
+	protected Map<String, RuntimeSearchParam> getSearchParamMap(String theResourceName) {
+		Map<String, RuntimeSearchParam> retval = myResourceNameToSpNameToSp.get(theResourceName);
+		if (retval == null) {
+			return Collections.emptyMap();
+		}
+		return Collections.unmodifiableMap(myResourceNameToSpNameToSp.get(theResourceName));
+	}
+
+	public int size() {
+		return myResourceNameToSpNameToSp.size();
+	}
+
+	public RuntimeSearchParam getByUrl(String theUrl) {
+		return myUrlToParam.get(theUrl);
 	}
 
 	public static ReadOnlySearchParamCache fromFhirContext(FhirContext theFhirContext) {
@@ -58,7 +81,7 @@ public class ReadOnlySearchParamCache {
 			RuntimeResourceDefinition nextResDef = theFhirContext.getResourceDefinition(resourceName);
 			String nextResourceName = nextResDef.getName();
 			HashMap<String, RuntimeSearchParam> nameToParam = new HashMap<>();
-			retval.myMap.put(nextResourceName, nameToParam);
+			retval.myResourceNameToSpNameToSp.put(nextResourceName, nameToParam);
 
 			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
 				nameToParam.put(nextSp.getName(), nextSp);
@@ -69,34 +92,5 @@ public class ReadOnlySearchParamCache {
 
 	public static ReadOnlySearchParamCache fromRuntimeSearchParamCache(RuntimeSearchParamCache theRuntimeSearchParamCache) {
 		return new ReadOnlySearchParamCache(theRuntimeSearchParamCache);
-	}
-
-	public Stream<RuntimeSearchParam> getSearchParamStream() {
-		return myMap.values().stream().flatMap(entry -> entry.values().stream());
-	}
-
-	protected Map<String, RuntimeSearchParam> getSearchParamMap(String theResourceName) {
-		Map<String, RuntimeSearchParam> retval = myMap.get(theResourceName);
-		if (retval == null) {
-			return Collections.emptyMap();
-		}
-		return Collections.unmodifiableMap(myMap.get(theResourceName));
-	}
-
-	public Collection<String> getValidSearchParameterNamesIncludingMeta(String theResourceName) {
-		TreeSet<String> retval;
-		Map<String, RuntimeSearchParam> searchParamMap = myMap.get(theResourceName);
-		if (searchParamMap == null) {
-			retval = new TreeSet<>();
-		} else {
-			retval = new TreeSet<>(searchParamMap.keySet());
-		}
-		retval.add(IAnyResource.SP_RES_ID);
-		retval.add(Constants.PARAM_LASTUPDATED);
-		return retval;
-	}
-
-	public int size() {
-		return myMap.size();
 	}
 }

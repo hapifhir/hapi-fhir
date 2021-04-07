@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.batch;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.batch;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.batch.processors.GoldenResourceAnnotatingProcessor;
 import ca.uhn.fhir.jpa.batch.processors.PidToIBaseResourceProcessor;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.context.annotation.Bean;
@@ -32,6 +33,12 @@ public class CommonBatchJobConfig {
 	@StepScope
 	public PidToIBaseResourceProcessor pidToResourceProcessor() {
 		return new PidToIBaseResourceProcessor();
+	}
+
+	@Bean
+	@StepScope
+	public GoldenResourceAnnotatingProcessor goldenResourceAnnotatingProcessor() {
+		return new GoldenResourceAnnotatingProcessor();
 	}
 
 }

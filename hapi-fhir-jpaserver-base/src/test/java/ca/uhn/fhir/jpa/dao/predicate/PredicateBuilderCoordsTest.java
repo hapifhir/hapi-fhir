@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.util.CoordCalculator;
 import ca.uhn.fhir.jpa.util.CoordCalculatorTest;
-import ca.uhn.fhir.jpa.util.SearchBox;
+import org.hibernate.search.engine.spatial.GeoBoundingBox;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,8 +41,8 @@ public class PredicateBuilderCoordsTest {
 
 	@Test
 	public void testLongitudePredicateFromBox() {
-		SearchBox box = CoordCalculator.getBox(CoordCalculatorTest.LATITUDE_CHIN, CoordCalculatorTest.LONGITUDE_CHIN, CoordCalculatorTest.DISTANCE_TAVEUNI);
-		assertThat(box.getNorthEast().getLongitude(), greaterThan(box.getSouthWest().getLongitude()));
+		GeoBoundingBox box = CoordCalculator.getBox(CoordCalculatorTest.LATITUDE_CHIN, CoordCalculatorTest.LONGITUDE_CHIN, CoordCalculatorTest.DISTANCE_TAVEUNI);
+		assertThat(box.bottomRight().longitude(), greaterThan(box.topLeft().longitude()));
 
 		ArgumentCaptor<Predicate> andLeft = ArgumentCaptor.forClass(Predicate.class);
 		ArgumentCaptor<Predicate> andRight = ArgumentCaptor.forClass(Predicate.class);
@@ -58,15 +58,15 @@ public class PredicateBuilderCoordsTest {
 		verify(myBuilder).and(andLeft.capture(), andRight.capture());
 		assertEquals(andLeft.getValue(), gte);
 		assertEquals(andRight.getValue(), lte);
-		assertEquals(gteValue.getValue(), box.getSouthWest().getLongitude());
-		assertEquals(lteValue.getValue(), box.getNorthEast().getLongitude());
+		assertEquals(gteValue.getValue(), box.topLeft().longitude());
+		assertEquals(lteValue.getValue(), box.bottomRight().longitude());
 	}
 
 	@Test
 	public void testAntiMeridianLongitudePredicateFromBox() {
-		SearchBox box = CoordCalculator.getBox(CoordCalculatorTest.LATITUDE_TAVEUNI, CoordCalculatorTest.LONGITIDE_TAVEUNI, CoordCalculatorTest.DISTANCE_TAVEUNI);
-		assertThat(box.getNorthEast().getLongitude(), lessThan(box.getSouthWest().getLongitude()));
-		assertTrue(box.crossesAntiMeridian());
+		GeoBoundingBox box = CoordCalculator.getBox(CoordCalculatorTest.LATITUDE_TAVEUNI, CoordCalculatorTest.LONGITIDE_TAVEUNI, CoordCalculatorTest.DISTANCE_TAVEUNI);
+		assertThat(box.bottomRight().longitude(), lessThan(box.topLeft().longitude()));
+		assertTrue(box.bottomRight().longitude() < box.topLeft().longitude());
 
 		ArgumentCaptor<Predicate> orLeft = ArgumentCaptor.forClass(Predicate.class);
 		ArgumentCaptor<Predicate> orRight = ArgumentCaptor.forClass(Predicate.class);
@@ -82,8 +82,8 @@ public class PredicateBuilderCoordsTest {
 		verify(myBuilder).or(orLeft.capture(), orRight.capture());
 		assertEquals(orLeft.getValue(), gte);
 		assertEquals(orRight.getValue(), lte);
-		assertEquals(gteValue.getValue(), box.getNorthEast().getLongitude());
-		assertEquals(lteValue.getValue(), box.getSouthWest().getLongitude());
+		assertEquals(gteValue.getValue(), box.bottomRight().longitude());
+		assertEquals(lteValue.getValue(), box.topLeft().longitude());
 	}
 
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk.job;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.bulk.job;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
 import ca.uhn.fhir.rest.api.Constants;
 import org.springframework.batch.core.JobParametersBuilder;
 
@@ -63,6 +64,10 @@ public class BulkExportJobParametersBuilder extends JobParametersBuilder {
 	}
 	public BulkExportJobParametersBuilder setReadChunkSize(Long theReadChunkSize) {
 		this.addLong("readChunkSize", theReadChunkSize);
+		return this;
+	}
+	public BulkExportJobParametersBuilder setExportStyle(BulkDataExportOptions.ExportStyle theExportStyle) {
+		this.addString("exportStyle", theExportStyle.name());
 		return this;
 	}
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.util;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,21 @@ import org.hibernate.validator.constraints.Length;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.InstantType;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Size;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,7 +57,9 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -99,6 +115,41 @@ public class TestUtil {
 	}
 
 	private static void scanClass(Set<String> theNames, Class<?> theClazz, boolean theIsSuperClass) {
+		Map<String, Integer> columnNameToLength = new HashMap<>();
+
+		scanClassOrSuperclass(theNames, theClazz, theIsSuperClass, columnNameToLength);
+
+		Table table = theClazz.getAnnotation(Table.class);
+		if (table != null) {
+
+			// This is the length for MySQL per https://dev.mysql.com/doc/refman/8.0/en/innodb-limits.html
+			// No idea why 3072.. what a weird limit but I'm sure they have their reason.
+			int maxIndexLength = 3072;
+
+			for (UniqueConstraint nextIndex : table.uniqueConstraints()) {
+				int indexLength = calculateIndexLength(nextIndex.columnNames(), columnNameToLength, theClazz, nextIndex.name());
+				if (indexLength > maxIndexLength) {
+					throw new IllegalStateException("Index '" + nextIndex.name() + "' is too long. Length is " + indexLength + " and must not exceed " + maxIndexLength + " which is the maximum MySQL length");
+				}
+			}
+
+		}
+
+	}
+
+	private static int calculateIndexLength(String[] theColumnNames, Map<String, Integer> theColumnNameToLength, Class<?> theClazz, String theIndexName) {
+		int retVal = 0;
+		for (String nextName : theColumnNames) {
+			Integer nextLength = theColumnNameToLength.get(nextName);
+			if (nextLength == null) {
+				throw new IllegalStateException("Index '" + theIndexName + "' references unknown column: " + nextName);
+			}
+			retVal += nextLength;
+		}
+		return retVal;
+	}
+
+	private static void scanClassOrSuperclass(Set<String> theNames, Class<?> theClazz, boolean theIsSuperClass, Map<String, Integer> columnNameToLength) {
 		ourLog.info("Scanning: {}", theClazz.getSimpleName());
 
 		Subselect subselect = theClazz.getAnnotation(Subselect.class);
@@ -131,15 +182,37 @@ public class TestUtil {
 				OneToOne oneToOne = nextField.getAnnotation(OneToOne.class);
 				boolean isOtherSideOfOneToManyMapping = oneToMany != null && isNotBlank(oneToMany.mappedBy());
 				boolean isOtherSideOfOneToOneMapping = oneToOne != null && isNotBlank(oneToOne.mappedBy());
-				boolean isField = nextField.getAnnotation(org.hibernate.search.annotations.Field.class) != null;
+				boolean isField = nextField.getAnnotation(org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField.class) != null;
+				isField |= nextField.getAnnotation(org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField.class) != null;
+				isField |= nextField.getAnnotation(org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumberField.class) != null;
 				Validate.isTrue(
 					hasEmbedded ||
-					hasColumn ||
+						hasColumn ||
 						hasJoinColumn ||
 						isOtherSideOfOneToManyMapping ||
 						isOtherSideOfOneToOneMapping ||
 						hasEmbeddedId ||
 						isField, "Non-transient has no @Column or @JoinColumn or @EmbeddedId: " + nextField);
+
+				int columnLength = 16;
+				String columnName = null;
+				if (hasColumn) {
+					columnName = nextField.getAnnotation(Column.class).name();
+					columnLength = nextField.getAnnotation(Column.class).length();
+				}
+				if (hasJoinColumn) {
+					columnName = nextField.getAnnotation(JoinColumn.class).name();
+				}
+
+				if (columnName != null) {
+					if (nextField.getType().isAssignableFrom(String.class)) {
+						// MySQL treats each char as the max possible byte count in UTF-8 for its calculations
+						columnLength = columnLength * 4;
+					}
+
+					columnNameToLength.put(columnName, columnLength);
+				}
+
 			}
 
 
@@ -149,7 +222,7 @@ public class TestUtil {
 			return;
 		}
 
-		scanClass(theNames, theClazz.getSuperclass(), true);
+		scanClassOrSuperclass(theNames, theClazz.getSuperclass(), true, columnNameToLength);
 	}
 
 	private static void scan(AnnotatedElement theAnnotatedElement, Set<String> theNames, boolean theIsSuperClass, boolean theIsView) {

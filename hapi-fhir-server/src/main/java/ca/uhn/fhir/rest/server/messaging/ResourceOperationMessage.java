@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.messaging;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class ResourceOperationMessage extends BaseResourceModifiedMessage {
+
+
 	public ResourceOperationMessage() {
 	}
 
@@ -34,5 +36,13 @@ public class ResourceOperationMessage extends BaseResourceModifiedMessage {
 
 	public ResourceOperationMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {
 		super(theFhirContext, theNewResource, theOperationType, theRequest);
+	}
+
+	/**
+	 * If you are using a non-fhir-resource payload, you may set the payload directly here instead of using the constructor.
+	 * @param thePayload the payload of the message.
+	 */
+	public void setPayload(String thePayload) {
+		this.myPayload = thePayload;
 	}
 }

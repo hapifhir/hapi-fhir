@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,12 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.BundleLinks;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.PreferHandlingEnum;
 import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -64,7 +65,19 @@ import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -269,9 +282,9 @@ public class RestfulServerUtils {
 		return b.toString();
 	}
 
-	public static String createOffsetPagingLink(String theServerBase, String requestPath, String tenantId, Integer theOffset, Integer theCount, Map<String, String[]> theRequestParameters) {
+	public static String createOffsetPagingLink(BundleLinks theBundleLinks, String requestPath, String tenantId, Integer theOffset, Integer theCount, Map<String, String[]> theRequestParameters) {
 		StringBuilder b = new StringBuilder();
-		b.append(theServerBase);
+		b.append(theBundleLinks.serverBase);
 
 		if (isNotBlank(requestPath)) {
 			b.append('/');
@@ -304,20 +317,17 @@ public class RestfulServerUtils {
 		return b.toString();
 	}
 
-	public static String createPagingLink(Set<Include> theIncludes, RequestDetails theRequestDetails, String theSearchId, int theOffset, int theCount, Map<String, String[]> theRequestParameters, boolean thePrettyPrint,
-													  BundleTypeEnum theBundleType) {
-		return createPagingLink(theIncludes, theRequestDetails, theSearchId, theOffset, theCount, theRequestParameters, thePrettyPrint,
-			theBundleType, null);
+	public static String createPagingLink(BundleLinks theBundleLinks, RequestDetails theRequestDetails, String theSearchId, int theOffset, int theCount, Map<String, String[]> theRequestParameters) {
+		return createPagingLink(theBundleLinks, theRequestDetails, theSearchId, theOffset, theCount, theRequestParameters, null);
 	}
 
-	public static String createPagingLink(Set<Include> theIncludes, RequestDetails theRequestDetails, String theSearchId, String thePageId, Map<String, String[]> theRequestParameters, boolean thePrettyPrint,
-													  BundleTypeEnum theBundleType) {
-		return createPagingLink(theIncludes, theRequestDetails, theSearchId, null, null, theRequestParameters, thePrettyPrint,
-			theBundleType, thePageId);
+	public static String createPagingLink(BundleLinks theBundleLinks, RequestDetails theRequestDetails, String theSearchId, String thePageId, Map<String, String[]> theRequestParameters) {
+		return createPagingLink(theBundleLinks, theRequestDetails, theSearchId, null, null, theRequestParameters,
+			thePageId);
 	}
 
-	private static String createPagingLink(Set<Include> theIncludes, RequestDetails theRequestDetails, String theSearchId, Integer theOffset, Integer theCount, Map<String, String[]> theRequestParameters, boolean thePrettyPrint,
-														BundleTypeEnum theBundleType, String thePageId) {
+	private static String createPagingLink(BundleLinks theBundleLinks, RequestDetails theRequestDetails, String theSearchId, Integer theOffset, Integer theCount, Map<String, String[]> theRequestParameters,
+														String thePageId) {
 
 		String serverBase = theRequestDetails.getFhirServerBase();
 
@@ -355,15 +365,15 @@ public class RestfulServerUtils {
 			format = replace(format, " ", "+");
 			b.append(UrlUtil.escapeUrlParam(format));
 		}
-		if (thePrettyPrint) {
+		if (theBundleLinks.prettyPrint) {
 			b.append('&');
 			b.append(Constants.PARAM_PRETTY);
 			b.append('=');
 			b.append(Constants.PARAM_PRETTY_VALUE_TRUE);
 		}
 
-		if (theIncludes != null) {
-			for (Include nextInclude : theIncludes) {
+		if (theBundleLinks.getIncludes() != null) {
+			for (Include nextInclude : theBundleLinks.getIncludes()) {
 				if (isNotBlank(nextInclude.getValue())) {
 					b.append('&');
 					b.append(Constants.PARAM_INCLUDE);
@@ -373,11 +383,11 @@ public class RestfulServerUtils {
 			}
 		}
 
-		if (theBundleType != null) {
+		if (theBundleLinks.bundleType != null) {
 			b.append('&');
 			b.append(Constants.PARAM_BUNDLETYPE);
 			b.append('=');
-			b.append(theBundleType.getCode());
+			b.append(theBundleLinks.bundleType.getCode());
 		}
 
 		// _elements
@@ -786,7 +796,7 @@ public class RestfulServerUtils {
 		PreferHeader retVal = new PreferHeader();
 
 		if (isNotBlank(theValue)) {
-			StringTokenizer tok = new StringTokenizer(theValue, ";");
+			StringTokenizer tok = new StringTokenizer(theValue, ";,");
 			while (tok.hasMoreTokens()) {
 				String next = trim(tok.nextToken());
 				int eqIndex = next.indexOf('=');
@@ -803,14 +813,13 @@ public class RestfulServerUtils {
 
 				if (key.equals(Constants.HEADER_PREFER_RETURN)) {
 
-					if (value.length() < 2) {
-						continue;
-					}
-					if ('"' == value.charAt(0) && '"' == value.charAt(value.length() - 1)) {
-						value = value.substring(1, value.length() - 1);
-					}
-
+					value = cleanUpValue(value);
 					retVal.setReturn(PreferReturnEnum.fromHeaderValue(value));
+
+				} else if (key.equals(Constants.HEADER_PREFER_HANDLING)) {
+
+					value = cleanUpValue(value);
+					retVal.setHanding(PreferHandlingEnum.fromHeaderValue(value));
 
 				} else if (key.equals(Constants.HEADER_PREFER_RESPOND_ASYNC)) {
 
@@ -825,6 +834,16 @@ public class RestfulServerUtils {
 		}
 
 		return retVal;
+	}
+
+	private static String cleanUpValue(String value) {
+		if (value.length() < 2) {
+			value = "";
+		}
+		if ('"' == value.charAt(0) && '"' == value.charAt(value.length() - 1)) {
+			value = value.substring(1, value.length() - 1);
+		}
+		return value;
 	}
 
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,35 +149,44 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 					ourLog.trace("Not adding specialization: {}", next.getImplementingClass());
 				}
 
-				if (!isSpecialization) {
 
-					if (!next.isStandardType()) {
+				if (!next.isStandardType()) {
+					continue;
+				}
+
+				String qualifiedName = next.getImplementingClass().getName();
+
+				/*
+				 * We don't want user-defined custom datatypes ending up overriding the built in
+				 * types here. It would probably be better for there to be a way for
+				 * a datatype to indicate via its annotation that it's a built in
+				 * type.
+				 */
+				if (!qualifiedName.startsWith("ca.uhn.fhir.model")) {
+					if (!qualifiedName.startsWith("org.hl7.fhir")) {
 						continue;
 					}
+				}
 
-					String qualifiedName = next.getImplementingClass().getName();
+				String attrName = createExtensionChildName(next);
+				if (isSpecialization && datatypeAttributeNameToDefinition.containsKey(attrName)) {
+					continue;
+				}
 
-					/*
-					 * We don't want user-defined custom datatypes ending up overriding the built in
-					 * types here. It would probably be better for there to be a way for
-					 * a datatype to indicate via its annotation that it's a built in
-					 * type.
-					 */
-					if (!qualifiedName.startsWith("ca.uhn.fhir.model")) {
-						if (!qualifiedName.startsWith("org.hl7.fhir")) {
-							continue;
-						}
-					}
-
-					String attrName = createExtensionChildName(next);
-					if (datatypeAttributeNameToDefinition.containsKey(attrName)) {
-						BaseRuntimeElementDefinition<?> existing = datatypeAttributeNameToDefinition.get(attrName);
+				if (datatypeAttributeNameToDefinition.containsKey(attrName)) {
+					BaseRuntimeElementDefinition<?> existing = datatypeAttributeNameToDefinition.get(attrName);
+					// We do allow built-in standard types to override extension types with the same element name,
+					// e.g. how EnumerationType extends CodeType but both serialize to "code". In this case,
+					// CodeType should win. If we aren't in a situation like that, there is a problem with the
+					// model so we should bail.
+					if (!existing.isStandardType()) {
 						throw new ConfigurationException("More than one child of " + getElementName() + " matches attribute name " + attrName + ". Found [" + existing.getImplementingClass().getName() + "] and [" + next.getImplementingClass().getName() + "]");
 					}
-					datatypeAttributeNameToDefinition.put(attrName, next);
-					datatypeAttributeNameToDefinition.put(attrName.toLowerCase(), next);
-					myDatatypeToAttributeName.put(next.getImplementingClass(), attrName);
 				}
+
+				datatypeAttributeNameToDefinition.put(attrName, next);
+				datatypeAttributeNameToDefinition.put(attrName.toLowerCase(), next);
+				myDatatypeToAttributeName.put(next.getImplementingClass(), attrName);
 			}
 		}
 

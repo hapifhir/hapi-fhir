@@ -11,7 +11,7 @@ import java.util.*;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import java.util.*;
  * <p>
  * <b>See:</b> A complete list of available exceptions is in the <a href="./package-summary.html">package summary</a>.
  * If an exception doesn't exist for a condition you want to represent, let us know by filing an
- * <a href="https://github.com/jamesagnew/hapi-fhir/issues">issue in our tracker</a>. You may also
+ * <a href="https://github.com/hapifhir/hapi-fhir/issues">issue in our tracker</a>. You may also
  * use {@link UnclassifiedServerFailureException} to represent any error code you want.
  * </p>
  */
@@ -78,7 +78,10 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 * @param theStatusCode The HTTP status code corresponding to this problem
 	 * @param theMessage    The message
 	 */
-	public BaseServerResponseException(int theStatusCode, String theMessage) {
+	public 	/**
+	 * Interceptor hook method. This method should not be called directly.
+	 */
+	BaseServerResponseException(int theStatusCode, String theMessage) {
 		super(theMessage);
 		myStatusCode = theStatusCode;
 		myBaseOperationOutcome = null;

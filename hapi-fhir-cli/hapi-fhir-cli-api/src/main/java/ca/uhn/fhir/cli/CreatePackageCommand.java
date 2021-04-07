@@ -4,7 +4,7 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.io.Files;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -37,7 +39,6 @@ import org.hl7.fhir.utilities.npm.PackageGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.print.attribute.standard.MediaSize;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -67,7 +68,7 @@ public class CreatePackageCommand extends BaseCommand {
 
 	@Override
 	public String getCommandDescription() {
-		return "Create an NPM package using the FHIR packging format";
+		return "Create an NPM package using the FHIR packaging format";
 	}
 
 	@Override
@@ -129,6 +130,7 @@ public class CreatePackageCommand extends BaseCommand {
 		manifestGenerator.name(myPackageName);
 		manifestGenerator.version(myPackageVersion);
 		manifestGenerator.description(myPackageDescription);
+		injectFhirVersionsArray(manifestGenerator);
 		if (isNotBlank(myPackageDescription)) {
 			manifestGenerator.description(myPackageDescription);
 		}
@@ -175,6 +177,13 @@ public class CreatePackageCommand extends BaseCommand {
 		} catch (IOException e) {
 			throw new ExecutionException("Failed to write file " + targetFile, e);
 		}
+	}
+
+	private void injectFhirVersionsArray(PackageGenerator manifestGenerator) {
+		JsonObject rootJsonObject = manifestGenerator.getRootJsonObject();
+		JsonArray fhirVersionsArray = new JsonArray();
+		fhirVersionsArray.add(myFhirCtx.getVersion().getVersion().getFhirVersionString());
+		rootJsonObject.add("fhirVersions", fhirVersionsArray);
 	}
 
 	public void addFiles(String[] thePackageValues, String theFolder) throws ParseException, ExecutionException {

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.interceptor;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,7 +129,7 @@ public class CascadingDeleteInterceptor {
 				IFhirResourceDao dao = myDaoRegistry.getResourceDao(nextSource.getResourceType());
 
 				// Interceptor call: STORAGE_CASCADE_DELETE
-				IBaseResource resource = dao.read(nextSource);
+				IBaseResource resource = dao.read(nextSource, theRequest);
 				HookParams params = new HookParams()
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest)

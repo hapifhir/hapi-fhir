@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2433
+title: "Support has been added for MDM expansion during Group bulk export. Calling a group export via `/Group/123/$export?_mdm=true`
+        will cause Bulk Export to not only match group members, but also any MDM-matched patients, and their related golden record patients"

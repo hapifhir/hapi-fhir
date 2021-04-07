@@ -49,19 +49,21 @@ public class AddTableByColumnTaskTest extends BaseTest {
 
 			Builder.BuilderWithTableName targetTable = v.addTableByColumns("1", "TGT_TABLE", "PID");
 			targetTable.addColumn("2", "PID").nonNullable().type(ColumnTypeEnum.LONG);
+			targetTable.addColumn("3", "PID2").nonNullable().type(ColumnTypeEnum.LONG);
 
-			Builder.BuilderAddTableByColumns fooTable = v.addTableByColumns("3", "FOO_TABLE", "PID");
+			Builder.BuilderAddTableByColumns fooTable = v.addTableByColumns("4", "FOO_TABLE", "PID");
 			fooTable.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
 			fooTable.addColumn("HELLO").nullable().type(ColumnTypeEnum.STRING, 200);
 			fooTable.addColumn("GOODBYE").nullable().type(ColumnTypeEnum.STRING, 200);
 			fooTable.addColumn("COL_REF").nullable().type(ColumnTypeEnum.LONG);
-			fooTable.addIndex("4", "IDX_HELLO").unique(true).withColumns("HELLO");
-			fooTable.addIndex("5", "IDX_GOODBYE").unique(true).withColumnsStub("GOODBYE");
-			fooTable.dropIndexStub("6", "IDX_HELLO");
-			fooTable.addForeignKey("7", "FK_REF").toColumn("COL_REF").references("TGT_TABLE", "PID");
+			fooTable.addIndex("5", "IDX_HELLO").unique(true).withColumns("HELLO");
+			fooTable.addIndex("6", "IDX_GOODBYE").unique(true).withColumnsStub("GOODBYE");
+			fooTable.dropIndexStub("7", "IDX_HELLO");
+			fooTable.addForeignKey("8", "FK_REF").toColumn("COL_REF").references("TGT_TABLE", "PID");
+			fooTable.addForeignKey("9", "FK_REF_INVALID").toColumn("COL_REF_INVALID").references("TGT_TABLE", "PID2").failureAllowed();
 
 			Builder.BuilderWithTableName renameIndexTable = v.onTable("FOO_TABLE");
-			renameIndexTable.renameIndex("8", "IDX_HELLO", "IDX_BONJOUR");
+			renameIndexTable.renameIndex("10", "IDX_HELLO", "IDX_BONJOUR");
 		}
 	}
 }

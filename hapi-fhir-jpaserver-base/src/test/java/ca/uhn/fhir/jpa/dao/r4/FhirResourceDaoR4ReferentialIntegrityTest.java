@@ -21,6 +21,7 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 	public void afterResetConfig() {
 		myDaoConfig.setEnforceReferentialIntegrityOnWrite(new DaoConfig().isEnforceReferentialIntegrityOnWrite());
 		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
+		myDaoConfig.setEnforceReferenceTargetTypes(new DaoConfig().isEnforceReferenceTargetTypes());
 	}
 
 	@Test
@@ -38,7 +39,7 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testCreateUnknownReferenceAllow() throws Exception {
+	public void testCreateUnknownReferenceAllowed() {
 		myDaoConfig.setEnforceReferentialIntegrityOnWrite(false);
 
 		Patient p = new Patient();
@@ -47,6 +48,20 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 
 		p = myPatientDao.read(id);
 		assertEquals("Organization/AAA", p.getManagingOrganization().getReference());
+
+	}
+
+	@Test
+	public void testCreateUnknownReferenceAllowed_NumericId() {
+		myDaoConfig.setEnforceReferentialIntegrityOnWrite(false);
+		myDaoConfig.setEnforceReferenceTargetTypes(false);
+
+		Patient p = new Patient();
+		p.setManagingOrganization(new Reference("Organization/123"));
+		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		p = myPatientDao.read(id);
+		assertEquals("Organization/123", p.getManagingOrganization().getReference());
 
 	}
 

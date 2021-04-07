@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -53,6 +54,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseMethodBinding<T> {
 
@@ -135,10 +138,21 @@ public abstract class BaseMethodBinding<T> {
 	}
 
 	public Set<String> getIncludes() {
-		Set<String> retVal = new TreeSet<String>();
+		return doGetIncludesOrRevIncludes(false);
+	}
+
+	public Set<String> getRevIncludes() {
+		return doGetIncludesOrRevIncludes(true);
+	}
+
+	private Set<String> doGetIncludesOrRevIncludes(boolean reverse) {
+		Set<String> retVal = new TreeSet<>();
 		for (IParameter next : myParameters) {
 			if (next instanceof IncludeParameter) {
-				retVal.addAll(((IncludeParameter) next).getAllow());
+				IncludeParameter includeParameter = (IncludeParameter) next;
+				if (includeParameter.isReverse() == reverse) {
+					retVal.addAll(includeParameter.getAllow());
+				}
 			}
 		}
 		return retVal;
@@ -221,12 +235,15 @@ public abstract class BaseMethodBinding<T> {
 
 	public abstract Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException;
 
-	protected final Object invokeServerMethod(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) {
+	protected final Object invokeServerMethod(RequestDetails theRequest, Object[] theMethodParams) {
 		// Handle server action interceptors
 		RestOperationTypeEnum operationType = getRestOperationType(theRequest);
 		if (operationType != null) {
+
 			ActionRequestDetails details = new ActionRequestDetails(theRequest);
 			populateActionRequestDetailsForInterceptor(theRequest, details, theMethodParams);
+
+			// Interceptor invoke: SERVER_INCOMING_REQUEST_PRE_HANDLED
 			HookParams preHandledParams = new HookParams();
 			preHandledParams.add(RestOperationTypeEnum.class, theRequest.getRestOperationType());
 			preHandledParams.add(RequestDetails.class, theRequest);
@@ -237,6 +254,7 @@ public abstract class BaseMethodBinding<T> {
 					.getInterceptorBroadcaster()
 					.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
 			}
+
 		}
 
 		// Actually invoke the method
@@ -246,6 +264,9 @@ public abstract class BaseMethodBinding<T> {
 		} catch (InvocationTargetException e) {
 			if (e.getCause() instanceof BaseServerResponseException) {
 				throw (BaseServerResponseException) e.getCause();
+			}
+			if (e.getTargetException() instanceof DataFormatException) {
+				throw (DataFormatException)e.getTargetException();
 			}
 			throw new InternalErrorException("Failed to call access method: " + e.getCause(), e);
 		} catch (Exception e) {
@@ -268,7 +289,7 @@ public abstract class BaseMethodBinding<T> {
 	}
 
 	/**
-	 * Subclasses may override this method (but should also call super.{@link #populateActionRequestDetailsForInterceptor(RequestDetails, ActionRequestDetails, Object[])} to provide method specifics to the
+	 * Subclasses may override this method (but should also call super) to provide method specifics to the
 	 * interceptors.
 	 *
 	 * @param theRequestDetails The server request details
@@ -301,6 +322,10 @@ public abstract class BaseMethodBinding<T> {
 		} else {
 			throw new InternalErrorException("Unexpected return type: " + response.getClass().getCanonicalName());
 		}
+	}
+
+	public void close() {
+		// subclasses may override
 	}
 
 	@SuppressWarnings("unchecked")
@@ -371,7 +396,11 @@ public abstract class BaseMethodBinding<T> {
 
 		Class<? extends IBaseResource> returnTypeFromAnnotation = IBaseResource.class;
 		if (read != null) {
-			returnTypeFromAnnotation = read.type();
+			if (isNotBlank(read.typeName())) {
+				returnTypeFromAnnotation = theContext.getResourceDefinition(read.typeName()).getImplementingClass();
+			} else {
+				returnTypeFromAnnotation = read.type();
+			}
 		} else if (search != null) {
 			returnTypeFromAnnotation = search.type();
 		} else if (history != null) {

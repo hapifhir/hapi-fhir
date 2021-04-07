@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.index;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -381,7 +381,6 @@ public class IdHelperService {
 	}
 
 	public Map<Long, Optional<String>> translatePidsToForcedIds(Set<Long> thePids) {
-
 		Map<Long, Optional<String>> retVal = new HashMap<>(myMemoryCacheService.getAllPresent(MemoryCacheService.CacheEnum.FORCED_ID, thePids));
 
 		List<Long> remainingPids = thePids
@@ -435,8 +434,20 @@ public class IdHelperService {
 	}
 
 	@Nonnull
+	public List<Long> getPidsOrThrowException(List<IIdType> theIds) {
+		List<ResourcePersistentId> resourcePersistentIds = this.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), theIds);
+		return resourcePersistentIds.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
+	}
+
+	@Nonnull
 	public Long getPidOrThrowException(IAnyResource theResource) {
-		return (Long) theResource.getUserData(RESOURCE_PID);
+		Long retVal = (Long) theResource.getUserData(RESOURCE_PID);
+		if (retVal == null) {
+			throw new IllegalStateException(
+				String.format("Unable to find %s in the user data for %s with ID %s", RESOURCE_PID, theResource, theResource.getId())
+			);
+		}
+		return retVal;
 	}
 
 	public IIdType resourceIdFromPidOrThrowException(Long thePid) {

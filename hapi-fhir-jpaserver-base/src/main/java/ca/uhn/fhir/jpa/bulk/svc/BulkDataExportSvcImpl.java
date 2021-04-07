@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk.svc;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,17 @@ package ca.uhn.fhir.jpa.bulk.svc;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.bulk.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
@@ -37,17 +43,21 @@ import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,12 +71,16 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions.ExportStyle.GROUP;
+import static ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions.ExportStyle.PATIENT;
+import static ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions.ExportStyle.SYSTEM;
 import static ca.uhn.fhir.util.UrlUtil.escapeUrlParam;
 import static ca.uhn.fhir.util.UrlUtil.escapeUrlParams;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -75,7 +89,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	private static final Long READ_CHUNK_SIZE = 10L;
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportSvcImpl.class);
-	private int myReuseBulkExportForMillis = (int) (60 * DateUtils.MILLIS_PER_MINUTE);
+	private final int myReuseBulkExportForMillis = (int) (60 * DateUtils.MILLIS_PER_MINUTE);
 
 	@Autowired
 	private IBulkExportJobDao myBulkExportJobDao;
@@ -97,10 +111,20 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	private IBatchJobSubmitter myJobSubmitter;
 
 	@Autowired
-	@Qualifier("bulkExportJob")
+	@Qualifier(BatchJobsConfig.BULK_EXPORT_JOB_NAME)
 	private org.springframework.batch.core.Job myBulkExportJob;
 
-	private int myRetentionPeriod = (int) (2 * DateUtils.MILLIS_PER_HOUR);
+	@Autowired
+	@Qualifier(BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME)
+	private org.springframework.batch.core.Job myGroupBulkExportJob;
+
+	@Autowired
+	@Qualifier(BatchJobsConfig.PATIENT_BULK_EXPORT_JOB_NAME)
+	private org.springframework.batch.core.Job myPatientBulkExportJob;
+
+	private Set<String> myCompartmentResources;
+
+	private final int myRetentionPeriod = (int) (2 * DateUtils.MILLIS_PER_HOUR);
 
 	/**
 	 * This method is called by the scheduler to run a pass of the
@@ -123,10 +147,11 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			return;
 		}
 
-		String jobUuid = jobToProcessOpt.get().getJobId();
+		BulkExportJobEntity bulkExportJobEntity = jobToProcessOpt.get();
 
+		String jobUuid = bulkExportJobEntity.getJobId();
 		try {
-			processJob(jobUuid);
+				processJob(bulkExportJobEntity);
 		} catch (Exception e) {
 			ourLog.error("Failure while preparing bulk export extract", e);
 			myTxTemplate.execute(t -> {
@@ -140,6 +165,18 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 				return null;
 			});
 		}
+
+	}
+
+	private String getQueryParameterIfPresent(String theRequestString, String theParameter) {
+		Map<String, String[]> stringMap = UrlUtil.parseQueryString(theRequestString);
+		if (stringMap != null) {
+			String[] strings = stringMap.get(theParameter);
+			if (strings != null) {
+				return String.join(",", strings);
+			}
+		}
+		return null;
 
 	}
 
@@ -191,19 +228,41 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	}
 
-	private void processJob(String theJobUuid) {
-		JobParameters parameters = new JobParametersBuilder()
-			.addString("jobUUID", theJobUuid)
-			.addLong("readChunkSize", READ_CHUNK_SIZE)
-			.toJobParameters();
+	private void processJob(BulkExportJobEntity theBulkExportJobEntity) {
+		String theJobUuid = theBulkExportJobEntity.getJobId();
+		JobParametersBuilder parameters = new JobParametersBuilder()
+			.addString(BulkExportJobConfig.JOB_UUID_PARAMETER, theJobUuid)
+			.addLong(BulkExportJobConfig.READ_CHUNK_PARAMETER, READ_CHUNK_SIZE);
 
 		ourLog.info("Submitting bulk export job {} to job scheduler", theJobUuid);
 
 		try {
-			myJobSubmitter.runJob(myBulkExportJob, parameters);
+			if (isGroupBulkJob(theBulkExportJobEntity)) {
+				enhanceBulkParametersWithGroupParameters(theBulkExportJobEntity, parameters);
+				myJobSubmitter.runJob(myGroupBulkExportJob, parameters.toJobParameters());
+			} else if (isPatientBulkJob(theBulkExportJobEntity)) {
+				myJobSubmitter.runJob(myPatientBulkExportJob, parameters.toJobParameters());
+			} else {
+				myJobSubmitter.runJob(myBulkExportJob, parameters.toJobParameters());
+			}
 		} catch (JobParametersInvalidException theE) {
 			ourLog.error("Unable to start job with UUID: {}, the parameters are invalid. {}", theJobUuid, theE.getMessage());
 		}
+	}
+
+	private boolean isPatientBulkJob(BulkExportJobEntity theBulkExportJobEntity) {
+		return theBulkExportJobEntity.getRequest().startsWith("/Patient/");
+	}
+
+	private boolean isGroupBulkJob(BulkExportJobEntity theBulkExportJobEntity) {
+		return theBulkExportJobEntity.getRequest().startsWith("/Group/");
+	}
+
+	private void enhanceBulkParametersWithGroupParameters(BulkExportJobEntity theBulkExportJobEntity, JobParametersBuilder theParameters) {
+		String theGroupId = getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_GROUP_ID);
+		String expandMdm  = getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_MDM);
+		theParameters.addString(BulkExportJobConfig.GROUP_ID_PARAMETER, theGroupId);
+		theParameters.addString(BulkExportJobConfig.EXPAND_MDM_PARAMETER, expandMdm);
 	}
 
 
@@ -229,36 +288,66 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	@Transactional
 	@Override
-	public JobInfo submitJob(String theOutputFormat, Set<String> theResourceTypes, Date theSince, Set<String> theFilters) {
+	public JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions) {
+		return submitJob(theBulkDataExportOptions, true);
+	}
+
+	@Transactional
+	@Override
+	public JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions, Boolean useCache) {
 		String outputFormat = Constants.CT_FHIR_NDJSON;
-		if (isNotBlank(theOutputFormat)) {
-			outputFormat = theOutputFormat;
+		if (isNotBlank(theBulkDataExportOptions.getOutputFormat())) {
+			outputFormat = theBulkDataExportOptions.getOutputFormat();
 		}
 		if (!Constants.CTS_NDJSON.contains(outputFormat)) {
-			throw new InvalidRequestException("Invalid output format: " + theOutputFormat);
+			throw new InvalidRequestException("Invalid output format: " + theBulkDataExportOptions.getOutputFormat());
 		}
 
+		// TODO GGG KS can we encode BulkDataExportOptions as a JSON string as opposed to this request string.  Feels like it would be a more extensible encoding...
+		//Probably yes, but this will all need to be rebuilt when we remove this bridge entity
 		StringBuilder requestBuilder = new StringBuilder();
-		requestBuilder.append("/").append(JpaConstants.OPERATION_EXPORT);
+		requestBuilder.append("/");
+
+		//Prefix the export url with Group/[id]/ or /Patient/ depending on what type of request it is.
+		if (theBulkDataExportOptions.getExportStyle().equals(GROUP)) {
+			requestBuilder.append(theBulkDataExportOptions.getGroupId().toVersionless()).append("/");
+		} else if (theBulkDataExportOptions.getExportStyle().equals(PATIENT)) {
+			requestBuilder.append("Patient/");
+		}
+
+		requestBuilder.append(JpaConstants.OPERATION_EXPORT);
 		requestBuilder.append("?").append(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT).append("=").append(escapeUrlParam(outputFormat));
-		Set<String> resourceTypes = theResourceTypes;
+		Set<String> resourceTypes = theBulkDataExportOptions.getResourceTypes();
 		if (resourceTypes != null) {
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE).append("=").append(String.join(",", escapeUrlParams(resourceTypes)));
 		}
-		Date since = theSince;
+		Date since = theBulkDataExportOptions.getSince();
 		if (since != null) {
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_SINCE).append("=").append(new InstantType(since).setTimeZoneZulu(true).getValueAsString());
 		}
-		if (theFilters != null && theFilters.size() > 0) {
-			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE_FILTER).append("=").append(String.join(",", escapeUrlParams(theFilters)));
+		if (theBulkDataExportOptions.getFilters() != null && theBulkDataExportOptions.getFilters().size() > 0) {
+			theBulkDataExportOptions.getFilters().stream()
+				.forEach(filter -> requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE_FILTER).append("=").append(escapeUrlParam(filter)));
 		}
+
+		if (theBulkDataExportOptions.getExportStyle().equals(GROUP)) {
+			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_GROUP_ID).append("=").append(theBulkDataExportOptions.getGroupId().getValue());
+			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_MDM).append("=").append(theBulkDataExportOptions.isExpandMdm());
+		}
+
+
+
 		String request = requestBuilder.toString();
 
-		Date cutoff = DateUtils.addMilliseconds(new Date(), -myReuseBulkExportForMillis);
-		Pageable page = PageRequest.of(0, 10);
-		Slice<BulkExportJobEntity> existing = myBulkExportJobDao.findExistingJob(page, request, cutoff, BulkJobStatusEnum.ERROR);
-		if (!existing.isEmpty()) {
-			return toSubmittedJobInfo(existing.iterator().next());
+
+		//If we are using the cache, then attempt to retrieve a matching job based on the Request String, otherwise just make a new one.
+		if (useCache) {
+			Date cutoff = DateUtils.addMilliseconds(new Date(), -myReuseBulkExportForMillis);
+			Pageable page = PageRequest.of(0, 10);
+			Slice<BulkExportJobEntity> existing = myBulkExportJobDao.findExistingJob(page, request, cutoff, BulkJobStatusEnum.ERROR);
+			if (!existing.isEmpty()) {
+				return toSubmittedJobInfo(existing.iterator().next());
+			}
 		}
 
 		if (resourceTypes != null && resourceTypes.contains("Binary")) {
@@ -270,7 +359,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			// This is probably not a useful default, but having the default be "download the whole
 			// server" seems like a risky default too. We'll deal with that by having the default involve
 			// only returning a small time span
-			resourceTypes = myContext.getResourceTypes();
+			resourceTypes = getAllowedResourceTypesForBulkExportStyle(theBulkDataExportOptions.getExportStyle());
 			if (since == null) {
 				since = DateUtils.addDays(new Date(), -1);
 			}
@@ -291,7 +380,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 		// Validate types
 		validateTypes(resourceTypes);
-		validateTypeFilters(theFilters, resourceTypes);
+		validateTypeFilters(theBulkDataExportOptions.getFilters(), resourceTypes);
 
 		updateExpiry(job);
 		myBulkExportJobDao.save(job);
@@ -321,17 +410,13 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	public void validateTypeFilters(Set<String> theTheFilters, Set<String> theResourceTypes) {
 		if (theTheFilters != null) {
-			Set<String> types = new HashSet<>();
 			for (String next : theTheFilters) {
 				if (!next.contains("?")) {
 					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Must be in the form [ResourceType]?[params]");
 				}
 				String resourceType = next.substring(0, next.indexOf("?"));
 				if (!theResourceTypes.contains(resourceType)) {
-					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Resource type does not appear in " + JpaConstants.PARAM_EXPORT_TYPE + " list");
-				}
-				if (!types.add(resourceType)) {
-					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Multiple filters found for type " + resourceType);
+					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Resource type does not appear in " + JpaConstants.PARAM_EXPORT_TYPE+ " list");
 				}
 			}
 		}
@@ -371,6 +456,35 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		}
 
 		return retVal;
+	}
+
+	@Override
+	public Set<String> getPatientCompartmentResources() {
+		if (myCompartmentResources == null) {
+			myCompartmentResources = myContext.getResourceTypes().stream()
+				.filter(this::resourceTypeIsInPatientCompartment)
+				.collect(Collectors.toSet());
+		}
+		return myCompartmentResources;
+	}
+
+	/**
+	 * Return true if any search parameter in the resource can point at a patient, false otherwise
+	 */
+	private boolean resourceTypeIsInPatientCompartment(String theResourceType) {
+		RuntimeResourceDefinition runtimeResourceDefinition = myContext.getResourceDefinition(theResourceType);
+		List<RuntimeSearchParam> searchParams = runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
+		return searchParams != null && searchParams.size() >= 1;
+	}
+
+	public Set<String> getAllowedResourceTypesForBulkExportStyle(BulkDataExportOptions.ExportStyle theExportStyle) {
+		if (theExportStyle.equals(SYSTEM)) {
+			return myContext.getResourceTypes();
+		} else if (theExportStyle.equals(GROUP) || theExportStyle.equals(PATIENT)) {
+			return getPatientCompartmentResources();
+		} else {
+			throw new IllegalArgumentException(String.format("HAPI FHIR does not recognize a Bulk Export request of type: %s", theExportStyle));
+		}
 	}
 
 	private IIdType toId(String theResourceId) {

@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.util.Arrays;
+import java.util.Collections;
+
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,15 +22,13 @@ public class CorsInterceptorTest {
 	public void testCustomCorsConfig() {
 		CorsConfiguration corsConfiguration = new CorsConfiguration();
 		corsConfiguration.applyPermitDefaultValues();
-		corsConfiguration.setAllowedMethods(Arrays.asList(new String[] { "*" }));
-		corsConfiguration.setExposedHeaders(Arrays.asList(new String[] {
-			"Content-Location",
+		corsConfiguration.setAllowedMethods(Collections.singletonList("*"));
+		corsConfiguration.setExposedHeaders(Arrays.asList("Content-Location",
 			"Date",
 			"ETag",
 			"Location",
 			"X-Request-Id",
-			"X-Correlation-Id"
-		}));
+			"X-Correlation-Id"));
 		CorsInterceptor corsInterceptor = new CorsInterceptor(corsConfiguration);
 
 		assertSame(corsConfiguration, corsInterceptor.getConfig());
@@ -37,10 +37,10 @@ public class CorsInterceptorTest {
 		assertNotNull(corsConfiguration.getAllowedMethods());
 		assertNotNull(corsConfiguration.getAllowedOrigins());
 		assertNotNull(corsConfiguration.getExposedHeaders());
-		assertEquals(Long.valueOf(1800l),corsConfiguration.getMaxAge());
-		assertNotNull(corsConfiguration.checkHeaders(Arrays.asList(new String[] {"Content-Type"})));
-		assertNotNull(corsConfiguration.checkHeaders(Arrays.asList(new String[] {"Authorization"})));
-		assertNotNull(corsConfiguration.checkHeaders(Arrays.asList(new String[] {"Authorization", "Content-Type"})));
+		assertEquals(Long.valueOf(1800L),corsConfiguration.getMaxAge());
+		assertNotNull(corsConfiguration.checkHeaders(Collections.singletonList("Content-Type")));
+		assertNotNull(corsConfiguration.checkHeaders(Collections.singletonList("Authorization")));
+		assertNotNull(corsConfiguration.checkHeaders(Arrays.asList("Authorization", "Content-Type")));
 		assertNotNull(corsConfiguration.checkHttpMethod(HttpMethod.GET));
 		assertNotNull(corsConfiguration.checkOrigin("http://clinfhir.com"));
 
@@ -65,9 +65,9 @@ public class CorsInterceptorTest {
 		assertNotNull(corsConfiguration.getAllowedOrigins());
 		assertNotNull(corsConfiguration.getExposedHeaders());
 		assertNull(corsConfiguration.getMaxAge());
-		assertNotNull(corsConfiguration.checkHeaders(Arrays.asList(new String[] {"Content-Type"})));
+		assertNotNull(corsConfiguration.checkHeaders(Collections.singletonList("Content-Type")));
 //		assertNotNull(corsConfiguration.checkHeaders(Arrays.asList(new String[] {"Authorization"})));
-		assertNotNull(corsConfiguration.checkHeaders(Arrays.asList(new String[] {"Authorization", "Content-Type"})));
+		assertNotNull(corsConfiguration.checkHeaders(Arrays.asList("Authorization", "Content-Type")));
 		assertNotNull(corsConfiguration.checkHttpMethod(HttpMethod.GET));
 		assertNotNull(corsConfiguration.checkOrigin("http://clinfhir.com"));
 

@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2054
+title: "Two new switches have neen added to FhirInstanceValidator to suppress optional warning messages. Thanks
+  to Anders Havn for the pull request!"

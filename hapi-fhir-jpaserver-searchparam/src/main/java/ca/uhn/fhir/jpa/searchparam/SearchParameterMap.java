@@ -6,6 +6,7 @@ import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -40,7 +41,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +80,8 @@ public class SearchParameterMap implements Serializable {
 	private boolean myLastN;
 	private Integer myLastNMax;
 	private boolean myDeleteExpunge;
-
+	private SearchContainedModeEnum mySearchContainedMode = SearchContainedModeEnum.FALSE;
+	
 	/**
 	 * Constructor
 	 */
@@ -162,8 +164,9 @@ public class SearchParameterMap implements Serializable {
 		return this;
 	}
 
-	public void addInclude(Include theInclude) {
+	public SearchParameterMap addInclude(Include theInclude) {
 		getIncludes().add(theInclude);
+		return this;
 	}
 
 	private void addLastUpdateParam(StringBuilder b, DateParam date) {
@@ -411,10 +414,6 @@ public class SearchParameterMap implements Serializable {
 				addUrlParamSeparator(b);
 				IQueryParameterType firstValue = nextValuesAnd.get(0);
 				b.append(UrlUtil.escapeUrlParam(nextKey));
-
-				if (nextKey.equals(Constants.PARAM_HAS)) {
-					b.append(':');
-				}
 
 				if (firstValue.getMissing() != null) {
 					b.append(Constants.PARAMQUALIFIER_MISSING);
@@ -737,4 +736,17 @@ public class SearchParameterMap implements Serializable {
 		return retVal;
 	}
 
+	public SearchContainedModeEnum getSearchContainedMode() {
+		return mySearchContainedMode;
+	}
+
+	public void setSearchContainedMode(SearchContainedModeEnum theSearchContainedMode) {
+		if (theSearchContainedMode == null) {
+			mySearchContainedMode = SearchContainedModeEnum.FALSE;
+		} else {
+			this.mySearchContainedMode = theSearchContainedMode;
+		}
+	}
+
+	
 }

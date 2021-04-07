@@ -2,9 +2,9 @@ package ca.uhn.fhir.jpa.model.sched;
 
 /*-
  * #%L
- * HAPI FHIR Model
+ * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,14 +34,14 @@ public interface ISchedulerService {
 	void logStatusForUnitTest();
 
 	/**
-	 * Only one instance of this task will fire across the whole cluster (when running in a clustered environment).
+	 * This task will execute locally (and should execute on all nodes of the cluster if there is a cluster)
 	 * @param theIntervalMillis How many milliseconds between passes should this job run
 	 * @param theJobDefinition  The Job to fire
 	 */
 	void scheduleLocalJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
 
 	/**
-	 * This task will execute locally (and should execute on all nodes of the cluster if there is a cluster)
+	 * Only one instance of this task will fire across the whole cluster (when running in a clustered environment).
 	 * @param theIntervalMillis How many milliseconds between passes should this job run
 	 * @param theJobDefinition  The Job to fire
 	 */

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2361
+title: "As of version 2.69, the LOINC Top2000CommonLabResultsSi.csv and Top2000CommonLabResultsUs.csv became optional.
+The Terminology Loader Service has been updated to reflect this change."

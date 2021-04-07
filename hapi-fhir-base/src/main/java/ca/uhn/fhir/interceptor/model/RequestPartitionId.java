@@ -4,7 +4,7 @@ package ca.uhn.fhir.interceptor.model;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,7 +161,10 @@ public class RequestPartitionId {
 	 * Returns true if this request partition contains only one partition ID and it is the DEFAULT partition ID (null)
 	 */
 	public boolean isDefaultPartition() {
-		return getPartitionIds().size() == 1 && getPartitionIds().get(0) == null;
+		if (isAllPartitions()) {
+			return false;
+		}
+		return hasPartitionIds() && getPartitionIds().size() == 1 && getPartitionIds().get(0) == null;
 	}
 
 	public boolean hasPartitionId(Integer thePartitionId) {
@@ -224,6 +227,11 @@ public class RequestPartitionId {
 	}
 
 	@Nonnull
+	public static RequestPartitionId defaultPartition(@Nullable LocalDate thePartitionDate) {
+		return fromPartitionIds(Collections.singletonList(null), thePartitionDate);
+	}
+
+	@Nonnull
 	public static RequestPartitionId fromPartitionId(@Nullable Integer thePartitionId) {
 		return fromPartitionIds(Collections.singletonList(thePartitionId));
 	}
@@ -235,7 +243,12 @@ public class RequestPartitionId {
 
 	@Nonnull
 	public static RequestPartitionId fromPartitionIds(@Nonnull Collection<Integer> thePartitionIds) {
-		return new RequestPartitionId(null, toListOrNull(thePartitionIds), null);
+		return fromPartitionIds(thePartitionIds, null);
+	}
+
+	@Nonnull
+	public static RequestPartitionId fromPartitionIds(@Nonnull Collection<Integer> thePartitionIds, @Nullable LocalDate thePartitionDate) {
+		return new RequestPartitionId(null, toListOrNull(thePartitionIds), thePartitionDate);
 	}
 
 	@Nonnull

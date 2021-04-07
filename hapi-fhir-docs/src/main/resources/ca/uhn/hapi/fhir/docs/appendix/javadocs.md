@@ -1,6 +1,6 @@
 # JavaDocs
 
-See the [Modules Page](/docs/introduction/modules.html) for more information on the various modules in HAPI FHIR.
+See the [Modules Page](/docs/getting_started/modules.html) for more information on the various modules in HAPI FHIR.
 
 * [Core API](/apidocs/hapi-fhir-base/) - hapi-fhir-base
 * [Model API (DSTU2)](/apidocs/hapi-fhir-structures-dstu2/) - hapi-fhir-structures-dstu2

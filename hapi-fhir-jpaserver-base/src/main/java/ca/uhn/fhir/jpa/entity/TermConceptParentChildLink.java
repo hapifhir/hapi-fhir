@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,7 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.Fields;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -44,7 +43,7 @@ public class TermConceptParentChildLink implements Serializable {
 	private TermCodeSystemVersion myCodeSystem;
 
 	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false, nullable = false)
-	@Fields({@Field(name = "myCodeSystemVersionPid")})
+	@FullTextField(name = "myCodeSystemVersionPid")
 	private long myCodeSystemVersionPid;
 
 	@ManyToOne(fetch = FetchType.LAZY, cascade = {})

@@ -1,0 +1,5 @@
+---
+type: change
+issue: 2340
+title: "The `@ResourceDef` annotation has been marked as inheritable, so it does not need to be explicitly added to
+   custom structures that extend built-in structures. Thanks to Marcelo Avancini for the pull request!"

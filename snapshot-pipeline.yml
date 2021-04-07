@@ -1,0 +1,89 @@
+# This is manually run to deploy SNAPSHOT versions of HAPI to oss.sonaypte.org
+# We don't need to trigger on any pull request or branch change, so we disable such behavior
+pr: none
+trigger: none
+
+# We'll run the process on the latest version of unbuntu because they tend to be the fastest
+pool:
+  vmImage: 'ubuntu-latest'
+
+# We cannot store things like gpg passwords and sonatype credentials as plain text within the 
+# pipeline's yaml file, so we've created variable groups in our library to store sensitive variables.
+# Pipelines do not load these groups by default, and we need to define which groups to load before
+# running any steps.
+variables:
+- group: GPG_VARIABLE_GROUP
+- group: SONATYPE_VARIABLE_GROUP
+
+steps:
+
+  # We need a valid signing key to sign our builds for deployment to sonatype. We have uploaded
+  # both our private and public keys to Azure as 'secure files' that we load into individual pipelines.
+
+  # 1. Load the public key file
+  - task: DownloadSecureFile@1
+    displayName: 'Load public key from secure files.'
+    inputs:
+      secureFile: public.pgp
+
+  # 2. Load the private key file
+  - task: DownloadSecureFile@1
+    displayName: 'Load private key from secure files.'
+    inputs:
+      secureFile: private.pgp
+
+  # Although we have imported the key files into our workspace, GPG has no knowledge that these keys exist.
+  # We use a bash script to import both the private and puablic keys into gpg for future signing.
+
+  # 3. Import keys into gpg
+  - bash: |
+      gpg --import --no-tty --batch --yes $(Agent.TempDirectory)/public.pgp
+      gpg --import --no-tty --batch --yes $(Agent.TempDirectory)/private.pgp
+      gpg --list-keys --keyid-format LONG
+      gpg --list-secret-keys --keyid-format LONG
+    displayName: 'Import signing keys into gpg.'
+  
+  # For creating a snapshot release with maven, we need to build a fake settings.xml file locally where
+  # we can set our credentials for both sonatype and gpg. Then maven can read
+  # for it to read from. This is done for the master branch merges only.
+
+  # 4. Create local settings.xml file
+  - bash: |
+      cat >$(System.DefaultWorkingDirectory)/settings.xml <<EOL
+      <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                                    https://maven.apache.org/xsd/settings-1.0.0.xsd">
+        <servers>
+          <server>
+            <id>ossrh</id>
+            <username>$(SONATYPE_USERNAME)</username>
+            <password>$(SONATYPE_PASSWORD)</password>
+          </server>
+        </servers>
+        <profiles>
+          <profile>
+            <id>SIGN_ARTIFACTS</id>
+            <activation>
+              <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+              <gpg.passphrase>$(GPG_PASSPHRASE)</gpg.passphrase>
+            </properties>
+          </profile>
+        </profiles>
+      </settings>
+      EOL
+    displayName: 'Create .mvn/settings.xml'
+  
+  # With our settings.xml created locally, we can now run maven (pointing to our created settings.xml file) to deploy
+  # the HAPI SNAPSHOT build.
+
+  # 5. Deploy SNAPSHOT build to sonatype
+  - task: Maven@3
+    displayName: 'Deploy to Sonatype staging'
+    inputs:
+      mavenPomFile: '$(System.DefaultWorkingDirectory)/pom.xml'
+      goals: deploy
+      options: '--settings $(System.DefaultWorkingDirectory)/settings.xml -P DIST,ALLMODULES -Dmaven.test.skip'
+      publishJUnitResults: false

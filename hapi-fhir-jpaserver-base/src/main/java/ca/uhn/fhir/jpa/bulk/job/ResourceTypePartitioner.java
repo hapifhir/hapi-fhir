@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk.job;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public class ResourceTypePartitioner implements Partitioner {
 
 				// The worker step needs to know which parent job it is processing for, and which collection entity it will be
 				// attaching its results to.
-				context.putString("jobUUID", myJobUUID);
+				context.putString(BulkExportJobConfig.JOB_UUID_PARAMETER, myJobUUID);
 				context.putLong("bulkExportCollectionEntityId", collectionEntityId);
 
 				// Name the partition based on the resource type

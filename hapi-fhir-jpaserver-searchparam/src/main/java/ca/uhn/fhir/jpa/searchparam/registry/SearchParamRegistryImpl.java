@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -31,9 +30,10 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
@@ -45,22 +45,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceChangeListener {
+public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceChangeListener, ISearchParamRegistryController {
+	// TODO: JA remove unused?
+
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamRegistryImpl.class);
 	private static final int MAX_MANAGED_PARAM_COUNT = 10000;
-	private static long REFRESH_INTERVAL = DateUtils.MILLIS_PER_HOUR;
-
+	private static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_HOUR;
+	private final JpaSearchParamCache myJpaSearchParamCache = new JpaSearchParamCache();
 	@Autowired
 	private ModelConfig myModelConfig;
 	@Autowired
@@ -71,10 +75,8 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	private SearchParameterCanonicalizer mySearchParameterCanonicalizer;
 	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
-
 	private volatile ReadOnlySearchParamCache myBuiltInSearchParams;
 	private volatile IPhoneticEncoder myPhoneticEncoder;
-	private volatile JpaSearchParamCache myJpaSearchParamCache = new JpaSearchParamCache();
 	private volatile RuntimeSearchParamCache myActiveSearchParams;
 
 	@Autowired
@@ -93,6 +95,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		}
 	}
 
+	@Nonnull
 	@Override
 	public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
 		requiresActiveSearchParams();
@@ -106,13 +109,23 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	}
 
 	@Override
-	public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
+	public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
 		return myJpaSearchParamCache.getActiveUniqueSearchParams(theResourceName);
 	}
 
 	@Override
-	public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
+	public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
 		return myJpaSearchParamCache.getActiveUniqueSearchParams(theResourceName, theParamNames);
+	}
+
+	@Nullable
+	@Override
+	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
+		if (myActiveSearchParams != null) {
+			return myActiveSearchParams.getByUrl(theUrl);
+		} else {
+			return null;
+		}
 	}
 
 	private void rebuildActiveSearchParams() {
@@ -121,7 +134,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		params.setLoadSynchronousUpTo(MAX_MANAGED_PARAM_COUNT);
 
 		IBundleProvider allSearchParamsBp = mySearchParamProvider.search(params);
-		int size = allSearchParamsBp.size();
+		int size = allSearchParamsBp.sizeOrThrowNpe();
 
 		ourLog.trace("Loaded {} search params from the DB", size);
 
@@ -147,6 +160,11 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		ourLog.debug("Refreshed search parameter cache in {}ms", sw.getMillis());
 	}
 
+	@VisibleForTesting
+	public void setFhirContext(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+	}
+
 	private ReadOnlySearchParamCache getBuiltInSearchParams() {
 		if (myBuiltInSearchParams == null) {
 			myBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(myFhirContext);
@@ -159,6 +177,11 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 			Map<String, RuntimeSearchParam> map = theSearchParams.getSearchParamMap(resourceName);
 			map.entrySet().removeIf(entry -> entry.getValue().getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
 		}
+	}
+
+	@VisibleForTesting
+	public void setModelConfig(ModelConfig theModelConfig) {
+		myModelConfig = theModelConfig;
 	}
 
 	private long overrideBuiltinSearchParamsWithActiveJpaSearchParams(RuntimeSearchParamCache theSearchParamCache, Collection<IBaseResource> theSearchParams) {
@@ -192,24 +215,12 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 				continue;
 			}
 
-			Map<String, RuntimeSearchParam> searchParamMap = theSearchParams.getSearchParamMap(nextBaseName);
 			String name = runtimeSp.getName();
+			theSearchParams.add(nextBaseName, name, runtimeSp);
 			ourLog.debug("Adding search parameter {}.{} to SearchParamRegistry", nextBaseName, StringUtils.defaultString(name, "[composite]"));
-			searchParamMap.put(name, runtimeSp);
 			retval++;
 		}
 		return retval;
-	}
-
-	@Override
-	public RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName) {
-		Map<String, RuntimeSearchParam> params = getActiveSearchParams(theResourceDef.getName());
-		return params.get(theParamName);
-	}
-
-	@Override
-	public Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef) {
-		return getActiveSearchParams(theResourceDef.getName()).values();
 	}
 
 	@Override
@@ -227,6 +238,11 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		return myResourceChangeListenerCache.refreshCacheIfNecessary();
 	}
 
+	@VisibleForTesting
+	public void setResourceChangeListenerRegistry(IResourceChangeListenerRegistry theResourceChangeListenerRegistry) {
+		myResourceChangeListenerRegistry = theResourceChangeListenerRegistry;
+	}
+
 	@PostConstruct
 	public void registerListener() {
 		myResourceChangeListenerCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener("SearchParameter", SearchParameterMap.newSynchronous(), this, REFRESH_INTERVAL);
@@ -237,7 +253,6 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(this);
 	}
 
-	@Override
 	public ReadOnlySearchParamCache getActiveSearchParams() {
 		requiresActiveSearchParams();
 		if (myActiveSearchParams == null) {
@@ -282,7 +297,15 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	@Override
 	public void handleInit(Collection<IIdType> theResourceIds) {
-		List<IBaseResource> searchParams = theResourceIds.stream().map(id -> mySearchParamProvider.read(id)).collect(Collectors.toList());
+		List<IBaseResource> searchParams = new ArrayList<>();
+		for (IIdType id : theResourceIds) {
+			try {
+				IBaseResource searchParam = mySearchParamProvider.read(id);
+				searchParams.add(searchParam);
+			} catch (ResourceNotFoundException e) {
+				ourLog.warn("SearchParameter {} not found.  Excluding from list of active search params.", id);
+			}
+		}
 		initializeActiveSearchParams(searchParams);
 	}
 

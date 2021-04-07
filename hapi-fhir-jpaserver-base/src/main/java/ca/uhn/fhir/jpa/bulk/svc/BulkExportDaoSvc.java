@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk.svc;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,10 +50,6 @@ public class BulkExportDaoSvc {
 	IBulkExportCollectionDao myBulkExportCollectionDao;
 	@Autowired
 	IBulkExportCollectionFileDao myBulkExportCollectionFileDao;
-	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
-	private DaoRegistry myDaoRegistry;
 
 	@Transactional
 	public void addFileToCollectionWithId(Long theCollectionEntityId, BulkExportCollectionFileEntity theFile) {
@@ -65,7 +61,6 @@ public class BulkExportDaoSvc {
 			myBulkExportCollectionFileDao.saveAndFlush(theFile);
 			myBulkExportCollectionDao.saveAndFlush(exportCollectionEntity);
 		}
-
 	}
 
 	@Transactional

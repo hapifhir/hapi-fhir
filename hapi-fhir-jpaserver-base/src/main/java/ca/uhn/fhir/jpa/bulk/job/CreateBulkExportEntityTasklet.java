@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk.job;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,9 @@ package ca.uhn.fhir.jpa.bulk.job;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.batch.core.StepContribution;
@@ -45,8 +47,8 @@ public class CreateBulkExportEntityTasklet implements Tasklet {
 		Map<String, Object> jobParameters = theChunkContext.getStepContext().getJobParameters();
 
 		//We can leave early if they provided us with an existing job.
-		if (jobParameters.containsKey("jobUUID")) {
-			addUUIDToJobContext(theChunkContext, (String)jobParameters.get("jobUUID"));
+		if (jobParameters.containsKey(BulkExportJobConfig.JOB_UUID_PARAMETER)) {
+			addUUIDToJobContext(theChunkContext, (String)jobParameters.get(BulkExportJobConfig.JOB_UUID_PARAMETER));
 			return RepeatStatus.FINISHED;
 		} else {
 			String resourceTypes = (String)jobParameters.get("resourceTypes");
@@ -60,12 +62,25 @@ public class CreateBulkExportEntityTasklet implements Tasklet {
 			}
 			Set<String> resourceTypeSet = Arrays.stream(resourceTypes.split(",")).collect(Collectors.toSet());
 
-			String outputFormat = (String)jobParameters.get("outputFormat");
+			String outputFormat = (String) jobParameters.get("outputFormat");
 			if (StringUtils.isBlank(outputFormat)) {
 				outputFormat = Constants.CT_FHIR_NDJSON;
 			}
 
-			IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.submitJob(outputFormat, resourceTypeSet, since, filterSet);
+			BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
+			bulkDataExportOptions.setOutputFormat(outputFormat);
+			bulkDataExportOptions.setResourceTypes(resourceTypeSet);
+			bulkDataExportOptions.setSince(since);
+			bulkDataExportOptions.setFilters(filterSet);
+			//Set export style
+			String exportStyle = (String)jobParameters.get("exportStyle");
+			bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.valueOf(exportStyle));
+
+			//Set group id if present
+			String groupId = (String)jobParameters.get("groupId");
+			bulkDataExportOptions.setGroupId(new IdDt(groupId));
+
+			IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
 
 			addUUIDToJobContext(theChunkContext, jobInfo.getJobId());
 			return RepeatStatus.FINISHED;
@@ -78,6 +93,6 @@ public class CreateBulkExportEntityTasklet implements Tasklet {
 			.getStepExecution()
 			.getJobExecution()
 			.getExecutionContext()
-			.putString("jobUUID", theJobUUID);
+			.putString(BulkExportJobConfig.JOB_UUID_PARAMETER, theJobUUID);
 	}
 }

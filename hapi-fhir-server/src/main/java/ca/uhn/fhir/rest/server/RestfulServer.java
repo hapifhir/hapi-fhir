@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,10 +91,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Manifest;
@@ -104,6 +107,12 @@ import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+/**
+ * This class is the central class for the HAPI FHIR Plain Server framework.
+ * <p>
+ * See <a href="https://hapifhir.io/hapi-fhir/docs/server_plain/">HAPI FHIR Plain Server</a>
+ * for information on how to use this framework.
+ */
 @SuppressWarnings("WeakerAccess")
 public class RestfulServer extends HttpServlet implements IRestfulServer<ServletRequestDetails> {
 
@@ -178,7 +187,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		this(theCtx, new InterceptorService("RestfulServer"));
 	}
 
-	public RestfulServer(FhirContext theCtx, IInterceptorService theInterceptorService)	{
+	public RestfulServer(FhirContext theCtx, IInterceptorService theInterceptorService) {
 		myFhirContext = theCtx;
 		setInterceptorService(theInterceptorService);
 	}
@@ -313,14 +322,32 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				invokeDestroy(iResourceProvider);
 			}
 		}
+
 		if (myServerConformanceProvider != null) {
 			invokeDestroy(myServerConformanceProvider);
 		}
+
 		if (getPlainProviders() != null) {
 			for (Object next : getPlainProviders()) {
 				invokeDestroy(next);
 			}
 		}
+
+		if (myServerConformanceMethod != null) {
+			myServerConformanceMethod.close();
+		}
+		myResourceNameToBinding
+			.values()
+			.stream()
+			.flatMap(t->t.getMethodBindings().stream())
+			.forEach(t->t.close());
+		myGlobalBinding
+			.getMethodBindings()
+			.forEach(t->t.close());
+		myServerBinding
+			.getMethodBindings()
+			.forEach(t->t.close());
+
 	}
 
 	/**
@@ -675,10 +702,16 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	/**
-	 * Sets the paging provider to use, or <code>null</code> to use no paging (which is the default)
+	 * Sets the paging provider to use, or <code>null</code> to use no paging (which is the default).
+	 * This will set defaultPageSize and maximumPageSize from the paging provider.
 	 */
 	public void setPagingProvider(IPagingProvider thePagingProvider) {
 		myPagingProvider = thePagingProvider;
+		if (myPagingProvider != null) {
+			setDefaultPageSize(myPagingProvider.getDefaultPageSize());
+			setMaximumPageSize(myPagingProvider.getMaximumPageSize());
+		}
+
 	}
 
 	@Override
@@ -755,6 +788,19 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 	public Collection<ResourceBinding> getResourceBindings() {
 		return myResourceNameToBinding.values();
+	}
+
+	public Collection<BaseMethodBinding<?>> getProviderMethodBindings(Object theProvider) {
+		Set<BaseMethodBinding<?>> retVal = new HashSet<>();
+		for (ResourceBinding resourceBinding : getResourceBindings()) {
+			for (BaseMethodBinding<?> methodBinding : resourceBinding.getMethodBindings()) {
+				if (theProvider.equals(methodBinding.getProvider())) {
+					retVal.add(methodBinding);
+				}
+			}
+		}
+
+		return retVal;
 	}
 
 	/**
@@ -985,12 +1031,15 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			 * Notify interceptors about the incoming request
 			 * *************************/
 
-			HookParams preProcessedParams = new HookParams();
-			preProcessedParams.add(HttpServletRequest.class, theRequest);
-			preProcessedParams.add(HttpServletResponse.class, theResponse);
-			if (!myInterceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED, preProcessedParams)) {
+			// Interceptor: SERVER_INCOMING_REQUEST_PRE_PROCESSED
+			if (myInterceptorService.hasHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)) {
+				HookParams preProcessedParams = new HookParams();
+				preProcessedParams.add(HttpServletRequest.class, theRequest);
+				preProcessedParams.add(HttpServletResponse.class, theResponse);
+				if (!myInterceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED, preProcessedParams)) {
 					return;
 				}
+			}
 
 			String requestPath = getRequestPath(requestFullPath, servletContextPath, servletPath);
 
@@ -1028,6 +1077,18 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			requestDetails.setFhirServerBase(fhirServerBase);
 			requestDetails.setCompleteUrl(completeUrl);
 
+			// Interceptor: SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED
+			if (myInterceptorService.hasHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED)) {
+				HookParams preProcessedParams = new HookParams();
+				preProcessedParams.add(HttpServletRequest.class, theRequest);
+				preProcessedParams.add(HttpServletResponse.class, theResponse);
+				preProcessedParams.add(RequestDetails.class, requestDetails);
+				preProcessedParams.add(ServletRequestDetails.class, requestDetails);
+				if (!myInterceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED, preProcessedParams)) {
+					return;
+				}
+			}
+
 			validateRequest(requestDetails);
 
 			BaseMethodBinding<?> resourceMethod = determineResourceMethod(requestDetails, requestPath);
@@ -1035,15 +1096,17 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			RestOperationTypeEnum operation = resourceMethod.getRestOperationType(requestDetails);
 			requestDetails.setRestOperationType(operation);
 
-			// Handle server interceptors
-			HookParams postProcessedParams = new HookParams();
-			postProcessedParams.add(RequestDetails.class, requestDetails);
-			postProcessedParams.add(ServletRequestDetails.class, requestDetails);
-			postProcessedParams.add(HttpServletRequest.class, theRequest);
-			postProcessedParams.add(HttpServletResponse.class, theResponse);
-			if (!myInterceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, postProcessedParams)) {
+			// Interceptor: SERVER_INCOMING_REQUEST_POST_PROCESSED
+			if (myInterceptorService.hasHooks(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)) {
+				HookParams postProcessedParams = new HookParams();
+				postProcessedParams.add(RequestDetails.class, requestDetails);
+				postProcessedParams.add(ServletRequestDetails.class, requestDetails);
+				postProcessedParams.add(HttpServletRequest.class, theRequest);
+				postProcessedParams.add(HttpServletResponse.class, theResponse);
+				if (!myInterceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, postProcessedParams)) {
 					return;
 				}
+			}
 
 			/*
 			 * Actually invoke the server method. This call is to a HAPI method binding, which
@@ -1062,7 +1125,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				myInterceptorService.callHooks(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY, hookParams);
 
 				ourLog.trace("Done writing to stream: {}", outputStreamOrWriter);
-				}
+			}
 
 		} catch (NotModifiedException | AuthenticationException e) {
 
@@ -1073,8 +1136,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			handleExceptionParams.add(HttpServletResponse.class, theResponse);
 			handleExceptionParams.add(BaseServerResponseException.class, e);
 			if (!myInterceptorService.callHooks(Pointcut.SERVER_HANDLE_EXCEPTION, handleExceptionParams)) {
-					return;
-				}
+				return;
+			}
 
 			writeExceptionToResponse(theResponse, e);
 
@@ -1129,8 +1192,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			handleExceptionParams.add(HttpServletResponse.class, theResponse);
 			handleExceptionParams.add(BaseServerResponseException.class, exception);
 			if (!myInterceptorService.callHooks(Pointcut.SERVER_HANDLE_EXCEPTION, handleExceptionParams)) {
-					return;
-				}
+				return;
+			}
 
 			/*
 			 * If we're handling an exception, no summary mode should be applied
@@ -1672,8 +1735,27 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		}
 		removeResourceMethods(theProvider, clazz, resourceNames);
 		removeResourceMethodsOnInterfaces(theProvider, clazz.getInterfaces(), resourceNames);
+		removeResourceNameBindings(resourceNames, theProvider);
+	}
+
+	private void removeResourceNameBindings(Collection<String> resourceNames, Object theProvider) {
 		for (String resourceName : resourceNames) {
-			myResourceNameToBinding.remove(resourceName);
+			ResourceBinding resourceBinding = myResourceNameToBinding.get(resourceName);
+			if (resourceBinding == null) {
+				continue;
+			}
+
+			for (Iterator<BaseMethodBinding<?>> it = resourceBinding.getMethodBindings().iterator(); it.hasNext(); ) {
+				BaseMethodBinding<?> binding = it.next();
+				if (theProvider.equals(binding.getProvider())) {
+					it.remove();
+					ourLog.info("{} binding of {} was removed", resourceName, binding);
+				}
+			}
+
+			if (resourceBinding.getMethodBindings().isEmpty()) {
+				myResourceNameToBinding.remove(resourceName);
+			}
 		}
 	}
 

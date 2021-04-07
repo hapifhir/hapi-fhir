@@ -8,9 +8,9 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
-import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -38,6 +38,7 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
+import org.hl7.fhir.r4.model.UrlType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.FilterOperator;
@@ -53,14 +54,19 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest.URL_MY_VALUE_SET;
+import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -312,17 +318,69 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("expand")
-			.withParameter(Parameters.class, "filter", new StringType("systolic"))
+			.withParameter(Parameters.class, "filter", new StringType("blood"))
 			.execute();
+				
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
 		assertThat(resp, not(containsString("\"Foo Code\"")));
-
 	}
 
+
+	@Test
+	public void testExpandByIdWithFilterWithPreExpansionWithPrefixValue() throws Exception {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSet();
+		await().until(() -> clearDeferredStorageQueue());
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+		assertEquals(1, page.getContent().size());
+
+		Parameters respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("expand")
+			.withParameter(Parameters.class, "filter", new StringType("blo"))
+			.execute();
+				
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
+		assertThat(resp, not(containsString("\"Foo Code\"")));
+	}
+	
+	@Test
+	public void testExpandByIdWithFilterWithPreExpansionWithoutPrefixValue() throws Exception {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSet();
+		await().until(() -> clearDeferredStorageQueue());
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+		assertEquals(1, page.getContent().size());
+
+		Parameters respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("expand")
+			.withParameter(Parameters.class, "filter", new StringType("lood"))
+			.execute();
+				
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		assertThat(resp, not(containsString("<display value=\"Systolic blood pressure at First encounter\"/>")));
+		assertThat(resp, not(containsString("\"Foo Code\"")));
+	}
+	
+	
 	@Test
 	public void testExpandByUrl() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
@@ -490,7 +548,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
-		assertThat(resp, containsStringIgnoringCase("<code value=\"M\"/>"));
+		assertThat(resp, is(containsStringIgnoringCase("<code value=\"M\"/>")));
 	}
 
 	@Test
@@ -864,60 +922,19 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			assertEquals(theCodeSystem.getConcept().size(), termValueSet.getConcepts().size());
 			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
-			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("8450-9", concept.getCode());
-			assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
-			assertEquals(2, concept.getDesignations().size());
-			assertEquals(0, concept.getOrder());
 
-			TermValueSetConceptDesignation designation = concept.getDesignations().get(0);
-			assertEquals("nl", designation.getLanguage());
-			assertEquals("http://snomed.info/sct", designation.getUseSystem());
-			assertEquals("900000000000013009", designation.getUseCode());
-			assertEquals("Synonym", designation.getUseDisplay());
-			assertEquals("Systolische bloeddruk - expiratie", designation.getValue());
+			TermValueSetConcept concept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
+			assertTermConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
+			assertTermConceptContainsDesignation(concept, "sv", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systoliskt blodtryck - utgång");
 
-			designation = concept.getDesignations().get(1);
-			assertEquals("sv", designation.getLanguage());
-			assertEquals("http://snomed.info/sct", designation.getUseSystem());
-			assertEquals("900000000000013009", designation.getUseCode());
-			assertEquals("Synonym", designation.getUseDisplay());
-			assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
-
-			concept = termValueSet.getConcepts().get(1);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("11378-7", concept.getCode());
-			assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
-			assertEquals(0, concept.getDesignations().size());
-			assertEquals(1, concept.getOrder());
+			assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter", 0);
 
 			// ...
 
-			concept = termValueSet.getConcepts().get(22);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("8491-3", concept.getCode());
-			assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
-			assertEquals(1, concept.getDesignations().size());
-			assertEquals(22, concept.getOrder());
+			TermValueSetConcept otherConcept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum", 1);
+			assertTermConceptContainsDesignation(otherConcept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk minimaal 1 uur");
 
-			designation = concept.getDesignations().get(0);
-			assertEquals("nl", designation.getLanguage());
-			assertEquals("http://snomed.info/sct", designation.getUseSystem());
-			assertEquals("900000000000013009", designation.getUseCode());
-			assertEquals("Synonym", designation.getUseDisplay());
-			assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
-
-			concept = termValueSet.getConcepts().get(23);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("8492-1", concept.getCode());
-			assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
-			assertEquals(0, concept.getDesignations().size());
-			assertEquals(23, concept.getOrder());
+			assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum", 0);
 		});
 	}
 
@@ -1023,6 +1040,165 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		createLocalVsWithIncludeConcept();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		testValidateCodeOperationByCodeAndSystemInstanceOnInstance();
+	}
+
+
+	@Test
+	public void testExpandUsingHierarchy_PreStored_NotPreCalculated() {
+		createLocalCs();
+		createHierarchicalVs();
+
+		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
+
+		ValueSet expansion;
+
+		// Non-hierarchical
+		myCaptureQueriesListener.clear();
+		expansion = myClient
+			.operation()
+			.onType("ValueSet")
+			.named(JpaConstants.OPERATION_EXPAND)
+			.withParameter(Parameters.class, "url", new UrlType(URL_MY_VALUE_SET))
+			.returnResourceType(ValueSet.class)
+			.execute();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A", "AA", "AB", "AAA"));
+		assertEquals(19, myCaptureQueriesListener.getSelectQueries().size());
+		assertEquals("ValueSet \"ValueSet.url[http://example.com/my_value_set]\" has not yet been pre-expanded. Performing in-memory expansion without parameters. Current status: NOT_EXPANDED | The ValueSet is waiting to be picked up and pre-expanded by a scheduled task.", expansion.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
+
+		// Hierarchical
+		myCaptureQueriesListener.clear();
+		expansion = myClient
+			.operation()
+			.onType("ValueSet")
+			.named(JpaConstants.OPERATION_EXPAND)
+			.withParameter(Parameters.class, "url", new UrlType(URL_MY_VALUE_SET))
+			.andParameter(JpaConstants.OPERATION_EXPAND_PARAM_INCLUDE_HIERARCHY, new BooleanType("true"))
+			.returnResourceType(ValueSet.class)
+			.execute();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A"));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains()), containsInAnyOrder("AA", "AB"));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t->t.getCode().equals("AA")).findFirst().orElseThrow(()->new IllegalArgumentException()).getContains()), containsInAnyOrder("AAA"));
+		assertEquals(16, myCaptureQueriesListener.getSelectQueries().size());
+
+	}
+
+	@Test
+	public void testExpandUsingHierarchy_NotPreStored() {
+		createLocalCs();
+		createHierarchicalVs();
+		myLocalVs.setUrl(null);
+
+		ValueSet expansion;
+
+		// Non-hierarchical
+		myCaptureQueriesListener.clear();
+		expansion = myClient
+			.operation()
+			.onType("ValueSet")
+			.named(JpaConstants.OPERATION_EXPAND)
+			.withParameter(Parameters.class, "valueSet", myLocalVs)
+			.returnResourceType(ValueSet.class)
+			.execute();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A", "AA", "AB", "AAA"));
+		assertEquals(15, myCaptureQueriesListener.getSelectQueries().size());
+		assertEquals(null, expansion.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
+
+		// Hierarchical
+		myCaptureQueriesListener.clear();
+		expansion = myClient
+			.operation()
+			.onType("ValueSet")
+			.named(JpaConstants.OPERATION_EXPAND)
+			.withParameter(Parameters.class, "valueSet", myLocalVs)
+			.andParameter(JpaConstants.OPERATION_EXPAND_PARAM_INCLUDE_HIERARCHY, new BooleanType("true"))
+			.returnResourceType(ValueSet.class)
+			.execute();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A"));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains()), containsInAnyOrder("AA", "AB"));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t->t.getCode().equals("AA")).findFirst().orElseThrow(()->new IllegalArgumentException()).getContains()), containsInAnyOrder("AAA"));
+		assertEquals(14, myCaptureQueriesListener.getSelectQueries().size());
+
+	}
+
+	@Test
+	public void testExpandUsingHierarchy_PreStored_PreCalculated() {
+		createLocalCs();
+		createHierarchicalVs();
+
+		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
+
+		ValueSet expansion;
+
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		// Do a warm-up pass to precache anything that can be pre-cached
+		myClient
+			.operation()
+			.onType("ValueSet")
+			.named(JpaConstants.OPERATION_EXPAND)
+			.withParameter(Parameters.class, "url", new UrlType(URL_MY_VALUE_SET))
+			.returnResourceType(ValueSet.class)
+			.execute();
+
+		// Non-hierarchical
+		myCaptureQueriesListener.clear();
+		expansion = myClient
+			.operation()
+			.onType("ValueSet")
+			.named(JpaConstants.OPERATION_EXPAND)
+			.withParameter(Parameters.class, "url", new UrlType(URL_MY_VALUE_SET))
+			.returnResourceType(ValueSet.class)
+			.execute();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A", "AA", "AB", "AAA"));
+		assertEquals(3, myCaptureQueriesListener.getSelectQueries().size());
+		assertEquals("ValueSet was expanded using a pre-calculated expansion", expansion.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
+
+		// Hierarchical
+		myCaptureQueriesListener.clear();
+		expansion = myClient
+			.operation()
+			.onType("ValueSet")
+			.named(JpaConstants.OPERATION_EXPAND)
+			.withParameter(Parameters.class, "url", new UrlType(URL_MY_VALUE_SET))
+			.andParameter(JpaConstants.OPERATION_EXPAND_PARAM_INCLUDE_HIERARCHY, new BooleanType("true"))
+			.returnResourceType(ValueSet.class)
+			.execute();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A"));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains()), containsInAnyOrder("AA", "AB"));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t->t.getCode().equals("AA")).findFirst().orElseThrow(()->new IllegalArgumentException()).getContains()), containsInAnyOrder("AAA"));
+		assertEquals(3, myCaptureQueriesListener.getSelectQueries().size());
+
+	}
+
+	private void createHierarchicalVs() {
+		myLocalVs = new ValueSet();
+		myLocalVs.setUrl(URL_MY_VALUE_SET);
+		myLocalVs
+			.getCompose()
+			.addInclude()
+			.setSystem(URL_MY_CODE_SYSTEM)
+			.addFilter()
+			.setProperty("concept")
+			.setOp(FilterOperator.ISA)
+			.setValue("A");
+		myLocalVs
+			.getCompose()
+			.addInclude()
+			.setSystem(URL_MY_CODE_SYSTEM)
+			.addConcept()
+			.setCode("A");
+	}
+
+	public List<String> toDirectCodes(List<ValueSet.ValueSetExpansionContainsComponent> theContains) {
+		List<String> collect = theContains.stream().map(t -> t.getCode()).collect(Collectors.toList());
+		ourLog.info("Codes: {}", collect);
+		return collect;
 	}
 
 	private void testValidateCodeOperationByCodeAndSystemInstanceOnInstance() throws IOException {

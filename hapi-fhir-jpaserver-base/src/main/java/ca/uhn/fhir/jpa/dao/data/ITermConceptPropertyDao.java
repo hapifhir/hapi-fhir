@@ -1,10 +1,9 @@
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.dao.IHapiJpaRepository;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -12,7 +11,7 @@ import org.springframework.data.repository.query.Param;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,17 +27,12 @@ import org.springframework.data.repository.query.Param;
  * #L%
  */
 
-public interface ITermConceptPropertyDao extends IHapiJpaRepository<TermConceptProperty> {
+public interface ITermConceptPropertyDao extends JpaRepository<TermConceptProperty, Long> {
 
 	@Query("SELECT t.myId FROM TermConceptProperty t WHERE t.myCodeSystemVersion.myId = :cs_pid")
 	Slice<Long> findIdsByCodeSystemVersion(Pageable thePage, @Param("cs_pid") Long thePid);
 
 	@Query("SELECT COUNT(t) FROM TermConceptProperty t WHERE t.myCodeSystemVersion.myId = :cs_pid")
 	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);
-
-	@Override
-	@Modifying
-	@Query("DELETE FROM TermConceptProperty t WHERE t.myId = :pid")
-	void deleteByPid(@Param("pid") Long theId);
 
 }

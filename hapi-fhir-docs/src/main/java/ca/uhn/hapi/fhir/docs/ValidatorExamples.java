@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -341,12 +341,20 @@ public class ValidatorExamples {
 		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(ctx);
 		supportChain.addValidationSupport(defaultSupport);
 
+		// This module supplies several code systems that are commonly used in validation
+		supportChain.addValidationSupport(new CommonCodeSystemsTerminologyService(ctx));
+
+		// This module implements terminology services for in-memory code validation
+		supportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(ctx));
+
 		// Create a PrePopulatedValidationSupport which can be used to load custom definitions.
 		// In this example we're loading two things, but in a real scenario we might
 		// load many StructureDefinitions, ValueSets, CodeSystems, etc.
 		PrePopulatedValidationSupport prePopulatedSupport = new PrePopulatedValidationSupport(ctx);
 		prePopulatedSupport.addStructureDefinition(someStructureDefnition);
 		prePopulatedSupport.addValueSet(someValueSet);
+
+		// Add the custom definitions to the chain
 		supportChain.addValidationSupport(prePopulatedSupport);
 
 		// Wrap the chain in a cache to improve performance

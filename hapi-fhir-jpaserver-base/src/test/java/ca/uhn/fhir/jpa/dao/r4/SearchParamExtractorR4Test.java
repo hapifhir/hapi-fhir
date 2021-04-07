@@ -5,22 +5,23 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
+import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Sets;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -29,19 +30,21 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
-import org.junit.jupiter.api.BeforeAll;
+import org.hl7.fhir.r4.model.StringType;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -50,6 +53,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -57,7 +62,6 @@ public class SearchParamExtractorR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamExtractorR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forCached(FhirVersionEnum.R4);
-	private static IValidationSupport ourValidationSupport;
 	private MySearchParamRegistry mySearchParamRegistry;
 	private PartitionSettings myPartitionSettings;
 
@@ -74,7 +78,7 @@ public class SearchParamExtractorR4Test {
 		Observation obs = new Observation();
 		obs.addCategory().addCoding().setSystem("SYSTEM").setCode("CODE");
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, ourValidationSupport, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs);
 		assertEquals(1, tokens.size());
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.iterator().next();
@@ -84,11 +88,28 @@ public class SearchParamExtractorR4Test {
 	}
 
 	@Test
+	public void testName() {
+		Patient patient = new Patient();
+		List<StringType> suffixStrings = Arrays.asList(new StringType("the Great"));
+		List<StringType> prefixStrings = Arrays.asList(new StringType("King"));
+		HumanName humanName = patient.addName();
+		humanName.addGiven("Jimmy");
+		humanName.setFamily("Jones");
+		humanName.setText("King Jimmy Jones the Great");
+		humanName.setSuffix(suffixStrings);
+		humanName.setPrefix(prefixStrings);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> stringSearchParams = extractor.extractSearchParamStrings(patient);
+		List<String> nameValues = stringSearchParams.stream().filter(param -> "name".equals(param.getParamName())).map(ResourceIndexedSearchParamString::getValueExact).collect(Collectors.toList());
+		assertThat(nameValues, containsInAnyOrder("Jimmy", "Jones", "King Jimmy Jones the Great", "King", "the Great"));
+	}
+
+	@Test
 	public void testTokenOnSearchParamContext() {
 		SearchParameter sp = new SearchParameter();
 		sp.addUseContext().setCode(new Coding().setSystem("http://system").setCode("code"));
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, ourValidationSupport, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(sp);
 		assertEquals(1, tokens.size());
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.iterator().next();
@@ -102,7 +123,7 @@ public class SearchParamExtractorR4Test {
 		Observation obs = new Observation();
 		obs.getCode().addCoding().setSystem("http://system").setCode("code").setDisplay("Help Im a Bug");
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), myPartitionSettings, ourCtx, ourValidationSupport, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), myPartitionSettings, ourCtx, mySearchParamRegistry);
 
 		List<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs)
 			.stream()
@@ -131,7 +152,7 @@ public class SearchParamExtractorR4Test {
 		Observation obs = new Observation();
 		obs.getCode().addCoding().setSystem("http://system").setCode("code").setDisplay("Help Im a Bug");
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), myPartitionSettings, ourCtx, ourValidationSupport, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), myPartitionSettings, ourCtx, mySearchParamRegistry);
 
 		List<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs)
 			.stream()
@@ -155,7 +176,7 @@ public class SearchParamExtractorR4Test {
 		Observation obs = new Observation();
 		obs.getCode().addCoding().setSystem("http://system").setCode("code").setDisplay("Help Im a Bug");
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(modelConfig, myPartitionSettings, ourCtx, ourValidationSupport, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(modelConfig, myPartitionSettings, ourCtx, mySearchParamRegistry);
 
 		List<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs)
 			.stream()
@@ -184,7 +205,7 @@ public class SearchParamExtractorR4Test {
 		Observation obs = new Observation();
 		obs.getCode().addCoding().setSystem("http://system").setCode("code").setDisplay("Help Im a Bug");
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(modelConfig, myPartitionSettings, ourCtx, ourValidationSupport, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(modelConfig, myPartitionSettings, ourCtx, mySearchParamRegistry);
 
 		List<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs)
 			.stream()
@@ -209,7 +230,7 @@ public class SearchParamExtractorR4Test {
 		Observation obs = new Observation();
 		obs.addIdentifier().setSystem("sys").setValue("val").getType().setText("Help Im a Bug");
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), myPartitionSettings, ourCtx, ourValidationSupport, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), myPartitionSettings, ourCtx, mySearchParamRegistry);
 
 		List<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs)
 			.stream()
@@ -239,7 +260,7 @@ public class SearchParamExtractorR4Test {
 		Observation obs = new Observation();
 		obs.addIdentifier().setSystem("sys").setValue("val").getType().setText("Help Im a Bug");
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), myPartitionSettings, ourCtx, ourValidationSupport, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), myPartitionSettings, ourCtx, mySearchParamRegistry);
 
 		List<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs)
 			.stream()
@@ -260,10 +281,10 @@ public class SearchParamExtractorR4Test {
 		Encounter enc = new Encounter();
 		enc.addLocation().setLocation(new Reference("Location/123"));
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, ourValidationSupport, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Encounter", "location");
 		assertNotNull(param);
-		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(enc);
+		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(enc, false);
 		assertEquals(1, links.size());
 		assertEquals("location", links.iterator().next().getSearchParamName());
 		assertEquals("Encounter.location.location", links.iterator().next().getPath());
@@ -275,10 +296,10 @@ public class SearchParamExtractorR4Test {
 		Consent consent = new Consent();
 		consent.setSource(new Reference().setReference("Consent/999"));
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, ourValidationSupport, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Consent", Consent.SP_SOURCE_REFERENCE);
 		assertNotNull(param);
-		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(consent);
+		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(consent, false);
 		assertEquals(1, links.size());
 		assertEquals("Consent.source", links.iterator().next().getPath());
 		assertEquals("Consent/999", ((Reference) links.iterator().next().getRef()).getReference());
@@ -290,7 +311,7 @@ public class SearchParamExtractorR4Test {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("sys").setValue("val");
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, ourValidationSupport, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Patient", Patient.SP_IDENTIFIER);
 		assertNotNull(param);
 		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> params = extractor.extractSearchParamTokens(p, param);
@@ -306,14 +327,14 @@ public class SearchParamExtractorR4Test {
 	public void testExtensionContainingReference() {
 		String path = "Patient.extension('http://patext').value.as(Reference)";
 
-		RuntimeSearchParam sp = new RuntimeSearchParam("extpat", "Patient SP", path, RestSearchParameterTypeEnum.REFERENCE, new HashSet<>(), Sets.newHashSet("Patient"), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
+		RuntimeSearchParam sp = new RuntimeSearchParam(null, null, "extpat", "Patient SP", path, RestSearchParameterTypeEnum.REFERENCE, new HashSet<>(), Sets.newHashSet("Patient"), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, false, null, null);
 		mySearchParamRegistry.addSearchParam(sp);
 
 		Patient patient = new Patient();
 		patient.addExtension("http://patext", new Reference("Organization/AAA"));
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, ourValidationSupport, mySearchParamRegistry);
-		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(patient);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(patient, false);
 		assertEquals(1, links.size());
 
 	}
@@ -328,13 +349,53 @@ public class SearchParamExtractorR4Test {
 			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code2")))
 			.setValue(new Quantity().setSystem("http://bar").setCode("code2").setValue(200));
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, ourValidationSupport, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		Set<ResourceIndexedSearchParamQuantity> links = extractor.extractSearchParamQuantity(o1);
 		ourLog.info("Links:\n  {}", links.stream().map(t -> t.toString()).collect(Collectors.joining("\n  ")));
 		assertEquals(4, links.size());
 	}
 
-	private static class MySearchParamRegistry implements ISearchParamRegistry {
+	@Test
+	public void testExtractComponentQuantityWithNormalizedQuantitySearchSupported() {
+
+		ModelConfig modelConfig = new ModelConfig();
+
+		modelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+
+		Observation o1 = new Observation();
+		o1.addComponent()
+			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code1")))
+			.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm").setValue(200));
+
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(modelConfig, new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		Set<ResourceIndexedSearchParamQuantityNormalized> links = extractor.extractSearchParamQuantityNormalized(o1);
+		ourLog.info("Links:\n  {}", links.stream().map(t -> t.toString()).collect(Collectors.joining("\n  ")));
+		assertEquals(2, links.size());
+
+	}
+
+	@Test
+	public void testExtractComponentQuantityValueWithNormalizedQuantitySearchSupported() {
+
+		ModelConfig modelConfig = new ModelConfig();
+
+		modelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+
+		Observation o1 = new Observation();
+
+		o1.addComponent()
+			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code1")))
+			.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm").setValue(200));
+
+		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation").get("component-value-quantity");
+
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(modelConfig, new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		List<String> list = extractor.extractParamValuesAsStrings(existingCodeSp, o1);
+
+		assertEquals(2, list.size());
+	}
+
+	private static class MySearchParamRegistry implements ISearchParamRegistry, ISearchParamRegistryController {
 
 
 		private List<RuntimeSearchParam> myExtraSearchParams = new ArrayList<>();
@@ -355,7 +416,6 @@ public class SearchParamExtractorR4Test {
 			return new ResourceChangeResult();
 		}
 
-		@Override
 		public ReadOnlySearchParamCache getActiveSearchParams() {
 			throw new UnsupportedOperationException();
 		}
@@ -380,12 +440,18 @@ public class SearchParamExtractorR4Test {
 		}
 
 		@Override
-		public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
+		public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Nullable
+		@Override
+		public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
+		public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -395,24 +461,9 @@ public class SearchParamExtractorR4Test {
 		}
 
 		@Override
-		public RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName) {
-			return null;
-		}
-
-		@Override
-		public Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef) {
-			return null;
-		}
-
-		@Override
 		public void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {
 			// nothing
 		}
-	}
-
-	@BeforeAll
-	public static void beforeClass() {
-		ourValidationSupport = new DefaultProfileValidationSupport(ourCtx);
 	}
 
 }

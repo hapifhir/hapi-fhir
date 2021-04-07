@@ -4,7 +4,7 @@ package ca.uhn.fhir.validation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,13 +88,13 @@ public class SchemaBaseValidator implements IValidatorModule {
 
 			try {
 				/*
-				 * See https://github.com/jamesagnew/hapi-fhir/issues/339
+				 * See https://github.com/hapifhir/hapi-fhir/issues/339
 				 * https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing
 				 */
 				validator.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
 				validator.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
 			} catch (SAXNotRecognizedException ex) {
-				ourLog.warn("Jaxp 1.5 Support not found.", ex);
+				ourLog.debug("Jaxp 1.5 Support not found.", ex);
 			}
 
 			validator.validate(new StreamSource(new StringReader(encodedResource)));
@@ -128,7 +128,7 @@ public class SchemaBaseValidator implements IValidatorModule {
 			try {
 				try {
 					/*
-					 * See https://github.com/jamesagnew/hapi-fhir/issues/339
+					 * See https://github.com/hapifhir/hapi-fhir/issues/339
 					 * https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing
 					 */
 					schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");

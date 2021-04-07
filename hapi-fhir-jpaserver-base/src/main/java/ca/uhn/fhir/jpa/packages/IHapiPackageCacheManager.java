@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.packages;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 
 public interface IHapiPackageCacheManager extends IPackageCacheManager {
 
@@ -42,6 +43,8 @@ public interface IHapiPackageCacheManager extends IPackageCacheManager {
 	NpmPackageSearchResultJson search(PackageSearchSpec thePackageSearchSpec);
 
 	PackageDeleteOutcomeJson uninstallPackage(String thePackageId, String theVersion);
+
+	List<IBaseResource> loadPackageAssetsByType(FhirVersionEnum theFhirVersion, String theResourceType);
 
 
 	class PackageContents {

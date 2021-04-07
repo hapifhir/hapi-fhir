@@ -1,0 +1,5 @@
+---
+type: change
+issue: 2372
+title: "ElasticsearchHibernatePropertiesBuilder will now reject any REST url which is protocol-aware. Protocol information should be set in the protocol field of the builder."
+

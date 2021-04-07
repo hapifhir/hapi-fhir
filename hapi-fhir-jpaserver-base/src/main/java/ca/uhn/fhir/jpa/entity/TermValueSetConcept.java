@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,21 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,11 +50,11 @@ import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
 /*
- * DM 2019-08-01 - Do not use IDX_VALUESET_CONCEPT_CS_CD; this was previously used as an index so reusing the name will
+ * DM 2019-08-01 - Do not use IDX_VALUESET_CONCEPT_CS_CD or IDX_VALUESET_CONCEPT_CS_CODE; this was previously used as an index so reusing the name will
  * bork up migration tasks.
  */
 @Table(name = "TRM_VALUESET_CONCEPT", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_VS_CONCEPT_CS_CODE", columnNames = {"VALUESET_PID", "SYSTEM_URL", "SYSTEM_VER", "CODEVAL"}),
+	@UniqueConstraint(name = "IDX_VS_CONCEPT_CSCD", columnNames = {"VALUESET_PID", "SYSTEM_URL", "CODEVAL"}),
 	@UniqueConstraint(name = "IDX_VS_CONCEPT_ORDER", columnNames = {"VALUESET_PID", "VALUESET_ORDER"})
 })
 @Entity()
@@ -60,6 +74,9 @@ public class TermValueSetConcept implements Serializable {
 	@Column(name = "VALUESET_PID", insertable = false, updatable = false, nullable = false)
 	private Long myValueSetPid;
 
+	@Column(name = "INDEX_STATUS", nullable = true)
+	private Long myIndexStatus;
+
 	@Column(name = "VALUESET_ORDER", nullable = false)
 	private int myOrder;
 
@@ -68,6 +85,13 @@ public class TermValueSetConcept implements Serializable {
 
 	@Transient
 	private String myValueSetName;
+
+	@Column(name = "SOURCE_PID", nullable = true)
+	private Long mySourceConceptPid;
+
+	@Lob
+	@Column(name = "SOURCE_DIRECT_PARENT_PIDS", nullable = true)
+	private String mySourceConceptDirectParentPids;
 
 	@Column(name = "SYSTEM_URL", nullable = false, length = TermCodeSystem.MAX_URL_LENGTH)
 	private String mySystem;
@@ -86,6 +110,13 @@ public class TermValueSetConcept implements Serializable {
 
 	@Transient
 	private transient Integer myHashCode;
+
+	/**
+	 * Constructor
+	 */
+	public TermValueSetConcept() {
+		super();
+	}
 
 	public Long getId() {
 		return myId;
@@ -218,5 +249,21 @@ public class TermValueSetConcept implements Serializable {
 			.append("myDisplay", myDisplay)
 			.append(myDesignations != null ? ("myDesignations - size=" + myDesignations.size()) : ("myDesignations=(null)"))
 			.toString();
+	}
+
+	public Long getIndexStatus() {
+		return myIndexStatus;
+	}
+
+	public void setIndexStatus(Long theIndexStatus) {
+		myIndexStatus = theIndexStatus;
+	}
+
+	public void setSourceConceptPid(Long theSourceConceptPid) {
+		mySourceConceptPid = theSourceConceptPid;
+	}
+
+	public void setSourceConceptDirectParentPids(String theSourceConceptDirectParentPids) {
+		mySourceConceptDirectParentPids = theSourceConceptDirectParentPids;
 	}
 }

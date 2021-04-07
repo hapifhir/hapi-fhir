@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.index;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
+import com.google.common.annotations.VisibleForTesting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +57,7 @@ public class DaoSearchParamSynchronizer {
 		synchronize(theEntity, retVal, theParams.myTokenParams, existingParams.myTokenParams);
 		synchronize(theEntity, retVal, theParams.myNumberParams, existingParams.myNumberParams);
 		synchronize(theEntity, retVal, theParams.myQuantityParams, existingParams.myQuantityParams);
+		synchronize(theEntity, retVal, theParams.myQuantityNormalizedParams, existingParams.myQuantityNormalizedParams);
 		synchronize(theEntity, retVal, theParams.myDateParams, existingParams.myDateParams);
 		synchronize(theEntity, retVal, theParams.myUriParams, existingParams.myUriParams);
 		synchronize(theEntity, retVal, theParams.myCoordsParams, existingParams.myCoordsParams);
@@ -65,6 +67,11 @@ public class DaoSearchParamSynchronizer {
 		theEntity.setResourceLinks(theParams.myLinks);
 
 		return retVal;
+	}
+
+	@VisibleForTesting
+	public void setEntityManager(EntityManager theEntityManager) {
+		myEntityManager = theEntityManager;
 	}
 
 	private <T extends BaseResourceIndex> void synchronize(ResourceTable theEntity, AddRemoveCount theAddRemoveCount, Collection<T> theNewParams, Collection<T> theExistingParams) {
@@ -87,6 +94,7 @@ public class DaoSearchParamSynchronizer {
 		for (T next : paramsToRemove) {
 			myEntityManager.remove(next);
 			theEntity.getParamsQuantity().remove(next);
+			theEntity.getParamsQuantityNormalized().remove(next);
 		}
 		for (T next : paramsToAdd) {
 			myEntityManager.merge(next);

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -330,6 +331,33 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			assertEquals("Invalid filter, must have fields populated: property op value", e.getMessage());
 		}
 	}
+	@Test
+	public void testExpandWithIncludeConceptHaveCodeAndDisplay() {
+		CodeSystem codeSystem = createExternalCsDogs();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(URL_MY_VALUE_SET);
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem(codeSystem.getUrl())
+			.addConcept(new ConceptReferenceComponent().setCode("hello").setDisplay("Display-VS"))
+			.addConcept(new ConceptReferenceComponent().setCode("goodbye").setDisplay("Goodbye-VS"));
+
+		myValueSetDao.create(valueSet, mySrd);
+
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
+		logAndValidateValueSet(result);
+
+		assertEquals(2, result.getExpansion().getTotal());
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("hello", "goodbye"));
+		for (ValueSetExpansionContainsComponent vsConcept : result.getExpansion().getContains()){
+			assertTrue(vsConcept.getDisplay().contains("VS"));
+		}
+
+
+	}
+
 
 	@Test
 	public void testExpandWithCodesAndDisplayFilterBlank() {
@@ -352,7 +380,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		myValueSetDao.create(valueSet, mySrd);
 
-		ValueSet result = myValueSetDao.expand(valueSet, "");
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
 		logAndValidateValueSet(result);
 
 		assertEquals(4, result.getExpansion().getTotal());
@@ -382,7 +410,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		myValueSetDao.create(valueSet, mySrd);
 
-		ValueSet result = myValueSetDao.expand(valueSet, "hel");
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter("hel"));
 		logAndValidateValueSet(result);
 
 		assertEquals(1, result.getExpansion().getTotal());
@@ -400,7 +428,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		valueSet.getCompose().addInclude().setSystem(codeSystem.getUrl());
 		myValueSetDao.create(valueSet, mySrd);
 
-		ValueSet result = myValueSetDao.expand(valueSet, "lab");
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter("lab"));
 		logAndValidateValueSet(result);
 
 		assertEquals(1, result.getExpansion().getTotal());
@@ -430,7 +458,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		myValueSetDao.create(valueSet, mySrd);
 
-		ValueSet result = myValueSetDao.expand(valueSet, "lab");
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter("lab"));
 		logAndValidateValueSet(result);
 
 		assertEquals(1, result.getExpansion().getTotal());
@@ -650,7 +678,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	public void testExpandWithOpEquals() {
 
 
-		ValueSet result = myValueSetDao.expandByIdentifier("http://hl7.org/fhir/ValueSet/doc-typecodes", "");
+		ValueSet result = myValueSetDao.expandByIdentifier("http://hl7.org/fhir/ValueSet/doc-typecodes", new ValueSetExpansionOptions().setFilter(""));
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result));
 	}
 
@@ -768,7 +796,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			.addInclude()
 			.setSystem(codeSystem.getUrl());
 
-		ValueSet result = myValueSetDao.expand(valueSet, "");
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
 		logAndValidateValueSet(result);
 
 		assertEquals(5, result.getExpansion().getTotal());

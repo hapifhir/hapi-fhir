@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,15 @@ package ca.uhn.hapi.fhir.docs;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.rest.api.PreferHandlingEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.*;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.hl7.fhir.r4.model.CapabilityStatement;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.springframework.web.cors.CorsConfiguration;
 
 import javax.servlet.ServletException;
@@ -139,6 +143,36 @@ public class ServletExamples {
 	}
 	// END SNIPPET: fhirPathInterceptor
 
+	// START SNIPPET: staticCapabilityStatementInterceptor
+	@WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
+	public class RestfulServerWithStaticCapabilityStatement extends RestfulServer {
+
+		@Override
+		protected void initialize() throws ServletException {
+
+			// ... define your resource providers here ...
+
+			// Create the interceptor
+			StaticCapabilityStatementInterceptor interceptor = new StaticCapabilityStatementInterceptor();
+
+			// There are two ways of supplying a CapabilityStatement to the
+			// interceptor. You can use a static resource found on the classpath
+			interceptor.setCapabilityStatementResource("/classpath/to/capabilitystatement.json");
+
+			// ..or you can simply create one in code (in which case you do not
+			// need to call setCapabilityStatementResource(..))
+			CapabilityStatement cs = new CapabilityStatement();
+			cs.setFhirVersion(Enumerations.FHIRVersion._4_0_1);
+			cs.getSoftware().setName("My Acme Server");
+
+			// Now register the interceptor
+			registerInterceptor(interceptor);
+
+		}
+
+	}
+	// END SNIPPET: staticCapabilityStatementInterceptor
+
    // START SNIPPET: responseHighlighterInterceptor
    @WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
    public class RestfulServerWithResponseHighlighter extends RestfulServer {
@@ -190,5 +224,50 @@ public class ServletExamples {
       
    }
    // END SNIPPET: corsInterceptor
+
+
+	@WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
+	public class RestfulServerWithResponseTerminologyTranslationInterceptor extends RestfulServer {
+
+		private IValidationSupport myValidationSupport;
+
+		@Override
+		protected void initialize() throws ServletException {
+			// START SNIPPET: ResponseTerminologyTranslationInterceptor
+
+			// Create an interceptor that will map from a proprietary CodeSystem to LOINC
+			ResponseTerminologyTranslationInterceptor interceptor = new ResponseTerminologyTranslationInterceptor(myValidationSupport);
+			interceptor.addMappingSpecification("http://examplelabs.org", "http://loinc.org");
+
+			// Register the interceptor
+			registerInterceptor(interceptor);
+
+			// END SNIPPET: ResponseTerminologyTranslationInterceptor
+		}
+	}
+
+
+	// START SNIPPET: preferHandling
+	@WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
+	public class RestfulServerWithPreferHandling extends RestfulServer {
+
+		@Override
+		protected void initialize() throws ServletException {
+
+			// Create an interceptor
+			SearchPreferHandlingInterceptor interceptor = new SearchPreferHandlingInterceptor();
+
+			// Optionally you can change the default behaviour for when the Prefer
+			// header is not found in the request or does not have a handling
+			// directive
+			interceptor.setDefaultBehaviour(PreferHandlingEnum.LENIENT);
+
+			// Register the interceptor
+			registerInterceptor(interceptor);
+
+		}
+		// END SNIPPET: preferHandling
+	}
+
 
 }

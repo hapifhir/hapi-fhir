@@ -4,7 +4,7 @@ package ca.uhn.fhir.interceptor.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,6 @@ import com.google.common.annotations.VisibleForTesting;
 @VisibleForTesting
 public interface IAnonymousInterceptor {
 
-	void invoke(Pointcut thePointcut, HookParams theArgs);
+	void invoke(IPointcut thePointcut, HookParams theArgs);
 
 }

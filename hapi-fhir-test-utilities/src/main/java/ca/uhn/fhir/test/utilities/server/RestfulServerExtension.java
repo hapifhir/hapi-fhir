@@ -4,7 +4,7 @@ package ca.uhn.fhir.test.utilities.server;
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,19 +40,24 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public class RestfulServerExtension implements BeforeEachCallback, AfterEachCallback {
 	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServerExtension.class);
 
 	private FhirContext myFhirContext;
-	private Object[] myProviders;
+	private List<Object> myProviders = new ArrayList<>();
 	private FhirVersionEnum myFhirVersion;
 	private Server myServer;
 	private RestfulServer myServlet;
 	private int myPort;
 	private CloseableHttpClient myHttpClient;
 	private IGenericClient myFhirClient;
+	private List<Consumer<RestfulServer>> myConsumers = new ArrayList<>();
 
 	/**
 	 * Constructor
@@ -60,7 +65,9 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 	public RestfulServerExtension(FhirContext theFhirContext, Object... theProviders) {
 		Validate.notNull(theFhirContext);
 		myFhirContext = theFhirContext;
-		myProviders = theProviders;
+		if (theProviders != null) {
+			myProviders = new ArrayList<>(Arrays.asList(theProviders));
+		}
 	}
 
 	/**
@@ -73,16 +80,9 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 
 	private void createContextIfNeeded() {
 		if (myFhirVersion != null) {
-			myFhirContext = new FhirContext(myFhirVersion);
+			myFhirContext = FhirContext.forCached(myFhirVersion);
 		}
 	}
-
-	private void destroyContextIfWeCreatedIt() {
-		if (myFhirVersion != null) {
-			myFhirContext = null;
-		}
-	}
-
 
 	private void stopServer() throws Exception {
 		JettyUtil.closeServer(myServer);
@@ -105,6 +105,8 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 		ServletHolder servletHolder = new ServletHolder(myServlet);
 		servletHandler.addServletWithMapping(servletHolder, "/*");
 
+		myConsumers.forEach(t -> t.accept(myServlet));
+
 		myServer.setHandler(servletHandler);
 		myServer.start();
 		myPort = JettyUtil.getPortForStartedServer(myServer);
@@ -125,6 +127,7 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 	}
 
 	public FhirContext getFhirContext() {
+		createContextIfNeeded();
 		return myFhirContext;
 	}
 
@@ -139,12 +142,37 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
 		stopServer();
-		destroyContextIfWeCreatedIt();
 	}
 
 	@Override
 	public void beforeEach(ExtensionContext context) throws Exception {
 		createContextIfNeeded();
 		startServer();
+	}
+
+	public RestfulServerExtension registerProvider(Object theProvider) {
+		if (myServlet != null) {
+			myServlet.registerProvider(theProvider);
+		} else {
+			myProviders.add(theProvider);
+		}
+		return this;
+	}
+
+	public RestfulServerExtension withServer(Consumer<RestfulServer> theConsumer) {
+		if (myServlet != null) {
+			theConsumer.accept(myServlet);
+		} else {
+			myConsumers.add(theConsumer);
+		}
+		return this;
+	}
+
+	public RestfulServerExtension registerInterceptor(Object theInterceptor) {
+		return withServer(t -> t.getInterceptorService().registerInterceptor(theInterceptor));
+	}
+
+	public void shutDownServer() throws Exception {
+		JettyUtil.closeServer(myServer);
 	}
 }

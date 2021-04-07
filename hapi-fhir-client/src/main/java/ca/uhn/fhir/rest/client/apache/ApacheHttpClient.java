@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.apache;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
  */
 public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 
-	private HttpClient myClient;
+	private final HttpClient myClient;
 
 	public ApacheHttpClient(HttpClient theClient, StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
 		super(theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
@@ -89,8 +89,7 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 
 	@Override
 	protected IHttpRequest createHttpRequest() {
-		IHttpRequest retVal = createHttpRequest((HttpEntity)null);
-		return retVal;
+		return createHttpRequest((HttpEntity)null);
 	}
 
 	@Override
@@ -101,19 +100,17 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 		 * the newer ones for whatever reason.
 		 */
 		ByteArrayEntity entity = new ByteArrayEntity(content);
-		IHttpRequest retVal = createHttpRequest(entity);
-		return retVal;
+		return createHttpRequest(entity);
 	}
 
 	private ApacheHttpRequest createHttpRequest(HttpEntity theEntity) {
 		HttpRequestBase request = constructRequestBase(theEntity);
-		ApacheHttpRequest result = new ApacheHttpRequest(myClient, request);
-		return result;
+		return new ApacheHttpRequest(myClient, request);
 	}
 
 	@Override
 	protected IHttpRequest createHttpRequest(Map<String, List<String>> theParams) {
-		List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+		List<NameValuePair> parameters = new ArrayList<>();
 		for (Entry<String, List<String>> nextParam : theParams.entrySet()) {
 			List<String> value = nextParam.getValue();
 			for (String s : value) {
@@ -122,8 +119,7 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 		}
 
 		UrlEncodedFormEntity entity = createFormEntity(parameters);
-		IHttpRequest retVal = createHttpRequest(entity);
-		return retVal;
+		return createHttpRequest(entity);
 	}
 
 
@@ -136,11 +132,6 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 		 * which one we use anyhow.
 		 */
 		ByteArrayEntity entity = new ByteArrayEntity(theContents.getBytes(Constants.CHARSET_UTF8));
-		IHttpRequest retVal = createHttpRequest(entity);
-		return retVal;
+		return createHttpRequest(entity);
 	}
-
-
-
-
 }

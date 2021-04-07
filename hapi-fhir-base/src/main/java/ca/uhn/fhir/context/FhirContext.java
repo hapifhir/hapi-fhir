@@ -32,6 +32,7 @@ import org.apache.jena.riot.Lang;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -57,7 +58,7 @@ import java.util.Set;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,10 +101,12 @@ public class FhirContext {
 	private static final Map<FhirVersionEnum, FhirContext> ourStaticContexts = Collections.synchronizedMap(new EnumMap<>(FhirVersionEnum.class));
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirContext.class);
 	private final IFhirVersion myVersion;
+	private final Map<String, Class<? extends IBaseResource>> myDefaultTypeForProfile = new HashMap<>();
+	private final Set<PerformanceOptionsEnum> myPerformanceOptions = new HashSet<>();
+	private final Collection<Class<? extends IBaseResource>> myResourceTypesToScan;
 	private AddProfileTagEnum myAddProfileTagWhenEncoding = AddProfileTagEnum.ONLY_FOR_CUSTOM;
 	private volatile Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myClassToElementDefinition = Collections.emptyMap();
 	private ArrayList<Class<? extends IBase>> myCustomTypes;
-	private Map<String, Class<? extends IBaseResource>> myDefaultTypeForProfile = new HashMap<>();
 	private volatile Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = Collections.emptyMap();
 	private volatile boolean myInitialized;
 	private volatile boolean myInitializing = false;
@@ -114,13 +117,14 @@ public class FhirContext {
 	private volatile INarrativeGenerator myNarrativeGenerator;
 	private volatile IParserErrorHandler myParserErrorHandler = new LenientErrorHandler();
 	private ParserOptions myParserOptions = new ParserOptions();
-	private Set<PerformanceOptionsEnum> myPerformanceOptions = new HashSet<>();
-	private Collection<Class<? extends IBaseResource>> myResourceTypesToScan;
 	private volatile IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 	private IValidationSupport myValidationSupport;
 	private Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> myVersionToNameToResourceType = Collections.emptyMap();
 	private volatile Set<String> myResourceNames;
+	private volatile Boolean myFormatXmlSupported;
+	private volatile Boolean myFormatJsonSupported;
+	private volatile Boolean myFormatRdfSupported;
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
@@ -672,6 +676,51 @@ public class FhirContext {
 		return !myDefaultTypeForProfile.isEmpty();
 	}
 
+	/**
+	 * @return Returns <code>true</code> if the XML serialization format is supported, based on the
+	 * available libraries on the classpath.
+	 *
+	 * @since 5.4.0
+	 */
+	public boolean isFormatXmlSupported() {
+		Boolean retVal = myFormatXmlSupported;
+		if (retVal == null) {
+			retVal = tryToInitParser(() -> newXmlParser());
+			myFormatXmlSupported = retVal;
+		}
+		return retVal;
+	}
+
+	/**
+	 * @return Returns <code>true</code> if the JSON serialization format is supported, based on the
+	 * available libraries on the classpath.
+	 *
+	 * @since 5.4.0
+	 */
+	public boolean isFormatJsonSupported() {
+		Boolean retVal = myFormatJsonSupported;
+		if (retVal == null) {
+			retVal = tryToInitParser(() -> newJsonParser());
+			myFormatJsonSupported = retVal;
+		}
+		return retVal;
+	}
+
+	/**
+	 * @return Returns <code>true</code> if the RDF serialization format is supported, based on the
+	 * available libraries on the classpath.
+	 *
+	 * @since 5.4.0
+	 */
+	public boolean isFormatRdfSupported() {
+		Boolean retVal = myFormatRdfSupported;
+		if (retVal == null) {
+			retVal = tryToInitParser(() -> newRDFParser());
+			myFormatRdfSupported = retVal;
+		}
+		return retVal;
+	}
+
 	public IVersionSpecificBundleFactory newBundleFactory() {
 		return myVersion.newBundleFactory(this);
 	}
@@ -734,7 +783,6 @@ public class FhirContext {
 	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed
 	 * without incurring any performance penalty
 	 * </p>
-	 *
 	 */
 	public IParser newRDFParser() {
 		return new RDFParser(this, myParserErrorHandler, Lang.TURTLE);
@@ -988,6 +1036,24 @@ public class FhirContext {
 		return "FhirContext[" + myVersion.getVersion().name() + "]";
 	}
 
+	// TODO KHS add the other primitive types
+	public IPrimitiveType<Boolean> getPrimitiveBoolean(Boolean theValue) {
+		IPrimitiveType<Boolean> retval = (IPrimitiveType<Boolean>) getElementDefinition("boolean").newInstance();
+		retval.setValue(theValue);
+		return retval;
+	}
+
+	private static boolean tryToInitParser(Runnable run) {
+		boolean retVal;
+		try {
+			run.run();
+			retVal = true;
+		} catch (Exception | NoClassDefFoundError e) {
+			retVal = false;
+		}
+		return retVal;
+	}
+
 	/**
 	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU2 DSTU2}
 	 */
@@ -1065,5 +1131,4 @@ public class FhirContext {
 		}
 		return retVal;
 	}
-
 }

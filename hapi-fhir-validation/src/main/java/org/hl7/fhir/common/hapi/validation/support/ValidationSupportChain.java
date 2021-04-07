@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import org.apache.commons.lang3.Validate;
@@ -14,9 +15,12 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ValidationSupportChain implements IValidationSupport {
@@ -40,6 +44,31 @@ public class ValidationSupportChain implements IValidationSupport {
 				addValidationSupport(next);
 			}
 		}
+	}
+
+	@Override
+	public TranslateConceptResults translateConcept(TranslateCodeRequest theRequest) {
+		TranslateConceptResults retVal = null;
+		for (IValidationSupport next : myChain) {
+			TranslateConceptResults translations = next.translateConcept(theRequest);
+			if (translations != null) {
+				if (retVal == null) {
+					retVal = new TranslateConceptResults();
+				}
+
+				if (retVal.getMessage() == null) {
+					retVal.setMessage(translations.getMessage());
+				}
+
+				if (translations.getResult() && !retVal.getResult()) {
+					retVal.setResult(translations.getResult());
+					retVal.setMessage(translations.getMessage());
+				}
+
+				retVal.getResults().addAll(translations.getResults());
+			}
+		}
+		return retVal;
 	}
 
 	@Override
@@ -131,7 +160,7 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
+	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
 		for (IValidationSupport next : myChain) {
 			// TODO: test if code system is supported?
 			ValueSetExpansionOutcome expanded = next.expandValueSet(theValidationSupportContext, theExpansionOptions, theValueSetToExpand);
@@ -156,10 +185,19 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	@Override
 	public List<IBaseResource> fetchAllStructureDefinitions() {
+		return doFetchStructureDefinitions(t->t.fetchAllStructureDefinitions());
+	}
+
+	@Override
+	public List<IBaseResource> fetchAllNonBaseStructureDefinitions() {
+		return doFetchStructureDefinitions(t->t.fetchAllNonBaseStructureDefinitions());
+	}
+
+	private List<IBaseResource> doFetchStructureDefinitions(Function<IValidationSupport, List<IBaseResource>> theFunction) {
 		ArrayList<IBaseResource> retVal = new ArrayList<>();
 		Set<String> urls = new HashSet<>();
 		for (IValidationSupport nextSupport : myChain) {
-			List<IBaseResource> allStructureDefinitions = nextSupport.fetchAllStructureDefinitions();
+			List<IBaseResource> allStructureDefinitions = theFunction.apply(nextSupport);
 			if (allStructureDefinitions != null) {
 				for (IBaseResource next : allStructureDefinitions) {
 

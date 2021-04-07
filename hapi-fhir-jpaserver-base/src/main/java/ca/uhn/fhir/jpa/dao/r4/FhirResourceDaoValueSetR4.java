@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,37 +44,20 @@ import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoValueSetDstu3.vsValidateC
 public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet> implements IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> {
 
 	@Override
-	public ValueSet expand(IIdType theId, String theFilter, RequestDetails theRequestDetails) {
+	public ValueSet expand(IIdType theId, ValueSetExpansionOptions theOptions, RequestDetails theRequestDetails) {
 		ValueSet source = read(theId, theRequestDetails);
-		return expand(source, theFilter);
+		return expand(source, theOptions);
+	}
+
+
+	@Override
+	public ValueSet expandByIdentifier(String theUri, ValueSetExpansionOptions theOptions) {
+		return myTerminologySvc.expandValueSet(theOptions, theUri);
 	}
 
 	@Override
-	public ValueSet expand(IIdType theId, String theFilter, int theOffset, int theCount, RequestDetails theRequestDetails) {
-		ValueSet source = read(theId, theRequestDetails);
-		return expand(source, theFilter, theOffset, theCount);
-	}
-
-	@Override
-	public ValueSet expandByIdentifier(String theUri, String theFilter) {
-		return myTerminologySvc.expandValueSet(null, theUri, theFilter);
-	}
-
-	@Override
-	public ValueSet expandByIdentifier(String theUri, String theFilter, int theOffset, int theCount) {
-		ValueSetExpansionOptions options = ValueSetExpansionOptions.forOffsetAndCount(theOffset, theCount);
-		return myTerminologySvc.expandValueSet(options, theUri, theFilter);
-	}
-
-	@Override
-	public ValueSet expand(ValueSet theSource, String theFilter) {
-		return myTerminologySvc.expandValueSet(null, theSource, theFilter);
-	}
-
-	@Override
-	public ValueSet expand(ValueSet theSource, String theFilter, int theOffset, int theCount) {
-		ValueSetExpansionOptions options = ValueSetExpansionOptions.forOffsetAndCount(theOffset, theCount);
-		return myTerminologySvc.expandValueSet(options, theSource, theFilter);
+	public ValueSet expand(ValueSet theSource, ValueSetExpansionOptions theOptions) {
+		return myTerminologySvc.expandValueSet(theOptions, theSource);
 	}
 
 	@Override
@@ -105,16 +88,6 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 		}
 
 		return retVal;
-	}
-
-	public static void validateHaveExpansionOrThrowInternalErrorException(IValidationSupport.ValueSetExpansionOutcome theRetVal) {
-		if (theRetVal != null && theRetVal.getValueSet() == null) {
-			throw new InternalErrorException("Unable to expand ValueSet: " + theRetVal.getError());
-		}
-
-		if (theRetVal == null) {
-			throw new InternalErrorException("Unable to expand ValueSet");
-		}
 	}
 
 

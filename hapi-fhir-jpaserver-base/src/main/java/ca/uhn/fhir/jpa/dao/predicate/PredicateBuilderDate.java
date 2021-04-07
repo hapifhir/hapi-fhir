@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,6 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +49,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderDate.class);
 
 
-	PredicateBuilderDate(LegacySearchBuilder theSearchBuilder) {
+	public PredicateBuilderDate(LegacySearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 
@@ -127,6 +126,9 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 		if (theParam instanceof DateParam) {
 			DateParam date = (DateParam) theParam;
 			if (!date.isEmpty()) {
+				if (theOperation == SearchFilterParser.CompareOperation.ne) {
+					date = new DateParam(ParamPrefixEnum.EQUAL, date.getValueAsString());
+				}
 				DateRangeParam range = new DateRangeParam(date);
 				p = createPredicateDateFromRange(theBuilder,
 					theFrom,
@@ -153,6 +155,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 		return theDateParam == null || theDateParam.getPrecision().ordinal() == TemporalPrecisionEnum.DAY.ordinal();
 	}
 
+	@SuppressWarnings("unchecked")
 	private Predicate createPredicateDateFromRange(CriteriaBuilder theBuilder,
 																  From<?, ResourceIndexedSearchParamDate> theFrom,
 																  DateRangeParam theRange,
@@ -192,36 +195,60 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 		}
 
 		if (operation == SearchFilterParser.CompareOperation.lt) {
-			if (lowerBoundInstant == null) {
-				throw new InvalidRequestException("lowerBound value not correctly specified for compare operation");
-			}
-			//im like 80% sure this should be ub and not lb, as it is an UPPER bound.
-			lb = theBuilder.lessThan(theFrom.get(lowValueField), genericLowerBound);
-		} else if (operation == SearchFilterParser.CompareOperation.le) {
-			if (upperBoundInstant == null) {
-				throw new InvalidRequestException("upperBound value not correctly specified for compare operation");
-			}
-			//im like 80% sure this should be ub and not lb, as it is an UPPER bound.
-			lb = theBuilder.lessThanOrEqualTo(theFrom.get(highValueField), genericUpperBound);
-		} else if (operation == SearchFilterParser.CompareOperation.gt) {
-			if (upperBoundInstant == null) {
-				throw new InvalidRequestException("upperBound value not correctly specified for compare operation");
-			}
-			lb = theBuilder.greaterThan(theFrom.get(highValueField), genericUpperBound);
-			} else if (operation == SearchFilterParser.CompareOperation.ge) {
-				if (lowerBoundInstant == null) {
-					throw new InvalidRequestException("lowerBound value not correctly specified for compare operation");
+			// use lower bound first
+			if (lowerBoundInstant != null) {
+					// the value has been reduced one in this case
+					lb = theBuilder.lessThanOrEqualTo(theFrom.get(lowValueField), genericLowerBound);
+			} else {
+				if (upperBoundInstant != null) {
+					ub = theBuilder.lessThanOrEqualTo(theFrom.get(lowValueField), genericUpperBound);
+				} else {
+					throw new InvalidRequestException("lowerBound and upperBound value not correctly specified for compare theOperation");
 				}
-				lb = theBuilder.greaterThanOrEqualTo(theFrom.get(lowValueField), genericLowerBound);
-			} else if (operation == SearchFilterParser.CompareOperation.ne) {
+			}
+		} else if (operation == SearchFilterParser.CompareOperation.le) {
+				// use lower bound first
+				if (lowerBoundInstant != null) {
+					lb = theBuilder.lessThanOrEqualTo(theFrom.get(lowValueField), genericLowerBound);
+				} else {
+					if (upperBoundInstant != null) {
+						ub = theBuilder.lessThanOrEqualTo(theFrom.get(lowValueField), genericUpperBound);
+					} else {
+						throw new InvalidRequestException("lowerBound and upperBound value not correctly specified for compare theOperation");
+					}
+				}
+		} else if (operation == SearchFilterParser.CompareOperation.gt) {
+			// use upper bound first, e.g value between 6 and 10
+			// gt7 true,    10>7, gt11 false,  10>11 false, gt5 true,    10>5
+			if (upperBoundInstant != null) {
+				ub = theBuilder.greaterThanOrEqualTo(theFrom.get(highValueField), genericUpperBound);
+			} else {
+				if (lowerBoundInstant != null) {
+					lb = theBuilder.greaterThanOrEqualTo(theFrom.get(highValueField), genericLowerBound);
+				} else {
+					throw new InvalidRequestException("upperBound and lowerBound value not correctly specified for compare theOperation");
+				}
+			} 
+		} else if (operation == SearchFilterParser.CompareOperation.ge) {
+			// use upper bound first, e.g value between 6 and 10
+			// gt7 true,    10>7, gt11 false,  10>11 false, gt5 true,    10>5
+			if (upperBoundInstant != null) {
+				ub = theBuilder.greaterThanOrEqualTo(theFrom.get(highValueField), genericUpperBound);;
+			} else {
+				if (lowerBoundInstant != null) {
+					lb = theBuilder.greaterThanOrEqualTo(theFrom.get(highValueField), genericLowerBound);
+				} else {
+					throw new InvalidRequestException("upperBound and lowerBound value not correctly specified for compare theOperation");
+				}
+			} 
+		} else if (operation == SearchFilterParser.CompareOperation.ne) {
 			if ((lowerBoundInstant == null) ||
 				(upperBoundInstant == null)) {
 				throw new InvalidRequestException("lowerBound and/or upperBound value not correctly specified for compare operation");
 			}
 			lt = theBuilder.lessThan(theFrom.get(lowValueField), genericLowerBound);
 			gt = theBuilder.greaterThan(theFrom.get(highValueField), genericUpperBound);
-			lb = theBuilder.or(lt,
-				gt);
+			lb = theBuilder.or(lt, gt);
 		} else if ((operation == SearchFilterParser.CompareOperation.eq) || (operation == null)) {
 			if (lowerBoundInstant != null) {
 				gt = theBuilder.greaterThanOrEqualTo(theFrom.get(lowValueField), genericLowerBound);

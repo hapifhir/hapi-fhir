@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>5.3.0-SNAPSHOT</version>
+		<version>5.4.0-PRE5-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -41,9 +41,20 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
+                        <_nouses>true</_nouses>
+                        <_removeheaders>Built-By, Include-Resource, Private-Package, Require-Capability</_removeheaders>
+                        <!-- No need to disable normal OSGi class loading
 						<Fragment-Host>
 							ca.uhn.hapi.fhir.hapi-fhir-base
 						</Fragment-Host>
+						-->
+                        <!-- maven-bundle-plugin does not generate
+                             exports for resource packages -->
+                        <Export-Package>
+                            org.hl7.fhir.r5.model.extension;version="${project.version}",
+                            org.hl7.fhir.r5.model.profile;version="${project.version}",
+                            org.hl7.fhir.r5.model.valueset;version="${project.version}"
+                        </Export-Package>
 					</instructions>
 				</configuration>
 			</plugin>

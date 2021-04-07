@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.api;
  * #L%
  */
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 
 /**
@@ -27,7 +28,7 @@ import java.util.HashMap;
  */
 public enum PreferReturnEnum {
 
-	REPRESENTATION("representation"), MINIMAL("minimal"), OPERATION_OUTCOME("OperationOutcome");
+	REPRESENTATION(Constants.HEADER_PREFER_RETURN_REPRESENTATION), MINIMAL(Constants.HEADER_PREFER_RETURN_MINIMAL), OPERATION_OUTCOME(Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 
 	private static HashMap<String, PreferReturnEnum> ourValues;
 	private String myHeaderValue;
@@ -40,6 +41,7 @@ public enum PreferReturnEnum {
 		return myHeaderValue;
 	}
 
+	@Nullable
 	public static PreferReturnEnum fromHeaderValue(String theHeaderValue) {
 		if (ourValues == null) {
 			HashMap<String, PreferReturnEnum> values = new HashMap<>();

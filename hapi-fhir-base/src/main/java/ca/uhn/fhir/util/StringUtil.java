@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,33 @@ public class StringUtil {
 			}
 		}
 		return new String(bytes, StandardCharsets.UTF_8);
+	}
+
+	/**
+	 * Gets the string prefix of the specified length.
+	 *
+	 * @param theString
+	 * 	String to get the prefix from
+	 * @param theCodePointCount
+	 * 	Length of the prefix in code points
+	 * @return
+	 * 	Returns the string prefix of the specified number of codepoints.
+	 */
+	public static String left(String theString, int theCodePointCount) {
+		if (theString == null) {
+			return null;
+		}
+
+		if (theCodePointCount < 0) {
+			return "";
+		}
+
+		// char count can only be bigger than the code point count
+		if (theString.length() <= theCodePointCount) {
+			return theString;
+		}
+
+		return theString.substring(0, theString.offsetByCodePoints(0, theCodePointCount));
 	}
 
 }

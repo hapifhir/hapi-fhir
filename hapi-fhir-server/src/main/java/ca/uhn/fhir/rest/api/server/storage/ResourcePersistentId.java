@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.api.server.storage;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,20 @@ import java.util.Optional;
 public class ResourcePersistentId {
 
 	private Object myId;
+	private Long myVersion;
 
 	public ResourcePersistentId(Object theId) {
+		this(theId, null);
+	}
+
+	/**
+	 * @param theVersion This should only be populated if a specific version is needed. If you want the current version,
+	 *                   leave this as <code>null</code>
+	 */
+	public ResourcePersistentId(Object theId, Long theVersion) {
 		assert !(theId instanceof Optional);
 		myId = theId;
+		myVersion = theVersion;
 	}
 
 	@Override
@@ -47,12 +57,18 @@ public class ResourcePersistentId {
 		}
 		ResourcePersistentId that = (ResourcePersistentId) theO;
 
-		return ObjectUtil.equals(myId, that.myId);
+		boolean retVal = ObjectUtil.equals(myId, that.myId);
+		retVal &= ObjectUtil.equals(myVersion, that.myVersion);
+		return retVal;
 	}
 
 	@Override
 	public int hashCode() {
-		return myId.hashCode();
+		int retVal = myId.hashCode();
+		if (myVersion != null) {
+			retVal += myVersion.hashCode();
+		}
+		return retVal;
 	}
 
 	public Object getId() {
@@ -70,6 +86,18 @@ public class ResourcePersistentId {
 	@Override
 	public String toString() {
 		return myId.toString();
+	}
+
+	public Long getVersion() {
+		return myVersion;
+	}
+
+	/**
+	 * @param theVersion This should only be populated if a specific version is needed. If you want the current version,
+	 *                   leave this as <code>null</code>
+	 */
+	public void setVersion(Long theVersion) {
+		myVersion = theVersion;
 	}
 
 	public static List<Long> toLongList(Collection<ResourcePersistentId> thePids) {

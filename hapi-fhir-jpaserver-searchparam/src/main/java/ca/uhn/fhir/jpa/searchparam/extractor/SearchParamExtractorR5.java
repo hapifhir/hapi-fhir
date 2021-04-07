@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,9 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -58,9 +56,9 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 	/**
 	 * Constructor for unit tests
 	 */
-	public SearchParamExtractorR5(ModelConfig theModelConfig, PartitionSettings thePartitionSettings, FhirContext theCtx, DefaultProfileValidationSupport theDefaultProfileValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
+	public SearchParamExtractorR5(ModelConfig theModelConfig, PartitionSettings thePartitionSettings, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
 		super(theModelConfig, thePartitionSettings, theCtx, theSearchParamRegistry);
-		initFhirPath(theDefaultProfileValidationSupport);
+		initFhirPath();
 		start();
 	}
 
@@ -69,13 +67,12 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 	public void start() {
 		super.start();
 		if (myFhirPathEngine == null) {
-			IValidationSupport support = myApplicationContext.getBean(IValidationSupport.class);
-			initFhirPath(support);
+			initFhirPath();
 		}
 	}
 
-	public void initFhirPath(IValidationSupport theSupport) {
-		IWorkerContext worker = new HapiWorkerContext(getContext(), theSupport);
+	public void initFhirPath() {
+		IWorkerContext worker = new HapiWorkerContext(getContext(), getContext().getValidationSupport());
 		myFhirPathEngine = new FHIRPathEngine(worker);
 		myFhirPathEngine.setHostServices(new SearchParamExtractorR5HostServices());
 	}
@@ -88,7 +85,7 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 
 	private static class SearchParamExtractorR5HostServices implements FHIRPathEngine.IEvaluationContext {
 
-		private Map<String, Base> myResourceTypeToStub = Collections.synchronizedMap(new HashMap<>());
+		private final Map<String, Base> myResourceTypeToStub = Collections.synchronizedMap(new HashMap<>());
 
 		@Override
 		public Base resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {

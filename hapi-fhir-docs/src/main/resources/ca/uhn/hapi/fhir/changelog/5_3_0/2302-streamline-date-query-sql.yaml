@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 2302
+title: The JPA server generated SQL for date search parameters has been streamlined to avoid the use of
+   redundant OR expressions that slow down performance in some cases.

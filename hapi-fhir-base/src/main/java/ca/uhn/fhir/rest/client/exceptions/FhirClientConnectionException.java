@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.exceptions;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,15 +33,15 @@ public class FhirClientConnectionException extends BaseServerResponseException {
 	private static final long serialVersionUID = 1L;
 
 	public FhirClientConnectionException(Throwable theCause) {
-		super(0, theCause);
+		super(500, theCause);
 	}
 
 	public FhirClientConnectionException(String theMessage, Throwable theCause) {
-		super(0, theMessage, theCause);
+		super(500, theMessage, theCause);
 	}
 
 	public FhirClientConnectionException(String theMessage) {
-		super(0, theMessage);
+		super(500, theMessage);
 	}
 
 }

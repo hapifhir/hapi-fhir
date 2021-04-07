@@ -9,7 +9,7 @@ import java.util.Map;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,9 @@ public interface IBaseQuery<T extends IBaseQuery<?>> {
 
 	/**
 	 * Add a set of search parameters to the query.
+	 *
+	 * Note that the entries of the map are extracted immediately upon invoking this method. Changes made to the
+	 * map afterward will not be reflected in the actual search.
 	 */
 	T where(Map<String, List<IQueryParameterType>> theCriterion);
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.context.support;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,17 @@ public class ValueSetExpansionOptions {
 	private boolean myFailOnMissingCodeSystem = true;
 	private int myCount = 1000;
 	private int myOffset = 0;
+	private boolean myIncludeHierarchy;
+	private String myFilter;
+
+	public String getFilter() {
+		return myFilter;
+	}
+
+	public ValueSetExpansionOptions setFilter(String theFilter) {
+		myFilter = theFilter;
+		return this;
+	}
 
 	/**
 	 * The number of codes to return.
@@ -92,6 +103,14 @@ public class ValueSetExpansionOptions {
 	public ValueSetExpansionOptions setFailOnMissingCodeSystem(boolean theFailOnMissingCodeSystem) {
 		myFailOnMissingCodeSystem = theFailOnMissingCodeSystem;
 		return this;
+	}
+
+	public boolean isIncludeHierarchy() {
+		return myIncludeHierarchy;
+	}
+
+	public void setIncludeHierarchy(boolean theIncludeHierarchy) {
+		myIncludeHierarchy = theIncludeHierarchy;
 	}
 
 	public static ValueSetExpansionOptions forOffsetAndCount(int theOffset, int theCount) {

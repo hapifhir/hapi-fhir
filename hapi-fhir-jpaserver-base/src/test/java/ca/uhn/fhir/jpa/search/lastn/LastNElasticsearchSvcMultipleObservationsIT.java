@@ -2,7 +2,8 @@ package ca.uhn.fhir.jpa.search.lastn;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.jpa.search.lastn.config.TestElasticsearchConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.search.lastn.config.TestElasticsearchContainerHelper;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -17,18 +18,31 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.hl7.fhir.r4.model.Observation;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.testcontainers.elasticsearch.ElasticsearchContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,8 +60,9 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestElasticsearchConfig.class})
+@ExtendWith({SpringExtension.class})
+@RequiresDocker
+@Testcontainers
 public class LastNElasticsearchSvcMultipleObservationsIT {
 
 	static private final Calendar baseObservationDate = new GregorianCalendar();
@@ -58,15 +73,30 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 	private final Map<String, Map<String, List<Date>>> createdPatientObservationMap = new HashMap<>();
 
 	private final FhirContext myFhirContext = FhirContext.forCached(FhirVersionEnum.R4);
-	@Autowired
+
+
+	@Container
+	public static ElasticsearchContainer elasticsearchContainer = TestElasticsearchContainerHelper.getEmbeddedElasticSearch();
+
+
+
 	private ElasticsearchSvcImpl elasticsearchSvc;
 
 	@BeforeEach
 	public void before() throws IOException {
+		PartitionSettings partitionSettings = new PartitionSettings();
+		partitionSettings.setPartitioningEnabled(false);
+		elasticsearchSvc = new ElasticsearchSvcImpl(partitionSettings, elasticsearchContainer.getHost(), elasticsearchContainer.getMappedPort(9200), "", "");
+
 		if (!indexLoaded) {
 			createMultiplePatientsAndObservations();
 			indexLoaded = true;
 		}
+	}
+
+	@AfterEach
+	public void after() throws IOException {
+		elasticsearchSvc.close();
 	}
 
 	@Test

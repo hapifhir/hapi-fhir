@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -251,7 +251,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				ourLog.trace("Search entity marked as finished with {} results", search.getNumFound());
 				break;
 			}
-			if (search.getNumFound() >= theTo) {
+			if ((search.getNumFound() - search.getNumBlocked()) >= theTo) {
 				ourLog.trace("Search entity has {} results so far", search.getNumFound());
 				break;
 			}
@@ -576,7 +576,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		return null;
 	}
 
-	@org.jetbrains.annotations.Nullable
+	@Nullable
 	private Integer getLoadSynchronousUpToOrNull(CacheControlDirective theCacheControlDirective) {
 		final Integer loadSynchronousUpTo;
 		if (theCacheControlDirective != null && theCacheControlDirective.isNoStore()) {
@@ -1091,7 +1091,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			int minWanted = 0;
 			if (myParams.getCount() != null) {
 				minWanted = myParams.getCount();
-				minWanted = Math.max(minWanted, myPagingProvider.getMaximumPageSize());
+				minWanted = Math.min(minWanted, myPagingProvider.getMaximumPageSize());
 				minWanted += currentlyLoaded;
 			}
 

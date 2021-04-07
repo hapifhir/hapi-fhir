@@ -2,7 +2,10 @@ package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
@@ -10,13 +13,17 @@ import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.util.JsonUtil;
@@ -41,6 +48,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
@@ -63,12 +71,12 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class NpmR4Test extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(NpmR4Test.class);
-	@Autowired
-	public IPackageInstallerSvc igInstaller;
 	@Autowired
 	private IHapiPackageCacheManager myPackageCacheManager;
 	@Autowired
@@ -81,6 +89,13 @@ public class NpmR4Test extends BaseJpaR4Test {
 	@Autowired
 	private INpmPackageVersionResourceDao myPackageVersionResourceDao;
 	private FakeNpmServlet myFakeNpmServlet;
+	@Autowired
+	private IInterceptorService myInterceptorService;
+	@Autowired
+	private RequestTenantPartitionInterceptor myRequestTenantPartitionInterceptor;
+	@Autowired
+	@Qualifier("myImplementationGuideDaoR4")
+	protected IFhirResourceDao<ImplementationGuide> myImplementationGuideDao;
 
 	@BeforeEach
 	public void before() throws Exception {
@@ -105,6 +120,9 @@ public class NpmR4Test extends BaseJpaR4Test {
 	public void after() throws Exception {
 		JettyUtil.closeServer(myServer);
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
+		myPartitionSettings.setPartitioningEnabled(false);
+		myInterceptorService.unregisterInterceptor(myRequestTenantPartitionInterceptor);
 	}
 
 
@@ -115,8 +133,12 @@ public class NpmR4Test extends BaseJpaR4Test {
 		jpaPackageCache.getPackageServers().clear();
 		jpaPackageCache.addPackageServer("https://packages.fhir.org");
 
-		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.us.core").setVersion("3.1.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setFetchDependencies(true);
-		igInstaller.install(spec);
+		PackageInstallationSpec spec = new PackageInstallationSpec()
+			.setName("hl7.fhir.us.core")
+			.setVersion("3.1.0")
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setFetchDependencies(true);
+		myPackageInstallerSvc.install(spec);
 
 		runInTransaction(()->{
 			SearchParameterMap map = SearchParameterMap.newSynchronous(SearchParameter.SP_BASE, new TokenParam("NamingSystem"));
@@ -130,7 +152,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 			}
 		});
 
-		igInstaller.install(spec);
+		myPackageInstallerSvc.install(spec);
 	}
 
 
@@ -140,7 +162,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		myFakeNpmServlet.myResponses.put("/nictiz.fhir.nl.stu3.questionnaires/1.0.2", bytes);
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("nictiz.fhir.nl.stu3.questionnaires").setVersion("1.0.2").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
-		igInstaller.install(spec);
+		myPackageInstallerSvc.install(spec);
 
 		// Be sure no further communication with the server
 		JettyUtil.closeServer(myServer);
@@ -179,7 +201,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.12.0", bytes);
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
-		PackageInstallOutcomeJson outcome = igInstaller.install(spec);
+		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
 		assertEquals(1, outcome.getResourcesInstalled().get("CodeSystem"));
 
 		// Be sure no further communication with the server
@@ -249,7 +271,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		resourceList.add("Organization");
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-organizations").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		spec.setInstallResourceTypes(resourceList);
-		PackageInstallOutcomeJson outcome = igInstaller.install(spec);
+		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
 		assertEquals(3, outcome.getResourcesInstalled().get("Organization"));
 
 		// Be sure no further communication with the server
@@ -274,6 +296,47 @@ public class NpmR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testInstallR4Package_NonConformanceResources_Partitioned() throws Exception {
+		myPartitionSettings.setPartitioningEnabled(true);
+		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
+		myDaoConfig.setAllowExternalReferences(true);
+
+		byte[] bytes = loadClasspathBytes("/packages/test-organizations-package.tgz");
+		myFakeNpmServlet.myResponses.put("/test-organizations/1.0.0", bytes);
+
+		List<String> resourceList = new ArrayList<>();
+		resourceList.add("Organization");
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-organizations").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		spec.setInstallResourceTypes(resourceList);
+		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
+		assertEquals(3, outcome.getResourcesInstalled().get("Organization"));
+
+		// Be sure no further communication with the server
+		JettyUtil.closeServer(myServer);
+
+		// Search for the installed resources
+		mySrd = mock(ServletRequestDetails.class);
+		when(mySrd.getTenantId()).thenReturn(JpaConstants.DEFAULT_PARTITION_NAME);
+		when(mySrd.getServer()).thenReturn(mock(RestfulServer.class));
+		when(mySrd.getInterceptorBroadcaster()).thenReturn(mock(IInterceptorBroadcaster.class));
+		runInTransaction(() -> {
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.add(Organization.SP_IDENTIFIER, new TokenParam("https://github.com/synthetichealth/synthea", "organization1"));
+			IBundleProvider result = myOrganizationDao.search(map, mySrd);
+			assertEquals(1, result.sizeOrThrowNpe());
+			map = SearchParameterMap.newSynchronous();
+			map.add(Organization.SP_IDENTIFIER, new TokenParam("https://github.com/synthetichealth/synthea", "organization2"));
+			result = myOrganizationDao.search(map, mySrd);
+			assertEquals(1, result.sizeOrThrowNpe());
+			map = SearchParameterMap.newSynchronous();
+			map.add(Organization.SP_IDENTIFIER, new TokenParam("https://github.com/synthetichealth/synthea", "organization3"));
+			result = myOrganizationDao.search(map, mySrd);
+			assertEquals(1, result.sizeOrThrowNpe());
+		});
+
+	}
+
+	@Test
 	public void testInstallR4Package_NoIdentifierNoUrl() throws Exception {
 		myDaoConfig.setAllowExternalReferences(true);
 
@@ -285,11 +348,39 @@ public class NpmR4Test extends BaseJpaR4Test {
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-organizations").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		spec.setInstallResourceTypes(resourceList);
 		try {
-			PackageInstallOutcomeJson outcome = igInstaller.install(spec);
+			PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
 			fail();
 		} catch (ImplementationGuideInstallationException theE) {
 			assertThat(theE.getMessage(), containsString("Resources in a package must have a url or identifier to be loaded by the package installer."));
 		}
+	}
+
+	// Reproduces https://github.com/hapifhir/hapi-fhir/issues/2332
+	@Test
+	public void testInstallR4Package_AutoCreatePlaceholder() throws Exception {
+		myDaoConfig.setAllowExternalReferences(true);
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+
+		byte[] bytes = loadClasspathBytes("/packages/test-auto-create-placeholder.tgz");
+		myFakeNpmServlet.myResponses.put("/test-ig/1.0.0", bytes);
+
+		List<String> resourceList = new ArrayList<>();
+		resourceList.add("ImplementationGuide");
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-ig").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		spec.setInstallResourceTypes(resourceList);
+		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
+		assertEquals(1, outcome.getResourcesInstalled().get("ImplementationGuide"));
+
+		// Be sure no further communication with the server
+		JettyUtil.closeServer(myServer);
+
+		// Search for the installed resources
+		runInTransaction(() -> {
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			IBundleProvider result = myImplementationGuideDao.search(map);
+			assertEquals(1, result.sizeOrThrowNpe());
+		});
+
 	}
 
 	@Test
@@ -300,7 +391,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.11.1", bytes);
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
-		PackageInstallOutcomeJson outcome = igInstaller.install(spec);
+		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
 		assertEquals(0, outcome.getResourcesInstalled().size(), outcome.getResourcesInstalled().toString());
 
 	}
@@ -315,11 +406,11 @@ public class NpmR4Test extends BaseJpaR4Test {
 		PackageInstallOutcomeJson outcome;
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
-		outcome = igInstaller.install(spec);
+		outcome = myPackageInstallerSvc.install(spec);
 		assertEquals(1, outcome.getResourcesInstalled().get("CodeSystem"));
 
-		igInstaller.install(spec);
-		outcome = igInstaller.install(spec);
+		myPackageInstallerSvc.install(spec);
+		outcome = myPackageInstallerSvc.install(spec);
 		assertEquals(null, outcome.getResourcesInstalled().get("CodeSystem"));
 
 		// Ensure that we loaded the contents
@@ -337,7 +428,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		myFakeNpmServlet.myResponses.put("/UK.Core.r4/1.1.0", bytes);
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("UK.Core.r4").setVersion("1.1.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
-		igInstaller.install(spec);
+		myPackageInstallerSvc.install(spec);
 
 		// Be sure no further communication with the server
 		JettyUtil.closeServer(myServer);
@@ -357,9 +448,9 @@ public class NpmR4Test extends BaseJpaR4Test {
 		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.11.1", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
-		igInstaller.install(spec);
+		myPackageInstallerSvc.install(spec);
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
-		igInstaller.install(spec);
+		myPackageInstallerSvc.install(spec);
 
 		runInTransaction(() -> {
 			NpmPackageMetadataJson metadata = myPackageCacheManager.loadPackageMetadata("hl7.fhir.uv.shorthand");
@@ -391,18 +482,18 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 		PackageInstallationSpec spec;
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
-		PackageInstallOutcomeJson outcome = igInstaller.install(spec);
+		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
 		ourLog.info("Install messages:\n * {}", outcome.getMessage().stream().collect(Collectors.joining("\n * ")));
 		assertThat(outcome.getMessage(), hasItem("Marking package hl7.fhir.uv.shorthand#0.12.0 as current version"));
 		assertThat(outcome.getMessage(), hasItem("Indexing CodeSystem Resource[package/CodeSystem-shorthand-code-system.json] with URL: http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system|0.12.0"));
 
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
-		outcome = igInstaller.install(spec);
+		outcome = myPackageInstallerSvc.install(spec);
 		ourLog.info("Install messages:\n * {}", outcome.getMessage().stream().collect(Collectors.joining("\n * ")));
 		assertThat(outcome.getMessage(), not(hasItem("Marking package hl7.fhir.uv.shorthand#0.11.1 as current version")));
 
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
-		igInstaller.install(spec);
+		myPackageInstallerSvc.install(spec);
 
 
 		NpmPackage pkg;
@@ -426,7 +517,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 		// Install older version
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
-		igInstaller.install(spec);
+		myPackageInstallerSvc.install(spec);
 
 		// Older version is current
 		runInTransaction(() -> {
@@ -442,7 +533,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 		// Now install newer version
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
-		igInstaller.install(spec);
+		myPackageInstallerSvc.install(spec);
 
 		// Newer version is current
 		runInTransaction(() -> {
@@ -469,7 +560,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 		// Install newer version
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
-		igInstaller.install(spec);
+		myPackageInstallerSvc.install(spec);
 
 
 		runInTransaction(() -> {
@@ -485,7 +576,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 		// Install older version
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
-		igInstaller.install(spec);
+		myPackageInstallerSvc.install(spec);
 
 		// Newer version is still current
 		runInTransaction(() -> {
@@ -511,7 +602,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 		// Install
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
-		igInstaller.install(spec);
+		myPackageInstallerSvc.install(spec);
 
 		runInTransaction(() -> {
 			NpmPackageVersionEntity versionEntity = myPackageVersionDao.findByPackageIdAndVersion("hl7.fhir.uv.shorthand", "0.12.0").orElseThrow(() -> new IllegalArgumentException());
@@ -520,7 +611,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 		// Install same again
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
-		igInstaller.install(spec);
+		myPackageInstallerSvc.install(spec);
 
 		runInTransaction(() -> {
 			NpmPackageVersionEntity versionEntity = myPackageVersionDao.findByPackageIdAndVersion("hl7.fhir.uv.shorthand", "0.12.0").orElseThrow(() -> new IllegalArgumentException());
@@ -541,7 +632,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 		// Install older version
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-exchange.fhir.us.com").setVersion("2.1.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
-		igInstaller.install(spec);
+		myPackageInstallerSvc.install(spec);
 
 		IBundleProvider spSearch = mySearchParameterDao.search(SearchParameterMap.newSynchronous("code", new TokenParam("network-id")));
 		assertEquals(1, spSearch.sizeOrThrowNpe());
@@ -564,7 +655,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		
 		// Install newer version
 		spec = new PackageInstallationSpec().setName("test-exchange.fhir.us.com").setVersion("2.1.2").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
-		igInstaller.install(spec);
+		myPackageInstallerSvc.install(spec);
 
 		spSearch = mySearchParameterDao.search(SearchParameterMap.newSynchronous("code", new TokenParam("network-id")));
 		assertEquals(1, spSearch.sizeOrThrowNpe());
@@ -582,9 +673,9 @@ public class NpmR4Test extends BaseJpaR4Test {
 		byte[] contents0120 = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY).setPackageContents(contents0111);
-		igInstaller.install(spec);
+		myPackageInstallerSvc.install(spec);
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY).setPackageContents(contents0120);
-		igInstaller.install(spec);
+		myPackageInstallerSvc.install(spec);
 
 
 		assertArrayEquals(contents0111, myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.11.1").getBytes());
@@ -606,9 +697,9 @@ public class NpmR4Test extends BaseJpaR4Test {
 		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.11.1", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
 		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.11.0", loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.0.tgz"));
 
-		igInstaller.install(new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY));
-		igInstaller.install(new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY));
-		igInstaller.install(new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY));
+		myPackageInstallerSvc.install(new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY));
+		myPackageInstallerSvc.install(new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY));
+		myPackageInstallerSvc.install(new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY));
 
 		runInTransaction(() -> {
 			Slice<NpmPackageVersionResourceEntity> versions = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrl(Pageable.unpaged(), FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ValueSet/shorthand-instance-tags");

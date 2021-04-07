@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,14 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.ColumnMapRowMapper;
 
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class ModifyColumnTask extends BaseTableColumnTypeTask {
@@ -56,7 +60,7 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 
 		try {
 			existingType = JdbcUtils.getColumnType(getConnectionProperties(), getTableName(), getColumnName());
-			nullable = JdbcUtils.isColumnNullable(getConnectionProperties(), getTableName(), getColumnName());
+			nullable = isColumnNullable(getTableName(), getColumnName());
 		} catch (SQLException e) {
 			throw new InternalErrorException(e);
 		}
@@ -152,4 +156,38 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 		}
 	}
 
+	private boolean isColumnNullable(String tableName, String columnName) throws SQLException {
+		boolean result = JdbcUtils.isColumnNullable(getConnectionProperties(), tableName, columnName);
+		// Oracle sometimes stores the NULLABLE property in a Constraint, so override the result if this is an Oracle DB
+		switch (getDriverType()) {
+			case ORACLE_12C:
+				@Language("SQL") String findNullableConstraintSql =
+				"SELECT acc.owner, acc.table_name, acc.column_name, search_condition_vc " +
+				"FROM all_cons_columns acc, all_constraints ac " +
+				"WHERE acc.constraint_name = ac.constraint_name " +
+				"AND acc.table_name = ac.table_name " +
+				"AND ac.constraint_type = ? " +
+				"AND acc.table_name = ? " +
+				"AND acc.column_name = ? " +
+				"AND search_condition_vc = ? ";
+				String[] params = new String[4];
+				params[0] = "C";
+				params[1] = tableName.toUpperCase();
+				params[2] = columnName.toUpperCase();
+				params[3] = "\"" + columnName.toUpperCase() + "\" IS NOT NULL";
+				List<Map<String, Object>> queryResults = getConnectionProperties().getTxTemplate().execute(t -> {
+					return getConnectionProperties().newJdbcTemplate().query(findNullableConstraintSql, params, new ColumnMapRowMapper());
+				});
+				// If this query returns a row then the existence of that row indicates that a NOT NULL constraint exists
+				// on this Column and we must override whatever result was previously calculated and set it to false
+				if (queryResults != null && queryResults.size() > 0 && queryResults.get(0) != null && !queryResults.get(0).isEmpty()) {
+					result = false;
+				}
+				break;
+			default:
+				// Do nothing since we already initialized the variable above
+				break;
+		}
+		return result;
+	}
 }

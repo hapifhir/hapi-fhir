@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -87,8 +88,11 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 		}
 	}
 
-	private String toFilterString(StringDt theFilter) {
-		return theFilter != null ? theFilter.getValue() : null;
+	private ValueSetExpansionOptions toFilterString(StringDt theFilter) {
+		if (theFilter != null) {
+			return ValueSetExpansionOptions.forOffsetAndCount(0, 1000).setFilter(theFilter.getValue());
+		}
+		return null;
 	}
 
 	@Operation(name = JpaConstants.OPERATION_LOOKUP, idempotent = true, returnParameters = {

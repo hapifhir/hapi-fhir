@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk.api;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,9 +35,16 @@ public interface IBulkDataExportSvc {
 	@Transactional(value = Transactional.TxType.NEVER)
 	void purgeExpiredFiles();
 
-	JobInfo submitJob(String theOutputFormat, Set<String> theResourceTypes, Date theSince, Set<String> theFilters);
+	JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions);
+
+	JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions, Boolean useCache);
 
 	JobInfo getJobInfoOrThrowResourceNotFound(String theJobId);
+
+	/**
+	 * Return a set of all resource types which contain search parameters which have Patient as a target.
+	 */
+	Set<String> getPatientCompartmentResources();
 
 	void cancelAndPurgeAllJobs();
 

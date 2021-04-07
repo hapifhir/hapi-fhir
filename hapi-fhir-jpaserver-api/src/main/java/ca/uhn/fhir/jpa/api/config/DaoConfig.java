@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,7 +26,7 @@ import java.util.TreeSet;
  * #%L
  * HAPI FHIR JPA API
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,11 +89,12 @@ public class DaoConfig {
 	 * Child Configurations
 	 */
 
-	private ModelConfig myModelConfig = new ModelConfig();
+	private final ModelConfig myModelConfig = new ModelConfig();
 
 	/**
 	 * update setter javadoc if default changes
 	 */
+	@Nonnull
 	private Long myTranslationCachesExpireAfterWriteInMinutes = DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES;
 	/**
 	 * update setter javadoc if default changes
@@ -118,11 +120,6 @@ public class DaoConfig {
 	 * update setter javadoc if default changes
 	 */
 	private Integer myFetchSizeDefaultMaximum = null;
-	private int myHardTagListLimit = 1000;
-	/**
-	 * update setter javadoc if default changes
-	 */
-	private boolean myIndexContainedResources = true;
 	private int myMaximumExpansionSize = DEFAULT_MAX_EXPANSION_SIZE;
 	private Integer myMaximumSearchResultCountInTransaction = DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION;
 
@@ -171,7 +168,7 @@ public class DaoConfig {
 	 *
 	 * @since 4.1.0
 	 */
-	private int myPreExpandValueSetsDefaultOffset = 0;
+	private final int myPreExpandValueSetsDefaultOffset = 0;
 	/**
 	 * Do not change default of {@code 1000}!
 	 *
@@ -186,9 +183,11 @@ public class DaoConfig {
 	private int myPreExpandValueSetsMaxCount = 1000;
 
 	/**
+	 * Do not change default of {@code true}!
+	 *
 	 * @since 4.2.0
 	 */
-	private boolean myPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets;
+	private boolean myPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets = true;
 
 	/**
 	 * @since 5.0.0
@@ -207,9 +206,6 @@ public class DaoConfig {
 	 * Constructor
 	 */
 	public DaoConfig() {
-		setSubscriptionEnabled(true);
-		setSubscriptionPollDelay(0);
-		setSubscriptionPurgeInactiveAfterMillis(Long.MAX_VALUE);
 		setMarkResourcesForReindexingUponSearchParameterChange(true);
 		setReindexThreadCount(Runtime.getRuntime().availableProcessors());
 		setExpungeThreadCount(Runtime.getRuntime().availableProcessors());
@@ -579,20 +575,6 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Gets the maximum number of results to return in a GetTags query (DSTU1 only)
-	 */
-	public int getHardTagListLimit() {
-		return myHardTagListLimit;
-	}
-
-	/**
-	 * Gets the maximum number of results to return in a GetTags query (DSTU1 only)
-	 */
-	public void setHardTagListLimit(int theHardTagListLimit) {
-		myHardTagListLimit = theHardTagListLimit;
-	}
-
-	/**
 	 * If set to {@link IndexEnabledEnum#DISABLED} (default is {@link IndexEnabledEnum#DISABLED})
 	 * the server will not create search indexes for search parameters with no values in resources.
 	 * <p>
@@ -627,6 +609,11 @@ public class DaoConfig {
 	 * Note that this setting also has an impact on sorting (i.e. using the
 	 * <code>_sort</code> parameter on searches): If the server is configured
 	 * to not index missing field.
+	 * </p>
+	 * <p>
+	 * The following index may need to be added into the indexed tables such as <code>HFJ_SPIDX_TOKEN</code> 
+	 * to improve the search performance while <code>:missing</code> is enabled.
+	 * <code>RES_TYPE, SP_NAME, SP_MISSING</code>
 	 * </p>
 	 */
 	public void setIndexMissingFields(IndexEnabledEnum theIndexMissingFields) {
@@ -899,6 +886,7 @@ public class DaoConfig {
 	 * Specifies the duration in minutes for which values will be retained after being
 	 * written to the terminology translation cache. Defaults to 60.
 	 */
+	@Nonnull
 	public Long getTranslationCachesExpireAfterWriteInMinutes() {
 		return myTranslationCachesExpireAfterWriteInMinutes;
 	}
@@ -1067,6 +1055,9 @@ public class DaoConfig {
 	 * This property can be useful in cases where replication between two servers is wanted.
 	 * Note however that references containing purely numeric IDs will not be auto-created
 	 * as they are never allowed to be client supplied in HAPI FHIR JPA.
+	 *
+	 * All placeholder resources created in this way have an extension
+	 * with the URL {@link HapiExtensions#EXT_RESOURCE_PLACEHOLDER} and the value "true".
 	 * </p>
 	 */
 	public boolean isAutoCreatePlaceholderReferenceTargets() {
@@ -1088,6 +1079,9 @@ public class DaoConfig {
 	 * This property can be useful in cases where replication between two servers is wanted.
 	 * Note however that references containing purely numeric IDs will not be auto-created
 	 * as they are never allowed to be client supplied in HAPI FHIR JPA.
+	 *
+	 * All placeholder resources created in this way have an extension
+	 * with the URL {@link HapiExtensions#EXT_RESOURCE_PLACEHOLDER} and the value "true".
 	 * </p>
 	 */
 	public void setAutoCreatePlaceholderReferenceTargets(boolean theAutoCreatePlaceholderReferenceTargets) {
@@ -1096,7 +1090,7 @@ public class DaoConfig {
 
 	/**
 	 * When {@link #setAutoCreatePlaceholderReferenceTargets(boolean)} is enabled, if this
-	 * setting is set to <code>true</code> (default is <code>false</code>) and the source
+	 * setting is set to <code>true</code> (default is <code>true</code>) and the source
 	 * reference has an identifier populated, the identifier will be copied to the target
 	 * resource.
 	 * <p>
@@ -1138,6 +1132,41 @@ public class DaoConfig {
 	 *   }
 	 * }
 	 * </pre>
+	 * <p>
+	 * Note that the default for this setting was previously <code>false</code>, and was changed to <code>true</code>
+	 * in 5.4.0 with consideration to the following:
+	 * </p>
+	 * <pre>
+	 * CP = Auto-Create Placeholder Reference Targets
+	 * PI = Populate Identifier in Auto-Created Placeholder Reference Targets
+	 *
+	 * CP | PI
+	 * -------
+	 *  F | F  <- PI=F is ignored
+	 *  F | T  <- PI=T is ignored
+	 *  T | F  <- resources may reference placeholder reference targets that are never updated : (
+	 *  T | T  <- placeholder reference targets can be updated : )
+	 * </pre>
+	 * <p>
+	 * Where CP=T and PI=F, the following could happen:
+	 * </p>
+	 * <ol>
+	 *    <li>
+	 *       Resource instance A is created with a reference to resource instance B. B is a placeholder reference target
+	 *       without an identifier.
+	 *    </li>
+	 *    <li>
+	 * 	   Resource instance C is conditionally created using a match URL. It is not matched to B although these
+	 * 	   resources represent the same entity.
+	 *    </li>
+	 *    <li>
+	 *       A continues to reference placeholder B, and does not reference populated C.
+	 *    </li>
+	 * </ol>
+	 * <p>
+	 * There may be cases where configuring this setting to <code>false</code> would be appropriate; however, these are
+	 * exceptional cases that should be opt-in.
+	 * </p>
 	 *
 	 * @since 4.2.0
 	 */
@@ -1147,7 +1176,7 @@ public class DaoConfig {
 
 	/**
 	 * When {@link #setAutoCreatePlaceholderReferenceTargets(boolean)} is enabled, if this
-	 * setting is set to <code>true</code> (default is <code>false</code>) and the source
+	 * setting is set to <code>true</code> (default is <code>true</code>) and the source
 	 * reference has an identifier populated, the identifier will be copied to the target
 	 * resource.
 	 * <p>
@@ -1189,6 +1218,41 @@ public class DaoConfig {
 	 *   }
 	 * }
 	 * </pre>
+	 * <p>
+	 * Note that the default for this setting was previously <code>false</code>, and was changed to <code>true</code>
+	 * in 5.4.0 with consideration to the following:
+	 * </p>
+	 * <pre>
+	 * CP = Auto-Create Placeholder Reference Targets
+	 * PI = Populate Identifier in Auto-Created Placeholder Reference Targets
+	 *
+	 * CP | PI
+	 * -------
+	 *  F | F  <- PI=F is ignored
+	 *  F | T  <- PI=T is ignored
+	 *  T | F  <- resources may reference placeholder reference targets that are never updated : (
+	 *  T | T  <- placeholder reference targets can be updated : )
+	 * </pre>
+	 * <p>
+	 * Where CP=T and PI=F, the following could happen:
+	 * </p>
+	 * <ol>
+	 *    <li>
+	 *       Resource instance A is created with a reference to resource instance B. B is a placeholder reference target
+	 *       without an identifier.
+	 *    </li>
+	 *    <li>
+	 * 	   Resource instance C is conditionally created using a match URL. It is not matched to B although these
+	 * 	   resources represent the same entity.
+	 *    </li>
+	 *    <li>
+	 *       A continues to reference placeholder B, and does not reference populated C.
+	 *    </li>
+	 * </ol>
+	 * <p>
+	 * There may be cases where configuring this setting to <code>false</code> would be appropriate; however, these are
+	 * exceptional cases that should be opt-in.
+	 * </p>
 	 *
 	 * @since 4.2.0
 	 */
@@ -1365,22 +1429,6 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Should contained IDs be indexed the same way that non-contained IDs are (default is
-	 * <code>true</code>)
-	 */
-	public boolean isIndexContainedResources() {
-		return myIndexContainedResources;
-	}
-
-	/**
-	 * Should contained IDs be indexed the same way that non-contained IDs are (default is
-	 * <code>true</code>)
-	 */
-	public void setIndexContainedResources(boolean theIndexContainedResources) {
-		myIndexContainedResources = theIndexContainedResources;
-	}
-
-	/**
 	 * Should resources be marked as needing reindexing when a
 	 * SearchParameter resource is added or changed. This should generally
 	 * be true (which is the default)
@@ -1511,62 +1559,6 @@ public class DaoConfig {
 	 */
 	public void setValidateSearchParameterExpressionsOnSave(boolean theValidateSearchParameterExpressionsOnSave) {
 		myValidateSearchParameterExpressionsOnSave = theValidateSearchParameterExpressionsOnSave;
-	}
-
-	/**
-	 * Do not call this method, it exists only for legacy reasons. It
-	 * will be removed in a future version. Configure the page size on your
-	 * paging provider instead.
-	 *
-	 * @deprecated This method does not do anything. Configure the page size on your
-	 * paging provider instead. Deprecated in HAPI FHIR 2.3 (Jan 2017)
-	 */
-	@Deprecated
-	public void setHardSearchLimit(int theHardSearchLimit) {
-		// this method does nothing
-	}
-
-	/**
-	 * This is the maximum number of resources that will be added to a single page of returned resources. Because of
-	 * includes with wildcards and other possibilities it is possible for a client to make requests that include very
-	 * large amounts of data, so this hard limit can be imposed to prevent runaway requests.
-	 *
-	 * @deprecated Deprecated in HAPI FHIR 3.2.0 as this method doesn't actually do anything
-	 */
-	@Deprecated
-	public void setIncludeLimit(@SuppressWarnings("unused") int theIncludeLimit) {
-		// nothing
-	}
-
-	/**
-	 * @deprecated As of HAPI FHIR 3.0.0, subscriptions no longer use polling for
-	 * detecting changes, so this setting has no effect
-	 */
-	@Deprecated
-	public void setSubscriptionEnabled(boolean theSubscriptionEnabled) {
-		// nothing
-	}
-
-	/**
-	 * @deprecated As of HAPI FHIR 3.0.0, subscriptions no longer use polling for
-	 * detecting changes, so this setting has no effect
-	 */
-	@Deprecated
-	public void setSubscriptionPollDelay(long theSubscriptionPollDelay) {
-		// ignore
-	}
-
-	/**
-	 * @deprecated As of HAPI FHIR 3.0.0, subscriptions no longer use polling for
-	 * detecting changes, so this setting has no effect
-	 */
-	@Deprecated
-	public void setSubscriptionPurgeInactiveAfterMillis(Long theMillis) {
-		// ignore
-	}
-
-	public void setSubscriptionPurgeInactiveAfterSeconds(int theSeconds) {
-		setSubscriptionPurgeInactiveAfterMillis(theSeconds * DateUtils.MILLIS_PER_SECOND);
 	}
 
 	/**

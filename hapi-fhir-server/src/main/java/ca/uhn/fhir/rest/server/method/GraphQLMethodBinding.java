@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 			methodParams[myIdParamIndex] = theRequest.getId();
 		}
 
-		String responseString = (String) invokeServerMethod(theServer, theRequest, methodParams);
+		String responseString = (String) invokeServerMethod(theRequest, methodParams);
 
 		int statusCode = Constants.STATUS_HTTP_200_OK;
 		String statusMessage = Constants.HTTP_STATUS_NAMES.get(statusCode);

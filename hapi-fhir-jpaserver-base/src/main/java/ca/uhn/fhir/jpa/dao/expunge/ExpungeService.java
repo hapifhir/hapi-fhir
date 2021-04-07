@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,20 +27,23 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Lookup;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 @Service
-public abstract class ExpungeService {
+public class ExpungeService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeService.class);
 
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;
 	@Autowired
 	private IResourceExpungeService myExpungeDaoService;
+	@Autowired
+	private ApplicationContext myApplicationContext;
 
-	@Lookup
-	protected abstract ExpungeOperation getExpungeOperation(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails);
+	protected ExpungeOperation getExpungeOperation(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
+		return myApplicationContext.getBean(ExpungeOperation.class, theResourceName, theResourceId, theVersion, theExpungeOptions, theRequestDetails);
+	}
 
 	public ExpungeOutcome expunge(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
 		ourLog.info("Expunge: ResourceName[{}] Id[{}] Version[{}] Options[{}]", theResourceName, theResourceId, theVersion, theExpungeOptions);

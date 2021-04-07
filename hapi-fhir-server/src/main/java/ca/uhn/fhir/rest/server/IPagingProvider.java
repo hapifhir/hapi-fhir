@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,22 @@ import javax.annotation.Nullable;
 
 public interface IPagingProvider {
 
+	/**
+	 * if no _count parameter is provided, use this for the page size
+	 */
 	int getDefaultPageSize();
 
+	/**
+	 * if the _count parameter is larger than this value, reduce it to this value
+	 */
 	int getMaximumPageSize();
+
+	/**
+	 * @return true if the paging provider is able to store search results.
+	 */
+	default boolean canStoreSearchResults() {
+		return true;
+	}
 
 	/**
 	 * Retrieve a result list by Search ID

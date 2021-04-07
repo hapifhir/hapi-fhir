@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk.job;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,11 @@ public class BulkExportGenerateResourceFilesStepListener implements StepExecutio
 	@Override
 	public ExitStatus afterStep(StepExecution theStepExecution) {
 		if (theStepExecution.getExitStatus().getExitCode().equals(ExitStatus.FAILED.getExitCode())) {
-			String jobUuid = theStepExecution.getJobExecution().getJobParameters().getString("jobUUID");
+			//Try to fetch it from the parameters first, and if it doesn't exist, fetch it from the context.
+			String jobUuid = theStepExecution.getJobExecution().getJobParameters().getString(BulkExportJobConfig.JOB_UUID_PARAMETER);
+			if (jobUuid == null) {
+				jobUuid = theStepExecution.getJobExecution().getExecutionContext().getString(BulkExportJobConfig.JOB_UUID_PARAMETER);
+			}
 			assert isNotBlank(jobUuid);
 			String exitDescription = theStepExecution.getExitStatus().getExitDescription();
 			myBulkExportDaoSvc.setJobToStatus(jobUuid, BulkJobStatusEnum.ERROR, exitDescription);

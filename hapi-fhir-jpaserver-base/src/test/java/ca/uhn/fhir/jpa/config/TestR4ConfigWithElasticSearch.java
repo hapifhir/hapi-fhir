@@ -1,77 +1,60 @@
 package ca.uhn.fhir.jpa.config;
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.search.elastic.ElasticsearchHibernatePropertiesBuilder;
-import org.hibernate.search.elasticsearch.cfg.ElasticsearchIndexStatus;
-import org.hibernate.search.elasticsearch.cfg.IndexSchemaManagementStrategy;
+import ca.uhn.fhir.jpa.search.lastn.config.TestElasticsearchContainerHelper;
+import org.hibernate.search.backend.elasticsearch.index.IndexStatus;
+import org.hibernate.search.mapper.orm.schema.management.SchemaManagementStrategyName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import pl.allegro.tech.embeddedelasticsearch.EmbeddedElastic;
-import pl.allegro.tech.embeddedelasticsearch.PopularProperties;
+import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
 import javax.annotation.PreDestroy;
-import java.io.IOException;
 import java.util.Properties;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+
 
 @Configuration
 public class TestR4ConfigWithElasticSearch extends TestR4Config {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TestR4ConfigWithElasticSearch.class);
-	private static final String ELASTIC_VERSION = "6.5.4";
-	protected final String elasticsearchHost = "localhost";
-	protected final String elasticsearchUserId = "";
-	protected final String elasticsearchPassword = "";
-
 
 	@Override
 	@Bean
 	public Properties jpaProperties() {
 		Properties retVal = super.jpaProperties();
 
+		//Override default lucene settings
 		// Force elasticsearch to start first
-		int httpPort = embeddedElasticSearch().getHttpPort();
-		ourLog.info("ElasticSearch started on port: {}", httpPort);
+		int httpPort = elasticContainer().getMappedPort(9200);//9200 is the HTTP port
+		String host = elasticContainer().getHost();
 
 		new ElasticsearchHibernatePropertiesBuilder()
-			.setDebugRefreshAfterWrite(true)
+			.setDebugIndexSyncStrategy("read-sync")
 			.setDebugPrettyPrintJsonLog(true)
-			.setIndexSchemaManagementStrategy(IndexSchemaManagementStrategy.CREATE)
+			.setIndexSchemaManagementStrategy(SchemaManagementStrategyName.CREATE)
 			.setIndexManagementWaitTimeoutMillis(10000)
-			.setRequiredIndexStatus(ElasticsearchIndexStatus.YELLOW)
-			.setRestUrl("http://"+ elasticsearchHost + ":" + httpPort)
-			.setUsername(elasticsearchUserId)
-			.setPassword(elasticsearchPassword)
+			.setRequiredIndexStatus(IndexStatus.YELLOW)
+			.setRestUrl(host+ ":" + httpPort)
+			.setProtocol("http")
+			.setUsername("")
+			.setPassword("")
 			.apply(retVal);
 
 		return retVal;
 	}
 
 	@Bean
-	public EmbeddedElastic embeddedElasticSearch() {
-		EmbeddedElastic embeddedElastic = null;
-		try {
-			embeddedElastic = EmbeddedElastic.builder()
-				.withElasticVersion(ELASTIC_VERSION)
-				.withSetting(PopularProperties.TRANSPORT_TCP_PORT, 0)
-				.withSetting(PopularProperties.HTTP_PORT, 0)
-				.withSetting(PopularProperties.CLUSTER_NAME, UUID.randomUUID())
-				.withStartTimeout(60, TimeUnit.SECONDS)
-				.build()
-				.start();
-		} catch (IOException | InterruptedException e) {
-			throw new ConfigurationException(e);
-		}
-
-		return embeddedElastic;
+	public ElasticsearchContainer elasticContainer() {
+		ElasticsearchContainer embeddedElasticSearch = TestElasticsearchContainerHelper.getEmbeddedElasticSearch();
+		embeddedElasticSearch.start();
+		return embeddedElasticSearch;
 	}
+
 
 	@PreDestroy
 	public void stop() {
-		embeddedElasticSearch().stop();
+		elasticContainer().stop();
 	}
 
 }

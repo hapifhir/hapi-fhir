@@ -13,8 +13,6 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.collect.Lists;
@@ -52,7 +50,6 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -426,25 +423,6 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 				myClient.create().resource(observation).execute();
 			}
 		}
-	}
-
-	public static void verifyDaoInterceptor(IServerInterceptor theDaoInterceptor) {
-		ArgumentCaptor<ActionRequestDetails> ardCaptor;
-		ArgumentCaptor<RestOperationTypeEnum> opTypeCaptor;
-		ardCaptor = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		opTypeCaptor = ArgumentCaptor.forClass(RestOperationTypeEnum.class);
-		verify(theDaoInterceptor, atLeast(1)).incomingRequestPreHandled(opTypeCaptor.capture(), ardCaptor.capture());
-//		boolean good = false;
-//		for (int i = 0; i < opTypeCaptor.getAllValues().size(); i++) {
-//			if (RestOperationTypeEnum.CREATE.equals(opTypeCaptor.getAllValues().get(i))) {
-//				if ("Patient".equals(ardCaptor.getValue().getResourceType())) {
-//					if (ardCaptor.getValue().getResource() != null) {
-//						good = true;
-//					}
-//				}
-//			}
-//		}
-//		assertTrue(good);
 	}
 
 }

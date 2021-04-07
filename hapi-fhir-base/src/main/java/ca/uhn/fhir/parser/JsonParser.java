@@ -4,7 +4,7 @@ package ca.uhn.fhir.parser;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import ca.uhn.fhir.parser.json.JsonLikeWriter;
 import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.ElementUtil;
+import ca.uhn.fhir.util.FhirTerser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.text.WordUtils;
@@ -74,7 +75,6 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParser.HeldExtension.class);
 
-	private FhirContext myContext;
 	private boolean myPrettyPrint;
 
 	/**
@@ -85,7 +85,6 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	 */
 	public JsonParser(FhirContext theContext, IParserErrorHandler theParserErrorHandler) {
 		super(theContext, theParserErrorHandler);
-		myContext = theContext;
 	}
 
 	private boolean addToHeldComments(int valueIdx, List<String> theCommentsToAdd, ArrayList<ArrayList<String>> theListToAddTo) {
@@ -177,7 +176,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 		theEventWriter.init();
 
-		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
+		RuntimeResourceDefinition resDef = getContext().getResourceDefinition(theResource);
 		encodeResourceToJsonStreamWriter(resDef, theResource, theEventWriter, null, false, theEncodeContext);
 		theEventWriter.flush();
 	}
@@ -209,7 +208,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 		String resourceType = resourceTypeObj.getAsString();
 
-		ParserState<? extends IBaseResource> state = ParserState.getPreResourceInstance(this, theResourceType, myContext, true, getErrorHandler());
+		ParserState<? extends IBaseResource> state = ParserState.getPreResourceInstance(this, theResourceType, getContext(), true, getErrorHandler());
 		state.enteringNewElement(null, resourceType);
 
 		parseChildren(object, state);
@@ -355,7 +354,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			}
 			case RESOURCE:
 				IBaseResource resource = (IBaseResource) theNextValue;
-				RuntimeResourceDefinition def = myContext.getResourceDefinition(resource);
+				RuntimeResourceDefinition def = getContext().getResourceDefinition(resource);
 
 				theEncodeContext.pushPath(def.getName(), true);
 				encodeResourceToJsonStreamWriter(def, resource, theEventWriter, theChildName, theContainedResource, theEncodeContext);
@@ -387,14 +386,14 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			if (nextChildElem.getDef().getElementName().equals("extension") || nextChildElem.getDef().getElementName().equals("modifierExtension")
 				|| nextChild instanceof RuntimeChildDeclaredExtensionDefinition) {
 				if (!haveWrittenExtensions) {
-					extractAndWriteExtensionsAsDirectChild(theElement, theEventWriter, myContext.getElementDefinition(theElement.getClass()), theResDef, theResource, nextChildElem, theParent, theEncodeContext, theContainedResource);
+					extractAndWriteExtensionsAsDirectChild(theElement, theEventWriter, getContext().getElementDefinition(theElement.getClass()), theResDef, theResource, nextChildElem, theParent, theEncodeContext, theContainedResource);
 					haveWrittenExtensions = true;
 				}
 				continue;
 			}
 
 			if (nextChild instanceof RuntimeChildNarrativeDefinition) {
-				INarrativeGenerator gen = myContext.getNarrativeGenerator();
+				INarrativeGenerator gen = getContext().getNarrativeGenerator();
 				if (gen != null) {
 					INarrative narr;
 					if (theResource instanceof IResource) {
@@ -405,7 +404,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 						narr = null;
 					}
 					if (narr != null && narr.isEmpty()) {
-						gen.populateResourceNarrative(myContext, theResource);
+						gen.populateResourceNarrative(getContext(), theResource);
 						if (!narr.isEmpty()) {
 							RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
 							String childName = nextChild.getChildNameByDatatype(child.getDatatype());
@@ -619,13 +618,13 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		Validate.notNull(theResource, "theResource can not be null");
 		Validate.notNull(theJsonLikeWriter, "theJsonLikeWriter can not be null");
 
-		if (theResource.getStructureFhirVersionEnum() != myContext.getVersion().getVersion()) {
+		if (theResource.getStructureFhirVersionEnum() != getContext().getVersion().getVersion()) {
 			throw new IllegalArgumentException(
-				"This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not encode a structure for version " + theResource.getStructureFhirVersionEnum());
+				"This parser is for FHIR version " + getContext().getVersion().getVersion() + " - Can not encode a structure for version " + theResource.getStructureFhirVersionEnum());
 		}
 
 		EncodeContext encodeContext = new EncodeContext();
-		String resourceName = myContext.getResourceType(theResource);
+		String resourceName = getContext().getResourceType(theResource);
 		encodeContext.pushPath(resourceName, true);
 		doEncodeResourceToJsonLikeWriter(theResource, theJsonLikeWriter, encodeContext);
 	}
@@ -660,10 +659,10 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 
 		if (!theContainedResource) {
-			super.containResourcesForEncoding(theResource);
+			setContainedResources(getContext().newTerser().containResources(theResource));
 		}
 
-		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
+		RuntimeResourceDefinition resDef = getContext().getResourceDefinition(theResource);
 
 		if (theObjectNameOrNull == null) {
 			theEventWriter.beginObject();
@@ -888,8 +887,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	}
 
 	private boolean isEncodeExtension(CompositeChildElement theParent, EncodeContext theEncodeContext, boolean theContainedResource, IBase theElement) {
-//		theEncodeContext.pushPath("extension", false);
-		BaseRuntimeElementDefinition<?> runtimeElementDefinition = myContext.getElementDefinition(theElement.getClass());
+		BaseRuntimeElementDefinition<?> runtimeElementDefinition = getContext().getElementDefinition(theElement.getClass());
 		boolean retVal = true;
 		if (runtimeElementDefinition instanceof BaseRuntimeElementCompositeDefinition) {
 			BaseRuntimeElementCompositeDefinition definition = (BaseRuntimeElementCompositeDefinition) runtimeElementDefinition;
@@ -897,7 +895,6 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			CompositeChildElement c = new CompositeChildElement(theParent, childDef, theEncodeContext);
 			retVal = c.shouldBeEncoded(theContainedResource);
 		}
-//		theEncodeContext.popPath();
 		return retVal;
 	}
 
@@ -916,37 +913,6 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 		return object.getAsArray();
 	}
-
-	// private JsonObject parse(Reader theReader) {
-	//
-	// PushbackReader pbr = new PushbackReader(theReader);
-	// JsonObject object;
-	// try {
-	// while(true) {
-	// int nextInt;
-	// nextInt = pbr.read();
-	// if (nextInt == -1) {
-	// throw new DataFormatException("Did not find any content to parse");
-	// }
-	// if (nextInt == '{') {
-	// pbr.unread('{');
-	// break;
-	// }
-	// if (Character.isWhitespace(nextInt)) {
-	// continue;
-	// }
-	// throw new DataFormatException("Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char)nextInt + "' (must be '{')");
-	// }
-	//
-	// Gson gson = newGson();
-	//
-	// object = gson.fromJson(pbr, JsonObject.class);
-	// } catch (Exception e) {
-	// throw new DataFormatException("Failed to parse JSON content, error was: " + e.getMessage(), e);
-	// }
-	//
-	// return object;
-	// }
 
 	private void parseAlternates(JsonLikeValue theAlternateVal, ParserState<?> theState, String theElementName, String theAlternateName) {
 		if (theAlternateVal == null || theAlternateVal.isNull()) {
@@ -1234,13 +1200,13 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		 * the correct FHIR version
 		 */
 		if (theResourceType != null) {
-			myContext.getResourceDefinition(theResourceType);
+			getContext().getResourceDefinition(theResourceType);
 		}
 
 		// Actually do the parse
 		T retVal = doParseResource(theResourceType, theJsonLikeStructure);
 
-		RuntimeResourceDefinition def = myContext.getResourceDefinition(retVal);
+		RuntimeResourceDefinition def = getContext().getResourceDefinition(retVal);
 		if ("Bundle".equals(def.getName())) {
 
 			BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
@@ -1553,10 +1519,10 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					 */
 					value = preProcessValues(myDef, theResource, Collections.singletonList(value), myChildElem, theEncodeContext).get(0);
 
-					RuntimeChildUndeclaredExtensionDefinition extDef = myContext.getRuntimeChildUndeclaredExtensionDefinition();
+					RuntimeChildUndeclaredExtensionDefinition extDef = getContext().getRuntimeChildUndeclaredExtensionDefinition();
 					String childName = extDef.getChildNameByDatatype(value.getClass());
 					if (childName == null) {
-						childName = "value" + WordUtils.capitalize(myContext.getElementDefinition(value.getClass()).getName());
+						childName = "value" + WordUtils.capitalize(getContext().getElementDefinition(value.getClass()).getName());
 					}
 					BaseRuntimeElementDefinition<?> childDef = extDef.getChildElementDefinitionByDatatype(value.getClass());
 					if (childDef == null) {

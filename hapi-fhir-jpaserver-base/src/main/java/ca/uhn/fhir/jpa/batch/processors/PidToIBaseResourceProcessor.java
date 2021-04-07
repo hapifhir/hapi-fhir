@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.batch.processors;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ public class PidToIBaseResourceProcessor implements ItemProcessor<List<ResourceP
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
+
 	@Value("#{stepExecutionContext['resourceType']}")
 	private String myResourceType;
 
@@ -58,6 +59,8 @@ public class PidToIBaseResourceProcessor implements ItemProcessor<List<ResourceP
 
 	@Override
 	public List<IBaseResource> process(List<ResourcePersistentId> theResourcePersistentId) {
+		String collect = theResourcePersistentId.stream().map(pid -> pid.getId().toString()).collect(Collectors.joining(","));
+		ourLog.trace("Processing PIDs: {}" + collect);
 
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(myResourceType);
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(myResourceType).getImplementingClass();

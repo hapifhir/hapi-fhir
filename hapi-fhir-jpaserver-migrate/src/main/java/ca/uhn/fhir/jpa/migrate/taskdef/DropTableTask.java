@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,8 @@ public class DropTableTask extends BaseTableTask {
 		theIndexTask
 			.setTableName(getTableName())
 			.setConnectionProperties(getConnectionProperties())
-			.setDriverType(getDriverType());
+			.setDriverType(getDriverType())
+			.setDryRun(isDryRun());
 		for (String nextIndex : indexNames) {
 			theIndexTask
 				.setIndexName(nextIndex)

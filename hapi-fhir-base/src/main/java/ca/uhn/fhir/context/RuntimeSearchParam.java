@@ -27,7 +27,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,6 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public class RuntimeSearchParam {
 	private final IIdType myId;
 	private final Set<String> myBase;
-	private final List<RuntimeSearchParam> myCompositeOf;
 	private final String myDescription;
 	private final String myName;
 	private final RestSearchParameterTypeEnum myParamType;
@@ -56,21 +55,29 @@ public class RuntimeSearchParam {
 	private final RuntimeSearchParamStatusEnum myStatus;
 	private final String myUri;
 	private final Map<String, List<IBaseExtension<?, ?>>> myExtensions = new HashMap<>();
+	private final boolean myUnique;
+	private final List<Component> myComponents;
 	private IPhoneticEncoder myPhoneticEncoder;
 
 	/**
 	 * Constructor
 	 */
-	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, List<RuntimeSearchParam> theCompositeOf,
-									  Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus) {
-		this(theId, theUri, theName, theDescription, thePath, theParamType, theCompositeOf, theProvidesMembershipInCompartments, theTargets, theStatus, null);
+	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType,
+									  Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, Collection<String> theBase) {
+		this(theId, theUri, theName, theDescription, thePath, theParamType, theProvidesMembershipInCompartments, theTargets, theStatus, false, Collections.emptyList(), theBase);
+	}
+
+	/**
+	 * Copy constructor
+	 */
+	public RuntimeSearchParam(RuntimeSearchParam theSp) {
+		this(theSp.getId(), theSp.getUri(), theSp.getName(), theSp.getDescription(), theSp.getPath(), theSp.getParamType(), theSp.getProvidesMembershipInCompartments(), theSp.getTargets(), theSp.getStatus(), theSp.isUnique(), theSp.getComponents(), theSp.getBase());
 	}
 
 	/**
 	 * Constructor
 	 */
-	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, List<RuntimeSearchParam> theCompositeOf,
-									  Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, Collection<String> theBase) {
+	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, boolean theUnique, List<Component> theComponents, Collection<String> theBase) {
 		super();
 
 		myId = theId;
@@ -79,7 +86,6 @@ public class RuntimeSearchParam {
 		myDescription = theDescription;
 		myPath = thePath;
 		myParamType = theParamType;
-		myCompositeOf = theCompositeOf;
 		myStatus = theStatus;
 		if (theProvidesMembershipInCompartments != null && !theProvidesMembershipInCompartments.isEmpty()) {
 			myProvidesMembershipInCompartments = Collections.unmodifiableSet(theProvidesMembershipInCompartments);
@@ -104,20 +110,20 @@ public class RuntimeSearchParam {
 		} else {
 			myBase = Collections.unmodifiableSet(new HashSet<>(theBase));
 		}
+		myUnique = theUnique;
+		if (theComponents != null) {
+			myComponents = Collections.unmodifiableList(theComponents);
+		} else {
+			myComponents = Collections.emptyList();
+		}
 	}
 
-	/**
-	 * Constructor
-	 */
-	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus) {
-		this(null, null, theName, theDescription, thePath, theParamType, null, theProvidesMembershipInCompartments, theTargets, theStatus);
+	public List<Component> getComponents() {
+		return myComponents;
 	}
 
-	/**
-	 * Copy constructor
-	 */
-	public RuntimeSearchParam(RuntimeSearchParam theSp) {
-		this(theSp.getId(), theSp.getUri(), theSp.getName(), theSp.getDescription(), theSp.getPath(), theSp.getParamType(), theSp.getCompositeOf(), theSp.getProvidesMembershipInCompartments(), theSp.getTargets(), theSp.getStatus(), theSp.getBase());
+	public boolean isUnique() {
+		return myUnique;
 	}
 
 	/**
@@ -205,10 +211,6 @@ public class RuntimeSearchParam {
 		return myStatus;
 	}
 
-	public List<RuntimeSearchParam> getCompositeOf() {
-		return myCompositeOf;
-	}
-
 	public String getDescription() {
 		return myDescription;
 	}
@@ -247,13 +249,6 @@ public class RuntimeSearchParam {
 		return myProvidesMembershipInCompartments;
 	}
 
-	public enum RuntimeSearchParamStatusEnum {
-		ACTIVE,
-		DRAFT,
-		RETIRED,
-		UNKNOWN
-	}
-
 	public RuntimeSearchParam setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {
 		myPhoneticEncoder = thePhoneticEncoder;
 		return this;
@@ -265,4 +260,42 @@ public class RuntimeSearchParam {
 		}
 		return myPhoneticEncoder.encode(theString);
 	}
+
+	public enum RuntimeSearchParamStatusEnum {
+		ACTIVE,
+		DRAFT,
+		RETIRED,
+		UNKNOWN
+	}
+
+	public static class Component {
+		private final String myExpression;
+		private final String myReference;
+
+		/**
+		 * Constructor
+		 */
+		public Component(String theExpression, String theReference) {
+			myExpression = theExpression;
+			myReference = theReference;
+
+		}
+
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+				.append("expression", myExpression)
+				.append("reference", myReference)
+				.toString();
+		}
+
+		public String getExpression() {
+			return myExpression;
+		}
+
+		public String getReference() {
+			return myReference;
+		}
+	}
+
 }

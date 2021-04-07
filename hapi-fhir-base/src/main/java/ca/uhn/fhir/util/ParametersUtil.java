@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,10 +80,7 @@ public class ParametersUtil {
 					.filter(t -> t instanceof IPrimitiveType<?>)
 					.map(t -> ((IPrimitiveType<?>) t))
 					.findFirst();
-				if (!nameValue.isPresent() || !theParameterName.equals(nameValue.get().getValueAsString())) {
-					return false;
-				}
-				return true;
+				return nameValue.isPresent() && theParameterName.equals(nameValue.get().getValueAsString());
 			})
 			.collect(Collectors.toList());
 
@@ -227,9 +224,7 @@ public class ParametersUtil {
 
 	@SuppressWarnings("unchecked")
 	public static void addParameterToParametersBoolean(FhirContext theCtx, IBaseParameters theParameters, String theName, boolean theValue) {
-		IPrimitiveType<Boolean> value = (IPrimitiveType<Boolean>) theCtx.getElementDefinition("boolean").newInstance();
-		value.setValue(theValue);
-		addParameterToParameters(theCtx, theParameters, theName, value);
+		addParameterToParameters(theCtx, theParameters, theName, theCtx.getPrimitiveBoolean(theValue));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -244,7 +239,16 @@ public class ParametersUtil {
 		IPrimitiveType<Integer> count = (IPrimitiveType<Integer>) theCtx.getElementDefinition("integer").newInstance();
 		count.setValue(theValue);
 		addParameterToParameters(theCtx, theParameters, theName, count);
+	}
 
+	public static void addParameterToParametersLong(FhirContext theCtx, IBaseParameters theParameters, String theName, long theValue) {
+		addParameterToParametersDecimal(theCtx, theParameters, theName, BigDecimal.valueOf(theValue));
+	}
+
+	public static void addParameterToParametersDecimal(FhirContext theCtx, IBaseParameters theParameters, String theName, BigDecimal theValue) {
+		IPrimitiveType<BigDecimal> count = (IPrimitiveType<BigDecimal>) theCtx.getElementDefinition("decimal").newInstance();
+		count.setValue(theValue);
+		addParameterToParameters(theCtx, theParameters, theName, count);
 	}
 
 	public static void addParameterToParametersReference(FhirContext theCtx, IBaseParameters theParameters, String theName, String theReference) {
@@ -301,10 +305,7 @@ public class ParametersUtil {
 	}
 
 	public static void addPartBoolean(FhirContext theContext, IBase theParameter, String theName, Boolean theValue) {
-		IPrimitiveType<Boolean> value = (IPrimitiveType<Boolean>) theContext.getElementDefinition("boolean").newInstance();
-		value.setValue(theValue);
-
-		addPart(theContext, theParameter, theName, value);
+		addPart(theContext, theParameter, theName, theContext.getPrimitiveBoolean(theValue));
 	}
 
 	public static void addPartDecimal(FhirContext theContext, IBase theParameter, String theName, Double theValue) {

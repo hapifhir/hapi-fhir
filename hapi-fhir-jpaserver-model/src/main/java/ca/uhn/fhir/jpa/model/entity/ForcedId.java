@@ -2,9 +2,9 @@ package ca.uhn.fhir.jpa.model.entity;
 
 /*
  * #%L
- * HAPI FHIR Model
+ * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
@@ -48,6 +49,7 @@ import javax.persistence.UniqueConstraint;
 	 * - IDX_FORCEDID_TYPE_RESID
 	 * so don't reuse these names
 	 */
+	@Index(name = "IDX_FORCEID_FID", columnList = "FORCED_ID")
 })
 public class ForcedId extends BasePartitionable {
 

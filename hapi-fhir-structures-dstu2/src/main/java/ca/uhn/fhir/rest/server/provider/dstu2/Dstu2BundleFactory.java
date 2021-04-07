@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.provider.dstu2;
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,25 +19,37 @@ package ca.uhn.fhir.rest.server.provider.dstu2;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.*;
-
-import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Link;
 import ca.uhn.fhir.model.dstu2.valueset.SearchEntryModeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.valueset.*;
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
+import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.rest.api.BundleLinks;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 	private String myBase;
@@ -138,31 +150,39 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public void addRootPropertiesToBundle(String theId, String theServerBase, String theLinkSelf, String theLinkPrev, String theLinkNext, Integer theTotalResults, BundleTypeEnum theBundleType,
+	public void addRootPropertiesToBundle(String theId, @Nonnull BundleLinks theBundleLinks, Integer theTotalResults,
 													  IPrimitiveType<Date> theLastUpdated) {
 		ensureBundle();
 
-		myBase = theServerBase;
+		myBase = theBundleLinks.serverBase;
 
 		if (myBundle.getIdElement().isEmpty()) {
 			myBundle.setId(theId);
-		}
-		if (myBundle.getId().isEmpty()) {
-			myBundle.setId(UUID.randomUUID().toString());
 		}
 
 		if (ResourceMetadataKeyEnum.UPDATED.get(myBundle) == null) {
 			ResourceMetadataKeyEnum.UPDATED.put(myBundle, (InstantDt) theLastUpdated);
 		}
 
-		if (!hasLink(Constants.LINK_SELF, myBundle) && isNotBlank(theLinkSelf)) {
-			myBundle.addLink().setRelation(Constants.LINK_SELF).setUrl(theLinkSelf);
+		if (!hasLink(Constants.LINK_SELF, myBundle) && isNotBlank(theBundleLinks.getSelf())) {
+			myBundle.addLink().setRelation(Constants.LINK_SELF).setUrl(theBundleLinks.getSelf());
 		}
-		if (!hasLink(Constants.LINK_NEXT, myBundle) && isNotBlank(theLinkNext)) {
-			myBundle.addLink().setRelation(Constants.LINK_NEXT).setUrl(theLinkNext);
+		if (!hasLink(Constants.LINK_NEXT, myBundle) && isNotBlank(theBundleLinks.getNext())) {
+			myBundle.addLink().setRelation(Constants.LINK_NEXT).setUrl(theBundleLinks.getNext());
 		}
-		if (!hasLink(Constants.LINK_PREVIOUS, myBundle) && isNotBlank(theLinkPrev)) {
-			myBundle.addLink().setRelation(Constants.LINK_PREVIOUS).setUrl(theLinkPrev);
+		if (!hasLink(Constants.LINK_PREVIOUS, myBundle) && isNotBlank(theBundleLinks.getPrev())) {
+			myBundle.addLink().setRelation(Constants.LINK_PREVIOUS).setUrl(theBundleLinks.getPrev());
+		}
+
+		addTotalResultsToBundle(theTotalResults, theBundleLinks.bundleType);
+	}
+
+	@Override
+	public void addTotalResultsToBundle(Integer theTotalResults, BundleTypeEnum theBundleType) {
+		ensureBundle();
+
+		if (myBundle.getId().isEmpty()) {
+			myBundle.setId(UUID.randomUUID().toString());
 		}
 
 		if (myBundle.getTypeElement().isEmpty() && theBundleType != null) {

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.api.model;
  * #%L
  * HAPI FHIR JPA API
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,9 @@ public class DaoMethodOutcome extends MethodOutcome {
 	/**
 	 * Was this a NO-OP - Typically because of an update to a resource that already matched the contents provided
 	 */
-	public void setNop(boolean theNop) {
+	public DaoMethodOutcome setNop(boolean theNop) {
 		myNop = theNop;
+		return this;
 	}
 
 	public IBasePersistedResource getEntity() {
