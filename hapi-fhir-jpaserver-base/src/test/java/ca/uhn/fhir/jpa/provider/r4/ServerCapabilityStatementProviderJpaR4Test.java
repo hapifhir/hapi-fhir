@@ -65,6 +65,19 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 
 	}
 
+	@Test
+	public void testLastUpdatedIncluded() {
+		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
+
+		List<CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent> fooSearchParams = findSearchParams(cs, "Patient", "_lastUpdated");
+		assertEquals(1, fooSearchParams.size());
+		assertEquals("_lastUpdated", fooSearchParams.get(0).getName());
+		assertEquals("SearchParameter/Patient-_lastUpdated", fooSearchParams.get(0).getDefinition());
+		assertEquals("Only return resources which were last updated as specified by the given range", fooSearchParams.get(0).getDocumentation());
+		assertEquals(Enumerations.SearchParamType.DATE, fooSearchParams.get(0).getType());
+
+	}
+
 	@Override
 	@AfterEach
 	public void after() throws Exception {
@@ -119,10 +132,10 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 			.execute();
 
 		List<String> includes = findIncludes(cs, "Patient");
-		assertThat(includes.toString(), includes, contains("*", "Patient:general-practitioner", "Patient:link", "Patient:organization"));
+		assertThat(includes.toString(), includes, containsInAnyOrder("*", "Patient:general-practitioner", "Patient:link", "Patient:organization"));
 
 		includes = findIncludes(cs, "Observation");
-		assertThat(includes.toString(), includes, contains("*", "Observation:based-on", "Observation:derived-from", "Observation:device", "Observation:encounter", "Observation:focus", "Observation:foo", "Observation:has-member", "Observation:part-of", "Observation:patient", "Observation:performer", "Observation:specimen", "Observation:subject"));
+		assertThat(includes.toString(), includes, containsInAnyOrder("*", "Observation:based-on", "Observation:derived-from", "Observation:device", "Observation:encounter", "Observation:focus", "Observation:foo", "Observation:has-member", "Observation:part-of", "Observation:patient", "Observation:performer", "Observation:specimen", "Observation:subject"));
 
 		List<String> revIncludes = findRevIncludes(cs, "Patient");
 		assertThat(revIncludes.toString(), revIncludes, hasItems(
