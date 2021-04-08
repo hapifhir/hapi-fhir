@@ -299,7 +299,7 @@ The RepositoryValidatingInterceptor can be used to enforce validation rules on d
 
 # Data Standardization
 
-`StandardizingInterceptor` handles data standardization (s13n) requirements. This interceptor applies standardization rules on all FHIR primitives as configured in the `s13n.json` file that should be made available on the classpath. This file contains FHIRPath definitions together with the standardizers that should be applied to that path. It comes with six per-build standardizers: NAME_FAMILY, NAME_GIVEN, EMAIL, TITLE, PHONE and TEXT. Custom standardizers can be developed by implementing `ca.uhn.fhir.rest.server.interceptor.s13n.standardizers.IStandardizer` interface.
+`StandardizingInterceptor` handles data standardization (s13n) requirements. This interceptor applies standardization rules on all FHIR primitives as configured in the `s13n.json` file that should be made available on the classpath. This file contains FHIRPath definitions together with the standardizers that should be applied to that path. It comes with six pre-built standardizers: NAME_FAMILY, NAME_GIVEN, EMAIL, TITLE, PHONE and TEXT. Custom standardizers can be developed by implementing `ca.uhn.fhir.rest.server.interceptor.s13n.standardizers.IStandardizer` interface.
 
 A sample configuration file can be found below:
 
