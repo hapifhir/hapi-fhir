@@ -72,7 +72,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 		List<CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent> fooSearchParams = findSearchParams(cs, "Patient", "_lastUpdated");
 		assertEquals(1, fooSearchParams.size());
 		assertEquals("_lastUpdated", fooSearchParams.get(0).getName());
-		assertEquals("SearchParameter/Patient-_lastUpdated", fooSearchParams.get(0).getDefinition());
+		assertEquals("http://localhost:" + ourPort + "/fhir/context/SearchParameter/Patient-_lastUpdated", fooSearchParams.get(0).getDefinition());
 		assertEquals("Only return resources which were last updated as specified by the given range", fooSearchParams.get(0).getDocumentation());
 		assertEquals(Enumerations.SearchParamType.DATE, fooSearchParams.get(0).getType());
 

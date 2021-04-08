@@ -395,7 +395,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
                         } else {
                             id = resourceName + "-" + next.getName();
                         }
-                        spUri = id;
+                        spUri = configuration.getServerAddressStrategy().determineServerBase(servletRequest.getServletContext(), servletRequest) + "/" + id;
                     }
                     if (isNotBlank(spUri)) {
                         terser.addElement(searchParam, "definition", spUri);
