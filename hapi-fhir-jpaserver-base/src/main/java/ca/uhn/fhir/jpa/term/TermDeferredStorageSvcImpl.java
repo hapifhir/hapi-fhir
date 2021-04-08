@@ -60,7 +60,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -68,7 +70,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TermDeferredStorageSvcImpl.class);
 	final private List<TermCodeSystem> myDeferredCodeSystemsDeletions = Collections.synchronizedList(new ArrayList<>());
-	final private List<TermCodeSystemVersion> myDeferredCodeSystemVersionsDeletions = Collections.synchronizedList(new ArrayList<>());
+	final private Queue<TermCodeSystemVersion> myDeferredCodeSystemVersionsDeletions = new ConcurrentLinkedQueue<>();
 	final private List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
 	final private List<ValueSet> myDeferredValueSets = Collections.synchronizedList(new ArrayList<>());
 	final private List<ConceptMap> myDeferredConceptMaps = Collections.synchronizedList(new ArrayList<>());
@@ -498,7 +500,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	@Override
-	public synchronized void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
+	public void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
 		myDeferredCodeSystemVersionsDeletions.add(theCodeSystemVersion);
 	}
 
