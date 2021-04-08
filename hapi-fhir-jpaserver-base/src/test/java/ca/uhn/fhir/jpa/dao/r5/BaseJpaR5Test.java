@@ -49,7 +49,6 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.r5.JpaSystemProviderR5;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
@@ -61,7 +60,6 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
-import ca.uhn.fhir.jpa.term.ValueSetExpansionR4Test;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR5;
@@ -73,6 +71,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
@@ -81,6 +80,7 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.AllergyIntolerance;
 import org.hl7.fhir.r5.model.Appointment;
 import org.hl7.fhir.r5.model.AuditEvent;
@@ -164,10 +164,9 @@ import static org.mockito.Mockito.mock;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR5Config.class})
-public abstract class BaseJpaR5Test extends BaseJpaTest {
+public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuilder {
 	private static IValidationSupport ourJpaValidationSupportChainR5;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
-
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Autowired
@@ -416,6 +415,23 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
 
+	@Override
+	public IIdType doCreateResource(IBaseResource theResource) {
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
+		return dao.create(theResource, mySrd).getId().toUnqualifiedVersionless();
+	}
+
+	@Override
+	public IIdType doUpdateResource(IBaseResource theResource) {
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
+		return dao.update(theResource, mySrd).getId().toUnqualifiedVersionless();
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myFhirCtx;
+	}
+
 	@AfterEach()
 	public void afterCleanupDao() {
 		myDaoConfig.setExpireSearchResults(new DaoConfig().isExpireSearchResults());
@@ -463,7 +479,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 	@BeforeEach
 	public void beforeFlushFT() {
 		runInTransaction(() -> {
-			SearchSession searchSession  = Search.session(myEntityManager);
+			SearchSession searchSession = Search.session(myEntityManager);
 			searchSession.workspace(ResourceTable.class).purge();
 //			searchSession.workspace(ResourceIndexedSearchParamString.class).purge();
 			searchSession.indexingPlan().execute();
@@ -522,6 +538,43 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 		IBaseResource resourceParsed = parser.parseResource(resource);
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceParsed.getIdElement().getResourceType());
 		dao.update(resourceParsed);
+	}
+
+	protected ValueSet.ValueSetExpansionContainsComponent assertExpandedValueSetContainsConcept(ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Integer theDesignationCount) {
+		List<ValueSet.ValueSetExpansionContainsComponent> contains = theValueSet.getExpansion().getContains();
+
+		Stream<ValueSet.ValueSetExpansionContainsComponent> stream = contains.stream();
+		if (theSystem != null) {
+			stream = stream.filter(concept -> theSystem.equalsIgnoreCase(concept.getSystem()));
+		}
+		if (theCode != null) {
+			stream = stream.filter(concept -> theCode.equalsIgnoreCase(concept.getCode()));
+		}
+		if (theDisplay != null) {
+			stream = stream.filter(concept -> theDisplay.equalsIgnoreCase(concept.getDisplay()));
+		}
+		if (theDesignationCount != null) {
+			stream = stream.filter(concept -> concept.getDesignation().size() == theDesignationCount);
+		}
+
+		Optional<ValueSet.ValueSetExpansionContainsComponent> first = stream.findFirst();
+		if (!first.isPresent()) {
+			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount);
+			fail(failureMessage);
+			return null;
+		} else {
+			return first.get();
+		}
+	}
+
+	public List<String> getExpandedConceptsByValueSetUrl(String theValuesetUrl) {
+		return runInTransaction(() -> {
+			List<TermValueSet> valueSets = myTermValueSetDao.findTermValueSetByUrl(Pageable.unpaged(), theValuesetUrl);
+			assertEquals(1, valueSets.size());
+			TermValueSet valueSet = valueSets.get(0);
+			List<TermValueSetConcept> concepts = valueSet.getConcepts();
+			return concepts.stream().map(concept -> concept.getCode()).collect(Collectors.toList());
+		});
 	}
 
 	@AfterAll
@@ -633,41 +686,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 		Map<String, String[]> params = UrlUtil.parseQueryString(linkNext);
 		String[] uuidParams = params.get(Constants.PARAM_PAGINGACTION);
 		return uuidParams[0];
-	}
-	protected ValueSet.ValueSetExpansionContainsComponent assertExpandedValueSetContainsConcept(ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Integer theDesignationCount) {
-		List<ValueSet.ValueSetExpansionContainsComponent> contains = theValueSet.getExpansion().getContains();
-
-		Stream<ValueSet.ValueSetExpansionContainsComponent> stream = contains.stream();
-		if (theSystem != null) {
-			stream = stream.filter(concept -> theSystem.equalsIgnoreCase(concept.getSystem()));
-		}
-		if (theCode != null ) {
-			stream = stream.filter(concept -> theCode.equalsIgnoreCase(concept.getCode()));
-		}
-		if (theDisplay != null){
-			stream = stream.filter(concept -> theDisplay.equalsIgnoreCase(concept.getDisplay()));
-		}
-		if (theDesignationCount != null) {
-			stream = stream.filter(concept -> concept.getDesignation().size() == theDesignationCount);
-		}
-
-		Optional<ValueSet.ValueSetExpansionContainsComponent> first = stream.findFirst();
-		if (!first.isPresent()) {
-			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount);
-			fail(failureMessage);
-			return null;
-		} else {
-			return first.get();
-		}
-	}
-	public List<String> getExpandedConceptsByValueSetUrl(String theValuesetUrl) {
-		return runInTransaction(() -> {
-			List<TermValueSet> valueSets = myTermValueSetDao.findTermValueSetByUrl(Pageable.unpaged(), theValuesetUrl);
-			assertEquals(1, valueSets.size());
-			TermValueSet valueSet = valueSets.get(0);
-			List<TermValueSetConcept> concepts = valueSet.getConcepts();
-			return concepts.stream().map(concept -> concept.getCode()).collect(Collectors.toList());
-		});
 	}
 
 }
