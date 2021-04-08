@@ -219,6 +219,11 @@ public class JpaConstants {
 	public static final String DEFAULT_PARTITION_NAME = "DEFAULT";
 
 	/**
+	 * Parameter for the $expand operation
+	 */
+	public static final String OPERATION_EXPAND_PARAM_INCLUDE_HIERARCHY = "includeHierarchy";
+
+	/**
 	 * Non-instantiable
 	 */
 	private JpaConstants() {

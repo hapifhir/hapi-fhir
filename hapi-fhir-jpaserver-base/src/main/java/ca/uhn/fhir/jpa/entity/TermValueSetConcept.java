@@ -27,7 +27,21 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +74,9 @@ public class TermValueSetConcept implements Serializable {
 	@Column(name = "VALUESET_PID", insertable = false, updatable = false, nullable = false)
 	private Long myValueSetPid;
 
+	@Column(name = "INDEX_STATUS", nullable = true)
+	private Long myIndexStatus;
+
 	@Column(name = "VALUESET_ORDER", nullable = false)
 	private int myOrder;
 
@@ -68,6 +85,13 @@ public class TermValueSetConcept implements Serializable {
 
 	@Transient
 	private String myValueSetName;
+
+	@Column(name = "SOURCE_PID", nullable = true)
+	private Long mySourceConceptPid;
+
+	@Lob
+	@Column(name = "SOURCE_DIRECT_PARENT_PIDS", nullable = true)
+	private String mySourceConceptDirectParentPids;
 
 	@Column(name = "SYSTEM_URL", nullable = false, length = TermCodeSystem.MAX_URL_LENGTH)
 	private String mySystem;
@@ -86,6 +110,13 @@ public class TermValueSetConcept implements Serializable {
 
 	@Transient
 	private transient Integer myHashCode;
+
+	/**
+	 * Constructor
+	 */
+	public TermValueSetConcept() {
+		super();
+	}
 
 	public Long getId() {
 		return myId;
@@ -218,5 +249,21 @@ public class TermValueSetConcept implements Serializable {
 			.append("myDisplay", myDisplay)
 			.append(myDesignations != null ? ("myDesignations - size=" + myDesignations.size()) : ("myDesignations=(null)"))
 			.toString();
+	}
+
+	public Long getIndexStatus() {
+		return myIndexStatus;
+	}
+
+	public void setIndexStatus(Long theIndexStatus) {
+		myIndexStatus = theIndexStatus;
+	}
+
+	public void setSourceConceptPid(Long theSourceConceptPid) {
+		mySourceConceptPid = theSourceConceptPid;
+	}
+
+	public void setSourceConceptDirectParentPids(String theSourceConceptDirectParentPids) {
+		mySourceConceptDirectParentPids = theSourceConceptDirectParentPids;
 	}
 }

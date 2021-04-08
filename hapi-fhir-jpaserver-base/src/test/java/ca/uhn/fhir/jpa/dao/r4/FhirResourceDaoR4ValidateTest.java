@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -257,8 +258,6 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.addPerformer(new Reference("Practitioner/123"));
 		obs.setEffective(DateTimeType.now());
 		obs.setStatus(ObservationStatus.FINAL);
-
-		OperationOutcome oo;
 
 		// Valid code
 		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
@@ -1702,7 +1701,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValueSet expansion = myValueSetDao.expand(id, null, 0, 10000, mySrd);
+		ValueSetExpansionOptions options = ValueSetExpansionOptions.forOffsetAndCount(0, 10000);
+		ValueSet expansion = myValueSetDao.expand(id, options, mySrd);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
 		assertEquals(2, expansion.getExpansion().getContains().size());

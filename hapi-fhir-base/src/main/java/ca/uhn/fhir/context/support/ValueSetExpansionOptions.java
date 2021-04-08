@@ -32,6 +32,17 @@ public class ValueSetExpansionOptions {
 	private boolean myFailOnMissingCodeSystem = true;
 	private int myCount = 1000;
 	private int myOffset = 0;
+	private boolean myIncludeHierarchy;
+	private String myFilter;
+
+	public String getFilter() {
+		return myFilter;
+	}
+
+	public ValueSetExpansionOptions setFilter(String theFilter) {
+		myFilter = theFilter;
+		return this;
+	}
 
 	/**
 	 * The number of codes to return.
@@ -92,6 +103,14 @@ public class ValueSetExpansionOptions {
 	public ValueSetExpansionOptions setFailOnMissingCodeSystem(boolean theFailOnMissingCodeSystem) {
 		myFailOnMissingCodeSystem = theFailOnMissingCodeSystem;
 		return this;
+	}
+
+	public boolean isIncludeHierarchy() {
+		return myIncludeHierarchy;
+	}
+
+	public void setIncludeHierarchy(boolean theIncludeHierarchy) {
+		myIncludeHierarchy = theIncludeHierarchy;
 	}
 
 	public static ValueSetExpansionOptions forOffsetAndCount(int theOffset, int theCount) {
