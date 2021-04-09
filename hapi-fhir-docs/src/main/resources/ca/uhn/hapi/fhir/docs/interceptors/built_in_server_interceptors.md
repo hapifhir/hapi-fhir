@@ -117,7 +117,7 @@ If you wish to override this behaviour and supply a static CapabilityStatement, 
 * [StaticCapabilityStatementInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/StaticCapabilityStatementInterceptor.html)
 * [StaticCapabilityStatementInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/StaticCapabilityStatementInterceptor.java)
 
-The following example shows how to register the ExceptionHandlingInterceptor.
+The following example shows how to register the StaticCapabilityStatementInterceptor.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ServletExamples.java|staticCapabilityStatementInterceptor}}
