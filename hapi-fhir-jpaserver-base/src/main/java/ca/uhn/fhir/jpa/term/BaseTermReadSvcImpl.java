@@ -2054,6 +2054,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@CoverageIgnore
 	@Override
 	public IValidationSupport.CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+		//TODO GGG TRY TO JUST AUTO_PASS HERE AND SEE WHAT HAPPENS.
 		invokeRunnableForUnitTest();
 
 		if (isNotBlank(theValueSetUrl)) {

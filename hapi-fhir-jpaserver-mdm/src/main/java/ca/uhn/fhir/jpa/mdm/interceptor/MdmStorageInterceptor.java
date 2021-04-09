@@ -36,6 +36,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,13 +59,10 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	private EIDHelper myEIDHelper;
 	@Autowired
 	private IMdmSettings myMdmSettings;
-	@Autowired
-	private GoldenResourceHelper myGoldenResourceHelper;
 
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void blockManualResourceManipulationOnCreate(IBaseResource theBaseResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
-
 		//If running in single EID mode, forbid multiple eids.
 		if (myMdmSettings.isPreventMultipleEids()) {
 			forbidIfHasMultipleEids(theBaseResource);

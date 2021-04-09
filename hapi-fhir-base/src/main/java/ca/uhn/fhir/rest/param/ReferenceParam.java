@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -41,6 +42,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	private String myBaseUrl;
 	private String myValue;
 	private String myIdPart;
+	private Boolean myMdmExpand;
 
 	/**
 	 * Constructor
@@ -90,8 +92,8 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 		}
 	}
 
-	@Override
-	String doGetQueryParameterQualifier() {
+
+	private String defaultGetQueryParameterQualifier() {
 		StringBuilder b = new StringBuilder();
 		if (isNotBlank(myChain)) {
 			if (isNotBlank(getResourceType())) {
@@ -105,6 +107,10 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 			return b.toString();
 		}
 		return null;
+	}
+	@Override
+	String doGetQueryParameterQualifier() {
+		return this.myMdmExpand != null ? ":mdm" : defaultGetQueryParameterQualifier();
 	}
 
 	@Override
@@ -121,6 +127,11 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 
 	@Override
 	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
+		if (Constants.PARAMQUALIFIER_MDM.equals(theQualifier)) {
+			myMdmExpand = true;
+			theQualifier = "";
+		}
+
 		String q = theQualifier;
 		if (isNotBlank(q)) {
 			if (q.startsWith(":")) {
@@ -166,6 +177,14 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 		return myBaseUrl;
 	}
 
+	public boolean isMdmExpand() {
+		return myMdmExpand != null && myMdmExpand;
+	}
+
+	public ReferenceParam setMdmExpand(boolean theMdmExpand) {
+		myMdmExpand = theMdmExpand;
+		return this;
+	}
 
 	public String getChain() {
 		return myChain;
