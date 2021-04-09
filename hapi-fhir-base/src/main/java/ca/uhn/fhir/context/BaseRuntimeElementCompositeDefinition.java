@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -600,6 +601,11 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 
 		public boolean isFirstFieldInNewClass() {
 			return myFirstFieldInNewClass;
+		}
+
+		@Override
+		public String toString() {
+			return myField.getName();
 		}
 	}
 
