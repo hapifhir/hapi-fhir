@@ -48,6 +48,7 @@ import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
@@ -1025,6 +1026,12 @@ public abstract class BaseTransactionProcessor {
 				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, nextPointcut, nextParams);
 			}
 
+			DeferredInterceptorBroadcasts deferredInterceptorBroadcasts = new DeferredInterceptorBroadcasts(deferredBroadcastEvents);
+			HookParams params = new HookParams()
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest)
+				.add(DeferredInterceptorBroadcasts.class, deferredInterceptorBroadcasts);
+			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_TRANSACTION_PROCESSED, params);
 
 			theTransactionDetails.deferredBroadcastProcessingFinished();
 

@@ -1513,10 +1513,10 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
-	 * Invoked before a resource will be deleted
+	 * Invoked after all entries in a transaction bundle have been executed
 	 * <p>
-	 * Hooks will have access to the contents of the resource being deleted
-	 * but should not make any changes as storage has already occurred
+	 * Hooks will have access to the original bundle, as well as all the deferred interceptor broadcasts related to the
+	 * processing of the transaction bundle
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
@@ -1536,6 +1536,9 @@ public enum Pointcut implements IPointcut {
 	 * </li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts- A collection of pointcut invocations and their parameters which were deferred.
 	 * </li>
 	 * </ul>
 	 * <p>
