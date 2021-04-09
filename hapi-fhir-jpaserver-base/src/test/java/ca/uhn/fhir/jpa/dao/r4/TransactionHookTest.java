@@ -40,22 +40,13 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 	public void testHookShouldContainParamsForAllCreateUpdateDeleteInvocations() {
 		final Observation obs1 = new Observation();
 		obs1.setStatus(Observation.ObservationStatus.FINAL);
-		IIdType obs1id = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
-
-		final Observation obs2 = new Observation();
-		obs2.setStatus(Observation.ObservationStatus.FINAL);
-		IIdType obs2id = myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
-
-		final DiagnosticReport rpt = new DiagnosticReport();
-		rpt.addResult(new Reference(obs2id));
-		IIdType rptId = myDiagnosticReportDao.create(rpt).getId().toUnqualifiedVersionless();
-
-		myObservationDao.read(obs1id);
-		myObservationDao.read(obs2id);
-		myDiagnosticReportDao.read(rptId);
 
 		Bundle b = new Bundle();
-		b.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(obs2id.getValue());
+		Bundle.BundleEntryComponent bundleEntryComponent = b.addEntry();
+		bundleEntryComponent.setResource(obs1);
+		bundleEntryComponent.getRequest().setMethod(Bundle.HTTPVerb.POST);
+
+
 
 		try {
 			mySystemDao.transaction(mySrd, b);
