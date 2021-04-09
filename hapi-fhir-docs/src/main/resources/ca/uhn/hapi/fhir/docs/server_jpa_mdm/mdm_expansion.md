@@ -5,7 +5,7 @@ Once you have MDM enabled, and you have many linked resources, it can be useful 
 Patient/1 --> Patient/3
 Patient/2 --> Patient/3
 ```
-This indicates that both Patient/1 and Patient/2 are MDM-mathed to the same golden resource (Patient/3).
+This indicates that both Patient/1 and Patient/2 are MDM-matched to the same golden resource (Patient/3).
 What if you want to get all observations from Patient/1, but also include any observations from all of their linked resources. You could do this by first querying the [$mdm-query-links](/docs/server_jpa_mdm/mdm_operations.html) endpoint, and then making a subsequent call like the following
 ```http request
 GET http://example.com:8000/Observation?subject=Patient/1,Patient/2,Patient/3
