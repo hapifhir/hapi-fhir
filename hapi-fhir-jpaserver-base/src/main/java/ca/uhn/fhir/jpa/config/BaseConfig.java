@@ -17,9 +17,11 @@ import ca.uhn.fhir.jpa.batch.config.NonPersistedBatchConfigurer;
 import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
-import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.bulk.provider.BulkDataExportProvider;
-import ca.uhn.fhir.jpa.bulk.svc.BulkDataExportSvcImpl;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
+import ca.uhn.fhir.jpa.bulk.export.svc.BulkDataExportSvcImpl;
+import ca.uhn.fhir.jpa.bulk.imp.api.IBulkDataImportSvc;
+import ca.uhn.fhir.jpa.bulk.imp.svc.BulkDataImportSvcImpl;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
 import ca.uhn.fhir.jpa.dao.DaoSearchParamProvider;
@@ -63,7 +65,6 @@ import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.jpa.interceptor.OverridePathBasedReferentialIntegrityForDeletesInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
@@ -95,8 +96,8 @@ import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityNormalizedPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
@@ -129,6 +130,7 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.validation.JpaResourceLoader;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import org.hibernate.jpa.HibernatePersistenceProvider;
@@ -185,7 +187,7 @@ import java.util.Date;
 @Configuration
 @EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
 @Import({
-	SearchParamConfig.class, BatchJobsConfig.class
+		  SearchParamConfig.class, BatchJobsConfig.class
 })
 @EnableBatchProcessing
 public abstract class BaseConfig {
@@ -199,24 +201,23 @@ public abstract class BaseConfig {
 	public static final String PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER = "PersistedJpaSearchFirstPageBundleProvider";
 	public static final String SEARCH_BUILDER = "SearchBuilder";
 	public static final String HISTORY_BUILDER = "HistoryBuilder";
-	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
 	public static final String REPOSITORY_VALIDATING_RULE_BUILDER = "repositoryValidatingRuleBuilder";
-
+	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
 	@Autowired
 	protected Environment myEnv;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	private Integer searchCoordCorePoolSize = 20;
+	private Integer searchCoordMaxPoolSize = 100;
+	private Integer searchCoordQueueCapacity = 200;
 
 	/**
 	 * Subclasses may override this method to provide settings such as search coordinator pool sizes.
 	 */
 	@PostConstruct
-	public void initSettings() {}
-
-	private Integer searchCoordCorePoolSize = 20;
-	private Integer searchCoordMaxPoolSize = 100;
-	private Integer searchCoordQueueCapacity = 200;
+	public void initSettings() {
+	}
 
 	public void setSearchCoordCorePoolSize(Integer searchCoordCorePoolSize) {
 		this.searchCoordCorePoolSize = searchCoordCorePoolSize;
@@ -514,6 +515,11 @@ public abstract class BaseConfig {
 		return new BulkDataExportProvider();
 	}
 
+	@Bean
+	@Lazy
+	public IBulkDataImportSvc bulkDataImportSvc() {
+		return new BulkDataImportSvcImpl();
+	}
 
 	@Bean
 	public PersistedJpaBundleProviderFactory persistedJpaBundleProviderFactory() {
@@ -614,7 +620,7 @@ public abstract class BaseConfig {
 	public QuantityNormalizedPredicateBuilder newQuantityNormalizedPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
 		return new QuantityNormalizedPredicateBuilder(theSearchBuilder);
 	}
-	
+
 	@Bean
 	@Scope("prototype")
 	public ResourceLinkPredicateBuilder newResourceLinkPredicateBuilder(QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder, boolean theReversed) {

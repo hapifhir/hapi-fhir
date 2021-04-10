@@ -23,6 +23,9 @@ package ca.uhn.fhir.jpa.dao.expunge;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobFileJson;
+import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
+import ca.uhn.fhir.jpa.entity.BulkImportJobFileEntity;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchInclude;
@@ -123,6 +126,8 @@ public class ExpungeEverythingService {
 		counter.addAndGet(expungeEverythingByType(NpmPackageVersionEntity.class));
 		counter.addAndGet(expungeEverythingByType(NpmPackageEntity.class));
 		counter.addAndGet(expungeEverythingByType(SearchParamPresent.class));
+		counter.addAndGet(expungeEverythingByType(BulkImportJobFileEntity.class));
+		counter.addAndGet(expungeEverythingByType(BulkImportJobEntity.class));
 		counter.addAndGet(expungeEverythingByType(ForcedId.class));
 		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamDate.class));
 		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamNumber.class));
