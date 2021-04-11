@@ -20,7 +20,8 @@ package ca.uhn.fhir.jpa.bulk.imp.job;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import ca.uhn.fhir.jpa.bulk.imp.model.ParsedBulkImportRecord;
+import ca.uhn.fhir.jpa.bulk.imp.model.RawBulkImportRecord;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.Step;
@@ -125,7 +126,7 @@ public class BulkImportJobConfig {
 		CompletionPolicy completionPolicy = completionPolicy();
 
 		return myStepBuilderFactory.get("groupBulkExportGenerateResourceFilesStep")
-			.<String, IBaseResource>chunk(completionPolicy)
+			.<RawBulkImportRecord, ParsedBulkImportRecord>chunk(completionPolicy)
 			.reader(bulkImportFileReader())
 			.processor(bulkImportParseFileProcessor())
 			.writer(bulkImportFileWriter())
@@ -152,7 +153,7 @@ public class BulkImportJobConfig {
 
 	@Bean
 	@StepScope
-	public ItemWriter<IBaseResource> bulkImportFileWriter() {
+	public ItemWriter<ParsedBulkImportRecord> bulkImportFileWriter() {
 		return new BulkImportFileWriter();
 	}
 

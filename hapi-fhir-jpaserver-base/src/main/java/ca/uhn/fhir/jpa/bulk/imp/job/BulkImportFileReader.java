@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imp.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobFileJson;
+import ca.uhn.fhir.jpa.bulk.imp.model.RawBulkImportRecord;
 import ca.uhn.fhir.util.IoUtil;
 import com.google.common.io.LineReader;
 import org.slf4j.Logger;
@@ -35,9 +36,8 @@ import org.springframework.beans.factory.annotation.Value;
 import java.io.StringReader;
 
 @SuppressWarnings("UnstableApiUsage")
-public class BulkImportFileReader implements ItemReader<String> {
+public class BulkImportFileReader implements ItemReader<RawBulkImportRecord> {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportFileReader.class);
 	@Autowired
 	private IBulkDataImportSvc myBulkDataImportSvc;
 	@Value("#{stepExecutionContext['" + BulkExportJobConfig.JOB_UUID_PARAMETER + "']}")
@@ -47,23 +47,26 @@ public class BulkImportFileReader implements ItemReader<String> {
 	private StringReader myReader;
 	private LineReader myLineReader;
 	private int myLineIndex;
+	private String myTenantName;
 
 	@Override
-	public String read() throws Exception {
+	public RawBulkImportRecord read() throws Exception {
 
 		if (myReader == null) {
-			BulkImportJobFileJson retVal = myBulkDataImportSvc.fetchFile(myJobUuid, myFileIndex);
-			myReader = new StringReader(retVal.getContents());
+			BulkImportJobFileJson file = myBulkDataImportSvc.fetchFile(myJobUuid, myFileIndex);
+			myTenantName = file.getTenantName();
+			myReader = new StringReader(file.getContents());
 			myLineReader = new LineReader(myReader);
 		}
 
-		String retVal = myLineReader.readLine();
-		if (retVal == null) {
+		String nextLine = myLineReader.readLine();
+		if (nextLine == null) {
 			IoUtil.closeQuietly(myReader);
+			return null;
 		}
 
 		Logs.getBatchTroubleshootingLog().debug("Reading line {} file index {} for job: {}", myLineIndex++, myFileIndex, myJobUuid);
 
-		return retVal;
+		return new RawBulkImportRecord(myTenantName, nextLine);
 	}
 }
