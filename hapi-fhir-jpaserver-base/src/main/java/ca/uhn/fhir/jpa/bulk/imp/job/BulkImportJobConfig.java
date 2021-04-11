@@ -120,7 +120,7 @@ public class BulkImportJobConfig {
 	@Bean
 	public Step bulkImportProcessFilesStep() {
 		return myStepBuilderFactory.get("groupBulkExportGenerateResourceFilesStep")
-			.<BulkImportJobFileJson, List<IBaseResource>>chunk(10) // FIXME: what does the chunk size do
+			.<BulkImportJobFileJson, List<IBaseResource>>chunk(1) // FIXME: what does the chunk size do
 			.reader(bulkImportFileReader())
 			.processor(bulkImportParseFileProcessor())
 			.writer(bulkImportFileWriter())
