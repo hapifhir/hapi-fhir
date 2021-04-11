@@ -142,14 +142,14 @@ public abstract class BaseTransactionProcessor {
 		ourLog.trace("Starting transaction processor");
 	}
 
-	public <BUNDLE extends IBaseBundle> BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest) {
+	public <BUNDLE extends IBaseBundle> BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest, boolean theNestedMode) {
 		if (theRequestDetails != null && theRequestDetails.getServer() != null && myDao != null) {
 			IServerInterceptor.ActionRequestDetails requestDetails = new IServerInterceptor.ActionRequestDetails(theRequestDetails, theRequest, "Bundle", null);
 			myDao.notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
 		}
 
 		String actionName = "Transaction";
-		IBaseBundle response = processTransactionAsSubRequest((RequestDetails) theRequestDetails, theRequest, actionName);
+		IBaseBundle response = processTransactionAsSubRequest(theRequestDetails, theRequest, actionName, theNestedMode);
 
 		List<IBase> entries = myVersionAdapter.getEntries(response);
 		for (int i = 0; i < entries.size(); i++) {
@@ -190,7 +190,7 @@ public abstract class BaseTransactionProcessor {
 			myVersionAdapter.setRequestUrl(entry, next.getIdElement().toUnqualifiedVersionless().getValue());
 		}
 
-		transaction(theRequestDetails, transactionBundle);
+		transaction(theRequestDetails, transactionBundle, false);
 
 		return resp;
 	}
@@ -270,10 +270,10 @@ public abstract class BaseTransactionProcessor {
 		myDao = theDao;
 	}
 
-	private IBaseBundle processTransactionAsSubRequest(RequestDetails theRequestDetails, IBaseBundle theRequest, String theActionName) {
+	private IBaseBundle processTransactionAsSubRequest(RequestDetails theRequestDetails, IBaseBundle theRequest, String theActionName, boolean theNestedMode) {
 		BaseHapiFhirDao.markRequestAsProcessingSubRequest(theRequestDetails);
 		try {
-			return processTransaction(theRequestDetails, theRequest, theActionName);
+			return processTransaction(theRequestDetails, theRequest, theActionName, theNestedMode);
 		} finally {
 			BaseHapiFhirDao.clearRequestAsProcessingSubRequest(theRequestDetails);
 		}
@@ -289,7 +289,7 @@ public abstract class BaseTransactionProcessor {
 		myTxManager = theTxManager;
 	}
 
-	private IBaseBundle batch(final RequestDetails theRequestDetails, IBaseBundle theRequest) {
+	private IBaseBundle batch(final RequestDetails theRequestDetails, IBaseBundle theRequest, boolean theNestedMode) {
 		ourLog.info("Beginning batch with {} resources", myVersionAdapter.getEntries(theRequest).size());
 		long start = System.currentTimeMillis();
 
@@ -310,7 +310,7 @@ public abstract class BaseTransactionProcessor {
 				IBaseBundle subRequestBundle = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode());
 				myVersionAdapter.addEntry(subRequestBundle, (IBase) nextRequestEntry);
 
-				IBaseBundle nextResponseBundle = processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, subRequestBundle, "Batch sub-request");
+				IBaseBundle nextResponseBundle = processTransactionAsSubRequest(theRequestDetails, subRequestBundle, "Batch sub-request", theNestedMode);
 
 				IBase subResponseEntry = (IBase) myVersionAdapter.getEntries(nextResponseBundle).get(0);
 				myVersionAdapter.addEntry(resp, subResponseEntry);
@@ -341,7 +341,7 @@ public abstract class BaseTransactionProcessor {
 		}
 
 		long delay = System.currentTimeMillis() - start;
-		ourLog.info("Batch completed in {}ms", new Object[]{delay});
+		ourLog.info("Batch completed in {}ms", delay);
 
 		return resp;
 	}
@@ -351,13 +351,13 @@ public abstract class BaseTransactionProcessor {
 		myHapiTransactionService = theHapiTransactionService;
 	}
 
-	private IBaseBundle processTransaction(final RequestDetails theRequestDetails, final IBaseBundle theRequest, final String theActionName) {
+	private IBaseBundle processTransaction(final RequestDetails theRequestDetails, final IBaseBundle theRequest, final String theActionName, boolean theNestedMode) {
 		validateDependencies();
 
 		String transactionType = myVersionAdapter.getBundleType(theRequest);
 
 		if (org.hl7.fhir.r4.model.Bundle.BundleType.BATCH.toCode().equals(transactionType)) {
-			return batch(theRequestDetails, theRequest);
+			return batch(theRequestDetails, theRequest, theNestedMode);
 		}
 
 		if (transactionType == null) {
@@ -464,6 +464,10 @@ public abstract class BaseTransactionProcessor {
 			transactionStopWatch.startTask("Process " + getEntries.size() + " GET entries");
 		}
 		for (IBase nextReqEntry : getEntries) {
+
+			if (theNestedMode) {
+				throw new InvalidRequestException("Can not invoke read operation on nested transaction");
+			}
 
 			if (!(theRequestDetails instanceof ServletRequestDetails)) {
 				throw new MethodNotAllowedException("Can not call transaction GET methods from this context");

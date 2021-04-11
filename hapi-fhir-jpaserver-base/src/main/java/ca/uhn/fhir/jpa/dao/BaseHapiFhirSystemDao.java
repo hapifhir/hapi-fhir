@@ -106,13 +106,13 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
 	public T transaction(RequestDetails theRequestDetails, T theRequest) {
-		return myTransactionProcessor.transaction(theRequestDetails, theRequest);
+		return myTransactionProcessor.transaction(theRequestDetails, theRequest, false);
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.MANDATORY)
 	public T transactionNested(RequestDetails theRequestDetails, T theRequest) {
-		return myTransactionProcessor.transaction(theRequestDetails, theRequest);
+		return myTransactionProcessor.transaction(theRequestDetails, theRequest, true);
 	}
 
 

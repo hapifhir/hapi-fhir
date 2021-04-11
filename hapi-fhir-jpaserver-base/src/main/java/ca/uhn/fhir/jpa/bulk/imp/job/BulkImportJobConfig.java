@@ -125,7 +125,6 @@ public class BulkImportJobConfig {
 		CompletionPolicy completionPolicy = completionPolicy();
 
 		return myStepBuilderFactory.get("groupBulkExportGenerateResourceFilesStep")
-//			.<String, IBaseResource>chunk(1) // FIXME: what does the chunk size do
 			.<String, IBaseResource>chunk(completionPolicy)
 			.reader(bulkImportFileReader())
 			.processor(bulkImportParseFileProcessor())
