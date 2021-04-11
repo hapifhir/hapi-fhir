@@ -23,37 +23,50 @@ package ca.uhn.fhir.jpa.bulk.imp.job;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imp.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobFileJson;
+import ca.uhn.fhir.util.IoUtil;
+import com.google.common.io.LineReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-public class BulkImportFileReader implements ItemReader<BulkImportJobFileJson> {
+import java.io.StringReader;
 
+public class BulkImportFileReader implements ItemReader<String> {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportFileReader.class);
 	@Autowired
 	private IBulkDataImportSvc myBulkDataImportSvc;
-
 	@Value("#{stepExecutionContext['" + BulkExportJobConfig.JOB_UUID_PARAMETER + "']}")
 	private String myJobUuid;
 	@Value("#{stepExecutionContext['" + BulkImportPartitioner.FILE_INDEX + "']}")
 	private int myFileIndex;
-
-	private boolean myDone = false;
+	private StringReader myReader;
+	private LineReader myLineReader;
+	private int myLineIndex;
+	private boolean myDone;
 
 	@Override
-	public BulkImportJobFileJson read() throws Exception {
+	public String read() throws Exception {
 		if (myDone) {
 			return null;
-		} else {
+		}
+
+		if (myReader == null) {
+			BulkImportJobFileJson retVal = myBulkDataImportSvc.fetchFile(myJobUuid, myFileIndex);
+			myReader = new StringReader(retVal.getContents());
+			myLineReader = new LineReader(myReader);
+		}
+
+		String retVal = myLineReader.readLine();
+		if (retVal == null) {
+			IoUtil.closeQuietly(myReader);
 			myDone = true;
 		}
 
-		BulkImportJobFileJson retVal = myBulkDataImportSvc.fetchFile(myJobUuid, myFileIndex);
+		ourLog.info("Reading line {} file index {} for job: {}", myLineIndex++, myFileIndex, myJobUuid);
 
-		ourLog.info("Reading file index {} for job: {}", myFileIndex, myJobUuid);
 		return retVal;
 	}
-private static final Logger ourLog = LoggerFactory.getLogger(BulkImportFileReader.class);
 }

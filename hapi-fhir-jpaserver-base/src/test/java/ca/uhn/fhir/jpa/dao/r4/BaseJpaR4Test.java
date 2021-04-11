@@ -530,7 +530,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		myInterceptor = mock(IServerInterceptor.class);
 
 		myPerformanceTracingLoggingInterceptor = new PerformanceTracingLoggingInterceptor();
-		myInterceptorRegistry.registerInterceptor(myPerformanceTracingLoggingInterceptor);
+		// FIXME: restore
+//		myInterceptorRegistry.registerInterceptor(myPerformanceTracingLoggingInterceptor);
 	}
 
 	@BeforeEach

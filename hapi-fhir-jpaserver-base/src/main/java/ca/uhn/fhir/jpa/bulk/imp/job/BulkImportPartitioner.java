@@ -41,7 +41,7 @@ public class BulkImportPartitioner implements Partitioner {
 
 	private static final Logger ourLog = getLogger(BulkImportPartitioner.class);
 
-	@Value("#{jobExecutionContext['jobUUID']}")
+	@Value("#{jobParameters['" + BulkExportJobConfig.JOB_UUID_PARAMETER + "']}")
 	private String myJobUUID;
 
 	@Autowired

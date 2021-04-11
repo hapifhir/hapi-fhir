@@ -31,7 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Will run before and after a job to set the status to whatever is appropriate.
  */
-public class CreateBulkImportEntityStepListener implements StepExecutionListener {
+public class ActivateBulkImportEntityStepListener implements StepExecutionListener {
 
 	@Autowired
 	private IBulkDataImportSvc myBulkImportDaoSvc;

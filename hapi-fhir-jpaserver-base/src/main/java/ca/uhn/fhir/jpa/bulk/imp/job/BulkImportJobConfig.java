@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.bulk.imp.job;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobFileJson;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersValidator;
@@ -34,6 +33,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.List;
 
@@ -59,8 +60,10 @@ public class BulkImportJobConfig {
 	public Job bulkImportJob() {
 		return myJobBuilderFactory.get(BULK_IMPORT_JOB_NAME)
 			.validator(bulkImportJobParameterValidator())
-			.start(createBulkImportEntityStep())
-			.next(bulkImportPartitionStep())
+			// FIXME: remove
+//			.start(createBulkImportEntityStep())
+//			.next(bulkImportPartitionStep())
+			.start(bulkImportPartitionStep())
 			.next(bulkImportCloseJobStep())
 			.build();
 	}
@@ -70,11 +73,12 @@ public class BulkImportJobConfig {
 		return new BulkImportJobParameterValidator();
 	}
 
+	// FIXME: remove
 	@Bean
 	public Step createBulkImportEntityStep() {
 		return myStepBuilderFactory.get("createBulkExportEntityStep")
 			.tasklet(createBulkImportEntityTasklet())
-			.listener(createBulkImportEntityStepListener())
+			.listener(activateBulkImportEntityStepListener())
 			.build();
 	}
 
@@ -85,8 +89,8 @@ public class BulkImportJobConfig {
 
 	@Bean
 	@JobScope
-	public CreateBulkImportEntityStepListener createBulkImportEntityStepListener() {
-		return new CreateBulkImportEntityStepListener();
+	public ActivateBulkImportEntityStepListener activateBulkImportEntityStepListener() {
+		return new ActivateBulkImportEntityStepListener();
 	}
 
 	@Bean
@@ -94,6 +98,8 @@ public class BulkImportJobConfig {
 		return myStepBuilderFactory.get("bulkImportPartitionStep")
 			.partitioner("bulkImportPartitionStep", bulkImportPartitioner())
 			.step(bulkImportProcessFilesStep())
+			.listener(activateBulkImportEntityStepListener())
+			.gridSize(10)
 			.build();
 	}
 
@@ -120,12 +126,21 @@ public class BulkImportJobConfig {
 	@Bean
 	public Step bulkImportProcessFilesStep() {
 		return myStepBuilderFactory.get("groupBulkExportGenerateResourceFilesStep")
-			.<BulkImportJobFileJson, List<IBaseResource>>chunk(1) // FIXME: what does the chunk size do
+			.<String, List<IBaseResource>>chunk(5) // FIXME: what does the chunk size do
 			.reader(bulkImportFileReader())
 			.processor(bulkImportParseFileProcessor())
 			.writer(bulkImportFileWriter())
 			.listener(bulkImportStepListener())
+			.taskExecutor(bulkImportTaskExecutor())
 			.build();
+	}
+
+	@Bean
+	public TaskExecutor bulkImportTaskExecutor() {
+		ThreadPoolTaskExecutor retVal = new ThreadPoolTaskExecutor();
+		retVal.setThreadNamePrefix("BulkImport-");
+		retVal.setMaxPoolSize(20);
+		return retVal;
 	}
 
 	@Bean
@@ -143,8 +158,8 @@ public class BulkImportJobConfig {
 
 	@Bean
 	@StepScope
-	public BulkImportParseFileProcessor bulkImportParseFileProcessor() {
-		return new BulkImportParseFileProcessor();
+	public BulkImportFileProcessor bulkImportParseFileProcessor() {
+		return new BulkImportFileProcessor();
 	}
 
 	@Bean

@@ -33,7 +33,7 @@ public class BulkImportFileWriter implements ItemWriter<List<IBaseResource>> {
 	@SuppressWarnings({"SwitchStatementWithTooFewBranches", "rawtypes", "unchecked"})
 	@Override
 	public void write(List<? extends List<IBaseResource>> theItemLists) throws Exception {
-		ourLog.info("Beginning bulk import write chunk Job[{}] FileIndex[{}]", myJobUuid, myFileIndex);
+		ourLog.info("Beginning bulk import write {} chunks Job[{}] FileIndex[{}]", theItemLists.size(), myJobUuid, myFileIndex);
 
 		for (List<IBaseResource> nextList : theItemLists) {
 			for (IBaseResource nextItem : nextList) {

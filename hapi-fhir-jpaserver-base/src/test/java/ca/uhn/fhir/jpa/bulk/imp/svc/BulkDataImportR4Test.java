@@ -5,9 +5,11 @@ import ca.uhn.fhir.jpa.bulk.BaseBatchJobR4Test;
 import ca.uhn.fhir.jpa.bulk.imp.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobFileJson;
 import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobJson;
+import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.imp.model.JobFileRowProcessingModeEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobFileDao;
+import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
@@ -70,6 +72,12 @@ public class BulkDataImportR4Test extends BaseBatchJobR4Test implements ITestDat
 
 		IBundleProvider searchResults = myPatientDao.search(SearchParameterMap.newSynchronous());
 		assertEquals(transactionsPerFile* fileCount, searchResults.sizeOrThrowNpe());
+
+		runInTransaction(()->{
+			List<BulkImportJobEntity> jobs = myBulkImportJobDao.findAll();
+			assertEquals(1, jobs.size());
+			assertEquals(BulkImportJobStatusEnum.COMPLETE, jobs.get(0).getStatus());
+		});
 	}
 
 	protected void awaitAllBulkJobCompletions() {
