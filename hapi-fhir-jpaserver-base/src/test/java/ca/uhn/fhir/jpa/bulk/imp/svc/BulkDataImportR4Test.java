@@ -16,10 +16,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
-import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -36,8 +33,6 @@ public class BulkDataImportR4Test extends BaseBatchJobR4Test implements ITestDat
 	private IBulkImportJobDao myBulkImportJobDao;
 	@Autowired
 	private IBulkImportJobFileDao myBulkImportJobFileDao;
-	@Autowired
-	private JobExplorer myJobExplorer;
 
 	@Test
 	public void testFlow_TransactionRows() {
@@ -63,6 +58,7 @@ public class BulkDataImportR4Test extends BaseBatchJobR4Test implements ITestDat
 
 		BulkImportJobJson job = new BulkImportJobJson();
 		job.setProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
+		job.setBatchSize(3);
 		String jobId = mySvc.createNewJob(job, files);
 		mySvc.markJobAsReadyForActivation(jobId);
 
@@ -72,9 +68,9 @@ public class BulkDataImportR4Test extends BaseBatchJobR4Test implements ITestDat
 		awaitAllBulkJobCompletions();
 
 		IBundleProvider searchResults = myPatientDao.search(SearchParameterMap.newSynchronous());
-		assertEquals(transactionsPerFile* fileCount, searchResults.sizeOrThrowNpe());
+		assertEquals(transactionsPerFile * fileCount, searchResults.sizeOrThrowNpe());
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			List<BulkImportJobEntity> jobs = myBulkImportJobDao.findAll();
 			assertEquals(1, jobs.size());
 			assertEquals(BulkImportJobStatusEnum.COMPLETE, jobs.get(0).getStatus());

@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imp.api.IBulkDataImportSvc;
+import ca.uhn.fhir.jpa.bulk.imp.job.BulkImportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobFileJson;
 import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobJson;
 import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobStatusEnum;
@@ -64,11 +65,6 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		jobDetail.setId(ActivationJob.class.getName());
 		jobDetail.setJobClass(ActivationJob.class);
 		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
-
-//		jobDetail = new ScheduledJobDefinition();
-//		jobDetail.setId(BulkDataExportSvcImpl.PurgeExpiredFilesJob.class.getName());
-//		jobDetail.setJobClass(BulkDataExportSvcImpl.PurgeExpiredFilesJob.class);
-//		mySchedulerService.scheduleClusteredJob(DateUtils.MILLIS_PER_HOUR, jobDetail);
 	}
 
 	@Override
@@ -76,6 +72,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	public String createNewJob(BulkImportJobJson theJobDescription, @Nonnull List<BulkImportJobFileJson> theInitialFiles) {
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theJobDescription, "Job must not be null");
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theJobDescription.getProcessingMode(), "Job File Processing mode must not be null");
+		ValidateUtil.isTrueOrThrowInvalidRequest(theJobDescription.getBatchSize() > 0, "Job File Batch Size must be > 0");
 
 		String jobId = UUID.randomUUID().toString();
 
@@ -85,6 +82,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		job.setJobId(jobId);
 		job.setFileCount(theInitialFiles.size());
 		job.setStatus(BulkImportJobStatusEnum.STAGING);
+		job.setBatchSize(theJobDescription.getBatchSize());
 		job.setRowProcessingMode(theJobDescription.getProcessingMode());
 		job = myJobDao.save(job);
 
@@ -212,11 +210,15 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	}
 
 	private void processJob(BulkImportJobEntity theBulkExportJobEntity) throws JobParametersInvalidException {
-		String theJobUuid = theBulkExportJobEntity.getJobId();
-		JobParametersBuilder parameters = new JobParametersBuilder()
-			.addString(BulkExportJobConfig.JOB_UUID_PARAMETER, theJobUuid);
+		String jobId = theBulkExportJobEntity.getJobId();
+		int batchSize = theBulkExportJobEntity.getBatchSize();
+		ValidateUtil.isTrueOrThrowInvalidRequest(batchSize > 0, "Batch size must be positive");
 
-		ourLog.info("Submitting bulk import job {} to job scheduler", theJobUuid);
+		JobParametersBuilder parameters = new JobParametersBuilder()
+			.addString(BulkExportJobConfig.JOB_UUID_PARAMETER, jobId)
+			.addLong(BulkImportJobConfig.JOB_PARAM_COMMIT_INTERVAL, (long) batchSize);
+
+		ourLog.info("Submitting bulk import job {} to job scheduler", jobId);
 
 		myJobSubmitter.runJob(myBulkImportJob, parameters.toJobParameters());
 	}

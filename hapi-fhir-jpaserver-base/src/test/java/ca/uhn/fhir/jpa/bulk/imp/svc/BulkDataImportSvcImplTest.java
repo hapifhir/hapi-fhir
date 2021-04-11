@@ -38,6 +38,7 @@ public class BulkDataImportSvcImplTest extends BaseJpaR4Test {
 		// Create job
 		BulkImportJobJson job = new BulkImportJobJson();
 		job.setProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
+		job.setBatchSize(3);
 		BulkImportJobFileJson file1 = new BulkImportJobFileJson();
 		file1.setContents("contents 1");
 		BulkImportJobFileJson file2 = new BulkImportJobFileJson();
@@ -67,6 +68,7 @@ public class BulkDataImportSvcImplTest extends BaseJpaR4Test {
 	public void testCreateNewJob_InvalidJob_NoContents() {
 		BulkImportJobJson job = new BulkImportJobJson();
 		job.setProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
+		job.setBatchSize(3);
 		BulkImportJobFileJson file1 = new BulkImportJobFileJson();
 		try {
 			mySvc.createNewJob(job, Lists.newArrayList(file1));
@@ -79,6 +81,7 @@ public class BulkDataImportSvcImplTest extends BaseJpaR4Test {
 	public void testCreateNewJob_InvalidJob_NoProcessingMode() {
 		BulkImportJobJson job = new BulkImportJobJson();
 		job.setProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
+		job.setBatchSize(3);
 		BulkImportJobFileJson file1 = new BulkImportJobFileJson();
 		file1.setContents("contents 1");
 		try {

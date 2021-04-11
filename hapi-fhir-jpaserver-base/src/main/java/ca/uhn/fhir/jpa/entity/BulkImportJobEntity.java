@@ -34,7 +34,7 @@ public class BulkImportJobEntity implements Serializable {
 	@Column(name = "PID")
 	private Long myId;
 
-	@Column(name = "JOB_ID", length = Search.UUID_COLUMN_LENGTH, nullable = false)
+	@Column(name = "JOB_ID", length = Search.UUID_COLUMN_LENGTH, nullable = false, updatable = false)
 	private String myJobId;
 
 	@Enumerated(EnumType.STRING)
@@ -55,9 +55,12 @@ public class BulkImportJobEntity implements Serializable {
 	@Column(name = "STATUS_MESSAGE", nullable = true, length = BulkExportJobEntity.STATUS_MESSAGE_LEN)
 	private String myStatusMessage;
 
-	@Column(name = "ROW_PROCESSING_MODE", length = 20, nullable = false)
+	@Column(name = "ROW_PROCESSING_MODE", length = 20, nullable = false, updatable = false)
 	@Enumerated(EnumType.STRING)
 	private JobFileRowProcessingModeEnum myRowProcessingMode;
+
+	@Column(name = "BATCH_SIZE", nullable = false, updatable = false)
+	private int myBatchSize;
 
 	public JobFileRowProcessingModeEnum getRowProcessingMode() {
 		return myRowProcessingMode;
@@ -118,5 +121,13 @@ public class BulkImportJobEntity implements Serializable {
 		return new BulkImportJobJson()
 			.setProcessingMode(getRowProcessingMode())
 			.setFileCount(getFileCount());
+	}
+
+	public int getBatchSize() {
+		return myBatchSize;
+	}
+
+	public void setBatchSize(int theBatchSize) {
+		myBatchSize = theBatchSize;
 	}
 }

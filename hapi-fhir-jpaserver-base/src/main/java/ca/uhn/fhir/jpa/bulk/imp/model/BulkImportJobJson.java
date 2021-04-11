@@ -11,6 +11,9 @@ public class BulkImportJobJson implements IModelJson {
 	@JsonProperty("fileCount")
 	private int myFileCount;
 
+	@JsonProperty("batchSize")
+	private int myBatchSize;
+
 	public JobFileRowProcessingModeEnum getProcessingMode() {
 		return myProcessingMode;
 	}
@@ -26,6 +29,15 @@ public class BulkImportJobJson implements IModelJson {
 
 	public BulkImportJobJson setFileCount(int theFileCount) {
 		myFileCount = theFileCount;
+		return this;
+	}
+
+	public int getBatchSize() {
+		return myBatchSize;
+	}
+
+	public BulkImportJobJson setBatchSize(int theBatchSize) {
+		myBatchSize = theBatchSize;
 		return this;
 	}
 }

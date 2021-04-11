@@ -103,6 +103,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		blkImportJobTable.addColumn("OPTLOCK").nonNullable().type(ColumnTypeEnum.INT);
 		blkImportJobTable.addColumn("FILE_COUNT").nonNullable().type(ColumnTypeEnum.INT);
 		blkImportJobTable.addColumn("ROW_PROCESSING_MODE").nonNullable().type(ColumnTypeEnum.STRING, 20);
+		blkImportJobTable.addColumn("BATCH_SIZE").nonNullable().type(ColumnTypeEnum.INT);
 		version.addIdGenerator("20210406.2", "SEQ_BLKIMJOB_PID");
 
 		// Bulk Import Job File

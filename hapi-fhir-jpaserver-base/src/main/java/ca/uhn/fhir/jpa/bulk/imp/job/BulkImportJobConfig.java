@@ -31,14 +31,13 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.partition.PartitionHandler;
 import org.springframework.batch.core.partition.support.TaskExecutorPartitionHandler;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.repeat.CompletionPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-
-import java.util.List;
 
 import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.BULK_IMPORT_JOB_NAME;
 
@@ -48,6 +47,8 @@ import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.BULK_IMPORT_JOB_NAME;
  */
 @Configuration
 public class BulkImportJobConfig {
+
+	public static final String JOB_PARAM_COMMIT_INTERVAL = "commitInterval";
 
 	@Autowired
 	private StepBuilderFactory myStepBuilderFactory;
@@ -121,13 +122,23 @@ public class BulkImportJobConfig {
 
 	@Bean
 	public Step bulkImportProcessFilesStep() {
+		CompletionPolicy completionPolicy = completionPolicy();
+
 		return myStepBuilderFactory.get("groupBulkExportGenerateResourceFilesStep")
-			.<String, IBaseResource>chunk(10) // FIXME: what does the chunk size do
+//			.<String, IBaseResource>chunk(1) // FIXME: what does the chunk size do
+			.<String, IBaseResource>chunk(completionPolicy)
 			.reader(bulkImportFileReader())
 			.processor(bulkImportParseFileProcessor())
 			.writer(bulkImportFileWriter())
 			.listener(bulkImportStepListener())
+			.listener(completionPolicy)
 			.build();
+	}
+
+	@Bean
+	@StepScope
+	public CompletionPolicy completionPolicy() {
+		return new BulkImportProcessStepCompletionPolicy();
 	}
 
 	@Bean
@@ -165,144 +176,5 @@ public class BulkImportJobConfig {
 		return new BulkImportStepListener();
 	}
 
-//	@Bean
-//	@Lazy
-//	@StepScope
-//	public CompositeItemProcessor<List<ResourcePersistentId>, List<IBaseResource>> inflateResourceThenAnnotateWithGoldenResourceProcessor() {
-//		CompositeItemProcessor processor = new CompositeItemProcessor<>();
-//		ArrayList<ItemProcessor> delegates = new ArrayList<>();
-//		delegates.add(myPidToIBaseResourceProcessor);
-//		delegates.add(myGoldenResourceAnnotatingProcessor);
-//		processor.setDelegates(delegates);
-//		return processor;
-//	}
-//
-//	@Bean
-//	@Lazy
-//	public Job groupBulkExportJob() {
-//		return myJobBuilderFactory.get(BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME)
-//			.validator(groupBulkJobParameterValidator())
-//			.validator(bulkJobParameterValidator())
-//			.start(createBulkExportEntityStep())
-//			.next(groupPartitionStep())
-//			.next(closeJobStep())
-//			.build();
-//	}
-//
-//	@Bean
-//	@Lazy
-//	public Job patientBulkExportJob() {
-//		return myJobBuilderFactory.get(BatchJobsConfig.PATIENT_BULK_EXPORT_JOB_NAME)
-//			.validator(bulkJobParameterValidator())
-//			.start(createBulkExportEntityStep())
-//			.next(patientPartitionStep())
-//			.next(closeJobStep())
-//			.build();
-//	}
-//
-//	@Bean
-//	public GroupIdPresentValidator groupBulkJobParameterValidator() {
-//		return new GroupIdPresentValidator();
-//	}
-//
-//	@Bean
-//	public Step createBulkExportEntityStep() {
-//		return myStepBuilderFactory.get("createBulkExportEntityStep")
-//			.tasklet(createBulkExportEntityTasklet())
-//			.listener(bulkExportCreateEntityStepListener())
-//			.build();
-//	}
-////
-//
-//	//Writers
-//	@Bean
-//	public Step groupBulkExportGenerateResourceFilesStep() {
-//		return myStepBuilderFactory.get("groupBulkExportGenerateResourceFilesStep")
-//			.<List<ResourcePersistentId>, List<IBaseResource>> chunk(CHUNK_SIZE) //1000 resources per generated file, as the reader returns 10 resources at a time.
-//			.reader(groupBulkItemReader())
-//			.processor(inflateResourceThenAnnotateWithGoldenResourceProcessor())
-//			.writer(resourceToFileWriter())
-//			.listener(bulkExportGenerateResourceFilesStepListener())
-//			.build();
-//	}
-//
-//	@Bean
-//	public Step bulkExportGenerateResourceFilesStep() {
-//		return myStepBuilderFactory.get("bulkExportGenerateResourceFilesStep")
-//			.<List<ResourcePersistentId>, List<IBaseResource>> chunk(CHUNK_SIZE) //1000 resources per generated file, as the reader returns 10 resources at a time.
-//			.reader(bulkItemReader())
-//			.processor(myPidToIBaseResourceProcessor)
-//			.writer(resourceToFileWriter())
-//			.listener(bulkExportGenerateResourceFilesStepListener())
-//			.build();
-//	}
-//	@Bean
-//	public Step patientBulkExportGenerateResourceFilesStep() {
-//		return myStepBuilderFactory.get("patientBulkExportGenerateResourceFilesStep")
-//			.<List<ResourcePersistentId>, List<IBaseResource>> chunk(CHUNK_SIZE) //1000 resources per generated file, as the reader returns 10 resources at a time.
-//			.reader(patientBulkItemReader())
-//			.processor(myPidToIBaseResourceProcessor)
-//			.writer(resourceToFileWriter())
-//			.listener(bulkExportGenerateResourceFilesStepListener())
-//			.build();
-//	}
-//
-//	@Bean
-//	@JobScope
-//	public BulkExportJobCloser bulkExportJobCloser() {
-//		return new BulkExportJobCloser();
-//	}
-//
-//	@Bean
-//	public Step closeJobStep() {
-//		return myStepBuilderFactory.get("closeJobStep")
-//			.tasklet(bulkExportJobCloser())
-//			.build();
-//	}
-//
-//
-//	@Bean
-//	@JobScope
-//	public BulkExportGenerateResourceFilesStepListener bulkExportGenerateResourceFilesStepListener() {
-//		return new BulkExportGenerateResourceFilesStepListener();
-//	}
-//
-//
-//	@Bean
-//	public Step groupPartitionStep() {
-//		return myStepBuilderFactory.get("partitionStep")
-//			.partitioner("groupBulkExportGenerateResourceFilesStep", bulkExportResourceTypePartitioner())
-//			.step(groupBulkExportGenerateResourceFilesStep())
-//			.build();
-//	}
-//
-//	@Bean
-//	public Step patientPartitionStep() {
-//		return myStepBuilderFactory.get("partitionStep")
-//			.partitioner("patientBulkExportGenerateResourceFilesStep", bulkExportResourceTypePartitioner())
-//			.step(patientBulkExportGenerateResourceFilesStep())
-//			.build();
-//	}
-//
-//
-//
-//	@Bean
-//	@StepScope
-//	public PatientBulkItemReader patientBulkItemReader() {
-//		return new PatientBulkItemReader();
-//	}
-//
-//	@Bean
-//	@StepScope
-//	public BulkItemReader bulkItemReader(){
-//		return new BulkItemReader();
-//	}
-//
-//
-//	@Bean
-//	@StepScope
-//	public ResourceToFileWriter resourceToFileWriter() {
-//		return new ResourceToFileWriter();
-//	}
 
 }
