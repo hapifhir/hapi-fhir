@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2493
+title: "A database deadlock in Postgresql was observed when uploading large terminology CodeSystems using
+  deferred uploading. Thanks to Tyge Folke Nielsen for reporting and suggesting a fix!"

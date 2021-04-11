@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2528
+title: "An issue with compartment definitions in R5 models was fixed. This issue caused some authorization
+   rules to reject valid requests. Thanks to Patrick Palacin for reporting!"

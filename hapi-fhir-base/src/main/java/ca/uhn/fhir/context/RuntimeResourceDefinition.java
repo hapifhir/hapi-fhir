@@ -187,6 +187,11 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		for (RuntimeSearchParam next : searchParams) {
 			if (next.getProvidesMembershipInCompartments() != null) {
 				for (String nextCompartment : next.getProvidesMembershipInCompartments()) {
+
+					if (nextCompartment.startsWith("Base FHIR compartment definition for ")) {
+						nextCompartment = nextCompartment.substring("Base FHIR compartment definition for ".length());
+					}
+
 					if (!compartmentNameToSearchParams.containsKey(nextCompartment)) {
 						compartmentNameToSearchParams.put(nextCompartment, new ArrayList<>());
 					}
