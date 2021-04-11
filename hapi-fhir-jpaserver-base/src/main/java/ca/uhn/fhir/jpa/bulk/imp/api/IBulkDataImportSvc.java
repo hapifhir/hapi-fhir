@@ -65,4 +65,9 @@ public interface IBulkDataImportSvc {
 	 * @return The file
 	 */
 	BulkImportJobFileJson fetchFile(String theJobId, int theFileIndex);
+
+	/**
+	 * Delete all input files associated with a particular job
+	 */
+	void deleteJobFiles(String theJobId);
 }

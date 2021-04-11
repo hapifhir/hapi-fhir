@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.bulk.imp.job;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imp.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobFileJson;
@@ -33,6 +34,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.io.StringReader;
 
+@SuppressWarnings("UnstableApiUsage")
 public class BulkImportFileReader implements ItemReader<String> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportFileReader.class);
@@ -45,13 +47,9 @@ public class BulkImportFileReader implements ItemReader<String> {
 	private StringReader myReader;
 	private LineReader myLineReader;
 	private int myLineIndex;
-	private boolean myDone;
 
 	@Override
 	public String read() throws Exception {
-		if (myDone) {
-			return null;
-		}
 
 		if (myReader == null) {
 			BulkImportJobFileJson retVal = myBulkDataImportSvc.fetchFile(myJobUuid, myFileIndex);
@@ -62,10 +60,9 @@ public class BulkImportFileReader implements ItemReader<String> {
 		String retVal = myLineReader.readLine();
 		if (retVal == null) {
 			IoUtil.closeQuietly(myReader);
-			myDone = true;
 		}
 
-		ourLog.info("Reading line {} file index {} for job: {}", myLineIndex++, myFileIndex, myJobUuid);
+		Logs.getBatchTroubleshootingLog().debug("Reading line {} file index {} for job: {}", myLineIndex++, myFileIndex, myJobUuid);
 
 		return retVal;
 	}

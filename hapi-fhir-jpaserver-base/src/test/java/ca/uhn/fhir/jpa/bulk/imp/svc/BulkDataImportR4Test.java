@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.bulk.imp.model.JobFileRowProcessingModeEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobFileDao;
 import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
+import ca.uhn.fhir.jpa.entity.BulkImportJobFileEntity;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
@@ -77,6 +78,10 @@ public class BulkDataImportR4Test extends BaseBatchJobR4Test implements ITestDat
 			List<BulkImportJobEntity> jobs = myBulkImportJobDao.findAll();
 			assertEquals(1, jobs.size());
 			assertEquals(BulkImportJobStatusEnum.COMPLETE, jobs.get(0).getStatus());
+
+			List<BulkImportJobFileEntity> jobFiles = myBulkImportJobFileDao.findAll();
+			assertEquals(0, jobFiles.size());
+
 		});
 	}
 

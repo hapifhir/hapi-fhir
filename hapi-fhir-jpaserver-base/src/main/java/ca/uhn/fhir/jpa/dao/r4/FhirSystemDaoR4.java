@@ -95,10 +95,4 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		return retVal;
 	}
 
-	@Transactional(propagation = Propagation.NEVER)
-	@Override
-	public Bundle transaction(RequestDetails theRequestDetails, Bundle theRequest) {
-		return myTransactionProcessor.transaction(theRequestDetails, theRequest);
-	}
-
 }

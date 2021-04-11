@@ -47,6 +47,7 @@ public class BulkImportJobCloser implements Tasklet {
 		BatchStatus executionStatus = theChunkContext.getStepContext().getStepExecution().getJobExecution().getStatus();
 		if (executionStatus == BatchStatus.STARTED) {
 			myBulkDataImportSvc.setJobToStatus(myJobUUID, BulkImportJobStatusEnum.COMPLETE);
+			myBulkDataImportSvc.deleteJobFiles(myJobUUID);
 		} else {
 			myBulkDataImportSvc.setJobToStatus(myJobUUID, BulkImportJobStatusEnum.ERROR, "Found job in status: " + executionStatus);
 		}

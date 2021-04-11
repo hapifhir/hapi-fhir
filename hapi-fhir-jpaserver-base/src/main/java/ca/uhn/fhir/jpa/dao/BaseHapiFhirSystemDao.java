@@ -10,13 +10,16 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.Bundle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +45,7 @@ import java.util.Map;
  * #L%
  */
 
-public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBaseResource> implements IFhirSystemDao<T, MT> {
+public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends BaseHapiFhirDao<IBaseResource> implements IFhirSystemDao<T, MT> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirSystemDao.class);
 	@Autowired
@@ -50,6 +53,15 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	public ResourceCountCache myResourceCountsCache;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+	@Autowired
+	private TransactionProcessor myTransactionProcessor;
+
+	@Override
+	@PostConstruct
+	public void start() {
+		super.start();
+		myTransactionProcessor.setDao(this);
+	}
 
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
@@ -89,6 +101,18 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 		IBundleProvider retVal = super.history(theRequestDetails, null, null, theSince, theUntil);
 		ourLog.info("Processed global history in {}ms", w.getMillisAndRestart());
 		return retVal;
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.NEVER)
+	public T transaction(RequestDetails theRequestDetails, T theRequest) {
+		return myTransactionProcessor.transaction(theRequestDetails, theRequest);
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.MANDATORY)
+	public T transactionNested(RequestDetails theRequestDetails, T theRequest) {
+		return myTransactionProcessor.transaction(theRequestDetails, theRequest);
 	}
 
 
