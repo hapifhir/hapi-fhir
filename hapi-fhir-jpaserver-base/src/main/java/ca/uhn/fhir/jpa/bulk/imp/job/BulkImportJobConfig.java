@@ -20,11 +20,7 @@ package ca.uhn.fhir.jpa.bulk.imp.job;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.batch.processors.GoldenResourceAnnotatingProcessor;
-import ca.uhn.fhir.jpa.batch.processors.PidToIBaseResourceProcessor;
-import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportDaoSvc;
 import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobFileJson;
-import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersValidator;
@@ -124,7 +120,7 @@ public class BulkImportJobConfig {
 	@Bean
 	public Step bulkImportProcessFilesStep() {
 		return myStepBuilderFactory.get("groupBulkExportGenerateResourceFilesStep")
-			.<BulkImportJobFileJson, List<IBaseResource>>chunk(1) // FIXME: what does the chunk size do
+			.<BulkImportJobFileJson, List<IBaseResource>>chunk(10) // FIXME: what does the chunk size do
 			.reader(bulkImportFileReader())
 			.processor(bulkImportParseFileProcessor())
 			.writer(bulkImportFileWriter())

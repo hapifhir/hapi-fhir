@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.bulk.imp.job;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imp.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobFileJson;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +40,20 @@ public class BulkImportFileReader implements ItemReader<BulkImportJobFileJson> {
 	@Value("#{stepExecutionContext['" + BulkImportPartitioner.FILE_INDEX + "']}")
 	private int myFileIndex;
 
+	private boolean myDone = false;
+
 	@Override
 	public BulkImportJobFileJson read() throws Exception {
-		return myBulkDataImportSvc.fetchFile(myJobUuid, myFileIndex);
+		if (myDone) {
+			return null;
+		} else {
+			myDone = true;
+		}
+
+		BulkImportJobFileJson retVal = myBulkDataImportSvc.fetchFile(myJobUuid, myFileIndex);
+
+		ourLog.info("Reading file index {} for job: {}", myFileIndex, myJobUuid);
+		return retVal;
 	}
+private static final Logger ourLog = LoggerFactory.getLogger(BulkImportFileReader.class);
 }

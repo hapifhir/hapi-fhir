@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -45,12 +44,12 @@ public class BulkImportFileWriter implements ItemWriter<List<IBaseResource>> {
 					case FHIR_TRANSACTION:
 						IFhirSystemDao systemDao = myDaoRegistry.getSystemDao();
 
-//						TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-//						txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
-//						txTemplate.afterPropertiesSet();
-//						txTemplate.executeWithoutResult(tx->{
-//							systemDao.transaction(null, nextItem);
-//						});
+						TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+						txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
+						txTemplate.afterPropertiesSet();
+						txTemplate.executeWithoutResult(tx -> {
+							systemDao.transaction(null, nextItem);
+						});
 
 						break;
 				}

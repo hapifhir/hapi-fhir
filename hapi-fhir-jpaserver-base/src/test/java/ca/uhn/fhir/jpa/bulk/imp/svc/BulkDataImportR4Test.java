@@ -8,6 +8,8 @@ import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobJson;
 import ca.uhn.fhir.jpa.bulk.imp.model.JobFileRowProcessingModeEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobFileDao;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -36,8 +38,8 @@ public class BulkDataImportR4Test extends BaseBatchJobR4Test implements ITestDat
 
 	@Test
 	public void testFlow_TransactionRows() {
-		int transactionsPerFile = 2;
-		int fileCount = 2;
+		int transactionsPerFile = 10;
+		int fileCount = 10;
 
 		List<BulkImportJobFileJson> files = new ArrayList<>();
 		for (int fileIndex = 0; fileIndex < fileCount; fileIndex++) {
@@ -45,8 +47,8 @@ public class BulkDataImportR4Test extends BaseBatchJobR4Test implements ITestDat
 
 			for (int transactionIdx = 0; transactionIdx < transactionsPerFile; transactionIdx++) {
 				BundleBuilder bundleBuilder = new BundleBuilder(myFhirCtx);
-				IBaseResource patient = buildPatient(withId("PT-" + fileIndex + "-" + transactionIdx), withFamily("FAM " + fileIndex + " " + transactionIdx));
-				bundleBuilder.addTransactionUpdateEntry(patient);
+				IBaseResource patient = buildPatient(withFamily("FAM " + fileIndex + " " + transactionIdx));
+				bundleBuilder.addTransactionCreateEntry(patient);
 				fileContents.append(myFhirCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(bundleBuilder.getBundle()));
 				fileContents.append("\n");
 			}
@@ -66,9 +68,8 @@ public class BulkDataImportR4Test extends BaseBatchJobR4Test implements ITestDat
 
 		awaitAllBulkJobCompletions();
 
-		// Should not fail
-		Patient pt = myPatientDao.read(new IdType("Patient/PT-3-3"));
-		assertEquals("PT-3-3", pt.getNameFirstRep().getFamily());
+		IBundleProvider searchResults = myPatientDao.search(SearchParameterMap.newSynchronous());
+		assertEquals(transactionsPerFile* fileCount, searchResults.sizeOrThrowNpe());
 	}
 
 	protected void awaitAllBulkJobCompletions() {
