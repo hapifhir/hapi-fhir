@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.bulk.imp.svc;
 
 import ca.uhn.fhir.jpa.bulk.imp.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobFileJson;
+import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobJson;
 import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.imp.model.JobFileRowProcessingModeEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobDao;
@@ -35,18 +36,17 @@ public class BulkDataImportSvcImplTest extends BaseJpaR4Test {
 	public void testCreateNewJob() {
 
 		// Create job
+		BulkImportJobJson job = new BulkImportJobJson();
+		job.setProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
 		BulkImportJobFileJson file1 = new BulkImportJobFileJson();
-		file1.setProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
 		file1.setContents("contents 1");
 		BulkImportJobFileJson file2 = new BulkImportJobFileJson();
-		file2.setProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
 		file2.setContents("contents 2");
-		String jobId = mySvc.createNewJob(Lists.newArrayList(file1, file2));
+		String jobId = mySvc.createNewJob(job, Lists.newArrayList(file1, file2));
 		assertThat(jobId, not(blankString()));
 
 		// Add file
 		BulkImportJobFileJson file3 = new BulkImportJobFileJson();
-		file3.setProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
 		file3.setContents("contents 3");
 		mySvc.addFilesToJob(jobId, Lists.newArrayList(file3));
 
@@ -65,10 +65,11 @@ public class BulkDataImportSvcImplTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateNewJob_InvalidJob_NoContents() {
+		BulkImportJobJson job = new BulkImportJobJson();
+		job.setProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
 		BulkImportJobFileJson file1 = new BulkImportJobFileJson();
-		file1.setProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
 		try {
-			mySvc.createNewJob(Lists.newArrayList(file1));
+			mySvc.createNewJob(job, Lists.newArrayList(file1));
 		} catch (UnprocessableEntityException e) {
 			assertEquals("Job File Contents mode must not be null", e.getMessage());
 		}
@@ -76,10 +77,12 @@ public class BulkDataImportSvcImplTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateNewJob_InvalidJob_NoProcessingMode() {
+		BulkImportJobJson job = new BulkImportJobJson();
+		job.setProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
 		BulkImportJobFileJson file1 = new BulkImportJobFileJson();
 		file1.setContents("contents 1");
 		try {
-			mySvc.createNewJob(Lists.newArrayList(file1));
+			mySvc.createNewJob(job, Lists.newArrayList(file1));
 		} catch (UnprocessableEntityException e) {
 			assertEquals("Job File Processing mode must not be null", e.getMessage());
 		}
@@ -88,7 +91,6 @@ public class BulkDataImportSvcImplTest extends BaseJpaR4Test {
 	@Test
 	public void testAddFilesToJob_InvalidId() {
 		BulkImportJobFileJson file3 = new BulkImportJobFileJson();
-		file3.setProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
 		file3.setContents("contents 3");
 		try {
 			mySvc.addFilesToJob("ABCDEFG", Lists.newArrayList(file3));
@@ -104,11 +106,11 @@ public class BulkDataImportSvcImplTest extends BaseJpaR4Test {
 			entity.setFileCount(1);
 			entity.setJobId("ABCDEFG");
 			entity.setStatus(BulkImportJobStatusEnum.RUNNING);
+			entity.setRowProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
 			myBulkImportJobDao.save(entity);
 		});
 
 		BulkImportJobFileJson file3 = new BulkImportJobFileJson();
-		file3.setProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
 		file3.setContents("contents 3");
 		try {
 			mySvc.addFilesToJob("ABCDEFG", Lists.newArrayList(file3));
@@ -124,16 +126,18 @@ public class BulkDataImportSvcImplTest extends BaseJpaR4Test {
 			entity.setFileCount(1);
 			entity.setJobId("ABCDEFG");
 			entity.setStatus(BulkImportJobStatusEnum.STAGING);
+			entity.setRowProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
 			myBulkImportJobDao.save(entity);
 		});
 
 		mySvc.markJobAsReadyForActivation("ABCDEFG");
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			List<BulkImportJobEntity> jobs = myBulkImportJobDao.findAll();
 			assertEquals(1, jobs.size());
 			assertEquals(BulkImportJobStatusEnum.READY, jobs.get(0).getStatus());
 		});
 	}
+
 
 }

@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.bulk.imp.job;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imp.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobFileJson;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,9 +33,9 @@ public class BulkImportFileReader implements ItemReader<BulkImportJobFileJson> {
 	@Autowired
 	private IBulkDataImportSvc myBulkDataImportSvc;
 
-	@Value("#{jobParameters['" + BulkExportJobConfig.JOB_UUID_PARAMETER + "']}")
+	@Value("#{stepExecutionContext['" + BulkExportJobConfig.JOB_UUID_PARAMETER + "']}")
 	private String myJobUuid;
-	@Value("#{jobParameters['" + BulkImportPartitioner.FILE_INDEX + "']}")
+	@Value("#{stepExecutionContext['" + BulkImportPartitioner.FILE_INDEX + "']}")
 	private int myFileIndex;
 
 	@Override

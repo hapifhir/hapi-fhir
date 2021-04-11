@@ -80,7 +80,7 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
 
 	@Override
-	Iterator<ResourcePersistentId> getResourcePidIterator() {
+	protected Iterator<ResourcePersistentId> getResourcePidIterator() {
 		Set<ResourcePersistentId> myReadPids = new HashSet<>();
 
 		//Short circuit out if we detect we are attempting to extract patients

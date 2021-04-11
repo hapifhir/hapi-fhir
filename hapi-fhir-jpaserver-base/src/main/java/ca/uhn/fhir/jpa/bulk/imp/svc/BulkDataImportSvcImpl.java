@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imp.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobFileJson;
+import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobJson;
 import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobFileDao;
@@ -72,7 +73,10 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 
 	@Override
 	@Transactional
-	public String createNewJob(@Nonnull List<BulkImportJobFileJson> theInitialFiles) {
+	public String createNewJob(BulkImportJobJson theJobDescription, @Nonnull List<BulkImportJobFileJson> theInitialFiles) {
+		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theJobDescription, "Job must not be null");
+		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theJobDescription.getProcessingMode(), "Job File Processing mode must not be null");
+
 		String jobId = UUID.randomUUID().toString();
 
 		ourLog.info("Creating new Bulk Import job with {} files, assigning job ID: {}", theInitialFiles.size(), jobId);
@@ -81,6 +85,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		job.setJobId(jobId);
 		job.setFileCount(theInitialFiles.size());
 		job.setStatus(BulkImportJobStatusEnum.STAGING);
+		job.setRowProcessingMode(theJobDescription.getProcessingMode());
 		job = myJobDao.save(job);
 
 		int nextSequence = 0;
@@ -128,7 +133,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	 */
 	@Transactional(value = Transactional.TxType.NEVER)
 	@Override
-	public void activateNextReadyJob() {
+	public boolean activateNextReadyJob() {
 
 		Optional<BulkImportJobEntity> jobToProcessOpt = Objects.requireNonNull(myTxTemplate.execute(t -> {
 			Pageable page = PageRequest.of(0, 1);
@@ -140,7 +145,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		}));
 
 		if (!jobToProcessOpt.isPresent()) {
-			return;
+			return false;
 		}
 
 		BulkImportJobEntity bulkImportJobEntity = jobToProcessOpt.get();
@@ -158,25 +163,32 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 					jobEntity.setStatusMessage(e.getMessage());
 					myJobDao.save(jobEntity);
 				}
-				return null;
+				return false;
 			});
 		}
 
+		return true;
 	}
 
 	@Override
 	@Transactional
 	public void setJobToStatus(String theJobId, BulkImportJobStatusEnum theStatus) {
+		setJobToStatus(theJobId, theStatus, null);
+	}
+
+	@Override
+	public void setJobToStatus(String theJobId, BulkImportJobStatusEnum theStatus, String theStatusMessage) {
 		BulkImportJobEntity job = findJobByJobId(theJobId);
 		job.setStatus(theStatus);
+		job.setStatusMessage(theStatusMessage);
 		myJobDao.save(job);
 	}
 
 	@Override
 	@Transactional
-	public int getFileCount(String theJobId) {
+	public BulkImportJobJson fetchJob(String theJobId) {
 		BulkImportJobEntity job = findJobByJobId(theJobId);
-		return job.getFileCount();
+		return job.toJson();
 	}
 
 	@Transactional
@@ -203,13 +215,11 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	private void addFilesToJob(@Nonnull List<BulkImportJobFileJson> theInitialFiles, BulkImportJobEntity job, int nextSequence) {
 		for (BulkImportJobFileJson nextFile : theInitialFiles) {
 			ValidateUtil.isNotBlankOrThrowUnprocessableEntity(nextFile.getContents(), "Job File Contents mode must not be null");
-			ValidateUtil.isNotNullOrThrowUnprocessableEntity(nextFile.getProcessingMode(), "Job File Processing mode must not be null");
 
 			BulkImportJobFileEntity jobFile = new BulkImportJobFileEntity();
 			jobFile.setJob(job);
 			jobFile.setContents(nextFile.getContents());
 			jobFile.setFileSequence(nextSequence++);
-			jobFile.setRowProcessingMode(nextFile.getProcessingMode());
 			myJobFileDao.save(jobFile);
 		}
 	}

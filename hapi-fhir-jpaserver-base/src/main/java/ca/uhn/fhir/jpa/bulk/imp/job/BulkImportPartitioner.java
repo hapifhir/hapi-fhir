@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.bulk.imp.job;
 
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imp.api.IBulkDataImportSvc;
+import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobJson;
 import org.slf4j.Logger;
 import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.item.ExecutionContext;
@@ -36,7 +37,10 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public class BulkImportPartitioner implements Partitioner {
 	public static final String FILE_INDEX = "fileIndex";
+	public static final String ROW_PROCESSING_MODE = "rowProcessingMode";
+
 	private static final Logger ourLog = getLogger(BulkImportPartitioner.class);
+
 	@Value("#{jobExecutionContext['jobUUID']}")
 	private String myJobUUID;
 
@@ -48,13 +52,14 @@ public class BulkImportPartitioner implements Partitioner {
 	public Map<String, ExecutionContext> partition(int gridSize) {
 		Map<String, ExecutionContext> retVal = new HashMap<>();
 
-		int fileCount = myBulkDataImportSvc.getFileCount(myJobUUID);
+		BulkImportJobJson job = myBulkDataImportSvc.fetchJob(myJobUUID);
 
-		for (int i = 0; i < fileCount; i++) {
+		for (int i = 0; i < job.getFileCount(); i++) {
 
 			ExecutionContext context = new ExecutionContext();
 			context.putString(BulkExportJobConfig.JOB_UUID_PARAMETER, myJobUUID);
 			context.putInt(FILE_INDEX, i);
+			context.put(ROW_PROCESSING_MODE, job.getProcessingMode());
 
 			String key = "FILE" + i;
 			retVal.put(key, context);

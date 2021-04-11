@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.bulk.imp.api;
 
 import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobFileJson;
+import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobJson;
 import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobStatusEnum;
 
 import javax.annotation.Nonnull;
@@ -11,7 +12,7 @@ public interface IBulkDataImportSvc {
 	/**
 	 * Create a new job in {@link ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobStatusEnum#STAGING STAGING} state (meaning it won't yet be worked on and can be added to)
 	 */
-	String createNewJob(@Nonnull List<BulkImportJobFileJson> theInitialFiles);
+	String createNewJob(BulkImportJobJson theJobDescription, @Nonnull List<BulkImportJobFileJson> theInitialFiles);
 
 	/**
 	 * Add more files to a job in {@link ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobStatusEnum#STAGING STAGING} state
@@ -33,8 +34,10 @@ public interface IBulkDataImportSvc {
 	/**
 	 * This method is intended to be called from the job scheduler, and will begin execution on
 	 * the next job in status {@link ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobStatusEnum#READY READY}
+	 *
+	 * @return Returns {@literal true} if a job was activated
 	 */
-	void activateNextReadyJob();
+	boolean activateNextReadyJob();
 
 	/**
 	 * Updates the job status for the given job
@@ -42,12 +45,17 @@ public interface IBulkDataImportSvc {
 	void setJobToStatus(String theJobId, BulkImportJobStatusEnum theStatus);
 
 	/**
+	 * Updates the job status for the given job
+	 */
+	void setJobToStatus(String theJobId, BulkImportJobStatusEnum theStatus, String theStatusMessage);
+
+	/**
 	 * Gets the number of files available for a given Job ID
 	 *
 	 * @param theJobId The job ID
 	 * @return The file count
 	 */
-	int getFileCount(String theJobId);
+	BulkImportJobJson fetchJob(String theJobId);
 
 	/**
 	 * Fetch a given file by job ID

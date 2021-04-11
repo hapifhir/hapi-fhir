@@ -36,10 +36,6 @@ public class BulkImportJobFileEntity implements Serializable {
 	@JoinColumn(name = "JOB_PID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name = "FK_BLKIMJOBFILE_JOB"))
 	private BulkImportJobEntity myJob;
 
-	@Column(name = "ROW_PROCESSING_MODE", length = 20, nullable = false)
-	@Enumerated(EnumType.STRING)
-	private JobFileRowProcessingModeEnum myRowProcessingMode;
-
 	@Column(name = "FILE_SEQ", nullable = false)
 	private int myFileSequence;
 
@@ -53,14 +49,6 @@ public class BulkImportJobFileEntity implements Serializable {
 
 	public void setJob(BulkImportJobEntity theJob) {
 		myJob = theJob;
-	}
-
-	public JobFileRowProcessingModeEnum getRowProcessingMode() {
-		return myRowProcessingMode;
-	}
-
-	public void setRowProcessingMode(JobFileRowProcessingModeEnum theRowProcessingMode) {
-		myRowProcessingMode = theRowProcessingMode;
 	}
 
 	public int getFileSequence() {
@@ -82,7 +70,6 @@ public class BulkImportJobFileEntity implements Serializable {
 
 	public BulkImportJobFileJson toJson() {
 		return new BulkImportJobFileJson()
-			.setContents(getContents())
-			.setProcessingMode(getRowProcessingMode());
+			.setContents(getContents());
 	}
 }

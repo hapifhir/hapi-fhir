@@ -22,11 +22,10 @@ package ca.uhn.fhir.jpa.bulk.imp.job;
 
 import ca.uhn.fhir.jpa.batch.processors.GoldenResourceAnnotatingProcessor;
 import ca.uhn.fhir.jpa.batch.processors.PidToIBaseResourceProcessor;
-import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobParameterValidator;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportDaoSvc;
 import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobFileJson;
-import ca.uhn.fhir.jpa.bulk.imp.model.ResourceListChunk;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.Step;
@@ -40,7 +39,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import java.util.function.Function;
+import java.util.List;
 
 import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.BULK_IMPORT_JOB_NAME;
 
@@ -59,40 +58,20 @@ public class BulkImportJobConfig {
 	@Autowired
 	private JobBuilderFactory myJobBuilderFactory;
 
-	@Autowired
-	private PidToIBaseResourceProcessor myPidToIBaseResourceProcessor;
-
-	@Autowired
-	private GoldenResourceAnnotatingProcessor myGoldenResourceAnnotatingProcessor;
-
-	@Bean
-	public BulkExportDaoSvc bulkExportDaoSvc() {
-		return new BulkExportDaoSvc();
-	}
-
-
-	@Bean
-	@Lazy
-	@JobScope
-	public MdmExpansionCacheSvc mdmExpansionCacheSvc() {
-		return new MdmExpansionCacheSvc();
-	}
-
-
 	@Bean(name = BULK_IMPORT_JOB_NAME)
 	@Lazy
 	public Job bulkImportJob() {
 		return myJobBuilderFactory.get(BULK_IMPORT_JOB_NAME)
 			.validator(bulkImportJobParameterValidator())
 			.start(createBulkImportEntityStep())
-			.next(partitionStep())
-			.next(closeJobStep())
+			.next(bulkImportPartitionStep())
+			.next(bulkImportCloseJobStep())
 			.build();
 	}
 
 	@Bean
 	public JobParametersValidator bulkImportJobParameterValidator() {
-		return new BulkExportJobParameterValidator();
+		return new BulkImportJobParameterValidator();
 	}
 
 	@Bean
@@ -118,8 +97,21 @@ public class BulkImportJobConfig {
 	public Step bulkImportPartitionStep() {
 		return myStepBuilderFactory.get("bulkImportPartitionStep")
 			.partitioner("bulkImportPartitionStep", bulkImportPartitioner())
-			.step(bulkExportGenerateResourceFilesStep())
+			.step(bulkImportProcessFilesStep())
 			.build();
+	}
+
+	@Bean
+	public Step bulkImportCloseJobStep() {
+		return myStepBuilderFactory.get("bulkImportCloseJobStep")
+			.tasklet(bulkImportJobCloser())
+			.build();
+	}
+
+	@Bean
+	@JobScope
+	public BulkImportJobCloser bulkImportJobCloser() {
+		return new BulkImportJobCloser();
 	}
 
 	@Bean
@@ -129,37 +121,41 @@ public class BulkImportJobConfig {
 	}
 
 
-	//Writers
 	@Bean
-	public Step groupBulkExportGenerateResourceFilesStep() {
+	public Step bulkImportProcessFilesStep() {
 		return myStepBuilderFactory.get("groupBulkExportGenerateResourceFilesStep")
-			.<BulkImportJobFileJson, ResourceListChunk>chunk(1) // FIXME: what does the chunk size do
+			.<BulkImportJobFileJson, List<IBaseResource>>chunk(1) // FIXME: what does the chunk size do
 			.reader(bulkImportFileReader())
 			.processor(bulkImportParseFileProcessor())
 			.writer(bulkImportFileWriter())
-			.listener(bulkExportGenerateResourceFilesStepListener())
+			.listener(bulkImportStepListener())
 			.build();
 	}
 
 	@Bean
 	@StepScope
-	public ItemWriter<ResourceListChunk> bulkImportFileWriter() {
+	public ItemWriter<List<IBaseResource>> bulkImportFileWriter() {
 		return new BulkImportFileWriter();
 	}
 
 
 	@Bean
 	@StepScope
-	public BulkImportFileReader bulkImportFileReader(){
+	public BulkImportFileReader bulkImportFileReader() {
 		return new BulkImportFileReader();
 	}
 
 	@Bean
 	@StepScope
-	private BulkImportParseFileProcessor bulkImportParseFileProcessor() {
+	public BulkImportParseFileProcessor bulkImportParseFileProcessor() {
 		return new BulkImportParseFileProcessor();
 	}
 
+	@Bean
+	@StepScope
+	public BulkImportStepListener bulkImportStepListener() {
+		return new BulkImportStepListener();
+	}
 
 //	@Bean
 //	@Lazy

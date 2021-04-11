@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobJson;
 import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobStatusEnum;
+import ca.uhn.fhir.jpa.bulk.imp.model.JobFileRowProcessingModeEnum;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,9 +20,11 @@ import javax.persistence.Version;
 import java.io.Serializable;
 import java.util.Date;
 
+import static org.apache.commons.lang3.StringUtils.left;
+
 @Entity
 @Table(name = "HFJ_BLK_IMPORT_JOB", uniqueConstraints = {
-		  @UniqueConstraint(name = "IDX_BLKIM_JOB_ID", columnNames = "JOB_ID")
+	@UniqueConstraint(name = "IDX_BLKIM_JOB_ID", columnNames = "JOB_ID")
 })
 public class BulkImportJobEntity implements Serializable {
 
@@ -47,8 +51,21 @@ public class BulkImportJobEntity implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "STATUS_TIME", nullable = false)
 	private Date myStatusTime;
+
 	@Column(name = "STATUS_MESSAGE", nullable = true, length = BulkExportJobEntity.STATUS_MESSAGE_LEN)
 	private String myStatusMessage;
+
+	@Column(name = "ROW_PROCESSING_MODE", length = 20, nullable = false)
+	@Enumerated(EnumType.STRING)
+	private JobFileRowProcessingModeEnum myRowProcessingMode;
+
+	public JobFileRowProcessingModeEnum getRowProcessingMode() {
+		return myRowProcessingMode;
+	}
+
+	public void setRowProcessingMode(JobFileRowProcessingModeEnum theRowProcessingMode) {
+		myRowProcessingMode = theRowProcessingMode;
+	}
 
 	public Date getStatusTime() {
 		return myStatusTime;
@@ -94,6 +111,12 @@ public class BulkImportJobEntity implements Serializable {
 	}
 
 	public void setStatusMessage(String theStatusMessage) {
-		myStatusMessage = theStatusMessage;
+		myStatusMessage = left(theStatusMessage, BulkExportJobEntity.STATUS_MESSAGE_LEN);
+	}
+
+	public BulkImportJobJson toJson() {
+		return new BulkImportJobJson()
+			.setProcessingMode(getRowProcessingMode())
+			.setFileCount(getFileCount());
 	}
 }

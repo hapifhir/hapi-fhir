@@ -42,7 +42,7 @@ public class BulkItemReader extends BaseBulkItemReader {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	@Override
-	Iterator<ResourcePersistentId> getResourcePidIterator() {
+	protected Iterator<ResourcePersistentId> getResourcePidIterator() {
 		ourLog.info("Bulk export assembling export of type {} for job {}", myResourceType, myJobUUID);
 		Set<ResourcePersistentId> myReadPids = new HashSet<>();
 

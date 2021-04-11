@@ -28,24 +28,36 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /**
- * Will run before and after a job to set the status to whatever is appropriate.
+ * This class sets the job status to ERROR if any failures occur while actually
+ * generating the export files.
  */
-public class CreateBulkImportEntityStepListener implements StepExecutionListener {
+public class BulkImportStepListener implements StepExecutionListener {
 
 	@Autowired
-	private IBulkDataImportSvc myBulkImportDaoSvc;
+	private IBulkDataImportSvc myBulkDataImportSvc;
 
 	@Override
-	public void beforeStep(StepExecution theStepExecution) {
-		String jobUuid = theStepExecution.getJobExecution().getJobParameters().getString(BulkExportJobConfig.JOB_UUID_PARAMETER);
-		if (jobUuid != null) {
-			myBulkImportDaoSvc.setJobToStatus(jobUuid, BulkImportJobStatusEnum.RUNNING);
-		}
+	public void beforeStep(@Nonnull StepExecution stepExecution) {
+		// nothing
 	}
 
 	@Override
 	public ExitStatus afterStep(StepExecution theStepExecution) {
-		return ExitStatus.EXECUTING;
+		if (theStepExecution.getExitStatus().getExitCode().equals(ExitStatus.FAILED.getExitCode())) {
+			//Try to fetch it from the parameters first, and if it doesn't exist, fetch it from the context.
+			String jobUuid = theStepExecution.getJobExecution().getJobParameters().getString(BulkExportJobConfig.JOB_UUID_PARAMETER);
+			if (jobUuid == null) {
+				jobUuid = theStepExecution.getJobExecution().getExecutionContext().getString(BulkExportJobConfig.JOB_UUID_PARAMETER);
+			}
+			assert isNotBlank(jobUuid);
+			String exitDescription = theStepExecution.getExitStatus().getExitDescription();
+			myBulkDataImportSvc.setJobToStatus(jobUuid, BulkImportJobStatusEnum.ERROR, exitDescription);
+		}
+		return theStepExecution.getExitStatus();
 	}
 }

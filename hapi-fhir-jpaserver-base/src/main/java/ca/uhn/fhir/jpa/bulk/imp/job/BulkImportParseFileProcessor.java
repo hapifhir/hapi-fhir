@@ -2,8 +2,6 @@ package ca.uhn.fhir.jpa.bulk.imp.job;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobFileJson;
-import ca.uhn.fhir.jpa.bulk.imp.model.JobFileRowProcessingModeEnum;
-import ca.uhn.fhir.jpa.bulk.imp.model.ResourceListChunk;
 import com.google.common.io.LineReader;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.batch.item.ItemProcessor;
@@ -13,14 +11,14 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BulkImportParseFileProcessor implements ItemProcessor<BulkImportJobFileJson, ResourceListChunk> {
+public class BulkImportParseFileProcessor implements ItemProcessor<BulkImportJobFileJson, List<IBaseResource>> {
 
 	@Autowired
 	private FhirContext myFhirContext;
 
 	@SuppressWarnings("UnstableApiUsage")
 	@Override
-	public ResourceListChunk process(BulkImportJobFileJson theInput) throws Exception {
+	public List<IBaseResource> process(BulkImportJobFileJson theInput) throws Exception {
 		String contents = theInput.getContents();
 		LineReader reader = new LineReader(new StringReader(contents));
 
@@ -31,7 +29,6 @@ public class BulkImportParseFileProcessor implements ItemProcessor<BulkImportJob
 			resources.add(nextResource);
 		}
 
-		JobFileRowProcessingModeEnum processingMode = theInput.getProcessingMode();
-		return new ResourceListChunk(resources, processingMode);
+		return resources;
 	}
 }

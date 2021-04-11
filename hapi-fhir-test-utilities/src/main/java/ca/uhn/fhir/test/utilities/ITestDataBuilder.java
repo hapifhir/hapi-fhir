@@ -154,7 +154,7 @@ public interface ITestDataBuilder {
 		}
 	}
 
-	default IBaseResource buildResource(String theResourceType, Consumer<IBaseResource>[] theModifiers) {
+	default IBaseResource buildResource(String theResourceType, Consumer<IBaseResource>... theModifiers) {
 		IBaseResource resource = getFhirContext().getResourceDefinition(theResourceType).newInstance();
 		for (Consumer<IBaseResource> next : theModifiers) {
 			next.accept(resource);

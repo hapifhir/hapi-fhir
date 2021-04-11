@@ -61,7 +61,7 @@ public class PatientBulkItemReader extends BaseBulkItemReader implements ItemRea
 	}
 
 	@Override
-	Iterator<ResourcePersistentId> getResourcePidIterator() {
+	protected Iterator<ResourcePersistentId> getResourcePidIterator() {
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
 			String errorMessage = "You attempted to start a Patient Bulk Export, but the system has `Index Missing Fields` disabled. It must be enabled for Patient Bulk Export";
 			ourLog.error(errorMessage);

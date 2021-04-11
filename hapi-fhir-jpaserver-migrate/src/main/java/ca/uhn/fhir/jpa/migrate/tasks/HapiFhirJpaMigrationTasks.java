@@ -102,6 +102,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		blkImportJobTable.addColumn("STATUS_MESSAGE").nonNullable().type(ColumnTypeEnum.STRING, 500);
 		blkImportJobTable.addColumn("OPTLOCK").nonNullable().type(ColumnTypeEnum.INT);
 		blkImportJobTable.addColumn("FILE_COUNT").nonNullable().type(ColumnTypeEnum.INT);
+		blkImportJobTable.addColumn("ROW_PROCESSING_MODE").nonNullable().type(ColumnTypeEnum.STRING, 20);
 		version.addIdGenerator("20210406.2", "SEQ_BLKIMJOB_PID");
 
 		// Bulk Import Job File
@@ -109,7 +110,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		blkImportJobFileTable.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
 		blkImportJobFileTable.addColumn("JOB_PID").nonNullable().type(ColumnTypeEnum.LONG);
 		blkImportJobFileTable.addColumn("JOB_CONTENTS").nonNullable().type(ColumnTypeEnum.BLOB);
-		blkImportJobFileTable.addColumn("ROW_PROCESSING_MODE").nonNullable().type(ColumnTypeEnum.STRING, 20);
 		blkImportJobFileTable.addColumn("FILE_SEQ").nonNullable().type(ColumnTypeEnum.INT);
 		blkImportJobFileTable.addForeignKey("20210406.4", "FK_BLKIMJOBFILE_JOB").toColumn("JOB_PID").references("HFJ_BLK_IMPORT_JOB", "PID");
 		version.addIdGenerator("20210406.5", "SEQ_BLKIMJOBFILE_PID");
