@@ -497,7 +497,15 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 			try (IResultIterator resultIter = theSb.createQuery(theParams, searchRuntimeDetails, theRequestDetails, theRequestPartitionId)) {
 				while (resultIter.hasNext()) {
-					pids.add(resultIter.next());
+					//
+					//pids.add(resultIter.next());
+					ResourcePersistentId result = resultIter.next();
+					if (result.getVersion() == null) {
+						ourLog.info("Found NULL version, overriding and setting it to 1, for resourceId: \n{}", result);
+						result.setVersion(1L);
+					}
+					pids.add(result);
+					//
 					if (theLoadSynchronousUpTo != null && pids.size() >= theLoadSynchronousUpTo) {
 						break;
 					}

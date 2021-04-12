@@ -606,11 +606,13 @@ public class SearchBuilder implements ISearchBuilder {
 
 		Map<Long, Long> resourcePidToVersion = null;
 		for (ResourcePersistentId next : thePids) {
-			if (next.getVersion() != null && myModelConfig.isRespectVersionsForSearchIncludes()) {
+			//if (next.getVersion() != null && myModelConfig.isRespectVersionsForSearchIncludes()) {
+			if (myModelConfig.isRespectVersionsForSearchIncludes()) {
 				if (resourcePidToVersion == null) {
 					resourcePidToVersion = new HashMap<>();
 				}
-				resourcePidToVersion.put(next.getIdAsLong(), next.getVersion());
+				//resourcePidToVersion.put(next.getIdAsLong(), next.getVersion());
+				resourcePidToVersion.put(next.getIdAsLong(), ((next.getVersion() == null)?1L:next.getVersion()));
 			}
 		}
 
@@ -643,7 +645,8 @@ public class SearchBuilder implements ISearchBuilder {
 			 */
 			if (resourcePidToVersion != null) {
 				Long version = resourcePidToVersion.get(next.getResourceId());
-				if (version != null && !version.equals(next.getVersion())) {
+				//if (version != null && !version.equals(next.getVersion())) {
+				if (version != null && (resourceId.getVersion() == null || !version.equals(next.getVersion()))) {
 					resourceId.setVersion(version);
 					IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDao(resourceType);
 					next = dao.readEntity(next.getIdDt().withVersion(Long.toString(version)), null);
@@ -661,8 +664,15 @@ public class SearchBuilder implements ISearchBuilder {
 
 			Integer index = thePosition.get(resourceId);
 			if (index == null) {
-				ourLog.warn("Got back unexpected resource PID {}", resourceId);
-				continue;
+				// FIXME KBD: If the version is NULL, try the lookup again with version set to 1
+				if (resourceId.getVersion() == null) {
+					resourceId.setVersion(1L);
+					index = thePosition.get(resourceId);
+				}
+				if (index == null) {
+					ourLog.warn("Got back unexpected resource PID {}", resourceId);
+					continue;
+				}
 			}
 
 			if (resource instanceof IResource) {
