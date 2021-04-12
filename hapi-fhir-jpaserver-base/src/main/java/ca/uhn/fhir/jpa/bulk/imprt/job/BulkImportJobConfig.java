@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.bulk.imprt.job;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.batch.BatchConstants;
 import ca.uhn.fhir.jpa.bulk.imprt.model.ParsedBulkImportRecord;
 import ca.uhn.fhir.jpa.bulk.imprt.model.RawBulkImportRecord;
 import org.springframework.batch.core.Job;
@@ -34,6 +35,7 @@ import org.springframework.batch.core.partition.support.TaskExecutorPartitionHan
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.repeat.CompletionPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -56,6 +58,10 @@ public class BulkImportJobConfig {
 
 	@Autowired
 	private JobBuilderFactory myJobBuilderFactory;
+
+	@Autowired
+	@Qualifier(BatchConstants.JOB_LAUNCHING_TASK_EXECUTOR)
+	private TaskExecutor myTaskExecutor;
 
 	@Bean(name = BULK_IMPORT_JOB_NAME)
 	@Lazy
@@ -94,9 +100,11 @@ public class BulkImportJobConfig {
 	}
 
 	private PartitionHandler partitionHandler() throws Exception {
+		assert myTaskExecutor != null;
+
 		TaskExecutorPartitionHandler retVal = new TaskExecutorPartitionHandler();
 		retVal.setStep(bulkImportProcessFilesStep());
-		retVal.setTaskExecutor(bulkImportTaskExecutor());
+		retVal.setTaskExecutor(myTaskExecutor);
 		retVal.afterPropertiesSet();
 		return retVal;
 	}
@@ -139,16 +147,6 @@ public class BulkImportJobConfig {
 	@StepScope
 	public CompletionPolicy completionPolicy() {
 		return new BulkImportProcessStepCompletionPolicy();
-	}
-
-	@Bean
-	public TaskExecutor bulkImportTaskExecutor() {
-		ThreadPoolTaskExecutor retVal = new ThreadPoolTaskExecutor();
-		retVal.setThreadNamePrefix("BulkImport-");
-		retVal.setCorePoolSize(1);
-		retVal.setMaxPoolSize(20);
-		retVal.setQueueCapacity(0);
-		return retVal;
 	}
 
 	@Bean

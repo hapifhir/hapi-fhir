@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.batch.BatchConstants;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.config.NonPersistedBatchConfigurer;
@@ -388,12 +389,12 @@ public abstract class BaseConfig {
 		return retVal;
 	}
 
-	@Bean
+	@Bean(name= BatchConstants.JOB_LAUNCHING_TASK_EXECUTOR)
 	public TaskExecutor jobLaunchingTaskExecutor() {
 		ThreadPoolTaskExecutor asyncTaskExecutor = new ThreadPoolTaskExecutor();
 		asyncTaskExecutor.setCorePoolSize(5);
 		asyncTaskExecutor.setMaxPoolSize(10);
-		asyncTaskExecutor.setQueueCapacity(500);
+		asyncTaskExecutor.setQueueCapacity(0);
 		asyncTaskExecutor.setThreadNamePrefix("JobLauncher-");
 		asyncTaskExecutor.initialize();
 		return asyncTaskExecutor;

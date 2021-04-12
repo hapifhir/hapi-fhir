@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.batch.config;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.batch.BatchConstants;
 import org.springframework.batch.core.configuration.annotation.DefaultBatchConfigurer;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.MapJobExplorerFactoryBean;
@@ -39,7 +40,7 @@ public class NonPersistedBatchConfigurer extends DefaultBatchConfigurer {
 	private PlatformTransactionManager myHapiPlatformTransactionManager;
 
 	@Autowired
-	@Qualifier("jobLaunchingTaskExecutor")
+	@Qualifier(BatchConstants.JOB_LAUNCHING_TASK_EXECUTOR)
 	private TaskExecutor myTaskExecutor;
 
 	private MapJobRepositoryFactoryBean myJobRepositoryFactory;
