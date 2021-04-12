@@ -787,9 +787,9 @@
 		<junit_version>5.7.0</junit_version>
 		<flyway_version>6.5.4</flyway_version>
 		<hibernate_version>5.4.26.Final</hibernate_version>
-		<hibernate_search_version>6.0.0.Final</hibernate_search_version>
+		<hibernate_search_version>6.0.2.Final</hibernate_search_version>
 		<!-- Update lucene version when you update hibernate-search version -->
-		<lucene_version>8.7.0</lucene_version>
+		<lucene_version>8.8.1</lucene_version>
 		<hamcrest_version>2.2</hamcrest_version>
 		<hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
 		<httpcore_version>4.4.13</httpcore_version>
@@ -832,6 +832,7 @@
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
+		<elasticsearch-client.version>7.11.2</elasticsearch-client.version>
 	</properties>
 
 	<dependencyManagement>
@@ -1499,12 +1500,23 @@
 			<dependency>
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-high-level-client</artifactId>
-				<version>7.10.2</version>
+				<version>${elasticsearch-client.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
 				<artifactId>hibernate-search-backend-elasticsearch</artifactId>
 				<version>${hibernate_search_version}</version>
+				<!-- Exclusions for CVE-2021-22134.  These exclusions can be removed once hibernate-search uses elasticsearch-rest-client version >= 7.11.2 -->
+				<exclusions>
+					<exclusion>
+						<groupId>org.elasticsearch.client</groupId>
+						<artifactId>elasticsearch-rest-client</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.elasticsearch.client</groupId>
+						<artifactId>elasticsearch-rest-client-sniffer</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
@@ -1750,7 +1762,7 @@
 			<dependency>
 				<groupId>org.testcontainers</groupId>
 				<artifactId>elasticsearch</artifactId>
-				<version>1.15.1</version>
+				<version>1.15.2</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
