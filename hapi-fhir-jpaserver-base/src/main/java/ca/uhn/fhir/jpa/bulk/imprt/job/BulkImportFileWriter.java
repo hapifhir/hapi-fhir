@@ -52,7 +52,6 @@ public class BulkImportFileWriter implements ItemWriter<ParsedBulkImportRecord> 
 	public void write(List<? extends ParsedBulkImportRecord> theItemLists) throws Exception {
 		ourLog.info("Beginning bulk import write {} chunks Job[{}] FileIndex[{}]", theItemLists.size(), myJobUuid, myFileIndex);
 
-
 		for (ParsedBulkImportRecord nextItem : theItemLists) {
 
 			SystemRequestDetails requestDetails = new SystemRequestDetails();

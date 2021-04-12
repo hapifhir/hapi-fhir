@@ -164,6 +164,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import java.util.Date;
+import java.util.concurrent.RejectedExecutionHandler;
 
 /*
  * #%L
@@ -392,10 +393,12 @@ public abstract class BaseConfig {
 	@Bean(name= BatchConstants.JOB_LAUNCHING_TASK_EXECUTOR)
 	public TaskExecutor jobLaunchingTaskExecutor() {
 		ThreadPoolTaskExecutor asyncTaskExecutor = new ThreadPoolTaskExecutor();
-		asyncTaskExecutor.setCorePoolSize(5);
+		asyncTaskExecutor.setCorePoolSize(0);
 		asyncTaskExecutor.setMaxPoolSize(10);
 		asyncTaskExecutor.setQueueCapacity(0);
+		asyncTaskExecutor.setAllowCoreThreadTimeOut(true);
 		asyncTaskExecutor.setThreadNamePrefix("JobLauncher-");
+		asyncTaskExecutor.setRejectedExecutionHandler(new ResourceReindexingSvcImpl.BlockPolicy());
 		asyncTaskExecutor.initialize();
 		return asyncTaskExecutor;
 	}

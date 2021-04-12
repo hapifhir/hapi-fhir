@@ -48,7 +48,7 @@ public class BaseBatchJobR4Test extends BaseJpaR4Test {
 	protected void awaitJobCompletion(JobExecution theJobExecution) {
 		await().atMost(120, TimeUnit.SECONDS).until(() -> {
 			JobExecution jobExecution = myJobExplorer.getJobExecution(theJobExecution.getId());
-			ourLog.info("JobExecution {} currently has status: {}", theJobExecution.getId(), jobExecution.getStatus());
+			ourLog.info("JobExecution {} currently has status: {}- Failures if any: {}", theJobExecution.getId(), jobExecution.getStatus(), jobExecution.getFailureExceptions());
 			return jobExecution.getStatus() == BatchStatus.COMPLETED || jobExecution.getStatus() == BatchStatus.FAILED;
 		});
 	}

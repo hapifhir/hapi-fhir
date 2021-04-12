@@ -133,7 +133,7 @@ public class BulkImportJobConfig {
 	public Step bulkImportProcessFilesStep() {
 		CompletionPolicy completionPolicy = completionPolicy();
 
-		return myStepBuilderFactory.get("groupBulkExportGenerateResourceFilesStep")
+		return myStepBuilderFactory.get("bulkImportProcessFilesStep")
 			.<RawBulkImportRecord, ParsedBulkImportRecord>chunk(completionPolicy)
 			.reader(bulkImportFileReader())
 			.processor(bulkImportParseFileProcessor())

@@ -32,16 +32,6 @@ public class BulkImportProcessStepCompletionPolicy extends CompletionPolicySuppo
 	private int myChunkSize;
 
 	@Override
-	public RepeatContext start(RepeatContext context) {
-		return super.start(context);
-	}
-
-	@Override
-	public void update(RepeatContext context) {
-		super.update(context);
-	}
-
-	@Override
 	public boolean isComplete(RepeatContext context) {
 		if (context.getStartedCount() < myChunkSize) {
 			return false;

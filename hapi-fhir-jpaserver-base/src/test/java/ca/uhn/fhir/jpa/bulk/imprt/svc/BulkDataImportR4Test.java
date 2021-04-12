@@ -70,18 +70,19 @@ public class BulkDataImportR4Test extends BaseBatchJobR4Test implements ITestDat
 
 		awaitAllBulkJobCompletions();
 
-		IBundleProvider searchResults = myPatientDao.search(SearchParameterMap.newSynchronous());
-		assertEquals(transactionsPerFile * fileCount, searchResults.sizeOrThrowNpe());
-
 		runInTransaction(() -> {
 			List<BulkImportJobEntity> jobs = myBulkImportJobDao.findAll();
 			assertEquals(1, jobs.size());
-			assertEquals(BulkImportJobStatusEnum.COMPLETE, jobs.get(0).getStatus());
+			assertEquals(BulkImportJobStatusEnum.COMPLETE, jobs.get(0).getStatus(), jobs.get(0).getStatusMessage());
 
 			List<BulkImportJobFileEntity> jobFiles = myBulkImportJobFileDao.findAll();
 			assertEquals(0, jobFiles.size());
 
 		});
+
+		IBundleProvider searchResults = myPatientDao.search(SearchParameterMap.newSynchronous());
+		assertEquals(transactionsPerFile * fileCount, searchResults.sizeOrThrowNpe());
+
 	}
 
 	@Test
