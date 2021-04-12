@@ -3,16 +3,15 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.Bundle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Propagation;
@@ -52,9 +51,12 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	@Qualifier("myResourceCountsCache")
 	public ResourceCountCache myResourceCountsCache;
 	@Autowired
-	private PartitionSettings myPartitionSettings;
-	@Autowired
 	private TransactionProcessor myTransactionProcessor;
+
+	@VisibleForTesting
+	public void setTransactionProcessorForUnitTest(TransactionProcessor theTransactionProcessor) {
+		myTransactionProcessor = theTransactionProcessor;
+	}
 
 	@Override
 	@PostConstruct

@@ -22,41 +22,19 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.FhirResourceDaoMessageHeaderDstu2;
-import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Meta;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.TypedQuery;
 import java.util.Collection;
 import java.util.List;
 
 public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
-
-	@Autowired
-	private TransactionProcessor myTransactionProcessor;
-
-	@VisibleForTesting
-	public void setTransactionProcessorForUnitTest(TransactionProcessor theTransactionProcessor) {
-		myTransactionProcessor = theTransactionProcessor;
-	}
-
-	@Override
-	@PostConstruct
-	public void start() {
-		super.start();
-		myTransactionProcessor.setDao(this);
-	}
-
 
 	@Override
 	public Meta metaGetOperation(RequestDetails theRequestDetails) {
