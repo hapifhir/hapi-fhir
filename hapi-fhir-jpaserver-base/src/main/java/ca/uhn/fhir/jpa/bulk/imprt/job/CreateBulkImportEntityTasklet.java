@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.bulk.imp.job;
+package ca.uhn.fhir.jpa.bulk.imprt.job;
 
 /*-
  * #%L

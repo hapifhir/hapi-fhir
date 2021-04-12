@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.bulk.imp.model;
+package ca.uhn.fhir.jpa.bulk.imprt.model;
 
 /*-
  * #%L
@@ -20,32 +20,12 @@ package ca.uhn.fhir.jpa.bulk.imp.model;
  * #L%
  */
 
-import ca.uhn.fhir.model.api.IModelJson;
-import com.fasterxml.jackson.annotation.JsonProperty;
+public enum JobFileRowProcessingModeEnum {
 
-public class BulkImportJobFileJson implements IModelJson {
+	/**
+	 * Sorting OK
+	 */
 
-	@JsonProperty("tenantName")
-	private String myTenantName;
-	@JsonProperty("contents")
-	private String myContents;
-
-	public String getTenantName() {
-		return myTenantName;
-	}
-
-	public BulkImportJobFileJson setTenantName(String theTenantName) {
-		myTenantName = theTenantName;
-		return this;
-	}
-
-	public String getContents() {
-		return myContents;
-	}
-
-	public BulkImportJobFileJson setContents(String theContents) {
-		myContents = theContents;
-		return this;
-	}
+	FHIR_TRANSACTION
 
 }

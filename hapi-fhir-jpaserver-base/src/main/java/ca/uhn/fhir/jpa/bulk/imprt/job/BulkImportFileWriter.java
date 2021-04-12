@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.bulk.imp.job;
+package ca.uhn.fhir.jpa.bulk.imprt.job;
 
 /*-
  * #%L
@@ -23,8 +23,8 @@ package ca.uhn.fhir.jpa.bulk.imp.job;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
-import ca.uhn.fhir.jpa.bulk.imp.model.JobFileRowProcessingModeEnum;
-import ca.uhn.fhir.jpa.bulk.imp.model.ParsedBulkImportRecord;
+import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
+import ca.uhn.fhir.jpa.bulk.imprt.model.ParsedBulkImportRecord;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;

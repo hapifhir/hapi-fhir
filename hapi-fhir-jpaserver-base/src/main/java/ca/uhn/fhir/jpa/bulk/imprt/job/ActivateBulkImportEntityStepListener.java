@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.bulk.imp.job;
+package ca.uhn.fhir.jpa.bulk.imprt.job;
 
 /*-
  * #%L
@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.bulk.imp.job;
  */
 
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
-import ca.uhn.fhir.jpa.bulk.imp.api.IBulkDataImportSvc;
-import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobStatusEnum;
+import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
+import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;

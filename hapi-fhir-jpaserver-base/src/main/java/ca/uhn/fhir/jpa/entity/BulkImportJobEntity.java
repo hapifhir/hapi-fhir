@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobJson;
-import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobStatusEnum;
-import ca.uhn.fhir.jpa.bulk.imp.model.JobFileRowProcessingModeEnum;
+import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
+import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
+import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

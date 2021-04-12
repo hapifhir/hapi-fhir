@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.batch;
  */
 
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
-import ca.uhn.fhir.jpa.bulk.imp.job.BulkImportJobConfig;
+import ca.uhn.fhir.jpa.bulk.imprt.job.BulkImportJobConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 

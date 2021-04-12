@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.bulk.imp.job;
+package ca.uhn.fhir.jpa.bulk.imprt.job;
 
 /*-
  * #%L
@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.bulk.imp.job;
  */
 
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
-import ca.uhn.fhir.jpa.bulk.imp.api.IBulkDataImportSvc;
-import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobJson;
+import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
+import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
 import org.slf4j.Logger;
 import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.item.ExecutionContext;

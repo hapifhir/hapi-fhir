@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.bulk.imp.job;
+package ca.uhn.fhir.jpa.bulk.imprt.job;
 
 /*-
  * #%L
@@ -22,13 +22,11 @@ package ca.uhn.fhir.jpa.bulk.imp.job;
 
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
-import ca.uhn.fhir.jpa.bulk.imp.api.IBulkDataImportSvc;
-import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobFileJson;
-import ca.uhn.fhir.jpa.bulk.imp.model.RawBulkImportRecord;
+import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
+import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
+import ca.uhn.fhir.jpa.bulk.imprt.model.RawBulkImportRecord;
 import ca.uhn.fhir.util.IoUtil;
 import com.google.common.io.LineReader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

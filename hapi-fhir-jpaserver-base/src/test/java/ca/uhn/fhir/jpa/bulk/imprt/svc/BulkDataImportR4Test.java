@@ -1,15 +1,15 @@
-package ca.uhn.fhir.jpa.bulk.imp.svc;
+package ca.uhn.fhir.jpa.bulk.imprt.svc;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.bulk.BaseBatchJobR4Test;
-import ca.uhn.fhir.jpa.bulk.imp.api.IBulkDataImportSvc;
-import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobFileJson;
-import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobJson;
-import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobStatusEnum;
-import ca.uhn.fhir.jpa.bulk.imp.model.JobFileRowProcessingModeEnum;
+import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
+import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
+import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
+import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
+import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobFileDao;
 import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;

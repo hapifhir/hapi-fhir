@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.bulk.imp.job;
+package ca.uhn.fhir.jpa.bulk.imprt.job;
 
 /*-
  * #%L
@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.bulk.imp.job;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.bulk.imp.model.ParsedBulkImportRecord;
-import ca.uhn.fhir.jpa.bulk.imp.model.RawBulkImportRecord;
+import ca.uhn.fhir.jpa.bulk.imprt.model.ParsedBulkImportRecord;
+import ca.uhn.fhir.jpa.bulk.imprt.model.RawBulkImportRecord;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.Step;

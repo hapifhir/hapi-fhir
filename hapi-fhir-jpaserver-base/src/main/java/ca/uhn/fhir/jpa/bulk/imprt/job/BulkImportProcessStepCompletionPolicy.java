@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.bulk.imp.job;
+package ca.uhn.fhir.jpa.bulk.imprt.job;
 
 /*-
  * #%L
@@ -24,7 +24,7 @@ import org.springframework.batch.repeat.RepeatContext;
 import org.springframework.batch.repeat.policy.CompletionPolicySupport;
 import org.springframework.beans.factory.annotation.Value;
 
-import static ca.uhn.fhir.jpa.bulk.imp.job.BulkImportJobConfig.JOB_PARAM_COMMIT_INTERVAL;
+import static ca.uhn.fhir.jpa.bulk.imprt.job.BulkImportJobConfig.JOB_PARAM_COMMIT_INTERVAL;
 
 public class BulkImportProcessStepCompletionPolicy extends CompletionPolicySupport {
 

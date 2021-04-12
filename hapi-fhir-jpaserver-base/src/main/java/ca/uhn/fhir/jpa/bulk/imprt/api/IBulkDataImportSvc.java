@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.bulk.imp.api;
+package ca.uhn.fhir.jpa.bulk.imprt.api;
 
 /*-
  * #%L
@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.bulk.imp.api;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobFileJson;
-import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobJson;
-import ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobStatusEnum;
+import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
+import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
+import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -30,12 +30,12 @@ import java.util.List;
 public interface IBulkDataImportSvc {
 
 	/**
-	 * Create a new job in {@link ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobStatusEnum#STAGING STAGING} state (meaning it won't yet be worked on and can be added to)
+	 * Create a new job in {@link ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum#STAGING STAGING} state (meaning it won't yet be worked on and can be added to)
 	 */
 	String createNewJob(BulkImportJobJson theJobDescription, @Nonnull List<BulkImportJobFileJson> theInitialFiles);
 
 	/**
-	 * Add more files to a job in {@link ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobStatusEnum#STAGING STAGING} state
+	 * Add more files to a job in {@link ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum#STAGING STAGING} state
 	 *
 	 * @param theJobId The job ID
 	 * @param theFiles The files to add to the job
@@ -43,8 +43,8 @@ public interface IBulkDataImportSvc {
 	void addFilesToJob(String theJobId, List<BulkImportJobFileJson> theFiles);
 
 	/**
-	 * Move a job from {@link ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobStatusEnum#STAGING STAGING}
-	 * state to {@link ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobStatusEnum#READY READY}
+	 * Move a job from {@link ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum#STAGING STAGING}
+	 * state to {@link ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum#READY READY}
 	 * state, meaning that is is a candidate to be picked up for processing
 	 *
 	 * @param theJobId The job ID
@@ -53,7 +53,7 @@ public interface IBulkDataImportSvc {
 
 	/**
 	 * This method is intended to be called from the job scheduler, and will begin execution on
-	 * the next job in status {@link ca.uhn.fhir.jpa.bulk.imp.model.BulkImportJobStatusEnum#READY READY}
+	 * the next job in status {@link ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum#READY READY}
 	 *
 	 * @return Returns {@literal true} if a job was activated
 	 */

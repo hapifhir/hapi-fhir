@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.bulk.imp.model;
+package ca.uhn.fhir.jpa.bulk.imprt.model;
 
 /*-
  * #%L
@@ -20,27 +20,32 @@ package ca.uhn.fhir.jpa.bulk.imp.model;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.io.Serializable;
+public class BulkImportJobFileJson implements IModelJson {
 
-public class ParsedBulkImportRecord implements Serializable {
-
-	private static final long serialVersionUID = 1L;
-
-	private final String myTenantName;
-	private final IBaseResource myRowContent;
-
-	public ParsedBulkImportRecord(String theTenantName, IBaseResource theRowContent) {
-		myTenantName = theTenantName;
-		myRowContent = theRowContent;
-	}
+	@JsonProperty("tenantName")
+	private String myTenantName;
+	@JsonProperty("contents")
+	private String myContents;
 
 	public String getTenantName() {
 		return myTenantName;
 	}
 
-	public IBaseResource getRowContent() {
-		return myRowContent;
+	public BulkImportJobFileJson setTenantName(String theTenantName) {
+		myTenantName = theTenantName;
+		return this;
 	}
+
+	public String getContents() {
+		return myContents;
+	}
+
+	public BulkImportJobFileJson setContents(String theContents) {
+		myContents = theContents;
+		return this;
+	}
+
 }

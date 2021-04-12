@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.bulk.imp.model;
+package ca.uhn.fhir.jpa.bulk.imprt.model;
 
 /*-
  * #%L
@@ -20,12 +20,25 @@ package ca.uhn.fhir.jpa.bulk.imp.model;
  * #L%
  */
 
-public enum JobFileRowProcessingModeEnum {
+import java.io.Serializable;
 
-	/**
-	 * Sorting OK
-	 */
+public class RawBulkImportRecord implements Serializable {
 
-	FHIR_TRANSACTION
+	private static final long serialVersionUID = 1L;
 
+	private final String myTenantName;
+	private final String myRowContent;
+
+	public RawBulkImportRecord(String theTenantName, String theRowContent) {
+		myTenantName = theTenantName;
+		myRowContent = theRowContent;
+	}
+
+	public String getTenantName() {
+		return myTenantName;
+	}
+
+	public String getRowContent() {
+		return myRowContent;
+	}
 }

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.bulk.imp.model;
+package ca.uhn.fhir.jpa.bulk.imprt.model;
 
 /*-
  * #%L

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.bulk.imp.job;
+package ca.uhn.fhir.jpa.bulk.imprt.job;
 
 /*-
  * #%L
@@ -23,8 +23,8 @@ package ca.uhn.fhir.jpa.bulk.imp.job;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
-import ca.uhn.fhir.jpa.bulk.imp.model.ParsedBulkImportRecord;
-import ca.uhn.fhir.jpa.bulk.imp.model.RawBulkImportRecord;
+import ca.uhn.fhir.jpa.bulk.imprt.model.ParsedBulkImportRecord;
+import ca.uhn.fhir.jpa.bulk.imprt.model.RawBulkImportRecord;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
