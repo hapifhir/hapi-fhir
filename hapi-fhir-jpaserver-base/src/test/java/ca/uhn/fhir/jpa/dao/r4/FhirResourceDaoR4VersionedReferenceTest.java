@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -427,7 +428,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		assertEquals(2, outcome.size());
 		List<IBaseResource> resources = outcome.getResources(0, 2);
 		// FIXME KBD: Change this to "2"
-		assertEquals(2, resources.size());
+		assertEquals(2, resources.size(), resources.stream().map(t->t.getIdElement().toUnqualified().getValue()).collect(Collectors.joining(", ")));
 		assertEquals(taskId.getValue(), resources.get(0).getIdElement().getValue());
 		assertEquals(conditionId.getValue(), ((Task)resources.get(0)).getBasedOn().get(0).getReference());
 		// FIXME KBD: Uncomment this line below
