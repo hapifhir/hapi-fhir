@@ -103,7 +103,7 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 	@Override
 	public List<INarrativeTemplate> getTemplateByElement(FhirContext theFhirContext, EnumSet<TemplateTypeEnum> theStyles, IBase theElement) {
 		List<INarrativeTemplate> retVal = getFromMap(theStyles, theElement.getClass().getName(), myClassToTemplate);
-		if (retVal == null) {
+		if (retVal.isEmpty()) {
 			if (theElement instanceof IBaseResource) {
 				String resourceName = theFhirContext.getResourceDefinition((IBaseResource) theElement).getName();
 				retVal = getTemplateByResourceName(theFhirContext, theStyles, resourceName);
