@@ -415,29 +415,24 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		// Create a Condition
 		Condition condition = new Condition();
 		IIdType conditionId = myConditionDao.create(condition).getId().toUnqualified();
-		ourLog.info("conditionId: {}", conditionId);
 
 		// Create a Task which is basedOn that Condition
 		Task task = new Task();
 		task.setBasedOn(Arrays.asList(new Reference(conditionId)));
 		IIdType taskId = myTaskDao.create(task).getId().toUnqualified();
-		ourLog.info("taskId: {}", taskId);
 
 		// Search for the Task using an _include=Task.basedOn and make sure we get the Condition resource in the Response
 		IBundleProvider outcome = myTaskDao.search(SearchParameterMap.newSynchronous().addInclude(Task.INCLUDE_BASED_ON));
 		assertEquals(2, outcome.size());
 		List<IBaseResource> resources = outcome.getResources(0, 2);
-		// FIXME KBD: Change this to "2"
 		assertEquals(2, resources.size(), resources.stream().map(t->t.getIdElement().toUnqualified().getValue()).collect(Collectors.joining(", ")));
 		assertEquals(taskId.getValue(), resources.get(0).getIdElement().getValue());
 		assertEquals(conditionId.getValue(), ((Task)resources.get(0)).getBasedOn().get(0).getReference());
-		// FIXME KBD: Uncomment this line below
 		assertEquals(conditionId.withVersion("1").getValue(), resources.get(1).getIdElement().getValue());
 
 		// Now, update the Condition to generate another version of it
 		condition.setRecordedDate(new Date(System.currentTimeMillis()));
 		String conditionIdString = myConditionDao.update(condition).getId().getValue();
-		ourLog.info("UPDATED conditionIdString: {}", conditionIdString);
 
 		// Search for the Task again and make sure that we get the original version of the Condition resource in the Response
 		outcome = myTaskDao.search(SearchParameterMap.newSynchronous().addInclude(Task.INCLUDE_BASED_ON));
