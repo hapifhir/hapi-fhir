@@ -902,21 +902,21 @@ public class FhirContext {
 	}
 
 	private BaseRuntimeElementDefinition<?> scanDatatype(final Class<? extends IElement> theResourceType) {
-		ArrayList<Class<? extends IElement>> resourceTypes = new ArrayList<Class<? extends IElement>>();
+		ArrayList<Class<? extends IElement>> resourceTypes = new ArrayList<>();
 		resourceTypes.add(theResourceType);
 		Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> defs = scanResourceTypes(resourceTypes);
 		return defs.get(theResourceType);
 	}
 
 	private RuntimeResourceDefinition scanResourceType(final Class<? extends IBaseResource> theResourceType) {
-		ArrayList<Class<? extends IElement>> resourceTypes = new ArrayList<Class<? extends IElement>>();
+		ArrayList<Class<? extends IElement>> resourceTypes = new ArrayList<>();
 		resourceTypes.add(theResourceType);
 		Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> defs = scanResourceTypes(resourceTypes);
 		return (RuntimeResourceDefinition) defs.get(theResourceType);
 	}
 
 	private synchronized Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> scanResourceTypes(final Collection<Class<? extends IElement>> theResourceTypes) {
-		List<Class<? extends IBase>> typesToScan = new ArrayList<Class<? extends IBase>>();
+		List<Class<? extends IBase>> typesToScan = new ArrayList<>();
 		if (theResourceTypes != null) {
 			typesToScan.addAll(theResourceTypes);
 		}

@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2537
+title: "It is now possible t create narrative generator templates that apply to any
+  custom strucures including custom extension structures."
