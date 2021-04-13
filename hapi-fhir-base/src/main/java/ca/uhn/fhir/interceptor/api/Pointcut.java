@@ -1416,6 +1416,9 @@ public enum Pointcut implements IPointcut {
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
 	 * </li>
+	 * <li>
+	 * Boolean - Whether this pointcut invocation was deferred or not(since 5.4.0)
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
@@ -1460,6 +1463,9 @@ public enum Pointcut implements IPointcut {
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
 	 * </li>
+	 * <li>
+	 * Boolean - Whether this pointcut invocation was deferred or not(since 5.4.0)
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
@@ -1500,6 +1506,9 @@ public enum Pointcut implements IPointcut {
 	 * </li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
+	 * </li>
+	 * <li>
+	 * Boolean - Whether this pointcut invocation was deferred or not(since 5.4.0)
 	 * </li>
 	 * </ul>
 	 * <p>
