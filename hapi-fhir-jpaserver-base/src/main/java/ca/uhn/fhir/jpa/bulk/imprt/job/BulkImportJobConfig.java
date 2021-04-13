@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.bulk.imprt.job;
 
 import ca.uhn.fhir.jpa.batch.BatchConstants;
 import ca.uhn.fhir.jpa.bulk.imprt.model.ParsedBulkImportRecord;
-import ca.uhn.fhir.jpa.bulk.imprt.model.RawBulkImportRecord;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.Step;
@@ -40,7 +39,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.BULK_IMPORT_JOB_NAME;
 
@@ -134,9 +132,8 @@ public class BulkImportJobConfig {
 		CompletionPolicy completionPolicy = completionPolicy();
 
 		return myStepBuilderFactory.get("bulkImportProcessFilesStep")
-			.<RawBulkImportRecord, ParsedBulkImportRecord>chunk(completionPolicy)
+			.<ParsedBulkImportRecord, ParsedBulkImportRecord>chunk(completionPolicy)
 			.reader(bulkImportFileReader())
-			.processor(bulkImportParseFileProcessor())
 			.writer(bulkImportFileWriter())
 			.listener(bulkImportStepListener())
 			.listener(completionPolicy)
@@ -160,12 +157,6 @@ public class BulkImportJobConfig {
 	@StepScope
 	public BulkImportFileReader bulkImportFileReader() {
 		return new BulkImportFileReader();
-	}
-
-	@Bean
-	@StepScope
-	public BulkImportFileProcessor bulkImportParseFileProcessor() {
-		return new BulkImportFileProcessor();
 	}
 
 	@Bean

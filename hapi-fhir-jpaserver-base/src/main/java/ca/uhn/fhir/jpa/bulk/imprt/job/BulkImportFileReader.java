@@ -20,13 +20,15 @@ package ca.uhn.fhir.jpa.bulk.imprt.job;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
-import ca.uhn.fhir.jpa.bulk.imprt.model.RawBulkImportRecord;
+import ca.uhn.fhir.jpa.bulk.imprt.model.ParsedBulkImportRecord;
 import ca.uhn.fhir.util.IoUtil;
 import com.google.common.io.LineReader;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,21 +36,24 @@ import org.springframework.beans.factory.annotation.Value;
 import java.io.StringReader;
 
 @SuppressWarnings("UnstableApiUsage")
-public class BulkImportFileReader implements ItemReader<RawBulkImportRecord> {
+public class BulkImportFileReader implements ItemReader<ParsedBulkImportRecord> {
 
 	@Autowired
 	private IBulkDataImportSvc myBulkDataImportSvc;
+	@Autowired
+	private FhirContext myFhirContext;
 	@Value("#{stepExecutionContext['" + BulkExportJobConfig.JOB_UUID_PARAMETER + "']}")
 	private String myJobUuid;
 	@Value("#{stepExecutionContext['" + BulkImportPartitioner.FILE_INDEX + "']}")
 	private int myFileIndex;
+
 	private StringReader myReader;
 	private LineReader myLineReader;
 	private int myLineIndex;
 	private String myTenantName;
 
 	@Override
-	public RawBulkImportRecord read() throws Exception {
+	public ParsedBulkImportRecord read() throws Exception {
 
 		if (myReader == null) {
 			BulkImportJobFileJson file = myBulkDataImportSvc.fetchFile(myJobUuid, myFileIndex);
@@ -65,6 +70,7 @@ public class BulkImportFileReader implements ItemReader<RawBulkImportRecord> {
 
 		Logs.getBatchTroubleshootingLog().debug("Reading line {} file index {} for job: {}", myLineIndex++, myFileIndex, myJobUuid);
 
-		return new RawBulkImportRecord(myTenantName, nextLine);
+		IBaseResource parsed = myFhirContext.newJsonParser().parseResource(nextLine);
+		return new ParsedBulkImportRecord(myTenantName, parsed);
 	}
 }
