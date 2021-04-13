@@ -9,7 +9,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.google.common.collect.ListMultimap;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -77,7 +76,6 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		patientComponent.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Patient");
 
 
-
 		//Delete an observation
 		b.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(daoMethodOutcome.getId().toUnqualifiedVersionless().getValue());
 
@@ -86,8 +84,7 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		mySystemDao.transaction(mySrd, b);
 		List<HookParams> hookParams = myPointcutLatch.awaitExpected();
 
-		IBaseBundle bundleResponseParam = hookParams.get(3).get(IBaseBundle.class);
-		DeferredInterceptorBroadcasts broadcastsParam = hookParams.get(0).get(DeferredInterceptorBroadcasts.class);
+		DeferredInterceptorBroadcasts broadcastsParam = hookParams.get(3).get(DeferredInterceptorBroadcasts.class);
 		ListMultimap<Pointcut, HookParams> deferredInterceptorBroadcasts = broadcastsParam.getDeferredInterceptorBroadcasts();
 		assertThat(deferredInterceptorBroadcasts.entries(), hasSize(3));
 
@@ -95,10 +92,14 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		assertThat(createPointcutInvocations, hasSize(2));
 
 		IBaseResource firstCreatedResource = createPointcutInvocations.get(0).get(IBaseResource.class);
+		boolean wasDeferred = createPointcutInvocations.get(0).get(Boolean.class);
 		assertTrue(firstCreatedResource instanceof Observation);
+		assertTrue(wasDeferred);
 
 		IBaseResource secondCreatedResource = createPointcutInvocations.get(1).get(IBaseResource.class);
+		wasDeferred = createPointcutInvocations.get(1).get(Boolean.class);
 		assertTrue(secondCreatedResource instanceof Patient);
+		assertTrue(wasDeferred);
 
 		assertThat(deferredInterceptorBroadcasts.get(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED), hasSize(1));
 	}
