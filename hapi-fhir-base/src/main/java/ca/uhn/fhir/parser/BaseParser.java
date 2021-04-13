@@ -980,7 +980,12 @@ public abstract class BaseParser implements IParser {
 			myEncodeContext = theEncodeContext;
 		}
 
-		private void addParent(CompositeChildElement theParent, StringBuilder theB) {
+        @Override
+        public String toString() {
+            return myDef.getElementName();
+        }
+
+        private void addParent(CompositeChildElement theParent, StringBuilder theB) {
 			if (theParent != null) {
 				if (theParent.myResDef != null) {
 					theB.append(theParent.myResDef.getName());

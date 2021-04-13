@@ -379,7 +379,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 
 		boolean haveWrittenExtensions = false;
-		for (CompositeChildElement nextChildElem : super.compositeChildIterator(theElement, theContainedResource, theParent, theEncodeContext)) {
+		Iterable<CompositeChildElement> compositeChildElements = super.compositeChildIterator(theElement, theContainedResource, theParent, theEncodeContext);
+		for (CompositeChildElement nextChildElem : compositeChildElements) {
 
 			BaseRuntimeChildDefinition nextChild = nextChildElem.getDef();
 

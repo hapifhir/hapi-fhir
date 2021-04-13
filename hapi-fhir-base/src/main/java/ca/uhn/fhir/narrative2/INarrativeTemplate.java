@@ -32,7 +32,7 @@ public interface INarrativeTemplate {
 
 	Set<String> getAppliesToResourceTypes();
 
-	Set<Class<? extends IBase>> getAppliesToResourceClasses();
+	Set<Class<? extends IBase>> getAppliesToClasses();
 
 	TemplateTypeEnum getTemplateType();
 
