@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -41,6 +42,8 @@ public class MdmSubmitterInterceptorLoader {
 	@Autowired
 	private IMdmStorageInterceptor myIMdmStorageInterceptor;
 	@Autowired
+	private MdmSearchExpandingInterceptor myMdmSearchExpandingInterceptorInterceptor;
+	@Autowired
 	private IInterceptorService myInterceptorService;
 	@Autowired
 	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
@@ -53,6 +56,7 @@ public class MdmSubmitterInterceptorLoader {
 
 		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
 		myInterceptorService.registerInterceptor(myIMdmStorageInterceptor);
+		myInterceptorService.registerInterceptor(myMdmSearchExpandingInterceptorInterceptor);
 		ourLog.info("MDM interceptor registered");
 		// We need to call SubscriptionSubmitInterceptorLoader.start() again in case there were no subscription types the first time it was called.
 		mySubscriptionSubmitInterceptorLoader.start();
