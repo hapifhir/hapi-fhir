@@ -1,23 +1,34 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.test.concurrency.PointcutLatch;
+import com.google.common.collect.ListMultimap;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class TransactionHookTest extends BaseJpaR4SystemTest {
@@ -34,26 +45,62 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 	@BeforeEach
 	public void beforeEach() {
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSED,  myPointcutLatch);
+		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED,  myPointcutLatch);
+		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED,  myPointcutLatch);
+		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED,  myPointcutLatch);
 	}
 
 	@Test
-	public void testHookShouldContainParamsForAllCreateUpdateDeleteInvocations() {
+	public void testHookShouldContainParamsForAllCreateUpdateDeleteInvocations() throws InterruptedException {
+
+		String urnReference = "urn:uuid:3bc44de3-069d-442d-829b-f3ef68cae371";
+
+		final Observation obsToDelete = new Observation();
+		obsToDelete.setStatus(Observation.ObservationStatus.FINAL);
+		DaoMethodOutcome daoMethodOutcome = myObservationDao.create(obsToDelete);
+
+		Patient pat1 = new Patient();
+
 		final Observation obs1 = new Observation();
 		obs1.setStatus(Observation.ObservationStatus.FINAL);
+		obs1.setSubject(new Reference(urnReference));
 
 		Bundle b = new Bundle();
 		Bundle.BundleEntryComponent bundleEntryComponent = b.addEntry();
+
 		bundleEntryComponent.setResource(obs1);
-		bundleEntryComponent.getRequest().setMethod(Bundle.HTTPVerb.POST);
+		bundleEntryComponent.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+
+		Bundle.BundleEntryComponent patientComponent = b.addEntry();
+		patientComponent.setFullUrl(urnReference);
+		patientComponent.setResource(pat1);
+		patientComponent.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Patient");
 
 
 
-		try {
-			mySystemDao.transaction(mySrd, b);
-			fail();
-		} catch (ResourceVersionConflictException e) {
-			// good, transaction should not succeed because DiagnosticReport has a reference to the obs2
-		}
+		//Delete an observation
+		b.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(daoMethodOutcome.getId().toUnqualifiedVersionless().getValue());
+
+
+		myPointcutLatch.setExpectedCount(4);
+		mySystemDao.transaction(mySrd, b);
+		List<HookParams> hookParams = myPointcutLatch.awaitExpected();
+
+		IBaseBundle bundleResponseParam = hookParams.get(3).get(IBaseBundle.class);
+		DeferredInterceptorBroadcasts broadcastsParam = hookParams.get(0).get(DeferredInterceptorBroadcasts.class);
+		ListMultimap<Pointcut, HookParams> deferredInterceptorBroadcasts = broadcastsParam.getDeferredInterceptorBroadcasts();
+		assertThat(deferredInterceptorBroadcasts.entries(), hasSize(3));
+
+		List<HookParams> createPointcutInvocations = deferredInterceptorBroadcasts.get(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED);
+		assertThat(createPointcutInvocations, hasSize(2));
+
+		IBaseResource firstCreatedResource = createPointcutInvocations.get(0).get(IBaseResource.class);
+		assertTrue(firstCreatedResource instanceof Observation);
+
+		IBaseResource secondCreatedResource = createPointcutInvocations.get(1).get(IBaseResource.class);
+		assertTrue(secondCreatedResource instanceof Patient);
+
+		assertThat(deferredInterceptorBroadcasts.get(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED), hasSize(1));
 	}
 
 	@Test

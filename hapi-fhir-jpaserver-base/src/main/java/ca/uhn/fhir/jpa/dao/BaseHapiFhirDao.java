@@ -1364,7 +1364,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				.add(IBaseResource.class, theResource)
 				.add(RequestDetails.class, theRequestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-				.add(TransactionDetails.class, theTransactionDetails);
+				.add(TransactionDetails.class, theTransactionDetails)
+				.add(Boolean.class, theTransactionDetails.isPointcutDeferred(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED));
 			doCallHooks(theTransactionDetails, theRequestDetails, Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, hookParams);
 		}
 

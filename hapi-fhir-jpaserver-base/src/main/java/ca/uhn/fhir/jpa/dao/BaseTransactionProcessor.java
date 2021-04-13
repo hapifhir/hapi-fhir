@@ -1030,12 +1030,12 @@ public abstract class BaseTransactionProcessor {
 			HookParams params = new HookParams()
 				.add(RequestDetails.class, theRequest)
 				.addIfMatchesType(ServletRequestDetails.class, theRequest)
-				.add(DeferredInterceptorBroadcasts.class, deferredInterceptorBroadcasts);
+				.add(DeferredInterceptorBroadcasts.class, deferredInterceptorBroadcasts)
+				.add(TransactionDetails.class, theTransactionDetails)
+				.add(IBaseBundle.class, theResponse);
 			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_TRANSACTION_PROCESSED, params);
 
 			theTransactionDetails.deferredBroadcastProcessingFinished();
-
-
 
 			//finishedCallingDeferredInterceptorBroadcasts
 

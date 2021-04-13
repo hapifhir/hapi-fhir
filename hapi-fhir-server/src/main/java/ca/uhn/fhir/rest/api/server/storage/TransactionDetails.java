@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -194,8 +195,12 @@ public class TransactionDetails {
 		myDeferredInterceptorBroadcasts.put(thePointcut, theHookParams);
 	}
 
-	public boolean isPointcutDeferred() {
-		return myIsPointcutDeferred;
+	public Boolean isPointcutDeferred(Pointcut thePointcut) {
+		if (myDeferredInterceptorBroadcasts == null) {
+			return false;
+		}
+		List<HookParams> hookParams = myDeferredInterceptorBroadcasts.get(thePointcut);
+		return hookParams != null;
 	}
 
 	public void deferredBroadcastProcessingFinished() {
