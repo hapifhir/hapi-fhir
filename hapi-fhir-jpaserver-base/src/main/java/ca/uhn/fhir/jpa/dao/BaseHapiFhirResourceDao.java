@@ -721,14 +721,23 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Interceptor call: STORAGE_PRECOMMIT_RESOURCE_UPDATED
 		IBaseResource newVersion = toResource(theEntity, false);
-		HookParams params = new HookParams()
+		HookParams preStorageParams = new HookParams()
 			.add(IBaseResource.class, oldVersion)
 			.add(IBaseResource.class, newVersion)
 			.add(RequestDetails.class, theRequestDetails)
 			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 			.add(TransactionDetails.class, theTransactionDetails);
-		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, params);
-		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, params);
+		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, preStorageParams);
+
+		HookParams preCommitParams = new HookParams()
+			.add(IBaseResource.class, oldVersion)
+			.add(IBaseResource.class, newVersion)
+			.add(RequestDetails.class, theRequestDetails)
+			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+			.add(TransactionDetails.class, theTransactionDetails)
+			.add(Boolean.class, theTransactionDetails.isPointcutDeferred(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED));
+
+		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, preCommitParams);
 
 	}
 
