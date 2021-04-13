@@ -15,7 +15,7 @@
 <li>Caffeine (JPA): 2.7.0 -> 3.0.1</li>
 <li>Hibernate (JPA): 5.4.26.Final -> 5.4.30.Final</li>
 <li>Hibernate Search (JPA): 6.0.0.Final -> 6.0.2.Final</li>
-<li>Spring (JPA): 5.3.3 -> 5.3.5</li>
+<li>Spring (JPA): 5.3.3 -> 5.3.6</li>
 <li>Spring Batch (JPA): 4.2.3.RELEASE -> 4.3.2</li>
 <li>Spring Data (JPA): 2.4.2 -> 2.4.7</li>
 <li>Commons DBCP2 (JPA): 2.7.0 -> 2.8.0</li>

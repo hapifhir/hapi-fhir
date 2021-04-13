@@ -808,7 +808,7 @@
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<slf4j_version>1.7.30</slf4j_version>
 		<log4j_to_slf4j_version>2.11.1</log4j_to_slf4j_version>
-		<spring_version>5.3.5</spring_version>
+		<spring_version>5.3.6</spring_version>
 		<!-- FYI: Spring Data JPA 2.1.9 causes test failures due to unexpected cascading deletes -->
 		<spring_data_version>2.4.7</spring_data_version>
 		<spring_batch_version>4.3.2</spring_batch_version>
