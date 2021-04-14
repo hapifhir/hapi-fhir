@@ -104,18 +104,19 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		blkImportJobTable.addColumn("FILE_COUNT").nonNullable().type(ColumnTypeEnum.INT);
 		blkImportJobTable.addColumn("ROW_PROCESSING_MODE").nonNullable().type(ColumnTypeEnum.STRING, 20);
 		blkImportJobTable.addColumn("BATCH_SIZE").nonNullable().type(ColumnTypeEnum.INT);
-		version.addIdGenerator("20210410.2", "SEQ_BLKIMJOB_PID");
+		blkImportJobTable.addIndex("20210410.2", "IDX_BLKIM_JOB_ID").unique(false).withColumns("JOB_PID");
+		version.addIdGenerator("20210410.3", "SEQ_BLKIMJOB_PID");
 
 		// Bulk Import Job File
-		Builder.BuilderAddTableByColumns blkImportJobFileTable = version.addTableByColumns("20210410.3", "HFJ_BLK_IMPORT_JOBFILE", "PID");
+		Builder.BuilderAddTableByColumns blkImportJobFileTable = version.addTableByColumns("20210410.4", "HFJ_BLK_IMPORT_JOBFILE", "PID");
 		blkImportJobFileTable.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
 		blkImportJobFileTable.addColumn("JOB_PID").nonNullable().type(ColumnTypeEnum.LONG);
 		blkImportJobFileTable.addColumn("JOB_CONTENTS").nonNullable().type(ColumnTypeEnum.BLOB);
 		blkImportJobFileTable.addColumn("FILE_SEQ").nonNullable().type(ColumnTypeEnum.INT);
 		blkImportJobFileTable.addColumn("TENANT_NAME").nullable().type(ColumnTypeEnum.STRING, 200);
-		blkImportJobFileTable.addForeignKey("20210410.4", "FK_BLKIMJOBFILE_JOB").toColumn("JOB_PID").references("HFJ_BLK_IMPORT_JOB", "PID");
-		version.addIdGenerator("20210410.5", "SEQ_BLKIMJOBFILE_PID");
-		version.onTable("HFJ_BLK_IMPORT_JOBFILE").addIndex("20210410.6", "IDX_BLKIM_JOB_ID").unique(false).withColumns("JOB_PID");
+		blkImportJobFileTable.addForeignKey("20210410.5", "FK_BLKIMJOBFILE_JOB").toColumn("JOB_PID").references("HFJ_BLK_IMPORT_JOB", "PID");
+		blkImportJobFileTable.addIndex("20210410.6", "IDX_BLKIM_JOBFILE_JOBID").unique(false).withColumns("JOB_PID");
+		version.addIdGenerator("20210410.7", "SEQ_BLKIMJOBFILE_PID");
 
 	}
 
