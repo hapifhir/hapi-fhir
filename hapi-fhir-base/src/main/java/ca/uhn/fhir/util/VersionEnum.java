@@ -68,7 +68,8 @@ public enum VersionEnum {
 	V5_2_0,
 	V5_2_1,
 	V5_3_0,
-	V5_3_1;
+	V5_3_1,
+	V5_3_2;
 
 	public static VersionEnum latestVersion() {
 		VersionEnum[] values = VersionEnum.values();
