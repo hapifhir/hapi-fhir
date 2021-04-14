@@ -444,6 +444,84 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		assertEquals(conditionId.withVersion("1").getValue(), resources.get(1).getIdElement().getValue());
 	}
 
+	@Test
+	public void testSearchAndIncludeVersionedReference_WhenMultipleVersionsExist() {
+		HashSet<String> refPaths = new HashSet<String>();
+		refPaths.add("Task.basedOn");
+		myFhirCtx.getParserOptions().setDontStripVersionsFromReferencesAtPaths(refPaths);
+		myModelConfig.setRespectVersionsForSearchIncludes(true);
+		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+
+		// Create a Condition
+		Condition condition = new Condition();
+		IIdType conditionId = myConditionDao.create(condition).getId().toUnqualified();
+
+		// Now, update the Condition 3 times to generate a 4th version of it
+		condition.setRecordedDate(new Date(System.currentTimeMillis()));
+		conditionId = myConditionDao.update(condition).getId();
+		condition.setRecordedDate(new Date(System.currentTimeMillis() + 1000000));
+		conditionId = myConditionDao.update(condition).getId();
+		condition.setRecordedDate(new Date(System.currentTimeMillis() + 2000000));
+		conditionId = myConditionDao.update(condition).getId();
+
+		// Create a Task which is basedOn that Condition
+		Task task = new Task();
+		task.setBasedOn(Arrays.asList(new Reference(conditionId)));
+		IIdType taskId = myTaskDao.create(task).getId().toUnqualified();
+
+		// Search for the Task using an _include=Task.basedOn and make sure we get the Condition resource in the Response
+		IBundleProvider outcome = myTaskDao.search(SearchParameterMap.newSynchronous().addInclude(Task.INCLUDE_BASED_ON));
+		assertEquals(2, outcome.size());
+		List<IBaseResource> resources = outcome.getResources(0, 2);
+		assertEquals(2, resources.size(), resources.stream().map(t->t.getIdElement().toUnqualified().getValue()).collect(Collectors.joining(", ")));
+		assertEquals(taskId.getValue(), resources.get(0).getIdElement().getValue());
+		assertEquals(conditionId.getValue(), ((Task)resources.get(0)).getBasedOn().get(0).getReference());
+		assertEquals(conditionId.withVersion("4").getValue(), resources.get(1).getIdElement().getValue());
+	}
+
+	@Test
+	public void testSearchAndIncludeVersionedReference_WhenPreviouslyReferencedVersionOne() {
+		HashSet<String> refPaths = new HashSet<String>();
+		refPaths.add("Task.basedOn");
+		myFhirCtx.getParserOptions().setDontStripVersionsFromReferencesAtPaths(refPaths);
+		myModelConfig.setRespectVersionsForSearchIncludes(true);
+		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+
+		// Create a Condition
+		Condition condition = new Condition();
+		IIdType conditionId = myConditionDao.create(condition).getId().toUnqualified();
+		ourLog.info("conditionId: \n{}", conditionId);
+
+		// Create a Task which is basedOn that Condition
+		Task task = new Task();
+		task.setBasedOn(Arrays.asList(new Reference(conditionId)));
+		IIdType taskId = myTaskDao.create(task).getId().toUnqualified();
+
+		// Now, update the Condition 3 times to generate a 4th version of it
+		condition.setRecordedDate(new Date(System.currentTimeMillis()));
+		conditionId = myConditionDao.update(condition).getId();
+		ourLog.info("UPDATED conditionId: \n{}", conditionId);
+		condition.setRecordedDate(new Date(System.currentTimeMillis() + 1000000));
+		conditionId = myConditionDao.update(condition).getId();
+		ourLog.info("UPDATED conditionId: \n{}", conditionId);
+		condition.setRecordedDate(new Date(System.currentTimeMillis() + 2000000));
+		conditionId = myConditionDao.update(condition).getId();
+		ourLog.info("UPDATED conditionId: \n{}", conditionId);
+
+		// Now, update the Task to refer to the latest version 4 of the Condition
+		task.setBasedOn(Arrays.asList(new Reference(conditionId)));
+		taskId = myTaskDao.update(task).getId();
+		ourLog.info("UPDATED taskId: \n{}", taskId);
+
+		// Search for the Task using an _include=Task.basedOn and make sure we get the Condition resource in the Response
+		IBundleProvider outcome = myTaskDao.search(SearchParameterMap.newSynchronous().addInclude(Task.INCLUDE_BASED_ON));
+		assertEquals(2, outcome.size());
+		List<IBaseResource> resources = outcome.getResources(0, 2);
+		assertEquals(2, resources.size(), resources.stream().map(t->t.getIdElement().toUnqualified().getValue()).collect(Collectors.joining(", ")));
+		assertEquals(taskId.getValue(), resources.get(0).getIdElement().getValue());
+		assertEquals(conditionId.getValue(), ((Task)resources.get(0)).getBasedOn().get(0).getReference());
+		assertEquals(conditionId.withVersion("4").getValue(), resources.get(1).getIdElement().getValue());
+	}
 
 	@Test
 	public void testSearchAndIncludeUnersionedReference_Asynchronous() {
