@@ -25,7 +25,7 @@ public class BaseBatchJobR4Test extends BaseJpaR4Test {
 	@Autowired
 	private JobExplorer myJobExplorer;
 
-	protected void awaitAllBulkJobCompletions(String... theJobNames) {
+	protected List<JobExecution> awaitAllBulkJobCompletions(String... theJobNames) {
 		assert theJobNames.length > 0;
 
 		List<JobInstance> bulkExport = new ArrayList<>();
@@ -39,6 +39,8 @@ public class BaseBatchJobR4Test extends BaseJpaR4Test {
 		}
 		List<JobExecution> bulkExportExecutions = bulkExport.stream().flatMap(jobInstance -> myJobExplorer.getJobExecutions(jobInstance).stream()).collect(Collectors.toList());
 		awaitJobCompletions(bulkExportExecutions);
+
+		return bulkExportExecutions;
 	}
 
 	protected void awaitJobCompletions(Collection<JobExecution> theJobs) {

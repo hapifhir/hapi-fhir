@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.bulk.BaseBatchJobR4Test;
+import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
@@ -23,6 +24,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -61,6 +63,7 @@ public class BulkDataImportR4Test extends BaseBatchJobR4Test implements ITestDat
 
 		BulkImportJobJson job = new BulkImportJobJson();
 		job.setProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
+		job.setJobDescription("This is the description");
 		job.setBatchSize(3);
 		String jobId = mySvc.createNewJob(job, files);
 		mySvc.markJobAsReadyForActivation(jobId);
@@ -68,7 +71,9 @@ public class BulkDataImportR4Test extends BaseBatchJobR4Test implements ITestDat
 		boolean activateJobOutcome = mySvc.activateNextReadyJob();
 		assertTrue(activateJobOutcome);
 
-		awaitAllBulkJobCompletions();
+		List<JobExecution> executions = awaitAllBulkJobCompletions();
+		assertEquals(1, executions.size());
+		assertEquals("", executions.get(0).getJobParameters().getString(BulkExportJobConfig.JOB_DESCRIPTION));
 
 		runInTransaction(() -> {
 			List<BulkImportJobEntity> jobs = myBulkImportJobDao.findAll();
@@ -144,8 +149,8 @@ public class BulkDataImportR4Test extends BaseBatchJobR4Test implements ITestDat
 		return files;
 	}
 
-	protected void awaitAllBulkJobCompletions() {
-		awaitAllBulkJobCompletions(BatchJobsConfig.BULK_IMPORT_JOB_NAME);
+	protected List<JobExecution> awaitAllBulkJobCompletions() {
+		return awaitAllBulkJobCompletions(BatchJobsConfig.BULK_IMPORT_JOB_NAME);
 	}
 
 }

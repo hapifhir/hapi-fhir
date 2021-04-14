@@ -59,6 +59,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataImportSvcImpl.class);
 	@Autowired
@@ -102,6 +104,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		job.setJobId(jobId);
 		job.setFileCount(theInitialFiles.size());
 		job.setStatus(BulkImportJobStatusEnum.STAGING);
+		job.setJobDescription(theJobDescription.getJobDescription());
 		job.setBatchSize(theJobDescription.getBatchSize());
 		job.setRowProcessingMode(theJobDescription.getProcessingMode());
 		job = myJobDao.save(job);
@@ -239,6 +242,10 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		JobParametersBuilder parameters = new JobParametersBuilder()
 			.addString(BulkExportJobConfig.JOB_UUID_PARAMETER, jobId)
 			.addLong(BulkImportJobConfig.JOB_PARAM_COMMIT_INTERVAL, (long) batchSize);
+
+		if(isNotBlank(theBulkExportJobEntity.getJobDescription())) {
+			parameters.addString(BulkExportJobConfig.JOB_DESCRIPTION, theBulkExportJobEntity.getJobDescription());
+		}
 
 		ourLog.info("Submitting bulk import job {} to job scheduler", jobId);
 

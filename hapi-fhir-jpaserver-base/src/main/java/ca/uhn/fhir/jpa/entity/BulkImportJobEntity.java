@@ -56,31 +56,34 @@ public class BulkImportJobEntity implements Serializable {
 
 	@Column(name = "JOB_ID", length = Search.UUID_COLUMN_LENGTH, nullable = false, updatable = false)
 	private String myJobId;
-
+	@Column(name = "JOB_DESC", nullable = true, length = BulkExportJobEntity.STATUS_MESSAGE_LEN)
+	private String myJobDescription;
 	@Enumerated(EnumType.STRING)
 	@Column(name = "JOB_STATUS", length = 10, nullable = false)
 	private BulkImportJobStatusEnum myStatus;
-
 	@Version
 	@Column(name = "OPTLOCK", nullable = false)
 	private int myVersion;
-
 	@Column(name = "FILE_COUNT", nullable = false)
 	private int myFileCount;
-
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "STATUS_TIME", nullable = false)
 	private Date myStatusTime;
-
 	@Column(name = "STATUS_MESSAGE", nullable = true, length = BulkExportJobEntity.STATUS_MESSAGE_LEN)
 	private String myStatusMessage;
-
 	@Column(name = "ROW_PROCESSING_MODE", length = 20, nullable = false, updatable = false)
 	@Enumerated(EnumType.STRING)
 	private JobFileRowProcessingModeEnum myRowProcessingMode;
-
 	@Column(name = "BATCH_SIZE", nullable = false, updatable = false)
 	private int myBatchSize;
+
+	public String getJobDescription() {
+		return myJobDescription;
+	}
+
+	public void setJobDescription(String theJobDescription) {
+		myJobDescription = left(theJobDescription, BulkExportJobEntity.STATUS_MESSAGE_LEN);
+	}
 
 	public JobFileRowProcessingModeEnum getRowProcessingMode() {
 		return myRowProcessingMode;
@@ -140,7 +143,8 @@ public class BulkImportJobEntity implements Serializable {
 	public BulkImportJobJson toJson() {
 		return new BulkImportJobJson()
 			.setProcessingMode(getRowProcessingMode())
-			.setFileCount(getFileCount());
+			.setFileCount(getFileCount())
+			.setJobDescription(getJobDescription());
 	}
 
 	public int getBatchSize() {
