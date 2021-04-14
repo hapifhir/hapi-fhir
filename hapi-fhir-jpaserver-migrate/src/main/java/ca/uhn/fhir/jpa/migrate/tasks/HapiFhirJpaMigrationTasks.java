@@ -115,6 +115,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		blkImportJobFileTable.addColumn("TENANT_NAME").nullable().type(ColumnTypeEnum.STRING, 200);
 		blkImportJobFileTable.addForeignKey("20210410.4", "FK_BLKIMJOBFILE_JOB").toColumn("JOB_PID").references("HFJ_BLK_IMPORT_JOB", "PID");
 		version.addIdGenerator("20210410.5", "SEQ_BLKIMJOBFILE_PID");
+		version.onTable("HFJ_BLK_IMPORT_JOBFILE").addIndex("20210410.6", "IDX_BLKIM_JOB_ID").unique(false).withColumns("JOB_PID");
+
 	}
 
 	private void init530() {
