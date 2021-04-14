@@ -73,12 +73,11 @@ public class BulkDataImportR4Test extends BaseBatchJobR4Test implements ITestDat
 
 		List<JobExecution> executions = awaitAllBulkJobCompletions();
 		assertEquals(1, executions.size());
-		assertEquals("", executions.get(0).getJobParameters().getString(BulkExportJobConfig.JOB_DESCRIPTION));
+		assertEquals("This is the description", executions.get(0).getJobParameters().getString(BulkExportJobConfig.JOB_DESCRIPTION));
 
 		runInTransaction(() -> {
 			List<BulkImportJobEntity> jobs = myBulkImportJobDao.findAll();
-			assertEquals(1, jobs.size());
-			assertEquals(BulkImportJobStatusEnum.COMPLETE, jobs.get(0).getStatus(), jobs.get(0).getStatusMessage());
+			assertEquals(0, jobs.size());
 
 			List<BulkImportJobFileEntity> jobFiles = myBulkImportJobFileDao.findAll();
 			assertEquals(0, jobFiles.size());
