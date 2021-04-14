@@ -404,9 +404,15 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	}
 
 	private boolean isStructureDefinitionWithoutSnapshot(IBaseResource r) {
+		boolean retVal = false;
 		FhirTerser terser = myFhirContext.newTerser();
-		return r.getClass().getSimpleName().equals("StructureDefinition") &&
-			terser.getSingleValueOrNull(r, "snapshot") == null;
+		if (r.getClass().getSimpleName().equals("StructureDefinition")) {
+			Optional<String> kind = terser.getSinglePrimitiveValue(r, "kind");
+			if (kind.isPresent() && !(kind.get().equals("logical"))) {
+				retVal = terser.getSingleValueOrNull(r, "snapshot") == null;
+			}
+		}
+		return retVal;
 	}
 
 	private IBaseResource generateSnapshot(IBaseResource sd) {
