@@ -20,6 +20,9 @@ package ca.uhn.fhir.jpa.bulk.export.model;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+@JsonFormat(shape = JsonFormat.Shape.STRING)
 public enum BulkExportJobStatusEnum {
 
 	/**

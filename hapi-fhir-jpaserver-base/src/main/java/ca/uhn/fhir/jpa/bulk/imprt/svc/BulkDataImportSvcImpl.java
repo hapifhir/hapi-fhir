@@ -223,10 +223,12 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	@Override
 	@Transactional
 	public void deleteJobFiles(String theJobId) {
+		BulkImportJobEntity job = findJobByJobId(theJobId);
 		List<Long> files = myJobFileDao.findAllIdsForJob(theJobId);
 		for (Long next : files) {
 			myJobFileDao.deleteById(next);
 		}
+		myJobDao.delete(job);
 	}
 
 	private void processJob(BulkImportJobEntity theBulkExportJobEntity) throws JobParametersInvalidException {

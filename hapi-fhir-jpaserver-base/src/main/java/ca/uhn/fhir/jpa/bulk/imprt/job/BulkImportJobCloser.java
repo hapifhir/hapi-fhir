@@ -50,6 +50,7 @@ public class BulkImportJobCloser implements Tasklet {
 			myBulkDataImportSvc.deleteJobFiles(myJobUUID);
 		} else {
 			myBulkDataImportSvc.setJobToStatus(myJobUUID, BulkImportJobStatusEnum.ERROR, "Found job in status: " + executionStatus);
+			myBulkDataImportSvc.deleteJobFiles(myJobUUID);
 		}
 		return RepeatStatus.FINISHED;
 	}

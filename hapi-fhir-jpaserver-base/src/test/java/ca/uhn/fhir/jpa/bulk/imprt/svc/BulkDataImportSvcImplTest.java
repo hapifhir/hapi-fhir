@@ -142,5 +142,9 @@ public class BulkDataImportSvcImplTest extends BaseJpaR4Test {
 		});
 	}
 
+	@Test
+	public void testCleanOldJobs() {
+
+	}
 
 }
