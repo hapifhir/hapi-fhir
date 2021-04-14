@@ -79,6 +79,8 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 	@Test
 	public void testNumeric() {
 		NumericEncoder numeric = new NumericEncoder();
+		assertEquals(PHONE, numeric.encode(PHONE_CLOSE));
+		assertEquals(PHONE, numeric.encode(PHONE));
 		assertEquals(numeric.encode(PHONE), numeric.encode(PHONE_CLOSE));
 		assertNotEquals(numeric.encode(PHONE), numeric.encode(PHONE_FAR));
 	}
