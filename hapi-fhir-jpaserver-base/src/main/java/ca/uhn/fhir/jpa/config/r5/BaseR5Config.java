@@ -80,11 +80,6 @@ public class BaseR5Config extends BaseConfigDstu3Plus {
 		return new TransactionProcessorVersionAdapterR5();
 	}
 
-	@Bean
-	public TransactionProcessor transactionProcessor() {
-		return new TransactionProcessor();
-	}
-
 	@Bean(name = GRAPHQL_PROVIDER_NAME)
 	@Lazy
 	public GraphQLProvider graphQLProvider() {

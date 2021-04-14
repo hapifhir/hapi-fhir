@@ -22,18 +22,13 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.FhirResourceDaoMessageHeaderDstu2;
-import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.TypedQuery;
@@ -42,14 +37,10 @@ import java.util.List;
 
 public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 
-	@Autowired
-	private TransactionProcessor myTransactionProcessor;
-
 	@Override
 	@PostConstruct
 	public void start() {
 		super.start();
-		myTransactionProcessor.setDao(this);
 	}
 
 	@Override
@@ -87,13 +78,6 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 	public IBaseBundle processMessage(RequestDetails theRequestDetails, IBaseBundle theMessage) {
 		return FhirResourceDaoMessageHeaderDstu2.throwProcessMessageNotImplemented();
 	}
-
-	@Transactional(propagation = Propagation.NEVER)
-	@Override
-	public Bundle transaction(RequestDetails theRequestDetails, Bundle theRequest) {
-		return myTransactionProcessor.transaction(theRequestDetails, theRequest);
-	}
-
 
 
 }

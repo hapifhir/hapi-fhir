@@ -82,11 +82,6 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 		return new TransactionProcessorVersionAdapterR4();
 	}
 
-	@Bean
-	public TransactionProcessor transactionProcessor() {
-		return new TransactionProcessor();
-	}
-
 	@Bean(name = GRAPHQL_PROVIDER_NAME)
 	@Lazy
 	public GraphQLProvider graphQLProvider() {
