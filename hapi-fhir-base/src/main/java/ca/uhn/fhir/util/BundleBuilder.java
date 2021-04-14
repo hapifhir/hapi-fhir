@@ -352,7 +352,6 @@ public class BundleBuilder {
 		public void conditional(String theConditionalUrl) {
 			myUrl.setValueAsString(theConditionalUrl);
 		}
-
 	}
 
 	public class CreateBuilder {

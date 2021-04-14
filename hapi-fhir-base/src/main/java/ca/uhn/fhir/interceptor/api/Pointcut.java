@@ -1450,7 +1450,7 @@ public enum Pointcut implements IPointcut {
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - The previous contents of the resource</li>
-	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - The proposed new new contents of the resource</li>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - The proposed new contents of the resource</li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
 	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
