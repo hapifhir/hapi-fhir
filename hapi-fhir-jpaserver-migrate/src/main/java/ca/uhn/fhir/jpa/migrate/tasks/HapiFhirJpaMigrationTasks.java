@@ -114,8 +114,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		blkImportJobFileTable.addColumn("JOB_CONTENTS").nonNullable().type(ColumnTypeEnum.BLOB);
 		blkImportJobFileTable.addColumn("FILE_SEQ").nonNullable().type(ColumnTypeEnum.INT);
 		blkImportJobFileTable.addColumn("TENANT_NAME").nullable().type(ColumnTypeEnum.STRING, 200);
-		blkImportJobFileTable.addForeignKey("20210410.5", "FK_BLKIMJOBFILE_JOB").toColumn("JOB_PID").references("HFJ_BLK_IMPORT_JOB", "PID");
-		blkImportJobFileTable.addIndex("20210410.6", "IDX_BLKIM_JOBFILE_JOBID").unique(false).withColumns("JOB_PID");
+		blkImportJobFileTable.addIndex("20210410.5", "IDX_BLKIM_JOBFILE_JOBID").unique(false).withColumns("JOB_PID");
+		blkImportJobFileTable.addForeignKey("20210410.6", "FK_BLKIMJOBFILE_JOB").toColumn("JOB_PID").references("HFJ_BLK_IMPORT_JOB", "PID");
 		version.addIdGenerator("20210410.7", "SEQ_BLKIMJOBFILE_PID");
 
 	}
