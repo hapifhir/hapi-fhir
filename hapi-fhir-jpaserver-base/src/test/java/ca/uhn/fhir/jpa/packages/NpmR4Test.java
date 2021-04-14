@@ -69,7 +69,9 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -734,6 +736,40 @@ public class NpmR4Test extends BaseJpaR4Test {
 		});
 	}
 
+	@Test
+	public void testInstallPkgContainingLogicalStructureDefinition() throws Exception {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		byte[] bytes = loadClasspathBytes("/packages/test-logical-structuredefinition.tgz");
+		myFakeNpmServlet.myResponses.put("/test-logical-structuredefinition/1.0.0", bytes);
+
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-logical-structuredefinition").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
+		assertEquals(2, outcome.getResourcesInstalled().get("StructureDefinition"));
+
+		// Be sure no further communication with the server
+		JettyUtil.closeServer(myServer);
+
+		// Search for the installed resource
+		runInTransaction(() -> {
+			// Confirm that Laborbefund (a logical StructureDefinition) was created without a snapshot.
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.add(StructureDefinition.SP_URL, new UriParam("https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/LogicalModel/Laborbefund"));
+			IBundleProvider result = myStructureDefinitionDao.search(map);
+			assertEquals(1, result.sizeOrThrowNpe());
+			List<IBaseResource> resources = result.getResources(0,1);
+			assertFalse(((StructureDefinition)resources.get(0)).hasSnapshot());
+
+			// Confirm that DiagnosticLab (a resource StructureDefinition with differential but no snapshot) was created with a generated snapshot.
+			map = SearchParameterMap.newSynchronous();
+			map.add(StructureDefinition.SP_URL, new UriParam("https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab"));
+			result = myStructureDefinitionDao.search(map);
+			assertEquals(1, result.sizeOrThrowNpe());
+			resources = result.getResources(0,1);
+			assertTrue(((StructureDefinition)resources.get(0)).hasSnapshot());
+
+		});
+	}
 
 	static class FakeNpmServlet extends HttpServlet {
 
