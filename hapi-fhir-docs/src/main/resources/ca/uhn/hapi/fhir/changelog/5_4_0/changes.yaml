@@ -21,5 +21,6 @@
 <li>Commons DBCP2 (JPA): 2.7.0 -> 2.8.0</li>
 <li>Thymeleaf (Testpage Overlay): 3.0.11.RELEASE -> 3.0.12.RELEASE</li>
 <li>JAnsi (CLI): 2.1.1 -> 2.3.2</li>
+<li>JArchivelib (CLI): 1.0.0 -> 1.1.0</li>
 </ul>
 "
