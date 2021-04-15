@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 2543
+title: "When issuing a request for a specific Resource and also specifying an _include param, 
+the proper historical referenced resource is not returned when there are more than 1 versions of the 
+referenced resource available, after the reference has been changed from the original version 1 to some other version. 
+When there are more than 1 versions available, and the referring resource had previously referred to version 1 
+but now refers to version 4, the resource returned in the response bundle is for version 1."
+backport: 5.3.2

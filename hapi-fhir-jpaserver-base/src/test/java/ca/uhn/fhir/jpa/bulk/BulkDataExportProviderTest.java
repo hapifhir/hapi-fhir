@@ -2,11 +2,11 @@ package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
-import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.bulk.model.BulkExportResponseJson;
-import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
-import ca.uhn.fhir.jpa.bulk.provider.BulkDataExportProvider;
+import ca.uhn.fhir.jpa.bulk.export.api.BulkDataExportOptions;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
+import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
@@ -188,7 +188,7 @@ public class BulkDataExportProviderTest {
 
 		IBulkDataExportSvc.JobInfo jobInfo = new IBulkDataExportSvc.JobInfo()
 			.setJobId(A_JOB_ID)
-			.setStatus(BulkJobStatusEnum.BUILDING)
+			.setStatus(BulkExportJobStatusEnum.BUILDING)
 			.setStatusTime(InstantType.now().getValue());
 		when(myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(eq(A_JOB_ID))).thenReturn(jobInfo);
 
@@ -212,7 +212,7 @@ public class BulkDataExportProviderTest {
 
 		IBulkDataExportSvc.JobInfo jobInfo = new IBulkDataExportSvc.JobInfo()
 			.setJobId(A_JOB_ID)
-			.setStatus(BulkJobStatusEnum.ERROR)
+			.setStatus(BulkExportJobStatusEnum.ERROR)
 			.setStatusTime(InstantType.now().getValue())
 			.setStatusMessage("Some Error Message");
 		when(myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(eq(A_JOB_ID))).thenReturn(jobInfo);
@@ -239,7 +239,7 @@ public class BulkDataExportProviderTest {
 
 		IBulkDataExportSvc.JobInfo jobInfo = new IBulkDataExportSvc.JobInfo()
 			.setJobId(A_JOB_ID)
-			.setStatus(BulkJobStatusEnum.COMPLETE)
+			.setStatus(BulkExportJobStatusEnum.COMPLETE)
 			.setStatusTime(InstantType.now().getValue());
 		jobInfo.addFile().setResourceType("Patient").setResourceId(new IdType("Binary/111"));
 		jobInfo.addFile().setResourceType("Patient").setResourceId(new IdType("Binary/222"));

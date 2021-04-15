@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -38,13 +38,13 @@ public interface IBulkExportJobDao extends JpaRepository<BulkExportJobEntity, Lo
 	Optional<BulkExportJobEntity> findByJobId(@Param("jobid") String theUuid);
 
 	@Query("SELECT j FROM BulkExportJobEntity j WHERE j.myStatus = :status")
-	Slice<BulkExportJobEntity> findByStatus(Pageable thePage, @Param("status") BulkJobStatusEnum theSubmitted);
+	Slice<BulkExportJobEntity> findByStatus(Pageable thePage, @Param("status") BulkExportJobStatusEnum theSubmitted);
 
 	@Query("SELECT j FROM BulkExportJobEntity j WHERE j.myExpiry < :cutoff")
 	Slice<BulkExportJobEntity> findByExpiry(Pageable thePage, @Param("cutoff") Date theCutoff);
 
 	@Query("SELECT j FROM BulkExportJobEntity j WHERE j.myRequest = :request AND j.myCreated > :createdAfter AND j.myStatus <> :status ORDER BY j.myCreated DESC")
-	Slice<BulkExportJobEntity> findExistingJob(Pageable thePage, @Param("request") String theRequest, @Param("createdAfter") Date theCreatedAfter, @Param("status") BulkJobStatusEnum theNotStatus);
+	Slice<BulkExportJobEntity> findExistingJob(Pageable thePage, @Param("request") String theRequest, @Param("createdAfter") Date theCreatedAfter, @Param("status") BulkExportJobStatusEnum theNotStatus);
 
 	@Modifying
 	@Query("DELETE FROM BulkExportJobEntity t")

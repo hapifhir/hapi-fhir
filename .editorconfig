@@ -31,6 +31,7 @@ charset = utf-8
 indent_style = tab
 tab_width = 3
 indent_size = 3
+continuation_indent_size=3
 ij_java_align_consecutive_assignments = false
 ij_java_align_consecutive_variable_declarations = false
 ij_java_align_group_field_declarations = false

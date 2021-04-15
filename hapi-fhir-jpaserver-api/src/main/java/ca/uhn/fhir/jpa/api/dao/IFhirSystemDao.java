@@ -67,6 +67,18 @@ public interface IFhirSystemDao<T, MT> extends IDao {
 	 */
 	IBaseBundle processMessage(RequestDetails theRequestDetails, IBaseBundle theMessage);
 
+	/**
+	 * Executes a FHIR transaction using a new database transaction. This method must
+	 * not be called from within a DB transaction.
+	 */
 	T transaction(RequestDetails theRequestDetails, T theResources);
+
+	/**
+	 * Executes a FHIR transaction nested inside the current database transaction.
+	 * This form of the transaction processor can handle write operations only (no reads)
+	 */
+	default T transactionNested(RequestDetails theRequestDetails, T theResources) {
+		throw new UnsupportedOperationException();
+	}
 
 }
