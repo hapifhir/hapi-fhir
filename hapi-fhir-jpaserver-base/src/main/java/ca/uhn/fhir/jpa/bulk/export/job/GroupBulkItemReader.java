@@ -29,6 +29,8 @@ import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -178,12 +180,12 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	 * @return A list of strings representing the Patient IDs of the members (e.g. ["P1", "P2", "P3"]
 	 */
 	private List<String> getMembers() {
-		IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId));
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setTenantId(JpaConstants.ALL_PARTITIONS_NAME);
+		IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId), requestDetails);
 		List<IPrimitiveType> evaluate = myContext.newFhirPath().evaluate(group, "member.entity.reference", IPrimitiveType.class);
 		return  evaluate.stream().map(IPrimitiveType::getValueAsString).collect(Collectors.toList());
 	}
-
-
 
 	/**
 	 * Given the local myGroupId, perform an expansion to retrieve all resource IDs of member patients.
@@ -194,7 +196,9 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	 */
 	private Set<String> expandAllPatientPidsFromGroup() {
 		Set<String> expandedIds = new HashSet<>();
-		IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId));
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setTenantId(JpaConstants.ALL_PARTITIONS_NAME);
+		IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId), new SystemRequestDetails());
 		Long pidOrNull = myIdHelperService.getPidOrNull(group);
 
 		//Attempt to perform MDM Expansion of membership

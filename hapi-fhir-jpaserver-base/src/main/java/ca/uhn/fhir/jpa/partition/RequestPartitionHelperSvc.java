@@ -44,6 +44,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.ALL_PARTITIONS_NAME;
 import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.doCallHooks;
 import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.doCallHooksAndReturnObject;
 import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.hasHooks;
@@ -101,6 +102,19 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 				return RequestPartitionId.defaultPartition();
 			}
 
+			//Shortcircuit and write system calls out to default partition.
+			if (theRequest instanceof SystemRequestDetails) {
+				if (theRequest.getTenantId() != null) {
+					if (theRequest.getTenantId().equals(ALL_PARTITIONS_NAME)) {
+						return RequestPartitionId.allPartitions();
+					} else {
+						return RequestPartitionId.fromPartitionName(theRequest.getTenantId());
+					}
+				} else {
+					return RequestPartitionId.defaultPartition();
+				}
+			}
+
 			// Interceptor call: STORAGE_PARTITION_IDENTIFY_READ
 			if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_READ, myInterceptorBroadcaster, theRequest)) {
 				HookParams params = new HookParams()
@@ -129,7 +143,21 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
 
-			// Interceptor call: STORAGE_PARTITION_IDENTIFY_CREATE
+			//Shortcircuit and write system calls out to default partition.
+			if (theRequest instanceof SystemRequestDetails) {
+				if (theRequest.getTenantId() != null) {
+					if (theRequest.getTenantId().equals(ALL_PARTITIONS_NAME)) {
+						return RequestPartitionId.allPartitions();
+					} else {
+						return RequestPartitionId.fromPartitionName(theRequest.getTenantId());
+					}
+				} else {
+					return RequestPartitionId.defaultPartition();
+				}
+			}
+
+
+				// Interceptor call: STORAGE_PARTITION_IDENTIFY_CREATE
 			HookParams params = new HookParams()
 				.add(IBaseResource.class, theResource)
 				.add(RequestDetails.class, theRequest)
