@@ -117,7 +117,7 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 
 			Binary b = new Binary();
 			b.setContent(new byte[]{0, 1, 2, 3});
-			String binaryId = myBinaryDao.create(b).getId().toUnqualifiedVersionless().getValue();
+			String binaryId = myBinaryDao.create(b, new SystemRequestDetails()).getId().toUnqualifiedVersionless().getValue();
 
 			BulkExportJobEntity job = new BulkExportJobEntity();
 			job.setStatus(BulkExportJobStatusEnum.COMPLETE);
@@ -524,7 +524,7 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 
 		// Iterate over the files
 		for (IBulkDataExportSvc.FileEntry next : status.getFiles()) {
-			Binary nextBinary = myBinaryDao.read(next.getResourceId());
+			Binary nextBinary = myBinaryDao.read(next.getResourceId(), new SystemRequestDetails());
 			assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
 			String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
 			ourLog.info("Next contents for type {}:\n{}", next.getResourceType(), nextContents);
@@ -1030,7 +1030,7 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 	}
 
 	@Test
-	public void testCacheSettingIsRespectedWhenCreatingNewJobs() {
+	public void testCacheSettingIsRespectedWhenCreatingNewJobs() throws InterruptedException {
 		BulkDataExportOptions options = new BulkDataExportOptions();
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
 		options.setResourceTypes(Sets.newHashSet("Procedure"));
@@ -1049,6 +1049,7 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 		IBulkDataExportSvc.JobInfo jobInfo6 = myBulkDataExportSvc.submitJob(options, false);
 		IBulkDataExportSvc.JobInfo jobInfo7 = myBulkDataExportSvc.submitJob(options, false);
 		IBulkDataExportSvc.JobInfo jobInfo8 = myBulkDataExportSvc.submitJob(options, false);
+		Thread.sleep(100L); //stupid commit timings.
 		IBulkDataExportSvc.JobInfo jobInfo9 = myBulkDataExportSvc.submitJob(options, false);
 
 		//First non-cached should retrieve new ID.

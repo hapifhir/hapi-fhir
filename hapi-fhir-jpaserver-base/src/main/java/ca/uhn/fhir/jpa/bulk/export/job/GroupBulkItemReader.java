@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryChunker;
@@ -55,6 +54,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.ALL_PARTITIONS_NAME;
 
 /**
  * Bulk Item reader for the Group Bulk Export job.
@@ -120,7 +121,9 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 		Set<Long> patientPidsToExport = new HashSet<>(pidsOrThrowException);
 
 		if (myMdmEnabled) {
-			IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId));
+			SystemRequestDetails srd = new SystemRequestDetails();
+			srd.setTenantId(ALL_PARTITIONS_NAME);
+			IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId), srd);
 			Long pidOrNull = myIdHelperService.getPidOrNull(group);
 			List<IMdmLinkDao.MdmPidTuple> goldenPidSourcePidTuple = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
 			goldenPidSourcePidTuple.forEach(tuple -> {
@@ -181,7 +184,7 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	 */
 	private List<String> getMembers() {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.setTenantId(JpaConstants.ALL_PARTITIONS_NAME);
+		requestDetails.setTenantId(ALL_PARTITIONS_NAME);
 		IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId), requestDetails);
 		List<IPrimitiveType> evaluate = myContext.newFhirPath().evaluate(group, "member.entity.reference", IPrimitiveType.class);
 		return  evaluate.stream().map(IPrimitiveType::getValueAsString).collect(Collectors.toList());
@@ -197,7 +200,7 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	private Set<String> expandAllPatientPidsFromGroup() {
 		Set<String> expandedIds = new HashSet<>();
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.setTenantId(JpaConstants.ALL_PARTITIONS_NAME);
+		requestDetails.setTenantId(ALL_PARTITIONS_NAME);
 		IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId), new SystemRequestDetails());
 		Long pidOrNull = myIdHelperService.getPidOrNull(group);
 

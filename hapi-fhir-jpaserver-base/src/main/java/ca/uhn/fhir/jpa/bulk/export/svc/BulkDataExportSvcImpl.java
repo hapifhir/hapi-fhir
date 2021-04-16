@@ -42,6 +42,7 @@ import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -203,8 +204,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 					for (BulkExportCollectionFileEntity nextFile : nextCollection.getFiles()) {
 
 						ourLog.info("Purging bulk data file: {}", nextFile.getResourceId());
-						getBinaryDao().delete(toId(nextFile.getResourceId()));
-						getBinaryDao().forceExpungeInExistingTransaction(toId(nextFile.getResourceId()), new ExpungeOptions().setExpungeDeletedResources(true).setExpungeOldVersions(true), null);
+						getBinaryDao().delete(toId(nextFile.getResourceId()), new SystemRequestDetails());
+						getBinaryDao().forceExpungeInExistingTransaction(toId(nextFile.getResourceId()), new ExpungeOptions().setExpungeDeletedResources(true).setExpungeOldVersions(true), new SystemRequestDetails());
 						myBulkExportCollectionFileDao.deleteByPid(nextFile.getId());
 
 					}
