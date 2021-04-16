@@ -103,10 +103,6 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 				return RequestPartitionId.defaultPartition();
 			}
 
-			//Shortcircuit and write system calls out to default partition.
-			if (theRequest instanceof SystemRequestDetails) {
-				return getSystemRequestPartitionId(theRequest);
-			}
 
 			// Interceptor call: STORAGE_PARTITION_IDENTIFY_READ
 			if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_READ, myInterceptorBroadcaster, theRequest)) {
@@ -116,6 +112,10 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 				requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_READ, params);
 			} else {
 				requestPartitionId = null;
+			}
+
+			if (theRequest instanceof SystemRequestDetails) {
+				requestPartitionId = getSystemRequestPartitionId(theRequest);
 			}
 
 			validateRequestPartitionNotNull(requestPartitionId, Pointcut.STORAGE_PARTITION_IDENTIFY_READ);
@@ -159,23 +159,19 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
 
-			//Shortcircuit and write system calls out to default partition.
-			if (theRequest instanceof SystemRequestDetails) {
-				return getSystemRequestPartitionId(theRequest);
-			}
-
-
-				// Interceptor call: STORAGE_PARTITION_IDENTIFY_CREATE
-			HookParams params = new HookParams()
-				.add(IBaseResource.class, theResource)
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE, params);
 
 			// Handle system requests
 			boolean nonPartitionableResource = myNonPartitionableResourceNames.contains(theResourceType);
-			if (nonPartitionableResource && requestPartitionId == null) {
+			if (nonPartitionableResource) {
 				requestPartitionId = RequestPartitionId.defaultPartition();
+			} else if(theRequest instanceof SystemRequestDetails) {
+				requestPartitionId =  getSystemRequestPartitionId(theRequest);
+			} else {
+				HookParams params = new HookParams()// Interceptor call: STORAGE_PARTITION_IDENTIFY_CREATE
+					.add(IBaseResource.class, theResource)
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE, params);
 			}
 
 			String resourceName = myFhirContext.getResourceType(theResource);

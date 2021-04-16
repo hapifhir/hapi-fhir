@@ -347,7 +347,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	private IBundleProvider searchResource(IFhirResourceDao theDao, SearchParameterMap theMap) {
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			SystemRequestDetails requestDetails = new SystemRequestDetails();
-			requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
+//			requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
 			return theDao.search(theMap, requestDetails);
 		} else {
 			return theDao.search(theMap);
