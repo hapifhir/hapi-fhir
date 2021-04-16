@@ -19,6 +19,7 @@ import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.jpa.provider.r5.JpaSystemProviderR5;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -271,6 +272,10 @@ public class TestRestfulServer extends RestfulServer {
 		 */
 		registerProvider(myAppCtx.getBean(DiffProvider.class));
 
+		/*
+		 * OpenAPI
+		 */
+		registerInterceptor(new OpenApiInterceptor());
 	}
 
 	/**

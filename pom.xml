@@ -1107,7 +1107,17 @@
 			<dependency>
 				<groupId>io.swagger</groupId>
 				<artifactId>swagger-annotations</artifactId>
-				<version>1.6.1</version>
+				<version>1.6.2</version>
+			</dependency>
+			<dependency>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-models</artifactId>
+				<version>2.1.7</version>
+			</dependency>
+			<dependency>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-core</artifactId>
+				<version>2.1.7</version>
 			</dependency>
 			<dependency>
 				<groupId>mysql</groupId>
@@ -1736,6 +1746,11 @@
 				<groupId>org.webjars.npm</groupId>
 				<artifactId>popper.js</artifactId>
 				<version>1.16.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars</groupId>
+				<artifactId>swagger-ui</artifactId>
+				<version>3.46.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.xmlunit</groupId>
@@ -2593,6 +2608,7 @@
 				<module>hapi-fhir-client</module>
 				<module>hapi-fhir-server</module>
 				<module>hapi-fhir-server-mdm</module>
+				<module>hapi-fhir-server-openapi</module>
 				<module>hapi-fhir-converter</module>
 				<module>hapi-fhir-validation</module>
 				<!--<module>hapi-fhir-narrativegenerator</module>-->

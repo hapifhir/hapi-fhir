@@ -67,6 +67,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -157,7 +158,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private IServerAddressStrategy myServerAddressStrategy = new IncomingRequestAddressStrategy();
 	private ResourceBinding myServerBinding = new ResourceBinding();
 	private ResourceBinding myGlobalBinding = new ResourceBinding();
-	private BaseMethodBinding<?> myServerConformanceMethod;
+	private ConformanceMethodBinding myServerConformanceMethod;
 	private Object myServerConformanceProvider;
 	private String myServerName = "HAPI FHIR Server";
 	/**
@@ -458,7 +459,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			count++;
 
 			if (foundMethodBinding instanceof ConformanceMethodBinding) {
-				myServerConformanceMethod = foundMethodBinding;
+				myServerConformanceMethod = (ConformanceMethodBinding) foundMethodBinding;
+				if (myServerConformanceProvider == null) {
+					myServerConformanceProvider = theProvider;
+				}
 				continue;
 			}
 
@@ -1982,6 +1986,13 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	public void setDefaultPreferReturn(PreferReturnEnum theDefaultPreferReturn) {
 		Validate.notNull(theDefaultPreferReturn, "theDefaultPreferReturn must not be null");
 		myDefaultPreferReturn = theDefaultPreferReturn;
+	}
+
+	/**
+	 * Create a CapabilityStatement based on the given request
+	 */
+	public IBaseConformance getCapabilityStatement(ServletRequestDetails theRequestDetails) {
+		return myServerConformanceMethod.provideCapabilityStatement(this, theRequestDetails);
 	}
 
 	/**

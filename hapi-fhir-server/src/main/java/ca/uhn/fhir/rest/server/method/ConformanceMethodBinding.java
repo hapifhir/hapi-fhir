@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -228,6 +229,15 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	@Override
 	protected BundleTypeEnum getResponseBundleType() {
 		return null;
+	}
+
+	/**
+	 * Create and return the server's CapabilityStatement
+	 */
+	public IBaseConformance provideCapabilityStatement(RestfulServer theServer, RequestDetails theRequest) {
+		Object[] params = createMethodParams(theRequest);
+		IBundleProvider resultObj = invokeServer(theServer, theRequest, params);
+		return (IBaseConformance) resultObj.getResources(0,1).get(0);
 	}
 
 }

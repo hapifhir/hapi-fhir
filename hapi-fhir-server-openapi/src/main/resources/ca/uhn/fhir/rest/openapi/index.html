@@ -1,0 +1,96 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Swagger UI</title>
+    <link rel="stylesheet" type="text/css" href="./swagger-ui.css" />
+    <link rel="icon" type="image/png" href="./favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="./favicon-16x16.png" sizes="16x16" />
+    <style>
+        html
+        {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+
+        *,
+        *:before,
+        *:after
+        {
+            box-sizing: inherit;
+        }
+
+        body
+        {
+            margin:0;
+            background: #fafafa;
+        }
+
+        .scheme-container, .information-container
+        {
+            display: none
+        }
+
+        .banner {
+            padding-top: 30px;
+            padding-left: 30px;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .banner H1 {
+            font-family: sans-serif;
+            height: 150%;
+            position: relative;
+            line-height: 120%;
+            top: 6px;
+            left: 18px;
+        }
+
+        .banner .version {
+            font-size: 30%;
+            position: relative;
+            top: -11px;
+            background-color: #888;
+            color: #FFF;
+            padding: 5px;
+            border-radius: 15px;
+        }
+
+    </style>
+</head>
+
+<body>
+<div class="container">
+</div>
+<div class="banner">
+    <img src="./raccoon.png" style="height: 100px;"/>
+    <h1>${SERVER_NAME}<br/><span class="version">${SERVER_VERSION}</span></h1>
+</div>
+<div id="swagger-ui"></div>
+
+<script src="./swagger-ui-bundle.js" charset="UTF-8"> </script>
+<script src="./swagger-ui-standalone-preset.js" charset="UTF-8"> </script>
+<script>
+    window.onload = function() {
+        // Begin Swagger UI call region
+        const ui = SwaggerUIBundle({
+            url: "/fhir/api-docs",
+            dom_id: '#swagger-ui',
+            deepLinking: true,
+            presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIStandalonePreset
+            ],
+            plugins: [
+                // SwaggerUIBundle.plugins.DownloadUrl
+            ],
+            // layout: "StandaloneLayout"
+        });
+        // End Swagger UI call region
+
+        window.ui = ui;
+    };
+</script>
+</body>
+</html>

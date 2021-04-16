@@ -47,6 +47,11 @@
 			<version>${project.version}</version>
 			<classifier>classes</classifier>
 		</dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-server-openapi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
 		<dependency>
 			<groupId>com.helger</groupId>

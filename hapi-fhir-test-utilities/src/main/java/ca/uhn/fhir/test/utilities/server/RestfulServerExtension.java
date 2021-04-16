@@ -54,10 +54,11 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 	private FhirVersionEnum myFhirVersion;
 	private Server myServer;
 	private RestfulServer myServlet;
-	private int myPort;
+	private int myPort = 0;
 	private CloseableHttpClient myHttpClient;
 	private IGenericClient myFhirClient;
 	private List<Consumer<RestfulServer>> myConsumers = new ArrayList<>();
+	private String myServletPath = "/*";
 
 	/**
 	 * Constructor
@@ -94,7 +95,7 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 	}
 
 	private void startServer() throws Exception {
-		myServer = new Server(0);
+		myServer = new Server(myPort);
 
 		ServletHandler servletHandler = new ServletHandler();
 		myServlet = new RestfulServer(myFhirContext);
@@ -103,7 +104,7 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 			myServlet.registerProviders(myProviders);
 		}
 		ServletHolder servletHolder = new ServletHolder(myServlet);
-		servletHandler.addServletWithMapping(servletHolder, "/*");
+		servletHandler.addServletWithMapping(servletHolder, myServletPath);
 
 		myConsumers.forEach(t -> t.accept(myServlet));
 
@@ -174,5 +175,15 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 
 	public void shutDownServer() throws Exception {
 		JettyUtil.closeServer(myServer);
+	}
+
+	public RestfulServerExtension withServletPath(String theServletPath) {
+		myServletPath = theServletPath;
+		return this;
+	}
+
+	public RestfulServerExtension withPort(int thePort) {
+		myPort = thePort;
+		return this;
 	}
 }

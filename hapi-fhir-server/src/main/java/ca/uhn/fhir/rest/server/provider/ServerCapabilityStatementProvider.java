@@ -332,7 +332,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
                         if (methodBinding.getQueryName() != null) {
                             String queryName = bindings.getNamedSearchMethodBindingToName().get(methodBinding);
                             if (operationNames.add(queryName)) {
-                                IBase operation = terser.addElement(rest, "operation");
+                                IBase operation = terser.addElement(resource, "operation");
                                 terser.addElement(operation, "name", methodBinding.getQueryName());
                                 terser.addElement(operation, "definition", (getOperationDefinitionPrefix(theRequestDetails) + "OperationDefinition/" + queryName));
                             }
@@ -342,7 +342,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
                         String opName = bindings.getOperationBindingToName().get(methodBinding);
                         // Only add each operation (by name) once
                         if (operationNames.add(opName)) {
-                            IBase operation = terser.addElement(rest, "operation");
+                            IBase operation = terser.addElement(resource, "operation");
                             terser.addElement(operation, "name", methodBinding.getName().substring(1));
                             terser.addElement(operation, "definition", getOperationDefinitionPrefix(theRequestDetails) + "OperationDefinition/" + opName);
                         }
@@ -547,6 +547,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
     }
 
 
+    @Override
     @Read(typeName = "OperationDefinition")
     public IBaseResource readOperationDefinition(@IdParam IIdType theId, RequestDetails theRequestDetails) {
         if (theId == null || theId.hasIdPart() == false) {
@@ -698,10 +699,8 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
             }
         }
 
-        name = "Operation_" + code;
-
         terser.addElements(op, "resource", resourceNames);
-        terser.addElement(op, "name", name);
+        terser.addElement(op, "name", "Operation_" + code);
         terser.addElement(op, "code", code);
         terser.addElement(op, "description", description);
         terser.addElement(op, "affectsState", Boolean.toString(affectsState));
