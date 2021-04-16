@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -49,8 +50,11 @@ import static ca.uhn.fhir.jpa.model.util.JpaConstants.ALL_PARTITIONS_NAME;
 import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.doCallHooks;
 import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.doCallHooksAndReturnObject;
 import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.hasHooks;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
+	private static final Logger ourLog = getLogger(RequestPartitionHelperSvc.class);
+
 
 	private final HashSet<Object> myNonPartitionableResourceNames;
 
@@ -97,15 +101,18 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType) {
 		RequestPartitionId requestPartitionId;
 
+		boolean nonPartitionableResource = myNonPartitionableResourceNames.contains(theResourceType);
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			// Handle system requests
-			if ((theRequest == null && myNonPartitionableResourceNames.contains(theResourceType))) {
+			//TODO GGG eventually, theRequest will not be allowed to be null here, and we will pass through SystemRequestDetails instead.
+			if (theRequest == null && nonPartitionableResource) {
 				return RequestPartitionId.defaultPartition();
 			}
 
-
-			// Interceptor call: STORAGE_PARTITION_IDENTIFY_READ
-			if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_READ, myInterceptorBroadcaster, theRequest)) {
+			if (theRequest instanceof SystemRequestDetails) {
+				requestPartitionId = getSystemRequestPartitionId(theRequest, nonPartitionableResource);
+				// Interceptor call: STORAGE_PARTITION_IDENTIFY_READ
+			} else if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_READ, myInterceptorBroadcaster, theRequest)) {
 				HookParams params = new HookParams()
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest);
@@ -114,16 +121,32 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 				requestPartitionId = null;
 			}
 
-			if (theRequest instanceof SystemRequestDetails) {
-				requestPartitionId = getSystemRequestPartitionId(theRequest);
-			}
-
 			validateRequestPartitionNotNull(requestPartitionId, Pointcut.STORAGE_PARTITION_IDENTIFY_READ);
 
 			return validateNormalizeAndNotifyHooksForRead(requestPartitionId, theRequest);
 		}
 
 		return RequestPartitionId.allPartitions();
+	}
+
+	/**
+	 *
+	 * For system requests, read partition from tenant ID if present, otherwise set to DEFAULT. If the resource they are attempting to partition
+	 * is non-partitionable scream in the logs and set the partition to DEFAULT.
+	 *
+	 * @param theRequest
+	 * @param theNonPartitionableResource
+	 * @return
+	 */
+	@NotNull
+	private RequestPartitionId getSystemRequestPartitionId(@NotNull RequestDetails theRequest, boolean theNonPartitionableResource) {
+		RequestPartitionId requestPartitionId;
+		requestPartitionId = getSystemRequestPartitionId(theRequest);
+		if (theNonPartitionableResource && !requestPartitionId.isDefaultPartition()) {
+			ourLog.warn("System call is attempting to write a non-partitionable resource to a partition! This is a bug in your code! Setting partition to DEFAULT");
+			requestPartitionId = RequestPartitionId.defaultPartition();
+		}
+		return requestPartitionId;
 	}
 
 	/**
@@ -158,20 +181,22 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 		RequestPartitionId requestPartitionId;
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
-
-
-			// Handle system requests
 			boolean nonPartitionableResource = myNonPartitionableResourceNames.contains(theResourceType);
-			if (nonPartitionableResource) {
-				requestPartitionId = RequestPartitionId.defaultPartition();
-			} else if(theRequest instanceof SystemRequestDetails) {
-				requestPartitionId =  getSystemRequestPartitionId(theRequest);
+
+			if (theRequest instanceof SystemRequestDetails) {
+				requestPartitionId = getSystemRequestPartitionId(theRequest, nonPartitionableResource);
 			} else {
+				//This is an external Request (e.g. ServletRequestDetails) so we want to figure out the partition via interceptor.
 				HookParams params = new HookParams()// Interceptor call: STORAGE_PARTITION_IDENTIFY_CREATE
 					.add(IBaseResource.class, theResource)
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest);
 				requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE, params);
+
+				//If the interceptors haven't selected a partition, and its a non-partitionable resource anyhow, send to DEFAULT
+				if (nonPartitionableResource && requestPartitionId == null) {
+					requestPartitionId = RequestPartitionId.defaultPartition();
+				}
 			}
 
 			String resourceName = myFhirContext.getResourceType(theResource);
