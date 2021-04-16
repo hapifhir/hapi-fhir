@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -104,15 +105,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 			//Shortcircuit and write system calls out to default partition.
 			if (theRequest instanceof SystemRequestDetails) {
-				if (theRequest.getTenantId() != null) {
-					if (theRequest.getTenantId().equals(ALL_PARTITIONS_NAME)) {
-						return RequestPartitionId.allPartitions();
-					} else {
-						return RequestPartitionId.fromPartitionName(theRequest.getTenantId());
-					}
-				} else {
-					return RequestPartitionId.defaultPartition();
-				}
+				return getSystemRequestPartitionId(theRequest);
 			}
 
 			// Interceptor call: STORAGE_PARTITION_IDENTIFY_READ
@@ -134,6 +127,29 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	}
 
 	/**
+	 * Determine the partition for a System Call (defined by the fact that the request is of type SystemRequestDetails)
+	 *
+	 * 1. If the tenant ID is set to the constant for all partitions, return all partitions
+	 * 2. If there is a tenant ID set in the request, use it.
+	 * 3. Otherwise, return the Default Partition.
+	 *
+	 * @param theRequest The {@link SystemRequestDetails}
+	 * @return the {@link RequestPartitionId} to be used for this request.
+	 */
+	@NotNull
+	private RequestPartitionId getSystemRequestPartitionId(@NotNull RequestDetails theRequest) {
+		if (theRequest.getTenantId() != null) {
+			if (theRequest.getTenantId().equals(ALL_PARTITIONS_NAME)) {
+				return RequestPartitionId.allPartitions();
+			} else {
+				return RequestPartitionId.fromPartitionName(theRequest.getTenantId());
+			}
+		} else {
+			return RequestPartitionId.defaultPartition();
+		}
+	}
+
+	/**
 	 * Invoke the {@link Pointcut#STORAGE_PARTITION_IDENTIFY_CREATE} interceptor pointcut to determine the tenant for a create request.
 	 */
 	@Nonnull
@@ -145,15 +161,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 			//Shortcircuit and write system calls out to default partition.
 			if (theRequest instanceof SystemRequestDetails) {
-				if (theRequest.getTenantId() != null) {
-					if (theRequest.getTenantId().equals(ALL_PARTITIONS_NAME)) {
-						return RequestPartitionId.allPartitions();
-					} else {
-						return RequestPartitionId.fromPartitionName(theRequest.getTenantId());
-					}
-				} else {
-					return RequestPartitionId.defaultPartition();
-				}
+				return getSystemRequestPartitionId(theRequest);
 			}
 
 
