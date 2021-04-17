@@ -109,7 +109,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		retVal.setUsername(myDbUsername);
 		retVal.setPassword(myDbPassword);
 		retVal.setDefaultQueryTimeout(20);
-		retVal.setMaxConnLifetimeMillis(5 * DateUtils.MILLIS_PER_MINUTE);
+		retVal.setTestOnBorrow(true);
 
 		DataSource dataSource = ProxyDataSourceBuilder
 			.create(retVal)

@@ -103,9 +103,7 @@ public class OpenApiInterceptor {
 		}
 
 		if (requestPath.startsWith("/swagger-ui/")) {
-			if (handleResourceRequest(theResponse, theRequestDetails, requestPath)) {
-				return false;
-			}
+			return !handleResourceRequest(theResponse, theRequestDetails, requestPath);
 
 		} else if (requestPath.equals("/api-docs")) {
 
@@ -508,18 +506,24 @@ public class OpenApiInterceptor {
 						param.setValue((Type) type);
 						break;
 					}
+					case "boolean": {
+						IPrimitiveType<?> type = (IPrimitiveType<?>) FHIR_CONTEXT_CANONICAL.getElementDefinition(paramType).newInstance();
+						type.setValueAsString("false");
+						param.setValue((Type) type);
+						break;
+					}
 					case "CodeableConcept": {
 						CodeableConcept type = new CodeableConcept();
 						type.getCodingFirstRep().setSystem("http://example.com");
 						type.getCodingFirstRep().setCode("1234");
-						param.setValue((Type) type);
+						param.setValue(type);
 						break;
 					}
 					case "Coding": {
 						Coding type = new Coding();
 						type.setSystem("http://example.com");
 						type.setCode("1234");
-						param.setValue((Type) type);
+						param.setValue(type);
 						break;
 					}
 					case "Reference":
