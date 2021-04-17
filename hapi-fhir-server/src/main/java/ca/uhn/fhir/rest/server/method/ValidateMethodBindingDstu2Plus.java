@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -39,7 +40,7 @@ public class ValidateMethodBindingDstu2Plus extends OperationMethodBinding {
 			Validate theAnnotation) {
 		super(theReturnResourceType, theReturnTypeFromRp, theMethod, theContext, theProvider, true, Constants.EXTOP_VALIDATE, theAnnotation.type(), null, new OperationParam[0], BundleTypeEnum.COLLECTION);
 
-		List<IParameter> newParams = new ArrayList<IParameter>();
+		List<IParameter> newParams = new ArrayList<>();
 		int idx = 0;
 		for (IParameter next : getParameters()) {
 			if (next instanceof ResourceParameter) {
@@ -48,7 +49,8 @@ public class ValidateMethodBindingDstu2Plus extends OperationMethodBinding {
 					if (String.class.equals(parameterType) || EncodingEnum.class.equals(parameterType)) {
 						newParams.add(next);
 					} else {
-						OperationParameter parameter = new OperationParameter(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_RESOURCE, 0, 1);
+						String description = ParametersUtil.extractDescription(theMethod.getParameterAnnotations()[idx]);
+						OperationParameter parameter = new OperationParameter(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_RESOURCE, 0, 1, description);
 						parameter.initializeTypes(theMethod, null, null, parameterType);
 						newParams.add(parameter);
 					}

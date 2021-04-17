@@ -32,10 +32,12 @@
         }
 
         .banner {
-            padding-top: 30px;
-            padding-left: 30px;
+            padding-top: 20px;
+            padding-left: 25px;
             display: flex;
             flex-direction: row;
+            background-color: #CCC;
+            border-bottom: 2px solid #888;
         }
 
         .banner H1 {
@@ -57,6 +59,40 @@
             border-radius: 15px;
         }
 
+        .banner2 {
+            font-family: sans-serif;
+            padding-top: 30px;
+            padding-left: 30px;
+            padding-right: 30px;
+            padding-bottom: 20px;
+            display: table;
+            flex-direction: row;
+            background-color: #DDD;
+            border-bottom: 2px solid #888;
+            width: 100%;
+
+        }
+
+        .banner2 > DIV {
+            display: table-row;
+        }
+
+        .banner2 > DIV > DIV {
+            display: table-cell;
+            padding-bottom: 10px;
+        }
+
+        .banner2_key {
+            min-width: 100px;
+            white-space: nowrap;
+            font-weight: bold;
+        }
+
+        .banner2_value {
+            padding-left: 20px;
+            width: 100%;
+        }
+
     </style>
 </head>
 
@@ -66,6 +102,17 @@
 <div class="banner">
     <img src="./raccoon.png" style="height: 100px;"/>
     <h1>${SERVER_NAME}<br/><span class="version">${SERVER_VERSION}</span></h1>
+</div>
+<div class="banner2">
+    <div>
+        <div class="banner2_key">FHIR Server Base URL</div><div class="banner2_value"><a href="${BASE_URL}">${BASE_URL}</a></div>
+    </div>
+    <div>
+        <div class="banner2_key">OpenAPI Docs</div><div class="banner2_value"><a href="${OPENAPI_DOCS}">${OPENAPI_DOCS}</a></div>
+    </div>
+    <div>
+        <div class="banner2_key">FHIR Version</div><div class="banner2_value">${FHIR_VERSION} (${FHIR_VERSION_CODENAME})</div>
+    </div>
 </div>
 <div id="swagger-ui"></div>
 

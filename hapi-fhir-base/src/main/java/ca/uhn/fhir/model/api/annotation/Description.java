@@ -34,13 +34,20 @@ import java.lang.annotation.Target;
 public @interface Description {
 
 	/**
+	 * A description of this method or parameter
+	 */
+	String value() default "";
+
+	/**
 	 * Optional short name for this child 
 	 */
 	String shortDefinition() default "";
 	
 	/**
 	 * Optional formal definition for this child
+	 * @deprecated Use {@link #value()} instead
 	 */
+	@Deprecated
 	String formalDefinition() default "";
 	
 }

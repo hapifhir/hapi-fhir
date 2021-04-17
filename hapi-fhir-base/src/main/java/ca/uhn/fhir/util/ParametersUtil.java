@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.StringDt;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -34,6 +35,10 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nullable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,6 +48,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Utilities for dealing with parameters resources in a version indepenedent way
@@ -418,4 +424,44 @@ public class ParametersUtil {
 			.findFirst();
 	}
 
+	@Nullable
+	public static String extractDescription(AnnotatedElement theType) {
+		Description description = theType.getAnnotation(Description.class);
+		if (description != null) {
+			return extractDescription(description);
+		} else {
+			return null;
+		}
+	}
+
+	@Nullable
+	public static String extractDescription(Description desc) {
+		String description = desc.value();
+		if (isBlank(description)) {
+			description = desc.formalDefinition();
+		}
+		if (isBlank(description)) {
+			description = desc.shortDefinition();
+		}
+		return defaultIfBlank(description, null);
+	}
+
+	@Nullable
+	public static String extractShortDefinition(AnnotatedElement theType) {
+		Description description = theType.getAnnotation(Description.class);
+		if (description != null) {
+			return defaultIfBlank(description.shortDefinition(), null);
+		} else {
+			return null;
+		}
+	}
+
+	public static String extractDescription(Annotation[] theAnnotations) {
+		for (Annotation next : theAnnotations) {
+			if (next instanceof Description) {
+				return extractDescription((Description)next);
+			}
+		}
+		return null;
+	}
 }

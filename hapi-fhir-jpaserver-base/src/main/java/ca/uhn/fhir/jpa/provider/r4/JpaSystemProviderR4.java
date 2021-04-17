@@ -196,28 +196,6 @@ public class JpaSystemProviderR4 extends BaseJpaSystemProviderDstu2Plus<Bundle, 
 		return parameters;
 	}
 
-	/**
-	 * /$process-message
-	 */
-	@Operation(name = JpaConstants.OPERATION_PROCESS_MESSAGE, idempotent = false)
-	public IBaseBundle processMessage(
-		HttpServletRequest theServletRequest,
-		RequestDetails theRequestDetails,
-
-		@OperationParam(name = "content", min = 1, max = 1)
-		@Description(formalDefinition = "The message to process (or, if using asynchronous messaging, it may be a response message to accept)")
-			Bundle theMessageToProcess
-	) {
-
-		startRequest(theServletRequest);
-		try {
-			return getDao().processMessage(theRequestDetails, theMessageToProcess);
-		} finally {
-			endRequest(theServletRequest);
-		}
-
-	}
-
 	@Transaction
 	public Bundle transaction(RequestDetails theRequestDetails, @TransactionParam Bundle theResources) {
 		startRequest(((ServletRequestDetails) theRequestDetails).getServletRequest());

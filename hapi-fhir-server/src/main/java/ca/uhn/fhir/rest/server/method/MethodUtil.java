@@ -52,15 +52,19 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class MethodUtil {
 
+	/**
+	 * Non instantiable
+	 */
+	private MethodUtil() {
+		// nothing
+	}
+
 	public static void extractDescription(SearchParameter theParameter, Annotation[] theAnnotations) {
 		for (Annotation annotation : theAnnotations) {
 			if (annotation instanceof Description) {
 				Description desc = (Description) annotation;
-				if (isNotBlank(desc.formalDefinition())) {
-					theParameter.setDescription(desc.formalDefinition());
-				} else {
-					theParameter.setDescription(desc.shortDefinition());
-				}
+				String description = ParametersUtil.extractDescription(desc);
+				theParameter.setDescription(description);
 			}
 		}
 	}
@@ -72,7 +76,7 @@ public class MethodUtil {
 
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
 		int paramIndex = 0;
-		for (Annotation[] annotations : theMethod.getParameterAnnotations()) {
+		for (Annotation[] nextParameterAnnotations : theMethod.getParameterAnnotations()) {
 
 			IParameter param = null;
 			Class<?> declaredParameterType = parameterTypes[paramIndex];
@@ -136,8 +140,8 @@ public class MethodUtil {
 			} else if (parameterType.equals(SearchTotalModeEnum.class)) {
 				param = new SearchTotalModeParameter();
 			} else {
-				for (int i = 0; i < annotations.length && param == null; i++) {
-					Annotation nextAnnotation = annotations[i];
+				for (int i = 0; i < nextParameterAnnotations.length && param == null; i++) {
+					Annotation nextAnnotation = nextParameterAnnotations[i];
 
 					if (nextAnnotation instanceof RequiredParam) {
 						SearchParameter parameter = new SearchParameter();
@@ -147,7 +151,7 @@ public class MethodUtil {
 						parameter.setCompositeTypes(((RequiredParam) nextAnnotation).compositeTypes());
 						parameter.setChainLists(((RequiredParam) nextAnnotation).chainWhitelist(), ((RequiredParam) nextAnnotation).chainBlacklist());
 						parameter.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
-						MethodUtil.extractDescription(parameter, annotations);
+						MethodUtil.extractDescription(parameter, nextParameterAnnotations);
 						param = parameter;
 					} else if (nextAnnotation instanceof OptionalParam) {
 						SearchParameter parameter = new SearchParameter();
@@ -157,7 +161,7 @@ public class MethodUtil {
 						parameter.setCompositeTypes(((OptionalParam) nextAnnotation).compositeTypes());
 						parameter.setChainLists(((OptionalParam) nextAnnotation).chainWhitelist(), ((OptionalParam) nextAnnotation).chainBlacklist());
 						parameter.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
-						MethodUtil.extractDescription(parameter, annotations);
+						MethodUtil.extractDescription(parameter, nextParameterAnnotations);
 						param = parameter;
 					} else if (nextAnnotation instanceof RawParam) {
 						param = new RawParamsParameter(parameters);
@@ -235,7 +239,8 @@ public class MethodUtil {
 						}
 
 						OperationParam operationParam = (OperationParam) nextAnnotation;
-						param = new OperationParameter(theContext, op.name(), operationParam);
+						String description = ParametersUtil.extractDescription(nextParameterAnnotations);
+						param = new OperationParameter(theContext, op.name(), operationParam.name(), operationParam.min(), operationParam.max(), description);
 						if (isNotBlank(operationParam.typeName())) {
 							BaseRuntimeElementDefinition<?> elementDefinition = theContext.getElementDefinition(operationParam.typeName());
 							if (elementDefinition == null) {
@@ -254,7 +259,8 @@ public class MethodUtil {
 							throw new ConfigurationException(
 								"Parameter annotated with @" + Validate.class.getSimpleName() + "." + Validate.Mode.class.getSimpleName() + " must be of type " + ValidationModeEnum.class.getName());
 						}
-						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_MODE, 0, 1).setConverter(new IOperationParamConverter() {
+						String description = ParametersUtil.extractDescription(nextParameterAnnotations);
+						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_MODE, 0, 1, description).setConverter(new IOperationParamConverter() {
 							@Override
 							public Object incomingServer(Object theObject) {
 								if (isNotBlank(theObject.toString())) {
@@ -277,7 +283,8 @@ public class MethodUtil {
 							throw new ConfigurationException(
 								"Parameter annotated with @" + Validate.class.getSimpleName() + "." + Validate.Profile.class.getSimpleName() + " must be of type " + String.class.getName());
 						}
-						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_PROFILE, 0, 1).setConverter(new IOperationParamConverter() {
+						String description = ParametersUtil.extractDescription(nextParameterAnnotations);
+						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_PROFILE, 0, 1, description).setConverter(new IOperationParamConverter() {
 							@Override
 							public Object incomingServer(Object theObject) {
 								return theObject.toString();
@@ -299,7 +306,7 @@ public class MethodUtil {
 			if (param == null) {
 				throw new ConfigurationException(
 					"Parameter #" + ((paramIndex + 1)) + "/" + (parameterTypes.length) + " of method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName()
-						+ "' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter");
+						+ "' has no recognized FHIR interface parameter nextParameterAnnotations. Don't know how to handle this parameter");
 			}
 
 			param.initializeTypes(theMethod, outerCollectionType, innerCollectionType, parameterType);

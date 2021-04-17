@@ -233,32 +233,4 @@ public class JpaSystemProviderDstu3 extends BaseJpaSystemProviderDstu2Plus<Bundl
 		}
 	}
 
-	/**
-	 * /$process-message
-	 */
-	@Operation(name = JpaConstants.OPERATION_PROCESS_MESSAGE, idempotent = false)
-	public IBaseBundle processMessage(
-		HttpServletRequest theServletRequest,
-		RequestDetails theRequestDetails,
-
-		@OperationParam(name = "content", min = 1, max = 1)
-		@Description(formalDefinition = "The message to process (or, if using asynchronous messaging, it may be a response message to accept)")
-			Bundle theMessageToProcess
-	) {
-
-		startRequest(theServletRequest);
-		try {
-			return getDao().processMessage(theRequestDetails, theMessageToProcess);
-		} finally {
-			endRequest(theServletRequest);
-		}
-
-	}
-
-	public static void validateFulltextSearchEnabled(IFulltextSearchSvc theSearchDao) {
-		if (theSearchDao == null || theSearchDao.isDisabled()) {
-			throw new InvalidRequestException("Fulltext searching is disabled on this server");
-		}
-	}
-
 }

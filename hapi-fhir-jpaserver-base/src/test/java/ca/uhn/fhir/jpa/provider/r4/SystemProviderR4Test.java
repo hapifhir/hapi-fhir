@@ -36,6 +36,7 @@ import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -247,7 +248,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testMarkResourcesForReindexing() throws Exception {
-		HttpGet get = new HttpGet(ourServerBase + "/$mark-all-resources-for-reindexing");
+		HttpRequestBase get = new HttpGet(ourServerBase + "/$mark-all-resources-for-reindexing");
 		CloseableHttpResponse http = ourHttpClient.execute(get);
 		try {
 			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -257,7 +258,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			IOUtils.closeQuietly(http);
 		}
 
-		get = new HttpGet(ourServerBase + "/$perform-reindexing-pass");
+		get = new HttpPost(ourServerBase + "/$perform-reindexing-pass");
 		http = ourHttpClient.execute(get);
 		try {
 			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);

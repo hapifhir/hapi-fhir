@@ -222,28 +222,6 @@ public class JpaSystemProviderDstu2 extends BaseJpaSystemProviderDstu2Plus<Bundl
 		}
 	}
 
-	/**
-	 * /$process-message
-	 */
-	@Operation(name = JpaConstants.OPERATION_PROCESS_MESSAGE, idempotent = false)
-	public IBaseBundle processMessage(
-		HttpServletRequest theServletRequest,
-		RequestDetails theRequestDetails,
-
-		@OperationParam(name = "content", min = 1, max = 1)
-		@Description(formalDefinition = "The message to process (or, if using asynchronous messaging, it may be a response message to accept)")
-			Bundle theMessageToProcess
-	) {
-
-		startRequest(theServletRequest);
-		try {
-			return getDao().processMessage(theRequestDetails, theMessageToProcess);
-		} finally {
-			endRequest(theServletRequest);
-		}
-
-	}
-
 	public static Parameters toExpungeResponse(org.hl7.fhir.r4.model.Parameters theRetVal) {
 		Integer count = ((IntegerType) theRetVal.getParameterFirstRep().getValue()).getValue();
 		return new Parameters()

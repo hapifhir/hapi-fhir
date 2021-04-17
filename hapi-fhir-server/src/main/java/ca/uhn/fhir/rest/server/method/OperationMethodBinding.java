@@ -22,7 +22,6 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -39,6 +38,7 @@ import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -64,6 +64,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private final String myName;
 	private final RestOperationTypeEnum myOtherOperationType;
 	private final ReturnTypeEnum myReturnType;
+	private final String myShortDescription;
 	private boolean myGlobal;
 	private BundleTypeEnum myBundleType;
 	private boolean myCanOperateAtInstanceLevel;
@@ -81,17 +82,8 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 		myBundleType = theBundleType;
 		myIdempotent = theIdempotent;
-
-		Description description = theMethod.getAnnotation(Description.class);
-		if (description != null) {
-			myDescription = description.formalDefinition();
-			if (isBlank(myDescription)) {
-				myDescription = description.shortDefinition();
-			}
-		}
-		if (isBlank(myDescription)) {
-			myDescription = null;
-		}
+		myDescription = ParametersUtil.extractDescription(theMethod);
+		myShortDescription = ParametersUtil.extractShortDefinition(theMethod);
 
 		for (Annotation[] nextParamAnnotations : theMethod.getParameterAnnotations()) {
 			for (Annotation nextParam : nextParamAnnotations) {
@@ -183,6 +175,10 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		myManualRequestMode = theAnnotation.manualRequest();
 		myManualResponseMode = theAnnotation.manualResponse();
 		myGlobal = theAnnotation.global();
+	}
+
+	public String getShortDescription() {
+		return myShortDescription;
 	}
 
 	@Override
