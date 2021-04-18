@@ -53,13 +53,14 @@ body
 
 .bannerCopyright {
     font-family: sans-serif;
-    padding-top: 30px;
+    padding-top: 20px;
     padding-left: 30px;
     padding-right: 30px;
-    padding-bottom: 30px;
+    padding-bottom: 20px;
     background-color: #CCC;
     border-bottom: 2px solid #888;
     width: 100%;
+    font-size: 0.9em;
 }
 
 .banner2 {

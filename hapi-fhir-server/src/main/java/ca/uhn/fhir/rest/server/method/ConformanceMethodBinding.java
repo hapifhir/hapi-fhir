@@ -195,6 +195,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 			myCachedResponse.set(conf);
 			myCachedResponseExpires.set(System.currentTimeMillis() + getCacheMillis());
 		}
+		
 		return conf;
 	}
 
