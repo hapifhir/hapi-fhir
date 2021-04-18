@@ -204,6 +204,9 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		terser.addElement(retVal, "implementation.url", serverBase);
 		terser.addElement(retVal, "implementation.description", configuration.getImplementationDescription());
 		terser.addElement(retVal, "kind", "instance");
+		if (myServer != null && isNotBlank(myServer.getCopyright())) {
+			terser.addElement(retVal, "copyright", myServer.getCopyright());
+		}
 		terser.addElement(retVal, "software.name", configuration.getServerName());
 		terser.addElement(retVal, "software.version", configuration.getServerVersion());
 		if (myContext.isFormatXmlSupported()) {

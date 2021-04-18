@@ -3,9 +3,10 @@
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<parent>
-		<artifactId>hapi-fhir</artifactId>
+		<artifactId>hapi-deployable-pom</artifactId>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<version>5.4.0-PRE6-SNAPSHOT</version>
+        <relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
@@ -48,6 +49,10 @@
         <dependency>
             <groupId>org.thymeleaf</groupId>
             <artifactId>thymeleaf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vladsch.flexmark</groupId>
+            <artifactId>flexmark</artifactId>
         </dependency>
 
         <!-- Unit Test Deps-->

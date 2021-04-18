@@ -39,6 +39,7 @@ import ca.uhn.fhirtest.config.TestR4Config;
 import ca.uhn.fhirtest.config.TestR5Config;
 import ca.uhn.hapi.converters.server.VersionedApiConverterInterceptor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -82,9 +83,10 @@ public class TestRestfulServer extends RestfulServer {
 		// These two parmeters are also declared in web.xml
 		String implDesc = getInitParameter("ImplementationDescription");
 		String fhirVersionParam = getInitParameter("FhirVersion");
-		if (StringUtils.isBlank(fhirVersionParam)) {
-			fhirVersionParam = "DSTU1";
-		}
+		Validate.notNull(fhirVersionParam);
+
+		setImplementationDescription("HAPI FHIR Test/Demo Server " + fhirVersionParam + " Endpoint");
+		setCopyright("This server is **Open Source Software**, licensed under the terms of the [Apache Software License 2.0](https://www.apache.org/licenses/LICENSE-2.0).");
 
 		// Depending on the version this server is supporing, we will
 		// retrieve all the appropriate resource providers and the

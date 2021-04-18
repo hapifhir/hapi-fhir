@@ -149,6 +149,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private FhirContext myFhirContext;
 	private boolean myIgnoreServerParsedRequestParameters = true;
 	private String myImplementationDescription;
+	private String myCopyright;
 	private IPagingProvider myPagingProvider;
 	private Integer myDefaultPageSize;
 	private Integer myMaximumPageSize;
@@ -637,6 +638,20 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 	public void setImplementationDescription(String theImplementationDescription) {
 		myImplementationDescription = theImplementationDescription;
+	}
+
+	/**
+	 * Returns the server copyright (will be added to the CapabilityStatement). Note that FHIR allows Markdown in this string.
+	 */
+	public String getCopyright() {
+		return myCopyright;
+	}
+
+	/**
+	 * Sets the server copyright (will be added to the CapabilityStatement). Note that FHIR allows Markdown in this string.
+	 */
+	public void setCopyright(String theCopyright) {
+		myCopyright = theCopyright;
 	}
 
 	/**

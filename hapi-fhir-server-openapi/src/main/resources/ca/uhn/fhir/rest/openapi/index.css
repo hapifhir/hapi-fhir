@@ -51,6 +51,17 @@ body
     border-radius: 15px;
 }
 
+.bannerCopyright {
+    font-family: sans-serif;
+    padding-top: 30px;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-bottom: 30px;
+    background-color: #CCC;
+    border-bottom: 2px solid #888;
+    width: 100%;
+}
+
 .banner2 {
     font-family: sans-serif;
     padding-top: 30px;

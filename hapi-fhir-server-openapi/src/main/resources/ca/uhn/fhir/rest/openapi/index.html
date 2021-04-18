@@ -13,7 +13,9 @@
 </div>
 <div class="banner">
     <img src="./raccoon.png" style="height: 100px;"/>
-    <h1>[[${SERVER_NAME}]]<br/><span class="version" th:text="${SERVER_VERSION}"></span></h1>
+    <h1>[[${DESCRIPTION}]]<br/><span class="version" th:text="${SERVER_NAME} + ' ' + ${SERVER_VERSION}"></span></h1>
+</div>
+<div class="bannerCopyright" th:if="${COPYRIGHT_HTML} != null" th:utext="${COPYRIGHT_HTML}">
 </div>
 <div class="banner2">
     <div>

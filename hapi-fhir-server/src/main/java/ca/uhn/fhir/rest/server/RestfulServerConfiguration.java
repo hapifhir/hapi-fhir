@@ -62,11 +62,11 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	private Collection<ResourceBinding> resourceBindings;
 	private List<BaseMethodBinding<?>> serverBindings;
 	private Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype;
-	private String implementationDescription;
-	private String serverVersion = VersionUtil.getVersion();
-	private String serverName = "HAPI FHIR";
-	private FhirContext fhirContext;
-	private IServerAddressStrategy serverAddressStrategy;
+	private String myImplementationDescription;
+	private String myServerName = "HAPI FHIR";
+	private String myServerVersion = VersionUtil.getVersion();
+	private FhirContext myFhirContext;
+	private IServerAddressStrategy myServerAddressStrategy;
 	private IPrimitiveType<Date> myConformanceDate;
 
 	/**
@@ -127,10 +127,10 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	 * @return the implementationDescription
 	 */
 	public String getImplementationDescription() {
-		if (isBlank(implementationDescription)) {
+		if (isBlank(myImplementationDescription)) {
 			return "HAPI FHIR";
 		}
-		return implementationDescription;
+		return myImplementationDescription;
 	}
 
 	/**
@@ -139,7 +139,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	 * @param implementationDescription the implementationDescription to set
 	 */
 	public RestfulServerConfiguration setImplementationDescription(String implementationDescription) {
-		this.implementationDescription = implementationDescription;
+		this.myImplementationDescription = implementationDescription;
 		return this;
 	}
 
@@ -149,7 +149,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	 * @return the serverVersion
 	 */
 	public String getServerVersion() {
-		return serverVersion;
+		return myServerVersion;
 	}
 
 	/**
@@ -158,7 +158,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	 * @param serverVersion the serverVersion to set
 	 */
 	public RestfulServerConfiguration setServerVersion(String serverVersion) {
-		this.serverVersion = serverVersion;
+		this.myServerVersion = serverVersion;
 		return this;
 	}
 
@@ -168,7 +168,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	 * @return the serverName
 	 */
 	public String getServerName() {
-		return serverName;
+		return myServerName;
 	}
 
 	/**
@@ -177,7 +177,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	 * @param serverName the serverName to set
 	 */
 	public RestfulServerConfiguration setServerName(String serverName) {
-		this.serverName = serverName;
+		this.myServerName = serverName;
 		return this;
 	}
 
@@ -186,7 +186,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	 * creating their own.
 	 */
 	public FhirContext getFhirContext() {
-		return this.fhirContext;
+		return this.myFhirContext;
 	}
 
 	/**
@@ -195,7 +195,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	 * @param fhirContext the fhirContext to set
 	 */
 	public RestfulServerConfiguration setFhirContext(FhirContext fhirContext) {
-		this.fhirContext = fhirContext;
+		this.myFhirContext = fhirContext;
 		return this;
 	}
 
@@ -205,7 +205,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	 * @return the serverAddressStrategy
 	 */
 	public IServerAddressStrategy getServerAddressStrategy() {
-		return serverAddressStrategy;
+		return myServerAddressStrategy;
 	}
 
 	/**
@@ -214,7 +214,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	 * @param serverAddressStrategy the serverAddressStrategy to set
 	 */
 	public void setServerAddressStrategy(IServerAddressStrategy serverAddressStrategy) {
-		this.serverAddressStrategy = serverAddressStrategy;
+		this.myServerAddressStrategy = serverAddressStrategy;
 	}
 
 	/**

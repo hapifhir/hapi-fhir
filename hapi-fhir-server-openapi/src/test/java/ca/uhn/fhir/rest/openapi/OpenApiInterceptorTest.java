@@ -19,7 +19,6 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.HtmlUtil;
-import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.ExtensionConstants;
 import com.gargoylesoftware.htmlunit.html.DomElement;
@@ -67,7 +66,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.contains;
 
 public class OpenApiInterceptorTest {
 
@@ -166,6 +164,16 @@ public class OpenApiInterceptorTest {
 	}
 
 	@Test
+	public void testSwaggerUiWithCopyright() throws IOException {
+		myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
+		myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
+
+		String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
+		String resp = fetchSwaggerUi(url);
+		assertThat(resp, resp, containsString("<p>This server is copyright <strong>Example Org</strong> 2021</p>"));
+	}
+
+	@Test
 	public void testSwaggerUiWithResourceCounts_OneResourceOnly() throws IOException {
 		myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor("OperationDefinition"));
 		myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
@@ -209,6 +217,7 @@ public class OpenApiInterceptorTest {
 		@Hook(Pointcut.SERVER_CAPABILITY_STATEMENT_GENERATED)
 		public void capabilityStatementGenerated(IBaseConformance theCapabilityStatement) {
 			CapabilityStatement cs = (CapabilityStatement) theCapabilityStatement;
+			cs.setCopyright("This server is copyright **Example Org** 2021");
 
 			int numResources = cs.getRestFirstRep().getResource().size();
 			for (int i = 0; i < numResources; i++) {

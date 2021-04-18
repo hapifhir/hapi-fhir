@@ -14,6 +14,9 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.ExtensionConstants;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.collect.Lists;
+import com.vladsch.flexmark.html.HtmlRenderer;
+import com.vladsch.flexmark.parser.Parser;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -84,6 +87,7 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class OpenApiInterceptor {
 	public static final String FHIR_JSON_RESOURCE = "FHIR-JSON-RESOURCE";
@@ -94,6 +98,8 @@ public class OpenApiInterceptor {
 	public static final String REQUEST_DETAILS = "REQUEST_DETAILS";
 	private final String mySwaggerUiVersion;
 	private final TemplateEngine myTemplateEngine;
+	private final Parser myFlexmarkParser;
+	private final HtmlRenderer myFlexmarkRenderer;
 	private Map<String, String> myResourcePathToClasspath = new HashMap<>();
 	private Map<String, String> myExtensionToContentType = new HashMap<>();
 
@@ -110,6 +116,9 @@ public class OpenApiInterceptor {
 		myTemplateEngine.setDialect(dialect);
 
 		myTemplateEngine.setLinkBuilder(new TemplateLinkBuilder());
+
+		myFlexmarkParser = Parser.builder().build();
+		myFlexmarkRenderer = HtmlRenderer.builder().build();
 
 		initResources();
 	}
@@ -226,12 +235,19 @@ public class OpenApiInterceptor {
 		ServletContext servletContext = servletRequest.getServletContext();
 		WebContext context = new WebContext(servletRequest, theResponse, servletContext);
 		context.setVariable(REQUEST_DETAILS, theRequestDetails);
+		context.setVariable("DESCRIPTION", cs.getImplementation().getDescription());
 		context.setVariable("SERVER_NAME", cs.getSoftware().getName());
 		context.setVariable("SERVER_VERSION", cs.getSoftware().getVersion());
 		context.setVariable("BASE_URL", cs.getImplementation().getUrl());
 		context.setVariable("OPENAPI_DOCS", cs.getImplementation().getUrl() + "/api-docs");
 		context.setVariable("FHIR_VERSION", cs.getFhirVersion().toCode());
 		context.setVariable("FHIR_VERSION_CODENAME", FhirVersionEnum.forVersionString(cs.getFhirVersion().toCode()).name());
+
+		String copyright = cs.getCopyright();
+		if (isNotBlank(copyright)) {
+			copyright = myFlexmarkRenderer.render(myFlexmarkParser.parse(copyright));
+			context.setVariable("COPYRIGHT_HTML", copyright);
+		}
 
 		List<String> pageNames = new ArrayList<>();
 		Map<String, Integer> resourceToCount = new HashMap<>();

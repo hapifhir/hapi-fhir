@@ -786,6 +786,7 @@
 		<jetty_version>9.4.39.v20210325</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.7.0</junit_version>
+        <flexmark_version>0.50.40</flexmark_version>
 		<flyway_version>6.5.4</flyway_version>
 		<hibernate_version>5.4.30.Final</hibernate_version>
 		<hibernate_search_version>6.0.2.Final</hibernate_search_version>
@@ -962,6 +963,21 @@
 				<artifactId>javax.mail</artifactId>
 				<version>1.6.1</version>
 			</dependency>
+            <dependency>
+                <groupId>com.vladsch.flexmark</groupId>
+                <artifactId>flexmark</artifactId>
+                <version>${flexmark_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vladsch.flexmark</groupId>
+                <artifactId>flexmark-ext-tables</artifactId>
+                <version>${flexmark_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vladsch.flexmark</groupId>
+                <artifactId>flexmark-profile-pegdown</artifactId>
+                <version>${flexmark_version}</version>
+            </dependency>
 			<dependency>
 				<groupId>commons-cli</groupId>
 				<artifactId>commons-cli</artifactId>
@@ -2208,6 +2224,9 @@
 								<copy todir="target/site/apidocs-server-mdm">
 									<fileset dir="hapi-fhir-server-mdm/target/site/apidocs"/>
 								</copy>
+                                <copy todir="target/site/apidocs-server-openapi">
+                                    <fileset dir="hapi-fhir-server-mdm/target/site/openapi"/>
+                                </copy>
 								<copy todir="target/site/xref-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/xref"/>
 								</copy>
