@@ -70,14 +70,22 @@ public class OperationParameter implements IParameter {
 	private String myParamType;
 	private SearchParameter mySearchParameterBinding;
 	private String myDescription;
+	private List<String> myExampleValues;
 
-	OperationParameter(FhirContext theCtx, String theOperationName, String theParameterName, int theMin, int theMax, String theDescription) {
+	OperationParameter(FhirContext theCtx, String theOperationName, String theParameterName, int theMin, int theMax, String theDescription, List<String> theExampleValues) {
 		myOperationName = theOperationName;
 		myName = theParameterName;
 		myMin = theMin;
 		myMax = theMax;
 		myContext = theCtx;
 		myDescription = theDescription;
+
+		List<String> exampleValues = new ArrayList<>();
+		if (theExampleValues != null) {
+			exampleValues.addAll(theExampleValues);
+		}
+		myExampleValues = Collections.unmodifiableList(exampleValues);
+
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
@@ -439,6 +447,10 @@ public class OperationParameter implements IParameter {
 
 	public String getDescription() {
 		return myDescription;
+	}
+
+	public List<String> getExampleValues() {
+		return myExampleValues;
 	}
 
 	interface IOperationParamConverter {

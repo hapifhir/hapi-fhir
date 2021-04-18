@@ -236,6 +236,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		RestfulServerConfiguration result = new RestfulServerConfiguration();
 		result.setResourceBindings(getResourceBindings());
 		result.setServerBindings(getServerBindings());
+		result.setGlobalBindings(getGlobalBindings());
 		result.setImplementationDescription(getImplementationDescription());
 		result.setServerVersion(getServerVersion());
 		result.setServerName(getServerName());
@@ -252,6 +253,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		}
 		result.computeSharedSupertypeForResourcePerName(getResourceProviders());
 		return result;
+	}
+
+	private List<BaseMethodBinding<?>> getGlobalBindings() {
+		return myGlobalBinding.getMethodBindings();
 	}
 
 	protected List<String> createPoweredByAttributes() {

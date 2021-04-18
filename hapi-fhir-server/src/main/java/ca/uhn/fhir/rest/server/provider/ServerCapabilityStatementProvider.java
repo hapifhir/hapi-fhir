@@ -27,7 +27,9 @@ import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.TreeMultimap;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -231,6 +233,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = configuration.collectMethodBindings();
 		Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype = configuration.getNameToSharedSupertype();
+		List<BaseMethodBinding<?>> globalMethodBindings = configuration.getGlobalBindings();
 
 		TreeMultimap<String, String> resourceNameToIncludes = TreeMultimap.create();
 		TreeMultimap<String, String> resourceNameToRevIncludes = TreeMultimap.create();
@@ -352,6 +355,23 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 				}
 
+				// Find any global operations (Operations defines at the system level but with the
+				// global flag set to tree, meaning they apply to all resource types)
+				if (globalMethodBindings != null) {
+					for (BaseMethodBinding<?> next : globalMethodBindings) {
+						if (next instanceof OperationMethodBinding) {
+							OperationMethodBinding methodBinding = (OperationMethodBinding) next;
+							if (methodBinding.isGlobalMethod()) {
+								String opName = bindings.getOperationBindingToName().get(methodBinding);
+								// Only add each operation (by name) once
+								if (operationNames.add(opName)) {
+									IBase operation = terser.addElement(resource, "operation");
+									populateOperation(theRequestDetails, terser, methodBinding, opName, operation);
+								}
+							}
+						}
+					}
+				}
 
 				ISearchParamRegistry serverConfiguration;
 				if (myServerConfiguration != null) {
@@ -691,6 +711,11 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 					terser.addElement(param, "max", (nextParam.getMax() == -1 ? "*" : Integer.toString(nextParam.getMax())));
 					terser.addElement(param, "name", nextParam.getName());
 					terser.addElement(param, "documentation", nextParam.getDescription());
+
+					for (String nextExample : nextParam.getExampleValues()) {
+						ExtensionUtil.addExtension(myContext, param, HapiExtensions.EXT_OP_PARAMETER_EXAMPLE_VALUE, "string", nextExample);
+					}
+
 				}
 			}
 

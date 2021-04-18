@@ -105,7 +105,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		try {
 			if (theReturnTypeFromRp != null) {
 				setResourceName(theContext.getResourceType(theReturnTypeFromRp));
-			} else if (Modifier.isAbstract(theOperationType.getModifiers()) == false) {
+			} else if (theOperationType != null && Modifier.isAbstract(theOperationType.getModifiers()) == false) {
 				setResourceName(theContext.getResourceType(theOperationType));
 			} else if (isNotBlank(theOperationTypeName)) {
 				setResourceName(theContext.getResourceType(theOperationTypeName));

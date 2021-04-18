@@ -240,7 +240,8 @@ public class MethodUtil {
 
 						OperationParam operationParam = (OperationParam) nextAnnotation;
 						String description = ParametersUtil.extractDescription(nextParameterAnnotations);
-						param = new OperationParameter(theContext, op.name(), operationParam.name(), operationParam.min(), operationParam.max(), description);
+						List<String> examples = ParametersUtil.extractExamples(nextParameterAnnotations);;
+						param = new OperationParameter(theContext, op.name(), operationParam.name(), operationParam.min(), operationParam.max(), description, examples);
 						if (isNotBlank(operationParam.typeName())) {
 							BaseRuntimeElementDefinition<?> elementDefinition = theContext.getElementDefinition(operationParam.typeName());
 							if (elementDefinition == null) {
@@ -260,7 +261,8 @@ public class MethodUtil {
 								"Parameter annotated with @" + Validate.class.getSimpleName() + "." + Validate.Mode.class.getSimpleName() + " must be of type " + ValidationModeEnum.class.getName());
 						}
 						String description = ParametersUtil.extractDescription(nextParameterAnnotations);
-						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_MODE, 0, 1, description).setConverter(new IOperationParamConverter() {
+						List<String> examples = ParametersUtil.extractExamples(nextParameterAnnotations);
+						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_MODE, 0, 1, description, examples).setConverter(new IOperationParamConverter() {
 							@Override
 							public Object incomingServer(Object theObject) {
 								if (isNotBlank(theObject.toString())) {
@@ -284,7 +286,8 @@ public class MethodUtil {
 								"Parameter annotated with @" + Validate.class.getSimpleName() + "." + Validate.Profile.class.getSimpleName() + " must be of type " + String.class.getName());
 						}
 						String description = ParametersUtil.extractDescription(nextParameterAnnotations);
-						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_PROFILE, 0, 1, description).setConverter(new IOperationParamConverter() {
+						List<String> examples = ParametersUtil.extractExamples(nextParameterAnnotations);
+						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_PROFILE, 0, 1, description, examples).setConverter(new IOperationParamConverter() {
 							@Override
 							public Object incomingServer(Object theObject) {
 								return theObject.toString();

@@ -13,8 +13,8 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.ExtensionConstants;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.collect.Lists;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import io.swagger.v3.core.util.Yaml;
@@ -23,6 +23,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.Content;
@@ -594,15 +595,26 @@ public class OpenApiInterceptor {
 
 		if (theGet) {
 
-			for (OperationDefinition.OperationDefinitionParameterComponent nextSearchParam : theOperationDefinition.getParameter()) {
+			for (OperationDefinition.OperationDefinitionParameterComponent nextParameter : theOperationDefinition.getParameter()) {
 				Parameter parametersItem = new Parameter();
 				theOperation.addParametersItem(parametersItem);
 
-				parametersItem.setName(nextSearchParam.getName());
+				parametersItem.setName(nextParameter.getName());
 				parametersItem.setIn("query");
-				parametersItem.setDescription(nextSearchParam.getDocumentation());
+				parametersItem.setDescription(nextParameter.getDocumentation());
 				parametersItem.setStyle(Parameter.StyleEnum.SIMPLE);
-				parametersItem.setRequired(nextSearchParam.getMin() > 0);
+				parametersItem.setRequired(nextParameter.getMin() > 0);
+
+				List<Extension> exampleExtensions = nextParameter.getExtensionsByUrl(HapiExtensions.EXT_OP_PARAMETER_EXAMPLE_VALUE);
+				if (exampleExtensions.size() == 1) {
+					parametersItem.setExample(exampleExtensions.get(0).getValueAsPrimitive().getValueAsString());
+				} else if (exampleExtensions.size() > 1) {
+					for (Extension next : exampleExtensions) {
+						String nextExample = next.getValueAsPrimitive().getValueAsString();
+						parametersItem.addExample(nextExample, new Example().value(nextExample));
+					}
+				}
+
 			}
 
 		} else {

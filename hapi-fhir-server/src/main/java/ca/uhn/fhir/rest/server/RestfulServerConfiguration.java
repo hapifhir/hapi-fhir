@@ -59,8 +59,10 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class RestfulServerConfiguration implements ISearchParamRegistry {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServerConfiguration.class);
+	public static final String GLOBAL = "GLOBAL";
 	private Collection<ResourceBinding> resourceBindings;
 	private List<BaseMethodBinding<?>> serverBindings;
+	private List<BaseMethodBinding<?>> myGlobalBindings;
 	private Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype;
 	private String myImplementationDescription;
 	private String myServerName = "HAPI FHIR";
@@ -301,6 +303,10 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 		return resourceToMethods;
 	}
 
+	public List<BaseMethodBinding<?>> getGlobalBindings() {
+		return myGlobalBindings;
+	}
+
 	/*
 	 * Populates {@link #resourceNameToSharedSupertype} by scanning the given resource providers. Only resource provider getResourceType values
 	 * are taken into account. {@link ProvidesResources} and method return types are deliberately ignored.
@@ -441,6 +447,10 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 
 		}
 
+	}
+
+	public void setGlobalBindings(List<BaseMethodBinding<?>> theGlobalBindings) {
+		myGlobalBindings = theGlobalBindings;
 	}
 
 

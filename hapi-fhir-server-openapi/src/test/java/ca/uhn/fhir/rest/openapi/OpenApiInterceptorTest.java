@@ -118,6 +118,9 @@ public class OpenApiInterceptorTest {
 		assertNotNull(fooOpPath.getPost());
 		assertEquals("Foo Op Description", fooOpPath.getPost().getDescription());
 		assertEquals("Foo Op Short", fooOpPath.getPost().getSummary());
+		assertEquals(2, fooOpPath.getParameters().size());
+		assertEquals(2, fooOpPath.getParameters().get(0).getDescription());
+		assertEquals(2, fooOpPath.getParameters().get(0).getExample());
 
 		PathItem lastNPath = parsed.getPaths().get("/Observation/$lastn");
 		assertNull(lastNPath.getPost());
@@ -243,7 +246,7 @@ public class OpenApiInterceptorTest {
 		@Description(value = "LastN Description", shortDefinition = "LastN Short")
 		@Operation(name = Constants.OPERATION_LASTN, typeName = "Observation", idempotent = true)
 		public IBaseBundle lastN(
-			@Description(value = "Subject description", shortDefinition = "Subject short")
+			@Description(value = "Subject description", shortDefinition = "Subject short", example = {"Patient/456", "Patient/789"})
 			@OperationParam(name = "subject", typeName = "reference", min = 0, max = 1) IBaseReference theSubject,
 			@OperationParam(name = "category", typeName = "coding", min = 0, max = OperationParam.MAX_UNLIMITED) List<IBaseCoding> theCategories,
 			@OperationParam(name = "code", typeName = "coding", min = 0, max = OperationParam.MAX_UNLIMITED) List<IBaseCoding> theCodes,
@@ -256,7 +259,7 @@ public class OpenApiInterceptorTest {
 		@Operation(name = "foo-op", idempotent = false)
 		public IBaseBundle foo(
 			ServletRequestDetails theRequestDetails,
-			@Description(shortDefinition = "Reference description")
+			@Description(shortDefinition = "Reference description", example = "Patient/123")
 			@OperationParam(name = "subject", typeName = "reference", min = 0, max = 1) IBaseReference theSubject,
 			@OperationParam(name = "category", typeName = "coding", min = 0, max = OperationParam.MAX_UNLIMITED) List<IBaseCoding> theCategories,
 			@OperationParam(name = "code", typeName = "coding", min = 0, max = OperationParam.MAX_UNLIMITED) List<IBaseCoding> theCodes,

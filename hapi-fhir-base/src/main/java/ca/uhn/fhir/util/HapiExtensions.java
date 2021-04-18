@@ -116,7 +116,13 @@ public class HapiExtensions {
 	 */
     public static final String ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL = "https://hapifhir.org/associated-patient-golden-resource/";
 
-    /**
+	/**
+	 * This extension provides an example value for a parameter value for
+	 * a REST operation (eg for an OperationDefinition)
+	 */
+	public static final String EXT_OP_PARAMETER_EXAMPLE_VALUE = "http://hapifhir.io/fhir/StructureDefinition/op-parameter-example-value";
+
+	/**
 	 * Non instantiable
 	 */
 	private HapiExtensions() {

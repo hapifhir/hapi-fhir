@@ -41,6 +41,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -456,12 +457,28 @@ public class ParametersUtil {
 		}
 	}
 
-	public static String extractDescription(Annotation[] theAnnotations) {
-		for (Annotation next : theAnnotations) {
+	public static String extractDescription(Annotation[] theParameterAnnotations) {
+		for (Annotation next : theParameterAnnotations) {
 			if (next instanceof Description) {
 				return extractDescription((Description)next);
 			}
 		}
 		return null;
+	}
+
+	public static List<String> extractExamples(Annotation[] theParameterAnnotations) {
+		ArrayList<String> retVal = null;
+		for (Annotation next : theParameterAnnotations) {
+			if (next instanceof Description) {
+				String[] examples = ((Description) next).example();
+				if (examples.length > 0) {
+					if (retVal == null) {
+						retVal = new ArrayList<>();
+					}
+					retVal.addAll(Arrays.asList(examples));
+				}
+			}
+		}
+		return retVal;
 	}
 }

@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.patch.FhirPatch;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -49,14 +50,21 @@ public class DiffProvider {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
+	@Description("This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.")
 	@Operation(name = ProviderConstants.DIFF_OPERATION_NAME, global = true, idempotent = true)
 	public IBaseParameters diff(
 		@IdParam IIdType theResourceId,
-		@OperationParam(name = ProviderConstants.DIFF_FROM_VERSION_PARAMETER, typeName = "string", min = 0, max = 1) IPrimitiveType<?> theFromVersion,
-		@OperationParam(name = ProviderConstants.DIFF_INCLUDE_META_PARAMETER, typeName = "boolean", min = 0, max = 1) IPrimitiveType<Boolean> theIncludeMeta,
+
+		@Description(value = "The resource ID and version to diff from", example = "Patient/example/version/1")
+		@OperationParam(name = ProviderConstants.DIFF_FROM_VERSION_PARAMETER, typeName = "string", min = 0, max = 1)
+			IPrimitiveType<?> theFromVersion,
+
+		@Description(value = "Should differences in the Resource.meta element be included in the diff", example = "false")
+		@OperationParam(name = ProviderConstants.DIFF_INCLUDE_META_PARAMETER, typeName = "boolean", min = 0, max = 1)
+			IPrimitiveType<Boolean> theIncludeMeta,
 		RequestDetails theRequestDetails) {
 
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResourceId.getResourceType());
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceId.getResourceType());
 		IBaseResource targetResource = dao.read(theResourceId, theRequestDetails);
 		IBaseResource sourceResource = null;
 
@@ -82,15 +90,23 @@ public class DiffProvider {
 		}
 
 		FhirPatch fhirPatch = newPatch(theIncludeMeta);
-		IBaseParameters diff = fhirPatch.diff(sourceResource, targetResource);
-		return diff;
+		return fhirPatch.diff(sourceResource, targetResource);
 	}
 
+	@Description("This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.")
 	@Operation(name = ProviderConstants.DIFF_OPERATION_NAME, idempotent = true)
 	public IBaseParameters diff(
-		@OperationParam(name = ProviderConstants.DIFF_FROM_PARAMETER, typeName = "id", min = 1, max = 1) IIdType theFromVersion,
-		@OperationParam(name = ProviderConstants.DIFF_TO_PARAMETER, typeName = "id", min = 1, max = 1) IIdType theToVersion,
-		@OperationParam(name = ProviderConstants.DIFF_INCLUDE_META_PARAMETER, typeName = "boolean", min = 0, max = 1) IPrimitiveType<Boolean> theIncludeMeta,
+		@Description(value = "The resource ID and version to diff from", example = "Patient/example/version/1")
+		@OperationParam(name = ProviderConstants.DIFF_FROM_PARAMETER, typeName = "id", min = 1, max = 1)
+			IIdType theFromVersion,
+
+		@Description(value = "The resource ID and version to diff to", example = "Patient/example/version/2")
+		@OperationParam(name = ProviderConstants.DIFF_TO_PARAMETER, typeName = "id", min = 1, max = 1)
+			IIdType theToVersion,
+
+		@Description(value = "Should differences in the Resource.meta element be included in the diff", example = "false")
+		@OperationParam(name = ProviderConstants.DIFF_INCLUDE_META_PARAMETER, typeName = "boolean", min = 0, max = 1)
+			IPrimitiveType<Boolean> theIncludeMeta,
 		RequestDetails theRequestDetails) {
 
 		if (!Objects.equal(theFromVersion.getResourceType(), theToVersion.getResourceType())) {
@@ -98,13 +114,12 @@ public class DiffProvider {
 			throw new InvalidRequestException(msg);
 		}
 
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theFromVersion.getResourceType());
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theFromVersion.getResourceType());
 		IBaseResource sourceResource = dao.read(theFromVersion, theRequestDetails);
 		IBaseResource targetResource = dao.read(theToVersion, theRequestDetails);
 
 		FhirPatch fhirPatch = newPatch(theIncludeMeta);
-		IBaseParameters diff = fhirPatch.diff(sourceResource, targetResource);
-		return diff;
+		return fhirPatch.diff(sourceResource, targetResource);
 	}
 
 	@Nonnull

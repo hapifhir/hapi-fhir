@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +50,10 @@ public class ValidateMethodBindingDstu2Plus extends OperationMethodBinding {
 					if (String.class.equals(parameterType) || EncodingEnum.class.equals(parameterType)) {
 						newParams.add(next);
 					} else {
-						String description = ParametersUtil.extractDescription(theMethod.getParameterAnnotations()[idx]);
-						OperationParameter parameter = new OperationParameter(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_RESOURCE, 0, 1, description);
+						Annotation[] parameterAnnotations = theMethod.getParameterAnnotations()[idx];
+						String description = ParametersUtil.extractDescription(parameterAnnotations);
+						List<String> examples = ParametersUtil.extractExamples(parameterAnnotations);
+						OperationParameter parameter = new OperationParameter(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_RESOURCE, 0, 1, description, examples);
 						parameter.initializeTypes(theMethod, null, null, parameterType);
 						newParams.add(parameter);
 					}
