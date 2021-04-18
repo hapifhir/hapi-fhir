@@ -143,8 +143,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 		RequestPartitionId requestPartitionId;
 		requestPartitionId = getSystemRequestPartitionId(theRequest);
 		if (theNonPartitionableResource && !requestPartitionId.isDefaultPartition()) {
-			ourLog.warn("System call is attempting to write a non-partitionable resource to a partition! This is a bug in your code! Setting partition to DEFAULT");
-			requestPartitionId = RequestPartitionId.defaultPartition();
+			throw new InternalErrorException("System call is attempting to write a non-partitionable resource to a partition! This is a bug!")
 		}
 		return requestPartitionId;
 	}

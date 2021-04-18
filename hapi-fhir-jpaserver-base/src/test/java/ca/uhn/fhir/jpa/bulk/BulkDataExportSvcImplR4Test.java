@@ -18,7 +18,6 @@ import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.jpa.entity.MdmLink;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -1115,8 +1114,7 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 		//Manually create a golden record
 		Patient goldenPatient = new Patient();
 		goldenPatient.setId("PAT999");
-		SystemRequestDetails srd = new SystemRequestDetails();
-		srd.setTenantId(JpaConstants.ALL_PARTITIONS_NAME);
+		SystemRequestDetails srd = SystemRequestDetails.newSystemRequestAllPartitions();
 		DaoMethodOutcome g1Outcome = myPatientDao.update(goldenPatient, srd);
 		Long goldenPid = myIdHelperService.getPidOrNull(g1Outcome.getResource());
 

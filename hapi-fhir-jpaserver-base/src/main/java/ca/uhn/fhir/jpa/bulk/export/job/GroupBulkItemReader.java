@@ -55,8 +55,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.model.util.JpaConstants.ALL_PARTITIONS_NAME;
-
 /**
  * Bulk Item reader for the Group Bulk Export job.
  * Instead of performing a normal query on the resource type using type filters, we instead
@@ -121,8 +119,7 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 		Set<Long> patientPidsToExport = new HashSet<>(pidsOrThrowException);
 
 		if (myMdmEnabled) {
-			SystemRequestDetails srd = new SystemRequestDetails();
-			srd.setTenantId(ALL_PARTITIONS_NAME);
+			SystemRequestDetails srd = SystemRequestDetails.newSystemRequestAllPartitions();
 			IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId), srd);
 			Long pidOrNull = myIdHelperService.getPidOrNull(group);
 			List<IMdmLinkDao.MdmPidTuple> goldenPidSourcePidTuple = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
@@ -183,8 +180,7 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	 * @return A list of strings representing the Patient IDs of the members (e.g. ["P1", "P2", "P3"]
 	 */
 	private List<String> getMembers() {
-		SystemRequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.setTenantId(ALL_PARTITIONS_NAME);
+		SystemRequestDetails requestDetails = SystemRequestDetails.newSystemRequestAllPartitions();
 		IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId), requestDetails);
 		List<IPrimitiveType> evaluate = myContext.newFhirPath().evaluate(group, "member.entity.reference", IPrimitiveType.class);
 		return  evaluate.stream().map(IPrimitiveType::getValueAsString).collect(Collectors.toList());
@@ -199,9 +195,8 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	 */
 	private Set<String> expandAllPatientPidsFromGroup() {
 		Set<String> expandedIds = new HashSet<>();
-		SystemRequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.setTenantId(ALL_PARTITIONS_NAME);
-		IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId), new SystemRequestDetails());
+		SystemRequestDetails requestDetails = SystemRequestDetails.newSystemRequestAllPartitions();
+		IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId), requestDetails);
 		Long pidOrNull = myIdHelperService.getPidOrNull(group);
 
 		//Attempt to perform MDM Expansion of membership
