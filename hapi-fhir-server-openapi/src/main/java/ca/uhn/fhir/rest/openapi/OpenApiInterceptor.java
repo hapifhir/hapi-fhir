@@ -12,6 +12,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.ExtensionConstants;
 import ca.uhn.fhir.util.UrlUtil;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
@@ -41,6 +42,7 @@ import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationDefinition;
 import org.hl7.fhir.r4.model.Parameters;
@@ -69,6 +71,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -91,6 +94,8 @@ public class OpenApiInterceptor {
 	public static final String REQUEST_DETAILS = "REQUEST_DETAILS";
 	private final String mySwaggerUiVersion;
 	private final TemplateEngine myTemplateEngine;
+	private Map<String, String> myResourcePathToClasspath = new HashMap<>();
+	private Map<String, String> myExtensionToContentType = new HashMap<>();
 
 	/**
 	 * Constructor
@@ -105,6 +110,17 @@ public class OpenApiInterceptor {
 		myTemplateEngine.setDialect(dialect);
 
 		myTemplateEngine.setLinkBuilder(new TemplateLinkBuilder());
+
+		initResources();
+	}
+
+	private void initResources() {
+		myResourcePathToClasspath.put("/swagger-ui/index.html", "/ca/uhn/fhir/rest/openapi/index.html");
+		myResourcePathToClasspath.put("/swagger-ui/raccoon.png", "/ca/uhn/fhir/rest/openapi/raccoon.png");
+		myResourcePathToClasspath.put("/swagger-ui/index.css", "/ca/uhn/fhir/rest/openapi/index.css");
+
+		myExtensionToContentType.put(".png", "image/png");
+		myExtensionToContentType.put(".css", "text/css; charset=UTF-8");
 	}
 
 	private String initSwaggerUiWebJar() {
@@ -121,12 +137,11 @@ public class OpenApiInterceptor {
 		return mySwaggerUiVersion;
 	}
 
-
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED)
 	public boolean serveSwaggerUi(HttpServletRequest theRequest, HttpServletResponse theResponse, ServletRequestDetails theRequestDetails) throws IOException {
 		String requestPath = theRequest.getPathInfo();
 
-		if (requestPath.equals("") || requestPath.equals("/")) {
+		if (isBlank(requestPath) || requestPath.equals("/")) {
 			Set<String> highestRankedAcceptValues = RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theRequest);
 			if (highestRankedAcceptValues.contains(Constants.CT_HTML)) {
 				theResponse.sendRedirect("./swagger-ui/");
@@ -161,15 +176,21 @@ public class OpenApiInterceptor {
 			return true;
 		}
 
-		if (requestPath.equals("/swagger-ui/raccoon.png")) {
+		String resourceClasspath = myResourcePathToClasspath.get(requestPath);
+		if (resourceClasspath != null) {
 			theResponse.setStatus(200);
-			theResponse.setContentType("image/png");
-			try (InputStream resource = ClasspathUtil.loadResourceAsStream("/ca/uhn/fhir/rest/openapi/raccoon.png")) {
+
+			String extension = requestPath.substring(requestPath.lastIndexOf('.'));
+			String contentType = myExtensionToContentType.get(extension);
+			assert contentType != null;
+			theResponse.setContentType(contentType);
+			try (InputStream resource = ClasspathUtil.loadResourceAsStream(resourceClasspath)) {
 				IOUtils.copy(resource, theResponse.getOutputStream());
 				theResponse.getOutputStream().close();
 			}
 			return true;
 		}
+
 
 		String resourcePath = requestPath.substring("/swagger-ui/".length());
 		try (InputStream resource = ClasspathUtil.loadResourceAsStream("/META-INF/resources/webjars/swagger-ui/" + mySwaggerUiVersion + "/" + resourcePath)) {
@@ -194,6 +215,7 @@ public class OpenApiInterceptor {
 		return false;
 	}
 
+	@SuppressWarnings("unchecked")
 	private void serveSwaggerUiHtml(ServletRequestDetails theRequestDetails, HttpServletResponse theResponse) throws IOException {
 		CapabilityStatement cs = getCapabilityStatement(theRequestDetails);
 
@@ -212,10 +234,38 @@ public class OpenApiInterceptor {
 		context.setVariable("FHIR_VERSION_CODENAME", FhirVersionEnum.forVersionString(cs.getFhirVersion().toCode()).name());
 
 		List<String> pageNames = new ArrayList<>();
-		pageNames.add(PAGE_ALL);
-		pageNames.add(PAGE_SYSTEM);
-		cs.getRestFirstRep().getResource().stream().map(t -> t.getType()).forEach(t -> pageNames.add(t));
+		Map<String, Integer> resourceToCount = new HashMap<>();
+		cs.getRestFirstRep().getResource().stream().forEach(t -> {
+			String type = t.getType();
+			pageNames.add(type);
+			Extension countExtension = t.getExtensionByUrl(ExtensionConstants.CONF_RESOURCE_COUNT);
+			if (countExtension != null) {
+				IPrimitiveType<? extends Number> countExtensionValue = (IPrimitiveType<? extends Number>) countExtension.getValueAsPrimitive();
+				if (countExtensionValue != null && countExtensionValue.hasValue()) {
+					resourceToCount.put(type, countExtensionValue.getValue().intValue());
+				}
+			}
+		});
+		pageNames.sort((o1, o2) -> {
+			Integer count1 = resourceToCount.get(o1);
+			Integer count2 = resourceToCount.get(o2);
+			if (count1 != null && count2 != null) {
+				return count2 - count1;
+			}
+			if (count1 != null) {
+				return -1;
+			}
+			if (count2 != null) {
+				return 1;
+			}
+			return o1.compareTo(o2);
+		});
+
+		pageNames.add(0, PAGE_ALL);
+		pageNames.add(1, PAGE_SYSTEM);
+
 		context.setVariable("PAGE_NAMES", pageNames);
+		context.setVariable("PAGE_NAME_TO_COUNT", resourceToCount);
 
 		String page = extractPageName(theRequestDetails, PAGE_SYSTEM);
 		context.setVariable("PAGE", page);
@@ -424,7 +474,7 @@ public class OpenApiInterceptor {
 	}
 
 	private Supplier<IBaseResource> patchExampleSupplier() {
-		return ()-> {
+		return () -> {
 			Parameters example = new Parameters();
 			Parameters.ParametersParameterComponent operation = example
 				.addParameter()
@@ -671,7 +721,7 @@ public class OpenApiInterceptor {
 		if (theResourceType == null) {
 			return null;
 		}
-		return ()-> {
+		return () -> {
 			IBaseResource example = null;
 			if (theResourceType != null) {
 				example = theFhirContext.getResourceDefinition(theResourceType).newInstance();
@@ -711,7 +761,7 @@ public class OpenApiInterceptor {
 	}
 
 	protected ClassLoaderTemplateResource getIndexTemplate() {
-		return new ClassLoaderTemplateResource("/ca/uhn/fhir/rest/openapi/index.html", StandardCharsets.UTF_8.name());
+		return new ClassLoaderTemplateResource(myResourcePathToClasspath.get("/swagger-ui/index.html"), StandardCharsets.UTF_8.name());
 	}
 
 	private class SwaggerUiTemplateResolver implements ITemplateResolver {
