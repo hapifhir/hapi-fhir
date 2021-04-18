@@ -1,4 +1,4 @@
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Swagger UI</title>
@@ -36,7 +36,7 @@
             padding-left: 25px;
             display: flex;
             flex-direction: row;
-            background-color: #CCC;
+            background-color: #AAA;
             border-bottom: 2px solid #888;
         }
 
@@ -67,10 +67,9 @@
             padding-bottom: 20px;
             display: table;
             flex-direction: row;
-            background-color: #DDD;
+            background-color: #CCC;
             border-bottom: 2px solid #888;
             width: 100%;
-
         }
 
         .banner2 > DIV {
@@ -93,6 +92,42 @@
             width: 100%;
         }
 
+        .banner3 {
+            font-family: sans-serif;
+            padding-top: 20px;
+            padding-left: 30px;
+            padding-right: 30px;
+            padding-bottom: 20px;
+            background-color: #EEE;
+            border-bottom: 2px solid #888;
+            width: 100%;
+        }
+
+        .pageButtons {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .pageButton {
+            background-color: #FFF;
+            color: #666;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 8px;
+            text-decoration: none;
+            line-height: 0.5em;
+            border: 1px solid #FFF;
+        }
+
+        .pageButton:HOVER {
+            border: 1px solid #888;
+        }
+
+        .pageButtonSelected {
+            background-color: #888;
+            color: #FFF;
+        }
+
     </style>
 </head>
 
@@ -101,18 +136,24 @@
 </div>
 <div class="banner">
     <img src="./raccoon.png" style="height: 100px;"/>
-    <h1>${SERVER_NAME}<br/><span class="version">${SERVER_VERSION}</span></h1>
+    <h1>[[${SERVER_NAME}]]<br/><span class="version" th:text="${SERVER_VERSION}"></span></h1>
 </div>
 <div class="banner2">
     <div>
-        <div class="banner2_key">FHIR Server Base URL</div><div class="banner2_value"><a href="${BASE_URL}">${BASE_URL}</a></div>
+        <div class="banner2_key">FHIR Server Base URL</div><div class="banner2_value"><a th:href="${BASE_URL}" th:text="${BASE_URL}"></a></div>
     </div>
     <div>
-        <div class="banner2_key">OpenAPI Docs</div><div class="banner2_value"><a href="${OPENAPI_DOCS}">${OPENAPI_DOCS}</a></div>
+        <div class="banner2_key">OpenAPI Docs</div><div class="banner2_value"><a th:href="${OPENAPI_DOCS}" th:text="${OPENAPI_DOCS}"></a></div>
     </div>
     <div>
-        <div class="banner2_key">FHIR Version</div><div class="banner2_value">${FHIR_VERSION} (${FHIR_VERSION_CODENAME})</div>
+        <div class="banner2_key">FHIR Version</div><div class="banner2_value">[[${FHIR_VERSION}]] ([[${FHIR_VERSION_CODENAME}]])</div>
     </div>
+</div>
+<div class="banner3">
+    <div class="pageButtons">
+        <a class="pageButton" th:each="pageName : ${PAGE_NAMES}" th:text="${pageName}" th:classappend="${pageName} == ${PAGE} ? 'pageButtonSelected' : ''" th:href="@{/swagger-ui/(page=${pageName})}"></a>
+    </div>
+
 </div>
 <div id="swagger-ui"></div>
 
@@ -122,7 +163,7 @@
     window.onload = function() {
         // Begin Swagger UI call region
         const ui = SwaggerUIBundle({
-            url: "../api-docs",
+            url: "[[@{/api-docs(page=${PAGE})}]]",
             dom_id: '#swagger-ui',
             deepLinking: true,
             presets: [

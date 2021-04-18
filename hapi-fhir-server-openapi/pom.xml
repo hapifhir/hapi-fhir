@@ -12,6 +12,7 @@
 	<artifactId>hapi-fhir-server-openapi</artifactId>
 
 	<dependencies>
+        <!-- HAPI FHIR -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-server</artifactId>
@@ -28,6 +29,7 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- OpenAPI/Swagger -->
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-models</artifactId>
@@ -42,8 +44,13 @@
             <artifactId>swagger-ui</artifactId>
 		</dependency>
 
+        <!-- Thymeleaf -->
+        <dependency>
+            <groupId>org.thymeleaf</groupId>
+            <artifactId>thymeleaf</artifactId>
+        </dependency>
 
-		<!-- Unit Test Deps-->
+        <!-- Unit Test Deps-->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-test-utilities</artifactId>
