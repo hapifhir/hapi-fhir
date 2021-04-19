@@ -156,8 +156,8 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	 * @param theRequest The {@link SystemRequestDetails}
 	 * @return the {@link RequestPartitionId} to be used for this request.
 	 */
-	@NotNull
-	private RequestPartitionId getSystemRequestPartitionId(@NotNull RequestDetails theRequest) {
+	@Nonnull
+	private RequestPartitionId getSystemRequestPartitionId(@Nonnull RequestDetails theRequest) {
 		if (theRequest.getTenantId() != null) {
 			if (theRequest.getTenantId().equals(ALL_PARTITIONS_NAME)) {
 				return RequestPartitionId.allPartitions();
