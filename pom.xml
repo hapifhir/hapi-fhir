@@ -785,8 +785,8 @@
 		<!-- 9.4.17 seems to have issues -->
 		<jetty_version>9.4.39.v20210325</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
-		<junit_version>5.7.0</junit_version>
-        <flexmark_version>0.50.40</flexmark_version>
+		<junit_version>5.7.1</junit_version>
+		<flexmark_version>0.50.40</flexmark_version>
 		<flyway_version>6.5.4</flyway_version>
 		<hibernate_version>5.4.30.Final</hibernate_version>
 		<hibernate_search_version>6.0.2.Final</hibernate_search_version>
