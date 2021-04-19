@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
+import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -16,6 +17,7 @@ import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.util.TestUtil;
@@ -24,7 +26,13 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerDstu3Test.class);
 
-	
+	@Override
+	@AfterEach
+	public void after() throws Exception {
+		super.after();
+		ourRestServer.getInterceptorService().unregisterInterceptorsIf(t->t instanceof OpenApiInterceptor);
+	}
+
 	
 	/**
 	 * See #519
@@ -60,6 +68,19 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 	}
 
+
+	@Test
+	public void testFetchOpenApi() throws IOException {
+		ourRestServer.registerInterceptor(new OpenApiInterceptor());
+
+		HttpGet get = new HttpGet(ourServerBase + "/api-docs");
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+			String string = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(string);
+
+			assertEquals(200, response.getStatusLine().getStatusCode());
+		}
+	}
 
 
 }

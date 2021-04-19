@@ -83,8 +83,18 @@ public class GraphQLMethodBinding extends OperationMethodBinding {
 	}
 
 	@Override
-	public boolean isCanOperateAtInstanceLevel() {
+	public boolean isCanOperateAtServerLevel() {
 		return true;
+	}
+
+	@Override
+	public boolean isCanOperateAtTypeLevel() {
+		return false;
+	}
+
+	@Override
+	public boolean isCanOperateAtInstanceLevel() {
+		return myIdParamIndex != null;
 	}
 
 	@Override

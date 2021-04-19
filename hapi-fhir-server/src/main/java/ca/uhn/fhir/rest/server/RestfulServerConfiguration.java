@@ -58,8 +58,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class RestfulServerConfiguration implements ISearchParamRegistry {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServerConfiguration.class);
 	public static final String GLOBAL = "GLOBAL";
+	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServerConfiguration.class);
 	private Collection<ResourceBinding> resourceBindings;
 	private List<BaseMethodBinding<?>> serverBindings;
 	private List<BaseMethodBinding<?>> myGlobalBindings;
@@ -244,38 +244,41 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 		HashMap<String, List<OperationMethodBinding>> myOperationNameToBindings = new HashMap<>();
 
 		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = collectMethodBindings();
-		for (Map.Entry<String, List<BaseMethodBinding<?>>> nextEntry : resourceToMethods.entrySet()) {
-			List<BaseMethodBinding<?>> nextMethodBindings = nextEntry.getValue();
-			for (BaseMethodBinding<?> nextMethodBinding : nextMethodBindings) {
-				if (nextMethodBinding instanceof OperationMethodBinding) {
-					OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
-					if (myOperationBindingToName.containsKey(methodBinding)) {
-						continue;
-					}
+		List<BaseMethodBinding<?>> methodBindings = resourceToMethods
+			.values()
+			.stream().flatMap(t -> t.stream())
+			.collect(Collectors.toList());
+		methodBindings.addAll(myGlobalBindings);
 
-					String name = createOperationName(methodBinding);
-					ourLog.debug("Detected operation: {}", name);
-
-					myOperationBindingToName.put(methodBinding, name);
-					if (myOperationNameToBindings.containsKey(name) == false) {
-						myOperationNameToBindings.put(name, new ArrayList<>());
-					}
-					myOperationNameToBindings.get(name).add(methodBinding);
-				} else if (nextMethodBinding instanceof SearchMethodBinding) {
-					SearchMethodBinding methodBinding = (SearchMethodBinding) nextMethodBinding;
-					if (myNamedSearchMethodBindingToName.containsKey(methodBinding)) {
-						continue;
-					}
-
-					String name = createNamedQueryName(methodBinding);
-					ourLog.debug("Detected named query: {}", name);
-
-					myNamedSearchMethodBindingToName.put(methodBinding, name);
-					if (!mySearchNameToBindings.containsKey(name)) {
-						mySearchNameToBindings.put(name, new ArrayList<>());
-					}
-					mySearchNameToBindings.get(name).add(methodBinding);
+		for (BaseMethodBinding<?> nextMethodBinding : methodBindings) {
+			if (nextMethodBinding instanceof OperationMethodBinding) {
+				OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
+				if (myOperationBindingToName.containsKey(methodBinding)) {
+					continue;
 				}
+
+				String name = createOperationName(methodBinding);
+				ourLog.debug("Detected operation: {}", name);
+
+				myOperationBindingToName.put(methodBinding, name);
+				if (myOperationNameToBindings.containsKey(name) == false) {
+					myOperationNameToBindings.put(name, new ArrayList<>());
+				}
+				myOperationNameToBindings.get(name).add(methodBinding);
+			} else if (nextMethodBinding instanceof SearchMethodBinding) {
+				SearchMethodBinding methodBinding = (SearchMethodBinding) nextMethodBinding;
+				if (myNamedSearchMethodBindingToName.containsKey(methodBinding)) {
+					continue;
+				}
+
+				String name = createNamedQueryName(methodBinding);
+				ourLog.debug("Detected named query: {}", name);
+
+				myNamedSearchMethodBindingToName.put(methodBinding, name);
+				if (!mySearchNameToBindings.containsKey(name)) {
+					mySearchNameToBindings.put(name, new ArrayList<>());
+				}
+				mySearchNameToBindings.get(name).add(methodBinding);
 			}
 		}
 
@@ -307,6 +310,10 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 		return myGlobalBindings;
 	}
 
+	public void setGlobalBindings(List<BaseMethodBinding<?>> theGlobalBindings) {
+		myGlobalBindings = theGlobalBindings;
+	}
+
 	/*
 	 * Populates {@link #resourceNameToSharedSupertype} by scanning the given resource providers. Only resource provider getResourceType values
 	 * are taken into account. {@link ProvidesResources} and method return types are deliberately ignored.
@@ -334,28 +341,6 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 				entry -> entry.getKey(),
 				entry -> entry.getValue().getLowestCommonSuperclass().get()));
 	}
-
-	private String createOperationName(OperationMethodBinding theMethodBinding) {
-		StringBuilder retVal = new StringBuilder();
-		if (theMethodBinding.getResourceName() != null) {
-			retVal.append(theMethodBinding.getResourceName());
-		}
-
-		retVal.append('-');
-		if (theMethodBinding.isCanOperateAtInstanceLevel()) {
-			retVal.append('i');
-		}
-		if (theMethodBinding.isCanOperateAtServerLevel()) {
-			retVal.append('s');
-		}
-		retVal.append('-');
-
-		// Exclude the leading $
-		retVal.append(theMethodBinding.getName(), 1, theMethodBinding.getName().length());
-
-		return retVal.toString();
-	}
-
 
 	private String createNamedQueryName(SearchMethodBinding searchMethodBinding) {
 		StringBuilder retVal = new StringBuilder();
@@ -449,11 +434,6 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 
 	}
 
-	public void setGlobalBindings(List<BaseMethodBinding<?>> theGlobalBindings) {
-		myGlobalBindings = theGlobalBindings;
-	}
-
-
 	private static class SearchParameterComparator implements Comparator<SearchParameter> {
 		private static final SearchParameterComparator INSTANCE = new SearchParameterComparator();
 
@@ -467,5 +447,28 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 			}
 			return 1;
 		}
+	}
+
+	private static String createOperationName(OperationMethodBinding theMethodBinding) {
+		StringBuilder retVal = new StringBuilder();
+		if (theMethodBinding.getResourceName() != null) {
+			retVal.append(theMethodBinding.getResourceName());
+		} else if (theMethodBinding.isGlobalMethod()) {
+			retVal.append("Global");
+		}
+
+		retVal.append('-');
+		if (theMethodBinding.isCanOperateAtInstanceLevel()) {
+			retVal.append('i');
+		}
+		if (theMethodBinding.isCanOperateAtServerLevel()) {
+			retVal.append('s');
+		}
+		retVal.append('-');
+
+		// Exclude the leading $
+		retVal.append(theMethodBinding.getName(), 1, theMethodBinding.getName().length());
+
+		return retVal.toString();
 	}
 }

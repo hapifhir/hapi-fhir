@@ -23,6 +23,7 @@ package ca.uhn.hapi.fhir.docs;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.rest.api.PreferHandlingEnum;
+import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.*;
@@ -64,6 +65,24 @@ public class ServletExamples {
       
    }
    // END SNIPPET: loggingInterceptor
+
+   // START SNIPPET: OpenApiInterceptor
+	@WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
+   public class RestfulServerWithOpenApi extends RestfulServer {
+
+      @Override
+      protected void initialize() throws ServletException {
+
+         // ... define your resource providers here ...
+
+         // Now register the interceptor
+			OpenApiInterceptor openApiInterceptor = new OpenApiInterceptor();
+         registerInterceptor(openApiInterceptor);
+
+      }
+
+   }
+   // END SNIPPET: OpenApiInterceptor
 
    // START SNIPPET: validatingInterceptor
    @WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")

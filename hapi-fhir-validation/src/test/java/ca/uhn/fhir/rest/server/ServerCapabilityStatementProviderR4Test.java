@@ -807,11 +807,13 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		class MyProvider {
 
+			@Description(value="This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.")
 			@GraphQL(type= RequestTypeEnum.GET)
 			public String processGraphQlGetRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryUrl String queryUrl) {
 				throw new IllegalStateException();
 			}
 
+			@Description(value="This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.")
 			@GraphQL(type=RequestTypeEnum.POST)
 			public String processGraphQlPostRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryBody String queryBody) {
 				throw new IllegalStateException();
@@ -835,11 +837,36 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		validate(opDef);
 
+		// On Patient Resource
 		CapabilityStatementRestResourceComponent resource = opDef.getRest().get(0).getResource().stream().filter(t->t.getType().equals("Patient")).findFirst().orElseThrow(()->new IllegalArgumentException());
 		CapabilityStatementRestResourceOperationComponent graphQlOperation = resource.getOperation().stream().filter(t -> t.getName().equals("graphql")).findFirst().orElseThrow(() -> new IllegalArgumentException());
-		assertEquals("", graphQlOperation.getName());
-		assertEquals("", graphQlOperation.getDefinition());
-		assertEquals("", graphQlOperation.getDocumentation());
+		assertEquals("graphql", graphQlOperation.getName());
+		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-graphql", graphQlOperation.getDefinition());
+		assertEquals("This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.", graphQlOperation.getDocumentation());
+
+		// On Patient Resource
+		resource = opDef.getRest().get(0).getResource().stream().filter(t->t.getType().equals("Observation")).findFirst().orElseThrow(()->new IllegalArgumentException());
+		graphQlOperation = resource.getOperation().stream().filter(t -> t.getName().equals("graphql")).findFirst().orElseThrow(() -> new IllegalArgumentException());
+		assertEquals("graphql", graphQlOperation.getName());
+		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-graphql", graphQlOperation.getDefinition());
+		assertEquals("This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.", graphQlOperation.getDocumentation());
+
+		// At Server Level
+		CapabilityStatementRestComponent rest = opDef.getRest().get(0);
+		graphQlOperation = rest.getOperation().stream().filter(t -> t.getName().equals("graphql")).findFirst().orElseThrow(() -> new IllegalArgumentException());
+		assertEquals("graphql", graphQlOperation.getName());
+		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-graphql", graphQlOperation.getDefinition());
+		assertEquals("This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.", graphQlOperation.getDocumentation());
+
+		// Fetch OperationDefinition
+		IdType id = new IdType("http://localhost/baseR4/OperationDefinition/Global-is-graphql");
+		RequestDetails requestDetails = createRequestDetails(rs);
+		OperationDefinition operationDefinition = (OperationDefinition) sc.readOperationDefinition(id, requestDetails);
+		assertEquals("Operation_graphql", operationDefinition.getName());
+		assertEquals("graphql", operationDefinition.getCode());
+		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-graphql", operationDefinition.getUrl());
+		assertEquals("This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.", operationDefinition.getDescription());
+
 	}
 
 	@Test

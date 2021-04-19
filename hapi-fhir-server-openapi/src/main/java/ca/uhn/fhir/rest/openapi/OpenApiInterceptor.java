@@ -91,6 +91,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class OpenApiInterceptor {
+
 	public static final String FHIR_JSON_RESOURCE = "FHIR-JSON-RESOURCE";
 	public static final String FHIR_XML_RESOURCE = "FHIR-XML-RESOURCE";
 	public static final String PAGE_SYSTEM = "System Level Operations";
@@ -101,8 +102,8 @@ public class OpenApiInterceptor {
 	private final TemplateEngine myTemplateEngine;
 	private final Parser myFlexmarkParser;
 	private final HtmlRenderer myFlexmarkRenderer;
-	private Map<String, String> myResourcePathToClasspath = new HashMap<>();
-	private Map<String, String> myExtensionToContentType = new HashMap<>();
+	private final Map<String, String> myResourcePathToClasspath = new HashMap<>();
+	private final Map<String, String> myExtensionToContentType = new HashMap<>();
 
 	/**
 	 * Constructor
@@ -539,6 +540,10 @@ public class OpenApiInterceptor {
 		if (theCapabilitiesProvider != null) {
 			IdType definitionId = new IdType(theOperation.getDefinition());
 			IBaseResource operationDefinitionNonCanonical = theCapabilitiesProvider.readOperationDefinition(definitionId, theRequestDetails);
+			if (operationDefinitionNonCanonical == null) {
+				return;
+			}
+
 			OperationDefinition operationDefinition = toCanonicalVersion(operationDefinitionNonCanonical);
 
 			if (!operationDefinition.getAffectsState()) {
