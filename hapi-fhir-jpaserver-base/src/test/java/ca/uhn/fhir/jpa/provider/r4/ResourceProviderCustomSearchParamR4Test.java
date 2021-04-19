@@ -13,9 +13,11 @@ import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleUtil;
 import org.apache.commons.io.IOUtils;
@@ -332,8 +334,8 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 		List<String> foundResources = toUnqualifiedVersionlessIdValues(bundle);
 		assertThat(foundResources, contains(p1id.getValue()));
-
 	}
+
 
 	@SuppressWarnings("unused")
 	@Test
@@ -393,7 +395,9 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(fooSp, mySrd);
 
+		myCaptureQueriesListener.clear();
 		mySearchParamRegistry.forceRefresh();
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
 		Patient pat = new Patient();
 		pat.setGender(AdministrativeGender.MALE);

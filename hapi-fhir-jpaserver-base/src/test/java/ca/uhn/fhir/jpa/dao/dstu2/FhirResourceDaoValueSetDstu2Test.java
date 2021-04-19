@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
@@ -180,7 +181,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		 * Filter with display name
 		 */
 
-		expanded = myValueSetDao.expand(myExtensionalVsId, ("systolic"), mySrd);
+		expanded = myValueSetDao.expand(myExtensionalVsId, new ValueSetExpansionOptions().setFilter("systolic"), mySrd);
 		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		//@formatter:off
@@ -193,7 +194,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		 * Filter with code
 		 */
 
-		expanded = myValueSetDao.expand(myExtensionalVsId, ("11378"), mySrd);
+		expanded = myValueSetDao.expand(myExtensionalVsId, new ValueSetExpansionOptions().setFilter("11378"), mySrd);
 		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		//@formatter:off
@@ -205,7 +206,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testExpandByIdentifier() {
-		ValueSet expanded = myValueSetDao.expandByIdentifier("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", "11378");
+		ValueSet expanded = myValueSetDao.expandByIdentifier("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", new ValueSetExpansionOptions().setFilter("11378"));
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		//@formatter:off
@@ -220,7 +221,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 	@Test
 	public void testExpandByValueSet() throws IOException {
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.xml");
-		ValueSet expanded = myValueSetDao.expand(toExpand, "11378");
+		ValueSet expanded = myValueSetDao.expand(toExpand, new ValueSetExpansionOptions().setFilter("11378"));
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		//@formatter:off
@@ -235,12 +236,12 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 	@Test
 	public void testValidateCodeForCodeSystemOperationNotSupported() {
 		try {
-			((IFhirResourceDaoCodeSystem)myValueSetDao).validateCode(null, null, null, null, null, null, null, null);
+			((IFhirResourceDaoCodeSystem) myValueSetDao).validateCode(null, null, null, null, null, null, null, null);
 			fail();
 		} catch (UnsupportedOperationException theE) {
 			assertNotNull(theE);
 		}
 
 	}
-	
+
 }

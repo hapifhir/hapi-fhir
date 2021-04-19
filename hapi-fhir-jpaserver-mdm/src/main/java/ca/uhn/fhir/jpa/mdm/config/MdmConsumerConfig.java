@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.mdm.config;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.jpa.mdm.svc.MdmSurvivorshipSvcImpl;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmExpungeSvc;
@@ -64,7 +65,7 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByEidSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByLinkSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByExampleSvc;
-import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.validation.IResourceLoader;
 import org.slf4j.Logger;
 import org.springframework.context.annotation.Bean;
@@ -77,6 +78,11 @@ public class MdmConsumerConfig {
 	@Bean
 	IMdmStorageInterceptor mdmStorageInterceptor() {
 		return new MdmStorageInterceptor();
+	}
+
+	@Bean
+    MdmSearchExpandingInterceptor myMdmSearchExpandingInterceptorInterceptor() {
+		return new MdmSearchExpandingInterceptor();
 	}
 
 	@Bean
@@ -153,7 +159,7 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmRuleValidator mdmRuleValidator(FhirContext theFhirContext, ISearchParamRetriever theSearchParamRetriever) {
+	MdmRuleValidator mdmRuleValidator(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRetriever) {
 		return new MdmRuleValidator(theFhirContext, theSearchParamRetriever);
 	}
 

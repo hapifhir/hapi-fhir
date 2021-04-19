@@ -254,7 +254,7 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 		mySearchParameterDao.update(numberParameter);
 
 		// This fires every 10 seconds
-		mySearchParamRegistry.refreshCacheIfNecessary();
+		mySearchParamRegistryController.refreshCacheIfNecessary();
 
 		Patient patient = new Patient();
 		patient.setId("future-appointment-count-pt");

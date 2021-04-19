@@ -8,7 +8,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSubscription;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestDstu2Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
@@ -17,12 +17,12 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
@@ -60,12 +60,10 @@ import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
-import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -82,6 +80,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -93,6 +92,8 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	protected ResourceCountCache myResourceCountsCache;
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	protected ISearchParamRegistryController mySearchParamRegistryController;
 	@Autowired
 	protected ApplicationContext myAppCtx;
 	@Autowired
@@ -267,7 +268,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 		if (stream == null) {
 			fail("Unable to load resource: " + resourceName);
 		}
-		String string = IOUtils.toString(stream, "UTF-8");
+		String string = IOUtils.toString(stream, StandardCharsets.UTF_8);
 		IParser newJsonParser = EncodingEnum.detectEncodingNoDefault(string).newParser(myFhirCtx);
 		return newJsonParser.parseResource(type, string);
 	}

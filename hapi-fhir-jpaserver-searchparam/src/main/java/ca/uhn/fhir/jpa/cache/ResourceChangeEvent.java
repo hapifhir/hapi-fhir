@@ -72,6 +72,7 @@ public class ResourceChangeEvent implements IResourceChangeEvent {
 		return myDeletedResourceIds;
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return myCreatedResourceIds.isEmpty() && myUpdatedResourceIds.isEmpty() && myDeletedResourceIds.isEmpty();
 	}

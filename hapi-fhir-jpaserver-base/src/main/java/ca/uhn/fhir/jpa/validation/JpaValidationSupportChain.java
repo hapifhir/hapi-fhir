@@ -26,8 +26,9 @@ import ca.uhn.fhir.jpa.packages.NpmJpaValidationSupport;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
-import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -52,6 +53,8 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	private NpmJpaValidationSupport myNpmJpaValidationSupport;
 	@Autowired
 	private ITermConceptMappingSvc myConceptMappingSvc;
+	@Autowired
+	private UnknownCodeSystemWarningValidationSupport myUnknownCodeSystemWarningValidationSupport;
 
 	public JpaValidationSupportChain(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
@@ -71,12 +74,14 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	public void postConstruct() {
 		addValidationSupport(myDefaultProfileValidationSupport);
 		addValidationSupport(myJpaValidationSupport);
+		//TODO MAKE SURE THAT THIS IS BEING CAL
 		addValidationSupport(myTerminologyService);
 		addValidationSupport(new SnapshotGeneratingValidationSupport(myFhirContext));
 		addValidationSupport(new InMemoryTerminologyServerValidationSupport(myFhirContext));
 		addValidationSupport(myNpmJpaValidationSupport);
 		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
 		addValidationSupport(myConceptMappingSvc);
+		addValidationSupport(myUnknownCodeSystemWarningValidationSupport);
 	}
 
 }

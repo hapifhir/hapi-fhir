@@ -26,7 +26,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -53,7 +53,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 
 	private volatile CapabilityStatement myCachedValue;
 	private DaoConfig myDaoConfig;
-	private ISearchParamRetriever mySearchParamRegistry;
+	private ISearchParamRegistry mySearchParamRegistry;
 	private String myImplementationDescription;
 	private boolean myIncludeResourceCounts;
 	private RestfulServer myRestfulServer;
@@ -72,7 +72,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 	/**
 	 * Constructor
 	 */
-	public JpaConformanceProviderDstu3(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, Meta> theSystemDao, DaoConfig theDaoConfig, ISearchParamRetriever theSearchParamRegistry) {
+	public JpaConformanceProviderDstu3(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, Meta> theSystemDao, DaoConfig theDaoConfig, ISearchParamRegistry theSearchParamRegistry) {
 		super(theRestfulServer);
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
@@ -82,7 +82,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		setIncludeResourceCounts(true);
 	}
 
-	public void setSearchParamRegistry(ISearchParamRetriever theSearchParamRegistry) {
+	public void setSearchParamRegistry(ISearchParamRegistry theSearchParamRegistry) {
 		mySearchParamRegistry = theSearchParamRegistry;
 	}
 

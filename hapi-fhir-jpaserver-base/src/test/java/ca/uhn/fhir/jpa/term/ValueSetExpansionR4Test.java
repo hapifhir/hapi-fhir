@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
-import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -38,11 +37,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -228,7 +226,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		// ValueSet by ID
 		{
 			myCaptureQueriesListener.clear();
-			ValueSet expandedValueSet = myValueSetDao.expand(vsId, "display value 100", 0, 1000, mySrd);
+			ValueSetExpansionOptions options = ValueSetExpansionOptions.forOffsetAndCount(0, 1000).setFilter("display value 100");
+			ValueSet expandedValueSet = myValueSetDao.expand(vsId, options, mySrd);
 			List<String> codes = expandedValueSet.getExpansion().getContains().stream().map(t -> t.getCode()).collect(Collectors.toList());
 			assertThat(codes.toString(), codes, containsInAnyOrder("code100", "code1000", "code1001", "code1002", "code1003", "code1004"));
 
@@ -300,7 +299,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, input);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		assertThat(toCodes(expandedValueSet).toString(), toCodes(expandedValueSet), contains(			"code99"		));
+		assertThat(toCodes(expandedValueSet).toString(), toCodes(expandedValueSet), contains("code99"));
 
 		// Make sure we used the pre-expanded version
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
@@ -786,7 +785,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertEquals(1000, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 
 		assertEquals(codeSystem.getConcept().size() - expandedValueSet.getExpansion().getOffset(), expandedValueSet.getExpansion().getContains().size());
-		assertThat(toCodes(expandedValueSet), is(equalTo(expandedConcepts.subList(1,expandedConcepts.size()))));
+		assertThat(toCodes(expandedValueSet), is(equalTo(expandedConcepts.subList(1, expandedConcepts.size()))));
 	}
 
 	@Test
@@ -818,7 +817,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertEquals(1000, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 
 		assertEquals(codeSystem.getConcept().size() - expandedValueSet.getExpansion().getOffset(), expandedValueSet.getExpansion().getContains().size());
-		assertThat(toCodes(expandedValueSet), is(equalTo(expandedConcepts.subList(1,expandedConcepts.size()))));
+		assertThat(toCodes(expandedValueSet), is(equalTo(expandedConcepts.subList(1, expandedConcepts.size()))));
 	}
 
 	@Test
@@ -953,7 +952,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		include.setSystem(CS_URL);
 
 		myTermSvc.expandValueSet(null, vs, myValueSetCodeAccumulator);
-		verify(myValueSetCodeAccumulator, times(9)).includeConceptWithDesignations(anyString(), anyString(), nullable(String.class), anyCollection());
+		verify(myValueSetCodeAccumulator, times(9)).includeConceptWithDesignations(anyString(), anyString(), nullable(String.class), anyCollection(), nullable(Long.class), nullable(String.class));
 	}
 
 	@Test
@@ -1431,7 +1430,6 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum", 0);
 		});
 	}
-
 
 
 }

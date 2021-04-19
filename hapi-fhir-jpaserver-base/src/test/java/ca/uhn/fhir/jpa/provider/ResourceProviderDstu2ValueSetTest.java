@@ -1,21 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
-
-import java.io.IOException;
-
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.springframework.transaction.annotation.Transactional;
-
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
@@ -24,12 +9,25 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2Test {
 
-	private IIdType myExtensionalVsId;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu2ValueSetTest.class);
+	private IIdType myExtensionalVsId;
 
 	@BeforeEach
 	@Transactional
@@ -38,7 +36,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		upload.setId("");
 		myExtensionalVsId = myValueSetDao.create(upload, mySrd).getId().toUnqualifiedVersionless();
 	}
-	
+
 	@Test
 	public void testValidateCodeOperationByCodeAndSystemInstance() {
 		Parameters respParam = ourClient
@@ -51,7 +49,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
-		
+
 		assertEquals(new BooleanDt(true), respParam.getParameter().get(0).getValue());
 	}
 
@@ -67,7 +65,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
-		
+
 		assertEquals("name", respParam.getParameter().get(0).getName());
 		assertEquals(new StringDt("Unknown"), respParam.getParameter().get(0).getValue());
 		assertEquals("display", respParam.getParameter().get(1).getName());
@@ -75,7 +73,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
 		assertEquals(new BooleanDt(false), respParam.getParameter().get(2).getValue());
 	}
-	
+
 	@Test
 	@Disabled
 	public void testLookupOperationForBuiltInCode() {
@@ -89,7 +87,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
-		
+
 		assertEquals("name", respParam.getParameter().get(0).getName());
 		assertEquals(new StringDt("Unknown"), respParam.getParameter().get(0).getValue());
 		assertEquals("display", respParam.getParameter().get(1).getName());
@@ -109,7 +107,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
-		
+
 		assertEquals("name", respParam.getParameter().get(0).getName());
 		assertEquals(new StringDt("Unknown"), respParam.getParameter().get(0).getValue());
 		assertEquals("display", respParam.getParameter().get(1).getName());
@@ -179,20 +177,20 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp,
-			stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">", 
-				"<expansion>", 
-					"<contains>", 
-						"<system value=\"http://loinc.org\"/>",
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter\"/>", 
-					"</contains>",
-					"<contains>", 
-						"<system value=\"http://loinc.org\"/>",
-						"<code value=\"8450-9\"/>", 
-						"<display value=\"Systolic blood pressure--expiration\"/>", 
-					"</contains>",
-				"</expansion>" 
-					));
+			stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">",
+				"<expansion>",
+				"<contains>",
+				"<system value=\"http://loinc.org\"/>",
+				"<code value=\"11378-7\"/>",
+				"<display value=\"Systolic blood pressure at First encounter\"/>",
+				"</contains>",
+				"<contains>",
+				"<system value=\"http://loinc.org\"/>",
+				"<code value=\"8450-9\"/>",
+				"<display value=\"Systolic blood pressure--expiration\"/>",
+				"</contains>",
+				"</expansion>"
+			));
 
 		/*
 		 * Filter with display name
@@ -206,12 +204,12 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		expanded = myValueSetDao.expand(myExtensionalVsId, ("systolic"), mySrd);
+		expanded = myValueSetDao.expand(myExtensionalVsId, new ValueSetExpansionOptions().setFilter("systolic"), mySrd);
 		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
-				"<code value=\"11378-7\"/>", 
-				"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 
 		/*
 		 * Filter with code
@@ -227,10 +225,10 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
-				"<code value=\"11378-7\"/>", 
-				"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 	}
-	
+
 	@Test
 	public void testExpandByIdentifier() {
 		Parameters respParam = ourClient
@@ -245,8 +243,8 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
-				"<code value=\"11378-7\"/>", 
-				"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 
 		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
 	}
@@ -254,7 +252,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 	@Test
 	public void testExpandByValueSet() throws IOException {
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.xml");
-		
+
 		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
@@ -267,8 +265,8 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
-				"<code value=\"11378-7\"/>", 
-				"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 
 		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
 	}
@@ -316,5 +314,5 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		}
 
 	}
-	
+
 }

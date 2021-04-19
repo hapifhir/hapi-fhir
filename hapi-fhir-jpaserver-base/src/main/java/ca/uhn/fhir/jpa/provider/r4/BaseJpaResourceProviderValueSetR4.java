@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.provider.r4;
  */
 
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProviderValueSetDstu2;
@@ -29,7 +31,17 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UriType;
+import org.hl7.fhir.r4.model.ValueSet;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -48,6 +60,7 @@ public class BaseJpaResourceProviderValueSetR4 extends JpaResourceProviderR4<Val
 		@OperationParam(name = "filter", min = 0, max = 1) StringType theFilter,
 		@OperationParam(name = "offset", min = 0, max = 1) IntegerType theOffset,
 		@OperationParam(name = "count", min = 0, max = 1) IntegerType theCount,
+		@OperationParam(name = JpaConstants.OPERATION_EXPAND_PARAM_INCLUDE_HIERARCHY, min = 0, max = 1, typeName = "boolean") IPrimitiveType<Boolean> theIncludeHierarchy,
 		RequestDetails theRequestDetails) {
 
 		boolean haveId = theId != null && theId.hasIdPart();
@@ -63,69 +76,28 @@ public class BaseJpaResourceProviderValueSetR4 extends JpaResourceProviderR4<Val
 			throw new InvalidRequestException("$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.");
 		}
 
-		int offset = myDaoConfig.getPreExpandValueSetsDefaultOffset();
-		if (theOffset != null && theOffset.hasValue()) {
-			if (theOffset.getValue() >= 0) {
-				offset = theOffset.getValue();
-			} else {
-				throw new InvalidRequestException("offset parameter for $expand operation must be >= 0 when specified. offset: " + theOffset.getValue());
-			}
-		}
-
-		int count = myDaoConfig.getPreExpandValueSetsDefaultCount();
-		if (theCount != null && theCount.hasValue()) {
-			if (theCount.getValue() >= 0) {
-				count = theCount.getValue();
-			} else {
-				throw new InvalidRequestException("count parameter for $expand operation must be >= 0 when specified. count: " + theCount.getValue());
-			}
-		}
-		int countMax = myDaoConfig.getPreExpandValueSetsMaxCount();
-		if (count > countMax) {
-			ourLog.warn("count parameter for $expand operation of {} exceeds maximum value of {}; using maximum value.", count, countMax);
-			count = countMax;
-		}
+		ValueSetExpansionOptions options = createValueSetExpansionOptions(myDaoConfig, theOffset, theCount, theIncludeHierarchy, theFilter);
 
 		startRequest(theServletRequest);
 		try {
+
 			IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> dao = (IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept>) getDao();
-			if (myDaoConfig.isPreExpandValueSets()) {
-				if (haveId) {
-					return dao.expand(theId, toFilterString(theFilter), offset, count, theRequestDetails);
-				} else if (haveIdentifier) {
-					if (haveValueSetVersion) {
-						return dao.expandByIdentifier(theUrl.getValue() + "|" + theValueSetVersion.getValue(), toFilterString(theFilter), offset, count);
-					} else {
-						return dao.expandByIdentifier(theUrl.getValue(), toFilterString(theFilter), offset, count);
-					}
+			if (haveId) {
+				return dao.expand(theId, options, theRequestDetails);
+			} else if (haveIdentifier) {
+				if (haveValueSetVersion) {
+					return dao.expandByIdentifier(theUrl.getValue() + "|" + theValueSetVersion.getValue(), options);
 				} else {
-					return dao.expand(theValueSet, toFilterString(theFilter), offset, count);
+					return dao.expandByIdentifier(theUrl.getValue(), options);
 				}
 			} else {
-				if (haveId) {
-					return dao.expand(theId, toFilterString(theFilter), theRequestDetails);
-				} else if (haveIdentifier) {
-					if (haveValueSetVersion) {
-						return dao.expandByIdentifier(theUrl.getValue() + "|" + theValueSetVersion.getValue(), toFilterString(theFilter));
-					} else {
-						return dao.expandByIdentifier(theUrl.getValue(), toFilterString(theFilter));
-					}
-				} else {
-					return dao.expand(theValueSet, toFilterString(theFilter));
-				}
+				return dao.expand(theValueSet, options);
 			}
 		} finally {
 			endRequest(theServletRequest);
 		}
 	}
 
-
-	private String toFilterString(StringType theFilter) {
-		return theFilter != null ? theFilter.getValue() : null;
-	}
-
-
-	@SuppressWarnings("unchecked")
 	@Operation(name = JpaConstants.OPERATION_VALIDATE_CODE, idempotent = true, returnParameters = {
 		@OperationParam(name = "result", type = BooleanType.class, min = 1),
 		@OperationParam(name = "message", type = StringType.class),
@@ -167,6 +139,42 @@ public class BaseJpaResourceProviderValueSetR4 extends JpaResourceProviderR4<Val
 		}
 	}
 
+	public static ValueSetExpansionOptions createValueSetExpansionOptions(DaoConfig theDaoConfig, IPrimitiveType<Integer> theOffset, IPrimitiveType<Integer> theCount, IPrimitiveType<Boolean> theIncludeHierarchy, IPrimitiveType<String> theFilter) {
+		int offset = theDaoConfig.getPreExpandValueSetsDefaultOffset();
+		if (theOffset != null && theOffset.hasValue()) {
+			if (theOffset.getValue() >= 0) {
+				offset = theOffset.getValue();
+			} else {
+				throw new InvalidRequestException("offset parameter for $expand operation must be >= 0 when specified. offset: " + theOffset.getValue());
+			}
+		}
+
+		int count = theDaoConfig.getPreExpandValueSetsDefaultCount();
+		if (theCount != null && theCount.hasValue()) {
+			if (theCount.getValue() >= 0) {
+				count = theCount.getValue();
+			} else {
+				throw new InvalidRequestException("count parameter for $expand operation must be >= 0 when specified. count: " + theCount.getValue());
+			}
+		}
+		int countMax = theDaoConfig.getPreExpandValueSetsMaxCount();
+		if (count > countMax) {
+			ourLog.warn("count parameter for $expand operation of {} exceeds maximum value of {}; using maximum value.", count, countMax);
+			count = countMax;
+		}
+
+		ValueSetExpansionOptions options = ValueSetExpansionOptions.forOffsetAndCount(offset, count);
+
+		if (theIncludeHierarchy != null && Boolean.TRUE.equals(theIncludeHierarchy.getValue())) {
+			options.setIncludeHierarchy(true);
+		}
+
+		if (theFilter != null) {
+			options.setFilter(theFilter.getValue());
+		}
+
+		return options;
+	}
 
 	private static boolean moreThanOneTrue(boolean... theBooleans) {
 		boolean haveOne = false;

@@ -85,7 +85,7 @@ public class TransactionProcessorTest {
 			.setUrl("/MedicationKnowledge");
 
 		try {
-			myTransactionProcessor.transaction(null, input);
+			myTransactionProcessor.transaction(null, input, false);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Resource MedicationKnowledge is not supported on this server. Supported resource types: []", e.getMessage());

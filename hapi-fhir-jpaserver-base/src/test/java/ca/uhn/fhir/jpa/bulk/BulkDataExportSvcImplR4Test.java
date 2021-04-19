@@ -6,19 +6,19 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
-import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
-import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.bulk.job.BulkExportJobParametersBuilder;
-import ca.uhn.fhir.jpa.bulk.job.GroupBulkExportJobParametersBuilder;
-import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
+import ca.uhn.fhir.jpa.bulk.export.api.BulkDataExportOptions;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobParametersBuilder;
+import ca.uhn.fhir.jpa.bulk.export.job.GroupBulkExportJobParametersBuilder;
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
-import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.parser.IParser;
@@ -46,28 +46,22 @@ import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -78,7 +72,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
+public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 
 	public static final String TEST_FILTER = "Patient?gender=female";
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportSvcImplR4Test.class);
@@ -92,8 +86,6 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	private IBulkDataExportSvc myBulkDataExportSvc;
 	@Autowired
 	private IBatchJobSubmitter myBatchJobSubmitter;
-	@Autowired
-	private JobExplorer myJobExplorer;
 
 	@Autowired
 	@Qualifier(BatchJobsConfig.BULK_EXPORT_JOB_NAME)
@@ -125,10 +117,10 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 			Binary b = new Binary();
 			b.setContent(new byte[]{0, 1, 2, 3});
-			String binaryId = myBinaryDao.create(b).getId().toUnqualifiedVersionless().getValue();
+			String binaryId = myBinaryDao.create(b, new SystemRequestDetails()).getId().toUnqualifiedVersionless().getValue();
 
 			BulkExportJobEntity job = new BulkExportJobEntity();
-			job.setStatus(BulkJobStatusEnum.COMPLETE);
+			job.setStatus(BulkExportJobStatusEnum.COMPLETE);
 			job.setExpiry(DateUtils.addHours(new Date(), -1));
 			job.setJobId(UUID.randomUUID().toString());
 			job.setCreated(new Date());
@@ -241,6 +233,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
 		return options;
 	}
+
 	@Test
 	public void testSubmit_ReusesExisting() {
 
@@ -278,7 +271,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 			// Check the status
 			IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
-			assertEquals(BulkJobStatusEnum.SUBMITTED, status.getStatus());
+			assertEquals(BulkExportJobStatusEnum.SUBMITTED, status.getStatus());
 
 			// Run a scheduled pass to build the export
 			myBulkDataExportSvc.buildExportFiles();
@@ -287,12 +280,20 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 			// Fetch the job again
 			status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
-			assertEquals(BulkJobStatusEnum.ERROR, status.getStatus());
+			assertEquals(BulkExportJobStatusEnum.ERROR, status.getStatus());
 			assertThat(status.getStatusMessage(), containsString("help i'm a bug"));
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
+	}
+
+	private void awaitAllBulkJobCompletions() {
+		awaitAllBulkJobCompletions(
+			BatchJobsConfig.BULK_EXPORT_JOB_NAME,
+			BatchJobsConfig.PATIENT_BULK_EXPORT_JOB_NAME,
+			BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME
+		);
 	}
 
 
@@ -313,7 +314,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		// Check the status
 		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
-		assertEquals(BulkJobStatusEnum.SUBMITTED, status.getStatus());
+		assertEquals(BulkExportJobStatusEnum.SUBMITTED, status.getStatus());
 		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Observation,Patient&_typeFilter=" + UrlUtil.escapeUrlParam(TEST_FILTER), status.getRequest());
 
 		// Run a scheduled pass to build the export
@@ -323,7 +324,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		// Fetch the job again
 		status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
-		assertEquals(BulkJobStatusEnum.COMPLETE, status.getStatus());
+		assertEquals(BulkExportJobStatusEnum.COMPLETE, status.getStatus());
 
 		// Iterate over the files
 		for (IBulkDataExportSvc.FileEntry next : status.getFiles()) {
@@ -368,7 +369,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		// Check the status
 		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
-		assertEquals(BulkJobStatusEnum.SUBMITTED, status.getStatus());
+		assertEquals(BulkExportJobStatusEnum.SUBMITTED, status.getStatus());
 		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson", status.getRequest());
 
 		// Run a scheduled pass to build the export
@@ -378,7 +379,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		// Fetch the job again
 		status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
-		assertEquals(BulkJobStatusEnum.COMPLETE, status.getStatus());
+		assertEquals(BulkExportJobStatusEnum.COMPLETE, status.getStatus());
 		assertEquals(5, status.getFiles().size());
 
 		// Iterate over the files
@@ -393,7 +394,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			} else if ("Observation".equals(next.getResourceType())) {
 				assertThat(nextContents, containsString("\"subject\":{\"reference\":\"Patient/PAT0\"}}\n"));
 				assertEquals(26, nextContents.split("\n").length);
-			}else if ("Immunization".equals(next.getResourceType())) {
+			} else if ("Immunization".equals(next.getResourceType())) {
 				assertThat(nextContents, containsString("\"patient\":{\"reference\":\"Patient/PAT0\"}}\n"));
 				assertEquals(26, nextContents.split("\n").length);
 			} else if ("CareTeam".equals(next.getResourceType())) {
@@ -428,7 +429,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 
-		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getStatus(), equalTo(BulkExportJobStatusEnum.COMPLETE));
 		assertThat(jobInfo.getFiles().size(), equalTo(5));
 	}
 
@@ -451,7 +452,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		// Check the status
 		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
-		assertEquals(BulkJobStatusEnum.SUBMITTED, status.getStatus());
+		assertEquals(BulkExportJobStatusEnum.SUBMITTED, status.getStatus());
 		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Patient&_typeFilter=Patient%3F_has%3AObservation%3Apatient%3Aidentifier%3DSYS%7CVAL3", status.getRequest());
 
 		// Run a scheduled pass to build the export
@@ -461,7 +462,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		// Fetch the job again
 		status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
-		assertEquals(BulkJobStatusEnum.COMPLETE, status.getStatus());
+		assertEquals(BulkExportJobStatusEnum.COMPLETE, status.getStatus());
 		assertEquals(1, status.getFiles().size());
 
 		// Iterate over the files
@@ -481,7 +482,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testGenerateBulkExport_WithSince() throws InterruptedException {
+	public void testGenerateBulkExport_WithSince() {
 
 		// Create some resources to load
 		createResources();
@@ -494,7 +495,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			Patient patient = new Patient();
 			patient.setId("PAT" + i);
 			patient.addIdentifier().setSystem("http://mrns").setValue("PAT" + i);
-			myPatientDao.update(patient).getId().toUnqualifiedVersionless();
+			myPatientDao.update(patient, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
 		}
 
 		// Create a bulk job
@@ -508,7 +509,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		// Check the status
 		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
-		assertEquals(BulkJobStatusEnum.SUBMITTED, status.getStatus());
+		assertEquals(BulkExportJobStatusEnum.SUBMITTED, status.getStatus());
 		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Observation,Patient&_since=" + cutoff.setTimeZoneZulu(true).getValueAsString(), status.getRequest());
 
 		// Run a scheduled pass to build the export
@@ -518,12 +519,12 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		// Fetch the job again
 		status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
-		assertEquals(BulkJobStatusEnum.COMPLETE, status.getStatus());
+		assertEquals(BulkExportJobStatusEnum.COMPLETE, status.getStatus());
 		assertEquals(1, status.getFiles().size());
 
 		// Iterate over the files
 		for (IBulkDataExportSvc.FileEntry next : status.getFiles()) {
-			Binary nextBinary = myBinaryDao.read(next.getResourceId());
+			Binary nextBinary = myBinaryDao.read(next.getResourceId(), new SystemRequestDetails());
 			assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
 			String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
 			ourLog.info("Next contents for type {}:\n{}", next.getResourceType(), nextContents);
@@ -560,24 +561,10 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		String jobUUID = (String) jobExecution.getExecutionContext().get("jobUUID");
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobUUID);
 
-		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getStatus(), equalTo(BulkExportJobStatusEnum.COMPLETE));
 		assertThat(jobInfo.getFiles().size(), equalTo(2));
 	}
 
-	public void awaitAllBulkJobCompletions() {
-		List<JobInstance> bulkExport = myJobExplorer.findJobInstancesByJobName(BatchJobsConfig.BULK_EXPORT_JOB_NAME, 0, 100);
-		bulkExport.addAll(myJobExplorer.findJobInstancesByJobName(BatchJobsConfig.PATIENT_BULK_EXPORT_JOB_NAME, 0, 100));
-		bulkExport.addAll(myJobExplorer.findJobInstancesByJobName(BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME, 0, 100));
-		if (bulkExport.isEmpty()) {
-			fail("There are no bulk export jobs running!");
-		}
-		List<JobExecution> bulkExportExecutions = bulkExport.stream().flatMap(jobInstance -> myJobExplorer.getJobExecutions(jobInstance).stream()).collect(Collectors.toList());
-		awaitJobCompletions(bulkExportExecutions);
-	}
-
-	public void awaitJobCompletions(Collection<JobExecution> theJobs) {
-		theJobs.forEach(jobExecution -> awaitJobCompletion(jobExecution));
-	}
 
 	@Test
 	public void testBatchJobSubmitsAndRuns() throws Exception {
@@ -599,13 +586,13 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		awaitJobCompletion(jobExecution);
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 
-		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getStatus(), equalTo(BulkExportJobStatusEnum.COMPLETE));
 		assertThat(jobInfo.getFiles().size(), equalTo(2));
 	}
 
 
 	@Test
-	public void testGroupBatchJobWorks() throws Exception {
+	public void testGroupBatchJobWorks() {
 		createResources();
 
 		// Create a bulk job
@@ -625,7 +612,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 
-		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getStatus(), equalTo(BulkExportJobStatusEnum.COMPLETE));
 		assertThat(jobInfo.getFiles().size(), equalTo(1));
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
 
@@ -639,8 +626,9 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(nextContents, is(containsString("IMM6")));
 		assertThat(nextContents, is(containsString("IMM8")));
 	}
+
 	@Test
-	public void testGroupBatchJobMdmExpansionIdentifiesGoldenResources() throws Exception {
+	public void testGroupBatchJobMdmExpansionIdentifiesGoldenResources() {
 		createResources();
 
 		// Create a bulk job
@@ -659,7 +647,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 
-		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getStatus(), equalTo(BulkExportJobStatusEnum.COMPLETE));
 		assertThat(jobInfo.getFiles().size(), equalTo(2));
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
 
@@ -716,7 +704,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		awaitJobCompletion(jobExecution);
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 
-		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getStatus(), equalTo(BulkExportJobStatusEnum.COMPLETE));
 		assertThat(jobInfo.getFiles().size(), equalTo(2));
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
 
@@ -747,7 +735,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 	// CareTeam has two patient references: participant and patient.  This test checks if we find the patient if participant is null but patient is not null
 	@Test
-	public void testGroupBatchJobCareTeam() throws Exception {
+	public void testGroupBatchJobCareTeam() {
 		createResources();
 
 		BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
@@ -766,7 +754,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 
-		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getStatus(), equalTo(BulkExportJobStatusEnum.COMPLETE));
 		assertThat(jobInfo.getFiles().size(), equalTo(1));
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("CareTeam")));
 
@@ -810,7 +798,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 
-		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getStatus(), equalTo(BulkExportJobStatusEnum.COMPLETE));
 		assertThat(jobInfo.getFiles().size(), equalTo(1));
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
 
@@ -847,7 +835,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 
-		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getStatus(), equalTo(BulkExportJobStatusEnum.COMPLETE));
 		assertThat(jobInfo.getFiles().size(), equalTo(1));
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Observation")));
 		String nextContents = getBinaryContents(jobInfo, 0);
@@ -861,7 +849,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 	public String getBinaryContents(IBulkDataExportSvc.JobInfo theJobInfo, int theIndex) {
 		// Iterate over the files
-		Binary nextBinary = myBinaryDao.read(theJobInfo.getFiles().get(theIndex).getResourceId());
+		Binary nextBinary = myBinaryDao.read(theJobInfo.getFiles().get(theIndex).getResourceId(), new SystemRequestDetails());
 		assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
 		String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
 		ourLog.info("Next contents for type {}:\n{}", nextBinary.getResourceType(), nextContents);
@@ -888,7 +876,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		awaitAllBulkJobCompletions();
 
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
-		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getStatus(), equalTo(BulkExportJobStatusEnum.COMPLETE));
 		assertThat(jobInfo.getFiles().size(), equalTo(1));
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Patient")));
 
@@ -900,7 +888,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testMdmExpansionWorksForGroupExportOnMatchedPatients() throws JobParametersInvalidException {
+	public void testMdmExpansionWorksForGroupExportOnMatchedPatients() {
 		createResources();
 
 		// Create a bulk job
@@ -918,9 +906,9 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		awaitAllBulkJobCompletions();
 
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
-		assertEquals("/Group/G0/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Observation,Immunization&_groupId=" + myPatientGroupId +"&_mdm=true", jobInfo.getRequest());
+		assertEquals("/Group/G0/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Observation,Immunization&_groupId=" + myPatientGroupId + "&_mdm=true", jobInfo.getRequest());
 
-		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getStatus(), equalTo(BulkExportJobStatusEnum.COMPLETE));
 		assertThat(jobInfo.getFiles().size(), equalTo(2));
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
 
@@ -941,7 +929,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 
 		//Check Observation Content
-		Binary observationExportContent = myBinaryDao.read(jobInfo.getFiles().get(1).getResourceId());
+		Binary observationExportContent = myBinaryDao.read(jobInfo.getFiles().get(1).getResourceId(), new SystemRequestDetails());
 		assertEquals(Constants.CT_FHIR_NDJSON, observationExportContent.getContentType());
 		nextContents = new String(observationExportContent.getContent(), Constants.CHARSET_UTF8);
 		ourLog.info("Next contents for type {}:\n{}", observationExportContent.getResourceType(), nextContents);
@@ -963,7 +951,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testGroupBulkExportSupportsTypeFilters() throws JobParametersInvalidException {
+	public void testGroupBulkExportSupportsTypeFilters() {
 		createResources();
 
 		//Only get COVID-19 vaccinations
@@ -985,7 +973,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 
-		assertThat(jobInfo.getStatus(), equalTo(BulkJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getStatus(), equalTo(BulkExportJobStatusEnum.COMPLETE));
 		assertThat(jobInfo.getFiles().size(), equalTo(1));
 		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
 
@@ -1021,7 +1009,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		myBulkDataExportSvc.buildExportFiles();
 		awaitAllBulkJobCompletions();
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
-		assertThat(jobInfo.getStatus(), is(equalTo(BulkJobStatusEnum.COMPLETE)));
+		assertThat(jobInfo.getStatus(), is(equalTo(BulkExportJobStatusEnum.COMPLETE)));
 
 		//Group-style
 		bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
@@ -1030,7 +1018,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		myBulkDataExportSvc.buildExportFiles();
 		awaitAllBulkJobCompletions();
 		jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
-		assertThat(jobInfo.getStatus(), is(equalTo(BulkJobStatusEnum.COMPLETE)));
+		assertThat(jobInfo.getStatus(), is(equalTo(BulkExportJobStatusEnum.COMPLETE)));
 
 		//System-style
 		bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
@@ -1038,11 +1026,11 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		myBulkDataExportSvc.buildExportFiles();
 		awaitAllBulkJobCompletions();
 		jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
-		assertThat(jobInfo.getStatus(), is(equalTo(BulkJobStatusEnum.COMPLETE)));
+		assertThat(jobInfo.getStatus(), is(equalTo(BulkExportJobStatusEnum.COMPLETE)));
 	}
 
 	@Test
-	public void testCacheSettingIsRespectedWhenCreatingNewJobs() {
+	public void testCacheSettingIsRespectedWhenCreatingNewJobs() throws InterruptedException {
 		BulkDataExportOptions options = new BulkDataExportOptions();
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
 		options.setResourceTypes(Sets.newHashSet("Procedure"));
@@ -1061,6 +1049,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		IBulkDataExportSvc.JobInfo jobInfo6 = myBulkDataExportSvc.submitJob(options, false);
 		IBulkDataExportSvc.JobInfo jobInfo7 = myBulkDataExportSvc.submitJob(options, false);
 		IBulkDataExportSvc.JobInfo jobInfo8 = myBulkDataExportSvc.submitJob(options, false);
+		Thread.sleep(100L); //stupid commit timings.
 		IBulkDataExportSvc.JobInfo jobInfo9 = myBulkDataExportSvc.submitJob(options, false);
 
 		//First non-cached should retrieve new ID.
@@ -1074,15 +1063,48 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		//Now if we create another one and ask for the cache, we should get the most-recently-insert entry.
 		IBulkDataExportSvc.JobInfo jobInfo10 = myBulkDataExportSvc.submitJob(options, true);
 		assertThat(jobInfo10.getJobId(), is(equalTo(jobInfo9.getJobId())));
-
 	}
+	@Test
+	public void testBulkExportWritesToDEFAULTPartitionWhenPartitioningIsEnabled() {
+		myPartitionSettings.setPartitioningEnabled(true);
 
-	private void awaitJobCompletion(JobExecution theJobExecution) {
-		await().atMost(120, TimeUnit.SECONDS).until(() -> {
-			JobExecution jobExecution = myJobExplorer.getJobExecution(theJobExecution.getId());
-			ourLog.info("JobExecution {} currently has status: {}", theJobExecution.getId(), jobExecution.getStatus());
-			return jobExecution.getStatus() == BatchStatus.COMPLETED || jobExecution.getStatus() == BatchStatus.FAILED;
-		});
+		createResources();
+
+		//Only get COVID-19 vaccinations
+		Set<String> filters = new HashSet<>();
+		filters.add("Immunization?vaccine-code=vaccines|COVID-19");
+
+		BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
+		bulkDataExportOptions.setOutputFormat(null);
+		bulkDataExportOptions.setResourceTypes(Sets.newHashSet("Immunization"));
+		bulkDataExportOptions.setSince(null);
+		bulkDataExportOptions.setFilters(filters);
+		bulkDataExportOptions.setGroupId(myPatientGroupId);
+		bulkDataExportOptions.setExpandMdm(true);
+		bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
+
+		myBulkDataExportSvc.buildExportFiles();
+		awaitAllBulkJobCompletions();
+
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+
+		assertThat(jobInfo.getStatus(), equalTo(BulkExportJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getFiles().size(), equalTo(1));
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
+
+		// Check immunization Content
+		String nextContents = getBinaryContents(jobInfo, 0);
+
+		assertThat(nextContents, is(containsString("IMM1")));
+		assertThat(nextContents, is(containsString("IMM3")));
+		assertThat(nextContents, is(containsString("IMM5")));
+		assertThat(nextContents, is(containsString("IMM7")));
+		assertThat(nextContents, is(containsString("IMM9")));
+		assertThat(nextContents, is(containsString("IMM999")));
+
+		assertThat(nextContents, is(not(containsString("Flu"))));
+		myPartitionSettings.setPartitioningEnabled(false);
 	}
 
 	private void createResources() {
@@ -1092,7 +1114,8 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		//Manually create a golden record
 		Patient goldenPatient = new Patient();
 		goldenPatient.setId("PAT999");
-		DaoMethodOutcome g1Outcome = myPatientDao.update(goldenPatient);
+		SystemRequestDetails srd = SystemRequestDetails.newSystemRequestAllPartitions();
+		DaoMethodOutcome g1Outcome = myPatientDao.update(goldenPatient, srd);
 		Long goldenPid = myIdHelperService.getPidOrNull(g1Outcome.getResource());
 
 		//Create our golden records' data.
@@ -1109,7 +1132,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			linkToGoldenResource(goldenPid, sourcePid);
 
 			//Only add half the patients to the group.
-			if (i % 2 == 0 ) {
+			if (i % 2 == 0) {
 				group.addMember().setEntity(new Reference(patId));
 			}
 
@@ -1119,12 +1142,12 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			createCareTeamWithIndex(i, patId);
 		}
 
-		myPatientGroupId =  myGroupDao.update(group).getId();
+		myPatientGroupId = myGroupDao.update(group, new SystemRequestDetails()).getId();
 
 		//Manually create another golden record
 		Patient goldenPatient2 = new Patient();
 		goldenPatient2.setId("PAT888");
-		DaoMethodOutcome g2Outcome = myPatientDao.update(goldenPatient2);
+		DaoMethodOutcome g2Outcome = myPatientDao.update(goldenPatient2, new SystemRequestDetails());
 		Long goldenPid2 = myIdHelperService.getPidOrNull(g2Outcome.getResource());
 
 		//Create some nongroup patients MDM linked to a different golden resource. They shouldnt be included in the query.
@@ -1153,21 +1176,20 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		patient.setGender(i % 2 == 0 ? Enumerations.AdministrativeGender.MALE : Enumerations.AdministrativeGender.FEMALE);
 		patient.addName().setFamily("FAM" + i);
 		patient.addIdentifier().setSystem("http://mrns").setValue("PAT" + i);
-		DaoMethodOutcome patientOutcome = myPatientDao.update(patient);
-		return patientOutcome;
+		return myPatientDao.update(patient, new SystemRequestDetails());
 	}
 
 	private void createCareTeamWithIndex(int i, IIdType patId) {
 		CareTeam careTeam = new CareTeam();
 		careTeam.setId("CT" + i);
 		careTeam.setSubject(new Reference(patId)); // This maps to the "patient" search parameter on CareTeam
-		myCareTeamDao.update(careTeam);
+		myCareTeamDao.update(careTeam, new SystemRequestDetails());
 	}
 
 	private void createImmunizationWithIndex(int i, IIdType patId) {
 		Immunization immunization = new Immunization();
 		immunization.setId("IMM" + i);
-		if (patId != null ) {
+		if (patId != null) {
 			immunization.setPatient(new Reference(patId));
 		}
 		if (i % 2 == 0) {
@@ -1179,7 +1201,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			cc.addCoding().setSystem("vaccines").setCode("COVID-19");
 			immunization.setVaccineCode(cc);
 		}
-		myImmunizationDao.update(immunization);
+		myImmunizationDao.update(immunization, new SystemRequestDetails());
 	}
 
 	private void createObservationWithIndex(int i, IIdType patId) {
@@ -1190,7 +1212,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		if (patId != null) {
 			obs.getSubject().setReference(patId.getValue());
 		}
-		myObservationDao.update(obs);
+		myObservationDao.update(obs, new SystemRequestDetails());
 	}
 
 	public void linkToGoldenResource(Long theGoldenPid, Long theSourcePid) {

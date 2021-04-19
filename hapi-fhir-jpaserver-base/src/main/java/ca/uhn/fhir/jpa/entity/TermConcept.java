@@ -388,7 +388,7 @@ public class TermConcept implements Serializable {
 			b.append("NONE");
 		}
 
-		myParentPids = b.toString();
+		setParentPids(b.toString());
 	}
 
 	public TermConcept setParentPids(String theParentPids) {
