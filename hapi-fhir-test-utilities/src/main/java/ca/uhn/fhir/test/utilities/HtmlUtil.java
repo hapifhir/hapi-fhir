@@ -12,7 +12,6 @@ import org.awaitility.Awaitility;
 import java.io.IOException;
 import java.net.URL;
 
-// FIXME: added to HAPI FHIR
 public class HtmlUtil {
 
 	public static HtmlPage parseAsHtml(String theRespString, URL theUrl) throws IOException {

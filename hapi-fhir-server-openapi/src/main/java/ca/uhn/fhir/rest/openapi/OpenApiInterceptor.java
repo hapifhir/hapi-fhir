@@ -56,6 +56,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.thymeleaf.IEngineConfiguration;
 import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.cache.AlwaysValidCacheEntryValidity;
 import org.thymeleaf.cache.ICacheEntryValidity;
 import org.thymeleaf.cache.NonCacheableCacheEntryValidity;
 import org.thymeleaf.context.IExpressionContext;
@@ -811,7 +812,7 @@ public class OpenApiInterceptor {
 		@Override
 		public TemplateResolution resolveTemplate(IEngineConfiguration configuration, String ownerTemplate, String template, Map<String, Object> templateResolutionAttributes) {
 			ClassLoaderTemplateResource resource = getIndexTemplate();
-			ICacheEntryValidity cacheValidity = new NonCacheableCacheEntryValidity(); // FIXME: replace
+			ICacheEntryValidity cacheValidity = new AlwaysValidCacheEntryValidity();
 			return new TemplateResolution(resource, TemplateMode.HTML, cacheValidity);
 		}
 	}

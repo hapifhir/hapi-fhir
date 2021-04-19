@@ -74,7 +74,6 @@ public class OpenApiInterceptorTest {
 	@RegisterExtension
 	@Order(0)
 	protected RestfulServerExtension myServer = new RestfulServerExtension(myFhirContext)
-		.withPort(8000) // FIXME: remove
 		.withServletPath("/fhir/*")
 		.withServer(t -> t.registerProvider(new HashMapResourceProvider<>(myFhirContext, Patient.class)))
 		.withServer(t -> t.registerProvider(new HashMapResourceProvider<>(myFhirContext, Observation.class)))
