@@ -138,6 +138,7 @@ public class ResourceLink extends BaseResourceIndex {
 		b.append(mySourceResource, obj.mySourceResource);
 		b.append(myTargetResourceUrl, obj.myTargetResourceUrl);
 		b.append(myTargetResourceType, obj.myTargetResourceType);
+		b.append(myTargetResourceVersion, obj.myTargetResourceVersion);
 		b.append(getTargetResourceId(), obj.getTargetResourceId());
 		return b.isEquals();
 	}
@@ -150,6 +151,7 @@ public class ResourceLink extends BaseResourceIndex {
 		myTargetResourceId = source.getTargetResourceId();
 		myTargetResourcePid = source.getTargetResourcePid();
 		myTargetResourceType = source.getTargetResourceType();
+		myTargetResourceVersion = source.getTargetResourceVersion();
 		myTargetResourceUrl = source.getTargetResourceUrl();
 	}
 
@@ -244,6 +246,7 @@ public class ResourceLink extends BaseResourceIndex {
 		b.append(mySourcePath);
 		b.append(mySourceResource);
 		b.append(myTargetResourceUrl);
+		b.append(myTargetResourceVersion);
 		b.append(getTargetResourceType());
 		b.append(getTargetResourceId());
 		return b.toHashCode();
@@ -257,6 +260,7 @@ public class ResourceLink extends BaseResourceIndex {
 		b.append(", src=").append(mySourceResourcePid);
 		b.append(", target=").append(myTargetResourcePid);
 		b.append(", targetType=").append(myTargetResourceType);
+		b.append(", targetVersion=").append(myTargetResourceVersion);
 		b.append(", targetUrl=").append(myTargetResourceUrl);
 
 		b.append("]");

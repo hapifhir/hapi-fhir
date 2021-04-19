@@ -18,6 +18,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -60,10 +61,10 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -109,8 +110,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	public void after() {
 		myDaoConfig.setAllowInlineMatchUrlReferences(false);
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-        myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
-    }
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+	}
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
@@ -549,7 +550,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		myValueSetDao.create(vs, mySrd);
 
 		sleepUntilTimeChanges();
-		
+
 		ResourceTable entity = new TransactionTemplate(myTxManager).execute(t -> myEntityManager.find(ResourceTable.class, id.getIdPartAsLong()));
 		assertEquals(Long.valueOf(1), entity.getIndexStatus());
 
@@ -568,9 +569,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		 * so it indexes the newest resource one more time. It wouldn't be a big deal
 		 * if this ever got fixed so that it ends up with 2 instead of 3.
 		 */
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			Optional<Integer> reindexCount = myResourceReindexJobDao.getReindexCount(jobId);
-			assertEquals(3, reindexCount.orElseThrow(()->new NullPointerException("No job " + jobId)).intValue());
+			assertEquals(3, reindexCount.orElseThrow(() -> new NullPointerException("No job " + jobId)).intValue());
 		});
 
 		// Try making the resource unparseable
@@ -626,7 +627,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		searchParamMap.add(Patient.SP_FAMILY, new StringParam("family2"));
 		assertEquals(1, myPatientDao.search(searchParamMap).size().intValue());
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			ResourceHistoryTable historyEntry = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 3);
 			assertNotNull(historyEntry);
 			myResourceHistoryTableDao.delete(historyEntry);
@@ -656,7 +657,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		searchParamMap.add(Patient.SP_FAMILY, new StringParam("family1"));
 		assertEquals(1, myPatientDao.search(searchParamMap).size().intValue());
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			myEntityManager
 				.createQuery("UPDATE ResourceIndexedSearchParamString s SET s.myHashNormalizedPrefix = 0")
 				.executeUpdate();
@@ -671,7 +672,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		myResourceReindexingSvc.markAllResourcesForReindexing();
 		myResourceReindexingSvc.forceReindexingPass();
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			ResourceIndexedSearchParamString param = myResourceIndexedSearchParamStringDao.findAll()
 				.stream()
 				.filter(t -> t.getParamName().equals("family"))
@@ -694,7 +695,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		searchParamMap.add(Patient.SP_FAMILY, new StringParam("family1"));
 		assertEquals(1, myPatientDao.search(searchParamMap).size().intValue());
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			Long i = myEntityManager
 				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity = 0", Long.class)
 				.getSingleResult();
@@ -714,7 +715,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		myResourceReindexingSvc.markAllResourcesForReindexing();
 		myResourceReindexingSvc.forceReindexingPass();
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			Long i = myEntityManager
 				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity = 0", Long.class)
 				.getSingleResult();
@@ -807,6 +808,30 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
 	}
+
+
+	@Test
+	public void testNestedTransaction_ReadsBlocked() {
+		String methodName = "testTransactionBatchWithFailingRead";
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+
+		Patient p = new Patient();
+		p.addName().setFamily(methodName);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST);
+
+		request.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient?identifier=foo");
+
+		try {
+			runInTransaction(()->{
+				mySystemDao.transactionNested(mySrd, request);
+			});
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Can not invoke read operation on nested transaction", e.getMessage());
+		}
+	}
+
 
 	@Test
 	public void testTransactionBatchWithFailingRead() {
@@ -923,8 +948,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Bundle outcome = mySystemDao.transaction(mySrd, request);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("400 Bad Request", outcome.getEntry().get(0).getResponse().getStatus());
-		assertEquals(IssueSeverity.ERROR, ((OperationOutcome)outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getSeverity());
-		assertEquals("Missing required resource in Bundle.entry[0].resource for operation POST", ((OperationOutcome)outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics());
+		assertEquals(IssueSeverity.ERROR, ((OperationOutcome) outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getSeverity());
+		assertEquals("Missing required resource in Bundle.entry[0].resource for operation POST", ((OperationOutcome) outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics());
 		validate(outcome);
 	}
 
@@ -942,8 +967,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Bundle outcome = mySystemDao.transaction(mySrd, request);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("400 Bad Request", outcome.getEntry().get(0).getResponse().getStatus());
-		assertEquals(IssueSeverity.ERROR, ((OperationOutcome)outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getSeverity());
-		assertEquals("Missing required resource in Bundle.entry[0].resource for operation PUT", ((OperationOutcome)outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics());
+		assertEquals(IssueSeverity.ERROR, ((OperationOutcome) outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getSeverity());
+		assertEquals("Missing required resource in Bundle.entry[0].resource for operation PUT", ((OperationOutcome) outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics());
 		validate(outcome);
 	}
 
@@ -2272,7 +2297,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		patient2.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP02");
 		request.addEntry().setResource(patient2).getRequest().setMethod(HTTPVerb.POST);
 
-		assertThrows(InvalidRequestException.class, ()->{
+		assertThrows(InvalidRequestException.class, () -> {
 			mySystemDao.transaction(mySrd, request);
 		});
 	}
@@ -3198,9 +3223,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals("1", id2.getVersionIdPart());
 
 		assertEquals(id.getValue(), id2.getValue());
-		
+
 	}
-	
+
 	@Test
 	public void testTransactionWithIfMatch() {
 		Patient p = new Patient();

@@ -39,7 +39,8 @@ public enum PhoneticEncoderEnum {
 	METAPHONE(new ApacheEncoder("METAPHONE", new Metaphone())),
 	NYSIIS(new ApacheEncoder("NYSIIS", new Nysiis())),
 	REFINED_SOUNDEX(new ApacheEncoder("REFINED_SOUNDEX", new RefinedSoundex())),
-	SOUNDEX(new ApacheEncoder("SOUNDEX", new Soundex()));
+	SOUNDEX(new ApacheEncoder("SOUNDEX", new Soundex())),
+	NUMERIC(new NumericEncoder());
 
 	private final IPhoneticEncoder myPhoneticEncoder;
 
