@@ -35,7 +35,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -138,8 +137,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	 * @param theNonPartitionableResource
 	 * @return
 	 */
-	@NotNull
-	private RequestPartitionId getSystemRequestPartitionId(@NotNull RequestDetails theRequest, boolean theNonPartitionableResource) {
+	private RequestPartitionId getSystemRequestPartitionId(RequestDetails theRequest, boolean theNonPartitionableResource) {
 		RequestPartitionId requestPartitionId;
 		requestPartitionId = getSystemRequestPartitionId(theRequest);
 		if (theNonPartitionableResource && !requestPartitionId.isDefaultPartition()) {
@@ -158,8 +156,8 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	 * @param theRequest The {@link SystemRequestDetails}
 	 * @return the {@link RequestPartitionId} to be used for this request.
 	 */
-	@NotNull
-	private RequestPartitionId getSystemRequestPartitionId(@NotNull RequestDetails theRequest) {
+	@Nonnull
+	private RequestPartitionId getSystemRequestPartitionId(@Nonnull RequestDetails theRequest) {
 		if (theRequest.getTenantId() != null) {
 			if (theRequest.getTenantId().equals(ALL_PARTITIONS_NAME)) {
 				return RequestPartitionId.allPartitions();
