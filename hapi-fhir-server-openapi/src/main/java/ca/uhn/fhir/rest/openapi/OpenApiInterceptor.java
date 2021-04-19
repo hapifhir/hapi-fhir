@@ -147,12 +147,16 @@ public class OpenApiInterceptor {
 	}
 
 	private void initResources() {
-		myResourcePathToClasspath.put("/swagger-ui/index.html", "/ca/uhn/fhir/rest/openapi/index.html");
-		myResourcePathToClasspath.put("/swagger-ui/raccoon.png", "/ca/uhn/fhir/rest/openapi/raccoon.png");
-		myResourcePathToClasspath.put("/swagger-ui/index.css", "/ca/uhn/fhir/rest/openapi/index.css");
+		addResourcePathToClasspath("/swagger-ui/index.html", "/ca/uhn/fhir/rest/openapi/index.html");
+		addResourcePathToClasspath("/swagger-ui/raccoon.png", "/ca/uhn/fhir/rest/openapi/raccoon.png");
+		addResourcePathToClasspath("/swagger-ui/index.css", "/ca/uhn/fhir/rest/openapi/index.css");
 
 		myExtensionToContentType.put(".png", "image/png");
 		myExtensionToContentType.put(".css", "text/css; charset=UTF-8");
+	}
+
+	protected void addResourcePathToClasspath(String thePath, String theClasspath) {
+		myResourcePathToClasspath.put(thePath, theClasspath);
 	}
 
 	private String initSwaggerUiWebJar() {
