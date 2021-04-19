@@ -642,7 +642,6 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertEquals(myPartitionId, resourceTable.getPartitionId().getPartitionId().intValue());
 			assertEquals(myPartitionDate, resourceTable.getPartitionId().getPartitionDate());
 		});
-
 	}
 
 	@Test
