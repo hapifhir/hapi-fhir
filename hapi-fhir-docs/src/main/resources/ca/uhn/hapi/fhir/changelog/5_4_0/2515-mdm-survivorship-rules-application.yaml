@@ -1,4 +1,4 @@
 ---
 type: fix
 issue: 2515
-title: "Addresses MDM survivorship rules application on matching a single resource"
+title: "Fixed issues with application of survivorship rules when matching golden record to a single resource"
