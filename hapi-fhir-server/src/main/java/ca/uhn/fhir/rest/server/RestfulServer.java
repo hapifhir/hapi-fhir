@@ -830,8 +830,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	/**
 	 * Provides the resource providers for this server
 	 */
-	public Collection<IResourceProvider> getResourceProviders() {
-		return myResourceProviders;
+	public List<IResourceProvider> getResourceProviders() {
+		return Collections.unmodifiableList(myResourceProviders);
 	}
 
 	/**

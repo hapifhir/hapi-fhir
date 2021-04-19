@@ -79,6 +79,16 @@ public @interface Search {
 	Class<? extends IBaseResource> type() default IBaseResource.class;
 
 	/**
+	 * This method allows the return type for this method to be specified in a
+	 * non-type-specific way, using the text name of the resource, e.g. "Patient".
+	 *
+	 * This attribute should be populate, or {@link #type()} should be, but not both.
+	 *
+	 * @since 5.4.0
+	 */
+	String typeName() default "";
+
+	/**
 	 * In a REST server, should this method be invoked even if it does not have method parameters 
 	 * which correspond to all of the URL parameters passed in by the client (default is <code>false</code>).
 	 * <p>
@@ -91,4 +101,5 @@ public @interface Search {
 	 * </p>
 	 */
 	boolean allowUnknownParams() default false;
+
 }

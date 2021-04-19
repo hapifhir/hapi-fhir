@@ -395,30 +395,41 @@ public abstract class BaseMethodBinding<T> {
 		}
 
 		Class<? extends IBaseResource> returnTypeFromAnnotation = IBaseResource.class;
+		String returnTypeNameFromAnnotation = null;
 		if (read != null) {
-			if (isNotBlank(read.typeName())) {
-				returnTypeFromAnnotation = theContext.getResourceDefinition(read.typeName()).getImplementingClass();
-			} else {
-				returnTypeFromAnnotation = read.type();
-			}
+			returnTypeFromAnnotation = read.type();
+			returnTypeNameFromAnnotation = read.typeName();
 		} else if (search != null) {
 			returnTypeFromAnnotation = search.type();
+			returnTypeNameFromAnnotation = search.typeName();
 		} else if (history != null) {
 			returnTypeFromAnnotation = history.type();
+			returnTypeNameFromAnnotation = history.typeName();
 		} else if (delete != null) {
 			returnTypeFromAnnotation = delete.type();
+			returnTypeNameFromAnnotation = delete.typeName();
 		} else if (patch != null) {
 			returnTypeFromAnnotation = patch.type();
+			returnTypeNameFromAnnotation = patch.typeName();
 		} else if (create != null) {
 			returnTypeFromAnnotation = create.type();
+			returnTypeNameFromAnnotation = create.typeName();
 		} else if (update != null) {
 			returnTypeFromAnnotation = update.type();
+			returnTypeNameFromAnnotation = update.typeName();
 		} else if (validate != null) {
 			returnTypeFromAnnotation = validate.type();
+			returnTypeNameFromAnnotation = validate.typeName();
 		} else if (addTags != null) {
 			returnTypeFromAnnotation = addTags.type();
+			returnTypeNameFromAnnotation = addTags.typeName();
 		} else if (deleteTags != null) {
 			returnTypeFromAnnotation = deleteTags.type();
+			returnTypeNameFromAnnotation = deleteTags.typeName();
+		}
+
+		if (isNotBlank(returnTypeNameFromAnnotation)) {
+			returnTypeFromAnnotation = theContext.getResourceDefinition(returnTypeNameFromAnnotation).getImplementingClass();
 		}
 
 		if (returnTypeFromRp != null) {
@@ -477,7 +488,7 @@ public abstract class BaseMethodBinding<T> {
 	}
 
 	private static boolean isResourceInterface(Class<?> theReturnTypeFromMethod) {
-		return theReturnTypeFromMethod.equals(IBaseResource.class) || theReturnTypeFromMethod.equals(IResource.class) || theReturnTypeFromMethod.equals(IAnyResource.class);
+		return theReturnTypeFromMethod != null && (theReturnTypeFromMethod.equals(IBaseResource.class) || theReturnTypeFromMethod.equals(IResource.class) || theReturnTypeFromMethod.equals(IAnyResource.class));
 	}
 
 	private static String toLogString(Class<?> theType) {
