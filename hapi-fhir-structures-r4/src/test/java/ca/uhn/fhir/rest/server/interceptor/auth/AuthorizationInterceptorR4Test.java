@@ -302,7 +302,36 @@ public class AuthorizationInterceptorR4Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$validate");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
 	}
+
+
+	/**
+	 * A GET to the base URL isn't valid, but the interceptor should allow it
+	 */
+	@Test
+	public void testGetRoot() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allowAll()
+					.build();
+			}
+		});
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/");
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(400, status.getStatusLine().getStatusCode());
+
+	}
+
 
 	@Test
 	public void testAllowAllForTenant() throws Exception {

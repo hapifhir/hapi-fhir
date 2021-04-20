@@ -12,7 +12,7 @@
 <div class="container">
 </div>
 <div class="banner">
-    <img src="./raccoon.png" style="height: 100px;"/>
+    <img th:src="${BANNER_IMAGE_URL}" style="height: 100px;"/>
     <h1>[[${DESCRIPTION}]]<br/><span class="version" th:text="${SERVER_NAME} + ' ' + ${SERVER_VERSION}"></span></h1>
 </div>
 <div class="banner2">

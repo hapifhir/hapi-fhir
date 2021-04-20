@@ -119,12 +119,14 @@ public class OpenApiInterceptor {
 	public static final String PAGE_ALL = "All";
 	public static final FhirContext FHIR_CONTEXT_CANONICAL = FhirContext.forR4();
 	public static final String REQUEST_DETAILS = "REQUEST_DETAILS";
+	public static final String RACCOON_PNG = "raccoon.png";
 	private final String mySwaggerUiVersion;
 	private final TemplateEngine myTemplateEngine;
 	private final Parser myFlexmarkParser;
 	private final HtmlRenderer myFlexmarkRenderer;
 	private final Map<String, String> myResourcePathToClasspath = new HashMap<>();
 	private final Map<String, String> myExtensionToContentType = new HashMap<>();
+	private String myBannerImage;
 
 	/**
 	 * Constructor
@@ -147,8 +149,10 @@ public class OpenApiInterceptor {
 	}
 
 	private void initResources() {
+		setBannerImage(RACCOON_PNG);
+
 		addResourcePathToClasspath("/swagger-ui/index.html", "/ca/uhn/fhir/rest/openapi/index.html");
-		addResourcePathToClasspath("/swagger-ui/raccoon.png", "/ca/uhn/fhir/rest/openapi/raccoon.png");
+		addResourcePathToClasspath("/swagger-ui/" + RACCOON_PNG, "/ca/uhn/fhir/rest/openapi/raccoon.png");
 		addResourcePathToClasspath("/swagger-ui/index.css", "/ca/uhn/fhir/rest/openapi/index.css");
 
 		myExtensionToContentType.put(".png", "image/png");
@@ -266,6 +270,7 @@ public class OpenApiInterceptor {
 		context.setVariable("SERVER_NAME", cs.getSoftware().getName());
 		context.setVariable("SERVER_VERSION", cs.getSoftware().getVersion());
 		context.setVariable("BASE_URL", cs.getImplementation().getUrl());
+		context.setVariable("BANNER_IMAGE_URL", getBannerImage());
 		context.setVariable("OPENAPI_DOCS", cs.getImplementation().getUrl() + "/api-docs");
 		context.setVariable("FHIR_VERSION", cs.getFhirVersion().toCode());
 		context.setVariable("FHIR_VERSION_CODENAME", FhirVersionEnum.forVersionString(cs.getFhirVersion().toCode()).name());
@@ -822,6 +827,14 @@ public class OpenApiInterceptor {
 		return new ClassLoaderTemplateResource(myResourcePathToClasspath.get("/swagger-ui/index.html"), StandardCharsets.UTF_8.name());
 	}
 
+	public void setBannerImage(String theBannerImage) {
+		myBannerImage = theBannerImage;
+	}
+
+	public String getBannerImage() {
+		return myBannerImage;
+	}
+
 	private class SwaggerUiTemplateResolver implements ITemplateResolver {
 		@Override
 		public String getName() {
@@ -872,7 +885,7 @@ public class OpenApiInterceptor {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T extends org.hl7.fhir.r4.model.Resource> T toCanonicalVersion(IBaseResource theNonCanonical) {
+	private static <T extends Resource> T toCanonicalVersion(IBaseResource theNonCanonical) {
 		IBaseResource canonical;
 		if (theNonCanonical instanceof org.hl7.fhir.dstu3.model.Resource) {
 			canonical = VersionConvertor_30_40.convertResource((org.hl7.fhir.dstu3.model.Resource) theNonCanonical, true);

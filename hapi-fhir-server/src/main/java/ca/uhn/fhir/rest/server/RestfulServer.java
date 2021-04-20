@@ -2012,7 +2012,11 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * Create a CapabilityStatement based on the given request
 	 */
 	public IBaseConformance getCapabilityStatement(ServletRequestDetails theRequestDetails) {
-		return myServerConformanceMethod.provideCapabilityStatement(this, theRequestDetails);
+		// Create a cloned request details so we can make it indicate that this is a capabilities request
+		ServletRequestDetails requestDetails = new ServletRequestDetails(theRequestDetails);
+		requestDetails.setRestOperationType(RestOperationTypeEnum.METADATA);
+
+		return myServerConformanceMethod.provideCapabilityStatement(this, requestDetails);
 	}
 
 	/**
