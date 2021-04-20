@@ -504,7 +504,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 	}
 
 	private RequestDetails createRequestDetails(RestfulServer theServer) {
-		ServletRequestDetails retVal = new ServletRequestDetails(null);
+		ServletRequestDetails retVal = new ServletRequestDetails();
 		retVal.setServer(theServer);
 		return retVal;
 	}

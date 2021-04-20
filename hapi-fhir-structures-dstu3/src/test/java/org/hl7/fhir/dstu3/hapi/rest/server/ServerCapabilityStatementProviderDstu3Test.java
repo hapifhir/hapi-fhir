@@ -1272,7 +1272,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
   public static class PatientTripleSub extends PatientSubSub {}
 
 	private RequestDetails createRequestDetails(RestfulServer theServer) {
-		ServletRequestDetails retVal = new ServletRequestDetails(null);
+		ServletRequestDetails retVal = new ServletRequestDetails();
 		retVal.setServer(theServer);
 		return retVal;
 	}
