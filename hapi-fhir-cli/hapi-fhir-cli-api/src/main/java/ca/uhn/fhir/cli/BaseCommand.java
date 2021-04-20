@@ -31,6 +31,7 @@ import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -70,6 +71,9 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	protected static final String VERBOSE_LOGGING_PARAM = "l";
 	protected static final String VERBOSE_LOGGING_PARAM_LONGOPT = "logging";
 	protected static final String VERBOSE_LOGGING_PARAM_DESC = "If specified, verbose logging will be used.";
+	protected static final int DEFAULT_THREAD_COUNT = 10;
+	protected static final String THREAD_COUNT = "thread-count";
+
 	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseCommand.class);
 	protected FhirContext myFhirCtx;
@@ -86,6 +90,11 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		addOptionalOption(theOptions, BASIC_AUTH_PARAM, BASIC_AUTH_PARAM_LONGOPT, BASIC_AUTH_PARAM_NAME, BASIC_AUTH_PARAM_DESC);
 		addOptionalOption(theOptions, null, BEARER_TOKEN_PARAM_LONGOPT, BEARER_TOKEN_PARAM_NAME, BEARER_TOKEN_PARAM_DESC);
 	}
+
+	protected void addThreadCountOption(Options theOptions) {
+		addOptionalOption(theOptions, null, THREAD_COUNT, "count", "If specified, this argument specifies the number of worker threads used (default is " + DEFAULT_THREAD_COUNT + ")");
+	}
+
 
 	protected String promptUser(String thePrompt) throws ParseException {
 		System.out.print(ansi().bold().fgBrightDefault());
@@ -307,6 +316,12 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 
 	public Class<? extends IBaseBundle> getBundleTypeForFhirVersion() {
 		return getFhirContext().getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class);
+	}
+
+	protected int getThreadCount(CommandLine theCommandLine) throws ParseException {
+		Integer parallelismThreadCount = getAndParsePositiveIntegerParam(theCommandLine, THREAD_COUNT);
+		parallelismThreadCount = ObjectUtils.defaultIfNull(parallelismThreadCount, DEFAULT_THREAD_COUNT);
+		return parallelismThreadCount.intValue();
 	}
 
 	public abstract String getCommandDescription();

@@ -30,6 +30,16 @@
 			<property name="ignorePattern"
 				value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
 		</module>
+
+		<module name="RegexpSingleline">
+			<property name="format" value="org.jetbrains.annotations.NotNull"/>
+			<property name="message" value="Incorrect NotNull annotation used: The &quot;javax.annotation.Nonnull&quot; annotation should be used for non-null things"/>
+		</module>
+
+		<module name="RegexpSingleline">
+			<property name="format" value="org.jetbrains.annotations.Nullable"/>
+			<property name="message" value="Incorrect Nullable annotation used: The &quot;javax.annotation.Nullable&quot; annotation should be used for nullable things"/>
+		</module>
 		<!--<module name="AvoidStarImport"/> -->
 		<module name="OneTopLevelClass"/>
 		<module name="NoLineWrap"/>
