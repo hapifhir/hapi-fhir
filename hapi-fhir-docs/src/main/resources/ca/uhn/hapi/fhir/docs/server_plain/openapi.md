@@ -18,7 +18,7 @@ When this interceptor is registered against the server, it performs the followin
 
 # Enabling OpenAPI
 
-The HAPI FHIR OpenAPI functionality os supplied in a dedicated module called `hapi-fhir-server-openapi`. To enable this functionality you must first include this module in your project. For example, Maven users should include the following dependency:
+The HAPI FHIR OpenAPI functionality is supplied in a dedicated module called `hapi-fhir-server-openapi`. To enable this functionality you must first include this module in your project. For example, Maven users should include the following dependency:
 
 ```xml
 <dependency>
