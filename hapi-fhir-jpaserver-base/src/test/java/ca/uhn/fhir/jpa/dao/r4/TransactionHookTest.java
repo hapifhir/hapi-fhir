@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.google.common.collect.ListMultimap;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -14,7 +15,9 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,12 +44,51 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 	@Autowired
 	private IInterceptorService myInterceptorService;
 
+
 	@BeforeEach
 	public void beforeEach() {
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSED,  myPointcutLatch);
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED,  myPointcutLatch);
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED,  myPointcutLatch);
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED,  myPointcutLatch);
+	}
+
+	@Test
+	public void testTopologicalTransactionSorting() {
+
+		Bundle b = new Bundle();
+		Bundle.BundleEntryComponent bundleEntryComponent = b.addEntry();
+		final Observation obs1 = new Observation();
+		obs1.setStatus(Observation.ObservationStatus.FINAL);
+		obs1.setSubject(new Reference("Patient/P1"));
+		obs1.setValue(new Quantity(4));
+		obs1.setId("Observation/O1");
+		bundleEntryComponent.setResource(obs1);
+		bundleEntryComponent.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+
+		bundleEntryComponent = b.addEntry();
+		final Observation obs2 = new Observation();
+		obs2.setStatus(Observation.ObservationStatus.FINAL);
+		obs2.setValue(new Quantity(4));
+		obs2.setId("Observation/O2");
+		bundleEntryComponent.setResource(obs2);
+		bundleEntryComponent.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+
+		Bundle.BundleEntryComponent patientComponent = b.addEntry();
+		Patient pat1 = new Patient();
+		pat1.setId("Patient/P1");
+		pat1.setManagingOrganization(new Reference("Organization/Org1"));
+		patientComponent.setResource(pat1);
+		patientComponent.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Patient");
+
+		Bundle.BundleEntryComponent organizationComponent = b.addEntry();
+		Organization org1 = new Organization();
+		org1.setId("Organization/Org1");
+		organizationComponent.setResource(org1);
+		organizationComponent.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Patient");
+
+		BundleUtil.topologicalSort(myFhirCtx, b);
+
 	}
 
 	@Test

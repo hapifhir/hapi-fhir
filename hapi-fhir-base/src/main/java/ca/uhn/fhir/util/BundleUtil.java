@@ -12,6 +12,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -168,6 +170,39 @@ public class BundleUtil {
 		EntryListAccumulator entryListAccumulator = new EntryListAccumulator();
 		processEntries(theContext, theBundle, entryListAccumulator);
 		return entryListAccumulator.getList();
+	}
+
+	static int WHITE = 1;
+	static int GRAY = 2;
+	static int BLACK = 3;
+
+	public static IBaseBundle topologicalSort(FhirContext theContext, IBaseBundle theBundle) {
+		boolean isPossible = true;
+		HashMap<String, Integer> color = new HashMap<String, Integer>();
+		HashMap<String, List<String>> adjList = new HashMap<>();
+		List<String> topologicalOrder = new ArrayList<>();
+
+		List<List<String>> prerequisites = new ArrayList<>();
+
+		List<BundleEntryParts> bundleEntryParts = toListOfEntries(theContext, theBundle);
+		for (BundleEntryParts bundleEntryPart : bundleEntryParts) {
+			IBaseResource resource = bundleEntryPart.getResource();
+			String resourceId = resource.getIdElement().toString();
+			if (resourceId == null) {
+				if (bundleEntryPart.getFullUrl() != null) {
+					resourceId = bundleEntryPart.getFullUrl();
+				}
+			}
+			List<ResourceReferenceInfo> allResourceReferences = theContext.newTerser().getAllResourceReferences(resource);
+			String finalResourceId = resourceId;
+			allResourceReferences
+				.forEach(refInfo -> {
+					prerequisites.add(Arrays.asList(finalResourceId, refInfo.getResourceReference().getReferenceElement().getValue()));
+				});
+
+		}
+		System.out.println("zoop!!");
+		return null;
 	}
 
 
