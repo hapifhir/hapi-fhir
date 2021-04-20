@@ -4,12 +4,10 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.google.common.collect.ListMultimap;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -33,10 +31,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.hamcrest.Matchers.is;
 
 public class TransactionHookTest extends BaseJpaR4SystemTest {
 
@@ -92,13 +88,14 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		organizationComponent.setResource(org1);
 		organizationComponent.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Patient");
 
-		List<BundleEntryParts> postBundleEntries = BundleUtil.topologicalSort(myFhirCtx, b, RequestTypeEnum.POST);
+		BundleUtil.sortEntriesIntoProcessingOrder(myFhirCtx, b);
 
-		assertThat(postBundleEntries, hasSize(4));
+		assertThat(b.getEntry(), hasSize(4));
 
-		int observationIndex = getIndexOfEntryWithId("Observation/O1", postBundleEntries);
-		int patientIndex = getIndexOfEntryWithId("Patient/P1", postBundleEntries);
-		int organizationIndex = getIndexOfEntryWithId("Organization/Org1", postBundleEntries);
+		List<Bundle.BundleEntryComponent> entry = b.getEntry();
+		int observationIndex = getIndexOfEntryWithId("Observation/O1", b);
+		int patientIndex = getIndexOfEntryWithId("Patient/P1", b);
+		int organizationIndex = getIndexOfEntryWithId("Organization/Org1", b);
 
 		assertTrue(organizationIndex < patientIndex);
 		assertTrue(patientIndex < observationIndex);
@@ -125,10 +122,12 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		obs2.setHasMember(Collections.singletonList(new Reference("Observation/O1")));
 		bundleEntryComponent.setResource(obs2);
 		bundleEntryComponent.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
-		List<BundleEntryParts> postBundleEntries = BundleUtil.topologicalSort(myFhirCtx, b, RequestTypeEnum.POST);
+		try {
+			BundleUtil.sortEntriesIntoProcessingOrder(myFhirCtx, b);
+			fail();
+		} catch (IllegalStateException e ) {
 
-		//Null value indicates that we hit a cycle, and could not process the deletions in order
-		assertThat(postBundleEntries, is(nullValue()));
+		}
 	}
 
 	@Test
@@ -164,21 +163,22 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		organizationComponent.setResource(org1);
 		organizationComponent.getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Organization");
 
-		List<BundleEntryParts> postBundleEntries = BundleUtil.topologicalSort(myFhirCtx, b, RequestTypeEnum.DELETE);
+		BundleUtil.sortEntriesIntoProcessingOrder(myFhirCtx, b);
 
-		assertThat(postBundleEntries, hasSize(4));
+		assertThat(b.getEntry(), hasSize(4));
 
-		int observationIndex = getIndexOfEntryWithId("Observation/O1", postBundleEntries);
-		int patientIndex = getIndexOfEntryWithId("Patient/P1", postBundleEntries);
-		int organizationIndex = getIndexOfEntryWithId("Organization/Org1", postBundleEntries);
+		int observationIndex = getIndexOfEntryWithId("Observation/O1", b);
+		int patientIndex = getIndexOfEntryWithId("Patient/P1", b);
+		int organizationIndex = getIndexOfEntryWithId("Organization/Org1", b);
 
 		assertTrue(patientIndex < organizationIndex);
 		assertTrue(observationIndex < patientIndex);
 	}
 
-	private int getIndexOfEntryWithId(String theResourceId, List<BundleEntryParts> theBundleEntryParts) {
-		for (int i = 0; i < theBundleEntryParts.size(); i++) {
-			String id = theBundleEntryParts.get(i).getResource().getIdElement().toUnqualifiedVersionless().toString();
+	private int getIndexOfEntryWithId(String theResourceId, Bundle theBundle) {
+		List<Bundle.BundleEntryComponent> entries = theBundle.getEntry();
+		for (int i = 0; i < entries.size(); i++) {
+			String id = entries.get(i).getResource().getIdElement().toUnqualifiedVersionless().toString();
 			if (id.equals(theResourceId)) {
 				return i;
 			}
