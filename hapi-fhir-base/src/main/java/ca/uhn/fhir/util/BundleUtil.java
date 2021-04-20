@@ -1,6 +1,10 @@
 package ca.uhn.fhir.util;
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -9,17 +13,21 @@ import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import ca.uhn.fhir.util.bundle.EntryListAccumulator;
 import ca.uhn.fhir.util.bundle.ModifiableBundleEntry;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -44,6 +52,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Fetch resources from a bundle
  */
 public class BundleUtil {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BundleUtil.class);
+
 
 	/**
 	 * @return Returns <code>null</code> if the link isn't found or has no value
@@ -176,18 +186,31 @@ public class BundleUtil {
 	static int GRAY = 2;
 	static int BLACK = 3;
 
-	public static IBaseBundle topologicalSort(FhirContext theContext, IBaseBundle theBundle) {
-		boolean isPossible = true;
+	public static List<BundleEntryParts> topologicalSort(FhirContext theContext, IBaseBundle theBundle, RequestTypeEnum theRequestTypeEnum) {
+		SortLegality legality = new SortLegality();
 		HashMap<String, Integer> color = new HashMap<String, Integer>();
 		HashMap<String, List<String>> adjList = new HashMap<>();
 		List<String> topologicalOrder = new ArrayList<>();
-
-		List<List<String>> prerequisites = new ArrayList<>();
-
 		List<BundleEntryParts> bundleEntryParts = toListOfEntries(theContext, theBundle);
+		bundleEntryParts.removeIf(bep -> !bep.getRequestType().equals(theRequestTypeEnum));
+		HashMap<String, BundleEntryParts> resourceIdToBundleEntryMap = new HashMap<>();
+
 		for (BundleEntryParts bundleEntryPart : bundleEntryParts) {
 			IBaseResource resource = bundleEntryPart.getResource();
 			String resourceId = resource.getIdElement().toString();
+			resourceIdToBundleEntryMap.put(resourceId, bundleEntryPart);
+			if (resourceId == null) {
+				if (bundleEntryPart.getFullUrl() != null) {
+					resourceId = bundleEntryPart.getFullUrl();
+				}
+			}
+			color.put(resourceId, WHITE);
+		}
+
+		for (BundleEntryParts bundleEntryPart : bundleEntryParts) {
+			IBaseResource resource = bundleEntryPart.getResource();
+			String resourceId = resource.getIdElement().toString();
+			resourceIdToBundleEntryMap.put(resourceId, bundleEntryPart);
 			if (resourceId == null) {
 				if (bundleEntryPart.getFullUrl() != null) {
 					resourceId = bundleEntryPart.getFullUrl();
@@ -197,14 +220,80 @@ public class BundleUtil {
 			String finalResourceId = resourceId;
 			allResourceReferences
 				.forEach(refInfo -> {
-					prerequisites.add(Arrays.asList(finalResourceId, refInfo.getResourceReference().getReferenceElement().getValue()));
+					String referencedResourceId = refInfo.getResourceReference().getReferenceElement().getValue();
+					if (color.containsKey(referencedResourceId)) {
+						if (!adjList.containsKey(finalResourceId)) {
+							adjList.put(finalResourceId, new ArrayList<>());
+						}
+						adjList.get(finalResourceId).add(refInfo.getResourceReference().getReferenceElement().getValue());
+					}
 				});
-
 		}
-		System.out.println("zoop!!");
-		return null;
+		//All nodes are now white
+		//Adjacency List has been built.
+
+		for (Map.Entry<String, Integer> entry:color.entrySet()) {
+			if (entry.getValue() == WHITE) {
+				depthFirstSearch(entry.getKey(), color, adjList, topologicalOrder, legality);
+			}
+		}
+		if (legality.isLegal()) {
+			if (ourLog.isDebugEnabled()) {
+				ourLog.debug("Topological order is: {}", String.join(",", topologicalOrder));
+			}
+			List<BundleEntryParts> beps = new ArrayList<>();
+
+			for (int i = 0;i < topologicalOrder.size(); i++) {
+				BundleEntryParts bep = resourceIdToBundleEntryMap.get(topologicalOrder.get(i));
+				beps.add(bep);
+			}
+
+			//In case of delete, we want to delete child elements LAST.
+			if (theRequestTypeEnum.equals(RequestTypeEnum.DELETE)) {
+				Collections.reverse(beps);
+			}
+			return beps;
+		} else {
+			return null;
+		}
 	}
 
+	private static class SortLegality {
+		private boolean myIsLegal;
+
+		SortLegality() {
+			this.myIsLegal = true;
+		}
+		private void setLegal(boolean theLegal) {
+			myIsLegal = theLegal;
+		}
+
+		public boolean isLegal() {
+			return myIsLegal;
+		}
+	}
+	private static void depthFirstSearch(String theResourceId, HashMap<String, Integer> theResourceIdToColor, HashMap<String, List<String>> theAdjList, List<String> theTopologicalOrder, SortLegality theLegality) {
+		System.out.println("RECURSING ON " + theResourceId);
+		if (!theLegality.isLegal()) {
+			System.out.println("IMPOSSIBLE!");
+			return;
+		}
+
+		//We are currently recursing over this node (gray)
+		theResourceIdToColor.put(theResourceId, GRAY);
+
+		for (String neighbourResourceId: theAdjList.getOrDefault(theResourceId, new ArrayList<>())) {
+			if (theResourceIdToColor.get(neighbourResourceId) == WHITE) {
+				depthFirstSearch(neighbourResourceId, theResourceIdToColor, theAdjList, theTopologicalOrder, theLegality);
+			} else if (theResourceIdToColor.get(neighbourResourceId) == GRAY) {
+				theLegality.setLegal(false);
+				return;
+			}
+		}
+		//Mark the node as black
+		theResourceIdToColor.put(theResourceId, BLACK);
+		theTopologicalOrder.add(theResourceId);
+	}
 
 	public static void processEntries(FhirContext theContext, IBaseBundle theBundle, Consumer<ModifiableBundleEntry> theProcessor) {
 		RuntimeResourceDefinition bundleDef = theContext.getResourceDefinition(theBundle);

@@ -4,10 +4,12 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.google.common.collect.ListMultimap;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -24,14 +26,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.hamcrest.Matchers.is;
 
 public class TransactionHookTest extends BaseJpaR4SystemTest {
 
@@ -54,7 +59,7 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testTopologicalTransactionSorting() {
+	public void testTopologicalTransactionSortForCreates() {
 
 		Bundle b = new Bundle();
 		Bundle.BundleEntryComponent bundleEntryComponent = b.addEntry();
@@ -87,8 +92,99 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		organizationComponent.setResource(org1);
 		organizationComponent.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Patient");
 
-		BundleUtil.topologicalSort(myFhirCtx, b);
+		List<BundleEntryParts> postBundleEntries = BundleUtil.topologicalSort(myFhirCtx, b, RequestTypeEnum.POST);
 
+		assertThat(postBundleEntries, hasSize(4));
+
+		int observationIndex = getIndexOfEntryWithId("Observation/O1", postBundleEntries);
+		int patientIndex = getIndexOfEntryWithId("Patient/P1", postBundleEntries);
+		int organizationIndex = getIndexOfEntryWithId("Organization/Org1", postBundleEntries);
+
+		assertTrue(organizationIndex < patientIndex);
+		assertTrue(patientIndex < observationIndex);
+	}
+
+	@Test
+	public void testTransactionSorterFailsOnCyclicReference() {
+		Bundle b = new Bundle();
+		Bundle.BundleEntryComponent bundleEntryComponent = b.addEntry();
+		final Observation obs1 = new Observation();
+		obs1.setStatus(Observation.ObservationStatus.FINAL);
+		obs1.setSubject(new Reference("Patient/P1"));
+		obs1.setValue(new Quantity(4));
+		obs1.setId("Observation/O1");
+		obs1.setHasMember(Collections.singletonList(new Reference("Observation/O2")));
+		bundleEntryComponent.setResource(obs1);
+		bundleEntryComponent.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+
+		bundleEntryComponent = b.addEntry();
+		final Observation obs2 = new Observation();
+		obs2.setStatus(Observation.ObservationStatus.FINAL);
+		obs2.setValue(new Quantity(4));
+		obs2.setId("Observation/O2");
+		obs2.setHasMember(Collections.singletonList(new Reference("Observation/O1")));
+		bundleEntryComponent.setResource(obs2);
+		bundleEntryComponent.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+		List<BundleEntryParts> postBundleEntries = BundleUtil.topologicalSort(myFhirCtx, b, RequestTypeEnum.POST);
+
+		//Null value indicates that we hit a cycle, and could not process the deletions in order
+		assertThat(postBundleEntries, is(nullValue()));
+	}
+
+	@Test
+	public void testTransactionSorterReturnsDeletesInCorrectProcessingOrder() {
+		Bundle b = new Bundle();
+		Bundle.BundleEntryComponent bundleEntryComponent = b.addEntry();
+		final Observation obs1 = new Observation();
+		obs1.setStatus(Observation.ObservationStatus.FINAL);
+		obs1.setSubject(new Reference("Patient/P1"));
+		obs1.setValue(new Quantity(4));
+		obs1.setId("Observation/O1");
+		bundleEntryComponent.setResource(obs1);
+		bundleEntryComponent.getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Observation");
+
+		bundleEntryComponent = b.addEntry();
+		final Observation obs2 = new Observation();
+		obs2.setStatus(Observation.ObservationStatus.FINAL);
+		obs2.setValue(new Quantity(4));
+		obs2.setId("Observation/O2");
+		bundleEntryComponent.setResource(obs2);
+		bundleEntryComponent.getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Observation");
+
+		Bundle.BundleEntryComponent patientComponent = b.addEntry();
+		Patient pat1 = new Patient();
+		pat1.setId("Patient/P1");
+		pat1.setManagingOrganization(new Reference("Organization/Org1"));
+		patientComponent.setResource(pat1);
+		patientComponent.getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Patient");
+
+		Bundle.BundleEntryComponent organizationComponent = b.addEntry();
+		Organization org1 = new Organization();
+		org1.setId("Organization/Org1");
+		organizationComponent.setResource(org1);
+		organizationComponent.getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Organization");
+
+		List<BundleEntryParts> postBundleEntries = BundleUtil.topologicalSort(myFhirCtx, b, RequestTypeEnum.DELETE);
+
+		assertThat(postBundleEntries, hasSize(4));
+
+		int observationIndex = getIndexOfEntryWithId("Observation/O1", postBundleEntries);
+		int patientIndex = getIndexOfEntryWithId("Patient/P1", postBundleEntries);
+		int organizationIndex = getIndexOfEntryWithId("Organization/Org1", postBundleEntries);
+
+		assertTrue(patientIndex < organizationIndex);
+		assertTrue(observationIndex < patientIndex);
+	}
+
+	private int getIndexOfEntryWithId(String theResourceId, List<BundleEntryParts> theBundleEntryParts) {
+		for (int i = 0; i < theBundleEntryParts.size(); i++) {
+			String id = theBundleEntryParts.get(i).getResource().getIdElement().toUnqualifiedVersionless().toString();
+			if (id.equals(theResourceId)) {
+				return i;
+			}
+		}
+		fail("Didn't find resource with ID " + theResourceId);
+		return -1;
 	}
 
 	@Test
