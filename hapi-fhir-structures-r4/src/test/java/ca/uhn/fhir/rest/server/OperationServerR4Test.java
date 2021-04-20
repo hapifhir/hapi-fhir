@@ -33,8 +33,18 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CapabilityStatement;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.MoneyQuantity;
+import org.hl7.fhir.r4.model.OperationDefinition;
 import org.hl7.fhir.r4.model.OperationDefinition.OperationParameterUse;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,6 +82,7 @@ public class OperationServerR4Test {
 	private static int ourPort;
 	private static Server ourServer;
 	private static IBaseResource ourNextResponse;
+	private static RestOperationTypeEnum ourLastRestOperation;
 	private IGenericClient myFhirClient;
 
 	@BeforeEach
@@ -98,11 +109,11 @@ public class OperationServerR4Test {
 		CapabilityStatement p = myFhirClient.fetchConformance().ofType(CapabilityStatement.class).prettyPrint().execute();
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p));
 
-		List<CapabilityStatement.CapabilityStatementRestResourceOperationComponent> ops = p.getRest().get(0).getOperation();
+		List<CapabilityStatement.CapabilityStatementRestResourceOperationComponent> ops = p.getRestFirstRep().getResource().stream().filter(t->t.getType().equals("Patient")).findFirst().orElseThrow(()->new IllegalArgumentException()).getOperation();
 		assertThat(ops.size(), greaterThan(1));
 
 		List<String> opNames = toOpNames(ops);
-		assertThat(opNames, containsInRelativeOrder("OP_TYPE"));
+		assertThat(opNames.toString(), opNames, containsInRelativeOrder("OP_TYPE"));
 
 		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId(ops.get(opNames.indexOf("OP_TYPE")).getDefinition()).execute();
 		assertEquals("OP_TYPE", def.getCode());
@@ -179,8 +190,6 @@ public class OperationServerR4Test {
 
 	}
 
-
-
 	@Test
 	public void testManualResponseWithPrimitiveParam() throws Exception {
 
@@ -196,7 +205,6 @@ public class OperationServerR4Test {
 		assertEquals("THIS_IS_A_PATH", ourLastParam1.getValue());
 
 	}
-
 
 	@Test
 	public void testInstanceEverythingGet() throws Exception {
@@ -229,7 +237,6 @@ public class OperationServerR4Test {
 		assertEquals("Patient/123", ourLastId.toUnqualifiedVersionless().getValue());
 		assertEquals(RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE, ourLastRestOperation);
 	}
-
 
 	@Test
 	public void testInstanceEverythingHapiClient() {
@@ -278,7 +285,7 @@ public class OperationServerR4Test {
 
 	@Test
 	public void testManualInputAndOutput() throws Exception {
-		byte[] bytes = new byte[]{1,2,3,4,5,6,7,8,7,6,5,4,3,2,1};
+		byte[] bytes = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1};
 		ContentType contentType = ContentType.IMAGE_PNG;
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$manualInputAndOutput");
@@ -295,10 +302,9 @@ public class OperationServerR4Test {
 
 	}
 
-
 	@Test
 	public void testManualInputAndOutputWithUrlParam() throws Exception {
-		byte[] bytes = new byte[]{1,2,3,4,5,6,7,8,7,6,5,4,3,2,1};
+		byte[] bytes = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1};
 		ContentType contentType = ContentType.IMAGE_PNG;
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$manualInputAndOutputWithParam?param1=value");
@@ -838,7 +844,7 @@ public class OperationServerR4Test {
 			return new Bundle();
 		}
 
-		@Operation(name="$manualInputAndOutput", manualResponse=true, manualRequest=true)
+		@Operation(name = "$manualInputAndOutput", manualResponse = true, manualRequest = true)
 		public void manualInputAndOutput(HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws IOException {
 			String contentType = theServletRequest.getContentType();
 			byte[] bytes = IOUtils.toByteArray(theServletRequest.getInputStream());
@@ -850,9 +856,9 @@ public class OperationServerR4Test {
 			theServletResponse.getOutputStream().close();
 		}
 
-		@Operation(name="$manualInputAndOutputWithParam", manualResponse=true, manualRequest=true)
+		@Operation(name = "$manualInputAndOutputWithParam", manualResponse = true, manualRequest = true)
 		public void manualInputAndOutputWithParam(
-			@OperationParam(name="param1") StringType theParam1,
+			@OperationParam(name = "param1") StringType theParam1,
 			HttpServletRequest theServletRequest,
 			HttpServletResponse theServletResponse
 		) throws IOException {
@@ -880,7 +886,6 @@ public class OperationServerR4Test {
 		}
 
 	}
-	private static RestOperationTypeEnum ourLastRestOperation;
 
 	public static class PlainProvider {
 
@@ -918,10 +923,10 @@ public class OperationServerR4Test {
 			return new SimpleBundleProvider(resources);
 		}
 
-		@Operation(name= "$manualResponseWithPrimitiveParam", idempotent = true, global = true, manualResponse = true)
+		@Operation(name = "$manualResponseWithPrimitiveParam", idempotent = true, global = true, manualResponse = true)
 		public void manualResponseWithPrimitiveParam(
 			@IdParam IIdType theResourceId,
-			@OperationParam(name="path", min = 1, max = 1) IPrimitiveType<String> thePath,
+			@OperationParam(name = "path", min = 1, max = 1) IPrimitiveType<String> thePath,
 			ServletRequestDetails theRequestDetails,
 			HttpServletRequest theServletRequest,
 			HttpServletResponse theServletResponse) {
@@ -933,7 +938,7 @@ public class OperationServerR4Test {
 			theServletResponse.setStatus(200);
 		}
 
-			@Operation(name = "$OP_SERVER")
+		@Operation(name = "$OP_SERVER")
 		public Parameters opServer(
 			@OperationParam(name = "PARAM1") StringType theParam1,
 			@OperationParam(name = "PARAM2") Patient theParam2
@@ -1026,14 +1031,6 @@ public class OperationServerR4Test {
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
 
-	}
-
-	public static void main(String[] theValue) {
-		Parameters p = new Parameters();
-		p.addParameter().setName("start").setValue(new DateTimeType("2001-01-02"));
-		p.addParameter().setName("end").setValue(new DateTimeType("2015-07-10"));
-		String inParamsStr = FhirContext.forDstu2().newXmlParser().encodeResourceToString(p);
-		ourLog.info(inParamsStr.replace("\"", "\\\""));
 	}
 
 }

@@ -147,8 +147,9 @@ public class ServerCapabilityStatementProviderR5Test {
 		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		assertEquals(1, conformance.getRest().get(0).getOperation().size());
-		assertEquals("everything", conformance.getRest().get(0).getOperation().get(0).getName());
+		List<CapabilityStatementRestResourceOperationComponent> operations = conformance.getRestFirstRep().getResource().stream().filter(t->t.getType().equals("Patient")).findFirst().orElseThrow(()->new IllegalArgumentException()).getOperation();
+		assertEquals(1, operations.size());
+		assertEquals("everything", operations.get(0).getName());
 
 		OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-everything"), createRequestDetails(rs));
 		validate(opDef);
@@ -291,13 +292,14 @@ public class ServerCapabilityStatementProviderR5Test {
 
 		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
+		List<CapabilityStatementRestResourceOperationComponent> operations;
 
-		assertEquals(4, conformance.getRest().get(0).getOperation().size());
-		List<String> operationNames = toOperationNames(conformance.getRest().get(0).getOperation());
-		assertThat(operationNames, containsInAnyOrder("someOp", "validate", "someOp", "validate"));
-
-		List<String> operationIdParts = toOperationIdParts(conformance.getRest().get(0).getOperation());
-		assertThat(operationIdParts, containsInAnyOrder("Patient-i-someOp", "Encounter-i-someOp", "Patient-i-validate", "Encounter-i-validate"));
+		operations = conformance.getRestFirstRep().getResource().stream().filter(t->t.getType().equals("Patient")).findFirst().orElseThrow(()->new IllegalArgumentException()).getOperation();
+		assertEquals(2, operations.size());
+		List<String> operationNames = toOperationNames(operations);
+		assertThat(operationNames.toString(), operationNames, containsInAnyOrder("someOp", "validate"));
+		List<String> operationIdParts = toOperationIdParts(operations);
+		assertThat(operationIdParts.toString(), operationIdParts, containsInAnyOrder("Patient-i-someOp", "Patient-i-validate"));
 
 		{
 			OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-someOp"), createRequestDetails(rs));
@@ -787,7 +789,7 @@ public class ServerCapabilityStatementProviderR5Test {
 		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		List<CapabilityStatementRestResourceOperationComponent> operations = conformance.getRest().get(0).getOperation();
+		List<CapabilityStatementRestResourceOperationComponent> operations = conformance.getRestFirstRep().getResource().stream().filter(t->t.getType().equals("Patient")).findFirst().orElseThrow(()->new IllegalArgumentException()).getOperation();
 		assertThat(operations.size(), is(1));
 		assertThat(operations.get(0).getName(), is(TypeLevelOperationProvider.OPERATION_NAME));
 

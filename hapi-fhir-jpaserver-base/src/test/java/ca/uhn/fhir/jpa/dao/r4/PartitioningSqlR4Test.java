@@ -2173,6 +2173,35 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	}
 
 	@Test
+	public void testSearch_StringParam_SearchOnePartition_AddRevIncludes() {
+		addReadPartition(1);
+		addCreatePartition(1, null);
+		Organization org = new Organization();
+		org.setName("FOO");
+		org.setId("FOO-ORG");
+		myOrganizationDao.update(org, mySrd);
+
+		for (int i = 0; i < 50; i++) {
+			addCreatePartition(1, null);
+			PractitionerRole pr = new PractitionerRole();
+			pr.getOrganization().setReference("Organization/FOO-ORG");
+			myPractitionerRoleDao.create(pr, mySrd);
+		}
+
+		addReadPartition(1);
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.addRevInclude(PractitionerRole.INCLUDE_ORGANIZATION);
+		map.setCount(10);
+		IBundleProvider results = myOrganizationDao.search(map, mySrd);
+		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertEquals(10, ids.size(), ()->ids.toString());
+	}
+
+	@Test
 	public void testSearch_TagNotParam_SearchAllPartitions() {
 		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue(), withTag("http://system", "code"), withIdentifier("http://foo", "bar"));
 		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue(), withTag("http://system", "code"), withIdentifier("http://foo", "bar"));

@@ -83,7 +83,7 @@ public class XmlUtilDstu3Test {
 		Document parsed = XmlUtil.parseDocument(input);
 		String output = XmlUtil.encodeDocument(parsed, true);
 		assertEquals("<document>\n" +
-			"   <tag id=\"1\"/>\n" +
+			"<tag id=\"1\"/>\n" +
 			"</document>\n", output);
 	}
 
