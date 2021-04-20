@@ -490,7 +490,8 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		@Operation(name = "$orlist-withnomax", idempotent = true)
 		public Parameters orlistWithNoMax(
 				//@formatter:off
-				@OperationParam(name="valstr") List<StringOrListParam> theValStr,
+				@OperationParam(name="valstr"
+				) List<StringOrListParam> theValStr,
 				@OperationParam(name="valtok") List<TokenOrListParam> theValTok
 				//@formatter:on
 		) {
