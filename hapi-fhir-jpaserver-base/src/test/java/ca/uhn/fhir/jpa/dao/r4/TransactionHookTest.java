@@ -14,6 +14,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -27,10 +29,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Collections;
 import java.util.List;
 
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.DELETE;
+import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.GET;
+import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST;
+import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -65,7 +73,7 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		obs1.setValue(new Quantity(4));
 		obs1.setId("Observation/O1");
 		bundleEntryComponent.setResource(obs1);
-		bundleEntryComponent.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+		bundleEntryComponent.getRequest().setMethod(POST).setUrl("Observation");
 
 		bundleEntryComponent = b.addEntry();
 		final Observation obs2 = new Observation();
@@ -73,20 +81,20 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		obs2.setValue(new Quantity(4));
 		obs2.setId("Observation/O2");
 		bundleEntryComponent.setResource(obs2);
-		bundleEntryComponent.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+		bundleEntryComponent.getRequest().setMethod(POST).setUrl("Observation");
 
 		Bundle.BundleEntryComponent patientComponent = b.addEntry();
 		Patient pat1 = new Patient();
 		pat1.setId("Patient/P1");
 		pat1.setManagingOrganization(new Reference("Organization/Org1"));
 		patientComponent.setResource(pat1);
-		patientComponent.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Patient");
+		patientComponent.getRequest().setMethod(POST).setUrl("Patient");
 
 		Bundle.BundleEntryComponent organizationComponent = b.addEntry();
 		Organization org1 = new Organization();
 		org1.setId("Organization/Org1");
 		organizationComponent.setResource(org1);
-		organizationComponent.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Patient");
+		organizationComponent.getRequest().setMethod(POST).setUrl("Patient");
 
 		BundleUtil.sortEntriesIntoProcessingOrder(myFhirCtx, b);
 
@@ -112,7 +120,7 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		obs1.setId("Observation/O1");
 		obs1.setHasMember(Collections.singletonList(new Reference("Observation/O2")));
 		bundleEntryComponent.setResource(obs1);
-		bundleEntryComponent.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+		bundleEntryComponent.getRequest().setMethod(POST).setUrl("Observation");
 
 		bundleEntryComponent = b.addEntry();
 		final Observation obs2 = new Observation();
@@ -121,13 +129,88 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		obs2.setId("Observation/O2");
 		obs2.setHasMember(Collections.singletonList(new Reference("Observation/O1")));
 		bundleEntryComponent.setResource(obs2);
-		bundleEntryComponent.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+		bundleEntryComponent.getRequest().setMethod(POST).setUrl("Observation");
 		try {
 			BundleUtil.sortEntriesIntoProcessingOrder(myFhirCtx, b);
 			fail();
 		} catch (IllegalStateException e ) {
 
 		}
+	}
+
+	@Test
+	public void testTransactionSortingReturnsOperationsInCorrectOrder() {
+
+		Bundle b = new Bundle();
+
+		//UPDATE patient
+		Bundle.BundleEntryComponent patientUpdateComponent= b.addEntry();
+		final Patient p2 = new Patient();
+		p2.setId("Patient/P2");
+		p2.getNameFirstRep().setFamily("Test!");
+		patientUpdateComponent.setResource(p2);
+		patientUpdateComponent.getRequest().setMethod(PUT).setUrl("Patient/P2");
+
+		//CREATE observation
+		Bundle.BundleEntryComponent bundleEntryComponent = b.addEntry();
+		final Observation obs1 = new Observation();
+		obs1.setStatus(Observation.ObservationStatus.FINAL);
+		obs1.setSubject(new Reference("Patient/P1"));
+		obs1.setValue(new Quantity(4));
+		obs1.setId("Observation/O1");
+		bundleEntryComponent.setResource(obs1);
+		bundleEntryComponent.getRequest().setMethod(POST).setUrl("Observation");
+
+		//DELETE medication
+		Bundle.BundleEntryComponent medicationComponent= b.addEntry();
+		final Medication med1 = new Medication();
+		med1.setId("Medication/M1");
+		medicationComponent.setResource(med1);
+		medicationComponent.getRequest().setMethod(DELETE).setUrl("Medication");
+
+		//GET medication
+		Bundle.BundleEntryComponent searchComponent = b.addEntry();
+		searchComponent.getRequest().setMethod(GET).setUrl("Medication?code=123");
+
+		//CREATE patient
+		Bundle.BundleEntryComponent patientComponent = b.addEntry();
+		Patient pat1 = new Patient();
+		pat1.setId("Patient/P1");
+		pat1.setManagingOrganization(new Reference("Organization/Org1"));
+		patientComponent.setResource(pat1);
+		patientComponent.getRequest().setMethod(POST).setUrl("Patient");
+
+		//CREATE organization
+		Bundle.BundleEntryComponent organizationComponent = b.addEntry();
+		Organization org1 = new Organization();
+		org1.setId("Organization/Org1");
+		organizationComponent.setResource(org1);
+		organizationComponent.getRequest().setMethod(POST).setUrl("Organization");
+
+		//DELETE ExplanationOfBenefit
+		Bundle.BundleEntryComponent explanationOfBenefitComponent= b.addEntry();
+		final ExplanationOfBenefit eob1 = new ExplanationOfBenefit();
+		eob1.setId("ExplanationOfBenefit/E1");
+		explanationOfBenefitComponent.setResource(eob1);
+		explanationOfBenefitComponent.getRequest().setMethod(DELETE).setUrl("ExplanationOfBenefit");
+
+		BundleUtil.sortEntriesIntoProcessingOrder(myFhirCtx, b);
+
+		assertThat(b.getEntry(), hasSize(7));
+
+		List<Bundle.BundleEntryComponent> entry = b.getEntry();
+
+		// DELETEs first
+		assertThat(entry.get(0).getRequest().getMethod(), is(equalTo(DELETE)));
+		assertThat(entry.get(1).getRequest().getMethod(), is(equalTo(DELETE)));
+		// Then POSTs
+		assertThat(entry.get(2).getRequest().getMethod(), is(equalTo(POST)));
+		assertThat(entry.get(3).getRequest().getMethod(), is(equalTo(POST)));
+		assertThat(entry.get(4).getRequest().getMethod(), is(equalTo(POST)));
+		// Then PUTs
+		assertThat(entry.get(5).getRequest().getMethod(), is(equalTo(PUT)));
+		// Then GETs
+		assertThat(entry.get(6).getRequest().getMethod(), is(equalTo(GET)));
 	}
 
 	@Test
@@ -140,7 +223,7 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		obs1.setValue(new Quantity(4));
 		obs1.setId("Observation/O1");
 		bundleEntryComponent.setResource(obs1);
-		bundleEntryComponent.getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Observation");
+		bundleEntryComponent.getRequest().setMethod(DELETE).setUrl("Observation");
 
 		bundleEntryComponent = b.addEntry();
 		final Observation obs2 = new Observation();
@@ -148,20 +231,20 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		obs2.setValue(new Quantity(4));
 		obs2.setId("Observation/O2");
 		bundleEntryComponent.setResource(obs2);
-		bundleEntryComponent.getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Observation");
+		bundleEntryComponent.getRequest().setMethod(DELETE).setUrl("Observation");
 
 		Bundle.BundleEntryComponent patientComponent = b.addEntry();
 		Patient pat1 = new Patient();
 		pat1.setId("Patient/P1");
 		pat1.setManagingOrganization(new Reference("Organization/Org1"));
 		patientComponent.setResource(pat1);
-		patientComponent.getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Patient");
+		patientComponent.getRequest().setMethod(DELETE).setUrl("Patient");
 
 		Bundle.BundleEntryComponent organizationComponent = b.addEntry();
 		Organization org1 = new Organization();
 		org1.setId("Organization/Org1");
 		organizationComponent.setResource(org1);
-		organizationComponent.getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Organization");
+		organizationComponent.getRequest().setMethod(DELETE).setUrl("Organization");
 
 		BundleUtil.sortEntriesIntoProcessingOrder(myFhirCtx, b);
 
@@ -206,16 +289,16 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		Bundle.BundleEntryComponent bundleEntryComponent = b.addEntry();
 
 		bundleEntryComponent.setResource(obs1);
-		bundleEntryComponent.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+		bundleEntryComponent.getRequest().setMethod(POST).setUrl("Observation");
 
 		Bundle.BundleEntryComponent patientComponent = b.addEntry();
 		patientComponent.setFullUrl(urnReference);
 		patientComponent.setResource(pat1);
-		patientComponent.getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Patient");
+		patientComponent.getRequest().setMethod(POST).setUrl("Patient");
 
 
 		//Delete an observation
-		b.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(daoMethodOutcome.getId().toUnqualifiedVersionless().getValue());
+		b.addEntry().getRequest().setMethod(DELETE).setUrl(daoMethodOutcome.getId().toUnqualifiedVersionless().getValue());
 
 
 		myPointcutLatch.setExpectedCount(4);
@@ -261,8 +344,8 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		myDiagnosticReportDao.read(rptId);
 
 		Bundle b = new Bundle();
-		b.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(rptId.getValue());
-		b.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(obs2id.getValue());
+		b.addEntry().getRequest().setMethod(DELETE).setUrl(rptId.getValue());
+		b.addEntry().getRequest().setMethod(DELETE).setUrl(obs2id.getValue());
 
 		try {
 			// transaction should succeed because the DiagnosticReport which references obs2 is also deleted
@@ -296,8 +379,8 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		rpt.addIdentifier().setSystem("foo").setValue("IDENTIFIER");
 
 		Bundle b = new Bundle();
-		b.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER");
-		b.addEntry().setResource(rpt).getRequest().setMethod(Bundle.HTTPVerb.PUT).setUrl("DiagnosticReport?identifier=foo|IDENTIFIER");
+		b.addEntry().getRequest().setMethod(DELETE).setUrl("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER");
+		b.addEntry().setResource(rpt).getRequest().setMethod(PUT).setUrl("DiagnosticReport?identifier=foo|IDENTIFIER");
 		mySystemDao.transaction(mySrd, b);
 
 		myObservationDao.read(obs1id);
@@ -334,8 +417,8 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		rpt.addResult(new Reference(obs2id));
 
 		Bundle b = new Bundle();
-		b.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(obs1id.getValue());
-		b.addEntry().setResource(rpt).getRequest().setMethod(Bundle.HTTPVerb.PUT).setUrl(rptId.getValue());
+		b.addEntry().getRequest().setMethod(DELETE).setUrl(obs1id.getValue());
+		b.addEntry().setResource(rpt).getRequest().setMethod(PUT).setUrl(rptId.getValue());
 		mySystemDao.transaction(mySrd, b);
 
 		myObservationDao.read(obs2id);
@@ -374,8 +457,8 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		rpt.addResult(new Reference(obs2id));
 
 		Bundle b = new Bundle();
-		b.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER");
-		b.addEntry().setResource(rpt).getRequest().setMethod(Bundle.HTTPVerb.PUT).setUrl("DiagnosticReport?identifier=foo|IDENTIFIER");
+		b.addEntry().getRequest().setMethod(DELETE).setUrl("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER");
+		b.addEntry().setResource(rpt).getRequest().setMethod(PUT).setUrl("DiagnosticReport?identifier=foo|IDENTIFIER");
 		try {
 			mySystemDao.transaction(mySrd, b);
 			fail();
