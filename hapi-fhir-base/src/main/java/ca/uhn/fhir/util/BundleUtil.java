@@ -350,7 +350,6 @@ public class BundleUtil {
 			map.put(parts, nextEntry);
 		}
 		return map;
-
 	}
 
 	/**
