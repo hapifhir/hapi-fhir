@@ -164,6 +164,7 @@ public class ServerCapabilityStatementProviderR5Test {
 
 		RestfulServer rs = new RestfulServer(myCtx);
 		rs.setProviders(new ProviderWithExtendedOperationReturningBundle());
+		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
 
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {
 		};
@@ -370,6 +371,7 @@ public class ServerCapabilityStatementProviderR5Test {
 	public void testOperationOnNoTypes() throws Exception {
 		RestfulServer rs = new RestfulServer(myCtx);
 		rs.setProviders(new PlainProviderWithExtendedOperationOnNoType());
+		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
 
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {
 			@Override
@@ -742,8 +744,8 @@ public class ServerCapabilityStatementProviderR5Test {
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
-		CapabilityStatementRestComponent restComponent = conformance.getRest().get(0);
-		CapabilityStatementRestResourceOperationComponent operationComponent = restComponent.getOperation().get(0);
+		CapabilityStatementRestResourceComponent resource = conformance.getRestFirstRep().getResource().stream().filter(t->t.getType().equals("Patient")).findFirst().orElseThrow(()->new IllegalArgumentException());
+		CapabilityStatementRestResourceOperationComponent operationComponent = resource.getOperation().get(0);
 		String operationReference = operationComponent.getDefinition();
 		assertThat(operationReference, not(nullValue()));
 
@@ -766,11 +768,7 @@ public class ServerCapabilityStatementProviderR5Test {
 		assertThat(param.getMax(), is("1"));
 		assertThat(param.getUse(), is(Enumerations.OperationParameterUse.IN));
 
-		CapabilityStatementRestResourceComponent patientResource = restComponent.getResource().stream()
-				.filter(r -> patientResourceName.equals(r.getType()))
-				.findAny()
-				.get();
-		assertThat("Named query parameters should not appear in the resource search params", patientResource.getSearchParam(), is(empty()));
+		assertThat("Named query parameters should not appear in the resource search params", resource.getSearchParam(), is(empty()));
 	}
 
 	@Test

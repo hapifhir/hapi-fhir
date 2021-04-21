@@ -242,6 +242,7 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		RestfulServer rs = new RestfulServer(myCtx);
 		rs.setProviders(new ProviderWithExtendedOperationReturningBundle());
+		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
 
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {
 		};
@@ -460,6 +461,7 @@ public class ServerCapabilityStatementProviderR4Test {
 	public void testOperationOnNoTypes() throws Exception {
 		RestfulServer rs = new RestfulServer(myCtx);
 		rs.setProviders(new PlainProviderWithExtendedOperationOnNoType());
+		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
 
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {
 			@Override

@@ -877,6 +877,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	public String getServerBaseForRequest(ServletRequestDetails theRequest) {
 		String fhirServerBase;
 		fhirServerBase = myServerAddressStrategy.determineServerBase(getServletContext(), theRequest.getServletRequest());
+		assert isNotBlank(fhirServerBase) : "Server Address Strategy did not return a value";
 
 		if (fhirServerBase.endsWith("/")) {
 			fhirServerBase = fhirServerBase.substring(0, fhirServerBase.length() - 1);

@@ -41,6 +41,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetai
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
@@ -386,6 +387,10 @@ public abstract class BaseMethodBinding<T> {
 					+ " returns a collection with generic type " + toLogString(returnTypeFromMethod)
 					+ " - Must return a resource type or a collection (List, Set) with a resource type parameter (e.g. List<Patient> or List<IBaseResource> )");
 			}
+		} else if (IBaseBundle.class.isAssignableFrom(returnTypeFromMethod) && returnTypeFromRp == null) {
+			// If a plain provider method returns a Bundle, we'll assume it to be a system
+			// level operation and not a type/instance level operation on the Bundle type.
+			returnTypeFromMethod = null;
 		} else {
 			if (!isResourceInterface(returnTypeFromMethod) && !verifyIsValidResourceReturnType(returnTypeFromMethod)) {
 				throw new ConfigurationException("Method '" + theMethod.getName() + "' from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName()

@@ -335,15 +335,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 					checkBindingForSystemOps(terser, rest, systemOps, nextMethodBinding);
 
 					if (nextMethodBinding instanceof SearchMethodBinding) {
-						SearchMethodBinding methodBinding = (SearchMethodBinding) nextMethodBinding;
-						if (methodBinding.getQueryName() != null) {
-							String queryName = bindings.getNamedSearchMethodBindingToName().get(methodBinding);
-							if (operationNames.add(queryName)) {
-								IBase operation = terser.addElement(resource, "operation");
-								terser.addElement(operation, "name", methodBinding.getQueryName());
-								terser.addElement(operation, "definition", (createOperationUrl(theRequestDetails, queryName)));
-							}
-						}
+						addSearchMethodIfSearchIsNamedQuery(theRequestDetails, bindings, terser, operationNames, resource, (SearchMethodBinding) nextMethodBinding);
 					} else if (nextMethodBinding instanceof OperationMethodBinding) {
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
 						String opName = bindings.getOperationBindingToName().get(methodBinding);
@@ -499,6 +491,8 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 							IBase operation = terser.addElement(rest, "operation");
 							populateOperation(theRequestDetails, terser, methodBinding, opName, operation);
 						}
+					} else if (nextMethodBinding instanceof SearchMethodBinding) {
+						addSearchMethodIfSearchIsNamedQuery(theRequestDetails, bindings, terser, operationNames, rest, (SearchMethodBinding) nextMethodBinding);
 					}
 				}
 			}
@@ -532,6 +526,17 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		postProcess(terser, retVal);
 
 		return retVal;
+	}
+
+	private void addSearchMethodIfSearchIsNamedQuery(RequestDetails theRequestDetails, Bindings theBindings, FhirTerser theTerser, Set<String> theOperationNamesAlreadyAdded, IBase theElementToAddTo, SearchMethodBinding theSearchMethodBinding) {
+		if (theSearchMethodBinding.getQueryName() != null) {
+			String queryName = theBindings.getNamedSearchMethodBindingToName().get(theSearchMethodBinding);
+			if (theOperationNamesAlreadyAdded.add(queryName)) {
+				IBase operation = theTerser.addElement(theElementToAddTo, "operation");
+				theTerser.addElement(operation, "name", theSearchMethodBinding.getQueryName());
+				theTerser.addElement(operation, "definition", (createOperationUrl(theRequestDetails, queryName)));
+			}
+		}
 	}
 
 	private void populateOperation(RequestDetails theRequestDetails, FhirTerser theTerser, OperationMethodBinding theMethodBinding, String theOpName, IBase theOperation) {
