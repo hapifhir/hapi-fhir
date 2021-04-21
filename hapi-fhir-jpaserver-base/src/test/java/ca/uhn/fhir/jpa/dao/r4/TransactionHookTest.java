@@ -4,6 +4,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -313,14 +314,14 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		assertThat(createPointcutInvocations, hasSize(2));
 
 		IBaseResource firstCreatedResource = createPointcutInvocations.get(0).get(IBaseResource.class);
-		boolean wasDeferred = createPointcutInvocations.get(0).get(Boolean.class);
+		InterceptorInvocationTimingEnum timing = createPointcutInvocations.get(0).get(InterceptorInvocationTimingEnum.class);
 		assertTrue(firstCreatedResource instanceof Observation);
-		assertTrue(wasDeferred);
+		assertTrue(timing.equals(InterceptorInvocationTimingEnum.DEFERRED));
 
 		IBaseResource secondCreatedResource = createPointcutInvocations.get(1).get(IBaseResource.class);
-		wasDeferred = createPointcutInvocations.get(1).get(Boolean.class);
+		timing = createPointcutInvocations.get(1).get(InterceptorInvocationTimingEnum.class);
 		assertTrue(secondCreatedResource instanceof Patient);
-		assertTrue(wasDeferred);
+		assertTrue(timing.equals(InterceptorInvocationTimingEnum.DEFERRED));
 
 		assertThat(deferredInterceptorBroadcasts.get(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED), hasSize(1));
 	}

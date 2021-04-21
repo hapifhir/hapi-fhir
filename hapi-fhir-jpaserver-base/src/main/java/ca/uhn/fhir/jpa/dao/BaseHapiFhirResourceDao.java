@@ -54,6 +54,7 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
@@ -377,7 +378,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.add(RequestDetails.class, theRequest)
 				.addIfMatchesType(ServletRequestDetails.class, theRequest)
 				.add(TransactionDetails.class, theTransactionDetails)
-				.add(Boolean.class, theTransactionDetails.isPointcutDeferred(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED));
+				.add(InterceptorInvocationTimingEnum.class, theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED));
 			doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, hookParams);
 		}
 
@@ -485,7 +486,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			.add(RequestDetails.class, theRequestDetails)
 			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 			.add(TransactionDetails.class, theTransactionDetails)
-			.add(Boolean.class, theTransactionDetails.isPointcutDeferred(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED));
+			.add(InterceptorInvocationTimingEnum.class, theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED));
 
 
 		doCallHooks(theTransactionDetails, theRequestDetails, Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
@@ -597,7 +598,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 						.add(RequestDetails.class, theRequest)
 						.addIfMatchesType(ServletRequestDetails.class, theRequest)
 						.add(TransactionDetails.class, transactionDetails)
-						.add(Boolean.class, transactionDetails.isPointcutDeferred(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED));
+						.add(InterceptorInvocationTimingEnum.class, transactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED));
 					doCallHooks(transactionDetails, theRequest, Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
 				}
 			});
@@ -697,7 +698,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			.add(RequestDetails.class, theRequestDetails)
 			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 			.add(TransactionDetails.class, theTransactionDetails)
-			.add(Boolean.class, theTransactionDetails.isPointcutDeferred(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED));
+			.add(InterceptorInvocationTimingEnum.class, theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED));
 		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, preCommitParams);
 
 	}
@@ -742,7 +743,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			.add(RequestDetails.class, theRequestDetails)
 			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 			.add(TransactionDetails.class, theTransactionDetails)
-			.add(Boolean.class, theTransactionDetails.isPointcutDeferred(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED));
+			.add(InterceptorInvocationTimingEnum.class, theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED));
 
 		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, preCommitParams);
 

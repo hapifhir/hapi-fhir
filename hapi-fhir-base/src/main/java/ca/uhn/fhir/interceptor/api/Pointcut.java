@@ -1423,6 +1423,9 @@ public enum Pointcut implements IPointcut {
 	 * <li>
 	 * Boolean - Whether this pointcut invocation was deferred or not(since 5.4.0)
 	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum - The timing at which the invocation of the interceptor took place. Options are ACTIVE and DEFERRED.
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
@@ -1433,7 +1436,7 @@ public enum Pointcut implements IPointcut {
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails",
-		Boolean.class.getName()
+		"ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum"
 	),
 
 	/**
@@ -1468,7 +1471,7 @@ public enum Pointcut implements IPointcut {
 	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
 	 * </li>
 	 * <li>
-	 * Boolean - Whether this pointcut invocation was deferred or not(since 5.4.0)
+	 * ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum - The timing at which the invocation of the interceptor took place. Options are ACTIVE and DEFERRED.
 	 * </li>
 	 * </ul>
 	 * <p>
@@ -1481,7 +1484,7 @@ public enum Pointcut implements IPointcut {
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails",
-		Boolean.class.getName()
+		"ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum"
 	),
 
 
@@ -1512,7 +1515,7 @@ public enum Pointcut implements IPointcut {
 	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
 	 * </li>
 	 * <li>
-	 * Boolean - Whether this pointcut invocation was deferred or not(since 5.4.0)
+	 * ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum - The timing at which the invocation of the interceptor took place. Options are ACTIVE and DEFERRED.
 	 * </li>
 	 * </ul>
 	 * <p>
@@ -1524,7 +1527,7 @@ public enum Pointcut implements IPointcut {
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails",
-		Boolean.class.getName()
+		"ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum"
 	),
 
 	/**

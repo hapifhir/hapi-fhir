@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.api.server.storage;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
@@ -195,12 +196,12 @@ public class TransactionDetails {
 		myDeferredInterceptorBroadcasts.put(thePointcut, theHookParams);
 	}
 
-	public Boolean isPointcutDeferred(Pointcut thePointcut) {
+	public InterceptorInvocationTimingEnum getInvocationTiming(Pointcut thePointcut) {
 		if (myDeferredInterceptorBroadcasts == null) {
-			return false;
+			return InterceptorInvocationTimingEnum.ACTIVE;
 		}
 		List<HookParams> hookParams = myDeferredInterceptorBroadcasts.get(thePointcut);
-		return hookParams != null;
+		return hookParams == null ? InterceptorInvocationTimingEnum.ACTIVE : InterceptorInvocationTimingEnum.DEFERRED;
 	}
 
 	public void deferredBroadcastProcessingFinished() {

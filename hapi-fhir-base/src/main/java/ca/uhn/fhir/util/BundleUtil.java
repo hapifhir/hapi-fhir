@@ -188,12 +188,17 @@ public class BundleUtil {
 	static int GRAY = 2;
 	static int BLACK = 3;
 
+	/**
+	 *
+	 * @param theContext
+	 * @param theBundle
+	 */
 	public static void sortEntriesIntoProcessingOrder(FhirContext theContext, IBaseBundle theBundle) {
 		Map<BundleEntryParts, IBase> partsToIBaseMap = getPartsToIBaseMap(theContext, theBundle);
 		LinkedHashSet<IBase> retVal = new LinkedHashSet<>();
 
 		//Get all deletions.
-		LinkedHashSet<IBase> deleteParts = sortEntriesIntoProcessingOrder(theContext, theBundle, RequestTypeEnum.DELETE, partsToIBaseMap);
+		LinkedHashSet<IBase> deleteParts = sortEntriesOfTypeIntoProcessingOrder(theContext, RequestTypeEnum.DELETE, partsToIBaseMap);
 		if (deleteParts == null) {
 			throw new IllegalStateException("Cycle!");
 		} else {
@@ -201,7 +206,7 @@ public class BundleUtil {
 		}
 
 		//Get all Creations
-		LinkedHashSet<IBase> createParts= sortEntriesIntoProcessingOrder(theContext, theBundle, RequestTypeEnum.POST, partsToIBaseMap);
+		LinkedHashSet<IBase> createParts= sortEntriesOfTypeIntoProcessingOrder(theContext, RequestTypeEnum.POST, partsToIBaseMap);
 		if (createParts== null) {
 			throw new IllegalStateException("Cycle!");
 		} else {
@@ -209,7 +214,7 @@ public class BundleUtil {
 		}
 
 		// Get all Updates
-		LinkedHashSet<IBase> updateParts= sortEntriesIntoProcessingOrder(theContext, theBundle, RequestTypeEnum.PUT, partsToIBaseMap);
+		LinkedHashSet<IBase> updateParts= sortEntriesOfTypeIntoProcessingOrder(theContext, RequestTypeEnum.PUT, partsToIBaseMap);
 		if (updateParts == null) {
 			throw new IllegalStateException("Cycle!");
 		} else {
@@ -223,7 +228,7 @@ public class BundleUtil {
 		TerserUtil.setField(theContext, "entry", theBundle, retVal.toArray(new IBase[0]));
 	}
 
-	public static LinkedHashSet<IBase> sortEntriesIntoProcessingOrder(FhirContext theContext, IBaseBundle theBundle, RequestTypeEnum theRequestTypeEnum, Map<BundleEntryParts, IBase> thePartsToIBaseMap) {
+	private static LinkedHashSet<IBase> sortEntriesOfTypeIntoProcessingOrder(FhirContext theContext, RequestTypeEnum theRequestTypeEnum, Map<BundleEntryParts, IBase> thePartsToIBaseMap) {
 		SortLegality legality = new SortLegality();
 		HashMap<String, Integer> color = new HashMap<>();
 		HashMap<String, List<String>> adjList = new HashMap<>();
@@ -299,24 +304,10 @@ public class BundleUtil {
 		}
 	}
 
-	private static class SortLegality {
-		private boolean myIsLegal;
-
-		SortLegality() {
-			this.myIsLegal = true;
-		}
-		private void setLegal(boolean theLegal) {
-			myIsLegal = theLegal;
-		}
-
-		public boolean isLegal() {
-			return myIsLegal;
-		}
-	}
 	private static void depthFirstSearch(String theResourceId, HashMap<String, Integer> theResourceIdToColor, HashMap<String, List<String>> theAdjList, List<String> theTopologicalOrder, SortLegality theLegality) {
-		System.out.println("RECURSING ON " + theResourceId);
+
 		if (!theLegality.isLegal()) {
-			System.out.println("IMPOSSIBLE!");
+			ourLog.debug("Found a cycle while trying to sort bundle entries. This bundle is not sortable.");
 			return;
 		}
 
@@ -361,6 +352,13 @@ public class BundleUtil {
 		return map;
 
 	}
+
+	/**
+	 * Given a bundle, and a consumer, apply the consumer to each entry in the bundle.
+	 * @param theContext The FHIR Context
+	 * @param theBundle The bundle to have its entries processed.
+	 * @param theProcessor a {@link Consumer} which will operate on all the entries of a bundle.
+	 */
 	public static void processEntries(FhirContext theContext, IBaseBundle theBundle, Consumer<ModifiableBundleEntry> theProcessor) {
 		RuntimeResourceDefinition bundleDef = theContext.getResourceDefinition(theBundle);
 		BaseRuntimeChildDefinition entryChildDef = bundleDef.getChildByName("entry");
@@ -483,4 +481,20 @@ public class BundleUtil {
 		}
 		return isPatch;
 	}
+
+	private static class SortLegality {
+		private boolean myIsLegal;
+
+		SortLegality() {
+			this.myIsLegal = true;
+		}
+		private void setLegal(boolean theLegal) {
+			myIsLegal = theLegal;
+		}
+
+		public boolean isLegal() {
+			return myIsLegal;
+		}
+	}
+
 }
