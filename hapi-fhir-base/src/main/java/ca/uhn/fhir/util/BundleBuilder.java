@@ -156,7 +156,8 @@ public class BundleBuilder {
 
 		// Bundle.entry.request.url
 		IPrimitiveType<?> url = (IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
-		url.setValueAsString(theResource.getIdElement().toUnqualifiedVersionless().getValue());
+		String resourceType = myContext.getResourceType(theResource);
+		url.setValueAsString(theResource.getIdElement().toUnqualifiedVersionless().withResourceType(resourceType).getValue());
 		myEntryRequestUrlChild.getMutator().setValue(request, url);
 
 		// Bundle.entry.request.url

@@ -292,10 +292,10 @@ The following algorithms are currently supported:
             <td>Gail = Gael, Gail != Gale, Thomas != Tom</td>
         </tr>
         <tr>
-            <td>CAVERPHONE1</td>
+            <td>CAVERPHONE2</td>
             <td>matcher</td>
             <td>
-              <a href="https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/language/Caverphone1.html">Apache Caverphone1</a>          
+              <a href="https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/language/Caverphone2.html">Apache Caverphone2</a>          
             </td>
             <td>Gail = Gael, Gail = Gale, Thomas != Tom</td>
         </tr>
@@ -378,6 +378,14 @@ The following algorithms are currently supported:
                Reduce the precision of the dates to the lowest precision of the two, then compare them as strings.
             </td>
             <td>2019-12,Month = 2019-12-19,Day</td>
+        </tr>
+        <tr>
+            <td>NUMERIC</td>
+            <td>matcher</td>
+            <td>
+               Remove all non-numeric characters from the string before comparing.
+            </td>
+            <td>4169671111 = (416) 967-1111</td>
         </tr>
         <tr>
             <td>NAME_ANY_ORDER</td>

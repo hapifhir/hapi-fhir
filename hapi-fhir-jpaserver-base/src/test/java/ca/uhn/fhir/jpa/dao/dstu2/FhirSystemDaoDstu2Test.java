@@ -785,7 +785,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		// try {
 		Bundle resp = mySystemDao.transaction(mySrd, request);
 		assertEquals(1, resp.getEntry().size());
-		assertEquals("404 Not Found", resp.getEntry().get(0).getResponse().getStatus());
+		assertEquals("204 No Content", resp.getEntry().get(0).getResponse().getStatus());
 
 		// fail();
 		// } catch (ResourceNotFoundException e) {
@@ -1159,11 +1159,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		}
 		assertEquals("201 Created", resp.getEntry().get(2).getResponse().getStatus());
 		assertThat(resp.getEntry().get(2).getResponse().getLocation(), startsWith("Patient/"));
-		if (pass == 0) {
-			assertEquals("404 Not Found", resp.getEntry().get(3).getResponse().getStatus());
-		} else {
-			assertEquals("204 No Content", resp.getEntry().get(3).getResponse().getStatus());
-		}
+		assertEquals("204 No Content", resp.getEntry().get(3).getResponse().getStatus());
 
 		Bundle respGetBundle = (Bundle) resp.getEntry().get(0).getResource();
 		assertEquals(1, respGetBundle.getEntry().size());

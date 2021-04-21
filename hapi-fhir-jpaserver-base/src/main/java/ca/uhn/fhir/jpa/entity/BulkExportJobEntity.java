@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.r5.model.InstantType;
@@ -51,9 +51,9 @@ import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
 @Table(name = "HFJ_BLK_EXPORT_JOB", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_BLKEX_JOB_ID", columnNames = "JOB_ID")
+		  @UniqueConstraint(name = "IDX_BLKEX_JOB_ID", columnNames = "JOB_ID")
 }, indexes = {
-	@Index(name = "IDX_BLKEX_EXPTIME", columnList = "EXP_TIME")
+		  @Index(name = "IDX_BLKEX_EXPTIME", columnList = "EXP_TIME")
 })
 public class BulkExportJobEntity implements Serializable {
 
@@ -70,7 +70,7 @@ public class BulkExportJobEntity implements Serializable {
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "JOB_STATUS", length = 10, nullable = false)
-	private BulkJobStatusEnum myStatus;
+	private BulkExportJobStatusEnum myStatus;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED_TIME", nullable = false)
 	private Date myCreated;
@@ -156,11 +156,11 @@ public class BulkExportJobEntity implements Serializable {
 		return b.toString();
 	}
 
-	public BulkJobStatusEnum getStatus() {
+	public BulkExportJobStatusEnum getStatus() {
 		return myStatus;
 	}
 
-	public void setStatus(BulkJobStatusEnum theStatus) {
+	public void setStatus(BulkExportJobStatusEnum theStatus) {
 		if (myStatus != theStatus) {
 			myStatusTime = new Date();
 			myStatus = theStatus;
