@@ -142,7 +142,7 @@ public class ResourceValidatorDstu3FeatureTest {
 		ValidationResult output = val.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
 
-		assertEquals("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/marital-status (http://hl7.org/fhir/ValueSet/marital-status, and a code should come from this value set unless it has no suitable code) (codes = http://hl7.org/fhir/v3/MaritalStatus#FOO)", output.getMessages().get(0).getMessage());
+		assertEquals("None of the codings provided are in the value set http://hl7.org/fhir/ValueSet/marital-status (http://hl7.org/fhir/ValueSet/marital-status, and a coding should come from this value set unless it has no suitable code) (codes = http://hl7.org/fhir/v3/MaritalStatus#FOO)", output.getMessages().get(0).getMessage());
 		assertEquals(ResultSeverityEnum.WARNING, output.getMessages().get(0).getSeverity());
 	}
 
