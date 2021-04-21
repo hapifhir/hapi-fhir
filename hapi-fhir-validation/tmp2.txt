@@ -1,0 +1,150 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< ca.uhn.hapi.fhir:hapi-fhir-validation >----------------
+[INFO] Building HAPI FHIR - Validation 5.4.0-PRE7-SNAPSHOT
+[INFO] -------------------------------[ bundle ]-------------------------------
+[INFO] 
+[INFO] --- maven-dependency-plugin:3.1.2:tree (default-cli) @ hapi-fhir-validation ---
+[INFO] ca.uhn.hapi.fhir:hapi-fhir-validation:bundle:5.4.0-PRE7-SNAPSHOT
+[INFO] +- ca.uhn.hapi.fhir:hapi-fhir-base:jar:5.4.0-PRE7-SNAPSHOT:compile
+[INFO] |  +- com.fasterxml.jackson.core:jackson-databind:jar:2.12.3:compile
+[INFO] |  |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.12.3:compile
+[INFO] |  |  \- com.fasterxml.jackson.core:jackson-core:jar:2.12.3:compile
+[INFO] |  +- org.apache.commons:commons-lang3:jar:3.12.0:compile
+[INFO] |  +- org.apache.commons:commons-text:jar:1.9:compile
+[INFO] |  +- commons-codec:commons-codec:jar:1.15:compile
+[INFO] |  +- commons-io:commons-io:jar:2.8.0:compile
+[INFO] |  +- org.slf4j:slf4j-api:jar:1.7.30:compile
+[INFO] |  \- org.slf4j:jcl-over-slf4j:jar:1.7.30:compile
+[INFO] +- ca.uhn.hapi.fhir:hapi-fhir-converter:jar:5.4.0-PRE7-SNAPSHOT:compile
+[INFO] |  +- ca.uhn.hapi.fhir:org.hl7.fhir.convertors:jar:5.3.0:compile
+[INFO] |  \- net.sf.saxon:Saxon-HE:jar:9.8.0-15:compile
+[INFO] +- ca.uhn.hapi.fhir:org.hl7.fhir.validation:jar:5.3.0:compile
+[INFO] |  +- ca.uhn.hapi.fhir:org.hl7.fhir.dstu2:jar:5.3.0:compile
+[INFO] |  +- ca.uhn.hapi.fhir:org.hl7.fhir.dstu2016may:jar:5.3.0:compile
+[INFO] |  +- ca.uhn.hapi.fhir:org.hl7.fhir.dstu3:jar:5.3.0:compile
+[INFO] |  +- ca.uhn.hapi.fhir:org.hl7.fhir.r4:jar:5.3.0:compile
+[INFO] |  +- xpp3:xpp3:jar:1.1.4c:compile
+[INFO] |  +- xpp3:xpp3_xpath:jar:1.1.4c:compile
+[INFO] |  +- org.apache.commons:commons-compress:jar:1.20:compile
+[INFO] |  +- org.fhir:ucum:jar:1.0.3:compile
+[INFO] |  \- org.thymeleaf:thymeleaf:jar:3.0.12.RELEASE:compile
+[INFO] |     +- ognl:ognl:jar:3.1.26:compile
+[INFO] |     |  \- org.javassist:javassist:jar:3.22.0-GA:compile
+[INFO] |     +- org.attoparser:attoparser:jar:2.0.5.RELEASE:compile
+[INFO] |     \- org.unbescape:unbescape:jar:1.1.6.RELEASE:compile
+[INFO] +- ca.uhn.hapi.fhir:org.hl7.fhir.utilities:jar:5.3.0:compile
+[INFO] +- com.github.ben-manes.caffeine:caffeine:jar:3.0.1:compile
+[INFO] |  +- org.checkerframework:checker-qual:jar:3.11.0:compile
+[INFO] |  \- com.google.errorprone:error_prone_annotations:jar:2.5.1:compile
+[INFO] +- com.google.code.findbugs:jsr305:jar:3.0.2:compile
+[INFO] +- com.google.code.gson:gson:jar:2.8.6:compile
+[INFO] +- ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2:jar:5.4.0-PRE7-SNAPSHOT:compile (optional) 
+[INFO] +- ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu2:jar:5.4.0-PRE7-SNAPSHOT:compile (optional) 
+[INFO] +- ca.uhn.hapi.fhir:hapi-fhir-structures-hl7org-dstu2:jar:5.4.0-PRE7-SNAPSHOT:compile (optional) 
+[INFO] +- ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2.1:jar:5.4.0-PRE7-SNAPSHOT:compile (optional) 
+[INFO] |  \- commons-lang:commons-lang:jar:2.5:compile (optional) 
+[INFO] +- ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu2.1:jar:5.4.0-PRE7-SNAPSHOT:compile (optional) 
+[INFO] +- ca.uhn.hapi.fhir:hapi-fhir-structures-dstu3:jar:5.4.0-PRE7-SNAPSHOT:compile (optional) 
+[INFO] +- ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu3:jar:5.4.0-PRE7-SNAPSHOT:compile (optional) 
+[INFO] +- ca.uhn.hapi.fhir:hapi-fhir-structures-r4:jar:5.4.0-PRE7-SNAPSHOT:compile (optional) 
+[INFO] +- ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4:jar:5.4.0-PRE7-SNAPSHOT:compile (optional) 
+[INFO] +- ca.uhn.hapi.fhir:hapi-fhir-structures-r5:jar:5.4.0-PRE7-SNAPSHOT:compile
+[INFO] |  \- ca.uhn.hapi.fhir:org.hl7.fhir.r5:jar:5.3.0:compile
+[INFO] +- ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r5:jar:5.4.0-PRE7-SNAPSHOT:compile (optional) 
+[INFO] +- com.fasterxml.woodstox:woodstox-core:jar:6.2.5:test
+[INFO] |  \- org.codehaus.woodstox:stax2-api:jar:4.2.1:test
+[INFO] +- ca.uhn.hapi.fhir:hapi-fhir-server:jar:5.4.0-PRE7-SNAPSHOT:test
+[INFO] |  +- org.apache.httpcomponents:httpcore:jar:4.4.13:compile
+[INFO] |  +- org.apache.commons:commons-collections4:jar:4.4:test
+[INFO] |  \- org.springframework:spring-messaging:jar:5.3.6:test
+[INFO] |     \- org.springframework:spring-beans:jar:5.3.6:test
+[INFO] +- ca.uhn.hapi.fhir:hapi-fhir-client:jar:5.4.0-PRE7-SNAPSHOT:test
+[INFO] +- ch.qos.logback:logback-classic:jar:1.2.3:test
+[INFO] |  \- ch.qos.logback:logback-core:jar:1.2.3:test
+[INFO] +- javax.servlet:javax.servlet-api:jar:3.1.0:test
+[INFO] +- com.google.guava:guava:jar:30.1.1-jre:test
+[INFO] |  +- com.google.guava:failureaccess:jar:1.0.1:test
+[INFO] |  +- com.google.guava:listenablefuture:jar:9999.0-empty-to-avoid-conflict-with-guava:test
+[INFO] |  \- com.google.j2objc:j2objc-annotations:jar:1.3:test
+[INFO] +- org.eclipse.jetty:jetty-servlets:jar:9.4.39.v20210325:test
+[INFO] |  +- org.eclipse.jetty:jetty-continuation:jar:9.4.39.v20210325:test
+[INFO] |  \- org.eclipse.jetty:jetty-io:jar:9.4.39.v20210325:test
+[INFO] +- org.eclipse.jetty:jetty-servlet:jar:9.4.39.v20210325:test
+[INFO] |  +- org.eclipse.jetty:jetty-security:jar:9.4.39.v20210325:test
+[INFO] |  \- org.eclipse.jetty:jetty-util-ajax:jar:9.4.39.v20210325:test
+[INFO] +- org.eclipse.jetty:jetty-server:jar:9.4.39.v20210325:test
+[INFO] +- org.eclipse.jetty:jetty-util:jar:9.4.39.v20210325:test
+[INFO] +- org.eclipse.jetty:jetty-webapp:jar:9.4.39.v20210325:test
+[INFO] |  \- org.eclipse.jetty:jetty-xml:jar:9.4.39.v20210325:test
+[INFO] +- org.eclipse.jetty:jetty-http:jar:9.4.39.v20210325:test
+[INFO] +- ca.uhn.hapi.fhir:hapi-fhir-test-utilities:jar:5.4.0-PRE7-SNAPSHOT:test
+[INFO] |  +- com.google.guava:guava-testlib:jar:30.1.1-jre:test
+[INFO] |  \- org.testcontainers:testcontainers:jar:1.15.3:test
+[INFO] |     +- junit:junit:jar:4.12:test
+[INFO] |     +- org.rnorth.duct-tape:duct-tape:jar:1.0.8:test
+[INFO] |     +- org.rnorth.visible-assertions:visible-assertions:jar:2.1.2:test
+[INFO] |     |  \- net.java.dev.jna:jna:jar:5.2.0:test
+[INFO] |     +- com.github.docker-java:docker-java-api:jar:3.2.8:test
+[INFO] |     \- com.github.docker-java:docker-java-transport-zerodep:jar:3.2.8:test
+[INFO] |        \- com.github.docker-java:docker-java-transport:jar:3.2.8:test
+[INFO] +- com.helger:ph-schematron:jar:5.6.5:test
+[INFO] |  +- com.helger:ph-commons:jar:9.5.4:test
+[INFO] |  +- com.helger:ph-xml:jar:9.5.3:test
+[INFO] |  |  \- com.helger:ph-collection:jar:9.5.3:test
+[INFO] |  \- com.helger:ph-jaxb:jar:9.5.3:test
+[INFO] |     \- com.helger:ph-jaxb-pom:pom:1.1.0:test
+[INFO] |        \- com.sun.xml.bind:jaxb-impl:jar:2.3.3:test
+[INFO] +- javax.activation:javax.activation-api:jar:1.2.0:test
+[INFO] +- javax.xml.bind:jaxb-api:jar:2.3.1:test
+[INFO] +- org.glassfish.jaxb:jaxb-runtime:jar:3.0.0:test
+[INFO] |  +- com.sun.activation:jakarta.activation:jar:2.0.0:test
+[INFO] |  \- org.glassfish.jaxb:jaxb-core:jar:3.0.0:test
+[INFO] |     +- jakarta.xml.bind:jakarta.xml.bind-api:jar:3.0.0:test
+[INFO] |     +- org.glassfish.jaxb:txw2:jar:3.0.0:test
+[INFO] |     \- com.sun.istack:istack-commons-runtime:jar:4.0.0:test
+[INFO] +- org.apache.httpcomponents:httpclient:jar:4.5.13:compile
+[INFO] |  \- commons-logging:commons-logging:jar:1.2:compile
+[INFO] +- org.springframework:spring-core:jar:5.3.6:test
+[INFO] |  \- org.springframework:spring-jcl:jar:5.3.6:test
+[INFO] +- org.apache.jena:apache-jena-libs:pom:3.16.0:test
+[INFO] |  +- org.apache.jena:jena-shacl:jar:3.16.0:test
+[INFO] |  |  \- org.apache.jena:jena-arq:jar:3.16.0:test
+[INFO] |  |     +- org.apache.jena:jena-core:jar:3.16.0:test
+[INFO] |  |     |  +- org.apache.jena:jena-base:jar:3.16.0:test
+[INFO] |  |     |  |  +- org.apache.commons:commons-csv:jar:1.8:test
+[INFO] |  |     |  |  \- com.github.andrewoma.dexx:collection:jar:0.7:test
+[INFO] |  |     |  +- org.apache.jena:jena-iri:jar:3.16.0:test
+[INFO] |  |     |  \- commons-cli:commons-cli:jar:1.4:test
+[INFO] |  |     +- org.apache.jena:jena-shaded-guava:jar:3.16.0:test
+[INFO] |  |     +- org.apache.httpcomponents:httpclient-cache:jar:4.5.13:test
+[INFO] |  |     \- org.apache.thrift:libthrift:jar:0.13.0:test
+[INFO] |  |        \- javax.annotation:javax.annotation-api:jar:1.3.2:test
+[INFO] |  +- org.apache.jena:jena-tdb:jar:3.16.0:test
+[INFO] |  +- org.apache.jena:jena-tdb2:jar:3.16.0:test
+[INFO] |  |  \- org.apache.jena:jena-dboe-storage:jar:3.16.0:test
+[INFO] |  |     \- org.apache.jena:jena-dboe-trans-data:jar:3.16.0:test
+[INFO] |  |        +- org.apache.jena:jena-dboe-transaction:jar:3.16.0:test
+[INFO] |  |        |  \- org.apache.jena:jena-dboe-base:jar:3.16.0:test
+[INFO] |  |        \- org.apache.jena:jena-dboe-index:jar:3.16.0:test
+[INFO] |  \- org.apache.jena:jena-rdfconnection:jar:3.16.0:test
+[INFO] +- org.junit.jupiter:junit-jupiter:jar:5.7.1:test
+[INFO] |  \- org.junit.jupiter:junit-jupiter-params:jar:5.7.1:test
+[INFO] +- org.junit.jupiter:junit-jupiter-api:jar:5.7.1:test
+[INFO] |  +- org.apiguardian:apiguardian-api:jar:1.1.0:test
+[INFO] |  +- org.opentest4j:opentest4j:jar:1.2.0:test
+[INFO] |  \- org.junit.platform:junit-platform-commons:jar:1.7.1:test
+[INFO] +- org.junit.jupiter:junit-jupiter-engine:jar:5.7.1:test
+[INFO] |  \- org.junit.platform:junit-platform-engine:jar:1.7.1:test
+[INFO] +- org.hamcrest:hamcrest:jar:2.2:test
+[INFO] +- org.mockito:mockito-core:jar:3.9.0:test
+[INFO] |  +- net.bytebuddy:byte-buddy:jar:1.10.20:test
+[INFO] |  +- net.bytebuddy:byte-buddy-agent:jar:1.10.20:test
+[INFO] |  \- org.objenesis:objenesis:jar:3.2:test
+[INFO] \- org.mockito:mockito-junit-jupiter:jar:3.9.0:test
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  1.543 s
+[INFO] Finished at: 2021-04-21T19:21:02-04:00
+[INFO] ------------------------------------------------------------------------
