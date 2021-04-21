@@ -11,5 +11,4 @@ public class PlaceholderTest {
 	public void testPass() {
 		// nothing
 	}
-	
 }
