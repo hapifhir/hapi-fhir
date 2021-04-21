@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.parser.IParser;
@@ -116,7 +117,7 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 
 			Binary b = new Binary();
 			b.setContent(new byte[]{0, 1, 2, 3});
-			String binaryId = myBinaryDao.create(b).getId().toUnqualifiedVersionless().getValue();
+			String binaryId = myBinaryDao.create(b, new SystemRequestDetails()).getId().toUnqualifiedVersionless().getValue();
 
 			BulkExportJobEntity job = new BulkExportJobEntity();
 			job.setStatus(BulkExportJobStatusEnum.COMPLETE);
@@ -494,7 +495,7 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 			Patient patient = new Patient();
 			patient.setId("PAT" + i);
 			patient.addIdentifier().setSystem("http://mrns").setValue("PAT" + i);
-			myPatientDao.update(patient).getId().toUnqualifiedVersionless();
+			myPatientDao.update(patient, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
 		}
 
 		// Create a bulk job
@@ -523,7 +524,7 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 
 		// Iterate over the files
 		for (IBulkDataExportSvc.FileEntry next : status.getFiles()) {
-			Binary nextBinary = myBinaryDao.read(next.getResourceId());
+			Binary nextBinary = myBinaryDao.read(next.getResourceId(), new SystemRequestDetails());
 			assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
 			String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
 			ourLog.info("Next contents for type {}:\n{}", next.getResourceType(), nextContents);
@@ -848,7 +849,7 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 
 	public String getBinaryContents(IBulkDataExportSvc.JobInfo theJobInfo, int theIndex) {
 		// Iterate over the files
-		Binary nextBinary = myBinaryDao.read(theJobInfo.getFiles().get(theIndex).getResourceId());
+		Binary nextBinary = myBinaryDao.read(theJobInfo.getFiles().get(theIndex).getResourceId(), new SystemRequestDetails());
 		assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
 		String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
 		ourLog.info("Next contents for type {}:\n{}", nextBinary.getResourceType(), nextContents);
@@ -928,7 +929,7 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 
 
 		//Check Observation Content
-		Binary observationExportContent = myBinaryDao.read(jobInfo.getFiles().get(1).getResourceId());
+		Binary observationExportContent = myBinaryDao.read(jobInfo.getFiles().get(1).getResourceId(), new SystemRequestDetails());
 		assertEquals(Constants.CT_FHIR_NDJSON, observationExportContent.getContentType());
 		nextContents = new String(observationExportContent.getContent(), Constants.CHARSET_UTF8);
 		ourLog.info("Next contents for type {}:\n{}", observationExportContent.getResourceType(), nextContents);
@@ -1029,7 +1030,7 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 	}
 
 	@Test
-	public void testCacheSettingIsRespectedWhenCreatingNewJobs() {
+	public void testCacheSettingIsRespectedWhenCreatingNewJobs() throws InterruptedException {
 		BulkDataExportOptions options = new BulkDataExportOptions();
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
 		options.setResourceTypes(Sets.newHashSet("Procedure"));
@@ -1048,6 +1049,7 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 		IBulkDataExportSvc.JobInfo jobInfo6 = myBulkDataExportSvc.submitJob(options, false);
 		IBulkDataExportSvc.JobInfo jobInfo7 = myBulkDataExportSvc.submitJob(options, false);
 		IBulkDataExportSvc.JobInfo jobInfo8 = myBulkDataExportSvc.submitJob(options, false);
+		Thread.sleep(100L); //stupid commit timings.
 		IBulkDataExportSvc.JobInfo jobInfo9 = myBulkDataExportSvc.submitJob(options, false);
 
 		//First non-cached should retrieve new ID.
@@ -1061,7 +1063,48 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 		//Now if we create another one and ask for the cache, we should get the most-recently-insert entry.
 		IBulkDataExportSvc.JobInfo jobInfo10 = myBulkDataExportSvc.submitJob(options, true);
 		assertThat(jobInfo10.getJobId(), is(equalTo(jobInfo9.getJobId())));
+	}
+	@Test
+	public void testBulkExportWritesToDEFAULTPartitionWhenPartitioningIsEnabled() {
+		myPartitionSettings.setPartitioningEnabled(true);
 
+		createResources();
+
+		//Only get COVID-19 vaccinations
+		Set<String> filters = new HashSet<>();
+		filters.add("Immunization?vaccine-code=vaccines|COVID-19");
+
+		BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
+		bulkDataExportOptions.setOutputFormat(null);
+		bulkDataExportOptions.setResourceTypes(Sets.newHashSet("Immunization"));
+		bulkDataExportOptions.setSince(null);
+		bulkDataExportOptions.setFilters(filters);
+		bulkDataExportOptions.setGroupId(myPatientGroupId);
+		bulkDataExportOptions.setExpandMdm(true);
+		bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
+
+		myBulkDataExportSvc.buildExportFiles();
+		awaitAllBulkJobCompletions();
+
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+
+		assertThat(jobInfo.getStatus(), equalTo(BulkExportJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getFiles().size(), equalTo(1));
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
+
+		// Check immunization Content
+		String nextContents = getBinaryContents(jobInfo, 0);
+
+		assertThat(nextContents, is(containsString("IMM1")));
+		assertThat(nextContents, is(containsString("IMM3")));
+		assertThat(nextContents, is(containsString("IMM5")));
+		assertThat(nextContents, is(containsString("IMM7")));
+		assertThat(nextContents, is(containsString("IMM9")));
+		assertThat(nextContents, is(containsString("IMM999")));
+
+		assertThat(nextContents, is(not(containsString("Flu"))));
+		myPartitionSettings.setPartitioningEnabled(false);
 	}
 
 	private void createResources() {
@@ -1071,7 +1114,8 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 		//Manually create a golden record
 		Patient goldenPatient = new Patient();
 		goldenPatient.setId("PAT999");
-		DaoMethodOutcome g1Outcome = myPatientDao.update(goldenPatient);
+		SystemRequestDetails srd = SystemRequestDetails.newSystemRequestAllPartitions();
+		DaoMethodOutcome g1Outcome = myPatientDao.update(goldenPatient, srd);
 		Long goldenPid = myIdHelperService.getPidOrNull(g1Outcome.getResource());
 
 		//Create our golden records' data.
@@ -1098,12 +1142,12 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 			createCareTeamWithIndex(i, patId);
 		}
 
-		myPatientGroupId = myGroupDao.update(group).getId();
+		myPatientGroupId = myGroupDao.update(group, new SystemRequestDetails()).getId();
 
 		//Manually create another golden record
 		Patient goldenPatient2 = new Patient();
 		goldenPatient2.setId("PAT888");
-		DaoMethodOutcome g2Outcome = myPatientDao.update(goldenPatient2);
+		DaoMethodOutcome g2Outcome = myPatientDao.update(goldenPatient2, new SystemRequestDetails());
 		Long goldenPid2 = myIdHelperService.getPidOrNull(g2Outcome.getResource());
 
 		//Create some nongroup patients MDM linked to a different golden resource. They shouldnt be included in the query.
@@ -1132,14 +1176,14 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 		patient.setGender(i % 2 == 0 ? Enumerations.AdministrativeGender.MALE : Enumerations.AdministrativeGender.FEMALE);
 		patient.addName().setFamily("FAM" + i);
 		patient.addIdentifier().setSystem("http://mrns").setValue("PAT" + i);
-		return myPatientDao.update(patient);
+		return myPatientDao.update(patient, new SystemRequestDetails());
 	}
 
 	private void createCareTeamWithIndex(int i, IIdType patId) {
 		CareTeam careTeam = new CareTeam();
 		careTeam.setId("CT" + i);
 		careTeam.setSubject(new Reference(patId)); // This maps to the "patient" search parameter on CareTeam
-		myCareTeamDao.update(careTeam);
+		myCareTeamDao.update(careTeam, new SystemRequestDetails());
 	}
 
 	private void createImmunizationWithIndex(int i, IIdType patId) {
@@ -1157,7 +1201,7 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 			cc.addCoding().setSystem("vaccines").setCode("COVID-19");
 			immunization.setVaccineCode(cc);
 		}
-		myImmunizationDao.update(immunization);
+		myImmunizationDao.update(immunization, new SystemRequestDetails());
 	}
 
 	private void createObservationWithIndex(int i, IIdType patId) {
@@ -1168,7 +1212,7 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 		if (patId != null) {
 			obs.getSubject().setReference(patId.getValue());
 		}
-		myObservationDao.update(obs);
+		myObservationDao.update(obs, new SystemRequestDetails());
 	}
 
 	public void linkToGoldenResource(Long theGoldenPid, Long theSourcePid) {
