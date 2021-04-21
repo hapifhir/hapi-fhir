@@ -134,6 +134,11 @@ public class MdmEidUpdateService {
 		ourLog.debug(theMessage);
 	}
 
+	public void applySurvivorshipRulesAndSaveGoldenResource(IAnyResource theTargetResource, IAnyResource theGoldenResource, MdmTransactionContext theMdmTransactionContext) {
+		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theTargetResource, theGoldenResource, theMdmTransactionContext);
+		myMdmResourceDaoSvc.upsertGoldenResource(theGoldenResource, theMdmTransactionContext.getResourceType());
+	}
+
 	/**
 	 * Data class to hold context surrounding an update operation for an MDM target.
 	 */
@@ -162,7 +167,7 @@ public class MdmEidUpdateService {
 			if (theExistingMatchLink.isPresent()) {
 				MdmLink mdmLink = theExistingMatchLink.get();
 				Long existingGoldenResourcePid = mdmLink.getGoldenResourcePid();
-				myExistingGoldenResource =  myMdmResourceDaoSvc.readGoldenResourceByPid(new ResourcePersistentId(existingGoldenResourcePid), resourceType);
+				myExistingGoldenResource = myMdmResourceDaoSvc.readGoldenResourceByPid(new ResourcePersistentId(existingGoldenResourcePid), resourceType);
 				myRemainsMatchedToSameGoldenResource = candidateIsSameAsMdmLinkGoldenResource(mdmLink, theMatchedGoldenResourceCandidate);
 			} else {
 				myRemainsMatchedToSameGoldenResource = false;

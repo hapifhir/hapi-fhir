@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -48,9 +49,15 @@ public final class TerserUtil {
 
 	private static final String EQUALS_DEEP = "equalsDeep";
 
+	/**
+	 * Exclude for id, identifier and meta fields of a resource.
+	 */
 	public static final Collection<String> IDS_AND_META_EXCLUDES =
 		Collections.unmodifiableSet(Stream.of("id", "identifier", "meta").collect(Collectors.toSet()));
 
+	/**
+	 * Exclusion predicate for id, identifier, meta fields.
+	 */
 	public static final Predicate<String> EXCLUDE_IDS_AND_META = new Predicate<String>() {
 		@Override
 		public boolean test(String s) {
@@ -58,6 +65,25 @@ public final class TerserUtil {
 		}
 	};
 
+	/**
+	 * Exclusion predicate for id/identifier, meta and fields with empty values. This ensures that source / target resources,
+	 * empty source fields will not results in erasure of target fields.
+	 */
+	public static final Predicate<Triple<BaseRuntimeChildDefinition, IBase, IBase>> EXCLUDE_IDS_META_AND_EMPTY = new Predicate<Triple<BaseRuntimeChildDefinition, IBase, IBase>>() {
+		@Override
+		public boolean test(Triple<BaseRuntimeChildDefinition, IBase, IBase> theTriple) {
+			if (!EXCLUDE_IDS_AND_META.test(theTriple.getLeft().getElementName())) {
+				return false;
+			}
+			BaseRuntimeChildDefinition childDefinition = theTriple.getLeft();
+			boolean isSourceFieldEmpty = childDefinition.getAccessor().getValues(theTriple.getMiddle()).isEmpty();
+			return !isSourceFieldEmpty;
+		}
+	};
+
+	/**
+	 * Exclusion predicate for keeping all fields.
+	 */
 	public static final Predicate<String> INCLUDE_ALL = new Predicate<String>() {
 		@Override
 		public boolean test(String s) {
@@ -235,24 +261,35 @@ public final class TerserUtil {
 	}
 
 	/**
-	 * Replaces all fields that test positive by the given inclusion strategy. <code>theTo</code> will contain a copy of the
+	 * Replaces all fields that have matching field names by the given inclusion strategy. <code>theTo</code> will contain a copy of the
 	 * values from <code>theFrom</code> instance.
 	 *
-	 * @param theFhirContext    Context holding resource definition
-	 * @param theFrom           The resource to merge the fields from
-	 * @param theTo             The resource to merge the fields into
-	 * @param inclusionStrategy Inclusion strategy that checks if a given field should be replaced by checking {@link Predicate#test(Object)}
+	 * @param theFhirContext        Context holding resource definition
+	 * @param theFrom               The resource to merge the fields from
+	 * @param theTo                 The resource to merge the fields into
+	 * @param theFieldNameInclusion Inclusion strategy that checks if a given field should be replaced
 	 */
-	public static void replaceFields(FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo, Predicate<String> inclusionStrategy) {
-		FhirTerser terser = theFhirContext.newTerser();
+	public static void replaceFields(FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo, Predicate<String> theFieldNameInclusion) {
+		Predicate<Triple<BaseRuntimeChildDefinition, IBase, IBase>> predicate
+			= (t) -> theFieldNameInclusion.test(t.getLeft().getElementName());
+		replaceFieldsByPredicate(theFhirContext, theFrom, theTo, predicate);
+	}
 
+	/**
+	 * Replaces fields on theTo resource that test positive by the given predicate. <code>theTo</code> will contain a copy of the
+	 * values from <code>theFrom</code> for which predicate tests positive. Please note that composite fields will be replaced fully.
+	 *
+	 * @param theFhirContext Context holding resource definition
+	 * @param theFrom        The resource to merge the fields from
+	 * @param theTo          The resource to merge the fields into
+	 * @param thePredicate   Predicate that checks if a given field should be replaced
+	 */
+	public static void replaceFieldsByPredicate(FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo, Predicate<Triple<BaseRuntimeChildDefinition, IBase, IBase>> thePredicate) {
 		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theFrom);
 		for (BaseRuntimeChildDefinition childDefinition : definition.getChildrenAndExtension()) {
-			if (!inclusionStrategy.test(childDefinition.getElementName())) {
-				continue;
+			if (thePredicate.test(Triple.of(childDefinition, theFrom, theTo))) {
+				replaceField(theFrom, theTo, childDefinition);
 			}
-
-			replaceField(theFrom, theTo, childDefinition);
 		}
 	}
 
@@ -277,14 +314,11 @@ public final class TerserUtil {
 	 * @param theTo          The resource to replace the field on
 	 */
 	public static void replaceField(FhirContext theFhirContext, String theFieldName, IBaseResource theFrom, IBaseResource theTo) {
-		replaceField(theFhirContext, theFhirContext.newTerser(), theFieldName, theFrom, theTo);
-	}
-
-	/**
-	 * @deprecated Use {@link #replaceField(FhirContext, String, IBaseResource, IBaseResource)} instead
-	 */
-	public static void replaceField(FhirContext theFhirContext, FhirTerser theTerser, String theFieldName, IBaseResource theFrom, IBaseResource theTo) {
-		replaceField(theFrom, theTo, getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theFrom));
+		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theFrom);
+		if (definition == null) {
+			throw new IllegalArgumentException(String.format("Field %s does not exist in %s", theFieldName, theFrom));
+		}
+		replaceField(theFrom, theTo, theFhirContext.getResourceDefinition(theFrom).getChildByName(theFieldName));
 	}
 
 	/**
@@ -301,7 +335,7 @@ public final class TerserUtil {
 
 	/**
 	 * Sets the provided field with the given values. This method will add to the collection of existing field values
-	 * in case of multiple cardinality. Use {@link #clearField(FhirContext, FhirTerser, String, IBaseResource, IBase...)}
+	 * in case of multiple cardinality. Use {@link #clearField(FhirContext, String, IBaseResource)}
 	 * to remove values before setting
 	 *
 	 * @param theFhirContext Context holding resource definition
@@ -315,7 +349,7 @@ public final class TerserUtil {
 
 	/**
 	 * Sets the provided field with the given values. This method will add to the collection of existing field values
-	 * in case of multiple cardinality. Use {@link #clearField(FhirContext, FhirTerser, String, IBaseResource, IBase...)}
+	 * in case of multiple cardinality. Use {@link #clearField(FhirContext, String, IBaseResource)}
 	 * to remove values before setting
 	 *
 	 * @param theFhirContext Context holding resource definition
@@ -370,10 +404,26 @@ public final class TerserUtil {
 		setFieldByFhirPath(theFhirContext.newTerser(), theFhirPath, theResource, theValue);
 	}
 
+	/**
+	 * Returns field values ant the specified FHIR path from the resource.
+	 *
+	 * @param theFhirContext Context holding resource definition
+	 * @param theFhirPath    The FHIR path to get the field from
+	 * @param theResource    The resource from which the value should be retrieved
+	 * @return Returns the list of field values at the given FHIR path
+	 */
 	public static List<IBase> getFieldByFhirPath(FhirContext theFhirContext, String theFhirPath, IBase theResource) {
 		return theFhirContext.newTerser().getValues(theResource, theFhirPath, false, false);
 	}
 
+	/**
+	 * Returns the first available field value at the specified FHIR path from the resource.
+	 *
+	 * @param theFhirContext Context holding resource definition
+	 * @param theFhirPath    The FHIR path to get the field from
+	 * @param theResource    The resource from which the value should be retrieved
+	 * @return Returns the first available value or null if no values can be retrieved
+	 */
 	public static IBase getFirstFieldByFhirPath(FhirContext theFhirContext, String theFhirPath, IBase theResource) {
 		List<IBase> values = getFieldByFhirPath(theFhirContext, theFhirPath, theResource);
 		if (values == null || values.isEmpty()) {
