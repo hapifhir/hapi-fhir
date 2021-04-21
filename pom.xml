@@ -2616,6 +2616,15 @@
 			</build>
 		</profile>
 		<profile>
+			<id>DEPLOYABLE_POM</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<modules>
+				<module>hapi-deployable-pom</module>
+			</modules>
+		</profile>
+		<profile>
 			<id>ALLMODULES</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
