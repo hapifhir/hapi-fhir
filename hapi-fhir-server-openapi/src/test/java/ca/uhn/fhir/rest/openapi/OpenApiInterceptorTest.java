@@ -117,9 +117,6 @@ public class OpenApiInterceptorTest {
 		assertNotNull(fooOpPath.getPost());
 		assertEquals("Foo Op Description", fooOpPath.getPost().getDescription());
 		assertEquals("Foo Op Short", fooOpPath.getPost().getSummary());
-		assertEquals(2, fooOpPath.getParameters().size());
-		assertEquals(2, fooOpPath.getParameters().get(0).getDescription());
-		assertEquals(2, fooOpPath.getParameters().get(0).getExample());
 
 		PathItem lastNPath = parsed.getPaths().get("/Observation/$lastn");
 		assertNull(lastNPath.getPost());
