@@ -17,8 +17,6 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -83,8 +81,12 @@ public class XmlUtilDstu3Test {
 	public void testEncodePrettyPrint() throws IOException, SAXException, TransformerException {
 		String input = "<document><tag id=\"1\"/></document>";
 		Document parsed = XmlUtil.parseDocument(input);
-		String output = XmlUtil.encodeDocument(parsed, true);
-		assertThat(output, containsString("<document>\n"));
+		String output = XmlUtil.encodeDocument(parsed, true)
+			.replace("\r\n", "\n")
+			.replaceAll("^ *", "");
+		assertEquals("<document>\n" +
+			"<tag id=\"1\"/>\n" +
+			"</document>\n", output);
 	}
 
 	@Test
