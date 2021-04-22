@@ -86,7 +86,7 @@ class FieldValidatingInterceptorTest {
 
 	@Test
 	public void testCustomInvalidValidation() {
-		myInterceptor.getConfig().put("telecom.where(system='phone').value", "ClassThatDoesntExist");
+		myInterceptor.getConfig().put("telecom.where(system='phone')", "ClassThatDoesntExist");
 		try {
 			myInterceptor.handleRequest(newRequestDetails(), new Person());
 			fail();
@@ -96,7 +96,7 @@ class FieldValidatingInterceptorTest {
 
 	@Test
 	public void testCustomValidation() {
-		myInterceptor.getConfig().put("telecom.where(system='phone').value", EmptyValidator.class.getName());
+		myInterceptor.getConfig().put("telecom.where(system='phone')", EmptyValidator.class.getName());
 
 		Person person = new Person();
 		person.addTelecom().setSystem(ContactPoint.ContactPointSystem.EMAIL).setValue("email@email.com");
@@ -118,8 +118,8 @@ class FieldValidatingInterceptorTest {
 		person.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue(" ");
 		try {
 			myInterceptor.handleRequest(newRequestDetails(), person);
-			fail();
 		} catch (Exception e) {
+			fail();
 		}
 	}
 

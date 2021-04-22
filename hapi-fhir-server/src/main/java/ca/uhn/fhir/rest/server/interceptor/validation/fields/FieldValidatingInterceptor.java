@@ -41,6 +41,8 @@ import java.util.Map;
 @Interceptor
 public class FieldValidatingInterceptor {
 
+	public static final String FHIR_PATH_VALUE = "value";
+
 	public enum ValidatorType {
 		EMAIL;
 	}
@@ -95,7 +97,7 @@ public class FieldValidatingInterceptor {
 			List<IBase> fields = fhirPath.evaluate(theResource, e.getKey(), IBase.class);
 			for (IBase field : fields) {
 
-				List<IPrimitiveType> values = fhirPath.evaluate(field, "value", IPrimitiveType.class);
+				List<IPrimitiveType> values = fhirPath.evaluate(field, FHIR_PATH_VALUE, IPrimitiveType.class);
 				boolean isValid = true;
 				for (IPrimitiveType value : values) {
 					String valueAsString = value.getValueAsString();

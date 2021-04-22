@@ -95,6 +95,18 @@ class LoquateAddressValidatorTest {
 	}
 
 	@Test
+	public void testEndpointOverride() {
+		assertEquals(LoquateAddressValidator.DEFAULT_DATA_CLEANSE_ENDPOINT, myValidator.getApiEndpoint());
+
+		myProperties = new Properties();
+		myProperties.setProperty(LoquateAddressValidator.PROPERTY_SERVICE_KEY, "MY_KEY");
+		myProperties.setProperty(LoquateAddressValidator.PROPERTY_SERVICE_ENDPOINT, "HTTP://MY_ENDPOINT/LOQUATE");
+		myValidator = new LoquateAddressValidator(myProperties);
+
+		assertEquals("HTTP://MY_ENDPOINT/LOQUATE", myValidator.getApiEndpoint());
+	}
+
+	@Test
 	public void testInvalidInit() {
 		try {
 			new LoquateAddressValidator(new Properties());

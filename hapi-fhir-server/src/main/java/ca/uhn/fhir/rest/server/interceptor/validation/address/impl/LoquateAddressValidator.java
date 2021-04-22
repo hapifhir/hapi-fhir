@@ -51,10 +51,9 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(LoquateAddressValidator.class);
 
-	private static final String[] DUPLICATE_FIELDS_IN_ADDRESS_LINES = {"Locality", "AdministrativeArea", "PostalCode"};
-
-	private static final String DEFAULT_DATA_CLEANSE_ENDPOINT = "https://api.addressy.com/Cleansing/International/Batch/v1.00/json4.ws";
-	private static final int MAX_ADDRESS_LINES = 8;
+	protected static final String[] DUPLICATE_FIELDS_IN_ADDRESS_LINES = {"Locality", "AdministrativeArea", "PostalCode"};
+	protected static final String DEFAULT_DATA_CLEANSE_ENDPOINT = "https://api.addressy.com/Cleansing/International/Batch/v1.00/json4.ws";
+	protected static final int MAX_ADDRESS_LINES = 8;
 
 	public LoquateAddressValidator(Properties theProperties) {
 		super(theProperties);
