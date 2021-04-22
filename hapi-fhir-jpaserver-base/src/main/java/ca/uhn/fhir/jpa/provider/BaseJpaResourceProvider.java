@@ -50,12 +50,12 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.util.ParametersUtil;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Meta;
-import org.hl7.fhir.r4.model.Parameters;
 import org.springframework.beans.factory.annotation.Required;
 
 import javax.servlet.http.HttpServletRequest;
@@ -79,7 +79,7 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	}
 
 
-	protected Parameters doExpunge(IIdType theIdParam, IPrimitiveType<? extends Integer> theLimit, IPrimitiveType<? extends Boolean> theExpungeDeletedResources, IPrimitiveType<? extends Boolean> theExpungeOldVersions, IPrimitiveType<? extends Boolean> theExpungeEverything, RequestDetails theRequest) {
+	protected IBaseParameters doExpunge(IIdType theIdParam, IPrimitiveType<? extends Integer> theLimit, IPrimitiveType<? extends Boolean> theExpungeDeletedResources, IPrimitiveType<? extends Boolean> theExpungeOldVersions, IPrimitiveType<? extends Boolean> theExpungeEverything, RequestDetails theRequest) {
 
 		ExpungeOptions options = createExpungeOptions(theLimit, theExpungeDeletedResources, theExpungeOldVersions, theExpungeEverything);
 
@@ -191,7 +191,7 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	@Operation(name = JpaConstants.OPERATION_EXPUNGE, idempotent = false, returnParameters = {
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, typeName = "integer")
 	})
-	public Parameters expunge(
+	public IBaseParameters expunge(
 		@IdParam IIdType theIdParam,
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT, typeName = "integer") IPrimitiveType<Integer> theLimit,
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES, typeName = "boolean") IPrimitiveType<Boolean> theExpungeDeletedResources,
@@ -203,7 +203,7 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	@Operation(name = JpaConstants.OPERATION_EXPUNGE, idempotent = false, returnParameters = {
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, typeName = "integer")
 	})
-	public Parameters expunge(
+	public IBaseParameters expunge(
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT, typeName = "integer") IPrimitiveType<Integer> theLimit,
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES, typeName = "boolean") IPrimitiveType<Boolean> theExpungeDeletedResources,
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS, typeName = "boolean") IPrimitiveType<Boolean> theExpungeOldVersions,
@@ -215,10 +215,11 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	@Operation(name = OPERATION_META, idempotent = true, returnParameters = {
 		@OperationParam(name = "return", typeName = "Meta")
 	})
-	public Parameters meta(RequestDetails theRequestDetails) {
-		Parameters parameters = new Parameters();
-		Meta metaGetOperation = getDao().metaGetOperation(Meta.class, theRequestDetails);
-		parameters.addParameter().setName("return").setValue(metaGetOperation);
+	public IBaseParameters meta(RequestDetails theRequestDetails) {
+		Class metaType = getContext().getElementDefinition("Meta").getImplementingClass();
+		IBaseMetaType metaGetOperation = getDao().metaGetOperation(metaType, theRequestDetails);
+		IBaseParameters parameters = ParametersUtil.newInstance(getContext());
+		ParametersUtil.addParameterToParameters(getContext(), parameters, "return", metaGetOperation);
 		return parameters;
 	}
 
@@ -226,10 +227,12 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	@Operation(name = OPERATION_META, idempotent = true, returnParameters = {
 		@OperationParam(name = "return", typeName = "Meta")
 	})
-	public Parameters meta(@IdParam IIdType theId, RequestDetails theRequestDetails) {
-		Parameters parameters = new Parameters();
-		Meta metaGetOperation = getDao().metaGetOperation(Meta.class, theId, theRequestDetails);
-		parameters.addParameter().setName("return").setValue(metaGetOperation);
+	public IBaseParameters meta(@IdParam IIdType theId, RequestDetails theRequestDetails) {
+		Class metaType = getContext().getElementDefinition("Meta").getImplementingClass();
+		IBaseMetaType metaGetOperation = getDao().metaGetOperation(metaType, theId, theRequestDetails);
+
+		IBaseParameters parameters = ParametersUtil.newInstance(getContext());
+		ParametersUtil.addParameterToParameters(getContext(), parameters, "return", metaGetOperation);
 		return parameters;
 	}
 
@@ -237,13 +240,13 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	@Operation(name = OPERATION_META_ADD, idempotent = false, returnParameters = {
 		@OperationParam(name = "return", typeName = "Meta")
 	})
-	public Parameters metaAdd(@IdParam IIdType theId, @OperationParam(name = "meta") Meta theMeta, RequestDetails theRequestDetails) {
+	public IBaseParameters metaAdd(@IdParam IIdType theId, @OperationParam(name = "meta", typeName = "Meta") IBaseMetaType theMeta, RequestDetails theRequestDetails) {
 		if (theMeta == null) {
 			throw new InvalidRequestException("Input contains no parameter with name 'meta'");
 		}
-		Parameters parameters = new Parameters();
-		Meta metaAddOperation = getDao().metaAddOperation(theId, theMeta, theRequestDetails);
-		parameters.addParameter().setName("return").setValue(metaAddOperation);
+		IBaseMetaType metaAddOperation = getDao().metaAddOperation(theId, theMeta, theRequestDetails);
+		IBaseParameters parameters = ParametersUtil.newInstance(getContext());
+		ParametersUtil.addParameterToParameters(getContext(), parameters, "return", metaAddOperation);
 		return parameters;
 	}
 
@@ -251,12 +254,13 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	@Operation(name = OPERATION_META_DELETE, idempotent = false, returnParameters = {
 		@OperationParam(name = "return", typeName = "Meta")
 	})
-	public Parameters metaDelete(@IdParam IIdType theId, @OperationParam(name = "meta") Meta theMeta, RequestDetails theRequestDetails) {
+	public IBaseParameters metaDelete(@IdParam IIdType theId, @OperationParam(name = "meta", typeName = "Meta") IBaseMetaType theMeta, RequestDetails theRequestDetails) {
 		if (theMeta == null) {
 			throw new InvalidRequestException("Input contains no parameter with name 'meta'");
 		}
-		Parameters parameters = new Parameters();
-		parameters.addParameter().setName("return").setValue(getDao().metaDeleteOperation(theId, theMeta, theRequestDetails));
+		IBaseMetaType metaDelete = getDao().metaDeleteOperation(theId, theMeta, theRequestDetails);
+		IBaseParameters parameters = ParametersUtil.newInstance(getContext());
+		ParametersUtil.addParameterToParameters(getContext(), parameters, "return", metaDelete);
 		return parameters;
 	}
 

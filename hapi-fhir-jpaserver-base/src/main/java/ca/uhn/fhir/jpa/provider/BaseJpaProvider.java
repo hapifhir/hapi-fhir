@@ -8,10 +8,10 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.Parameters;
 import org.jboss.logging.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -78,13 +78,11 @@ public class BaseJpaProvider {
 		return options;
 	}
 
-	protected Parameters createExpungeResponse(ExpungeOutcome theOutcome) {
-		Parameters retVal = new Parameters();
-		retVal
-			.addParameter()
-			.setName(JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT)
-			.setValue(new IntegerType(theOutcome.getDeletedCount()));
-		return retVal;
+	protected IBaseParameters createExpungeResponse(ExpungeOutcome theOutcome) {
+		IBaseParameters parameters = ParametersUtil.newInstance(getContext());
+		String value = Integer.toString(theOutcome.getDeletedCount());
+		ParametersUtil.addParameterToParameters(getContext(), parameters, JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, "integer", value);
+		return parameters;
 	}
 
 	/**
