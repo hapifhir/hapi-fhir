@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2515
+title: "Fixed issues with application of survivorship rules when matching golden record to a single resource"
