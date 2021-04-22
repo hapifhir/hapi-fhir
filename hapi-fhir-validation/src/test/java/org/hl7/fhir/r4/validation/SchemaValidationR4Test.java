@@ -3,6 +3,7 @@ package org.hl7.fhir.r4.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.SchemaBaseValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
@@ -49,9 +50,13 @@ public class SchemaValidationR4Test {
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(encoded);
 
-		assertFalse(result.isSuccessful());
-		assertThat(encoded, containsString("passwd"));
-		assertThat(encoded, containsString("accessExternalDTD"));
+		// Newer Schema libraries don't seem to support this property any more, since they
+		// no longer honour XXE entities..
+		if (SchemaBaseValidator.isJaxp15Supported()) {
+			assertFalse(result.isSuccessful());
+			assertThat(encoded, containsString("passwd"));
+			assertThat(encoded, containsString("accessExternalDTD"));
+		}
 	}
 
 	@AfterAll

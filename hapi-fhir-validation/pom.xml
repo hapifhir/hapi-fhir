@@ -298,15 +298,6 @@
             </exclusions>
         </dependency>
 
-		<!-- We need a new enough version of Xerces to be able to test XXE exclusion -->
-		<dependency>
-			<groupId>xerces</groupId>
-			<artifactId>xerces</artifactId>
-			<version>2.4.0</version>
-			<scope>test</scope>
-		</dependency>
-
-
     </dependencies>
 
 	<reporting>
