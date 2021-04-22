@@ -243,12 +243,14 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 		IdentityHashMap<OperationMethodBinding, String> myOperationBindingToName = new IdentityHashMap<>();
 		HashMap<String, List<OperationMethodBinding>> myOperationNameToBindings = new HashMap<>();
 
-		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = collectMethodBindings();
-		List<BaseMethodBinding<?>> methodBindings = resourceToMethods
-			.values()
-			.stream().flatMap(t -> t.stream())
-			.collect(Collectors.toList());
-		methodBindings.addAll(myGlobalBindings);
+			Map<String, List<BaseMethodBinding<?>>> resourceToMethods = collectMethodBindings();
+			List<BaseMethodBinding<?>> methodBindings = resourceToMethods
+				.values()
+				.stream().flatMap(t -> t.stream())
+				.collect(Collectors.toList());
+		if (myGlobalBindings != null) {
+			methodBindings.addAll(myGlobalBindings);
+		}
 
 		for (BaseMethodBinding<?> nextMethodBinding : methodBindings) {
 			if (nextMethodBinding instanceof OperationMethodBinding) {
