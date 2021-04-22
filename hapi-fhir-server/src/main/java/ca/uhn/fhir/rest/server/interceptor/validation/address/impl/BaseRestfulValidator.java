@@ -37,6 +37,7 @@ import java.util.Properties;
 public abstract class BaseRestfulValidator implements IAddressValidator {
 
 	public static final String PROPERTY_SERVICE_KEY = "service.key";
+	public static final String PROPERTY_SERVICE_ENDPOINT = "service.endpoint";
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseRestfulValidator.class);
 
@@ -74,7 +75,7 @@ public abstract class BaseRestfulValidator implements IAddressValidator {
 		retVal.setRawResponse(responseBody);
 
 		try {
-			JsonNode response  = new ObjectMapper().readTree(responseBody);
+			JsonNode response = new ObjectMapper().readTree(responseBody);
 			ourLog.debug("Parsed address validator response {}", response);
 			return getValidationResult(retVal, response, theFhirContext);
 		} catch (Exception e) {
@@ -96,5 +97,9 @@ public abstract class BaseRestfulValidator implements IAddressValidator {
 
 	protected String getApiKey() {
 		return getProperties().getProperty(PROPERTY_SERVICE_KEY);
+	}
+
+	protected String getApiEndpoint() {
+		return getProperties().getProperty(PROPERTY_SERVICE_ENDPOINT);
 	}
 }

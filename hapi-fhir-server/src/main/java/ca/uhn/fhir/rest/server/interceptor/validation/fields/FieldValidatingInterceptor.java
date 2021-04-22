@@ -27,7 +27,9 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ConfigLoader;
-import ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator;
+import ca.uhn.fhir.util.ExtensionUtil;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
@@ -46,11 +48,10 @@ public class FieldValidatingInterceptor {
 	private static final Logger ourLog = LoggerFactory.getLogger(FieldValidatingInterceptor.class);
 
 	public static final String VALIDATION_DISABLED_HEADER = "HAPI-Field-Validation-Disabled";
-
-	private IAddressValidator myAddressValidator;
+	public static final String VALIDATION_EXTENSION_URL = "https://hapifhir.org/StructureDefinition/ext-validation-field-error";
+	public static final String PROPERTY_EXTENSION_URL = "validation.extension.url";
 
 	private Map<String, String> myConfig;
-
 
 	public FieldValidatingInterceptor() {
 		super();
@@ -84,20 +85,52 @@ public class FieldValidatingInterceptor {
 
 		FhirContext ctx = theRequest.getFhirContext();
 		IFhirPath fhirPath = ctx.newFhirPath();
+
 		for (Map.Entry<String, String> e : myConfig.entrySet()) {
 			IValidator validator = getValidator(e.getValue());
+			if (validator == null) {
+				continue;
+			}
 
-			List<IPrimitiveType> values = fhirPath.evaluate(theResource, e.getKey(), IPrimitiveType.class);
-			for (IPrimitiveType value : values) {
-				String valueAsString = value.getValueAsString();
-				if (!validator.isValid(valueAsString)) {
-					throw new IllegalArgumentException(String.format("Invalid resource %s", valueAsString));
+			List<IBase> fields = fhirPath.evaluate(theResource, e.getKey(), IBase.class);
+			for (IBase field : fields) {
+
+				List<IPrimitiveType> values = fhirPath.evaluate(field, "value", IPrimitiveType.class);
+				boolean isValid = true;
+				for (IPrimitiveType value : values) {
+					String valueAsString = value.getValueAsString();
+					isValid = validator.isValid(valueAsString);
+					ourLog.debug("Field {} at path {} validated {}", value, e.getKey(), isValid);
+					if (!isValid) {
+						break;
+					}
 				}
+				setValidationStatus(ctx, field, isValid);
 			}
 		}
 	}
 
+	private void setValidationStatus(FhirContext ctx, IBase theBase, boolean isValid) {
+		if (isValid) {
+			ExtensionUtil.clearExtensionsByUrl(theBase, getValidationExtensionUrl());
+		} else {
+			IBaseExtension<?, ?> validationResultExtension = ExtensionUtil.addExtension(theBase, getValidationExtensionUrl());
+			ExtensionUtil.setExtension(ctx, theBase, getValidationExtensionUrl(), "boolean", Boolean.TRUE);
+		}
+	}
+
+	private String getValidationExtensionUrl() {
+		if (myConfig.containsKey(PROPERTY_EXTENSION_URL)) {
+			return myConfig.get(PROPERTY_EXTENSION_URL);
+		}
+		return VALIDATION_EXTENSION_URL;
+	}
+
 	private IValidator getValidator(String theValue) {
+		if (PROPERTY_EXTENSION_URL.equals(theValue)) {
+			return null;
+		}
+
 		if (ValidatorType.EMAIL.name().equals(theValue)) {
 			return new EmailValidator();
 		}

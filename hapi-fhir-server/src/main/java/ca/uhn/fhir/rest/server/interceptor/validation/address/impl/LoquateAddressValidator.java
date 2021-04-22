@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.ContentType;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.slf4j.Logger;
@@ -52,7 +53,7 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 
 	private static final String[] DUPLICATE_FIELDS_IN_ADDRESS_LINES = {"Locality", "AdministrativeArea", "PostalCode"};
 
-	private static final String DATA_CLEANSE_ENDPOINT = "https://api.addressy.com/Cleansing/International/Batch/v1.00/json4.ws";
+	private static final String DEFAULT_DATA_CLEANSE_ENDPOINT = "https://api.addressy.com/Cleansing/International/Batch/v1.00/json4.ws";
 	private static final int MAX_ADDRESS_LINES = 8;
 
 	public LoquateAddressValidator(Properties theProperties) {
@@ -171,7 +172,13 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 
 		String requestBody = getRequestBody(theFhirContext, theAddress);
 		HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
-		return newTemplate().postForEntity(DATA_CLEANSE_ENDPOINT, request, String.class);
+		return newTemplate().postForEntity(getApiEndpoint(), request, String.class);
+	}
+
+	@Override
+	protected String getApiEndpoint() {
+		String endpoint = super.getApiEndpoint();
+		return StringUtils.isEmpty(endpoint) ? DEFAULT_DATA_CLEANSE_ENDPOINT : endpoint;
 	}
 
 	protected String getRequestBody(FhirContext theFhirContext, IBase... theAddresses) throws JsonProcessingException {

@@ -56,7 +56,13 @@ public class MelissaAddressValidator extends BaseRestfulValidator {
 	@Override
 	protected ResponseEntity<String> getResponseEntity(IBase theAddress, FhirContext theFhirContext) throws Exception {
 		Map<String, String> requestParams = getRequestParams(theAddress);
-		return newTemplate().getForEntity(GLOBAL_ADDRESS_VALIDATION_ENDPOINT, String.class, requestParams);
+		return newTemplate().getForEntity(getApiEndpoint(), String.class, requestParams);
+	}
+
+	@Override
+	protected String getApiEndpoint() {
+		String endpoint = super.getApiEndpoint();
+		return StringUtils.isEmpty(endpoint) ? GLOBAL_ADDRESS_VALIDATION_ENDPOINT : endpoint;
 	}
 
 	protected Map<String, String> getRequestParams(IBase theAddress) {

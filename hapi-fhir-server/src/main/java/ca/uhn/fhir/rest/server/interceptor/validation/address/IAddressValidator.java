@@ -31,7 +31,7 @@ public interface IAddressValidator {
 	/**
 	 * URL for validation results that should be placed on addresses
 	 */
-	public static final String ADDRESS_VALIDATION_EXTENSION_URL = "https://hapifhir.org/AddressValidation/";
+	public static final String ADDRESS_VALIDATION_EXTENSION_URL = "https://hapifhir.org/StructureDefinition/ext-validation-address-error";
 
 	/**
 	 * Extension value confirming that address can be considered valid (it exists and can be traced to the building)
