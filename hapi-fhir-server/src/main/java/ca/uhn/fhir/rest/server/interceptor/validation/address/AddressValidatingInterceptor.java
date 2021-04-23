@@ -29,9 +29,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ConfigLoader;
 import ca.uhn.fhir.util.ExtensionUtil;
-import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.TerserUtil;
-import ca.uhn.fhir.util.TerserUtilHelper;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -50,6 +47,7 @@ public class AddressValidatingInterceptor {
 
 	public static final String ADDRESS_TYPE_NAME = "Address";
 	public static final String PROPERTY_VALIDATOR_CLASS = "validator.class";
+	public static final String PROPERTY_EXTENSION_URL = "extension.url";
 
 	public static final String ADDRESS_VALIDATION_DISABLED_HEADER = "HAPI-Address-Validation-Disabled";
 
@@ -127,8 +125,8 @@ public class AddressValidatingInterceptor {
 		getAddresses(theResource, ctx)
 			.stream()
 			.filter(a -> {
-				return !ExtensionUtil.hasExtension(a, IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL) ||
-					ExtensionUtil.hasExtension(a, IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL, IAddressValidator.EXT_UNABLE_TO_VALIDATE);
+				return !ExtensionUtil.hasExtension(a, getExtensionUrl()) ||
+					ExtensionUtil.hasExtension(a, getExtensionUrl(), IAddressValidator.EXT_UNABLE_TO_VALIDATE);
 			})
 			.forEach(a -> validateAddress(a, ctx));
 	}
@@ -138,13 +136,21 @@ public class AddressValidatingInterceptor {
 			AddressValidationResult validationResult = getAddressValidator().isValid(theAddress, theFhirContext);
 			ourLog.debug("Validated address {}", validationResult);
 
-			ExtensionUtil.setExtensionAsString(theFhirContext, theAddress, IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL,
+			ExtensionUtil.setExtensionAsString(theFhirContext, theAddress, getExtensionUrl(),
 				validationResult.isValid() ? IAddressValidator.EXT_VALUE_VALID : IAddressValidator.EXT_VALUE_INVALID);
 
 			theFhirContext.newTerser().cloneInto(validationResult.getValidatedAddress(), theAddress, true);
 		} catch (Exception ex) {
 			ourLog.warn("Unable to validate address", ex);
-			ExtensionUtil.setExtensionAsString(theFhirContext, theAddress, IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL, IAddressValidator.EXT_UNABLE_TO_VALIDATE);
+			ExtensionUtil.setExtensionAsString(theFhirContext, theAddress, getExtensionUrl(), IAddressValidator.EXT_UNABLE_TO_VALIDATE);
+		}
+	}
+
+	protected String getExtensionUrl() {
+		if (getProperties().containsKey(PROPERTY_EXTENSION_URL)) {
+			return getProperties().getProperty(PROPERTY_EXTENSION_URL);
+		} else {
+			return IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL;
 		}
 	}
 

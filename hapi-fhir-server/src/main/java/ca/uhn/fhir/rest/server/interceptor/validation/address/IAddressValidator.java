@@ -36,12 +36,12 @@ public interface IAddressValidator {
 	/**
 	 * Extension value confirming that address can be considered valid (it exists and can be traced to the building)
 	 */
-	public static final String EXT_VALUE_VALID = "valid";
+	public static final String EXT_VALUE_VALID = "yes";
 
 	/**
 	 * Extension value confirming that address is invalid (doesn't exist)
 	 */
-	public static final String EXT_VALUE_INVALID = "invalid";
+	public static final String EXT_VALUE_INVALID = "no";
 
 	/**
 	 * Extension value indicating that address validation was attempted but could not complete successfully
