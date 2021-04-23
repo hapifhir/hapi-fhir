@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server.interceptor.validation.address;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.interceptor.validation.address.impl.LoquateAddressValidator;
 import org.checkerframework.checker.units.qual.A;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.Address;
@@ -19,7 +20,9 @@ import java.util.Properties;
 import static ca.uhn.fhir.rest.server.interceptor.s13n.StandardizingInterceptor.STANDARDIZATION_DISABLED_HEADER;
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidatingInterceptor.ADDRESS_VALIDATION_DISABLED_HEADER;
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidatingInterceptor.PROPERTY_VALIDATOR_CLASS;
+import static ca.uhn.fhir.rest.server.interceptor.validation.address.impl.BaseRestfulValidator.PROPERTY_SERVICE_KEY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -40,6 +43,32 @@ class AddressValidatingInterceptorTest {
 	private IAddressValidator myValidator;
 
 	private RequestDetails myRequestDetails;
+
+	@Test
+	public void testReal() {
+		Properties config = new Properties();
+		config.setProperty(PROPERTY_VALIDATOR_CLASS, LoquateAddressValidator.class.getCanonicalName());
+		config.setProperty(PROPERTY_SERVICE_KEY, "KR26-JA29-HB16-PA11");
+		AddressValidatingInterceptor interceptor = new AddressValidatingInterceptor(config);
+
+		Address address = new Address();
+		address.setUse(Address.AddressUse.WORK);
+		address.addLine("100 Somewhere");
+		address.setCity("Burloak");
+		address.setPostalCode("A0A0A0");
+		address.setCountry("Canada");
+		interceptor.validateAddress(address, ourCtx);
+
+		assertTrue(address.hasExtension());
+		assertEquals("no", address.getExtensionFirstRep().getValueAsPrimitive().getValueAsString());
+
+		assertEquals("100 Somewhere,Burloak", address.getText());
+		assertEquals(1, address.getLine().size());
+		assertEquals("100 Somewhere", address.getLine().get(0).getValueAsString());
+		assertEquals("Burloak", address.getCity());
+		assertEquals("A0A0A0", address.getPostalCode());
+		assertEquals("Canada", address.getCountry());
+	}
 
 	@Test
 	void start() throws Exception {

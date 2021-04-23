@@ -21,6 +21,8 @@ package ca.uhn.fhir.rest.server.interceptor.validation.address;
  */
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.Hook;
@@ -29,9 +31,13 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ConfigLoader;
 import ca.uhn.fhir.util.ExtensionUtil;
+import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.IModelVisitor2;
+import ca.uhn.fhir.util.TerserUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +61,6 @@ public class AddressValidatingInterceptor {
 
 	private Properties myProperties;
 
-
 	public AddressValidatingInterceptor() {
 		super();
 
@@ -66,6 +71,7 @@ public class AddressValidatingInterceptor {
 
 	public AddressValidatingInterceptor(Properties theProperties) {
 		super();
+		myProperties = theProperties;
 		start(theProperties);
 	}
 
@@ -136,14 +142,19 @@ public class AddressValidatingInterceptor {
 			AddressValidationResult validationResult = getAddressValidator().isValid(theAddress, theFhirContext);
 			ourLog.debug("Validated address {}", validationResult);
 
+			clearPossibleDuplicatesDueToTerserCloning(theAddress, theFhirContext);
 			ExtensionUtil.setExtensionAsString(theFhirContext, theAddress, getExtensionUrl(),
 				validationResult.isValid() ? IAddressValidator.EXT_VALUE_VALID : IAddressValidator.EXT_VALUE_INVALID);
-
 			theFhirContext.newTerser().cloneInto(validationResult.getValidatedAddress(), theAddress, true);
 		} catch (Exception ex) {
 			ourLog.warn("Unable to validate address", ex);
 			ExtensionUtil.setExtensionAsString(theFhirContext, theAddress, getExtensionUrl(), IAddressValidator.EXT_UNABLE_TO_VALIDATE);
 		}
+	}
+
+	private void clearPossibleDuplicatesDueToTerserCloning(IBase theAddress, FhirContext theFhirContext) {
+		TerserUtil.clearField(theFhirContext, "line", theAddress);
+		ExtensionUtil.clearExtensionsByUrl(theAddress, getExtensionUrl());
 	}
 
 	protected String getExtensionUrl() {

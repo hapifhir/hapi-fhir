@@ -334,6 +334,22 @@ public final class TerserUtil {
 	}
 
 	/**
+	 * Clears the specified field on the element provided
+	 *
+	 * @param theFhirContext Context holding resource definition
+	 * @param theFieldName   Name of the field to clear values for
+	 * @param theBase        The element definition to clear values on
+	 */
+	public static void clearField(FhirContext theFhirContext, String theFieldName, IBase theBase) {
+		BaseRuntimeElementDefinition definition = theFhirContext.getElementDefinition(theBase.getClass());
+		BaseRuntimeChildDefinition childDefinition = definition.getChildByName(theFieldName);
+		if (childDefinition == null) {
+			throw new IllegalStateException(String.format("Field %s does not exist", theFieldName));
+		}
+		childDefinition.getAccessor().getValues(theBase).clear();
+	}
+
+	/**
 	 * Sets the provided field with the given values. This method will add to the collection of existing field values
 	 * in case of multiple cardinality. Use {@link #clearField(FhirContext, String, IBaseResource)}
 	 * to remove values before setting
