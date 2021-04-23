@@ -27,6 +27,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 	@Test
 	public void testTranslateWithConceptMapUrlAndVersion() {
 		System.out.println("DEBUG Entering testTranslateWithConceptMapUrlAndVersion()!");
+		ourLog.info("\nDEBUG Entering testTranslateWithConceptMapUrlAndVersion()...\n");
 
 		//- conceptMap1 v1
 		ConceptMap conceptMap1 = new ConceptMap();
@@ -94,8 +95,10 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
 		System.out.println("DEBUG param.getPart().size(): " + param.getPart().size());
+		ourLog.info("\nDEBUG param.getPart().size(): {}\n", param.getPart().size());
 		for (ParametersParameterComponent parm : param.getPart()) {
 			System.out.println("DEBUG parm: " + parm.toString());
+		        ourLog.info("\nDEBUG parm: {}\n", parm.toString());
 		}
 		assertEquals(2, param.getPart().size());
 		
