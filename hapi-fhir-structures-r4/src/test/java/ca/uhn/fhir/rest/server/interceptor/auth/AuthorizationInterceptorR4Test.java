@@ -1973,7 +1973,6 @@ public class AuthorizationInterceptorR4Test {
 
 		HttpGet httpGet;
 		HttpResponse status;
-		String response;
 
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
@@ -1997,7 +1996,6 @@ public class AuthorizationInterceptorR4Test {
 
 		HttpGet httpGet;
 		HttpResponse status;
-		String response;
 
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
@@ -2217,7 +2215,6 @@ public class AuthorizationInterceptorR4Test {
 
 		HttpGet httpGet;
 		HttpResponse status;
-		String response;
 
 		ourReturn = Collections.singletonList(new Consent().setDateTime(new Date()).setId("Consent/123"));
 		ourHitMethod = false;
@@ -2962,7 +2959,7 @@ public class AuthorizationInterceptorR4Test {
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/");
 		httpPost.setEntity(createFhirResourceEntity(requestBundle));
 		CloseableHttpResponse status = ourClient.execute(httpPost);
-		String resp = extractResponseAndClose(status);
+		extractResponseAndClose(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 	}

@@ -1966,7 +1966,7 @@
 						<runOrder>random</runOrder>
 						<argLine>@{argLine} ${surefire_jvm_args}</argLine>
 						<forkCount>1.0C</forkCount>
-						<trimStackTrace>false</trimStackTrace>
+						<trimStackTrace>true</trimStackTrace>
 					</configuration>
 				</plugin>
 				<plugin>

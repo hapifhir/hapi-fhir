@@ -572,10 +572,10 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
       for (IParameter nextParamUntyped : sharedDescription.getParameters()) {
         if (nextParamUntyped instanceof OperationParameter) {
           OperationParameter nextParam = (OperationParameter) nextParamUntyped;
-          OperationDefinitionParameterComponent param = op.addParameter();
           if (!inParams.add(nextParam.getName())) {
             continue;
           }
+          OperationDefinitionParameterComponent param = op.addParameter();
           param.setUse(OperationParameterUse.IN);
           if (nextParam.getParamType() != null) {
             param.setType(nextParam.getParamType());

@@ -73,6 +73,11 @@ public class GraphQLMethodBinding extends OperationMethodBinding {
 	}
 
 	@Override
+	public RestOperationTypeEnum getRestOperationType(RequestDetails theRequestDetails) {
+		return getRestOperationType();
+	}
+
+	@Override
 	protected Set<Class<?>> provideExpectedReturnTypes() {
 		return Collections.singleton(String.class);
 	}
