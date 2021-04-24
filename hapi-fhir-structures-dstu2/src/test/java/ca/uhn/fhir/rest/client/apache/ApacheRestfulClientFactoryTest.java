@@ -21,6 +21,7 @@ import org.apache.http.impl.execchain.ClientExecChain;
 import org.apache.http.protocol.HttpProcessor;
 import org.apache.http.protocol.HttpRequestExecutor;
 import org.junit.jupiter.api.Test;
+import org.junitpioneer.jupiter.SetSystemProperty;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
@@ -69,8 +70,8 @@ public class ApacheRestfulClientFactoryTest {
 	}
 
 	@Test
-//	@SetSystemProperty(key = "http.proxyHost", value = "hostFromSystemProperty")
-//	@SetSystemProperty(key = "http.proxyPort", value = "1234")
+	@SetSystemProperty(key = "http.proxyHost", value = "hostFromSystemProperty")
+	@SetSystemProperty(key = "http.proxyPort", value = "1234")
 	public void testGetNativeHttpClientWithSystemProxy() throws IOException, HttpException {
 		HttpRoute httpRoute = executeRequestAndCaptureHttpRoute(f -> {
 		});
@@ -82,8 +83,8 @@ public class ApacheRestfulClientFactoryTest {
 	}
 
 	@Test
-//	@SetSystemProperty(key = "http.proxyHost", value = "hostFromSystemProperty")
-//	@SetSystemProperty(key = "http.proxyPort", value = "1234")
+	@SetSystemProperty(key = "http.proxyHost", value = "hostFromSystemProperty")
+	@SetSystemProperty(key = "http.proxyPort", value = "1234")
 	public void testGetNativeHttpClientWithSystemAndProvidedProxy() throws IOException, HttpException {
 		HttpRoute httpRoute = executeRequestAndCaptureHttpRoute(
 				f -> f.setProxy("providedProxy", 0));
