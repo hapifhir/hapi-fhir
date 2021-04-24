@@ -21,6 +21,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.servlet.ServletException;
@@ -70,6 +72,23 @@ public class RestfulServerTest {
 		restfulServer.unregisterProvider(provider);
 		assertTrue(restfulServer.getProviderMethodBindings(provider).isEmpty());
 		assertFalse(restfulServer.getProviderMethodBindings(provider2).isEmpty());
+	}
+
+	@Test
+	public void testFhirContextMap() {
+		FhirContext r4Ctx = Mockito.mock(FhirContext.class, Answers.RETURNS_DEEP_STUBS);
+		when(r4Ctx.getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);
+
+		try (MockedStatic<FhirContext> mfc = Mockito.mockStatic(FhirContext.class)) {
+			// stub the static method that is called by the class under test
+			mfc.when(FhirContext::forR4).thenReturn(r4Ctx);
+
+			assertEquals(myCtx, restfulServer.getFhirContext(FhirVersionEnum.DSTU3));
+			assertNotNull(restfulServer.getFhirContext(FhirVersionEnum.R4));
+
+			restfulServer.addFhirContext(FhirVersionEnum.R4, r4Ctx);
+			assertEquals(r4Ctx, restfulServer.getFhirContext(FhirVersionEnum.R4));
+		}
 	}
 
 	@Test

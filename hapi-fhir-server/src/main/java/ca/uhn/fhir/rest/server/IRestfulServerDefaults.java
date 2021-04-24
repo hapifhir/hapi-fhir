@@ -1,12 +1,14 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 import java.util.List;
+import java.util.Map;
 
 /*
  * #%L
@@ -63,6 +65,18 @@ public interface IRestfulServerDefaults {
 	 * creating their own.
 	 */
 	FhirContext getFhirContext();
+
+	/**
+	 * Gets a {@link FhirContext} associated with the given version and this server
+	 * in case a different version is required than that of {@link #getFhirContext()}.
+	 */
+	default FhirContext getFhirContext(FhirVersionEnum fhirVersion) {
+		if (getFhirContext().getVersion().getVersion().equals(fhirVersion)) {
+			return getFhirContext();
+		} else {
+			return fhirVersion.newContext();
+		}
+	}
 
 	/**
 	 * Returns the list of interceptors registered against this server
