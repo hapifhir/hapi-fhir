@@ -56,14 +56,14 @@ public class OperationDuplicateServerHl7OrgDstu2Test {
 
       ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 
-      assertEquals(3, resp.getRest().get(0).getOperation().size());
+      assertEquals(1, resp.getRest().get(0).getOperation().size());
       assertEquals("$myoperation", resp.getRest().get(0).getOperation().get(0).getName());
-      assertEquals("OperationDefinition/-s-myoperation", resp.getRest().get(0).getOperation().get(0).getDefinition().getReference());
+      assertEquals("OperationDefinition/OrganizationPatient-ts-myoperation", resp.getRest().get(0).getOperation().get(0).getDefinition().getReference());
     }
 
     // OperationDefinition
     {
-      HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/OperationDefinition/Patient--myoperation?_pretty=true");
+      HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/OperationDefinition/OrganizationPatient-ts-myoperation?_pretty=true");
       HttpResponse status = ourClient.execute(httpGet);
 
       assertEquals(200, status.getStatusLine().getStatusCode());
@@ -74,7 +74,7 @@ public class OperationDuplicateServerHl7OrgDstu2Test {
       OperationDefinition resp = ourCtx.newXmlParser().parseResource(OperationDefinition.class, response);
       assertEquals("$myoperation", resp.getCode());
       assertEquals(true, resp.getIdempotent());
-      assertEquals(1, resp.getType().size());
+      assertEquals(2, resp.getType().size());
       assertEquals(1, resp.getParameter().size());
     }
   }
