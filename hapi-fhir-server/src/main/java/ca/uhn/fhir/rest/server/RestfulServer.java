@@ -436,6 +436,16 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			throw new ConfigurationException("Did not find any annotated RESTful methods on provider class " + theProvider.getClass().getName());
 		}
 	}
+	private int findResourceMethodsOnInterfaces(Object theProvider, Class<?>[] interfaces) {
+		int count = 0;
+		for (Class<?> anInterface : interfaces) {
+			count += findResourceMethods(theProvider, anInterface);
+			count += findResourceMethodsOnInterfaces(theProvider, anInterface.getInterfaces());
+		}
+		return count;
+	}
+
+
 
 	private int findResourceMethodsOnInterfaces(Object theProvider, Class<?>[] interfaces) {
 		int count = 0;
