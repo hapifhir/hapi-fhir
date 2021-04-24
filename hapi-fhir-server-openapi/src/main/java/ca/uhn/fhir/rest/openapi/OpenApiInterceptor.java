@@ -579,10 +579,6 @@ public class OpenApiInterceptor {
 			if (!operationDefinition.getAffectsState()) {
 
 				// GET form for non-state-affecting operations
-				if (operationDefinition.getSystem()) {
-					Operation operation = getPathItem(thePaths, "/$" + operationDefinition.getCode(), PathItem.HttpMethod.GET);
-					populateOperation(theFhirContext, theOpenApi, null, operationDefinition, operation, true);
-				}
 				if (theResourceType != null) {
 					if (operationDefinition.getType()) {
 						Operation operation = getPathItem(thePaths, "/" + theResourceType + "/$" + operationDefinition.getCode(), PathItem.HttpMethod.GET);
@@ -593,15 +589,16 @@ public class OpenApiInterceptor {
 						addResourceIdParameter(operation);
 						populateOperation(theFhirContext, theOpenApi, theResourceType, operationDefinition, operation, true);
 					}
+				} else {
+					if (operationDefinition.getSystem()) {
+						Operation operation = getPathItem(thePaths, "/$" + operationDefinition.getCode(), PathItem.HttpMethod.GET);
+						populateOperation(theFhirContext, theOpenApi, null, operationDefinition, operation, true);
+					}
 				}
 
 			} else {
 
 				// POST form for all operations
-				if (operationDefinition.getSystem()) {
-					Operation operation = getPathItem(thePaths, "/$" + operationDefinition.getCode(), PathItem.HttpMethod.POST);
-					populateOperation(theFhirContext, theOpenApi, null, operationDefinition, operation, false);
-				}
 				if (theResourceType != null) {
 					if (operationDefinition.getType()) {
 						Operation operation = getPathItem(thePaths, "/" + theResourceType + "/$" + operationDefinition.getCode(), PathItem.HttpMethod.POST);
@@ -611,6 +608,11 @@ public class OpenApiInterceptor {
 						Operation operation = getPathItem(thePaths, "/" + theResourceType + "/{id}/$" + operationDefinition.getCode(), PathItem.HttpMethod.POST);
 						addResourceIdParameter(operation);
 						populateOperation(theFhirContext, theOpenApi, theResourceType, operationDefinition, operation, false);
+					}
+				} else {
+					if (operationDefinition.getSystem()) {
+						Operation operation = getPathItem(thePaths, "/$" + operationDefinition.getCode(), PathItem.HttpMethod.POST);
+						populateOperation(theFhirContext, theOpenApi, null, operationDefinition, operation, false);
 					}
 				}
 

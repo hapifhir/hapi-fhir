@@ -251,8 +251,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testMarkResourcesForReindexing() throws Exception {
-		HttpRequestBase get = new HttpPost(ourServerBase + "/$mark-all-resources-for-reindexing");
-		CloseableHttpResponse http = ourHttpClient.execute(get);
+		HttpRequestBase post = new HttpPost(ourServerBase + "/$mark-all-resources-for-reindexing");
+		CloseableHttpResponse http = ourHttpClient.execute(post);
 		try {
 			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);
@@ -261,8 +261,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			IOUtils.closeQuietly(http);
 		}
 
-		get = new HttpPost(ourServerBase + "/$perform-reindexing-pass");
-		http = ourHttpClient.execute(get);
+		post = new HttpPost(ourServerBase + "/$perform-reindexing-pass");
+		http = ourHttpClient.execute(post);
 		try {
 			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);

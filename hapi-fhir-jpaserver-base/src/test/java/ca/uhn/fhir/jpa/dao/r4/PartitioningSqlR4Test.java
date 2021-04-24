@@ -52,7 +52,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.SearchParameter;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
@@ -2177,7 +2177,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	 * Should try to get this down at some point
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testSearch_StringParam_SearchOnePartition_AddRevIncludes() {
 		addReadPartition(1);
 		addCreatePartition(1, null);
@@ -2203,7 +2203,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueries();
 
-		assertEquals(10, ids.size(), ()->ids.toString());
+		assertEquals(10, ids.size(), () -> ids.toString());
 	}
 
 	@Test
@@ -2948,7 +2948,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myResourceReindexingSvc.markAllResourcesForReindexing();
 		myResourceReindexingSvc.forceReindexingPass();
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertNotEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED, myResourceTableDao.findById(patientIdNull.getIdPartAsLong()).get().getIndexStatus());
 			assertNotEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED, myResourceTableDao.findById(patientId1.getIdPartAsLong()).get().getIndexStatus());
 		});
