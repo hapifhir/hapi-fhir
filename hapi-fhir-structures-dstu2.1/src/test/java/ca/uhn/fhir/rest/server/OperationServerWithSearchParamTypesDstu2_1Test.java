@@ -193,7 +193,7 @@ public class OperationServerWithSearchParamTypesDstu2_1Test {
 		/*
 		 * Check the operation definitions themselves
 		 */
-		OperationDefinition andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--andlist"), createRequestDetails(rs));
+		OperationDefinition andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-t-andlist"), createRequestDetails(rs));
 		String def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(andListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -209,7 +209,7 @@ public class OperationServerWithSearchParamTypesDstu2_1Test {
 		));
 		//@formatter:on
 		
-		andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--andlist-withnomax"), createRequestDetails(rs));
+		andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-t-andlist-withnomax"), createRequestDetails(rs));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(andListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -225,7 +225,7 @@ public class OperationServerWithSearchParamTypesDstu2_1Test {
 		));
 		//@formatter:on
 
-		OperationDefinition orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--orlist"), createRequestDetails(rs));
+		OperationDefinition orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-t-orlist"), createRequestDetails(rs));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(orListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -241,7 +241,7 @@ public class OperationServerWithSearchParamTypesDstu2_1Test {
 		));
 		//@formatter:on
 		
-		orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--orlist-withnomax"), createRequestDetails(rs));
+		orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-t-orlist-withnomax"), createRequestDetails(rs));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(orListDef);
 		ourLog.info(def);
 		//@formatter:off
