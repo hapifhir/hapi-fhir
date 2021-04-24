@@ -1388,9 +1388,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				 */
 				findResourceMethods(new PageProvider());
 
-			} catch (Exception ex) {
-				ourLog.error("An error occurred while loading request handlers!", ex);
-				throw new ServletException("Failed to initialize FHIR Restful server", ex);
+			} catch (Exception e) {
+				ourLog.error("An error occurred while loading request handlers!", e);
+				throw new ServletException("Failed to initialize FHIR Restful server: " + e.getMessage(), e);
 			}
 
 			myStarted = true;

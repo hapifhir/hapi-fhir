@@ -53,7 +53,7 @@ public class GraphQLMethodBinding extends OperationMethodBinding {
 	private final RequestTypeEnum myMethodRequestType;
 
 	public GraphQLMethodBinding(Method theMethod, RequestTypeEnum theMethodRequestType, FhirContext theContext, Object theProvider) {
-		super(null, null, theMethod, theContext, theProvider, true, Constants.OPERATION_NAME_GRAPHQL, null, null, null, null);
+		super(null, null, theMethod, theContext, theProvider, true, Constants.OPERATION_NAME_GRAPHQL, null, null, null, null, true);
 
 		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, theContext);
 		myQueryUrlParamIndex = ParameterUtil.findParamAnnotationIndex(theMethod, GraphQLQueryUrl.class);
@@ -75,11 +75,6 @@ public class GraphQLMethodBinding extends OperationMethodBinding {
 	@Override
 	protected Set<Class<?>> provideExpectedReturnTypes() {
 		return Collections.singleton(String.class);
-	}
-
-	@Override
-	public boolean isGlobalMethod() {
-		return true;
 	}
 
 	@Override

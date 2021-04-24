@@ -30,6 +30,9 @@ import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.VersionUtil;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -46,12 +49,15 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -238,53 +244,114 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	}
 
 	public Bindings provideBindings() {
-		IdentityHashMap<SearchMethodBinding, String> myNamedSearchMethodBindingToName = new IdentityHashMap<>();
-		HashMap<String, List<SearchMethodBinding>> mySearchNameToBindings = new HashMap<>();
-		IdentityHashMap<OperationMethodBinding, String> myOperationBindingToName = new IdentityHashMap<>();
-		HashMap<String, List<OperationMethodBinding>> myOperationNameToBindings = new HashMap<>();
+		IdentityHashMap<SearchMethodBinding, String> namedSearchMethodBindingToName = new IdentityHashMap<>();
+		HashMap<String, List<SearchMethodBinding>> searchNameToBindings = new HashMap<>();
+		IdentityHashMap<OperationMethodBinding, String> operationBindingToId = new IdentityHashMap<>();
+		HashMap<String, List<OperationMethodBinding>> operationIdToBindings = new HashMap<>();
 
-			Map<String, List<BaseMethodBinding<?>>> resourceToMethods = collectMethodBindings();
-			List<BaseMethodBinding<?>> methodBindings = resourceToMethods
-				.values()
-				.stream().flatMap(t -> t.stream())
-				.collect(Collectors.toList());
+		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = collectMethodBindings();
+		List<BaseMethodBinding<?>> methodBindings = resourceToMethods
+			.values()
+			.stream().flatMap(t -> t.stream())
+			.collect(Collectors.toList());
 		if (myGlobalBindings != null) {
 			methodBindings.addAll(myGlobalBindings);
 		}
 
+		ListMultimap<String, OperationMethodBinding> nameToOperationMethodBindings = ArrayListMultimap.create();
 		for (BaseMethodBinding<?> nextMethodBinding : methodBindings) {
 			if (nextMethodBinding instanceof OperationMethodBinding) {
 				OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
-				if (myOperationBindingToName.containsKey(methodBinding)) {
-					continue;
-				}
-
-				String name = createOperationName(methodBinding);
-				ourLog.debug("Detected operation: {}", name);
-
-				myOperationBindingToName.put(methodBinding, name);
-				if (myOperationNameToBindings.containsKey(name) == false) {
-					myOperationNameToBindings.put(name, new ArrayList<>());
-				}
-				myOperationNameToBindings.get(name).add(methodBinding);
+				nameToOperationMethodBindings.put(methodBinding.getName(), methodBinding);
 			} else if (nextMethodBinding instanceof SearchMethodBinding) {
 				SearchMethodBinding methodBinding = (SearchMethodBinding) nextMethodBinding;
-				if (myNamedSearchMethodBindingToName.containsKey(methodBinding)) {
+				if (namedSearchMethodBindingToName.containsKey(methodBinding)) {
 					continue;
 				}
 
 				String name = createNamedQueryName(methodBinding);
 				ourLog.debug("Detected named query: {}", name);
 
-				myNamedSearchMethodBindingToName.put(methodBinding, name);
-				if (!mySearchNameToBindings.containsKey(name)) {
-					mySearchNameToBindings.put(name, new ArrayList<>());
+				namedSearchMethodBindingToName.put(methodBinding, name);
+				if (!searchNameToBindings.containsKey(name)) {
+					searchNameToBindings.put(name, new ArrayList<>());
 				}
-				mySearchNameToBindings.get(name).add(methodBinding);
+				searchNameToBindings.get(name).add(methodBinding);
 			}
 		}
 
-		return new Bindings(myNamedSearchMethodBindingToName, mySearchNameToBindings, myOperationNameToBindings, myOperationBindingToName);
+		for (String nextName : nameToOperationMethodBindings.keySet()) {
+			List<OperationMethodBinding> nextMethodBindings = nameToOperationMethodBindings.get(nextName);
+
+			boolean global = false;
+			boolean system = false;
+			boolean instance = false;
+			boolean type = false;
+			Set<String> resourceTypes = null;
+
+			for (OperationMethodBinding nextMethodBinding : nextMethodBindings) {
+				global |= nextMethodBinding.isGlobalMethod();
+				system |= nextMethodBinding.isCanOperateAtServerLevel();
+				type |= nextMethodBinding.isCanOperateAtTypeLevel();
+				instance |= nextMethodBinding.isCanOperateAtInstanceLevel();
+				if (nextMethodBinding.getResourceName() != null) {
+					resourceTypes = resourceTypes != null ? resourceTypes : new TreeSet<>();
+					resourceTypes.add(nextMethodBinding.getResourceName());
+				}
+			}
+
+			StringBuilder operationIdBuilder = new StringBuilder();
+			if (global) {
+				operationIdBuilder.append("Global");
+			} else if (resourceTypes != null && resourceTypes.size() == 1) {
+				operationIdBuilder.append(resourceTypes.iterator().next());
+			} else if (resourceTypes != null && resourceTypes.size() == 2) {
+				Iterator<String> iterator = resourceTypes.iterator();
+				operationIdBuilder.append(iterator.next());
+				operationIdBuilder.append(iterator.next());
+			} else if (resourceTypes != null) {
+				operationIdBuilder.append("Multi");
+			}
+
+			operationIdBuilder.append('-');
+			if (instance) {
+				operationIdBuilder.append('i');
+			}
+			if (type) {
+				operationIdBuilder.append('t');
+			}
+			if (system) {
+				operationIdBuilder.append('s');
+			}
+			operationIdBuilder.append('-');
+
+			// Exclude the leading $
+			operationIdBuilder.append(nextName, 1, nextName.length());
+
+			String operationId = operationIdBuilder.toString();
+			operationIdToBindings.put(operationId, nextMethodBindings);
+			nextMethodBindings.forEach(t->operationBindingToId.put(t, operationId));
+		}
+
+		for (BaseMethodBinding<?> nextMethodBinding : methodBindings) {
+			if (nextMethodBinding instanceof OperationMethodBinding) {
+				OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
+				if (operationBindingToId.containsKey(methodBinding)) {
+					continue;
+				}
+
+				String name = createOperationName(methodBinding);
+				ourLog.debug("Detected operation: {}", name);
+
+				operationBindingToId.put(methodBinding, name);
+				if (operationIdToBindings.containsKey(name) == false) {
+					operationIdToBindings.put(name, new ArrayList<>());
+				}
+				operationIdToBindings.get(name).add(methodBinding);
+			}
+		}
+
+		return new Bindings(namedSearchMethodBindingToName, searchNameToBindings, operationIdToBindings, operationBindingToId);
 	}
 
 	public Map<String, List<BaseMethodBinding<?>>> collectMethodBindings() {

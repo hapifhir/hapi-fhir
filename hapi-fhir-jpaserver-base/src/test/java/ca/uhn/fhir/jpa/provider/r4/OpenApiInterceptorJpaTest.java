@@ -27,7 +27,15 @@ public class OpenApiInterceptorJpaTest extends BaseResourceProviderR4Test {
 	public void testFetchOpenApi() throws IOException {
 		ourRestServer.registerInterceptor(new OpenApiInterceptor());
 
-		HttpGet get = new HttpGet(ourServerBase + "/api-docs");
+		HttpGet get = new HttpGet(ourServerBase + "/metadata?_format=json&_pretty=true");
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+			String string = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(string);
+
+			assertEquals(200, response.getStatusLine().getStatusCode());
+		}
+
+		get = new HttpGet(ourServerBase + "/api-docs");
 		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			String string = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(string);

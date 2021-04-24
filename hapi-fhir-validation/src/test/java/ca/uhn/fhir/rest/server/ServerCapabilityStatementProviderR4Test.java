@@ -38,20 +38,22 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.IParameter;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.test.utilities.server.MockServletUtil;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -77,12 +79,10 @@ import org.hl7.fhir.r4.model.OperationDefinition.OperationKind;
 import org.hl7.fhir.r4.model.OperationDefinition.OperationParameterUse;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -102,6 +102,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -132,12 +133,6 @@ public class ServerCapabilityStatementProviderR4Test {
 		return req;
 	}
 
-	private ServletConfig createServletConfig() {
-		ServletConfig sc = mock(ServletConfig.class);
-		when(sc.getServletContext()).thenReturn(null);
-		return sc;
-	}
-
 	private CapabilityStatementRestResourceComponent findRestResource(CapabilityStatement conformance, String wantResource) throws Exception {
 		CapabilityStatementRestResourceComponent resource = null;
 		for (CapabilityStatementRestResourceComponent next : conformance.getRest().get(0).getResource()) {
@@ -159,7 +154,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement cs = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		List<String> formats = cs
@@ -187,7 +182,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
@@ -219,7 +214,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		validate(conformance);
@@ -248,7 +243,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		};
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-everything"), createRequestDetails(rs));
 		validate(opDef);
@@ -269,7 +264,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = validate(conformance);
@@ -287,7 +282,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		boolean found = false;
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
@@ -319,7 +314,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		validate(conformance);
@@ -342,15 +337,20 @@ public class ServerCapabilityStatementProviderR4Test {
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
-		OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-someOp"), createRequestDetails(rs));
+		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		validate(conformance);
+
+		IdType operationId = new IdType("OperationDefinition/EncounterPatient-i-someOp");
+		RequestDetails requestDetails = createRequestDetails(rs);
+		OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(operationId, requestDetails);
 		validate(opDef);
 		Set<String> types = toStrings(opDef.getResource());
 		assertEquals("someOp", opDef.getCode());
 		assertEquals(true, opDef.getInstance());
 		assertEquals(false, opDef.getSystem());
-		assertThat(types, containsInAnyOrder("Patient"));
+		assertThat(types, containsInAnyOrder("Patient", "Encounter"));
 		assertEquals(2, opDef.getParameter().size());
 		assertEquals("someOpParam1", opDef.getParameter().get(0).getName());
 		assertEquals("date", opDef.getParameter().get(0).getType());
@@ -375,7 +375,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
@@ -384,56 +384,41 @@ public class ServerCapabilityStatementProviderR4Test {
 		CapabilityStatementRestResourceComponent patient = conformance.getRestFirstRep().getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
 		assertEquals(2, patient.getOperation().size());
 		assertThat(toOperationNames(patient.getOperation()), containsInAnyOrder("someOp", "validate"));
-		assertThat(toOperationDefinitions(patient.getOperation()), containsInAnyOrder("http://localhost/baseR4/OperationDefinition/Patient-i-someOp", "http://localhost/baseR4/OperationDefinition/Patient-i-validate"));
+		assertThat(toOperationDefinitions(patient.getOperation()), containsInAnyOrder("http://localhost/baseR4/OperationDefinition/EncounterPatient-i-someOp", "http://localhost/baseR4/OperationDefinition/EncounterPatient-i-validate"));
 
 		CapabilityStatementRestResourceComponent encounter = conformance.getRestFirstRep().getResource().stream().filter(t -> t.getType().equals("Encounter")).findFirst().orElseThrow(() -> new IllegalArgumentException());
 		assertEquals(2, encounter.getOperation().size());
 		assertThat(toOperationNames(encounter.getOperation()), containsInAnyOrder("someOp", "validate"));
-		assertThat(toOperationDefinitions(encounter.getOperation()), containsInAnyOrder("http://localhost/baseR4/OperationDefinition/Encounter-i-someOp", "http://localhost/baseR4/OperationDefinition/Encounter-i-validate"));
+		assertThat(toOperationDefinitions(encounter.getOperation()).toString(), toOperationDefinitions(encounter.getOperation()), containsInAnyOrder("http://localhost/baseR4/OperationDefinition/EncounterPatient-i-someOp", "http://localhost/baseR4/OperationDefinition/EncounterPatient-i-validate"));
 
 
 		{
-			OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-someOp"), createRequestDetails(rs));
+			OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/EncounterPatient-i-someOp"), createRequestDetails(rs));
 			validate(opDef);
 			ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
 			Set<String> types = toStrings(opDef.getResource());
 			assertEquals("someOp", opDef.getCode());
 			assertEquals(true, opDef.getInstance());
 			assertEquals(false, opDef.getSystem());
-			assertThat(types, containsInAnyOrder("Patient"));
+			assertThat(types, containsInAnyOrder("Patient", "Encounter"));
 			assertEquals(2, opDef.getParameter().size());
 			assertEquals("someOpParam1", opDef.getParameter().get(0).getName());
 			assertEquals("date", opDef.getParameter().get(0).getType());
 			assertEquals("someOpParam2", opDef.getParameter().get(1).getName());
-			assertEquals("Patient", opDef.getParameter().get(1).getType());
+			assertEquals("Resource", opDef.getParameter().get(1).getType());
 		}
 		{
-			OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/Encounter-i-someOp"), createRequestDetails(rs));
-			validate(opDef);
-			ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
-			Set<String> types = toStrings(opDef.getResource());
-			assertEquals("someOp", opDef.getCode());
-			assertEquals(true, opDef.getInstance());
-			assertEquals(false, opDef.getSystem());
-			assertThat(types, containsInAnyOrder("Encounter"));
-			assertEquals(2, opDef.getParameter().size());
-			assertEquals("someOpParam1", opDef.getParameter().get(0).getName());
-			assertEquals("date", opDef.getParameter().get(0).getType());
-			assertEquals("someOpParam2", opDef.getParameter().get(1).getName());
-			assertEquals("Encounter", opDef.getParameter().get(1).getType());
-		}
-		{
-			OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-validate"), createRequestDetails(rs));
+			OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/EncounterPatient-i-validate"), createRequestDetails(rs));
 			validate(opDef);
 			ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
 			Set<String> types = toStrings(opDef.getResource());
 			assertEquals("validate", opDef.getCode());
 			assertEquals(true, opDef.getInstance());
 			assertEquals(false, opDef.getSystem());
-			assertThat(types, containsInAnyOrder("Patient"));
+			assertThat(types, containsInAnyOrder("Patient", "Encounter"));
 			assertEquals(1, opDef.getParameter().size());
 			assertEquals("resource", opDef.getParameter().get(0).getName());
-			assertEquals("Patient", opDef.getParameter().get(0).getType());
+			assertEquals("Resource", opDef.getParameter().get(0).getType());
 		}
 	}
 
@@ -446,7 +431,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
@@ -458,46 +443,6 @@ public class ServerCapabilityStatementProviderR4Test {
 	}
 
 	@Test
-	public void testOperationOnNoTypes() throws Exception {
-		RestfulServer rs = new RestfulServer(myCtx);
-		rs.setProviders(new PlainProviderWithExtendedOperationOnNoType());
-		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
-
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {
-			@Override
-			public CapabilityStatement getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
-				return (CapabilityStatement) super.getServerConformance(theRequest, createRequestDetails(rs));
-			}
-		};
-		rs.setServerConformanceProvider(sc);
-
-		rs.init(createServletConfig());
-
-		OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/-is-plain"), createRequestDetails(rs));
-		validate(opDef);
-
-		assertEquals("plain", opDef.getCode());
-		assertEquals(false, opDef.getAffectsState());
-		assertEquals(3, opDef.getParameter().size());
-
-		assertTrue(opDef.getParameter().get(0).hasName());
-		assertEquals("start", opDef.getParameter().get(0).getName());
-		assertEquals("in", opDef.getParameter().get(0).getUse().toCode());
-		assertEquals("0", opDef.getParameter().get(0).getMinElement().getValueAsString());
-		assertEquals("date", opDef.getParameter().get(0).getTypeElement().getValueAsString());
-
-		assertEquals("out1", opDef.getParameter().get(2).getName());
-		assertEquals("out", opDef.getParameter().get(2).getUse().toCode());
-		assertEquals("1", opDef.getParameter().get(2).getMinElement().getValueAsString());
-		assertEquals("2", opDef.getParameter().get(2).getMaxElement().getValueAsString());
-		assertEquals("string", opDef.getParameter().get(2).getTypeElement().getValueAsString());
-
-		assertThat(opDef.getSystem(), is(true));
-		assertThat(opDef.getType(), is(false));
-		assertThat(opDef.getInstance(), is(true));
-	}
-
-	@Test
 	public void testProviderWithRequiredAndOptional() throws Exception {
 
 		RestfulServer rs = new RestfulServer(myCtx);
@@ -506,7 +451,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		validate(conformance);
@@ -535,7 +480,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = validate(conformance);
@@ -553,7 +498,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
@@ -573,7 +518,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		boolean found = false;
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
@@ -609,7 +554,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 		CapabilityStatement serverConformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		List<String> formatCodes = serverConformance.getFormat().stream().map(c -> c.getCode()).collect(Collectors.toList());
@@ -632,7 +577,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		boolean found = false;
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
@@ -664,7 +609,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		boolean found = false;
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
@@ -704,7 +649,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		rsNoType.registerProvider(new SearchProviderWithListNoType());
 		ServerCapabilityStatementProvider scNoType = new ServerCapabilityStatementProvider(rsNoType);
 		rsNoType.setServerConformanceProvider(scNoType);
-		rsNoType.init(createServletConfig());
+		rsNoType.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) scNoType.getServerConformance(createHttpServletRequest(), createRequestDetails(rsNoType));
 		conformance.setId("");
@@ -721,7 +666,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		rsWithType.registerProvider(new SearchProviderWithListWithType());
 		ServerCapabilityStatementProvider scWithType = new ServerCapabilityStatementProvider(rsWithType);
 		rsWithType.setServerConformanceProvider(scWithType);
-		rsWithType.init(createServletConfig());
+		rsWithType.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement conformanceWithType = (CapabilityStatement) scWithType.getServerConformance(createHttpServletRequest(), createRequestDetails(rsWithType));
 		conformanceWithType.setId("");
@@ -740,7 +685,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = validate(conformance);
@@ -757,7 +702,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = validate(conformance);
@@ -792,7 +737,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		};
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement opDef = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
@@ -809,14 +754,14 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		class MyProvider {
 
-			@Description(value="This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.")
-			@GraphQL(type= RequestTypeEnum.GET)
+			@Description(value = "This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.")
+			@GraphQL(type = RequestTypeEnum.GET)
 			public String processGraphQlGetRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryUrl String queryUrl) {
 				throw new IllegalStateException();
 			}
 
-			@Description(value="This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.")
-			@GraphQL(type=RequestTypeEnum.POST)
+			@Description(value = "This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.")
+			@GraphQL(type = RequestTypeEnum.POST)
 			public String processGraphQlPostRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryBody String queryBody) {
 				throw new IllegalStateException();
 			}
@@ -833,21 +778,21 @@ public class ServerCapabilityStatementProviderR4Test {
 		};
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement opDef = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		validate(opDef);
 
 		// On Patient Resource
-		CapabilityStatementRestResourceComponent resource = opDef.getRest().get(0).getResource().stream().filter(t->t.getType().equals("Patient")).findFirst().orElseThrow(()->new IllegalArgumentException());
+		CapabilityStatementRestResourceComponent resource = opDef.getRest().get(0).getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
 		CapabilityStatementRestResourceOperationComponent graphQlOperation = resource.getOperation().stream().filter(t -> t.getName().equals("graphql")).findFirst().orElseThrow(() -> new IllegalArgumentException());
 		assertEquals("graphql", graphQlOperation.getName());
 		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-graphql", graphQlOperation.getDefinition());
 		assertEquals("This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.", graphQlOperation.getDocumentation());
 
 		// On Patient Resource
-		resource = opDef.getRest().get(0).getResource().stream().filter(t->t.getType().equals("Observation")).findFirst().orElseThrow(()->new IllegalArgumentException());
+		resource = opDef.getRest().get(0).getResource().stream().filter(t -> t.getType().equals("Observation")).findFirst().orElseThrow(() -> new IllegalArgumentException());
 		graphQlOperation = resource.getOperation().stream().filter(t -> t.getName().equals("graphql")).findFirst().orElseThrow(() -> new IllegalArgumentException());
 		assertEquals("graphql", graphQlOperation.getName());
 		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-graphql", graphQlOperation.getDefinition());
@@ -855,7 +800,7 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		// At Server Level
 		CapabilityStatementRestComponent rest = opDef.getRest().get(0);
-		graphQlOperation = rest.getOperation().stream().filter(t -> t.getName().equals("graphql")).findFirst().orElseThrow(() -> new IllegalArgumentException());
+		graphQlOperation = rest.getOperation().stream().filter(t -> t.getName().equals("graphql")).findAny().orElseThrow(() -> new IllegalArgumentException());
 		assertEquals("graphql", graphQlOperation.getName());
 		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-graphql", graphQlOperation.getDefinition());
 		assertEquals("This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.", graphQlOperation.getDocumentation());
@@ -864,10 +809,177 @@ public class ServerCapabilityStatementProviderR4Test {
 		IdType id = new IdType("http://localhost/baseR4/OperationDefinition/Global-is-graphql");
 		RequestDetails requestDetails = createRequestDetails(rs);
 		OperationDefinition operationDefinition = (OperationDefinition) sc.readOperationDefinition(id, requestDetails);
-		assertEquals("Operation_graphql", operationDefinition.getName());
+		assertEquals("Graphql", operationDefinition.getName());
 		assertEquals("graphql", operationDefinition.getCode());
 		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-graphql", operationDefinition.getUrl());
 		assertEquals("This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.", operationDefinition.getDescription());
+		assertTrue(operationDefinition.getSystem());
+		assertFalse(operationDefinition.getType());
+		assertTrue(operationDefinition.getInstance());
+	}
+
+
+	@Test
+	public void testPlainProviderGlobalSystemAndInstanceOperations() throws Exception {
+
+		class MyProvider {
+
+			@Description(
+				value = "This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.",
+				shortDefinition = "Comparte two resources or two versions of a single resource")
+			@Operation(name = ProviderConstants.DIFF_OPERATION_NAME, global = true, idempotent = true)
+			public IBaseParameters diff(
+				@IdParam IIdType theResourceId,
+
+				@Description(value = "The resource ID and version to diff from", example = "Patient/example/version/1")
+				@OperationParam(name = ProviderConstants.DIFF_FROM_VERSION_PARAMETER, typeName = "string", min = 0, max = 1)
+					IPrimitiveType<?> theFromVersion,
+
+				@Description(value = "Should differences in the Resource.meta element be included in the diff", example = "false")
+				@OperationParam(name = ProviderConstants.DIFF_INCLUDE_META_PARAMETER, typeName = "boolean", min = 0, max = 1)
+					IPrimitiveType<Boolean> theIncludeMeta,
+				RequestDetails theRequestDetails) {
+				throw new IllegalStateException();
+			}
+
+			@Description("This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.")
+			@Operation(name = ProviderConstants.DIFF_OPERATION_NAME, idempotent = true)
+			public IBaseParameters diff(
+				@Description(value = "The resource ID and version to diff from", example = "Patient/example/version/1")
+				@OperationParam(name = ProviderConstants.DIFF_FROM_PARAMETER, typeName = "id", min = 1, max = 1)
+					IIdType theFromVersion,
+
+				@Description(value = "The resource ID and version to diff to", example = "Patient/example/version/2")
+				@OperationParam(name = ProviderConstants.DIFF_TO_PARAMETER, typeName = "id", min = 1, max = 1)
+					IIdType theToVersion,
+
+				@Description(value = "Should differences in the Resource.meta element be included in the diff", example = "false")
+				@OperationParam(name = ProviderConstants.DIFF_INCLUDE_META_PARAMETER, typeName = "boolean", min = 0, max = 1)
+					IPrimitiveType<Boolean> theIncludeMeta,
+				RequestDetails theRequestDetails) {
+				throw new IllegalStateException();
+			}
+
+		}
+
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
+		rs.registerProvider(new MyProvider());
+		rs.registerProvider(new HashMapResourceProvider<>(myCtx, Patient.class));
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {
+		};
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(MockServletUtil.createServletConfig());
+
+		CapabilityStatement opDef = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+
+		validate(opDef);
+
+		// On Patient Resource
+		CapabilityStatementRestResourceComponent resource = opDef.getRest().get(0).getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
+		CapabilityStatementRestResourceOperationComponent operation = resource.getOperation().stream().filter(t -> t.getName().equals("diff")).findFirst().orElseThrow(() -> new IllegalArgumentException());
+		assertEquals("diff", operation.getName());
+		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-diff", operation.getDefinition());
+		assertEquals("This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.", operation.getDocumentation());
+
+		// At Server Level
+		CapabilityStatementRestComponent rest = opDef.getRest().get(0);
+		operation = rest.getOperation().stream().filter(t -> t.getName().equals("diff")).findAny().orElse(null);
+		assertEquals("diff", operation.getName());
+		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-diff", operation.getDefinition());
+		assertEquals("This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.", operation.getDocumentation());
+
+		// Fetch OperationDefinition
+		IdType id = new IdType("http://localhost/baseR4/OperationDefinition/Global-is-diff");
+		RequestDetails requestDetails = createRequestDetails(rs);
+		OperationDefinition operationDefinition = (OperationDefinition) sc.readOperationDefinition(id, requestDetails);
+		assertEquals("Diff", operationDefinition.getName());
+		assertEquals("diff", operationDefinition.getCode());
+		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-diff", operationDefinition.getUrl());
+		assertEquals("This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.", operationDefinition.getDescription());
+		assertTrue(operationDefinition.getSystem());
+		assertFalse(operationDefinition.getType());
+		assertTrue(operationDefinition.getInstance());
+	}
+
+	@Test
+	public void testResourceProviderTypeAndInstanceLevelOperations() throws Exception {
+
+		class MyProvider implements IResourceProvider {
+
+			@Description("This is the expunge operation")
+			@Operation(name = "expunge", idempotent = false, returnParameters = {
+				@OperationParam(name = "count", typeName = "integer")
+			})
+			public IBaseParameters expunge(
+				@IdParam IIdType theIdParam,
+				@OperationParam(name = "limit", typeName = "integer") IPrimitiveType<Integer> theLimit,
+				@OperationParam(name = "deleted", typeName = "boolean") IPrimitiveType<Boolean> theExpungeDeletedResources,
+				@OperationParam(name = "previous", typeName = "boolean") IPrimitiveType<Boolean> theExpungeOldVersions,
+				RequestDetails theRequest) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Description("This is the expunge operation")
+			@Operation(name = "expunge", idempotent = false, returnParameters = {
+				@OperationParam(name = "count", typeName = "integer")
+			})
+			public IBaseParameters expunge(
+				@OperationParam(name = "limit", typeName = "integer") IPrimitiveType<Integer> theLimit,
+				@OperationParam(name = "deleted", typeName = "boolean") IPrimitiveType<Boolean> theExpungeDeletedResources,
+				@OperationParam(name = "previous", typeName = "boolean") IPrimitiveType<Boolean> theExpungeOldVersions,
+				RequestDetails theRequest) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public Class<? extends IBaseResource> getResourceType() {
+				return Patient.class;
+			}
+		}
+
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
+		rs.registerProvider(new MyProvider());
+		rs.registerProvider(new HashMapResourceProvider<>(myCtx, Patient.class));
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {
+		};
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(MockServletUtil.createServletConfig());
+
+		CapabilityStatement opDef = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+
+		validate(opDef);
+
+		// On Patient Resource
+		CapabilityStatementRestResourceComponent resource = opDef.getRest().get(0).getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
+		List<CapabilityStatementRestResourceOperationComponent> expungeResourceOperations = resource.getOperation().stream().filter(t -> t.getName().equals("expunge")).collect(Collectors.toList());
+		assertEquals(1, expungeResourceOperations.size());
+		CapabilityStatementRestResourceOperationComponent operation = expungeResourceOperations.get(0);
+		assertEquals("expunge", operation.getName());
+		assertEquals("http://localhost/baseR4/OperationDefinition/Patient-it-expunge", operation.getDefinition());
+		assertEquals("This is the expunge operation", operation.getDocumentation());
+
+		// At Server Level
+		CapabilityStatementRestComponent rest = opDef.getRest().get(0);
+		operation = rest.getOperation().stream().filter(t -> t.getName().equals("expunge")).findAny().orElse(null);
+		assertNull(operation);
+
+		// Fetch OperationDefinition
+		IdType id = new IdType("http://localhost/baseR4/OperationDefinition/Patient-it-expunge");
+		RequestDetails requestDetails = createRequestDetails(rs);
+		OperationDefinition operationDefinition = (OperationDefinition) sc.readOperationDefinition(id, requestDetails);
+		assertEquals("Expunge", operationDefinition.getName());
+		assertEquals("expunge", operationDefinition.getCode());
+		assertEquals("http://localhost/baseR4/OperationDefinition/Patient-it-expunge", operationDefinition.getUrl());
+		assertEquals("This is the expunge operation", operationDefinition.getDescription());
+		assertFalse(operationDefinition.getSystem());
+		assertTrue(operationDefinition.getType());
+		assertTrue(operationDefinition.getInstance());
 
 	}
 
@@ -901,7 +1013,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		};
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement opDef = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
@@ -922,7 +1034,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		validate(conformance);
@@ -938,7 +1050,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
 		validate(operationDefinition);
 		assertThat(operationDefinition.getCode(), is(NamedQueryPlainProvider.QUERY_NAME));
-		assertThat(operationDefinition.getName(), is("Search_" + NamedQueryPlainProvider.QUERY_NAME));
+		assertThat(operationDefinition.getName(), is("TestQuery"));
 		assertThat(operationDefinition.getStatus(), is(PublicationStatus.ACTIVE));
 		assertThat(operationDefinition.getKind(), is(OperationKind.QUERY));
 		assertThat(operationDefinition.getDescription(), is(NamedQueryPlainProvider.DESCRIPTION));
@@ -967,7 +1079,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		validate(conformance);
@@ -980,7 +1092,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		OperationDefinition operationDefinition = (OperationDefinition) sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
 		ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
 		validate(operationDefinition);
-		assertThat("The operation name should be the code if no description is set", operationDefinition.getName(), is("Search_" + NamedQueryResourceProvider.QUERY_NAME));
+		assertThat("The operation name should be the code if no description is set", operationDefinition.getName(), is("TestQuery"));
 		String patientResourceName = "Patient";
 		assertThat("A resource level search targets the resource of the provider it's defined in", operationDefinition.getResource().get(0).getValue(), is(patientResourceName));
 		assertThat(operationDefinition.getSystem(), is(false));
@@ -1009,7 +1121,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
@@ -1036,7 +1148,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
@@ -1086,7 +1198,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		sc.setRestResourceRevIncludesEnabled(true);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
@@ -1136,7 +1248,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		sc.setRestResourceRevIncludesEnabled(true);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(createServletConfig());
+		rs.init(MockServletUtil.createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
@@ -1163,6 +1275,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		}
 		return retVal;
 	}
+
 	private List<String> toOperationDefinitions(List<CapabilityStatementRestResourceOperationComponent> theOperation) {
 		ArrayList<String> retVal = Lists.newArrayList();
 		for (CapabilityStatementRestResourceOperationComponent next : theOperation) {
@@ -1310,17 +1423,6 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		@Update
 		public MethodOutcome update(@IdParam IdType theId, @ResourceParam Patient thePatient) {
-			return null;
-		}
-
-	}
-
-	@SuppressWarnings("unused")
-	public static class PlainProviderWithExtendedOperationOnNoType {
-
-		@Operation(name = "plain", idempotent = true, returnParameters = {@OperationParam(min = 1, max = 2, name = "out1", type = StringType.class)})
-		public IBundleProvider everything(HttpServletRequest theServletRequest, @IdParam IdType theId, @OperationParam(name = "start") DateType theStart,
-													 @OperationParam(name = "end") DateType theEnd) {
 			return null;
 		}
 
@@ -1489,7 +1591,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		public static final String DESCRIPTION = "A query description";
 		public static final String SP_QUANTITY = "quantity";
 
-		@Search(queryName = QUERY_NAME, type=Patient.class)
+		@Search(queryName = QUERY_NAME, type = Patient.class)
 		@Description(formalDefinition = DESCRIPTION)
 		public Bundle findAllGivenParameter(@RequiredParam(name = SP_QUANTITY) QuantityParam quantity) {
 			return null;

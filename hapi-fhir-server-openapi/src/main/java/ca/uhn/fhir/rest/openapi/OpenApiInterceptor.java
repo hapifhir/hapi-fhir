@@ -736,7 +736,7 @@ public class OpenApiInterceptor {
 				assert pathItem.getPost() == null : "Have duplicate POST at path: " + thePath;
 				return pathItem.post(new Operation()).getPost();
 			case GET:
-				assert pathItem.getGet() == null;
+				assert pathItem.getGet() == null : "Have duplicate GET at path: " + thePath;
 				return pathItem.get(new Operation()).getGet();
 			case PUT:
 				assert pathItem.getPut() == null;
