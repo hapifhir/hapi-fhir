@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -36,6 +37,7 @@ import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -49,6 +51,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.IdType;
@@ -75,6 +78,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -247,8 +251,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testMarkResourcesForReindexing() throws Exception {
-		HttpGet get = new HttpGet(ourServerBase + "/$mark-all-resources-for-reindexing");
-		CloseableHttpResponse http = ourHttpClient.execute(get);
+		HttpRequestBase post = new HttpPost(ourServerBase + "/$mark-all-resources-for-reindexing");
+		CloseableHttpResponse http = ourHttpClient.execute(post);
 		try {
 			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);
@@ -257,8 +261,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			IOUtils.closeQuietly(http);
 		}
 
-		get = new HttpGet(ourServerBase + "/$perform-reindexing-pass");
-		http = ourHttpClient.execute(get);
+		post = new HttpPost(ourServerBase + "/$perform-reindexing-pass");
+		http = ourHttpClient.execute(post);
 		try {
 			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);
@@ -272,8 +276,10 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testMarkResourcesForReindexingTyped() throws Exception {
-		HttpGet get = new HttpGet(ourServerBase + "/$mark-all-resources-for-reindexing?type=Patient");
-		CloseableHttpResponse http = ourHttpClient.execute(get);
+
+		HttpPost post = new HttpPost(ourServerBase + "/$mark-all-resources-for-reindexing?type=Patient");
+		post.setEntity(new ResourceEntity(myFhirCtx, new Parameters().addParameter("type", new CodeType("Patient"))));
+		CloseableHttpResponse http = ourHttpClient.execute(post);
 		try {
 			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);
@@ -282,8 +288,9 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			IOUtils.closeQuietly(http);
 		}
 
-		get = new HttpGet(ourServerBase + "/$mark-all-resources-for-reindexing?type=FOO");
-		http = ourHttpClient.execute(get);
+		post = new HttpPost(ourServerBase + "/$mark-all-resources-for-reindexing?type=FOO");
+		post.setEntity(new ResourceEntity(myFhirCtx, new Parameters().addParameter("type", new CodeType("FOO"))));
+		http = ourHttpClient.execute(post);
 		try {
 			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);

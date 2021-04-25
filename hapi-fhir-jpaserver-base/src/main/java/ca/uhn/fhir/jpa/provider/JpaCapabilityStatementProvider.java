@@ -80,6 +80,11 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 		if (isNotBlank(myImplementationDescription)) {
 			theTerser.setElement(theCapabilityStatement, "implementation.description", myImplementationDescription);
 		}
+
+		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_FHIR_JSON_NEW);
+		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_FHIR_XML_NEW);
+		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_JSON_PATCH);
+		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_XML_PATCH);
 	}
 
 	@Override

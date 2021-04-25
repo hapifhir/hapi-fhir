@@ -50,14 +50,14 @@ public class OperationDuplicateServerDstu2Test {
 			ourLog.info(response);
 
 			Conformance resp = ourCtx.newXmlParser().parseResource(Conformance.class, response);
-			assertEquals(3, resp.getRest().get(0).getOperation().size());
+			assertEquals(1, resp.getRest().get(0).getOperation().size());
 			assertEquals("myoperation", resp.getRest().get(0).getOperation().get(0).getName());
-			assertEquals("OperationDefinition/-s-myoperation", resp.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue());
+			assertEquals("OperationDefinition/OrganizationPatient-ts-myoperation", resp.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue());
 		}
 
 		// OperationDefinition
 		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/OperationDefinition/-s-myoperation?_pretty=true");
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/OperationDefinition/OrganizationPatient-ts-myoperation?_pretty=true");
 			HttpResponse status = ourClient.execute(httpGet);
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -69,25 +69,7 @@ public class OperationDuplicateServerDstu2Test {
 			assertEquals(true, resp.getSystemElement().getValue().booleanValue());
 			assertEquals("myoperation", resp.getCode());
 			assertEquals(true, resp.getIdempotent().booleanValue());
-			assertEquals(0, resp.getType().size());
-			assertEquals(1, resp.getParameter().size());
-		}
-		// OperationDefinition
-		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/OperationDefinition/Organization--myoperation?_pretty=true");
-			HttpResponse status = ourClient.execute(httpGet);
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			String response = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
-			ourLog.info(response);
-
-			OperationDefinition resp = ourCtx.newXmlParser().parseResource(OperationDefinition.class, response);
-			assertEquals(false, resp.getSystemElement().getValue().booleanValue());
-			assertEquals("myoperation", resp.getCode());
-			assertEquals(true, resp.getIdempotent().booleanValue());
-			assertEquals(1, resp.getType().size());
-			assertEquals("Organization", resp.getType().get(0).getValue());
+			assertEquals(2, resp.getType().size());
 			assertEquals(1, resp.getParameter().size());
 		}
 	}

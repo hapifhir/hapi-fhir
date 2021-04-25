@@ -302,7 +302,36 @@ public class AuthorizationInterceptorR4Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$validate");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
 	}
+
+
+	/**
+	 * A GET to the base URL isn't valid, but the interceptor should allow it
+	 */
+	@Test
+	public void testGetRoot() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allowAll()
+					.build();
+			}
+		});
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/");
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(400, status.getStatusLine().getStatusCode());
+
+	}
+
 
 	@Test
 	public void testAllowAllForTenant() throws Exception {
@@ -1944,7 +1973,6 @@ public class AuthorizationInterceptorR4Test {
 
 		HttpGet httpGet;
 		HttpResponse status;
-		String response;
 
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
@@ -1968,7 +1996,6 @@ public class AuthorizationInterceptorR4Test {
 
 		HttpGet httpGet;
 		HttpResponse status;
-		String response;
 
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
@@ -2188,7 +2215,6 @@ public class AuthorizationInterceptorR4Test {
 
 		HttpGet httpGet;
 		HttpResponse status;
-		String response;
 
 		ourReturn = Collections.singletonList(new Consent().setDateTime(new Date()).setId("Consent/123"));
 		ourHitMethod = false;
@@ -2933,7 +2959,7 @@ public class AuthorizationInterceptorR4Test {
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/");
 		httpPost.setEntity(createFhirResourceEntity(requestBundle));
 		CloseableHttpResponse status = ourClient.execute(httpPost);
-		String resp = extractResponseAndClose(status);
+		extractResponseAndClose(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 	}

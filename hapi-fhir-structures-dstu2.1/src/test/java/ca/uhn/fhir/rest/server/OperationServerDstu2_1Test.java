@@ -98,7 +98,7 @@ public class OperationServerDstu2_1Test {
 	 */
 	@Test
 	public void testOperationDefinition() {
-		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId("OperationDefinition/Patient--OP_TYPE").execute();
+		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId("OperationDefinition/Patient-t-OP_TYPE").execute();
 		
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(def));
 		
