@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>ca.uhn.hapi.fhir</groupId>
     <artifactId>hapi-fhir-bom</artifactId>
-    <version>5.4.0-PRE7-SNAPSHOT</version>
+    <version>5.4.0-PRE8-SNAPSHOT</version>
     <packaging>pom</packaging>
 	 <name>HAPI FHIR BOM</name>
 
     <parent>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-deployable-pom</artifactId>
-      <version>5.4.0-PRE7-SNAPSHOT</version>
+      <version>5.4.0-PRE8-SNAPSHOT</version>
       <relativePath>../hapi-deployable-pom/pom.xml</relativePath>
    </parent>
     
@@ -41,6 +41,11 @@
 				  <artifactId>hapi-fhir-server-mdm</artifactId>
 				  <version>${project.version}</version>
 			  </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>hapi-fhir-server-openapi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>hapi-fhir-validation</artifactId>

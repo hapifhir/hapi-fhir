@@ -28,6 +28,9 @@ import org.eclipse.jetty.server.handler.StatisticsHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 public class JettyUtil {
     
     /**
@@ -43,18 +46,20 @@ public class JettyUtil {
     /**
      * Starts the given Jetty server, and configures it for graceful shutdown
      */
-    public static void startServer(Server server) throws Exception {
+    public static void startServer(@Nonnull Server theServer) throws Exception {
         //Needed for graceful shutdown, see https://github.com/eclipse/jetty.project/issues/2076#issuecomment-353717761
-        server.insertHandler(new StatisticsHandler());
-        server.start();
+        theServer.insertHandler(new StatisticsHandler());
+        theServer.start();
     }
     
     /**
-     * Shut down the given Jetty server, and release held resources. 
+     * Shut down the given Jetty server, and release held resources.
      */
-    public static void closeServer(Server server) throws Exception {
-        server.stop();
-        server.destroy();
+    public static void closeServer(@Nullable Server theServer) throws Exception {
+    	if (theServer != null) {
+			theServer.stop();
+			theServer.destroy();
+		}
     }
     
 }

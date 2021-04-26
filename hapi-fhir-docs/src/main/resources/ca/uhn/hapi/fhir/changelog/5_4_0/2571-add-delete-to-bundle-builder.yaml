@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2571
+title: "Added support for deleting resources to BundleBuilder via method `addTransactionDeleteEntry`."

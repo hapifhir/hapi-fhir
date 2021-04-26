@@ -271,7 +271,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 						handleSearchMethodBinding(resource, def, includes, (SearchMethodBinding) nextMethodBinding, theRequestDetails);
 					} else if (nextMethodBinding instanceof OperationMethodBinding) {
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
-						String opName = bindings.getOperationBindingToName().get(methodBinding);
+						String opName = bindings.getOperationBindingToId().get(methodBinding);
 						if (operationNames.add(opName)) {
 							// Only add each operation (by name) once
 							rest.addOperation().setName(methodBinding.getName().substring(1)).getDefinition().setReference("OperationDefinition/" + opName);
@@ -306,7 +306,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 					checkBindingForSystemOps(rest, systemOps, nextMethodBinding);
 					if (nextMethodBinding instanceof OperationMethodBinding) {
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
-						String opName = bindings.getOperationBindingToName().get(methodBinding);
+						String opName = bindings.getOperationBindingToId().get(methodBinding);
 						if (operationNames.add(opName)) {
 							rest.addOperation().setName(methodBinding.getName().substring(1)).getDefinition().setReference("OperationDefinition/" + opName);
 						}
@@ -415,7 +415,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 		RestfulServerConfiguration serverConfiguration = getServerConfiguration(theRequestDetails);
 		Bindings bindings = serverConfiguration.provideBindings();
 
-		List<OperationMethodBinding> sharedDescriptions = bindings.getOperationNameToBindings().get(theId.getIdPart());
+		List<OperationMethodBinding> sharedDescriptions = bindings.getOperationIdToBindings().get(theId.getIdPart());
 		if (sharedDescriptions == null || sharedDescriptions.isEmpty()) {
 			throw new ResourceNotFoundException(theId);
 		}
@@ -449,10 +449,10 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 			for (IParameter nextParamUntyped : sharedDescription.getParameters()) {
 				if (nextParamUntyped instanceof OperationParameter) {
 					OperationParameter nextParam = (OperationParameter) nextParamUntyped;
-					Parameter param = op.addParameter();
 					if (!inParams.add(nextParam.getName())) {
 						continue;
 					}
+					Parameter param = op.addParameter();
 					param.setUse(OperationParameterUseEnum.IN);
 					if (nextParam.getParamType() != null) {
 						param.setType(nextParam.getParamType());

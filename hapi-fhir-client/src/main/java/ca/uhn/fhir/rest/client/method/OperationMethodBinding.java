@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.*;
 
 import java.lang.reflect.Method;
@@ -64,10 +65,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 		Description description = theMethod.getAnnotation(Description.class);
 		if (description != null) {
-			myDescription = description.formalDefinition();
-			if (isBlank(myDescription)) {
-				myDescription = description.shortDefinition();
-			}
+			myDescription = ParametersUtil.extractDescription(description);
 		}
 		if (isBlank(myDescription)) {
 			myDescription = null;

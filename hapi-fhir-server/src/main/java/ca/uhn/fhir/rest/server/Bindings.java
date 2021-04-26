@@ -30,14 +30,14 @@ import java.util.List;
 public class Bindings {
 	private final IdentityHashMap<SearchMethodBinding, String> myNamedSearchMethodBindingToName;
 	private final HashMap<String, List<SearchMethodBinding>> mySearchNameToBindings;
-	private final HashMap<String, List<OperationMethodBinding>> myOperationNameToBindings;
-	private final IdentityHashMap<OperationMethodBinding, String> myOperationBindingToName;
+	private final HashMap<String, List<OperationMethodBinding>> myOperationIdToBindings;
+	private final IdentityHashMap<OperationMethodBinding, String> myOperationBindingToId;
 
-	public Bindings(IdentityHashMap<SearchMethodBinding, String> theNamedSearchMethodBindingToName, HashMap<String, List<SearchMethodBinding>> theSearchNameToBindings, HashMap<String, List<OperationMethodBinding>> theOperationNameToBindings, IdentityHashMap<OperationMethodBinding, String> theOperationBindingToName) {
+	public Bindings(IdentityHashMap<SearchMethodBinding, String> theNamedSearchMethodBindingToName, HashMap<String, List<SearchMethodBinding>> theSearchNameToBindings, HashMap<String, List<OperationMethodBinding>> theOperationIdToBindings, IdentityHashMap<OperationMethodBinding, String> theOperationBindingToName) {
 		myNamedSearchMethodBindingToName = theNamedSearchMethodBindingToName;
 		mySearchNameToBindings = theSearchNameToBindings;
-		myOperationNameToBindings = theOperationNameToBindings;
-		myOperationBindingToName = theOperationBindingToName;
+		myOperationIdToBindings = theOperationIdToBindings;
+		myOperationBindingToId = theOperationBindingToName;
 	}
 
 	public IdentityHashMap<SearchMethodBinding, String> getNamedSearchMethodBindingToName() {
@@ -48,11 +48,11 @@ public class Bindings {
 		return mySearchNameToBindings;
 	}
 
-	public HashMap<String, List<OperationMethodBinding>> getOperationNameToBindings() {
-		return myOperationNameToBindings;
+	public HashMap<String, List<OperationMethodBinding>> getOperationIdToBindings() {
+		return myOperationIdToBindings;
 	}
 
-	public IdentityHashMap<OperationMethodBinding, String> getOperationBindingToName() {
-		return myOperationBindingToName;
+	public IdentityHashMap<OperationMethodBinding, String> getOperationBindingToId() {
+		return myOperationBindingToId;
 	}
 }

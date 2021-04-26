@@ -244,44 +244,6 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 	}
 
 	@Test
-	public void testOperationOnNoTypes() throws Exception {
-		RestfulServer rs = new RestfulServer(ourCtx);
-		rs.setProviders(new PlainProviderWithExtendedOperationOnNoType());
-
-		ServerConformanceProvider sc = new ServerConformanceProvider(rs) {
-			@Override
-			public Conformance getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
-				return super.getServerConformance(theRequest, theRequestDetails);
-			}
-		};
-		rs.setServerConformanceProvider(sc);
-
-		rs.init(createServletConfig());
-
-		Conformance sconf = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-		assertEquals("OperationDefinition/-is-plain", sconf.getRest().get(0).getOperation().get(0).getDefinition().getReference());
-
-		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/-is-plain"), createRequestDetails(rs));
-
-		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
-		ourLog.info(conf);
-
-		assertEquals("$plain", opDef.getCode());
-		assertEquals(true, opDef.getIdempotent());
-		assertEquals(3, opDef.getParameter().size());
-		assertEquals("start", opDef.getParameter().get(0).getName());
-		assertEquals("in", opDef.getParameter().get(0).getUse().toCode());
-		assertEquals("0", opDef.getParameter().get(0).getMinElement().getValueAsString());
-		assertEquals("date", opDef.getParameter().get(0).getTypeElement().getValueAsString());
-
-		assertEquals("out1", opDef.getParameter().get(2).getName());
-		assertEquals("out", opDef.getParameter().get(2).getUse().toCode());
-		assertEquals("1", opDef.getParameter().get(2).getMinElement().getValueAsString());
-		assertEquals("2", opDef.getParameter().get(2).getMaxElement().getValueAsString());
-		assertEquals("string", opDef.getParameter().get(2).getTypeElement().getValueAsString());
-}
-
-	@Test
 	public void testProviderWithRequiredAndOptional() throws Exception {
 
 		RestfulServer rs = new RestfulServer(ourCtx);
@@ -617,7 +579,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 	}
 
   private RequestDetails createRequestDetails(RestfulServer theServer) {
-    ServletRequestDetails retVal = new ServletRequestDetails(null);
+    ServletRequestDetails retVal = new ServletRequestDetails();
     retVal.setServer(theServer);
     return retVal;
   }

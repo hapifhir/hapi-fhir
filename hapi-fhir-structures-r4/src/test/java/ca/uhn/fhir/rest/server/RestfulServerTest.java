@@ -3,7 +3,7 @@ package ca.uhn.fhir.rest.server;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -16,11 +16,10 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.servlet.ServletException;
@@ -33,70 +32,55 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class RestfulServerTest {
-	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
-	private FhirContext myCtx;
-	private RestfulServer restfulServer;
+	private final FhirContext myCtx = FhirContext.forR4(); // don't use cached, we register custom resources
+	private RestfulServer myRestfulServer;
 
 	@BeforeEach
 	public void setUp() throws ServletException {
-		when(myCtx.getVersion().getVersion()).thenReturn(FhirVersionEnum.DSTU3);
-		when(myCtx.getVersion().getServerVersion()).thenReturn(new MyFhirVersionServer());
-
-		restfulServer = new RestfulServer(myCtx);
-		restfulServer.init();
-	}
-
-	private void mockResource(Class theClass) {
-		RuntimeResourceDefinition resourceDefinitionMock = mock(RuntimeResourceDefinition.class);
-		String className = theClass.getSimpleName();
-		lenient().when(resourceDefinitionMock.getName()).thenReturn(className);
-		lenient().when(myCtx.getResourceDefinition(className)).thenReturn(resourceDefinitionMock);
-		lenient().when(myCtx.getResourceType(theClass)).thenReturn(className);
+		myRestfulServer = new RestfulServer(myCtx);
+		myRestfulServer.init();
 	}
 
 	@Test
 	public void testRegisterProvidersWithMethodBindings() {
-		mockResource(MyResource.class);
-		mockResource(MyResource2.class);
-
 		MyProvider provider = new MyProvider();
-		restfulServer.registerProvider(provider);
+		myRestfulServer.registerProvider(provider);
 		MyProvider2 provider2 = new MyProvider2();
-		restfulServer.registerProvider(provider2);
+		myRestfulServer.registerProvider(provider2);
 
-		assertFalse(restfulServer.getProviderMethodBindings(provider).isEmpty());
-		assertFalse(restfulServer.getProviderMethodBindings(provider2).isEmpty());
+		assertFalse(myRestfulServer.getProviderMethodBindings(provider).isEmpty());
+		assertFalse(myRestfulServer.getProviderMethodBindings(provider2).isEmpty());
 
-		restfulServer.unregisterProvider(provider);
-		assertTrue(restfulServer.getProviderMethodBindings(provider).isEmpty());
-		assertFalse(restfulServer.getProviderMethodBindings(provider2).isEmpty());
+		myRestfulServer.unregisterProvider(provider);
+		assertTrue(myRestfulServer.getProviderMethodBindings(provider).isEmpty());
+		assertFalse(myRestfulServer.getProviderMethodBindings(provider2).isEmpty());
 	}
 
 	@Test
 	public void testRegisterProviders() {
 		//test register Plain Provider
-		restfulServer.registerProvider(new MyClassWithRestInterface());
-		assertEquals(1, restfulServer.getPlainProviders().size());
-		Object plainProvider = restfulServer.getPlainProviders().iterator().next();
+		myRestfulServer.registerProvider(new MyClassWithRestInterface());
+		assertEquals(1, myRestfulServer.getResourceProviders().size());
+		Object plainProvider = myRestfulServer.getResourceProviders().get(0);
 		assertTrue(plainProvider instanceof MyClassWithRestInterface);
 
 		//test register Resource Provider
-		restfulServer.registerProvider(new MyResourceProvider());
-		assertEquals(1, restfulServer.getResourceProviders().size());
-		IResourceProvider resourceProvider = restfulServer.getResourceProviders().iterator().next();
+		myRestfulServer.registerProvider(new MyResourceProvider());
+		assertEquals(2, myRestfulServer.getResourceProviders().size());
+		IResourceProvider resourceProvider = myRestfulServer.getResourceProviders().get(1);
 		assertTrue(resourceProvider instanceof MyResourceProvider);
 
 		//test unregister providers
-		restfulServer.unregisterProvider(plainProvider);
-		assertTrue(restfulServer.getPlainProviders().isEmpty());
-		restfulServer.unregisterProvider(resourceProvider);
-		assertTrue(restfulServer.getResourceProviders().isEmpty());
+		myRestfulServer.unregisterProvider(plainProvider);
+		assertFalse(myRestfulServer.getResourceProviders().isEmpty());
+		myRestfulServer.unregisterProvider(resourceProvider);
+		assertTrue(myRestfulServer.getResourceProviders().isEmpty());
 	}
 
 	@Test
 	public void testFailRegisterInterfaceProviderWithoutRestfulMethod() {
 		try {
-			restfulServer.registerProvider(new MyClassWithoutRestInterface());
+			myRestfulServer.registerProvider(new MyClassWithoutRestInterface());
 			fail();
 		} catch (ConfigurationException e) {
 			assertEquals("Did not find any annotated RESTful methods on provider class ca.uhn.fhir.rest.server.RestfulServerTest$MyClassWithoutRestInterface", e.getMessage());
@@ -108,7 +92,11 @@ public class RestfulServerTest {
 	private static class MyClassWithoutRestInterface implements Serializable {
 	}
 
-	private static class MyClassWithRestInterface implements MyRestInterface {
+	private static class MyClassWithRestInterface implements MyRestInterface, IResourceProvider {
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
 	}
 
 	@SuppressWarnings("unused")
@@ -148,7 +136,7 @@ public class RestfulServerTest {
 
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
-			return IBaseResource.class;
+			return Patient.class;
 		}
 	}
 
@@ -176,7 +164,8 @@ public class RestfulServerTest {
 		}
 	}
 
-	private static class MyResource implements IBaseResource {
+	@ResourceDef(name="MyResource")
+	public static class MyResource implements IBaseResource {
 
 		@Override
 		public boolean isEmpty() {
@@ -230,11 +219,12 @@ public class RestfulServerTest {
 
 		@Override
 		public FhirVersionEnum getStructureFhirVersionEnum() {
-			return null;
+			return FhirVersionEnum.R4;
 		}
 	}
 
-	private static class MyResource2 extends MyResource {
+	@ResourceDef(name="MyResource2")
+	public static class MyResource2 extends MyResource {
 	}
 
 }
