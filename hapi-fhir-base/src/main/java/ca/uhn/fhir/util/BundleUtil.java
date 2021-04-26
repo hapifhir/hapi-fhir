@@ -189,43 +189,53 @@ public class BundleUtil {
 	static int BLACK = 3;
 
 	/**
+	 * Function which will do an in-place sort of a bundles' entries, to the correct processing order, which is:
+	 * 1. Deletes
+	 * 2. Creates
+	 * 3. Updates
 	 *
-	 * @param theContext
-	 * @param theBundle
+	 * Furthermore, within these operation types, the entries will be sorted based on the order in which they should be processed
+	 * e.g. if you have 2 CREATEs, one for a Patient, and one for an Observation which has this Patient as its Subject,
+	 * the patient will come first, then the observation.
+	 *
+	 * In cases of there being a cyclic dependency (e.g. Organization/1 is partOf Organization/2 and Organization/2 is partOf Organization/1)
+	 * this function will throw an IllegalStateException.
+	 *
+	 * @param theContext The FhirContext.
+	 * @param theBundle The {@link IBaseBundle} which contains the entries you would like sorted into processing order.
 	 */
-	public static void sortEntriesIntoProcessingOrder(FhirContext theContext, IBaseBundle theBundle) {
+	public static void sortEntriesIntoProcessingOrder(FhirContext theContext, IBaseBundle theBundle) throws IllegalStateException {
 		Map<BundleEntryParts, IBase> partsToIBaseMap = getPartsToIBaseMap(theContext, theBundle);
 		LinkedHashSet<IBase> retVal = new LinkedHashSet<>();
 
 		//Get all deletions.
 		LinkedHashSet<IBase> deleteParts = sortEntriesOfTypeIntoProcessingOrder(theContext, RequestTypeEnum.DELETE, partsToIBaseMap);
-		if (deleteParts == null) {
-			throw new IllegalStateException("Cycle!");
-		} else {
-			retVal.addAll(deleteParts);
-		}
+		validatePartsNotNull(deleteParts);
+		retVal.addAll(deleteParts);
 
 		//Get all Creations
 		LinkedHashSet<IBase> createParts= sortEntriesOfTypeIntoProcessingOrder(theContext, RequestTypeEnum.POST, partsToIBaseMap);
-		if (createParts== null) {
-			throw new IllegalStateException("Cycle!");
-		} else {
-			retVal.addAll(createParts);
-		}
+		validatePartsNotNull(createParts);
+		retVal.addAll(createParts);
 
 		// Get all Updates
 		LinkedHashSet<IBase> updateParts= sortEntriesOfTypeIntoProcessingOrder(theContext, RequestTypeEnum.PUT, partsToIBaseMap);
-		if (updateParts == null) {
-			throw new IllegalStateException("Cycle!");
-		} else {
-			retVal.addAll(updateParts);
-		}
+		validatePartsNotNull(updateParts);
+		retVal.addAll(updateParts);
+
 		//Once we are done adding all DELETE, POST, PUT operations, add everything else.
+		//Since this is a set, it will just fail to add already-added operations.
 		retVal.addAll(partsToIBaseMap.values());
 
 		//Blow away the entries and reset them in the right order.
 		TerserUtil.clearField(theContext, "entry", theBundle);
 		TerserUtil.setField(theContext, "entry", theBundle, retVal.toArray(new IBase[0]));
+	}
+
+	private static void validatePartsNotNull(LinkedHashSet<IBase> theDeleteParts) {
+		if (theDeleteParts == null) {
+			throw new IllegalStateException("This transaction contains a cycle, so it cannot be sorted.");
+		}
 	}
 
 	private static LinkedHashSet<IBase> sortEntriesOfTypeIntoProcessingOrder(FhirContext theContext, RequestTypeEnum theRequestTypeEnum, Map<BundleEntryParts, IBase> thePartsToIBaseMap) {
