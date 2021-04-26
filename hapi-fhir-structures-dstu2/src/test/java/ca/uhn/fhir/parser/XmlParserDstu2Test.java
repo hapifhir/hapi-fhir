@@ -1134,7 +1134,7 @@ public class XmlParserDstu2Test {
 		ourLog.info(string);
 
 		parsed = parser.parseResource(Composition.class, string);
-		assertEquals(2, parsed.getContained().getContainedResources().size());
+		assertEquals(3, parsed.getContained().getContainedResources().size());
 	}
 
 	/**
@@ -1159,7 +1159,7 @@ public class XmlParserDstu2Test {
 		ourLog.info(string);
 
 		parsed = parser.parseResource(Composition.class, string);
-		assertEquals(2, parsed.getContained().getContainedResources().size());
+		assertEquals(3, parsed.getContained().getContainedResources().size());
 	}
 
 	@Test

@@ -22,8 +22,11 @@ package ca.uhn.fhir.rest.server;
 
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface IServerConformanceProvider<T extends IBaseResource> {
 
@@ -33,6 +36,11 @@ public interface IServerConformanceProvider<T extends IBaseResource> {
 	 * See the class documentation for an important note if you are extending this class
 	 */
 	T getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails);
+
+	@Read(typeName = "OperationDefinition")
+	default IBaseResource readOperationDefinition(@IdParam IIdType theId, RequestDetails theRequestDetails) {
+		return null;
+	}
 
 	/**
 	 * This setter is needed in implementation classes (along with

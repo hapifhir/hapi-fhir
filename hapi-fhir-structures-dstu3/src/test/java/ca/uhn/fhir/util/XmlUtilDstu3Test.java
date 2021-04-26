@@ -81,9 +81,11 @@ public class XmlUtilDstu3Test {
 	public void testEncodePrettyPrint() throws IOException, SAXException, TransformerException {
 		String input = "<document><tag id=\"1\"/></document>";
 		Document parsed = XmlUtil.parseDocument(input);
-		String output = XmlUtil.encodeDocument(parsed, true);
+		String output = XmlUtil.encodeDocument(parsed, true)
+			.replace("\r\n", "\n")
+			.replaceAll("^ *", "");
 		assertEquals("<document>\n" +
-			"   <tag id=\"1\"/>\n" +
+			"<tag id=\"1\"/>\n" +
 			"</document>\n", output);
 	}
 

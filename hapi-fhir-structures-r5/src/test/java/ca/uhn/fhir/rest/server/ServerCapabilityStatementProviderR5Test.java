@@ -125,7 +125,7 @@ public class ServerCapabilityStatementProviderR5Test {
 	}
 
 	private RequestDetails createRequestDetails(RestfulServer theServer) {
-		ServletRequestDetails retVal = new ServletRequestDetails(null);
+		ServletRequestDetails retVal = new ServletRequestDetails();
 		retVal.setServer(theServer);
 		return retVal;
 	}
@@ -147,8 +147,9 @@ public class ServerCapabilityStatementProviderR5Test {
 		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		assertEquals(1, conformance.getRest().get(0).getOperation().size());
-		assertEquals("everything", conformance.getRest().get(0).getOperation().get(0).getName());
+		List<CapabilityStatementRestResourceOperationComponent> operations = conformance.getRestFirstRep().getResource().stream().filter(t->t.getType().equals("Patient")).findFirst().orElseThrow(()->new IllegalArgumentException()).getOperation();
+		assertEquals(1, operations.size());
+		assertEquals("everything", operations.get(0).getName());
 
 		OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-everything"), createRequestDetails(rs));
 		validate(opDef);
@@ -163,6 +164,7 @@ public class ServerCapabilityStatementProviderR5Test {
 
 		RestfulServer rs = new RestfulServer(myCtx);
 		rs.setProviders(new ProviderWithExtendedOperationReturningBundle());
+		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
 
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {
 		};
@@ -291,56 +293,42 @@ public class ServerCapabilityStatementProviderR5Test {
 
 		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
+		List<CapabilityStatementRestResourceOperationComponent> operations;
 
-		assertEquals(4, conformance.getRest().get(0).getOperation().size());
-		List<String> operationNames = toOperationNames(conformance.getRest().get(0).getOperation());
-		assertThat(operationNames, containsInAnyOrder("someOp", "validate", "someOp", "validate"));
-
-		List<String> operationIdParts = toOperationIdParts(conformance.getRest().get(0).getOperation());
-		assertThat(operationIdParts, containsInAnyOrder("Patient-i-someOp", "Encounter-i-someOp", "Patient-i-validate", "Encounter-i-validate"));
+		operations = conformance.getRestFirstRep().getResource().stream().filter(t->t.getType().equals("Patient")).findFirst().orElseThrow(()->new IllegalArgumentException()).getOperation();
+		assertEquals(2, operations.size());
+		List<String> operationNames = toOperationNames(operations);
+		assertThat(operationNames.toString(), operationNames, containsInAnyOrder("someOp", "validate"));
+		List<String> operationIdParts = toOperationIdParts(operations);
+		assertThat(operationIdParts.toString(), operationIdParts, containsInAnyOrder("EncounterPatient-i-someOp", "EncounterPatient-i-validate"));
 
 		{
-			OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-someOp"), createRequestDetails(rs));
+			OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/EncounterPatient-i-someOp"), createRequestDetails(rs));
 			validate(opDef);
 			ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
 			Set<String> types = toStrings(opDef.getResource());
 			assertEquals("someOp", opDef.getCode());
 			assertEquals(true, opDef.getInstance());
 			assertEquals(false, opDef.getSystem());
-			assertThat(types, containsInAnyOrder("Patient"));
+			assertThat(types, containsInAnyOrder("Patient", "Encounter"));
 			assertEquals(2, opDef.getParameter().size());
 			assertEquals("someOpParam1", opDef.getParameter().get(0).getName());
 			assertEquals("date", opDef.getParameter().get(0).getType().toCode());
 			assertEquals("someOpParam2", opDef.getParameter().get(1).getName());
-			assertEquals("Patient", opDef.getParameter().get(1).getType().toCode());
+			assertEquals("Resource", opDef.getParameter().get(1).getType().toCode());
 		}
 		{
-			OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/Encounter-i-someOp"), createRequestDetails(rs));
-			validate(opDef);
-			ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
-			Set<String> types = toStrings(opDef.getResource());
-			assertEquals("someOp", opDef.getCode());
-			assertEquals(true, opDef.getInstance());
-			assertEquals(false, opDef.getSystem());
-			assertThat(types, containsInAnyOrder("Encounter"));
-			assertEquals(2, opDef.getParameter().size());
-			assertEquals("someOpParam1", opDef.getParameter().get(0).getName());
-			assertEquals("date", opDef.getParameter().get(0).getType().toCode());
-			assertEquals("someOpParam2", opDef.getParameter().get(1).getName());
-			assertEquals("Encounter", opDef.getParameter().get(1).getType().toCode());
-		}
-		{
-			OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-validate"), createRequestDetails(rs));
+			OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/EncounterPatient-i-validate"), createRequestDetails(rs));
 			validate(opDef);
 			ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
 			Set<String> types = toStrings(opDef.getResource());
 			assertEquals("validate", opDef.getCode());
 			assertEquals(true, opDef.getInstance());
 			assertEquals(false, opDef.getSystem());
-			assertThat(types, containsInAnyOrder("Patient"));
+			assertThat(types, containsInAnyOrder("Patient", "Encounter"));
 			assertEquals(1, opDef.getParameter().size());
 			assertEquals("resource", opDef.getParameter().get(0).getName());
-			assertEquals("Patient", opDef.getParameter().get(0).getType().toCode());
+			assertEquals("Resource", opDef.getParameter().get(0).getType().toCode());
 		}
 	}
 
@@ -362,45 +350,6 @@ public class ServerCapabilityStatementProviderR5Test {
 		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
 		assertThat(conf, containsString("<type value=\"token\"/>"));
 
-	}
-
-	@Test
-	public void testOperationOnNoTypes() throws Exception {
-		RestfulServer rs = new RestfulServer(myCtx);
-		rs.setProviders(new PlainProviderWithExtendedOperationOnNoType());
-
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {
-			@Override
-			public CapabilityStatement getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
-				return (CapabilityStatement) super.getServerConformance(theRequest, createRequestDetails(rs));
-			}
-		};
-		rs.setServerConformanceProvider(sc);
-
-		rs.init(createServletConfig());
-
-		OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/-is-plain"), createRequestDetails(rs));
-		validate(opDef);
-
-		assertEquals("plain", opDef.getCode());
-		assertEquals(false, opDef.getAffectsState());
-		assertEquals(3, opDef.getParameter().size());
-
-		assertTrue(opDef.getParameter().get(0).hasName());
-		assertEquals("start", opDef.getParameter().get(0).getName());
-		assertEquals("in", opDef.getParameter().get(0).getUse().toCode());
-		assertEquals("0", opDef.getParameter().get(0).getMinElement().getValueAsString());
-		assertEquals("date", opDef.getParameter().get(0).getTypeElement().getValueAsString());
-
-		assertEquals("out1", opDef.getParameter().get(2).getName());
-		assertEquals("out", opDef.getParameter().get(2).getUse().toCode());
-		assertEquals("1", opDef.getParameter().get(2).getMinElement().getValueAsString());
-		assertEquals("2", opDef.getParameter().get(2).getMaxElement().getValueAsString());
-		assertEquals("string", opDef.getParameter().get(2).getTypeElement().getValueAsString());
-
-		assertThat(opDef.getSystem(), is(true));
-		assertThat(opDef.getType(), is(false));
-		assertThat(opDef.getInstance(), is(true));
 	}
 
 	@Test
@@ -706,7 +655,7 @@ public class ServerCapabilityStatementProviderR5Test {
 		ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
 		validate(operationDefinition);
 		assertThat(operationDefinition.getCode(), is(NamedQueryPlainProvider.QUERY_NAME));
-		assertThat("The operation name should be the description, if a description is set", operationDefinition.getName(), equalTo("Search_testQuery"));
+		assertThat("The operation name should be the description, if a description is set", operationDefinition.getName(), equalTo("TestQuery"));
 		assertThat(operationDefinition.getStatus(), is(PublicationStatus.ACTIVE));
 		assertThat(operationDefinition.getKind(), is(OperationKind.QUERY));
 		assertThat(operationDefinition.getDescription(), is(NamedQueryPlainProvider.DESCRIPTION));
@@ -740,15 +689,15 @@ public class ServerCapabilityStatementProviderR5Test {
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
-		CapabilityStatementRestComponent restComponent = conformance.getRest().get(0);
-		CapabilityStatementRestResourceOperationComponent operationComponent = restComponent.getOperation().get(0);
+		CapabilityStatementRestResourceComponent resource = conformance.getRestFirstRep().getResource().stream().filter(t->t.getType().equals("Patient")).findFirst().orElseThrow(()->new IllegalArgumentException());
+		CapabilityStatementRestResourceOperationComponent operationComponent = resource.getOperation().get(0);
 		String operationReference = operationComponent.getDefinition();
 		assertThat(operationReference, not(nullValue()));
 
 		OperationDefinition operationDefinition = (OperationDefinition) sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
 		ourLog.info(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
 		validate(operationDefinition);
-		assertThat("The operation name should be the code if no description is set", operationDefinition.getName(), equalTo("Search_testQuery"));
+		assertThat("The operation name should be the code if no description is set", operationDefinition.getName(), equalTo("TestQuery"));
 		String patientResourceName = "Patient";
 		assertThat("A resource level search targets the resource of the provider it's defined in", operationDefinition.getResource().get(0).getValue(), is(patientResourceName));
 		assertThat(operationDefinition.getSystem(), is(false));
@@ -764,11 +713,7 @@ public class ServerCapabilityStatementProviderR5Test {
 		assertThat(param.getMax(), is("1"));
 		assertThat(param.getUse(), is(Enumerations.OperationParameterUse.IN));
 
-		CapabilityStatementRestResourceComponent patientResource = restComponent.getResource().stream()
-				.filter(r -> patientResourceName.equals(r.getType()))
-				.findAny()
-				.get();
-		assertThat("Named query parameters should not appear in the resource search params", patientResource.getSearchParam(), is(empty()));
+		assertThat("Named query parameters should not appear in the resource search params", resource.getSearchParam(), is(empty()));
 	}
 
 	@Test
@@ -787,7 +732,7 @@ public class ServerCapabilityStatementProviderR5Test {
 		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		List<CapabilityStatementRestResourceOperationComponent> operations = conformance.getRest().get(0).getOperation();
+		List<CapabilityStatementRestResourceOperationComponent> operations = conformance.getRestFirstRep().getResource().stream().filter(t->t.getType().equals("Patient")).findFirst().orElseThrow(()->new IllegalArgumentException()).getOperation();
 		assertThat(operations.size(), is(1));
 		assertThat(operations.get(0).getName(), is(TypeLevelOperationProvider.OPERATION_NAME));
 

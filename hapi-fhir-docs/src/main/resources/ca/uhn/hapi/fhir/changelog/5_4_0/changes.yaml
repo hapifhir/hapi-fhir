@@ -11,6 +11,7 @@
 <li>Guava (Core): 30.1-jre -> 30.1.1-jre</li>
 <li>Jackson (Core): 2.12.1 -> 2.12.3</li>
 <li>Woodstox (Core): 6.2.3 -> 6.2.5</li>
+<li>Apache Jena (Core/RDF): 3.16.0 -> 3.17.0</li>
 <li>Gson (JPA): 2.8.5 -> 2.8.6</li>
 <li>Caffeine (JPA): 2.7.0 -> 3.0.1</li>
 <li>Hibernate (JPA): 5.4.26.Final -> 5.4.30.Final</li>

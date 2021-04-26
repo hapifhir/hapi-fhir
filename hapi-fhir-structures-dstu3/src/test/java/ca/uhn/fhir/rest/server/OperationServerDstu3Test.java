@@ -102,7 +102,7 @@ public class OperationServerDstu3Test {
 	 */
 	@Test
 	public void testOperationDefinition() {
-		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId("OperationDefinition/Patient--OP_TYPE").execute();
+		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId("OperationDefinition/Patient-t-OP_TYPE").execute();
 		
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(def));
 		
@@ -565,14 +565,6 @@ public class OperationServerDstu3Test {
 	}
 
 	
-	public static void main(String[] theValue) {
-		Parameters p = new Parameters();
-		p.addParameter().setName("start").setValue(new DateTimeType("2001-01-02"));
-		p.addParameter().setName("end").setValue(new DateTimeType("2015-07-10"));
-		String inParamsStr = FhirContext.forDstu2().newXmlParser().encodeResourceToString(p);
-		ourLog.info(inParamsStr.replace("\"", "\\\""));
-	}
-
 	public static class PatientProvider implements IResourceProvider {
 
 		@Override

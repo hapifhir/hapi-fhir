@@ -32,6 +32,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -54,10 +55,11 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 	private FhirVersionEnum myFhirVersion;
 	private Server myServer;
 	private RestfulServer myServlet;
-	private int myPort;
+	private int myPort = 0;
 	private CloseableHttpClient myHttpClient;
 	private IGenericClient myFhirClient;
 	private List<Consumer<RestfulServer>> myConsumers = new ArrayList<>();
+	private String myServletPath = "/*";
 
 	/**
 	 * Constructor
@@ -94,20 +96,21 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 	}
 
 	private void startServer() throws Exception {
-		myServer = new Server(0);
+		myServer = new Server(myPort);
 
-		ServletHandler servletHandler = new ServletHandler();
 		myServlet = new RestfulServer(myFhirContext);
 		myServlet.setDefaultPrettyPrint(true);
 		if (myProviders != null) {
 			myServlet.registerProviders(myProviders);
 		}
 		ServletHolder servletHolder = new ServletHolder(myServlet);
-		servletHandler.addServletWithMapping(servletHolder, "/*");
 
 		myConsumers.forEach(t -> t.accept(myServlet));
 
-		myServer.setHandler(servletHandler);
+		ServletContextHandler contextHandler = new ServletContextHandler();
+		contextHandler.addServlet(servletHolder, myServletPath);
+
+		myServer.setHandler(contextHandler);
 		myServer.start();
 		myPort = JettyUtil.getPortForStartedServer(myServer);
 		ourLog.info("Server has started on port {}", myPort);
@@ -174,5 +177,15 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 
 	public void shutDownServer() throws Exception {
 		JettyUtil.closeServer(myServer);
+	}
+
+	public RestfulServerExtension withServletPath(String theServletPath) {
+		myServletPath = theServletPath;
+		return this;
+	}
+
+	public RestfulServerExtension withPort(int thePort) {
+		myPort = thePort;
+		return this;
 	}
 }

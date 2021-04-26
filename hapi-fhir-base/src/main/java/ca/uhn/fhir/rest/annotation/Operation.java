@@ -132,7 +132,10 @@ public @interface Operation {
 
 	/**
 	 * If this is set to <code>true</code>, this method will be a <b>global operation</b>
-	 * meaning that it applies to all resource types
+	 * meaning that it applies to all resource types. Operations with this flag set should be
+	 * placed in Plain Providers (i.e. they don't need to be placed in a resource-type-specific
+	 * <code>IResourceProvider</code> instance) and should have a parameter annotated with
+	 * {@link IdParam}.
 	 */
 	boolean global() default false;
 
