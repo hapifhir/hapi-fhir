@@ -3,18 +3,28 @@ package ca.uhn.fhir.rest.server.interceptor.validation.address.impl;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationException;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationResult;
+import ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator;
+import ca.uhn.fhir.util.ExtensionUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.r4.model.Address;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
 import java.util.Properties;
 
+import static ca.uhn.fhir.rest.server.interceptor.validation.address.impl.LoquateAddressValidator.PROPERTY_GEOCODE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -74,6 +84,22 @@ class LoquateAddressValidatorTest {
 		"  }\n" +
 		"]";
 
+	private static final String RESPONSE_VALID_ADDRESS_W_GEO = "[\n" +
+		"  {\n" +
+		"    \"Input\": {\n" +
+		"      \"Address\": \"\"\n" +
+		"    },\n" +
+		"    \"Matches\": [\n" +
+		"      {\n" +
+		"        \"AQI\": \"A\",\n" +
+		"        \"Address\": \"My Valid Address\",\n" +
+		"        \"Latitude\": \"-32.94217742803439\",\n" +
+		"        \"Longitude\": \"-60.640132034941836\"\n" +
+		"      }\n" +
+		"    ]\n" +
+		"  }\n" +
+		"]";
+
 	private static final String RESPONSE_INVALID_KEY = "{\n" +
 		"  \"Number\": 2,\n" +
 		"  \"Description\": \"Unknown key\",\n" +
@@ -92,6 +118,16 @@ class LoquateAddressValidatorTest {
 		myProperties = new Properties();
 		myProperties.setProperty(LoquateAddressValidator.PROPERTY_SERVICE_KEY, "MY_KEY");
 		myValidator = new LoquateAddressValidator(myProperties);
+	}
+
+	@Test
+	public void testGetText() {
+		ObjectNode node = new ObjectNode(null, new HashMap<>());
+		node.set("text1", new TextNode("This,Is,Text"));
+		node.set("text2", new TextNode("This Is-Text,"));
+
+		assertEquals("This, Is, Text", myValidator.getString(node, "text1"));
+		assertEquals("This Is-Text,", myValidator.getString(node, "text2"));
 	}
 
 	@Test
@@ -178,6 +214,25 @@ class LoquateAddressValidatorTest {
 			new ObjectMapper().readTree(RESPONSE_VALID_ADDRESS), ourCtx);
 		assertTrue(res.isValid());
 		assertEquals("My Valid Address", res.getValidatedAddressString());
+	}
+
+	@Test
+	public void testSuccessfulResponsesWithGeocode() throws Exception {
+		myValidator.getProperties().setProperty(PROPERTY_GEOCODE, "true");
+		AddressValidationResult res = myValidator.getValidationResult(new AddressValidationResult(),
+			new ObjectMapper().readTree(RESPONSE_VALID_ADDRESS_W_GEO), ourCtx);
+		assertTrue(res.isValid());
+
+		IBase address = res.getValidatedAddress();
+		IBaseExtension geocode = ExtensionUtil.getExtensionByUrl(address, IAddressValidator.FHIR_GEOCODE_EXTENSION_URL);
+		assertNotNull(geocode);
+		assertEquals(2, geocode.getExtension().size());
+		assertEquals("latitude", ((IBaseExtension)geocode.getExtension().get(0)).getUrl());
+		assertEquals("longitude", ((IBaseExtension)geocode.getExtension().get(1)).getUrl());
+
+		IBaseExtension quality = ExtensionUtil.getExtensionByUrl(address, IAddressValidator.ADDRESS_QUALITY_EXTENSION_URL);
+		assertNotNull(quality);
+		assertEquals("A", quality.getValue().toString());
 	}
 
 	@Test

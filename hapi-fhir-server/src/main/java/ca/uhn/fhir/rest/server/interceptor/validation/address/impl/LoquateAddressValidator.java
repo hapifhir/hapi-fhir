@@ -24,6 +24,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationException;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationResult;
 import ca.uhn.fhir.rest.server.interceptor.validation.helpers.AddressHelper;
+import ca.uhn.fhir.util.ExtensionUtil;
+import ca.uhn.fhir.util.TerserUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,6 +34,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.ContentType;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -39,7 +42,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
 import javax.annotation.Nullable;
+import java.math.BigDecimal;
 import java.util.Properties;
+import java.util.StringJoiner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * For more details regarind the API refer to
@@ -51,14 +58,21 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(LoquateAddressValidator.class);
 
+	public static final String PROPERTY_GEOCODE = "service.geocode";
+	public static final String LOQUATE_AQI = "AQI";
+
 	protected static final String[] DUPLICATE_FIELDS_IN_ADDRESS_LINES = {"Locality", "AdministrativeArea", "PostalCode"};
 	protected static final String DEFAULT_DATA_CLEANSE_ENDPOINT = "https://api.addressy.com/Cleansing/International/Batch/v1.00/json4.ws";
 	protected static final int MAX_ADDRESS_LINES = 8;
 
+	private Pattern myPattern = Pattern.compile("\\,(\\S)");
+
 	public LoquateAddressValidator(Properties theProperties) {
 		super(theProperties);
 		if (!theProperties.containsKey(PROPERTY_SERVICE_KEY)) {
-			throw new IllegalArgumentException(String.format("Missing service key defined as %s", PROPERTY_SERVICE_KEY));
+			if (!theProperties.containsKey(PROPERTY_SERVICE_ENDPOINT)) {
+				throw new IllegalArgumentException("Expected service key or custom service endpoint in the configuration, but got " + theProperties);
+			}
 		}
 	}
 
@@ -97,13 +111,17 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 	}
 
 	protected boolean isValid(JsonNode theMatch) {
-		String addressQualityIndex = null;
-		if (theMatch.has("AQI")) {
-			addressQualityIndex = theMatch.get("AQI").asText();
-		}
-
-		ourLog.debug("Address quality index {}", addressQualityIndex);
+		String addressQualityIndex = getAqi(theMatch);
 		return "A".equals(addressQualityIndex) || "B".equals(addressQualityIndex);
+	}
+
+	private String getAqi(JsonNode theMatch) {
+		String addressQualityIndex = null;
+		if (theMatch.has(LOQUATE_AQI)) {
+			addressQualityIndex = theMatch.get(LOQUATE_AQI).asText();
+		}
+		ourLog.debug("Address quality index {}", addressQualityIndex);
+		return addressQualityIndex;
 	}
 
 	protected IBase toAddress(JsonNode match, FhirContext theFhirContext) {
@@ -117,14 +135,51 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 			helper.addLine(str);
 		}
 
+		if (isGeocodeEnabled()) {
+			toGeolocation(match, helper, theFhirContext);
+		}
+
 		removeDuplicateAddressLines(match, helper);
 
 		helper.setCity(getString(match, "Locality"));
 		helper.setState(getString(match, "AdministrativeArea"));
 		helper.setPostalCode(getString(match, "PostalCode"));
 		helper.setCountry(getString(match, "CountryName"));
+		toQualityIndex(match, helper, theFhirContext);
 
 		return helper.getAddress();
+	}
+
+	private void toQualityIndex(JsonNode theMatch, AddressHelper theHelper, FhirContext theFhirContext) {
+		String addressQuality = getAqi(theMatch);
+		if (StringUtils.isEmpty(addressQuality)) {
+			ourLog.debug("AQI is not provided on {}", theMatch);
+			return;
+		}
+
+		IBase address = theHelper.getAddress();
+		ExtensionUtil.clearExtensionsByUrl(address, ADDRESS_QUALITY_EXTENSION_URL);
+		IBaseExtension addressQualityExt = ExtensionUtil.addExtension(address, ADDRESS_QUALITY_EXTENSION_URL);
+		addressQualityExt.setValue(TerserUtil.newElement(theFhirContext, "string", addressQuality));
+	}
+
+	private void toGeolocation(JsonNode theMatch, AddressHelper theHelper, FhirContext theFhirContext) {
+		if (!theMatch.has("Latitude") || !theMatch.has("Longitude")) {
+			ourLog.warn("Geocode is not provided in JSON {}", theMatch);
+			return;
+		}
+
+		IBase address = theHelper.getAddress();
+		ExtensionUtil.clearExtensionsByUrl(address, FHIR_GEOCODE_EXTENSION_URL);
+		IBaseExtension geolocation = ExtensionUtil.addExtension(address, FHIR_GEOCODE_EXTENSION_URL);
+
+		IBaseExtension latitude = ExtensionUtil.addExtension(geolocation, "latitude");
+		latitude.setValue(TerserUtil.newElement(theFhirContext, "decimal",
+			BigDecimal.valueOf(theMatch.get("Latitude").asDouble())));
+
+		IBaseExtension longitude = ExtensionUtil.addExtension(geolocation, "longitude");
+		longitude.setValue(TerserUtil.newElement(theFhirContext, "decimal",
+			BigDecimal.valueOf(theMatch.get("Longitude").asDouble())));
 	}
 
 	private void removeDuplicateAddressLines(JsonNode match, AddressHelper address) {
@@ -150,7 +205,7 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 	}
 
 	@Nullable
-	private String getString(JsonNode theNode, String theField) {
+	protected String getString(JsonNode theNode, String theField) {
 		if (!theNode.has(theField)) {
 			return null;
 		}
@@ -159,7 +214,17 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 		if (field.asText().isEmpty()) {
 			return null;
 		}
-		return theNode.get(theField).asText();
+
+		String text = theNode.get(theField).asText();
+		if (StringUtils.isEmpty(text)) {
+			return text;
+		}
+
+		Matcher m = myPattern.matcher(text);
+		if (m.find()) {
+			text = m.replaceAll(", $1");
+		}
+		return text.trim();
 	}
 
 	@Override
@@ -183,8 +248,10 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 	protected String getRequestBody(FhirContext theFhirContext, IBase... theAddresses) throws JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode rootNode = mapper.createObjectNode();
-		rootNode.put("Key", getApiKey());
-		rootNode.put("Geocode", false);
+		if (!StringUtils.isEmpty(getApiKey())) {
+			rootNode.put("Key", getApiKey());
+		}
+		rootNode.put("Geocode", isGeocodeEnabled());
 
 		ArrayNode addressesArrayNode = mapper.createArrayNode();
 		int i = 0;
@@ -214,5 +281,12 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 		addressNode.put("PostalCode", helper.getPostalCode());
 		addressNode.put("Country", helper.getCountry());
 		return addressNode;
+	}
+
+	protected boolean isGeocodeEnabled() {
+		if (!getProperties().containsKey(PROPERTY_GEOCODE)) {
+			return false;
+		}
+		return Boolean.parseBoolean(getProperties().getProperty(PROPERTY_GEOCODE));
 	}
 }

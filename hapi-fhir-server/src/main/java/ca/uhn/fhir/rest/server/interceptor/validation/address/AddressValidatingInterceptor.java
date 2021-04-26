@@ -36,6 +36,7 @@ import ca.uhn.fhir.util.IModelVisitor2;
 import ca.uhn.fhir.util.TerserUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.slf4j.Logger;
@@ -130,11 +131,21 @@ public class AddressValidatingInterceptor {
 		FhirContext ctx = theRequest.getFhirContext();
 		getAddresses(theResource, ctx)
 			.stream()
-			.filter(a -> {
-				return !ExtensionUtil.hasExtension(a, getExtensionUrl()) ||
-					ExtensionUtil.hasExtension(a, getExtensionUrl(), IAddressValidator.EXT_UNABLE_TO_VALIDATE);
-			})
+			.filter(this::isValidating)
 			.forEach(a -> validateAddress(a, ctx));
+	}
+
+	private boolean isValidating(IBase theAddress) {
+		IBaseExtension ext = ExtensionUtil.getExtensionByUrl(theAddress, getExtensionUrl());
+		if (ext == null) {
+			return true;
+		}
+
+		if (ext.getValue() == null || ext.getValue().isEmpty()) {
+			return true;
+		}
+
+		return !"false".equals(ext.getValue().toString());
 	}
 
 	protected void validateAddress(IBase theAddress, FhirContext theFhirContext) {
@@ -143,12 +154,17 @@ public class AddressValidatingInterceptor {
 			ourLog.debug("Validated address {}", validationResult);
 
 			clearPossibleDuplicatesDueToTerserCloning(theAddress, theFhirContext);
-			ExtensionUtil.setExtensionAsString(theFhirContext, theAddress, getExtensionUrl(),
-				validationResult.isValid() ? IAddressValidator.EXT_VALUE_VALID : IAddressValidator.EXT_VALUE_INVALID);
-			theFhirContext.newTerser().cloneInto(validationResult.getValidatedAddress(), theAddress, true);
+			ExtensionUtil.setExtension(theFhirContext, theAddress, getExtensionUrl(), "boolean", !validationResult.isValid());
+			if (validationResult.getValidatedAddress() != null) {
+				theFhirContext.newTerser().cloneInto(validationResult.getValidatedAddress(), theAddress, true);
+			} else {
+				ourLog.info("Validated address is not provided - skipping update on the target address instance");
+			}
 		} catch (Exception ex) {
 			ourLog.warn("Unable to validate address", ex);
-			ExtensionUtil.setExtensionAsString(theFhirContext, theAddress, getExtensionUrl(), IAddressValidator.EXT_UNABLE_TO_VALIDATE);
+			IBaseExtension extension = ExtensionUtil.getOrCreateExtension(theAddress, getExtensionUrl());
+			IBaseExtension errorValue = ExtensionUtil.getOrCreateExtension(extension, "error");
+			errorValue.setValue(TerserUtil.newElement(theFhirContext, "string", ex.getMessage()));
 		}
 	}
 

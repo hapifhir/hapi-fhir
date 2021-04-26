@@ -29,24 +29,19 @@ import org.hl7.fhir.instance.model.api.IBase;
 public interface IAddressValidator {
 
 	/**
-	 * URL for validation results that should be placed on addresses
+	 * URL for validation results that should be placed on addresses. Extension with boolean value "true" indicates there there is an address validation error.
 	 */
-	public static final String ADDRESS_VALIDATION_EXTENSION_URL = "https://hapifhir.org/StructureDefinition/ext-validation-address-error";
+	public static final String ADDRESS_VALIDATION_EXTENSION_URL = "http://hapifhir.org/StructureDefinition/ext-validation-address-has-error";
 
 	/**
-	 * Extension value confirming that address can be considered valid (it exists and can be traced to the building)
+	 * URL for address quality extensions that may be added to addresses.
 	 */
-	public static final String EXT_VALUE_VALID = "yes";
+	public static final String ADDRESS_QUALITY_EXTENSION_URL = "http://hapifhir.org/StructureDefinition/ext-validation-address-quality";
 
 	/**
-	 * Extension value confirming that address is invalid (doesn't exist)
+	 * FHIR Geolocation extension URL
 	 */
-	public static final String EXT_VALUE_INVALID = "no";
-
-	/**
-	 * Extension value indicating that address validation was attempted but could not complete successfully
-	 */
-	public static final String EXT_UNABLE_TO_VALIDATE = "not-validated";
+	public static final String FHIR_GEOCODE_EXTENSION_URL = "http://hl7.org/fhir/StructureDefinition/geolocation";
 
 	/**
 	 * Validates address against a service

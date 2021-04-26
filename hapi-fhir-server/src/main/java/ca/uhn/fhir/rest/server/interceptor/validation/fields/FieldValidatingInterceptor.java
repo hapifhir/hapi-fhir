@@ -38,6 +38,8 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 
+import static ca.uhn.fhir.rest.server.interceptor.validation.fields.IValidator.VALIDATION_EXTENSION_URL;
+
 @Interceptor
 public class FieldValidatingInterceptor {
 
@@ -50,7 +52,6 @@ public class FieldValidatingInterceptor {
 	private static final Logger ourLog = LoggerFactory.getLogger(FieldValidatingInterceptor.class);
 
 	public static final String VALIDATION_DISABLED_HEADER = "HAPI-Field-Validation-Disabled";
-	public static final String VALIDATION_EXTENSION_URL = "https://hapifhir.org/StructureDefinition/ext-validation-field-error";
 	public static final String PROPERTY_EXTENSION_URL = "validation.extension.url";
 
 	private Map<String, String> myConfig;
@@ -115,7 +116,7 @@ public class FieldValidatingInterceptor {
 	private void setValidationStatus(FhirContext ctx, IBase theBase, boolean isValid) {
 		ExtensionUtil.clearExtensionsByUrl(theBase, getValidationExtensionUrl());
 		IBaseExtension<?, ?> validationResultExtension = ExtensionUtil.addExtension(theBase, getValidationExtensionUrl());
-		ExtensionUtil.setExtensionAsString(ctx, theBase, getValidationExtensionUrl(), isValid ? "yes" : "no");
+		ExtensionUtil.setExtension(ctx, theBase, getValidationExtensionUrl(), "boolean", !isValid);
 	}
 
 	private String getValidationExtensionUrl() {

@@ -78,10 +78,11 @@ class FieldValidatingInterceptorTest {
 
 		ContactPoint invalidEmail = person.getTelecomFirstRep();
 		assertTrue(invalidEmail.hasExtension());
-		assertEquals("true", invalidEmail.getExtensionString("https://hapifhir.org/StructureDefinition/ext-validation-field-error"));
+		assertEquals("true", invalidEmail.getExtensionString(IValidator.VALIDATION_EXTENSION_URL));
 
 		ContactPoint validEmail = person.getTelecom().get(1);
-		assertFalse(validEmail.hasExtension());
+		assertTrue(validEmail.hasExtension());
+		assertEquals("false", validEmail.getExtensionString(IValidator.VALIDATION_EXTENSION_URL));
 	}
 
 	@Test
