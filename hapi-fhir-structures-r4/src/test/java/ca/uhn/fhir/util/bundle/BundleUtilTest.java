@@ -169,7 +169,8 @@ public class BundleUtilTest {
 		obs2.setStatus(Observation.ObservationStatus.FINAL);
 		obs2.setValue(new Quantity(4));
 		obs2.setId("Observation/O2/_history/1");
-		obs2.setHasMember(Collections.singletonList(new Reference("Observation/O1/_history/3")));
+		//We use a random history version here to ensure cycles are counted without versions.
+		obs2.setHasMember(Collections.singletonList(new Reference("Observation/O1/_history/300")));
 		bundleEntryComponent.setResource(obs2);
 		bundleEntryComponent.getRequest().setMethod(POST).setUrl("Observation");
 		try {
