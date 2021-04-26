@@ -297,8 +297,14 @@
                 </exclusion>
             </exclusions>
         </dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-model</artifactId>
+			<version>5.4.0-PRE5-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
 
-    </dependencies>
+	</dependencies>
 
 	<reporting>
 		<plugins>

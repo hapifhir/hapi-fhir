@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -46,6 +47,7 @@ import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
@@ -60,6 +62,7 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationDefinition;
@@ -76,9 +79,11 @@ import org.junit.jupiter.api.Test;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -1034,6 +1039,27 @@ public class ServerCapabilityStatementProviderR4Test {
         assertThat(toStrings(patientResource.getSearchRevInclude()), containsInAnyOrder("Observation:subject"));
     }
 
+    @Test
+	 public void testBulkDataExport() throws ServletException {
+		 RestfulServer rs = new RestfulServer(myCtx);
+		 rs.setResourceProviders(new BulkDataExportProvider());
+		 rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
+
+		 ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		 rs.setServerConformanceProvider(sc);
+		 rs.init(createServletConfig());
+
+		 CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		 ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conformance));
+
+		 List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+		 CapabilityStatementRestResourceComponent groupResource = resources.stream()
+			 .filter(resource -> "Group".equals(resource.getType()))
+			 .findFirst().get();
+		 ourLog.info("---");
+		 ourLog.info(groupResource.toString());
+    }
+
     private List<String> toOperationIdParts(List<CapabilityStatementRestResourceOperationComponent> theOperation) {
         ArrayList<String> retVal = Lists.newArrayList();
         for (CapabilityStatementRestResourceOperationComponent next : theOperation) {
@@ -1069,6 +1095,48 @@ public class ServerCapabilityStatementProviderR4Test {
 
         return myCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(theResource);
     }
+
+	public static class BulkDataExportProvider implements IResourceProvider {
+		@Operation(name = JpaConstants.OPERATION_EXPORT, global = false /* set to true once we can handle this */, manualResponse = true, idempotent = true)
+		public void export(
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theTypeFilter,
+			ServletRequestDetails theRequestDetails
+		) { }
+
+		@Operation(name = JpaConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Group")
+		public void groupExport(
+			@IdParam IIdType theIdParam,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theTypeFilter,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_MDM, min = 0, max = 1, typeName = "boolean") IPrimitiveType<Boolean> theMdm,
+			ServletRequestDetails theRequestDetails
+		) {}
+
+		@Operation(name = JpaConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Patient")
+		public void patientExport(
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theTypeFilter,
+			ServletRequestDetails theRequestDetails
+		) {}
+
+		@Operation(name = JpaConstants.OPERATION_EXPORT_POLL_STATUS, manualResponse = true, idempotent = true)
+		public void exportPollStatus(
+			@OperationParam(name = JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID, typeName = "string", min = 0, max = 1) IPrimitiveType<String> theJobId,
+			ServletRequestDetails theRequestDetails
+		) throws IOException {}
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Group.class;
+		}
+	}
 
     @SuppressWarnings("unused")
     public static class ConditionalProvider implements IResourceProvider {
