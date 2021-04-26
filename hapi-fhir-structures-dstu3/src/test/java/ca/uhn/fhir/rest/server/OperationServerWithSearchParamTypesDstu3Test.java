@@ -193,7 +193,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		/*
 		 * Check the operation definitions themselves
 		 */
-		OperationDefinition andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--andlist"), createRequestDetails(rs));
+		OperationDefinition andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-t-andlist"), createRequestDetails(rs));
 		String def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(andListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -209,7 +209,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		));
 		//@formatter:on
 		
-		andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--andlist-withnomax"), createRequestDetails(rs));
+		andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-t-andlist-withnomax"), createRequestDetails(rs));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(andListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -225,7 +225,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		));
 		//@formatter:on
 
-		OperationDefinition orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--orlist"), createRequestDetails(rs));
+		OperationDefinition orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-t-orlist"), createRequestDetails(rs));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(orListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -241,7 +241,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		));
 		//@formatter:on
 		
-		orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--orlist-withnomax"), createRequestDetails(rs));
+		orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-t-orlist-withnomax"), createRequestDetails(rs));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(orListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -490,7 +490,8 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		@Operation(name = "$orlist-withnomax", idempotent = true)
 		public Parameters orlistWithNoMax(
 				//@formatter:off
-				@OperationParam(name="valstr") List<StringOrListParam> theValStr,
+				@OperationParam(name="valstr"
+				) List<StringOrListParam> theValStr,
 				@OperationParam(name="valtok") List<TokenOrListParam> theValTok
 				//@formatter:on
 		) {
@@ -504,7 +505,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 	}
 
 	private RequestDetails createRequestDetails(RestfulServer theServer) {
-		ServletRequestDetails retVal = new ServletRequestDetails(null);
+		ServletRequestDetails retVal = new ServletRequestDetails();
 		retVal.setServer(theServer);
 		return retVal;
 	}

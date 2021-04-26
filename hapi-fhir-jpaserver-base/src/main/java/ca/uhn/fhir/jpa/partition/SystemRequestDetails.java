@@ -35,17 +35,15 @@ import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.List;
-import java.util.Optional;
+
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.ALL_PARTITIONS_NAME;
 
 /**
  * A default RequestDetails implementation that can be used for system calls to
@@ -103,6 +101,11 @@ public class SystemRequestDetails extends RequestDetails {
 			myHeaders = ArrayListMultimap.create();
 		}
 		myHeaders.put(theName, theValue);
+	}
+	public static SystemRequestDetails newSystemRequestAllPartitions() {
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.setTenantId(ALL_PARTITIONS_NAME);
+		return systemRequestDetails;
 	}
 
 

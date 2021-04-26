@@ -9,7 +9,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.TermConcept;

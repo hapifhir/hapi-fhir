@@ -49,9 +49,30 @@ public class ServletRequestDetails extends RequestDetails {
 	private HttpServletRequest myServletRequest;
 	private HttpServletResponse myServletResponse;
 
+	/**
+	 * Constructor for testing only
+	 */
+	public ServletRequestDetails() {
+		this((IInterceptorBroadcaster)null);
+	}
+
+	/**
+	 * Constructor
+	 */
 	public ServletRequestDetails(IInterceptorBroadcaster theInterceptorBroadcaster) {
 		super(theInterceptorBroadcaster);
 		setResponse(new ServletRestfulResponse(this));
+	}
+
+	/**
+	 * Copy constructor
+	 */
+	public ServletRequestDetails(ServletRequestDetails theRequestDetails) {
+		super(theRequestDetails);
+
+		myServer = theRequestDetails.getServer();
+		myServletRequest = theRequestDetails.getServletRequest();
+		myServletResponse = theRequestDetails.getServletResponse();
 	}
 
 	@Override

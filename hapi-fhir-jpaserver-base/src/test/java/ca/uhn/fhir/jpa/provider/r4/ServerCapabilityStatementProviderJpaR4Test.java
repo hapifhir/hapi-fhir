@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -26,6 +27,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProviderR4Test {
 
@@ -37,6 +39,38 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 
 		List<String> resourceTypes = cs.getRest().get(0).getResource().stream().map(t -> t.getType()).collect(Collectors.toList());
 		assertThat(resourceTypes, hasItems("Patient", "Observation", "SearchParameter"));
+	}
+
+
+	@Test
+	public void testNoDuplicateResourceOperationNames() {
+		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
+		for (CapabilityStatement.CapabilityStatementRestResourceComponent next : cs.getRestFirstRep().getResource()) {
+			List<String> opNames = next
+				.getOperation()
+				.stream()
+				.map(t -> t.getName())
+				.sorted()
+				.collect(Collectors.toList());
+			ourLog.info("System ops: {}", opNames);
+			assertEquals(opNames.stream().distinct().sorted().collect(Collectors.toList()), opNames);
+		}
+	}
+
+	@Test
+	public void testNoDuplicateSystemOperationNames() {
+		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
+		List<String> systemOpNames = cs
+			.getRestFirstRep()
+			.getOperation()
+			.stream()
+			.map(t -> t.getName())
+			.sorted()
+			.collect(Collectors.toList());
+		ourLog.info("System ops: {}", systemOpNames);
+		assertEquals(systemOpNames.stream().distinct().sorted().collect(Collectors.toList()), systemOpNames);
 	}
 
 	@Test

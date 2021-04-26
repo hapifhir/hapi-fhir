@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.model.primitive.IdDt;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -156,7 +157,8 @@ public class BundleBuilder {
 
 		// Bundle.entry.request.url
 		IPrimitiveType<?> url = (IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
-		url.setValueAsString(theResource.getIdElement().toUnqualifiedVersionless().getValue());
+		String resourceType = myContext.getResourceType(theResource);
+		url.setValueAsString(theResource.getIdElement().toUnqualifiedVersionless().withResourceType(resourceType).getValue());
 		myEntryRequestUrlChild.getMutator().setValue(request, url);
 
 		// Bundle.entry.request.url
@@ -192,6 +194,45 @@ public class BundleBuilder {
 
 		return new CreateBuilder(request);
 	}
+
+	/**
+	 * Adds an entry containing a delete (DELETE) request.
+	 * Also sets the Bundle.type value to "transaction" if it is not already set.
+	 *
+	 * Note that the resource is only used to extract its ID and type, and the body of the resource is not included in the entry,
+	 *
+	 * @param theResource The resource to delete.
+	 */
+	public void addTransactionDeleteEntry(IBaseResource theResource) {
+		String resourceType = myContext.getResourceType(theResource);
+		String idPart = theResource.getIdElement().toUnqualifiedVersionless().getIdPart();
+		addTransactionDeleteEntry(resourceType, idPart);
+	}
+
+	/**
+	 * Adds an entry containing a delete (DELETE) request.
+	 * Also sets the Bundle.type value to "transaction" if it is not already set.
+	 *
+	 * @param theResourceType The type resource to delete.
+	 * @param theIdPart  the ID of the resource to delete.
+	 */
+	public void addTransactionDeleteEntry(String theResourceType, String theIdPart) {
+		setBundleField("type", "transaction");
+		IBase request = addEntryAndReturnRequest();
+		IdDt idDt = new IdDt(theIdPart);
+		
+		// Bundle.entry.request.url
+		IPrimitiveType<?> url = (IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
+		url.setValueAsString(idDt.toUnqualifiedVersionless().withResourceType(theResourceType).getValue());
+		myEntryRequestUrlChild.getMutator().setValue(request, url);
+
+		// Bundle.entry.request.method
+		IPrimitiveType<?> method = (IPrimitiveType<?>) myEntryRequestMethodDef.newInstance(myEntryRequestMethodChild.getInstanceConstructorArguments());
+		method.setValueAsString("DELETE");
+		myEntryRequestMethodChild.getMutator().setValue(request, method);
+	}
+
+
 
 	/**
 	 * Adds an entry for a Collection bundle type
@@ -248,6 +289,16 @@ public class BundleBuilder {
 		IBase request = myEntryRequestDef.newInstance();
 		myEntryRequestChild.getMutator().setValue(entry, request);
 		return request;
+	}
+
+	public IBase addEntryAndReturnRequest() {
+		IBase entry = addEntry();
+
+		// Bundle.entry.request
+		IBase request = myEntryRequestDef.newInstance();
+		myEntryRequestChild.getMutator().setValue(entry, request);
+		return request;
+
 	}
 
 

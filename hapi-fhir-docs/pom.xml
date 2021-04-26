@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>5.4.0-PRE5-SNAPSHOT</version>
+		<version>5.4.0-PRE8-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -55,6 +55,11 @@
 			<artifactId>hapi-fhir-jpaserver-base</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-server-openapi</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -78,13 +83,13 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
-			<version>5.4.0-PRE5-SNAPSHOT</version>
+			<version>5.4.0-PRE8-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-subscription</artifactId>
-			<version>5.4.0-PRE5-SNAPSHOT</version>
+			<version>5.4.0-PRE8-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -101,7 +106,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-testpage-overlay</artifactId>
-			<version>5.4.0-PRE5-SNAPSHOT</version>
+			<version>5.4.0-PRE8-SNAPSHOT</version>
 			<classifier>classes</classifier>
 		</dependency>
 		<dependency>
@@ -118,7 +123,7 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
-	</dependencies>
+    </dependencies>
 
 	<build>
 		<plugins>

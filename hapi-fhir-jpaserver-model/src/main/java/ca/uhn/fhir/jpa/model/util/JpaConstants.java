@@ -219,6 +219,11 @@ public class JpaConstants {
 	public static final String DEFAULT_PARTITION_NAME = "DEFAULT";
 
 	/**
+	 * The name of the collection of all partitions
+	 */
+	public static final String ALL_PARTITIONS_NAME = "ALL_PARTITIONS";
+
+	/**
 	 * Parameter for the $expand operation
 	 */
 	public static final String OPERATION_EXPAND_PARAM_INCLUDE_HIERARCHY = "includeHierarchy";

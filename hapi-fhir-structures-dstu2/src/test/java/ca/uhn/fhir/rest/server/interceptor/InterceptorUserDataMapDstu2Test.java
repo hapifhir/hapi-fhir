@@ -42,6 +42,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -78,7 +79,7 @@ public class InterceptorUserDataMapDstu2Test {
 	@BeforeEach
 	public void beforePurgeMap() {
 		myMap = null;
-		myMapCheckMethods = new LinkedHashSet<>();
+		myMapCheckMethods = Collections.synchronizedSet(new LinkedHashSet<>());
 	}
 
 

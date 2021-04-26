@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
@@ -68,17 +69,23 @@ public class OperationParameter implements IParameter {
 	private Class<?> myParameterType;
 	private String myParamType;
 	private SearchParameter mySearchParameterBinding;
+	private String myDescription;
+	private List<String> myExampleValues;
 
-	public OperationParameter(FhirContext theCtx, String theOperationName, OperationParam theOperationParam) {
-		this(theCtx, theOperationName, theOperationParam.name(), theOperationParam.min(), theOperationParam.max());
-	}
-
-	OperationParameter(FhirContext theCtx, String theOperationName, String theParameterName, int theMin, int theMax) {
+	OperationParameter(FhirContext theCtx, String theOperationName, String theParameterName, int theMin, int theMax, String theDescription, List<String> theExampleValues) {
 		myOperationName = theOperationName;
 		myName = theParameterName;
 		myMin = theMin;
 		myMax = theMax;
 		myContext = theCtx;
+		myDescription = theDescription;
+
+		List<String> exampleValues = new ArrayList<>();
+		if (theExampleValues != null) {
+			exampleValues.addAll(theExampleValues);
+		}
+		myExampleValues = Collections.unmodifiableList(exampleValues);
+
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
@@ -436,6 +443,14 @@ public class OperationParameter implements IParameter {
 
 			addValueToList(theMatchingParamValues, nextValue);
 		}
+	}
+
+	public String getDescription() {
+		return myDescription;
+	}
+
+	public List<String> getExampleValues() {
+		return myExampleValues;
 	}
 
 	interface IOperationParamConverter {

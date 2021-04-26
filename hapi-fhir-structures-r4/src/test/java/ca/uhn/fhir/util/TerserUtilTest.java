@@ -13,6 +13,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.junit.jupiter.api.Test;
 
+import java.util.Date;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
@@ -76,6 +78,7 @@ class TerserUtilTest {
 		DateType check = TerserUtil.newElement(ourFhirContext, "date", "1999-01-01");
 		assertEquals(check.getValue(), p.getBirthDate());
 	}
+
 
 	@Test
 	void testFieldExists() {
@@ -292,6 +295,26 @@ class TerserUtilTest {
 
 		assertEquals(1, p2.getName().size());
 		assertEquals("Doe", p2.getName().get(0).getFamily());
+	}
+
+	@Test
+	public void testReplaceFieldsByPredicate() {
+		Patient p1 = new Patient();
+		p1.addName().setFamily("Doe");
+		p1.setGender(Enumerations.AdministrativeGender.MALE);
+
+		Patient p2 = new Patient();
+		p2.addName().setFamily("Smith");
+		Date dob = new Date();
+		p2.setBirthDate(dob);
+
+		TerserUtil.replaceFieldsByPredicate(ourFhirContext, p1, p2, TerserUtil.EXCLUDE_IDS_META_AND_EMPTY);
+
+		// expect p2 to have "Doe" and MALE after replace
+		assertEquals(1, p2.getName().size());
+		assertEquals("Doe", p2.getName().get(0).getFamily());
+		assertEquals(Enumerations.AdministrativeGender.MALE, p2.getGender());
+		assertEquals(dob, p2.getBirthDate());
 	}
 
 	@Test

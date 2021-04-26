@@ -87,11 +87,6 @@ public class BaseDstu3Config extends BaseConfigDstu3Plus {
 		return new TransactionProcessorVersionAdapterDstu3();
 	}
 
-	@Bean
-	public TransactionProcessor transactionProcessor() {
-		return new TransactionProcessor();
-	}
-
 	@Bean(name = "myResourceCountsCache")
 	public ResourceCountCache resourceCountsCache() {
 		ResourceCountCache retVal = new ResourceCountCache(() -> systemDaoDstu3().getResourceCounts());

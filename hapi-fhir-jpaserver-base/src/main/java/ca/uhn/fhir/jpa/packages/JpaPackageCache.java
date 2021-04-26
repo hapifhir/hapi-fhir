@@ -65,7 +65,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -655,16 +654,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	private void deleteAndExpungeResourceBinary(IIdType theResourceBinaryId, ExpungeOptions theOptions) {
-
-		if (myPartitionSettings.isPartitioningEnabled()) {
-			SystemRequestDetails requestDetails = new SystemRequestDetails();
-			requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
-			getBinaryDao().delete(theResourceBinaryId, requestDetails).getEntity();
-			getBinaryDao().forceExpungeInExistingTransaction(theResourceBinaryId, theOptions, requestDetails);
-		} else {
-			getBinaryDao().delete(theResourceBinaryId).getEntity();
-			getBinaryDao().forceExpungeInExistingTransaction(theResourceBinaryId, theOptions, null);
-		}
+		getBinaryDao().delete(theResourceBinaryId, new SystemRequestDetails()).getEntity();
+		getBinaryDao().forceExpungeInExistingTransaction(theResourceBinaryId, theOptions, new SystemRequestDetails());
 	}
 
 

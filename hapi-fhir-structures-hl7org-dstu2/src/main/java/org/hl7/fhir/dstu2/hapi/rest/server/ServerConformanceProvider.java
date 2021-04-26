@@ -263,7 +263,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
                 (SearchMethodBinding) nextMethodBinding, theRequestDetails);
           } else if (nextMethodBinding instanceof OperationMethodBinding) {
             OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
-            String opName = bindings.getOperationBindingToName().get(methodBinding);
+            String opName = bindings.getOperationBindingToId().get(methodBinding);
             if (operationNames.add(opName)) {
               // Only add each operation (by name) once
               rest.addOperation().setName(methodBinding.getName()).getDefinition()
@@ -299,7 +299,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
           checkBindingForSystemOps(rest, systemOps, nextMethodBinding);
           if (nextMethodBinding instanceof OperationMethodBinding) {
             OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
-            String opName = bindings.getOperationBindingToName().get(methodBinding);
+            String opName = bindings.getOperationBindingToId().get(methodBinding);
             if (operationNames.add(opName)) {
               rest.addOperation().setName(methodBinding.getName()).getDefinition()
                   .setReference("OperationDefinition/" + opName);
@@ -412,7 +412,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
     if (theId == null || theId.hasIdPart() == false) {
       throw new ResourceNotFoundException(theId);
     }
-    List<OperationMethodBinding> sharedDescriptions = getServerConfiguration(theRequestDetails).provideBindings().getOperationNameToBindings().get(theId.getIdPart());
+    List<OperationMethodBinding> sharedDescriptions = getServerConfiguration(theRequestDetails).provideBindings().getOperationIdToBindings().get(theId.getIdPart());
     if (sharedDescriptions == null || sharedDescriptions.isEmpty()) {
       throw new ResourceNotFoundException(theId);
     }

@@ -477,28 +477,6 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void testPatientCreateDoesNotOverwriteGoldenResourceAttributesThatAreInvolvedInLinking() {
-		Patient paul = buildPaulPatient();
-		paul.setGender(Enumerations.AdministrativeGender.MALE);
-		paul = createPatientAndUpdateLinks(paul);
-
-		Patient sourcePatientFromTarget = (Patient) getGoldenResourceFromTargetResource(paul);
-
-		assertThat(sourcePatientFromTarget.getGender(), is(equalTo(Enumerations.AdministrativeGender.MALE)));
-
-		Patient paul2 = buildPaulPatient();
-		paul2.setGender(Enumerations.AdministrativeGender.FEMALE);
-		paul2 = createPatientAndUpdateLinks(paul2);
-
-		assertThat(paul2, is(sameGoldenResourceAs(paul)));
-
-		//Newly matched patients aren't allowed to overwrite GoldenResource Attributes unless they are empty,
-		// so gender should still be set to male.
-		Patient paul2GoldenResource = (Patient) getGoldenResourceFromTargetResource(paul2);
-		assertThat(paul2GoldenResource.getGender(), is(equalTo(Enumerations.AdministrativeGender.MALE)));
-	}
-
-	@Test
 	//Test Case #1
 	public void testPatientUpdatesOverwriteGoldenResourceData() {
 		Patient paul = buildPaulPatient();
