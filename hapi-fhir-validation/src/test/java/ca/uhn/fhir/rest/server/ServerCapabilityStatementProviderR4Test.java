@@ -1247,7 +1247,7 @@ public class ServerCapabilityStatementProviderR4Test {
 			}
 
 			@Search
-			public List<Observation> search(@OptionalParam(name = "subject") ReferenceParam theSubject) {
+			public List<Observation> search(@OptionalParam(name = "subject") ReferenceParam  theSubject) {
 				return Collections.emptyList();
 			}
 
@@ -1289,8 +1289,6 @@ public class ServerCapabilityStatementProviderR4Test {
 		CapabilityStatementRestResourceComponent groupResource = resources.stream()
 			.filter(resource -> "Group".equals(resource.getType()))
 			.findFirst().get();
-		ourLog.info("---");
-		ourLog.info(groupResource.toString());
 	}
 
 	private List<String> toOperationIdParts(List<CapabilityStatementRestResourceOperationComponent> theOperation) {
