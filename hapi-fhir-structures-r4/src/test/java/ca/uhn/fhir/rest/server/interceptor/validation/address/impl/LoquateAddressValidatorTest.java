@@ -125,9 +125,11 @@ class LoquateAddressValidatorTest {
 		ObjectNode node = new ObjectNode(null, new HashMap<>());
 		node.set("text1", new TextNode("This,Is,Text"));
 		node.set("text2", new TextNode("This Is-Text,"));
+		node.set("text3", new TextNode("This Is-Text  with Invalid Formatting"));
 
-		assertEquals("This, Is, Text", myValidator.getString(node, "text1"));
-		assertEquals("This Is-Text,", myValidator.getString(node, "text2"));
+		assertEquals("This, Is, Text", myValidator.standardize(myValidator.getString(node, "text1")));
+		assertEquals("This Is-Text,", myValidator.standardize(myValidator.getString(node, "text2")));
+		assertEquals("This Is-Text, with Invalid Formatting", myValidator.standardize(myValidator.getString(node, "text3")));
 	}
 
 	@Test

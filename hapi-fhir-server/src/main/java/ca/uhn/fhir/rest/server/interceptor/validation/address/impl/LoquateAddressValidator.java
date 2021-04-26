@@ -44,7 +44,6 @@ import org.springframework.http.ResponseEntity;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.Properties;
-import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,7 +64,7 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 	protected static final String DEFAULT_DATA_CLEANSE_ENDPOINT = "https://api.addressy.com/Cleansing/International/Batch/v1.00/json4.ws";
 	protected static final int MAX_ADDRESS_LINES = 8;
 
-	private Pattern myPattern = Pattern.compile("\\,(\\S)");
+	private Pattern myCommaPattern = Pattern.compile("\\,(\\S)");
 
 	public LoquateAddressValidator(Properties theProperties) {
 		super(theProperties);
@@ -128,7 +127,7 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 		IBase addressBase = theFhirContext.getElementDefinition("Address").newInstance();
 
 		AddressHelper helper = new AddressHelper(theFhirContext, addressBase);
-		helper.setText(getString(match, "Address"));
+		helper.setText(standardize(getString(match, "Address")));
 
 		String str = getString(match, "Address1");
 		if (str != null) {
@@ -217,14 +216,22 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 
 		String text = theNode.get(theField).asText();
 		if (StringUtils.isEmpty(text)) {
-			return text;
+			return "";
 		}
+		return text;
+	}
 
-		Matcher m = myPattern.matcher(text);
-		if (m.find()) {
-			text = m.replaceAll(", $1");
+	protected String standardize(String theText) {
+		if (StringUtils.isEmpty(theText)) {
+			return "";
 		}
-		return text.trim();
+		
+		theText = theText.replaceAll("\\s\\s", ", ");
+		Matcher m = myCommaPattern.matcher(theText);
+		if (m.find()) {
+			theText = m.replaceAll(", $1");
+		}
+		return theText.trim();
 	}
 
 	@Override
