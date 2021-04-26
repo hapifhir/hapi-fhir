@@ -4,14 +4,31 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.DELETE;
+import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.GET;
+import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST;
+import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class BundleUtilTest {
 
@@ -85,6 +102,214 @@ public class BundleUtilTest {
 		Consumer<ModifiableBundleEntry> consumer = e -> e.setRequestUrl(ourCtx, e.getRequestUrl() + "?foo=bar");
 		BundleUtil.processEntries(ourCtx, bundle, consumer);
 		assertEquals("Observation?foo=bar", bundle.getEntryFirstRep().getRequest().getUrl());
+	}
+
+	@Test
+	public void testTopologicalTransactionSortForCreates() {
+
+		Bundle b = new Bundle();
+		Bundle.BundleEntryComponent bundleEntryComponent = b.addEntry();
+		final Observation obs1 = new Observation();
+		obs1.setStatus(Observation.ObservationStatus.FINAL);
+		obs1.setSubject(new Reference("Patient/P1"));
+		obs1.setValue(new Quantity(4));
+		obs1.setId("Observation/O1");
+		bundleEntryComponent.setResource(obs1);
+		bundleEntryComponent.getRequest().setMethod(POST).setUrl("Observation");
+
+		bundleEntryComponent = b.addEntry();
+		final Observation obs2 = new Observation();
+		obs2.setStatus(Observation.ObservationStatus.FINAL);
+		obs2.setValue(new Quantity(4));
+		obs2.setId("Observation/O2");
+		bundleEntryComponent.setResource(obs2);
+		bundleEntryComponent.getRequest().setMethod(POST).setUrl("Observation");
+
+		Bundle.BundleEntryComponent patientComponent = b.addEntry();
+		Patient pat1 = new Patient();
+		pat1.setId("Patient/P1");
+		pat1.setManagingOrganization(new Reference("Organization/Org1"));
+		patientComponent.setResource(pat1);
+		patientComponent.getRequest().setMethod(POST).setUrl("Patient");
+
+		Bundle.BundleEntryComponent organizationComponent = b.addEntry();
+		Organization org1 = new Organization();
+		org1.setId("Organization/Org1");
+		organizationComponent.setResource(org1);
+		organizationComponent.getRequest().setMethod(POST).setUrl("Patient");
+
+		BundleUtil.sortEntriesIntoProcessingOrder(ourCtx, b);
+
+		assertThat(b.getEntry(), hasSize(4));
+
+		List<Bundle.BundleEntryComponent> entry = b.getEntry();
+		int observationIndex = getIndexOfEntryWithId("Observation/O1", b);
+		int patientIndex = getIndexOfEntryWithId("Patient/P1", b);
+		int organizationIndex = getIndexOfEntryWithId("Organization/Org1", b);
+
+		assertTrue(organizationIndex < patientIndex);
+		assertTrue(patientIndex < observationIndex);
+	}
+
+	@Test
+	public void testTransactionSorterFailsOnCyclicReference() {
+		Bundle b = new Bundle();
+		Bundle.BundleEntryComponent bundleEntryComponent = b.addEntry();
+		final Observation obs1 = new Observation();
+		obs1.setStatus(Observation.ObservationStatus.FINAL);
+		obs1.setSubject(new Reference("Patient/P1"));
+		obs1.setValue(new Quantity(4));
+		obs1.setId("Observation/O1/_history/1");
+		obs1.setHasMember(Collections.singletonList(new Reference("Observation/O2")));
+		bundleEntryComponent.setResource(obs1);
+		bundleEntryComponent.getRequest().setMethod(POST).setUrl("Observation");
+
+		bundleEntryComponent = b.addEntry();
+		final Observation obs2 = new Observation();
+		obs2.setStatus(Observation.ObservationStatus.FINAL);
+		obs2.setValue(new Quantity(4));
+		obs2.setId("Observation/O2/_history/1");
+		obs2.setHasMember(Collections.singletonList(new Reference("Observation/O1/_history/3")));
+		bundleEntryComponent.setResource(obs2);
+		bundleEntryComponent.getRequest().setMethod(POST).setUrl("Observation");
+		try {
+			BundleUtil.sortEntriesIntoProcessingOrder(ourCtx, b);
+			fail();
+		} catch (IllegalStateException e ) {
+
+		}
+	}
+
+	@Test
+	public void testTransactionSortingReturnsOperationsInCorrectOrder() {
+
+		Bundle b = new Bundle();
+
+		//UPDATE patient
+		Bundle.BundleEntryComponent patientUpdateComponent= b.addEntry();
+		final Patient p2 = new Patient();
+		p2.setId("Patient/P2");
+		p2.getNameFirstRep().setFamily("Test!");
+		patientUpdateComponent.setResource(p2);
+		patientUpdateComponent.getRequest().setMethod(PUT).setUrl("Patient/P2");
+
+		//CREATE observation
+		Bundle.BundleEntryComponent bundleEntryComponent = b.addEntry();
+		final Observation obs1 = new Observation();
+		obs1.setStatus(Observation.ObservationStatus.FINAL);
+		obs1.setSubject(new Reference("Patient/P1"));
+		obs1.setValue(new Quantity(4));
+		obs1.setId("Observation/O1");
+		bundleEntryComponent.setResource(obs1);
+		bundleEntryComponent.getRequest().setMethod(POST).setUrl("Observation");
+
+		//DELETE medication
+		Bundle.BundleEntryComponent medicationComponent= b.addEntry();
+		final Medication med1 = new Medication();
+		med1.setId("Medication/M1");
+		medicationComponent.setResource(med1);
+		medicationComponent.getRequest().setMethod(DELETE).setUrl("Medication");
+
+		//GET medication
+		Bundle.BundleEntryComponent searchComponent = b.addEntry();
+		searchComponent.getRequest().setMethod(GET).setUrl("Medication?code=123");
+
+		//CREATE patient
+		Bundle.BundleEntryComponent patientComponent = b.addEntry();
+		Patient pat1 = new Patient();
+		pat1.setId("Patient/P1");
+		pat1.setManagingOrganization(new Reference("Organization/Org1"));
+		patientComponent.setResource(pat1);
+		patientComponent.getRequest().setMethod(POST).setUrl("Patient");
+
+		//CREATE organization
+		Bundle.BundleEntryComponent organizationComponent = b.addEntry();
+		Organization org1 = new Organization();
+		org1.setId("Organization/Org1");
+		organizationComponent.setResource(org1);
+		organizationComponent.getRequest().setMethod(POST).setUrl("Organization");
+
+		//DELETE ExplanationOfBenefit
+		Bundle.BundleEntryComponent explanationOfBenefitComponent= b.addEntry();
+		final ExplanationOfBenefit eob1 = new ExplanationOfBenefit();
+		eob1.setId("ExplanationOfBenefit/E1");
+		explanationOfBenefitComponent.setResource(eob1);
+		explanationOfBenefitComponent.getRequest().setMethod(DELETE).setUrl("ExplanationOfBenefit");
+
+		BundleUtil.sortEntriesIntoProcessingOrder(ourCtx, b);
+
+		assertThat(b.getEntry(), hasSize(7));
+
+		List<Bundle.BundleEntryComponent> entry = b.getEntry();
+
+		// DELETEs first
+		assertThat(entry.get(0).getRequest().getMethod(), is(equalTo(DELETE)));
+		assertThat(entry.get(1).getRequest().getMethod(), is(equalTo(DELETE)));
+		// Then POSTs
+		assertThat(entry.get(2).getRequest().getMethod(), is(equalTo(POST)));
+		assertThat(entry.get(3).getRequest().getMethod(), is(equalTo(POST)));
+		assertThat(entry.get(4).getRequest().getMethod(), is(equalTo(POST)));
+		// Then PUTs
+		assertThat(entry.get(5).getRequest().getMethod(), is(equalTo(PUT)));
+		// Then GETs
+		assertThat(entry.get(6).getRequest().getMethod(), is(equalTo(GET)));
+	}
+
+	@Test
+	public void testTransactionSorterReturnsDeletesInCorrectProcessingOrder() {
+		Bundle b = new Bundle();
+		Bundle.BundleEntryComponent bundleEntryComponent = b.addEntry();
+		final Observation obs1 = new Observation();
+		obs1.setStatus(Observation.ObservationStatus.FINAL);
+		obs1.setSubject(new Reference("Patient/P1"));
+		obs1.setValue(new Quantity(4));
+		obs1.setId("Observation/O1");
+		bundleEntryComponent.setResource(obs1);
+		bundleEntryComponent.getRequest().setMethod(DELETE).setUrl("Observation");
+
+		bundleEntryComponent = b.addEntry();
+		final Observation obs2 = new Observation();
+		obs2.setStatus(Observation.ObservationStatus.FINAL);
+		obs2.setValue(new Quantity(4));
+		obs2.setId("Observation/O2");
+		bundleEntryComponent.setResource(obs2);
+		bundleEntryComponent.getRequest().setMethod(DELETE).setUrl("Observation");
+
+		Bundle.BundleEntryComponent patientComponent = b.addEntry();
+		Patient pat1 = new Patient();
+		pat1.setId("Patient/P1");
+		pat1.setManagingOrganization(new Reference("Organization/Org1"));
+		patientComponent.setResource(pat1);
+		patientComponent.getRequest().setMethod(DELETE).setUrl("Patient");
+
+		Bundle.BundleEntryComponent organizationComponent = b.addEntry();
+		Organization org1 = new Organization();
+		org1.setId("Organization/Org1");
+		organizationComponent.setResource(org1);
+		organizationComponent.getRequest().setMethod(DELETE).setUrl("Organization");
+
+		BundleUtil.sortEntriesIntoProcessingOrder(ourCtx, b);
+
+		assertThat(b.getEntry(), hasSize(4));
+
+		int observationIndex = getIndexOfEntryWithId("Observation/O1", b);
+		int patientIndex = getIndexOfEntryWithId("Patient/P1", b);
+		int organizationIndex = getIndexOfEntryWithId("Organization/Org1", b);
+
+		assertTrue(patientIndex < organizationIndex);
+		assertTrue(observationIndex < patientIndex);
+	}
+
+	private int getIndexOfEntryWithId(String theResourceId, Bundle theBundle) {
+		List<Bundle.BundleEntryComponent> entries = theBundle.getEntry();
+		for (int i = 0; i < entries.size(); i++) {
+			String id = entries.get(i).getResource().getIdElement().toUnqualifiedVersionless().toString();
+			if (id.equals(theResourceId)) {
+				return i;
+			}
+		}
+		fail("Didn't find resource with ID " + theResourceId);
+		return -1;
 	}
 
 	@AfterAll

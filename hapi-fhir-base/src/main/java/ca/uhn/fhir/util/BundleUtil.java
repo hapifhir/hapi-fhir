@@ -238,7 +238,7 @@ public class BundleUtil {
 
 		for (BundleEntryParts bundleEntryPart : bundleEntryParts) {
 			IBaseResource resource = bundleEntryPart.getResource();
-			String resourceId = resource.getIdElement().toString();
+			String resourceId = resource.getIdElement().toVersionless().toString();
 			resourceIdToBundleEntryMap.put(resourceId, bundleEntryPart);
 			if (resourceId == null) {
 				if (bundleEntryPart.getFullUrl() != null) {
@@ -252,7 +252,7 @@ public class BundleUtil {
 
 		for (BundleEntryParts bundleEntryPart : bundleEntryParts) {
 			IBaseResource resource = bundleEntryPart.getResource();
-			String resourceId = resource.getIdElement().toString();
+			String resourceId = resource.getIdElement().toVersionless().toString();
 			resourceIdToBundleEntryMap.put(resourceId, bundleEntryPart);
 			if (resourceId == null) {
 				if (bundleEntryPart.getFullUrl() != null) {
@@ -263,12 +263,12 @@ public class BundleUtil {
 			String finalResourceId = resourceId;
 			allResourceReferences
 				.forEach(refInfo -> {
-					String referencedResourceId = refInfo.getResourceReference().getReferenceElement().getValue();
+					String referencedResourceId = refInfo.getResourceReference().getReferenceElement().toVersionless().getValue();
 					if (color.containsKey(referencedResourceId)) {
 						if (!adjList.containsKey(finalResourceId)) {
 							adjList.put(finalResourceId, new ArrayList<>());
 						}
-						adjList.get(finalResourceId).add(refInfo.getResourceReference().getReferenceElement().getValue());
+						adjList.get(finalResourceId).add(referencedResourceId);
 					}
 				});
 		}
