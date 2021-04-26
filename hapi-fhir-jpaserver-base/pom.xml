@@ -610,6 +610,12 @@
             <version>2.5-20081211</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>jena-arq</artifactId>
+            <version>3.17.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 

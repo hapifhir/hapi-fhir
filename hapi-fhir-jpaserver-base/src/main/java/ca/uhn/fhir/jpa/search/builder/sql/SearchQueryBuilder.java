@@ -310,12 +310,15 @@ public class SearchQueryBuilder {
 			addJoin(fromTable, toTable, theSourceJoinColumn, toColumn);
 		} else {
 			if (myFirstPredicateBuilder == null) {
-				ResourceTablePredicateBuilder root;
-				if (thePredicateBuilder instanceof ResourceTablePredicateBuilder) {
-					root = (ResourceTablePredicateBuilder) thePredicateBuilder;
-				} else {
-					root = mySqlBuilderFactory.resourceTable(this);
-				}
+
+				// FIXME: restore?
+				BaseJoiningPredicateBuilder root = thePredicateBuilder;
+//				ResourceTablePredicateBuilder root;
+//				if (thePredicateBuilder instanceof ResourceTablePredicateBuilder) {
+//					root = (ResourceTablePredicateBuilder) thePredicateBuilder;
+//				} else {
+//					root = mySqlBuilderFactory.resourceTable(this);
+//				}
 
 				if (myCountQuery) {
 					mySelect.addCustomColumns(FunctionCall.count().setIsDistinct(true).addColumnParams(root.getResourceIdColumn()));
@@ -325,9 +328,10 @@ public class SearchQueryBuilder {
 				mySelect.addFromTable(root.getTable());
 				myFirstPredicateBuilder = root;
 
-				if (thePredicateBuilder instanceof ResourceTablePredicateBuilder) {
+				// FIXME: restore
+//				if (thePredicateBuilder instanceof ResourceTablePredicateBuilder) {
 					return;
-				}
+//				}
 			}
 
 			DbTable fromTable = myFirstPredicateBuilder.getTable();
