@@ -1495,6 +1495,41 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testPeriodWithNoStart() {
+		ServiceRequest serviceRequest = new ServiceRequest();
+
+		Period period = new Period();
+		period.setEnd(new Date());
+		Timing timing = new Timing();
+		timing.setRepeat(new Timing.TimingRepeatComponent().setBounds(period));
+		serviceRequest.setOccurrence(timing);
+
+		// Should not crash
+		myServiceRequestDao.create(serviceRequest);
+
+		runInTransaction(()->{
+			assertEquals(1, myResourceIndexedSearchParamDateDao.findAll().size());
+		});
+	}
+
+	@Test
+	public void testPeriodWithNoEnd() {
+		ServiceRequest serviceRequest = new ServiceRequest();
+		
+		Period period = new Period();
+		period.setStart(new Date());
+		Timing timing = new Timing();
+		timing.setRepeat(new Timing.TimingRepeatComponent().setBounds(period));
+		serviceRequest.setOccurrence(timing);
+
+		// Should not crash
+		myServiceRequestDao.create(serviceRequest);
+
+		runInTransaction(()->{
+			assertEquals(1, myResourceIndexedSearchParamDateDao.findAll().size());
+		});
+	}
 
 	@Test
 	public void testSearchByIdParamInverse() {
