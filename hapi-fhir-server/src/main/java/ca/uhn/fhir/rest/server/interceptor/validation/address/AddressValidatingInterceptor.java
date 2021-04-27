@@ -126,13 +126,31 @@ public class AddressValidatingInterceptor {
 
 		if (!theRequest.getHeaders(ADDRESS_VALIDATION_DISABLED_HEADER).isEmpty()) {
 			ourLog.debug("Address validation is disabled for this request via header");
+			return;
 		}
 
 		FhirContext ctx = theRequest.getFhirContext();
-		getAddresses(theResource, ctx)
+		List<IBase> addresses = getAddresses(theResource, ctx)
 			.stream()
 			.filter(this::isValidating)
-			.forEach(a -> validateAddress(a, ctx));
+			.collect(Collectors.toList());
+
+		if (!addresses.isEmpty()) {
+			validateAddresses(theRequest, theResource, addresses);
+		}
+	}
+
+	/**
+	 * Validates specified child addresses for the resource
+	 *
+	 * @return Returns true if all addresses are valid, or false if there is at least one invalid address
+	 */
+	protected boolean validateAddresses(RequestDetails theRequest, IBaseResource theResource, List<IBase> theAddresses) {
+		boolean retVal = true;
+		for (IBase address : theAddresses) {
+			retVal &= validateAddress(address, theRequest.getFhirContext());
+		}
+		return retVal;
 	}
 
 	private boolean isValidating(IBase theAddress) {
@@ -140,15 +158,13 @@ public class AddressValidatingInterceptor {
 		if (ext == null) {
 			return true;
 		}
-
 		if (ext.getValue() == null || ext.getValue().isEmpty()) {
 			return true;
 		}
-
 		return !"false".equals(ext.getValue().toString());
 	}
 
-	protected void validateAddress(IBase theAddress, FhirContext theFhirContext) {
+	protected boolean validateAddress(IBase theAddress, FhirContext theFhirContext) {
 		try {
 			AddressValidationResult validationResult = getAddressValidator().isValid(theAddress, theFhirContext);
 			ourLog.debug("Validated address {}", validationResult);
@@ -160,11 +176,13 @@ public class AddressValidatingInterceptor {
 			} else {
 				ourLog.info("Validated address is not provided - skipping update on the target address instance");
 			}
+			return validationResult.isValid();
 		} catch (Exception ex) {
 			ourLog.warn("Unable to validate address", ex);
 			IBaseExtension extension = ExtensionUtil.getOrCreateExtension(theAddress, getExtensionUrl());
 			IBaseExtension errorValue = ExtensionUtil.getOrCreateExtension(extension, "error");
 			errorValue.setValue(TerserUtil.newElement(theFhirContext, "string", ex.getMessage()));
+			return false;
 		}
 	}
 
