@@ -1289,6 +1289,8 @@ public class ServerCapabilityStatementProviderR4Test {
 		CapabilityStatementRestResourceComponent groupResource = resources.stream()
 			.filter(resource -> "Group".equals(resource.getType()))
 			.findFirst().get();
+
+		assertThat(toOperationNames(groupResource.getOperation()),containsInAnyOrder("export", "export-poll-status"));
 	}
 
 	private List<String> toOperationIdParts(List<CapabilityStatementRestResourceOperationComponent> theOperation) {
