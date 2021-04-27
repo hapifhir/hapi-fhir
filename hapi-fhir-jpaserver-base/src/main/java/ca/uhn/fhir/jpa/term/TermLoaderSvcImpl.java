@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -140,6 +141,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	public static final String CUSTOM_CONCEPTS_FILE = "concepts.csv";
 	public static final String CUSTOM_HIERARCHY_FILE = "hierarchy.csv";
+	public static final String CUSTOM_PROPERTIES_FILE = "properties.csv";
 	static final String IMGTHLA_HLA_NOM_TXT = "hla_nom.txt";
 	static final String IMGTHLA_HLA_XML = "hla.xml";
 	static final String CUSTOM_CODESYSTEM_JSON = "codesystem.json";
@@ -225,14 +227,14 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				uploadProperties.getProperty(LOINC_PARENT_GROUP_FILE.getCode(), LOINC_PARENT_GROUP_FILE_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE.getCode(), LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE.getCode(), LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode())
-				);
+			);
 			descriptors.verifyOptionalFilesExist(optionalFilenameFragments);
 
 			ourLog.info("Beginning LOINC processing");
 
 
 			String codeSystemVersionId = uploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
-			if (codeSystemVersionId != null ) {
+			if (codeSystemVersionId != null) {
 				// Load the code system with version and then remove the version property.
 				processLoincFiles(descriptors, theRequestDetails, uploadProperties, false);
 				uploadProperties.remove(LOINC_CODESYSTEM_VERSION.getCode());
@@ -483,7 +485,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		try {
 			String loincCsString = IOUtils.toString(BaseTermReadSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/loinc/loinc.xml"), Charsets.UTF_8);
 			loincCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, loincCsString);
-			String  codeSystemVersionId = theUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+			String codeSystemVersionId = theUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
 			if (codeSystemVersionId != null) {
 				loincCs.setVersion(codeSystemVersionId);
 				loincCs.setId(loincCs.getId() + "-" + codeSystemVersionId);
@@ -788,5 +790,11 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			id2concept.put(id, concept);
 		}
 		return concept;
+	}
+
+	public static TermConceptProperty getOrCreateConceptProperty(Map<String, List<TermConceptProperty>> code2Properties, String code, String key) {
+		List<TermConceptProperty> termConceptProperties = code2Properties.get(code);
+		Optional<TermConceptProperty> termConceptProperty = termConceptProperties.stream().filter(property -> key.equals(property.getKey())).findFirst();
+		return termConceptProperty.isPresent() ? termConceptProperty.get() :  new TermConceptProperty();
 	}
 }

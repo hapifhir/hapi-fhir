@@ -1,0 +1,9 @@
+CODE,KEY, VALUE, TYPE
+
+CHEM,color,green,String
+HB,color,red,String
+NEUT,color,pink,String
+NEUT,shape,spherical,String
+
+MICRO,color,yellow,String
+C&S,color,blue,String

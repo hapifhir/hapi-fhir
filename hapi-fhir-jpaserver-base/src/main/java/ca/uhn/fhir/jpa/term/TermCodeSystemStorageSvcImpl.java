@@ -580,6 +580,11 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		conceptToAdd.setParentPids(null);
 		conceptToAdd.setCodeSystemVersion(theCsv);
 
+		if (conceptToAdd.getProperties() !=null)
+			conceptToAdd.getProperties().forEach(termConceptProperty -> {
+				termConceptProperty.setConcept(theConceptToAdd);
+				termConceptProperty.setCodeSystemVersion(theCsv);
+			});
 		if (theStatisticsTracker.getUpdatedConceptCount() <= myDaoConfig.getDeferIndexingForCodesystemsOfSize()) {
 			saveConcept(conceptToAdd);
 			Long nextConceptPid = conceptToAdd.getId();
