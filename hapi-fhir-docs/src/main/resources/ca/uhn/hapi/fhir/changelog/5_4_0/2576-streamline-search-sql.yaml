@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 2576
+title: "The generated search SQL statements have been optimized for simple JPA server searches containing
+   only one parameter. In this case, an unnecessary JOIN has been removed."
