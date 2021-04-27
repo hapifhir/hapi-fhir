@@ -1528,7 +1528,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		preProcessResourceForStorage(resource);
 		preProcessResourceForStorage(theResource, theRequest, theTransactionDetails, thePerformIndexing);
 
-		final ResourceTable entity;
+		ResourceTable entity = null;
 
 		IIdType resourceId;
 		if (isNotBlank(theMatchUrl)) {
@@ -1554,9 +1554,25 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			assert resourceId.hasIdPart();
 
 			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequest, getResourceName());
-			try {
-				entity = readEntityLatestVersion(resourceId, requestPartitionId);
-			} catch (ResourceNotFoundException e) {
+
+			boolean create = false;
+
+			if (theRequest != null) {
+				String existenceCheck = theRequest.getHeader(JpaConstants.HEADER_UPSERT_EXISTENCE_CHECK);
+				if (JpaConstants.HEADER_UPSERT_EXISTENCE_CHECK_DISABLED.equals(existenceCheck)) {
+					create = true;
+				}
+			}
+
+			if (!create) {
+				try {
+					entity = readEntityLatestVersion(resourceId, requestPartitionId);
+				} catch (ResourceNotFoundException e) {
+					create = true;
+				}
+			}
+
+			if (create) {
 				requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(theRequest, theResource, getResourceName());
 				return doCreateForPostOrPut(resource, null, thePerformIndexing, theTransactionDetails, theRequest, requestPartitionId);
 			}

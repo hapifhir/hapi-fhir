@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -13,6 +14,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -53,7 +55,9 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
 
 public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4UpdateTest.class);
@@ -70,6 +74,30 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	public void before() {
 		myInterceptorRegistry.registerInterceptor(myInterceptor);
 	}
+
+	@Test
+	public void testCreateWithClientAssignedId_CheckDisabledMode_AlreadyExists() {
+		when(mySrd.getHeader(eq(JpaConstants.HEADER_UPSERT_EXISTENCE_CHECK))).thenReturn(JpaConstants.HEADER_UPSERT_EXISTENCE_CHECK_DISABLED);
+
+		runInTransaction(() -> {
+			Patient p = new Patient();
+			p.setId("AAA");
+			p.getMaritalStatus().setText("123");
+			return myPatientDao.update(p, mySrd).getId().toUnqualified();
+		});
+		try {
+			runInTransaction(() -> {
+				Patient p = new Patient();
+				p.setId("AAA");
+				p.getMaritalStatus().setText("123");
+				return myPatientDao.update(p, mySrd).getId().toUnqualified();
+			});
+			fail();
+		} catch (ResourceVersionConflictException e) {
+			assertThat(e.getMessage(), containsString("It can also happen when a request disables the Upsert Existence Check."));
+		}
+	}
+
 
 	@Test
 	public void testCreateAndUpdateWithoutRequest() {

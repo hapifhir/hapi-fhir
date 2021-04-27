@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringParam;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -31,6 +31,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4QueryCountTest.class);
@@ -218,6 +220,27 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
 
+	@Test
+	public void testCreateWithClientAssignedId_CheckDisabledMode() {
+		when(mySrd.getHeader(eq(JpaConstants.HEADER_UPSERT_EXISTENCE_CHECK))).thenReturn(JpaConstants.HEADER_UPSERT_EXISTENCE_CHECK_DISABLED);
+
+		myCaptureQueriesListener.clear();
+		runInTransaction(() -> {
+			Patient p = new Patient();
+			p.setId("AAA");
+			p.getMaritalStatus().setText("123");
+			return myPatientDao.update(p, mySrd).getId().toUnqualified();
+		});
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		assertEquals(4, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
 
 	@Test
 	public void testReferenceToForcedId() {
