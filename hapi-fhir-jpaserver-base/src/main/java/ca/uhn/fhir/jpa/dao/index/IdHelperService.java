@@ -141,7 +141,6 @@ public class IdHelperService {
 			if (myDaoConfig.isDeleteEnabled()) {
 				retVal = new ResourcePersistentId(resolveResourceIdentity(theRequestPartitionId, theResourceType, theId).getResourceId());
 			} else {
-				// FIXME: use FORCED_ID
 				String key = toForcedIdToPidKey(theRequestPartitionId, theResourceType, theId);
 				retVal = myMemoryCacheService.get(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, t -> new ResourcePersistentId(resolveResourceIdentity(theRequestPartitionId, theResourceType, theId).getResourceId()));
 			}

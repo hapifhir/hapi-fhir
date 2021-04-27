@@ -305,8 +305,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 				Supplier<IIdType> idSupplier = ()-> {
 					IIdType retVal = myIdHelperService.translatePidIdToForcedId(myFhirContext, myResourceName, pid);
-					if (!retVal.hasVersionIdPart() && myDaoConfig.isAlwaysReturnVersionForConditionalCreate()) {
-						retVal = myMemoryCacheService.get(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, retVal, t->entitySupplier.get().getResource().getIdElement());
+					if (!retVal.hasVersionIdPart()) {
+						return myMemoryCacheService.get(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, retVal, t-> {
+							long version = myResourceTableDao.findCurrentVersionByPid(pid.getIdAsLong());
+							return myFhirContext.getVersion().newIdType().setParts(retVal.getBaseUrl(), retVal.getResourceType(), retVal.getIdPart(), Long.toString(version));
+						});
 					}
 					return retVal;
 				};

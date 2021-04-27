@@ -91,4 +91,7 @@ public interface IResourceTableDao extends JpaRepository<ResourceTable, Long> {
 	 */
 	@Query("SELECT t.myResourceType, t.myId, t.myDeleted FROM ResourceTable t WHERE t.myId IN (:pid) AND t.myPartitionIdValue IS NULL")
 	Collection<Object[]> findLookupFieldsByResourcePidInPartitionNull(@Param("pid") List<Long> thePids);
+
+	@Query("SELECT t.myVersion FROM ResourceTable t WHERE t.myId = :pid")
+	long findCurrentVersionByPid(@Param("pid") Long thePid);
 }

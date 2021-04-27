@@ -205,10 +205,6 @@ public class DaoConfig {
 	 * @since 5.4.0
 	 */
 	private boolean myMatchUrlCache;
-	/**
-	 * @since 5.4.0
-	 */
-	private boolean myAlwaysReturnVersionForConditionalCreate = true;
 
 	/**
 	 * Constructor
@@ -271,18 +267,29 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Specifies the duration in minutes for which values will be retained after being
-	 * written to the terminology translation cache. Defaults to 60.
+	 * If enabled, resolutions for match URLs (e.g. conditional create URLs, conditional update URLs, etc) will be
+	 * cached in an in-memory cache. This cache can have a noticeable improvement on write performance on servers
+	 * where conditional operations are frequently performed, but note that this cache will not be
+	 * invalidated based on updates to resources so this may have detrimental effects.
+	 *
+	 * Default is <code>false</code>
+	 *
+	 * @since 5.4.0
 	 */
-	public void setTranslationCachesExpireAfterWriteInMinutes(Long translationCachesExpireAfterWriteInMinutes) {
-		myTranslationCachesExpireAfterWriteInMinutes = translationCachesExpireAfterWriteInMinutes;
-	}
-
-	// FIXME: add docs
 	public void setMatchUrlCache(boolean theMatchUrlCache) {
 		myMatchUrlCache = theMatchUrlCache;
 	}
 
+	/**
+	 * If enabled, resolutions for match URLs (e.g. conditional create URLs, conditional update URLs, etc) will be
+	 * cached in an in-memory cache. This cache can have a noticeable improvement on write performance on servers
+	 * where conditional operations are frequently performed, but note that this cache will not be
+	 * invalidated based on updates to resources so this may have detrimental effects.
+	 *
+	 * Default is <code>false</code>
+	 *
+	 * @since 5.4.0
+	 */
 	public boolean getMatchUrlCache() {
 		return myMatchUrlCache;
 	}
@@ -2124,15 +2131,6 @@ public class DaoConfig {
 	@Deprecated
 	public void setPreloadBlobFromInputStream(Boolean thePreloadBlobFromInputStream) {
 		// ignore
-	}
-
-	public boolean isAlwaysReturnVersionForConditionalCreate() {
-		return myAlwaysReturnVersionForConditionalCreate;
-	}
-
-	// FIXME: document
-	public void setAlwaysReturnVersionForConditionalCreate(boolean theAlwaysReturnVersionForConditionalCreate) {
-		myAlwaysReturnVersionForConditionalCreate = theAlwaysReturnVersionForConditionalCreate;
 	}
 
 	public enum StoreMetaSourceInformationEnum {
