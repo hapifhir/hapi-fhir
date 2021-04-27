@@ -23,6 +23,7 @@ import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -387,8 +388,8 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testMarkResourcesForReindexing() throws Exception {
-		HttpGet get = new HttpGet(ourServerBase + "/$mark-all-resources-for-reindexing");
-		CloseableHttpResponse http = ourHttpClient.execute(get);
+		HttpPost post = new HttpPost(ourServerBase + "/$mark-all-resources-for-reindexing");
+		CloseableHttpResponse http = ourHttpClient.execute(post);
 		try {
 			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);

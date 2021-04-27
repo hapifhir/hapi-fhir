@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>5.4.0-PRE7-SNAPSHOT</version>
+	<version>5.4.0-PRE8-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -780,12 +780,13 @@
 		<jaxb_api_version>2.3.1</jaxb_api_version>
 		<jaxb_core_version>2.3.0.1</jaxb_core_version>
 		<jaxb_runtime_version>3.0.0</jaxb_runtime_version>
-		<jena_version>3.16.0</jena_version>
+		<jena_version>3.17.0</jena_version>
 		<jersey_version>3.0.0</jersey_version>
 		<!-- 9.4.17 seems to have issues -->
 		<jetty_version>9.4.39.v20210325</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.7.1</junit_version>
+		<flexmark_version>0.50.40</flexmark_version>
 		<flyway_version>6.5.4</flyway_version>
 		<hibernate_version>5.4.30.Final</hibernate_version>
 		<hibernate_search_version>6.0.2.Final</hibernate_search_version>
@@ -962,6 +963,21 @@
 				<artifactId>javax.mail</artifactId>
 				<version>1.6.1</version>
 			</dependency>
+            <dependency>
+                <groupId>com.vladsch.flexmark</groupId>
+                <artifactId>flexmark</artifactId>
+                <version>${flexmark_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vladsch.flexmark</groupId>
+                <artifactId>flexmark-ext-tables</artifactId>
+                <version>${flexmark_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vladsch.flexmark</groupId>
+                <artifactId>flexmark-profile-pegdown</artifactId>
+                <version>${flexmark_version}</version>
+            </dependency>
 			<dependency>
 				<groupId>commons-cli</groupId>
 				<artifactId>commons-cli</artifactId>
@@ -1107,13 +1123,28 @@
 			<dependency>
 				<groupId>io.swagger</groupId>
 				<artifactId>swagger-annotations</artifactId>
-				<version>1.6.1</version>
+				<version>1.6.2</version>
+			</dependency>
+			<dependency>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-models</artifactId>
+				<version>2.1.7</version>
+			</dependency>
+			<dependency>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-core</artifactId>
+				<version>2.1.7</version>
 			</dependency>
 			<dependency>
 				<groupId>mysql</groupId>
 				<artifactId>mysql-connector-java</artifactId>
 				<version>8.0.20</version>
 			</dependency>
+            <dependency>
+                <groupId>net.sourceforge.htmlunit</groupId>
+                <artifactId>htmlunit</artifactId>
+                <version>2.49.1</version>
+            </dependency>
 			<dependency>
 				<groupId>net.sf.json-lib</groupId>
 				<artifactId>json-lib</artifactId>
@@ -1218,12 +1249,16 @@
 				<artifactId>apache-jena-libs</artifactId>
 				<version>${jena_version}</version>
 				<type>pom</type>
-				<exclusions>
-					<exclusion>
-						<groupId>com.github.jsonld-java</groupId>
-						<artifactId>jsonld-java</artifactId>
-					</exclusion>
-				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>jena-core</artifactId>
+				<version>${jena_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>jena-arq</artifactId>
+				<version>${jena_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.lucene</groupId>
@@ -1518,6 +1553,13 @@
 				<version>3.22.0-GA</version>
 			</dependency>
 			<dependency>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
+				<version>${junit_version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
 				<groupId>org.junit.jupiter</groupId>
 				<artifactId>junit-jupiter</artifactId>
 				<version>${junit_version}</version>
@@ -1544,7 +1586,7 @@
 			<dependency>
 				<groupId>org.junit-pioneer</groupId>
 				<artifactId>junit-pioneer</artifactId>
-				<version>1.1.0</version>
+				<version>1.3.8</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mariadb.jdbc</groupId>
@@ -1738,6 +1780,11 @@
 				<version>1.16.1</version>
 			</dependency>
 			<dependency>
+				<groupId>org.webjars</groupId>
+				<artifactId>swagger-ui</artifactId>
+				<version>3.46.0</version>
+			</dependency>
+			<dependency>
 				<groupId>org.xmlunit</groupId>
 				<artifactId>xmlunit-core</artifactId>
 				<version>2.4.0</version>
@@ -1745,19 +1792,19 @@
 			<dependency>
 				<groupId>org.testcontainers</groupId>
 				<artifactId>testcontainers</artifactId>
-				<version>1.15.1</version>
+				<version>1.15.3</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.testcontainers</groupId>
 				<artifactId>elasticsearch</artifactId>
-				<version>1.15.1</version>
+				<version>1.15.3</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.testcontainers</groupId>
 				<artifactId>junit-jupiter</artifactId>
-				<version>1.15.1</version>
+				<version>1.15.3</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -1923,7 +1970,7 @@
 						<runOrder>random</runOrder>
 						<argLine>@{argLine} ${surefire_jvm_args}</argLine>
 						<forkCount>1.0C</forkCount>
-						<trimStackTrace>false</trimStackTrace>
+						<trimStackTrace>true</trimStackTrace>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -2101,7 +2148,7 @@
 						<dependency>
 							<groupId>com.puppycrawl.tools</groupId>
 							<artifactId>checkstyle</artifactId>
-							<version>8.29</version>
+							<version>8.41.1</version>
 						</dependency>
 					</dependencies>
 					<configuration>
@@ -2188,6 +2235,9 @@
 								<copy todir="target/site/apidocs-server-mdm">
 									<fileset dir="hapi-fhir-server-mdm/target/site/apidocs"/>
 								</copy>
+                                <copy todir="target/site/apidocs-server-openapi">
+                                    <fileset dir="hapi-fhir-server-mdm/target/site/openapi"/>
+                                </copy>
 								<copy todir="target/site/xref-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/xref"/>
 								</copy>
@@ -2593,6 +2643,7 @@
 				<module>hapi-fhir-client</module>
 				<module>hapi-fhir-server</module>
 				<module>hapi-fhir-server-mdm</module>
+				<module>hapi-fhir-server-openapi</module>
 				<module>hapi-fhir-converter</module>
 				<module>hapi-fhir-validation</module>
 				<!--<module>hapi-fhir-narrativegenerator</module>-->

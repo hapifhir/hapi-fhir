@@ -275,7 +275,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 						handleSearchMethodBinding(rest, resource, resourceName, def, includes, (SearchMethodBinding) nextMethodBinding, theRequestDetails);
 					} else if (nextMethodBinding instanceof OperationMethodBinding) {
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
-						String opName = bindings.getOperationBindingToName().get(methodBinding);
+						String opName = bindings.getOperationBindingToId().get(methodBinding);
 						if (operationNames.add(opName)) {
 							// Only add each operation (by name) once
 							rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition(new Reference("OperationDefinition/" + opName));
@@ -310,7 +310,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 					checkBindingForSystemOps(rest, systemOps, nextMethodBinding);
 					if (nextMethodBinding instanceof OperationMethodBinding) {
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
-						String opName = bindings.getOperationBindingToName().get(methodBinding);
+						String opName = bindings.getOperationBindingToId().get(methodBinding);
 						if (operationNames.add(opName)) {
 							ourLog.debug("Found bound operation: {}", opName);
 							rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition(new Reference("OperationDefinition/" + opName));
@@ -419,7 +419,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 		RestfulServerConfiguration serverConfiguration = getServerConfiguration(theRequestDetails);
 		Bindings bindings = serverConfiguration.provideBindings();
 
-		List<OperationMethodBinding> sharedDescriptions = bindings.getOperationNameToBindings().get(theId.getIdPart());
+		List<OperationMethodBinding> sharedDescriptions = bindings.getOperationIdToBindings().get(theId.getIdPart());
 		if (sharedDescriptions == null || sharedDescriptions.isEmpty()) {
 			throw new ResourceNotFoundException(theId);
 		}

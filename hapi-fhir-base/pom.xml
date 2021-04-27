@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>5.4.0-PRE7-SNAPSHOT</version>
+		<version>5.4.0-PRE8-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -73,15 +73,13 @@
 		<!-- JENA Dependencies - Used for Turtle encoding -->
 		<dependency>
 			<groupId>org.apache.jena</groupId>
-			<artifactId>apache-jena-libs</artifactId>
+			<artifactId>jena-core</artifactId>
 			<optional>true</optional>
-			<type>pom</type>
-			<exclusions>
-				<exclusion>
-					<groupId>com.github.jsonld-java</groupId>
-					<artifactId>jsonld-java</artifactId>
-				</exclusion>
-			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-arq</artifactId>
+			<optional>true</optional>
 		</dependency>
 
 		<dependency>

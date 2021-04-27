@@ -22,6 +22,7 @@ package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -60,7 +61,7 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		myElementName = theElementName;
 		if (theDescriptionAnnotation != null) {
 			myShortDefinition = theDescriptionAnnotation.shortDefinition();
-			myFormalDefinition = theDescriptionAnnotation.formalDefinition();
+			myFormalDefinition = ParametersUtil.extractDescription(theDescriptionAnnotation);
 		} else {
 			myShortDefinition = null;
 			myFormalDefinition = null;

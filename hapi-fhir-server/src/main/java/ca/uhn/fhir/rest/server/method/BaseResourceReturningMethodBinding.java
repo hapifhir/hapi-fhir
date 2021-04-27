@@ -27,6 +27,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.fhir.util.ValidateUtil;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -79,7 +81,13 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		super(theMethod, theContext, theProvider);
 
 		Class<?> methodReturnType = theMethod.getReturnType();
-		if (Collection.class.isAssignableFrom(methodReturnType)) {
+
+		Set<Class<?>> expectedReturnTypes = provideExpectedReturnTypes();
+		if (expectedReturnTypes != null) {
+
+			Validate.isTrue(expectedReturnTypes.contains(methodReturnType), "Unexpected method return type on %s - Allowed: %s", theMethod, expectedReturnTypes);
+
+		} else if (Collection.class.isAssignableFrom(methodReturnType)) {
 
 			myMethodReturnType = MethodReturnTypeEnum.LIST_OF_RESOURCES;
 			Class<?> collectionType = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(theMethod);
@@ -121,6 +129,13 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			}
 		}
 
+	}
+
+	/**
+	 * Subclasses may override
+	 */
+	protected Set<Class<?>> provideExpectedReturnTypes() {
+		return null;
 	}
 
 	IBaseResource createBundleFromBundleProvider(IRestfulServer<?> theServer, RequestDetails theRequest, Integer theLimit, String theLinkSelf, Set<Include> theIncludes,

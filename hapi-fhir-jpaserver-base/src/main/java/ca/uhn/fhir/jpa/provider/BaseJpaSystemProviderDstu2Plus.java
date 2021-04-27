@@ -20,19 +20,27 @@ package ca.uhn.fhir.jpa.provider;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import javax.servlet.http.HttpServletRequest;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseJpaSystemProviderDstu2Plus<T, MT> extends BaseJpaSystemProvider<T, MT> {
 
 
-	@Operation(name = MARK_ALL_RESOURCES_FOR_REINDEXING, idempotent = true, returnParameters = {
+	@Description("Marks all currently existing resources of a given type, or all resources of all types, for reindexing.")
+	@Operation(name = MARK_ALL_RESOURCES_FOR_REINDEXING, idempotent = false, returnParameters = {
 		@OperationParam(name = "status")
 	})
 	public IBaseResource markAllResourcesForReindexing(
@@ -53,7 +61,8 @@ public abstract class BaseJpaSystemProviderDstu2Plus<T, MT> extends BaseJpaSyste
 		return retVal;
 	}
 
-	@Operation(name = PERFORM_REINDEXING_PASS, idempotent = true, returnParameters = {
+	@Description("Forces a single pass of the resource reindexing processor")
+	@Operation(name = PERFORM_REINDEXING_PASS, idempotent = false, returnParameters = {
 		@OperationParam(name = "status")
 	})
 	public IBaseResource performReindexingPass() {
@@ -71,5 +80,29 @@ public abstract class BaseJpaSystemProviderDstu2Plus<T, MT> extends BaseJpaSyste
 
 		return retVal;
 	}
+
+	/**
+	 * $process-message
+	 */
+	@Description("Accept a FHIR Message Bundle for processing")
+	@Operation(name = JpaConstants.OPERATION_PROCESS_MESSAGE, idempotent = false)
+	public IBaseBundle processMessage(
+		HttpServletRequest theServletRequest,
+		RequestDetails theRequestDetails,
+
+		@OperationParam(name = "content", min = 1, max = 1, typeName = "Bundle")
+		@Description(formalDefinition = "The message to process (or, if using asynchronous messaging, it may be a response message to accept)")
+			IBaseBundle theMessageToProcess
+	) {
+
+		startRequest(theServletRequest);
+		try {
+			return getDao().processMessage(theRequestDetails, theMessageToProcess);
+		} finally {
+			endRequest(theServletRequest);
+		}
+
+	}
+
 
 }

@@ -30,17 +30,33 @@ import java.lang.annotation.Target;
  * a search parameter definition in order to provide documentation for that item.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value= {ElementType.FIELD, ElementType.TYPE, ElementType.PARAMETER, ElementType.METHOD})
+@Target(value = {ElementType.FIELD, ElementType.TYPE, ElementType.PARAMETER, ElementType.METHOD})
 public @interface Description {
 
 	/**
-	 * Optional short name for this child 
+	 * A description of this method or parameter
+	 *
+	 * @since 5.4.0
+	 */
+	String value() default "";
+
+	/**
+	 * Optional short name for this child
 	 */
 	String shortDefinition() default "";
-	
+
 	/**
 	 * Optional formal definition for this child
+	 *
+	 * @deprecated Use {@link #value()} instead. Deprecated in 5.4.0.
 	 */
+	@Deprecated
 	String formalDefinition() default "";
-	
+
+	/**
+	 * May be used to supply example values for this
+	 *
+	 * @since 5.4.0
+	 */
+	String[] example() default {};
 }

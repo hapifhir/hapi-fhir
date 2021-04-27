@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.GraphQL;
 import ca.uhn.fhir.rest.annotation.GraphQLQueryBody;
 import ca.uhn.fhir.rest.annotation.GraphQLQueryUrl;
@@ -110,18 +111,20 @@ public class GraphQLProvider {
 		myStorageServices = theStorageServices;
 	}
 
+	@Description(value="This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.")
 	@GraphQL(type=RequestTypeEnum.GET)
-	public String processGraphQlGetRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryUrl String queryUrl) {
-		if (queryUrl != null) {
-			return processGraphQLRequest(theRequestDetails, theId, queryUrl);
+	public String processGraphQlGetRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryUrl String theQueryUrl) {
+		if (theQueryUrl != null) {
+			return processGraphQLRequest(theRequestDetails, theId, theQueryUrl);
 		}
 		throw new InvalidRequestException("Unable to parse empty GraphQL expression");
 	}
 
+	@Description(value="This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.")
 	@GraphQL(type=RequestTypeEnum.POST)
-	public String processGraphQlPostRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryBody String queryBody) {
-		if (queryBody != null) {
-			return processGraphQLRequest(theRequestDetails, theId, queryBody);
+	public String processGraphQlPostRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryBody String theQueryBody) {
+		if (theQueryBody != null) {
+			return processGraphQLRequest(theRequestDetails, theId, theQueryBody);
 		}
 		throw new InvalidRequestException("Unable to parse empty GraphQL expression");
 	}
