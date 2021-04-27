@@ -21,8 +21,11 @@ package ca.uhn.fhir.jpa.util;
  */
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.TranslationQuery;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
@@ -76,15 +79,18 @@ public class MemoryCacheService {
 
 
 	public <K, T> T get(CacheEnum theCache, K theKey, Function<K, T> theSupplier) {
+		assert theCache.myKeyType.isAssignableFrom(theKey.getClass());
 		Cache<K, T> cache = getCache(theCache);
 		return cache.get(theKey, theSupplier);
 	}
 
 	public <K, V> V getIfPresent(CacheEnum theCache, K theKey) {
+		assert theCache.myKeyType.isAssignableFrom(theKey.getClass());
 		return (V) getCache(theCache).getIfPresent(theKey);
 	}
 
 	public <K, V> void put(CacheEnum theCache, K theKey, V theValue) {
+		assert theCache.myKeyType.isAssignableFrom(theKey.getClass());
 		getCache(theCache).put(theKey, theValue);
 	}
 
@@ -102,13 +108,19 @@ public class MemoryCacheService {
 
 	public enum CacheEnum {
 
-		TAG_DEFINITION,
-		PERSISTENT_ID,
-		RESOURCE_LOOKUP,
-		FORCED_ID,
-		CONCEPT_TRANSLATION,
-		CONCEPT_TRANSLATION_REVERSE
+		TAG_DEFINITION(Pair.class),
+		PERSISTENT_ID(String.class),
+		RESOURCE_LOOKUP(String.class),
+		FORCED_ID(Long.class),
+		CONCEPT_TRANSLATION(TranslationQuery.class),
+		MATCH_URL(String.class),
+		CONCEPT_TRANSLATION_REVERSE(TranslationQuery.class);
 
+		private final Class<?> myKeyType;
+
+		CacheEnum(Class<?> theKeyType) {
+			myKeyType = theKeyType;
+		}
 	}
 
 

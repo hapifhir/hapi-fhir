@@ -25,22 +25,26 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.Set;
 
 @Service
@@ -52,9 +56,20 @@ public class MatchResourceUrlService {
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired
+	private DaoConfig myDaoConfig;
+	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Autowired
+	private MemoryCacheService myMemoryCacheService;
 
 	public <R extends IBaseResource> Set<ResourcePersistentId> processMatchUrl(String theMatchUrl, Class<R> theResourceType, RequestDetails theRequest) {
+		if (myDaoConfig.getMatchUrlCache()) {
+			ResourcePersistentId existing = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.MATCH_URL, theMatchUrl);
+			if (existing != null) {
+				return Collections.singleton(existing);
+			}
+		}
+
 		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceType);
 		SearchParameterMap paramMap = myMatchUrlService.translateMatchUrl(theMatchUrl, resourceDef);
 		if (paramMap.isEmpty() && paramMap.getLastUpdated() == null) {
@@ -62,7 +77,13 @@ public class MatchResourceUrlService {
 		}
 		paramMap.setLoadSynchronous(true);
 
-		return search(paramMap, theResourceType, theRequest);
+		Set<ResourcePersistentId> retVal = search(paramMap, theResourceType, theRequest);
+
+		if (myDaoConfig.getMatchUrlCache() && retVal.size() == 1) {
+			myMemoryCacheService.put(MemoryCacheService.CacheEnum.MATCH_URL, theMatchUrl, retVal.iterator().next());
+		}
+
+		return retVal;
 	}
 
 	public <R extends IBaseResource> Set<ResourcePersistentId> search(SearchParameterMap theParamMap, Class<R> theResourceType, RequestDetails theRequest) {
@@ -88,4 +109,11 @@ public class MatchResourceUrlService {
 	}
 
 
+	public void matchUrlResolved(String theMatchUrl, ResourcePersistentId theResourcePersistentId) {
+		Validate.notBlank(theMatchUrl);
+		Validate.notNull(theResourcePersistentId);
+		if (myDaoConfig.getMatchUrlCache()) {
+			myMemoryCacheService.put(MemoryCacheService.CacheEnum.MATCH_URL, theMatchUrl, theResourcePersistentId);
+		}
+	}
 }

@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -26,6 +27,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -42,6 +45,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myDaoConfig.setResourceMetaCountHardLimit(new DaoConfig().getResourceMetaCountHardLimit());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 		myDaoConfig.setDeleteEnabled(new DaoConfig().isDeleteEnabled());
+		myDaoConfig.setMatchUrlCache(new DaoConfig().getMatchUrlCache());
 	}
 
 	@BeforeEach
@@ -367,7 +371,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		});
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		// Perform count, Search history table, resolve forced IDs
-		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		assertNoPartitionSelectors();
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
@@ -429,7 +433,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		});
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		// Perform count, Search history table, resolve forced IDs, load tags (x3)
-		assertEquals(6, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(5, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
@@ -609,6 +613,128 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
+
+	@Test
+	public void testTransactionWithConditionalCreate_MatchUrlCacheEnabled() {
+		myDaoConfig.setMatchUrlCache(true);
+
+		Supplier<Bundle> bundleCreator = ()-> {
+			BundleBuilder bb = new BundleBuilder(myFhirCtx);
+
+			Patient pt = new Patient();
+			pt.setId(IdType.newRandomUuid());
+			pt.addIdentifier().setSystem("http://foo").setValue("123");
+			bb.addTransactionCreateEntry(pt).conditional("Patient?identifier=http://foo|123");
+
+			Observation obs = new Observation();
+			obs.setId(IdType.newRandomUuid());
+			obs.setSubject(new Reference(pt.getId()));
+			bb.addTransactionCreateEntry(obs);
+
+			return (Bundle) bb.getBundle();
+		};
+
+		// Run once (creates both)
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, bundleCreator.get());
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+
+		runInTransaction(()->{
+			List<String> types = myResourceTableDao.findAll().stream().map(t -> t.getResourceType()).collect(Collectors.toList());
+			assertThat(types, containsInAnyOrder("Patient", "Observation"));
+		});
+
+		// Run a second time (creates a new observation, reuses the patient, should use cache)
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, bundleCreator.get());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(3, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+
+		runInTransaction(()->{
+			List<String> types = myResourceTableDao.findAll().stream().map(t -> t.getResourceType()).collect(Collectors.toList());
+			assertThat(types, containsInAnyOrder("Patient", "Observation", "Observation"));
+		});
+
+		// Run a third time (creates a new observation, reuses the patient, should use cache)
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, bundleCreator.get());
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(3, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+
+		runInTransaction(()->{
+			List<String> types = myResourceTableDao.findAll().stream().map(t -> t.getResourceType()).collect(Collectors.toList());
+			assertThat(types, containsInAnyOrder("Patient", "Observation", "Observation", "Observation"));
+		});
+
+	}
+
+	@Test
+	public void testTransactionWithConditionalCreate_MatchUrlCacheNotEnabled() {
+		Supplier<Bundle> bundleCreator = ()-> {
+			BundleBuilder bb = new BundleBuilder(myFhirCtx);
+
+			Patient pt = new Patient();
+			pt.setId(IdType.newRandomUuid());
+			pt.addIdentifier().setSystem("http://foo").setValue("123");
+			bb.addTransactionCreateEntry(pt).conditional("Patient?identifier=http://foo|123");
+
+			Observation obs = new Observation();
+			obs.setId(IdType.newRandomUuid());
+			obs.setSubject(new Reference(pt.getId()));
+			bb.addTransactionCreateEntry(obs);
+
+			return (Bundle) bb.getBundle();
+		};
+
+		// Run once (creates both)
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, bundleCreator.get());
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+
+		runInTransaction(()->{
+			List<String> types = myResourceTableDao.findAll().stream().map(t -> t.getResourceType()).collect(Collectors.toList());
+			assertThat(types, containsInAnyOrder("Patient", "Observation"));
+		});
+
+		// Run a second time (creates a new observation, reuses the patient, should use cache)
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, bundleCreator.get());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(3, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+
+		runInTransaction(()->{
+			List<String> types = myResourceTableDao.findAll().stream().map(t -> t.getResourceType()).collect(Collectors.toList());
+			assertThat(types, containsInAnyOrder("Patient", "Observation", "Observation"));
+		});
+
+		// Run a third time (creates a new observation, reuses the patient, should use cache)
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, bundleCreator.get());
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(3, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+
+		runInTransaction(()->{
+			List<String> types = myResourceTableDao.findAll().stream().map(t -> t.getResourceType()).collect(Collectors.toList());
+			assertThat(types, containsInAnyOrder("Patient", "Observation", "Observation", "Observation"));
+		});
+
 	}
 
 	@Test
@@ -1111,7 +1237,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 		// Lookup the two existing IDs to make sure they are legit
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
@@ -1170,7 +1296,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 		// Lookup the two existing IDs to make sure they are legit
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());

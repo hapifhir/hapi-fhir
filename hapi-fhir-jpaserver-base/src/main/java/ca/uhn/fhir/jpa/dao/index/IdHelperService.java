@@ -237,7 +237,7 @@ public class IdHelperService {
 	public IIdType translatePidIdToForcedId(FhirContext theCtx, String theResourceType, ResourcePersistentId theId) {
 		IIdType retVal = theCtx.getVersion().newIdType();
 
-		Optional<String> forcedId = translatePidIdToForcedId(theId);
+		Optional<String> forcedId = translatePidIdToForcedIdWithCache(theId);
 		if (forcedId.isPresent()) {
 			retVal.setValue(theResourceType + '/' + forcedId.get());
 		} else {
@@ -248,7 +248,7 @@ public class IdHelperService {
 	}
 
 
-	public Optional<String> translatePidIdToForcedId(ResourcePersistentId theId) {
+	public Optional<String> translatePidIdToForcedIdWithCache(ResourcePersistentId theId) {
 		return myMemoryCacheService.get(MemoryCacheService.CacheEnum.FORCED_ID, theId.getIdAsLong(), pid -> myForcedIdDao.findByResourcePid(pid).map(t -> t.getForcedId()));
 	}
 
@@ -479,6 +479,17 @@ public class IdHelperService {
 			throw new ResourceNotFoundException("Requested resource not found");
 		}
 		return optionalResource.get().getIdDt().toVersionless();
+	}
+
+	/**
+	 * Pre-cache a PID-to-Resource-ID mapping for later retrieval by {@link #translatePidsToForcedIds(Set)} and related methods
+	 */
+	public void addResolvedPidToForcedId(ResourcePersistentId theResourcePersistentId, @Nullable String theForcedId) {
+		if (theForcedId != null) {
+			myMemoryCacheService.put(MemoryCacheService.CacheEnum.FORCED_ID, theResourcePersistentId.getIdAsLong(), Optional.of(theForcedId));
+		}else {
+			myMemoryCacheService.put(MemoryCacheService.CacheEnum.FORCED_ID, theResourcePersistentId.getIdAsLong(), Optional.empty());
+		}
 	}
 
 	public static boolean isValidPid(IIdType theId) {

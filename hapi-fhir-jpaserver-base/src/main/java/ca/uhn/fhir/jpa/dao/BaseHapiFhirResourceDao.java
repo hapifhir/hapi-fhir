@@ -33,9 +33,11 @@ import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
+import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.expunge.DeleteExpungeService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -134,6 +136,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -288,10 +291,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				throw new PreconditionFailedException(msg);
 			} else if (match.size() == 1) {
 				ResourcePersistentId pid = match.iterator().next();
-				entity = myEntityManager.find(ResourceTable.class, pid.getId());
-				IBaseResource resource = toResource(entity, false);
-				theResource.setId(resource.getIdElement().getValue());
-				return toMethodOutcome(theRequest, entity, resource).setCreated(false).setNop(true);
+
+				Supplier<LazyDaoMethodOutcome.EntityAndResource> entitySupplier = ()->{
+					ResourceTable foundEntity = myEntityManager.find(ResourceTable.class, pid.getId());
+					IBaseResource resource = toResource(foundEntity, false);
+					theResource.setId(resource.getIdElement().getValue());
+					return new LazyDaoMethodOutcome.EntityAndResource(foundEntity, resource);
+				};
+
+				Supplier<IIdType> idSupplier = ()-> myIdHelperService.translatePidIdToForcedId(myFhirContext, myResourceName, pid);
+
+				return toMethodOutcomeLazy(theRequest, pid, entitySupplier, idSupplier).setCreated(false).setNop(true);
 			}
 		}
 
@@ -352,6 +362,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					}
 					break;
 			}
+		}
+
+		String forcedId = null;
+		if (updatedEntity.getForcedId() != null) {
+			forcedId = updatedEntity.getForcedId().getForcedId();
+		}
+		myIdHelperService.addResolvedPidToForcedId(new ResourcePersistentId(updatedEntity.getResourceId()), forcedId);
+
+		if (theIfNoneExist != null) {
+			myMatchResourceUrlService.matchUrlResolved(theIfNoneExist, new ResourcePersistentId(entity.getResourceId()));
 		}
 
 		/*
@@ -435,7 +455,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Don't delete again if it's already deleted
 		if (entity.getDeleted() != null) {
-			DaoMethodOutcome outcome = new DaoMethodOutcome();
+			DaoMethodOutcome outcome = new DaoMethodOutcome(new ResourcePersistentId(entity.getResourceId()));
 			outcome.setEntity(entity);
 
 			IIdType id = getContext().getVersion().newIdType();

@@ -132,6 +132,12 @@
 			<artifactId>quartz</artifactId>
 		</dependency>
 
+		<!-- Caffeine -->
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
+		</dependency>
+
 		<!-- Java -->
 		<dependency>
 			<groupId>javax.annotation</groupId>

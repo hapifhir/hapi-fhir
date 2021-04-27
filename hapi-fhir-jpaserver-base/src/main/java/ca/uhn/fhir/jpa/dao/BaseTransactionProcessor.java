@@ -225,11 +225,11 @@ public abstract class BaseTransactionProcessor {
 		myVersionAdapter.setResponseLastModified(newEntry, lastModifier);
 
 		if (theRequestDetails != null) {
-			if (outcome.getResource() != null) {
 				String prefer = theRequestDetails.getHeader(Constants.HEADER_PREFER);
 				PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(null, prefer).getReturn();
 				if (preferReturn != null) {
 					if (preferReturn == PreferReturnEnum.REPRESENTATION) {
+					if (outcome.getResource() != null) {
 						outcome.fireResourceViewCallbacks();
 						myVersionAdapter.setResource(newEntry, outcome.getResource());
 					}
@@ -439,21 +439,21 @@ public abstract class BaseTransactionProcessor {
 		 * heavy load with lots of concurrent transactions using all available
 		 * database connections.
 		 */
-		TransactionCallback<Map<IBase, IBasePersistedResource>> txCallback = status -> {
+		TransactionCallback<Map<IBase, IIdType>> txCallback = status -> {
 			final Set<IIdType> allIds = new LinkedHashSet<>();
 			final Map<IIdType, IIdType> idSubstitutions = new HashMap<>();
 			final Map<IIdType, DaoMethodOutcome> idToPersistedOutcome = new HashMap<>();
-			Map<IBase, IBasePersistedResource> retVal = doTransactionWriteOperations(theRequestDetails, theActionName, transactionDetails, allIds, idSubstitutions, idToPersistedOutcome, response, originalRequestOrder, entries, transactionStopWatch);
+			Map<IBase, IIdType> retVal = doTransactionWriteOperations(theRequestDetails, theActionName, transactionDetails, allIds, idSubstitutions, idToPersistedOutcome, response, originalRequestOrder, entries, transactionStopWatch);
 
 			transactionStopWatch.startTask("Commit writes to database");
 			return retVal;
 		};
-		Map<IBase, IBasePersistedResource> entriesToProcess = myHapiTransactionService.execute(theRequestDetails, txCallback);
+		Map<IBase, IIdType> entriesToProcess = myHapiTransactionService.execute(theRequestDetails, txCallback);
 		transactionStopWatch.endCurrentTask();
 
-		for (Map.Entry<IBase, IBasePersistedResource> nextEntry : entriesToProcess.entrySet()) {
-			String responseLocation = nextEntry.getValue().getIdDt().toUnqualified().getValue();
-			String responseEtag = nextEntry.getValue().getIdDt().getVersionIdPart();
+		for (Map.Entry<IBase, IIdType> nextEntry : entriesToProcess.entrySet()) {
+			String responseLocation = nextEntry.getValue().toUnqualified().getValue();
+			String responseEtag = nextEntry.getValue().getVersionIdPart();
 			myVersionAdapter.setResponseLocation(nextEntry.getKey(), responseLocation);
 			myVersionAdapter.setResponseETag(nextEntry.getKey(), responseEtag);
 		}
@@ -575,7 +575,7 @@ public abstract class BaseTransactionProcessor {
 		myModelConfig = theModelConfig;
 	}
 
-	private Map<IBase, IBasePersistedResource> doTransactionWriteOperations(final RequestDetails theRequest, String theActionName, TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
+	private Map<IBase, IIdType> doTransactionWriteOperations(final RequestDetails theRequest, String theActionName, TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
 																									Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder, List<IBase> theEntries, StopWatch theTransactionStopWatch) {
 
 		theTransactionDetails.beginAcceptingDeferredInterceptorBroadcasts(
@@ -587,8 +587,8 @@ public abstract class BaseTransactionProcessor {
 
 			Set<String> deletedResources = new HashSet<>();
 			DeleteConflictList deleteConflicts = new DeleteConflictList();
-			Map<IBase, IBasePersistedResource> entriesToProcess = new IdentityHashMap<>();
-			Set<IBasePersistedResource> nonUpdatedEntities = new HashSet<>();
+			Map<IBase, IIdType> entriesToProcess = new IdentityHashMap<>();
+			Set<IIdType> nonUpdatedEntities = new HashSet<>();
 			Set<IBasePersistedResource> updatedEntities = new HashSet<>();
 			List<IBaseResource> updatedResources = new ArrayList<>();
 			Map<String, Class<? extends IBaseResource>> conditionalRequestUrls = new HashMap<>();
@@ -725,9 +725,9 @@ public abstract class BaseTransactionProcessor {
 						if (nextResourceId != null) {
 							handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequest);
 						}
-						entriesToProcess.put(nextRespEntry, outcome.getEntity());
+						entriesToProcess.put(nextRespEntry, outcome.getId());
 						if (outcome.getCreated() == false) {
-							nonUpdatedEntities.add(outcome.getEntity());
+							nonUpdatedEntities.add(outcome.getId());
 						} else {
 							if (isNotBlank(matchUrl)) {
 								conditionalRequestUrls.put(matchUrl, res.getClass());
@@ -748,7 +748,7 @@ public abstract class BaseTransactionProcessor {
 								DaoMethodOutcome outcome = dao.delete(deleteId, deleteConflicts, theRequest, theTransactionDetails);
 								if (outcome.getEntity() != null) {
 									deletedResources.add(deleteId.getValueAsString());
-									entriesToProcess.put(nextRespEntry, outcome.getEntity());
+									entriesToProcess.put(nextRespEntry, outcome.getId());
 								}
 							}
 						} else {
@@ -811,7 +811,7 @@ public abstract class BaseTransactionProcessor {
 						}
 
 						handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequest);
-						entriesToProcess.put(nextRespEntry, outcome.getEntity());
+						entriesToProcess.put(nextRespEntry, outcome.getId());
 						break;
 					}
 					case "PATCH": {
@@ -915,7 +915,7 @@ public abstract class BaseTransactionProcessor {
 			}
 			DeleteConflictService.validateDeleteConflictsEmptyOrThrowException(myContext, deleteConflicts);
 
-			theIdToPersistedOutcome.entrySet().forEach(t -> theTransactionDetails.addResolvedResourceId(t.getKey(), t.getValue().getEntity().getPersistentId()));
+			theIdToPersistedOutcome.entrySet().forEach(t -> theTransactionDetails.addResolvedResourceId(t.getKey(), t.getValue().getPersistentId()));
 
 			/*
 			 * Perform ID substitutions and then index each resource we have saved
@@ -928,6 +928,10 @@ public abstract class BaseTransactionProcessor {
 
 				if (i++ % 250 == 0) {
 					ourLog.debug("Have indexed {} entities out of {} in transaction", i, theIdToPersistedOutcome.values().size());
+				}
+
+				if (nextOutcome.isNop()) {
+					continue;
 				}
 
 				IBaseResource nextResource = nextOutcome.getResource();
@@ -994,7 +998,7 @@ public abstract class BaseTransactionProcessor {
 
 				if (updatedEntities.contains(nextOutcome.getEntity())) {
 					jpaDao.updateInternal(theRequest, nextResource, true, false, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource(), theTransactionDetails);
-				} else if (!nonUpdatedEntities.contains(nextOutcome.getEntity())) {
+				} else if (!nonUpdatedEntities.contains(nextOutcome.getId())) {
 					jpaDao.updateEntity(theRequest, nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theTransactionDetails, false, true);
 				}
 			}

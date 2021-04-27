@@ -49,15 +49,15 @@ public class DaoConfig {
 	 */
 	public static final Long DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS = DateUtils.MILLIS_PER_MINUTE;
 	/**
+	 * See {@link #setStatusBasedReindexingDisabled(boolean)}
+	 */
+	public static final String DISABLE_STATUS_BASED_REINDEX = "disable_status_based_reindex";
+	/**
 	 * Default value for {@link #setTranslationCachesExpireAfterWriteInMinutes(Long)}: 60 minutes
 	 *
 	 * @see #setTranslationCachesExpireAfterWriteInMinutes(Long)
 	 */
 	public static final Long DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES = 60L;
-	/**
-	 * See {@link #setStatusBasedReindexingDisabled(boolean)}
-	 */
-	public static final String DISABLE_STATUS_BASED_REINDEX = "disable_status_based_reindex";
 	/**
 	 * Default {@link #setBundleTypesAllowedForStorage(Set)} value:
 	 * <ul>
@@ -91,11 +91,6 @@ public class DaoConfig {
 
 	private final ModelConfig myModelConfig = new ModelConfig();
 
-	/**
-	 * update setter javadoc if default changes
-	 */
-	@Nonnull
-	private Long myTranslationCachesExpireAfterWriteInMinutes = DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES;
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -201,6 +196,15 @@ public class DaoConfig {
 	 * @since 5.2.0
 	 */
 	private boolean myUseLegacySearchBuilder = false;
+	/**
+	 * update setter javadoc if default changes
+	 */
+	@Nonnull
+	private Long myTranslationCachesExpireAfterWriteInMinutes = DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES;
+	/**
+	 * @since 5.4.0
+	 */
+	private boolean myMatchUrlCache;
 
 	/**
 	 * Constructor
@@ -251,6 +255,32 @@ public class DaoConfig {
 	 */
 	public boolean isUseLegacySearchBuilder() {
 		return myUseLegacySearchBuilder;
+	}
+
+	/**
+	 * Specifies the duration in minutes for which values will be retained after being
+	 * written to the terminology translation cache. Defaults to 60.
+	 */
+	@Nonnull
+	public Long getTranslationCachesExpireAfterWriteInMinutes() {
+		return myTranslationCachesExpireAfterWriteInMinutes;
+	}
+
+	/**
+	 * Specifies the duration in minutes for which values will be retained after being
+	 * written to the terminology translation cache. Defaults to 60.
+	 */
+	public void setTranslationCachesExpireAfterWriteInMinutes(Long translationCachesExpireAfterWriteInMinutes) {
+		myTranslationCachesExpireAfterWriteInMinutes = translationCachesExpireAfterWriteInMinutes;
+	}
+
+	// FIXME: add docs
+	public void setMatchUrlCache(boolean theMatchUrlCache) {
+		myMatchUrlCache = theMatchUrlCache;
+	}
+
+	public boolean getMatchUrlCache() {
+		return myMatchUrlCache;
 	}
 
 	/**
@@ -880,23 +910,6 @@ public class DaoConfig {
 	 */
 	public void setReuseCachedSearchResultsForMillis(Long theReuseCachedSearchResultsForMillis) {
 		myReuseCachedSearchResultsForMillis = theReuseCachedSearchResultsForMillis;
-	}
-
-	/**
-	 * Specifies the duration in minutes for which values will be retained after being
-	 * written to the terminology translation cache. Defaults to 60.
-	 */
-	@Nonnull
-	public Long getTranslationCachesExpireAfterWriteInMinutes() {
-		return myTranslationCachesExpireAfterWriteInMinutes;
-	}
-
-	/**
-	 * Specifies the duration in minutes for which values will be retained after being
-	 * written to the terminology translation cache. Defaults to 60.
-	 */
-	public void setTranslationCachesExpireAfterWriteInMinutes(Long translationCachesExpireAfterWriteInMinutes) {
-		myTranslationCachesExpireAfterWriteInMinutes = translationCachesExpireAfterWriteInMinutes;
 	}
 
 	/**

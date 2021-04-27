@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.api.model;
 
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class DaoMethodOutcome extends MethodOutcome {
@@ -29,12 +30,14 @@ public class DaoMethodOutcome extends MethodOutcome {
 	private IBasePersistedResource myEntity;
 	private IBaseResource myPreviousResource;
 	private boolean myNop;
+	private ResourcePersistentId myResourcePersistentId;
 
 	/**
 	 * Constructor
 	 */
-	public DaoMethodOutcome() {
-		super();
+	public DaoMethodOutcome(ResourcePersistentId theResourcePersistentId) {
+		assert theResourcePersistentId != null;
+		myResourcePersistentId = theResourcePersistentId;
 	}
 
 	/**
@@ -81,5 +84,9 @@ public class DaoMethodOutcome extends MethodOutcome {
 	public DaoMethodOutcome setCreated(Boolean theCreated) {
 		super.setCreated(theCreated);
 		return this;
+	}
+
+	public ResourcePersistentId getPersistentId() {
+		return myResourcePersistentId;
 	}
 }
