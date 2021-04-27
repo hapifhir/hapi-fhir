@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 import static ca.uhn.fhir.rest.server.interceptor.s13n.StandardizingInterceptor.STANDARDIZATION_DISABLED_HEADER;
 import static ca.uhn.fhir.rest.server.interceptor.validation.fields.FieldValidatingInterceptor.VALIDATION_DISABLED_HEADER;
@@ -36,6 +37,17 @@ class FieldValidatingInterceptorTest {
 	@BeforeEach
 	public void init() throws Exception {
 		myInterceptor = new FieldValidatingInterceptor();
+	}
+
+	@Test
+	public void testEmptyRequests() {
+		try {
+			myInterceptor.setConfig(new HashMap<>());
+			myInterceptor.resourcePreCreate(null, null);
+			myInterceptor.resourcePreUpdate(null, null, null);
+		} catch (Exception ex) {
+			fail();
+		}
 	}
 
 	@Test

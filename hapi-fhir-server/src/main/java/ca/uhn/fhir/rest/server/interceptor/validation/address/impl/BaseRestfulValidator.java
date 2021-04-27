@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationException;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationResult;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
