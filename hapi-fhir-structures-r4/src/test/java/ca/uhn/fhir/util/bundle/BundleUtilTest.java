@@ -1,6 +1,7 @@
 package ca.uhn.fhir.util.bundle;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.r4.model.Bundle;
@@ -254,6 +255,15 @@ public class BundleUtilTest {
 		assertThat(entry.get(5).getRequest().getMethod(), is(equalTo(PUT)));
 		// Then GETs
 		assertThat(entry.get(6).getRequest().getMethod(), is(equalTo(GET)));
+	}
+
+	@Test
+	public void testBundleSortsCanHandlesDeletesThatContainNoResources() {
+		Patient p = new Patient();
+		p.setId("Patient/123");
+		BundleBuilder builder = new BundleBuilder(ourCtx);
+		builder.addTransactionDeleteEntry(p);
+		BundleUtil.sortEntriesIntoProcessingOrder(ourCtx, builder.getBundle());
 	}
 
 	@Test

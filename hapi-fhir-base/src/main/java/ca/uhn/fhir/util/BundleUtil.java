@@ -248,39 +248,42 @@ public class BundleUtil {
 
 		for (BundleEntryParts bundleEntryPart : bundleEntryParts) {
 			IBaseResource resource = bundleEntryPart.getResource();
-			String resourceId = resource.getIdElement().toVersionless().toString();
-			resourceIdToBundleEntryMap.put(resourceId, bundleEntryPart);
-			if (resourceId == null) {
-				if (bundleEntryPart.getFullUrl() != null) {
-					resourceId = bundleEntryPart.getFullUrl();
+			if (resource != null) {
+				String resourceId = resource.getIdElement().toVersionless().toString();
+				resourceIdToBundleEntryMap.put(resourceId, bundleEntryPart);
+				if (resourceId == null) {
+					if (bundleEntryPart.getFullUrl() != null) {
+						resourceId = bundleEntryPart.getFullUrl();
+					}
 				}
+
+				color.put(resourceId, WHITE);
 			}
-
-			color.put(resourceId, WHITE);
-
 		}
 
 		for (BundleEntryParts bundleEntryPart : bundleEntryParts) {
 			IBaseResource resource = bundleEntryPart.getResource();
-			String resourceId = resource.getIdElement().toVersionless().toString();
-			resourceIdToBundleEntryMap.put(resourceId, bundleEntryPart);
-			if (resourceId == null) {
-				if (bundleEntryPart.getFullUrl() != null) {
-					resourceId = bundleEntryPart.getFullUrl();
-				}
-			}
-			List<ResourceReferenceInfo> allResourceReferences = theContext.newTerser().getAllResourceReferences(resource);
-			String finalResourceId = resourceId;
-			allResourceReferences
-				.forEach(refInfo -> {
-					String referencedResourceId = refInfo.getResourceReference().getReferenceElement().toVersionless().getValue();
-					if (color.containsKey(referencedResourceId)) {
-						if (!adjList.containsKey(finalResourceId)) {
-							adjList.put(finalResourceId, new ArrayList<>());
-						}
-						adjList.get(finalResourceId).add(referencedResourceId);
+			if (resource != null) {
+				String resourceId = resource.getIdElement().toVersionless().toString();
+				resourceIdToBundleEntryMap.put(resourceId, bundleEntryPart);
+				if (resourceId == null) {
+					if (bundleEntryPart.getFullUrl() != null) {
+						resourceId = bundleEntryPart.getFullUrl();
 					}
-				});
+				}
+				List<ResourceReferenceInfo> allResourceReferences = theContext.newTerser().getAllResourceReferences(resource);
+				String finalResourceId = resourceId;
+				allResourceReferences
+					.forEach(refInfo -> {
+						String referencedResourceId = refInfo.getResourceReference().getReferenceElement().toVersionless().getValue();
+						if (color.containsKey(referencedResourceId)) {
+							if (!adjList.containsKey(finalResourceId)) {
+								adjList.put(finalResourceId, new ArrayList<>());
+							}
+							adjList.get(finalResourceId).add(referencedResourceId);
+						}
+					});
+			}
 		}
 
 		for (Map.Entry<String, Integer> entry:color.entrySet()) {
