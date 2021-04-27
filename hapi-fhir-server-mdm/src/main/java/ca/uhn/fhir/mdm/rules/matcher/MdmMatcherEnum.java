@@ -50,7 +50,9 @@ public enum MdmMatcherEnum {
 
 	IDENTIFIER(new IdentifierMatcher()),
 
-	EMPTY_FIELD(new EmptyFieldMatcher());
+	EMPTY_FIELD(new EmptyFieldMatcher()),
+	EXTENSION_ANY_ORDER(new ExtensionMatcher()),
+	NUMERIC(new HapiStringMatcher(new NumericMatcher()));
 
 	private final IMdmFieldMatcher myMdmFieldMatcher;
 

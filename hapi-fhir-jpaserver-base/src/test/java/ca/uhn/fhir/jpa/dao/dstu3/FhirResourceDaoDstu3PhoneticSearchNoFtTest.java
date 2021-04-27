@@ -1,15 +1,15 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.context.phonetic.ApacheEncoder;
+import ca.uhn.fhir.context.phonetic.NumericEncoder;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.util.HapiExtensions;
 import org.apache.commons.codec.language.Soundex;
-import org.aspectj.lang.annotation.Before;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.SearchParameter;
@@ -36,10 +36,14 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 	public static final String GAIL = "Gail";
 	public static final String NAME_SOUNDEX_SP = "nameSoundex";
 	public static final String ADDRESS_LINE_SOUNDEX_SP = "addressLineSoundex";
+	public static final String PHONE_NUMBER_SP = "phoneNumber";
 	private static final String BOB = "BOB";
 	private static final String ADDRESS = "123 Nohili St";
 	private static final String ADDRESS_CLOSE = "123 Nohily St";
 	private static final String ADDRESS_FAR = "123 College St";
+	private static final String PHONE = "4169671111";
+	private static final String PHONE_CLOSE = "(416) 967-1111";
+	private static final String PHONE_FAR = "416 421 0421";
 
 	@Autowired
 	ISearchParamRegistry mySearchParamRegistry;
@@ -50,8 +54,9 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 		myDaoConfig.setFetchSizeDefaultMaximum(new DaoConfig().getFetchSizeDefaultMaximum());
 
-		createSoundexSearchParameter(NAME_SOUNDEX_SP, PhoneticEncoderEnum.SOUNDEX, "Patient.name");
-		createSoundexSearchParameter(ADDRESS_LINE_SOUNDEX_SP, PhoneticEncoderEnum.SOUNDEX, "Patient.address.line");
+		createPhoneticSearchParameter(NAME_SOUNDEX_SP, PhoneticEncoderEnum.SOUNDEX, "Patient.name");
+		createPhoneticSearchParameter(ADDRESS_LINE_SOUNDEX_SP, PhoneticEncoderEnum.SOUNDEX, "Patient.address.line");
+		createPhoneticSearchParameter(PHONE_NUMBER_SP, PhoneticEncoderEnum.NUMERIC, "Patient.telecom");
 		mySearchParamRegistry.forceRefresh();
 		mySearchParamRegistry.setPhoneticEncoder(new ApacheEncoder(PhoneticEncoderEnum.SOUNDEX.name(), new Soundex()));
 	}
@@ -72,21 +77,31 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 	}
 
 	@Test
+	public void testNumeric() {
+		NumericEncoder numeric = new NumericEncoder();
+		assertEquals(PHONE, numeric.encode(PHONE_CLOSE));
+		assertEquals(PHONE, numeric.encode(PHONE));
+		assertEquals(numeric.encode(PHONE), numeric.encode(PHONE_CLOSE));
+		assertNotEquals(numeric.encode(PHONE), numeric.encode(PHONE_FAR));
+	}
+
+	@Test
 	public void phoneticMatch() {
 		Patient patient;
 
 		patient = new Patient();
 		patient.addName().addGiven(GALE);
 		patient.addAddress().addLine(ADDRESS);
+		patient.addTelecom().setValue(PHONE);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		IIdType pId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		List<ResourceIndexedSearchParamString> stringParams = myResourceIndexedSearchParamStringDao.findAll();
 
-		assertThat(stringParams, hasSize(6));
+		assertThat(stringParams, hasSize(7));
 		List<String> stringParamNames = stringParams.stream().map(ResourceIndexedSearchParamString::getParamName).collect(Collectors.toList());
-		assertThat(stringParamNames, containsInAnyOrder(Patient.SP_NAME, Patient.SP_GIVEN, Patient.SP_PHONETIC, NAME_SOUNDEX_SP, Patient.SP_ADDRESS, ADDRESS_LINE_SOUNDEX_SP));
+		assertThat(stringParamNames, containsInAnyOrder(Patient.SP_NAME, Patient.SP_GIVEN, Patient.SP_PHONETIC, NAME_SOUNDEX_SP, Patient.SP_ADDRESS, ADDRESS_LINE_SOUNDEX_SP, PHONE_NUMBER_SP));
 
 		assertSearchMatch(pId, Patient.SP_PHONETIC, GALE);
 		assertSearchMatch(pId, Patient.SP_PHONETIC, GAIL);
@@ -99,6 +114,10 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		assertSearchMatch(pId, ADDRESS_LINE_SOUNDEX_SP, ADDRESS);
 		assertSearchMatch(pId, ADDRESS_LINE_SOUNDEX_SP, ADDRESS_CLOSE);
 		assertNoMatch(ADDRESS_LINE_SOUNDEX_SP, ADDRESS_FAR);
+
+		assertSearchMatch(pId, PHONE_NUMBER_SP, PHONE);
+		assertSearchMatch(pId, PHONE_NUMBER_SP, PHONE_CLOSE);
+		assertNoMatch(PHONE_NUMBER_SP, PHONE_FAR);
 	}
 
 	private void assertSearchMatch(IIdType thePId1, String theSp, String theValue) {
@@ -115,7 +134,7 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), hasSize(0));
 	}
 
-	private void createSoundexSearchParameter(String theCode, PhoneticEncoderEnum theEncoder, String theFhirPath) {
+	private void createPhoneticSearchParameter(String theCode, PhoneticEncoderEnum theEncoder, String theFhirPath) {
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.addBase("Patient");
 		searchParameter.setCode(theCode);
@@ -126,7 +145,7 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 //		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.PHONETIC);
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		searchParameter.addExtension()
-			.setUrl(JpaConstants.EXT_SEARCHPARAM_PHONETIC_ENCODER)
+			.setUrl(HapiExtensions.EXT_SEARCHPARAM_PHONETIC_ENCODER)
 			.setValue(new StringType(theEncoder.name()));
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.create(searchParameter, mySrd).getId().toUnqualifiedVersionless();

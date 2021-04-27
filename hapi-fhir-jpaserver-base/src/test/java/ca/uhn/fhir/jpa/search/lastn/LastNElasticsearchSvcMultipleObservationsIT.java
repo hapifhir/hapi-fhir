@@ -29,16 +29,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -66,20 +56,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class LastNElasticsearchSvcMultipleObservationsIT {
 
 	static private final Calendar baseObservationDate = new GregorianCalendar();
-	private static ObjectMapper ourMapperNonPrettyPrint;
-
-	private static boolean indexLoaded = false;
-
-	private final Map<String, Map<String, List<Date>>> createdPatientObservationMap = new HashMap<>();
-
-	private final FhirContext myFhirContext = FhirContext.forCached(FhirVersionEnum.R4);
-
-
 	@Container
 	public static ElasticsearchContainer elasticsearchContainer = TestElasticsearchContainerHelper.getEmbeddedElasticSearch();
-
-
-
+	private static ObjectMapper ourMapperNonPrettyPrint;
+	private static boolean indexLoaded = false;
+	private final Map<String, Map<String, List<Date>>> createdPatientObservationMap = new HashMap<>();
+	private final FhirContext myFhirContext = FhirContext.forCached(FhirVersionEnum.R4);
 	private ElasticsearchSvcImpl elasticsearchSvc;
 
 	@BeforeEach

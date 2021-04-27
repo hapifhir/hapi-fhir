@@ -18,7 +18,6 @@ public class SearchParameterMapTest extends BaseTest {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("_has", new HasParam("Observation", "subject", "identifier", "urn:system|FOO"));
 		String criteria = params.toNormalizedQueryString(myContext);
-		assertEquals(criteria, "?_has:Observation:identifier:urn:system|FOO=urn%3Asystem%7CFOO");
+		assertEquals(criteria, "?_has:Observation:subject:identifier=urn%3Asystem%7CFOO");
 	}
-
 }

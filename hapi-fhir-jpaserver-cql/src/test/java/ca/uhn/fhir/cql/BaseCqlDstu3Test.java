@@ -73,10 +73,18 @@ public class BaseCqlDstu3Test extends BaseJpaDstu3Test implements CqlProviderTes
 		return count;
 	}
 
-	protected Bundle loadBundle(String theLocation) throws IOException {
+	protected Bundle parseBundle(String theLocation) throws IOException  {
 		String json = stringFromResource(theLocation);
 		Bundle bundle = (Bundle) myFhirContext.newJsonParser().parseResource(json);
-		Bundle result = (Bundle) mySystemDao.transaction(null, bundle);
-		return result;
+		return bundle;
+	}
+
+	protected Bundle loadBundle(Bundle bundle) {
+		return (Bundle) mySystemDao.transaction(null, bundle);
+	}
+ 
+	protected Bundle loadBundle(String theLocation) throws IOException {
+		Bundle bundle = parseBundle(theLocation);
+		return loadBundle(bundle);
 	}
 }

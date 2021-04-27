@@ -309,6 +309,25 @@ public class ResponseHighlightingInterceptorTest {
 	}
 
 	@Test
+	public void testForceHtmlTurtle() throws Exception {
+		String url = "http://localhost:" + ourPort + "/Patient/1?_format=html/turtle";
+		HttpGet httpGet = new HttpGet(url);
+		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
+
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		status.close();
+		ourLog.info(responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
+		assertThat(responseContent, containsString("html"));
+		assertThat(responseContent, containsString("<span class='hlQuot'>&quot;urn:hapitest:mrns&quot;</span>"));
+		assertThat(responseContent, containsString(Constants.HEADER_REQUEST_ID));
+
+	}
+
+	@Test
 	public void testForceHtmlJsonWithAdditionalParts() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=" + UrlUtil.escapeUrlParam("html/json; fhirVersion=1.0"));
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");

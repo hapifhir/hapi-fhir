@@ -14,7 +14,7 @@ The HAPI FHIR server framework includes an interceptor that can be used to provi
 Spring is generally unlikely to conflict with other libraries so it is usually safe to add it to your classpath, but it is a fairly large library so if size is a concern you might opt to use a filter instead.
 
 * [CorsInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/CorsInterceptor.html)
-* [CorsInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/CorsInterceptor.java)
+* [CorsInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/CorsInterceptor.java)
 
 The following steps outline how to enable HAPI's CorsInterceptor:
 

@@ -39,7 +39,7 @@ import java.util.*;
  * <p>
  * <b>See:</b> A complete list of available exceptions is in the <a href="./package-summary.html">package summary</a>.
  * If an exception doesn't exist for a condition you want to represent, let us know by filing an
- * <a href="https://github.com/jamesagnew/hapi-fhir/issues">issue in our tracker</a>. You may also
+ * <a href="https://github.com/hapifhir/hapi-fhir/issues">issue in our tracker</a>. You may also
  * use {@link UnclassifiedServerFailureException} to represent any error code you want.
  * </p>
  */

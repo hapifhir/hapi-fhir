@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -40,6 +41,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetai
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
@@ -53,6 +55,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseMethodBinding<T> {
 
@@ -135,10 +139,21 @@ public abstract class BaseMethodBinding<T> {
 	}
 
 	public Set<String> getIncludes() {
-		Set<String> retVal = new TreeSet<String>();
+		return doGetIncludesOrRevIncludes(false);
+	}
+
+	public Set<String> getRevIncludes() {
+		return doGetIncludesOrRevIncludes(true);
+	}
+
+	private Set<String> doGetIncludesOrRevIncludes(boolean reverse) {
+		Set<String> retVal = new TreeSet<>();
 		for (IParameter next : myParameters) {
 			if (next instanceof IncludeParameter) {
-				retVal.addAll(((IncludeParameter) next).getAllow());
+				IncludeParameter includeParameter = (IncludeParameter) next;
+				if (includeParameter.isReverse() == reverse) {
+					retVal.addAll(includeParameter.getAllow());
+				}
 			}
 		}
 		return retVal;
@@ -251,6 +266,9 @@ public abstract class BaseMethodBinding<T> {
 			if (e.getCause() instanceof BaseServerResponseException) {
 				throw (BaseServerResponseException) e.getCause();
 			}
+			if (e.getTargetException() instanceof DataFormatException) {
+				throw (DataFormatException)e.getTargetException();
+			}
 			throw new InternalErrorException("Failed to call access method: " + e.getCause(), e);
 		} catch (Exception e) {
 			throw new InternalErrorException("Failed to call access method: " + e.getCause(), e);
@@ -305,6 +323,10 @@ public abstract class BaseMethodBinding<T> {
 		} else {
 			throw new InternalErrorException("Unexpected return type: " + response.getClass().getCanonicalName());
 		}
+	}
+
+	public void close() {
+		// subclasses may override
 	}
 
 	@SuppressWarnings("unchecked")
@@ -365,6 +387,10 @@ public abstract class BaseMethodBinding<T> {
 					+ " returns a collection with generic type " + toLogString(returnTypeFromMethod)
 					+ " - Must return a resource type or a collection (List, Set) with a resource type parameter (e.g. List<Patient> or List<IBaseResource> )");
 			}
+		} else if (IBaseBundle.class.isAssignableFrom(returnTypeFromMethod) && returnTypeFromRp == null) {
+			// If a plain provider method returns a Bundle, we'll assume it to be a system
+			// level operation and not a type/instance level operation on the Bundle type.
+			returnTypeFromMethod = null;
 		} else {
 			if (!isResourceInterface(returnTypeFromMethod) && !verifyIsValidResourceReturnType(returnTypeFromMethod)) {
 				throw new ConfigurationException("Method '" + theMethod.getName() + "' from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName()
@@ -374,26 +400,41 @@ public abstract class BaseMethodBinding<T> {
 		}
 
 		Class<? extends IBaseResource> returnTypeFromAnnotation = IBaseResource.class;
+		String returnTypeNameFromAnnotation = null;
 		if (read != null) {
 			returnTypeFromAnnotation = read.type();
+			returnTypeNameFromAnnotation = read.typeName();
 		} else if (search != null) {
 			returnTypeFromAnnotation = search.type();
+			returnTypeNameFromAnnotation = search.typeName();
 		} else if (history != null) {
 			returnTypeFromAnnotation = history.type();
+			returnTypeNameFromAnnotation = history.typeName();
 		} else if (delete != null) {
 			returnTypeFromAnnotation = delete.type();
+			returnTypeNameFromAnnotation = delete.typeName();
 		} else if (patch != null) {
 			returnTypeFromAnnotation = patch.type();
+			returnTypeNameFromAnnotation = patch.typeName();
 		} else if (create != null) {
 			returnTypeFromAnnotation = create.type();
+			returnTypeNameFromAnnotation = create.typeName();
 		} else if (update != null) {
 			returnTypeFromAnnotation = update.type();
+			returnTypeNameFromAnnotation = update.typeName();
 		} else if (validate != null) {
 			returnTypeFromAnnotation = validate.type();
+			returnTypeNameFromAnnotation = validate.typeName();
 		} else if (addTags != null) {
 			returnTypeFromAnnotation = addTags.type();
+			returnTypeNameFromAnnotation = addTags.typeName();
 		} else if (deleteTags != null) {
 			returnTypeFromAnnotation = deleteTags.type();
+			returnTypeNameFromAnnotation = deleteTags.typeName();
+		}
+
+		if (isNotBlank(returnTypeNameFromAnnotation)) {
+			returnTypeFromAnnotation = theContext.getResourceDefinition(returnTypeNameFromAnnotation).getImplementingClass();
 		}
 
 		if (returnTypeFromRp != null) {
@@ -452,7 +493,7 @@ public abstract class BaseMethodBinding<T> {
 	}
 
 	private static boolean isResourceInterface(Class<?> theReturnTypeFromMethod) {
-		return theReturnTypeFromMethod.equals(IBaseResource.class) || theReturnTypeFromMethod.equals(IResource.class) || theReturnTypeFromMethod.equals(IAnyResource.class);
+		return theReturnTypeFromMethod != null && (theReturnTypeFromMethod.equals(IBaseResource.class) || theReturnTypeFromMethod.equals(IResource.class) || theReturnTypeFromMethod.equals(IAnyResource.class));
 	}
 
 	private static String toLogString(Class<?> theType) {

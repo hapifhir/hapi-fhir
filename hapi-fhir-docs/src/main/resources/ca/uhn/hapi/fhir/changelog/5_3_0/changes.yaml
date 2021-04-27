@@ -3,21 +3,23 @@
     type: "add"
     title: "The version of a few dependencies have been bumped to the latest versions
 (dependent HAPI modules listed in brackets):
-* SLF4j (All Modules): 1.7.28 -> 1.7.30
-* Jackson (All Modules): 2.11.2 -> 2.12.1
-* Woodstox (XML FHIR Parser): 4.4.1 -> 6.2.3 (Note that the Maven groupId has changed from `org.codehaus.woodstox` to `com.fasterxml.woodstox` and the Maven artifactId has changed from `woodstox-core-asl` to `woodstox-core` for this library)
-* Spring (JPA): 5.2.3.RELEASE -> 5.2.9.RELEASE
-* Datasource-Proxy (JPA): 1.5.1 -> 1.7
-* Apache Commons Collections4 (JPA): 4.3 -> 4.4
-* Jetty (JPA Starter): 9.4.30.v20200611 -> 9.4.35.v20201120
-* Guava (JP): 29.0-jre -> 30.1-jre
-* Hibernate ORM (JPA Server): 5.4.22.FINAL -> 5.4.26.FINAL
-* Spring (JPA Server): 5.2.9.RELEASE -> 5.3.3
-* Spring Data (JPA Server): 2.2.0.RELEASE -> 2.4.2
-* Hibernate Search (JPA Server): 5.11.5.FINAL -> 6.0.0.Final
-* Lucene(HAPI FHIR JPA Server): 5.5.5 -> 8.7.0
-* Spring Boot (JPA Starter): 2.2.6.RELEASE -> 2.4.1
-* JANSI (CLI):  1.18 -> 2.1.1
-* PH-Schematron (SCH Validator): 5.2.0 -> 5.6.5
-* PH-Commons (SCH Validator): 5.3.8 -> 9.5.4
+<ul>
+<li>SLF4j (All Modules): 1.7.28 -> 1.7.30</li>
+<li>Jackson (All Modules): 2.11.2 -> 2.12.1</li>
+<li>Woodstox (XML FHIR Parser): 4.4.1 -> 6.2.3 (Note that the Maven groupId has changed from `org.codehaus.woodstox` to `com.fasterxml.woodstox` and the Maven artifactId has changed from `woodstox-core-asl` to `woodstox-core` for this library)</li>
+<li>Spring (JPA): 5.2.3.RELEASE -> 5.2.9.RELEASE</li>
+<li>Datasource-Proxy (JPA): 1.5.1 -> 1.7</li>
+<li>Apache Commons Collections4 (JPA): 4.3 -> 4.4</li>
+<li>Jetty (JPA Starter): 9.4.30.v20200611 -> 9.4.35.v20201120</li>
+<li>Guava (JP): 29.0-jre -> 30.1-jre</li>
+<li>Hibernate ORM (JPA Server): 5.4.22.FINAL -> 5.4.26.FINAL</li>
+<li>Spring (JPA Server): 5.2.9.RELEASE -> 5.3.3</li>
+<li>Spring Data (JPA Server): 2.2.0.RELEASE -> 2.4.2</li>
+<li>Hibernate Search (JPA Server): 5.11.5.FINAL -> 6.0.0.Final</li>
+<li>Lucene(HAPI FHIR JPA Server): 5.5.5 -> 8.7.0</li>
+<li>Spring Boot (JPA Starter): 2.2.6.RELEASE -> 2.4.1</li>
+<li>JANSI (CLI):  1.18 -> 2.1.1</li>
+<li>PH-Schematron (SCH Validator): 5.2.0 -> 5.6.5</li>
+<li>PH-Commons (SCH Validator): 5.3.8 -> 9.5.4</li>
+</ul>
 "

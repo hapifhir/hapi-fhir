@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2466
+title: "When performainfg a search using a date search parameter, invalid values (e.g. `date=foo`) resulted
+   in a confusing error message. This has been improved."

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -344,7 +345,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		myValueSetDao.create(valueSet, mySrd);
 
-		ValueSet result = myValueSetDao.expand(valueSet, "");
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
 		logAndValidateValueSet(result);
 
 		assertEquals(2, result.getExpansion().getTotal());
@@ -379,7 +380,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		myValueSetDao.create(valueSet, mySrd);
 
-		ValueSet result = myValueSetDao.expand(valueSet, "");
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
 		logAndValidateValueSet(result);
 
 		assertEquals(4, result.getExpansion().getTotal());
@@ -409,7 +410,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		myValueSetDao.create(valueSet, mySrd);
 
-		ValueSet result = myValueSetDao.expand(valueSet, "hel");
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter("hel"));
 		logAndValidateValueSet(result);
 
 		assertEquals(1, result.getExpansion().getTotal());
@@ -427,7 +428,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		valueSet.getCompose().addInclude().setSystem(codeSystem.getUrl());
 		myValueSetDao.create(valueSet, mySrd);
 
-		ValueSet result = myValueSetDao.expand(valueSet, "lab");
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter("lab"));
 		logAndValidateValueSet(result);
 
 		assertEquals(1, result.getExpansion().getTotal());
@@ -457,7 +458,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		myValueSetDao.create(valueSet, mySrd);
 
-		ValueSet result = myValueSetDao.expand(valueSet, "lab");
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter("lab"));
 		logAndValidateValueSet(result);
 
 		assertEquals(1, result.getExpansion().getTotal());
@@ -677,7 +678,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	public void testExpandWithOpEquals() {
 
 
-		ValueSet result = myValueSetDao.expandByIdentifier("http://hl7.org/fhir/ValueSet/doc-typecodes", "");
+		ValueSet result = myValueSetDao.expandByIdentifier("http://hl7.org/fhir/ValueSet/doc-typecodes", new ValueSetExpansionOptions().setFilter(""));
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result));
 	}
 
@@ -795,7 +796,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			.addInclude()
 			.setSystem(codeSystem.getUrl());
 
-		ValueSet result = myValueSetDao.expand(valueSet, "");
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
 		logAndValidateValueSet(result);
 
 		assertEquals(5, result.getExpansion().getTotal());

@@ -59,6 +59,8 @@ public class Constants {
 	 */
 	public static final String CT_FHIR_JSON_NEW = "application/fhir+json";
 	public static final String CT_FHIR_XML = "application/xml+fhir";
+
+
 	/**
 	 * The FHIR MimeType for XML encoding in FHIR DSTU3+
 	 */
@@ -83,7 +85,8 @@ public class Constants {
 	public static final String FORMAT_HTML = "html";
 	public static final String FORMAT_JSON = "json";
 	public static final String FORMAT_XML = "xml";
-	public static final String FORMAT_TURTLE = "text/turtle";
+	public static final String CT_RDF_TURTLE_LEGACY = "text/turtle";
+	public static final String FORMAT_TURTLE = "ttl";
 
 
 	/**
@@ -92,6 +95,7 @@ public class Constants {
 	public static final Set<String> FORMATS_HTML;
 	public static final String FORMATS_HTML_JSON = "html/json";
 	public static final String FORMATS_HTML_XML = "html/xml";
+	public static final String FORMATS_HTML_TTL = "html/turtle";
 	public static final String HEADER_ACCEPT = "Accept";
 	public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
 	public static final String HEADER_ACCEPT_VALUE_JSON_NON_LEGACY = CT_FHIR_JSON_NEW + ";q=1.0, " + CT_FHIR_JSON + ";q=0.9";
@@ -129,6 +133,9 @@ public class Constants {
 	public static final String HEADER_LOCATION_LC = HEADER_LOCATION.toLowerCase();
 	public static final String HEADER_ORIGIN = "Origin";
 	public static final String HEADER_PREFER = "Prefer";
+	public static final String HEADER_PREFER_HANDLING = "handling";
+	public static final String HEADER_PREFER_HANDLING_STRICT = "strict";
+	public static final String HEADER_PREFER_HANDLING_LENIENT = "lenient";
 	public static final String HEADER_PREFER_RETURN = "return";
 	public static final String HEADER_PREFER_RETURN_MINIMAL = "minimal";
 	public static final String HEADER_PREFER_RETURN_REPRESENTATION = "representation";
@@ -188,6 +195,7 @@ public class Constants {
 	public static final String PARAM_SOURCE = "_source";
 	public static final String PARAM_SUMMARY = "_summary";
 	public static final String PARAM_TAG = "_tag";
+	public static final String PARAM_LIST = "_list";
 	public static final String PARAM_TAGS = "_tags";
 	public static final String PARAM_TEXT = "_text";
 	public static final String PARAM_VALIDATE = "_validate";
@@ -197,6 +205,7 @@ public class Constants {
 	public static final String PARAMQUALIFIER_STRING_CONTAINS = ":contains";
 	public static final String PARAMQUALIFIER_STRING_EXACT = ":exact";
 	public static final String PARAMQUALIFIER_TOKEN_TEXT = ":text";
+	public static final String PARAMQUALIFIER_MDM = ":mdm";
 	public static final int STATUS_HTTP_200_OK = 200;
 	public static final int STATUS_HTTP_201_CREATED = 201;
 	public static final int STATUS_HTTP_204_NO_CONTENT = 204;
@@ -264,6 +273,7 @@ public class Constants {
 	 */
 	public static final String RESOURCE_PARTITION_ID = Constants.class.getName() + "_RESOURCE_PARTITION_ID";
 	public static final String CT_APPLICATION_GZIP = "application/gzip";
+	public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;

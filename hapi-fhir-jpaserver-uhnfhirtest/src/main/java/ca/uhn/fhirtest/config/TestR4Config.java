@@ -66,7 +66,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		retVal.setWebsocketContextPath("/websocketR4");
 		retVal.setAllowContainsSearches(true);
 		retVal.setAllowMultipleDelete(true);
-		retVal.setAllowInlineMatchUrlReferences(true);
+		retVal.setAllowInlineMatchUrlReferences(false);
 		retVal.setAllowExternalReferences(true);
 		retVal.getTreatBaseUrlsAsLocal().add("http://hapi.fhir.org/baseR4");
 		retVal.getTreatBaseUrlsAsLocal().add("https://hapi.fhir.org/baseR4");
@@ -78,6 +78,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		retVal.setExpungeEnabled(true);
 		retVal.setFilterParameterEnabled(true);
 		retVal.setDefaultSearchParamsCanBeOverridden(false);
+		retVal.getModelConfig().setIndexOnContainedResources(true);
 		return retVal;
 	}
 
@@ -108,7 +109,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		retVal.setUsername(myDbUsername);
 		retVal.setPassword(myDbPassword);
 		retVal.setDefaultQueryTimeout(20);
-		retVal.setMaxConnLifetimeMillis(5 * DateUtils.MILLIS_PER_MINUTE);
+		retVal.setTestOnBorrow(true);
 
 		DataSource dataSource = ProxyDataSourceBuilder
 			.create(retVal)

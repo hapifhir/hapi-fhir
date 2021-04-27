@@ -467,14 +467,18 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			return null;
 		} else {
 			NpmPackageVersionResourceEntity contents = slice.getContent().get(0);
-			ResourcePersistentId binaryPid = new ResourcePersistentId(contents.getResourceBinary().getId());
-			IBaseBinary binary = getBinaryDao().readByPid(binaryPid);
-			byte[] resourceContentsBytes = BinaryUtil.getOrCreateData(myCtx, binary).getValue();
-			String resourceContents = new String(resourceContentsBytes, StandardCharsets.UTF_8);
-
-			FhirContext packageContext = getFhirContext(contents.getFhirVersion());
-			return EncodingEnum.detectEncoding(resourceContents).newParser(packageContext).parseResource(resourceContents);
+			return loadPackageEntity(contents);
 		}
+	}
+
+	private IBaseResource loadPackageEntity(NpmPackageVersionResourceEntity contents) {
+		ResourcePersistentId binaryPid = new ResourcePersistentId(contents.getResourceBinary().getId());
+		IBaseBinary binary = getBinaryDao().readByPid(binaryPid);
+		byte[] resourceContentsBytes = BinaryUtil.getOrCreateData(myCtx, binary).getValue();
+		String resourceContents = new String(resourceContentsBytes, StandardCharsets.UTF_8);
+
+		FhirContext packageContext = getFhirContext(contents.getFhirVersion());
+		return EncodingEnum.detectEncoding(resourceContents).newParser(packageContext).parseResource(resourceContents);
 	}
 
 	@Override
@@ -641,17 +645,17 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		return retVal;
 	}
 
-	private void deleteAndExpungeResourceBinary(IIdType theResourceBinaryId, ExpungeOptions theOptions) {
+	@Override
+	@Transactional
+	public List<IBaseResource> loadPackageAssetsByType(FhirVersionEnum theFhirVersion, String theResourceType) {
+//		List<NpmPackageVersionResourceEntity> outcome = myPackageVersionResourceDao.findAll();
+		Slice<NpmPackageVersionResourceEntity> outcome = myPackageVersionResourceDao.findCurrentVersionByResourceType(PageRequest.of(0, 1000), theFhirVersion, theResourceType);
+		return outcome.stream().map(t->loadPackageEntity(t)).collect(Collectors.toList());
+	}
 
-		if (myPartitionSettings.isPartitioningEnabled()) {
-			SystemRequestDetails requestDetails = new SystemRequestDetails();
-			requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
-			getBinaryDao().delete(theResourceBinaryId, requestDetails).getEntity();
-			getBinaryDao().forceExpungeInExistingTransaction(theResourceBinaryId, theOptions, requestDetails);
-		} else {
-			getBinaryDao().delete(theResourceBinaryId).getEntity();
-			getBinaryDao().forceExpungeInExistingTransaction(theResourceBinaryId, theOptions, null);
-		}
+	private void deleteAndExpungeResourceBinary(IIdType theResourceBinaryId, ExpungeOptions theOptions) {
+		getBinaryDao().delete(theResourceBinaryId, new SystemRequestDetails()).getEntity();
+		getBinaryDao().forceExpungeInExistingTransaction(theResourceBinaryId, theOptions, new SystemRequestDetails());
 	}
 
 

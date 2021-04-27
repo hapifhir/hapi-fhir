@@ -35,9 +35,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public class ResourceMetaParams {
 	/**
@@ -48,7 +46,6 @@ public class ResourceMetaParams {
 	 * These are parameters which are supported by searches
 	 */
 	public static final Map<String, Class<? extends IQueryParameterType>> RESOURCE_META_PARAMS;
-	public static final Set<String> EXCLUDE_ELEMENTS_IN_ENCODED;
 
 	static {
 		Map<String, Class<? extends IQueryParameterType>> resourceMetaParams = new HashMap<>();
@@ -67,10 +64,5 @@ public class ResourceMetaParams {
 		resourceMetaAndParams.put(Constants.PARAM_HAS, HasAndListParam.class);
 		RESOURCE_META_PARAMS = Collections.unmodifiableMap(resourceMetaParams);
 		RESOURCE_META_AND_PARAMS = Collections.unmodifiableMap(resourceMetaAndParams);
-
-		HashSet<String> excludeElementsInEncoded = new HashSet<>();
-		excludeElementsInEncoded.add("id");
-		excludeElementsInEncoded.add("*.meta");
-		EXCLUDE_ELEMENTS_IN_ENCODED = Collections.unmodifiableSet(excludeElementsInEncoded);
 	}
 }

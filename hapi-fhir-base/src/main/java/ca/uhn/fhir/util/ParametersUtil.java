@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.StringDt;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -34,8 +35,13 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nullable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +49,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Utilities for dealing with parameters resources in a version indepenedent way
@@ -80,10 +87,7 @@ public class ParametersUtil {
 					.filter(t -> t instanceof IPrimitiveType<?>)
 					.map(t -> ((IPrimitiveType<?>) t))
 					.findFirst();
-				if (!nameValue.isPresent() || !theParameterName.equals(nameValue.get().getValueAsString())) {
-					return false;
-				}
-				return true;
+				return nameValue.isPresent() && theParameterName.equals(nameValue.get().getValueAsString());
 			})
 			.collect(Collectors.toList());
 
@@ -227,9 +231,7 @@ public class ParametersUtil {
 
 	@SuppressWarnings("unchecked")
 	public static void addParameterToParametersBoolean(FhirContext theCtx, IBaseParameters theParameters, String theName, boolean theValue) {
-		IPrimitiveType<Boolean> value = (IPrimitiveType<Boolean>) theCtx.getElementDefinition("boolean").newInstance();
-		value.setValue(theValue);
-		addParameterToParameters(theCtx, theParameters, theName, value);
+		addParameterToParameters(theCtx, theParameters, theName, theCtx.getPrimitiveBoolean(theValue));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -310,10 +312,7 @@ public class ParametersUtil {
 	}
 
 	public static void addPartBoolean(FhirContext theContext, IBase theParameter, String theName, Boolean theValue) {
-		IPrimitiveType<Boolean> value = (IPrimitiveType<Boolean>) theContext.getElementDefinition("boolean").newInstance();
-		value.setValue(theValue);
-
-		addPart(theContext, theParameter, theName, value);
+		addPart(theContext, theParameter, theName, theContext.getPrimitiveBoolean(theValue));
 	}
 
 	public static void addPartDecimal(FhirContext theContext, IBase theParameter, String theName, Double theValue) {
@@ -426,4 +425,60 @@ public class ParametersUtil {
 			.findFirst();
 	}
 
+	@Nullable
+	public static String extractDescription(AnnotatedElement theType) {
+		Description description = theType.getAnnotation(Description.class);
+		if (description != null) {
+			return extractDescription(description);
+		} else {
+			return null;
+		}
+	}
+
+	@Nullable
+	public static String extractDescription(Description desc) {
+		String description = desc.value();
+		if (isBlank(description)) {
+			description = desc.formalDefinition();
+		}
+		if (isBlank(description)) {
+			description = desc.shortDefinition();
+		}
+		return defaultIfBlank(description, null);
+	}
+
+	@Nullable
+	public static String extractShortDefinition(AnnotatedElement theType) {
+		Description description = theType.getAnnotation(Description.class);
+		if (description != null) {
+			return defaultIfBlank(description.shortDefinition(), null);
+		} else {
+			return null;
+		}
+	}
+
+	public static String extractDescription(Annotation[] theParameterAnnotations) {
+		for (Annotation next : theParameterAnnotations) {
+			if (next instanceof Description) {
+				return extractDescription((Description)next);
+			}
+		}
+		return null;
+	}
+
+	public static List<String> extractExamples(Annotation[] theParameterAnnotations) {
+		ArrayList<String> retVal = null;
+		for (Annotation next : theParameterAnnotations) {
+			if (next instanceof Description) {
+				String[] examples = ((Description) next).example();
+				if (examples.length > 0) {
+					if (retVal == null) {
+						retVal = new ArrayList<>();
+					}
+					retVal.addAll(Arrays.asList(examples));
+				}
+			}
+		}
+		return retVal;
+	}
 }

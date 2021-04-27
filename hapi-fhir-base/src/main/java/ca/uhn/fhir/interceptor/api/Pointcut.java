@@ -121,6 +121,15 @@ public enum Pointcut implements IPointcut {
 	 * must be of type <code>IBaseConformance</code>, so it is the responsibility of the interceptor hook method
 	 * code to cast to the appropriate version.
 	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to
+	 * be processed
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that
+	 * is about to be processed. This parameter is identical to the RequestDetails parameter above but will only
+	 * be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
 	 * </ul>
 	 * </p>
 	 * Hook methods may an instance of a new <code>CapabilityStatement</code> resource which will replace the
@@ -129,7 +138,9 @@ public enum Pointcut implements IPointcut {
 	 * for your hook method to return <code>void</code> or <code>null</code>.
 	 */
 	SERVER_CAPABILITY_STATEMENT_GENERATED(IBaseConformance.class,
-		"org.hl7.fhir.instance.model.api.IBaseConformance"
+		"org.hl7.fhir.instance.model.api.IBaseConformance",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),
 
 	/**
@@ -209,6 +220,53 @@ public enum Pointcut implements IPointcut {
 		"javax.servlet.http.HttpServletRequest",
 		"javax.servlet.http.HttpServletResponse",
 		"ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException"
+	),
+
+	/**
+	 * <b>Server Hook:</b>
+	 * This method is immediately before the handling method is selected. Interceptors may make changes
+	 * to the request that can influence which handler will ultimately be called.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request.
+	 * Note that the bean properties are not all guaranteed to be populated at the time this hook is called.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * <li>
+	 * javax.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
+	 * </li>
+	 * <li>
+	 * javax.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hook methods may return <code>true</code> or <code>void</code> if processing should continue normally.
+	 * This is generally the right thing to do.
+	 * If your interceptor is providing an HTTP response rather than letting HAPI handle the response normally, you
+	 * must return <code>false</code>. In this case, no further processing will occur and no further interceptors
+	 * will be called.
+	 * </p>
+	 * <p>
+	 * Hook methods may also throw {@link AuthenticationException} if they would like. This exception may be thrown
+	 * to indicate that the interceptor has detected an unauthorized access
+	 * attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
+	 *
+	 * @since 5.4.0
+	 */
+	SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED(boolean.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"javax.servlet.http.HttpServletRequest",
+		"javax.servlet.http.HttpServletResponse"
 	),
 
 	/**
@@ -1144,6 +1202,9 @@ public enum Pointcut implements IPointcut {
 	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.jpa.searchparam.SearchParameterMap - Contains the details of the search being checked. This can be modified.
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
@@ -1152,7 +1213,8 @@ public enum Pointcut implements IPointcut {
 	STORAGE_PRESEARCH_REGISTERED(void.class,
 		"ca.uhn.fhir.rest.server.util.ICachedSearchDetails",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
-		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.searchparam.SearchParameterMap"
 	),
 
 	/**

@@ -51,6 +51,7 @@ public class SchemaBaseValidator implements IValidatorModule {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SchemaBaseValidator.class);
 	private static final Set<String> SCHEMA_NAMES;
+	private static boolean ourJaxp15Supported;
 
 	static {
 		HashSet<String> sn = new HashSet<>();
@@ -88,13 +89,13 @@ public class SchemaBaseValidator implements IValidatorModule {
 
 			try {
 				/*
-				 * See https://github.com/jamesagnew/hapi-fhir/issues/339
+				 * See https://github.com/hapifhir/hapi-fhir/issues/339
 				 * https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing
 				 */
 				validator.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
 				validator.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
 			} catch (SAXNotRecognizedException ex) {
-				ourLog.warn("Jaxp 1.5 Support not found.", ex);
+				ourLog.debug("Jaxp 1.5 Support not found.", ex);
 			}
 
 			validator.validate(new StreamSource(new StringReader(encodedResource)));
@@ -128,11 +129,13 @@ public class SchemaBaseValidator implements IValidatorModule {
 			try {
 				try {
 					/*
-					 * See https://github.com/jamesagnew/hapi-fhir/issues/339
+					 * See https://github.com/hapifhir/hapi-fhir/issues/339
 					 * https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing
 					 */
 					schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+					ourJaxp15Supported = true;
 				} catch (SAXNotRecognizedException e) {
+					ourJaxp15Supported = false;
 					ourLog.warn("Jaxp 1.5 Support not found.", e);
 				}
 				schema = schemaFactory.newSchema(new Source[]{baseSource});
@@ -214,6 +217,10 @@ public class SchemaBaseValidator implements IValidatorModule {
 			addIssue(theException, ResultSeverityEnum.WARNING);
 		}
 
+	}
+
+	public static boolean isJaxp15Supported() {
+		return ourJaxp15Supported;
 	}
 
 }

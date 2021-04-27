@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -20,8 +21,10 @@ import ca.uhn.fhir.rest.server.interceptor.consent.DelegatingConsentService;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.IOUtils;
@@ -61,7 +64,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
@@ -551,12 +556,30 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("2"))).execute();
 		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.FEMALE).addName(new HumanName().setFamily("3"))).execute();
 
+		runInTransaction(()->{
+			assertEquals(3, myResourceTableDao.count());
+		});
+
 		Bundle response = myClient.search().forResource(Patient.class).count(1).returnBundle(Bundle.class).execute();
 		String searchId = response.getId();
 
 		// 2 results returned, but no total since it's stripped
 		assertEquals(1, response.getEntry().size());
 		assertNull(response.getTotalElement().getValue());
+
+		StopWatch sw = new StopWatch();
+		while(true) {
+			SearchStatusEnum status = runInTransaction(() -> {
+				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException());
+				return search.getStatus();
+			});
+			if (status == SearchStatusEnum.FINISHED) {
+				break;
+			}
+			if (sw.getMillis() > 60000) {
+				fail("Status is still " + status);
+			}
+		}
 
 		// Load next page
 		response = myClient.loadPage().next(response).execute();
@@ -571,7 +594,12 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		});
 
 		// The paging should have ended now - but the last redacted female result is an empty existing page which should never have been there.
-		assertNull(BundleUtil.getLinkUrlOfType(myFhirCtx, response, "next"));
+		String next = BundleUtil.getLinkUrlOfType(myFhirCtx, response, "next");
+		if (next != null) {
+			response = myClient.loadPage().next(response).execute();
+			fail(myFhirCtx.newJsonParser().encodeResourceToString(response));
+		}
+
 	}
 
 	/**
@@ -600,6 +628,12 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		// The paging should have ended now - but the last redacted female result is an empty existing page which should never have been there.
 		assertNotNull(BundleUtil.getLinkUrlOfType(myFhirCtx, response, "next"));
+
+		await()
+			.until(
+				()->mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException()).getStatus(),
+				equalTo(SearchStatusEnum.FINISHED)
+			);
 
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException());

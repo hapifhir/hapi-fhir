@@ -3,12 +3,14 @@ package org.hl7.fhir.common.hapi.validation.support;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -36,6 +38,12 @@ public class BaseValidationSupportWrapper extends BaseValidationSupport {
 	@Override
 	public List<IBaseResource> fetchAllConformanceResources() {
 		return myWrap.fetchAllConformanceResources();
+	}
+
+	@Nullable
+	@Override
+	public <T extends IBaseResource> List<T> fetchAllNonBaseStructureDefinitions() {
+		return myWrap.fetchAllNonBaseStructureDefinitions();
 	}
 
 	@Override
@@ -69,7 +77,7 @@ public class BaseValidationSupportWrapper extends BaseValidationSupport {
 	}
 
 	@Override
-	public IValidationSupport.ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
+	public IValidationSupport.ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
 		return myWrap.expandValueSet(theValidationSupportContext, theExpansionOptions, theValueSetToExpand);
 	}
 
@@ -99,5 +107,8 @@ public class BaseValidationSupportWrapper extends BaseValidationSupport {
 		return myWrap.validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, theDisplay, theValueSet);
 	}
 
-
+	@Override
+	public TranslateConceptResults translateConcept(TranslateCodeRequest theRequest) {
+		return myWrap.translateConcept(theRequest);
+	}
 }

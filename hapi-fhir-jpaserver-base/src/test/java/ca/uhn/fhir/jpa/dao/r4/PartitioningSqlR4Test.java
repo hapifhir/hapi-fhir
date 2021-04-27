@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
@@ -51,6 +52,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
@@ -68,6 +70,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -640,7 +643,6 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertEquals(myPartitionId, resourceTable.getPartitionId().getPartitionId().intValue());
 			assertEquals(myPartitionDate, resourceTable.getPartitionId().getPartitionDate());
 		});
-
 	}
 
 	@Test
@@ -971,6 +973,58 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 				fail();
 			} catch (ResourceNotFoundException e) {
 				assertThat(e.getMessage(), matchesPattern("Resource Patient/[0-9]+ is not known"));
+			}
+		}
+	}
+
+
+	@Test
+	public void testRead_PidId_UnknownResourceId() {
+		// Read in specific Partition
+		{
+			addReadPartition(1);
+			try {
+				myPatientDao.read(new IdType("Patient/1"), mySrd);
+				fail();
+			} catch (ResourceNotFoundException e) {
+				// expected
+			}
+		}
+
+		// Read in null Partition
+		{
+			addReadDefaultPartition();
+			try {
+				myPatientDao.read(new IdType("Patient/1"), mySrd);
+				fail();
+			} catch (ResourceNotFoundException e) {
+				// expected
+			}
+		}
+	}
+
+	@Test
+	public void testRead_PidId_ResourceIdOnlyExistsInDifferentPartition() {
+		IIdType id = createPatient(withPartition(2), withActiveTrue());
+		// Read in specific Partition
+		{
+			addReadPartition(1);
+			try {
+				myPatientDao.read(id, mySrd);
+				fail();
+			} catch (ResourceNotFoundException e) {
+				// expected
+			}
+		}
+
+		// Read in null Partition
+		{
+			addReadDefaultPartition();
+			try {
+				myPatientDao.read(id, mySrd);
+				fail();
+			} catch (ResourceNotFoundException e) {
+				// expected
 			}
 		}
 	}
@@ -2119,6 +2173,39 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertEquals(1, StringUtils.countMatches(searchSql, "SP_VALUE_NORMALIZED"));
 	}
 
+	/*
+	 * Should try to get this down at some point
+	 */
+	@Test
+	@Disabled
+	public void testSearch_StringParam_SearchOnePartition_AddRevIncludes() {
+		addReadPartition(1);
+		addCreatePartition(1, null);
+		Organization org = new Organization();
+		org.setName("FOO");
+		org.setId("FOO-ORG");
+		myOrganizationDao.update(org, mySrd);
+
+		for (int i = 0; i < 50; i++) {
+			addCreatePartition(1, null);
+			PractitionerRole pr = new PractitionerRole();
+			pr.getOrganization().setReference("Organization/FOO-ORG");
+			myPractitionerRoleDao.create(pr, mySrd);
+		}
+
+		addReadPartition(1);
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.addRevInclude(PractitionerRole.INCLUDE_ORGANIZATION);
+		map.setCount(10);
+		IBundleProvider results = myOrganizationDao.search(map, mySrd);
+		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertEquals(10, ids.size(), () -> ids.toString());
+	}
+
 	@Test
 	public void testSearch_TagNotParam_SearchAllPartitions() {
 		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue(), withTag("http://system", "code"), withIdentifier("http://foo", "bar"));
@@ -2851,6 +2938,20 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true).toUpperCase();
 		assertEquals(1, countMatches(sql, "FORCEDID0_.RESOURCE_PID IN"), sql);
 		assertEquals(0, countMatches(sql, "PARTITION_ID IS NULL"), sql);
+	}
+
+	@Test
+	public void testReindexPartitionedServer() {
+		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue());
+		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
+
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+
+		runInTransaction(() -> {
+			assertNotEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED, myResourceTableDao.findById(patientIdNull.getIdPartAsLong()).get().getIndexStatus());
+			assertNotEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED, myResourceTableDao.findById(patientId1.getIdPartAsLong()).get().getIndexStatus());
+		});
 	}
 
 	@Test

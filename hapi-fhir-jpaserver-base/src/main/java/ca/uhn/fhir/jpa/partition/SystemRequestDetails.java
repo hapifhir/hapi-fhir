@@ -33,12 +33,17 @@ import ca.uhn.fhir.rest.server.ElementsSupportEnum;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ListMultimap;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.List;
+
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.ALL_PARTITIONS_NAME;
 
 /**
  * A default RequestDetails implementation that can be used for system calls to
@@ -50,6 +55,8 @@ public class SystemRequestDetails extends RequestDetails {
 	public SystemRequestDetails() {
 		super(new MyInterceptorBroadcaster());
 	}
+
+	private ListMultimap<String, String> myHeaders;
 
 	public SystemRequestDetails(IInterceptorBroadcaster theInterceptorBroadcaster) {
 		super(theInterceptorBroadcaster);
@@ -72,13 +79,35 @@ public class SystemRequestDetails extends RequestDetails {
 
 	@Override
 	public String getHeader(String name) {
-		return null;
+		List<String> headers = getHeaders(name);
+		if (headers.isEmpty()) {
+			return null;
+		} else {
+			return headers.get(0);
+		}
 	}
 
 	@Override
 	public List<String> getHeaders(String name) {
-		return null;
+		ListMultimap<String, String> headers = myHeaders;
+		if (headers == null) {
+			headers = ImmutableListMultimap.of();
+		}
+		return headers.get(name);
 	}
+
+	public void addHeader(String theName, String theValue) {
+		if (myHeaders == null) {
+			myHeaders = ArrayListMultimap.create();
+		}
+		myHeaders.put(theName, theValue);
+	}
+	public static SystemRequestDetails newSystemRequestAllPartitions() {
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.setTenantId(ALL_PARTITIONS_NAME);
+		return systemRequestDetails;
+	}
+
 
 	@Override
 	public Object getAttribute(String theAttributeName) {

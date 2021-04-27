@@ -380,8 +380,30 @@ public class IdHelperService {
 		}
 	}
 
-	public Map<Long, Optional<String>> translatePidsToForcedIds(Set<Long> thePids) {
+	/**
+	 *
+	 * Given a set of PIDs, return a set of public FHIR Resource IDs.
+	 * This function will resolve a forced ID if it resolves, and if it fails to resolve to a forced it, will just return the pid
+	 * Example:
+	 * Let's say we have Patient/1(pid == 1), Patient/pat1 (pid == 2), Patient/3 (pid == 3), their pids would resolve as follows:
+	 *
+	 * [1,2,3] -> ["1","pat1","3"]
+	 *
+	 * @param thePids The Set of pids you would like to resolve to external FHIR Resource IDs.
+	 * @return A Set of strings representing the FHIR IDs of the pids.
+	 */
+	public Set<String> translatePidsToFhirResourceIds(Set<Long> thePids) {
+		Map<Long, Optional<String>> pidToForcedIdMap = translatePidsToForcedIds(thePids);
 
+		//If the result of the translation is an empty optional, it means there is no forced id, and we can use the PID as the resource ID.
+		Set<String> resolvedResourceIds = pidToForcedIdMap.entrySet().stream()
+			.map(entry -> entry.getValue().isPresent() ? entry.getValue().get() : entry.getKey().toString())
+			.collect(Collectors.toSet());
+
+		return resolvedResourceIds;
+
+	}
+	public Map<Long, Optional<String>> translatePidsToForcedIds(Set<Long> thePids) {
 		Map<Long, Optional<String>> retVal = new HashMap<>(myMemoryCacheService.getAllPresent(MemoryCacheService.CacheEnum.FORCED_ID, thePids));
 
 		List<Long> remainingPids = thePids
@@ -432,6 +454,12 @@ public class IdHelperService {
 		List<IIdType> ids = Collections.singletonList(theId);
 		List<ResourcePersistentId> resourcePersistentIds = this.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), ids);
 		return resourcePersistentIds.get(0).getIdAsLong();
+	}
+
+	@Nonnull
+	public List<Long> getPidsOrThrowException(List<IIdType> theIds) {
+		List<ResourcePersistentId> resourcePersistentIds = this.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), theIds);
+		return resourcePersistentIds.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
 	}
 
 	@Nonnull

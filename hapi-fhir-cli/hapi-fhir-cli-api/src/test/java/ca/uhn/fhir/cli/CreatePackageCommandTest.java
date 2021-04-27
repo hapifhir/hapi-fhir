@@ -101,6 +101,9 @@ public class CreatePackageCommandTest extends BaseTest {
 		String expectedPackageJson = "{\n" +
 			"  \"name\": \"com.example.ig\",\n" +
 			"  \"version\": \"1.0.1\",\n" +
+			"  \"fhirVersions\": [\n" +
+			"    \"4.0.1\"\n" +
+			"  ],\n" +
 			"  \"dependencies\": {\n" +
 			"    \"hl7.fhir.core\": \"4.0.1\",\n" +
 			"    \"foo.bar\": \"1.2.3\"\n" +
@@ -111,7 +114,6 @@ public class CreatePackageCommandTest extends BaseTest {
 		// Try parsing the module again to make sure we can
 		NpmPackage loadedPackage = NpmPackage.fromPackage(new FileInputStream(igArchive));
 		assertEquals("com.example.ig", loadedPackage.name());
-
 	}
 
 	@Test
@@ -152,7 +154,10 @@ public class CreatePackageCommandTest extends BaseTest {
 
 		String expectedPackageJson = "{\n" +
 			"  \"name\": \"com.example.ig\",\n" +
-			"  \"version\": \"1.0.1\"\n" +
+			"  \"version\": \"1.0.1\",\n" +
+			"  \"fhirVersions\": [\n" +
+			"    \"4.0.1\"\n" +
+			"  ]\n" +
 			"}";
 		assertEquals(expectedPackageJson, packageJsonContents);
 

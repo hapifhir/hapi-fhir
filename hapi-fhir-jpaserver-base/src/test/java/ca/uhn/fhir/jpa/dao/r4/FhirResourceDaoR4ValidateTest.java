@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -9,7 +10,6 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
-import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
@@ -28,6 +28,7 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -46,6 +47,7 @@ import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
@@ -68,14 +70,15 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -92,18 +95,111 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	@Autowired
 	private ITermReadSvc myTermReadSvc;
 	@Autowired
-	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvcc;
-	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private JpaValidationSupportChain myJpaValidationSupportChain;
 	@Autowired
-	private PlatformTransactionManager myTransactionManager;
-	@Autowired
 	private ValidationSettings myValidationSettings;
+	@Autowired
+	private UnknownCodeSystemWarningValidationSupport myUnknownCodeSystemWarningValidationSupport;
 
+	@AfterEach
+	public void after() {
+		FhirInstanceValidator val = AopTestUtils.getTargetObject(myValidatorModule);
+		val.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
+
+		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+		myDaoConfig.setMaximumExpansionSize(DaoConfig.DEFAULT_MAX_EXPANSION_SIZE);
+		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
+
+		BaseTermReadSvcImpl.setInvokeOnNextCallForUnitTest(null);
+
+		myValidationSettings.setLocalReferenceValidationDefaultPolicy(IResourceValidator.ReferenceValidationPolicy.IGNORE);
+		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+
+		myUnknownCodeSystemWarningValidationSupport.setAllowNonExistentCodeSystem(UnknownCodeSystemWarningValidationSupport.ALLOW_NON_EXISTENT_CODE_SYSTEM_DEFAULT);
+	}
+
+	/**
+	 * By default an unknown code system should fail vaildation
+	 */
 	@Test
-	public void testValidateCodeInValueSetWithUnknownCodeSystem() {
+	public void testValidateCodeInValueSetWithUnknownCodeSystem_FailValidation() {
+		createStructureDefWithBindingToUnknownCs();
+
+		Observation obs = new Observation();
+		obs.getMeta().addProfile("http://sd");
+		obs.getText().setDivAsString("<div>Hello</div>");
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.getCode().setText("hello");
+		obs.setSubject(new Reference("Patient/123"));
+		obs.addPerformer(new Reference("Practitioner/123"));
+		obs.setEffective(DateTimeType.now());
+		obs.setStatus(ObservationStatus.FINAL);
+
+		OperationOutcome oo;
+
+		// Valid code
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
+		oo = validateAndReturnOutcome(obs);
+		String encoded = encode(oo);
+		ourLog.info(encoded);
+		assertEquals("No issues detected during validation", oo.getIssueFirstRep().getDiagnostics(), encoded);
+
+		// Invalid code
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code99").setValue(123));
+		oo = validateAndReturnOutcome(obs);
+		encoded = encode(oo);
+		ourLog.info(encoded);
+		assertEquals(1, oo.getIssue().size(), encoded);
+		assertEquals("The code provided (http://cs#code99) is not in the value set http://vs, and a code from this value set is required: Unknown code system: http://cs", oo.getIssueFirstRep().getDiagnostics(), encoded);
+		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssueFirstRep().getSeverity(), encoded);
+
+	}
+
+	/**
+	 * By default an unknown code system should fail vaildation
+	 */
+	@Test
+	public void testValidateCodeInValueSetWithUnknownCodeSystem_Warning() {
+		myUnknownCodeSystemWarningValidationSupport.setAllowNonExistentCodeSystem(true);
+
+		createStructureDefWithBindingToUnknownCs();
+
+		Observation obs = new Observation();
+		obs.getMeta().addProfile("http://sd");
+		obs.getText().setDivAsString("<div>Hello</div>");
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.getCode().setText("hello");
+		obs.setSubject(new Reference("Patient/123"));
+		obs.addPerformer(new Reference("Practitioner/123"));
+		obs.setEffective(DateTimeType.now());
+		obs.setStatus(ObservationStatus.FINAL);
+
+		OperationOutcome oo;
+		String encoded;
+
+		// Valid code
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
+		oo = validateAndReturnOutcome(obs);
+		encoded = encode(oo);
+		ourLog.info(encoded);
+		assertEquals("No issues detected during validation", oo.getIssueFirstRep().getDiagnostics(), encoded);
+
+		// Invalid code
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code99").setValue(123));
+		oo = validateAndReturnOutcome(obs);
+		encoded = encode(oo);
+		ourLog.info(encoded);
+		assertEquals(1, oo.getIssue().size(), encoded);
+		assertEquals("Error Unknown code system: http://cs validating Coding", oo.getIssueFirstRep().getDiagnostics(), encoded);
+		assertEquals(OperationOutcome.IssueSeverity.WARNING, oo.getIssueFirstRep().getSeverity(), encoded);
+
+	}
+
+	public void createStructureDefWithBindingToUnknownCs() {
 		myValidationSupport.fetchCodeSystem("http://not-exist"); // preload DefaultProfileValidationSupport
 
 		ValueSet vs = new ValueSet();
@@ -128,32 +224,6 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			.setBinding(new ElementDefinition.ElementDefinitionBindingComponent().setStrength(Enumerations.BindingStrength.REQUIRED).setValueSet("http://vs"))
 			.setId("Observation.value[x]");
 		myStructureDefinitionDao.create(sd);
-
-		Observation obs = new Observation();
-		obs.getMeta().addProfile("http://sd");
-		obs.getText().setDivAsString("<div>Hello</div>");
-		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
-		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
-		obs.getCode().setText("hello");
-		obs.setSubject(new Reference("Patient/123"));
-		obs.addPerformer(new Reference("Practitioner/123"));
-		obs.setEffective(DateTimeType.now());
-		obs.setStatus(ObservationStatus.FINAL);
-
-		OperationOutcome oo;
-
-		// Valid code
-		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
-		oo = validateAndReturnOutcome(obs);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertEquals("No issues detected during validation", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
-
-		// Invalid code
-		obs.setValue(new Quantity().setSystem("http://cs").setCode("code99").setValue(123));
-		oo = validateAndReturnOutcome(obs);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertEquals("The code provided (http://cs#code99) is not in the value set http://vs, and a code from this value set is required: Unknown code {http://cs}code99 - Unable to expand ValueSet[http://vs]", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
-
 	}
 
 	@Test
@@ -188,8 +258,6 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.addPerformer(new Reference("Practitioner/123"));
 		obs.setEffective(DateTimeType.now());
 		obs.setStatus(ObservationStatus.FINAL);
-
-		OperationOutcome oo;
 
 		// Valid code
 		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
@@ -540,7 +608,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.setSubject(new Reference("Group/ABC"));
 		oo = validateAndReturnOutcome(obs);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertEquals("Unable to find matching profile for Group/ABC (by type) among choices: ; [CanonicalType[http://hl7.org/fhir/StructureDefinition/Patient]]", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
+		assertEquals("Unable to find a match for profile Group/ABC (by type) among choices: ; [CanonicalType[http://hl7.org/fhir/StructureDefinition/Patient]]", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
 		// Target of right type
 		obs.setSubject(new Reference("Patient/DEF"));
@@ -616,8 +684,6 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 
-
-
 	@Test
 	public void testValidateValueSet() {
 		String input = "{\n" +
@@ -670,8 +736,26 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertEquals("The code 123 is not valid in the system https://bb", oo.getIssue().get(0).getDiagnostics());
 	}
 
+	@Test
+	public void testValidateWithFragmentCodeSystem_NoDirectBinding() throws IOException {
+		myCodeSystemDao.create(loadResourceFromClasspath(CodeSystem.class, "/r4/fragment/codesystem.json"));
 
+		Location location = new Location();
+		location.getPhysicalType().addCoding()
+			.setSystem("http://example.com/codesystem")
+			.setCode("foo")
+			.setDisplay("Foo Code");
 
+		MethodOutcome outcome = myLocationDao.validate(location, null, null, null, ValidationModeEnum.CREATE, null, null);
+
+		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
+		String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+		ourLog.info(ooString);
+
+		assertThat(ooString, containsString("Unknown code in fragment CodeSystem 'http://example.com/codesystem#foo'"));
+
+		assertThat(oo.getIssue().stream().map(t -> t.getSeverity().toCode()).collect(Collectors.toList()), contains("warning", "warning"));
+	}
 
 
 	/**
@@ -680,7 +764,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	 * We should generate a warning if a code can't be found but the codesystem is a fragment
 	 */
 	@Test
-	public void testValidateWithFragmentCodeSystem() throws IOException {
+	public void testValidateWithFragmentCodeSystem_WithDirectBinding() throws IOException {
 		myStructureDefinitionDao.create(loadResourceFromClasspath(StructureDefinition.class, "/r4/fragment/structuredefinition.json"));
 		myCodeSystemDao.create(loadResourceFromClasspath(CodeSystem.class, "/r4/fragment/codesystem.json"));
 		myValueSetDao.create(loadResourceFromClasspath(ValueSet.class, "/r4/fragment/valueset.json"));
@@ -1058,8 +1142,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	}
 
-	private String encode(IBaseResource thePatient) {
-		return myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(thePatient);
+	private String encode(IBaseResource theResource) {
+		return myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource);
 	}
 
 
@@ -1223,21 +1307,6 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		}
 	}
 
-	@AfterEach
-	public void after() {
-		FhirInstanceValidator val = AopTestUtils.getTargetObject(myValidatorModule);
-		val.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
-
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-		myDaoConfig.setMaximumExpansionSize(DaoConfig.DEFAULT_MAX_EXPANSION_SIZE);
-		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
-
-		BaseTermReadSvcImpl.setInvokeOnNextCallForUnitTest(null);
-
-		myValidationSettings.setLocalReferenceValidationDefaultPolicy(IResourceValidator.ReferenceValidationPolicy.IGNORE);
-		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
-	}
-
 	@Test
 	public void testValidateCapabilityStatement() {
 
@@ -1255,7 +1324,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		cs.getText().setStatus(Narrative.NarrativeStatus.GENERATED).getDiv().setValue("<div>aaaa</div>");
 		CapabilityStatement.CapabilityStatementRestComponent rest = cs.addRest();
 		CapabilityStatement.CapabilityStatementRestResourceComponent patient = rest.addResource();
-		patient		.setType("Patient");
+		patient.setType("Patient");
 		patient.addSearchParam().setName("foo").setType(Enumerations.SearchParamType.DATE).setDefinition("http://example.com/name");
 
 
@@ -1632,7 +1701,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValueSet expansion = myValueSetDao.expand(id, null, 0, 10000, mySrd);
+		ValueSetExpansionOptions options = ValueSetExpansionOptions.forOffsetAndCount(0, 10000);
+		ValueSet expansion = myValueSetDao.expand(id, options, mySrd);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
 		assertEquals(2, expansion.getExpansion().getContains().size());
@@ -1652,7 +1722,6 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertFalse(result.isOk());
 		assertEquals("Unknown code {http://loinc.org}10013-1 - Unable to locate ValueSet[http://fooVs]", result.getMessage());
 	}
-
 
 
 }

@@ -22,7 +22,6 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -39,6 +38,7 @@ import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -64,6 +64,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private final String myName;
 	private final RestOperationTypeEnum myOtherOperationType;
 	private final ReturnTypeEnum myReturnType;
+	private final String myShortDescription;
 	private boolean myGlobal;
 	private BundleTypeEnum myBundleType;
 	private boolean myCanOperateAtInstanceLevel;
@@ -74,24 +75,29 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private boolean myManualRequestMode;
 	private boolean myManualResponseMode;
 
+	/**
+	 * Constructor - This is the constructor that is called when binding a
+	 * standard @Operation method.
+	 */
+	public OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider,
+											Operation theAnnotation) {
+		this(theReturnResourceType, theReturnTypeFromRp, theMethod, theContext, theProvider, theAnnotation.idempotent(), theAnnotation.name(), theAnnotation.type(), theAnnotation.typeName(), theAnnotation.returnParameters(),
+			theAnnotation.bundleType(), theAnnotation.global());
+
+		myManualRequestMode = theAnnotation.manualRequest();
+		myManualResponseMode = theAnnotation.manualResponse();
+	}
+
 	protected OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider,
 												boolean theIdempotent, String theOperationName, Class<? extends IBaseResource> theOperationType, String theOperationTypeName,
-												OperationParam[] theReturnParams, BundleTypeEnum theBundleType) {
+												OperationParam[] theReturnParams, BundleTypeEnum theBundleType, boolean theGlobal) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
 
 		myBundleType = theBundleType;
 		myIdempotent = theIdempotent;
-
-		Description description = theMethod.getAnnotation(Description.class);
-		if (description != null) {
-			myDescription = description.formalDefinition();
-			if (isBlank(myDescription)) {
-				myDescription = description.shortDefinition();
-			}
-		}
-		if (isBlank(myDescription)) {
-			myDescription = null;
-		}
+		myDescription = ParametersUtil.extractDescription(theMethod);
+		myShortDescription = ParametersUtil.extractShortDefinition(theMethod);
+		myGlobal = theGlobal;
 
 		for (Annotation[] nextParamAnnotations : theMethod.getParameterAnnotations()) {
 			for (Annotation nextParam : nextParamAnnotations) {
@@ -113,7 +119,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		try {
 			if (theReturnTypeFromRp != null) {
 				setResourceName(theContext.getResourceType(theReturnTypeFromRp));
-			} else if (Modifier.isAbstract(theOperationType.getModifiers()) == false) {
+			} else if (theOperationType != null && Modifier.isAbstract(theOperationType.getModifiers()) == false) {
 				setResourceName(theContext.getResourceType(theOperationType));
 			} else if (isNotBlank(theOperationTypeName)) {
 				setResourceName(theContext.getResourceType(theOperationTypeName));
@@ -133,9 +139,10 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
 		if (getResourceName() == null) {
 			myOtherOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
-			myCanOperateAtServerLevel = true;
 			if (myIdParamIndex != null) {
 				myCanOperateAtInstanceLevel = true;
+			} else {
+				myCanOperateAtServerLevel = true;
 			}
 		} else if (myIdParamIndex == null) {
 			myOtherOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_TYPE;
@@ -169,20 +176,16 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 				myReturnParams.add(type);
 			}
 		}
+
+		// Parameter Validation
+		if (myCanOperateAtInstanceLevel && !isGlobalMethod() && getResourceName() == null) {
+			throw new ConfigurationException("@" + Operation.class.getSimpleName() + " method is an instance level method (it has an @" + IdParam.class.getSimpleName() + " parameter) but is not marked as global() and is not declared in a resource provider: " + theMethod.getName());
+		}
+
 	}
 
-	/**
-	 * Constructor - This is the constructor that is called when binding a
-	 * standard @Operation method.
-	 */
-	public OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider,
-											Operation theAnnotation) {
-		this(theReturnResourceType, theReturnTypeFromRp, theMethod, theContext, theProvider, theAnnotation.idempotent(), theAnnotation.name(), theAnnotation.type(), theAnnotation.typeName(), theAnnotation.returnParameters(),
-			theAnnotation.bundleType());
-
-		myManualRequestMode = theAnnotation.manualRequest();
-		myManualResponseMode = theAnnotation.manualResponse();
-		myGlobal = theAnnotation.global();
+	public String getShortDescription() {
+		return myShortDescription;
 	}
 
 	@Override

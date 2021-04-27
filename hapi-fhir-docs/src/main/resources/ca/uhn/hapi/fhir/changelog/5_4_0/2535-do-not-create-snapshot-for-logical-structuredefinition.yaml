@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2535
+title: "An issue with package installer involving logical StructureDefinition resources was fixed. Package registry will no
+    longer attempt to generate a snapshot for logical StructureDefinition resources if one is not already provided in the
+    resource definition."

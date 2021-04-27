@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2417
+title: "A NullPointerException was corrected when indexing resources containing an indexed Period field that
+  had a start but not an end defined."
+backport: 5.3.3

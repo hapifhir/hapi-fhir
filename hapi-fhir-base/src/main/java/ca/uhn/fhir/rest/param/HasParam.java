@@ -1,5 +1,10 @@
 package ca.uhn.fhir.rest.param;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 /*
@@ -21,11 +26,6 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
  * limitations under the License.
  * #L%
  */
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 /**
  * Implementation of the _has method parameter
@@ -55,7 +55,7 @@ public class HasParam extends BaseParam implements IQueryParameterType {
 
 	@Override
 	String doGetQueryParameterQualifier() {
-		return myTargetResourceType + ':' + myParameterName + ':' + myParameterValue;
+		return ':' + myTargetResourceType + ':' + myReferenceFieldName + ':' + myParameterName;
 	}
 	
 	@Override

@@ -22,11 +22,14 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface IMdmLinkDao extends JpaRepository<MdmLink, Long> {
@@ -37,4 +40,31 @@ public interface IMdmLinkDao extends JpaRepository<MdmLink, Long> {
 	@Modifying
 	@Query("DELETE FROM MdmLink f WHERE (myGoldenResourcePid = :pid OR mySourcePid = :pid) AND myMatchResult <> :matchResult")
 	int deleteWithAnyReferenceToPidAndMatchResultNot(@Param("pid") Long thePid, @Param("matchResult") MdmMatchResultEnum theMatchResult);
+
+	@Query("SELECT ml2.myGoldenResourcePid as goldenPid, ml2.mySourcePid as sourcePid FROM MdmLink ml2 " +
+		"WHERE ml2.myMatchResult=:matchResult " +
+		"AND ml2.myGoldenResourcePid IN (" +
+			"SELECT ml.myGoldenResourcePid FROM MdmLink ml " +
+			"INNER JOIN ResourceLink hrl " +
+			"ON hrl.myTargetResourcePid=ml.mySourcePid " +
+			"AND hrl.mySourceResourcePid=:groupPid " +
+			"AND hrl.mySourcePath='Group.member.entity' " +
+			"AND hrl.myTargetResourceType='Patient'" +
+		")")
+	List<MdmPidTuple> expandPidsFromGroupPidGivenMatchResult(@Param("groupPid") Long theGroupPid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+
+	interface MdmPidTuple {
+		Long getGoldenPid();
+		Long getSourcePid();
+	}
+
+	@Query("SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid " +
+		"FROM MdmLink ml " +
+		"INNER JOIN MdmLink ml2 " +
+		"on ml.myGoldenResourcePid=ml2.myGoldenResourcePid " +
+		"WHERE ml2.mySourcePid=:sourcePid " +
+		"AND ml2.myMatchResult=:matchResult " +
+		"AND ml.myMatchResult=:matchResult")
+	List<MdmPidTuple> expandPidsBySourcePidAndMatchResult(@Param("sourcePid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+
 }

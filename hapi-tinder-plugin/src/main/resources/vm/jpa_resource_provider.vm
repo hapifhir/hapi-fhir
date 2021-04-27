@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
+import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 
 public class ${className}ResourceProvider extends 
 ## We have specialized base classes for RPs that handle certain resource types. These
@@ -111,23 +112,17 @@ public class ${className}ResourceProvider extends
 			@RawParam
 			Map<String, List<String>> theAdditionalRawParams,
 
-#if ( $version != 'dstu' )
-			@IncludeParam(reverse=true)
-			Set<Include> theRevIncludes,
 			@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
 			@OptionalParam(name="_lastUpdated")
 			DateRangeParam theLastUpdated, 
-#end
 
-			@IncludeParam(allow= {
-#foreach ( $include in $includes )
-				"${include.path}",
-#end
-				"*"
-			})
+			@IncludeParam
 			Set<Include> theIncludes,
-			
-			@Sort 
+
+			@IncludeParam(reverse=true)
+			Set<Include> theRevIncludes,
+
+			@Sort
 			SortSpec theSort,
 			
 			@ca.uhn.fhir.rest.annotation.Count
@@ -138,7 +133,9 @@ public class ${className}ResourceProvider extends
 
 			SummaryEnum theSummaryMode,
 
-			SearchTotalModeEnum theSearchTotalMode
+			SearchTotalModeEnum theSearchTotalMode,
+
+			SearchContainedModeEnum theSearchContainedMode
 
 			) {
 		startRequest(theServletRequest);
@@ -165,6 +162,7 @@ public class ${className}ResourceProvider extends
 			paramMap.setOffset(theOffset);
 			paramMap.setSummaryMode(theSummaryMode);
 			paramMap.setSearchTotalMode(theSearchTotalMode);
+			paramMap.setSearchContainedMode(theSearchContainedMode);
 
 			getDao().translateRawParameters(theAdditionalRawParams, paramMap);
 

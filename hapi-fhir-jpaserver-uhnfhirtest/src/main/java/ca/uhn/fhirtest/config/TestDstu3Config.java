@@ -77,6 +77,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		retVal.setExpungeEnabled(true);
 		retVal.setFilterParameterEnabled(true);
 		retVal.setDefaultSearchParamsCanBeOverridden(false);
+		retVal.getModelConfig().setIndexOnContainedResources(true);
 		return retVal;
 	}
 
@@ -124,7 +125,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		retVal.setUsername(myDbUsername);
 		retVal.setPassword(myDbPassword);
 		retVal.setDefaultQueryTimeout(20);
-		retVal.setMaxConnLifetimeMillis(5 * DateUtils.MILLIS_PER_MINUTE);
+		retVal.setTestOnBorrow(true);
 
 		DataSource dataSource = ProxyDataSourceBuilder
 			.create(retVal)

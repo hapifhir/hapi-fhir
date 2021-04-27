@@ -17,8 +17,12 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.SearchParameter;
@@ -62,10 +66,10 @@ public class SearchParamRegistryImplTest {
 	private static final ReadOnlySearchParamCache ourBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(ourFhirContext);
 
 	public static final int TEST_SEARCH_PARAMS = 3;
-	private static List<ResourceTable> ourEntities;
-	private static ResourceVersionMap ourResourceVersionMap;
+	private static final List<ResourceTable> ourEntities;
+	private static final ResourceVersionMap ourResourceVersionMap;
 	private static int ourLastId;
-	private static int ourBuiltinPatientSearchParamCount;
+	private static final int ourBuiltinPatientSearchParamCount;
 
 	static {
 		ourEntities = new ArrayList<>();
@@ -112,7 +116,7 @@ public class SearchParamRegistryImplTest {
 		}
 
 		@Bean
-		ISearchParamRegistry searchParamRegistry() {
+        ISearchParamRegistry searchParamRegistry() {
 			return new SearchParamRegistryImpl();
 		}
 
@@ -170,6 +174,24 @@ public class SearchParamRegistryImplTest {
 		myResourceChangeListenerRegistry.clearCachesForUnitTest();
 		// Empty out the searchparam registry
 		mySearchParamRegistry.resetForUnitTest();
+	}
+
+	@Test
+	void handleInit() {
+		assertEquals(25, mySearchParamRegistry.getActiveSearchParams("Patient").size());
+
+		IdDt idBad = new IdDt("SearchParameter/bad");
+		when(mySearchParamProvider.read(idBad)).thenThrow(new ResourceNotFoundException("id bad"));
+
+		IdDt idGood = new IdDt("SearchParameter/good");
+		SearchParameter goodSearchParam = buildSearchParameter(Enumerations.PublicationStatus.ACTIVE);
+		when(mySearchParamProvider.read(idGood)).thenReturn(goodSearchParam);
+
+		List<IIdType> idList = new ArrayList<>();
+		idList.add(idBad);
+		idList.add(idGood);
+		mySearchParamRegistry.handleInit(idList);
+		assertEquals(26, mySearchParamRegistry.getActiveSearchParams("Patient").size());
 	}
 
 	@Test

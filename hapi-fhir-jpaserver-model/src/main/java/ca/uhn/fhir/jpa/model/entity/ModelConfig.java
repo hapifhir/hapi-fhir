@@ -98,6 +98,8 @@ public class ModelConfig {
 	private Set<String> myAutoVersionReferenceAtPaths = Collections.emptySet();
 	private Map<String, Set<String>> myTypeToAutoVersionReferenceAtPaths = Collections.emptyMap();
 	private boolean myRespectVersionsForSearchIncludes;
+	private boolean myIndexOnContainedResources = false;
+	private boolean myAllowMdmExpansion = false;
 
 	/**
 	 * Constructor
@@ -156,6 +158,36 @@ public class ModelConfig {
 	 */
 	public boolean isAllowContainsSearches() {
 		return myAllowContainsSearches;
+	}
+
+	/**
+	 * If enabled, the server will support the use of :mdm search parameter qualifier on Reference Search Parameters.
+	 * This Parameter Qualifier is HAPI-specific, and not defined anywhere in the FHIR specification. Using this qualifier
+	 * will result in an MDM expansion being done on the reference, which will expand the search scope. For example, if Patient/1
+	 * is MDM-matched to Patient/2 and you execute the search:
+	 * Observation?subject:mdm=Patient/1 , you will receive observations for both Patient/1 and Patient/2.
+	 * <p>
+	 * Default is <code>false</code>
+	 * </p>
+	 * @since 5.4.0
+	 */
+	public boolean isAllowMdmExpansion() {
+		return myAllowMdmExpansion;
+	}
+
+	/**
+	 * If enabled, the server will support the use of :mdm search parameter qualifier on Reference Search Parameters.
+	 * This Parameter Qualifier is HAPI-specific, and not defined anywhere in the FHIR specification. Using this qualifier
+	 * will result in an MDM expansion being done on the reference, which will expand the search scope. For example, if Patient/1
+	 * is MDM-matched to Patient/2 and you execute the search:
+	 * Observation?subject:mdm=Patient/1 , you will receive observations for both Patient/1 and Patient/2.
+	 * <p>
+	 * Default is <code>false</code>
+	 * </p>
+	 * @since 5.4.0
+	 */
+	public void setAllowMdmExpansion(boolean theAllowMdmExpansion) {
+		myAllowMdmExpansion = theAllowMdmExpansion;
 	}
 
 	/**
@@ -728,6 +760,26 @@ public class ModelConfig {
 	 */
 	public void setRespectVersionsForSearchIncludes(boolean theRespectVersionsForSearchIncludes) {
 		myRespectVersionsForSearchIncludes = theRespectVersionsForSearchIncludes;
+	}
+
+	/**
+	 * Should indexing and searching on contained resources be enabled on this server.
+	 * This may have performance impacts, and should be enabled only if it is needed. Default is <code>false</code>.
+	 * 
+	 * @since 5.4.0
+	 */
+	public boolean isIndexOnContainedResources() {
+		return myIndexOnContainedResources;
+	}
+	
+	/**
+	 * Should indexing and searching on contained resources be enabled on this server.
+	 * This may have performance impacts, and should be enabled only if it is needed. Default is <code>false</code>.
+	 *
+	 * @since 5.4.0
+	 */
+	public void setIndexOnContainedResources(boolean theIndexOnContainedResources) {
+		myIndexOnContainedResources = theIndexOnContainedResources;
 	}
 	
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {

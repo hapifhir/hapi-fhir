@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
@@ -69,6 +70,7 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
@@ -141,14 +143,14 @@ public abstract class BaseTransactionProcessor {
 		ourLog.trace("Starting transaction processor");
 	}
 
-	public <BUNDLE extends IBaseBundle> BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest) {
+	public <BUNDLE extends IBaseBundle> BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest, boolean theNestedMode) {
 		if (theRequestDetails != null && theRequestDetails.getServer() != null && myDao != null) {
 			IServerInterceptor.ActionRequestDetails requestDetails = new IServerInterceptor.ActionRequestDetails(theRequestDetails, theRequest, "Bundle", null);
 			myDao.notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
 		}
 
 		String actionName = "Transaction";
-		IBaseBundle response = processTransactionAsSubRequest((RequestDetails) theRequestDetails, theRequest, actionName);
+		IBaseBundle response = processTransactionAsSubRequest(theRequestDetails, theRequest, actionName, theNestedMode);
 
 		List<IBase> entries = myVersionAdapter.getEntries(response);
 		for (int i = 0; i < entries.size(); i++) {
@@ -189,7 +191,7 @@ public abstract class BaseTransactionProcessor {
 			myVersionAdapter.setRequestUrl(entry, next.getIdElement().toUnqualifiedVersionless().getValue());
 		}
 
-		transaction(theRequestDetails, transactionBundle);
+		transaction(theRequestDetails, transactionBundle, false);
 
 		return resp;
 	}
@@ -269,16 +271,26 @@ public abstract class BaseTransactionProcessor {
 		myDao = theDao;
 	}
 
-	private IBaseBundle processTransactionAsSubRequest(RequestDetails theRequestDetails, IBaseBundle theRequest, String theActionName) {
+	private IBaseBundle processTransactionAsSubRequest(RequestDetails theRequestDetails, IBaseBundle theRequest, String theActionName, boolean theNestedMode) {
 		BaseHapiFhirDao.markRequestAsProcessingSubRequest(theRequestDetails);
 		try {
-			return processTransaction(theRequestDetails, theRequest, theActionName);
+			return processTransaction(theRequestDetails, theRequest, theActionName, theNestedMode);
 		} finally {
 			BaseHapiFhirDao.clearRequestAsProcessingSubRequest(theRequestDetails);
 		}
 	}
 
-	private IBaseBundle batch(final RequestDetails theRequestDetails, IBaseBundle theRequest) {
+	@VisibleForTesting
+	public void setVersionAdapter(ITransactionProcessorVersionAdapter theVersionAdapter) {
+		myVersionAdapter = theVersionAdapter;
+	}
+
+	@VisibleForTesting
+	public void setTxManager(PlatformTransactionManager theTxManager) {
+		myTxManager = theTxManager;
+	}
+
+	private IBaseBundle batch(final RequestDetails theRequestDetails, IBaseBundle theRequest, boolean theNestedMode) {
 		ourLog.info("Beginning batch with {} resources", myVersionAdapter.getEntries(theRequest).size());
 		long start = System.currentTimeMillis();
 
@@ -299,7 +311,7 @@ public abstract class BaseTransactionProcessor {
 				IBaseBundle subRequestBundle = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode());
 				myVersionAdapter.addEntry(subRequestBundle, (IBase) nextRequestEntry);
 
-				IBaseBundle nextResponseBundle = processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, subRequestBundle, "Batch sub-request");
+				IBaseBundle nextResponseBundle = processTransactionAsSubRequest(theRequestDetails, subRequestBundle, "Batch sub-request", theNestedMode);
 
 				IBase subResponseEntry = (IBase) myVersionAdapter.getEntries(nextResponseBundle).get(0);
 				myVersionAdapter.addEntry(resp, subResponseEntry);
@@ -330,18 +342,23 @@ public abstract class BaseTransactionProcessor {
 		}
 
 		long delay = System.currentTimeMillis() - start;
-		ourLog.info("Batch completed in {}ms", new Object[]{delay});
+		ourLog.info("Batch completed in {}ms", delay);
 
 		return resp;
 	}
 
-	private IBaseBundle processTransaction(final RequestDetails theRequestDetails, final IBaseBundle theRequest, final String theActionName) {
+	@VisibleForTesting
+	public void setHapiTransactionService(HapiTransactionService theHapiTransactionService) {
+		myHapiTransactionService = theHapiTransactionService;
+	}
+
+	private IBaseBundle processTransaction(final RequestDetails theRequestDetails, final IBaseBundle theRequest, final String theActionName, boolean theNestedMode) {
 		validateDependencies();
 
 		String transactionType = myVersionAdapter.getBundleType(theRequest);
 
 		if (org.hl7.fhir.r4.model.Bundle.BundleType.BATCH.toCode().equals(transactionType)) {
-			return batch(theRequestDetails, theRequest);
+			return batch(theRequestDetails, theRequest, theNestedMode);
 		}
 
 		if (transactionType == null) {
@@ -449,6 +466,10 @@ public abstract class BaseTransactionProcessor {
 		}
 		for (IBase nextReqEntry : getEntries) {
 
+			if (theNestedMode) {
+				throw new InvalidRequestException("Can not invoke read operation on nested transaction");
+			}
+
 			if (!(theRequestDetails instanceof ServletRequestDetails)) {
 				throw new MethodNotAllowedException("Can not call transaction GET methods from this context");
 			}
@@ -549,6 +570,10 @@ public abstract class BaseTransactionProcessor {
 		return myContext.getVersion().newIdType().setValue(theValue);
 	}
 
+	@VisibleForTesting
+	public void setModelConfig(ModelConfig theModelConfig) {
+		myModelConfig = theModelConfig;
+	}
 
 	private Map<IBase, IBasePersistedResource> doTransactionWriteOperations(final RequestDetails theRequest, String theActionName, TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
 																									Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder, List<IBase> theEntries, StopWatch theTransactionStopWatch) {
@@ -612,16 +637,16 @@ public abstract class BaseTransactionProcessor {
 							String existingUuid = keyToUuid.get(key);
 							for (IBase nextEntry : theEntries) {
 								IBaseResource nextResource = myVersionAdapter.getResource(nextEntry);
-								for (ResourceReferenceInfo nextReference : myContext.newTerser().getAllResourceReferences(nextResource)) {
+								for (IBaseReference nextReference : myContext.newTerser().getAllPopulatedChildElementsOfType(nextResource, IBaseReference.class)) {
 									// We're interested in any references directly to the placeholder ID, but also
 									// references that have a resource target that has the placeholder ID.
-									String nextReferenceId = nextReference.getResourceReference().getReferenceElement().getValue();
-									if (isBlank(nextReferenceId) && nextReference.getResourceReference().getResource() != null) {
-										nextReferenceId = nextReference.getResourceReference().getResource().getIdElement().getValue();
+									String nextReferenceId = nextReference.getReferenceElement().getValue();
+									if (isBlank(nextReferenceId) && nextReference.getResource() != null) {
+										nextReferenceId = nextReference.getResource().getIdElement().getValue();
 									}
 									if (entryUrl.equals(nextReferenceId)) {
-										nextReference.getResourceReference().setReference(existingUuid);
-										nextReference.getResourceReference().setResource(null);
+										nextReference.setReference(existingUuid);
+										nextReference.setResource(null);
 									}
 								}
 							}
@@ -923,7 +948,6 @@ public abstract class BaseTransactionProcessor {
 						IIdType newId = theIdSubstitutions.get(nextId);
 						ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
 						if (referencesToVersion.contains(resourceReference)) {
-							DaoMethodOutcome outcome = theIdToPersistedOutcome.get(newId);
 							resourceReference.setReference(newId.getValue());
 						} else {
 							resourceReference.setReference(newId.toVersionless().getValue());
@@ -957,7 +981,12 @@ public abstract class BaseTransactionProcessor {
 					}
 				}
 
-				IPrimitiveType<Date> deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) nextResource);
+				IPrimitiveType<Date> deletedInstantOrNull;
+				if (nextResource instanceof IAnyResource) {
+					deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) nextResource);
+				} else {
+					deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IResource) nextResource);
+				}
 				Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
 
 				IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDao(nextResource.getClass());
@@ -1042,6 +1071,11 @@ public abstract class BaseTransactionProcessor {
 		return newIdType(theToResourceName, theIdPart, null);
 	}
 
+	@VisibleForTesting
+	public void setDaoRegistry(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
+	}
+
 	private IFhirResourceDao getDaoOrThrowException(Class<? extends IBaseResource> theClass) {
 		IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDaoOrNull(theClass);
 		if (dao == null) {
@@ -1111,6 +1145,11 @@ public abstract class BaseTransactionProcessor {
 			}
 		}
 		return null;
+	}
+
+	@VisibleForTesting
+	public void setDaoConfig(DaoConfig theDaoConfig) {
+		myDaoConfig = theDaoConfig;
 	}
 
 	public interface ITransactionProcessorVersionAdapter<BUNDLE extends IBaseBundle, BUNDLEENTRY extends IBase> {

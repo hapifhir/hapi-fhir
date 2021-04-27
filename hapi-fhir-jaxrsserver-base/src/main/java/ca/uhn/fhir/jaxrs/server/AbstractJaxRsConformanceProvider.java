@@ -33,9 +33,11 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu2.hapi.rest.server.ServerConformanceProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.*;
@@ -137,8 +139,8 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 		FhirVersionEnum fhirContextVersion = super.getFhirContext().getVersion().getVersion();
 		switch (fhirContextVersion) {
 			case R4:
-				org.hl7.fhir.r4.hapi.rest.server.ServerCapabilityStatementProvider r4ServerCapabilityStatementProvider = new org.hl7.fhir.r4.hapi.rest.server.ServerCapabilityStatementProvider(serverConfiguration);
-				myR4CapabilityStatement = r4ServerCapabilityStatementProvider.getServerConformance(null, null);
+				ServerCapabilityStatementProvider r4ServerCapabilityStatementProvider = new ServerCapabilityStatementProvider(getFhirContext(), serverConfiguration);
+				myR4CapabilityStatement = (CapabilityStatement) r4ServerCapabilityStatementProvider.getServerConformance(null, null);
 				break;
 			case DSTU3:
 				org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider dstu3ServerCapabilityStatementProvider = new org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider(serverConfiguration);
@@ -226,7 +228,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 	}
 
 	/**
-	 * This method will add a provider to the conformance. This method is almost an exact copy of {@link ca.uhn.fhir.rest.server.RestfulServer#findResourceMethods(Object, Class)}  }
+	 * This method will add a provider to the conformance. This method is almost an exact copy of {@link ca.uhn.fhir.rest.server.RestfulServer#findResourceMethods(Object)}
 	 * 
 	 * @param theProvider
 	 *           an instance of the provider interface

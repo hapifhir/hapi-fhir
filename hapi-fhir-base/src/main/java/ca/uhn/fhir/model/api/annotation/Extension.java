@@ -49,13 +49,13 @@ public @interface Extension {
 	 * by regional authorities or jurisdictional governments)
 	 * </p>
 	 */
-	boolean definedLocally();
+	boolean definedLocally() default true;
 
 	/**
 	 * Returns <code>true</code> if this extension is a <a
 	 * href="http://www.hl7.org/implement/standards/fhir/extensibility.html#modifierExtension">modifier extension</a>
 	 */
-	boolean isModifier();
+	boolean isModifier() default false;
 
 	/**
 	 * The URL associated with this extension

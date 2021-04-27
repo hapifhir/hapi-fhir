@@ -168,6 +168,13 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	T readByPid(ResourcePersistentId thePid);
 
 	/**
+	 * Read a resource by its internal PID
+	 */
+	default T readByPid(ResourcePersistentId thePid, boolean theDeletedOk) {
+		throw new UnsupportedOperationException();
+	}
+
+	/**
 	 * @param theRequestDetails TODO
 	 * @throws ResourceNotFoundException If the ID is not known to the server
 	 */

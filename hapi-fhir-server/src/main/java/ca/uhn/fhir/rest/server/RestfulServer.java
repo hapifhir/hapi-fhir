@@ -68,6 +68,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -150,6 +151,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private FhirContext myFhirContext;
 	private boolean myIgnoreServerParsedRequestParameters = true;
 	private String myImplementationDescription;
+	private String myCopyright;
 	private IPagingProvider myPagingProvider;
 	private Integer myDefaultPageSize;
 	private Integer myMaximumPageSize;
@@ -159,7 +161,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private IServerAddressStrategy myServerAddressStrategy = new IncomingRequestAddressStrategy();
 	private ResourceBinding myServerBinding = new ResourceBinding();
 	private ResourceBinding myGlobalBinding = new ResourceBinding();
-	private BaseMethodBinding<?> myServerConformanceMethod;
+	private ConformanceMethodBinding myServerConformanceMethod;
 	private Object myServerConformanceProvider;
 	private String myServerName = "HAPI FHIR Server";
 	/**
@@ -236,6 +238,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		RestfulServerConfiguration result = new RestfulServerConfiguration();
 		result.setResourceBindings(getResourceBindings());
 		result.setServerBindings(getServerBindings());
+		result.setGlobalBindings(getGlobalBindings());
 		result.setImplementationDescription(getImplementationDescription());
 		result.setServerVersion(getServerVersion());
 		result.setServerName(getServerName());
@@ -252,6 +255,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		}
 		result.computeSharedSupertypeForResourcePerName(getResourceProviders());
 		return result;
+	}
+
+	private List<BaseMethodBinding<?>> getGlobalBindings() {
+		return myGlobalBinding.getMethodBindings();
 	}
 
 	protected List<String> createPoweredByAttributes() {
@@ -324,14 +331,32 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				invokeDestroy(iResourceProvider);
 			}
 		}
+
 		if (myServerConformanceProvider != null) {
 			invokeDestroy(myServerConformanceProvider);
 		}
+
 		if (getPlainProviders() != null) {
 			for (Object next : getPlainProviders()) {
 				invokeDestroy(next);
 			}
 		}
+
+		if (myServerConformanceMethod != null) {
+			myServerConformanceMethod.close();
+		}
+		myResourceNameToBinding
+			.values()
+			.stream()
+			.flatMap(t->t.getMethodBindings().stream())
+			.forEach(t->t.close());
+		myGlobalBinding
+			.getMethodBindings()
+			.forEach(t->t.close());
+		myServerBinding
+			.getMethodBindings()
+			.forEach(t->t.close());
+
 	}
 
 	/**
@@ -442,7 +467,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			count++;
 
 			if (foundMethodBinding instanceof ConformanceMethodBinding) {
-				myServerConformanceMethod = foundMethodBinding;
+				myServerConformanceMethod = (ConformanceMethodBinding) foundMethodBinding;
+				if (myServerConformanceProvider == null) {
+					myServerConformanceProvider = theProvider;
+				}
 				continue;
 			}
 
@@ -620,6 +648,20 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	/**
+	 * Returns the server copyright (will be added to the CapabilityStatement). Note that FHIR allows Markdown in this string.
+	 */
+	public String getCopyright() {
+		return myCopyright;
+	}
+
+	/**
+	 * Sets the server copyright (will be added to the CapabilityStatement). Note that FHIR allows Markdown in this string.
+	 */
+	public void setCopyright(String theCopyright) {
+		myCopyright = theCopyright;
+	}
+
+	/**
 	 * Returns a list of all registered server interceptors
 	 *
 	 * @deprecated As of HAPI FHIR 3.8.0, use {@link #getInterceptorService()} to access the interceptor service. You can register and unregister interceptors using this service.
@@ -790,8 +832,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	/**
 	 * Provides the resource providers for this server
 	 */
-	public Collection<IResourceProvider> getResourceProviders() {
-		return myResourceProviders;
+	public List<IResourceProvider> getResourceProviders() {
+		return Collections.unmodifiableList(myResourceProviders);
 	}
 
 	/**
@@ -837,6 +879,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	public String getServerBaseForRequest(ServletRequestDetails theRequest) {
 		String fhirServerBase;
 		fhirServerBase = myServerAddressStrategy.determineServerBase(getServletContext(), theRequest.getServletRequest());
+		assert isNotBlank(fhirServerBase) : "Server Address Strategy did not return a value";
 
 		if (fhirServerBase.endsWith("/")) {
 			fhirServerBase = fhirServerBase.substring(0, fhirServerBase.length() - 1);
@@ -1015,11 +1058,14 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			 * Notify interceptors about the incoming request
 			 * *************************/
 
-			HookParams preProcessedParams = new HookParams();
-			preProcessedParams.add(HttpServletRequest.class, theRequest);
-			preProcessedParams.add(HttpServletResponse.class, theResponse);
-			if (!myInterceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED, preProcessedParams)) {
-				return;
+			// Interceptor: SERVER_INCOMING_REQUEST_PRE_PROCESSED
+			if (myInterceptorService.hasHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)) {
+				HookParams preProcessedParams = new HookParams();
+				preProcessedParams.add(HttpServletRequest.class, theRequest);
+				preProcessedParams.add(HttpServletResponse.class, theResponse);
+				if (!myInterceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED, preProcessedParams)) {
+					return;
+				}
 			}
 
 			String requestPath = getRequestPath(requestFullPath, servletContextPath, servletPath);
@@ -1058,6 +1104,18 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			requestDetails.setFhirServerBase(fhirServerBase);
 			requestDetails.setCompleteUrl(completeUrl);
 
+			// Interceptor: SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED
+			if (myInterceptorService.hasHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED)) {
+				HookParams preProcessedParams = new HookParams();
+				preProcessedParams.add(HttpServletRequest.class, theRequest);
+				preProcessedParams.add(HttpServletResponse.class, theResponse);
+				preProcessedParams.add(RequestDetails.class, requestDetails);
+				preProcessedParams.add(ServletRequestDetails.class, requestDetails);
+				if (!myInterceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED, preProcessedParams)) {
+					return;
+				}
+			}
+
 			validateRequest(requestDetails);
 
 			BaseMethodBinding<?> resourceMethod = determineResourceMethod(requestDetails, requestPath);
@@ -1065,14 +1123,16 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			RestOperationTypeEnum operation = resourceMethod.getRestOperationType(requestDetails);
 			requestDetails.setRestOperationType(operation);
 
-			// Handle server interceptors
-			HookParams postProcessedParams = new HookParams();
-			postProcessedParams.add(RequestDetails.class, requestDetails);
-			postProcessedParams.add(ServletRequestDetails.class, requestDetails);
-			postProcessedParams.add(HttpServletRequest.class, theRequest);
-			postProcessedParams.add(HttpServletResponse.class, theResponse);
-			if (!myInterceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, postProcessedParams)) {
-				return;
+			// Interceptor: SERVER_INCOMING_REQUEST_POST_PROCESSED
+			if (myInterceptorService.hasHooks(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)) {
+				HookParams postProcessedParams = new HookParams();
+				postProcessedParams.add(RequestDetails.class, requestDetails);
+				postProcessedParams.add(ServletRequestDetails.class, requestDetails);
+				postProcessedParams.add(HttpServletRequest.class, theRequest);
+				postProcessedParams.add(HttpServletResponse.class, theResponse);
+				if (!myInterceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, postProcessedParams)) {
+					return;
+				}
 			}
 
 			/*
@@ -1330,9 +1390,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				 */
 				findResourceMethods(new PageProvider());
 
-			} catch (Exception ex) {
-				ourLog.error("An error occurred while loading request handlers!", ex);
-				throw new ServletException("Failed to initialize FHIR Restful server", ex);
+			} catch (Exception e) {
+				ourLog.error("An error occurred while loading request handlers!", e);
+				throw new ServletException("Failed to initialize FHIR Restful server: " + e.getMessage(), e);
 			}
 
 			myStarted = true;
@@ -1949,6 +2009,17 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	public void setDefaultPreferReturn(PreferReturnEnum theDefaultPreferReturn) {
 		Validate.notNull(theDefaultPreferReturn, "theDefaultPreferReturn must not be null");
 		myDefaultPreferReturn = theDefaultPreferReturn;
+	}
+
+	/**
+	 * Create a CapabilityStatement based on the given request
+	 */
+	public IBaseConformance getCapabilityStatement(ServletRequestDetails theRequestDetails) {
+		// Create a cloned request details so we can make it indicate that this is a capabilities request
+		ServletRequestDetails requestDetails = new ServletRequestDetails(theRequestDetails);
+		requestDetails.setRestOperationType(RestOperationTypeEnum.METADATA);
+
+		return myServerConformanceMethod.provideCapabilityStatement(this, requestDetails);
 	}
 
 	/**

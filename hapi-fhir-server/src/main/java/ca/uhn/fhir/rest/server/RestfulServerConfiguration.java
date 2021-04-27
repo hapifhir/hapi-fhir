@@ -21,33 +21,60 @@ package ca.uhn.fhir.rest.server;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
+import ca.uhn.fhir.rest.server.method.SearchParameter;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.VersionUtil;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+public class RestfulServerConfiguration implements ISearchParamRegistry {
 
-public class RestfulServerConfiguration {
-
+	public static final String GLOBAL = "GLOBAL";
 	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServerConfiguration.class);
 	private Collection<ResourceBinding> resourceBindings;
 	private List<BaseMethodBinding<?>> serverBindings;
-    private Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype;
-	private String implementationDescription;
-	private String serverVersion = VersionUtil.getVersion();
-	private String serverName = "HAPI FHIR";
-	private FhirContext fhirContext;
-	private IServerAddressStrategy serverAddressStrategy;
+	private List<BaseMethodBinding<?>> myGlobalBindings;
+	private Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype;
+	private String myImplementationDescription;
+	private String myServerName = "HAPI FHIR";
+	private String myServerVersion = VersionUtil.getVersion();
+	private FhirContext myFhirContext;
+	private IServerAddressStrategy myServerAddressStrategy;
 	private IPrimitiveType<Date> myConformanceDate;
 
 	/**
@@ -92,15 +119,15 @@ public class RestfulServerConfiguration {
 		this.serverBindings = theServerBindings;
 		return this;
 	}
-    
-    public Map<String, Class<? extends IBaseResource>> getNameToSharedSupertype() {
-      return resourceNameToSharedSupertype;
-    }
 
-    public RestfulServerConfiguration setNameToSharedSupertype(Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype) {
-      this.resourceNameToSharedSupertype = resourceNameToSharedSupertype;
-      return this;
-    }
+	public Map<String, Class<? extends IBaseResource>> getNameToSharedSupertype() {
+		return resourceNameToSharedSupertype;
+	}
+
+	public RestfulServerConfiguration setNameToSharedSupertype(Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype) {
+		this.resourceNameToSharedSupertype = resourceNameToSharedSupertype;
+		return this;
+	}
 
 	/**
 	 * Get the implementationDescription
@@ -108,10 +135,10 @@ public class RestfulServerConfiguration {
 	 * @return the implementationDescription
 	 */
 	public String getImplementationDescription() {
-		if (isBlank(implementationDescription)) {
+		if (isBlank(myImplementationDescription)) {
 			return "HAPI FHIR";
 		}
-		return implementationDescription;
+		return myImplementationDescription;
 	}
 
 	/**
@@ -120,7 +147,7 @@ public class RestfulServerConfiguration {
 	 * @param implementationDescription the implementationDescription to set
 	 */
 	public RestfulServerConfiguration setImplementationDescription(String implementationDescription) {
-		this.implementationDescription = implementationDescription;
+		this.myImplementationDescription = implementationDescription;
 		return this;
 	}
 
@@ -130,7 +157,7 @@ public class RestfulServerConfiguration {
 	 * @return the serverVersion
 	 */
 	public String getServerVersion() {
-		return serverVersion;
+		return myServerVersion;
 	}
 
 	/**
@@ -139,7 +166,7 @@ public class RestfulServerConfiguration {
 	 * @param serverVersion the serverVersion to set
 	 */
 	public RestfulServerConfiguration setServerVersion(String serverVersion) {
-		this.serverVersion = serverVersion;
+		this.myServerVersion = serverVersion;
 		return this;
 	}
 
@@ -149,7 +176,7 @@ public class RestfulServerConfiguration {
 	 * @return the serverName
 	 */
 	public String getServerName() {
-		return serverName;
+		return myServerName;
 	}
 
 	/**
@@ -158,7 +185,7 @@ public class RestfulServerConfiguration {
 	 * @param serverName the serverName to set
 	 */
 	public RestfulServerConfiguration setServerName(String serverName) {
-		this.serverName = serverName;
+		this.myServerName = serverName;
 		return this;
 	}
 
@@ -167,7 +194,7 @@ public class RestfulServerConfiguration {
 	 * creating their own.
 	 */
 	public FhirContext getFhirContext() {
-		return this.fhirContext;
+		return this.myFhirContext;
 	}
 
 	/**
@@ -176,7 +203,7 @@ public class RestfulServerConfiguration {
 	 * @param fhirContext the fhirContext to set
 	 */
 	public RestfulServerConfiguration setFhirContext(FhirContext fhirContext) {
-		this.fhirContext = fhirContext;
+		this.myFhirContext = fhirContext;
 		return this;
 	}
 
@@ -186,7 +213,7 @@ public class RestfulServerConfiguration {
 	 * @return the serverAddressStrategy
 	 */
 	public IServerAddressStrategy getServerAddressStrategy() {
-		return serverAddressStrategy;
+		return myServerAddressStrategy;
 	}
 
 	/**
@@ -195,7 +222,7 @@ public class RestfulServerConfiguration {
 	 * @param serverAddressStrategy the serverAddressStrategy to set
 	 */
 	public void setServerAddressStrategy(IServerAddressStrategy serverAddressStrategy) {
-		this.serverAddressStrategy = serverAddressStrategy;
+		this.myServerAddressStrategy = serverAddressStrategy;
 	}
 
 	/**
@@ -217,52 +244,118 @@ public class RestfulServerConfiguration {
 	}
 
 	public Bindings provideBindings() {
-		IdentityHashMap<SearchMethodBinding, String> myNamedSearchMethodBindingToName = new IdentityHashMap<>();
-		HashMap<String, List<SearchMethodBinding>> mySearchNameToBindings = new HashMap<>();
-		IdentityHashMap<OperationMethodBinding, String> myOperationBindingToName = new IdentityHashMap<>();
-		HashMap<String, List<OperationMethodBinding>> myOperationNameToBindings = new HashMap<>();
+		IdentityHashMap<SearchMethodBinding, String> namedSearchMethodBindingToName = new IdentityHashMap<>();
+		HashMap<String, List<SearchMethodBinding>> searchNameToBindings = new HashMap<>();
+		IdentityHashMap<OperationMethodBinding, String> operationBindingToId = new IdentityHashMap<>();
+		HashMap<String, List<OperationMethodBinding>> operationIdToBindings = new HashMap<>();
 
 		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = collectMethodBindings();
-		for (Map.Entry<String, List<BaseMethodBinding<?>>> nextEntry : resourceToMethods.entrySet()) {
-			List<BaseMethodBinding<?>> nextMethodBindings = nextEntry.getValue();
-			for (BaseMethodBinding<?> nextMethodBinding : nextMethodBindings) {
-				if (nextMethodBinding instanceof OperationMethodBinding) {
-					OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
-					if (myOperationBindingToName.containsKey(methodBinding)) {
-						continue;
-					}
+		List<BaseMethodBinding<?>> methodBindings = resourceToMethods
+			.values()
+			.stream().flatMap(t -> t.stream())
+			.collect(Collectors.toList());
+		if (myGlobalBindings != null) {
+			methodBindings.addAll(myGlobalBindings);
+		}
 
-					String name = createOperationName(methodBinding);
-					ourLog.debug("Detected operation: {}", name);
-
-					myOperationBindingToName.put(methodBinding, name);
-					if (myOperationNameToBindings.containsKey(name) == false) {
-						myOperationNameToBindings.put(name, new ArrayList<>());
-					}
-					myOperationNameToBindings.get(name).add(methodBinding);
-				} else if (nextMethodBinding instanceof SearchMethodBinding) {
-					SearchMethodBinding methodBinding = (SearchMethodBinding) nextMethodBinding;
-					if (myNamedSearchMethodBindingToName.containsKey(methodBinding)) {
-						continue;
-					}
-
-					String name = createNamedQueryName(methodBinding);
-					ourLog.debug("Detected named query: {}", name);
-
-					myNamedSearchMethodBindingToName.put(methodBinding, name);
-					if (!mySearchNameToBindings.containsKey(name)) {
-						mySearchNameToBindings.put(name, new ArrayList<>());
-					}
-					mySearchNameToBindings.get(name).add(methodBinding);
+		ListMultimap<String, OperationMethodBinding> nameToOperationMethodBindings = ArrayListMultimap.create();
+		for (BaseMethodBinding<?> nextMethodBinding : methodBindings) {
+			if (nextMethodBinding instanceof OperationMethodBinding) {
+				OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
+				nameToOperationMethodBindings.put(methodBinding.getName(), methodBinding);
+			} else if (nextMethodBinding instanceof SearchMethodBinding) {
+				SearchMethodBinding methodBinding = (SearchMethodBinding) nextMethodBinding;
+				if (namedSearchMethodBindingToName.containsKey(methodBinding)) {
+					continue;
 				}
+
+				String name = createNamedQueryName(methodBinding);
+				ourLog.debug("Detected named query: {}", name);
+
+				namedSearchMethodBindingToName.put(methodBinding, name);
+				if (!searchNameToBindings.containsKey(name)) {
+					searchNameToBindings.put(name, new ArrayList<>());
+				}
+				searchNameToBindings.get(name).add(methodBinding);
 			}
 		}
 
-		return new Bindings(myNamedSearchMethodBindingToName, mySearchNameToBindings, myOperationNameToBindings, myOperationBindingToName);
+		for (String nextName : nameToOperationMethodBindings.keySet()) {
+			List<OperationMethodBinding> nextMethodBindings = nameToOperationMethodBindings.get(nextName);
+
+			boolean global = false;
+			boolean system = false;
+			boolean instance = false;
+			boolean type = false;
+			Set<String> resourceTypes = null;
+
+			for (OperationMethodBinding nextMethodBinding : nextMethodBindings) {
+				global |= nextMethodBinding.isGlobalMethod();
+				system |= nextMethodBinding.isCanOperateAtServerLevel();
+				type |= nextMethodBinding.isCanOperateAtTypeLevel();
+				instance |= nextMethodBinding.isCanOperateAtInstanceLevel();
+				if (nextMethodBinding.getResourceName() != null) {
+					resourceTypes = resourceTypes != null ? resourceTypes : new TreeSet<>();
+					resourceTypes.add(nextMethodBinding.getResourceName());
+				}
+			}
+
+			StringBuilder operationIdBuilder = new StringBuilder();
+			if (global) {
+				operationIdBuilder.append("Global");
+			} else if (resourceTypes != null && resourceTypes.size() == 1) {
+				operationIdBuilder.append(resourceTypes.iterator().next());
+			} else if (resourceTypes != null && resourceTypes.size() == 2) {
+				Iterator<String> iterator = resourceTypes.iterator();
+				operationIdBuilder.append(iterator.next());
+				operationIdBuilder.append(iterator.next());
+			} else if (resourceTypes != null) {
+				operationIdBuilder.append("Multi");
+			}
+
+			operationIdBuilder.append('-');
+			if (instance) {
+				operationIdBuilder.append('i');
+			}
+			if (type) {
+				operationIdBuilder.append('t');
+			}
+			if (system) {
+				operationIdBuilder.append('s');
+			}
+			operationIdBuilder.append('-');
+
+			// Exclude the leading $
+			operationIdBuilder.append(nextName, 1, nextName.length());
+
+			String operationId = operationIdBuilder.toString();
+			operationIdToBindings.put(operationId, nextMethodBindings);
+			nextMethodBindings.forEach(t->operationBindingToId.put(t, operationId));
+		}
+
+		for (BaseMethodBinding<?> nextMethodBinding : methodBindings) {
+			if (nextMethodBinding instanceof OperationMethodBinding) {
+				OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
+				if (operationBindingToId.containsKey(methodBinding)) {
+					continue;
+				}
+
+				String name = createOperationName(methodBinding);
+				ourLog.debug("Detected operation: {}", name);
+
+				operationBindingToId.put(methodBinding, name);
+				if (operationIdToBindings.containsKey(name) == false) {
+					operationIdToBindings.put(name, new ArrayList<>());
+				}
+				operationIdToBindings.get(name).add(methodBinding);
+			}
+		}
+
+		return new Bindings(namedSearchMethodBindingToName, searchNameToBindings, operationIdToBindings, operationBindingToId);
 	}
 
 	public Map<String, List<BaseMethodBinding<?>>> collectMethodBindings() {
-		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = new TreeMap<String, List<BaseMethodBinding<?>>>();
+		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = new TreeMap<>();
 		for (ResourceBinding next : getResourceBindings()) {
 			String resourceName = next.getResourceName();
 			for (BaseMethodBinding<?> nextMethodBinding : next.getMethodBindings()) {
@@ -280,6 +373,14 @@ public class RestfulServerConfiguration {
 			resourceToMethods.get(resourceName).add(nextMethodBinding);
 		}
 		return resourceToMethods;
+	}
+
+	public List<BaseMethodBinding<?>> getGlobalBindings() {
+		return myGlobalBindings;
+	}
+
+	public void setGlobalBindings(List<BaseMethodBinding<?>> theGlobalBindings) {
+		myGlobalBindings = theGlobalBindings;
 	}
 
 	/*
@@ -310,10 +411,119 @@ public class RestfulServerConfiguration {
 				entry -> entry.getValue().getLowestCommonSuperclass().get()));
 	}
 
-	private String createOperationName(OperationMethodBinding theMethodBinding) {
+	private String createNamedQueryName(SearchMethodBinding searchMethodBinding) {
+		StringBuilder retVal = new StringBuilder();
+		if (searchMethodBinding.getResourceName() != null) {
+			retVal.append(searchMethodBinding.getResourceName());
+		}
+		retVal.append("-query-");
+		retVal.append(searchMethodBinding.getQueryName());
+
+		return retVal.toString();
+	}
+
+	@Override
+	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
+		return getActiveSearchParams(theResourceName).get(theParamName);
+	}
+
+	@Override
+	public Map<String, RuntimeSearchParam> getActiveSearchParams(@Nonnull String theResourceName) {
+		Validate.notBlank(theResourceName, "theResourceName must not be null or blank");
+
+		Map<String, RuntimeSearchParam> retVal = new LinkedHashMap<>();
+
+		collectMethodBindings()
+			.getOrDefault(theResourceName, Collections.emptyList())
+			.stream()
+			.filter(t -> theResourceName.equals(t.getResourceName()))
+			.filter(t -> t instanceof SearchMethodBinding)
+			.map(t -> (SearchMethodBinding) t)
+			.filter(t -> t.getQueryName() == null)
+			.forEach(t -> createRuntimeBinding(retVal, t));
+
+		return retVal;
+	}
+
+	@Nullable
+	@Override
+	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
+		throw new UnsupportedOperationException();
+	}
+
+	private void createRuntimeBinding(Map<String, RuntimeSearchParam> theMapToPopulate, SearchMethodBinding theSearchMethodBinding) {
+
+		List<SearchParameter> parameters = theSearchMethodBinding
+			.getParameters()
+			.stream()
+			.filter(t -> t instanceof SearchParameter)
+			.map(t -> (SearchParameter) t)
+			.sorted(SearchParameterComparator.INSTANCE)
+			.collect(Collectors.toList());
+
+		for (SearchParameter nextParameter : parameters) {
+
+			String nextParamName = nextParameter.getName();
+
+			String nextParamUnchainedName = nextParamName;
+			if (nextParamName.contains(".")) {
+				nextParamUnchainedName = nextParamName.substring(0, nextParamName.indexOf('.'));
+			}
+
+			String nextParamDescription = nextParameter.getDescription();
+
+			/*
+			 * If the parameter has no description, default to the one from the resource
+			 */
+			if (StringUtils.isBlank(nextParamDescription)) {
+				RuntimeResourceDefinition def = getFhirContext().getResourceDefinition(theSearchMethodBinding.getResourceName());
+				RuntimeSearchParam paramDef = def.getSearchParam(nextParamUnchainedName);
+				if (paramDef != null) {
+					nextParamDescription = paramDef.getDescription();
+				}
+			}
+
+			if (theMapToPopulate.containsKey(nextParamUnchainedName)) {
+				continue;
+			}
+
+			IIdType id = getFhirContext().getVersion().newIdType().setValue("SearchParameter/" + theSearchMethodBinding.getResourceName() + "-" + nextParamName);
+			String uri = null;
+			String description = nextParamDescription;
+			String path = null;
+			RestSearchParameterTypeEnum type = nextParameter.getParamType();
+			Set<String> providesMembershipInCompartments = Collections.emptySet();
+			Set<String> targets = Collections.emptySet();
+			RuntimeSearchParam.RuntimeSearchParamStatusEnum status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE;
+			Collection<String> base = Collections.singletonList(theSearchMethodBinding.getResourceName());
+			RuntimeSearchParam param = new RuntimeSearchParam(id, uri, nextParamName, description, path, type, providesMembershipInCompartments, targets, status, false, null, base);
+			theMapToPopulate.put(nextParamName, param);
+
+		}
+
+	}
+
+	private static class SearchParameterComparator implements Comparator<SearchParameter> {
+		private static final SearchParameterComparator INSTANCE = new SearchParameterComparator();
+
+		@Override
+		public int compare(SearchParameter theO1, SearchParameter theO2) {
+			if (theO1.isRequired() == theO2.isRequired()) {
+				return theO1.getName().compareTo(theO2.getName());
+			}
+			if (theO1.isRequired()) {
+				return -1;
+			}
+			return 1;
+		}
+	}
+
+	private static String createOperationName(OperationMethodBinding theMethodBinding) {
 		StringBuilder retVal = new StringBuilder();
 		if (theMethodBinding.getResourceName() != null) {
 			retVal.append(theMethodBinding.getResourceName());
+		} else if (theMethodBinding.isGlobalMethod()) {
+			retVal.append("Global");
 		}
 
 		retVal.append('-');
@@ -330,17 +540,4 @@ public class RestfulServerConfiguration {
 
 		return retVal.toString();
 	}
-
-
-	private String createNamedQueryName(SearchMethodBinding searchMethodBinding) {
-		StringBuilder retVal = new StringBuilder();
-		if (searchMethodBinding.getResourceName() != null) {
-			retVal.append(searchMethodBinding.getResourceName());
-		}
-		retVal.append("-query-");
-		retVal.append(searchMethodBinding.getQueryName());
-
-		return retVal.toString();
-	}
-
 }

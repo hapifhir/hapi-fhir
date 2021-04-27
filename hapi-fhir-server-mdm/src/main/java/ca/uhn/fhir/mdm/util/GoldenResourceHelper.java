@@ -73,8 +73,9 @@ public class GoldenResourceHelper {
 	/**
 	 * Creates a copy of the specified resource. This method will carry over resource EID if it exists. If it does not exist,
 	 * a randomly generated UUID EID will be created.
-	 *  @param <T>                 Supported MDM resource type (e.g. Patient, Practitioner)
-	 * @param theIncomingResource The resource that will be used as the starting point for the MDM linking.
+	 *
+	 * @param <T>                      Supported MDM resource type (e.g. Patient, Practitioner)
+	 * @param theIncomingResource      The resource that will be used as the starting point for the MDM linking.
 	 * @param theMdmTransactionContext
 	 */
 	public <T extends IAnyResource> T createGoldenResourceFromMdmSourceResource(T theIncomingResource, MdmTransactionContext theMdmTransactionContext) {
@@ -115,7 +116,7 @@ public class GoldenResourceHelper {
 		theGoldenResourceIdentifier.getMutator().addValue(theNewGoldenResource, IdentifierUtil.toId(myFhirContext, hapiEid));
 
 		// set identifier on the source resource
-		TerserUtil.cloneEidIntoResource(myFhirContext, theSourceResource, hapiEid);
+		cloneEidIntoResource(myFhirContext, theSourceResource, hapiEid);
 	}
 
 	private void cloneAllExternalEidsIntoNewGoldenResource(BaseRuntimeChildDefinition theGoldenResourceIdentifier,
@@ -130,7 +131,7 @@ public class GoldenResourceHelper {
 				String mdmSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystem();
 				String baseSystem = system.get().getValueAsString();
 				if (Objects.equals(baseSystem, mdmSystem)) {
-					TerserUtil.cloneEidIntoResource(myFhirContext, theGoldenResourceIdentifier, base, theNewGoldenResource);
+					ca.uhn.fhir.util.TerserUtil.cloneEidIntoResource(myFhirContext, theGoldenResourceIdentifier, base, theNewGoldenResource);
 					ourLog.debug("System {} differs from system in the MDM rules {}", baseSystem, mdmSystem);
 				}
 			} else {
@@ -235,18 +236,18 @@ public class GoldenResourceHelper {
 		for (CanonicalEID incomingExternalEid : theIncomingSourceExternalEids) {
 			if (goldenResourceExternalEids.contains(incomingExternalEid)) {
 				continue;
-			} else {
-				TerserUtil.cloneEidIntoResource(myFhirContext, theGoldenResource, incomingExternalEid);
 			}
+			cloneEidIntoResource(myFhirContext, theGoldenResource, incomingExternalEid);
 		}
 	}
 
 	public boolean hasIdentifier(IBaseResource theResource) {
-		return TerserUtil.hasValues(myFhirContext, theResource, FIELD_NAME_IDENTIFIER);
+		return ca.uhn.fhir.util.TerserUtil.hasValues(myFhirContext, theResource, FIELD_NAME_IDENTIFIER);
 	}
 
 	public void mergeIndentifierFields(IBaseResource theFromGoldenResource, IBaseResource theToGoldenResource, MdmTransactionContext theMdmTransactionContext) {
-		TerserUtil.cloneCompositeField(myFhirContext, theFromGoldenResource, theToGoldenResource, FIELD_NAME_IDENTIFIER);
+		ca.uhn.fhir.util.TerserUtil.cloneCompositeField(myFhirContext, theFromGoldenResource, theToGoldenResource,
+			FIELD_NAME_IDENTIFIER);
 	}
 
 	public void mergeNonIdentiferFields(IBaseResource theFromGoldenResource, IBaseResource theToGoldenResource, MdmTransactionContext theMdmTransactionContext) {
@@ -274,5 +275,21 @@ public class GoldenResourceHelper {
 		if (!eidFromResource.isEmpty()) {
 			updateGoldenResourceExternalEidFromSourceResource(theGoldenResource, theSourceResource, theMdmTransactionContext);
 		}
+	}
+
+	/**
+	 * Clones the specified canonical EID into the identifier field on the resource
+	 *
+	 * @param theFhirContext         Context to pull resource definitions from
+	 * @param theResourceToCloneInto Resource to set the EID on
+	 * @param theEid                 EID to be set
+	 */
+	public void cloneEidIntoResource(FhirContext theFhirContext, IBaseResource theResourceToCloneInto, CanonicalEID theEid) {
+		// get a ref to the actual ID Field
+		RuntimeResourceDefinition resourceDefinition = theFhirContext.getResourceDefinition(theResourceToCloneInto);
+		// hapi has 2 metamodels: for children and types
+		BaseRuntimeChildDefinition resourceIdentifier = resourceDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
+		ca.uhn.fhir.util.TerserUtil.cloneEidIntoResource(theFhirContext, resourceIdentifier,
+			IdentifierUtil.toId(theFhirContext, theEid), theResourceToCloneInto);
 	}
 }

@@ -13,6 +13,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class SchemaValidationDstu3Test {
 
+	static {
+
+	}
+
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SchemaValidationDstu3Test.class);

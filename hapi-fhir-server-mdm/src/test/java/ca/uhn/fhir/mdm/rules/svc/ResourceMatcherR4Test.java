@@ -56,8 +56,8 @@ public class ResourceMatcherR4Test extends BaseMdmRulesR4Test {
 	@Test
 	public void testMetaphoneMatchResult() {
 		MdmResourceMatcherSvc matcherSvc = buildMatcher(buildNamePhoneRules(MdmMatcherEnum.METAPHONE));
-		MdmMatchOutcome result = matcherSvc.match(myLeft, myRight);
-		assertMatchResult(MdmMatchResultEnum.MATCH, 7L, 3.0, false, false, result);
+			MdmMatchOutcome result = matcherSvc.match(myLeft, myRight);
+			assertMatchResult(MdmMatchResultEnum.MATCH, 7L, 3.0, false, false, result);
 	}
 
 	@Test

@@ -189,7 +189,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		ourClient.update().resource(numberParameter).execute();
 
 		// This fires every 10 seconds
-		mySearchParamRegistry.refreshCacheIfNecessary();
+		mySearchParamRegistryController.refreshCacheIfNecessary();
 
 		Patient patient = new Patient();
 		patient.setId("future-appointment-count-pt");
@@ -309,9 +309,6 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testCountParam() {
-		// NB this does not get used- The paging provider has its own limits built in
-		myDaoConfig.setHardSearchLimit(100);
-
 		List<IBaseResource> resources = new ArrayList<IBaseResource>();
 		for (int i = 0; i < 100; i++) {
 			Organization org = new Organization();

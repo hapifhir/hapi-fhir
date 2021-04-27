@@ -142,16 +142,16 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 	@VisibleForTesting
 	public void unregisterAllInterceptors() {
 		synchronized (myRegistryMutex) {
-			myAnonymousInvokers.clear();
-			myGlobalInvokers.clear();
-			myInterceptors.clear();
+			unregisterInterceptors(myAnonymousInvokers.values());
+			unregisterInterceptors(myGlobalInvokers.values());
+			unregisterInterceptors(myInterceptors);
 		}
 	}
 
 	@Override
 	public void unregisterInterceptors(@Nullable Collection<?> theInterceptors) {
 		if (theInterceptors != null) {
-			theInterceptors.forEach(t -> unregisterInterceptor(t));
+			new ArrayList<>(theInterceptors).forEach(t -> unregisterInterceptor(t));
 		}
 	}
 

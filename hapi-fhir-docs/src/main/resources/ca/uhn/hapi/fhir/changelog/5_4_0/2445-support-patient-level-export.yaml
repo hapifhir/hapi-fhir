@@ -1,0 +1,4 @@
+---
+type: add
+issue: 2445
+title: "Support has been added for patient level Bulk export. This can be done via the `/Patient/$export` endpoint. Also, support has been added for setting Cache-Control header to no-cache for Bulk Export requests."

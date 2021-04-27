@@ -1,0 +1,15 @@
+---
+type: add
+issue: 2449
+title: "Adds interceptors for the following functionality:
+   <ul>
+      <li>
+         Data normalization (n11n) - removing unwanted characters (control, etc. as defined by the requirements)
+      </li>
+      <li>
+         Data standardization (s13n) - normalizing data by ensuring word spacing and character cases are uniform
+      </li>
+      <li>
+         Data validation - making sure that addresses / emails are validated
+      </li>
+   </ul>"

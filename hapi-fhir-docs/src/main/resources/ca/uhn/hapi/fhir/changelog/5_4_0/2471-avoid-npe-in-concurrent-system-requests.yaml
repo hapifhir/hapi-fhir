@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2471
+title: "An NPE was fixed when performing highly concurrent system requests while using the ResourceVersionConflictResolutionStrategy interceptor."

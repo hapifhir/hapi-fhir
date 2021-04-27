@@ -1,0 +1,15 @@
+{
+	"Person" : {
+		"Person.name.family" : "NAME_FAMILY",
+		"Person.name.given" : "NAME_GIVEN",
+		"Person.telecom.where(system='phone').value" : "PHONE"
+	},
+	"Patient" : {
+		"name.family" : "NAME_FAMILY",
+		"name.given" : "NAME_GIVEN",
+		"telecom.where(system='phone').value" : "PHONE"
+	},
+	"*" : {
+		"telecom.where(system='email').value" : "EMAIL"
+	}
+}

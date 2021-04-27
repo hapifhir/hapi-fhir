@@ -10,6 +10,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
@@ -32,6 +33,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 	@AfterEach
 	public void afterDisableExpunge() {
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+		myDaoConfig.setEnforceReferentialIntegrityOnDelete(false);
 	}
 
 	private void assertExpunged(IIdType theId) {
@@ -119,6 +121,9 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 				break;
 			case "Observation":
 				dao = myObservationDao;
+				break;
+			case "Organization":
+				dao = myOrganizationDao;
 				break;
 			default:
 				fail("Restype: " + theId.getResourceType());
@@ -321,6 +326,52 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 		assertStillThere(myTwoVersionObservationId.withVersion("1"));
 		assertStillThere(myTwoVersionObservationId.withVersion("2"));
 		assertGone(myDeletedObservationId);
+
+	}
+
+	/**
+	 * See #2015
+	 */
+	@Test
+	public void testExpungeSucceedsWithIncomingReferences_ReferentialIntegrityDisabled() {
+		myDaoConfig.setEnforceReferentialIntegrityOnDelete(false);
+
+		Organization org = new Organization();
+		org.setActive(true);
+		IIdType orgId = myOrganizationDao.create(org).getId();
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		patient.getManagingOrganization().setReference(orgId.toUnqualifiedVersionless().getValue());
+		myPatientDao.create(patient);
+
+		runInTransaction(()-> assertEquals(1, myResourceLinkDao.count()));
+
+		myOrganizationDao.delete(orgId);
+
+		runInTransaction(()-> assertEquals(0, myResourceLinkDao.count()));
+
+		Parameters input = new Parameters();
+		input.addParameter()
+			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT)
+			.setValue(new IntegerType(1000));
+		input.addParameter()
+			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
+			.setValue(new BooleanType(true));
+		input.addParameter()
+			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
+			.setValue(new BooleanType(true));
+
+		myClient
+			.operation()
+			.onInstance(orgId.toUnqualifiedVersionless())
+			.named("expunge")
+			.withParameters(input)
+			.execute();
+
+		assertExpunged(orgId.toUnqualifiedVersionless());
+
+		runInTransaction(()-> assertEquals(0, myResourceLinkDao.count()));
 
 	}
 

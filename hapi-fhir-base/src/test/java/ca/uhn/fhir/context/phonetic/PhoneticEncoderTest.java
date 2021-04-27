@@ -1,14 +1,14 @@
 package ca.uhn.fhir.context.phonetic;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PhoneticEncoderTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(PhoneticEncoderTest.class);
@@ -23,7 +23,11 @@ class PhoneticEncoderTest {
 	public void testEncodeAddress(PhoneticEncoderEnum thePhoneticEncoderEnum) {
 		String encoded = thePhoneticEncoderEnum.getPhoneticEncoder().encode(ADDRESS_LINE);
 		ourLog.info("{}: {}", thePhoneticEncoderEnum.name(), encoded);
-		assertThat(encoded, startsWith(NUMBER + " "));
-		assertThat(encoded, endsWith(" " + SUITE));
+		if (thePhoneticEncoderEnum == PhoneticEncoderEnum.NUMERIC) {
+			assertEquals(NUMBER + SUITE, encoded);
+		} else {
+			assertThat(encoded, startsWith(NUMBER + " "));
+			assertThat(encoded, endsWith(" " + SUITE));
+		}
 	}
 }

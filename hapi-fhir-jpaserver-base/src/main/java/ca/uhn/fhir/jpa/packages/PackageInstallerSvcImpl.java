@@ -36,7 +36,8 @@ import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -105,6 +106,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	private INpmPackageVersionDao myPackageVersionDao;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	private ISearchParamRegistryController mySearchParamRegistryController;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 	/**
@@ -175,7 +178,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					install(npmPackage, theInstallationSpec, retVal);
 
 					// If any SearchParameters were installed, let's load them right away
-					mySearchParamRegistry.refreshCacheIfNecessary();
+					mySearchParamRegistryController.refreshCacheIfNecessary();
 				}
 
 			} catch (IOException e) {
@@ -344,7 +347,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	private IBundleProvider searchResource(IFhirResourceDao theDao, SearchParameterMap theMap) {
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			SystemRequestDetails requestDetails = new SystemRequestDetails();
-			requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
+//			requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
 			return theDao.search(theMap, requestDetails);
 		} else {
 			return theDao.search(theMap);
@@ -401,9 +404,15 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	}
 
 	private boolean isStructureDefinitionWithoutSnapshot(IBaseResource r) {
+		boolean retVal = false;
 		FhirTerser terser = myFhirContext.newTerser();
-		return r.getClass().getSimpleName().equals("StructureDefinition") &&
-			terser.getSingleValueOrNull(r, "snapshot") == null;
+		if (r.getClass().getSimpleName().equals("StructureDefinition")) {
+			Optional<String> kind = terser.getSinglePrimitiveValue(r, "kind");
+			if (kind.isPresent() && !(kind.get().equals("logical"))) {
+				retVal = terser.getSingleValueOrNull(r, "snapshot") == null;
+			}
+		}
+		return retVal;
 	}
 
 	private IBaseResource generateSnapshot(IBaseResource sd) {

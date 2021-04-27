@@ -73,7 +73,6 @@ public class RDFParser extends BaseParser {
 	public static final String MODIFIER_EXTENSION = "modifierExtension";
 	private final Map<Class, String> classToFhirTypeMap = new HashMap<>();
 
-	private final FhirContext context;
 	private final Lang lang;
 
 	/**
@@ -84,7 +83,6 @@ public class RDFParser extends BaseParser {
 	 */
 	public RDFParser(final FhirContext context, final IParserErrorHandler parserErrorHandler, final Lang lang) {
 		super(context, parserErrorHandler);
-		this.context = context;
 		this.lang = lang;
 	}
 
@@ -148,13 +146,13 @@ public class RDFParser extends BaseParser {
 																	 final EncodeContext encodeContext,
 																	 final boolean rootResource, Resource parentResource) {
 
-		RuntimeResourceDefinition resDef = this.context.getResourceDefinition(resource);
+		RuntimeResourceDefinition resDef = getContext().getResourceDefinition(resource);
 		if (resDef == null) {
 			throw new ConfigurationException("Unknown resource type: " + resource.getClass());
 		}
 
 		if (!containedResource) {
-			super.containResourcesForEncoding(resource);
+			setContainedResources(getContext().newTerser().containResources(resource));
 		}
 
 		if (!(resource instanceof IAnyResource)) {
@@ -302,7 +300,7 @@ public class RDFParser extends BaseParser {
 
 							String propertyName = constructPredicateName(resource, childDefinition, childName, parentElement);
 							if (element != null) {
-								XSDDatatype dataType = getXSDDataTypeForFhirType(element.fhirType());
+								XSDDatatype dataType = getXSDDataTypeForFhirType(element.fhirType(), encodedValue);
 								rdfResource.addProperty(rdfModel.createProperty(propertyName), this.createFhirValueBlankNode(rdfModel, encodedValue, dataType, cardinalityIndex));
 							}
 						}
@@ -316,14 +314,14 @@ public class RDFParser extends BaseParser {
 					if (value != null || !hasNoExtensions(pd)) {
 						if (value != null) {
 							String propertyName = constructPredicateName(resource, childDefinition, childName, parentElement);
-							XSDDatatype dataType = getXSDDataTypeForFhirType(pd.fhirType());
+							XSDDatatype dataType = getXSDDataTypeForFhirType(pd.fhirType(), value);
 							Resource valueResource = this.createFhirValueBlankNode(rdfModel, value, dataType, cardinalityIndex);
 							if (!hasNoExtensions(pd)) {
 								IBaseHasExtensions hasExtension = (IBaseHasExtensions)pd;
 								if (hasExtension.getExtension() != null && hasExtension.getExtension().size() > 0) {
 									int i = 0;
 									for (IBaseExtension extension : hasExtension.getExtension()) {
-										RuntimeResourceDefinition resDef = this.context.getResourceDefinition(resource);
+										RuntimeResourceDefinition resDef = getContext().getResourceDefinition(resource);
 										Resource extensionResource = rdfModel.createResource();
 										extensionResource.addProperty(rdfModel.createProperty(FHIR_NS+FHIR_INDEX), rdfModel.createTypedLiteral(i, XSDDatatype.XSDinteger));
 										valueResource.addProperty(rdfModel.createProperty(FHIR_NS + ELEMENT_EXTENSION), extensionResource);
@@ -375,7 +373,7 @@ public class RDFParser extends BaseParser {
 				}
 				case RESOURCE: {
 					IBaseResource baseResource = (IBaseResource) element;
-					String resourceName = this.context.getResourceType(baseResource);
+					String resourceName = getContext().getResourceType(baseResource);
 					if (!super.shouldEncodeResource(resourceName)) {
 						break;
 					}
@@ -413,7 +411,7 @@ public class RDFParser extends BaseParser {
 	 * @param fhirType hapi field type
 	 * @return XSDDatatype value
 	 */
-	private XSDDatatype getXSDDataTypeForFhirType(String fhirType) {
+	private XSDDatatype getXSDDataTypeForFhirType(String fhirType, String value) {
 		switch (fhirType) {
 			case "boolean":
 				return XSDDatatype.XSDboolean;
@@ -425,7 +423,16 @@ public class RDFParser extends BaseParser {
 				return XSDDatatype.XSDdate;
 			case "dateTime":
 			case "instant":
-				return XSDDatatype.XSDdateTime;
+				switch (value.length()) { // assumes valid lexical value
+					case 4:
+						return XSDDatatype.XSDgYear;
+					case 7:
+						return XSDDatatype.XSDgYearMonth;
+					case 10:
+						return XSDDatatype.XSDdate;
+					default:
+						return XSDDatatype.XSDdateTime;
+				}
 			case "code":
 			case "string":
 			default:
@@ -486,7 +493,7 @@ public class RDFParser extends BaseParser {
 			BaseRuntimeChildDefinition nextChild = nextChildElem.getDef();
 
 			if (nextChild instanceof RuntimeChildNarrativeDefinition) {
-				INarrativeGenerator gen = this.context.getNarrativeGenerator();
+				INarrativeGenerator gen = getContext().getNarrativeGenerator();
 				if (gen != null) {
 					INarrative narrative;
 					if (resource instanceof IResource) {
@@ -498,7 +505,7 @@ public class RDFParser extends BaseParser {
 					}
 					assert narrative != null;
 					if (narrative.isEmpty()) {
-						gen.populateResourceNarrative(this.context, resource);
+						gen.populateResourceNarrative(getContext(), resource);
 					}
 					else {
 						RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
@@ -619,7 +626,7 @@ public class RDFParser extends BaseParser {
 	private <T extends IBaseResource> T parseResource(Class<T> resourceType, Model rdfModel) {
 		// jsonMode of true is passed in so that the xhtml parser state behaves as expected
 		// Push PreResourceState
-		ParserState<T> parserState = ParserState.getPreResourceInstance(this, resourceType, context, true, getErrorHandler());
+		ParserState<T> parserState = ParserState.getPreResourceInstance(this, resourceType, getContext(), true, getErrorHandler());
 		return parseRootResource(rdfModel, parserState, resourceType);
 	}
 
@@ -646,7 +653,7 @@ public class RDFParser extends BaseParser {
 				fhirTypeString = resourceType.getSimpleName();
 			}
 
-			RuntimeResourceDefinition definition = this.context.getResourceDefinition(fhirTypeString);
+			RuntimeResourceDefinition definition = getContext().getResourceDefinition(fhirTypeString);
 			fhirResourceType = definition.getName();
 
 			parseResource(parserState, fhirResourceType, rootResource);
@@ -777,7 +784,7 @@ public class RDFParser extends BaseParser {
 			String propertyUri = statement.getPredicate().getURI();
 			if (propertyUri.contains("Extension.value")) {
 				extensionValueType = propertyUri.replace(FHIR_NS + "Extension.", "");
-				BaseRuntimeElementDefinition<?> target = context.getRuntimeChildUndeclaredExtensionDefinition().getChildByName(extensionValueType);
+				BaseRuntimeElementDefinition<?> target = getContext().getRuntimeChildUndeclaredExtensionDefinition().getChildByName(extensionValueType);
 				if (target.getChildType().equals(ID_DATATYPE) || target.getChildType().equals(PRIMITIVE_DATATYPE)) {
 					extensionValueResource = statement.getObject().asResource().getProperty(resource.getModel().createProperty(FHIR_NS+VALUE)).getObject().asLiteral();
 				} else {

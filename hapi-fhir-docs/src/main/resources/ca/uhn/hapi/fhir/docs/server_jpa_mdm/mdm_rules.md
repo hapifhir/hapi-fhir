@@ -51,7 +51,7 @@ Here is an example of a full HAPI MDM rules json document:
 		{
 			"name": "firstname-meta",
 			"resourceType": "Patient",
-			"resourcePath": "name.given",
+			"fhirPath": "name.given.first()",
 			"matcher": {
 				"algorithm": "METAPHONE"
 			}
@@ -173,8 +173,8 @@ Here is a matcher matchField that uses the SOUNDEX matcher to determine whether 
 
 ```json
 {
-	"name": "familyname-soundex",
-    "resourceType": "*",
+	"name": "familyname-soundex", 
+   "resourceType": "*",
 	"resourcePath": "name.family",
 	"matcher": {
 			"algorithm": "SOUNDEX"
@@ -195,6 +195,53 @@ Here is a matcher matchField that only matches when two family names are identic
 	}
 }
 ```
+
+While it is often suitable to use the `resourcePath` field to indicate the location of the data to be matched, occasionally you will need more direct control over precisely which fields are matched. When performing string matching, the matcher will indiscriminately try to match all elements of the left resource to all elements of the right resource. For example, consider the following two patients and matcher.
+
+```json
+{
+   "resourceType": "Patient",
+   "name": [{
+      "given": ["Frank", "John"]
+   }]
+}
+```
+
+```json
+{
+   "resourceType": "Patient",
+   "name": [{
+      "given": ["John", "Frank"]
+   }]
+}
+```
+
+```json
+{
+   "name": "firstname-meta",
+   "resourceType": "Patient",
+   "resourcePath": "name.given",
+   "matcher": {
+      "algorithm": "METAPHONE"
+   }
+}
+```
+
+In this example, these two patients would match, as the matcher will compare all elements of `["John", "Frank"]` to all elements of `["Frank", "John"]` and find that there are matches. This is when you would want to use a FHIRPath matcher, as FHIRPath expressions give you more direct control. This following example shows a matcher that would cause these two patient's not to match to each other.
+
+```json
+{
+   "name": "firstname-meta-fhirpath",
+   "resourceType": "Patient",
+   "fhirPath": "name.given[0]",
+   "matcher": {
+      "algorithm": "METAPHONE"
+   }
+}
+```
+Since FHIRPath expressions support indexing it is possible to directly indicate that you would only like to compare the first element of each resource. 
+
+
 
 Special identifier matching is also available if you need to match on a particular identifier system:
 ```json
@@ -245,10 +292,10 @@ The following algorithms are currently supported:
             <td>Gail = Gael, Gail != Gale, Thomas != Tom</td>
         </tr>
         <tr>
-            <td>CAVERPHONE1</td>
+            <td>CAVERPHONE2</td>
             <td>matcher</td>
             <td>
-              <a href="https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/language/Caverphone1.html">Apache Caverphone1</a>          
+              <a href="https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/language/Caverphone2.html">Apache Caverphone2</a>          
             </td>
             <td>Gail = Gael, Gail = Gale, Thomas != Tom</td>
         </tr>
@@ -333,6 +380,14 @@ The following algorithms are currently supported:
             <td>2019-12,Month = 2019-12-19,Day</td>
         </tr>
         <tr>
+            <td>NUMERIC</td>
+            <td>matcher</td>
+            <td>
+               Remove all non-numeric characters from the string before comparing.
+            </td>
+            <td>4169671111 = (416) 967-1111</td>
+        </tr>
+        <tr>
             <td>NAME_ANY_ORDER</td>
             <td>matcher</td>
             <td>
@@ -356,6 +411,14 @@ The following algorithms are currently supported:
             </td>
             <td>If an optional "identifierSystem" is provided, then the identifiers only match when they belong to that system</td>
         </tr>     
+        <tr>
+            <td>EXTENSION_ANY_ORDER</td>
+            <td>matcher</td>
+            <td>
+               Matches extensions of resources in any order. Matches are made if both resources share at least one extensions that have the same URL and value.
+            </td>
+            <td></td>
+        </tr>
         <tr>
             <td>EMPTY_FIELD</td>
             <td>matcher</td>

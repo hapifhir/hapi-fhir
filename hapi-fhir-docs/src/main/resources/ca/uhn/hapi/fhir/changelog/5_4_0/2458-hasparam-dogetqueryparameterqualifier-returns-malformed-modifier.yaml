@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2458
+title: "`HasParam#doGetQueryParameterQualifier()` returned a malformed modifier. For example, the modifier for
+   `_has:Observation:patient:code=123` was returned as `Observation:code:123` when it should be
+   `:Observation:patient:code`. This has been corrected."

@@ -199,7 +199,7 @@
 		The karaf verification step doesn't happen by default
 		because it doesn't seem to work on Windows.
 
-		See https://github.com/jamesagnew/hapi-fhir/issues/921
+		See https://github.com/hapifhir/hapi-fhir/issues/921
 		-->
 		<profile>
 			<id>DIST</id>

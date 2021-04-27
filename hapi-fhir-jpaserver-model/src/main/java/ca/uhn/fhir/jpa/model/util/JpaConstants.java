@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.util;
  */
 
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.HapiExtensions;
 
 public class JpaConstants {
 
@@ -184,6 +185,16 @@ public class JpaConstants {
 	public static final String PARAM_EXPORT_TYPE_FILTER = "_typeFilter";
 
 	/**
+	 * The [id] of the group when $export is called on /Group/[id]/$export
+	 */
+	public static final String PARAM_EXPORT_GROUP_ID = "_groupId";
+
+	/**
+	 * Whether mdm should be performed on group export items to expand the group items to linked items before performing the export
+	 */
+	public static final String PARAM_EXPORT_MDM = "_mdm";
+
+	/**
 	 * Parameter for delete to indicate the deleted resources should also be expunged
 	 */
 
@@ -195,15 +206,27 @@ public class JpaConstants {
 	public static final String EXTENSION_EXT_SYSTEMDEFINED = JpaConstants.class.getName() + "_EXTENSION_EXT_SYSTEMDEFINED";
 
 	/**
-	 * URL for extension on a Phonetic String SearchParameter indicating that text values should be phonetically indexed with the named encoder
+	 * Deprecated.  Please use {@link HapiExtensions#EXT_SEARCHPARAM_PHONETIC_ENCODER} instead.
 	 */
-	public static final String EXT_SEARCHPARAM_PHONETIC_ENCODER = "http://hapifhir.io/fhir/StructureDefinition/searchparameter-phonetic-encoder";
+	@Deprecated
+	public static final String EXT_SEARCHPARAM_PHONETIC_ENCODER = HapiExtensions.EXT_SEARCHPARAM_PHONETIC_ENCODER;
+
 	public static final String VALUESET_FILTER_DISPLAY = "display";
 
 	/**
 	 * The name of the default partition
 	 */
 	public static final String DEFAULT_PARTITION_NAME = "DEFAULT";
+
+	/**
+	 * The name of the collection of all partitions
+	 */
+	public static final String ALL_PARTITIONS_NAME = "ALL_PARTITIONS";
+
+	/**
+	 * Parameter for the $expand operation
+	 */
+	public static final String OPERATION_EXPAND_PARAM_INCLUDE_HIERARCHY = "includeHierarchy";
 
 	/**
 	 * Non-instantiable

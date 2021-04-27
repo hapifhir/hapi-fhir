@@ -1,0 +1,4 @@
+---
+type: add
+issue: 2417
+title: "Support for the FHIR _list search parameter."

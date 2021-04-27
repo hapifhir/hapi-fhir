@@ -41,6 +41,8 @@ import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.util.ReflectionUtil;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseMethodBinding.class);

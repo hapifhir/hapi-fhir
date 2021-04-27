@@ -20,15 +20,21 @@ package ca.uhn.fhir.jpa.batch;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.bulk.job.BulkExportJobConfig;
+import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
+import ca.uhn.fhir.jpa.bulk.imprt.job.BulkImportJobConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
 //When you define a new batch job, add it here.
 @Import({
-	CommonBatchJobConfig.class,
-	BulkExportJobConfig.class,})
+		  CommonBatchJobConfig.class,
+		  BulkExportJobConfig.class,
+		  BulkImportJobConfig.class
+})
 public class BatchJobsConfig {
-	//Empty config, as this is just an aggregator for all the various batch jobs defined around the system.
+	public static final String BULK_IMPORT_JOB_NAME = "bulkImportJob";
+	public static final String BULK_EXPORT_JOB_NAME = "bulkExportJob";
+	public static final String GROUP_BULK_EXPORT_JOB_NAME = "groupBulkExportJob";
+	public static final String PATIENT_BULK_EXPORT_JOB_NAME = "patientBulkExportJob";
 }

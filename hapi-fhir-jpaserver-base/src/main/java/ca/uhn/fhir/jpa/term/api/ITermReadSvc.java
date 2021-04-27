@@ -58,11 +58,9 @@ import java.util.Set;
  */
 public interface ITermReadSvc extends IValidationSupport {
 
-	ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull String theValueSetCanonicalUrl, @Nullable String theExpansionFilter);
+	ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull String theValueSetCanonicalUrl);
 
 	ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull ValueSet theValueSetToExpand);
-
-	ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull ValueSet theValueSetToExpand, @Nullable String theFilter);
 
 	void expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator);
 
@@ -91,17 +89,9 @@ public interface ITermReadSvc extends IValidationSupport {
 
 	CodeSystem fetchCanonicalCodeSystemFromCompleteContext(String theSystem);
 
-	void deleteConceptMapAndChildren(ResourceTable theResourceTable);
-
 	void deleteValueSetAndChildren(ResourceTable theResourceTable);
 
-	void storeTermConceptMapAndChildren(ResourceTable theResourceTable, ConceptMap theConceptMap);
-
 	void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet);
-
-	List<TermConceptMapGroupElementTarget> translate(TranslationRequest theTranslationRequest);
-
-	List<TermConceptMapGroupElement> translateWithReverse(TranslationRequest theTranslationRequest);
 
 	IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB);
 

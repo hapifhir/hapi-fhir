@@ -1,0 +1,17 @@
+{
+	"version": "1",
+	"mdmTypes": ["Organization"],
+	"candidateSearchParams" : [],
+	"candidateFilterSearchParams" : [],
+	"matchFields" : [ {
+		"name" : "Organization-extension",
+		"resourceType" : "Organization",
+		"fhirPath" : "identifier[1]",
+		"matcher" : {
+			"algorithm": "EXTENSION_ANY_ORDER"
+		}
+	}],
+	"matchResultMap" : {
+		"Organization-extension" : "MATCH"
+	}
+}

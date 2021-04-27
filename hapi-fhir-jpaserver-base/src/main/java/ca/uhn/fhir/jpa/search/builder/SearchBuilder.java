@@ -55,11 +55,12 @@ import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryExecutor;
 import ca.uhn.fhir.jpa.search.builder.sql.SqlObjectFactory;
 import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
-import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
+import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
@@ -91,7 +92,6 @@ import com.healthmarketscience.sqlbuilder.Condition;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -216,6 +216,8 @@ public class SearchBuilder implements ISearchBuilder {
 			attemptCompositeUniqueSpProcessing(theQueryStack, theParams, theRequest);
 		}
 
+		SearchContainedModeEnum searchContainedMode = theParams.getSearchContainedMode();
+		
 		// Handle each parameter
 		List<String> paramNames = new ArrayList<>(myParams.keySet());
 		for (String nextParamName : paramNames) {
@@ -224,7 +226,7 @@ public class SearchBuilder implements ISearchBuilder {
 				continue;
 			}
 			List<List<IQueryParameterType>> andOrParams = myParams.get(nextParamName);
-			Condition predicate = theQueryStack.searchForIdsWithAndOr(null, myResourceName, nextParamName, andOrParams, theRequest, myRequestPartitionId);
+			Condition predicate = theQueryStack.searchForIdsWithAndOr(null, myResourceName, nextParamName, andOrParams, theRequest, myRequestPartitionId, searchContainedMode);
 			if (predicate != null) {
 				theSearchSqlBuilder.addPredicate(predicate);
 			}
@@ -514,8 +516,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		} else {
 
-			RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceName);
-			RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theSort.getParamName());
+			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
 			if (param == null) {
 				String msg = myContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSortParameter", theSort.getParamName(), getResourceName(), mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName()));
 				throw new InvalidRequestException(msg);
@@ -544,17 +545,17 @@ public class SearchBuilder implements ISearchBuilder {
 					theQueryStack.addSortOnQuantity(myResourceName, theSort.getParamName(), ascending);
 					break;
 				case COMPOSITE:
-					List<RuntimeSearchParam> compositList = param.getCompositeOf();
-					if (compositList == null) {
+					List<RuntimeSearchParam> compositeList = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, param);
+					if (compositeList == null) {
 						throw new InvalidRequestException("The composite _sort parameter " + theSort.getParamName() + " is not defined by the resource " + myResourceName);
 					}
-					if (compositList.size() != 2) {
+					if (compositeList.size() != 2) {
 						throw new InvalidRequestException("The composite _sort parameter " + theSort.getParamName()
 							+ " must have 2 composite types declared in parameter annotation, found "
-							+ compositList.size());
+							+ compositeList.size());
 					}
-					RuntimeSearchParam left = compositList.get(0);
-					RuntimeSearchParam right = compositList.get(1);
+					RuntimeSearchParam left = compositeList.get(0);
+					RuntimeSearchParam right = compositeList.get(1);
 
 					createCompositeSort(theQueryStack, myResourceName, left.getParamType(), left.getName(), ascending);
 					createCompositeSort(theQueryStack, myResourceName, right.getParamType(), right.getName(), ascending);
@@ -642,8 +643,8 @@ public class SearchBuilder implements ISearchBuilder {
 			 */
 			if (resourcePidToVersion != null) {
 				Long version = resourcePidToVersion.get(next.getResourceId());
+				resourceId.setVersion(version);
 				if (version != null && !version.equals(next.getVersion())) {
-					resourceId.setVersion(version);
 					IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDao(resourceType);
 					next = dao.readEntity(next.getIdDt().withVersion(Long.toString(version)), null);
 				}
@@ -833,7 +834,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 					String paramName = nextInclude.getParamName();
 					if (isNotBlank(paramName)) {
-						param = mySearchParamRegistry.getSearchParamByName(def, paramName);
+						param = mySearchParamRegistry.getActiveSearchParam(resType, paramName);
 					} else {
 						param = null;
 					}
@@ -967,7 +968,7 @@ public class SearchBuilder implements ISearchBuilder {
 		// Since we're going to remove elements below
 		theParams.values().forEach(nextAndList -> ensureSubListsAreWritable(nextAndList));
 
-		List<JpaRuntimeSearchParam> activeUniqueSearchParams = mySearchParamRegistry.getActiveUniqueSearchParams(myResourceName, theParams.keySet());
+		List<RuntimeSearchParam> activeUniqueSearchParams = mySearchParamRegistry.getActiveUniqueSearchParams(myResourceName, theParams.keySet());
 		if (activeUniqueSearchParams.size() > 0) {
 
 			StringBuilder sb = new StringBuilder();

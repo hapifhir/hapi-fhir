@@ -7,12 +7,12 @@ import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
+import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -22,8 +22,8 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.test.utilities.JettyUtil;
-import ca.uhn.fhir.util.TestUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -35,10 +35,9 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
@@ -54,11 +53,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.slf4j.LoggerFactory.getLogger;
 
 public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
-	private static final Logger ourLog = getLogger(BaseResourceProviderR4Test.class);
-
 
 	protected static IValidationSupport myValidationSupport;
 	protected static CloseableHttpClient ourHttpClient;
@@ -68,6 +64,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected static SearchParamRegistryImpl ourSearchParamRegistry;
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	protected static Server ourServer;
+	protected static JpaCapabilityStatementProvider ourCapabilityStatementProvider;
 	private static DatabaseBackedPagingProvider ourPagingProvider;
 	private static GenericWebApplicationContext ourWebApplicationContext;
 	protected IGenericClient myClient;
@@ -155,10 +152,11 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourRestServer.registerInterceptor(corsInterceptor);
 
 			ourSearchParamRegistry = myAppCtx.getBean(SearchParamRegistryImpl.class);
+			IValidationSupport validationSupport = myAppCtx.getBean(IValidationSupport.class);
 
-			JpaConformanceProviderR4 confProvider = new JpaConformanceProviderR4(ourRestServer, mySystemDao, myDaoConfig, ourSearchParamRegistry);
-			confProvider.setImplementationDescription("THIS IS THE DESC");
-			ourRestServer.setServerConformanceProvider(confProvider);
+			ourCapabilityStatementProvider = new JpaCapabilityStatementProvider(ourRestServer, mySystemDao, myDaoConfig, ourSearchParamRegistry, validationSupport);
+			ourCapabilityStatementProvider.setImplementationDescription("THIS IS THE DESC");
+			ourRestServer.setServerConformanceProvider(ourCapabilityStatementProvider);
 
 			server.setHandler(proxyHandler);
 			JettyUtil.startServer(server);
@@ -168,12 +166,9 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(subsServletHolder.getServlet().getServletConfig().getServletContext());
 			myValidationSupport = wac.getBean(IValidationSupport.class);
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
-			SubscriptionMatcherInterceptor ourSubscriptionMatcherInterceptor = wac.getBean(SubscriptionMatcherInterceptor.class);
-
-			confProvider.setSearchParamRegistry(ourSearchParamRegistry);
 
 			myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-			myFhirCtx.getRestfulClientFactory().setSocketTimeout(20000);
+			myFhirCtx.getRestfulClientFactory().setSocketTimeout(400000);
 
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
@@ -185,6 +180,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		}
 
 		ourRestServer.setPagingProvider(ourPagingProvider);
+		ourRestServer.registerInterceptor(new ResponseHighlighterInterceptor());
 
 		myClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
 		if (shouldLogClient()) {

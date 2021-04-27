@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
+import com.google.common.annotations.VisibleForTesting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -66,6 +67,11 @@ public class DaoSearchParamSynchronizer {
 		theEntity.setResourceLinks(theParams.myLinks);
 
 		return retVal;
+	}
+
+	@VisibleForTesting
+	public void setEntityManager(EntityManager theEntityManager) {
+		myEntityManager = theEntityManager;
 	}
 
 	private <T extends BaseResourceIndex> void synchronize(ResourceTable theEntity, AddRemoveCount theAddRemoveCount, Collection<T> theNewParams, Collection<T> theExistingParams) {

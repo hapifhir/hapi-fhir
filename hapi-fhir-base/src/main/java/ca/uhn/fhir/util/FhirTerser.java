@@ -13,14 +13,16 @@ import ca.uhn.fhir.context.RuntimeExtensionDtDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IIdentifiableElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseElement;
@@ -29,17 +31,25 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -47,6 +57,7 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.substring;
 
 /*
  * #%L
@@ -71,7 +82,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class FhirTerser {
 
 	private static final Pattern COMPARTMENT_MATCHER_PATH = Pattern.compile("([a-zA-Z.]+)\\.where\\(resolve\\(\\) is ([a-zA-Z]+)\\)");
-	private FhirContext myContext;
+	private static final EnumSet<OptionsEnum> EMPTY_OPTION_SET = EnumSet.noneOf(OptionsEnum.class);
+	private static final String USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED = FhirTerser.class.getName() + "_CONTAIN_RESOURCES_COMPLETED";
+	private final FhirContext myContext;
 
 	public FhirTerser(FhirContext theContext) {
 		super();
@@ -308,10 +321,17 @@ public class FhirTerser {
 		return retVal.get(0);
 	}
 
+	public Optional<String> getSinglePrimitiveValue(IBase theTarget, String thePath) {
+		return getSingleValue(theTarget, thePath, IPrimitiveType.class).map(t->t.getValueAsString());
+	}
+
+	public String getSinglePrimitiveValueOrNull(IBase theTarget, String thePath) {
+		return getSingleValue(theTarget, thePath, IPrimitiveType.class).map(t->t.getValueAsString()).orElse(null);
+	}
+
 	public <T extends IBase> Optional<T> getSingleValue(IBase theTarget, String thePath, Class<T> theWantedType) {
 		return Optional.ofNullable(getSingleValueOrNull(theTarget, thePath, theWantedType));
 	}
-
 
 	private <T extends IBase> List<T> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, IBase theCurrentObj, List<String> theSubList, Class<T> theWantedClass) {
 		return getValues(theCurrentDef, theCurrentObj, theSubList, theWantedClass, false, false);
@@ -663,10 +683,8 @@ public class FhirTerser {
 
 		parts.add(thePath.substring(currentStart));
 
-		if (theElementDef instanceof RuntimeResourceDefinition) {
-			if (parts.size() > 0 && parts.get(0).equals(theElementDef.getName())) {
-				parts = parts.subList(1, parts.size());
-			}
+		if (parts.size() > 0 && parts.get(0).equals(theElementDef.getName())) {
+			parts = parts.subList(1, parts.size());
 		}
 
 		if (parts.size() < 1) {
@@ -1056,6 +1074,441 @@ public class FhirTerser {
 			}
 
 		});
+	}
+
+	private void containResourcesForEncoding(ContainedResources theContained, IBaseResource theResource, EnumSet<OptionsEnum> theOptions) {
+		List<IBaseReference> allReferences = getAllPopulatedChildElementsOfType(theResource, IBaseReference.class);
+		for (IBaseReference next : allReferences) {
+			IBaseResource resource = next.getResource();
+			if (resource == null && next.getReferenceElement().isLocal()) {
+				if (theContained.hasExistingIdToContainedResource()) {
+					IBaseResource potentialTarget = theContained.getExistingIdToContainedResource().remove(next.getReferenceElement().getValue());
+					if (potentialTarget != null) {
+						theContained.addContained(next.getReferenceElement(), potentialTarget);
+						containResourcesForEncoding(theContained, potentialTarget, theOptions);
+					}
+				}
+			}
+		}
+
+		for (IBaseReference next : allReferences) {
+			IBaseResource resource = next.getResource();
+			if (resource != null) {
+				if (resource.getIdElement().isEmpty() || resource.getIdElement().isLocal()) {
+					if (theContained.getResourceId(resource) != null) {
+						// Prevent infinite recursion if there are circular loops in the contained resources
+						continue;
+					}
+					IIdType id = theContained.addContained(resource);
+					if (theOptions.contains(OptionsEnum.MODIFY_RESOURCE)) {
+						getContainedResourceList(theResource).add(resource);
+						next.setReference(id.getValue());
+					}
+					if (resource.getIdElement().isLocal() && theContained.hasExistingIdToContainedResource()) {
+						theContained.getExistingIdToContainedResource().remove(resource.getIdElement().getValue());
+					}
+				} else {
+					continue;
+				}
+
+			}
+
+		}
+
+	}
+
+	/**
+	 * Iterate through the whole resource and identify any contained resources. Optionally this method
+	 * can also assign IDs and modify references where the resource link has been specified but not the
+	 * reference text.
+	 *
+	 * @since 5.4.0
+	 */
+	public ContainedResources containResources(IBaseResource theResource, OptionsEnum... theOptions) {
+		EnumSet<OptionsEnum> options = toOptionSet(theOptions);
+
+		if (options.contains(OptionsEnum.STORE_AND_REUSE_RESULTS)) {
+			Object cachedValue = theResource.getUserData(USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED);
+			if (cachedValue != null) {
+				return (ContainedResources) cachedValue;
+			}
+		}
+
+		ContainedResources contained = new ContainedResources();
+
+		List<? extends IBaseResource> containedResources = getContainedResourceList(theResource);
+		for (IBaseResource next : containedResources) {
+			String nextId = next.getIdElement().getValue();
+			if (StringUtils.isNotBlank(nextId)) {
+				if (!nextId.startsWith("#")) {
+					nextId = '#' + nextId;
+				}
+				next.getIdElement().setValue(nextId);
+			}
+			contained.addContained(next);
+		}
+
+		containResourcesForEncoding(contained, theResource, options);
+
+		if (options.contains(OptionsEnum.STORE_AND_REUSE_RESULTS)) {
+			theResource.setUserData(USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED, contained);
+		}
+
+		return contained;
+	}
+
+	private EnumSet<OptionsEnum> toOptionSet(OptionsEnum[] theOptions) {
+		EnumSet<OptionsEnum> options;
+		if (theOptions == null || theOptions.length == 0) {
+			options = EMPTY_OPTION_SET;
+		} else {
+			options = EnumSet.of(theOptions[0], theOptions);
+		}
+		return options;
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T extends IBaseResource> List<T> getContainedResourceList(T theResource) {
+		List<T> containedResources = Collections.emptyList();
+		if (theResource instanceof IResource) {
+			containedResources = (List<T>) ((IResource) theResource).getContained().getContainedResources();
+		} else if (theResource instanceof IDomainResource) {
+			containedResources = (List<T>) ((IDomainResource) theResource).getContained();
+		}
+		return containedResources;
+	}
+
+	/**
+	 * Adds and returns a new element at the given path within the given structure. The paths used here
+	 * are <b>not FHIRPath expressions</b> but instead just simple dot-separated path expressions.
+	 * <p>
+	 * Only the last entry in the path is always created, existing repetitions of elements before
+	 * the final dot are returned if they exists (although they are created if they do not). For example,
+	 * given the path <code>Patient.name.given</code>, a new repetition of <code>given</code> is always
+	 * added to the first (index 0) repetition of the name. If an index-0 repetition of <code>name</code>
+	 * already exists, it is added to. If one does not exist, it if created and then added to.
+	 * </p>
+	 * <p>
+	 * If the last element in the path refers to a non-repeatable element that is already present and
+	 * is not empty, a {@link DataFormatException} error will be thrown.
+	 * </p>
+	 *
+	 * @param theTarget The element to add to. This will often be a {@link IBaseResource resource}
+	 *                  instance, but does not need to be.
+	 * @param thePath   The path.
+	 * @return The newly added element
+	 * @throws DataFormatException If the path is invalid or does not end with either a repeatable element, or
+	 *                             an element that is non-repeatable but not already populated.
+	 */
+	@SuppressWarnings("unchecked")
+	@Nonnull
+	public <T extends IBase> T addElement(@Nonnull IBase theTarget, @Nonnull String thePath) {
+		return (T) doAddElement(theTarget, thePath, 1).get(0);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T extends IBase> List<T> doAddElement(IBase theTarget, String thePath, int theElementsToAdd) {
+		if (theElementsToAdd == 0) {
+			return Collections.emptyList();
+		}
+
+		IBase target = theTarget;
+		BaseRuntimeElementCompositeDefinition<?> def = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(target.getClass());
+		List<String> parts = parsePath(def, thePath);
+
+		for (int i = 0, partsSize = parts.size(); ; i++) {
+			String nextPart = parts.get(i);
+			boolean lastPart = i == partsSize - 1;
+
+			BaseRuntimeChildDefinition nextChild = def.getChildByName(nextPart);
+			if (nextChild == null) {
+				throw new DataFormatException("Invalid path " + thePath + ": Element of type " + def.getName() + " has no child named " + nextPart + ". Valid names: " + def.getChildrenAndExtension().stream().map(t -> t.getElementName()).sorted().collect(Collectors.joining(", ")));
+			}
+
+			List<IBase> childValues = nextChild.getAccessor().getValues(target);
+			IBase childValue;
+			if (childValues.size() > 0 && !lastPart) {
+				childValue = childValues.get(0);
+			} else {
+
+				if (lastPart) {
+					if (!childValues.isEmpty()) {
+						if (theElementsToAdd == -1) {
+							return (List<T>) Collections.singletonList(childValues.get(0));
+						} else if (nextChild.getMax() == 1 && !childValues.get(0).isEmpty()) {
+							throw new DataFormatException("Element at path " + thePath + " is not repeatable and not empty");
+						} else if (nextChild.getMax() == 1 && childValues.get(0).isEmpty()) {
+							return (List<T>) Collections.singletonList(childValues.get(0));
+						}
+					}
+				}
+
+				BaseRuntimeElementDefinition<?> elementDef = nextChild.getChildByName(nextPart);
+				childValue = elementDef.newInstance(nextChild.getInstanceConstructorArguments());
+				nextChild.getMutator().addValue(target, childValue);
+
+				if (lastPart) {
+					if (theElementsToAdd == 1 || theElementsToAdd == -1) {
+						return (List<T>) Collections.singletonList(childValue);
+					} else {
+						if (nextChild.getMax() == 1) {
+							throw new DataFormatException("Can not add multiple values at path " + thePath + ": Element does not repeat");
+						}
+
+						List<T> values = (List<T>) Lists.newArrayList(childValue);
+						for (int j = 1; j < theElementsToAdd; j++) {
+							childValue = elementDef.newInstance(nextChild.getInstanceConstructorArguments());
+							nextChild.getMutator().addValue(target, childValue);
+							values.add((T) childValue);
+						}
+
+						return values;
+					}
+				}
+
+			}
+
+			target = childValue;
+
+			if (!lastPart) {
+				BaseRuntimeElementDefinition<?> nextDef = myContext.getElementDefinition(target.getClass());
+				if (!(nextDef instanceof BaseRuntimeElementCompositeDefinition)) {
+					throw new DataFormatException("Invalid path " + thePath + ": Element of type " + def.getName() + " has no child named " + nextPart + " (this is a primitive type)");
+				}
+				def = (BaseRuntimeElementCompositeDefinition<?>) nextDef;
+			}
+		}
+
+	}
+
+	/**
+	 * Adds and returns a new element at the given path within the given structure. The paths used here
+	 * are <b>not FHIRPath expressions</b> but instead just simple dot-separated path expressions.
+	 * <p>
+	 * This method follows all of the same semantics as {@link #addElement(IBase, String)} but it
+	 * requires the path to point to an element with a primitive datatype and set the value of
+	 * the datatype to the given value.
+	 * </p>
+	 *
+	 * @param theTarget The element to add to. This will often be a {@link IBaseResource resource}
+	 *                  instance, but does not need to be.
+	 * @param thePath   The path.
+	 * @param theValue  The value to set, or <code>null</code>.
+	 * @return The newly added element
+	 * @throws DataFormatException If the path is invalid or does not end with either a repeatable element, or
+	 *                             an element that is non-repeatable but not already populated.
+	 */
+	@SuppressWarnings("unchecked")
+	@Nonnull
+	public <T extends IBase> T addElement(@Nonnull IBase theTarget, @Nonnull String thePath, @Nullable String theValue) {
+		T value = (T) doAddElement(theTarget, thePath, 1).get(0);
+		if (!(value instanceof IPrimitiveType)) {
+			throw new DataFormatException("Element at path " + thePath + " is not a primitive datatype. Found: " + myContext.getElementDefinition(value.getClass()).getName());
+		}
+
+		((IPrimitiveType<?>) value).setValueAsString(theValue);
+
+		return value;
+	}
+
+
+	/**
+	 * Adds and returns a new element at the given path within the given structure. The paths used here
+	 * are <b>not FHIRPath expressions</b> but instead just simple dot-separated path expressions.
+	 * <p>
+	 * This method follows all of the same semantics as {@link #addElement(IBase, String)} but it
+	 * requires the path to point to an element with a primitive datatype and set the value of
+	 * the datatype to the given value.
+	 * </p>
+	 *
+	 * @param theTarget The element to add to. This will often be a {@link IBaseResource resource}
+	 *                  instance, but does not need to be.
+	 * @param thePath   The path.
+	 * @param theValue  The value to set, or <code>null</code>.
+	 * @return The newly added element
+	 * @throws DataFormatException If the path is invalid or does not end with either a repeatable element, or
+	 *                             an element that is non-repeatable but not already populated.
+	 */
+	@SuppressWarnings("unchecked")
+	@Nonnull
+	public <T extends IBase> T setElement(@Nonnull IBase theTarget, @Nonnull String thePath, @Nullable String theValue) {
+		T value = (T) doAddElement(theTarget, thePath, -1).get(0);
+		if (!(value instanceof IPrimitiveType)) {
+			throw new DataFormatException("Element at path " + thePath + " is not a primitive datatype. Found: " + myContext.getElementDefinition(value.getClass()).getName());
+		}
+
+		((IPrimitiveType<?>) value).setValueAsString(theValue);
+
+		return value;
+	}
+
+
+	/**
+	 * This method has the same semantics as {@link #addElement(IBase, String, String)} but adds
+	 * a collection of primitives instead of a single one.
+	 *
+	 * @param theTarget The element to add to. This will often be a {@link IBaseResource resource}
+	 *                  instance, but does not need to be.
+	 * @param thePath   The path.
+	 * @param theValues The values to set, or <code>null</code>.
+	 */
+	public void addElements(IBase theTarget, String thePath, Collection<String> theValues) {
+		List<IBase> targets = doAddElement(theTarget, thePath, theValues.size());
+		Iterator<String> valuesIter = theValues.iterator();
+		for (IBase target : targets) {
+
+			if (!(target instanceof IPrimitiveType)) {
+				throw new DataFormatException("Element at path " + thePath + " is not a primitive datatype. Found: " + myContext.getElementDefinition(target.getClass()).getName());
+			}
+
+			((IPrimitiveType<?>) target).setValueAsString(valuesIter.next());
+		}
+
+	}
+
+
+	public enum OptionsEnum {
+
+		/**
+		 * Should we modify the resource in the case that contained resource IDs are assigned
+		 * during a {@link #containResources(IBaseResource, OptionsEnum...)} pass.
+		 */
+		MODIFY_RESOURCE,
+
+		/**
+		 * Store the results of the operation in the resource metadata and reuse them if
+		 * subsequent calls are made.
+		 */
+		STORE_AND_REUSE_RESULTS
+	}
+
+	public static class ContainedResources {
+		private long myNextContainedId = 1;
+
+		private List<IBaseResource> myResourceList;
+		private IdentityHashMap<IBaseResource, IIdType> myResourceToIdMap;
+		private Map<String, IBaseResource> myExistingIdToContainedResourceMap;
+
+		public Map<String, IBaseResource> getExistingIdToContainedResource() {
+			if (myExistingIdToContainedResourceMap == null) {
+				myExistingIdToContainedResourceMap = new HashMap<>();
+			}
+			return myExistingIdToContainedResourceMap;
+		}
+
+		public IIdType addContained(IBaseResource theResource) {
+			IIdType existing = getResourceToIdMap().get(theResource);
+			if (existing != null) {
+				return existing;
+			}
+
+			IIdType newId = theResource.getIdElement();
+			if (isBlank(newId.getValue())) {
+				newId.setValue("#" + myNextContainedId++);
+			} else {
+				// Avoid auto-assigned contained IDs colliding with pre-existing ones
+				String idPart = newId.getValue();
+				if (substring(idPart, 0, 1).equals("#")) {
+					idPart = idPart.substring(1);
+					if (StringUtils.isNumeric(idPart)) {
+						myNextContainedId = Long.parseLong(idPart) + 1;
+					}
+				}
+			}
+
+			getResourceToIdMap().put(theResource, newId);
+			getOrCreateResourceList().add(theResource);
+			return newId;
+		}
+
+		public void addContained(IIdType theId, IBaseResource theResource) {
+			if (!getResourceToIdMap().containsKey(theResource)) {
+				getResourceToIdMap().put(theResource, theId);
+				getOrCreateResourceList().add(theResource);
+			}
+		}
+
+		public List<IBaseResource> getContainedResources() {
+			if (getResourceToIdMap() == null) {
+				return Collections.emptyList();
+			}
+			return getOrCreateResourceList();
+		}
+
+		public IIdType getResourceId(IBaseResource theNext) {
+			if (getResourceToIdMap() == null) {
+				return null;
+			}
+			return getResourceToIdMap().get(theNext);
+		}
+
+		private List<IBaseResource> getOrCreateResourceList() {
+			if (myResourceList == null) {
+				myResourceList = new ArrayList<>();
+			}
+			return myResourceList;
+		}
+
+		private IdentityHashMap<IBaseResource, IIdType> getResourceToIdMap() {
+			if (myResourceToIdMap == null) {
+				myResourceToIdMap = new IdentityHashMap<>();
+			}
+			return myResourceToIdMap;
+		}
+
+		public boolean isEmpty() {
+			if (myResourceToIdMap == null) {
+				return true;
+			}
+			return myResourceToIdMap.isEmpty();
+		}
+
+		public boolean hasExistingIdToContainedResource() {
+			return myExistingIdToContainedResourceMap != null;
+		}
+
+		public void assignIdsToContainedResources() {
+
+			if (!getContainedResources().isEmpty()) {
+
+				/*
+				 * The idea with the code block below:
+				 *
+				 * We want to preserve any IDs that were user-assigned, so that if it's really
+				 * important to someone that their contained resource have the ID of #FOO
+				 * or #1 we will keep that.
+				 *
+				 * For any contained resources where no ID was assigned by the user, we
+				 * want to manually create an ID but make sure we don't reuse an existing ID.
+				 */
+
+				Set<String> ids = new HashSet<>();
+
+				// Gather any user assigned IDs
+				for (IBaseResource nextResource : getContainedResources()) {
+					if (getResourceToIdMap().get(nextResource) != null) {
+						ids.add(getResourceToIdMap().get(nextResource).getValue());
+					}
+				}
+
+				// Automatically assign IDs to the rest
+				for (IBaseResource nextResource : getContainedResources()) {
+
+					while (getResourceToIdMap().get(nextResource) == null) {
+						String nextCandidate = "#" + myNextContainedId;
+						myNextContainedId++;
+						if (!ids.add(nextCandidate)) {
+							continue;
+						}
+
+						getResourceToIdMap().put(nextResource, new IdDt(nextCandidate));
+					}
+
+				}
+
+			}
+
+		}
 	}
 
 }

@@ -38,6 +38,7 @@ import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IntegerType;
@@ -193,9 +194,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 		search = myPatientDao.search(SearchParameterMap.newSynchronous("future-appointment-count", new NumberParam("lt0")));
 		assertEquals(0, search.size());
-
 	}
-
 
 	/**
 	 * Draft search parameters should be ok even if they aren't completely valid
@@ -276,6 +275,8 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 			assertEquals("SearchParameter.base is missing", e.getMessage());
 		}
 	}
+
+
 
 	@Test
 	@Disabled
@@ -1603,7 +1604,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 			verify(interceptor, times(1)).invoke(any(), paramsCaptor.capture());
 
 			StorageProcessingMessage msg = paramsCaptor.getValue().get(StorageProcessingMessage.class);
-			assertThat(msg.getMessage(), containsString("refers to unknown component foo, ignoring this parameter"));
+			assertThat(msg.getMessage(), containsString("ignoring this parameter"));
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);

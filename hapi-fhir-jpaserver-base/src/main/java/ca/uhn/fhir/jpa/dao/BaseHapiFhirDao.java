@@ -11,7 +11,6 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
@@ -52,7 +51,6 @@ import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
-import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.LogicalReferenceHelper;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
@@ -65,7 +63,6 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
-import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
@@ -98,6 +95,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -173,7 +171,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	public static final long INDEX_STATUS_INDEXED = 1L;
 	public static final long INDEX_STATUS_INDEXING_FAILED = 2L;
-	public static final String NS_JPA_PROFILE = "https://github.com/jamesagnew/hapi-fhir/ns/jpa/profile";
+	public static final String NS_JPA_PROFILE = "https://github.com/hapifhir/hapi-fhir/ns/jpa/profile";
 	public static final String OO_SEVERITY_ERROR = "error";
 	public static final String OO_SEVERITY_INFO = "information";
 	public static final String OO_SEVERITY_WARN = "warning";
@@ -237,6 +235,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private IPartitionLookupSvc myPartitionLookupSvc;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
+	@Autowired(required = false)
+	private IFulltextSearchSvc myFulltextSearchSvc;
+
+	@VisibleForTesting
+	public void setSearchParamPresenceSvc(ISearchParamPresenceSvc theSearchParamPresenceSvc) {
+		mySearchParamPresenceSvc = theSearchParamPresenceSvc;
+	}
 
 	@Override
 	protected IInterceptorBroadcaster getInterceptorBroadcaster() {
@@ -492,20 +497,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	/**
 	 * Returns true if the resource has changed (either the contents or the tags)
 	 */
-	protected EncodedResource populateResourceIntoEntity(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, boolean theUpdateHash) {
+	protected EncodedResource populateResourceIntoEntity(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, boolean thePerformIndexing) {
 		if (theEntity.getResourceType() == null) {
 			theEntity.setResourceType(toResourceName(theResource));
-		}
-
-		if (theResource != null) {
-			List<BaseResourceReferenceDt> refs = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, BaseResourceReferenceDt.class);
-			for (BaseResourceReferenceDt nextRef : refs) {
-				if (nextRef.getReference().isEmpty() == false) {
-					if (nextRef.getReference().hasVersionIdPart()) {
-						nextRef.setReference(nextRef.getReference().toUnqualifiedVersionless());
-					}
-				}
-			}
 		}
 
 		byte[] bytes;
@@ -514,19 +508,79 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		if (theEntity.getDeleted() == null) {
 
-			encoding = myConfig.getResourceEncoding();
-			Set<String> excludeElements = ResourceMetaParams.EXCLUDE_ELEMENTS_IN_ENCODED;
-			theEntity.setFhirVersion(myContext.getVersion().getVersion());
+			if (thePerformIndexing) {
 
-			bytes = encodeResource(theResource, encoding, excludeElements, myContext);
+				encoding = myConfig.getResourceEncoding();
 
-			if (theUpdateHash) {
+				String resourceType = theEntity.getResourceType();
+
+				List<String> excludeElements = new ArrayList<>(8);
+				excludeElements.add("id");
+
+				IBaseMetaType meta = theResource.getMeta();
+				boolean hasExtensions = false;
+				IBaseExtension<?,?> sourceExtension = null;
+				if (meta instanceof IBaseHasExtensions) {
+					List<? extends IBaseExtension<?, ?>> extensions = ((IBaseHasExtensions) meta).getExtension();
+					if (!extensions.isEmpty()) {
+						hasExtensions = true;
+
+						/*
+						 * FHIR DSTU3 did not have the Resource.meta.source field, so we use a
+						 * custom HAPI FHIR extension in Resource.meta to store that field. However,
+						 * we put the value for that field in a separate table so we don't want to serialize
+						 * it into the stored BLOB. Therefore: remove it from the resource temporarily
+						 * and restore it afterward.
+						 */
+						if (myFhirContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU3)) {
+							for (int i = 0; i < extensions.size(); i++) {
+								if (extensions.get(i).getUrl().equals(HapiExtensions.EXT_META_SOURCE)) {
+									sourceExtension = extensions.remove(i);
+									i--;
+								}
+							}
+						}
+
+					}
+				}
+				if (hasExtensions) {
+					excludeElements.add(resourceType + ".meta.profile");
+					excludeElements.add(resourceType + ".meta.tag");
+					excludeElements.add(resourceType + ".meta.security");
+					excludeElements.add(resourceType + ".meta.versionId");
+					excludeElements.add(resourceType + ".meta.lastUpdated");
+					excludeElements.add(resourceType + ".meta.source");
+				} else {
+					/*
+					 * If there are no extensions in the meta element, we can just exclude the
+					 * whole meta element, which avoids adding an empty "meta":{}
+					 * from showing up in the serialized JSON.
+					 */
+					excludeElements.add(resourceType + ".meta");
+				}
+
+				theEntity.setFhirVersion(myContext.getVersion().getVersion());
+
+				bytes = encodeResource(theResource, encoding, excludeElements, myContext);
+
+				if (sourceExtension != null) {
+					IBaseExtension<?, ?> newSourceExtension = ((IBaseHasExtensions) meta).addExtension();
+					newSourceExtension.setUrl(sourceExtension.getUrl());
+					newSourceExtension.setValue(sourceExtension.getValue());
+				}
+
 				HashFunction sha256 = Hashing.sha256();
 				String hashSha256 = sha256.hashBytes(bytes).toString();
 				if (hashSha256.equals(theEntity.getHashSha256()) == false) {
 					changed = true;
 				}
 				theEntity.setHashSha256(hashSha256);
+
+			} else {
+
+				encoding = null;
+				bytes = null;
+
 			}
 
 			Set<ResourceTag> allDefs = new HashSet<>();
@@ -543,11 +597,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				String profile = def.getResourceProfile("");
 				if (isNotBlank(profile)) {
 					TagDefinition profileDef = getTagOrNull(TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null);
-					if (def != null) {
-						ResourceTag tag = theEntity.addTag(profileDef);
-						allDefs.add(tag);
-						theEntity.setHasTags(true);
-					}
+
+					ResourceTag tag = theEntity.addTag(profileDef);
+					allDefs.add(tag);
+					theEntity.setHasTags(true);
 				}
 			}
 
@@ -580,7 +633,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			encoding = ResourceEncodingEnum.DEL;
 		}
 
-		if (changed == false) {
+		if (thePerformIndexing && changed == false) {
 			if (theEntity.getId() == null) {
 				changed = true;
 			} else {
@@ -988,6 +1041,26 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return updateEntity(theRequest, null, entity, updateTime, true, true, theTransactionDetails, false, true);
 	}
 
+	@VisibleForTesting
+	public void setEntityManager(EntityManager theEntityManager) {
+		myEntityManager = theEntityManager;
+	}
+
+	@VisibleForTesting
+	public void setSearchParamWithInlineReferencesExtractor(SearchParamWithInlineReferencesExtractor theSearchParamWithInlineReferencesExtractor) {
+		mySearchParamWithInlineReferencesExtractor = theSearchParamWithInlineReferencesExtractor;
+	}
+
+	@VisibleForTesting
+	public void setResourceHistoryTableDao(IResourceHistoryTableDao theResourceHistoryTableDao) {
+		myResourceHistoryTableDao = theResourceHistoryTableDao;
+	}
+
+	@VisibleForTesting
+	public void setDaoSearchParamSynchronizer(DaoSearchParamSynchronizer theDaoSearchParamSynchronizer) {
+		myDaoSearchParamSynchronizer = theDaoSearchParamSynchronizer;
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public ResourceTable updateEntity(RequestDetails theRequest, final IBaseResource theResource, IBasePersistedResource
@@ -1059,7 +1132,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					newParams.populateResourceTableSearchParamsPresentFlags(entity);
 					entity.setIndexStatus(INDEX_STATUS_INDEXED);
 				}
-				populateFullTextFields(myContext, theResource, entity);
+
+				if (myFulltextSearchSvc != null && !myFulltextSearchSvc.isDisabled()) {
+					populateFullTextFields(myContext, theResource, entity);
+				}
+
 			} else {
 
 				changed = populateResourceIntoEntity(theRequest, theResource, entity, false);
@@ -1071,7 +1148,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		}
 
-		if (!changed.isChanged() && !theForceUpdate && myConfig.isSuppressUpdatesWithNoChange()) {
+		if (thePerformIndexing && changed != null && !changed.isChanged() && !theForceUpdate && myConfig.isSuppressUpdatesWithNoChange()) {
 			ourLog.debug("Resource {} has not changed", entity.getIdDt().toUnqualified().getValue());
 			if (theResource != null) {
 				updateResourceMetadata(entity, theResource);
@@ -1323,7 +1400,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 	}
 
-	private void validateChildReferences(IBase theElement, String thePath) {
+	private void validateChildReferenceTargetTypes(IBase theElement, String thePath) {
 		if (theElement == null) {
 			return;
 		}
@@ -1343,7 +1420,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			String newPath = thePath + "." + nextChildDef.getElementName();
 
 			for (IBase nextChild : values) {
-				validateChildReferences(nextChild, newPath);
+				validateChildReferenceTargetTypes(nextChild, newPath);
 			}
 
 			if (nextChildDef instanceof RuntimeChildResourceDefinition) {
@@ -1426,8 +1503,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			throw new UnprocessableEntityException("Resource contains the 'subsetted' tag, and must not be stored as it may contain a subset of available data");
 		}
 
-		String resName = getContext().getResourceType(theResource);
-		validateChildReferences(theResource, resName);
+		if (getConfig().isEnforceReferenceTargetTypes()) {
+			String resName = getContext().getResourceType(theResource);
+			validateChildReferenceTargetTypes(theResource, resName);
+		}
 
 		validateMetaCount(totalMetaCount);
 
@@ -1504,7 +1583,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return resourceText;
 	}
 
-	public static byte[] encodeResource(IBaseResource theResource, ResourceEncodingEnum theEncoding, Set<String> theExcludeElements, FhirContext theContext) {
+	public static byte[] encodeResource(IBaseResource theResource, ResourceEncodingEnum theEncoding, List<String> theExcludeElements, FhirContext theContext) {
 		byte[] bytes;
 		IParser parser = theEncoding.newParser(theContext);
 		parser.setDontEncodeElements(theExcludeElements);

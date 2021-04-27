@@ -161,3 +161,13 @@ This following example shows how to load all pages of a bundle by fetching each 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/BundleFetcher.java|loadAll}}
 ```
+
+# Create Composition and Generate Document
+
+This example shows how to generate a Composition resource with two linked resources, then apply the server `$document` operation to generate a document based on this composition.
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/CreateCompositionAndGenerateDocument.java|CreateCompositionAndGenerateDocument}}
+```
+
+

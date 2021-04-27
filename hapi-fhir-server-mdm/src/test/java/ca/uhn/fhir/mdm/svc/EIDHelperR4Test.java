@@ -45,10 +45,7 @@ public class EIDHelperR4Test extends BaseR4Test {
 	@BeforeEach
 	public void before() {
 		when(mySearchParamRetriever.getActiveSearchParam("Patient", "identifier"))
-			.thenReturn(new RuntimeSearchParam(
-				"identifier", "Description", "identifier", RestSearchParameterTypeEnum.STRING,
-				new HashSet<>(), new HashSet<>(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE
-			));
+			.thenReturn(new RuntimeSearchParam(null, null, "identifier", "Description", "identifier", RestSearchParameterTypeEnum.STRING, new HashSet<>(), new HashSet<>(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, false, null, null));
 
 		myMdmSettings = new MdmSettings(new MdmRuleValidator(ourFhirContext, mySearchParamRetriever)) {
 			{
