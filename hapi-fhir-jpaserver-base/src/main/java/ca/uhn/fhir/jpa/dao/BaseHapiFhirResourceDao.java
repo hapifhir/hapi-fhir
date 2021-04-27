@@ -468,7 +468,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Don't delete again if it's already deleted
 		if (entity.getDeleted() != null) {
-			DaoMethodOutcome outcome = new DaoMethodOutcome(new ResourcePersistentId(entity.getResourceId()));
+			DaoMethodOutcome outcome = new DaoMethodOutcome().setPersistentId(new ResourcePersistentId(entity.getResourceId()));
 			outcome.setEntity(entity);
 
 			IIdType id = getContext().getVersion().newIdType();

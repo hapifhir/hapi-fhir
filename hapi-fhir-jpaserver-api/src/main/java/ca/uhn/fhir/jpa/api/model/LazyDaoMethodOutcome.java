@@ -37,7 +37,7 @@ public class LazyDaoMethodOutcome extends DaoMethodOutcome {
 	 * Constructor
 	 */
 	public LazyDaoMethodOutcome(ResourcePersistentId theResourcePersistentId) {
-		super(theResourcePersistentId);
+		setPersistentId(theResourcePersistentId);
 	}
 
 	@Override

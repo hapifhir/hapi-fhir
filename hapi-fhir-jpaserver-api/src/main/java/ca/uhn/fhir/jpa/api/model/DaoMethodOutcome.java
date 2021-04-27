@@ -35,9 +35,8 @@ public class DaoMethodOutcome extends MethodOutcome {
 	/**
 	 * Constructor
 	 */
-	public DaoMethodOutcome(ResourcePersistentId theResourcePersistentId) {
-		assert theResourcePersistentId != null;
-		myResourcePersistentId = theResourcePersistentId;
+	public DaoMethodOutcome() {
+		super();
 	}
 
 	/**
@@ -86,7 +85,13 @@ public class DaoMethodOutcome extends MethodOutcome {
 		return this;
 	}
 
+	public DaoMethodOutcome setPersistentId(ResourcePersistentId theResourcePersistentId) {
+		myResourcePersistentId = theResourcePersistentId;
+		return this;
+	}
+
 	public ResourcePersistentId getPersistentId() {
 		return myResourcePersistentId;
 	}
+
 }

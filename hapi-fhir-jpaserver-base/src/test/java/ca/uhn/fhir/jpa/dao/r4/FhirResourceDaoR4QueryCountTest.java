@@ -46,7 +46,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 		myDaoConfig.setDeleteEnabled(new DaoConfig().isDeleteEnabled());
 		myDaoConfig.setMatchUrlCache(new DaoConfig().getMatchUrlCache());
-		myDaoConfig.setAlwaysReturnVersionForConditionalCreate(new DaoConfig().isAlwaysReturnVersionForConditionalCreate());
 	}
 
 	@BeforeEach
@@ -1229,7 +1228,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 	@Test
 	public void testTransactionWithMultiplePreExistingReferences_IfNoneExist() {
 		myDaoConfig.setDeleteEnabled(true);
-		myDaoConfig.setAlwaysReturnVersionForConditionalCreate(false);
 
 		Patient patient = new Patient();
 		patient.setId("Patient/A");

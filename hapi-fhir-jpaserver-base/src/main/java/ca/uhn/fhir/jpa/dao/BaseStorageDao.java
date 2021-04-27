@@ -215,7 +215,7 @@ public abstract class BaseStorageDao {
 	}
 
 	protected DaoMethodOutcome toMethodOutcome(RequestDetails theRequest, @Nonnull final IBasePersistedResource theEntity, @Nonnull IBaseResource theResource) {
-		DaoMethodOutcome outcome = new DaoMethodOutcome(theEntity.getPersistentId());
+		DaoMethodOutcome outcome = new DaoMethodOutcome().setPersistentId(theEntity.getPersistentId());
 
 		if (theEntity instanceof ResourceTable) {
 			if (((ResourceTable) theEntity).isUnchangedInCurrentOperation()) {
