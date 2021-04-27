@@ -115,7 +115,6 @@ public class FieldValidatingInterceptor {
 
 	private void setValidationStatus(FhirContext ctx, IBase theBase, boolean isValid) {
 		ExtensionUtil.clearExtensionsByUrl(theBase, getValidationExtensionUrl());
-		IBaseExtension<?, ?> validationResultExtension = ExtensionUtil.addExtension(theBase, getValidationExtensionUrl());
 		ExtensionUtil.setExtension(ctx, theBase, getValidationExtensionUrl(), "boolean", !isValid);
 	}
 

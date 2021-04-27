@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.http.entity.ContentType;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -68,28 +69,19 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 
 	public LoquateAddressValidator(Properties theProperties) {
 		super(theProperties);
-		if (!theProperties.containsKey(PROPERTY_SERVICE_KEY)) {
-			if (!theProperties.containsKey(PROPERTY_SERVICE_ENDPOINT)) {
-				throw new IllegalArgumentException("Expected service key or custom service endpoint in the configuration, but got " + theProperties);
-			}
-		}
+		Validate.isTrue(theProperties.containsKey(PROPERTY_SERVICE_KEY) || !theProperties.containsKey(PROPERTY_SERVICE_ENDPOINT),
+			"Expected service key or custom service endpoint in the configuration, but got " + theProperties);
 	}
 
 	@Override
 	protected AddressValidationResult getValidationResult(AddressValidationResult theResult, JsonNode response, FhirContext theFhirContext) {
-		if (!response.isArray() || response.size() < 1) {
-			throw new AddressValidationException("Invalid response - expected to get an array of validated addresses");
-		}
+		Validate.isTrue(response.isArray() && response.size() >= 1, "Invalid response - expected to get an array of validated addresses");
 
 		JsonNode firstMatch = response.get(0);
-		if (!firstMatch.has("Matches")) {
-			throw new AddressValidationException("Invalid response - matches are unavailable");
-		}
+		Validate.isTrue(firstMatch.has("Matches"), "Invalid response - matches are unavailable");
 
 		JsonNode matches = firstMatch.get("Matches");
-		if (!matches.isArray()) {
-			throw new AddressValidationException("Invalid response - expected to get a validated match in the response");
-		}
+		Validate.isTrue(matches.isArray(), "Invalid response - expected to get a validated match in the response");
 
 		JsonNode match = matches.get(0);
 		return toAddressValidationResult(theResult, match, theFhirContext);
