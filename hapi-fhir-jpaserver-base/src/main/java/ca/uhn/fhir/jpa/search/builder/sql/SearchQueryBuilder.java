@@ -101,12 +101,13 @@ public class SearchQueryBuilder {
 	private BaseJoiningPredicateBuilder myFirstPredicateBuilder;
 	private boolean dialectIsMsSql;
 	private boolean dialectIsMySql;
+	private boolean myNeedResourceTableRoot;
 
 	/**
 	 * Constructor
 	 */
 	public SearchQueryBuilder(FhirContext theFhirContext, ModelConfig theModelConfig, PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, SqlObjectFactory theSqlBuilderFactory, HibernatePropertiesProvider theDialectProvider, boolean theCountQuery) {
-		this(theFhirContext, theModelConfig, thePartitionSettings, theRequestPartitionId, theResourceType, theSqlBuilderFactory, UUID.randomUUID().toString() + "-", theDialectProvider.getDialect(), theCountQuery, new ArrayList<>());
+		this(theFhirContext, theModelConfig, thePartitionSettings, theRequestPartitionId, theResourceType, theSqlBuilderFactory, UUID.randomUUID() + "-", theDialectProvider.getDialect(), theCountQuery, new ArrayList<>());
 	}
 
 	/**
@@ -311,14 +312,16 @@ public class SearchQueryBuilder {
 		} else {
 			if (myFirstPredicateBuilder == null) {
 
-				// FIXME: restore?
-				BaseJoiningPredicateBuilder root = thePredicateBuilder;
-//				ResourceTablePredicateBuilder root;
-//				if (thePredicateBuilder instanceof ResourceTablePredicateBuilder) {
-//					root = (ResourceTablePredicateBuilder) thePredicateBuilder;
-//				} else {
-//					root = mySqlBuilderFactory.resourceTable(this);
-//				}
+				BaseJoiningPredicateBuilder root;
+				if (!myNeedResourceTableRoot) {
+					root = thePredicateBuilder;
+				} else {
+					if (thePredicateBuilder instanceof ResourceTablePredicateBuilder) {
+						root = thePredicateBuilder;
+					} else {
+						root = mySqlBuilderFactory.resourceTable(this);
+					}
+				}
 
 				if (myCountQuery) {
 					mySelect.addCustomColumns(FunctionCall.count().setIsDistinct(true).addColumnParams(root.getResourceIdColumn()));
@@ -328,10 +331,9 @@ public class SearchQueryBuilder {
 				mySelect.addFromTable(root.getTable());
 				myFirstPredicateBuilder = root;
 
-				// FIXME: restore
-//				if (thePredicateBuilder instanceof ResourceTablePredicateBuilder) {
+				if (!myNeedResourceTableRoot || (thePredicateBuilder instanceof ResourceTablePredicateBuilder)) {
 					return;
-//				}
+				}
 			}
 
 			DbTable fromTable = myFirstPredicateBuilder.getTable();
@@ -684,4 +686,15 @@ public class SearchQueryBuilder {
 		mySelect.addCustomOrderings(orderObject);
 	}
 
+	/**
+	 * If set to true (default is false), force the generated SQL to start
+	 * with the {@link ca.uhn.fhir.jpa.model.entity.ResourceTable HFJ_RESOURCE}
+	 * table at the root of the query.
+	 *
+	 * This seems to perform better if there are multiple joins on the
+	 * resource ID table.
+	 */
+	public void setNeedResourceTableRoot(boolean theNeedResourceTableRoot) {
+		myNeedResourceTableRoot = theNeedResourceTableRoot;
+	}
 }

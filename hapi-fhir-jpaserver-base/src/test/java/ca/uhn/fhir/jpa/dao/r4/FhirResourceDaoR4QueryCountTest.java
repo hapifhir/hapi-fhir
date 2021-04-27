@@ -537,7 +537,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true).toLowerCase();
-		assertEquals(2, StringUtils.countMatches(sql, "join"), sql);
+		assertEquals(1, StringUtils.countMatches(sql, "join"), sql);
 	}
 
 
