@@ -1122,6 +1122,23 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
 		assertEquals("1", respEntry.getResponse().getEtag());
 
+		/*
+		 * Third time should not update
+		 */
+
+		request = new Bundle();
+		o = new Observation();
+		o.getCode().setText("Some Observation");
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST).setIfNoneExist("Observation?_lastUpdated=gt2011-01-01");
+		resp = mySystemDao.transaction(mySrd, request);
+		assertEquals(1, resp.getEntry().size());
+
+		respEntry = resp.getEntry().get(0);
+		assertEquals(Constants.STATUS_HTTP_200_OK + " OK", respEntry.getResponse().getStatus());
+		assertThat(respEntry.getResponse().getLocation(), containsString("Observation/"));
+		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
+		assertEquals("1", respEntry.getResponse().getEtag());
+
 	}
 
 	@Test

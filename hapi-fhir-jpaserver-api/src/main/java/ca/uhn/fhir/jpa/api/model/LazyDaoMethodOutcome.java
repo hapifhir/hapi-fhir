@@ -56,6 +56,7 @@ public class LazyDaoMethodOutcome extends DaoMethodOutcome {
 			EntityAndResource entityAndResource = myEntitySupplier.get();
 			setEntity(entityAndResource.getEntity());
 			setResource(entityAndResource.getResource());
+			setId(entityAndResource.getResource().getIdElement());
 			myEntitySupplierUseCallback.run();
 
 		}

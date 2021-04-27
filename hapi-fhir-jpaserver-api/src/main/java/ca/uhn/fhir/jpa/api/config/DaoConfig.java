@@ -205,6 +205,10 @@ public class DaoConfig {
 	 * @since 5.4.0
 	 */
 	private boolean myMatchUrlCache;
+	/**
+	 * @since 5.4.0
+	 */
+	private boolean myAlwaysReturnVersionForConditionalCreate = true;
 
 	/**
 	 * Constructor
@@ -2120,6 +2124,15 @@ public class DaoConfig {
 	@Deprecated
 	public void setPreloadBlobFromInputStream(Boolean thePreloadBlobFromInputStream) {
 		// ignore
+	}
+
+	public boolean isAlwaysReturnVersionForConditionalCreate() {
+		return myAlwaysReturnVersionForConditionalCreate;
+	}
+
+	// FIXME: document
+	public void setAlwaysReturnVersionForConditionalCreate(boolean theAlwaysReturnVersionForConditionalCreate) {
+		myAlwaysReturnVersionForConditionalCreate = theAlwaysReturnVersionForConditionalCreate;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

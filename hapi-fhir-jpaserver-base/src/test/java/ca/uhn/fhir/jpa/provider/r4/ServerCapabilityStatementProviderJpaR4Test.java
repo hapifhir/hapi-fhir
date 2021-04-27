@@ -132,7 +132,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 			.stream()
 			.map(t -> t.getCode())
 			.collect(Collectors.toList());
-		assertThat(formats.toString(), formats, containsInAnyOrder(
+		assertThat(formats.toString(), formats, hasItems(
 			"application/x-turtle",
 			"ttl",
 			"application/fhir+xml",

@@ -208,13 +208,14 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		IdType patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
 		IdType encounterId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
 		IdType observationId = new IdType(outcome.getEntry().get(2).getResponse().getLocation());
-		assertEquals("2", patientId.getVersionIdPart());
+		assertEquals("1", patientId.getVersionIdPart());
 		assertEquals("1", encounterId.getVersionIdPart());
 		assertEquals("1", observationId.getVersionIdPart());
 
 		// Read back and verify that reference is now versioned
 		observation = myObservationDao.read(observationId);
 		assertEquals(patientId.getValue(), observation.getSubject().getReference());
+		assertEquals("1", observation.getSubject().getReferenceElement().getVersionIdPart());
 		assertEquals(encounterId.toVersionless().getValue(), observation.getEncounter().getReference());
 
 	}

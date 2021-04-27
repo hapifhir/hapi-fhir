@@ -22,17 +22,15 @@ package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.TranslationQuery;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.lang3.tuple.Pair;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -65,7 +63,7 @@ public class MemoryCacheService {
 				case TAG_DEFINITION:
 				case PERSISTENT_ID:
 				case RESOURCE_LOOKUP:
-				case FORCED_ID:
+				case PID_TO_FORCED_ID:
 				default:
 					timeoutSeconds = 60;
 					break;
@@ -111,10 +109,12 @@ public class MemoryCacheService {
 		TAG_DEFINITION(Pair.class),
 		PERSISTENT_ID(String.class),
 		RESOURCE_LOOKUP(String.class),
-		FORCED_ID(Long.class),
+		FORCED_ID_TO_PID(String.class),
+		PID_TO_FORCED_ID(Long.class),
 		CONCEPT_TRANSLATION(TranslationQuery.class),
 		MATCH_URL(String.class),
-		CONCEPT_TRANSLATION_REVERSE(TranslationQuery.class);
+		CONCEPT_TRANSLATION_REVERSE(TranslationQuery.class),
+		RESOURCE_CONDITIONAL_CREATE_VERSION(IIdType.class);
 
 		private final Class<?> myKeyType;
 

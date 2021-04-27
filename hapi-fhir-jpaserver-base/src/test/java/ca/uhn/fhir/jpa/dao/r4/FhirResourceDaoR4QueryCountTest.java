@@ -46,6 +46,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 		myDaoConfig.setDeleteEnabled(new DaoConfig().isDeleteEnabled());
 		myDaoConfig.setMatchUrlCache(new DaoConfig().getMatchUrlCache());
+		myDaoConfig.setAlwaysReturnVersionForConditionalCreate(new DaoConfig().isAlwaysReturnVersionForConditionalCreate());
 	}
 
 	@BeforeEach
@@ -245,6 +246,59 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
+
+	@Test
+	public void testUpdateWithClientAssignedId_DeletesDisabled() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myDaoConfig.setDeleteEnabled(false);
+
+		runInTransaction(() -> {
+			Patient p = new Patient();
+			p.setId("AAA");
+			p.getMaritalStatus().setText("123");
+			myPatientDao.update(p).getId().toUnqualified();
+		});
+
+
+		// Second time
+
+		myCaptureQueriesListener.clear();
+		runInTransaction(() -> {
+			Patient p = new Patient();
+			p.setId("AAA");
+			p.getMaritalStatus().setText("456");
+			myPatientDao.update(p).getId().toUnqualified();
+		});
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(1, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		assertEquals(1, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+
+		// Third time (caches all loaded by now)
+
+		myCaptureQueriesListener.clear();
+		runInTransaction(() -> {
+			Patient p = new Patient();
+			p.setId("AAA");
+			p.getMaritalStatus().setText("789");
+			myPatientDao.update(p).getId().toUnqualified();
+		});
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(1, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		assertEquals(1, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
+
 
 	@Test
 	public void testReferenceToForcedId() {
@@ -618,6 +672,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 	@Test
 	public void testTransactionWithConditionalCreate_MatchUrlCacheEnabled() {
 		myDaoConfig.setMatchUrlCache(true);
+		myDaoConfig.setAlwaysReturnVersionForConditionalCreate(false);
 
 		Supplier<Bundle> bundleCreator = ()-> {
 			BundleBuilder bb = new BundleBuilder(myFhirCtx);
@@ -679,6 +734,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 	@Test
 	public void testTransactionWithConditionalCreate_MatchUrlCacheNotEnabled() {
+		myDaoConfig.setAlwaysReturnVersionForConditionalCreate(false);
+
 		Supplier<Bundle> bundleCreator = ()-> {
 			BundleBuilder bb = new BundleBuilder(myFhirCtx);
 
@@ -1172,6 +1229,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 	@Test
 	public void testTransactionWithMultiplePreExistingReferences_IfNoneExist() {
 		myDaoConfig.setDeleteEnabled(true);
+		myDaoConfig.setAlwaysReturnVersionForConditionalCreate(false);
 
 		Patient patient = new Patient();
 		patient.setId("Patient/A");

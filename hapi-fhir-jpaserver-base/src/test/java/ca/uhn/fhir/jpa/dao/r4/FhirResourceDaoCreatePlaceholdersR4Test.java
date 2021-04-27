@@ -348,7 +348,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		Observation createdObs = myObservationDao.read(id);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
-		assertEquals("Patient/ABC", obsToCreate.getSubject().getReference());
+		assertEquals("Patient/ABC", createdObs.getSubject().getReference());
 
 	}
 

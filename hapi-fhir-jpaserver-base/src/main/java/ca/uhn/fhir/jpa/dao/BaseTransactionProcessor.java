@@ -996,11 +996,27 @@ public abstract class BaseTransactionProcessor {
 				IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDao(nextResource.getClass());
 				IJpaDao jpaDao = (IJpaDao) dao;
 
+				IBasePersistedResource updateOutcome = null;
 				if (updatedEntities.contains(nextOutcome.getEntity())) {
-					jpaDao.updateInternal(theRequest, nextResource, true, false, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource(), theTransactionDetails);
+					updateOutcome = jpaDao.updateInternal(theRequest, nextResource, true, false, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource(), theTransactionDetails);
 				} else if (!nonUpdatedEntities.contains(nextOutcome.getId())) {
-					jpaDao.updateEntity(theRequest, nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theTransactionDetails, false, true);
+					updateOutcome = jpaDao.updateEntity(theRequest, nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theTransactionDetails, false, true);
 				}
+
+				// Make sure we reflect the actual final version for the resource.
+				if (updateOutcome != null) {
+					IIdType newId = updateOutcome.getIdDt();
+					for (IIdType nextEntry : entriesToProcess.values()) {
+						if (nextEntry.getResourceType().equals(newId.getResourceType())) {
+							if (nextEntry.getIdPart().equals(newId.getIdPart())) {
+								if (!nextEntry.hasVersionIdPart() || !nextEntry.getVersionIdPart().equals(newId.getVersionIdPart())) {
+									nextEntry.setParts(nextEntry.getBaseUrl(), nextEntry.getResourceType(), nextEntry.getIdPart(), newId.getVersionIdPart());
+								}
+							}
+						}
+					}
+				}
+
 			}
 
 			theTransactionStopWatch.endCurrentTask();

@@ -56,6 +56,7 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
@@ -270,6 +271,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return doCreateForPostOrPut(theResource, theIfNoneExist, thePerformIndexing, theTransactionDetails, theRequestDetails, requestPartitionId);
 	}
 
+	@Autowired
+	private MemoryCacheService myMemoryCacheService;
+
 	/**
 	 * Called both for FHIR create (POST) operations (via {@link #doCreateForPost(IBaseResource, String, boolean, TransactionDetails, RequestDetails)}
 	 * as well as for FHIR update (PUT) where we're doing a create-with-client-assigned-ID (via {@link #doUpdate(IBaseResource, String, boolean, boolean, RequestDetails, TransactionDetails)}.
@@ -299,7 +303,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					return new LazyDaoMethodOutcome.EntityAndResource(foundEntity, resource);
 				};
 
-				Supplier<IIdType> idSupplier = ()-> myIdHelperService.translatePidIdToForcedId(myFhirContext, myResourceName, pid);
+				Supplier<IIdType> idSupplier = ()-> {
+					IIdType retVal = myIdHelperService.translatePidIdToForcedId(myFhirContext, myResourceName, pid);
+					if (!retVal.hasVersionIdPart() && myDaoConfig.isAlwaysReturnVersionForConditionalCreate()) {
+						retVal = myMemoryCacheService.get(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, retVal, t->entitySupplier.get().getResource().getIdElement());
+					}
+					return retVal;
+				};
 
 				return toMethodOutcomeLazy(theRequest, pid, entitySupplier, idSupplier).setCreated(false).setNop(true);
 			}
@@ -364,12 +374,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		String forcedId = null;
-		if (updatedEntity.getForcedId() != null) {
-			forcedId = updatedEntity.getForcedId().getForcedId();
-		}
-		myIdHelperService.addResolvedPidToForcedId(new ResourcePersistentId(updatedEntity.getResourceId()), forcedId);
-
 		if (theIfNoneExist != null) {
 			myMatchResourceUrlService.matchUrlResolved(theIfNoneExist, new ResourcePersistentId(entity.getResourceId()));
 		}
@@ -407,6 +411,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "successfulCreate", outcome.getId(), w.getMillisAndRestart());
 		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
+
+		String forcedId = null;
+		if (updatedEntity.getForcedId() != null) {
+			forcedId = updatedEntity.getForcedId().getForcedId();
+		}
+		myIdHelperService.addResolvedPidToForcedId(new ResourcePersistentId(updatedEntity.getResourceId()), theRequestPartitionId, getResourceName(), forcedId);
 
 		ourLog.debug(msg);
 		return outcome;
@@ -1634,6 +1644,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			DaoMethodOutcome outcome = toMethodOutcome(theRequest, entity, resource).setCreated(wasDeleted);
 			outcome.setPreviousResource(oldResource);
 			if (!outcome.isNop()) {
+				// Technically this may not end up being right since we might not increment if the
+				// contents turn out to be the same
 				outcome.setId(outcome.getId().withVersion(Long.toString(outcome.getId().getVersionIdPartAsLong() + 1)));
 			}
 			return outcome;
