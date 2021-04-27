@@ -159,7 +159,7 @@ class LoquateAddressValidatorTest {
 			AddressValidationResult res = myValidator.getValidationResult(new AddressValidationResult(),
 				new ObjectMapper().readTree(RESPONSE_INVALID), ourCtx);
 			fail();
-		} catch (AddressValidationException e) {
+		} catch (Exception e) {
 		}
 	}
 
@@ -239,7 +239,7 @@ class LoquateAddressValidatorTest {
 
 	@Test
 	public void testErrorResponses() throws Exception {
-		assertThrows(AddressValidationException.class, () -> {
+		assertThrows(IllegalArgumentException.class, () -> {
 			myValidator.getValidationResult(new AddressValidationResult(),
 				new ObjectMapper().readTree(RESPONSE_INVALID_KEY), ourCtx);
 		});

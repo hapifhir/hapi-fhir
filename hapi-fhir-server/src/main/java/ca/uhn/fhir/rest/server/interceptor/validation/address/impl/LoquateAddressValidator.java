@@ -69,7 +69,7 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 
 	public LoquateAddressValidator(Properties theProperties) {
 		super(theProperties);
-		Validate.isTrue(theProperties.containsKey(PROPERTY_SERVICE_KEY) || !theProperties.containsKey(PROPERTY_SERVICE_ENDPOINT),
+		Validate.isTrue(theProperties.containsKey(PROPERTY_SERVICE_KEY) || theProperties.containsKey(PROPERTY_SERVICE_ENDPOINT),
 			"Expected service key or custom service endpoint in the configuration, but got " + theProperties);
 	}
 
