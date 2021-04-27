@@ -794,7 +794,9 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 	public static TermConceptProperty getOrCreateConceptProperty(Map<String, List<TermConceptProperty>> code2Properties, String code, String key) {
 		List<TermConceptProperty> termConceptProperties = code2Properties.get(code);
+		if (termConceptProperties == null)
+			return new TermConceptProperty();
 		Optional<TermConceptProperty> termConceptProperty = termConceptProperties.stream().filter(property -> key.equals(property.getKey())).findFirst();
-		return termConceptProperty.isPresent() ? termConceptProperty.get() :  new TermConceptProperty();
+		return termConceptProperty.isPresent() ? termConceptProperty.get() : new TermConceptProperty();
 	}
 }
