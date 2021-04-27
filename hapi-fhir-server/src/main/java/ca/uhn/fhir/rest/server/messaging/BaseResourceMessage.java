@@ -160,6 +160,7 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 		CREATE,
 		UPDATE,
 		DELETE,
-		MANUALLY_TRIGGERED
+		MANUALLY_TRIGGERED,
+		TRANSACTION
 	}
 }

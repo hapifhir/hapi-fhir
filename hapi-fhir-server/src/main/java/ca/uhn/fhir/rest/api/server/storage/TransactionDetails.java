@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.api.server.storage;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
@@ -32,6 +33,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -53,6 +55,7 @@ public class TransactionDetails {
 	private Map<String, Object> myUserData;
 	private ListMultimap<Pointcut, HookParams> myDeferredInterceptorBroadcasts;
 	private EnumSet<Pointcut> myDeferredInterceptorBroadcastPointcuts;
+	private boolean myIsPointcutDeferred;
 
 	/**
 	 * Constructor
@@ -189,7 +192,20 @@ public class TransactionDetails {
 	 */
 	public void addDeferredInterceptorBroadcast(Pointcut thePointcut, HookParams theHookParams) {
 		Validate.isTrue(isAcceptingDeferredInterceptorBroadcasts(thePointcut));
+		myIsPointcutDeferred = true;
 		myDeferredInterceptorBroadcasts.put(thePointcut, theHookParams);
+	}
+
+	public InterceptorInvocationTimingEnum getInvocationTiming(Pointcut thePointcut) {
+		if (myDeferredInterceptorBroadcasts == null) {
+			return InterceptorInvocationTimingEnum.ACTIVE;
+		}
+		List<HookParams> hookParams = myDeferredInterceptorBroadcasts.get(thePointcut);
+		return hookParams == null ? InterceptorInvocationTimingEnum.ACTIVE : InterceptorInvocationTimingEnum.DEFERRED;
+	}
+
+	public void deferredBroadcastProcessingFinished() {
+		myIsPointcutDeferred = false;
 	}
 }
 

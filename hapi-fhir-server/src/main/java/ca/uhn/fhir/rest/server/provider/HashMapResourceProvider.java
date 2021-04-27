@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
@@ -387,25 +388,42 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 				if (!myIdToHistory.containsKey(theIdPart)) {
 
 					// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_CREATED
-					HookParams params = new HookParams()
+					HookParams preStorageParams = new HookParams()
 						.add(RequestDetails.class, theRequestDetails)
 						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 						.add(IBaseResource.class, theResource)
 						.add(TransactionDetails.class, theTransactionDetails);
-					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, params);
-					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, params);
+					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, preStorageParams);
+
+					// Interceptor call: STORAGE_PRECOMMIT_RESOURCE_CREATED
+					HookParams preCommitParams = new HookParams()
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+						.add(IBaseResource.class, theResource)
+						.add(TransactionDetails.class, theTransactionDetails)
+						.add(InterceptorInvocationTimingEnum.class, theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED));
+					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, preCommitParams);
 
 				} else {
 
 					// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_UPDATED
-					HookParams params = new HookParams()
+					HookParams preStorageParams = new HookParams()
 						.add(RequestDetails.class, theRequestDetails)
 						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 						.add(IBaseResource.class, myIdToHistory.get(theIdPart).getFirst())
 						.add(IBaseResource.class, theResource)
 						.add(TransactionDetails.class, theTransactionDetails);
-					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, params);
-					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, params);
+					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, preStorageParams);
+
+					// Interceptor call: STORAGE_PRECOMMIT_RESOURCE_UPDATED
+					HookParams preCommitParams = new HookParams()
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+						.add(IBaseResource.class, myIdToHistory.get(theIdPart).getFirst())
+						.add(IBaseResource.class, theResource)
+						.add(TransactionDetails.class, theTransactionDetails)
+						.add(InterceptorInvocationTimingEnum.class, theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED));
+					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, preCommitParams);
 
 				}
 			}
