@@ -4849,6 +4849,35 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(SearchEntryMode.INCLUDE, found.getEntry().get(1).getSearch().getMode());
 	}
 
+	@Test
+	public void testOffsetSearchWithInclude() {
+		Organization org = new Organization();
+		org.addIdentifier().setSystem("urn:system:rpr4").setValue("testSearchWithInclude01");
+		IdType orgId = (IdType) myClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
+
+		Patient pat = new Patient();
+		pat.addIdentifier().setSystem("urn:system:rpr4").setValue("testSearchWithInclude02");
+		pat.getManagingOrganization().setReferenceElement(orgId.toUnqualifiedVersionless());
+		myClient.create().resource(pat).prettyPrint().encodedXml().execute();
+
+		Bundle found = myClient
+			.search()
+			.forResource(Patient.class)
+			.where(Patient.IDENTIFIER.exactly().systemAndIdentifier("urn:system:rpr4", "testSearchWithInclude02"))
+			.include(Patient.INCLUDE_ORGANIZATION)
+			.offset(0)
+			.count(1)
+			.prettyPrint()
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(2, found.getEntry().size());
+		assertEquals(Patient.class, found.getEntry().get(0).getResource().getClass());
+		assertEquals(SearchEntryMode.MATCH, found.getEntry().get(0).getSearch().getMode());
+		assertEquals(Organization.class, found.getEntry().get(1).getResource().getClass());
+		assertEquals(SearchEntryMode.INCLUDE, found.getEntry().get(1).getSearch().getMode());
+	}
+
 	@Test()
 	public void testSearchWithInvalidNumberPrefix() {
 		try {

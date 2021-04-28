@@ -2177,6 +2177,36 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
+	public void testOffsetSearchWithInclude() {
+		Organization org = new Organization();
+		org.addIdentifier().setSystem("urn:system:rpdstu2").setValue("testSearchWithInclude01");
+		IdDt orgId = (IdDt) ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
+
+		Patient pat = new Patient();
+		pat.addIdentifier().setSystem("urn:system:rpdstu2").setValue("testSearchWithInclude02");
+		pat.getManagingOrganization().setReference(orgId.toUnqualifiedVersionless());
+		ourClient.create().resource(pat).prettyPrint().encodedXml().execute().getId();
+
+		Bundle found = ourClient
+			.search()
+			.forResource(Patient.class)
+			.where(Patient.IDENTIFIER.exactly().systemAndIdentifier("urn:system:rpdstu2", "testSearchWithInclude02"))
+			.include(Patient.INCLUDE_ORGANIZATION)
+			.offset(0)
+			.count(1)
+			.prettyPrint()
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(2, found.getEntry().size());
+		assertEquals(Patient.class, found.getEntry().get(0).getResource().getClass());
+		assertEquals(SearchEntryModeEnum.MATCH, found.getEntry().get(0).getSearch().getModeElement().getValueAsEnum());
+		assertThat(found.getEntry().get(0).getResource().getText().getDiv().getValueAsString(), containsString("<table class=\"hapiPropertyTable"));
+		assertEquals(Organization.class, found.getEntry().get(1).getResource().getClass());
+		assertEquals(SearchEntryModeEnum.INCLUDE, found.getEntry().get(1).getSearch().getModeElement().getValueAsEnum());
+	}
+
+	@Test
 	public void testSearchWithCompositeSortWith_CodeValueQuantity() throws IOException {
 		
 		IIdType pid0;
