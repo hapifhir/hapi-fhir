@@ -37,7 +37,6 @@ import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.expunge.DeleteExpungeService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
-import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -56,20 +55,20 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.jpa.util.MemoryCacheService;
-import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
-import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu2.resource.ListResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
@@ -177,6 +176,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private Class<T> myResourceType;
 	@Autowired
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
+	@Autowired
+	private MemoryCacheService myMemoryCacheService;
 
 	@Override
 	@Transactional
@@ -272,9 +273,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return doCreateForPostOrPut(theResource, theIfNoneExist, thePerformIndexing, theTransactionDetails, theRequestDetails, requestPartitionId);
 	}
 
-	@Autowired
-	private MemoryCacheService myMemoryCacheService;
-
 	/**
 	 * Called both for FHIR create (POST) operations (via {@link #doCreateForPost(IBaseResource, String, boolean, TransactionDetails, RequestDetails)}
 	 * as well as for FHIR update (PUT) where we're doing a create-with-client-assigned-ID (via {@link #doUpdate(IBaseResource, String, boolean, boolean, RequestDetails, TransactionDetails)}.
@@ -297,17 +295,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			} else if (match.size() == 1) {
 				ResourcePersistentId pid = match.iterator().next();
 
-				Supplier<LazyDaoMethodOutcome.EntityAndResource> entitySupplier = ()->{
+				Supplier<LazyDaoMethodOutcome.EntityAndResource> entitySupplier = () -> {
 					ResourceTable foundEntity = myEntityManager.find(ResourceTable.class, pid.getId());
 					IBaseResource resource = toResource(foundEntity, false);
 					theResource.setId(resource.getIdElement().getValue());
 					return new LazyDaoMethodOutcome.EntityAndResource(foundEntity, resource);
 				};
 
-				Supplier<IIdType> idSupplier = ()-> {
+				Supplier<IIdType> idSupplier = () -> {
 					IIdType retVal = myIdHelperService.translatePidIdToForcedId(myFhirContext, myResourceName, pid);
 					if (!retVal.hasVersionIdPart()) {
-						return myMemoryCacheService.get(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, retVal, t-> {
+						return myMemoryCacheService.get(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, retVal, t -> {
 							long version = myResourceTableDao.findCurrentVersionByPid(pid.getIdAsLong());
 							return myFhirContext.getVersion().newIdType().setParts(retVal.getBaseUrl(), retVal.getResourceType(), retVal.getIdPart(), Long.toString(version));
 						});
