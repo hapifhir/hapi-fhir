@@ -39,6 +39,11 @@ public interface IAddressValidator {
 	public static final String ADDRESS_QUALITY_EXTENSION_URL = "http://hapifhir.org/StructureDefinition/ext-validation-address-quality";
 
 	/**
+	 * URL for address verification extensions that may be added to addresses.
+	 */
+	public static final String ADDRESS_VERIFICATION_CODE_EXTENSION_URL = "http://hapifhir.org/StructureDefinition/ext-validation-address-verification";
+
+	/**
 	 * FHIR Geolocation extension URL
 	 */
 	public static final String FHIR_GEOCODE_EXTENSION_URL = "http://hl7.org/fhir/StructureDefinition/geolocation";

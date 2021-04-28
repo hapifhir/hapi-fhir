@@ -92,6 +92,7 @@ class LoquateAddressValidatorTest {
 		"    \"Matches\": [\n" +
 		"      {\n" +
 		"        \"AQI\": \"A\",\n" +
+		"        \"AVC\": \"V44-I44-P6-100\",\n" +
 		"        \"Address\": \"My Valid Address\",\n" +
 		"        \"Latitude\": \"-32.94217742803439\",\n" +
 		"        \"Longitude\": \"-60.640132034941836\"\n" +
@@ -219,7 +220,7 @@ class LoquateAddressValidatorTest {
 	}
 
 	@Test
-	public void testSuccessfulResponsesWithGeocode() throws Exception {
+	public void testSuccessfulResponsesWithGeocodeAndQuality() throws Exception {
 		myValidator.getProperties().setProperty(PROPERTY_GEOCODE, "true");
 		AddressValidationResult res = myValidator.getValidationResult(new AddressValidationResult(),
 			new ObjectMapper().readTree(RESPONSE_VALID_ADDRESS_W_GEO), ourCtx);
@@ -235,6 +236,10 @@ class LoquateAddressValidatorTest {
 		IBaseExtension quality = ExtensionUtil.getExtensionByUrl(address, IAddressValidator.ADDRESS_QUALITY_EXTENSION_URL);
 		assertNotNull(quality);
 		assertEquals("A", quality.getValue().toString());
+
+		IBaseExtension verificationCode = ExtensionUtil.getExtensionByUrl(address, IAddressValidator.ADDRESS_VERIFICATION_CODE_EXTENSION_URL);
+		assertNotNull(verificationCode);
+		assertEquals("V44-I44-P6-100", verificationCode.getValue().toString());
 	}
 
 	@Test

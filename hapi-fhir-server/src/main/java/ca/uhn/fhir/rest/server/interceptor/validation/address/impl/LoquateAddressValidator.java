@@ -21,7 +21,6 @@ package ca.uhn.fhir.rest.server.interceptor.validation.address.impl;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationException;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationResult;
 import ca.uhn.fhir.rest.server.interceptor.validation.helpers.AddressHelper;
 import ca.uhn.fhir.util.ExtensionUtil;
@@ -48,6 +47,9 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator.ADDRESS_QUALITY_EXTENSION_URL;
+import static ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator.ADDRESS_VERIFICATION_CODE_EXTENSION_URL;
+
 /**
  * For more details regarind the API refer to
  * <a href="https://www.loqate.com/resources/support/cleanse-api/international-batch-cleanse/">
@@ -60,6 +62,7 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 
 	public static final String PROPERTY_GEOCODE = "service.geocode";
 	public static final String LOQUATE_AQI = "AQI";
+	public static final String LOQUATE_AVC = "AVC";
 
 	protected static final String[] DUPLICATE_FIELDS_IN_ADDRESS_LINES = {"Locality", "AdministrativeArea", "PostalCode"};
 	protected static final String DEFAULT_DATA_CLEANSE_ENDPOINT = "https://api.addressy.com/Cleansing/International/Batch/v1.00/json4.ws";
@@ -102,17 +105,17 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 	}
 
 	protected boolean isValid(JsonNode theMatch) {
-		String addressQualityIndex = getAqi(theMatch);
+		String addressQualityIndex = getField(theMatch, LOQUATE_AQI);
 		return "A".equals(addressQualityIndex) || "B".equals(addressQualityIndex);
 	}
 
-	private String getAqi(JsonNode theMatch) {
-		String addressQualityIndex = null;
-		if (theMatch.has(LOQUATE_AQI)) {
-			addressQualityIndex = theMatch.get(LOQUATE_AQI).asText();
+	private String getField(JsonNode theMatch, String theFieldName) {
+		String field = null;
+		if (theMatch.has(theFieldName)) {
+			field = theMatch.get(theFieldName).asText();
 		}
-		ourLog.debug("Address quality index {}", addressQualityIndex);
-		return addressQualityIndex;
+		ourLog.debug("Found {}={}", theFieldName, field);
+		return field;
 	}
 
 	protected IBase toAddress(JsonNode match, FhirContext theFhirContext) {
@@ -136,21 +139,23 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 		helper.setState(getString(match, "AdministrativeArea"));
 		helper.setPostalCode(getString(match, "PostalCode"));
 		helper.setCountry(getString(match, "CountryName"));
-		toQualityIndex(match, helper, theFhirContext);
+		addExtension(match, LOQUATE_AQI, ADDRESS_QUALITY_EXTENSION_URL, helper, theFhirContext);
+		addExtension(match, LOQUATE_AVC, ADDRESS_VERIFICATION_CODE_EXTENSION_URL, helper, theFhirContext);
 
 		return helper.getAddress();
 	}
 
-	private void toQualityIndex(JsonNode theMatch, AddressHelper theHelper, FhirContext theFhirContext) {
-		String addressQuality = getAqi(theMatch);
+	private void addExtension(JsonNode theMatch, String theMatchField, String theExtUrl, AddressHelper theHelper, FhirContext theFhirContext) {
+		String addressQuality = getField(theMatch, theMatchField);
 		if (StringUtils.isEmpty(addressQuality)) {
-			ourLog.debug("AQI is not provided on {}", theMatch);
+			ourLog.debug("{} is not found in {}", theMatchField, theMatch);
 			return;
 		}
 
 		IBase address = theHelper.getAddress();
-		ExtensionUtil.clearExtensionsByUrl(address, ADDRESS_QUALITY_EXTENSION_URL);
-		IBaseExtension addressQualityExt = ExtensionUtil.addExtension(address, ADDRESS_QUALITY_EXTENSION_URL);
+		ExtensionUtil.clearExtensionsByUrl(address, theExtUrl);
+
+		IBaseExtension addressQualityExt = ExtensionUtil.addExtension(address, theExtUrl);
 		addressQualityExt.setValue(TerserUtil.newElement(theFhirContext, "string", addressQuality));
 	}
 
@@ -217,7 +222,7 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 		if (StringUtils.isEmpty(theText)) {
 			return "";
 		}
-		
+
 		theText = theText.replaceAll("\\s\\s", ", ");
 		Matcher m = myCommaPattern.matcher(theText);
 		if (m.find()) {
