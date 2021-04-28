@@ -1,6 +1,10 @@
 package ca.uhn.fhir.util;
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -9,15 +13,23 @@ import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import ca.uhn.fhir.util.bundle.EntryListAccumulator;
 import ca.uhn.fhir.util.bundle.ModifiableBundleEntry;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -42,6 +54,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Fetch resources from a bundle
  */
 public class BundleUtil {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BundleUtil.class);
+
 
 	/**
 	 * @return Returns <code>null</code> if the link isn't found or has no value
@@ -170,16 +184,200 @@ public class BundleUtil {
 		return entryListAccumulator.getList();
 	}
 
+	static int WHITE = 1;
+	static int GRAY = 2;
+	static int BLACK = 3;
 
+	/**
+	 * Function which will do an in-place sort of a bundles' entries, to the correct processing order, which is:
+	 * 1. Deletes
+	 * 2. Creates
+	 * 3. Updates
+	 *
+	 * Furthermore, within these operation types, the entries will be sorted based on the order in which they should be processed
+	 * e.g. if you have 2 CREATEs, one for a Patient, and one for an Observation which has this Patient as its Subject,
+	 * the patient will come first, then the observation.
+	 *
+	 * In cases of there being a cyclic dependency (e.g. Organization/1 is partOf Organization/2 and Organization/2 is partOf Organization/1)
+	 * this function will throw an IllegalStateException.
+	 *
+	 * @param theContext The FhirContext.
+	 * @param theBundle The {@link IBaseBundle} which contains the entries you would like sorted into processing order.
+	 */
+	public static void sortEntriesIntoProcessingOrder(FhirContext theContext, IBaseBundle theBundle) throws IllegalStateException {
+		Map<BundleEntryParts, IBase> partsToIBaseMap = getPartsToIBaseMap(theContext, theBundle);
+		LinkedHashSet<IBase> retVal = new LinkedHashSet<>();
+
+		//Get all deletions.
+		LinkedHashSet<IBase> deleteParts = sortEntriesOfTypeIntoProcessingOrder(theContext, RequestTypeEnum.DELETE, partsToIBaseMap);
+		validatePartsNotNull(deleteParts);
+		retVal.addAll(deleteParts);
+
+		//Get all Creations
+		LinkedHashSet<IBase> createParts= sortEntriesOfTypeIntoProcessingOrder(theContext, RequestTypeEnum.POST, partsToIBaseMap);
+		validatePartsNotNull(createParts);
+		retVal.addAll(createParts);
+
+		// Get all Updates
+		LinkedHashSet<IBase> updateParts= sortEntriesOfTypeIntoProcessingOrder(theContext, RequestTypeEnum.PUT, partsToIBaseMap);
+		validatePartsNotNull(updateParts);
+		retVal.addAll(updateParts);
+
+		//Once we are done adding all DELETE, POST, PUT operations, add everything else.
+		//Since this is a set, it will just fail to add already-added operations.
+		retVal.addAll(partsToIBaseMap.values());
+
+		//Blow away the entries and reset them in the right order.
+		TerserUtil.clearField(theContext, "entry", theBundle);
+		TerserUtil.setField(theContext, "entry", theBundle, retVal.toArray(new IBase[0]));
+	}
+
+	private static void validatePartsNotNull(LinkedHashSet<IBase> theDeleteParts) {
+		if (theDeleteParts == null) {
+			throw new IllegalStateException("This transaction contains a cycle, so it cannot be sorted.");
+		}
+	}
+
+	private static LinkedHashSet<IBase> sortEntriesOfTypeIntoProcessingOrder(FhirContext theContext, RequestTypeEnum theRequestTypeEnum, Map<BundleEntryParts, IBase> thePartsToIBaseMap) {
+		SortLegality legality = new SortLegality();
+		HashMap<String, Integer> color = new HashMap<>();
+		HashMap<String, List<String>> adjList = new HashMap<>();
+		List<String> topologicalOrder = new ArrayList<>();
+		Set<BundleEntryParts> bundleEntryParts = thePartsToIBaseMap.keySet().stream().filter(part -> part.getRequestType().equals(theRequestTypeEnum)).collect(Collectors.toSet());
+		HashMap<String, BundleEntryParts> resourceIdToBundleEntryMap = new HashMap<>();
+
+		for (BundleEntryParts bundleEntryPart : bundleEntryParts) {
+			IBaseResource resource = bundleEntryPart.getResource();
+			if (resource != null) {
+				String resourceId = resource.getIdElement().toVersionless().toString();
+				resourceIdToBundleEntryMap.put(resourceId, bundleEntryPart);
+				if (resourceId == null) {
+					if (bundleEntryPart.getFullUrl() != null) {
+						resourceId = bundleEntryPart.getFullUrl();
+					}
+				}
+
+				color.put(resourceId, WHITE);
+			}
+		}
+
+		for (BundleEntryParts bundleEntryPart : bundleEntryParts) {
+			IBaseResource resource = bundleEntryPart.getResource();
+			if (resource != null) {
+				String resourceId = resource.getIdElement().toVersionless().toString();
+				resourceIdToBundleEntryMap.put(resourceId, bundleEntryPart);
+				if (resourceId == null) {
+					if (bundleEntryPart.getFullUrl() != null) {
+						resourceId = bundleEntryPart.getFullUrl();
+					}
+				}
+				List<ResourceReferenceInfo> allResourceReferences = theContext.newTerser().getAllResourceReferences(resource);
+				String finalResourceId = resourceId;
+				allResourceReferences
+					.forEach(refInfo -> {
+						String referencedResourceId = refInfo.getResourceReference().getReferenceElement().toVersionless().getValue();
+						if (color.containsKey(referencedResourceId)) {
+							if (!adjList.containsKey(finalResourceId)) {
+								adjList.put(finalResourceId, new ArrayList<>());
+							}
+							adjList.get(finalResourceId).add(referencedResourceId);
+						}
+					});
+			}
+		}
+
+		for (Map.Entry<String, Integer> entry:color.entrySet()) {
+			if (entry.getValue() == WHITE) {
+				depthFirstSearch(entry.getKey(), color, adjList, topologicalOrder, legality);
+			}
+		}
+
+		if (legality.isLegal()) {
+			if (ourLog.isDebugEnabled()) {
+				ourLog.debug("Topological order is: {}", String.join(",", topologicalOrder));
+			}
+
+			LinkedHashSet<IBase> orderedEntries = new LinkedHashSet<>();
+			for (int i = 0; i < topologicalOrder.size(); i++) {
+				BundleEntryParts bep;
+				if (theRequestTypeEnum.equals(RequestTypeEnum.DELETE)) {
+					int index = topologicalOrder.size() - i - 1;
+					bep = resourceIdToBundleEntryMap.get(topologicalOrder.get(index));
+				} else {
+					bep = resourceIdToBundleEntryMap.get(topologicalOrder.get(i));
+				}
+				IBase base = thePartsToIBaseMap.get(bep);
+				orderedEntries.add(base);
+			}
+
+			return orderedEntries;
+
+		} else {
+			return null;
+		}
+	}
+
+	private static void depthFirstSearch(String theResourceId, HashMap<String, Integer> theResourceIdToColor, HashMap<String, List<String>> theAdjList, List<String> theTopologicalOrder, SortLegality theLegality) {
+
+		if (!theLegality.isLegal()) {
+			ourLog.debug("Found a cycle while trying to sort bundle entries. This bundle is not sortable.");
+			return;
+		}
+
+		//We are currently recursing over this node (gray)
+		theResourceIdToColor.put(theResourceId, GRAY);
+
+		for (String neighbourResourceId: theAdjList.getOrDefault(theResourceId, new ArrayList<>())) {
+			if (theResourceIdToColor.get(neighbourResourceId) == WHITE) {
+				depthFirstSearch(neighbourResourceId, theResourceIdToColor, theAdjList, theTopologicalOrder, theLegality);
+			} else if (theResourceIdToColor.get(neighbourResourceId) == GRAY) {
+				theLegality.setLegal(false);
+				return;
+			}
+		}
+		//Mark the node as black
+		theResourceIdToColor.put(theResourceId, BLACK);
+		theTopologicalOrder.add(theResourceId);
+	}
+
+	private static Map<BundleEntryParts, IBase> getPartsToIBaseMap(FhirContext theContext, IBaseBundle theBundle) {
+		RuntimeResourceDefinition bundleDef = theContext.getResourceDefinition(theBundle);
+		BaseRuntimeChildDefinition entryChildDef = bundleDef.getChildByName("entry");
+		List<IBase> entries = entryChildDef.getAccessor().getValues(theBundle);
+
+		BaseRuntimeElementCompositeDefinition<?> entryChildContentsDef = (BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
+		BaseRuntimeChildDefinition fullUrlChildDef = entryChildContentsDef.getChildByName("fullUrl");
+		BaseRuntimeChildDefinition resourceChildDef = entryChildContentsDef.getChildByName("resource");
+		BaseRuntimeChildDefinition requestChildDef = entryChildContentsDef.getChildByName("request");
+		BaseRuntimeElementCompositeDefinition<?> requestChildContentsDef = (BaseRuntimeElementCompositeDefinition<?>) requestChildDef.getChildByName("request");
+		BaseRuntimeChildDefinition requestUrlChildDef = requestChildContentsDef.getChildByName("url");
+		BaseRuntimeChildDefinition requestIfNoneExistChildDef = requestChildContentsDef.getChildByName("ifNoneExist");
+		BaseRuntimeChildDefinition methodChildDef = requestChildContentsDef.getChildByName("method");
+		Map<BundleEntryParts, IBase> map = new HashMap<>();
+		for (IBase nextEntry : entries) {
+			BundleEntryParts parts = getBundleEntryParts(fullUrlChildDef, resourceChildDef, requestChildDef, requestUrlChildDef, requestIfNoneExistChildDef, methodChildDef, nextEntry);
+			/*
+			 * All 3 might be null - That's ok because we still want to know the
+			 * order in the original bundle.
+			 */
+			map.put(parts, nextEntry);
+		}
+		return map;
+	}
+
+	/**
+	 * Given a bundle, and a consumer, apply the consumer to each entry in the bundle.
+	 * @param theContext The FHIR Context
+	 * @param theBundle The bundle to have its entries processed.
+	 * @param theProcessor a {@link Consumer} which will operate on all the entries of a bundle.
+	 */
 	public static void processEntries(FhirContext theContext, IBaseBundle theBundle, Consumer<ModifiableBundleEntry> theProcessor) {
 		RuntimeResourceDefinition bundleDef = theContext.getResourceDefinition(theBundle);
 		BaseRuntimeChildDefinition entryChildDef = bundleDef.getChildByName("entry");
 		List<IBase> entries = entryChildDef.getAccessor().getValues(theBundle);
 
 		BaseRuntimeElementCompositeDefinition<?> entryChildContentsDef = (BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
-
 		BaseRuntimeChildDefinition fullUrlChildDef = entryChildContentsDef.getChildByName("fullUrl");
-
 		BaseRuntimeChildDefinition resourceChildDef = entryChildContentsDef.getChildByName("resource");
 		BaseRuntimeChildDefinition requestChildDef = entryChildContentsDef.getChildByName("request");
 		BaseRuntimeElementCompositeDefinition<?> requestChildContentsDef = (BaseRuntimeElementCompositeDefinition<?>) requestChildDef.getChildByName("request");
@@ -188,55 +386,60 @@ public class BundleUtil {
 		BaseRuntimeChildDefinition methodChildDef = requestChildContentsDef.getChildByName("method");
 
 		for (IBase nextEntry : entries) {
-			IBaseResource resource = null;
-			String url = null;
-			RequestTypeEnum requestType = null;
-			String conditionalUrl = null;
-			String fullUrl = fullUrlChildDef
-				.getAccessor()
-				.getFirstValueOrNull(nextEntry)
-				.map(t->((IPrimitiveType<?>)t).getValueAsString())
-				.orElse(null);
-
-			for (IBase nextResource : resourceChildDef.getAccessor().getValues(nextEntry)) {
-				resource = (IBaseResource) nextResource;
-			}
-			for (IBase nextRequest : requestChildDef.getAccessor().getValues(nextEntry)) {
-				for (IBase nextUrl : requestUrlChildDef.getAccessor().getValues(nextRequest)) {
-					url = ((IPrimitiveType<?>) nextUrl).getValueAsString();
-				}
-				for (IBase nextMethod : methodChildDef.getAccessor().getValues(nextRequest)) {
-					String methodString = ((IPrimitiveType<?>) nextMethod).getValueAsString();
-					if (isNotBlank(methodString)) {
-						requestType = RequestTypeEnum.valueOf(methodString);
-					}
-				}
-
-				if (requestType != null) {
-					//noinspection EnumSwitchStatementWhichMissesCases
-					switch (requestType) {
-						case PUT:
-							conditionalUrl = url != null && url.contains("?") ? url : null;
-							break;
-						case POST:
-							List<IBase> ifNoneExistReps = requestIfNoneExistChildDef.getAccessor().getValues(nextRequest);
-							if (ifNoneExistReps.size() > 0) {
-								IPrimitiveType<?> ifNoneExist = (IPrimitiveType<?>) ifNoneExistReps.get(0);
-								conditionalUrl = ifNoneExist.getValueAsString();
-							}
-							break;
-					}
-				}
-			}
-
+			BundleEntryParts parts = getBundleEntryParts(fullUrlChildDef, resourceChildDef, requestChildDef, requestUrlChildDef, requestIfNoneExistChildDef, methodChildDef, nextEntry);
 			/*
 			 * All 3 might be null - That's ok because we still want to know the
 			 * order in the original bundle.
 			 */
 			BundleEntryMutator mutator = new BundleEntryMutator(theContext, nextEntry, requestChildDef, requestChildContentsDef, entryChildContentsDef);
-			ModifiableBundleEntry entry = new ModifiableBundleEntry(new BundleEntryParts(fullUrl, requestType, url, resource, conditionalUrl), mutator);
+			ModifiableBundleEntry entry = new ModifiableBundleEntry(parts, mutator);
 			theProcessor.accept(entry);
 		}
+	}
+
+	private static BundleEntryParts getBundleEntryParts(BaseRuntimeChildDefinition fullUrlChildDef, BaseRuntimeChildDefinition resourceChildDef, BaseRuntimeChildDefinition requestChildDef, BaseRuntimeChildDefinition requestUrlChildDef, BaseRuntimeChildDefinition requestIfNoneExistChildDef, BaseRuntimeChildDefinition methodChildDef, IBase nextEntry) {
+		IBaseResource resource = null;
+		String url = null;
+		RequestTypeEnum requestType = null;
+		String conditionalUrl = null;
+		String fullUrl = fullUrlChildDef
+			.getAccessor()
+			.getFirstValueOrNull(nextEntry)
+			.map(t->((IPrimitiveType<?>)t).getValueAsString())
+			.orElse(null);
+
+		for (IBase nextResource : resourceChildDef.getAccessor().getValues(nextEntry)) {
+			resource = (IBaseResource) nextResource;
+		}
+		for (IBase nextRequest : requestChildDef.getAccessor().getValues(nextEntry)) {
+			for (IBase nextUrl : requestUrlChildDef.getAccessor().getValues(nextRequest)) {
+				url = ((IPrimitiveType<?>) nextUrl).getValueAsString();
+			}
+			for (IBase nextMethod : methodChildDef.getAccessor().getValues(nextRequest)) {
+				String methodString = ((IPrimitiveType<?>) nextMethod).getValueAsString();
+				if (isNotBlank(methodString)) {
+					requestType = RequestTypeEnum.valueOf(methodString);
+				}
+			}
+
+			if (requestType != null) {
+				//noinspection EnumSwitchStatementWhichMissesCases
+				switch (requestType) {
+					case PUT:
+						conditionalUrl = url != null && url.contains("?") ? url : null;
+						break;
+					case POST:
+						List<IBase> ifNoneExistReps = requestIfNoneExistChildDef.getAccessor().getValues(nextRequest);
+						if (ifNoneExistReps.size() > 0) {
+							IPrimitiveType<?> ifNoneExist = (IPrimitiveType<?>) ifNoneExistReps.get(0);
+							conditionalUrl = ifNoneExist.getValueAsString();
+						}
+						break;
+				}
+			}
+		}
+		BundleEntryParts parts = new BundleEntryParts(fullUrl, requestType, url, resource, conditionalUrl);
+		return parts;
 	}
 
 	/**
@@ -290,4 +493,20 @@ public class BundleUtil {
 		}
 		return isPatch;
 	}
+
+	private static class SortLegality {
+		private boolean myIsLegal;
+
+		SortLegality() {
+			this.myIsLegal = true;
+		}
+		private void setLegal(boolean theLegal) {
+			myIsLegal = theLegal;
+		}
+
+		public boolean isLegal() {
+			return myIsLegal;
+		}
+	}
+
 }
