@@ -25,7 +25,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -72,6 +71,7 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -82,7 +82,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -2600,6 +2599,56 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	}
 
+	/**
+	 * DAOs can't handle references where <code>Reference.setResource</code>
+	 * is set but not <code>Reference.setReference</code> so make sure
+	 * we block this so it doesn't get used accidentally.
+	 */
+	@Test
+	public void testTransactionWithResourceReferenceInsteadOfIdReferenceBlocked() {
+
+		Bundle input = createBundleWithConditionalCreateReferenceByResource();
+		mySystemDao.transaction(mySrd, input);
+
+		// Fails the second time
+		try {
+			input = createBundleWithConditionalCreateReferenceByResource();
+			mySystemDao.transaction(mySrd, input);
+			fail();
+		} catch (InternalErrorException e) {
+			assertEquals("References by resource with no reference ID are not supported in DAO layer", e.getMessage());
+		}
+
+	}
+
+	@Nonnull
+	private Bundle createBundleWithConditionalCreateReferenceByResource() {
+		Bundle input = new Bundle();
+		input.setType(BundleType.TRANSACTION);
+
+		Patient p = new Patient();
+		p.setId(IdType.newRandomUuid());
+		p.addIdentifier().setSystem("foo").setValue("bar");
+		input.addEntry()
+			.setFullUrl(p.getId())
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Patient")
+			.setIfNoneExist("Patient?identifier=foo|bar");
+
+		Observation o1 = new Observation();
+		o1.setId(IdType.newRandomUuid());
+		o1.setStatus(ObservationStatus.FINAL);
+		o1.getSubject().setResource(p); // Not allowed
+		input.addEntry()
+			.setFullUrl(o1.getId())
+			.setResource(o1)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Observation");
+		return input;
+	}
 
 	@Test
 	public void testDeleteInTransactionShouldFailWhenReferencesExist() {
@@ -2683,7 +2732,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Observation o = new Observation();
 		o.setId(IdType.newRandomUuid());
 		o.setStatus(ObservationStatus.FINAL);
-		o.getSubject().setResource(p);
+		o.getSubject().setReference(p.getId());
 		b.addEntry()
 			.setFullUrl(o.getId())
 			.setResource(o)

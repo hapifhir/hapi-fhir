@@ -946,11 +946,23 @@ public abstract class BaseTransactionProcessor {
 				for (ResourceReferenceInfo nextRef : allRefs) {
 					IBaseReference resourceReference = nextRef.getResourceReference();
 					IIdType nextId = resourceReference.getReferenceElement();
+					IIdType newId = null;
 					if (!nextId.hasIdPart()) {
-						continue;
+						if (resourceReference.getResource() != null) {
+							IIdType targetId = resourceReference.getResource().getIdElement();
+							if (theIdSubstitutions.containsValue(targetId)) {
+								newId = targetId;
+							} else {
+								throw new InternalErrorException("References by resource with no reference ID are not supported in DAO layer");
+							}
+						} else {
+							continue;
+						}
 					}
-					if (theIdSubstitutions.containsKey(nextId)) {
-						IIdType newId = theIdSubstitutions.get(nextId);
+					if (newId != null || theIdSubstitutions.containsKey(nextId)) {
+						if (newId == null) {
+							newId = theIdSubstitutions.get(nextId);
+						}
 						ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
 						if (referencesToVersion.contains(resourceReference)) {
 							resourceReference.setReference(newId.getValue());
