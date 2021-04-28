@@ -106,7 +106,7 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 
 	protected boolean isValid(JsonNode theMatch) {
 		String addressQualityIndex = getField(theMatch, LOQUATE_AQI);
-		return "A".equals(addressQualityIndex) || "B".equals(addressQualityIndex);
+		return "A".equals(addressQualityIndex) || "B".equals(addressQualityIndex) || "C".equals(addressQualityIndex);
 	}
 
 	private String getField(JsonNode theMatch, String theFieldName) {

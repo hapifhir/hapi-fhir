@@ -63,7 +63,7 @@ class LoquateAddressValidatorTest {
 		"    },\n" +
 		"    \"Matches\": [\n" +
 		"      {\n" +
-		"        \"AQI\": \"C\",\n" +
+		"        \"AQI\": \"D\",\n" +
 		"        \"Address\": \"\"\n" +
 		"      }\n" +
 		"    ]\n" +
