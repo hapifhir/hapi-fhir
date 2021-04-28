@@ -671,7 +671,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 	@Test
 	public void testTransactionWithConditionalCreate_MatchUrlCacheEnabled() {
 		myDaoConfig.setMatchUrlCache(true);
-		myDaoConfig.setAlwaysReturnVersionForConditionalCreate(false);
 
 		Supplier<Bundle> bundleCreator = ()-> {
 			BundleBuilder bb = new BundleBuilder(myFhirCtx);
@@ -733,7 +732,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 	@Test
 	public void testTransactionWithConditionalCreate_MatchUrlCacheNotEnabled() {
-		myDaoConfig.setAlwaysReturnVersionForConditionalCreate(false);
 
 		Supplier<Bundle> bundleCreator = ()-> {
 			BundleBuilder bb = new BundleBuilder(myFhirCtx);
