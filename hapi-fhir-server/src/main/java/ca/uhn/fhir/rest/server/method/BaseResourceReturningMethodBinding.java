@@ -158,7 +158,10 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 					numToReturn = numTotalResults != null ? numTotalResults : Integer.MAX_VALUE;
 				}
 			}
-			if (numToReturn > 0) {
+			if (requestOffset != null) {
+				// When offset query is done theResult already contains correct amount (+ their includes etc.) so return everything
+				resourceList = theResult.getResources(0, Integer.MAX_VALUE);
+			} else if (numToReturn > 0) {
 				resourceList = theResult.getResources(0, numToReturn);
 			} else {
 				resourceList = Collections.emptyList();
