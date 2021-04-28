@@ -29,11 +29,13 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
@@ -73,6 +75,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.OO_SEVERITY_ERROR;
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.OO_SEVERITY_INFO;
@@ -212,7 +215,7 @@ public abstract class BaseStorageDao {
 	}
 
 	protected DaoMethodOutcome toMethodOutcome(RequestDetails theRequest, @Nonnull final IBasePersistedResource theEntity, @Nonnull IBaseResource theResource) {
-		DaoMethodOutcome outcome = new DaoMethodOutcome();
+		DaoMethodOutcome outcome = new DaoMethodOutcome().setPersistentId(theEntity.getPersistentId());
 
 		if (theEntity instanceof ResourceTable) {
 			if (((ResourceTable) theEntity).isUnchangedInCurrentOperation()) {
@@ -268,6 +271,46 @@ public abstract class BaseStorageDao {
 
 		return outcome;
 	}
+
+	protected DaoMethodOutcome toMethodOutcomeLazy(RequestDetails theRequest, ResourcePersistentId theResourcePersistentId, @Nonnull final Supplier<LazyDaoMethodOutcome.EntityAndResource> theEntity, Supplier<IIdType> theIdSupplier) {
+		LazyDaoMethodOutcome outcome = new LazyDaoMethodOutcome(theResourcePersistentId);
+
+		outcome.setEntitySupplier(theEntity);
+		outcome.setIdSupplier(theIdSupplier);
+		outcome.setEntitySupplierUseCallback(()->{
+			// Interceptor broadcast: STORAGE_PREACCESS_RESOURCES
+			if (outcome.getResource() != null) {
+				SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(outcome.getResource());
+				HookParams params = new HookParams()
+					.add(IPreResourceAccessDetails.class, accessDetails)
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				JpaInterceptorBroadcaster.doCallHooks(getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+				if (accessDetails.isDontReturnResourceAtIndex(0)) {
+					outcome.setResource(null);
+				}
+			}
+
+			// Interceptor broadcast: STORAGE_PRESHOW_RESOURCES
+			// Note that this will only fire if someone actually goes to use the
+			// resource in a response (it's their responsibility to call
+			// outcome.fireResourceViewCallback())
+			outcome.registerResourceViewCallback(() -> {
+				if (outcome.getResource() != null) {
+					SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(outcome.getResource());
+					HookParams params = new HookParams()
+						.add(IPreResourceShowDetails.class, showDetails)
+						.add(RequestDetails.class, theRequest)
+						.addIfMatchesType(ServletRequestDetails.class, theRequest);
+					JpaInterceptorBroadcaster.doCallHooks(getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+					outcome.setResource(showDetails.getResource(0));
+				}
+			});
+		});
+
+		return outcome;
+	}
+
 
 	protected void doCallHooks(TransactionDetails theTransactionDetails, RequestDetails theRequestDetails, Pointcut thePointcut, HookParams theParams) {
 		if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts(thePointcut)) {

@@ -233,4 +233,9 @@ public class MethodOutcome {
 			setCreated(true);
 		}
 	}
+
+	protected boolean hasResource() {
+		return myResource != null;
+	}
+
 }

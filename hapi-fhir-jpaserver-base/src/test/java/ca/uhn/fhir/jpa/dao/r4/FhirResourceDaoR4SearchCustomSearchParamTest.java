@@ -857,7 +857,8 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, contains(p2id.getValue()));
 		sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-		assertThat(sql, countMatches(sql, "JOIN"), equalTo(1));
+		assertThat(sql, countMatches(sql, "JOIN"), equalTo(0));
+		assertThat(sql, countMatches(sql, "SELECT"), equalTo(1));
 		assertThat(sql, countMatches(sql, "t0.SRC_PATH = 'Patient.extension('http://acme.org/sibling')'"), equalTo(1));
 		assertThat(sql, countMatches(sql, "t0.TARGET_RESOURCE_ID = '"), equalTo(1));
 
@@ -869,7 +870,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, contains(p2id.getValue()));
 		sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-		assertThat(sql, countMatches(sql, "JOIN"), equalTo(2));
+		assertThat(sql, countMatches(sql, "JOIN"), equalTo(1));
 		assertThat(sql, countMatches(sql, "SRC_PATH = 'Patient.extension('http://acme.org/sibling')'"), equalTo(1));
 		assertThat(sql, countMatches(sql, "HASH_NORM_PREFIX = '"), equalTo(39));
 		assertThat(sql, countMatches(sql, "SP_VALUE_NORMALIZED LIKE "), equalTo(39));
@@ -882,7 +883,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, containsInAnyOrder(appid.getValue()));
 		sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-		assertThat(sql, countMatches(sql, "JOIN"), equalTo(3));
+		assertThat(sql, countMatches(sql, "JOIN"), equalTo(2));
 		assertThat(sql, countMatches(sql, "SRC_PATH = 'Appointment.participant.actor.where(resolve() is Patient)'"), equalTo(1));
 		assertThat(sql, countMatches(sql, "SRC_PATH = 'Patient.extension('http://acme.org/sibling')'"), equalTo(1));
 		assertThat(sql, countMatches(sql, "SP_VALUE_NORMALIZED LIKE 'P1%'"), equalTo(39));
