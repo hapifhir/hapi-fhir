@@ -34,17 +34,17 @@ public interface IAddressValidator {
 	public static final String ADDRESS_VALIDATION_EXTENSION_URL = "http://hapifhir.org/StructureDefinition/ext-validation-address-has-error";
 
 	/**
-	 * URL for address quality extensions that may be added to addresses.
+	 * URL for an optional address quality extensions that may be added to addresses.
 	 */
 	public static final String ADDRESS_QUALITY_EXTENSION_URL = "http://hapifhir.org/StructureDefinition/ext-validation-address-quality";
 
 	/**
-	 * URL for address verification extensions that may be added to addresses.
+	 * URL for an optional address verification extensions that may be added to addresses.
 	 */
 	public static final String ADDRESS_VERIFICATION_CODE_EXTENSION_URL = "http://hapifhir.org/StructureDefinition/ext-validation-address-verification";
 
 	/**
-	 * FHIR Geolocation extension URL
+	 * URL for an optional FHIR geolocation extension.
 	 */
 	public static final String FHIR_GEOCODE_EXTENSION_URL = "http://hl7.org/fhir/StructureDefinition/geolocation";
 
