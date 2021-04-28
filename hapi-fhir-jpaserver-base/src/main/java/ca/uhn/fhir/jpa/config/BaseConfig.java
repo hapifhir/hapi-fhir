@@ -43,7 +43,9 @@ import ca.uhn.fhir.jpa.dao.expunge.ResourceExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
+import ca.uhn.fhir.jpa.dao.index.searchparameter.IPlaceholderReferenceSearchParamLoader;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.searchparameter.PlaceholderReferenceSearchParamLoader;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkExpandSvc;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilder;
@@ -164,7 +166,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import java.util.Date;
-import java.util.concurrent.RejectedExecutionHandler;
 
 /*
  * #%L
@@ -764,6 +765,16 @@ public abstract class BaseConfig {
 	@Scope("prototype")
 	public HistoryBuilder newPersistedJpaSearchFirstPageBundleProvider(@Nullable String theResourceType, @Nullable Long theResourceId, @Nullable Date theRangeStartInclusive, @Nullable Date theRangeEndInclusive) {
 		return new HistoryBuilder(theResourceType, theResourceId, theRangeStartInclusive, theRangeEndInclusive);
+	}
+
+	@Bean
+	public IPlaceholderReferenceSearchParamLoader placeholderReferenceSearchParamLoader(DaoConfig theDaoConfig, DaoRegistry theDaoRegistry, FhirContext theFhirContext) {
+		if (theDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
+			return new PlaceholderReferenceSearchParamLoader(theDaoRegistry, theFhirContext);
+		} else {
+			return new IPlaceholderReferenceSearchParamLoader.NullPlaceholderReferenceSearchParamLoader();
+		}
+
 	}
 
 	@Bean
