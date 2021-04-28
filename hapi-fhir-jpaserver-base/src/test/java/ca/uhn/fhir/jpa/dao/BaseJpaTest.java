@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
@@ -163,6 +164,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	private IValidationSupport myJpaPersistedValidationSupport;
 	@Autowired
 	private FhirInstanceValidator myFhirInstanceValidator;
+	@Autowired
+	protected InMemoryResourceMatcher myInMemoryResourceMatcher;
 
 	@AfterEach
 	public void afterPerformCleanup() {

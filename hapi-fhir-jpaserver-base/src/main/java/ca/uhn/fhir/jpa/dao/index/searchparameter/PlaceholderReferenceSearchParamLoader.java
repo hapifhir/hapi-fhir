@@ -12,6 +12,7 @@ import java.util.Set;
 
 public class PlaceholderReferenceSearchParamLoader implements IPlaceholderReferenceSearchParamLoader{
 
+	public static final String PLACEHOLDER_FHIRPATH_SUFFIX = ".extension('http://hapifhir.io/fhir/StructureDefinition/resource-placeholder').value.as(boolean)";
 	public DaoRegistry myDaoRegistry;
 	FhirContext myFhirContext;
 
@@ -44,7 +45,7 @@ public class PlaceholderReferenceSearchParamLoader implements IPlaceholderRefere
 		canonicalSearchParameter.setCode("resource-placeholder");
 		canonicalSearchParameter.setBase(Collections.singletonList(theType));
 		canonicalSearchParameter.setType("token");
-		canonicalSearchParameter.setExpression(theType + ".extension('http://hapifhir.io/fhir/StructureDefinition/resource-placeholder').value.as(boolean)");
+		canonicalSearchParameter.setExpression(theType + PLACEHOLDER_FHIRPATH_SUFFIX);
 		return canonicalSearchParameter;
 	}
 

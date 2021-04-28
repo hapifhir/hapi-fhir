@@ -10,6 +10,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Sets;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -31,6 +32,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -67,5 +69,16 @@ public class FhirResourceDaoPlaceholderSearchParamR4Test extends BaseJpaR4Test {
 		searchParameterMap.add("resource-placeholder", new TokenParam("true"));
 		IBundleProvider search = myPatientDao.search(searchParameterMap);
 		assertThat(search.size(), is(equalTo(1)));
+	}
+
+	@Test
+	public void testNonExistentSearchParameterDoesntReturnAnIndexRow() {
+		Observation o = new Observation();
+		o.setStatus(ObservationStatus.FINAL);
+		myObservationDao.create(o, mySrd);
+
+		String theFhirPath = "Observation" + PlaceholderReferenceSearchParamLoader.PLACEHOLDER_FHIRPATH_SUFFIX;
+		List<IBase> evaluate = myFhirCtx.newFhirPath().evaluate(o, theFhirPath, IBase.class);
+		assertThat(evaluate, hasSize(0));
 	}
 }
