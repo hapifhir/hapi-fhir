@@ -362,6 +362,10 @@ public class SearchBuilder implements ISearchBuilder {
 		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, sqlBuilderResourceName, mySqlBuilderFactory, myDialectProvider, theCount);
 		QueryStack queryStack3 = new QueryStack(theParams, myDaoConfig, myDaoConfig.getModelConfig(), myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
 
+		if (theParams.keySet().size() > 1 || theParams.getSort() != null || theParams.keySet().contains(Constants.PARAM_HAS)) {
+			sqlBuilder.setNeedResourceTableRoot(true);
+		}
+
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(myEntityManagerFactory.getDataSource());
 		jdbcTemplate.setFetchSize(myFetchSize);
 		if (theMaximumResults != null) {

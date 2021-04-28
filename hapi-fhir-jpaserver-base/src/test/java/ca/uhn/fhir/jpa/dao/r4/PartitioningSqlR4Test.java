@@ -2631,7 +2631,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids, contains(id.withVersion("2").getValue(), id.withVersion("1").getValue()));
 
-		assertEquals(4, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 
 		// Resolve resource
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
@@ -2645,12 +2645,6 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Fetch history resource
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true);
-		ourLog.info("SQL:{}", searchSql);
-		assertEquals(0, countMatches(searchSql, "PARTITION_ID="), searchSql.replace(" ", "").toUpperCase());
-		assertEquals(0, countMatches(searchSql, "PARTITION_IDIN"), searchSql.replace(" ", "").toUpperCase());
-
-		// Fetch history resource
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(3).getSql(true, true);
 		ourLog.info("SQL:{}", searchSql);
 		assertEquals(0, countMatches(searchSql, "PARTITION_ID="), searchSql.replace(" ", "").toUpperCase());
 		assertEquals(0, countMatches(searchSql, "PARTITION_IDIN"), searchSql.replace(" ", "").toUpperCase());
@@ -2694,9 +2688,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids, contains(id.withVersion("2").getValue(), id.withVersion("1").getValue()));
 
-		assertEquals(4, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 
-		// Resolve resource
+		// Fetch history resource
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("SQL:{}", sql);
 		assertEquals(0, countMatches(sql, "PARTITION_ID="));
@@ -2708,11 +2702,6 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Fetch history resource
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true);
-		ourLog.info("SQL:{}", sql);
-		assertEquals(0, countMatches(sql, "PARTITION_ID="));
-
-		// Fetch history resource
-		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(3).getSql(true, true);
 		ourLog.info("SQL:{}", sql);
 		assertEquals(0, countMatches(sql, "PARTITION_ID="));
 	}
@@ -2764,7 +2753,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids, contains(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue()));
 
-		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 
 		// Count
 		ourLog.info("SQL:{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
@@ -2777,12 +2766,6 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		ourLog.info("SQL:{}", sql);
 		assertEquals(1, countMatches(sql, "PARTITION_ID IN ('1')"), sql);
 
-		// Fetch history resource
-		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, false);
-		sql = sql.replace(" ", "").toUpperCase();
-		ourLog.info("SQL:{}", sql);
-		assertEquals(0, countMatches(sql, "PARTITION_ID="), sql);
-		assertEquals(0, countMatches(sql, "PARTITION_IDIN"), sql);
 	}
 
 	@Test
@@ -2802,20 +2785,15 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids, contains(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue()));
 
-		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 
 		// Count
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("SQL:{}", searchSql);
 		assertEquals(1, countMatches(searchSql, "PARTITION_ID is null"), searchSql);
 
-		// Fetch history
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
-		ourLog.info("SQL:{}", searchSql);
-		assertEquals(1, countMatches(searchSql, "PARTITION_ID is null"), searchSql);
-
 		// Fetch history resource
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true);
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
 		ourLog.info("SQL:{}", searchSql);
 		assertEquals(0, countMatches(searchSql, "PARTITION_ID="), searchSql.replace(" ", "").toUpperCase());
 		assertEquals(0, countMatches(searchSql, "PARTITION_IDIN"), searchSql.replace(" ", "").toUpperCase());
@@ -2885,7 +2863,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids, contains(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue()));
 
-		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 
 		// Count
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false).toUpperCase();
@@ -2893,15 +2871,10 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertEquals(1, countMatches(sql, "COUNT("), sql);
 		assertEquals(1, countMatches(sql, "PARTITION_ID IN ('1')"), sql);
 
-		// Fetch history resources
+		// History
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false).toUpperCase();
 		ourLog.info("SQL:{}", sql);
 		assertEquals(1, countMatches(sql, "PARTITION_ID IN ('1')"), sql);
-
-		// Resolve forced ID
-		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, false).toUpperCase();
-		ourLog.info("SQL:{}", sql);
-		assertEquals(0, countMatches(sql, "PARTITION_ID IN ('1')"), sql);
 	}
 
 
@@ -2923,7 +2896,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertThat(ids, contains(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue()));
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 
 		// Resolve resource
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true).toUpperCase();
@@ -2934,10 +2907,6 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true).toUpperCase();
 		assertEquals(1, countMatches(sql, "PARTITION_ID IS NULL"));
 
-		// Resolve forced IDs
-		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true).toUpperCase();
-		assertEquals(1, countMatches(sql, "FORCEDID0_.RESOURCE_PID IN"), sql);
-		assertEquals(0, countMatches(sql, "PARTITION_ID IS NULL"), sql);
 	}
 
 	@Test

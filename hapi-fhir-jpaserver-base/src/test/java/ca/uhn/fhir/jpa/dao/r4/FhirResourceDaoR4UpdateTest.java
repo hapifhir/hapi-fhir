@@ -1,21 +1,25 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Coding;
@@ -23,14 +27,15 @@ import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -39,6 +44,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -53,7 +59,9 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
 
 public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4UpdateTest.class);
@@ -70,6 +78,30 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	public void before() {
 		myInterceptorRegistry.registerInterceptor(myInterceptor);
 	}
+
+	@Test
+	public void testCreateWithClientAssignedId_CheckDisabledMode_AlreadyExists() {
+		when(mySrd.getHeader(eq(JpaConstants.HEADER_UPSERT_EXISTENCE_CHECK))).thenReturn(JpaConstants.HEADER_UPSERT_EXISTENCE_CHECK_DISABLED);
+
+		runInTransaction(() -> {
+			Patient p = new Patient();
+			p.setId("AAA");
+			p.getMaritalStatus().setText("123");
+			return myPatientDao.update(p, mySrd).getId().toUnqualified();
+		});
+		try {
+			runInTransaction(() -> {
+				Patient p = new Patient();
+				p.setId("AAA");
+				p.getMaritalStatus().setText("123");
+				return myPatientDao.update(p, mySrd).getId().toUnqualified();
+			});
+			fail();
+		} catch (ResourceVersionConflictException e) {
+			assertThat(e.getMessage(), containsString("It can also happen when a request disables the Upsert Existence Check."));
+		}
+	}
+
 
 	@Test
 	public void testCreateAndUpdateWithoutRequest() {
@@ -176,7 +208,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAMILY1");
 		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			myEntityManager.createQuery("UPDATE ResourceIndexedSearchParamString s SET s.myHashIdentity = null").executeUpdate();
 			myEntityManager.createQuery("UPDATE ResourceIndexedSearchParamString s SET s.myHashExact = null").executeUpdate();
 			myEntityManager.createQuery("UPDATE ResourceIndexedSearchParamString s SET s.myHashNormalizedPrefix = null").executeUpdate();
@@ -195,7 +227,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Patient.SP_FAMILY, new StringParam("FAMILY2"));
-		Patient newPatient = (Patient) myPatientDao.search(map).getResources(0,1).get(0);
+		Patient newPatient = (Patient) myPatientDao.search(map).getResources(0, 1).get(0);
 		assertEquals("FAMILY2", newPatient.getName().get(0).getFamily());
 	}
 

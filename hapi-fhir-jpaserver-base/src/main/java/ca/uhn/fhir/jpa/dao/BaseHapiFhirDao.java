@@ -280,6 +280,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				retVal.setPartitionId(theEntity.getPartitionId());
 				theEntity.setForcedId(retVal);
 			}
+		} else if (theEntity.getForcedId() != null) {
+			retVal = theEntity.getForcedId();
 		}
 
 		return retVal;

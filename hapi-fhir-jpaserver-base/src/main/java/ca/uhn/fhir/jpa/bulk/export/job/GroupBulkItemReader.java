@@ -160,7 +160,7 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 		// }
 		Map<String, String> sourceResourceIdToGoldenResourceIdMap = new HashMap<>();
 		goldenResourceToSourcePidMap.forEach((key, value) -> {
-			String goldenResourceId = myIdHelperService.translatePidIdToForcedId(new ResourcePersistentId(key)).orElse(key.toString());
+			String goldenResourceId = myIdHelperService.translatePidIdToForcedIdWithCache(new ResourcePersistentId(key)).orElse(key.toString());
 			Map<Long, Optional<String>> pidsToForcedIds = myIdHelperService.translatePidsToForcedIds(value);
 
 			Set<String> sourceResourceIds = pidsToForcedIds.entrySet().stream()
