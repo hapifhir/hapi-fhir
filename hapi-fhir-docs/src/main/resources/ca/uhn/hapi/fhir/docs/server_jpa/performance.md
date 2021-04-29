@@ -33,3 +33,17 @@ It can also be disabled at a more granular level (or selectively re-enabled if i
   "expression": "Observation.code"
 }
 ```
+
+# Disable Upsert Existence Check
+
+If you are using an *Update with Client Assigned ID* (aka an Upsert), the server will perform a SQL Select in order to determine whether the ID already exists, and then proceed to create a new record if no data matches the existing row.
+
+If you are sure that the row does not already exist, you can add the following header to your request in order to avoid this check.
+
+```http
+X-Upsert-Extistence-Check: disabled
+```
+
+This should improve write performance, so this header can be useful when large amounts of data will be created using client assigned IDs in a controlled fashion.
+
+If this setting is used and a resource already exists with a given client-assigned ID, a database constraint error will prevent any duplicate records from being created, and the operation will fail.
