@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2585
+title: "When automatically creating a placeholder reference that is set to auto-populate identifiers, logic has been improved. If the reference does not contain an
+identifier, but the inline match URL does, the identifier found in the match URL will be added to the target. If both are populated, they will both be added to the target."
