@@ -14,13 +14,13 @@ A complete working example of HAPI CQL can be found in the [JPA Server Starter](
 
 ## Overview
 
-To get up and running with HAPI CQL, either enable it using the `hapi.properties` file in the JPA Server Starter, or follow the instructions below to [enable it in HAPI FHIR directly](#cql-settings).
+To get up and running with HAPI CQL, you can enable it using the `hapi.properties` file in the JPA Server Starter by setting `hapi.fhir.enable_cql` key to `true`. If you are running your own server follow the instructions below to [enable it in HAPI FHIR directly](#cql-settings).
 
-Once you've enabled CQL processing, the next step is to load the appropriate knowledge artifact resources into you server.
+Once you've enabled CQL processing, the next step is to load the appropriate knowledge artifact resources into your server.
 
 ## CQL Settings
 
-There are two Spring beans available that and CQL processing to HAPI. You can enable CQL processing by importing the appropriate version for your server configuration.
+There are two Spring beans available that add CQL processing to HAPI. You can enable CQL processing by importing the appropriate version for your server configuration.
 
 * `ca.uhn.fhir.cql.config.CqlDstu3Config`
 * `ca.uhn.fhir.cql.config.CqlR4Config`
@@ -31,7 +31,7 @@ HAPI provides implementations for some Measure operations for DSTU3 and R4
 
 ### $evaluate-measure
 
-The [$evaluate-measure](http://hl7.org/fhir/measure-operation-evaluate-measure.html) allows the evaluation of a clinical quality measure. This operation is invoked on an instance of a Measure resource:
+The [$evaluate-measure](http://hl7.org/fhir/measure-operation-evaluate-measure.html) operation allows the evaluation of a clinical quality measure. This operation is invoked on an instance of a Measure resource:
 
 `http://base/Measure/measureId/$evaluate-measure?subject=124&periodStart=2014-01&periodend=2014-03`
 
