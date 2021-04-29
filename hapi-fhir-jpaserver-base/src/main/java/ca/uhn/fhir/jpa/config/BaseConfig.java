@@ -164,7 +164,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import java.util.Date;
-import java.util.concurrent.RejectedExecutionHandler;
 
 /*
  * #%L

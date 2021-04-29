@@ -790,7 +790,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		String selectQuery = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
 		ourLog.info(selectQuery);
-		assertEquals(2, StringUtils.countMatches(selectQuery, "JOIN"));
+		assertEquals(1, StringUtils.countMatches(selectQuery, "JOIN"));
 		assertEquals(1, StringUtils.countMatches(selectQuery, "SELECT"));
 	}
 

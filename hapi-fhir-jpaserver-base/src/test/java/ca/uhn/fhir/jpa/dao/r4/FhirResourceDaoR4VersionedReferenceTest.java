@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -183,6 +184,9 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			myEncounterDao.create(encounter);
 		}
 
+		// Verify Patient Version
+		assertEquals("2", myPatientDao.search(SearchParameterMap.newSynchronous("active", new TokenParam("false"))).getResources(0,1).get(0).getIdElement().getVersionIdPart());
+
 		BundleBuilder builder = new BundleBuilder(myFhirCtx);
 
 		Patient patient = new Patient();
@@ -215,6 +219,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		// Read back and verify that reference is now versioned
 		observation = myObservationDao.read(observationId);
 		assertEquals(patientId.getValue(), observation.getSubject().getReference());
+		assertEquals("2", observation.getSubject().getReferenceElement().getVersionIdPart());
 		assertEquals(encounterId.toVersionless().getValue(), observation.getEncounter().getReference());
 
 	}

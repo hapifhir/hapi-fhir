@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 2576
+title: "A new PID-to-forced-ID cache, and a new optional Match-URL-to-PID cache have been added. These
+   can improve write performance when doing large loads."

@@ -616,6 +616,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 
 		List<String> notInListQueries = new ArrayList<>();
 		for (String query : queries) {
+			ourLog.info("Query: {}", query);
 			if (query.contains("RES_ID NOT IN"))
 				notInListQueries.add(query);
 		}

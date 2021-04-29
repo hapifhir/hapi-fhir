@@ -28,6 +28,7 @@ import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.DateTimeType;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.Collections;
@@ -381,6 +382,8 @@ public class ModelConfig {
 		myTreatReferencesAsLogical = theTreatReferencesAsLogical;
 		return this;
 	}
+
+
 
 	/**
 	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted

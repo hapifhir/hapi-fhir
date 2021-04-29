@@ -227,6 +227,8 @@ public class JpaConstants {
 	 * Parameter for the $expand operation
 	 */
 	public static final String OPERATION_EXPAND_PARAM_INCLUDE_HIERARCHY = "includeHierarchy";
+	public static final String HEADER_UPSERT_EXISTENCE_CHECK = "X-Upsert-Extistence-Check";
+	public static final String HEADER_UPSERT_EXISTENCE_CHECK_DISABLED = "disabled";
 
 	/**
 	 * Non-instantiable
