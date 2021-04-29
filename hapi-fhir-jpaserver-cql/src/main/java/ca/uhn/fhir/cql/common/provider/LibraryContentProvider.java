@@ -22,14 +22,15 @@ package ca.uhn.fhir.cql.common.provider;
 
 import org.cqframework.cql.cql2elm.FhirLibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentType;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.function.Function;
 
-public class LibrarySourceProvider<LibraryType, AttachmentType>
-	implements org.cqframework.cql.cql2elm.LibrarySourceProvider {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LibrarySourceProvider.class);
+public class LibraryContentProvider<LibraryType, AttachmentType>
+	implements org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LibraryContentProvider.class);
 
 	private FhirLibrarySourceProvider innerProvider;
 	private LibraryResolutionProvider<LibraryType> provider;
@@ -37,7 +38,7 @@ public class LibrarySourceProvider<LibraryType, AttachmentType>
 	private Function<AttachmentType, String> getContentType;
 	private Function<AttachmentType, byte[]> getContent;
 
-	public LibrarySourceProvider(LibraryResolutionProvider<LibraryType> provider,
+	public LibraryContentProvider(LibraryResolutionProvider<LibraryType> provider,
 										  Function<LibraryType, Iterable<AttachmentType>> getAttachments,
 										  Function<AttachmentType, String> getContentType, Function<AttachmentType, byte[]> getContent) {
 
@@ -50,7 +51,13 @@ public class LibrarySourceProvider<LibraryType, AttachmentType>
 	}
 
 	@Override
-	public InputStream getLibrarySource(VersionedIdentifier versionedIdentifier) {
+	public InputStream getLibraryContent(VersionedIdentifier versionedIdentifier, LibraryContentType libraryContentType){
+
+		// TODO: Support loading ELM
+		if (libraryContentType != LibraryContentType.CQL) {
+			return null;
+		}
+
 		try {
 			LibraryType lib = this.provider.resolveLibraryByName(versionedIdentifier.getId(),
 				versionedIdentifier.getVersion());

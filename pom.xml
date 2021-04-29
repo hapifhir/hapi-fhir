@@ -743,7 +743,7 @@
 
 	<properties>
 
-		<fhir_core_version>5.3.0</fhir_core_version>
+		<fhir_core_version>5.3.10</fhir_core_version>
 		<ucum_version>1.0.3</ucum_version>
 
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -829,8 +829,8 @@
 		<elastic_apm_version>1.13.0</elastic_apm_version>
 		<!-- CQL Support -->
 		<cql-engine.version>1.5.1</cql-engine.version>
-		<cql-evaluator.version>1.1.0</cql-evaluator.version>
-		<cqframework.version>1.5.1</cqframework.version>
+		<cql-evaluator.version>1.2.0</cql-evaluator.version>
+		<cqframework.version>1.5.2</cqframework.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>

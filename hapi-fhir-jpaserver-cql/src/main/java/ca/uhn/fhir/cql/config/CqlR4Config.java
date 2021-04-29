@@ -27,12 +27,20 @@ import ca.uhn.fhir.cql.common.provider.EvaluationProviderFactory;
 import ca.uhn.fhir.cql.common.provider.LibraryResolutionProvider;
 import ca.uhn.fhir.cql.r4.evaluation.ProviderFactory;
 import ca.uhn.fhir.cql.r4.helper.LibraryHelper;
+import ca.uhn.fhir.cql.r4.listener.ElmCacheResourceChangeListener;
 import ca.uhn.fhir.cql.r4.provider.JpaTerminologyProvider;
 import ca.uhn.fhir.cql.r4.provider.LibraryResolutionProviderImpl;
 import ca.uhn.fhir.cql.r4.provider.MeasureOperationsProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
+
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+
+import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.model.Model;
+import org.cqframework.cql.elm.execution.Library;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
@@ -55,19 +63,21 @@ public class CqlR4Config extends BaseCqlConfig {
 
 	@Lazy
 	@Bean
-	TerminologyProvider terminologyProvider(ITermReadSvcR4 theITermReadSvc, DaoRegistry theDaoRegistry, IValidationSupport theValidationSupport) {
+	TerminologyProvider terminologyProvider(ITermReadSvcR4 theITermReadSvc, DaoRegistry theDaoRegistry,
+			IValidationSupport theValidationSupport) {
 		return new JpaTerminologyProvider(theITermReadSvc, theDaoRegistry, theValidationSupport);
 	}
 
 	@Lazy
 	@Bean
-	EvaluationProviderFactory evaluationProviderFactory(FhirContext theFhirContext, DaoRegistry theDaoRegistry, TerminologyProvider theLocalSystemTerminologyProvider, ModelResolver modelResolver) {
+	EvaluationProviderFactory evaluationProviderFactory(FhirContext theFhirContext, DaoRegistry theDaoRegistry,
+			TerminologyProvider theLocalSystemTerminologyProvider, ModelResolver modelResolver) {
 		return new ProviderFactory(theFhirContext, theDaoRegistry, theLocalSystemTerminologyProvider, modelResolver);
 	}
 
 	@Lazy
 	@Bean
-	LibraryResolutionProvider libraryResolutionProvider() {
+	LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> libraryResolutionProvider() {
 		return new LibraryResolutionProviderImpl();
 	}
 
@@ -77,13 +87,30 @@ public class CqlR4Config extends BaseCqlConfig {
 		return new MeasureOperationsProvider();
 	}
 
+	@Lazy
 	@Bean
 	public ModelResolver fhirModelResolver() {
 		return new CachingModelResolverDecorator(new R4FhirModelResolver());
 	}
 
+	@Lazy
 	@Bean
-	public LibraryHelper libraryHelper(Map<VersionedIdentifier, Model> globalModelCache) {
-		return new LibraryHelper(globalModelCache);
+	public LibraryHelper libraryHelper(Map<VersionedIdentifier, Model> globalModelCache,
+			Map<org.cqframework.cql.elm.execution.VersionedIdentifier, Library> globalLibraryCache,
+			CqlTranslatorOptions cqlTranslatorOptions) {
+		return new LibraryHelper(globalModelCache, globalLibraryCache, cqlTranslatorOptions);
+	}
+
+	@Lazy
+	@Bean
+	public CqlTranslatorOptions cqlTranslatorOptions() {
+		return CqlTranslatorOptions.defaultOptions();
+	}
+
+	@Bean
+	public ElmCacheResourceChangeListener elmCacheResourceChangeListener(IResourceChangeListenerRegistry resourceChangeListenerRegistry, IFhirResourceDao<org.hl7.fhir.r4.model.Library> libraryDao,  Map<org.cqframework.cql.elm.execution.VersionedIdentifier, Library> globalLibraryCache) {
+		ElmCacheResourceChangeListener listener = new ElmCacheResourceChangeListener(libraryDao, globalLibraryCache);
+		resourceChangeListenerRegistry.registerResourceResourceChangeListener("Library", new SearchParameterMap(), listener, 1000);
+		return listener;
 	}
 }

@@ -26,7 +26,6 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 
 	@Test
 	public void testTranslateWithConceptMapUrlAndVersion() {
-		
 		//- conceptMap1 v1
 		ConceptMap conceptMap1 = new ConceptMap();
 		conceptMap1.setUrl(CM_URL).setVersion("v1").setSource(new UriType(VS_URL)).setTarget(new UriType(VS_URL_2));
@@ -63,7 +62,6 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		
 		ourLog.info("ConceptMap: 2 \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap2));
 
-		
 		Parameters inParams = new Parameters();
 		inParams.addParameter().setName("url").setValue(new UriType(CM_URL));
 		inParams.addParameter().setName("conceptMapVersion").setValue(new StringType("v2"));
@@ -73,7 +71,6 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		
 		Parameters respParams = myClient
 			.operation()
 			.onType(ConceptMap.class)
@@ -82,8 +79,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 			.execute();
 
 		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
-		
-		
+
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
@@ -92,7 +88,8 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(2, param.getPart().size());
+
+		assertEquals(3, param.getPart().size());
 		
 		ParametersParameterComponent part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
@@ -104,7 +101,9 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		
 		part = getPartByName(param, "source");
 		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
-	
+
+		part = getPartByName(param, "equivalence");
+		assertEquals("relatedto", part.getValue().toString());
 	}
 	
 	@Test
