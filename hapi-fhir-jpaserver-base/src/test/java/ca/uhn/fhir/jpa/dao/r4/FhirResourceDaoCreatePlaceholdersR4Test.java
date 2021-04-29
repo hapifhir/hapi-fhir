@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Patient;
@@ -24,9 +25,11 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -239,6 +242,74 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		Patient patient = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(0, patient.getIdentifier().size());
+	}
+
+
+	// Case 4
+	@Test
+	public void testCreatePlaceholderWithMisMatchedIdentifiers_BothIdentifiersCopied() {
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+
+		/*
+		 * Create an Observation that references a Patient
+		 * Reference is populated with inline match URL and includes identifier which differs from the inlined identifier
+		 */
+		Observation obsToCreate = new Observation();
+		obsToCreate.setStatus(ObservationStatus.FINAL);
+		obsToCreate.getSubject().setReference("Patient?identifier=http://foo|123");
+		obsToCreate.getSubject().getIdentifier().setSystem("http://bar").setValue("321");
+		IIdType obsId = myObservationDao.create(obsToCreate, mySrd).getId();
+
+		// Read the Observation
+		Observation createdObs = myObservationDao.read(obsId);
+
+		//Read the Placeholder Patient
+		Patient placeholderPat = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
+		ourLog.info("\nObservation created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+
+		//Ensure the Obs has the right placeholder ID.
+		IIdType placeholderPatId = placeholderPat.getIdElement();
+		assertEquals(createdObs.getSubject().getReference(), placeholderPatId.toUnqualifiedVersionless().getValueAsString());
+
+		/*
+		 * Placeholder Identifiers should both be populated since they were both provided, and did not match
+		 */
+		ourLog.info("\nPlaceholder Patient created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
+		assertEquals(2, placeholderPat.getIdentifier().size());
+		List<Identifier> identifiers = placeholderPat.getIdentifier();
+
+		//inline match-url identifier
+		assertThat(identifiers.get(0).getSystem(), is(equalTo("http://foo")));
+		assertThat(identifiers.get(0).getValue(), is(equalTo("123")));
+
+		//subject identifier
+		assertThat(identifiers.get(1).getSystem(), is(equalTo("http://foo")));
+		assertThat(identifiers.get(1).getValue(), is(equalTo("123")));
+
+
+		// Conditionally update a Patient with the same identifier
+		Patient patToConditionalUpdate = new Patient();
+		patToConditionalUpdate.addIdentifier().setSystem("http://foo").setValue("123");
+		patToConditionalUpdate.addName().setFamily("Simpson");
+		IIdType conditionalUpdatePatId = myPatientDao.update(patToConditionalUpdate, "Patient?identifier=http://foo|123", mySrd).getId();
+
+		// Read the conditionally updated Patient
+		Patient conditionalUpdatePat = myPatientDao.read(conditionalUpdatePatId);
+		ourLog.info("\nConditionally updated Patient:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conditionalUpdatePat));
+		assertEquals(1, conditionalUpdatePat.getIdentifier().size());
+
+		/*
+		 * Observation should reference conditionally updated Patient
+		 * ID of placeholder Patient should match ID of conditionally updated Patient
+		 */
+		createdObs = myObservationDao.read(obsId);
+		ourLog.info("\nObservation read after Patient update:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+		assertEquals(createdObs.getSubject().getReference(), conditionalUpdatePatId.toUnqualifiedVersionless().getValueAsString());
+		assertEquals(placeholderPatId.toUnqualifiedVersionless().getValueAsString(), conditionalUpdatePatId.toUnqualifiedVersionless().getValueAsString());
+
+
 	}
 
 	@Test
