@@ -33,17 +33,20 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
+import ca.uhn.fhir.mdm.util.CanonicalIdentifier;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.TerserUtil;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -122,11 +125,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 			@SuppressWarnings("unchecked")
 			T newResource = (T) missingResourceDef.newInstance();
 
-			if (newResource instanceof IBaseHasExtensions) {
-				IBaseExtension<?, ?> extension = ((IBaseHasExtensions) newResource).addExtension();
-				extension.setUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER);
-				extension.setValue(myContext.getPrimitiveBoolean(true));
-			}
+			tryToAddPlaceholderExtensionToResource(newResource);
 
 			IFhirResourceDao<T> placeholderResourceDao = myDaoRegistry.getResourceDao(theType);
 			ourLog.debug("Automatically creating empty placeholder resource: {}", newResource.getIdElement().getValue());
@@ -146,24 +145,96 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		return Optional.ofNullable(valueOf);
 	}
 
+	private <T extends IBaseResource> void tryToAddPlaceholderExtensionToResource(T newResource) {
+		if (newResource instanceof IBaseHasExtensions) {
+			IBaseExtension<?, ?> extension = ((IBaseHasExtensions) newResource).addExtension();
+			extension.setUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER);
+			extension.setValue(myContext.getPrimitiveBoolean(true));
+		}
+	}
+
 	private <T extends IBaseResource> void tryToCopyIdentifierFromReferenceToTargetResource(IBaseReference theSourceReference, RuntimeResourceDefinition theTargetResourceDef, T theTargetResource) {
-		boolean referenceHasIdentifier = theSourceReference.hasIdentifier();
-		if (referenceHasIdentifier) {
-			BaseRuntimeChildDefinition targetIdentifier = theTargetResourceDef.getChildByName("identifier");
-			if (targetIdentifier != null) {
-				BaseRuntimeElementDefinition<?> identifierElement = targetIdentifier.getChildByName("identifier");
-				String identifierElementName = identifierElement.getName();
-				boolean targetHasIdentifierElement = identifierElementName.equals("Identifier");
-				if (targetHasIdentifierElement) {
+//		boolean referenceHasIdentifier = theSourceReference.hasIdentifier();
+		CanonicalIdentifier referenceMatchUrlIdentifier = extractIdentifierFromUrl(theSourceReference.getReferenceElement().getValue());
+		CanonicalIdentifier referenceIdentifier = extractIdentifierReference(theSourceReference);
 
-					BaseRuntimeElementCompositeDefinition<?> referenceElement = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(theSourceReference.getClass());
-					BaseRuntimeChildDefinition referenceIdentifierChild = referenceElement.getChildByName("identifier");
-					Optional<IBase> identifierOpt = referenceIdentifierChild.getAccessor().getFirstValueOrNull(theSourceReference);
-					identifierOpt.ifPresent(theIBase -> targetIdentifier.getMutator().addValue(theTargetResource, theIBase));
-
-				}
+		if (referenceIdentifier == null && referenceMatchUrlIdentifier != null) {
+			addMatchUrlIdentifierToTargetResource(theTargetResourceDef, theTargetResource, referenceMatchUrlIdentifier);
+		} else if (referenceIdentifier!= null && referenceMatchUrlIdentifier == null) {
+			addSubjectIdentifierToTargetResource(theSourceReference, theTargetResourceDef, theTargetResource);
+		} else if (referenceIdentifier != null && referenceMatchUrlIdentifier != null) {
+			if (referenceIdentifier.equals(referenceMatchUrlIdentifier)) {
+				addSubjectIdentifierToTargetResource(theSourceReference, theTargetResourceDef, theTargetResource);
+			} else {
+				addSubjectIdentifierToTargetResource(theSourceReference, theTargetResourceDef, theTargetResource);
+				addMatchUrlIdentifierToTargetResource(theTargetResourceDef, theTargetResource, referenceMatchUrlIdentifier);
 			}
 		}
+	}
+
+	private <T extends IBaseResource> void addSubjectIdentifierToTargetResource(IBaseReference theSourceReference, RuntimeResourceDefinition theTargetResourceDef, T theTargetResource) {
+		BaseRuntimeChildDefinition targetIdentifier = theTargetResourceDef.getChildByName("identifier");
+		if (targetIdentifier != null) {
+			BaseRuntimeElementDefinition<?> identifierElement = targetIdentifier.getChildByName("identifier");
+			String identifierElementName = identifierElement.getName();
+			boolean targetHasIdentifierElement = identifierElementName.equals("Identifier");
+			if (targetHasIdentifierElement) {
+
+				BaseRuntimeElementCompositeDefinition<?> referenceElement = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(theSourceReference.getClass());
+				BaseRuntimeChildDefinition referenceIdentifierChild = referenceElement.getChildByName("identifier");
+				Optional<IBase> identifierOpt = referenceIdentifierChild.getAccessor().getFirstValueOrNull(theSourceReference);
+				identifierOpt.ifPresent(theIBase -> targetIdentifier.getMutator().addValue(theTargetResource, theIBase));
+			}
+		}
+	}
+
+	private <T extends IBaseResource> void addMatchUrlIdentifierToTargetResource(RuntimeResourceDefinition theTargetResourceDef, T theTargetResource, CanonicalIdentifier referenceMatchUrlIdentifier) {
+		BaseRuntimeChildDefinition identifierDefinition = theTargetResourceDef.getChildByName("identifier");
+		IBase identifierIBase = identifierDefinition.getChildByName("identifier").newInstance(identifierDefinition.getInstanceConstructorArguments());
+		IBase systemIBase = TerserUtil.newElement(myContext, "uri", referenceMatchUrlIdentifier.getSystemElement().getValueAsString());
+		IBase valueIBase = TerserUtil.newElement(myContext, "string", referenceMatchUrlIdentifier.getValueElement().getValueAsString());
+		//Set system in the IBase Identifier
+
+		BaseRuntimeElementDefinition<?> elementDefinition = myContext.getElementDefinition(identifierIBase.getClass());
+
+		BaseRuntimeChildDefinition systemDefinition = elementDefinition.getChildByName("system");
+		systemDefinition.getMutator().setValue(identifierIBase, systemIBase);
+
+		BaseRuntimeChildDefinition valueDefinition = elementDefinition.getChildByName("value");
+		valueDefinition.getMutator().setValue(identifierIBase, valueIBase);
+
+		//Set Value in the IBase identifier
+		identifierDefinition.getMutator().addValue(theTargetResource, identifierIBase);
+	}
+
+	private CanonicalIdentifier extractIdentifierReference(IBaseReference theSourceReference) {
+		Optional<IBase> identifier = myContext.newFhirPath().evaluateFirst(theSourceReference, "identifier", IBase.class);
+		if (!identifier.isPresent()) {
+			return null;
+		} else {
+			CanonicalIdentifier canonicalIdentifier = new CanonicalIdentifier();
+			Optional<IPrimitiveType> system = myContext.newFhirPath().evaluateFirst(identifier.get(), "system", IPrimitiveType.class);
+			Optional<IPrimitiveType> value = myContext.newFhirPath().evaluateFirst(identifier.get(), "value", IPrimitiveType.class);
+
+			system.ifPresent(theIPrimitiveType -> canonicalIdentifier.setSystem(theIPrimitiveType.getValueAsString()));
+			value.ifPresent(theIPrimitiveType -> canonicalIdentifier.setValue(theIPrimitiveType.getValueAsString()));
+			return canonicalIdentifier;
+		}
+	}
+
+	private CanonicalIdentifier extractIdentifierFromUrl(String theValue) {
+		if (!theValue.contains("identifier=")) {
+			return null;
+		}
+		CanonicalIdentifier identifier = new CanonicalIdentifier();
+		String identifierString = theValue.substring(theValue.indexOf("=") + 1);
+		String[] split = identifierString.split("\\|");
+		if (split.length != 2) {
+			throw new IllegalArgumentException("Can't create a placeholder reference with identifier " + theValue + ". It is not a valid identifier");
+		}
+		identifier.setSystem(split[0]);
+		identifier.setValue(split[1]);
+		return identifier;
 	}
 
 	@Override

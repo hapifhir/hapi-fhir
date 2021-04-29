@@ -423,12 +423,12 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		List<Identifier> identifiers = placeholderPat.getIdentifier();
 
 		//inline match-url identifier
-		assertThat(identifiers.get(0).getSystem(), is(equalTo("http://foo")));
-		assertThat(identifiers.get(0).getValue(), is(equalTo("123")));
-
-		//subject identifier
 		assertThat(identifiers.get(1).getSystem(), is(equalTo("http://foo")));
 		assertThat(identifiers.get(1).getValue(), is(equalTo("123")));
+
+		//subject identifier
+		assertThat(identifiers.get(0).getSystem(), is(equalTo("http://bar")));
+		assertThat(identifiers.get(0).getValue(), is(equalTo("321")));
 
 
 		// Conditionally update a Patient with the same identifier
