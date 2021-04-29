@@ -49,7 +49,7 @@ class AddressValidatingInterceptorTest {
 
 	@Test
 	@Disabled
-	public void testReal() {
+	public void testValidationCallAgainstLiveLoquateEndpoint() {
 		Properties config = new Properties();
 		config.setProperty(PROPERTY_VALIDATOR_CLASS, LoquateAddressValidator.class.getCanonicalName());
 		config.setProperty(PROPERTY_SERVICE_KEY, "KR26-JA29-HB16-PA11"); // Replace with a real key when testing
