@@ -1660,7 +1660,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testPagingOverEverythingSetWithNoPagingProvider() {
+	public void testEverythingWithNoPagingProvider() {
 		ourRestServer.setPagingProvider(null);
 
 		Patient p = new Patient();
@@ -1689,20 +1689,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		assertEquals(10, response.getEntry().size());
 		assertEquals(null, response.getTotalElement().getValue());
-		assertThat(response.getLink("next").getUrl(), not(emptyString()));
-
-		response = ourClient.fetchResourceFromUrl(ca.uhn.fhir.model.dstu2.resource.Bundle.class, response.getLink("next").getUrl());
-
-		assertEquals(10, response.getEntry().size());
-		assertEquals(null, response.getTotalElement().getValue());
-		assertThat(response.getLink("next").getUrl(), not(emptyString()));
-
-		response = ourClient.fetchResourceFromUrl(ca.uhn.fhir.model.dstu2.resource.Bundle.class, response.getLink("next").getUrl());
-
-		assertEquals(1, response.getEntry().size());
-		assertEquals(21, response.getTotalElement().getValue().intValue());
 		assertEquals(null, response.getLink("next"));
-
 	}
 
 	@Test

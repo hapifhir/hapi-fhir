@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
@@ -27,7 +28,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
-import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -234,7 +234,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		BundleLinks links = new BundleLinks(theRequest.getFhirServerBase(), theIncludes, RestfulServerUtils.prettyPrintResponse(theServer, theRequest), theBundleType);
 		links.setSelf(theLinkSelf);
 
-		if (requestOffset != null || !theServer.canStoreSearchResults()) {
+		if (requestOffset != null || (!theServer.canStoreSearchResults() && !isEverythingOperation(theRequest))) {
 			int offset = requestOffset != null ? requestOffset : 0;
 			// Paging without caching
 			// We're doing requestOffset pages
@@ -282,6 +282,12 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 		return bundleFactory.getResourceBundle();
 
+	}
+
+	private boolean isEverythingOperation(RequestDetails theRequest) {
+		return (theRequest.getRestOperationType() == RestOperationTypeEnum.EXTENDED_OPERATION_TYPE
+			|| theRequest.getRestOperationType() == RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE)
+			&& theRequest.getOperation() != null && theRequest.getOperation().equals("$everything");
 	}
 
 	public IBaseResource doInvokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) {
