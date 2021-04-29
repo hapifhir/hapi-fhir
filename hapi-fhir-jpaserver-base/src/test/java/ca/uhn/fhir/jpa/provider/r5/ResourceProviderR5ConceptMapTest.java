@@ -100,7 +100,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 			System.out.println("DEBUG parm: " + parm.toString());
 		        ourLog.info("\nDEBUG parm: {}\n", parm.toString());
 		}
-		assertEquals(2, param.getPart().size());
+		assertEquals(3, param.getPart().size());
 		
 		ParametersParameterComponent part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
@@ -112,7 +112,9 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		
 		part = getPartByName(param, "source");
 		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
-	
+
+		part = getPartByName(param, "equivalence");
+		assertEquals("relatedto", part.getValue().toString());
 	}
 	
 	@Test
