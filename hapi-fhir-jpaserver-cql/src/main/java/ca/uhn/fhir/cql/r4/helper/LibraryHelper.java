@@ -141,19 +141,19 @@ public class LibraryHelper {
 					String.format("Could not load library source for libraries referenced in %s.", measure.getId()));
 		}
 
-		// VersionedIdentifier primaryLibraryId = libraries.get(0).getIdentifier();
-		// org.hl7.fhir.r4.model.Library primaryLibrary =
-		// libraryResourceProvider.resolveLibraryByName(primaryLibraryId.getId(),
-		// primaryLibraryId.getVersion());
 		for (RelatedArtifact artifact : primaryLibrary.getRelatedArtifact()) {
 			if (artifact.hasType() && artifact.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON)
 					&& artifact.hasResource()) {
 				org.hl7.fhir.r4.model.Library library = null;
 				library = resolveLibraryReference(libraryResourceProvider, artifact.getResource());
 
-				if (library != null && isLogicLibrary(library)) {
-					libraries.add(libraryLoader
-							.load(new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion())));
+				if (library != null) {
+					if (isLogicLibrary(library)) {
+						libraries.add(libraryLoader
+								.load(new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion())));
+					} else {
+						ourLog.warn("Library {} not included as part of evaluation context. Only Libraries with the 'logic-library' type are included.", library.getId());
+					}
 				}
 			}
 		}
@@ -197,27 +197,10 @@ public class LibraryHelper {
 
 	public Library resolveLibraryById(String libraryId, org.opencds.cqf.cql.engine.execution.LibraryLoader libraryLoader,
 			LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> libraryResourceProvider) {
-		// Library library = null;
 
 		org.hl7.fhir.r4.model.Library fhirLibrary = libraryResourceProvider.resolveLibraryById(libraryId);
 		return libraryLoader
 				.load(new VersionedIdentifier().withId(fhirLibrary.getName()).withVersion(fhirLibrary.getVersion()));
-
-		// for (Library l : libraryLoader.getLibraries()) {
-		// VersionedIdentifier vid = l.getIdentifier();
-		// if (vid.getId().equals(fhirLibrary.getName()) &&
-		// LibraryResourceHelper.compareVersions(fhirLibrary.getVersion(),
-		// vid.getVersion()) == 0) {
-		// library = l;
-		// break;
-		// }
-		// }
-
-		// if (library == null) {
-
-		// }
-
-		// return library;
 	}
 
 	public Library resolvePrimaryLibrary(Measure measure,

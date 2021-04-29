@@ -139,4 +139,9 @@ public class CqlMeasureEvaluationDstu3Test extends BaseCqlDstu3Test {
 	public void test_EXM124_FHIR3_72000() throws IOException {
 		this.testMeasureBundle("dstu3/connectathon/EXM124-FHIR3-7.2.000-bundle.json");
 	}
+
+	@Test
+	public void test_EXM104_FHIR3_81000() throws IOException {
+		this.testMeasureBundle("dstu3/connectathon/EXM104-FHIR3-8.1.000-bundle.json");
+	}
 }

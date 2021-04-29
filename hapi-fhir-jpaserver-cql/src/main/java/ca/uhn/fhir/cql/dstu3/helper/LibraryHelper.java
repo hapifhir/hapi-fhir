@@ -120,11 +120,13 @@ public class LibraryHelper {
 			if (artifact.hasType() && artifact.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON) && artifact.hasResource() && artifact.getResource().hasReference()) {
 				if (artifact.getResource().getReferenceElement().getResourceType().equals("Library")) {
 					org.hl7.fhir.dstu3.model.Library library = libraryResourceProvider.resolveLibraryById(artifact.getResource().getReferenceElement().getIdPart());
-
-					if (library != null && isLogicLibrary(library)) {
-						libraries.add(
-							libraryLoader.load(new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion()))
-						);
+					if (library != null) {
+						if (isLogicLibrary(library)) {
+							libraries.add(libraryLoader
+									.load(new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion())));
+						} else {
+							ourLog.warn("Library {} not included as part of evaluation context. Only Libraries with the 'logic-library' type are included.", library.getId());
+						}
 					}
 				}
 			}

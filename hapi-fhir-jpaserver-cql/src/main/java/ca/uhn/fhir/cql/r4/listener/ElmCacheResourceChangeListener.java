@@ -14,6 +14,8 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 
 public class ElmCacheResourceChangeListener implements IResourceChangeListener {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ElmCacheResourceChangeListener.class);
+
 	private IFhirResourceDao<org.hl7.fhir.r4.model.Library> libraryDao;
 	private Map<VersionedIdentifier, Library> globalLibraryCache;
 
@@ -57,9 +59,13 @@ public class ElmCacheResourceChangeListener implements IResourceChangeListener {
 
 			this.globalLibraryCache.remove(new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion()));
 		}
+		// This happens when a Library is deleted entirely so it's impossible to look up name and version.
 		catch (Exception e) {
-			// TODO: This needs to be smarter...
-			// Couldn't locate the library since it was deleted. Clear the cache entirely.
+			// TODO: This needs to be smarter... the issue is that ELM is cached with library name and version as the key since
+			// that's the access path the CQL engine uses, but change notifications occur with the resource Id, which is not
+			// necessarily tied to the resource name. In any event, if a unknown resource is deleted, clear all libraries as a workaround.
+			// One option is to maintain a cache with multiple indices.
+			ourLog.debug("Failed to locate resource {} to look up name and version. Clearing all libraries from cache.", theId.getValueAsString());
 			this.globalLibraryCache.clear();
 		}
 	}
