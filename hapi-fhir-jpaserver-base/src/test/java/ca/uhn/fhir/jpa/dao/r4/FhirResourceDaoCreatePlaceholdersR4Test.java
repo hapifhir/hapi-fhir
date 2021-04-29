@@ -244,8 +244,150 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertEquals(0, patient.getIdentifier().size());
 	}
 
+	//	Case 1:
+	//
+	//	IF the inline match URL does include an identifier
+	//	AND the reference does not include an identifier
+	//	AND a placeholder reference target is to be created
+   //	DO use the value of the inline match URL's identifier to populate an identifier in the placeholder
 
-	// Case 4
+	@Test
+	public void testCreatePlaceholderWithMatchUrl_NoReferenceDefined() {
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+
+		/*
+		 * Create an Observation that references a Patient
+		 * Reference is populated with inline match URL and includes identifier which differs from the inlined identifier
+		 */
+		Observation obsToCreate = new Observation();
+		obsToCreate.setStatus(ObservationStatus.FINAL);
+		obsToCreate.getSubject().setReference("Patient?identifier=http://foo|123");
+		IIdType obsId = myObservationDao.create(obsToCreate, mySrd).getId();
+
+		// Read the Observation
+		Observation createdObs = myObservationDao.read(obsId);
+
+		//Read the Placeholder Patient
+		Patient placeholderPat = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
+		ourLog.info("\nObservation created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+
+		//Ensure the Obs has the right placeholder ID.
+		IIdType placeholderPatId = placeholderPat.getIdElement();
+		assertEquals(createdObs.getSubject().getReference(), placeholderPatId.toUnqualifiedVersionless().getValueAsString());
+
+		/*
+		 * Should have a single identifier populated.
+		 */
+		ourLog.info("\nPlaceholder Patient created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
+		assertEquals(1, placeholderPat.getIdentifier().size());
+		List<Identifier> identifiers = placeholderPat.getIdentifier();
+		Identifier identifier = identifiers.get(0);
+		assertThat(identifier.getSystem(), is(equalTo("http://foo")));
+		assertThat(identifier.getValue(), is(equalTo("123")));
+	}
+
+
+	//	Case 2:
+	//
+	//	IF the inline match URL does not include an identifier
+	//	AND the reference does include an identifier
+	//	AND a placeholder reference target is to be created
+	//	DO use the value of the reference's identifier to populate an identifier in the placeholder
+	@Test
+	public void testCreatePlaceholderReferenceWhereInlineMatchUrlDoesNotContainIdentifierButSubjectReferenceDoes() {
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+
+		/*
+		 * Create an Observation that references a Patient
+		 * Reference is populated with inline match URL and includes identifier which differs from the inlined identifier
+		 */
+		Observation obsToCreate = new Observation();
+		obsToCreate.setStatus(ObservationStatus.FINAL);
+		obsToCreate.getSubject().setReference("Patient?name=Johhnybravo");
+		obsToCreate.getSubject().getIdentifier().setSystem("http://foo").setValue("123");
+		IIdType obsId = myObservationDao.create(obsToCreate, mySrd).getId();
+
+		// Read the Observation
+		Observation createdObs = myObservationDao.read(obsId);
+
+		//Read the Placeholder Patient
+		Patient placeholderPat = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
+		ourLog.info("\nObservation created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+
+		//Ensure the Obs has the right placeholder ID.
+		IIdType placeholderPatId = placeholderPat.getIdElement();
+		assertEquals(createdObs.getSubject().getReference(), placeholderPatId.toUnqualifiedVersionless().getValueAsString());
+
+		/*
+		 * Should have a single identifier populated.
+		 */
+		ourLog.info("\nPlaceholder Patient created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
+		assertEquals(1, placeholderPat.getIdentifier().size());
+		List<Identifier> identifiers = placeholderPat.getIdentifier();
+		Identifier identifier = identifiers.get(0);
+		assertThat(identifier.getSystem(), is(equalTo("http://foo")));
+		assertThat(identifier.getValue(), is(equalTo("123")));
+	}
+
+
+	//	Case 3:
+	//
+	//	IF the inline match URL does include an identifier
+	//	AND the reference does include an identifier
+	//	AND the identifiers are the same
+	//	AND a placeholder reference target is to be created
+	//	DO use only the value of the reference's identifier to populate an identifier in the placeholder
+	@Test
+	public void testCreatePlaceholderWithMatchingInlineAndSubjectReferenceIdentifiersCreatesOnlyOne() {
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+
+		/*
+		 * Create an Observation that references a Patient
+		 * Reference is populated with inline match URL and includes identifier which differs from the inlined identifier
+		 */
+		Observation obsToCreate = new Observation();
+		obsToCreate.setStatus(ObservationStatus.FINAL);
+		obsToCreate.getSubject().setReference("Patient?identifier=http://bar|321");
+		obsToCreate.getSubject().getIdentifier().setSystem("http://bar").setValue("321");
+		IIdType obsId = myObservationDao.create(obsToCreate, mySrd).getId();
+
+		// Read the Observation
+		Observation createdObs = myObservationDao.read(obsId);
+
+		//Read the Placeholder Patient
+		Patient placeholderPat = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
+		ourLog.info("\nObservation created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+
+		//Ensure the Obs has the right placeholder ID.
+		IIdType placeholderPatId = placeholderPat.getIdElement();
+		assertEquals(createdObs.getSubject().getReference(), placeholderPatId.toUnqualifiedVersionless().getValueAsString());
+
+		/*
+		 * Should have a single identifier populated.
+		 */
+		ourLog.info("\nPlaceholder Patient created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
+		assertEquals(1, placeholderPat.getIdentifier().size());
+		List<Identifier> identifiers = placeholderPat.getIdentifier();
+		Identifier identifier = identifiers.get(0);
+		assertThat(identifier.getSystem(), is(equalTo("http://bar")));
+		assertThat(identifier.getValue(), is(equalTo("321")));
+
+
+	}
+
+	//	Case 4:
+	//
+	//	IF the inline match URL does include an identifier
+	//	AND the reference does include an identifier
+	//	AND the identifiers are different
+	//	AND a placeholder reference target is to be created
+	//	DO use both the value of the inline match URL's identifier and the value of the reference's identifier to populate two identifiers in the placeholder
 	@Test
 	public void testCreatePlaceholderWithMisMatchedIdentifiers_BothIdentifiersCopied() {
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
