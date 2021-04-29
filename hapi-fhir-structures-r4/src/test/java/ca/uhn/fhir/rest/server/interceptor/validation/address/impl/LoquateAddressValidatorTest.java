@@ -93,6 +93,7 @@ class LoquateAddressValidatorTest {
 		"      {\n" +
 		"        \"AQI\": \"A\",\n" +
 		"        \"AVC\": \"V44-I44-P6-100\",\n" +
+		"        \"GeoAccuracy\": \"Z1\",\n" +
 		"        \"Address\": \"My Valid Address\",\n" +
 		"        \"Latitude\": \"-32.94217742803439\",\n" +
 		"        \"Longitude\": \"-60.640132034941836\"\n" +
@@ -240,6 +241,10 @@ class LoquateAddressValidatorTest {
 		IBaseExtension verificationCode = ExtensionUtil.getExtensionByUrl(address, IAddressValidator.ADDRESS_VERIFICATION_CODE_EXTENSION_URL);
 		assertNotNull(verificationCode);
 		assertEquals("V44-I44-P6-100", verificationCode.getValue().toString());
+
+		IBaseExtension geoAccuracy = ExtensionUtil.getExtensionByUrl(address, IAddressValidator.ADDRESS_GEO_ACCURACY_EXTENSION_URL);
+		assertNotNull(geoAccuracy);
+		assertEquals("Z1", geoAccuracy.getValue().toString());
 	}
 
 	@Test

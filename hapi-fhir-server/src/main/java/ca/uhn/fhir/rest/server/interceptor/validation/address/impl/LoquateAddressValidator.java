@@ -43,6 +43,7 @@ import org.springframework.http.ResponseEntity;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -63,6 +64,7 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 	public static final String PROPERTY_GEOCODE = "service.geocode";
 	public static final String LOQUATE_AQI = "AQI";
 	public static final String LOQUATE_AVC = "AVC";
+	public static final String LOQUATE_GEO_ACCURACY = "GeoAccuracy";
 
 	protected static final String[] DUPLICATE_FIELDS_IN_ADDRESS_LINES = {"Locality", "AdministrativeArea", "PostalCode"};
 	protected static final String DEFAULT_DATA_CLEANSE_ENDPOINT = "https://api.addressy.com/Cleansing/International/Batch/v1.00/json4.ws";
@@ -139,8 +141,10 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 		helper.setState(getString(match, "AdministrativeArea"));
 		helper.setPostalCode(getString(match, "PostalCode"));
 		helper.setCountry(getString(match, "CountryName"));
+
 		addExtension(match, LOQUATE_AQI, ADDRESS_QUALITY_EXTENSION_URL, helper, theFhirContext);
 		addExtension(match, LOQUATE_AVC, ADDRESS_VERIFICATION_CODE_EXTENSION_URL, helper, theFhirContext);
+		addExtension(match, LOQUATE_GEO_ACCURACY, ADDRESS_GEO_ACCURACY_EXTENSION_URL, helper, theFhirContext);
 
 		return helper.getAddress();
 	}
