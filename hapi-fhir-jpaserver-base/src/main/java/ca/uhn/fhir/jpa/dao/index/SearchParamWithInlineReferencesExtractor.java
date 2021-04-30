@@ -276,6 +276,7 @@ public class SearchParamWithInlineReferencesExtractor {
 					throw new InvalidRequestException(msg);
 				}
 				Class<? extends IBaseResource> matchResourceType = matchResourceDef.getImplementingClass();
+				//Attempt to find the target reference before creating a placeholder
 				Set<ResourcePersistentId> matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType, theRequest);
 
 				ResourcePersistentId match;
