@@ -52,6 +52,7 @@ import com.google.gson.JsonElement;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
@@ -329,8 +330,16 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 				ourLog.info("Creating new resource matching {}", map.toNormalizedQueryString(myFhirContext));
 				theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
-				createResource(dao, theResource);
 
+				IIdType id = theResource.getIdElement();
+
+				if (id.isEmpty()) {
+					createResource(dao, theResource);
+					ourLog.info("Created resource with new id");
+				} else {
+					updateResource(dao, theResource);
+					ourLog.info("Created resource with existing id");
+				}
 			} else {
 
 				ourLog.info("Updating existing resource matching {}", map.toNormalizedQueryString(myFhirContext));
