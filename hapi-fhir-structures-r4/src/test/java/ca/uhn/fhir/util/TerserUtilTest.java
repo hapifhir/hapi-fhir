@@ -2,6 +2,7 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import org.checkerframework.checker.units.qual.A;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
@@ -319,12 +320,25 @@ class TerserUtilTest {
 
 	@Test
 	public void testClearFields() {
-		Patient p1 = new Patient();
-		p1.addName().setFamily("Doe");
+		{
+			Patient p1 = new Patient();
+			p1.addName().setFamily("Doe");
 
-		TerserUtil.clearField(ourFhirContext, "name", p1);
+			TerserUtil.clearField(ourFhirContext, "name", p1);
 
-		assertEquals(0, p1.getName().size());
+			assertEquals(0, p1.getName().size());
+		}
+
+		{
+			Address a1 = new Address();
+			a1.addLine("Line 1");
+			a1.addLine("Line 2");
+			a1.setCity("Test");
+			TerserUtil.clearField(ourFhirContext, "line", a1);
+
+			assertEquals(0, a1.getLine().size());
+			assertEquals("Test", a1.getCity());
+		}
 	}
 
 	@Test

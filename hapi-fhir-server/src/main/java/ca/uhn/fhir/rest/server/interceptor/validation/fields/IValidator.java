@@ -22,6 +22,8 @@ package ca.uhn.fhir.rest.server.interceptor.validation.fields;
 
 public interface IValidator {
 
+	public static final String VALIDATION_EXTENSION_URL = "https://hapifhir.org/StructureDefinition/ext-validation-field-has-error";
+
 	public boolean isValid(String theString);
 
 }

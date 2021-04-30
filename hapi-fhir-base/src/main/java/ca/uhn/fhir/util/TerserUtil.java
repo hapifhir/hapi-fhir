@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -172,9 +173,7 @@ public final class TerserUtil {
 
 		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theFrom);
 		BaseRuntimeChildDefinition childDefinition = definition.getChildByName(theField);
-		if (childDefinition == null) {
-			throw new IllegalArgumentException(String.format("Unable to find child definition %s in %s", theField, theFrom));
-		}
+		Validate.notNull(childDefinition);
 
 		List<IBase> theFromFieldValues = childDefinition.getAccessor().getValues(theFrom);
 		List<IBase> theToFieldValues = childDefinition.getAccessor().getValues(theTo);
@@ -226,9 +225,7 @@ public final class TerserUtil {
 		}
 
 		final Method method = getMethod(theItem1, EQUALS_DEEP);
-		if (method == null) {
-			throw new IllegalArgumentException(String.format("Instance %s do not provide %s method", theItem1, EQUALS_DEEP));
-		}
+		Validate.notNull(method);
 		return equals(theItem1, theItem2, method);
 	}
 
@@ -315,9 +312,7 @@ public final class TerserUtil {
 	 */
 	public static void replaceField(FhirContext theFhirContext, String theFieldName, IBaseResource theFrom, IBaseResource theTo) {
 		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theFrom);
-		if (definition == null) {
-			throw new IllegalArgumentException(String.format("Field %s does not exist in %s", theFieldName, theFrom));
-		}
+		Validate.notNull(definition);
 		replaceField(theFrom, theTo, theFhirContext.getResourceDefinition(theFrom).getChildByName(theFieldName));
 	}
 
@@ -331,6 +326,20 @@ public final class TerserUtil {
 	public static void clearField(FhirContext theFhirContext, String theFieldName, IBaseResource theResource) {
 		BaseRuntimeChildDefinition childDefinition = getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theResource);
 		childDefinition.getAccessor().getValues(theResource).clear();
+	}
+
+	/**
+	 * Clears the specified field on the element provided
+	 *
+	 * @param theFhirContext Context holding resource definition
+	 * @param theFieldName   Name of the field to clear values for
+	 * @param theBase        The element definition to clear values on
+	 */
+	public static void clearField(FhirContext theFhirContext, String theFieldName, IBase theBase) {
+		BaseRuntimeElementDefinition definition = theFhirContext.getElementDefinition(theBase.getClass());
+		BaseRuntimeChildDefinition childDefinition = definition.getChildByName(theFieldName);
+		Validate.notNull(childDefinition);
+		childDefinition.getAccessor().getValues(theBase).clear();
 	}
 
 	/**
@@ -512,9 +521,7 @@ public final class TerserUtil {
 	private static BaseRuntimeChildDefinition getBaseRuntimeChildDefinition(FhirContext theFhirContext, String theFieldName, IBaseResource theFrom) {
 		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theFrom);
 		BaseRuntimeChildDefinition childDefinition = definition.getChildByName(theFieldName);
-		if (childDefinition == null) {
-			throw new IllegalStateException(String.format("Field %s does not exist", theFieldName));
-		}
+		Validate.notNull(childDefinition);
 		return childDefinition;
 	}
 
@@ -577,9 +584,7 @@ public final class TerserUtil {
 	 */
 	public static <T extends IBase> T newElement(FhirContext theFhirContext, String theElementType, Object theConstructorParam) {
 		BaseRuntimeElementDefinition def = theFhirContext.getElementDefinition(theElementType);
-		if (def == null) {
-			throw new IllegalArgumentException(String.format("Unable to find element type definition for %s", theElementType));
-		}
+		Validate.notNull(def);
 		return (T) def.newInstance(theConstructorParam);
 	}
 

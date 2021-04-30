@@ -21,6 +21,8 @@ package ca.uhn.fhir.rest.server.interceptor.validation.address;
  */
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.Hook;
@@ -29,9 +31,14 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ConfigLoader;
 import ca.uhn.fhir.util.ExtensionUtil;
+import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.IModelVisitor2;
+import ca.uhn.fhir.util.TerserUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,13 +54,13 @@ public class AddressValidatingInterceptor {
 
 	public static final String ADDRESS_TYPE_NAME = "Address";
 	public static final String PROPERTY_VALIDATOR_CLASS = "validator.class";
+	public static final String PROPERTY_EXTENSION_URL = "extension.url";
 
 	public static final String ADDRESS_VALIDATION_DISABLED_HEADER = "HAPI-Address-Validation-Disabled";
 
 	private IAddressValidator myAddressValidator;
 
 	private Properties myProperties;
-
 
 	public AddressValidatingInterceptor() {
 		super();
@@ -65,6 +72,7 @@ public class AddressValidatingInterceptor {
 
 	public AddressValidatingInterceptor(Properties theProperties) {
 		super();
+		myProperties = theProperties;
 		start(theProperties);
 	}
 
@@ -118,28 +126,76 @@ public class AddressValidatingInterceptor {
 
 		if (!theRequest.getHeaders(ADDRESS_VALIDATION_DISABLED_HEADER).isEmpty()) {
 			ourLog.debug("Address validation is disabled for this request via header");
+			return;
 		}
 
 		FhirContext ctx = theRequest.getFhirContext();
-		getAddresses(theResource, ctx)
+		List<IBase> addresses = getAddresses(theResource, ctx)
 			.stream()
-			.filter(a -> {
-				return !ExtensionUtil.hasExtension(a, IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL) ||
-					ExtensionUtil.hasExtension(a, IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL, IAddressValidator.EXT_UNABLE_TO_VALIDATE);
-			})
-			.forEach(a -> validateAddress(a, ctx));
+			.filter(this::isValidating)
+			.collect(Collectors.toList());
+
+		if (!addresses.isEmpty()) {
+			validateAddresses(theRequest, theResource, addresses);
+		}
 	}
 
-	protected void validateAddress(IBase theAddress, FhirContext theFhirContext) {
+	/**
+	 * Validates specified child addresses for the resource
+	 *
+	 * @return Returns true if all addresses are valid, or false if there is at least one invalid address
+	 */
+	protected boolean validateAddresses(RequestDetails theRequest, IBaseResource theResource, List<IBase> theAddresses) {
+		boolean retVal = true;
+		for (IBase address : theAddresses) {
+			retVal &= validateAddress(address, theRequest.getFhirContext());
+		}
+		return retVal;
+	}
+
+	private boolean isValidating(IBase theAddress) {
+		IBaseExtension ext = ExtensionUtil.getExtensionByUrl(theAddress, getExtensionUrl());
+		if (ext == null) {
+			return true;
+		}
+		if (ext.getValue() == null || ext.getValue().isEmpty()) {
+			return true;
+		}
+		return !"false".equals(ext.getValue().toString());
+	}
+
+	protected boolean validateAddress(IBase theAddress, FhirContext theFhirContext) {
 		try {
 			AddressValidationResult validationResult = getAddressValidator().isValid(theAddress, theFhirContext);
 			ourLog.debug("Validated address {}", validationResult);
 
-			ExtensionUtil.setExtensionAsString(theFhirContext, theAddress, IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL,
-				validationResult.isValid() ? IAddressValidator.EXT_VALUE_VALID : IAddressValidator.EXT_VALUE_INVALID);
+			clearPossibleDuplicatesDueToTerserCloning(theAddress, theFhirContext);
+			ExtensionUtil.setExtension(theFhirContext, theAddress, getExtensionUrl(), "boolean", !validationResult.isValid());
+			if (validationResult.getValidatedAddress() != null) {
+				theFhirContext.newTerser().cloneInto(validationResult.getValidatedAddress(), theAddress, true);
+			} else {
+				ourLog.info("Validated address is not provided - skipping update on the target address instance");
+			}
+			return validationResult.isValid();
 		} catch (Exception ex) {
 			ourLog.warn("Unable to validate address", ex);
-			ExtensionUtil.setExtensionAsString(theFhirContext, theAddress, IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL, IAddressValidator.EXT_UNABLE_TO_VALIDATE);
+			IBaseExtension extension = ExtensionUtil.getOrCreateExtension(theAddress, getExtensionUrl());
+			IBaseExtension errorValue = ExtensionUtil.getOrCreateExtension(extension, "error");
+			errorValue.setValue(TerserUtil.newElement(theFhirContext, "string", ex.getMessage()));
+			return false;
+		}
+	}
+
+	private void clearPossibleDuplicatesDueToTerserCloning(IBase theAddress, FhirContext theFhirContext) {
+		TerserUtil.clearField(theFhirContext, "line", theAddress);
+		ExtensionUtil.clearExtensionsByUrl(theAddress, getExtensionUrl());
+	}
+
+	protected String getExtensionUrl() {
+		if (getProperties().containsKey(PROPERTY_EXTENSION_URL)) {
+			return getProperties().getProperty(PROPERTY_EXTENSION_URL);
+		} else {
+			return IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL;
 		}
 	}
 
