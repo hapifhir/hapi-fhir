@@ -259,7 +259,10 @@ public class NpmR4Test extends BaseJpaR4Test {
 			map.add(StructureDefinition.SP_URL, new UriParam("http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system"));
 			IBundleProvider result = myCodeSystemDao.search(map);
 			assertEquals(1, result.sizeOrThrowNpe());
+			IBaseResource resource = result.getResources(0, 1).get(0);
+			assertEquals("CodeSystem/shorthand-code-system/_history/1", resource.getIdElement().toString());
 		});
+
 	}
 
 	@Test
