@@ -45,7 +45,7 @@ public class FhirResourceDaoEncounterR5 extends BaseHapiFhirResourceDao<Encounte
 			paramMap.setCount(theCount.getValue());
 		}
 		if (theOffset != null) {
-			paramMap.setOffset(theOffset.getValue());
+			throw new IllegalArgumentException("Everything operation does not support offset searching");
 		}
 
 //		paramMap.setRevIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
