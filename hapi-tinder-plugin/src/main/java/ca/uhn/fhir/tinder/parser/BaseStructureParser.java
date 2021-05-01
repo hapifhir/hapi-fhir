@@ -8,6 +8,7 @@ import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.tinder.TinderResourceGeneratorMojo;
 import ca.uhn.fhir.tinder.TinderStructuresMojo;
 import ca.uhn.fhir.tinder.ValueSetGenerator;
 import ca.uhn.fhir.tinder.VelocityHelper;
@@ -22,7 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.tools.generic.EscapeTool;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -519,7 +519,7 @@ public abstract class BaseStructureParser {
 		ctx.put("searchParamsReference", (theResource.getSearchParametersResource()));
 		ctx.put("searchParamsWithoutComposite", (theResource.getSearchParametersWithoutComposite()));
 		ctx.put("includes", (theResource.getIncludes()));
-		ctx.put("esc", new EscapeTool());
+		ctx.put("esc", new TinderResourceGeneratorMojo.EscapeTool());
 		ctx.put("isRi", determineVersionEnum().isRi());
 
 		String capitalize = WordUtils.capitalize(myVersion);
@@ -664,7 +664,7 @@ public abstract class BaseStructureParser {
 				ctx.put("nameToDatatypeClass", myNameToDatatypeClass);
 				ctx.put("version", myVersion.replace(".", ""));
 				ctx.put("versionEnumName", determineVersionEnum().name());
-				ctx.put("esc", new EscapeTool());
+				ctx.put("esc", new TinderResourceGeneratorMojo.EscapeTool());
 				ctx.put("isRi", determineVersionEnum().isRi());
 				ctx.put("package_suffix", packageSuffix);
 				String capitalize = WordUtils.capitalize(myVersion);

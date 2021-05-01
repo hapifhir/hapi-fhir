@@ -33,6 +33,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -82,23 +83,43 @@ public class HapiTransactionService {
 					}
 				}
 
-			} catch (ResourceVersionConflictException e) {
-				ourLog.debug("Version conflict detected: {}", e.toString());
+			} catch (ResourceVersionConflictException | DataIntegrityViolationException e) {
+				ourLog.debug("Version conflict detected", e);
 
 				if (theOnRollback != null) {
 					theOnRollback.run();
 				}
 
-				HookParams params = new HookParams()
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-				ResourceVersionConflictResolutionStrategy conflictResolutionStrategy = (ResourceVersionConflictResolutionStrategy) JpaInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_VERSION_CONFLICT, params);
-				if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
-					if (i <= conflictResolutionStrategy.getMaxRetries()) {
-						continue;
-					}
+				int maxRetries = 0;
 
-					ourLog.info("Max retries ({}) exceeded for version conflict", conflictResolutionStrategy.getMaxRetries());
+		 		/*
+		 		 * If two client threads both concurrently try to add the same tag that isn't
+		 		 * known to the system already, they'll both try to create a row in HFJ_TAG_DEF,
+		 		 * which is the tag definition table. In that case, a constraint error will be
+		 		 * thrown by one of the client threads, so we auto-retry in order to avoid
+		 		 * annopying spurious failures for the client.
+		 		 */
+				if (e.getMessage().contains("HFJ_TAG_DEF")) {
+					maxRetries = 3;
+				}
+
+				if (maxRetries == 0) {
+					HookParams params = new HookParams()
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+					ResourceVersionConflictResolutionStrategy conflictResolutionStrategy = (ResourceVersionConflictResolutionStrategy) JpaInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_VERSION_CONFLICT, params);
+					if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
+						maxRetries = conflictResolutionStrategy.getMaxRetries();
+					}
+				}
+
+				if (i <= maxRetries) {
+					sleepAtLeast(250, false);
+					continue;
+				}
+
+				if (maxRetries > 0) {
+					ourLog.info("Max retries ({}) exceeded for version conflict", maxRetries);
 				}
 
 				throw e;
@@ -118,4 +139,21 @@ public class HapiTransactionService {
 		}
 	}
 
+	@SuppressWarnings("BusyWait")
+	public static void sleepAtLeast(long theMillis, boolean theLogProgress) {
+		long start = System.currentTimeMillis();
+		while (System.currentTimeMillis() <= start + theMillis) {
+			try {
+				long timeSinceStarted = System.currentTimeMillis() - start;
+				long timeToSleep = Math.max(0, theMillis - timeSinceStarted);
+				if (theLogProgress) {
+					ourLog.info("Sleeping for {}ms", timeToSleep);
+				}
+				Thread.sleep(timeToSleep);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				ourLog.error("Interrupted", e);
+			}
+		}
+	}
 }

@@ -113,7 +113,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -413,8 +418,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			return null;
 		}
 
-		Pair<String, String> key = Pair.of(theScheme, theTerm);
-		return myMemoryCacheService.get(MemoryCacheService.CacheEnum.TAG_DEFINITION, key, k -> {
+		Pair<String, String> key = toTagDefinitionMemoryCacheKey(theScheme, theTerm);
+		TagDefinition retVal = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, key);
+
+		if (retVal == null) {
 
 			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 			CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
@@ -436,14 +443,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			TypedQuery<TagDefinition> q = myEntityManager.createQuery(cq);
 			try {
-				return q.getSingleResult();
+				retVal = q.getSingleResult();
 			} catch (NoResultException e) {
-				TagDefinition retVal = new TagDefinition(theTagType, theScheme, theTerm, theLabel);
+				retVal = new TagDefinition(theTagType, theScheme, theTerm, theLabel);
 				myEntityManager.persist(retVal);
-				return retVal;
 			}
 
-		});
+			TransactionSynchronization sync = new AddTagDefinitionToCacheAfterCommitSynchronization(key, retVal);
+			TransactionSynchronizationManager.registerSynchronization(sync);
+		}
+
+		return retVal;
 	}
 
 	protected IBundleProvider history(RequestDetails theRequest, String theResourceType, Long theResourcePid, Date theRangeStartInclusive, Date theRangeEndInclusive) {
@@ -522,7 +532,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 				IBaseMetaType meta = theResource.getMeta();
 				boolean hasExtensions = false;
-				IBaseExtension<?,?> sourceExtension = null;
+				IBaseExtension<?, ?> sourceExtension = null;
 				if (meta instanceof IBaseHasExtensions) {
 					List<? extends IBaseExtension<?, ?>> extensions = ((IBaseHasExtensions) meta).getExtension();
 					if (!extensions.isEmpty()) {
@@ -1519,6 +1529,27 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@PostConstruct
 	public void start() {
 		// nothing yet
+	}
+
+	private class AddTagDefinitionToCacheAfterCommitSynchronization implements TransactionSynchronization {
+
+		private final TagDefinition myTagDefinition;
+		private final Pair<String, String> myKey;
+
+		public AddTagDefinitionToCacheAfterCommitSynchronization(Pair<String, String> theKey, TagDefinition theTagDefinition) {
+			myTagDefinition = theTagDefinition;
+			myKey = theKey;
+		}
+
+		@Override
+		public void afterCommit() {
+			myMemoryCacheService.put(MemoryCacheService.CacheEnum.TAG_DEFINITION, myKey, myTagDefinition);
+		}
+	}
+
+	@Nonnull
+	public static Pair<String, String> toTagDefinitionMemoryCacheKey(String theScheme, String theTerm) {
+		return Pair.of(theScheme, theTerm);
 	}
 
 	static String cleanProvenanceSourceUri(String theProvenanceSourceUri) {

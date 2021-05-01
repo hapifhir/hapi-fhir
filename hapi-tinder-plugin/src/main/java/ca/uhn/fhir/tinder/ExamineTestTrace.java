@@ -1,6 +1,5 @@
 package ca.uhn.fhir.tinder;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +38,6 @@ public class ExamineTestTrace {
 
 		ourLog.info("Started {}", started.size());
 		ourLog.info("Finished {}", finished.size());
-		ourLog.info(CollectionUtils.disjunction(started, finished).toString());
 
 	}
 

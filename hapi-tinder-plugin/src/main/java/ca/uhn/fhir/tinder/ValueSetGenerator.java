@@ -17,7 +17,6 @@ import org.apache.commons.lang3.text.WordUtils;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.tools.generic.EscapeTool;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -287,7 +286,7 @@ public class ValueSetGenerator {
 		InputStream templateIs = null;
 		ctx.put("valueSet", theValueSetTm);
 		ctx.put("packageBase", thePackageBase);
-		ctx.put("esc", new EscapeTool());
+		ctx.put("esc", new TinderResourceGeneratorMojo.EscapeTool());
 
 		VelocityEngine v = VelocityHelper.configureVelocityEngine(myTemplateFile, myVelocityPath, myVelocityProperties);
 		if (myTemplateFile != null) {
