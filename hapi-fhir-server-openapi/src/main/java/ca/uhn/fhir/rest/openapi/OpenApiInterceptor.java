@@ -184,7 +184,15 @@ public class OpenApiInterceptor {
 		if (isBlank(requestPath) || requestPath.equals("/")) {
 			Set<String> highestRankedAcceptValues = RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theRequest);
 			if (highestRankedAcceptValues.contains(Constants.CT_HTML)) {
-				theResponse.sendRedirect("./swagger-ui/");
+
+				String serverBase = ".";
+				if (theRequestDetails.getServletRequest() != null) {
+					IServerAddressStrategy addressStrategy = theRequestDetails.getServer().getServerAddressStrategy();
+					serverBase = addressStrategy.determineServerBase(theRequest.getServletContext(), theRequest);
+				}
+				String redirectUrl = theResponse.encodeRedirectURL(serverBase + "/swagger-ui/");
+				theResponse.sendRedirect(redirectUrl);
+				theResponse.getWriter().close();
 				return false;
 			}
 
