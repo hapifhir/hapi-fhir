@@ -1298,6 +1298,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			public Pageable first() {
 				return null;
 			}
+
+			@Override
+			public Pageable withPage(int theI) {
+				return null;
+			}
 		};
 
 		return page;
