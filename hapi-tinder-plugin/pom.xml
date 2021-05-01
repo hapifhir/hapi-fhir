@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>5.4.0-PRE9-SNAPSHOT</version>
+		<version>5.4.0-PRE10-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -58,74 +58,46 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu3</artifactId>
-			<version>5.4.0-PRE9-SNAPSHOT</version>
+			<version>5.4.0-PRE10-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
-			<version>5.4.0-PRE9-SNAPSHOT</version>
+			<version>5.4.0-PRE10-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r4</artifactId>
-			<version>5.4.0-PRE9-SNAPSHOT</version>
+			<version>5.4.0-PRE10-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r5</artifactId>
-			<version>5.4.0-PRE9-SNAPSHOT</version>
+			<version>5.4.0-PRE10-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
-			<version>5.4.0-PRE9-SNAPSHOT</version>
+			<version>5.4.0-PRE10-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
-			<version>5.4.0-PRE9-SNAPSHOT</version>
+			<version>5.4.0-PRE10-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-r4</artifactId>
-			<version>5.4.0-PRE9-SNAPSHOT</version>
+			<version>5.4.0-PRE10-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.velocity</groupId>
-			<artifactId>velocity</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-lang</artifactId>
-					<groupId>commons-lang</groupId>
-				</exclusion>
-			</exclusions>
+			<artifactId>velocity-engine-core</artifactId>
 		</dependency>
 		<dependency>
 			<artifactId>commons-lang</artifactId>
 			<groupId>commons-lang</groupId>
 			<version>2.5</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.velocity</groupId>
-			<artifactId>velocity-tools</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-chain</artifactId>
-					<groupId>commons-chain</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>commons-validator</artifactId>
-					<groupId>commons-validator</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>commons-collections</artifactId>
-					<groupId>commons-collections</groupId>
-				</exclusion>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<dependency>

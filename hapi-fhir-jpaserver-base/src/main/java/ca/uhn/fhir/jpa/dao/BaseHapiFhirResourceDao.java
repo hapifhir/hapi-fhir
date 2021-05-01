@@ -174,41 +174,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private IInstanceValidatorModule myInstanceValidator;
 	private String myResourceName;
 	private Class<T> myResourceType;
+
 	@Autowired
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
-
-	@Override
-	@Transactional
-	public void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel, RequestDetails theRequest) {
-		StopWatch w = new StopWatch();
-		BaseHasResource entity = readEntity(theId, theRequest);
-		if (entity == null) {
-			throw new ResourceNotFoundException(theId);
-		}
-
-		for (BaseTag next : new ArrayList<>(entity.getTags())) {
-			if (ObjectUtil.equals(next.getTag().getTagType(), theTagType) &&
-				ObjectUtil.equals(next.getTag().getSystem(), theScheme) &&
-				ObjectUtil.equals(next.getTag().getCode(), theTerm)) {
-				return;
-			}
-		}
-
-		entity.setHasTags(true);
-
-		TagDefinition def = getTagOrNull(TagTypeEnum.TAG, theScheme, theTerm, theLabel);
-		if (def != null) {
-			BaseTag newEntity = entity.addTag(def);
-			if (newEntity.getTagId() == null) {
-				myEntityManager.persist(newEntity);
-				myEntityManager.merge(entity);
-			}
-		}
-
-		ourLog.debug("Processed addTag {}/{} on {} in {}ms", theScheme, theTerm, theId, w.getMillisAndRestart());
-	}
 
 	@Override
 	public DaoMethodOutcome create(final T theResource) {
@@ -700,7 +670,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (!hasTag) {
 				theEntity.setHasTags(true);
 
-				TagDefinition def = getTagOrNull(nextDef.getTagType(), nextDef.getSystem(), nextDef.getCode(), nextDef.getDisplay());
+				TagDefinition def = getTagOrNull(theTransactionDetails, nextDef.getTagType(), nextDef.getSystem(), nextDef.getCode(), nextDef.getDisplay());
 				if (def != null) {
 					BaseTag newEntity = theEntity.addTag(def);
 					if (newEntity.getTagId() == null) {

@@ -22,8 +22,11 @@ package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.TranslationQuery;
+import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +67,9 @@ public class MemoryCacheService {
 				case PERSISTENT_ID:
 				case RESOURCE_LOOKUP:
 				case PID_TO_FORCED_ID:
+				case FORCED_ID_TO_PID:
+				case MATCH_URL:
+				case RESOURCE_CONDITIONAL_CREATE_VERSION:
 				default:
 					timeoutSeconds = 60;
 					break;
@@ -106,7 +112,7 @@ public class MemoryCacheService {
 
 	public enum CacheEnum {
 
-		TAG_DEFINITION(Pair.class),
+		TAG_DEFINITION(TagDefinitionCacheKey.class),
 		PERSISTENT_ID(String.class),
 		RESOURCE_LOOKUP(String.class),
 		FORCED_ID_TO_PID(String.class),
@@ -123,5 +129,44 @@ public class MemoryCacheService {
 		}
 	}
 
+
+	public static class TagDefinitionCacheKey {
+
+		private final TagTypeEnum myType;
+		private final String mySystem;
+		private final String myCode;
+		private final int myHashCode;
+
+		@Override
+		public boolean equals(Object theO) {
+			boolean retVal = false;
+			if (theO instanceof TagDefinitionCacheKey) {
+				TagDefinitionCacheKey that = (TagDefinitionCacheKey) theO;
+
+				retVal = new EqualsBuilder()
+					.append(myType, that.myType)
+					.append(mySystem, that.mySystem)
+					.append(myCode, that.myCode)
+					.isEquals();
+			}
+			return retVal;
+		}
+
+		@Override
+		public int hashCode() {
+			return myHashCode;
+		}
+
+		public TagDefinitionCacheKey(TagTypeEnum theType, String theSystem, String theCode) {
+			myType = theType;
+			mySystem = theSystem;
+			myCode = theCode;
+			myHashCode = new HashCodeBuilder(17, 37)
+				.append(myType)
+				.append(mySystem)
+				.append(myCode)
+				.toHashCode();
+		}
+	}
 
 }

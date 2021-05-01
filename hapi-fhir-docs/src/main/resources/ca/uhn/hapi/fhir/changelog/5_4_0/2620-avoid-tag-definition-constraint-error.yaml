@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2620
+title: "When creating resources in a JPA server under highly concurrent conditions, creating a new
+   tag across multiple threads could result in a race condition leaving an invalid entry in the
+   tag cache. This resulted in new instances of this tag being unavailable for creation."

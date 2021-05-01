@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2620
+title: "In the JPA server, if a tag was defined with the exact same system and code as a security
+   label on a different resource, the tag would be incorrectly filed as a security label (and
+   vice versa). This has been corrected."
