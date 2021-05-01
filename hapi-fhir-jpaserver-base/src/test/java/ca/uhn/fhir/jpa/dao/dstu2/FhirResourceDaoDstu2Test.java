@@ -2797,39 +2797,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertEquals("http://profile/1", profiles.get(0).getValue());
 		assertEquals("http://profile/2", profiles.get(1).getValue());
 
-		myPatientDao.addTag(patientId, TagTypeEnum.TAG, "http://foo", "Cat", "Kittens", null);
-		myPatientDao.addTag(patientId, TagTypeEnum.TAG, "http://foo", "Cow", "Calves", null);
-
-		retrieved = myPatientDao.read(patientId, mySrd);
-		published = (TagList) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
-		sort(published);
-		assertEquals(3, published.size());
-		assertEquals( "Dog", published.get(0).getTerm());
-		assertEquals( "Puppies", published.get(0).getLabel());
-		assertEquals(null, published.get(0).getScheme());
-		assertEquals( "Cat", published.get(1).getTerm());
-		assertEquals( "Kittens", published.get(1).getLabel());
-		assertEquals( "http://foo", published.get(1).getScheme());
-		assertEquals( "Cow", published.get(2).getTerm());
-		assertEquals( "Calves", published.get(2).getLabel());
-		assertEquals( "http://foo", published.get(2).getScheme());
-
-		secLabels = ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved);
-		sortCodings(secLabels);
-		assertEquals(2, secLabels.size());
-		assertEquals("seclabel:sys:1", secLabels.get(0).getSystemElement().getValue());
-		assertEquals("seclabel:code:1", secLabels.get(0).getCodeElement().getValue());
-		assertEquals("seclabel:dis:1", secLabels.get(0).getDisplayElement().getValue());
-		assertEquals("seclabel:sys:2", secLabels.get(1).getSystemElement().getValue());
-		assertEquals("seclabel:code:2", secLabels.get(1).getCodeElement().getValue());
-		assertEquals("seclabel:dis:2", secLabels.get(1).getDisplayElement().getValue());
-
-		profiles = ResourceMetadataKeyEnum.PROFILES.get(retrieved);
-		profiles = sortIds(profiles);
-		assertEquals(2, profiles.size());
-		assertEquals("http://profile/1", profiles.get(0).getValue());
-		assertEquals("http://profile/2", profiles.get(1).getValue());
-
 	}
 
 	@Test

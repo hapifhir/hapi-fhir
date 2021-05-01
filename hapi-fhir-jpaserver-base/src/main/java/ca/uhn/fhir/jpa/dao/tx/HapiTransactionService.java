@@ -113,7 +113,7 @@ public class HapiTransactionService {
 					}
 				}
 
-				if (i <= maxRetries) {
+				if (i < maxRetries) {
 					sleepAtLeast(250, false);
 					continue;
 				}

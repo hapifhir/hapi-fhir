@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
@@ -109,22 +110,29 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Disabled
-	public void testAddTagBadCache() {
+	public void testAddTagAndSecurityLabelWithSameValues() {
 
-		Pair<String, String> key = BaseHapiFhirDao.toTagDefinitionMemoryCacheKey("http://foo", "bar");
-		TagDefinition value = new TagDefinition();
-		value.setTagType(TagTypeEnum.TAG);
-		value.setSystem("http://foo");
-		value.setCode("bar");
-		value.setId(0L); // doesn't exist
-		myMemoryCacheService.put(MemoryCacheService.CacheEnum.TAG_DEFINITION, key, value);
+		Patient patient1 = new Patient();
+		patient1.getMeta().addTag().setSystem("http://foo").setCode("bar");
+		patient1.setActive(true);
+		IIdType pid1 = myPatientDao.create(patient1).getId();
 
-		Patient patient = new Patient();
-		patient.getMeta().addTag().setSystem("http://foo").setCode("bar");
-		patient.setActive(true);
-		myPatientDao.create(patient);
+		Patient patient2 = new Patient();
+		patient2.getMeta().addSecurity().setSystem("http://foo").setCode("bar");
+		patient2.setActive(true);
+		IIdType pid2 = myPatientDao.create(patient2).getId();
 
+		patient1 = myPatientDao.read(pid1);
+		assertEquals(1, patient1.getMeta().getTag().size());
+		assertEquals(0, patient1.getMeta().getSecurity().size());
+		assertEquals("http://foo", patient1.getMeta().getTagFirstRep().getSystem());
+		assertEquals("bar", patient1.getMeta().getTagFirstRep().getCode());
+
+		patient2 = myPatientDao.read(pid2);
+		assertEquals(0, patient2.getMeta().getTag().size());
+		assertEquals(1, patient2.getMeta().getSecurity().size());
+		assertEquals("http://foo", patient2.getMeta().getSecurityFirstRep().getSystem());
+		assertEquals("bar", patient2.getMeta().getSecurityFirstRep().getCode());
 	}
 
 

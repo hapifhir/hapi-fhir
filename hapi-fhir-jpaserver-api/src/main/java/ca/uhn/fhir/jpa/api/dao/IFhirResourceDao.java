@@ -61,8 +61,6 @@ import java.util.Set;
  */
 public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
-	void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel, RequestDetails theRequest);
-
 	/**
 	 * Create a resource - Note that this variant of the method does not take in a {@link RequestDetails} and
 	 * therefore can not fire any interceptors. Use only for internal system calls

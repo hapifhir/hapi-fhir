@@ -113,10 +113,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
@@ -184,6 +182,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseHapiFhirDao.class);
 	private static final Map<FhirVersionEnum, FhirContext> ourRetrievalContexts = new HashMap<>();
 	private static final String PROCESSING_SUB_REQUEST = "BaseHapiFhirDao.processingSubRequest";
+	public static final String XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS = BaseHapiFhirDao.class.getName() + "_RESOLVED_TAG_DEFINITIONS";
 	private static boolean ourValidationDisabledForUnitTest;
 	private static boolean ourDisableIncrementOnUpdateForUnitTest = false;
 
@@ -292,11 +291,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return retVal;
 	}
 
-	private void extractTagsHapi(IResource theResource, ResourceTable theEntity, Set<ResourceTag> allDefs) {
+	private void extractTagsHapi(TransactionDetails theTransactionDetails, IResource theResource, ResourceTable theEntity, Set<ResourceTag> allDefs) {
 		TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(theResource);
 		if (tagList != null) {
 			for (Tag next : tagList) {
-				TagDefinition def = getTagOrNull(TagTypeEnum.TAG, next.getScheme(), next.getTerm(), next.getLabel());
+				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getScheme(), next.getTerm(), next.getLabel());
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
@@ -308,7 +307,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		List<BaseCodingDt> securityLabels = ResourceMetadataKeyEnum.SECURITY_LABELS.get(theResource);
 		if (securityLabels != null) {
 			for (BaseCodingDt next : securityLabels) {
-				TagDefinition def = getTagOrNull(TagTypeEnum.SECURITY_LABEL, next.getSystemElement().getValue(), next.getCodeElement().getValue(), next.getDisplayElement().getValue());
+				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.SECURITY_LABEL, next.getSystemElement().getValue(), next.getCodeElement().getValue(), next.getDisplayElement().getValue());
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
@@ -320,7 +319,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		List<IdDt> profiles = ResourceMetadataKeyEnum.PROFILES.get(theResource);
 		if (profiles != null) {
 			for (IIdType next : profiles) {
-				TagDefinition def = getTagOrNull(TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null);
+				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null);
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
@@ -330,11 +329,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 	}
 
-	private void extractTagsRi(IAnyResource theResource, ResourceTable theEntity, Set<ResourceTag> theAllTags) {
+	private void extractTagsRi(TransactionDetails theTransactionDetails, IAnyResource theResource, ResourceTable theEntity, Set<ResourceTag> theAllTags) {
 		List<? extends IBaseCoding> tagList = theResource.getMeta().getTag();
 		if (tagList != null) {
 			for (IBaseCoding next : tagList) {
-				TagDefinition def = getTagOrNull(TagTypeEnum.TAG, next.getSystem(), next.getCode(), next.getDisplay());
+				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getSystem(), next.getCode(), next.getDisplay());
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					theAllTags.add(tag);
@@ -346,7 +345,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		List<? extends IBaseCoding> securityLabels = theResource.getMeta().getSecurity();
 		if (securityLabels != null) {
 			for (IBaseCoding next : securityLabels) {
-				TagDefinition def = getTagOrNull(TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay());
+				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay());
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					theAllTags.add(tag);
@@ -358,7 +357,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		List<? extends IPrimitiveType<String>> profiles = theResource.getMeta().getProfile();
 		if (profiles != null) {
 			for (IPrimitiveType<String> next : profiles) {
-				TagDefinition def = getTagOrNull(TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null);
+				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null);
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					theAllTags.add(tag);
@@ -413,44 +412,53 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	/**
 	 * <code>null</code> will only be returned if the scheme and tag are both blank
 	 */
-	protected TagDefinition getTagOrNull(TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
+	protected TagDefinition getTagOrNull(TransactionDetails theTransactionDetails, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
 		if (isBlank(theScheme) && isBlank(theTerm) && isBlank(theLabel)) {
 			return null;
 		}
 
-		Pair<String, String> key = toTagDefinitionMemoryCacheKey(theScheme, theTerm);
+		MemoryCacheService.TagDefinitionCacheKey key = toTagDefinitionMemoryCacheKey(theTagType, theScheme, theTerm);
+
+
 		TagDefinition retVal = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, key);
 
+
 		if (retVal == null) {
+			HashMap<MemoryCacheService.TagDefinitionCacheKey, TagDefinition> resolvedTagDefinitions = theTransactionDetails.getOrCreateUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS, () -> new HashMap<>());
+			retVal = resolvedTagDefinitions.get(key);
 
-			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-			CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
-			Root<TagDefinition> from = cq.from(TagDefinition.class);
+			if (retVal == null) {
+				CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+				CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
+				Root<TagDefinition> from = cq.from(TagDefinition.class);
 
-			if (isNotBlank(theScheme)) {
-				cq.where(
-					builder.and(
-						builder.equal(from.get("myTagType"), theTagType),
-						builder.equal(from.get("mySystem"), theScheme),
-						builder.equal(from.get("myCode"), theTerm)));
-			} else {
-				cq.where(
-					builder.and(
-						builder.equal(from.get("myTagType"), theTagType),
-						builder.isNull(from.get("mySystem")),
-						builder.equal(from.get("myCode"), theTerm)));
+				if (isNotBlank(theScheme)) {
+					cq.where(
+						builder.and(
+							builder.equal(from.get("myTagType"), theTagType),
+							builder.equal(from.get("mySystem"), theScheme),
+							builder.equal(from.get("myCode"), theTerm)));
+				} else {
+					cq.where(
+						builder.and(
+							builder.equal(from.get("myTagType"), theTagType),
+							builder.isNull(from.get("mySystem")),
+							builder.equal(from.get("myCode"), theTerm)));
+				}
+
+				TypedQuery<TagDefinition> q = myEntityManager.createQuery(cq);
+				try {
+					retVal = q.getSingleResult();
+				} catch (NoResultException e) {
+					retVal = new TagDefinition(theTagType, theScheme, theTerm, theLabel);
+					myEntityManager.persist(retVal);
+				}
+
+				TransactionSynchronization sync = new AddTagDefinitionToCacheAfterCommitSynchronization(key, retVal);
+				TransactionSynchronizationManager.registerSynchronization(sync);
+
+				resolvedTagDefinitions.put(key, retVal);
 			}
-
-			TypedQuery<TagDefinition> q = myEntityManager.createQuery(cq);
-			try {
-				retVal = q.getSingleResult();
-			} catch (NoResultException e) {
-				retVal = new TagDefinition(theTagType, theScheme, theTerm, theLabel);
-				myEntityManager.persist(retVal);
-			}
-
-			TransactionSynchronization sync = new AddTagDefinitionToCacheAfterCommitSynchronization(key, retVal);
-			TransactionSynchronizationManager.registerSynchronization(sync);
 		}
 
 		return retVal;
@@ -510,7 +518,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	/**
 	 * Returns true if the resource has changed (either the contents or the tags)
 	 */
-	protected EncodedResource populateResourceIntoEntity(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, boolean thePerformIndexing) {
+	protected EncodedResource populateResourceIntoEntity(TransactionDetails theTransactionDetails, RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, boolean thePerformIndexing) {
 		if (theEntity.getResourceType() == null) {
 			theEntity.setResourceType(toResourceName(theResource));
 		}
@@ -600,16 +608,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			Set<ResourceTag> allTagsOld = getAllTagDefinitions(theEntity);
 
 			if (theResource instanceof IResource) {
-				extractTagsHapi((IResource) theResource, theEntity, allDefs);
+				extractTagsHapi(theTransactionDetails, (IResource) theResource, theEntity, allDefs);
 			} else {
-				extractTagsRi((IAnyResource) theResource, theEntity, allDefs);
+				extractTagsRi(theTransactionDetails, (IAnyResource) theResource, theEntity, allDefs);
 			}
 
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
 			if (def.isStandardType() == false) {
 				String profile = def.getResourceProfile("");
 				if (isNotBlank(profile)) {
-					TagDefinition profileDef = getTagOrNull(TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null);
+					TagDefinition profileDef = getTagOrNull(theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null);
 
 					ResourceTag tag = theEntity.addTag(profileDef);
 					allDefs.add(tag);
@@ -1121,7 +1129,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			entity.setContentText(null);
 			entity.setHashSha256(null);
 			entity.setIndexStatus(INDEX_STATUS_INDEXED);
-			changed = populateResourceIntoEntity(theRequest, theResource, entity, true);
+			changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);
 
 		} else {
 			// CREATE or UPDATE
@@ -1133,7 +1141,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				newParams = new ResourceIndexedSearchParams();
 				mySearchParamWithInlineReferencesExtractor.populateFromResource(newParams, theTransactionDetails, entity, theResource, existingParams, theRequest);
 
-				changed = populateResourceIntoEntity(theRequest, theResource, entity, true);
+				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);
 				if (changed.isChanged()) {
 					entity.setUpdated(theTransactionDetails.getTransactionDate());
 					if (theResource instanceof IResource) {
@@ -1152,7 +1160,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			} else {
 
-				changed = populateResourceIntoEntity(theRequest, theResource, entity, false);
+				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, false);
 
 				entity.setUpdated(theTransactionDetails.getTransactionDate());
 				entity.setIndexStatus(null);
@@ -1534,9 +1542,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private class AddTagDefinitionToCacheAfterCommitSynchronization implements TransactionSynchronization {
 
 		private final TagDefinition myTagDefinition;
-		private final Pair<String, String> myKey;
+		private final MemoryCacheService.TagDefinitionCacheKey myKey;
 
-		public AddTagDefinitionToCacheAfterCommitSynchronization(Pair<String, String> theKey, TagDefinition theTagDefinition) {
+		public AddTagDefinitionToCacheAfterCommitSynchronization(MemoryCacheService.TagDefinitionCacheKey theKey, TagDefinition theTagDefinition) {
 			myTagDefinition = theTagDefinition;
 			myKey = theKey;
 		}
@@ -1548,8 +1556,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	@Nonnull
-	public static Pair<String, String> toTagDefinitionMemoryCacheKey(String theScheme, String theTerm) {
-		return Pair.of(theScheme, theTerm);
+	public static MemoryCacheService.TagDefinitionCacheKey toTagDefinitionMemoryCacheKey(TagTypeEnum theTagType, String theScheme, String theTerm) {
+		return new MemoryCacheService.TagDefinitionCacheKey(theTagType, theScheme, theTerm);
 	}
 
 	static String cleanProvenanceSourceUri(String theProvenanceSourceUri) {
