@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>5.4.0-PRE9-SNAPSHOT</version>
+		<version>5.4.0-PRE10-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -198,12 +198,6 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-test-utilities</artifactId>
-			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

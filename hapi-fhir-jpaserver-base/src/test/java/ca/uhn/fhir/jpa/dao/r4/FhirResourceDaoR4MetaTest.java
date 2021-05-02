@@ -1,58 +1,44 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
-import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.model.entity.TagDefinition;
+import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.QuantityParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.rest.param.TokenParam;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.DateType;
-import org.hl7.fhir.r4.model.DecimalType;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Meta;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Quantity;
-import org.hl7.fhir.r4.model.SampledData;
-import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4MetaTest.class);
+	@Autowired
+	private MemoryCacheService myMemoryCacheService;
 
 	/**
 	 * See #1731
@@ -123,4 +109,65 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		assertThat(patient.getMeta().getSecurity(), empty());
 	}
 
+	@Test
+	public void testAddTagAndSecurityLabelWithSameValues() {
+
+		Patient patient1 = new Patient();
+		patient1.getMeta().addTag().setSystem("http://foo").setCode("bar");
+		patient1.setActive(true);
+		IIdType pid1 = myPatientDao.create(patient1).getId();
+
+		Patient patient2 = new Patient();
+		patient2.getMeta().addSecurity().setSystem("http://foo").setCode("bar");
+		patient2.setActive(true);
+		IIdType pid2 = myPatientDao.create(patient2).getId();
+
+		patient1 = myPatientDao.read(pid1);
+		assertEquals(1, patient1.getMeta().getTag().size());
+		assertEquals(0, patient1.getMeta().getSecurity().size());
+		assertEquals("http://foo", patient1.getMeta().getTagFirstRep().getSystem());
+		assertEquals("bar", patient1.getMeta().getTagFirstRep().getCode());
+
+		patient2 = myPatientDao.read(pid2);
+		assertEquals(0, patient2.getMeta().getTag().size());
+		assertEquals(1, patient2.getMeta().getSecurity().size());
+		assertEquals("http://foo", patient2.getMeta().getSecurityFirstRep().getSystem());
+		assertEquals("bar", patient2.getMeta().getSecurityFirstRep().getCode());
+	}
+
+
+	@Test
+	public void testConcurrentAddTag() throws ExecutionException, InterruptedException {
+
+		ExecutorService pool = Executors.newFixedThreadPool(10);
+
+		List<Future<?>> futures = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			Runnable task = () -> {
+				Patient patient = new Patient();
+				patient.getMeta().addTag().setSystem("http://foo").setCode("bar");
+				patient.setActive(true);
+				myPatientDao.create(patient);
+			};
+			futures.add(pool.submit(task));
+		}
+
+		// Wait for the tasks to complete, should not throw any exception
+		for (Future<?> next : futures) {
+			try {
+				next.get();
+			} catch (Exception e) {
+				ourLog.error("Failure", e);
+				fail(e.toString());
+			}
+		}
+
+		runInTransaction(() -> {
+			ourLog.info("Tag definitions:\n * {}", myTagDefinitionDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
+		assertEquals(10, myPatientDao.search(SearchParameterMap.newSynchronous()).sizeOrThrowNpe());
+		assertEquals(10, myPatientDao.search(SearchParameterMap.newSynchronous(PARAM_TAG, new TokenParam("http://foo", "bar"))).sizeOrThrowNpe());
+
+	}
 }

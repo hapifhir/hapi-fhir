@@ -83,7 +83,7 @@ public class CqlMeasureEvaluationR4Test extends BaseCqlR4Test {
 
 		for (MeasureReportGroupComponent mrgcExpected : expected.getGroup()) {
 			Optional<MeasureReportGroupComponent> mrgcActualOptional = actual.getGroup().stream()
-					.filter(x -> x.getId().equals(mrgcExpected.getId())).findFirst();
+			.filter(x -> x.getId() != null && x.getId().equals(mrgcExpected.getId())).findFirst();
 
 			errorLocator = String.format("Measure: %s, Subject: %s, Group: %s", expected.getMeasure(),
 					expected.getSubject().getReference(), mrgcExpected.getId());

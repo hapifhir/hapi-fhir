@@ -22,7 +22,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.tools.generic.EscapeTool;
 
 import ca.uhn.fhir.tinder.AbstractGenerator.ExecutionException;
 import ca.uhn.fhir.tinder.AbstractGenerator.FailureException;
@@ -360,7 +359,7 @@ public class TinderGenericSingleFileMojo extends AbstractMojo {
 			ctx.put("version", version);
 			ctx.put("isRi", BaseStructureParser.determineVersionEnum(version).isRi());
 			ctx.put("hash", "#");
-			ctx.put("esc", new EscapeTool());
+			ctx.put("esc", new TinderResourceGeneratorMojo.EscapeTool());
 			if (BaseStructureParser.determineVersionEnum(version).isRi()) {
 				ctx.put("resourcePackage", "org.hl7.fhir." + version + ".model");
 			} else {

@@ -67,6 +67,7 @@ import org.hl7.fhir.dstu3.model.OperationDefinition;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.PrimitiveType;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Quantity.QuantityComparator;
 import org.hl7.fhir.dstu3.model.Questionnaire;
@@ -173,40 +174,19 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	private void sort(ArrayList<Coding> thePublished) {
-		ArrayList<Coding> tags = new ArrayList<Coding>(thePublished);
-		Collections.sort(tags, new Comparator<Coding>() {
-			@Override
-			public int compare(Coding theO1, Coding theO2) {
-				int retVal = defaultString(theO1.getSystem()).compareTo(defaultString(theO2.getSystem()));
-				if (retVal == 0) {
-					retVal = defaultString(theO1.getCode()).compareTo(defaultString(theO2.getCode()));
-				}
-				return retVal;
-			}
-		});
+		ArrayList<Coding> tags = new ArrayList<>(thePublished);
+		tags.sort(Comparator.comparing((Coding o) -> defaultString(o.getSystem())).thenComparing(o -> defaultString(o.getCode())));
 		thePublished.clear();
-		for (Coding next : tags) {
-			thePublished.add(next);
-		}
+		thePublished.addAll(tags);
 	}
 
 	private void sortCodings(List<Coding> theSecLabels) {
-		Collections.sort(theSecLabels, new Comparator<Coding>() {
-			@Override
-			public int compare(Coding theO1, Coding theO2) {
-				return theO1.getSystemElement().getValue().compareTo(theO2.getSystemElement().getValue());
-			}
-		});
+		theSecLabels.sort(Comparator.comparing(o -> o.getSystemElement().getValue()));
 	}
 
 	private List<UriType> sortIds(List<UriType> theProfiles) {
 		ArrayList<UriType> retVal = new ArrayList<UriType>(theProfiles);
-		Collections.sort(retVal, new Comparator<UriType>() {
-			@Override
-			public int compare(UriType theO1, UriType theO2) {
-				return theO1.getValue().compareTo(theO2.getValue());
-			}
-		});
+		retVal.sort(Comparator.comparing(PrimitiveType::getValue));
 		return retVal;
 	}
 
@@ -3285,8 +3265,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		assertEquals("http://profile/1", profiles.get(0).getValue());
 		assertEquals("http://profile/2", profiles.get(1).getValue());
 
-		myPatientDao.addTag(patientId, TagTypeEnum.TAG, "http://foo", "Cat", "Kittens", null);
-		myPatientDao.addTag(patientId, TagTypeEnum.TAG, "http://foo", "Cow", "Calves", null);
+		myPatientDao.metaAddOperation(patientId, new Meta().addTag( "http://foo", "Cat", "Kittens"), null);
+		myPatientDao.metaAddOperation(patientId, new Meta().addTag( "http://foo", "Cow", "Calves"), null);
 
 		retrieved = myPatientDao.read(patientId, mySrd);
 		published = (ArrayList<Coding>) retrieved.getMeta().getTag();

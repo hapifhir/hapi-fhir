@@ -40,8 +40,6 @@ import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -54,8 +52,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class MeasureOperationsProvider {
-	private static final Logger logger = LoggerFactory.getLogger(MeasureOperationsProvider.class);
-
 	@Autowired
 	private LibraryResolutionProvider<Library> libraryResolutionProvider;
 	@Autowired

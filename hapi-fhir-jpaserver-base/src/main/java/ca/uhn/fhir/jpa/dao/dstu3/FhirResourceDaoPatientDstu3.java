@@ -54,7 +54,7 @@ public class FhirResourceDaoPatientDstu3 extends BaseHapiFhirResourceDao<Patient
 			paramMap.setCount(theCount.getValue());
 		}
 		if (theOffset != null) {
-			paramMap.setOffset(theOffset.getValue());
+			throw new IllegalArgumentException("Everything operation does not support offset searching");
 		}
 		if (theContent != null) {
 			paramMap.add(Constants.PARAM_CONTENT, theContent);

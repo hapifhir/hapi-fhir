@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>5.4.0-PRE9-SNAPSHOT</version>
+		<version>5.4.0-PRE10-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -30,6 +30,11 @@
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-jpa</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
+		</dependency>
+
 		<!--test dependencies -->
 		<dependency>
 			<groupId>org.springframework.batch</groupId>
@@ -44,11 +49,6 @@
 		</dependency>
 		<!-- test -->
 		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.awaitility</groupId>
 			<artifactId>awaitility</artifactId>
 			<scope>test</scope>
@@ -58,15 +58,6 @@
 			<artifactId>hapi-fhir-test-utilities</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.annotation</groupId>
-			<artifactId>javax.annotation-api</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.annotation</groupId>
-			<artifactId>javax.annotation-api</artifactId>
 		</dependency>
 	</dependencies>
 

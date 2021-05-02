@@ -29,13 +29,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import ca.uhn.fhir.tinder.TinderResourceGeneratorMojo;
 import org.apache.commons.lang.WordUtils;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.tools.generic.EscapeTool;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.tinder.AbstractGenerator;
@@ -423,7 +423,7 @@ public class TinderGeneratorTask extends Task {
 				ctx.put("version", version);
 				ctx.put("isRi", BaseStructureSpreadsheetParser.determineVersionEnum(version).isRi());
 				ctx.put("hash", "#");
-				ctx.put("esc", new EscapeTool());
+				ctx.put("esc", new TinderResourceGeneratorMojo.EscapeTool());
 				if (BaseStructureSpreadsheetParser.determineVersionEnum(version).isRi()) {
 					ctx.put("resourcePackage", "org.hl7.fhir." + version + ".model");
 				} else {

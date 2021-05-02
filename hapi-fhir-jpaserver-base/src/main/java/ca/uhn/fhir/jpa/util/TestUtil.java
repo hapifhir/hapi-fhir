@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.collect.ImmutableSet;
@@ -345,17 +346,7 @@ public class TestUtil {
 	}
 
 	public static void sleepAtLeast(long theMillis) {
-		long start = System.currentTimeMillis();
-		while (System.currentTimeMillis() <= start + theMillis) {
-			try {
-				long timeSinceStarted = System.currentTimeMillis() - start;
-				long timeToSleep = Math.max(0, theMillis - timeSinceStarted);
-				ourLog.info("Sleeping for {}ms", timeToSleep);
-				Thread.sleep(timeToSleep);
-			} catch (InterruptedException theE) {
-				ourLog.error("Interrupted", theE);
-			}
-		}
+		HapiTransactionService.sleepAtLeast(theMillis, true);
 	}
 
 	public static InstantType getTimestamp(IBaseResource resource) {

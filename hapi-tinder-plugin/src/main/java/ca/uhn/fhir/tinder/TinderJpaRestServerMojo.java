@@ -11,7 +11,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProject;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.tools.generic.EscapeTool;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -146,7 +145,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			ctx.put("configPackageBase", configPackageBase);
 			ctx.put("version", version);
 			ctx.put("package_suffix", packageSuffix);
-			ctx.put("esc", new EscapeTool());
+			ctx.put("esc", new TinderResourceGeneratorMojo.EscapeTool());
 			if (BaseStructureSpreadsheetParser.determineVersionEnum(version).isRi()) {
 				ctx.put("resourcePackage", "org.hl7.fhir." + version + ".model");
 			} else {
