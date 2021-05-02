@@ -148,6 +148,12 @@ public class OpenApiInterceptorTest {
 			assertThat(responseString, containsString("<title>Swagger UI</title>"));
 		}
 
+		get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/?foo=foo");
+		get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML);
+		try (CloseableHttpResponse response = myClient.execute(get)) {
+			assertEquals(400, response.getStatusLine().getStatusCode());
+		}
+
 	}
 
 
