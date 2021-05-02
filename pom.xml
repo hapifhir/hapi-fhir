@@ -789,7 +789,7 @@
 		<flexmark_version>0.50.40</flexmark_version>
 		<flyway_version>6.5.4</flyway_version>
 		<hibernate_version>5.4.30.Final</hibernate_version>
-		<hibernate_search_version>6.0.2.Final</hibernate_search_version>
+		<hibernate_search_version>6.0.3.Final</hibernate_search_version>
 		<!-- Update lucene version when you update hibernate-search version -->
 		<lucene_version>8.7.0</lucene_version>
 		<hamcrest_version>2.2</hamcrest_version>
@@ -811,7 +811,7 @@
 		<log4j_to_slf4j_version>2.11.1</log4j_to_slf4j_version>
 		<spring_version>5.3.6</spring_version>
 		<!-- FYI: Spring Data JPA 2.1.9 causes test failures due to unexpected cascading deletes -->
-		<spring_data_version>2.4.7</spring_data_version>
+		<spring_data_version>2.5.0</spring_data_version>
 		<spring_batch_version>4.3.2</spring_batch_version>
 		<spring_boot_version>2.4.4</spring_boot_version>
 		<spring_retry_version>1.2.2.RELEASE</spring_retry_version>
@@ -1157,7 +1157,7 @@
 			<dependency>
 				<groupId>mysql</groupId>
 				<artifactId>mysql-connector-java</artifactId>
-				<version>8.0.20</version>
+				<version>8.0.24</version>
 			</dependency>
             <dependency>
                 <groupId>net.sourceforge.htmlunit</groupId>
@@ -1328,6 +1328,21 @@
 				<groupId>org.apache.maven.plugin-tools</groupId>
 				<artifactId>maven-plugin-annotations</artifactId>
 				<version>3.6.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.poi</groupId>
+				<artifactId>poi</artifactId>
+				<version>4.1.2</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.poi</groupId>
+				<artifactId>poi-ooxml</artifactId>
+				<version>4.1.2</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.poi</groupId>
+				<artifactId>poi-ooxml-schemas</artifactId>
+				<version>4.1.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.velocity</groupId>
@@ -1547,6 +1562,10 @@
 				</exclusions>
 			</dependency>
 			<dependency>
+				<!--
+				Be careful bumping this, you need to match the maximum version supported by Hibernate Search.
+				See: https://docs.jboss.org/hibernate/stable/search/reference/en-US/html_single/#getting-started-compatibility
+				-->
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-high-level-client</artifactId>
 				<version>7.10.2</version>
@@ -1620,7 +1639,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.2.19</version>
+				<version>42.2.20</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
@@ -1751,6 +1770,12 @@
 				<groupId>org.webjars</groupId>
 				<artifactId>Eonasdan-bootstrap-datetimepicker</artifactId>
 				<version>4.17.47</version>
+				<exclusions>
+					<exclusion>
+						<groupId>*</groupId>
+						<artifactId>*</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars</groupId>
