@@ -1,6 +1,0 @@
-# Don't run the tests when doing LGTM analysis
-extraction:
-  java:
-    index:
-      build_command: mvn clean install -DskipTests
-

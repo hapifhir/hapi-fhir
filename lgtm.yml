@@ -1,7 +1,8 @@
+# Don't run the tests when doing LGTM analysis
 extraction:
-  javascript:
+  java:
     index:
-      filters:
-        - exclude: "**/jquery*.js"
-        - exclude: "**/bootstrap*.js"
-        - exclude: "**/webapp/fa/*.js"
+      java_version: 11
+      maven: 
+        version: 3.8.1
+
