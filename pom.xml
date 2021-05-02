@@ -1547,9 +1547,13 @@
 				</exclusions>
 			</dependency>
 			<dependency>
+				<!--
+				Be careful bumping this, you need to match the maximum version supported by Hibernate Search.
+				See: https://docs.jboss.org/hibernate/stable/search/reference/en-US/html_single/#getting-started-compatibility
+				-->
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-high-level-client</artifactId>
-				<version>7.12.1</version>
+				<version>7.10.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
