@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.graphql;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -94,8 +95,8 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 	@Transactional(propagation = Propagation.NEVER)
 	@Override
 	public void listResources(Object theAppInfo, String theType, List<Argument> theSearchParams, List<IBaseResource> theMatches) throws FHIRException {
-
-		RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(theType);
+		FhirContext fhirContext = getContext();
+		RuntimeResourceDefinition typeDef = fhirContext.getResourceDefinition(theType);
 		IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDaoOrNull(typeDef.getImplementingClass());
 
 		SearchParameterMap params = new SearchParameterMap();
@@ -148,7 +149,9 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 				case TOKEN:
 					TokenOrListParam tokenOrListParam = new TokenOrListParam();
 					for (Value value: nextArgument.getValues()) {
-						tokenOrListParam.addOr(new TokenParam(value.getValue()));
+						TokenParam tokenParam = new TokenParam();
+						tokenParam.setValueAsQueryToken(fhirContext, searchParamName, null, value.getValue());
+						tokenOrListParam.addOr(tokenParam);
 					}
 					queryParam = tokenOrListParam;
 					break;
