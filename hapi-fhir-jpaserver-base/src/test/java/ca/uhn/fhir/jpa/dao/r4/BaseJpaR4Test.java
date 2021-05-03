@@ -48,6 +48,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupElementTargetDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
@@ -281,6 +282,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected ITermConceptDao myTermConceptDao;
 	@Autowired
 	protected ITermConceptDesignationDao myTermConceptDesignationDao;
+	@Autowired
+	protected ITermConceptPropertyDao myTermConceptPropertyDao;
 	@Autowired
 	@Qualifier("myConditionDaoR4")
 	protected IFhirResourceDao<Condition> myConditionDao;
@@ -541,7 +544,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@BeforeEach
 	public void beforeFlushFT() {
 		runInTransaction(() -> {
-			SearchSession searchSession  = Search.session(myEntityManager);
+			SearchSession searchSession = Search.session(myEntityManager);
 			searchSession.workspace(ResourceTable.class).purge();
 			searchSession.indexingPlan().execute();
 		});
@@ -644,6 +647,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 			List<TermConcept> children = nextCode.getChildCodes();
 			flattenExpansionHierarchy(theFlattenedHierarchy, children, thePrefix + " ");
+
 		}
 	}
 
@@ -795,10 +799,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		if (theSystem != null) {
 			stream = stream.filter(concept -> theSystem.equalsIgnoreCase(concept.getSystem()));
 		}
-		if (theCode != null ) {
+		if (theCode != null) {
 			stream = stream.filter(concept -> theCode.equalsIgnoreCase(concept.getCode()));
 		}
-		if (theDisplay != null){
+		if (theDisplay != null) {
 			stream = stream.filter(concept -> theDisplay.equalsIgnoreCase(concept.getDisplay()));
 		}
 		if (theDesignationCount != null) {
@@ -815,6 +819,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 			return first.get();
 		}
 	}
+
 	public List<String> getExpandedConceptsByValueSetUrl(String theValuesetUrl) {
 		return runInTransaction(() -> {
 			List<TermValueSet> valueSets = myTermValueSetDao.findTermValueSetByUrl(Pageable.unpaged(), theValuesetUrl);

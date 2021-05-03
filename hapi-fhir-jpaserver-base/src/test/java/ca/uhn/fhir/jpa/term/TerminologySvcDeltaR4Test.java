@@ -558,21 +558,21 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeAAA").isPresent()));
 
 		// Remove CodeA
-		runInTransaction(()->{
-			ourLog.info("About to remove CodeA. Have codes:\n * {}", myTermConceptDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		runInTransaction(() -> {
+			ourLog.info("About to remove CodeA. Have codes:\n * {}", myTermConceptDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 
 		myCaptureQueriesListener.clear();
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			CustomTerminologySet delta2 = new CustomTerminologySet();
 			delta2.addRootConcept("codeA");
 			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove("http://foo/cs", delta2);
 		});
 		myCaptureQueriesListener.logAllQueries();
 
-		runInTransaction(()->{
-			ourLog.info("Done removing. Have codes:\n * {}", myTermConceptDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		runInTransaction(() -> {
+			ourLog.info("Done removing. Have codes:\n * {}", myTermConceptDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeB").isPresent()));

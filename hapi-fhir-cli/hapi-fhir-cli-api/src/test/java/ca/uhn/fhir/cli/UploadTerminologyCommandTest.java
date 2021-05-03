@@ -116,7 +116,7 @@ public class UploadTerminologyCommandTest extends BaseTest {
 		verify(myTermLoaderSvc, times(1)).loadDeltaAdd(eq("http://foo"), myDescriptorListCaptor.capture(), any());
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertEquals(1, listOfDescriptors.size());
+		assertEquals(2, listOfDescriptors.size());
 		assertEquals("concepts.csv", listOfDescriptors.get(0).getFilename());
 		String uploadFile = IOUtils.toString(listOfDescriptors.get(0).getInputStream(), Charsets.UTF_8);
 		assertThat(uploadFile, uploadFile, containsString("\"CODE\",\"Display\""));

@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.custom.ConceptHandler;
 import ca.uhn.fhir.jpa.term.custom.HierarchyHandler;
+import ca.uhn.fhir.jpa.term.custom.PropertyHandler;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -214,12 +215,14 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 	private void convertCodeSystemsToFileDescriptors(List<ITermLoaderSvc.FileDescriptor> theFiles, List<IBaseResource> theCodeSystems) {
 		Map<String, String> codes = new LinkedHashMap<>();
+		Map<String, List<CodeSystem.ConceptPropertyComponent>> codeToProperties = new LinkedHashMap<>();
+
 		Multimap<String, String> codeToParentCodes = ArrayListMultimap.create();
 
 		if (theCodeSystems != null) {
 			for (IBaseResource nextCodeSystemUncast : theCodeSystems) {
 				CodeSystem nextCodeSystem = canonicalizeCodeSystem(nextCodeSystemUncast);
-				convertCodeSystemCodesToCsv(nextCodeSystem.getConcept(), codes, null, codeToParentCodes);
+				convertCodeSystemCodesToCsv(nextCodeSystem.getConcept(), codes, codeToProperties, null, codeToParentCodes);
 			}
 		}
 
@@ -260,6 +263,36 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor = new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
 			theFiles.add(fileDescriptor);
 		}
+		// Create codeToProperties file
+		if (codeToProperties.size() > 0) {
+			StringBuilder b = new StringBuilder();
+			b.append(PropertyHandler.CODE);
+			b.append(",");
+			b.append(PropertyHandler.KEY);
+			b.append(",");
+			b.append(PropertyHandler.VALUE);
+			b.append(",");
+			b.append(PropertyHandler.TYPE);
+			b.append("\n");
+
+			for (Map.Entry<String, List<CodeSystem.ConceptPropertyComponent>> nextEntry : codeToProperties.entrySet()) {
+				for (CodeSystem.ConceptPropertyComponent propertyComponent : nextEntry.getValue()) {
+					b.append(csvEscape(nextEntry.getKey()));
+					b.append(",");
+					b.append(csvEscape(propertyComponent.getCode()));
+					b.append(",");
+					//TODO: check this for different types, other types should be added once TermConceptPropertyTypeEnum contain different types
+					b.append(csvEscape(propertyComponent.getValueStringType().getValue()));
+					b.append(",");
+					b.append(csvEscape(propertyComponent.getValue().primitiveValue()));
+					b.append("\n");
+				}
+			}
+			byte[] bytes = b.toString().getBytes(Charsets.UTF_8);
+			String fileName = TermLoaderSvcImpl.CUSTOM_PROPERTIES_FILE;
+			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor = new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
+			theFiles.add(fileDescriptor);
+		}
 
 	}
 
@@ -283,14 +316,17 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		return nextCodeSystem;
 	}
 
-	private void convertCodeSystemCodesToCsv(List<CodeSystem.ConceptDefinitionComponent> theConcept, Map<String, String> theCodes, String theParentCode, Multimap<String, String> theCodeToParentCodes) {
+	private void convertCodeSystemCodesToCsv(List<CodeSystem.ConceptDefinitionComponent> theConcept, Map<String, String> theCodes, Map<String, List<CodeSystem.ConceptPropertyComponent>> theProperties, String theParentCode, Multimap<String, String> theCodeToParentCodes) {
 		for (CodeSystem.ConceptDefinitionComponent nextConcept : theConcept) {
 			if (isNotBlank(nextConcept.getCode())) {
 				theCodes.put(nextConcept.getCode(), nextConcept.getDisplay());
 				if (isNotBlank(theParentCode)) {
 					theCodeToParentCodes.put(nextConcept.getCode(), theParentCode);
 				}
-				convertCodeSystemCodesToCsv(nextConcept.getConcept(), theCodes, nextConcept.getCode(), theCodeToParentCodes);
+				if (nextConcept.getProperty() != null) {
+					theProperties.put(nextConcept.getCode(), nextConcept.getProperty());
+				}
+				convertCodeSystemCodesToCsv(nextConcept.getConcept(), theCodes, theProperties, nextConcept.getCode(), theCodeToParentCodes);
 			}
 		}
 	}
