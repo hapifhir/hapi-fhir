@@ -131,11 +131,15 @@
 			</exclusions>
 		</dependency>
 
-
 		<!--
 		Optional dependencies used by org.hl7.fhir.r4
 		We include these here to get the aggregate JavaDoc to work
 		-->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>ooxml-schemas</artifactId>
+			<optional>true</optional>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
@@ -151,6 +155,8 @@
 			<artifactId>poi-ooxml-schemas</artifactId>
 			<optional>true</optional>
 		</dependency>
+
+
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
