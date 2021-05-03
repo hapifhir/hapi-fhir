@@ -262,6 +262,30 @@ public class NpmR4Test extends BaseJpaR4Test {
 			IBaseResource resource = result.getResources(0, 1).get(0);
 			assertEquals("CodeSystem/shorthand-code-system/_history/1", resource.getIdElement().toString());
 		});
+	}
+
+	@Test
+	public void testNumericIdsInstalledWithNpmPrefix() throws Exception {
+			myDaoConfig.setAllowExternalReferences(true);
+
+			// Load a copy of hl7.fhir.uv.shorthand-0.12.0, but with id set to 1 instead of "shorthand-code-system"
+			byte[] bytes = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.13.0.tgz");
+			myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.13.0", bytes);
+
+			PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.13.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+			PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
+			// Be sure no further communication with the server
+			JettyUtil.closeServer(myServer);
+
+			// Search for the installed resource
+			runInTransaction(() -> {
+				SearchParameterMap map = SearchParameterMap.newSynchronous();
+				map.add(StructureDefinition.SP_URL, new UriParam("http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system"));
+				IBundleProvider result = myCodeSystemDao.search(map);
+				assertEquals(1, result.sizeOrThrowNpe());
+				IBaseResource resource = result.getResources(0, 1).get(0);
+				assertEquals("CodeSystem/npm-1/_history/1", resource.getIdElement().toString());
+			});
 
 	}
 

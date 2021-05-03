@@ -337,12 +337,15 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					createResource(dao, theResource);
 					ourLog.info("Created resource with new id");
 				} else {
+					if (id.isIdPartValidLong()) {
+						String newIdPart = "npm-" + id.getIdPart();
+						id.setParts(id.getBaseUrl(), id.getResourceType(), newIdPart, id.getVersionIdPart());
+					}
 					updateResource(dao, theResource);
 					ourLog.info("Created resource with existing id");
 				}
 			} else {
-
-				ourLog.info("Updating existing resource matching {}", map.toNormalizedQueryString(myFhirContext));
+			ourLog.info("Updating existing resource matching {}", map.toNormalizedQueryString(myFhirContext));
 				theResource.setId(searchResult.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
 				DaoMethodOutcome outcome = updateResource(dao, theResource);
 				if (!outcome.isNop()) {
