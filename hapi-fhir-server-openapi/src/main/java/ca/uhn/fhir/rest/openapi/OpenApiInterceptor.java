@@ -198,6 +198,8 @@ public class OpenApiInterceptor {
 					return false;
 				}
 			}
+
+			return true;
 		}
 
 		if (requestPath.startsWith("/swagger-ui/")) {
