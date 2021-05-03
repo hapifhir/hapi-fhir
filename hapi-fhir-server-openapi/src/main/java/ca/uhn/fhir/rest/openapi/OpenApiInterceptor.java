@@ -180,22 +180,24 @@ public class OpenApiInterceptor {
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED)
 	public boolean serveSwaggerUi(HttpServletRequest theRequest, HttpServletResponse theResponse, ServletRequestDetails theRequestDetails) throws IOException {
 		String requestPath = theRequest.getPathInfo();
+		String queryString = theRequest.getQueryString();
 
 		if (isBlank(requestPath) || requestPath.equals("/")) {
-			Set<String> highestRankedAcceptValues = RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theRequest);
-			if (highestRankedAcceptValues.contains(Constants.CT_HTML)) {
+			if (isBlank(queryString)) {
+				Set<String> highestRankedAcceptValues = RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theRequest);
+				if (highestRankedAcceptValues.contains(Constants.CT_HTML)) {
 
-				String serverBase = ".";
-				if (theRequestDetails.getServletRequest() != null) {
-					IServerAddressStrategy addressStrategy = theRequestDetails.getServer().getServerAddressStrategy();
-					serverBase = addressStrategy.determineServerBase(theRequest.getServletContext(), theRequest);
+					String serverBase = ".";
+					if (theRequestDetails.getServletRequest() != null) {
+						IServerAddressStrategy addressStrategy = theRequestDetails.getServer().getServerAddressStrategy();
+						serverBase = addressStrategy.determineServerBase(theRequest.getServletContext(), theRequest);
+					}
+					String redirectUrl = theResponse.encodeRedirectURL(serverBase + "/swagger-ui/");
+					theResponse.sendRedirect(redirectUrl);
+					theResponse.getWriter().close();
+					return false;
 				}
-				String redirectUrl = theResponse.encodeRedirectURL(serverBase + "/swagger-ui/");
-				theResponse.sendRedirect(redirectUrl);
-				theResponse.getWriter().close();
-				return false;
 			}
-
 		}
 
 		if (requestPath.startsWith("/swagger-ui/")) {
