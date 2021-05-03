@@ -743,7 +743,7 @@
 
 	<properties>
 
-		<fhir_core_version>5.3.10</fhir_core_version>
+		<fhir_core_version>5.3.11</fhir_core_version>
 		<ucum_version>1.0.3</ucum_version>
 
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -801,6 +801,8 @@
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<okhttp_version>3.8.1</okhttp_version>
+		<poi_version>4.1.2</poi_version>
+		<poi_ooxml_schemas_version>1.4</poi_ooxml_schemas_version>
 		<resteasy_version>4.0.0.Beta3</resteasy_version>
 		<ph_schematron_version>5.6.5</ph_schematron_version>
 		<ph_commons_version>9.5.4</ph_commons_version>
@@ -1331,18 +1333,23 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.poi</groupId>
+				<artifactId>ooxml-schemas</artifactId>
+				<version>${poi_ooxml_schemas_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.poi</groupId>
 				<artifactId>poi</artifactId>
-				<version>4.1.2</version>
+				<version>${poi_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.poi</groupId>
 				<artifactId>poi-ooxml</artifactId>
-				<version>4.1.2</version>
+				<version>${poi_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.poi</groupId>
 				<artifactId>poi-ooxml-schemas</artifactId>
-				<version>4.1.2</version>
+				<version>${poi_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.velocity</groupId>
@@ -1569,6 +1576,16 @@
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-high-level-client</artifactId>
 				<version>7.10.2</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.fasterxml.jackson.dataformat</groupId>
+						<artifactId>*</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.yaml</groupId>
+						<artifactId>*</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
