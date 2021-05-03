@@ -36,7 +36,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
-			<version>2.2</version>
+			<version>5.3.0</version>
 			<exclusions>
 				<exclusion>
 					<groupId>ca.uhn.hapi.fhir</groupId>
@@ -47,7 +47,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2.1</artifactId>
-			<version>3.3.0</version>
+			<version>5.3.0</version>
 			<exclusions>
 				<exclusion>
 					<groupId>ca.uhn.hapi.fhir</groupId>
@@ -97,7 +97,7 @@
 		<dependency>
 			<artifactId>commons-lang</artifactId>
 			<groupId>commons-lang</groupId>
-			<version>2.5</version>
+			<version>2.6</version>
 		</dependency>
 
 		<dependency>
@@ -188,7 +188,7 @@
 		<dependency>
 			<groupId>org.apache.ant</groupId>
 			<artifactId>ant</artifactId>
-			<version>1.10.8</version>
+			<version>1.10.10</version>
 		</dependency>
 		
 		<!-- This is just used for  -->
@@ -199,15 +199,10 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- 
-		Android includes an old version of commons-codec, so 
-		we compile against the old version to make sure we can compile
-		against it 
-		-->
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>1.1</version>
+			<version>1.15</version>
 		</dependency>
 
 

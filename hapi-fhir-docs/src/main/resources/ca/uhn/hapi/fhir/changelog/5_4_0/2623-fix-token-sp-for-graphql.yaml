@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2623
+title: "When performing a search via GraphQL, token search parameters were not properly parsed. Thanks to
+   Jari Maijenburg for the pull request!"

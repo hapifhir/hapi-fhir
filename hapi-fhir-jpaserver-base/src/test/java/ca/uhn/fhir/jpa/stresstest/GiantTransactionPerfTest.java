@@ -392,6 +392,11 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
+		public void deleteAllById(Iterable<? extends Long> ids) {
+
+		}
+
+		@Override
 		public void deleteAll(Iterable<? extends ResourceHistoryTable> entities) {
 			throw new UnsupportedOperationException();
 		}
@@ -433,7 +438,22 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
+		public <S extends ResourceHistoryTable> List<S> saveAllAndFlush(Iterable<S> entities) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
 		public void deleteInBatch(Iterable<ResourceHistoryTable> entities) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void deleteAllInBatch(Iterable<ResourceHistoryTable> entities) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void deleteAllByIdInBatch(Iterable<Long> ids) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -444,6 +464,11 @@ public class GiantTransactionPerfTest {
 
 		@Override
 		public ResourceHistoryTable getOne(Long theLong) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public ResourceHistoryTable getById(Long theLong) {
 			throw new UnsupportedOperationException();
 		}
 

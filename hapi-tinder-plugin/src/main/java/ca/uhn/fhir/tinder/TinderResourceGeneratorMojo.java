@@ -11,8 +11,13 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.runtime.RuntimeConstants;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 
 @Mojo(name = "generate-resource", defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
 public class TinderResourceGeneratorMojo extends AbstractGeneratorMojo {
@@ -45,9 +50,9 @@ public class TinderResourceGeneratorMojo extends AbstractGeneratorMojo {
 			ctx.put("versionCapitalized", configuration.getVersionCapitalized());
 
 			VelocityEngine v = new VelocityEngine();
-			v.setProperty("resource.loader", "cp");
-			v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-			v.setProperty("runtime.references.strict", Boolean.TRUE);
+			v.setProperty(RuntimeConstants.RESOURCE_LOADERS, "cp");
+			v.setProperty("resource.loader.cp.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+			v.setProperty("runtime.strict_mode.enable", Boolean.TRUE);
 
 			InputStream templateIs = ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream(templateName);
 			InputStreamReader templateReader = new InputStreamReader(templateIs);

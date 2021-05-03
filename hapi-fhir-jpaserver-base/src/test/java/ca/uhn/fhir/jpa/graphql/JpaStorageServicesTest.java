@@ -85,6 +85,19 @@ public class JpaStorageServicesTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testListResourceGraphqlTokenArgumentWithSystem() {
+		String appointmentId = createSomeAppointment();
+
+		Argument argument = new Argument("appointment_type", new StringValue("TEST_SYSTEM|TEST_CODE"));
+
+		List<IBaseResource> result = new ArrayList<>();
+		mySvc.listResources(mySrd, "Appointment", Collections.singletonList(argument), result);
+
+		assertFalse(result.isEmpty());
+		assertTrue(result.stream().anyMatch((it) -> it.getIdElement().getIdPart().equals(appointmentId)));
+	}
+
+	@Test
 	public void testListResourceGraphqlInvalidException() {
 		Argument argument = new Argument("test", new StringValue("some test value"));
 

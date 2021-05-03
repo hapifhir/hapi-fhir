@@ -12,7 +12,14 @@ import ca.uhn.fhir.tinder.TinderResourceGeneratorMojo;
 import ca.uhn.fhir.tinder.TinderStructuresMojo;
 import ca.uhn.fhir.tinder.ValueSetGenerator;
 import ca.uhn.fhir.tinder.VelocityHelper;
-import ca.uhn.fhir.tinder.model.*;
+import ca.uhn.fhir.tinder.model.BaseElement;
+import ca.uhn.fhir.tinder.model.BaseRootType;
+import ca.uhn.fhir.tinder.model.Child;
+import ca.uhn.fhir.tinder.model.Composite;
+import ca.uhn.fhir.tinder.model.Extension;
+import ca.uhn.fhir.tinder.model.Resource;
+import ca.uhn.fhir.tinder.model.ResourceBlock;
+import ca.uhn.fhir.tinder.model.SimpleChild;
 import ca.uhn.fhir.tinder.model.SimpleSetter.Parameter;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.FileUtils;
@@ -23,14 +30,30 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.runtime.RuntimeConstants;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import static org.apache.commons.lang.StringUtils.defaultString;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -311,7 +334,7 @@ public abstract class BaseStructureParser {
 		return myTemplateFile;
 	}
 
-	public void setTemplateFile (File theTemplateFile) {
+	public void setTemplateFile(File theTemplateFile) {
 		myTemplateFile = theTemplateFile;
 	}
 
@@ -569,7 +592,7 @@ public abstract class BaseStructureParser {
 			fos.flush();
 		}
 	}
-	
+
 	public void writeAll(File theOutputDirectory, File theResourceOutputDirectory, String thePackageBase) throws MojoFailureException {
 		writeAll(TargetType.SOURCE, theOutputDirectory, theResourceOutputDirectory, thePackageBase);
 	}
@@ -674,9 +697,9 @@ public abstract class BaseStructureParser {
 				ctx.put("versionCapitalized", capitalize);
 
 				VelocityEngine v = new VelocityEngine();
-				v.setProperty("resource.loader", "cp");
-				v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-				v.setProperty("runtime.references.strict", Boolean.TRUE);
+				v.setProperty(RuntimeConstants.RESOURCE_LOADERS, "cp");
+				v.setProperty("resource.loader.cp.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+				v.setProperty("runtime.strict_mode.enable", Boolean.TRUE);
 
 				InputStream templateIs = ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream("/vm/fhirversion_properties.vm");
 				InputStreamReader templateReader = new InputStreamReader(templateIs);

@@ -74,8 +74,8 @@ public class VelocityHelper {
 					result.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, path);
 				}
 			} else {
-				result.setProperty("resource.loader", "cp");
-				result.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+				result.setProperty(RuntimeConstants.RESOURCE_LOADERS, "cp");
+				result.setProperty("resource.loader.cp.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 			}
 		}
 		
