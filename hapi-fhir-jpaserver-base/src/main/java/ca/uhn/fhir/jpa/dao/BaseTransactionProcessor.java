@@ -226,10 +226,10 @@ public abstract class BaseTransactionProcessor {
 		myVersionAdapter.setResponseLastModified(newEntry, lastModifier);
 
 		if (theRequestDetails != null) {
-				String prefer = theRequestDetails.getHeader(Constants.HEADER_PREFER);
-				PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(null, prefer).getReturn();
-				if (preferReturn != null) {
-					if (preferReturn == PreferReturnEnum.REPRESENTATION) {
+			String prefer = theRequestDetails.getHeader(Constants.HEADER_PREFER);
+			PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(null, prefer).getReturn();
+			if (preferReturn != null) {
+				if (preferReturn == PreferReturnEnum.REPRESENTATION) {
 					if (outcome.getResource() != null) {
 						outcome.fireResourceViewCallbacks();
 						myVersionAdapter.setResource(newEntry, outcome.getResource());
@@ -475,7 +475,7 @@ public abstract class BaseTransactionProcessor {
 				throw new MethodNotAllowedException("Can not call transaction GET methods from this context");
 			}
 
-			ServletRequestDetails srd = (ServletRequestDetails)theRequestDetails;
+			ServletRequestDetails srd = (ServletRequestDetails) theRequestDetails;
 			Integer originalOrder = originalRequestOrder.get(nextReqEntry);
 			IBase nextRespEntry = (IBase) myVersionAdapter.getEntries(response).get(originalOrder);
 
@@ -577,7 +577,7 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	private Map<IBase, IIdType> doTransactionWriteOperations(final RequestDetails theRequest, String theActionName, TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
-																									Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder, List<IBase> theEntries, StopWatch theTransactionStopWatch) {
+																				Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder, List<IBase> theEntries, StopWatch theTransactionStopWatch) {
 
 		theTransactionDetails.beginAcceptingDeferredInterceptorBroadcasts(
 			Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED,
@@ -950,7 +950,10 @@ public abstract class BaseTransactionProcessor {
 					if (!nextId.hasIdPart()) {
 						if (resourceReference.getResource() != null) {
 							IIdType targetId = resourceReference.getResource().getIdElement();
-							if (theIdSubstitutions.containsValue(targetId)) {
+							if (targetId.getValue() == null) {
+								// This means it's a contained resource
+								continue;
+							} else if (theIdSubstitutions.containsValue(targetId)) {
 								newId = targetId;
 							} else {
 								throw new InternalErrorException("References by resource with no reference ID are not supported in DAO layer");
