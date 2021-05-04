@@ -136,7 +136,7 @@ public class MdmCandidateSearchSvc {
 		//3.
 		IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theResourceType);
 		IBundleProvider search = resourceDao.search(searchParameterMap);
-		List<IBaseResource> resources = search.getResources();
+		List<IBaseResource> resources = search.getAllResources();
 
 		int initialSize = theMatchedPidsToResources.size();
 

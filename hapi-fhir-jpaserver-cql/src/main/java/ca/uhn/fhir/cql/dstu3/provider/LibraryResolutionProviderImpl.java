@@ -78,7 +78,7 @@ public class LibraryResolutionProviderImpl implements LibraryResolutionProvider<
 		if (bundleProvider.size() == null || bundleProvider.size() == 0) {
 			return null;
 		}
-		List<IBaseResource> resourceList = bundleProvider.getResources();
+		List<IBaseResource> resourceList = bundleProvider.getAllResources();
 		return LibraryResolutionProvider.selectFromList(resolveLibraries(resourceList), version, x -> x.getVersion());
 	}
 
@@ -104,7 +104,7 @@ public class LibraryResolutionProviderImpl implements LibraryResolutionProvider<
 		if (bundleProvider.size() == null || bundleProvider.size() == 0) {
 			return new ArrayList<>();
 		}
-		List<IBaseResource> resourceList = bundleProvider.getResources();
+		List<IBaseResource> resourceList = bundleProvider.getAllResources();
 		return resolveLibraries(resourceList);
 	}
 

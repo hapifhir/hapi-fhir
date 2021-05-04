@@ -155,7 +155,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		IBundleProvider searchResults = dao.search(payloadSearchMap);
 
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
-		for (IBaseResource next : searchResults.getResources()) {
+		for (IBaseResource next : searchResults.getAllResources()) {
 			builder.addTransactionUpdateEntry(next);
 		}
 

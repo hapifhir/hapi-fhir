@@ -111,7 +111,7 @@ public class MeasureEvaluation {
 
 		List<Patient> patients = new ArrayList<>();
 		IBundleProvider patientProvider = registry.getResourceDao("Patient").search(map);
-		List<IBaseResource> patientList = patientProvider.getResources();
+		List<IBaseResource> patientList = patientProvider.getAllResources();
 		patientList.forEach(x -> patients.add((Patient) x));
 		return patients;
 	}
@@ -119,7 +119,7 @@ public class MeasureEvaluation {
 	private List<Patient> getAllPatients() {
 		List<Patient> patients = new ArrayList<>();
 		IBundleProvider patientProvider = registry.getResourceDao("Patient").search(SearchParameterMap.newSynchronous());
-		List<IBaseResource> patientList = patientProvider.getResources();
+		List<IBaseResource> patientList = patientProvider.getAllResources();
 		patientList.forEach(x -> patients.add((Patient) x));
 		return patients;
 	}

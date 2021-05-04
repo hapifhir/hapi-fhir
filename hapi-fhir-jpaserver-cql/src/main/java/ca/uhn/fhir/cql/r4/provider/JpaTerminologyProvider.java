@@ -95,7 +95,7 @@ public class JpaTerminologyProvider implements TerminologyProvider {
 
 			IBundleProvider bundleProvider = myValueSetDao
 				.search(SearchParameterMap.newSynchronous().add(ValueSet.SP_URL, new UriParam(valueSet.getId())));
-			List<IBaseResource> valueSets = bundleProvider.getResources();
+			List<IBaseResource> valueSets = bundleProvider.getAllResources();
 			if (valueSets.isEmpty()) {
 				throw new IllegalArgumentException(String.format("Could not resolve value set %s.", valueSet.getId()));
 			} else if (valueSets.size() == 1) {

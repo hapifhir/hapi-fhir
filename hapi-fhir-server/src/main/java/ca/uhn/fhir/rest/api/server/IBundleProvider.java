@@ -122,7 +122,7 @@ public interface IBundleProvider {
 	 * @throws ConfigurationException if size() is null
 	 */
 	@Nonnull
-	default List<IBaseResource> getResources() {
+	default List<IBaseResource> getAllResources() {
 		List<IBaseResource> retval = new ArrayList<>();
 
 		Integer size = size();

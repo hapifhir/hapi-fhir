@@ -107,20 +107,20 @@ public class MeasureEvaluation {
 
     private List<Patient> getPractitionerPatients(String practitionerRef) {
 		 SearchParameterMap map = SearchParameterMap.newSynchronous();
-        map.add("general-practitioner", new ReferenceParam(
-                practitionerRef.startsWith("Practitioner/") ? practitionerRef : "Practitioner/" + practitionerRef));
+		 map.add("general-practitioner", new ReferenceParam(
+			 practitionerRef.startsWith("Practitioner/") ? practitionerRef : "Practitioner/" + practitionerRef));
 
-        List<Patient> patients = new ArrayList<>();
+		 List<Patient> patients = new ArrayList<>();
 		 IBundleProvider patientProvider = registry.getResourceDao("Patient").search(map);
-		 List<IBaseResource> patientList = patientProvider.getResources();
-        patientList.forEach(x -> patients.add((Patient) x));
-        return patients;
-    }
+		 List<IBaseResource> patientList = patientProvider.getAllResources();
+		 patientList.forEach(x -> patients.add((Patient) x));
+		 return patients;
+	 }
 
     private List<Patient> getAllPatients() {
 		 List<Patient> patients = new ArrayList<>();
 		 IBundleProvider patientProvider = registry.getResourceDao("Patient").search(SearchParameterMap.newSynchronous());
-		 List<IBaseResource> patientList = patientProvider.getResources();
+		 List<IBaseResource> patientList = patientProvider.getAllResources();
 		 patientList.forEach(x -> patients.add((Patient) x));
 		 return patients;
 	 }

@@ -128,7 +128,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		 * " entries, but server method response contained " + retVal.size() + " entries (must be the same)"); } }
 		 */
 
-		List<IBaseResource> retResources = retVal.getResources();
+		List<IBaseResource> retResources = retVal.getAllResources();
 		for (int i = 0; i < retResources.size(); i++) {
 			IBaseResource newRes = retResources.get(i);
 			if (newRes.getIdElement() == null || newRes.getIdElement().isEmpty()) {

@@ -51,7 +51,7 @@ public class IBundleProviderTest {
 			}
 		};
 		try {
-			provider.getResources();
+			provider.getAllResources();
 			fail();
 		} catch (ConfigurationException e) {
 			assertEquals("Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.", e.getMessage());
