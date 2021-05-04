@@ -19,12 +19,6 @@ package ca.uhn.fhir.rest.server.method;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.lang.reflect.Method;
-import java.util.List;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -34,13 +28,20 @@ import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.server.*;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.IRestfulServer;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.method.TransactionParameter.ParamStyle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.Method;
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TransactionMethodBinding extends BaseResourceReturningMethodBinding {
 
@@ -127,7 +128,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		 * " entries, but server method response contained " + retVal.size() + " entries (must be the same)"); } }
 		 */
 
-		List<IBaseResource> retResources = retVal.getResources(0, retVal.size());
+		List<IBaseResource> retResources = retVal.getResources();
 		for (int i = 0; i < retResources.size(); i++) {
 			IBaseResource newRes = retResources.get(i);
 			if (newRes.getIdElement() == null || newRes.getIdElement().isEmpty()) {

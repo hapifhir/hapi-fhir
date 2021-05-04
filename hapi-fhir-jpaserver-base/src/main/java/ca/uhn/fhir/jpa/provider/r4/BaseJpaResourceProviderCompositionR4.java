@@ -78,7 +78,7 @@ public class BaseJpaResourceProviderCompositionR4 extends JpaResourceProviderR4<
 		startRequest(theServletRequest);
 		try {
 			IBundleProvider bundleProvider = ((IFhirResourceDaoComposition<Composition>) getDao()).getDocumentForComposition(theServletRequest, theId, theCount, theOffset, theLastUpdated, theSortSpec, theRequestDetails);
-			List<IBaseResource> resourceList = bundleProvider.getResources(0, bundleProvider.size());
+			List<IBaseResource> resourceList = bundleProvider.getResources();
 
 			boolean foundCompositionResource = false;
 			Bundle bundle = new Bundle().setType(Bundle.BundleType.DOCUMENT);

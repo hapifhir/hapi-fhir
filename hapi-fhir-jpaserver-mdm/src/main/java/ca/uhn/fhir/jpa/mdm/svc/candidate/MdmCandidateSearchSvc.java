@@ -20,15 +20,15 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  * #L%
  */
 
-import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.log.Logs;
-import ca.uhn.fhir.mdm.rules.json.MdmFilterSearchParamJson;
-import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.mdm.rules.json.MdmFilterSearchParamJson;
+import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -136,7 +136,7 @@ public class MdmCandidateSearchSvc {
 		//3.
 		IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theResourceType);
 		IBundleProvider search = resourceDao.search(searchParameterMap);
-		List<IBaseResource> resources = search.getResources(0, search.size());
+		List<IBaseResource> resources = search.getResources();
 
 		int initialSize = theMatchedPidsToResources.size();
 

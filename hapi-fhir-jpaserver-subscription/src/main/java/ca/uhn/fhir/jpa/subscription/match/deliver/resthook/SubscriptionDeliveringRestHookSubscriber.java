@@ -66,7 +66,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Scope("prototype")
 public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDeliverySubscriber {
-	private static Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringRestHookSubscriber.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringRestHookSubscriber.class);
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -155,7 +155,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		IBundleProvider searchResults = dao.search(payloadSearchMap);
 
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
-		for (IBaseResource next : searchResults.getResources(0, searchResults.size())) {
+		for (IBaseResource next : searchResults.getResources()) {
 			builder.addTransactionUpdateEntry(next);
 		}
 

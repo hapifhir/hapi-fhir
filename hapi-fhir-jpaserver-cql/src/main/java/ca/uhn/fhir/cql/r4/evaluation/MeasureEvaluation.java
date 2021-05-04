@@ -35,7 +35,6 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
@@ -68,9 +67,9 @@ public class MeasureEvaluation {
 
 	private static final Logger logger = LoggerFactory.getLogger(MeasureEvaluation.class);
 
-	private DataProvider provider;
-	private Interval measurementPeriod;
-	private DaoRegistry registry;
+	private final DataProvider provider;
+	private final Interval measurementPeriod;
+	private final DaoRegistry registry;
 
 	public MeasureEvaluation(DataProvider provider, DaoRegistry registry, Interval measurementPeriod) {
 		this.provider = provider;
@@ -106,21 +105,21 @@ public class MeasureEvaluation {
 	}
 
 	private List<Patient> getPractitionerPatients(String practitionerRef) {
-		SearchParameterMap map = new SearchParameterMap();
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add("general-practitioner", new ReferenceParam(
-				practitionerRef.startsWith("Practitioner/") ? practitionerRef : "Practitioner/" + practitionerRef));
+			practitionerRef.startsWith("Practitioner/") ? practitionerRef : "Practitioner/" + practitionerRef));
 
 		List<Patient> patients = new ArrayList<>();
 		IBundleProvider patientProvider = registry.getResourceDao("Patient").search(map);
-		List<IBaseResource> patientList = patientProvider.getResources(0, patientProvider.size());
+		List<IBaseResource> patientList = patientProvider.getResources();
 		patientList.forEach(x -> patients.add((Patient) x));
 		return patients;
 	}
 
 	private List<Patient> getAllPatients() {
 		List<Patient> patients = new ArrayList<>();
-		IBundleProvider patientProvider = registry.getResourceDao("Patient").search(new SearchParameterMap());
-		List<IBaseResource> patientList = patientProvider.getResources(0, patientProvider.size());
+		IBundleProvider patientProvider = registry.getResourceDao("Patient").search(SearchParameterMap.newSynchronous());
+		List<IBaseResource> patientList = patientProvider.getResources();
 		patientList.forEach(x -> patients.add((Patient) x));
 		return patients;
 	}
@@ -552,7 +551,7 @@ public class MeasureEvaluation {
 			}
 
 			if (!list.isEmpty()) {
-				list.setId("List/" + UUID.randomUUID().toString());
+				list.setId("List/" + UUID.randomUUID());
 				list.setTitle(key);
 				resources.put(list.getId(), list);
 				list.getEntry().forEach(listResource -> evaluatedResourcesList.add(listResource.getItem().getReference()));
@@ -700,10 +699,8 @@ public class MeasureEvaluation {
 			if (o instanceof Resource) {
 				Resource r = (Resource) o;
 				String id = (r.getIdElement().getResourceType() != null ? (r.getIdElement().getResourceType() + "/") : "")
-						+ r.getIdElement().getIdPart();
-				if (!codeHashSet.contains(id)) {
-					codeHashSet.add(id);
-				}
+					+ r.getIdElement().getIdPart();
+				codeHashSet.add(id);
 
 				if (!resources.containsKey(id)) {
 					resources.put(id, r);

@@ -33,7 +33,6 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.IntegerType;
 import org.hl7.fhir.dstu3.model.ListResource;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.MeasureReport;
@@ -65,20 +64,20 @@ import java.util.stream.Collectors;
 
 public class MeasureEvaluation {
 
-    private static final Logger logger = LoggerFactory.getLogger(MeasureEvaluation.class);
+	private static final Logger logger = LoggerFactory.getLogger(MeasureEvaluation.class);
 
-    private Interval measurementPeriod;
-    private DaoRegistry registry;
+	private final Interval measurementPeriod;
+	private final DaoRegistry registry;
 
-    public MeasureEvaluation(DaoRegistry registry, Interval measurementPeriod) {
-        this.registry = registry;
-        this.measurementPeriod = measurementPeriod;
-    }
+	public MeasureEvaluation(DaoRegistry registry, Interval measurementPeriod) {
+		this.registry = registry;
+		this.measurementPeriod = measurementPeriod;
+	}
 
-    public MeasureReport evaluatePatientMeasure(Measure measure, Context context, String patientId) {
-        logger.info("Generating individual report");
+	public MeasureReport evaluatePatientMeasure(Measure measure, Context context, String patientId) {
+		logger.info("Generating individual report");
 
-        if (patientId == null) {
+		if (patientId == null) {
             return evaluatePopulationMeasure(measure, context);
         }
 
@@ -107,24 +106,24 @@ public class MeasureEvaluation {
     }
 
     private List<Patient> getPractitionerPatients(String practitionerRef) {
-        SearchParameterMap map = new SearchParameterMap();
+		 SearchParameterMap map = SearchParameterMap.newSynchronous();
         map.add("general-practitioner", new ReferenceParam(
                 practitionerRef.startsWith("Practitioner/") ? practitionerRef : "Practitioner/" + practitionerRef));
 
         List<Patient> patients = new ArrayList<>();
-        IBundleProvider patientProvider = registry.getResourceDao("Patient").search(map);
-        List<IBaseResource> patientList = patientProvider.getResources(0, patientProvider.size());
+		 IBundleProvider patientProvider = registry.getResourceDao("Patient").search(map);
+		 List<IBaseResource> patientList = patientProvider.getResources();
         patientList.forEach(x -> patients.add((Patient) x));
         return patients;
     }
 
     private List<Patient> getAllPatients() {
-        List<Patient> patients = new ArrayList<>();
-        IBundleProvider patientProvider = registry.getResourceDao("Patient").search(new SearchParameterMap());
-        List<IBaseResource> patientList = patientProvider.getResources(0, patientProvider.size());
-        patientList.forEach(x -> patients.add((Patient) x));
-        return patients;
-    }
+		 List<Patient> patients = new ArrayList<>();
+		 IBundleProvider patientProvider = registry.getResourceDao("Patient").search(SearchParameterMap.newSynchronous());
+		 List<IBaseResource> patientList = patientProvider.getResources();
+		 patientList.forEach(x -> patients.add((Patient) x));
+		 return patients;
+	 }
 
     public MeasureReport evaluatePopulationMeasure(Measure measure, Context context) {
         logger.info("Generating summary report");
@@ -567,8 +566,8 @@ public class MeasureEvaluation {
             }
 
             if (!list.isEmpty()) {
-                list.setId("List/" + UUID.randomUUID().toString());
-                list.setTitle(key);
+					list.setId("List/" + UUID.randomUUID());
+					list.setTitle(key);
                 resources.put(list.getId(), list);
                 list.getEntry().forEach(listResource -> evaluatedResourcesList.add(listResource.getItem().getReference()));
             }
@@ -713,17 +712,15 @@ public class MeasureEvaluation {
 
         for (Object o : context.getEvaluatedResources()) {
             if (o instanceof Resource) {
-                Resource r = (Resource) o;
-                String id = (r.getIdElement().getResourceType() != null ? (r.getIdElement().getResourceType() + "/")
-                        : "") + r.getIdElement().getIdPart();
-                if (!codeHashSet.contains(id)) {
-                    codeHashSet.add(id);
-                }
+					Resource r = (Resource) o;
+					String id = (r.getIdElement().getResourceType() != null ? (r.getIdElement().getResourceType() + "/")
+						: "") + r.getIdElement().getIdPart();
+					codeHashSet.add(id);
 
-                if (!resources.containsKey(id)) {
-                    resources.put(id, r);
-                }
-            }
+					if (!resources.containsKey(id)) {
+						resources.put(id, r);
+					}
+				}
         }
 
         context.clearEvaluatedResources();

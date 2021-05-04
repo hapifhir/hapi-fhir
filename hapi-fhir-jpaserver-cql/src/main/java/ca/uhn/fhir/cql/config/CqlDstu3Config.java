@@ -33,10 +33,8 @@ import ca.uhn.fhir.cql.dstu3.provider.MeasureOperationsProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
-
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-
+import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.elm.execution.Library;
@@ -99,7 +97,7 @@ public class CqlDstu3Config extends BaseCqlConfig {
 	@Bean
 	public ElmCacheResourceChangeListener elmCacheResourceChangeListener(IResourceChangeListenerRegistry resourceChangeListenerRegistry, IFhirResourceDao<org.hl7.fhir.dstu3.model.Library> libraryDao,  Map<org.cqframework.cql.elm.execution.VersionedIdentifier, Library> globalLibraryCache) {
 		ElmCacheResourceChangeListener listener = new ElmCacheResourceChangeListener(libraryDao, globalLibraryCache);
-		resourceChangeListenerRegistry.registerResourceResourceChangeListener("Library", new SearchParameterMap(), listener, 1000);
+		resourceChangeListenerRegistry.registerResourceResourceChangeListener("Library", SearchParameterMap.newSynchronous(), listener, 1000);
 		return listener;
 	}
 }
