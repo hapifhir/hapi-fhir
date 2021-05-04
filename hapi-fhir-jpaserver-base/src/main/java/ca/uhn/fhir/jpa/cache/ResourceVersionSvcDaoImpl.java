@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -52,7 +53,7 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 	public ResourceVersionMap getVersionMap(String theResourceName, SearchParameterMap theSearchParamMap) {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceName);
 
-		List<Long> matchingIds = dao.searchForIds(theSearchParamMap, null).stream()
+		List<Long> matchingIds = dao.searchForIds(theSearchParamMap, new SystemRequestDetails()).stream()
 			.map(ResourcePersistentId::getIdAsLong)
 			.collect(Collectors.toList());
 
