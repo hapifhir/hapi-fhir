@@ -29,8 +29,8 @@ import javax.annotation.Nullable;
 
 public interface IRequestPartitionHelperSvc {
 	@Nonnull
-	RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType);
+	RequestPartitionId determineReadPartitionForRequest(RequestDetails theRequest, String theResourceType);
 
 	@Nonnull
-	RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType);
+	RequestPartitionId determineCreatePartitionForRequest(RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType);
 }
