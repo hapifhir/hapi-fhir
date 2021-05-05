@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
@@ -35,6 +36,7 @@ import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -99,6 +101,10 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	private ISearchCacheSvc mySearchCacheSvc;
 	@Autowired
 	private RequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	@Autowired
+	private DaoConfig myDaoConfig;
+	@Autowired
+	private MemoryCacheService myMemoryCacheService;
 
 	/*
 	 * Non autowired fields (will be different for every instance
@@ -241,15 +247,21 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.HISTORY) {
 			if (mySearchEntity.getTotalCount() == null) {
-				new TransactionTemplate(myTxManager).executeWithoutResult(t->{
-					HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(mySearchEntity.getResourceType(), mySearchEntity.getResourceId(), mySearchEntity.getLastUpdatedLow(), mySearchEntity.getLastUpdatedHigh());
-					Long count = historyBuilder.fetchCount(getRequestPartitionId());
-					mySearchEntity.setTotalCount(count.intValue());
-				});
+				calculateHistoryCount();
 			}
 		}
 
 		return true;
+	}
+
+	private void calculateHistoryCount() {
+		myMemoryCacheService.get(MemoryCacheService.CacheEnum.HISTORY_COUNT, key, supplier);
+
+		new TransactionTemplate(myTxManager).executeWithoutResult(t->{
+			HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(mySearchEntity.getResourceType(), mySearchEntity.getResourceId(), mySearchEntity.getLastUpdatedLow(), mySearchEntity.getLastUpdatedHigh());
+			Long count = historyBuilder.fetchCount(getRequestPartitionId());
+			mySearchEntity.setTotalCount(count.intValue());
+		});
 	}
 
 	@Override

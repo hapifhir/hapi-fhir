@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -25,6 +26,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -463,7 +466,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	 */
 	@Test
 	public void testContainedArePreservedForBug410() throws IOException {
-		String input = IOUtils.toString(getClass().getResourceAsStream("/r4/bug-410-bundle.xml"), StandardCharsets.UTF_8);
+		String input = ClasspathUtil.loadResource("/r4/bug-410-bundle.xml");
 		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
 
 		Bundle output = mySystemDao.transaction(mySrd, bundle);
