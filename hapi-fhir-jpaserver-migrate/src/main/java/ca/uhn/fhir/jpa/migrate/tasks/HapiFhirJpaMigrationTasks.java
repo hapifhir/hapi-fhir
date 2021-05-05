@@ -120,7 +120,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.addIdGenerator("20210410.7", "SEQ_BLKIMJOBFILE_PID");
 
 		//Increase ResourceLink path length
-		version.onTable("HFJ_RES_LINK").modifyColumn("20210505.1", "SRC_PATH").nonNullable().withType(ColumnTypeEnum.STRING, 500);
+		version.onTable("HFJ_RES_LINK").modifyColumn("20210505.1", "SRC_PATH").nonNullable().failureAllowed().withType(ColumnTypeEnum.STRING, 500);
 	}
 
 	private void init530() {
