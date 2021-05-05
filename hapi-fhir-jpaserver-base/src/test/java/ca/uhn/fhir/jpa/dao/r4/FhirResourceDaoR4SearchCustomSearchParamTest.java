@@ -24,6 +24,7 @@ import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.Appointment.AppointmentStatus;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ChargeItem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -47,6 +48,7 @@ import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ServiceRequest;
@@ -1506,6 +1508,44 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		} catch (InvalidRequestException e) {
 			assertEquals("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _language, _lastUpdated, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
+	}
+
+
+	@Test
+	public void testSearchParametersWithVeryLongFhirPathExpressionsAreAccepted() {
+		//Given
+		String twoHundredCharUrl = "http://urlurlurlsurlurlurlsurlurlurlsurlurlurlsurlurlurlsurlurlurlsurlurlurlsurlurlurlsurlurlurlsurlurlurlsurlurlurlsurlurlurlsurlurlurlsurlurlurlsurlurlurlsurlurlurlsurlurlurlsurlurlurlsurlurlurlsurlurlurls.com";
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setExpression("PractitionerRole.extension.where(url='" + twoHundredCharUrl + "').value.as(Reference)");
+		searchParameter.addBase("PractitionerRole");
+		searchParameter.setId("random-extension-sp");
+		searchParameter.setCode("random-extension");
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
+		mySearchParameterDao.update(searchParameter);
+
+		mySearchParamRegistry.forceRefresh();
+		mySearchParamRegistry.refreshCacheIfNecessary();
+
+		Practitioner p = new Practitioner();
+		p.setId("Practitioner/P123");
+		myPractitionerDao.update(p);
+
+		//When
+		PractitionerRole pr = new PractitionerRole();
+		pr.addExtension().setUrl(twoHundredCharUrl).setValue(new Reference("Practitioner/P123"));
+		pr.setPractitioner(new Reference("Practitioner/P123"));
+		pr.setId("PractitionerRole/PR123");
+		myCaptureQueriesListener.clear();
+		myPractitionerRoleDao.update(pr);
+		myCaptureQueriesListener.logInsertQueries();
+
+		//Then
+		SearchParameterMap searchParameterMap = new SearchParameterMap();
+		searchParameterMap.setLoadSynchronous(true);
+		searchParameterMap.add("random-extension", new TokenParam("true"));
+		IBundleProvider search = myPractitionerRoleDao.search(searchParameterMap);
+
 	}
 
 	@Test
