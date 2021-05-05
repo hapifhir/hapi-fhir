@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.interceptor.ex.PartitionInterceptorReadPartitionsBasedOnS
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -92,7 +93,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 
 		StructureDefinition sd = new StructureDefinition();
 		sd.setUrl("http://foo");
-		myStructureDefinitionDao.create(sd);
+		myStructureDefinitionDao.create(sd, new ServletRequestDetails());
 
 		runInTransaction(()->{
 			List<ResourceTable> resources = myResourceTableDao.findAll();
@@ -108,7 +109,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 
 		StructureDefinition sd = new StructureDefinition();
 		sd.setUrl("http://foo");
-		myStructureDefinitionDao.create(sd);
+		myStructureDefinitionDao.create(sd, new ServletRequestDetails());
 
 		runInTransaction(()->{
 			List<ResourceTable> resources = myResourceTableDao.findAll();
@@ -124,7 +125,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		StructureDefinition sd = new StructureDefinition();
 		sd.setUrl("http://foo");
 		try {
-			myStructureDefinitionDao.create(sd);
+			myStructureDefinitionDao.create(sd, new ServletRequestDetails());
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("Resource type StructureDefinition can not be partitioned", e.getMessage());
