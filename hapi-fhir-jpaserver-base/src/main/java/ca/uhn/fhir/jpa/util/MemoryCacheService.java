@@ -175,10 +175,10 @@ public class MemoryCacheService {
 
 	public static class HistoryCountKey {
 		private final String myTypeName;
-		private final String myInstanceId;
+		private final Long myInstanceId;
 		private final int myHashCode;
 
-		private HistoryCountKey(String theTypeName, String theInstanceId) {
+		private HistoryCountKey(String theTypeName, Long theInstanceId) {
 			myTypeName = theTypeName;
 			myInstanceId = theInstanceId;
 			myHashCode = new HashCodeBuilder().append(myTypeName).append(myInstanceId).toHashCode();
@@ -203,16 +203,14 @@ public class MemoryCacheService {
 			return new HistoryCountKey(null, null);
 		}
 
-		public static HistoryCountKey forSystem(@Nonnull String theType) {
+		public static HistoryCountKey forType(@Nonnull String theType) {
 			assert isNotBlank(theType);
 			return new HistoryCountKey(theType, null);
 		}
 
-		public static HistoryCountKey forSystem(@Nonnull IIdType theInstance) {
-			assert theInstance != null;
-			assert theInstance.hasResourceType();
-			assert theInstance.hasIdPart();
-			return new HistoryCountKey(null, theInstance.toUnqualifiedVersionless().getValue());
+		public static HistoryCountKey forInstance(@Nonnull Long theInstanceId) {
+			assert theInstanceId != null;
+			return new HistoryCountKey(null, theInstanceId);
 		}
 
 	}

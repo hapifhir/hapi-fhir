@@ -35,15 +35,14 @@ import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
-import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
-import ca.uhn.fhir.jpa.util.MemoryCacheService;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
+import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.util.InterceptorUtil;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
@@ -51,6 +50,7 @@ import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -72,6 +72,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 public class PersistedJpaBundleProvider implements IBundleProvider {
 
@@ -80,7 +81,9 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	/*
 	 * Autowired fields
 	 */
-
+	private final RequestDetails myRequest;
+	@Autowired
+	protected PlatformTransactionManager myTxManager;
 	@PersistenceContext
 	private EntityManager myEntityManager;
 	@Autowired
@@ -92,8 +95,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
-	protected PlatformTransactionManager myTxManager;
-	@Autowired
 	private FhirContext myContext;
 	@Autowired
 	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
@@ -103,15 +104,13 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	private RequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Autowired
 	private DaoConfig myDaoConfig;
-	@Autowired
-	private MemoryCacheService myMemoryCacheService;
 
 	/*
 	 * Non autowired fields (will be different for every instance
 	 * of this class, since it's a prototype
 	 */
-
-	private final RequestDetails myRequest;
+	@Autowired
+	private MemoryCacheService myMemoryCacheService;
 	private Search mySearchEntity;
 	private String myUuid;
 	private SearchCacheStatusEnum myCacheStatus;
@@ -255,13 +254,37 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	}
 
 	private void calculateHistoryCount() {
-		myMemoryCacheService.get(MemoryCacheService.CacheEnum.HISTORY_COUNT, key, supplier);
+		MemoryCacheService.HistoryCountKey key;
+		if (mySearchEntity.getResourceId() != null) {
+			key = MemoryCacheService.HistoryCountKey.forInstance(mySearchEntity.getResourceId());
+		} else if (mySearchEntity.getResourceType() != null) {
+			key = MemoryCacheService.HistoryCountKey.forType(mySearchEntity.getResourceType());
+		} else {
+			key = MemoryCacheService.HistoryCountKey.forSystem();
+		}
 
-		new TransactionTemplate(myTxManager).executeWithoutResult(t->{
+		Function<MemoryCacheService.HistoryCountKey, Integer> supplier = k -> new TransactionTemplate(myTxManager).execute(t -> {
 			HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(mySearchEntity.getResourceType(), mySearchEntity.getResourceId(), mySearchEntity.getLastUpdatedLow(), mySearchEntity.getLastUpdatedHigh());
 			Long count = historyBuilder.fetchCount(getRequestPartitionId());
-			mySearchEntity.setTotalCount(count.intValue());
+			return count.intValue();
 		});
+
+		switch (myDaoConfig.getHistoryCountMode()) {
+			case COUNT_ACCURATE: {
+				int count = supplier.apply(key);
+				mySearchEntity.setTotalCount(count);
+				break;
+			}
+			case COUNT_CACHED: {
+				int count = myMemoryCacheService.get(MemoryCacheService.CacheEnum.HISTORY_COUNT, key, supplier);
+				mySearchEntity.setTotalCount(count);
+				break;
+			}
+			case COUNT_DISABLED: {
+				break;
+			}
+		}
+
 	}
 
 	@Override
