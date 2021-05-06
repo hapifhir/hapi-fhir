@@ -4,6 +4,9 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResult;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupElementDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupElementTargetDao;
 import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -16,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.TransactionStatus;
@@ -38,7 +42,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4ConceptMapTest.class);
-
+	@Autowired
+	protected ITermConceptMapGroupDao myConceptMapGroupDao;
+	@Autowired
+	protected ITermConceptMapGroupElementDao myConceptMapGroupElementDao;
+	@Autowired
+	protected ITermConceptMapGroupElementTargetDao myConceptMapGroupElementTargetDao;
 	private IIdType myConceptMapId;
 
 	@BeforeEach
@@ -595,6 +604,113 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 			}
 		});
+	}
+
+	/**
+	 * Make sure we can handle mapping where the system has no explicit version
+	 * specified in the ConceptMap
+	 */
+	@Test
+	public void testTranslateWithReverse_NonVersionedSystem() {
+
+		ConceptMap conceptMap1 = new ConceptMap();
+		conceptMap1.setUrl(CM_URL);
+
+		conceptMap1.setSource(new UriType(VS_URL));
+		conceptMap1.setTarget(new UriType(VS_URL_2));
+
+		ConceptMap.ConceptMapGroupComponent group = conceptMap1.addGroup();
+		group.setSource(CS_URL);
+		group.setTarget(CS_URL_2);
+
+		ConceptMap.SourceElementComponent element = group.addElement();
+		element.setCode("12345");
+		element.setDisplay("Source Code 12345");
+
+		ConceptMap.TargetElementComponent target = element.addTarget();
+		target.setCode("34567");
+		target.setDisplay("Target Code 34567");
+		target.setEquivalence(ConceptMapEquivalence.EQUAL);
+
+		element = group.addElement();
+		element.setCode("23456");
+		element.setDisplay("Source Code 23456");
+
+		target = element.addTarget();
+		target.setCode("45678");
+		target.setDisplay("Target Code 45678");
+		target.setEquivalence(ConceptMapEquivalence.WIDER);
+
+		group = conceptMap1.addGroup();
+		group.setSource(CS_URL);
+		group.setTarget(CS_URL_3);
+
+		element = group.addElement();
+		element.setCode("12345");
+		element.setDisplay("Source Code 12345");
+
+		target = element.addTarget();
+		target.setCode("56789");
+		target.setDisplay("Target Code 56789");
+		target.setEquivalence(ConceptMapEquivalence.EQUAL);
+
+		target = element.addTarget();
+		target.setCode("67890");
+		target.setDisplay("Target Code 67890");
+		target.setEquivalence(ConceptMapEquivalence.WIDER);
+
+		group = conceptMap1.addGroup();
+		group.setSource(CS_URL_4);
+		group.setTarget(CS_URL_2);
+
+		element = group.addElement();
+		element.setCode("12345");
+		element.setDisplay("Source Code 12345");
+
+		target = element.addTarget();
+		target.setCode("34567");
+		target.setDisplay("Target Code 34567");
+		target.setEquivalence(ConceptMapEquivalence.NARROWER);
+
+		conceptMap1.setId(myConceptMapId);
+		myConceptMapDao.update(conceptMap1, mySrd).getId().toUnqualifiedVersionless();
+
+
+		runInTransaction(() -> {
+			/*
+			 * Provided:
+			 *   source code
+			 *   reverse = true
+			 */
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setCode("34567");
+			translationRequest.setReverse(true);
+
+			TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
+
+			assertTrue(translationResult.getResult());
+			assertEquals("Matches found", translationResult.getMessage());
+
+			assertEquals(2, translationResult.getResults().size());
+
+			TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+			assertEquals(ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
+			assertEquals("12345", translationMatch.getCode());
+			assertEquals("Source Code 12345", translationMatch.getDisplay());
+			assertEquals(CS_URL, translationMatch.getSystem());
+			assertEquals(null, translationMatch.getSystemVersion());
+			assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+
+			translationMatch = translationResult.getResults().get(1);
+			assertEquals(ConceptMapEquivalence.NARROWER.toCode(), translationMatch.getEquivalence());
+			assertEquals("12345", translationMatch.getCode());
+			assertEquals("Source Code 12345", translationMatch.getDisplay());
+			assertEquals(CS_URL_4, translationMatch.getSystem());
+			assertEquals(null, translationMatch.getSystemVersion());
+			assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+		});
+
 	}
 
 	@Test

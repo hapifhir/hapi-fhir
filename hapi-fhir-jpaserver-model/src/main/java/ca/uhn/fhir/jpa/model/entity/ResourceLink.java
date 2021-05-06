@@ -52,7 +52,7 @@ import java.util.Date;
 })
 public class ResourceLink extends BaseResourceIndex {
 
-	public static final int SRC_PATH_LENGTH = 200;
+	public static final int SRC_PATH_LENGTH = 500;
 	private static final long serialVersionUID = 1L;
 	@SequenceGenerator(name = "SEQ_RESLINK_ID", sequenceName = "SEQ_RESLINK_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESLINK_ID")

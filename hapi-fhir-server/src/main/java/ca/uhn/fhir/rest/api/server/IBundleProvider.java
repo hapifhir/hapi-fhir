@@ -1,11 +1,13 @@
 package ca.uhn.fhir.rest.api.server;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -112,6 +114,26 @@ public interface IBundleProvider {
 	 */
 	@Nonnull
 	List<IBaseResource> getResources(int theFromIndex, int theToIndex);
+
+	/**
+	 * Get all resources
+	 *
+	 * @return getResources(0, this.size ()).  Return an empty list if size() is zero.
+	 * @throws ConfigurationException if size() is null
+	 */
+	@Nonnull
+	default List<IBaseResource> getAllResources() {
+		List<IBaseResource> retval = new ArrayList<>();
+
+		Integer size = size();
+		if (size == null) {
+			throw new ConfigurationException("Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.");
+		}
+		if (size > 0) {
+			retval.addAll(getResources(0, size));
+		}
+		return retval;
+	}
 
 	/**
 	 * Returns the UUID associated with this search. Note that this

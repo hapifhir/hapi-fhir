@@ -2608,6 +2608,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	 * we block this so it doesn't get used accidentally.
 	 */
 	@Test
+	@Disabled
 	public void testTransactionWithResourceReferenceInsteadOfIdReferenceBlocked() {
 
 		Bundle input = createBundleWithConditionalCreateReferenceByResource();
@@ -2622,6 +2623,26 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			assertEquals("References by resource with no reference ID are not supported in DAO layer", e.getMessage());
 		}
 
+	}
+
+	@Test
+	public void testTransactionWithContainedResource() {
+
+		Organization organization = new Organization();
+		organization.setName("ORG NAME");
+
+		Patient patient = new Patient();
+		patient.getManagingOrganization().setResource(organization);
+
+		BundleBuilder bundleBuilder = new BundleBuilder(myFhirCtx);
+		bundleBuilder.addTransactionCreateEntry(patient);
+		Bundle outcome = mySystemDao.transaction(null, (Bundle) bundleBuilder.getBundle());
+
+		String id = outcome.getEntry().get(0).getResponse().getLocation();
+		patient = myPatientDao.read(new IdType(id));
+
+		assertEquals("#1", patient.getManagingOrganization().getReference());
+		assertEquals("#1", patient.getContained().get(0).getId());
 	}
 
 	@Nonnull

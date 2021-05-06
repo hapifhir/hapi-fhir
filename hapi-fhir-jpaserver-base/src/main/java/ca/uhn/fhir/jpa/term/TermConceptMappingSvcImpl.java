@@ -202,69 +202,68 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 			termConceptMap = myConceptMapDao.save(termConceptMap);
 			int codesSaved = 0;
 
-			if (theConceptMap.hasGroup()) {
-				TermConceptMapGroup termConceptMapGroup;
-				for (ConceptMap.ConceptMapGroupComponent group : theConceptMap.getGroup()) {
+			TermConceptMapGroup termConceptMapGroup;
+			for (ConceptMap.ConceptMapGroupComponent group : theConceptMap.getGroup()) {
 
-					String groupSource = group.getSource();
-					if (isBlank(groupSource)) {
-						groupSource = source;
-					}
-					if (isBlank(groupSource)) {
-						throw new UnprocessableEntityException("ConceptMap[url='" + theConceptMap.getUrl() + "'] contains at least one group without a value in ConceptMap.group.source");
-					}
+				String groupSource = group.getSource();
+				if (isBlank(groupSource)) {
+					groupSource = source;
+				}
+				if (isBlank(groupSource)) {
+					throw new UnprocessableEntityException("ConceptMap[url='" + theConceptMap.getUrl() + "'] contains at least one group without a value in ConceptMap.group.source");
+				}
 
-					String groupTarget = group.getTarget();
-					if (isBlank(groupTarget)) {
-						groupTarget = target;
-					}
-					if (isBlank(groupTarget)) {
-						throw new UnprocessableEntityException("ConceptMap[url='" + theConceptMap.getUrl() + "'] contains at least one group without a value in ConceptMap.group.target");
-					}
+				String groupTarget = group.getTarget();
+				if (isBlank(groupTarget)) {
+					groupTarget = target;
+				}
+				if (isBlank(groupTarget)) {
+					throw new UnprocessableEntityException("ConceptMap[url='" + theConceptMap.getUrl() + "'] contains at least one group without a value in ConceptMap.group.target");
+				}
 
-					termConceptMapGroup = new TermConceptMapGroup();
-					termConceptMapGroup.setConceptMap(termConceptMap);
-					termConceptMapGroup.setSource(groupSource);
-					termConceptMapGroup.setSourceVersion(group.getSourceVersion());
-					termConceptMapGroup.setTarget(groupTarget);
-					termConceptMapGroup.setTargetVersion(group.getTargetVersion());
-					myConceptMapGroupDao.save(termConceptMapGroup);
+				termConceptMapGroup = new TermConceptMapGroup();
+				termConceptMapGroup.setConceptMap(termConceptMap);
+				termConceptMapGroup.setSource(groupSource);
+				termConceptMapGroup.setSourceVersion(group.getSourceVersion());
+				termConceptMapGroup.setTarget(groupTarget);
+				termConceptMapGroup.setTargetVersion(group.getTargetVersion());
+				termConceptMapGroup = myConceptMapGroupDao.save(termConceptMapGroup);
 
-					if (group.hasElement()) {
-						TermConceptMapGroupElement termConceptMapGroupElement;
-						for (ConceptMap.SourceElementComponent element : group.getElement()) {
-							if (isBlank(element.getCode())) {
-								continue;
-							}
-							termConceptMapGroupElement = new TermConceptMapGroupElement();
-							termConceptMapGroupElement.setConceptMapGroup(termConceptMapGroup);
-							termConceptMapGroupElement.setCode(element.getCode());
-							termConceptMapGroupElement.setDisplay(element.getDisplay());
-							myConceptMapGroupElementDao.save(termConceptMapGroupElement);
+				if (group.hasElement()) {
+					TermConceptMapGroupElement termConceptMapGroupElement;
+					for (ConceptMap.SourceElementComponent element : group.getElement()) {
+						if (isBlank(element.getCode())) {
+							continue;
+						}
+						termConceptMapGroupElement = new TermConceptMapGroupElement();
+						termConceptMapGroupElement.setConceptMapGroup(termConceptMapGroup);
+						termConceptMapGroupElement.setCode(element.getCode());
+						termConceptMapGroupElement.setDisplay(element.getDisplay());
+						termConceptMapGroupElement = myConceptMapGroupElementDao.save(termConceptMapGroupElement);
 
-							if (element.hasTarget()) {
-								TermConceptMapGroupElementTarget termConceptMapGroupElementTarget;
-								for (ConceptMap.TargetElementComponent elementTarget : element.getTarget()) {
-									if (isBlank(elementTarget.getCode())) {
-										continue;
-									}
-									termConceptMapGroupElementTarget = new TermConceptMapGroupElementTarget();
-									termConceptMapGroupElementTarget.setConceptMapGroupElement(termConceptMapGroupElement);
-									termConceptMapGroupElementTarget.setCode(elementTarget.getCode());
-									termConceptMapGroupElementTarget.setDisplay(elementTarget.getDisplay());
-									termConceptMapGroupElementTarget.setEquivalence(elementTarget.getEquivalence());
-									myConceptMapGroupElementTargetDao.save(termConceptMapGroupElementTarget);
+						if (element.hasTarget()) {
+							TermConceptMapGroupElementTarget termConceptMapGroupElementTarget;
+							for (ConceptMap.TargetElementComponent elementTarget : element.getTarget()) {
+								if (isBlank(elementTarget.getCode())) {
+									continue;
+								}
+								termConceptMapGroupElementTarget = new TermConceptMapGroupElementTarget();
+								termConceptMapGroupElementTarget.setConceptMapGroupElement(termConceptMapGroupElement);
+								termConceptMapGroupElementTarget.setCode(elementTarget.getCode());
+								termConceptMapGroupElementTarget.setDisplay(elementTarget.getDisplay());
+								termConceptMapGroupElementTarget.setEquivalence(elementTarget.getEquivalence());
+								myConceptMapGroupElementTargetDao.save(termConceptMapGroupElementTarget);
 
-									if (++codesSaved % 250 == 0) {
-										ourLog.info("Have saved {} codes in ConceptMap", codesSaved);
-										myConceptMapGroupElementTargetDao.flush();
-									}
+								if (++codesSaved % 250 == 0) {
+									ourLog.info("Have saved {} codes in ConceptMap", codesSaved);
+									myConceptMapGroupElementTargetDao.flush();
 								}
 							}
 						}
 					}
 				}
 			}
+
 		} else {
 			TermConceptMap existingTermConceptMap = optionalExistingTermConceptMapByUrl.get();
 
@@ -558,9 +557,9 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 
 	private boolean alreadyContainsMapping(List<TranslateConceptResult> elements, TranslateConceptResult translationMatch) {
 		for (TranslateConceptResult nextExistingElement : elements) {
-			if (nextExistingElement.getSystem().equals(translationMatch.getSystem())) {
-				if (nextExistingElement.getSystemVersion().equals(translationMatch.getSystemVersion())) {
-					if (nextExistingElement.getCode().equals(translationMatch.getCode())) {
+			if (StringUtils.equals(nextExistingElement.getSystem(), translationMatch.getSystem())) {
+				if (StringUtils.equals(nextExistingElement.getSystemVersion(), translationMatch.getSystemVersion())) {
+					if (StringUtils.equals(nextExistingElement.getCode(), translationMatch.getCode())) {
 						return true;
 					}
 				}
