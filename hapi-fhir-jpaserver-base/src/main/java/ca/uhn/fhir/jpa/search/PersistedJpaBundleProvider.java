@@ -253,6 +253,12 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		return true;
 	}
 
+	/**
+	 * Note that this method is called outside a DB transaction, and uses a loading cache
+	 * (assuming the default {@literal COUNT_CACHED} mode) so this effectively throttles
+	 * access to the database by preventing multiple concurrent DB calls for an expensive
+	 * count operation.
+	 */
 	private void calculateHistoryCount() {
 		MemoryCacheService.HistoryCountKey key;
 		if (mySearchEntity.getResourceId() != null) {
