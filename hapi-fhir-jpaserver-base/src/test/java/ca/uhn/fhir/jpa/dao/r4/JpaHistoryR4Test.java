@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
@@ -21,8 +22,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -32,7 +35,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setHistoryCountMode(new DaoConfig().getHistoryCountMode());
+		myDaoConfig.setHistoryCountMode(DaoConfig.DEFAULT_HISTORY_COUNT_MODE);
 	}
 
 	@Test
@@ -56,7 +59,9 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		// Resource query happens but not count query
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT), not(startsWith("select count")));
 
 	}
 
@@ -153,6 +158,32 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		myCaptureQueriesListener.logSelectQueries(false, false);
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT), containsString(" from hfj_res_ver "));
 		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
+
+	}
+
+	@Test
+	public void testTypeHistory_CountCacheEnabled_WithOffset() {
+		create20Patients();
+		sleepAtLeast(10);
+
+		/*
+		 * Perform initial history
+		 */
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider history = myPatientDao.history(null, new Date(), new SystemRequestDetails());
+
+		// No count since there is an offset
+		assertEquals(null, history.size());
+
+		// Simulate the server actually loading the resources
+		assertEquals(20, history.getResources(0, 999).size());
+
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT), not(startsWith("select count")));
 
 	}
 

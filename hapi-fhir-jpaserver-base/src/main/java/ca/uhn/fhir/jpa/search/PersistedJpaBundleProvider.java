@@ -275,15 +275,19 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			return count.intValue();
 		});
 
+		boolean haveOffset = mySearchEntity.getLastUpdatedLow() != null || mySearchEntity.getLastUpdatedHigh() != null;
+
 		switch (myDaoConfig.getHistoryCountMode()) {
 			case COUNT_ACCURATE: {
 				int count = supplier.apply(key);
 				mySearchEntity.setTotalCount(count);
 				break;
 			}
-			case COUNT_CACHED: {
-				int count = myMemoryCacheService.get(MemoryCacheService.CacheEnum.HISTORY_COUNT, key, supplier);
-				mySearchEntity.setTotalCount(count);
+			case CACHED_ONLY_WITHOUT_OFFSET: {
+				if (!haveOffset) {
+					int count = myMemoryCacheService.get(MemoryCacheService.CacheEnum.HISTORY_COUNT, key, supplier);
+					mySearchEntity.setTotalCount(count);
+				}
 				break;
 			}
 			case COUNT_DISABLED: {

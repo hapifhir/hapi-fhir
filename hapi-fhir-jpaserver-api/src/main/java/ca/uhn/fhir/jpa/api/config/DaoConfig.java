@@ -75,7 +75,7 @@ public class DaoConfig {
 	)));
 	// update setter javadoc if default changes
 	public static final int DEFAULT_MAX_EXPANSION_SIZE = 1000;
-	public static final HistoryCountModeEnum DEFAULT_HISTORY_COUNT_MODE = HistoryCountModeEnum.COUNT_CACHED;
+	public static final HistoryCountModeEnum DEFAULT_HISTORY_COUNT_MODE = HistoryCountModeEnum.CACHED_ONLY_WITHOUT_OFFSET;
 	/**
 	 * Default value for {@link #setMaximumSearchResultCountInTransaction(Integer)}
 	 *
@@ -229,12 +229,12 @@ public class DaoConfig {
 	 * returning total values that may be slightly out of date. Total counts can also be disabled,
 	 * or forced to always be accurate.
 	 * <p>
-	 * In {@link HistoryCountModeEnum#COUNT_CACHED} mode, a loading cache is used to fetch the value,
+	 * In {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET} mode, a loading cache is used to fetch the value,
 	 * meaning that only one thread per JVM will fetch the count, and others will block while waiting
 	 * for the cache to load, avoiding excessive load on the database.
 	 * </p>
 	 * <p>
-	 * Default is {@link HistoryCountModeEnum#COUNT_CACHED}
+	 * Default is {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET}
 	 * </p>
 	 *
 	 * @since 5.4.0
@@ -251,12 +251,12 @@ public class DaoConfig {
 	 * returning total values that may be slightly out of date. Total counts can also be disabled,
 	 * or forced to always be accurate.
 	 * <p>
-	 * In {@link HistoryCountModeEnum#COUNT_CACHED} mode, a loading cache is used to fetch the value,
+	 * In {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET} mode, a loading cache is used to fetch the value,
 	 * meaning that only one thread per JVM will fetch the count, and others will block while waiting
 	 * for the cache to load, avoiding excessive load on the database.
 	 * </p>
 	 * <p>
-	 * Default is {@link HistoryCountModeEnum#COUNT_CACHED}
+	 * Default is {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET}
 	 * </p>
 	 *
 	 * @since 5.4.0
