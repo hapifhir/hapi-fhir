@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
-import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
+import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.Date;
 
-class MdmBatchSvcImplTest extends BaseMdmR4Test {
+class MdmBatchSvcImplIT extends BaseMdmR4Test {
 
 	@Autowired
 	IMdmSubmitSvc myMdmSubmitSvc;

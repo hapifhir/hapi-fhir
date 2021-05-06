@@ -95,10 +95,7 @@ public class JpaFhirRetrieveProvider extends SearchParamFhirRetrieveProvider {
         if (bundleProvider.size() == null) {
             return resolveResourceList(bundleProvider.getResources(0, 10000));
         }
-        if (bundleProvider.size() == 0) {
-            return new ArrayList<>();
-        }
-        List<IBaseResource> resourceList = bundleProvider.getResources(0, bundleProvider.size());
+        List<IBaseResource> resourceList = bundleProvider.getAllResources();
         return resolveResourceList(resourceList);
     }
 
