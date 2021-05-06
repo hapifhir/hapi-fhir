@@ -119,6 +119,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		blkImportJobFileTable.addForeignKey("20210410.6", "FK_BLKIMJOBFILE_JOB").toColumn("JOB_PID").references("HFJ_BLK_IMPORT_JOB", "PID");
 		version.addIdGenerator("20210410.7", "SEQ_BLKIMJOBFILE_PID");
 
+		//Increase ResourceLink path length
+		version.onTable("HFJ_RES_LINK").modifyColumn("20210505.1", "SRC_PATH").nonNullable().failureAllowed().withType(ColumnTypeEnum.STRING, 500);
 	}
 
 	private void init530() {

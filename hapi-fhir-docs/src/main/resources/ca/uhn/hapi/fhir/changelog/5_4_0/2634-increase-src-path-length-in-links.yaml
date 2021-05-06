@@ -1,0 +1,5 @@
+---
+type: change
+issue: 2634
+title: "Custom Search Parameters may now have FHIRPath expressions up to 500 characters long, up from 200."
+
