@@ -67,7 +67,7 @@ public class LibraryResolutionProviderImpl implements LibraryResolutionProvider<
 			version = parts[1];
 		}
 
-		SearchParameterMap map = new SearchParameterMap();
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add("url", new UriParam(resourceUrl));
 		if (version != null) {
 			map.add("version", new TokenParam(version));
@@ -75,10 +75,10 @@ public class LibraryResolutionProviderImpl implements LibraryResolutionProvider<
 
 		ca.uhn.fhir.rest.api.server.IBundleProvider bundleProvider = myLibraryDao.search(map);
 
-		if (bundleProvider.size() == 0) {
+		if (bundleProvider.size() == null || bundleProvider.size() == 0) {
 			return null;
 		}
-		List<IBaseResource> resourceList = bundleProvider.getResources(0, bundleProvider.size());
+		List<IBaseResource> resourceList = bundleProvider.getAllResources();
 		return LibraryResolutionProvider.selectFromList(resolveLibraries(resourceList), version, x -> x.getVersion());
 	}
 
@@ -97,14 +97,14 @@ public class LibraryResolutionProviderImpl implements LibraryResolutionProvider<
 
 	private Iterable<org.hl7.fhir.dstu3.model.Library> getLibrariesByName(String name) {
 		// Search for libraries by name
-		SearchParameterMap map = new SearchParameterMap();
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add("name", new StringParam(name, true));
 		ca.uhn.fhir.rest.api.server.IBundleProvider bundleProvider = myLibraryDao.search(map);
 
-		if (bundleProvider.size() == 0) {
+		if (bundleProvider.size() == null || bundleProvider.size() == 0) {
 			return new ArrayList<>();
 		}
-		List<IBaseResource> resourceList = bundleProvider.getResources(0, bundleProvider.size());
+		List<IBaseResource> resourceList = bundleProvider.getAllResources();
 		return resolveLibraries(resourceList);
 	}
 
