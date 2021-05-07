@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
@@ -126,6 +127,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 		myDaoConfig.setTreatReferencesAsLogical(new DaoConfig().getTreatReferencesAsLogical());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myDaoConfig.setHistoryCountMode(DaoConfig.DEFAULT_HISTORY_COUNT_MODE);
 	}
 
 	private void assertGone(IIdType theId) {
@@ -895,6 +897,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testDeleteResource() {
+		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
+
 		int initialHistory = myPatientDao.history(null, null, mySrd).size();
 
 		IIdType id1;
@@ -1282,6 +1286,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testHistoryOverMultiplePages() throws Exception {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
 
 		String methodName = "testHistoryOverMultiplePages";
 
@@ -1432,7 +1437,9 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testHistoryReflectsMetaOperations() throws Exception {
+	public void testHistoryReflectsMetaOperations() {
+		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
+
 		Patient inPatient = new Patient();
 		inPatient.addName().setFamily("version1");
 		inPatient.getMeta().addProfile("http://example.com/1");
@@ -1517,6 +1524,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testHistoryWithFromAndTo() throws Exception {
+		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
+
 		String methodName = "testHistoryWithFromAndTo";
 
 		Patient patient = new Patient();
@@ -1548,6 +1557,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testHistoryWithFutureSinceDate() throws Exception {
+		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
 
 		Date before = new Date();
 		Thread.sleep(10);
