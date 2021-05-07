@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQuery;
@@ -46,6 +47,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 		myDaoConfig.setDeleteEnabled(new DaoConfig().isDeleteEnabled());
 		myDaoConfig.setMatchUrlCache(new DaoConfig().getMatchUrlCache());
+		myDaoConfig.setHistoryCountMode(DaoConfig.DEFAULT_HISTORY_COUNT_MODE);
 	}
 
 	@BeforeEach
@@ -401,6 +403,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 	@Test
 	public void testHistory_Server() {
+		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
+
 		runInTransaction(() -> {
 			Patient p = new Patient();
 			p.setId("A");
@@ -457,6 +461,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 	 */
 	@Test
 	public void testHistory_Server_WithTags() {
+		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
+
 		runInTransaction(() -> {
 			Patient p = new Patient();
 			p.getMeta().addTag("system", "code1", "displaY1");

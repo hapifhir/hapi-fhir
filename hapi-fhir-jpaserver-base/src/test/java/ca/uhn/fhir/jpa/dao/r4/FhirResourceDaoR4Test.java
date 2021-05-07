@@ -2119,7 +2119,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	@Test
 	public void testHistoryWithFutureSinceDate() throws Exception {
 		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
-		
+
 		Date before = new Date();
 		Thread.sleep(10);
 
