@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
@@ -14,6 +15,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -43,8 +45,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
-
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
@@ -131,7 +131,6 @@ import java.util.concurrent.Future;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
@@ -163,8 +162,9 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
 		myDaoConfig.setEnforceReferenceTargetTypes(new DaoConfig().isEnforceReferenceTargetTypes());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
-        myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
-    }
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+		myDaoConfig.setHistoryCountMode(DaoConfig.DEFAULT_HISTORY_COUNT_MODE);
+	}
 
 	@BeforeEach
 	public void before() {
@@ -673,9 +673,9 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("ne123", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
 			assertEquals(0, found.size().intValue());
 		}
-		
+
 	}
-	
+
 	@Test
 	public void testChoiceParamQuantityPrecision() {
 		Observation o3 = new Observation();
@@ -754,9 +754,9 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			List<IIdType> list = toUnqualifiedVersionlessIds(found);
 			assertThat(list, Matchers.empty());
 		}
-		
+
 	}
-	
+
 	@Test
 	public void testChoiceParamString() {
 
@@ -1370,6 +1370,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testDeleteResource() {
+		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
+
 		int initialHistory = myPatientDao.history(null, null, mySrd).size();
 
 		IIdType id1;
@@ -1559,7 +1561,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myObservationDao.read(obs1id);
 		myObservationDao.read(obs2id);
 	}
-	
+
 	@Test
 	public void testDeleteWithMatchUrl() {
 		String methodName = "testDeleteWithMatchUrl";
@@ -1845,6 +1847,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testHistoryOverMultiplePages() throws Exception {
+		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
+
 		String methodName = "testHistoryOverMultiplePages";
 
 		Patient patient = new Patient();
@@ -1995,6 +1999,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testHistoryReflectsMetaOperations() {
+		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
+
 		Patient inPatient = new Patient();
 		inPatient.addName().setFamily("version1");
 		inPatient.getMeta().addProfile("http://example.com/1");
@@ -2079,6 +2085,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testHistoryWithFromAndTo() throws Exception {
+		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
+
 		String methodName = "testHistoryWithFromAndTo";
 
 		Patient patient = new Patient();
@@ -2110,6 +2118,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testHistoryWithFutureSinceDate() throws Exception {
+		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
 
 		Date before = new Date();
 		Thread.sleep(10);
@@ -3158,10 +3167,10 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			assertTrue(next.getResource().getIdElement().hasIdPart());
 		}
 	}
-	
+
 	@Test()
 	public void testSortByComposite() {
-		
+
 		IIdType pid0;
 		IIdType oid1;
 		IIdType oid2;
@@ -3179,55 +3188,55 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			obs.getSubject().setReferenceElement(pid0);
 			obs.getCode().addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			obs.setValue(new StringType("200"));
-			
+
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
 			obs.getCode().addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			obs.setValue(new StringType("300"));
-			
+
 			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
 			obs.getCode().addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			obs.setValue(new StringType("150"));
-			
+
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
 			obs.getCode().addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			obs.setValue(new StringType("250"));
-			
+
 			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 
 		SearchParameterMap pm = new SearchParameterMap();
 		pm.setSort(new SortSpec(Observation.SP_CODE_VALUE_STRING));
-		
-		
+
+
 		IBundleProvider found = myObservationDao.search(pm);
-		
+
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
 		assertEquals(4, list.size());
 		assertEquals(oid3, list.get(0));
@@ -3350,20 +3359,20 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		IIdType id2 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
-		p.setId(methodName+"1");
+		p.setId(methodName + "1");
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		IIdType idMethodName1 = myPatientDao.update(p, mySrd).getId().toUnqualifiedVersionless();
-		assertEquals(methodName+"1", idMethodName1.getIdPart());
+		assertEquals(methodName + "1", idMethodName1.getIdPart());
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		IIdType id3 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
-		p.setId(methodName+"2");
+		p.setId(methodName + "2");
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		IIdType idMethodName2 = myPatientDao.update(p, mySrd).getId().toUnqualifiedVersionless();
-		assertEquals(methodName+"2", idMethodName2.getIdPart());
+		assertEquals(methodName + "2", idMethodName2.getIdPart());
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -3533,7 +3542,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		assertThat(actual, contains(id4, id3, id2, id1));
 
 	}
-	
+
 	@Test
 	@Disabled
 	public void testSortByQuantityWithNormalizedQuantitySearchFullSupported() {
@@ -4015,15 +4024,15 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		published = (ArrayList<Coding>) retrieved.getMeta().getTag();
 		sort(published);
 		assertEquals(3, published.size());
-		assertEquals( "Dog", published.get(0).getCode());
-		assertEquals( "Puppies", published.get(0).getDisplay());
-		assertEquals( null, published.get(0).getSystem());
-		assertEquals( "Cat", published.get(1).getCode());
-		assertEquals( "Kittens", published.get(1).getDisplay());
-		assertEquals( "http://foo", published.get(1).getSystem());
-		assertEquals( "Cow", published.get(2).getCode());
-		assertEquals( "Calves", published.get(2).getDisplay());
-		assertEquals( "http://foo", published.get(2).getSystem());
+		assertEquals("Dog", published.get(0).getCode());
+		assertEquals("Puppies", published.get(0).getDisplay());
+		assertEquals(null, published.get(0).getSystem());
+		assertEquals("Cat", published.get(1).getCode());
+		assertEquals("Kittens", published.get(1).getDisplay());
+		assertEquals("http://foo", published.get(1).getSystem());
+		assertEquals("Cow", published.get(2).getCode());
+		assertEquals("Calves", published.get(2).getDisplay());
+		assertEquals("http://foo", published.get(2).getSystem());
 
 		secLabels = retrieved.getMeta().getSecurity();
 		sortCodings(secLabels);
