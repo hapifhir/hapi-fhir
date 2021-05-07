@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.api.config;
 
+import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
@@ -74,6 +75,7 @@ public class DaoConfig {
 	)));
 	// update setter javadoc if default changes
 	public static final int DEFAULT_MAX_EXPANSION_SIZE = 1000;
+	public static final HistoryCountModeEnum DEFAULT_HISTORY_COUNT_MODE = HistoryCountModeEnum.CACHED_ONLY_WITHOUT_OFFSET;
 	/**
 	 * Default value for {@link #setMaximumSearchResultCountInTransaction(Integer)}
 	 *
@@ -84,13 +86,18 @@ public class DaoConfig {
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
 	private static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
 	private static final int DEFAULT_MAXIMUM_DELETE_CONFLICT_COUNT = 60;
-	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
 	/**
 	 * Child Configurations
 	 */
 
 	private final ModelConfig myModelConfig = new ModelConfig();
-
+	/**
+	 * Do not change default of {@code 0}!
+	 *
+	 * @since 4.1.0
+	 */
+	private final int myPreExpandValueSetsDefaultOffset = 0;
+	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -117,7 +124,6 @@ public class DaoConfig {
 	private Integer myFetchSizeDefaultMaximum = null;
 	private int myMaximumExpansionSize = DEFAULT_MAX_EXPANSION_SIZE;
 	private Integer myMaximumSearchResultCountInTransaction = DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION;
-
 	private Integer myMaximumTransactionBundleSize = DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE;
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
 	/**
@@ -148,6 +154,8 @@ public class DaoConfig {
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
 	private boolean myFilterParameterEnabled = false;
 	private StoreMetaSourceInformationEnum myStoreMetaSourceInformation = StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID;
+	private HistoryCountModeEnum myHistoryCountMode = DEFAULT_HISTORY_COUNT_MODE;
+
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -158,12 +166,6 @@ public class DaoConfig {
 	 * @since 4.1.0
 	 */
 	private boolean myPreExpandValueSets = true;
-	/**
-	 * Do not change default of {@code 0}!
-	 *
-	 * @since 4.1.0
-	 */
-	private final int myPreExpandValueSetsDefaultOffset = 0;
 	/**
 	 * Do not change default of {@code 1000}!
 	 *
@@ -176,14 +178,12 @@ public class DaoConfig {
 	 * @since 4.1.0
 	 */
 	private int myPreExpandValueSetsMaxCount = 1000;
-
 	/**
 	 * Do not change default of {@code true}!
 	 *
 	 * @since 4.2.0
 	 */
 	private boolean myPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets = true;
-
 	/**
 	 * @since 5.0.0
 	 */
@@ -219,6 +219,52 @@ public class DaoConfig {
 			ourLog.info("Status based reindexing is DISABLED");
 			setStatusBasedReindexingDisabled(true);
 		}
+	}
+
+	/**
+	 * When performing a FHIR history operation, a <code>Bundle.total</code> value is included in the
+	 * response, indicating the total number of history entries. This response is calculated using a
+	 * SQL COUNT query statement which can be expensive. This setting allows the results of the count
+	 * query to be cached, resulting in a much lighter load on the server, at the expense of
+	 * returning total values that may be slightly out of date. Total counts can also be disabled,
+	 * or forced to always be accurate.
+	 * <p>
+	 * In {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET} mode, a loading cache is used to fetch the value,
+	 * meaning that only one thread per JVM will fetch the count, and others will block while waiting
+	 * for the cache to load, avoiding excessive load on the database.
+	 * </p>
+	 * <p>
+	 * Default is {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET}
+	 * </p>
+	 *
+	 * @since 5.4.0
+	 */
+	public HistoryCountModeEnum getHistoryCountMode() {
+		return myHistoryCountMode;
+	}
+
+	/**
+	 * When performing a FHIR history operation, a <code>Bundle.total</code> value is included in the
+	 * response, indicating the total number of history entries. This response is calculated using a
+	 * SQL COUNT query statement which can be expensive. This setting allows the results of the count
+	 * query to be cached, resulting in a much lighter load on the server, at the expense of
+	 * returning total values that may be slightly out of date. Total counts can also be disabled,
+	 * or forced to always be accurate.
+	 * <p>
+	 * In {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET} mode, a loading cache is used to fetch the value,
+	 * meaning that only one thread per JVM will fetch the count, and others will block while waiting
+	 * for the cache to load, avoiding excessive load on the database.
+	 * </p>
+	 * <p>
+	 * Default is {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET}
+	 * </p>
+	 *
+	 * @since 5.4.0
+	 */
+	public void setHistoryCountMode(@Nonnull HistoryCountModeEnum theHistoryCountMode) {
+
+		Validate.notNull(theHistoryCountMode, "theHistoryCountMode must not be null");
+		myHistoryCountMode = theHistoryCountMode;
 	}
 
 	/**
@@ -258,6 +304,18 @@ public class DaoConfig {
 	}
 
 	/**
+	 * This method controls whether to use the new non-hibernate search SQL builder that was introduced in HAPI FHIR 5.2.0.
+	 * By default this will be <code>false</code> meaning that the new SQL builder is used. Set to <code>true</code> to use the
+	 * legacy SQL builder based on Hibernate.
+	 * <p>Note that this method will be removed in HAPI FHIR 5.4.0</p>
+	 *
+	 * @since 5.3.0
+	 */
+	public void setUseLegacySearchBuilder(boolean theUseLegacySearchBuilder) {
+		myUseLegacySearchBuilder = theUseLegacySearchBuilder;
+	}
+
+	/**
 	 * Specifies the duration in minutes for which values will be retained after being
 	 * written to the terminology translation cache. Defaults to 60.
 	 */
@@ -271,21 +329,7 @@ public class DaoConfig {
 	 * cached in an in-memory cache. This cache can have a noticeable improvement on write performance on servers
 	 * where conditional operations are frequently performed, but note that this cache will not be
 	 * invalidated based on updates to resources so this may have detrimental effects.
-	 *
-	 * Default is <code>false</code>
-	 *
-	 * @since 5.4.0
-	 */
-	public void setMatchUrlCache(boolean theMatchUrlCache) {
-		myMatchUrlCache = theMatchUrlCache;
-	}
-
-	/**
-	 * If enabled, resolutions for match URLs (e.g. conditional create URLs, conditional update URLs, etc) will be
-	 * cached in an in-memory cache. This cache can have a noticeable improvement on write performance on servers
-	 * where conditional operations are frequently performed, but note that this cache will not be
-	 * invalidated based on updates to resources so this may have detrimental effects.
-	 *
+	 * <p>
 	 * Default is <code>false</code>
 	 *
 	 * @since 5.4.0
@@ -295,15 +339,17 @@ public class DaoConfig {
 	}
 
 	/**
-	 * This method controls whether to use the new non-hibernate search SQL builder that was introduced in HAPI FHIR 5.2.0.
-	 * By default this will be <code>false</code> meaning that the new SQL builder is used. Set to <code>true</code> to use the
-	 * legacy SQL builder based on Hibernate.
-	 * <p>Note that this method will be removed in HAPI FHIR 5.4.0</p>
+	 * If enabled, resolutions for match URLs (e.g. conditional create URLs, conditional update URLs, etc) will be
+	 * cached in an in-memory cache. This cache can have a noticeable improvement on write performance on servers
+	 * where conditional operations are frequently performed, but note that this cache will not be
+	 * invalidated based on updates to resources so this may have detrimental effects.
+	 * <p>
+	 * Default is <code>false</code>
 	 *
-	 * @since 5.3.0
+	 * @since 5.4.0
 	 */
-	public void setUseLegacySearchBuilder(boolean theUseLegacySearchBuilder) {
-		myUseLegacySearchBuilder = theUseLegacySearchBuilder;
+	public void setMatchUrlCache(boolean theMatchUrlCache) {
+		myMatchUrlCache = theMatchUrlCache;
 	}
 
 	/**
@@ -652,7 +698,7 @@ public class DaoConfig {
 	 * to not index missing field.
 	 * </p>
 	 * <p>
-	 * The following index may need to be added into the indexed tables such as <code>HFJ_SPIDX_TOKEN</code> 
+	 * The following index may need to be added into the indexed tables such as <code>HFJ_SPIDX_TOKEN</code>
 	 * to improve the search performance while <code>:missing</code> is enabled.
 	 * <code>RES_TYPE, SP_NAME, SP_MISSING</code>
 	 * </p>
@@ -1079,7 +1125,7 @@ public class DaoConfig {
 	 * This property can be useful in cases where replication between two servers is wanted.
 	 * Note however that references containing purely numeric IDs will not be auto-created
 	 * as they are never allowed to be client supplied in HAPI FHIR JPA.
-	 *
+	 * <p>
 	 * All placeholder resources created in this way have an extension
 	 * with the URL {@link HapiExtensions#EXT_RESOURCE_PLACEHOLDER} and the value "true".
 	 * </p>
@@ -1103,7 +1149,7 @@ public class DaoConfig {
 	 * This property can be useful in cases where replication between two servers is wanted.
 	 * Note however that references containing purely numeric IDs will not be auto-created
 	 * as they are never allowed to be client supplied in HAPI FHIR JPA.
-	 *
+	 * <p>
 	 * All placeholder resources created in this way have an extension
 	 * with the URL {@link HapiExtensions#EXT_RESOURCE_PLACEHOLDER} and the value "true".
 	 * </p>
@@ -1386,11 +1432,8 @@ public class DaoConfig {
 	}
 
 	/**
-	 * If set to <code>true</code> (default is <code>false</code>), the _expunge parameter on the DELETE
-	 * operation will be enabled on this server. DELETE _expunge removes all data associated with a resource in a highly performant
-	 * way, skipping most of the the checks that are enforced with usual DELETE operations.  The only check
-	 * that is performed before deleting the resources and their indexes is that no other resources reference the resources about to
-	 * be deleted.  This operation is potentially dangerous since it allows
+	 * If set to <code>true</code> (default is <code>false</code>), the $expunge operation
+	 * will be enabled on this server. This operation is potentially dangerous since it allows
 	 * a client to physically delete data in a way that can not be recovered (without resorting
 	 * to backups).
 	 * <p>
@@ -1399,8 +1442,8 @@ public class DaoConfig {
 	 * operation.
 	 * </p>
 	 */
-	public void setDeleteExpungeEnabled(boolean theDeleteExpungeEnabled) {
-		myDeleteExpungeEnabled = theDeleteExpungeEnabled;
+	public void setExpungeEnabled(boolean theExpungeEnabled) {
+		myExpungeEnabled = theExpungeEnabled;
 	}
 
 	/**
@@ -1422,8 +1465,11 @@ public class DaoConfig {
 	}
 
 	/**
-	 * If set to <code>true</code> (default is <code>false</code>), the $expunge operation
-	 * will be enabled on this server. This operation is potentially dangerous since it allows
+	 * If set to <code>true</code> (default is <code>false</code>), the _expunge parameter on the DELETE
+	 * operation will be enabled on this server. DELETE _expunge removes all data associated with a resource in a highly performant
+	 * way, skipping most of the the checks that are enforced with usual DELETE operations.  The only check
+	 * that is performed before deleting the resources and their indexes is that no other resources reference the resources about to
+	 * be deleted.  This operation is potentially dangerous since it allows
 	 * a client to physically delete data in a way that can not be recovered (without resorting
 	 * to backups).
 	 * <p>
@@ -1432,8 +1478,8 @@ public class DaoConfig {
 	 * operation.
 	 * </p>
 	 */
-	public void setExpungeEnabled(boolean theExpungeEnabled) {
-		myExpungeEnabled = theExpungeEnabled;
+	public void setDeleteExpungeEnabled(boolean theDeleteExpungeEnabled) {
+		myDeleteExpungeEnabled = theDeleteExpungeEnabled;
 	}
 
 	/**
@@ -1749,6 +1795,7 @@ public class DaoConfig {
 	 * <p>
 	 * Default is <code>false</code>
 	 * </p>
+	 *
 	 * @since 5.4.0
 	 */
 	public boolean isAllowMdmExpansion() {
@@ -1764,6 +1811,7 @@ public class DaoConfig {
 	 * <p>
 	 * Default is <code>false</code>
 	 * </p>
+	 *
 	 * @since 5.4.0
 	 */
 	public void setAllowMdmExpansion(boolean theAllowMdmExpansion) {

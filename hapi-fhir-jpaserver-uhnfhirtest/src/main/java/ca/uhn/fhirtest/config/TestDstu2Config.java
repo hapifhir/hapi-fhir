@@ -1,6 +1,7 @@
 package ca.uhn.fhirtest.config;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
@@ -80,6 +81,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		retVal.setFilterParameterEnabled(true);
 		retVal.setDefaultSearchParamsCanBeOverridden(false);
 		retVal.getModelConfig().setIndexOnContainedResources(true);
+//		retVal.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
 		return retVal;
 	}
 

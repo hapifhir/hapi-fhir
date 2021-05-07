@@ -1,6 +1,19 @@
 # Performance
 
-This page contains information for performance optimization.
+This page contains information for performance optimization. If you are planning a production deployment, you should consider the options discussed here as they may have significant impacts on your ability to scale.
+
+# History Counting
+
+The FHIR history operation allows clients to see a change history for a resource, across all resources of a given type, or even across all resources on a server. This operation includes a total count (in `Bundle.total`) that can be very expensive to calculate on large databases with many resources.
+
+As a result, a setting on the `DaoConfig` object has been added called **History Count Mode**. This setting has 3 possible options:
+
+* COUNT_CACHED. This is the new default: A loading cache will be used for history counts without any dates specified, meaning that counts are stored in RAM for up to one minute, and the loading cache blocks all but one client thread per JVM from actually performing the count. This effectively throttles access to the database. History operation invocations that include a `_since` or `_to` parameter will never have a count included in the results.
+  
+* COUNT_ACCURATE: This option always uses a fresh count statement for all history invocations. This means that the count total in the History bundle is guaranteed to be accurate every time. Note that this means that users may trigger a large amount of potentially expensive database operations by performing a large number of history operations. Do not use this option in situations where you have untrusted users accessing your server.
+  
+* COUNT_DISABLED: This setting avoids the count query entirely, saving time and avoiding any risk of expensive count queries at the expense of not including any total in the response.
+
 
 # Bulk Loading
 

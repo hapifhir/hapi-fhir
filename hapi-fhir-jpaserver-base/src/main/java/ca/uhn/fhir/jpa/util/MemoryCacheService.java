@@ -27,15 +27,17 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This class acts as a central spot for all of the many Caffeine caches we use in HAPI FHIR.
@@ -120,7 +122,8 @@ public class MemoryCacheService {
 		CONCEPT_TRANSLATION(TranslationQuery.class),
 		MATCH_URL(String.class),
 		CONCEPT_TRANSLATION_REVERSE(TranslationQuery.class),
-		RESOURCE_CONDITIONAL_CREATE_VERSION(IIdType.class);
+		RESOURCE_CONDITIONAL_CREATE_VERSION(IIdType.class),
+		HISTORY_COUNT(HistoryCountKey.class);
 
 		private final Class<?> myKeyType;
 
@@ -136,6 +139,17 @@ public class MemoryCacheService {
 		private final String mySystem;
 		private final String myCode;
 		private final int myHashCode;
+
+		public TagDefinitionCacheKey(TagTypeEnum theType, String theSystem, String theCode) {
+			myType = theType;
+			mySystem = theSystem;
+			myCode = theCode;
+			myHashCode = new HashCodeBuilder(17, 37)
+				.append(myType)
+				.append(mySystem)
+				.append(myCode)
+				.toHashCode();
+		}
 
 		@Override
 		public boolean equals(Object theO) {
@@ -156,17 +170,49 @@ public class MemoryCacheService {
 		public int hashCode() {
 			return myHashCode;
 		}
+	}
 
-		public TagDefinitionCacheKey(TagTypeEnum theType, String theSystem, String theCode) {
-			myType = theType;
-			mySystem = theSystem;
-			myCode = theCode;
-			myHashCode = new HashCodeBuilder(17, 37)
-				.append(myType)
-				.append(mySystem)
-				.append(myCode)
-				.toHashCode();
+
+	public static class HistoryCountKey {
+		private final String myTypeName;
+		private final Long myInstanceId;
+		private final int myHashCode;
+
+		private HistoryCountKey(String theTypeName, Long theInstanceId) {
+			myTypeName = theTypeName;
+			myInstanceId = theInstanceId;
+			myHashCode = new HashCodeBuilder().append(myTypeName).append(myInstanceId).toHashCode();
 		}
+
+		@Override
+		public boolean equals(Object theO) {
+			boolean retVal = false;
+			if (theO instanceof HistoryCountKey) {
+				HistoryCountKey that = (HistoryCountKey) theO;
+				retVal = new EqualsBuilder().append(myTypeName, that.myTypeName).append(myInstanceId, that.myInstanceId).isEquals();
+			}
+			return retVal;
+		}
+
+		@Override
+		public int hashCode() {
+			return myHashCode;
+		}
+
+		public static HistoryCountKey forSystem() {
+			return new HistoryCountKey(null, null);
+		}
+
+		public static HistoryCountKey forType(@Nonnull String theType) {
+			assert isNotBlank(theType);
+			return new HistoryCountKey(theType, null);
+		}
+
+		public static HistoryCountKey forInstance(@Nonnull Long theInstanceId) {
+			assert theInstanceId != null;
+			return new HistoryCountKey(null, theInstanceId);
+		}
+
 	}
 
 }
