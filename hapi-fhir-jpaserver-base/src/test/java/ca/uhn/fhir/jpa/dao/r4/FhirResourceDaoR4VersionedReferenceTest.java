@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -136,15 +137,75 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		// Send it again
 		Bundle outcome2 = mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
 		assertEquals("Organization/O/_history/1", outcome2.getEntry().get(0).getResponse().getLocation());
-		assertEquals("Patient/A/_history/2", outcome2.getEntry().get(1).getResponse().getLocation());
+		// Technically the patient did not change - If this ever got optimized so that the version here
+		// was 1 that would be even better
+		String patientId = outcome2.getEntry().get(1).getResponse().getLocation();
+		assertEquals("Patient/A/_history/2", patientId);
 		String eobId2 = outcome2.getEntry().get(2).getResponse().getLocation();
 		assertThat(eobId2, matchesPattern("ExplanationOfBenefit/[0-9]+/_history/1"));
 
 		Patient patient = myPatientDao.read(new IdType("Patient/A"), new SystemRequestDetails());
-		assertEquals("Patient/A/_history/2", patient.getId());
+		assertEquals(patientId, patient.getId());
 
 		ExplanationOfBenefit eob2 = myExplanationOfBenefitDao.read(new IdType(eobId2), new SystemRequestDetails());
-		assertEquals("Patient/A/_history/2", eob2.getPatient().getReference());
+		assertEquals(patientId, eob2.getPatient().getReference());
+	}
+
+	@Test
+	public void testCreateAndUpdateVersionedReferencesInTransaction_VersionedReferenceToVersionedReferenceToUpsertWithChange() {
+		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myModelConfig.setAutoVersionReferenceAtPaths(
+			"Patient.managingOrganization",
+			"ExplanationOfBenefit.patient"
+		);
+
+		AtomicInteger counter = new AtomicInteger();
+		Supplier<Bundle> supplier = () -> {
+			BundleBuilder bb = new BundleBuilder(myFhirCtx);
+
+			Organization organization = new Organization();
+			organization.setId("Organization/O");
+			organization.setName("Org " + counter.incrementAndGet()); // change each time
+			organization.setActive(true);
+			bb.addTransactionUpdateEntry(organization);
+
+			Patient patient = new Patient();
+			patient.setId("Patient/A");
+			patient.setManagingOrganization(new Reference("Organization/O"));
+			patient.setActive(true);
+			bb.addTransactionUpdateEntry(patient);
+
+			ExplanationOfBenefit eob = new ExplanationOfBenefit();
+			eob.setId(IdType.newRandomUuid());
+			eob.setPatient(new Reference("Patient/A"));
+			bb.addTransactionCreateEntry(eob);
+
+			return (Bundle) bb.getBundle();
+		};
+
+		// Send it the first time
+		Bundle outcome1 = mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
+		assertEquals("Organization/O/_history/1", outcome1.getEntry().get(0).getResponse().getLocation());
+		assertEquals("Patient/A/_history/1", outcome1.getEntry().get(1).getResponse().getLocation());
+		String eobId1 = outcome1.getEntry().get(2).getResponse().getLocation();
+		assertThat(eobId1, matchesPattern("ExplanationOfBenefit/[0-9]+/_history/1"));
+
+		ExplanationOfBenefit eob1 = myExplanationOfBenefitDao.read(new IdType(eobId1), new SystemRequestDetails());
+		assertEquals("Patient/A/_history/1", eob1.getPatient().getReference());
+
+		// Send it again
+		Bundle outcome2 = mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
+		assertEquals("Organization/O/_history/2", outcome2.getEntry().get(0).getResponse().getLocation());
+		String patientId = outcome2.getEntry().get(1).getResponse().getLocation();
+		assertEquals("Patient/A/_history/2", patientId);
+		String eobId2 = outcome2.getEntry().get(2).getResponse().getLocation();
+		assertThat(eobId2, matchesPattern("ExplanationOfBenefit/[0-9]+/_history/1"));
+
+		Patient patient = myPatientDao.read(new IdType("Patient/A"), new SystemRequestDetails());
+		assertEquals(patientId, patient.getId());
+
+		ExplanationOfBenefit eob2 = myExplanationOfBenefitDao.read(new IdType(eobId2), new SystemRequestDetails());
+		assertEquals(patientId, eob2.getPatient().getReference());
 	}
 
 	@Test
