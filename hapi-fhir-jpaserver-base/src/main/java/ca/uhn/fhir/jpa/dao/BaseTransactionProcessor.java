@@ -922,46 +922,7 @@ public abstract class BaseTransactionProcessor {
 			 * Perform ID substitutions and then index each resource we have saved
 			 */
 
-			FhirTerser terser = myContext.newTerser();
-			theTransactionStopWatch.startTask("Index " + theIdToPersistedOutcome.size() + " resources");
-			IdentityHashMap<DaoMethodOutcome, Set<IBaseReference>> deferredIndexesForAutoVersioning = null;
-			int i = 0;
-			for (DaoMethodOutcome nextOutcome : theIdToPersistedOutcome.values()) {
-
-				if (i++ % 250 == 0) {
-					ourLog.debug("Have indexed {} entities out of {} in transaction", i, theIdToPersistedOutcome.values().size());
-				}
-
-				if (nextOutcome.isNop()) {
-					continue;
-				}
-
-				IBaseResource nextResource = nextOutcome.getResource();
-				if (nextResource == null) {
-					continue;
-				}
-
-				Set<IBaseReference> referencesToAutoVersion = BaseStorageDao.extractReferencesToAutoVersion(myContext, myModelConfig, nextResource);
-				if (referencesToAutoVersion.isEmpty()) {
-					resolveReferencesThenSaveAndIndexResource(theRequest, theTransactionDetails, theIdSubstitutions, theIdToPersistedOutcome, entriesToProcess, nonUpdatedEntities, updatedEntities, terser, nextOutcome, nextResource, referencesToAutoVersion);
-				} else {
-					if (deferredIndexesForAutoVersioning == null) {
-						deferredIndexesForAutoVersioning = new IdentityHashMap<>();
-					}
-					deferredIndexesForAutoVersioning.put(nextOutcome, referencesToAutoVersion);
-				}
-
-			}
-
-			// If we have any resources we'll be auto-versioning, index these next
-			if (deferredIndexesForAutoVersioning != null) {
-				for (Map.Entry<DaoMethodOutcome, Set<IBaseReference>> nextEntry : deferredIndexesForAutoVersioning.entrySet()) {
-					DaoMethodOutcome nextOutcome = nextEntry.getKey();
-					Set<IBaseReference> referencesToAutoVersion = nextEntry.getValue();
-					IBaseResource nextResource = nextOutcome.getResource();
-					resolveReferencesThenSaveAndIndexResource(theRequest, theTransactionDetails, theIdSubstitutions, theIdToPersistedOutcome, entriesToProcess, nonUpdatedEntities, updatedEntities, terser, nextOutcome, nextResource, referencesToAutoVersion);
-				}
-			}
+			resolveReferencesThenSaveAndIndexResources(theRequest, theTransactionDetails, theIdSubstitutions, theIdToPersistedOutcome, theTransactionStopWatch, entriesToProcess, nonUpdatedEntities, updatedEntities);
 
 			theTransactionStopWatch.endCurrentTask();
 			theTransactionStopWatch.startTask("Flush writes to database");
@@ -1015,6 +976,71 @@ public abstract class BaseTransactionProcessor {
 		} finally {
 			if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts()) {
 				theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
+			}
+		}
+	}
+
+	/**
+	 * This method replaces any placeholder references in the
+	 * source transaction Bundle with their actual targets, then stores the resource contents and indexes
+	 * in the database. This is trickier than you'd think because of a couple of possibilities during the
+	 * save:
+	 * * There may be resources that have not changed (e.g. an update/PUT with a resource body identical
+	 *   to what is already in the database)
+	 * * There may be resources with auto-versioned references, meaning we're replacing certain references
+	 *   in the resource with a versioned references, referencing the current version at the time of the
+	 *   transaction processing
+	 * * There may by auto-versioned references pointing to these unchanged targets
+	 *
+	 * If we're not doing any auto-versioned references, we'll just iterate through all resources in the
+	 * transaction and save them one at a time.
+	 *
+	 * However, if we have any auto-versioned references we do this in 2 passes: First the resources from the
+	 * transaction that don't have any auto-versioned references are stored. We do them first since there's
+	 * a chance they may be a NOP and we'll need to account for their version number not actually changing.
+	 * Then we do a second pass for any resources that have auto-versioned references. These happen in a separate
+	 * pass because it's too complex to try and insert the auto-versioned references and still
+	 * account for NOPs, so we block NOPs in that pass.
+	 */
+	private void resolveReferencesThenSaveAndIndexResources(RequestDetails theRequest, TransactionDetails theTransactionDetails, Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, StopWatch theTransactionStopWatch, Map<IBase, IIdType> entriesToProcess, Set<IIdType> nonUpdatedEntities, Set<IBasePersistedResource> updatedEntities) {
+		FhirTerser terser = myContext.newTerser();
+		theTransactionStopWatch.startTask("Index " + theIdToPersistedOutcome.size() + " resources");
+		IdentityHashMap<DaoMethodOutcome, Set<IBaseReference>> deferredIndexesForAutoVersioning = null;
+		int i = 0;
+		for (DaoMethodOutcome nextOutcome : theIdToPersistedOutcome.values()) {
+
+			if (i++ % 250 == 0) {
+				ourLog.debug("Have indexed {} entities out of {} in transaction", i, theIdToPersistedOutcome.values().size());
+			}
+
+			if (nextOutcome.isNop()) {
+				continue;
+			}
+
+			IBaseResource nextResource = nextOutcome.getResource();
+			if (nextResource == null) {
+				continue;
+			}
+
+			Set<IBaseReference> referencesToAutoVersion = BaseStorageDao.extractReferencesToAutoVersion(myContext, myModelConfig, nextResource);
+			if (referencesToAutoVersion.isEmpty()) {
+				resolveReferencesThenSaveAndIndexResource(theRequest, theTransactionDetails, theIdSubstitutions, theIdToPersistedOutcome, entriesToProcess, nonUpdatedEntities, updatedEntities, terser, nextOutcome, nextResource, referencesToAutoVersion);
+			} else {
+				if (deferredIndexesForAutoVersioning == null) {
+					deferredIndexesForAutoVersioning = new IdentityHashMap<>();
+				}
+				deferredIndexesForAutoVersioning.put(nextOutcome, referencesToAutoVersion);
+			}
+
+		}
+
+		// If we have any resources we'll be auto-versioning, index these next
+		if (deferredIndexesForAutoVersioning != null) {
+			for (Map.Entry<DaoMethodOutcome, Set<IBaseReference>> nextEntry : deferredIndexesForAutoVersioning.entrySet()) {
+				DaoMethodOutcome nextOutcome = nextEntry.getKey();
+				Set<IBaseReference> referencesToAutoVersion = nextEntry.getValue();
+				IBaseResource nextResource = nextOutcome.getResource();
+				resolveReferencesThenSaveAndIndexResource(theRequest, theTransactionDetails, theIdSubstitutions, theIdToPersistedOutcome, entriesToProcess, nonUpdatedEntities, updatedEntities, terser, nextOutcome, nextResource, referencesToAutoVersion);
 			}
 		}
 	}

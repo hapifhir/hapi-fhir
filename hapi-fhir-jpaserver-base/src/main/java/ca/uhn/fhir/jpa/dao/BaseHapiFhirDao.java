@@ -1143,7 +1143,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);
 
-				if (!changed.isChanged() && theForceUpdate) {
+				if (theForceUpdate) {
 					changed.setChanged(true);
 				}
 
