@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -11,8 +12,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
@@ -23,8 +26,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -38,6 +44,107 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		myDaoConfig.setDeleteEnabled(new DaoConfig().isDeleteEnabled());
 		myModelConfig.setRespectVersionsForSearchIncludes(new ModelConfig().isRespectVersionsForSearchIncludes());
 		myModelConfig.setAutoVersionReferenceAtPaths(new ModelConfig().getAutoVersionReferenceAtPaths());
+	}
+
+	@Test
+	public void testCreateAndUpdateVersionedReferencesInTransaction_VersionedReferenceToUpsertWithNop() {
+		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myModelConfig.setAutoVersionReferenceAtPaths("ExplanationOfBenefit.patient");
+
+		// We'll submit the same bundle twice. It has an UPSERT (with no changes
+		// the second time) on a Patient, and a CREATE on an ExplanationOfBenefit
+		// referencing that Patient.
+		Supplier<Bundle> supplier = () -> {
+			BundleBuilder bb = new BundleBuilder(myFhirCtx);
+
+			Patient patient = new Patient();
+			patient.setId("Patient/A");
+			patient.setActive(true);
+			bb.addTransactionUpdateEntry(patient);
+
+			ExplanationOfBenefit eob = new ExplanationOfBenefit();
+			eob.setId(IdType.newRandomUuid());
+			eob.setPatient(new Reference("Patient/A"));
+			bb.addTransactionCreateEntry(eob);
+
+			return (Bundle) bb.getBundle();
+		};
+
+		// Send it the first time
+		Bundle outcome1 = mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
+		assertEquals("Patient/A/_history/1", outcome1.getEntry().get(0).getResponse().getLocation());
+		String eobId1 = outcome1.getEntry().get(1).getResponse().getLocation();
+		assertThat(eobId1, matchesPattern("ExplanationOfBenefit/[0-9]+/_history/1"));
+
+		ExplanationOfBenefit eob1 = myExplanationOfBenefitDao.read(new IdType(eobId1), new SystemRequestDetails());
+		assertEquals("Patient/A/_history/1", eob1.getPatient().getReference());
+
+		// Send it again
+		Bundle outcome2 = mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
+		assertEquals("Patient/A/_history/1", outcome2.getEntry().get(0).getResponse().getLocation());
+		String eobId2 = outcome2.getEntry().get(1).getResponse().getLocation();
+		assertThat(eobId2, matchesPattern("ExplanationOfBenefit/[0-9]+/_history/1"));
+
+		ExplanationOfBenefit eob2 = myExplanationOfBenefitDao.read(new IdType(eobId2), new SystemRequestDetails());
+		assertEquals("Patient/A/_history/1", eob2.getPatient().getReference());
+	}
+
+
+	@Test
+	public void testCreateAndUpdateVersionedReferencesInTransaction_VersionedReferenceToVersionedReferenceToUpsertWithNop() {
+		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myModelConfig.setAutoVersionReferenceAtPaths(
+			"Patient.managingOrganization",
+			"ExplanationOfBenefit.patient"
+		);
+
+		// We'll submit the same bundle twice. It has an UPSERT (with no changes
+		// the second time) on a Patient, and a CREATE on an ExplanationOfBenefit
+		// referencing that Patient.
+		Supplier<Bundle> supplier = () -> {
+			BundleBuilder bb = new BundleBuilder(myFhirCtx);
+
+			Organization organization = new Organization();
+			organization.setId("Organization/O");
+			organization.setActive(true);
+			bb.addTransactionUpdateEntry(organization);
+
+			Patient patient = new Patient();
+			patient.setId("Patient/A");
+			patient.setManagingOrganization(new Reference("Organization/O"));
+			patient.setActive(true);
+			bb.addTransactionUpdateEntry(patient);
+
+			ExplanationOfBenefit eob = new ExplanationOfBenefit();
+			eob.setId(IdType.newRandomUuid());
+			eob.setPatient(new Reference("Patient/A"));
+			bb.addTransactionCreateEntry(eob);
+
+			return (Bundle) bb.getBundle();
+		};
+
+		// Send it the first time
+		Bundle outcome1 = mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
+		assertEquals("Organization/O/_history/1", outcome1.getEntry().get(0).getResponse().getLocation());
+		assertEquals("Patient/A/_history/1", outcome1.getEntry().get(1).getResponse().getLocation());
+		String eobId1 = outcome1.getEntry().get(2).getResponse().getLocation();
+		assertThat(eobId1, matchesPattern("ExplanationOfBenefit/[0-9]+/_history/1"));
+
+		ExplanationOfBenefit eob1 = myExplanationOfBenefitDao.read(new IdType(eobId1), new SystemRequestDetails());
+		assertEquals("Patient/A/_history/1", eob1.getPatient().getReference());
+
+		// Send it again
+		Bundle outcome2 = mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
+		assertEquals("Organization/O/_history/1", outcome2.getEntry().get(0).getResponse().getLocation());
+		assertEquals("Patient/A/_history/2", outcome2.getEntry().get(1).getResponse().getLocation());
+		String eobId2 = outcome2.getEntry().get(2).getResponse().getLocation();
+		assertThat(eobId2, matchesPattern("ExplanationOfBenefit/[0-9]+/_history/1"));
+
+		Patient patient = myPatientDao.read(new IdType("Patient/A"), new SystemRequestDetails());
+		assertEquals("Patient/A/_history/2", patient.getId());
+
+		ExplanationOfBenefit eob2 = myExplanationOfBenefitDao.read(new IdType(eobId2), new SystemRequestDetails());
+		assertEquals("Patient/A/_history/2", eob2.getPatient().getReference());
 	}
 
 	@Test
@@ -185,7 +292,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		}
 
 		// Verify Patient Version
-		assertEquals("2", myPatientDao.search(SearchParameterMap.newSynchronous("active", new TokenParam("false"))).getResources(0,1).get(0).getIdElement().getVersionIdPart());
+		assertEquals("2", myPatientDao.search(SearchParameterMap.newSynchronous("active", new TokenParam("false"))).getResources(0, 1).get(0).getIdElement().getVersionIdPart());
 
 		BundleBuilder builder = new BundleBuilder(myFhirCtx);
 
@@ -430,9 +537,9 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		IBundleProvider outcome = myTaskDao.search(SearchParameterMap.newSynchronous().addInclude(Task.INCLUDE_BASED_ON));
 		assertEquals(2, outcome.size());
 		List<IBaseResource> resources = outcome.getResources(0, 2);
-		assertEquals(2, resources.size(), resources.stream().map(t->t.getIdElement().toUnqualified().getValue()).collect(Collectors.joining(", ")));
+		assertEquals(2, resources.size(), resources.stream().map(t -> t.getIdElement().toUnqualified().getValue()).collect(Collectors.joining(", ")));
 		assertEquals(taskId.getValue(), resources.get(0).getIdElement().getValue());
-		assertEquals(conditionId.getValue(), ((Task)resources.get(0)).getBasedOn().get(0).getReference());
+		assertEquals(conditionId.getValue(), ((Task) resources.get(0)).getBasedOn().get(0).getReference());
 		assertEquals(conditionId.withVersion("1").getValue(), resources.get(1).getIdElement().getValue());
 
 		// Now, update the Condition to generate another version of it
@@ -445,7 +552,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		resources = outcome.getResources(0, 2);
 		assertEquals(2, resources.size());
 		assertEquals(taskId.getValue(), resources.get(0).getIdElement().getValue());
-		assertEquals(conditionId.getValue(), ((Task)resources.get(0)).getBasedOn().get(0).getReference());
+		assertEquals(conditionId.getValue(), ((Task) resources.get(0)).getBasedOn().get(0).getReference());
 		assertEquals(conditionId.withVersion("1").getValue(), resources.get(1).getIdElement().getValue());
 	}
 
@@ -478,9 +585,9 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		IBundleProvider outcome = myTaskDao.search(SearchParameterMap.newSynchronous().addInclude(Task.INCLUDE_BASED_ON));
 		assertEquals(2, outcome.size());
 		List<IBaseResource> resources = outcome.getResources(0, 2);
-		assertEquals(2, resources.size(), resources.stream().map(t->t.getIdElement().toUnqualified().getValue()).collect(Collectors.joining(", ")));
+		assertEquals(2, resources.size(), resources.stream().map(t -> t.getIdElement().toUnqualified().getValue()).collect(Collectors.joining(", ")));
 		assertEquals(taskId.getValue(), resources.get(0).getIdElement().getValue());
-		assertEquals(conditionId.getValue(), ((Task)resources.get(0)).getBasedOn().get(0).getReference());
+		assertEquals(conditionId.getValue(), ((Task) resources.get(0)).getBasedOn().get(0).getReference());
 		assertEquals(conditionId.withVersion("4").getValue(), resources.get(1).getIdElement().getValue());
 	}
 
@@ -522,9 +629,9 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		IBundleProvider outcome = myTaskDao.search(SearchParameterMap.newSynchronous().addInclude(Task.INCLUDE_BASED_ON));
 		assertEquals(2, outcome.size());
 		List<IBaseResource> resources = outcome.getResources(0, 2);
-		assertEquals(2, resources.size(), resources.stream().map(t->t.getIdElement().toUnqualified().getValue()).collect(Collectors.joining(", ")));
+		assertEquals(2, resources.size(), resources.stream().map(t -> t.getIdElement().toUnqualified().getValue()).collect(Collectors.joining(", ")));
 		assertEquals(taskId.getValue(), resources.get(0).getIdElement().getValue());
-		assertEquals(conditionId.getValue(), ((Task)resources.get(0)).getBasedOn().get(0).getReference());
+		assertEquals(conditionId.getValue(), ((Task) resources.get(0)).getBasedOn().get(0).getReference());
 		assertEquals(conditionId.withVersion("4").getValue(), resources.get(1).getIdElement().getValue());
 	}
 

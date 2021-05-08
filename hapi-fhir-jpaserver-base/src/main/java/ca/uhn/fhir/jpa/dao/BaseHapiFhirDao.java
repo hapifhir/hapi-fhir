@@ -1142,6 +1142,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				mySearchParamWithInlineReferencesExtractor.populateFromResource(newParams, theTransactionDetails, entity, theResource, existingParams, theRequest);
 
 				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);
+
+				if (!changed.isChanged() && theForceUpdate) {
+					changed.setChanged(true);
+				}
+
 				if (changed.isChanged()) {
 					entity.setUpdated(theTransactionDetails.getTransactionDate());
 					if (theResource instanceof IResource) {

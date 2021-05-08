@@ -924,6 +924,7 @@ public abstract class BaseTransactionProcessor {
 
 			FhirTerser terser = myContext.newTerser();
 			theTransactionStopWatch.startTask("Index " + theIdToPersistedOutcome.size() + " resources");
+			IdentityHashMap<DaoMethodOutcome, Set<IBaseReference>> deferredIndexesForAutoVersioning = null;
 			int i = 0;
 			for (DaoMethodOutcome nextOutcome : theIdToPersistedOutcome.values()) {
 
@@ -940,99 +941,26 @@ public abstract class BaseTransactionProcessor {
 					continue;
 				}
 
-				// References
-				Set<IBaseReference> referencesToVersion = BaseStorageDao.extractReferencesToAutoVersion(myContext, myModelConfig, nextResource);
-				List<ResourceReferenceInfo> allRefs = terser.getAllResourceReferences(nextResource);
-				for (ResourceReferenceInfo nextRef : allRefs) {
-					IBaseReference resourceReference = nextRef.getResourceReference();
-					IIdType nextId = resourceReference.getReferenceElement();
-					IIdType newId = null;
-					if (!nextId.hasIdPart()) {
-						if (resourceReference.getResource() != null) {
-							IIdType targetId = resourceReference.getResource().getIdElement();
-							if (targetId.getValue() == null) {
-								// This means it's a contained resource
-								continue;
-							} else if (theIdSubstitutions.containsValue(targetId)) {
-								newId = targetId;
-							} else {
-								throw new InternalErrorException("References by resource with no reference ID are not supported in DAO layer");
-							}
-						} else {
-							continue;
-						}
-					}
-					if (newId != null || theIdSubstitutions.containsKey(nextId)) {
-						if (newId == null) {
-							newId = theIdSubstitutions.get(nextId);
-						}
-						ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
-						if (referencesToVersion.contains(resourceReference)) {
-							resourceReference.setReference(newId.getValue());
-						} else {
-							resourceReference.setReference(newId.toVersionless().getValue());
-						}
-					} else if (nextId.getValue().startsWith("urn:")) {
-						throw new InvalidRequestException("Unable to satisfy placeholder ID " + nextId.getValue() + " found in element named '" + nextRef.getName() + "' within resource of type: " + nextResource.getIdElement().getResourceType());
-					} else {
-						if (referencesToVersion.contains(resourceReference)) {
-							DaoMethodOutcome outcome = theIdToPersistedOutcome.get(nextId);
-							if (!outcome.isNop() && !Boolean.TRUE.equals(outcome.getCreated())) {
-								resourceReference.setReference(nextId.getValue());
-							}
-						}
-					}
-				}
-
-				// URIs
-				Class<? extends IPrimitiveType<?>> uriType = (Class<? extends IPrimitiveType<?>>) myContext.getElementDefinition("uri").getImplementingClass();
-				List<? extends IPrimitiveType<?>> allUris = terser.getAllPopulatedChildElementsOfType(nextResource, uriType);
-				for (IPrimitiveType<?> nextRef : allUris) {
-					if (nextRef instanceof IIdType) {
-						continue; // No substitution on the resource ID itself!
-					}
-					IIdType nextUriString = newIdType(nextRef.getValueAsString());
-					if (theIdSubstitutions.containsKey(nextUriString)) {
-						IIdType newId = theIdSubstitutions.get(nextUriString);
-						ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
-						nextRef.setValueAsString(newId.toVersionless().getValue());
-					} else {
-						ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
-					}
-				}
-
-				IPrimitiveType<Date> deletedInstantOrNull;
-				if (nextResource instanceof IAnyResource) {
-					deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) nextResource);
+				Set<IBaseReference> referencesToAutoVersion = BaseStorageDao.extractReferencesToAutoVersion(myContext, myModelConfig, nextResource);
+				if (referencesToAutoVersion.isEmpty()) {
+					resolveReferencesThenSaveAndIndexResource(theRequest, theTransactionDetails, theIdSubstitutions, theIdToPersistedOutcome, entriesToProcess, nonUpdatedEntities, updatedEntities, terser, nextOutcome, nextResource, referencesToAutoVersion);
 				} else {
-					deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IResource) nextResource);
-				}
-				Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
-
-				IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDao(nextResource.getClass());
-				IJpaDao jpaDao = (IJpaDao) dao;
-
-				IBasePersistedResource updateOutcome = null;
-				if (updatedEntities.contains(nextOutcome.getEntity())) {
-					updateOutcome = jpaDao.updateInternal(theRequest, nextResource, true, false, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource(), theTransactionDetails);
-				} else if (!nonUpdatedEntities.contains(nextOutcome.getId())) {
-					updateOutcome = jpaDao.updateEntity(theRequest, nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theTransactionDetails, false, true);
-				}
-
-				// Make sure we reflect the actual final version for the resource.
-				if (updateOutcome != null) {
-					IIdType newId = updateOutcome.getIdDt();
-					for (IIdType nextEntry : entriesToProcess.values()) {
-						if (nextEntry.getResourceType().equals(newId.getResourceType())) {
-							if (nextEntry.getIdPart().equals(newId.getIdPart())) {
-								if (!nextEntry.hasVersionIdPart() || !nextEntry.getVersionIdPart().equals(newId.getVersionIdPart())) {
-									nextEntry.setParts(nextEntry.getBaseUrl(), nextEntry.getResourceType(), nextEntry.getIdPart(), newId.getVersionIdPart());
-								}
-							}
-						}
+					if (deferredIndexesForAutoVersioning == null) {
+						deferredIndexesForAutoVersioning = new IdentityHashMap<>();
 					}
+					deferredIndexesForAutoVersioning.put(nextOutcome, referencesToAutoVersion);
 				}
 
+			}
+
+			// If we have any resources we'll be auto-versioning, index these next
+			if (deferredIndexesForAutoVersioning != null) {
+				for (Map.Entry<DaoMethodOutcome, Set<IBaseReference>> nextEntry : deferredIndexesForAutoVersioning.entrySet()) {
+					DaoMethodOutcome nextOutcome = nextEntry.getKey();
+					Set<IBaseReference> referencesToAutoVersion = nextEntry.getValue();
+					IBaseResource nextResource = nextOutcome.getResource();
+					resolveReferencesThenSaveAndIndexResource(theRequest, theTransactionDetails, theIdSubstitutions, theIdToPersistedOutcome, entriesToProcess, nonUpdatedEntities, updatedEntities, terser, nextOutcome, nextResource, referencesToAutoVersion);
+				}
 			}
 
 			theTransactionStopWatch.endCurrentTask();
@@ -1041,8 +969,6 @@ public abstract class BaseTransactionProcessor {
 			flushSession(theIdToPersistedOutcome);
 
 			theTransactionStopWatch.endCurrentTask();
-
-
 
 			/*
 			 * Double check we didn't allow any duplicates we shouldn't have
@@ -1090,6 +1016,118 @@ public abstract class BaseTransactionProcessor {
 			if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts()) {
 				theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
 			}
+		}
+	}
+
+	private void resolveReferencesThenSaveAndIndexResource(RequestDetails theRequest, TransactionDetails theTransactionDetails, Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, Map<IBase, IIdType> entriesToProcess, Set<IIdType> nonUpdatedEntities, Set<IBasePersistedResource> updatedEntities, FhirTerser terser, DaoMethodOutcome nextOutcome, IBaseResource nextResource, Set<IBaseReference> theReferencesToAutoVersion) {
+		// References
+		List<ResourceReferenceInfo> allRefs = terser.getAllResourceReferences(nextResource);
+		for (ResourceReferenceInfo nextRef : allRefs) {
+			IBaseReference resourceReference = nextRef.getResourceReference();
+			IIdType nextId = resourceReference.getReferenceElement();
+			IIdType newId = null;
+			if (!nextId.hasIdPart()) {
+				if (resourceReference.getResource() != null) {
+					IIdType targetId = resourceReference.getResource().getIdElement();
+					if (targetId.getValue() == null) {
+						// This means it's a contained resource
+						continue;
+					} else if (theIdSubstitutions.containsValue(targetId)) {
+						newId = targetId;
+					} else {
+						throw new InternalErrorException("References by resource with no reference ID are not supported in DAO layer");
+					}
+				} else {
+					continue;
+				}
+			}
+			if (newId != null || theIdSubstitutions.containsKey(nextId)) {
+				if (newId == null) {
+					newId = theIdSubstitutions.get(nextId);
+				}
+				ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
+				if (theReferencesToAutoVersion.contains(resourceReference)) {
+					resourceReference.setReference(newId.getValue());
+				} else {
+					resourceReference.setReference(newId.toVersionless().getValue());
+				}
+			} else if (nextId.getValue().startsWith("urn:")) {
+				throw new InvalidRequestException("Unable to satisfy placeholder ID " + nextId.getValue() + " found in element named '" + nextRef.getName() + "' within resource of type: " + nextResource.getIdElement().getResourceType());
+			} else {
+				if (theReferencesToAutoVersion.contains(resourceReference)) {
+					DaoMethodOutcome outcome = theIdToPersistedOutcome.get(nextId);
+					if (!outcome.isNop() && !Boolean.TRUE.equals(outcome.getCreated())) {
+						resourceReference.setReference(nextId.getValue());
+					}
+				}
+			}
+		}
+
+		// URIs
+		Class<? extends IPrimitiveType<?>> uriType = (Class<? extends IPrimitiveType<?>>) myContext.getElementDefinition("uri").getImplementingClass();
+		List<? extends IPrimitiveType<?>> allUris = terser.getAllPopulatedChildElementsOfType(nextResource, uriType);
+		for (IPrimitiveType<?> nextRef : allUris) {
+			if (nextRef instanceof IIdType) {
+				continue; // No substitution on the resource ID itself!
+			}
+			IIdType nextUriString = newIdType(nextRef.getValueAsString());
+			if (theIdSubstitutions.containsKey(nextUriString)) {
+				IIdType newId = theIdSubstitutions.get(nextUriString);
+				ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
+				nextRef.setValueAsString(newId.toVersionless().getValue());
+			} else {
+				ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
+			}
+		}
+
+		IPrimitiveType<Date> deletedInstantOrNull;
+		if (nextResource instanceof IAnyResource) {
+			deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) nextResource);
+		} else {
+			deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IResource) nextResource);
+		}
+		Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
+
+		IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDao(nextResource.getClass());
+		IJpaDao jpaDao = (IJpaDao) dao;
+
+		IBasePersistedResource updateOutcome = null;
+		if (updatedEntities.contains(nextOutcome.getEntity())) {
+			boolean forceUpdateVersion = false;
+			if (!theReferencesToAutoVersion.isEmpty()) {
+				forceUpdateVersion = true;
+			}
+
+			updateOutcome = jpaDao.updateInternal(theRequest, nextResource, true, forceUpdateVersion, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource(), theTransactionDetails);
+		} else if (!nonUpdatedEntities.contains(nextOutcome.getId())) {
+			updateOutcome = jpaDao.updateEntity(theRequest, nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theTransactionDetails, false, true);
+		}
+
+		// Make sure we reflect the actual final version for the resource.
+		if (updateOutcome != null) {
+			IIdType newId = updateOutcome.getIdDt();
+			for (IIdType nextEntry : entriesToProcess.values()) {
+				if (nextEntry.getResourceType().equals(newId.getResourceType())) {
+					if (nextEntry.getIdPart().equals(newId.getIdPart())) {
+						if (!nextEntry.hasVersionIdPart() || !nextEntry.getVersionIdPart().equals(newId.getVersionIdPart())) {
+							nextEntry.setParts(nextEntry.getBaseUrl(), nextEntry.getResourceType(), nextEntry.getIdPart(), newId.getVersionIdPart());
+						}
+					}
+				}
+			}
+
+			nextOutcome.setId(newId);
+
+			for (IIdType next : theIdSubstitutions.values()) {
+				if (next.getResourceType().equals(newId.getResourceType())) {
+					if (next.getIdPart().equals(newId.getIdPart())) {
+						if (!next.getValue().equals(newId.getValue())) {
+							next.setValue(newId.getValue());
+						}
+					}
+				}
+			}
+
 		}
 	}
 

@@ -1537,7 +1537,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		String id = theResource.getIdElement().getValue();
 		Runnable onRollback = () -> theResource.getIdElement().setValue(id);
 
-		// Execute the update in a retriable transasction
+		// Execute the update in a retriable transaction
 		return myTransactionService.execute(theRequest, tx -> doUpdate(theResource, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theRequest, theTransactionDetails), onRollback);
 	}
 
