@@ -89,13 +89,22 @@ The following table lists vocabulary that is validated by this module:
         <tr>
             <td>Languages (BCP-47)</td>
             <td>
-                ValueSet: <a href="http://hl7.org/fhir/ValueSet/mimetypes">(...)/ValueSet/mimetypes</a>
+                ValueSet: <a href="http://hl7.org/fhir/ValueSet/languages">(...)/ValueSet/languages</a>
+                <br/>
+                ValueSet: <a href="http://hl7.org/fhir/ValueSet/all-languages">(...)/ValueSet/all-languages</a>
                 <br/>
                 CodeSystem: <code>urn:ietf:bcp:47</code>
             </td>
             <td>
-                Codes are not validated, but are instead assumed to be correct. Improved validation should be
-                added in the future, please get in touch if you would like to help.
+                Codes are validated against the respective ValueSet. Support for two different ValueSets
+                is provided: The <a href="http://hl7.org/fhir/ValueSet/languages">languages</a> 
+                ValueSet provides a collection of commonly used language codes. Only codes explicitly 
+                referenced in this ValueSet are considered valid. 
+                The <a href="http://hl7.org/fhir/ValueSet/languages">all-languages</a> ValueSet
+                accepts any valid BCP-47 code. Codes are validated using data supplied by
+                the 
+                <a href="https://github.com/mattcg/language-subtag-registry">Language Subtype Registry</a> 
+                project.
             </td>
         </tr>
         <tr>
