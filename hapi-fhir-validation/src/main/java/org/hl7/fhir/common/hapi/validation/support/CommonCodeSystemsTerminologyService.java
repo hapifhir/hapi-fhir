@@ -140,11 +140,11 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 						.setMessage("Inappropriate CodeSystem URL \"" + theCodeSystem + "\" for ValueSet: " + theValueSetUrl);
 				}
 
-				String display = lookupLanguageCode(theCode);
-				if (display != null) {
+				LookupCodeResult outcome = lookupLanguageCode(theCode);
+				if (outcome.isFound()) {
 					return new CodeValidationResult()
 						.setCode(theCode)
-						.setDisplay(display);
+						.setDisplay(outcome.getCodeDisplay());
 				} else {
 					return new CodeValidationResult()
 						.setSeverity(IssueSeverity.ERROR)
@@ -203,6 +203,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 					.setDisplay(lookupResult.getCodeDisplay());
 			}
 		}
+
 		return validationResult;
 	}
 
@@ -212,6 +213,8 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 		Map<String, String> map;
 		switch (theSystem) {
+			case LANGUAGES_CODESYSTEM_URL:
+				return lookupLanguageCode(theCode);
 			case UCUM_CODESYSTEM_URL:
 				return lookupUcumCode(theCode);
 			case MIMETYPES_CODESYSTEM_URL:
@@ -248,7 +251,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 	}
 
-	private String lookupLanguageCode(String theCode) {
+	private LookupCodeResult lookupLanguageCode(String theCode) {
 		Map<String, String> languagesMap = myLanguagesLanugageMap;
 		Map<String, String> regionsMap = myLanguagesRegionMap;
 		if (languagesMap == null || regionsMap == null) {
@@ -256,7 +259,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			ourLog.info("Loading BCP47 Language Registry");
 
 			String input = ClasspathUtil.loadResource("org/hl7/fhir/common/hapi/validation/support/registry.json");
-			ArrayNode map = null;
+			ArrayNode map;
 			try {
 				map = (ArrayNode) new ObjectMapper().readTree(input);
 			} catch (JsonProcessingException e) {
@@ -303,11 +306,18 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			language = languagesMap.get(theCode.substring(0, idx));
 			region = regionsMap.get(theCode.substring(idx + 1));
 		}
+
+		LookupCodeResult retVal = new LookupCodeResult();
+		retVal.setSearchedForCode(theCode);
+		retVal.setSearchedForSystem(LANGUAGES_CODESYSTEM_URL);
+
 		if (language != null && region != null) {
-			return language + " " + region;
-		} else {
-			return null;
+			String display = language + " " + region;
+			retVal.setFound(true);
+			retVal.setCodeDisplay(display);
 		}
+
+		return retVal;
 	}
 
 	@Nonnull
