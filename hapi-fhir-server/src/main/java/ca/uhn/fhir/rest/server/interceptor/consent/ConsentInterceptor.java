@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
 @Interceptor
 public class ConsentInterceptor {
 	private static final AtomicInteger ourInstanceCount = new AtomicInteger(0);
@@ -345,12 +344,9 @@ public class ConsentInterceptor {
 	}
 
 	private boolean isAllowListedRequest(RequestDetails theRequestDetails) {
-		if (isMetadataPath(theRequestDetails) || isMetaOperation(theRequestDetails)){
-			return true;
-		} else {
-			return false;
-		}
+		return isMetadataPath(theRequestDetails) || isMetaOperation(theRequestDetails);
 	}
+
 	private boolean isMetaOperation(RequestDetails theRequestDetails) {
 		return "$meta".equals(theRequestDetails.getOperation());
 	}
