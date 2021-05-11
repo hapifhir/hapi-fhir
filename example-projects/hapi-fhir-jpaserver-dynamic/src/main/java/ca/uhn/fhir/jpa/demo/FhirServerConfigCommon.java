@@ -82,6 +82,10 @@ public class FhirServerConfigCommon {
 			logger.error("----FhiServerConfigCommon: getDataSource: setting driver error: " + e.getMessage());
 		}
 		dataSource.setUrl(dbUrl);
+
+		// A check for WS-2020-0287
+		assert dataSource.getJmxName() == null;
+
 		return dataSource;
 	}
 
