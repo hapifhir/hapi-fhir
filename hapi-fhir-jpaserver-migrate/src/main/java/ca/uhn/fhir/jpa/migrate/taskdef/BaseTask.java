@@ -122,11 +122,13 @@ public abstract class BaseTask {
 					return changesCount;
 				} catch (DataAccessException e) {
 					if (myFailureAllowed) {
-						ourLog.info("Task did not exit successfully, but task is allowed to fail");
+						ourLog.info("Task {} did not exit successfully, but task is allowed to fail", getFlywayVersion());
 						ourLog.debug("Error was: {}", e.getMessage(), e);
 						return 0;
 					} else {
-						throw e;
+						throw new DataAccessException("Failed during task " + getFlywayVersion() + ": " + e, e) {
+							private static final long serialVersionUID = 8211678931579252166L;
+						};
 					}
 				}
 			});

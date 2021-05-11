@@ -93,5 +93,5 @@ public interface IResourceTableDao extends JpaRepository<ResourceTable, Long> {
 	Collection<Object[]> findLookupFieldsByResourcePidInPartitionNull(@Param("pid") List<Long> thePids);
 
 	@Query("SELECT t.myVersion FROM ResourceTable t WHERE t.myId = :pid")
-	long findCurrentVersionByPid(@Param("pid") Long thePid);
+	Long findCurrentVersionByPid(@Param("pid") Long thePid);
 }

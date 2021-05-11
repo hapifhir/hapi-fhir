@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2647
+title: "The new Match URL cache suffered from potential cache poisoning if multiple threads performed
+    a condiitonal create operation at the same time."
