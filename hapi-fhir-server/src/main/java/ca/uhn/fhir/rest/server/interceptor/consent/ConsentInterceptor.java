@@ -352,7 +352,7 @@ public class ConsentInterceptor {
 		}
 	}
 	private boolean isMetaOperation(RequestDetails theRequestDetails) {
-		return theRequestDetails.getOperation() != null && theRequestDetails.getOperation().equals("$meta");
+		return "$meta".equals(theRequestDetails.getOperation());
 	}
 
 	private boolean isMetadataPath(RequestDetails theRequestDetails) {
