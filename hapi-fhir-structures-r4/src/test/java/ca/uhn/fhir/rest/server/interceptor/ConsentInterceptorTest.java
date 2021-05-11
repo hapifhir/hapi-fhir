@@ -2,6 +2,8 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
@@ -11,11 +13,13 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.interceptor.auth.SearchNarrowingInterceptorTest;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOperationStatusEnum;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOutcome;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -27,9 +31,11 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
@@ -70,6 +76,7 @@ public class ConsentInterceptorTest {
 	private static Server ourServer;
 	private static DummyPatientResourceProvider ourPatientProvider;
 	private static IGenericClient ourFhirClient;
+	private static DummySystemProvider ourSystemProvider;
 
 	@Mock
 	private IConsentService myConsentSvc;
@@ -161,6 +168,28 @@ public class ConsentInterceptorTest {
 			assertThat(responseContent, containsString("\"total\""));
 		}
 
+	}
+
+	@Test
+	public void testMetadataCallHasChecksSkipped() throws IOException{
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+		}
+
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/$meta");
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+		}
+
+		verify(myConsentSvc, times(0)).canSeeResource(any(), any(), any());
+		verify(myConsentSvc, times(0)).willSeeResource(any(), any(), any());
+		verify(myConsentSvc, times(0)).startOperation(any(), any());
+		verify(myConsentSvc, times(2)).completeOperationSuccess(any(), any());
 	}
 
 	@Test
@@ -457,11 +486,13 @@ public class ConsentInterceptorTest {
 		ourServer = new Server(0);
 
 		ourPatientProvider = new DummyPatientResourceProvider(ourCtx);
+		ourSystemProvider = new DummySystemProvider();
 
 		ServletHandler servletHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
 		ourServlet.setDefaultPrettyPrint(true);
 		ourServlet.setResourceProviders(ourPatientProvider);
+		ourServlet.registerProvider(ourSystemProvider);
 		ourServlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		servletHandler.addServletWithMapping(servletHolder, "/*");
@@ -478,4 +509,15 @@ public class ConsentInterceptorTest {
 		ourFhirClient = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
 	}
 
+	private static class DummySystemProvider{
+
+		@Operation(name = "$meta", idempotent = true, returnParameters = {
+			@OperationParam(name = "return", typeName = "Meta")
+		})
+		public IBaseParameters meta(ServletRequestDetails theRequestDetails) {
+			Parameters retval = new Parameters();
+			retval.addParameter("Meta", "Yes");
+			return retval;
+		}
+	}
 }
