@@ -44,6 +44,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META;
+
 @Interceptor
 public class ConsentInterceptor {
 	private static final AtomicInteger ourInstanceCount = new AtomicInteger(0);
@@ -94,6 +96,9 @@ public class ConsentInterceptor {
 
 	@Hook(value = Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
 	public void interceptPreHandled(RequestDetails theRequestDetails) {
+		if (isAllowListedRequest(theRequestDetails)) {
+			return;
+		}
 		ConsentOutcome outcome = myConsentService.startOperation(theRequestDetails, myContextConsentServices);
 		Validate.notNull(outcome, "Consent service returned null outcome");
 
@@ -129,6 +134,9 @@ public class ConsentInterceptor {
 		if (isRequestAuthorized(theRequestDetails)) {
 			return;
 		}
+		if (isAllowListedRequest(theRequestDetails)) {
+			return;
+		}
 
 		for (int i = 0; i < thePreResourceAccessDetails.size(); i++) {
 			IBaseResource nextResource = thePreResourceAccessDetails.getResource(i);
@@ -148,6 +156,9 @@ public class ConsentInterceptor {
 	@Hook(value = Pointcut.STORAGE_PRESHOW_RESOURCES)
 	public void interceptPreShow(RequestDetails theRequestDetails, IPreResourceShowDetails thePreResourceShowDetails) {
 		if (isRequestAuthorized(theRequestDetails)) {
+			return;
+		}
+		if (isAllowListedRequest(theRequestDetails)) {
 			return;
 		}
 		IdentityHashMap<IBaseResource, Boolean> alreadySeenResources = getAlreadySeenResourcesMap(theRequestDetails);
@@ -196,6 +207,9 @@ public class ConsentInterceptor {
 			return;
 		}
 		if (isRequestAuthorized(theRequestDetails)) {
+			return;
+		}
+		if (isAllowListedRequest(theRequestDetails)) {
 			return;
 		}
 
@@ -329,5 +343,20 @@ public class ConsentInterceptor {
 			operationOutcome = theOutcome.getOperationOutcome();
 		}
 		return new ForbiddenOperationException("Rejected by consent service", operationOutcome);
+	}
+
+	private boolean isAllowListedRequest(RequestDetails theRequestDetails) {
+		if (isMetadataPath(theRequestDetails) || isMetaOperation(theRequestDetails)){
+			return true;
+		} else {
+			return false;
+		}
+	}
+	private boolean isMetaOperation(RequestDetails theRequestDetails) {
+		return theRequestDetails.getOperation() != null && theRequestDetails.getOperation().equals(OPERATION_META);
+	}
+
+	private boolean isMetadataPath(RequestDetails theRequestDetails) {
+		return "metadata".equals(theRequestDetails.getRequestPath());
 	}
 }
