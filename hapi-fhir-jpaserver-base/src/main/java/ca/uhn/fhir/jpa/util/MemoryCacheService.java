@@ -23,12 +23,15 @@ package ca.uhn.fhir.jpa.util;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.TranslationQuery;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
@@ -100,6 +103,15 @@ public class MemoryCacheService {
 		getCache(theCache).put(theKey, theValue);
 	}
 
+	public <K, V> void putAfterCommit(CacheEnum theCache, K theKey, V theValue) {
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+			@Override
+			public void afterCommit() {
+				put(theCache, theKey, theValue);
+			}
+		});
+	}
+
 	public <K, V> Map<K, V> getAllPresent(CacheEnum theCache, Iterable<K> theKeys) {
 		return (Map<K, V>) getCache(theCache).getAllPresent(theKeys);
 	}
@@ -122,7 +134,7 @@ public class MemoryCacheService {
 		CONCEPT_TRANSLATION(TranslationQuery.class),
 		MATCH_URL(String.class),
 		CONCEPT_TRANSLATION_REVERSE(TranslationQuery.class),
-		RESOURCE_CONDITIONAL_CREATE_VERSION(IIdType.class),
+		RESOURCE_CONDITIONAL_CREATE_VERSION(Long.class),
 		HISTORY_COUNT(HistoryCountKey.class);
 
 		private final Class<?> myKeyType;

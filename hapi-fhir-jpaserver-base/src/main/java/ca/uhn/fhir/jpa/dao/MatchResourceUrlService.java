@@ -43,6 +43,8 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Collections;
 import java.util.Set;
@@ -80,7 +82,8 @@ public class MatchResourceUrlService {
 		Set<ResourcePersistentId> retVal = search(paramMap, theResourceType, theRequest);
 
 		if (myDaoConfig.getMatchUrlCache() && retVal.size() == 1) {
-			myMemoryCacheService.put(MemoryCacheService.CacheEnum.MATCH_URL, theMatchUrl, retVal.iterator().next());
+			ResourcePersistentId pid = retVal.iterator().next();
+			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, theMatchUrl, pid);
 		}
 
 		return retVal;
@@ -113,7 +116,7 @@ public class MatchResourceUrlService {
 		Validate.notBlank(theMatchUrl);
 		Validate.notNull(theResourcePersistentId);
 		if (myDaoConfig.getMatchUrlCache()) {
-			myMemoryCacheService.put(MemoryCacheService.CacheEnum.MATCH_URL, theMatchUrl, theResourcePersistentId);
+			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, theMatchUrl, theResourcePersistentId);
 		}
 	}
 }
