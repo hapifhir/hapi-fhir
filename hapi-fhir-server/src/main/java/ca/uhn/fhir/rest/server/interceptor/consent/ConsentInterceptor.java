@@ -44,6 +44,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static ca.uhn.fhir.rest.api.Constants.URL_TOKEN_METADATA;
+
 @Interceptor
 public class ConsentInterceptor {
 	private static final AtomicInteger ourInstanceCount = new AtomicInteger(0);
@@ -51,6 +53,7 @@ public class ConsentInterceptor {
 	private final String myRequestAuthorizedKey = ConsentInterceptor.class.getName() + "_" + myInstanceIndex + "_AUTHORIZED";
 	private final String myRequestCompletedKey = ConsentInterceptor.class.getName() + "_" + myInstanceIndex + "_COMPLETED";
 	private final String myRequestSeenResourcesKey = ConsentInterceptor.class.getName() + "_" + myInstanceIndex + "_SEENRESOURCES";
+	public static final String META_OPERATION_NAME = "$meta";
 
 	private IConsentService myConsentService;
 	private IConsentContextServices myContextConsentServices;
@@ -348,10 +351,10 @@ public class ConsentInterceptor {
 	}
 
 	private boolean isMetaOperation(RequestDetails theRequestDetails) {
-		return "$meta".equals(theRequestDetails.getOperation());
+		return META_OPERATION_NAME.equals(theRequestDetails.getOperation());
 	}
 
 	private boolean isMetadataPath(RequestDetails theRequestDetails) {
-		return "metadata".equals(theRequestDetails.getRequestPath());
+		return URL_TOKEN_METADATA.equals(theRequestDetails.getRequestPath());
 	}
 }
