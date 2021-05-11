@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.interceptor.auth.SearchNarrowingInterceptorTest;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOperationStatusEnum;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOutcome;
@@ -75,6 +76,7 @@ public class ConsentInterceptorTest {
 	private static Server ourServer;
 	private static DummyPatientResourceProvider ourPatientProvider;
 	private static IGenericClient ourFhirClient;
+	private static DummySystemProvider ourSystemProvider;
 
 	@Mock
 	private IConsentService myConsentSvc;
@@ -175,12 +177,19 @@ public class ConsentInterceptorTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, not(containsString("\"total\"")));
 		}
+
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/$meta");
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+		}
+
 		verify(myConsentSvc, times(0)).canSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(0)).willSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(0)).startOperation(any(), any());
-		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
+		verify(myConsentSvc, times(2)).completeOperationSuccess(any(), any());
 	}
 
 	@Test
@@ -477,11 +486,13 @@ public class ConsentInterceptorTest {
 		ourServer = new Server(0);
 
 		ourPatientProvider = new DummyPatientResourceProvider(ourCtx);
+		ourSystemProvider = new DummySystemProvider();
 
 		ServletHandler servletHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
 		ourServlet.setDefaultPrettyPrint(true);
 		ourServlet.setResourceProviders(ourPatientProvider);
+		ourServlet.registerProvider(ourSystemProvider);
 		ourServlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		servletHandler.addServletWithMapping(servletHolder, "/*");
@@ -496,5 +507,17 @@ public class ConsentInterceptorTest {
 		ourClient = builder.build();
 
 		ourFhirClient = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
+	}
+
+	private static class DummySystemProvider{
+
+		@Operation(name = "$meta", idempotent = true, returnParameters = {
+			@OperationParam(name = "return", typeName = "Meta")
+		})
+		public IBaseParameters meta(ServletRequestDetails theRequestDetails) {
+			Parameters retval = new Parameters();
+			retval.addParameter("Meta", "Yes");
+			return retval;
+		}
 	}
 }
