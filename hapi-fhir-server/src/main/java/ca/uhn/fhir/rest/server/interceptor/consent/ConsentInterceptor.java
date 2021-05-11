@@ -53,7 +53,6 @@ public class ConsentInterceptor {
 	private final String myRequestAuthorizedKey = ConsentInterceptor.class.getName() + "_" + myInstanceIndex + "_AUTHORIZED";
 	private final String myRequestCompletedKey = ConsentInterceptor.class.getName() + "_" + myInstanceIndex + "_COMPLETED";
 	private final String myRequestSeenResourcesKey = ConsentInterceptor.class.getName() + "_" + myInstanceIndex + "_SEENRESOURCES";
-	public static final String META_OPERATION_NAME = "$meta";
 
 	private IConsentService myConsentService;
 	private IConsentContextServices myContextConsentServices;

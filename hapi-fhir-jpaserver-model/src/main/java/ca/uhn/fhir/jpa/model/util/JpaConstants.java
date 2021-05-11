@@ -94,10 +94,6 @@ public class JpaConstants {
 	 */
 	public static final String OPERATION_GET_RESOURCE_COUNTS = "$get-resource-counts";
 	/**
-	 * Operation name for the $meta operation
-	 */
-	public static final String OPERATION_META = "$meta";
-	/**
 	 * Operation name for the $validate operation
 	 */
 	// NB don't delete this, it's used in Smile as well, even though hapi-fhir-server uses the version from Constants.java

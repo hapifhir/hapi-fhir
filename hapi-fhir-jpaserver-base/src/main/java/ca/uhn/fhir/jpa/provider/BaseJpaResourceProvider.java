@@ -61,7 +61,7 @@ import org.springframework.beans.factory.annotation.Required;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
-import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_META;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_ADD;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_DELETE;
 
