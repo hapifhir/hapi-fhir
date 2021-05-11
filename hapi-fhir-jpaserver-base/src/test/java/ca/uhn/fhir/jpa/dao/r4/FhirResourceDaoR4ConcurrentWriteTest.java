@@ -11,15 +11,20 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
@@ -35,6 +40,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -69,6 +75,83 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		myExecutor.shutdown();
 		myInterceptorRegistry.unregisterInterceptor(myRetryInterceptor);
 	}
+
+	@Test
+	public void testConcurrentTransactionCreates() throws ExecutionException, InterruptedException {
+		myDaoConfig.setMatchUrlCache(true);
+
+		AtomicInteger counter = new AtomicInteger(0);
+		Runnable creator = () -> {
+			BundleBuilder bb = new BundleBuilder(myFhirCtx);
+			String patientId = "Patient/PT" + counter.get();
+			IdType practitionerId = IdType.newRandomUuid();
+			IdType practitionerId2 = IdType.newRandomUuid();
+
+			ExplanationOfBenefit eob = new ExplanationOfBenefit();
+			eob.addIdentifier().setSystem("foo").setValue("" + counter.get());
+			eob.getPatient().setReference(patientId);
+			eob.addCareTeam().getProvider().setReference(practitionerId.getValue());
+			eob.addCareTeam().getProvider().setReference(practitionerId2.getValue());
+			bb.addTransactionUpdateEntry(eob).conditional("ExplanationOfBenefit?identifier=foo|" + counter.get());
+
+			Patient pt = new Patient();
+			pt.setId(patientId);
+			pt.setActive(true);
+			bb.addTransactionUpdateEntry(pt);
+
+			Coverage coverage = new Coverage();
+			coverage.addIdentifier().setSystem("foo").setValue("" + counter.get());
+			coverage.getBeneficiary().setReference(patientId);
+			bb.addTransactionUpdateEntry(coverage).conditional("Coverage?identifier=foo|" + counter.get());
+
+			Practitioner practitioner = new Practitioner();
+			practitioner.setId(practitionerId);
+			practitioner.addIdentifier().setSystem("foo").setValue("" + counter.get());
+			bb.addTransactionCreateEntry(practitioner).conditional("Practitioner?identifier=foo|" + counter.get());
+
+			Practitioner practitioner2 = new Practitioner();
+			practitioner2.setId(practitionerId2);
+			practitioner2.addIdentifier().setSystem("foo2").setValue("" + counter.get());
+			bb.addTransactionCreateEntry(practitioner2).conditional("Practitioner?identifier=foo2|" + counter.get());
+
+			Observation obs = new Observation();
+			obs.setId("Observation/OBS" + counter);
+			obs.getSubject().setReference(pt.getId());
+			bb.addTransactionUpdateEntry(obs);
+
+			Bundle input = (Bundle) bb.getBundle();
+			mySystemDao.transaction(new SystemRequestDetails(), input);
+		};
+
+		for (int i = 0; i < 10; i++) {
+			counter.set(i);
+			ourLog.info("*********************************************************************************");
+			ourLog.info("Starting pass {}", i);
+			ourLog.info("*********************************************************************************");
+
+			List<Future<?>> futures = new ArrayList<>();
+			for (int j = 0; j < 10; j++) {
+				futures.add(myExecutor.submit(creator));
+			}
+
+			for (Future<?> next : futures) {
+				try {
+					next.get();
+				} catch (Exception e) {
+					// ignore
+				}
+			}
+
+			creator.run();
+		}
+
+		runInTransaction(()->{
+			assertEquals(60, myResourceTableDao.count());
+		});
+
+	}
+
+
 
 	@Test
 	public void testCreateWithClientAssignedId() {
