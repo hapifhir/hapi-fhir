@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.rest.api.Constants.URL_TOKEN_METADATA;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_META;
 
 @Interceptor
 public class ConsentInterceptor {
@@ -350,7 +351,7 @@ public class ConsentInterceptor {
 	}
 
 	private boolean isMetaOperation(RequestDetails theRequestDetails) {
-		return META_OPERATION_NAME.equals(theRequestDetails.getOperation());
+		return OPERATION_META.equals(theRequestDetails.getOperation());
 	}
 
 	private boolean isMetadataPath(RequestDetails theRequestDetails) {
