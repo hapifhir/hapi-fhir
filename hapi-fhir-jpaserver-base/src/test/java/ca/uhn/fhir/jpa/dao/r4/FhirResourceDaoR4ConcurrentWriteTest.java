@@ -36,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -146,7 +148,19 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		}
 
 		runInTransaction(()->{
-			assertEquals(60, myResourceTableDao.count());
+			Map<String, Integer> counts = new TreeMap<>();
+			myResourceTableDao
+				.findAll()
+				.stream()
+				.forEach(t->{
+					counts.putIfAbsent(t.getResourceType(), 0);
+					int value = counts.get(t.getResourceType());
+					value++;
+					counts.put(t.getResourceType(), value);
+				});
+			ourLog.info("Counts: {}", counts);
+
+			assertEquals(60, myResourceTableDao.count(), counts.toString());
 		});
 
 	}
