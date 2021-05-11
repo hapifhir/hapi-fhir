@@ -2,6 +2,8 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
@@ -16,6 +18,7 @@ import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOperationStatusEnum;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOutcome;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -27,9 +30,11 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
@@ -161,6 +166,21 @@ public class ConsentInterceptorTest {
 			assertThat(responseContent, containsString("\"total\""));
 		}
 
+	}
+
+	@Test
+	public void testMetadataCallHasChecksSkipped() throws IOException{
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			assertThat(responseContent, not(containsString("\"total\"")));
+		}
+		verify(myConsentSvc, times(0)).canSeeResource(any(), any(), any());
+		verify(myConsentSvc, times(0)).willSeeResource(any(), any(), any());
+		verify(myConsentSvc, times(0)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
 	}
 
 	@Test
@@ -477,5 +497,4 @@ public class ConsentInterceptorTest {
 
 		ourFhirClient = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
 	}
-
 }

@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META;
 
 @Interceptor
 public class ConsentInterceptor {
@@ -353,7 +352,7 @@ public class ConsentInterceptor {
 		}
 	}
 	private boolean isMetaOperation(RequestDetails theRequestDetails) {
-		return theRequestDetails.getOperation() != null && theRequestDetails.getOperation().equals(OPERATION_META);
+		return theRequestDetails.getOperation() != null && theRequestDetails.getOperation().equals("$meta");
 	}
 
 	private boolean isMetadataPath(RequestDetails theRequestDetails) {
