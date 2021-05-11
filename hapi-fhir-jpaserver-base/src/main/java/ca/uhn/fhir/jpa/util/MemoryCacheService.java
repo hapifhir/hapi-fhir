@@ -104,12 +104,16 @@ public class MemoryCacheService {
 	}
 
 	public <K, V> void putAfterCommit(CacheEnum theCache, K theKey, V theValue) {
-		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-			@Override
-			public void afterCommit() {
-				put(theCache, theKey, theValue);
-			}
-		});
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void afterCommit() {
+					put(theCache, theKey, theValue);
+				}
+			});
+		} else {
+			put(theCache, theKey, theValue);
+		}
 	}
 
 	public <K, V> Map<K, V> getAllPresent(CacheEnum theCache, Iterable<K> theKeys) {
