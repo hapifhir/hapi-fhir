@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2644
+title: "Support for validating BCP-47 (language) codes against the FHIR Languages and All-Languages ValueSets
+   has been improved."

@@ -1,6 +1,7 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -18,6 +19,7 @@ import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -49,26 +51,11 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 
 		String inputUrl = null;
 		try {
-			assert theInput.getStructureFhirVersionEnum() == myCtx.getVersion().getVersion();
+			FhirVersionEnum version = theInput.getStructureFhirVersionEnum();
+			assert version == myCtx.getVersion().getVersion();
 
-			VersionSpecificWorkerContextWrapper.IVersionTypeConverter converter;
-			switch (theInput.getStructureFhirVersionEnum()) {
-				case DSTU3:
-					converter = new VersionTypeConverterDstu3();
-					break;
-				case R4:
-					converter = new VersionTypeConverterR4();
-					break;
-				case R5:
-					converter = VersionSpecificWorkerContextWrapper.IDENTITY_VERSION_TYPE_CONVERTER;
-					break;
-				case DSTU2:
-				case DSTU2_HL7ORG:
-				case DSTU2_1:
-				default:
-					throw new IllegalStateException("Can not generate snapshot for version: " + theInput.getStructureFhirVersionEnum());
-			}
-
+			VersionSpecificWorkerContextWrapper.IVersionTypeConverter converter = newVersionTypeConverter(version);
+			Validate.notNull(converter, "Can not generate snapshot for version: %s", version);
 
 			org.hl7.fhir.r5.model.StructureDefinition inputCanonical = (org.hl7.fhir.r5.model.StructureDefinition) converter.toCanonical(theInput);
 
@@ -103,7 +90,7 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 			ProfileUtilities profileUtilities = new ProfileUtilities(context, messages, profileKnowledgeProvider);
 			profileUtilities.generateSnapshot(baseCanonical, inputCanonical, theUrl, theWebUrl, theProfileName);
 
-			switch (theInput.getStructureFhirVersionEnum()) {
+			switch (version) {
 				case DSTU3:
 					org.hl7.fhir.dstu3.model.StructureDefinition generatedDstu3 = (org.hl7.fhir.dstu3.model.StructureDefinition) converter.fromCanonical(inputCanonical);
 					((org.hl7.fhir.dstu3.model.StructureDefinition) theInput).getSnapshot().getElement().clear();
@@ -123,7 +110,7 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 				case DSTU2_HL7ORG:
 				case DSTU2_1:
 				default:
-					throw new IllegalStateException("Can not generate snapshot for version: " + theInput.getStructureFhirVersionEnum());
+					throw new IllegalStateException("Can not generate snapshot for version: " + version);
 			}
 
 			return theInput;
@@ -142,6 +129,28 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 	@Override
 	public FhirContext getFhirContext() {
 		return myCtx;
+	}
+
+	@Nullable
+	public static VersionSpecificWorkerContextWrapper.IVersionTypeConverter newVersionTypeConverter(FhirVersionEnum version) {
+		VersionSpecificWorkerContextWrapper.IVersionTypeConverter converter;
+		switch (version) {
+			case DSTU3:
+				converter = new VersionTypeConverterDstu3();
+				break;
+			case R4:
+				converter = new VersionTypeConverterR4();
+				break;
+			case R5:
+				converter = VersionSpecificWorkerContextWrapper.IDENTITY_VERSION_TYPE_CONVERTER;
+				break;
+			case DSTU2:
+			case DSTU2_HL7ORG:
+			case DSTU2_1:
+			default:
+				return null;
+		}
+		return converter;
 	}
 
 

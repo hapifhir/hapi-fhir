@@ -73,6 +73,7 @@ public class JpaFhirRetrieveProvider extends SearchParamFhirRetrieveProvider {
         // TODO: Once HAPI breaks this out from the server dependencies
         // we can include it on its own.
         ca.uhn.fhir.jpa.searchparam.SearchParameterMap hapiMap = new ca.uhn.fhir.jpa.searchparam.SearchParameterMap();
+        hapiMap.setLoadSynchronous(true);
         try {
 
             Method[] methods = hapiMap.getClass().getDeclaredMethods();
