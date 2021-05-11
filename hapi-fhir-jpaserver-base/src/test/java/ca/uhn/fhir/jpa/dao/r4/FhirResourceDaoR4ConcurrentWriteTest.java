@@ -160,7 +160,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 				});
 			ourLog.info("Counts: {}", counts);
 
-			assertEquals(60, myResourceTableDao.count(), counts.toString());
+			assertEquals(10, counts.get("Patient"), counts.toString());
 		});
 
 	}
