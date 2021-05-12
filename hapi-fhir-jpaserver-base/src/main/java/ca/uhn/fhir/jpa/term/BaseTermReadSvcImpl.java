@@ -1725,6 +1725,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	@Override
 	public synchronized void preExpandDeferredValueSetsToTerminologyTables() {
+		if (!myDaoConfig.isEnableTaskPreExpandValueSets()) {
+			return;
+		}
 		if (isNotSafeToPreExpandValueSets()) {
 			ourLog.info("Skipping scheduled pre-expansion of ValueSets while deferred entities are being loaded.");
 			return;

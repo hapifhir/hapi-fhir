@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.bulk.export.svc;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
@@ -129,6 +130,9 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	@Transactional(value = Transactional.TxType.NEVER)
 	@Override
 	public synchronized void buildExportFiles() {
+		if (!myDaoConfig.isEnableTaskBulkImportJobExecution()) {
+			return;
+		}
 
 		Optional<BulkExportJobEntity> jobToProcessOpt = myTxTemplate.execute(t -> {
 			Pageable page = PageRequest.of(0, 1);
@@ -176,6 +180,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	}
 
+	@Autowired
+	private DaoConfig myDaoConfig;
 
 	/**
 	 * This method is called by the scheduler to run a pass of the
@@ -184,6 +190,10 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	@Transactional(value = Transactional.TxType.NEVER)
 	@Override
 	public void purgeExpiredFiles() {
+		if (!myDaoConfig.isEnableTaskBulkImportJobExecution()) {
+			return;
+		}
+
 		Optional<BulkExportJobEntity> jobToDelete = myTxTemplate.execute(t -> {
 			Pageable page = PageRequest.of(0, 1);
 			Slice<BulkExportJobEntity> submittedJobs = myBulkExportJobDao.findByExpiry(page, new Date());

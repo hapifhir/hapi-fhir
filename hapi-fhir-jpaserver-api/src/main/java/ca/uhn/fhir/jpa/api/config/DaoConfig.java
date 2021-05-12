@@ -86,6 +86,14 @@ public class DaoConfig {
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
 	private static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
 	private static final int DEFAULT_MAXIMUM_DELETE_CONFLICT_COUNT = 60;
+
+	/**
+	 * This constant applies to task enablement, e.g. {@link #setEnableTaskStaleSearchCleanup(boolean)}.
+	 *
+	 * By default, all are enabled.
+	 */
+	public static final boolean DEFAULT_ENABLE_TASKS = true;
+
 	/**
 	 * Child Configurations
 	 */
@@ -205,6 +213,27 @@ public class DaoConfig {
 	 * @since 5.4.0
 	 */
 	private boolean myMatchUrlCache;
+	/**
+	 * @since 5.5.0
+	 */
+	private boolean myEnableTaskBulkImportJobExecution;
+	/**
+	 * @since 5.5.0
+	 */
+	private boolean myEnableTaskStaleSearchCleanup;
+
+	/**
+	 * @since 5.5.0
+	 */
+	private boolean myEnableTaskPreExpandValueSets;
+	/**
+	 * @since 5.5.0
+	 */
+	private boolean myEnableTaskResourceReindexing;
+	/**
+	 * @since 5.5.0
+	 */
+	private boolean myEnableTaskBulkExportJobExecution;
 
 	/**
 	 * Constructor
@@ -214,6 +243,13 @@ public class DaoConfig {
 		setReindexThreadCount(Runtime.getRuntime().availableProcessors());
 		setExpungeThreadCount(Runtime.getRuntime().availableProcessors());
 		setBundleTypesAllowedForStorage(DEFAULT_BUNDLE_TYPES_ALLOWED_FOR_STORAGE);
+
+		// Scheduled tasks are all enabled by default
+		setEnableTaskBulkImportJobExecution(DEFAULT_ENABLE_TASKS);
+		setEnableTaskBulkExportJobExecution(DEFAULT_ENABLE_TASKS);
+		setEnableTaskStaleSearchCleanup(DEFAULT_ENABLE_TASKS);
+		setEnableTaskPreExpandValueSets(DEFAULT_ENABLE_TASKS);
+		setEnableTaskResourceReindexing(DEFAULT_ENABLE_TASKS);
 
 		if ("true".equalsIgnoreCase(System.getProperty(DISABLE_STATUS_BASED_REINDEX))) {
 			ourLog.info("Status based reindexing is DISABLED");
@@ -2179,6 +2215,107 @@ public class DaoConfig {
 	@Deprecated
 	public void setPreloadBlobFromInputStream(Boolean thePreloadBlobFromInputStream) {
 		// ignore
+	}
+
+	/**
+	 * If this is enabled (this is the default), this server will attempt to activate and run <b>Bulk Import</b>
+	 * batch jobs. Otherwise, this server will not.
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isEnableTaskBulkImportJobExecution() {
+		return myEnableTaskBulkImportJobExecution;
+	}
+
+	/**
+	 * If this is enabled (this is the default), this server will attempt to activate and run <b>Bulk Import</b>
+	 * batch jobs. Otherwise, this server will not.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setEnableTaskBulkImportJobExecution(boolean theEnableTaskBulkImportJobExecution) {
+		myEnableTaskBulkImportJobExecution = theEnableTaskBulkImportJobExecution;
+	}
+
+	/**
+	 * If this is enabled (this is the default), this server will attempt to activate and run <b>Bulk Export</b>
+	 * batch jobs. Otherwise, this server will not.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setEnableTaskBulkExportJobExecution(boolean theEnableTaskBulkExportJobExecution) {
+		myEnableTaskBulkExportJobExecution = theEnableTaskBulkExportJobExecution;
+	}
+
+	/**
+	 * If this is enabled (this is the default), this server will attempt to activate and run <b>Bulk Export</b>
+	 * batch jobs. Otherwise, this server will not.
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean getEnableTaskBulkExportJobExecution() {
+		return myEnableTaskBulkExportJobExecution;
+	}
+
+
+	/**
+	 * If this is enabled (this is the default), this server will attempt to pre-expand any ValueSets that
+	 * have been uploaded and are not yet pre-expanded. Otherwise, this server will not.
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isEnableTaskPreExpandValueSets() {
+		return myEnableTaskPreExpandValueSets;
+	}
+
+	/**
+	 * If this is enabled (this is the default), this server will attempt to pre-expand any ValueSets that
+	 * have been uploaded and are not yet pre-expanded. Otherwise, this server will not.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setEnableTaskPreExpandValueSets(boolean theEnableTaskPreExpandValueSets) {
+		myEnableTaskPreExpandValueSets = theEnableTaskPreExpandValueSets;
+	}
+
+	/**
+	 * If this is enabled (this is the default), this server will periodically scan for and try to delete
+	 * stale searches in the database. Otherwise, this server will not.
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isEnableTaskStaleSearchCleanup() {
+		return myEnableTaskStaleSearchCleanup;
+	}
+
+	/**
+	 * If this is enabled (this is the default), this server will periodically scan for and try to delete
+	 * stale searches in the database. Otherwise, this server will not.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setEnableTaskStaleSearchCleanup(boolean theEnableTaskStaleSearchCleanup) {
+		myEnableTaskStaleSearchCleanup = theEnableTaskStaleSearchCleanup;
+	}
+
+	/**
+	 * If this is enabled (this is the default), this server will attempt to run resource reindexing jobs.
+	 * Otherwise, this server will not.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setEnableTaskResourceReindexing(boolean theEnableTaskResourceReindexing) {
+		myEnableTaskResourceReindexing = theEnableTaskResourceReindexing;
+	}
+
+	/**
+	 * If this is enabled (this is the default), this server will attempt to run resource reindexing jobs.
+	 * Otherwise, this server will not.
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isEnableTaskResourceReindexing() {
+		return myEnableTaskResourceReindexing;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

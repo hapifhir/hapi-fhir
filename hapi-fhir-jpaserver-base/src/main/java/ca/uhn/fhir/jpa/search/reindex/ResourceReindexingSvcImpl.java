@@ -256,7 +256,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	@Override
 	@Transactional(Transactional.TxType.NEVER)
 	public Integer runReindexingPass() {
-		if (myDaoConfig.isSchedulingDisabled()) {
+		if (myDaoConfig.isSchedulingDisabled() || !myDaoConfig.isEnableTaskPreExpandValueSets()) {
 			return null;
 		}
 		if (myIndexingLock.tryLock()) {
