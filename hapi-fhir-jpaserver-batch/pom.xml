@@ -16,7 +16,7 @@
 	<name>HAPI FHIR JPA Server - Batch Task Processor</name>
 
 	<dependencies>
-		<dependency>
+        <dependency>
 			<groupId>org.springframework.batch</groupId>
 			<artifactId>spring-batch-core</artifactId>
 			<version>${spring_batch_version}</version>
@@ -59,7 +59,7 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+    </dependencies>
 
 	<build>
 		<pluginManagement>

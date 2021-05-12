@@ -20,8 +20,10 @@ package ca.uhn.fhir.jpa.bulk.imprt.svc;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.job.BulkImportJobConfig;
@@ -58,14 +60,15 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.Semaphore;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataImportSvcImpl.class);
+	private final Semaphore myRunningJobSemaphore = new Semaphore(1);
 	@Autowired
 	private IBulkImportJobDao myJobDao;
-
 	@Autowired
 	private IBulkImportJobFileDao myJobFileDao;
 	@Autowired
@@ -78,6 +81,8 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	@Autowired
 	@Qualifier(BatchJobsConfig.BULK_IMPORT_JOB_NAME)
 	private org.springframework.batch.core.Job myBulkImportJob;
+	@Autowired
+	private DaoConfig myDaoConfig;
 
 	@PostConstruct
 	public void start() {
@@ -155,7 +160,24 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	@Transactional(value = Transactional.TxType.NEVER)
 	@Override
 	public boolean activateNextReadyJob() {
+		if (!myDaoConfig.isEnableTaskBulkImportJobExecution()) {
+			Logs.getBatchTroubleshootingLog().trace("Bulk import job execution is not enabled on this server. No action taken.");
+			return false;
+		}
 
+		if (!myRunningJobSemaphore.tryAcquire()) {
+			Logs.getBatchTroubleshootingLog().trace("Already have a running batch job, not going to check for more");
+			return false;
+		}
+
+		try {
+			return doActivateNextReadyJob();
+		} finally {
+			myRunningJobSemaphore.release();
+		}
+	}
+
+	private boolean doActivateNextReadyJob() {
 		Optional<BulkImportJobEntity> jobToProcessOpt = Objects.requireNonNull(myTxTemplate.execute(t -> {
 			Pageable page = PageRequest.of(0, 1);
 			Slice<BulkImportJobEntity> submittedJobs = myJobDao.findByStatus(page, BulkImportJobStatusEnum.READY);
@@ -243,7 +265,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 			.addString(BulkExportJobConfig.JOB_UUID_PARAMETER, jobId)
 			.addLong(BulkImportJobConfig.JOB_PARAM_COMMIT_INTERVAL, (long) batchSize);
 
-		if(isNotBlank(theBulkExportJobEntity.getJobDescription())) {
+		if (isNotBlank(theBulkExportJobEntity.getJobDescription())) {
 			parameters.addString(BulkExportJobConfig.JOB_DESCRIPTION, theBulkExportJobEntity.getJobDescription());
 		}
 
