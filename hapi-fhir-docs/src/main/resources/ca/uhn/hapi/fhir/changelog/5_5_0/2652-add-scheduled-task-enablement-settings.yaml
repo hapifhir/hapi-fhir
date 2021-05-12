@@ -1,0 +1,4 @@
+---
+type: add
+issue: 2652
+title: "Settings have been added to the JPA Server DaoConfig to enable/disable various individual kinds of scheduled tasks."
