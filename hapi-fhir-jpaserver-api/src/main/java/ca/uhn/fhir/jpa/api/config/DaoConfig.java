@@ -2253,7 +2253,7 @@ public class DaoConfig {
 	 *
 	 * @since 5.5.0
 	 */
-	public boolean getEnableTaskBulkExportJobExecution() {
+	public boolean isEnableTaskBulkExportJobExecution() {
 		return myEnableTaskBulkExportJobExecution;
 	}
 

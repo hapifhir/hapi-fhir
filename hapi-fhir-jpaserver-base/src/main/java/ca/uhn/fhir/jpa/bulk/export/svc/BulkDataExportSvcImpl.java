@@ -130,7 +130,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	@Transactional(value = Transactional.TxType.NEVER)
 	@Override
 	public synchronized void buildExportFiles() {
-		if (!myDaoConfig.isEnableTaskBulkImportJobExecution()) {
+		if (!myDaoConfig.isEnableTaskBulkExportJobExecution()) {
 			return;
 		}
 
@@ -190,7 +190,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	@Transactional(value = Transactional.TxType.NEVER)
 	@Override
 	public void purgeExpiredFiles() {
-		if (!myDaoConfig.isEnableTaskBulkImportJobExecution()) {
+		if (!myDaoConfig.isEnableTaskBulkExportJobExecution()) {
 			return;
 		}
 
