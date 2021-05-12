@@ -78,7 +78,7 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	@Transactional(propagation = Propagation.NEVER)
 	@Override
 	public synchronized void schedulePollForStaleSearches() {
-		if (!myDaoConfig.isSchedulingDisabled() && myDaoConfig.isEnableTaskResourceReindexing()) {
+		if (!myDaoConfig.isSchedulingDisabled() && myDaoConfig.isEnableTaskStaleSearchCleanup()) {
 			pollForStaleSearchesAndDeleteThem();
 		}
 	}
