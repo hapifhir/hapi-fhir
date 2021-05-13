@@ -1446,7 +1446,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest) {
 		return myTransactionService.execute(theRequest, tx -> {
-			theParams.setLoadSynchronousUpTo(10000);
+			theParams.setLoadSynchronousUpTo(myDaoConfig.getInternalSynchronousSearchSize());
 
 			ISearchBuilder builder = mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
 

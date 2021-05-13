@@ -1,0 +1,5 @@
+---
+type: change
+issue: 2655
+title: "Added a new configuration option to DaoConfig, `setInternalSynchronousSearchSize()`, this controls the loadSynchronousUpTo()
+        during internal operations such as delete with expunge, and certain CodeSystem searches."

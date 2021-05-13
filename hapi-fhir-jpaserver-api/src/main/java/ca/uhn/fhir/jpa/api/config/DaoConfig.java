@@ -89,6 +89,7 @@ public class DaoConfig {
 	/**
 	 * Child Configurations
 	 */
+	private static final Integer DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE = 10000;
 
 	private final ModelConfig myModelConfig = new ModelConfig();
 	/**
@@ -155,6 +156,7 @@ public class DaoConfig {
 	private boolean myFilterParameterEnabled = false;
 	private StoreMetaSourceInformationEnum myStoreMetaSourceInformation = StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID;
 	private HistoryCountModeEnum myHistoryCountMode = DEFAULT_HISTORY_COUNT_MODE;
+	private int myInternalSynchronousSearchSize = DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE;
 
 	/**
 	 * update setter javadoc if default changes
@@ -2179,6 +2181,30 @@ public class DaoConfig {
 	@Deprecated
 	public void setPreloadBlobFromInputStream(Boolean thePreloadBlobFromInputStream) {
 		// ignore
+	}
+
+	/**
+	 * <p>
+	 *    This determines the internal search size that is run synchronously during operations such as:
+	 *    1. Delete with _expunge parameter.
+	 *    2. Searching for Code System IDs by System and Code
+	 * </p>
+	 * @since 5.4.0
+	 */
+	public Integer getInternalSynchronousSearchSize() {
+		return myInternalSynchronousSearchSize;
+	}
+
+	/**
+	 * <p>
+	 *    This determines the internal search size that is run synchronously during operations such as:
+	 *    1. Delete with _expunge parameter.
+	 *    2. Searching for Code System IDs by System and Code
+	 * </p>
+	 * @since 5.4.0
+	 */
+	public void setInternalSynchronousSearchSize(Integer theInternalSynchronousSearchSize) {
+		myInternalSynchronousSearchSize = theInternalSynchronousSearchSize;
 	}
 
 	public enum StoreMetaSourceInformationEnum {
