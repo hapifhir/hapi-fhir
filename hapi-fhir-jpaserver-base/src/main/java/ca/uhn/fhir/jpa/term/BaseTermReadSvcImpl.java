@@ -420,6 +420,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 
 		ValueSet valueSet = new ValueSet();
+		valueSet.setId(theValueSetToExpand.getId());
 		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		valueSet.setCompose(theValueSetToExpand.getCompose());
 		valueSet.setExpansion(accumulator);
@@ -1765,7 +1766,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					return null;
 				});
 
-				ourLog.info("Pre-expanded ValueSet[{}] with URL[{}] - Saved {} concepts in {}", valueSet.getId(), valueSet.getUrl(), accumulator.getConceptsSaved(), sw.toString());
+				ourLog.info("Pre-expanded ValueSet[{}] with URL[{}] - Saved {} concepts in {}", valueSet.getId(), valueSet.getUrl(), accumulator.getConceptsSaved(), sw);
 
 			} catch (Exception e) {
 				ourLog.error("Failed to pre-expand ValueSet: " + e.getMessage(), e);
