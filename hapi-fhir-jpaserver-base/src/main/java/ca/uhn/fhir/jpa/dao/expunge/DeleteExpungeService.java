@@ -69,8 +69,6 @@ public class DeleteExpungeService {
 	@Autowired
 	private ResourceTableFKProvider myResourceTableFKProvider;
 	@Autowired
-	private IResourceTableDao myResourceTableDao;
-	@Autowired
 	private IResourceLinkDao myResourceLinkDao;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
