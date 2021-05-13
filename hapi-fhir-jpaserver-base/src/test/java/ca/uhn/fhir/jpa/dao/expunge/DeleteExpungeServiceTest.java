@@ -67,28 +67,29 @@ class DeleteExpungeServiceTest extends BaseJpaR4Test {
 	}
 	@Test
 	public void testDeleteExpungeRespectsSynchronousSize() {
-		//When
+		//Given
 		myDaoConfig.setInternalSynchronousSearchSize(1);
-
 		Patient patient = new Patient();
 		myPatientDao.create(patient);
-
 		Patient otherPatient = new Patient();
 		myPatientDao.create(otherPatient);
 
 
-		//Then
+		//When
 		DeleteMethodOutcome deleteMethodOutcome = myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
+		IBundleProvider remaining = myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true));
+
+		//Then
 		assertThat(deleteMethodOutcome.getExpungedResourcesCount(), is(equalTo(1L)));
+		assertThat(remaining.size(), is(equalTo(1)));
 
-		IBundleProvider search = myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true));
-		assertThat(search.size(), is(equalTo(1)));
-
+		//When
 		deleteMethodOutcome = myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
-		assertThat(deleteMethodOutcome.getExpungedResourcesCount(), is(equalTo(1L)));
+		remaining = myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true));
 
-		search = myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true));
-		assertThat(search.size(), is(equalTo(0)));
+		//Then
+		assertThat(deleteMethodOutcome.getExpungedResourcesCount(), is(equalTo(1L)));
+		assertThat(remaining.size(), is(equalTo(0)));
 	}
 
 	@Test
