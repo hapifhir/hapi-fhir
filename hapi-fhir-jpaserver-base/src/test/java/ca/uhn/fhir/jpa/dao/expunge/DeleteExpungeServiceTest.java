@@ -74,7 +74,6 @@ class DeleteExpungeServiceTest extends BaseJpaR4Test {
 		Patient otherPatient = new Patient();
 		myPatientDao.create(otherPatient);
 
-
 		//When
 		DeleteMethodOutcome deleteMethodOutcome = myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
 		IBundleProvider remaining = myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true));
