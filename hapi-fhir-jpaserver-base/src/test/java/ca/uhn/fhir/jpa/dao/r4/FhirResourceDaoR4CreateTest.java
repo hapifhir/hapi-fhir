@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -98,8 +99,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		try {
 			myObservationDao.create(obs, "identifier=A%20B", new SystemRequestDetails());
 			fail();
-		} catch (NullPointerException e) {
-			assertEquals("", e.getMessage());
+		} catch (InvalidRequestException e) {
+			assertEquals("Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
 		}
 	}
 
@@ -113,6 +114,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		Patient patient = new Patient();
 		patient.setId(IdType.newRandomUuid());
 		patient.setActive(true);
+		bb.addTransactionCreateEntry(patient);
 
 		Observation obs = new Observation();
 		obs.getSubject().setReference(patient.getId());
@@ -122,7 +124,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		try {
 			mySystemDao.transaction(new SystemRequestDetails(), (Bundle) bb.getBundle());
 			fail();
-		} catch (NullPointerException e) {
+		} catch (InvalidRequestException e) {
 			assertEquals("", e.getMessage());
 		}
 	}
