@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  */
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.intellij.lang.annotations.Language;
@@ -34,7 +35,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,12 +55,17 @@ public abstract class BaseTask {
 	private boolean myDryRun;
 	private boolean myDoNothing;
 	private List<ExecutedStatement> myExecutedStatements = new ArrayList<>();
+	private Set<DriverTypeEnum> myOnlyAppliesToPlatforms = new HashSet<>();
 	private boolean myNoColumnShrink;
 	private boolean myFailureAllowed;
-
 	protected BaseTask(String theProductVersion, String theSchemaVersion) {
 		myProductVersion = theProductVersion;
 		mySchemaVersion = theSchemaVersion;
+	}
+
+	public void setOnlyAppliesToPlatforms(Set<DriverTypeEnum> theOnlyAppliesToPlatforms) {
+		Validate.notNull(theOnlyAppliesToPlatforms);
+		myOnlyAppliesToPlatforms = theOnlyAppliesToPlatforms;
 	}
 
 	public String getProductVersion() {
@@ -91,7 +99,6 @@ public abstract class BaseTask {
 		return myDescription;
 	}
 
-	@SuppressWarnings("unchecked")
 	public BaseTask setDescription(String theDescription) {
 		myDescription = theDescription;
 		return this;
@@ -176,19 +183,30 @@ public abstract class BaseTask {
 			ourLog.info("Skipping stubbed task: {}", getDescription());
 			return;
 		}
+		if (!myOnlyAppliesToPlatforms.isEmpty()) {
+			if (!myOnlyAppliesToPlatforms.contains(getDriverType())) {
+				ourLog.debug("Skipping task {} as it does not apply to {}", getDescription(), getDriverType());
+				return;
+			}
+		}
+		if (!myOnlyAppliesToPlatforms.isEmpty()) {
+			if (!myOnlyAppliesToPlatforms.contains(getDriverType())) {
+				ourLog.debug("Skipping task {} as it does not apply to {}", getDescription(), getDriverType());
+				return;
+			}
+		}
 		doExecute();
 	}
 
 	protected abstract void doExecute() throws SQLException;
 
-	public void setFailureAllowed(boolean theFailureAllowed) {
-		myFailureAllowed = theFailureAllowed;
-	}
-
 	protected boolean isFailureAllowed() {
 		return myFailureAllowed;
 	}
 
+	public void setFailureAllowed(boolean theFailureAllowed) {
+		myFailureAllowed = theFailureAllowed;
+	}
 
 	public String getFlywayVersion() {
 		String releasePart = myProductVersion;

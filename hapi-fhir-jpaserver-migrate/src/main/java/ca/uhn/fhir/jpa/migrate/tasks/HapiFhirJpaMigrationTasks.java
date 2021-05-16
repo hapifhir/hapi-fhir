@@ -73,7 +73,19 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init510(); // 20200516 - 20201028
 		init520(); // 20201029 -
 		init530();
-		init540(); // 20210218 - 
+		init540(); // 20210218 - 20210520
+		init550(); // 20210520 -
+	}
+
+	private void init550() {
+
+		Builder version = forVersion(VersionEnum.V5_5_0);
+
+		// For MSSQL only - Replace ForcedId index with a version that has an INCLUDE clause
+		Builder.BuilderWithTableName forcedId = version.onTable("HFJ_FORCED_ID");
+		forcedId.dropIndex("20210516.1", "IDX_FORCEDID_TYPE_FID").onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
+		forcedId.addIndex("20210516.1", "IDX_FORCEDID_TYPE_FID").unique(true).includeColumns("RESOURCE_PID").withColumns("RESOURCE_TYPE", "FORCED_ID").onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
+
 	}
 
 	private void init540() {

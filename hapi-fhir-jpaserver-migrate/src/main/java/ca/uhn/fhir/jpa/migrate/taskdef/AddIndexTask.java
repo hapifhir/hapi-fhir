@@ -29,8 +29,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.util.StringUtils;
 
+import javax.annotation.Nonnull;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -41,6 +43,7 @@ public class AddIndexTask extends BaseTableTask {
 	private String myIndexName;
 	private List<String> myColumns;
 	private Boolean myUnique;
+	private List<String> myIncludeColumns = Collections.emptyList();
 
 	public AddIndexTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
@@ -77,20 +80,7 @@ public class AddIndexTask extends BaseTableTask {
 
 		logInfo(ourLog, "Going to add a {} index named {} on table {} for columns {}", (myUnique ? "UNIQUE" : "NON-UNIQUE"), myIndexName, getTableName(), myColumns);
 
-		String unique = myUnique ? "unique " : "";
-		String columns = String.join(", ", myColumns);
-		String mssqlWhereClause = "";
-		if (myUnique && getDriverType() == DriverTypeEnum.MSSQL_2012) {
-			mssqlWhereClause = " WHERE (";
-			for (int i = 0; i <myColumns.size(); i++) {
-				mssqlWhereClause += myColumns.get(i) + " IS NOT NULL ";
-				if (i < myColumns.size() - 1) {
-					mssqlWhereClause += "AND ";
-				}
-			}
-			mssqlWhereClause += ")";
-		}
-		String sql = "create " + unique + "index " + myIndexName + " on " + getTableName() + "(" + columns + ")" + mssqlWhereClause;
+		String sql = generateSql();
 		String tableName = getTableName();
 
 		try {
@@ -102,6 +92,43 @@ public class AddIndexTask extends BaseTableTask {
 				throw e;
 			}
 		}
+	}
+
+	@Nonnull
+	String generateSql() {
+		String unique = myUnique ? "unique " : "";
+		String columns = String.join(", ", myColumns);
+		String includeClause = "";
+		String mssqlWhereClause = "";
+		if (!myIncludeColumns.isEmpty()) {
+			switch (getDriverType()) {
+				case POSTGRES_9_4:
+				case MSSQL_2012:
+					includeClause = " INCLUDE (" + StringUtils.join(myIncludeColumns, ", ") + ")";
+					break;
+				case H2_EMBEDDED:
+				case DERBY_EMBEDDED:
+				case MARIADB_10_1:
+				case MYSQL_5_7:
+				case ORACLE_12C:
+					// These platforms don't support the include clause
+					// Per:
+					// https://use-the-index-luke.com/blog/2019-04/include-columns-in-btree-indexes#postgresql-limitations
+					break;
+			}
+		}
+		if (myUnique && getDriverType() == DriverTypeEnum.MSSQL_2012) {
+			mssqlWhereClause = " WHERE (";
+			for (int i = 0; i <myColumns.size(); i++) {
+				mssqlWhereClause += myColumns.get(i) + " IS NOT NULL ";
+				if (i < myColumns.size() - 1) {
+					mssqlWhereClause += "AND ";
+				}
+			}
+			mssqlWhereClause += ")";
+		}
+		String sql = "create " + unique + "index " + myIndexName + " on " + getTableName() + "(" + columns + ")" + includeClause + mssqlWhereClause;
+		return sql;
 	}
 
 	public void setColumns(String... theColumns) {
@@ -125,5 +152,14 @@ public class AddIndexTask extends BaseTableTask {
 		theBuilder.append(myIndexName);
 		theBuilder.append(myColumns);
 		theBuilder.append(myUnique);
+	}
+
+	public void setIncludeColumns(String... theIncludeColumns) {
+		setIncludeColumns(Arrays.asList(theIncludeColumns));
+	}
+
+	private void setIncludeColumns(List<String> theIncludeColumns) {
+		Validate.notNull(theIncludeColumns);
+		myIncludeColumns = theIncludeColumns;
 	}
 }
