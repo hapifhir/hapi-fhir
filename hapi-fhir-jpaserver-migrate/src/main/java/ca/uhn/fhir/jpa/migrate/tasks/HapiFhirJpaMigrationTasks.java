@@ -84,7 +84,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// For MSSQL only - Replace ForcedId index with a version that has an INCLUDE clause
 		Builder.BuilderWithTableName forcedId = version.onTable("HFJ_FORCED_ID");
 		forcedId.dropIndex("20210516.1", "IDX_FORCEDID_TYPE_FID").onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
-		forcedId.addIndex("20210516.1", "IDX_FORCEDID_TYPE_FID").unique(true).includeColumns("RESOURCE_PID").withColumns("RESOURCE_TYPE", "FORCED_ID").onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
+		forcedId.addIndex("20210516.2", "IDX_FORCEDID_TYPE_FID").unique(true).includeColumns("RESOURCE_PID").withColumns("RESOURCE_TYPE", "FORCED_ID").onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
 
 	}
 
