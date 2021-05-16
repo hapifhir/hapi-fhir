@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,6 +12,7 @@ import java.util.function.Supplier;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AddIndexTest extends BaseTest {
 
@@ -105,6 +107,27 @@ public class AddIndexTest extends BaseTest {
 		getMigrator().migrate();
 
 		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("IDX_DIFINDEX", "IDX_ANINDEX"));
+	}
+
+	@Test
+	public void testIncludeColumns() {
+
+		AddIndexTask task = new AddIndexTask("1", "1");
+		task.setIndexName("IDX_ANINDEX");
+		task.setTableName("SOMETABLE");
+		task.setColumns("PID", "TEXTCOL");
+		task.setIncludeColumns("FOO1", "FOO2");
+		task.setUnique(false);
+
+		// MSSQL supports include clause
+		task.setDriverType(DriverTypeEnum.MSSQL_2012);
+		String sql = task.generateSql();
+		assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) INCLUDE (FOO1, FOO2)", sql);
+
+		// Oracle does not support include clause
+		task.setDriverType(DriverTypeEnum.ORACLE_12C);
+		sql = task.generateSql();
+		assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", sql);
 	}
 
 }

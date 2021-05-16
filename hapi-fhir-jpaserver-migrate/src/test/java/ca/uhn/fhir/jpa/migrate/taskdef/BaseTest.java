@@ -52,9 +52,11 @@ public abstract class BaseTest {
 
 	@AfterEach
 	public void resetMigrationVersion() throws SQLException {
-		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
-		if (tableNames.contains(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME)) {
-			executeSql("DELETE from " + SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME + " where \"installed_rank\" > 0");
+		if (getConnectionProperties() != null) {
+			Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
+			if (tableNames.contains(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME)) {
+				executeSql("DELETE from " + SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME + " where \"installed_rank\" > 0");
+			}
 		}
 	}
 
@@ -77,7 +79,9 @@ public abstract class BaseTest {
 
 	@AfterEach
 	public void after() {
-		myConnectionProperties.close();
+		if (myConnectionProperties != null) {
+			myConnectionProperties.close();
+		}
 	}
 
 	protected DriverTypeEnum getDriverType() {
@@ -96,6 +100,10 @@ public abstract class BaseTest {
 			myConnectionProperties = theConnectionProperties;
 			myDataSource = theDataSource;
 			myMigrator = theMigrator;
+		}
+
+		public DriverTypeEnum getDriverType() {
+			return myConnectionProperties.getDriverType();
 		}
 
 	}
