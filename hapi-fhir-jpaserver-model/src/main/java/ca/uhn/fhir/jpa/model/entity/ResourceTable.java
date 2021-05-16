@@ -252,6 +252,9 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OneToOne(optional = true, fetch = FetchType.EAGER, cascade = {}, orphanRemoval = false, mappedBy = "myResource")
 	private ForcedId myForcedId;
 
+	@Transient
+	private volatile String myCreatedByMatchUrl;
+
 	/**
 	 * Constructor
 	 */
@@ -698,4 +701,11 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		}
 	}
 
+	public void setCreatedByMatchUrl(String theCreatedByMatchUrl) {
+		myCreatedByMatchUrl = theCreatedByMatchUrl;
+	}
+
+	public String getCreatedByMatchUrl() {
+		return myCreatedByMatchUrl;
+	}
 }

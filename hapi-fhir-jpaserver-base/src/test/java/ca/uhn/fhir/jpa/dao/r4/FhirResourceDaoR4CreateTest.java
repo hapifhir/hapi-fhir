@@ -125,7 +125,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			mySystemDao.transaction(new SystemRequestDetails(), (Bundle) bb.getBundle());
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
 		}
 	}
 

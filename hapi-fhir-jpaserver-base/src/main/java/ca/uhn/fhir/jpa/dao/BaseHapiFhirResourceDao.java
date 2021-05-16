@@ -57,8 +57,6 @@ import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
-import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -247,9 +245,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return doCreateForPostOrPut(theResource, theIfNoneExist, thePerformIndexing, theTransactionDetails, theRequestDetails, requestPartitionId);
 	}
 
-	@Autowired
-	private InMemoryResourceMatcher myInMemoryResourceMatcher;
-
 	/**
 	 * Called both for FHIR create (POST) operations (via {@link #doCreateForPost(IBaseResource, String, boolean, TransactionDetails, RequestDetails)}
 	 * as well as for FHIR update (PUT) where we're doing a create-with-client-assigned-ID (via {@link #doUpdate(IBaseResource, String, boolean, boolean, RequestDetails, TransactionDetails)}.
@@ -263,6 +258,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
 		entity.setPartitionId(theRequestPartitionId);
+		entity.setCreatedByMatchUrl(theIfNoneExist);
 
 		if (isNotBlank(theIfNoneExist)) {
 			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theIfNoneExist, myResourceType, theRequest);
@@ -280,7 +276,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				};
 
 				Supplier<IIdType> idSupplier = () -> {
-					return myTxTemplate.execute(tx-> {
+					return myTxTemplate.execute(tx -> {
 						IIdType retVal = myIdHelperService.translatePidIdToForcedId(myFhirContext, myResourceName, pid);
 						if (!retVal.hasVersionIdPart()) {
 							IIdType idWithVersion = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getIdAsLong());
@@ -362,14 +358,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (theIfNoneExist != null) {
-			if (thePerformIndexing) {
-				// Make sure that the match URL was actually appropriate for the supplied resource
-				InMemoryMatchResult outcome = myInMemoryResourceMatcher.match(theIfNoneExist, theResource, new ResourceIndexedSearchParams(entity));
-				if (outcome.supported() && !outcome.matched()) {
-					throw new InvalidRequestException("Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
-				}
-			}
-
 			// Pre-cache the match URL
 			myMatchResourceUrlService.matchUrlResolved(theIfNoneExist, new ResourcePersistentId(entity.getResourceId()));
 		}
@@ -419,10 +407,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		ourLog.debug(msg);
 		return outcome;
-	}
-
-	private static ResourceIndexedSearchParams toResourceIndexedSearchParams(ResourceTable theEntity) {
-		return new ResourceIndexedSearchParams(theEntity);
 	}
 
 	private IInstanceValidatorModule getInstanceValidator() {
@@ -678,7 +662,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
-
 	private <MT extends IBaseMetaType> void doMetaAdd(MT theMetaAdd, BaseHasResource theEntity, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
 		IBaseResource oldVersion = toResource(theEntity, false);
 
@@ -827,7 +810,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public String getResourceName() {
 		return myResourceName;
 	}
-
 
 	@Override
 	public Class<T> getResourceType() {
@@ -1827,6 +1809,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		}
 
+	}
+
+	private static ResourceIndexedSearchParams toResourceIndexedSearchParams(ResourceTable theEntity) {
+		return new ResourceIndexedSearchParams(theEntity);
 	}
 
 }
