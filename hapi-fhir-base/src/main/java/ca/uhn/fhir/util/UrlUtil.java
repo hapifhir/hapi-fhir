@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.escape.Escaper;
 import com.google.common.net.PercentEscaper;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringSubstitutor;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
@@ -527,6 +528,8 @@ public class UrlUtil {
 		if (questionMarkIndex != -1) {
 			matchUrl = matchUrl.substring(questionMarkIndex + 1);
 		}
+
+		matchUrl = matchUrl.replace("+", "%2B");
 		matchUrl = matchUrl.replace("|", "%7C");
 		matchUrl = matchUrl.replace("=>=", "=%3E%3D");
 		matchUrl = matchUrl.replace("=<=", "=%3C%3D");

@@ -56,6 +56,9 @@ import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -244,6 +247,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return doCreateForPostOrPut(theResource, theIfNoneExist, thePerformIndexing, theTransactionDetails, theRequestDetails, requestPartitionId);
 	}
 
+	@Autowired
+	private InMemoryResourceMatcher myInMemoryResourceMatcher;
+
 	/**
 	 * Called both for FHIR create (POST) operations (via {@link #doCreateForPost(IBaseResource, String, boolean, TransactionDetails, RequestDetails)}
 	 * as well as for FHIR update (PUT) where we're doing a create-with-client-assigned-ID (via {@link #doUpdate(IBaseResource, String, boolean, boolean, RequestDetails, TransactionDetails)}.
@@ -356,6 +362,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (theIfNoneExist != null) {
+			// Make sure that the match URL was actually appropriate for the supplied resource
+			InMemoryMatchResult outcome = myInMemoryResourceMatcher.match(theIfNoneExist, theResource, new ResourceIndexedSearchParams(entity));
+			if (outcome.supported() && !outcome.matched()) {
+				throw new InvalidRequestException("Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
+			}
+
+			// Pre-cache the match URL
 			myMatchResourceUrlService.matchUrlResolved(theIfNoneExist, new ResourcePersistentId(entity.getResourceId()));
 		}
 
@@ -404,6 +417,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		ourLog.debug(msg);
 		return outcome;
+	}
+
+	private static ResourceIndexedSearchParams toResourceIndexedSearchParams(ResourceTable theEntity) {
+		return new ResourceIndexedSearchParams(theEntity);
 	}
 
 	private IInstanceValidatorModule getInstanceValidator() {

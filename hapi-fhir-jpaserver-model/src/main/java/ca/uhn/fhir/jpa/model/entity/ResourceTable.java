@@ -698,5 +698,4 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		}
 	}
 
-
 }
