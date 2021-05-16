@@ -362,10 +362,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (theIfNoneExist != null) {
-			// Make sure that the match URL was actually appropriate for the supplied resource
-			InMemoryMatchResult outcome = myInMemoryResourceMatcher.match(theIfNoneExist, theResource, new ResourceIndexedSearchParams(entity));
-			if (outcome.supported() && !outcome.matched()) {
-				throw new InvalidRequestException("Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
+			if (thePerformIndexing) {
+				// Make sure that the match URL was actually appropriate for the supplied resource
+				InMemoryMatchResult outcome = myInMemoryResourceMatcher.match(theIfNoneExist, theResource, new ResourceIndexedSearchParams(entity));
+				if (outcome.supported() && !outcome.matched()) {
+					throw new InvalidRequestException("Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
+				}
 			}
 
 			// Pre-cache the match URL
