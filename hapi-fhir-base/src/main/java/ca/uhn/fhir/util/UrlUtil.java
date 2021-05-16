@@ -529,12 +529,23 @@ public class UrlUtil {
 			matchUrl = matchUrl.substring(questionMarkIndex + 1);
 		}
 
-		matchUrl = matchUrl.replace("+", "%2B");
-		matchUrl = matchUrl.replace("|", "%7C");
-		matchUrl = matchUrl.replace("=>=", "=%3E%3D");
-		matchUrl = matchUrl.replace("=<=", "=%3C%3D");
-		matchUrl = matchUrl.replace("=>", "=%3E");
-		matchUrl = matchUrl.replace("=<", "=%3C");
+		final String[] searchList = new String[]{
+			"+",
+			"|",
+			"=>=",
+			"=<=",
+			"=>",
+			"=<"
+		};
+		final String[] replacementList = new String[]{
+			"%2B",
+			"%7C",
+			"=%3E%3D",
+			"=%3C%3D",
+			"=%3E",
+			"=%3C"
+		};
+		matchUrl = StringUtils.replaceEach(matchUrl, searchList, replacementList);
 		if (matchUrl.contains(" ")) {
 			throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - URL is invalid (must not contain spaces)");
 		}
