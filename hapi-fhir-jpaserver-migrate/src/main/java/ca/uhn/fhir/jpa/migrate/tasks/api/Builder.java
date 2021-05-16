@@ -27,6 +27,8 @@ import org.intellij.lang.annotations.Language;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Builder {
 
@@ -291,6 +293,7 @@ public class Builder {
 			public class BuilderAddIndexUnique {
 				private final String myVersion;
 				private final boolean myUnique;
+				private String[] myIncludeColumns;
 
 				public BuilderAddIndexUnique(String theVersion, boolean theUnique) {
 					myVersion = theVersion;
@@ -313,8 +316,16 @@ public class Builder {
 					task.setUnique(myUnique);
 					task.setColumns(theColumnNames);
 					task.setDoNothing(theDoNothing);
+					if (myIncludeColumns != null) {
+						task.setIncludeColumns(myIncludeColumns);
+					}
 					addTask(task);
 					return task;
+				}
+
+				public BuilderAddIndexUnique includeColumns(String... theIncludeColumns) {
+					myIncludeColumns = theIncludeColumns;
+					return this;
 				}
 			}
 		}
@@ -484,6 +495,12 @@ public class Builder {
 
 		public BuilderCompleteTask doNothing() {
 			myTask.setDoNothing(true);
+			return this;
+		}
+
+		public BuilderCompleteTask onlyAppliesToPlatforms(DriverTypeEnum... theTypes) {
+			Set<DriverTypeEnum> typesSet = Arrays.stream(theTypes).collect(Collectors.toSet());
+			myTask.setOnlyAppliesToPlatforms(typesSet);
 			return this;
 		}
 
