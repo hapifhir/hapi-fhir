@@ -122,6 +122,9 @@ public enum DriverTypeEnum {
 		dataSource.setUsername(theUsername);
 		dataSource.setPassword(thePassword);
 
+		// A check for WS-2020-0287
+		assert dataSource.getJmxName() == null;
+
 		return newConnectionProperties(dataSource);
 	}
 

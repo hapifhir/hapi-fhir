@@ -97,4 +97,8 @@ public class ProviderConstants {
 	 */
 	public static final String CQL_EVALUATE_MEASURE = "$evaluate-measure";
 
+	/**
+	*  Operation name for the $meta operation
+	* */
+	public static final String OPERATION_META = "$meta";
 }

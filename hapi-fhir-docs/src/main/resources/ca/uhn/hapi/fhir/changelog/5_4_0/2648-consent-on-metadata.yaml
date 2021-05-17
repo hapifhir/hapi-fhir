@@ -1,0 +1,4 @@
+---
+type: change
+issue: 2648
+title: "The ConsentInterceptor no longer fully runs on calls to `/metadata` or during the `$meta` operation."

@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -163,7 +164,7 @@ public class JpaSystemProviderDstu2 extends BaseJpaSystemProviderDstu2Plus<Bundl
 		return retVal;
 	}
 
-	@Operation(name = JpaConstants.OPERATION_META, idempotent = true, returnParameters = {
+	@Operation(name = ProviderConstants.OPERATION_META, idempotent = true, returnParameters = {
 		@OperationParam(name = "return", type = MetaDt.class)
 	})
 	public Parameters meta(RequestDetails theRequestDetails) {
