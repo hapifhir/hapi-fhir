@@ -2511,7 +2511,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		assertEquals("Patient/P1/_history/1", new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualified().getValue());
 
 		p = new Patient();
-		p.setActive(true);
+		p.setActive(false);
 		p.addName().setFamily("AAA");
 
 		b = new Bundle();
