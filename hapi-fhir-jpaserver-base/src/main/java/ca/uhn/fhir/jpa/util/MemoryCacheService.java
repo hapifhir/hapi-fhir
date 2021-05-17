@@ -68,6 +68,7 @@ public class MemoryCacheService {
 				case CONCEPT_TRANSLATION_REVERSE:
 					timeoutSeconds = myDaoConfig.getTranslationCachesExpireAfterWriteInMinutes() * 1000;
 					break;
+				case HISTORY_COUNT:
 				case TAG_DEFINITION:
 				case PERSISTENT_ID:
 				case RESOURCE_LOOKUP:
@@ -103,6 +104,17 @@ public class MemoryCacheService {
 		getCache(theCache).put(theKey, theValue);
 	}
 
+	/**
+	 * This method registers a transaction synchronization that puts an entry in the cache
+	 * if and when the current database transaction successfully commits. If the
+	 * transaction is rolled back, the key+value passed into this method will
+	 * not be added to the cache.
+	 *
+	 * This is useful for situations where you want to store something that has been
+	 * resolved in the DB during the current transaction, but it's not yet guaranteed
+	 * that this item will successfully save to the DB. Use this method in that case
+	 * in order to avoid cache poisoning.
+	 */
 	public <K, V> void putAfterCommit(CacheEnum theCache, K theKey, V theValue) {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
@@ -116,6 +128,7 @@ public class MemoryCacheService {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public <K, V> Map<K, V> getAllPresent(CacheEnum theCache, Iterable<K> theKeys) {
 		return (Map<K, V>) getCache(theCache).getAllPresent(theKeys);
 	}

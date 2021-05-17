@@ -798,6 +798,84 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testTransactionWithCreateClientAssignedIdAndReference() {
+		myDaoConfig.setDeleteEnabled(false);
+
+		Bundle input = new Bundle();
+
+		Patient patient = new Patient();
+		patient.setId("Patient/A");
+		patient.setActive(true);
+		input.addEntry()
+			.setFullUrl(patient.getId())
+			.setResource(patient)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.PUT)
+			.setUrl("Patient/A");
+
+		Observation observation = new Observation();
+		observation.setId(IdType.newRandomUuid());
+		observation.addReferenceRange().setText("A");
+		input.addEntry()
+			.setFullUrl(observation.getId())
+			.setResource(observation)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("Observation");
+
+		myCaptureQueriesListener.clear();
+		Bundle output = mySystemDao.transaction(mySrd, input);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		assertEquals(5, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+		// Pass 2
+
+		input = new Bundle();
+
+		 patient = new Patient();
+		patient.setId("Patient/A");
+		patient.setActive(true);
+		input.addEntry()
+			.setFullUrl(patient.getId())
+			.setResource(patient)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.PUT)
+			.setUrl("Patient/A");
+
+		 observation = new Observation();
+		observation.setId(IdType.newRandomUuid());
+		observation.addReferenceRange().setText("A");
+		input.addEntry()
+			.setFullUrl(observation.getId())
+			.setResource(observation)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("Observation");
+
+		myCaptureQueriesListener.clear();
+		 output = mySystemDao.transaction(mySrd, input);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		assertEquals(2, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+
+	}
+
+
+	@Test
 	public void testTransactionWithMultipleReferences() {
 		Bundle input = new Bundle();
 

@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.escape.Escaper;
 import com.google.common.net.PercentEscaper;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringSubstitutor;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
@@ -527,11 +528,24 @@ public class UrlUtil {
 		if (questionMarkIndex != -1) {
 			matchUrl = matchUrl.substring(questionMarkIndex + 1);
 		}
-		matchUrl = matchUrl.replace("|", "%7C");
-		matchUrl = matchUrl.replace("=>=", "=%3E%3D");
-		matchUrl = matchUrl.replace("=<=", "=%3C%3D");
-		matchUrl = matchUrl.replace("=>", "=%3E");
-		matchUrl = matchUrl.replace("=<", "=%3C");
+
+		final String[] searchList = new String[]{
+			"+",
+			"|",
+			"=>=",
+			"=<=",
+			"=>",
+			"=<"
+		};
+		final String[] replacementList = new String[]{
+			"%2B",
+			"%7C",
+			"=%3E%3D",
+			"=%3C%3D",
+			"=%3E",
+			"=%3C"
+		};
+		matchUrl = StringUtils.replaceEach(matchUrl, searchList, replacementList);
 		if (matchUrl.contains(" ")) {
 			throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - URL is invalid (must not contain spaces)");
 		}

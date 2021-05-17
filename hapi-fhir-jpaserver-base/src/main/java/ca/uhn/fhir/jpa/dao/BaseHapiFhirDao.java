@@ -53,6 +53,8 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.LogicalReferenceHelper;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
@@ -77,6 +79,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
@@ -92,7 +95,6 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -179,10 +181,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	public static final String OO_SEVERITY_ERROR = "error";
 	public static final String OO_SEVERITY_INFO = "information";
 	public static final String OO_SEVERITY_WARN = "warning";
+	public static final String XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS = BaseHapiFhirDao.class.getName() + "_RESOLVED_TAG_DEFINITIONS";
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseHapiFhirDao.class);
 	private static final Map<FhirVersionEnum, FhirContext> ourRetrievalContexts = new HashMap<>();
 	private static final String PROCESSING_SUB_REQUEST = "BaseHapiFhirDao.processingSubRequest";
-	public static final String XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS = BaseHapiFhirDao.class.getName() + "_RESOLVED_TAG_DEFINITIONS";
 	private static boolean ourValidationDisabledForUnitTest;
 	private static boolean ourDisableIncrementOnUpdateForUnitTest = false;
 
@@ -210,6 +212,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
+	@Autowired
+	protected InMemoryResourceMatcher myInMemoryResourceMatcher;
 	@Autowired
 	ExpungeService myExpungeService;
 	@Autowired
@@ -1082,6 +1086,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		myDaoSearchParamSynchronizer = theDaoSearchParamSynchronizer;
 	}
 
+	private void verifyMatchUrlForConditionalCreate(IBaseResource theResource, String theIfNoneExist, ResourceTable entity, ResourceIndexedSearchParams theParams) {
+		// Make sure that the match URL was actually appropriate for the supplied resource
+		InMemoryMatchResult outcome = myInMemoryResourceMatcher.match(theIfNoneExist, theResource, theParams);
+		if (outcome.supported() && !outcome.matched()) {
+			throw new InvalidRequestException("Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
+		}
+	}
+
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public ResourceTable updateEntity(RequestDetails theRequest, final IBaseResource theResource, IBasePersistedResource
@@ -1148,6 +1161,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 
 				if (changed.isChanged()) {
+
+					// Make sure that the match URL was actually appropriate for the supplied
+					// resource. We only do this for version 1 right now since technically it
+					// is possible (and legal) for someone to be using a conditional update
+					// to match a resource and then update it in a way that it no longer
+					// matches. We could certainly make this configurable though in the
+					// future.
+					if (entity.getVersion() <= 1L && entity.getCreatedByMatchUrl() != null) {
+						verifyMatchUrlForConditionalCreate(theResource, entity.getCreatedByMatchUrl(), entity, newParams);
+					}
+
 					entity.setUpdated(theTransactionDetails.getTransactionDate());
 					if (theResource instanceof IResource) {
 						entity.setLanguage(((IResource) theResource).getLanguage().getValue());

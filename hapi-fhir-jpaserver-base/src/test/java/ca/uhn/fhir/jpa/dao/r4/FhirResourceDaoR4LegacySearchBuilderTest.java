@@ -564,10 +564,8 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 		ma.setMedication(new Reference(medId));
 		IIdType moId = myMedicationAdministrationDao.create(ma).getId().toUnqualified();
 
-		runInTransaction(() -> {
-			ourLog.info("Resource Links:\n * {}", myResourceLinkDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
-			ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
-		});
+		logAllResourceLinks();
+		logAllTokenIndexes();
 
 		SearchParameterMap map =  SearchParameterMap.newSynchronous();
 		map.add(MedicationAdministration.SP_MEDICATION, new ReferenceAndListParam().addAnd(new ReferenceOrListParam().add(new ReferenceParam("code", "04823543"))));

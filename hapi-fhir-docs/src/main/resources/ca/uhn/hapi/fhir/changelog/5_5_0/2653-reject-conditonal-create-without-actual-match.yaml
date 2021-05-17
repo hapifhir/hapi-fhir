@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2653
+title: "When performing a conditional create operation on a JPA server, the system will now
+  verify that the conditional URL actually matches the data supplied in the resource body,
+  and aborts the conditional create if it does not."

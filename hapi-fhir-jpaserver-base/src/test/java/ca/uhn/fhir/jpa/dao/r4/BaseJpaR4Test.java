@@ -216,13 +216,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Qualifier("myResourceCountsCache")
 	protected ResourceCountCache myResourceCountsCache;
 	@Autowired
-	protected IResourceLinkDao myResourceLinkDao;
-	@Autowired
 	protected ISearchParamPresentDao mySearchParamPresentDao;
 	@Autowired
 	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
-	@Autowired
-	protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
 	@Autowired
 	protected IResourceIndexedSearchParamCoordsDao myResourceIndexedSearchParamCoordsDao;
 	@Autowired

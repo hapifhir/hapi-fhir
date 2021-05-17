@@ -1,19 +1,24 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -53,6 +58,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -65,6 +71,62 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
 		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+	}
+
+	@Test
+	public void testConditionalCreateWithPlusInUrl() {
+		Observation obs = new Observation();
+		obs.addIdentifier().setValue("20210427133226.444+0800");
+		DaoMethodOutcome outcome = myObservationDao.create(obs, "identifier=20210427133226.444+0800", new SystemRequestDetails());
+		assertTrue(outcome.getCreated());
+
+		logAllTokenIndexes();
+		myCaptureQueriesListener.clear();
+		obs = new Observation();
+		obs.addIdentifier().setValue("20210427133226.444+0800");
+		outcome = myObservationDao.create(obs, "identifier=20210427133226.444+0800", new SystemRequestDetails());
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertFalse(outcome.getCreated());
+	}
+
+	/**
+	 * Simulate a client error: Identifier has a "+" but URL has an escaped space character
+	 */
+	@Test
+	public void testConditionalCreateFailsIfMatchUrlDoesntMatch() {
+		Observation obs = new Observation();
+		obs.addIdentifier().setValue("A+B");
+		try {
+			myObservationDao.create(obs, "identifier=A%20B", new SystemRequestDetails());
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
+		}
+	}
+
+	/**
+	 * Simulate a client error: Identifier has a "+" but URL has an escaped space character
+	 */
+	@Test
+	public void testConditionalCreateFailsIfMatchUrlDoesntMatch_InTransaction() {
+		BundleBuilder bb = new BundleBuilder(myFhirCtx);
+
+		Patient patient = new Patient();
+		patient.setId(IdType.newRandomUuid());
+		patient.setActive(true);
+		bb.addTransactionCreateEntry(patient);
+
+		Observation obs = new Observation();
+		obs.getSubject().setReference(patient.getId());
+		obs.addIdentifier().setValue("A+B");
+		bb.addTransactionCreateEntry(obs).conditional("identifier=A%20B");
+
+		try {
+			mySystemDao.transaction(new SystemRequestDetails(), (Bundle) bb.getBundle());
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
+		}
 	}
 
 	@Test

@@ -56,6 +56,7 @@ import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -257,6 +258,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
 		entity.setPartitionId(theRequestPartitionId);
+		entity.setCreatedByMatchUrl(theIfNoneExist);
 
 		if (isNotBlank(theIfNoneExist)) {
 			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theIfNoneExist, myResourceType, theRequest);
@@ -274,7 +276,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				};
 
 				Supplier<IIdType> idSupplier = () -> {
-					return myTxTemplate.execute(tx-> {
+					return myTxTemplate.execute(tx -> {
 						IIdType retVal = myIdHelperService.translatePidIdToForcedId(myFhirContext, myResourceName, pid);
 						if (!retVal.hasVersionIdPart()) {
 							IIdType idWithVersion = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getIdAsLong());
@@ -356,6 +358,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (theIfNoneExist != null) {
+			// Pre-cache the match URL
 			myMatchResourceUrlService.matchUrlResolved(theIfNoneExist, new ResourcePersistentId(entity.getResourceId()));
 		}
 
@@ -659,7 +662,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
-
 	private <MT extends IBaseMetaType> void doMetaAdd(MT theMetaAdd, BaseHasResource theEntity, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
 		IBaseResource oldVersion = toResource(theEntity, false);
 
@@ -808,7 +810,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public String getResourceName() {
 		return myResourceName;
 	}
-
 
 	@Override
 	public Class<T> getResourceType() {
@@ -1808,6 +1809,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		}
 
+	}
+
+	private static ResourceIndexedSearchParams toResourceIndexedSearchParams(ResourceTable theEntity) {
+		return new ResourceIndexedSearchParams(theEntity);
 	}
 
 }

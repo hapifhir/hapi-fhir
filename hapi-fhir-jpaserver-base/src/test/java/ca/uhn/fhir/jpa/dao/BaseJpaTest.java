@@ -11,6 +11,8 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
@@ -25,7 +27,6 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
@@ -37,6 +38,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
@@ -123,16 +125,6 @@ public abstract class BaseJpaTest extends BaseTest {
 		TestUtil.setShouldRandomizeTimezones(false);
 	}
 
-	public static Map<?,?> buildHeapLuceneHibernateSearchProperties() {
-		Map<String, String> props = new HashMap<>();
-		props.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
-		props.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
-		props.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-heap");
-		props.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
-		props.put(HibernateOrmMapperSettings.ENABLED, "true");
-		return props;
-	}
-
 	@RegisterExtension
 	public LoggingExtension myLoggingExtension = new LoggingExtension();
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -154,6 +146,10 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
 	protected SubscriptionLoader mySubscriptionLoader;
+	@Autowired
+	protected IResourceLinkDao myResourceLinkDao;
+	@Autowired
+	protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
 	@Autowired
 	private IdHelperService myIdHelperService;
 	@Autowired
@@ -236,6 +232,18 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected abstract FhirContext getContext();
 
 	protected abstract PlatformTransactionManager getTxManager();
+
+	protected void logAllResourceLinks() {
+		runInTransaction(() -> {
+			ourLog.info("Resource Links:\n * {}", myResourceLinkDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected void logAllTokenIndexes() {
+		runInTransaction(() -> {
+			ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+	}
 
 	public TransactionTemplate newTxTemplate() {
 		TransactionTemplate retVal = new TransactionTemplate(getTxManager());
@@ -461,6 +469,74 @@ public abstract class BaseJpaTest extends BaseTest {
 		Thread.sleep(500);
 	}
 
+	protected TermValueSetConceptDesignation assertTermConceptContainsDesignation(TermValueSetConcept theConcept, String theLanguage, String theUseSystem, String theUseCode, String theUseDisplay, String theDesignationValue) {
+		Stream<TermValueSetConceptDesignation> stream = theConcept.getDesignations().stream();
+		if (theLanguage != null) {
+			stream = stream.filter(designation -> theLanguage.equalsIgnoreCase(designation.getLanguage()));
+		}
+		if (theUseSystem != null) {
+			stream = stream.filter(designation -> theUseSystem.equalsIgnoreCase(designation.getUseSystem()));
+		}
+		if (theUseCode != null) {
+			stream = stream.filter(designation -> theUseCode.equalsIgnoreCase(designation.getUseCode()));
+		}
+		if (theUseDisplay != null) {
+			stream = stream.filter(designation -> theUseDisplay.equalsIgnoreCase(designation.getUseDisplay()));
+		}
+		if (theDesignationValue != null) {
+			stream = stream.filter(designation -> theDesignationValue.equalsIgnoreCase(designation.getValue()));
+		}
+
+		Optional<TermValueSetConceptDesignation> first = stream.findFirst();
+		if (!first.isPresent()) {
+			String failureMessage = String.format("Concept %s did not contain designation [%s|%s|%s|%s|%s] ", theConcept.toString(), theLanguage, theUseSystem, theUseCode, theUseDisplay, theDesignationValue);
+			fail(failureMessage);
+			return null;
+		} else {
+			return first.get();
+		}
+
+	}
+
+	protected TermValueSetConcept assertTermValueSetContainsConceptAndIsInDeclaredOrder(TermValueSet theValueSet, String theSystem, String theCode, String theDisplay, Integer theDesignationCount) {
+		List<TermValueSetConcept> contains = theValueSet.getConcepts();
+
+		Stream<TermValueSetConcept> stream = contains.stream();
+		if (theSystem != null) {
+			stream = stream.filter(concept -> theSystem.equalsIgnoreCase(concept.getSystem()));
+		}
+		if (theCode != null) {
+			stream = stream.filter(concept -> theCode.equalsIgnoreCase(concept.getCode()));
+		}
+		if (theDisplay != null) {
+			stream = stream.filter(concept -> theDisplay.equalsIgnoreCase(concept.getDisplay()));
+		}
+		if (theDesignationCount != null) {
+			stream = stream.filter(concept -> concept.getDesignations().size() == theDesignationCount);
+		}
+
+		Optional<TermValueSetConcept> first = stream.findFirst();
+		if (!first.isPresent()) {
+			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount);
+			fail(failureMessage);
+			return null;
+		} else {
+			TermValueSetConcept termValueSetConcept = first.get();
+			assertEquals(termValueSetConcept.getOrder(), theValueSet.getConcepts().indexOf(termValueSetConcept));
+			return termValueSetConcept;
+		}
+	}
+
+	public static Map<?, ?> buildHeapLuceneHibernateSearchProperties() {
+		Map<String, String> props = new HashMap<>();
+		props.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
+		props.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
+		props.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-heap");
+		props.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
+		props.put(HibernateOrmMapperSettings.ENABLED, "true");
+		return props;
+	}
+
 	@BeforeAll
 	public static void beforeClassRandomizeLocale() {
 		randomizeLocale();
@@ -600,64 +676,6 @@ public abstract class BaseJpaTest extends BaseTest {
 			fail("Size " + theCallable.call() + " is != target " + theTarget + " - " + theFailureMessage.call());
 		}
 		Thread.sleep(500);
-	}
-
-	protected TermValueSetConceptDesignation assertTermConceptContainsDesignation(TermValueSetConcept theConcept, String theLanguage, String theUseSystem, String theUseCode, String theUseDisplay, String theDesignationValue) {
-		Stream<TermValueSetConceptDesignation> stream = theConcept.getDesignations().stream();
-		if (theLanguage != null) {
-			stream = stream.filter(designation -> theLanguage.equalsIgnoreCase(designation.getLanguage()));
-		}
-		if (theUseSystem != null) {
-			stream = stream.filter(designation -> theUseSystem.equalsIgnoreCase(designation.getUseSystem()));
-		}
-		if (theUseCode != null) {
-			stream = stream.filter(designation -> theUseCode.equalsIgnoreCase(designation.getUseCode()));
-		}
-		if (theUseDisplay != null) {
-			stream = stream.filter(designation -> theUseDisplay.equalsIgnoreCase(designation.getUseDisplay()));
-		}
-		if (theDesignationValue != null) {
-			stream = stream.filter(designation -> theDesignationValue.equalsIgnoreCase(designation.getValue()));
-		}
-
-		Optional<TermValueSetConceptDesignation> first = stream.findFirst();
-		if (!first.isPresent()) {
-			String failureMessage = String.format("Concept %s did not contain designation [%s|%s|%s|%s|%s] ", theConcept.toString(), theLanguage, theUseSystem, theUseCode, theUseDisplay, theDesignationValue);
-			fail(failureMessage);
-			return null;
-		} else {
-			return first.get();
-		}
-
-	}
-
-	protected TermValueSetConcept assertTermValueSetContainsConceptAndIsInDeclaredOrder(TermValueSet theValueSet, String theSystem, String theCode, String theDisplay, Integer theDesignationCount) {
-		List<TermValueSetConcept> contains = theValueSet.getConcepts();
-
-		Stream<TermValueSetConcept> stream = contains.stream();
-		if (theSystem != null) {
-			stream = stream.filter(concept -> theSystem.equalsIgnoreCase(concept.getSystem()));
-		}
-		if (theCode != null ) {
-			stream = stream.filter(concept -> theCode.equalsIgnoreCase(concept.getCode()));
-		}
-		if (theDisplay != null){
-			stream = stream.filter(concept -> theDisplay.equalsIgnoreCase(concept.getDisplay()));
-		}
-		if (theDesignationCount != null) {
-			stream = stream.filter(concept -> concept.getDesignations().size() == theDesignationCount);
-		}
-
-		Optional<TermValueSetConcept> first = stream.findFirst();
-		if (!first.isPresent()) {
-			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount);
-			fail(failureMessage);
-			return null;
-		} else {
-			TermValueSetConcept termValueSetConcept = first.get();
-			assertEquals(termValueSetConcept.getOrder(), theValueSet.getConcepts().indexOf(termValueSetConcept));
-			return termValueSetConcept;
-		}
 	}
 
 
