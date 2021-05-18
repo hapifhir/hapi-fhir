@@ -215,23 +215,6 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:Binary-904808fd-8e4c-4c2a-a9d3-0772a6eaaa70",
-      "resource": {
-        "resourceType": "Binary",
-        "id": "904808fd-8e4c-4c2a-a9d3-0772a6eaaa70",
-        "meta": {
-          "versionId": "1",
-          "lastUpdated": "2021-05-18T09:07:33.000-05:00"
-        },
-        "contentType": "application/xml",
-        "data": "AAA"
-      },
-      "request": {
-        "method": "POST",
-        "url": "Binary"
-      }
-    },
-    {
       "fullUrl": "urn:uuid:Communication-a8baadd1-787b-433d-af86-109f0db9a7a1",
       "resource": {
         "resourceType": "Communication",
@@ -263,13 +246,6 @@
                 "display": "medical record correction request"
               }
             ]
-          }
-        ],
-        "payload": [
-          {
-            "contentReference": {
-              "reference": "DocumentReference/9baf4df8-73ff-45c0-8831-3a8121eab8fc"
-            }
           }
         ]
       },
