@@ -89,7 +89,7 @@ public class FlywayMigrationTask implements JavaMigration {
 	}
 
 	private void executeTask() throws SQLException {
-		if (myFlywayMigrator.isSchemaWasInitialized() && !(myTask instanceof InitializeSchemaTask)) {
+		if (myFlywayMigrator.isSchemaWasInitialized() && !myTask.isRunDuringSchemaInitialization()) {
 			// Empty schema was initialized, stub out this non-schema-init task since we're starting with a fully migrated schema
 			myTask.setDoNothing(true);
 		}
