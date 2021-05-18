@@ -58,9 +58,24 @@ public abstract class BaseTask {
 	private Set<DriverTypeEnum> myOnlyAppliesToPlatforms = new HashSet<>();
 	private boolean myNoColumnShrink;
 	private boolean myFailureAllowed;
+	private boolean myRunDuringSchemaInitialization;
+
 	protected BaseTask(String theProductVersion, String theSchemaVersion) {
 		myProductVersion = theProductVersion;
 		mySchemaVersion = theSchemaVersion;
+	}
+
+	public boolean isRunDuringSchemaInitialization() {
+		return myRunDuringSchemaInitialization;
+	}
+
+	/**
+	 * Should this task run even if we're doing the very first initialization of an empty schema. By
+	 * default we skip most tasks during that pass, since they just take up time and the
+	 * schema should be fully initialized by the {@link InitializeSchemaTask}
+	 */
+	public void setRunDuringSchemaInitialization(boolean theRunDuringSchemaInitialization) {
+		myRunDuringSchemaInitialization = theRunDuringSchemaInitialization;
 	}
 
 	public void setOnlyAppliesToPlatforms(Set<DriverTypeEnum> theOnlyAppliesToPlatforms) {
