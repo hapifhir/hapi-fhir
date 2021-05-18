@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
 import ca.uhn.fhir.jpa.bulk.imprt.model.ParsedBulkImportRecord;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.util.StopWatch;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +52,7 @@ public class BulkImportFileWriter implements ItemWriter<ParsedBulkImportRecord> 
 	@Override
 	public void write(List<? extends ParsedBulkImportRecord> theItemLists) throws Exception {
 		ourLog.info("Beginning bulk import write {} chunks Job[{}] FileIndex[{}]", theItemLists.size(), myJobUuid, myFileIndex);
+		StopWatch sw = new StopWatch();
 
 		for (ParsedBulkImportRecord nextItem : theItemLists) {
 
@@ -69,6 +71,7 @@ public class BulkImportFileWriter implements ItemWriter<ParsedBulkImportRecord> 
 
 		}
 
+		ourLog.info("Completed bulk import write {} chunks Job[{}] FileIndex[{}] in {}", theItemLists.size(), myJobUuid, myFileIndex, sw);
 	}
 
 }
