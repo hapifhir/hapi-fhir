@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
@@ -44,8 +43,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManager;
@@ -148,7 +145,6 @@ public class DeleteExpungeService {
 			targetResourceId + " because " + sourceResourceId + " refers to it via the path " + firstConflict.getSourcePath());
 	}
 
-	@Transactional(propagation = Propagation.NESTED)
 	public void findResourceLinksWithTargetPidIn(List<Long> theAllTargetPids, List<Long> theSomeTargetPids, List<ResourceLink> theConflictResourceLinks) {
 		// We only need to find one conflict, so if we found one already in an earlier partition run, we can skip the rest of the searches
 		if (theConflictResourceLinks.isEmpty()) {
