@@ -30,10 +30,16 @@ public class ParsedBulkImportRecord implements Serializable {
 
 	private final String myTenantName;
 	private final IBaseResource myRowContent;
+	private final int myLineIndex;
 
-	public ParsedBulkImportRecord(String theTenantName, IBaseResource theRowContent) {
+	public ParsedBulkImportRecord(String theTenantName, IBaseResource theRowContent, int theLineIndex) {
 		myTenantName = theTenantName;
 		myRowContent = theRowContent;
+		myLineIndex = theLineIndex;
+	}
+
+	public int getLineIndex() {
+		return myLineIndex;
 	}
 
 	public String getTenantName() {

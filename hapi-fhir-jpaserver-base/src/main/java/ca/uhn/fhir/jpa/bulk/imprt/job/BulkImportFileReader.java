@@ -71,6 +71,6 @@ public class BulkImportFileReader implements ItemReader<ParsedBulkImportRecord> 
 		Logs.getBatchTroubleshootingLog().debug("Reading line {} file index {} for job: {}", myLineIndex++, myFileIndex, myJobUuid);
 
 		IBaseResource parsed = myFhirContext.newJsonParser().parseResource(nextLine);
-		return new ParsedBulkImportRecord(myTenantName, parsed);
+		return new ParsedBulkImportRecord(myTenantName, parsed, myLineIndex);
 	}
 }
