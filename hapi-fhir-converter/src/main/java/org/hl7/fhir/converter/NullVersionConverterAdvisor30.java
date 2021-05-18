@@ -20,33 +20,33 @@ package org.hl7.fhir.converter;
  * #L%
  */
 
-import org.hl7.fhir.convertors.VersionConvertorAdvisor30;
+import org.hl7.fhir.convertors.advisors.VersionConvertorAdvisor30;
+import org.hl7.fhir.dstu2.model.Resource;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.dstu2.model.Resource;
+import org.hl7.fhir.r5.model.FhirPublication;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class NullVersionConverterAdvisor30 implements VersionConvertorAdvisor30 {
 
+
+	@Nullable
 	@Override
-	public boolean ignoreEntry(BundleEntryComponent theSrc) {
+	public CodeSystem getCodeSystem(@Nullable ValueSet theValueSet) throws FHIRException {
+		return null;
+	}
+
+	@Override
+	public void handleCodeSystem(@Nullable CodeSystem theCodeSystem, @Nullable ValueSet theValueSet) throws FHIRException {
+		// nothing
+	}
+
+	@Override
+	public boolean ignoreEntry(@Nullable BundleEntryComponent theBundleEntryComponent, @Nonnull FhirPublication theFhirPublication) {
 		return false;
 	}
-
-	@Override
-	public Resource convert(org.hl7.fhir.dstu3.model.Resource theResource) throws FHIRException {
-		return null;
-	}
-
-	@Override
-	public void handleCodeSystem(CodeSystem theTgtcs, ValueSet theSource) {
-		//nothing
-	}
-
-	@Override
-	public CodeSystem getCodeSystem(ValueSet theSrc) {
-		return null;
-	}
-
 }

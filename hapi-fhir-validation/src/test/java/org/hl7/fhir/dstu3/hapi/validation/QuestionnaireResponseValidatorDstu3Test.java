@@ -34,11 +34,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.BOOLEAN;
 import static org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.CHOICE;
 import static org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED;
@@ -1119,10 +1121,15 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaire().setReference(questionnaireRef);
-		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setDisplay("Hello"));
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("Hello"));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.getMessages(), empty());
+		List<SingleValidationMessage> warningsAndErrors = errors
+			.getMessages()
+			.stream()
+			.filter(t -> t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal())
+			.collect(Collectors.toList());
+		assertThat(warningsAndErrors, is(empty()));
 
 		// Missing String answer
 

@@ -129,10 +129,12 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 
 	protected Subscription newSubscription(String theCriteria, String thePayload) {
 		SubscriptionTopic topic = new SubscriptionTopic();
-		topic.getResourceTrigger().getQueryCriteria().setCurrent(theCriteria);
+		topic.getResourceTriggerFirstRep().getQueryCriteria().setCurrent(theCriteria);
+		topic.setId("1");
 
 		Subscription subscription = new Subscription();
-		subscription.getTopic().setResource(topic);
+		subscription.getContained().add(topic);
+		subscription.setTopic("#1");
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Enumerations.SubscriptionState.REQUESTED);
 

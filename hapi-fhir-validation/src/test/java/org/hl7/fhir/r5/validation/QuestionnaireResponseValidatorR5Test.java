@@ -14,12 +14,30 @@ import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerVali
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r5.model.*;
+import org.hl7.fhir.r5.model.Attachment;
+import org.hl7.fhir.r5.model.BooleanType;
+import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeSystem.CodeSystemContentMode;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.DataType;
+import org.hl7.fhir.r5.model.DateTimeType;
+import org.hl7.fhir.r5.model.DateType;
+import org.hl7.fhir.r5.model.DecimalType;
+import org.hl7.fhir.r5.model.IntegerType;
+import org.hl7.fhir.r5.model.MarkdownType;
+import org.hl7.fhir.r5.model.Narrative;
+import org.hl7.fhir.r5.model.Quantity;
+import org.hl7.fhir.r5.model.Questionnaire;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType;
+import org.hl7.fhir.r5.model.QuestionnaireResponse;
 import org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseStatus;
+import org.hl7.fhir.r5.model.Reference;
+import org.hl7.fhir.r5.model.StringType;
+import org.hl7.fhir.r5.model.TimeType;
+import org.hl7.fhir.r5.model.UriType;
+import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -102,7 +121,7 @@ public class QuestionnaireResponseValidatorR5Test {
 		when(myValSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), nullable(ValueSet.class)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 
-		int itemCnt = 16;
+		int itemCnt = 15;
 		QuestionnaireItemType[] questionnaireItemTypes = new QuestionnaireItemType[itemCnt];
 		questionnaireItemTypes[0] = QuestionnaireItemType.BOOLEAN;
 		questionnaireItemTypes[1] = QuestionnaireItemType.DECIMAL;
@@ -114,12 +133,11 @@ public class QuestionnaireResponseValidatorR5Test {
 		questionnaireItemTypes[7] = QuestionnaireItemType.TEXT;
 		questionnaireItemTypes[8] = QuestionnaireItemType.TEXT;
 		questionnaireItemTypes[9] = QuestionnaireItemType.URL;
-		questionnaireItemTypes[10] = QuestionnaireItemType.CHOICE;
-		questionnaireItemTypes[11] = QuestionnaireItemType.OPENCHOICE;
-		questionnaireItemTypes[12] = QuestionnaireItemType.OPENCHOICE;
-		questionnaireItemTypes[13] = QuestionnaireItemType.ATTACHMENT;
-		questionnaireItemTypes[14] = QuestionnaireItemType.REFERENCE;
-		questionnaireItemTypes[15] = QuestionnaireItemType.QUANTITY;
+		questionnaireItemTypes[10] = QuestionnaireItemType.CODING;
+		questionnaireItemTypes[11] = QuestionnaireItemType.CODING;
+		questionnaireItemTypes[12] = QuestionnaireItemType.ATTACHMENT;
+		questionnaireItemTypes[13] = QuestionnaireItemType.REFERENCE;
+		questionnaireItemTypes[14] = QuestionnaireItemType.QUANTITY;
 
 		DataType[] answerValues = new DataType[itemCnt];
 		answerValues[0] = new BooleanType(true);
@@ -134,10 +152,9 @@ public class QuestionnaireResponseValidatorR5Test {
 		answerValues[9] = new UriType("http://example.com");
 		answerValues[10] = new Coding().setSystem("http://codesystems.com/system").setCode("code0");
 		answerValues[11] = new Coding().setSystem("http://codesystems.com/system").setCode("code0");
-		answerValues[12] = new StringType("some value");
-		answerValues[13] = new Attachment().setData("some data".getBytes()).setContentType("txt");
-		answerValues[14] = new Reference("http://example.com/Questionnaire/q1");
-		answerValues[15] = new Quantity(42);
+		answerValues[12] = new Attachment().setData("some data".getBytes()).setContentType("txt");
+		answerValues[13] = new Reference("http://example.com/Questionnaire/q1");
+		answerValues[14] = new Quantity(42);
 
 
 		for (int i = 0; i < itemCnt; i++) {
@@ -195,7 +212,7 @@ public class QuestionnaireResponseValidatorR5Test {
 		String questionnaireRef = "http://example.com/Questionnaire/q1";
 
 		Questionnaire q = new Questionnaire();
-		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.CHOICE).setAnswerValueSet("http://somevalueset");
+		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.CODING).setAnswerValueSet("http://somevalueset");
 		when(myValSupport.fetchResource(eq(Questionnaire.class), eq("http://example.com/Questionnaire/q1"))).thenReturn(q);
 
 		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system"))).thenReturn(true);
@@ -238,7 +255,7 @@ public class QuestionnaireResponseValidatorR5Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode("code0"));
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
-		assertEquals( 0, errors.getMessages().size(), errors.toString());
+		assertEquals(0, errors.getMessages().size(), errors.toString());
 
 		// Bad code
 
@@ -336,7 +353,7 @@ public class QuestionnaireResponseValidatorR5Test {
 		// create the questionnaire
 		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
 		item1.setLinkId("link1")
-			.setType(QuestionnaireItemType.CHOICE)
+			.setType(QuestionnaireItemType.CODING)
 			.setAnswerValueSet(valueSetRef);
 
 		item1.addItem().setLinkId("link11")
@@ -392,7 +409,7 @@ public class QuestionnaireResponseValidatorR5Test {
 		// create the questionnaire
 		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
 		item1.setLinkId("link1")
-			.setType(QuestionnaireItemType.OPENCHOICE)
+			.setType(QuestionnaireItemType.CODING)
 			.setAnswerValueSet(valueSetRef);
 
 		item1.addItem().setLinkId("link11")
@@ -513,7 +530,7 @@ public class QuestionnaireResponseValidatorR5Test {
 
 		Questionnaire q = new Questionnaire();
 		QuestionnaireItemComponent item = q.addItem();
-		item.setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.OPENCHOICE).setAnswerValueSet("http://somevalueset");
+		item.setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.CODING).setAnswerValueSet("http://somevalueset").setAnswerConstraint(Questionnaire.QuestionnaireAnswerConstraint.OPTIONSORTYPE);
 		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(questionnaireRef))).thenReturn(q);
 
 		CodeSystem codeSystem = new CodeSystem();
@@ -570,10 +587,10 @@ public class QuestionnaireResponseValidatorR5Test {
 		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaireElement().setValue(questionnaireRef);
-		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setDisplay("Hello"));
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("Hello"));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.getMessages(), empty());
+		assertThat(errors.getMessages().stream().filter(t->t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal()).collect(Collectors.toList()), empty());
 
 		// Missing String answer
 
@@ -660,7 +677,7 @@ public class QuestionnaireResponseValidatorR5Test {
 			basicGroup
 				.addItem()
 				.setLinkId("schoolType")
-				.setType(QuestionnaireItemType.CHOICE)
+				.setType(QuestionnaireItemType.CODING)
 				.setAnswerValueSet(ID_VS_SCHOOLTYPE)
 				.setRequired(true);
 		}
