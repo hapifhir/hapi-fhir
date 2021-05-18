@@ -139,7 +139,7 @@ public class DeleteExpungeService {
 		//actually had to run delete conflict checks in multiple partitions, the executor service starts its own sessions on a per thread basis, and by the time
 		//we arrive here, those sessions are closed. So instead, we resolve them from PIDs, which are eagerly loaded.
 		String sourceResourceId = myIdHelper.resourceIdFromPidOrThrowException(firstConflict.getSourceResourcePid()).toVersionless().getValue();
-		String targetResourceId = myIdHelper.resourceIdFromPidOrThrowException(firstConflict.getSourceResourcePid()).toVersionless().getValue();
+		String targetResourceId = myIdHelper.resourceIdFromPidOrThrowException(firstConflict.getTargetResourcePid()).toVersionless().getValue();
 
 		throw new InvalidRequestException("DELETE with _expunge=true failed.  Unable to delete " +
 			targetResourceId + " because " + sourceResourceId + " refers to it via the path " + firstConflict.getSourcePath());
