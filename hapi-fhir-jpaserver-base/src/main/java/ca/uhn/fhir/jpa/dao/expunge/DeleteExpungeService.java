@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -43,6 +44,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManager;
@@ -74,6 +77,8 @@ public class DeleteExpungeService {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private DaoConfig myDaoConfig;
+	@Autowired
+	private IdHelperService myIdHelper;
 
 	public DeleteMethodOutcome expungeByResourcePids(String theUrl, String theResourceName, Slice<Long> thePids, RequestDetails theRequest) {
 		StopWatch w = new StopWatch();
@@ -132,13 +137,19 @@ public class DeleteExpungeService {
 		}
 
 		ResourceLink firstConflict = conflictResourceLinks.get(0);
-		String sourceResourceId = firstConflict.getSourceResource().getIdDt().toVersionless().getValue();
-		String targetResourceId = firstConflict.getTargetResource().getIdDt().toVersionless().getValue();
+
+		//NB-GGG: We previously instantiated these ID values from firstConflict.getSourceResource().getIdDt(), but in a situation where we
+		//actually had to run delete conflict checks in multiple partitions, the executor service starts its own sessions on a per thread basis, and by the time
+		//we arrive here, those sessions are closed. So instead, we resolve them from PIDs, which are eagerly loaded.
+		String sourceResourceId = myIdHelper.resourceIdFromPidOrThrowException(firstConflict.getSourceResourcePid()).toVersionless().getValue();
+		String targetResourceId = myIdHelper.resourceIdFromPidOrThrowException(firstConflict.getSourceResourcePid()).toVersionless().getValue();
+
 		throw new InvalidRequestException("DELETE with _expunge=true failed.  Unable to delete " +
 			targetResourceId + " because " + sourceResourceId + " refers to it via the path " + firstConflict.getSourcePath());
 	}
 
-	private void findResourceLinksWithTargetPidIn(List<Long> theAllTargetPids, List<Long> theSomeTargetPids, List<ResourceLink> theConflictResourceLinks) {
+	@Transactional(propagation = Propagation.NESTED)
+	public void findResourceLinksWithTargetPidIn(List<Long> theAllTargetPids, List<Long> theSomeTargetPids, List<ResourceLink> theConflictResourceLinks) {
 		// We only need to find one conflict, so if we found one already in an earlier partition run, we can skip the rest of the searches
 		if (theConflictResourceLinks.isEmpty()) {
 			List<ResourceLink> conflictResourceLinks = myResourceLinkDao.findWithTargetPidIn(theSomeTargetPids).stream()
