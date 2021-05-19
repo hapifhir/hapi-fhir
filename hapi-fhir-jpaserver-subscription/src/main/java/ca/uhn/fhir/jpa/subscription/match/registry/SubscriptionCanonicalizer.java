@@ -368,9 +368,11 @@ public class SubscriptionCanonicalizer {
 				retVal = ((org.hl7.fhir.r4.model.Subscription) theSubscription).getCriteria();
 				break;
 			case R5:
-				org.hl7.fhir.r5.model.SubscriptionTopic topic = (org.hl7.fhir.r5.model.SubscriptionTopic) ((org.hl7.fhir.r5.model.Subscription) theSubscription).getTopic().getResource();
+				org.hl7.fhir.r5.model.Subscription subscription = (org.hl7.fhir.r5.model.Subscription) theSubscription;
+				String topicElement = subscription.getTopicElement().getValue();
+				org.hl7.fhir.r5.model.SubscriptionTopic topic = (org.hl7.fhir.r5.model.SubscriptionTopic) subscription.getContained().stream().filter(t -> ("#" + t.getId()).equals(topicElement) || (t.getId()).equals(topicElement)).findFirst().orElse(null);
 				Validate.notNull(topic);
-				retVal = topic.getResourceTrigger().getQueryCriteria().getCurrent();
+				retVal = topic.getResourceTriggerFirstRep().getQueryCriteria().getCurrent();
 				break;
 		}
 

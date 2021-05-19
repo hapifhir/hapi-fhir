@@ -613,10 +613,8 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 		conceptMap.setTarget(new UriType(VS_URL_2));
 
 		ConceptMapGroupComponent group = conceptMap.addGroup();
-		group.setSource(CS_URL);
-		group.setSourceVersion("Version 1");
-		group.setTarget(CS_URL_2);
-		group.setTargetVersion("Version 2");
+		group.setSource(CS_URL + "|" + "Version 1");
+		group.setTarget(CS_URL_2 + "|" + "Version 2");
 
 		SourceElementComponent element = group.addElement();
 		element.setCode("12345");
@@ -643,10 +641,8 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 		target.setRelationship(Enumerations.ConceptMapRelationship.SOURCEISBROADERTHANTARGET);
 
 		group = conceptMap.addGroup();
-		group.setSource(CS_URL);
-		group.setSourceVersion("Version 3");
-		group.setTarget(CS_URL_3);
-		group.setTargetVersion("Version 4");
+		group.setSource(CS_URL + "|" + "Version 3");
+		group.setTarget(CS_URL_3 + "|" + "Version 4");
 
 		element = group.addElement();
 		element.setCode("12345");
@@ -663,10 +659,8 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 		target.setRelationship(Enumerations.ConceptMapRelationship.SOURCEISBROADERTHANTARGET);
 
 		group = conceptMap.addGroup();
-		group.setSource(CS_URL_4);
-		group.setSourceVersion("Version 5");
-		group.setTarget(CS_URL_2);
-		group.setTargetVersion("Version 2");
+		group.setSource(CS_URL_4 + "|" + "Version 5");
+		group.setTarget(CS_URL_2 + "|" + "Version 2");
 
 		element = group.addElement();
 		element.setCode("78901");

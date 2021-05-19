@@ -31,7 +31,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		conceptMap1.setUrl(CM_URL).setVersion("v1").setSource(new UriType(VS_URL)).setTarget(new UriType(VS_URL_2));
 		
 		ConceptMapGroupComponent group1 = conceptMap1.addGroup();
-		group1.setSource(CS_URL).setSourceVersion("Version 1").setTarget(CS_URL_2).setTargetVersion("Version 2");
+		group1.setSource(CS_URL + "|" + "Version 1").setTarget(CS_URL_2 + "|" + "Version 2");
 
 		SourceElementComponent element1 = group1.addElement();
 		element1.setCode("11111").setDisplay("Source Code 11111");
@@ -49,7 +49,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		conceptMap2.setUrl(CM_URL).setVersion("v2").setSource(new UriType(VS_URL)).setTarget(new UriType(VS_URL_2));
 		
 		ConceptMapGroupComponent group2 = conceptMap2.addGroup();
-		group2.setSource(CS_URL).setSourceVersion("Version 1").setTarget(CS_URL_2).setTargetVersion("Version 2");
+		group2.setSource(CS_URL + "|" + "Version 1").setTarget(CS_URL_2 + "|" + "Version 2");
 
 		SourceElementComponent element2 = group2.addElement();
 		element2.setCode("11111").setDisplay("Source Code 11111");
@@ -114,7 +114,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		conceptMap1.setUrl(CM_URL).setVersion("v1").setSource(new UriType(VS_URL)).setTarget(new UriType(VS_URL_2));
 		
 		ConceptMapGroupComponent group1 = conceptMap1.addGroup();
-		group1.setSource(CS_URL).setSourceVersion("Version 1").setTarget(CS_URL_2).setTargetVersion("Version 2");
+		group1.setSource(CS_URL + "|" + "Version 1").setTarget(CS_URL_2 + "|" + "Version 2");
 
 		SourceElementComponent element1 = group1.addElement();
 		element1.setCode("12222").setDisplay("Source Code 12222");
@@ -132,7 +132,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		conceptMap2.setUrl(CM_URL).setVersion("v2").setSource(new UriType(VS_URL)).setTarget(new UriType(VS_URL_2));
 		
 		ConceptMapGroupComponent group2 = conceptMap2.addGroup();
-		group2.setSource(CS_URL).setSourceVersion("Version 1").setTarget(CS_URL_2).setTargetVersion("Version 2");
+		group2.setSource(CS_URL + "|" + "Version 1").setTarget(CS_URL_2 + "|" + "Version 2");
 
 		SourceElementComponent element2 = group2.addElement();
 		element2.setCode("13333").setDisplay("Source Code 13333");

@@ -28,11 +28,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -627,10 +629,14 @@ public class QuestionnaireResponseValidatorR4Test {
 		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaireElement().setValue(questionnaireRef);
-		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setDisplay("Hello"));
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("Hello"));
 		errors = myVal.validateWithResult(qa);
-		ourLog.info(errors.toString());
-		assertThat(errors.getMessages(), empty());
+		List<SingleValidationMessage> warningsAndErrors = errors
+			.getMessages()
+			.stream()
+			.filter(t -> t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal())
+			.collect(Collectors.toList());
+		assertThat(warningsAndErrors, is(empty()));
 
 		// Missing String answer
 
@@ -653,6 +659,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		List<Questionnaire.QuestionnaireItemAnswerOptionComponent> options = new ArrayList<>();
 		options.add(new Questionnaire.QuestionnaireItemAnswerOptionComponent().setValue(new Coding("http://foo", "foo", "FOOOO")));
 		options.add(new Questionnaire.QuestionnaireItemAnswerOptionComponent().setValue(new Coding("http://bar", "bar", "FOOOO")));
+		options.add(new Questionnaire.QuestionnaireItemAnswerOptionComponent().setValue(new StringType("Hello")));
 
 		Questionnaire q = new Questionnaire();
 		QuestionnaireItemComponent item = q.addItem();
@@ -681,7 +688,12 @@ public class QuestionnaireResponseValidatorR4Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("Hello"));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertEquals(true, errors.isSuccessful());
+		List<SingleValidationMessage> warningsAndErrors = errors
+			.getMessages()
+			.stream()
+			.filter(t -> t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal())
+			.collect(Collectors.toList());
+		assertThat(warningsAndErrors, is(empty()));
 
 		qa = new QuestionnaireResponse();
 		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);

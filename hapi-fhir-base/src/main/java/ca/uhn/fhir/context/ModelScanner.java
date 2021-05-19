@@ -214,6 +214,10 @@ class ModelScanner {
 		}
 
 		if (blockDefinition == null) {
+			if (theClass.getSimpleName().equals("XhtmlType")) {
+				return;
+			}
+
 			throw new ConfigurationException("Resource class[" + theClass.getName() + "] does not contain any valid HAPI-FHIR annotations");
 		}
 	}

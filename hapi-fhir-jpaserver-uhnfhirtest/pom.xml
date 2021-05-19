@@ -169,7 +169,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-converter</artifactId>
-			<version>5.5.0-PRE1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 
 	</dependencies>

@@ -444,8 +444,8 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 		assertNotNull(subscriptionTemp);
 
-		SubscriptionTopic topic = (SubscriptionTopic) subscriptionTemp.getTopic().getResource();
-		topic.getResourceTrigger().getQueryCriteria().setCurrent(criteria1);
+		SubscriptionTopic topic = (SubscriptionTopic) subscriptionTemp.getContained().get(0);
+		topic.getResourceTriggerFirstRep().getQueryCriteria().setCurrent(criteria1);
 
 		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
@@ -526,8 +526,8 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 		assertNotNull(subscriptionTemp);
 
-		SubscriptionTopic topic = (SubscriptionTopic) subscriptionTemp.getTopic().getResource();
-		topic.getResourceTrigger().getQueryCriteria().setCurrent(criteria1);
+		SubscriptionTopic topic = (SubscriptionTopic) subscriptionTemp.getContained().get(0);
+		topic.getResourceTriggerFirstRep().getQueryCriteria().setCurrent(criteria1);
 
 		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
@@ -604,8 +604,9 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 		assertNotNull(subscriptionTemp);
-		SubscriptionTopic topic = (SubscriptionTopic) subscriptionTemp.getTopic().getResource();
-		topic.getResourceTrigger().getQueryCriteria().setCurrent(criteria1);
+		SubscriptionTopic topic = (SubscriptionTopic) subscriptionTemp.getContained().get(0);
+		topic.getResourceTriggerFirstRep().getQueryCriteria().setCurrent(criteria1);
+
 		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
 
@@ -732,8 +733,8 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		assertNotNull(subscriptionTemp);
 		String criteriaGood = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-		SubscriptionTopic topic = (SubscriptionTopic) subscriptionTemp.getTopic().getResource();
-		topic.getResourceTrigger().getQueryCriteria().setCurrent(criteriaGood);
+		SubscriptionTopic topic = (SubscriptionTopic) subscriptionTemp.getContained().get(0);
+		topic.getResourceTriggerFirstRep().getQueryCriteria().setCurrent(criteriaGood);
 
 		ourLog.info("** About to update subscription");
 		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();

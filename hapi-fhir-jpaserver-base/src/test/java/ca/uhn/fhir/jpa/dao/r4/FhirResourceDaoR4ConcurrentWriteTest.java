@@ -79,7 +79,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testConcurrentTransactionCreates() throws ExecutionException, InterruptedException {
+	public void testConcurrentTransactionCreates() {
 		myDaoConfig.setMatchUrlCache(true);
 
 		AtomicInteger counter = new AtomicInteger(0);

@@ -75,7 +75,12 @@
 			<version>${fhir_core_version}</version>
 		</dependency>
 
-		<dependency>
+        <dependency>
+            <groupId>org.fhir</groupId>
+            <artifactId>ucum</artifactId>
+        </dependency>
+
+        <dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
 			<artifactId>caffeine</artifactId>
 		</dependency>

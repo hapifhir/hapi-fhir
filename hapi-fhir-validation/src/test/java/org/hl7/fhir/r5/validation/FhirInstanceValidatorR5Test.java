@@ -255,7 +255,7 @@ public class FhirInstanceValidatorR5Test {
 		ValidationResult result = val.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("ele-1: 'All FHIR elements must have a @value or children' failed", all.get(0).getMessage());
+		assertEquals("ele-1: 'All FHIR elements must have a @value or children' Rule 'All FHIR elements must have a @value or children' Failed", all.get(0).getMessage());
 	}
 
 	/**
@@ -615,7 +615,7 @@ public class FhirInstanceValidatorR5Test {
 		assertEquals( 3, messages.size(), output.toString());
 		assertThat(messages.get(0).getMessage(), containsString("Element must have some content"));
 		assertThat(messages.get(1).getMessage(), containsString("Primitive types must have a value or must have child extensions"));
-		assertThat(messages.get(2).getMessage(), containsString("ele-1: 'All FHIR elements must have a @value or children' failed"));
+		assertThat(messages.get(2).getMessage(), containsString("ele-1: 'All FHIR elements must have a @value or children' Rule 'All FHIR elements must have a @value or children' Failed"));
 	}
 
 	@Test
@@ -650,8 +650,8 @@ public class FhirInstanceValidatorR5Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(1, res.size(), output.toString());
-		assertEquals("A code with no system has no defined meaning. A system should be provided", output.getMessages().get(0).getMessage());
+		assertEquals(2, res.size(), output.toString());
+		assertEquals("A code with no system has no defined meaning. A system should be provided", output.getMessages().get(1).getMessage());
 	}
 
 	@Test
@@ -841,9 +841,10 @@ public class FhirInstanceValidatorR5Test {
 				"</Observation>";
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
-		assertEquals(
-			"The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status|4.5.0 (http://hl7.org/fhir/ValueSet/observation-status), and a code is required from this value set) (error message = Unknown code 'notvalidcode')",
-			output.getMessages().get(0).getMessage());
+		assertThat(
+			output.getMessages().get(0).getMessage(),
+			containsString("The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status")
+			);
 	}
 
 	@Test

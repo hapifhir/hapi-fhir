@@ -149,13 +149,13 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-test-utilities</artifactId>
-			<version>5.5.0-PRE1-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-test-utilities</artifactId>
-			<version>5.5.0-PRE1-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
  </dependencies>

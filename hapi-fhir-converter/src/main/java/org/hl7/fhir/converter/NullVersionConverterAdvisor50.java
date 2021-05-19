@@ -20,43 +20,21 @@ package org.hl7.fhir.converter;
  * #L%
  */
 
-import org.hl7.fhir.convertors.VersionConvertorAdvisor50;
+import org.hl7.fhir.convertors.advisors.VersionConvertorAdvisor50;
 import org.hl7.fhir.dstu2.model.Resource;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.FhirPublication;
 import org.hl7.fhir.r5.model.ValueSet;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.IdentityHashMap;
 
 public class NullVersionConverterAdvisor50 implements VersionConvertorAdvisor50 {
 
 	private IdentityHashMap<ValueSet, CodeSystem> myCodeSystems = new IdentityHashMap<>();
-
-	@Override
-	public boolean ignoreEntry(Bundle.BundleEntryComponent src) {
-		return false;
-	}
-
-	@Override
-	public Resource convertR2(org.hl7.fhir.r5.model.Resource resource) throws FHIRException {
-		return null;
-	}
-
-	@Override
-	public org.hl7.fhir.dstu2016may.model.Resource convertR2016May(org.hl7.fhir.r5.model.Resource resource) throws FHIRException {
-		return null;
-	}
-
-	@Override
-	public org.hl7.fhir.dstu3.model.Resource convertR3(org.hl7.fhir.r5.model.Resource resource) throws FHIRException {
-		return null;
-	}
-
-	@Override
-	public org.hl7.fhir.r4.model.Resource convertR4(org.hl7.fhir.r5.model.Resource resource) throws FHIRException {
-		return null;
-	}
 
 	@Override
 	public void handleCodeSystem(CodeSystem tgtcs, ValueSet source) throws FHIRException {
@@ -66,5 +44,10 @@ public class NullVersionConverterAdvisor50 implements VersionConvertorAdvisor50 
 	@Override
 	public CodeSystem getCodeSystem(ValueSet src) throws FHIRException {
 		return myCodeSystems.get(src);
+	}
+
+	@Override
+	public boolean ignoreEntry(@Nullable Bundle.BundleEntryComponent theBundleEntryComponent, @Nonnull FhirPublication theFhirPublication) {
+		return false;
 	}
 }
