@@ -1071,11 +1071,15 @@ public abstract class BaseTransactionProcessor {
 				if (newId == null) {
 					newId = theIdSubstitutions.get(nextId);
 				}
-				ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
-				if (theReferencesToAutoVersion.contains(resourceReference)) {
-					resourceReference.setReference(newId.getValue());
-				} else {
-					resourceReference.setReference(newId.toVersionless().getValue());
+				if (newId != null) {
+					ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
+					if (theReferencesToAutoVersion.contains(resourceReference)) {
+						resourceReference.setReference(newId.getValue());
+						resourceReference.setResource(null);
+					} else {
+						resourceReference.setReference(newId.toVersionless().getValue());
+						resourceReference.setResource(null);
+					}
 				}
 			} else if (nextId.getValue().startsWith("urn:")) {
 				throw new InvalidRequestException("Unable to satisfy placeholder ID " + nextId.getValue() + " found in element named '" + nextRef.getName() + "' within resource of type: " + nextResource.getIdElement().getResourceType());
@@ -1084,6 +1088,7 @@ public abstract class BaseTransactionProcessor {
 					DaoMethodOutcome outcome = theIdToPersistedOutcome.get(nextId);
 					if (!outcome.isNop() && !Boolean.TRUE.equals(outcome.getCreated())) {
 						resourceReference.setReference(nextId.getValue());
+						resourceReference.setResource(null);
 					}
 				}
 			}

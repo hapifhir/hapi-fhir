@@ -45,9 +45,11 @@ import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.EpisodeOfCare;
 import org.hl7.fhir.r4.model.IdType;
@@ -881,6 +883,27 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		// Check GET
 		respEntry = resp.getEntry().get(1).getResponse();
 		assertThat(respEntry.getStatus(), startsWith("404"));
+
+	}
+
+	@Test
+	public void testTransactionNoContained() throws IOException {
+
+		// Run once (should create the patient)
+		Bundle request = loadResourceFromClasspath(Bundle.class, "/r4/transaction-no-contained.json");
+		mySystemDao.transaction(mySrd, request);
+
+		// Run a second time (no conditional update)
+		request = loadResourceFromClasspath(Bundle.class, "/r4/transaction-no-contained.json");
+		Bundle outcome = mySystemDao.transaction(mySrd, request);
+
+		ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+
+		IdType communicationId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
+		Communication communication = myCommunicationDao.read(communicationId, mySrd);
+		assertThat(communication.getSubject().getReference(), matchesPattern("Patient/[0-9]+"));
+
+		ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(communication));
 
 	}
 
