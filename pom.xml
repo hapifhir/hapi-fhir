@@ -761,7 +761,7 @@
 		<activation_api_version>1.2.0</activation_api_version>
 		<apache_karaf_version>4.2.5</apache_karaf_version>
 		<aries_spifly_version>1.2</aries_spifly_version>
-		<caffeine_version>3.0.1</caffeine_version>
+		<caffeine_version>2.9.1</caffeine_version>
 		<commons_codec_version>1.15</commons_codec_version>
 		<commons_compress_version>1.20</commons_compress_version>
 		<commons_text_version>1.9</commons_text_version>
