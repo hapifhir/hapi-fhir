@@ -59,6 +59,11 @@ public class ProviderConstants {
 	public static final String DIFF_INCLUDE_META_PARAMETER = "includeMeta";
 
 	/**
+	 * Operation name: docref
+	 */
+	public static final String DOCREF = "$docref";
+
+	/**
 	 * EMPI Operations
 	 */
 	public static final String EMPI_MATCH = "$match";
