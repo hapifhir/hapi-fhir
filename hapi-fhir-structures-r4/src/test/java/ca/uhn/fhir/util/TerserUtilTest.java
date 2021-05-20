@@ -346,7 +346,6 @@ class TerserUtilTest {
 		// expect p2 to have "Doe" and MALE after replace
 		assertEquals(1, p2.getName().size());
 		assertEquals("Doe", p2.getName().get(0).getFamily());
-		System.out.println(p2.getGender());
 
 		assertEquals(Enumerations.AdministrativeGender.MALE, p2.getGender());
 		assertEquals(dob, p2.getBirthDate());
