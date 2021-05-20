@@ -538,14 +538,14 @@ public final class TerserUtil {
 
 			IBase newFieldValue = childDefinition.getChildByName(childDefinition.getElementName()).newInstance();
 			if (theFromFieldValue instanceof IPrimitiveType) {
-				Method copyMethod = getMethod(theFromFieldValue, "copy");
-				if (copyMethod != null) {
 					try {
-						newFieldValue = (IBase) copyMethod.invoke(theFromFieldValue, new Object[]{});
+						Method copyMethod = getMethod(theFromFieldValue, "copy");
+						if (copyMethod != null) {
+							newFieldValue = (IBase) copyMethod.invoke(theFromFieldValue, new Object[]{});
+						}
 					} catch (Throwable t) {
 						((IPrimitiveType) newFieldValue).setValueAsString(((IPrimitiveType) theFromFieldValue).getValueAsString());
 					}
-				}
 			} else {
 				theTerser.cloneInto(theFromFieldValue, newFieldValue, true);
 			}
