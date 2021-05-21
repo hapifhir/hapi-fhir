@@ -79,6 +79,7 @@ import org.hl7.fhir.dstu3.model.Encounter.EncounterLocationComponent;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterStatus;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.EpisodeOfCare;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
@@ -663,6 +664,64 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/bryn-bundle.json"), StandardCharsets.UTF_8);
 		Validate.notNull(input);
 		ourClient.create().resource(input).execute().getResource();
+	}
+
+	@Test
+	public void testUrlSearchWithNoStoreHeader() throws IOException {
+		submitBundle("/dstu3/no-store-header/patient-bundle.json");
+		submitBundle("/dstu3/no-store-header/practitioner-bundle.json");
+		submitBundle("/dstu3/no-store-header/organization-bundle.json");
+		submitBundle("/dstu3/no-store-header/location-bundle.json");
+		submitBundle("/dstu3/no-store-header/episodeofcare-bundle.json");
+
+//		HttpGet read = new HttpGet(ourServerBase + "/Patient");
+//		try (CloseableHttpResponse response = ourHttpClient.execute(read)) {
+//			ourLog.info(response.toString());
+//			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
+//			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+//			ourLog.info("resp: \n{}", resp);
+//			Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, resp);
+//			ourLog.info("bundle.getTotal(): \n{}", bundle.getTotal());
+//		}
+
+//		Bundle responseBundle = ourClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
+//			//.where(new StringClientParam("_content").matches().value("AAA")).returnBundle(Bundle.class).execute();
+//		assertEquals(0, responseBundle.getTotal());
+
+		Bundle responseBundle = ourClient
+			.search()
+			.forResource(EpisodeOfCare.class)
+			.prettyPrint()
+			.returnBundle(Bundle.class)
+			.encodedJson()
+			.execute();
+		assertEquals(0, responseBundle.getTotal());
+//			.where(new StringClientParam("foo").matches().value("bar"))
+
+//		//String uri = ourServerBase + "/EpisodeOfCare?_id=ECC19005O3&_include=*&_revinclude=*&_count=300&_pretty=true";
+//		String uri = ourServerBase + "/EpisodeOfCare";
+//		ourLog.info("URI: {}", uri);
+//		HttpGet get = new HttpGet(uri);
+//		CloseableHttpResponse resp = ourHttpClient.execute(get);
+//		try {
+//			assertEquals(200, resp.getStatusLine().getStatusCode());
+//			String output = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
+//			ourLog.info(output);
+//			Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, output);
+//			ourLog.info("bundle.total: {}", bundle.getTotal());
+//			//assertEquals("http://localhost:" + ourPort + "/fhir/context/Patient?_count=5&_pretty=true&name=Jernel%C3%B6v", b.getLink("self").getUrl());
+//			//Patient p = (Patient) b.getEntry().get(0).getResource();
+//			//assertEquals("Jernelöv", p.getName().get(0).getFamily());
+//		} finally {
+//			IOUtils.closeQuietly(resp.getEntity().getContent());
+//		}
+
+	}
+
+	private void submitBundle(String bundleName) throws IOException {
+		String input = IOUtils.toString(getClass().getResourceAsStream(bundleName), StandardCharsets.UTF_8);
+		Validate.notNull(input);
+		ourClient.create().resource(input).execute();
 	}
 
 	@Test
