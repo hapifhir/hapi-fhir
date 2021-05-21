@@ -685,6 +685,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.where(new StringClientParam("_id").matches().value("ECC19005O3"))
 			.where(new StringClientParam("_include").matches().value("*"))
 			.where(new StringClientParam("_revinclude").matches().value("*"))
+			.where(new StringClientParam("_count").matches().value("300"))
 			.returnBundle(Bundle.class)
 			.encodedJson()
 			.execute();
@@ -697,6 +698,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.where(new StringClientParam("_id").matches().value("ECC19005O3"))
 			.where(new StringClientParam("_include").matches().value("*"))
 			.where(new StringClientParam("_revinclude").matches().value("*"))
+			.where(new StringClientParam("_count").matches().value("300"))
 			.cacheControl(new CacheControlDirective().setNoStore(true))
 			.returnBundle(Bundle.class)
 			.encodedJson()
