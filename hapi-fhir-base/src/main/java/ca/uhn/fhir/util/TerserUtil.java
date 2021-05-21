@@ -329,7 +329,7 @@ public final class TerserUtil {
 	 */
 	public static void clearField(FhirContext theFhirContext, String theFieldName, IBaseResource theResource) {
 		BaseRuntimeChildDefinition childDefinition = getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theResource);
-		childDefinition.getAccessor().getValues(theResource).clear();
+		clear(childDefinition.getAccessor().getValues(theResource));
 	}
 
 	/**
@@ -343,7 +343,7 @@ public final class TerserUtil {
 		BaseRuntimeElementDefinition definition = theFhirContext.getElementDefinition(theBase.getClass());
 		BaseRuntimeChildDefinition childDefinition = definition.getChildByName(theFieldName);
 		Validate.notNull(childDefinition);
-		childDefinition.getAccessor().getValues(theBase).clear();
+		clear(childDefinition.getAccessor().getValues(theBase));
 	}
 
 	/**
@@ -448,7 +448,7 @@ public final class TerserUtil {
 	private static void replaceField(FhirTerser theTerser, IBaseResource theFrom, IBaseResource theTo, BaseRuntimeChildDefinition childDefinition) {
 		List<IBase> fromValues = childDefinition.getAccessor().getValues(theFrom);
 		List<IBase> toValues = childDefinition.getAccessor().getValues(theTo);
-		toValues.clear();
+		clear(toValues);
 
 		mergeFields(theTerser, theTo, childDefinition, fromValues, toValues);
 	}
@@ -629,6 +629,14 @@ public final class TerserUtil {
 	public static <T extends IBase> T newResource(FhirContext theFhirContext, String theResourceName, Object theConstructorParam) {
 		RuntimeResourceDefinition def = theFhirContext.getResourceDefinition(theResourceName);
 		return (T) def.newInstance(theConstructorParam);
+	}
+
+	private static void clear(List<IBase> values) {
+		if (values == null) {
+			return;
+		}
+
+		values.clear();
 	}
 
 }
