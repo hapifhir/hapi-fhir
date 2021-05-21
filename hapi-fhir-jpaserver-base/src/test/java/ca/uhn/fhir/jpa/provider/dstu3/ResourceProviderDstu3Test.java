@@ -5,14 +5,17 @@ import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.provider.r4.ResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
@@ -25,6 +28,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -118,6 +122,7 @@ import org.hl7.fhir.dstu3.model.Task;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.codesystems.DeviceStatus;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
@@ -674,54 +679,35 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		submitBundle("/dstu3/no-store-header/location-bundle.json");
 		submitBundle("/dstu3/no-store-header/episodeofcare-bundle.json");
 
-//		HttpGet read = new HttpGet(ourServerBase + "/Patient");
-//		try (CloseableHttpResponse response = ourHttpClient.execute(read)) {
-//			ourLog.info(response.toString());
-//			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
-//			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-//			ourLog.info("resp: \n{}", resp);
-//			Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, resp);
-//			ourLog.info("bundle.getTotal(): \n{}", bundle.getTotal());
-//		}
-
-//		Bundle responseBundle = ourClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
-//			//.where(new StringClientParam("_content").matches().value("AAA")).returnBundle(Bundle.class).execute();
-//		assertEquals(0, responseBundle.getTotal());
-
 		Bundle responseBundle = ourClient
 			.search()
 			.forResource(EpisodeOfCare.class)
-			.prettyPrint()
+			.where(new StringClientParam("_id").matches().value("ECC19005O3"))
+			.where(new StringClientParam("_include").matches().value("*"))
+			.where(new StringClientParam("_revinclude").matches().value("*"))
 			.returnBundle(Bundle.class)
 			.encodedJson()
 			.execute();
-		assertEquals(0, responseBundle.getTotal());
-//			.where(new StringClientParam("foo").matches().value("bar"))
+		assertEquals(1, responseBundle.getTotal());
 
-//		//String uri = ourServerBase + "/EpisodeOfCare?_id=ECC19005O3&_include=*&_revinclude=*&_count=300&_pretty=true";
-//		String uri = ourServerBase + "/EpisodeOfCare";
-//		ourLog.info("URI: {}", uri);
-//		HttpGet get = new HttpGet(uri);
-//		CloseableHttpResponse resp = ourHttpClient.execute(get);
-//		try {
-//			assertEquals(200, resp.getStatusLine().getStatusCode());
-//			String output = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
-//			ourLog.info(output);
-//			Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, output);
-//			ourLog.info("bundle.total: {}", bundle.getTotal());
-//			//assertEquals("http://localhost:" + ourPort + "/fhir/context/Patient?_count=5&_pretty=true&name=Jernel%C3%B6v", b.getLink("self").getUrl());
-//			//Patient p = (Patient) b.getEntry().get(0).getResource();
-//			//assertEquals("Jernelöv", p.getName().get(0).getFamily());
-//		} finally {
-//			IOUtils.closeQuietly(resp.getEntity().getContent());
-//		}
-
+		// Now try the exact same search again but using the Cache-Control no-store Header
+		responseBundle = ourClient
+			.search()
+			.forResource(EpisodeOfCare.class)
+			.where(new StringClientParam("_id").matches().value("ECC19005O3"))
+			.where(new StringClientParam("_include").matches().value("*"))
+			.where(new StringClientParam("_revinclude").matches().value("*"))
+			.cacheControl(new CacheControlDirective().setNoStore(true))
+			.returnBundle(Bundle.class)
+			.encodedJson()
+			.execute();
+		assertEquals(1, responseBundle.getTotal());
 	}
 
 	private void submitBundle(String bundleName) throws IOException {
 		String input = IOUtils.toString(getClass().getResourceAsStream(bundleName), StandardCharsets.UTF_8);
 		Validate.notNull(input);
-		ourClient.create().resource(input).execute();
+		ourClient.transaction().withBundle(input).execute();
 	}
 
 	@Test
