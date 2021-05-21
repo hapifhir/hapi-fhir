@@ -639,7 +639,7 @@ public final class TerserUtil {
 		try {
 			values.clear();
 		} catch (Throwable t) {
-			ourLog.warn("Unable to clear values " + String.valueOf(values), t);
+			ourLog.debug("Unable to clear values " + String.valueOf(values), t);
 		}
 	}
 
