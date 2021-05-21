@@ -321,7 +321,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(theCallingDao, theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
 
-		final Integer loadSynchronousUpTo = getLoadSynchronousUpToOrNull(theCacheControlDirective);
+		final Integer loadSynchronousUpTo = getLoadSynchronousUpToOrNull(theParams, theCacheControlDirective);
 
 		if (theParams.isLoadSynchronous() || loadSynchronousUpTo != null) {
 			ourLog.debug("Search {} is loading in synchronous mode", searchUuid);
@@ -588,8 +588,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	}
 
 	@Nullable
-	private Integer getLoadSynchronousUpToOrNull(CacheControlDirective theCacheControlDirective) {
+	private Integer getLoadSynchronousUpToOrNull(final SearchParameterMap theParams, CacheControlDirective theCacheControlDirective) {
 		final Integer loadSynchronousUpTo;
+		if (theParams != null && !theParams.isEmpty() && theParams.containsKey("_id")) {
+			return null;
+		}
 		if (theCacheControlDirective != null && theCacheControlDirective.isNoStore()) {
 			if (theCacheControlDirective.getMaxResults() != null) {
 				loadSynchronousUpTo = theCacheControlDirective.getMaxResults();
