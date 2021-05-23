@@ -690,7 +690,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.returnBundle(Bundle.class)
 			.encodedJson()
 			.execute();
-		assertEquals(1, responseBundle.getTotal());
+		String bundleContents = "\n * " + responseBundle.getEntry().stream().map(t->t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.joining("\n * "));
+		assertEquals(3, responseBundle.getEntry().size(), bundleContents);
 
 		runInTransaction(()->{
 			ourLog.info("Resources:\n * {}", myResourceTableDao
@@ -713,7 +714,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.returnBundle(Bundle.class)
 			.encodedJson()
 			.execute();
-		assertEquals(1, responseBundle.getTotal());
+		bundleContents = "\n * " + responseBundle.getEntry().stream().map(t->t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.joining("\n * "));
+		assertEquals(3, responseBundle.getEntry().size(), bundleContents);
 	}
 
 	private void submitBundle(String bundleName) throws IOException {

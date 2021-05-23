@@ -753,12 +753,12 @@ public class SearchBuilder implements ISearchBuilder {
 	 * so it can't be Collections.emptySet() or some such thing
 	 */
 	@Override
-	public Set<ResourcePersistentId> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<ResourcePersistentId> theMatches, Set<Include> theRevIncludes,
+	public Set<ResourcePersistentId> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<ResourcePersistentId> theMatches, Set<Include> theIncludes,
 																	  boolean theReverseMode, DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest) {
 		if (theMatches.size() == 0) {
 			return new HashSet<>();
 		}
-		if (theRevIncludes == null || theRevIncludes.isEmpty()) {
+		if (theIncludes == null || theIncludes.isEmpty()) {
 			return new HashSet<>();
 		}
 		String searchPidFieldName = theReverseMode ? "myTargetResourcePid" : "mySourceResourcePid";
@@ -771,7 +771,7 @@ public class SearchBuilder implements ISearchBuilder {
 		List<ResourcePersistentId> nextRoundMatches = new ArrayList<>(theMatches);
 		HashSet<ResourcePersistentId> allAdded = new HashSet<>();
 		HashSet<ResourcePersistentId> original = new HashSet<>(theMatches);
-		ArrayList<Include> includes = new ArrayList<>(theRevIncludes);
+		ArrayList<Include> includes = new ArrayList<>(theIncludes);
 
 		int roundCounts = 0;
 		StopWatch w = new StopWatch();

@@ -540,6 +540,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			}
 
 			List<ResourcePersistentId> includedPidsList = new ArrayList<>(includedPids);
+			pids.addAll(includedPidsList);
 
 			List<IBaseResource> resources = new ArrayList<>();
 			theSb.loadResourcesByPid(pids, includedPidsList, resources, false, theRequestDetails);
