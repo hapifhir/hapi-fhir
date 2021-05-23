@@ -675,21 +675,23 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testUrlSearchWithNoStoreHeader() throws IOException {
 		submitBundle("/dstu3/no-store-header/patient-bundle.json");
 		submitBundle("/dstu3/no-store-header/practitioner-bundle.json");
-		submitBundle("/dstu3/no-store-header/organization-bundle.json");
-		submitBundle("/dstu3/no-store-header/location-bundle.json");
+//		submitBundle("/dstu3/no-store-header/organization-bundle.json");
+//		submitBundle("/dstu3/no-store-header/location-bundle.json");
 		submitBundle("/dstu3/no-store-header/episodeofcare-bundle.json");
 
-		Bundle responseBundle = ourClient
-			.search()
-			.forResource(EpisodeOfCare.class)
-			.where(new StringClientParam("_id").matches().value("ECC19005O3"))
-			.where(new StringClientParam("_include").matches().value("*"))
-			.where(new StringClientParam("_revinclude").matches().value("*"))
-			.where(new StringClientParam("_count").matches().value("300"))
-			.returnBundle(Bundle.class)
-			.encodedJson()
-			.execute();
-		assertEquals(1, responseBundle.getTotal());
+		Bundle responseBundle;
+
+//		Bundle responseBundle = ourClient
+//			.search()
+//			.forResource(EpisodeOfCare.class)
+//			.where(new StringClientParam("_id").matches().value("ECC19005O3"))
+//			.where(new StringClientParam("_include").matches().value("*"))
+//			.where(new StringClientParam("_revinclude").matches().value("*"))
+//			.where(new StringClientParam("_count").matches().value("300"))
+//			.returnBundle(Bundle.class)
+//			.encodedJson()
+//			.execute();
+//		assertEquals(1, responseBundle.getTotal());
 
 		// Now try the exact same search again but using the Cache-Control no-store Header
 		responseBundle = ourClient

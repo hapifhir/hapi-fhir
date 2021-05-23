@@ -130,9 +130,6 @@
 				"patient": {
 					"reference": "Patient/P999999991"
 				},
-				"managingOrganization": {
-					"reference": "Organization/O182903"
-				},
 				"period": {
 					"start": "1996-11-07T00:00:00-05:00"
 				},
@@ -271,9 +268,6 @@
 				],
 				"patient": {
 					"reference": "Patient/P999999990"
-				},
-				"managingOrganization": {
-					"reference": "Organization/O182903"
 				},
 				"period": {
 					"start": "2017-10-20T00:00:00-04:00"
@@ -414,9 +408,6 @@
 				"patient": {
 					"reference": "Patient/P999999983"
 				},
-				"managingOrganization": {
-					"reference": "Organization/O182903"
-				},
 				"period": {
 					"start": "2011-10-01T00:00:00-04:00"
 				},
@@ -555,9 +546,6 @@
 				],
 				"patient": {
 					"reference": "Patient/P999999981"
-				},
-				"managingOrganization": {
-					"reference": "Organization/O182903"
 				},
 				"period": {
 					"start": "2018-12-06T00:00:00-05:00",
@@ -699,9 +687,6 @@
 				"patient": {
 					"reference": "Patient/P999999982"
 				},
-				"managingOrganization": {
-					"reference": "Organization/O182903"
-				},
 				"period": {
 					"start": "2017-05-15T00:00:00-04:00"
 				},
@@ -840,9 +825,6 @@
 				],
 				"patient": {
 					"reference": "Patient/P999999986"
-				},
-				"managingOrganization": {
-					"reference": "Organization/O182903"
 				},
 				"period": {
 					"start": "2018-11-16T00:00:00-05:00",
@@ -984,9 +966,6 @@
 				"patient": {
 					"reference": "Patient/P999999989"
 				},
-				"managingOrganization": {
-					"reference": "Organization/O182903"
-				},
 				"period": {
 					"start": "2018-01-24T00:00:00-05:00"
 				},
@@ -1113,9 +1092,6 @@
 				],
 				"patient": {
 					"reference": "Patient/P999999984"
-				},
-				"managingOrganization": {
-					"reference": "Organization/O182903"
 				},
 				"period": {
 					"start": "2018-10-09T00:00:00-04:00"
@@ -1256,9 +1232,6 @@
 				"patient": {
 					"reference": "Patient/P999999987"
 				},
-				"managingOrganization": {
-					"reference": "Organization/O182903"
-				},
 				"period": {
 					"start": "2013-09-17T00:00:00-04:00"
 				},
@@ -1385,9 +1358,6 @@
 				],
 				"patient": {
 					"reference": "Patient/P999999985"
-				},
-				"managingOrganization": {
-					"reference": "Organization/O182903"
 				},
 				"period": {
 					"start": "2016-02-05T00:00:00-05:00"
@@ -1528,9 +1498,6 @@
 				"patient": {
 					"reference": "Patient/P999999980"
 				},
-				"managingOrganization": {
-					"reference": "Organization/O182902"
-				},
 				"period": {
 					"start": "1996-11-07T00:00:00-05:00"
 				},
@@ -1669,9 +1636,6 @@
 				],
 				"patient": {
 					"reference": "Patient/P999999979"
-				},
-				"managingOrganization": {
-					"reference": "Organization/O182902"
 				},
 				"period": {
 					"start": "2017-10-20T00:00:00-04:00"
@@ -1812,9 +1776,6 @@
 				"patient": {
 					"reference": "Patient/P999999972"
 				},
-				"managingOrganization": {
-					"reference": "Organization/O182902"
-				},
 				"period": {
 					"start": "2011-10-01T00:00:00-04:00"
 				},
@@ -1954,9 +1915,7 @@
 				"patient": {
 					"reference": "Patient/P999999970"
 				},
-				"managingOrganization": {
-					"reference": "Organization/O182902"
-				},
+
 				"period": {
 					"start": "2018-12-06T00:00:00-05:00",
 					"end": "2018-12-19T23:59:59-05:00"
@@ -2097,9 +2056,6 @@
 				"patient": {
 					"reference": "Patient/P999999971"
 				},
-				"managingOrganization": {
-					"reference": "Organization/O182902"
-				},
 				"period": {
 					"start": "2017-05-15T00:00:00-04:00"
 				},
@@ -2238,9 +2194,6 @@
 				],
 				"patient": {
 					"reference": "Patient/P999999975"
-				},
-				"managingOrganization": {
-					"reference": "Organization/O182902"
 				},
 				"period": {
 					"start": "2018-11-16T00:00:00-05:00",
@@ -2382,9 +2335,6 @@
 				"patient": {
 					"reference": "Patient/P999999977"
 				},
-				"managingOrganization": {
-					"reference": "Organization/O182902"
-				},
 				"period": {
 					"start": "2018-01-24T00:00:00-05:00"
 				},
@@ -2511,9 +2461,6 @@
 				],
 				"patient": {
 					"reference": "Patient/P999999973"
-				},
-				"managingOrganization": {
-					"reference": "Organization/O182902"
 				},
 				"period": {
 					"start": "2018-10-09T00:00:00-04:00"
@@ -2654,9 +2601,6 @@
 				"patient": {
 					"reference": "Patient/P999999976"
 				},
-				"managingOrganization": {
-					"reference": "Organization/O182902"
-				},
 				"period": {
 					"start": "2013-09-17T00:00:00-04:00"
 				},
@@ -2783,9 +2727,6 @@
 				],
 				"patient": {
 					"reference": "Patient/P999999974"
-				},
-				"managingOrganization": {
-					"reference": "Organization/O182902"
 				},
 				"period": {
 					"start": "2016-02-05T00:00:00-05:00"
@@ -2926,9 +2867,6 @@
 				"patient": {
 					"reference": "Patient/P999999969"
 				},
-				"managingOrganization": {
-					"reference": "Organization/O182901"
-				},
 				"period": {
 					"start": "1996-11-07T00:00:00-05:00"
 				},
@@ -3067,9 +3005,6 @@
 				],
 				"patient": {
 					"reference": "Patient/P999999968"
-				},
-				"managingOrganization": {
-					"reference": "Organization/O182901"
 				},
 				"period": {
 					"start": "2017-10-20T00:00:00-04:00"
@@ -3210,9 +3145,6 @@
 				"patient": {
 					"reference": "Patient/P999999961"
 				},
-				"managingOrganization": {
-					"reference": "Organization/O182901"
-				},
 				"period": {
 					"start": "2011-10-01T00:00:00-04:00"
 				},
@@ -3351,9 +3283,6 @@
 				],
 				"patient": {
 					"reference": "Patient/P999999959"
-				},
-				"managingOrganization": {
-					"reference": "Organization/O182901"
 				},
 				"period": {
 					"start": "2018-12-06T00:00:00-05:00",
@@ -3495,9 +3424,6 @@
 				"patient": {
 					"reference": "Patient/P999999960"
 				},
-				"managingOrganization": {
-					"reference": "Organization/O182901"
-				},
 				"period": {
 					"start": "2017-05-15T00:00:00-04:00"
 				},
@@ -3636,9 +3562,6 @@
 				],
 				"patient": {
 					"reference": "Patient/P999999964"
-				},
-				"managingOrganization": {
-					"reference": "Organization/O182901"
 				},
 				"period": {
 					"start": "2018-11-16T00:00:00-05:00",
@@ -3780,9 +3703,6 @@
 				"patient": {
 					"reference": "Patient/P999999966"
 				},
-				"managingOrganization": {
-					"reference": "Organization/O182901"
-				},
 				"period": {
 					"start": "2018-01-24T00:00:00-05:00"
 				},
@@ -3909,9 +3829,6 @@
 				],
 				"patient": {
 					"reference": "Patient/P999999962"
-				},
-				"managingOrganization": {
-					"reference": "Organization/O182901"
 				},
 				"period": {
 					"start": "2018-10-09T00:00:00-04:00"
@@ -4052,9 +3969,6 @@
 				"patient": {
 					"reference": "Patient/P999999965"
 				},
-				"managingOrganization": {
-					"reference": "Organization/O182901"
-				},
 				"period": {
 					"start": "2013-09-17T00:00:00-04:00"
 				},
@@ -4181,9 +4095,6 @@
 				],
 				"patient": {
 					"reference": "Patient/P999999963"
-				},
-				"managingOrganization": {
-					"reference": "Organization/O182901"
 				},
 				"period": {
 					"start": "2016-02-05T00:00:00-05:00"
