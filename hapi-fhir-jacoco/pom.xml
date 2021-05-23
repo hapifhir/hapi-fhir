@@ -144,6 +144,13 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<executions>
+					<execution><id>validate</id><phase>none</phase></execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 </project>
