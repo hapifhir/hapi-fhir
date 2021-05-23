@@ -151,6 +151,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -675,23 +676,30 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testUrlSearchWithNoStoreHeader() throws IOException {
 		submitBundle("/dstu3/no-store-header/patient-bundle.json");
 		submitBundle("/dstu3/no-store-header/practitioner-bundle.json");
-//		submitBundle("/dstu3/no-store-header/organization-bundle.json");
-//		submitBundle("/dstu3/no-store-header/location-bundle.json");
 		submitBundle("/dstu3/no-store-header/episodeofcare-bundle.json");
 
 		Bundle responseBundle;
 
-//		Bundle responseBundle = ourClient
-//			.search()
-//			.forResource(EpisodeOfCare.class)
-//			.where(new StringClientParam("_id").matches().value("ECC19005O3"))
-//			.where(new StringClientParam("_include").matches().value("*"))
-//			.where(new StringClientParam("_revinclude").matches().value("*"))
-//			.where(new StringClientParam("_count").matches().value("300"))
-//			.returnBundle(Bundle.class)
-//			.encodedJson()
-//			.execute();
-//		assertEquals(1, responseBundle.getTotal());
+		responseBundle = ourClient
+			.search()
+			.forResource(EpisodeOfCare.class)
+			.where(new StringClientParam("_id").matches().value("ECC19005O3"))
+			.where(new StringClientParam("_include").matches().value("*"))
+			.where(new StringClientParam("_revinclude").matches().value("*"))
+			.where(new StringClientParam("_count").matches().value("300"))
+			.returnBundle(Bundle.class)
+			.encodedJson()
+			.execute();
+		assertEquals(1, responseBundle.getTotal());
+
+		runInTransaction(()->{
+			ourLog.info("Resources:\n * {}", myResourceTableDao
+				.findAll()
+				.stream()
+				.sorted(((o1, o2) -> (int) (o1.getId() - o2.getId())))
+				.map(t->t.getId() + " - " + t.getIdDt().toUnqualifiedVersionless().getValue())
+				.collect(Collectors.joining("\n * ")));
+		});
 
 		// Now try the exact same search again but using the Cache-Control no-store Header
 		responseBundle = ourClient
