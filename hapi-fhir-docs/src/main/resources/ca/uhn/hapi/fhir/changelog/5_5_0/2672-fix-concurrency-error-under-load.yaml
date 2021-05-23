@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2672
+title: "A concurrency error was fixed when using client assigned IDs on a highly concurrent server
+  with resource deletion disabled."
