@@ -28,6 +28,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -92,6 +93,24 @@ public class MemoryCacheService {
 		assert theCache.myKeyType.isAssignableFrom(theKey.getClass());
 		Cache<K, T> cache = getCache(theCache);
 		return cache.get(theKey, theSupplier);
+	}
+
+	/**
+	 * Fetch an item from the cache if it exists, and use the loading function to
+	 * obtain it otherwise.
+	 *
+	 * This method will put the value into the cache using {@link #putAfterCommit(CacheEnum, Object, Object)}.
+	 */
+	public <K, T> T getThenPutAfterCommit(CacheEnum theCache, K theKey, Function<K, T> theSupplier) {
+		assert theCache.myKeyType.isAssignableFrom(theKey.getClass());
+
+		Cache<K, T> cache = getCache(theCache);
+		T retVal = cache.getIfPresent(theKey);
+		if (retVal == null) {
+			retVal = theSupplier.apply(theKey);
+			putAfterCommit(theCache, theKey, retVal);
+		}
+		return retVal;
 	}
 
 	public <K, V> V getIfPresent(CacheEnum theCache, K theKey) {
