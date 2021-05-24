@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -133,13 +134,12 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		myClient
 			.operation()
 			.onInstance(savedPatientId)
-			.named(JpaConstants.OPERATION_EXPUNGE)
+			.named(ProviderConstants.OPERATION_EXPUNGE)
 			.withParameters(parameters)
 			.execute();
 
 		assertEquals(savedPatientPid.longValue(), pid.get());
 	}
-
 
 	@Test
 	public void testSTORAGE_PRECOMMIT_RESOURCE_UPDATED_hasCorrectPid() {

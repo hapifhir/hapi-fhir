@@ -1,13 +1,11 @@
-package ca.uhn.fhir.jpa.bulk;
+package ca.uhn.fhir.test.utilities;
 
-import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.batch.core.BatchStatus;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,13 +17,15 @@ import java.util.stream.Collectors;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class BaseBatchJobR4Test extends BaseJpaR4Test {
+public class BatchJobHelper {
+	private static final Logger ourLog = LoggerFactory.getLogger(BatchJobHelper.class);
+	private final JobExplorer myJobExplorer;
 
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseBatchJobR4Test.class);
-	@Autowired
-	private JobExplorer myJobExplorer;
+	public BatchJobHelper(JobExplorer theJobExplorer) {
+		myJobExplorer = theJobExplorer;
+	}
 
-	protected List<JobExecution> awaitAllBulkJobCompletions(String... theJobNames) {
+	public List<JobExecution> awaitAllBulkJobCompletions(String... theJobNames) {
 		assert theJobNames.length > 0;
 
 		List<JobInstance> bulkExport = new ArrayList<>();
@@ -47,12 +47,11 @@ public class BaseBatchJobR4Test extends BaseJpaR4Test {
 		theJobs.forEach(jobExecution -> awaitJobCompletion(jobExecution));
 	}
 
-	protected void awaitJobCompletion(JobExecution theJobExecution) {
+	public void awaitJobCompletion(JobExecution theJobExecution) {
 		await().atMost(120, TimeUnit.SECONDS).until(() -> {
 			JobExecution jobExecution = myJobExplorer.getJobExecution(theJobExecution.getId());
 			ourLog.info("JobExecution {} currently has status: {}- Failures if any: {}", theJobExecution.getId(), jobExecution.getStatus(), jobExecution.getFailureExceptions());
 			return jobExecution.getStatus() == BatchStatus.COMPLETED || jobExecution.getStatus() == BatchStatus.FAILED;
 		});
 	}
-
 }

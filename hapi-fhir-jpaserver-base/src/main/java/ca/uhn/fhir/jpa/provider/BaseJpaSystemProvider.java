@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +59,7 @@ public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider implements IJp
 		return myResourceReindexingSvc;
 	}
 
-	@Operation(name = JpaConstants.OPERATION_EXPUNGE, idempotent = false, returnParameters = {
+	@Operation(name = ProviderConstants.OPERATION_EXPUNGE, idempotent = false, returnParameters = {
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, typeName = "integer")
 	})
 	public IBaseParameters expunge(

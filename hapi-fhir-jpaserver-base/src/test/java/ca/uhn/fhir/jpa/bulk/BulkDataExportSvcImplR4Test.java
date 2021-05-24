@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
+import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
@@ -24,6 +25,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
@@ -72,7 +74,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
+public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 	public static final String TEST_FILTER = "Patient?gender=female";
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportSvcImplR4Test.class);
@@ -86,6 +88,8 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 	private IBulkDataExportSvc myBulkDataExportSvc;
 	@Autowired
 	private IBatchJobSubmitter myBatchJobSubmitter;
+	@Autowired
+	private BatchJobHelper myBatchJobHelper;
 
 	@Autowired
 	@Qualifier(BatchJobsConfig.BULK_EXPORT_JOB_NAME)
@@ -289,7 +293,7 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 	}
 
 	private void awaitAllBulkJobCompletions() {
-		awaitAllBulkJobCompletions(
+		myBatchJobHelper.awaitAllBulkJobCompletions(
 			BatchJobsConfig.BULK_EXPORT_JOB_NAME,
 			BatchJobsConfig.PATIENT_BULK_EXPORT_JOB_NAME,
 			BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME
@@ -557,7 +561,7 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 
 		JobExecution jobExecution = myBatchJobSubmitter.runJob(myBulkJob, paramBuilder.toJobParameters());
 
-		awaitJobCompletion(jobExecution);
+		myBatchJobHelper.awaitJobCompletion(jobExecution);
 		String jobUUID = (String) jobExecution.getExecutionContext().get("jobUUID");
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobUUID);
 
@@ -583,7 +587,7 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 
 		JobExecution jobExecution = myBatchJobSubmitter.runJob(myBulkJob, paramBuilder.toJobParameters());
 
-		awaitJobCompletion(jobExecution);
+		myBatchJobHelper.awaitJobCompletion(jobExecution);
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 
 		assertThat(jobInfo.getStatus(), equalTo(BulkExportJobStatusEnum.COMPLETE));
@@ -701,7 +705,7 @@ public class BulkDataExportSvcImplR4Test extends BaseBatchJobR4Test {
 
 		JobExecution jobExecution = myBatchJobSubmitter.runJob(myPatientBulkJob, paramBuilder.toJobParameters());
 
-		awaitJobCompletion(jobExecution);
+		myBatchJobHelper.awaitJobCompletion(jobExecution);
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 
 		assertThat(jobInfo.getStatus(), equalTo(BulkExportJobStatusEnum.COMPLETE));

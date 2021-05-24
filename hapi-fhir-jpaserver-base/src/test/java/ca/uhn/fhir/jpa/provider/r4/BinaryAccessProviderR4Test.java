@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -610,7 +611,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		myClient
 			.operation()
 			.onInstance(id)
-			.named(JpaConstants.OPERATION_EXPUNGE)
+			.named(ProviderConstants.OPERATION_EXPUNGE)
 			.withParameters(parameters)
 			.execute();
 

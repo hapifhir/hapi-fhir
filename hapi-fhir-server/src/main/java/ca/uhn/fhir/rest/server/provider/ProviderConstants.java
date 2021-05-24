@@ -99,6 +99,18 @@ public class ProviderConstants {
 
 	/**
 	*  Operation name for the $meta operation
-	* */
+	*/
 	public static final String OPERATION_META = "$meta";
+
+	/**
+	 *  Operation name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE = "$expunge";
+
+	/**
+	 *  Operation name for the $delete-expunge operation
+	 */
+	// FIXME KHS use this
+	public static final String OPERATION_DELETE_EXPUNGE = "$delete-expunge";
+
 }

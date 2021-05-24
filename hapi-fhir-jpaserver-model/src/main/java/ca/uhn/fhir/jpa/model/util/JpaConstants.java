@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.util;
  */
 
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.HapiExtensions;
 
 public class JpaConstants {
@@ -39,17 +40,15 @@ public class JpaConstants {
 	public static final String OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE = "$apply-codesystem-delta-remove";
 	/**
 	 * Operation name for the $expunge operation
+	 * @deprecated Replace with {@link ProviderConstants#OPERATION_EXPUNGE}
 	 */
-	public static final String OPERATION_EXPUNGE = "$expunge";
-	/**
-	 * Operation name for the $match operation
-	 */
-	public static final String OPERATION_MATCH = "$match";
+	@Deprecated
+	public static final String OPERATION_EXPUNGE = ProviderConstants.OPERATION_EXPUNGE;
 	/**
 	 * @deprecated Replace with {@link #OPERATION_EXPUNGE}
 	 */
 	@Deprecated
-	public static final String OPERATION_NAME_EXPUNGE = OPERATION_EXPUNGE;
+	public static final String OPERATION_NAME_EXPUNGE = ProviderConstants.OPERATION_EXPUNGE;
 	/**
 	 * Parameter name for the $expunge operation
 	 */
