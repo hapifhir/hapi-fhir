@@ -787,7 +787,18 @@ public class SearchBuilder implements ISearchBuilder {
 					iter.remove();
 				}
 
+				// Account for _include=*
 				boolean matchAll = "*".equals(nextInclude.getValue());
+
+				// Account for _include=[resourceType]:*
+				String wantResourceType = null;
+				if (!matchAll) {
+					if (nextInclude.getParamName().equals("*")) {
+						wantResourceType = nextInclude.getParamType();
+						matchAll = true;
+					}
+				}
+
 				if (matchAll) {
 					StringBuilder sqlBuilder = new StringBuilder();
 					sqlBuilder.append("SELECT r.").append(findPidFieldName);
@@ -797,11 +808,27 @@ public class SearchBuilder implements ISearchBuilder {
 					sqlBuilder.append(" FROM ResourceLink r WHERE r.");
 					sqlBuilder.append(searchPidFieldName);
 					sqlBuilder.append(" IN (:target_pids)");
+
+					// Technically if the request is a qualified star (e.g. _include=Observation:*) we
+					// should always be checking the source resource type on the resource link. We don't
+					// actually index that column though by default, so in order to try and be efficient
+					// we don't actually include it for includes (but we do for revincludes). This is
+					// because for an include it doesn't really make sense to include a different
+					// resource type than the one you are searching on.
+					if (wantResourceType != null && theReverseMode) {
+						sqlBuilder.append(" AND r.mySourceResourceType = :want_resource_type");
+					} else {
+						wantResourceType = null;
+					}
+
 					String sql = sqlBuilder.toString();
 					List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, getMaximumPageSize());
 					for (Collection<ResourcePersistentId> nextPartition : partitions) {
 						TypedQuery<?> q = theEntityManager.createQuery(sql, Object[].class);
 						q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
+						if (wantResourceType != null) {
+							q.setParameter("want_resource_type", wantResourceType);
+						}
 						List<?> results = q.getResultList();
 						for (Object nextRow : results) {
 							if (nextRow == null) {
