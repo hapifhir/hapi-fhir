@@ -194,6 +194,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	private static IValidationSupport ourJpaValidationSupportChainR4;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
+	// TODO KHS reduce the number of collaborators in this class
 	@Autowired
 	protected IPackageInstallerSvc myPackageInstallerSvc;
 	@Autowired

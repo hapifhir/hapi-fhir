@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -61,6 +62,7 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -753,6 +755,40 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		}
 	}
 
+	@Test
+	public void testDeleteExpungeOperation() {
+		// setup
+		Patient patient1 = new Patient();
+		patient1.setActive(true);
+		Patient patient2 = new Patient();
+		patient1.setActive(false);
+		IIdType patient1Id = myClient.create().resource(patient1).execute().getId().toUnqualifiedVersionless();
+		IIdType patient2Id = myClient.create().resource(patient2).execute().getId().toUnqualifiedVersionless();
+		Observation obs1 = new Observation();
+		obs1.setSubject(new Reference(patient1Id));
+		IIdType obsId = myClient.create().resource(obs1).execute().getId();
+		Observation obs2 = new Observation();
+		obs2.setSubject(new Reference(patient2Id));
+		IIdType obs2Id = myClient.create().resource(obs2).execute().getId();
+
+		// validate setup
+		assertEquals(2, myClient.search().forResource("Patient").returnBundle(Bundle.class).execute().getTotal());
+		assertEquals(2, myClient.search().forResource("Observation").returnBundle(Bundle.class).execute().getTotal());
+
+		Parameters input = new Parameters();
+		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "/Observation?subject.active=false");
+		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "/Patient?active=false");
+
+		// execute
+		Parameters result = myClient.operation().onServer().named(ProviderConstants.OPERATION_DELETE_EXPUNGE).withParameters(input).execute();
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
+
+		// validate
+		// FIXME KHS assert result
+		// FIXME await until job done
+		assertEquals(1, myClient.search().forResource("Patient").returnBundle(Bundle.class).execute().getTotal());
+		assertEquals(1, myClient.search().forResource("Observation").returnBundle(Bundle.class).execute().getTotal());
+	}
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
