@@ -110,7 +110,10 @@ public class ProviderConstants {
 	/**
 	 *  Operation name for the $delete-expunge operation
 	 */
-	// FIXME KHS use this
 	public static final String OPERATION_DELETE_EXPUNGE = "$delete-expunge";
 
+	/**
+	 *  Operation url of resources to delete
+	 */
+	public static final String OPERATION_DELETE_EXPUNGE_URL = "url";
 }
