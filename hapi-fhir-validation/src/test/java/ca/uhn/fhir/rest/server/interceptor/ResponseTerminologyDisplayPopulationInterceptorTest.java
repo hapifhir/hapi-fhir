@@ -58,7 +58,7 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest {
 		myServerExtension.getRestfulServer().registerInterceptor(new ResponseTerminologyDisplayPopulationInterceptor(new NullableValidationSupport(myCtx)));
 
 		Patient p = new Patient();
-		p.getMaritalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus").setCode("A");
+		p.getMaritalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus").setCode("zz");
 		IIdType id = myClient.create().resource(p).execute().getId();
 
 		p = myClient.read().resource(Patient.class).withId(id).execute();
@@ -101,7 +101,7 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest {
 		myServerExtension.getRestfulServer().registerInterceptor(new ResponseTerminologyDisplayPopulationInterceptor(myCtx.getValidationSupport()));
 
 		Patient p = new Patient();
-		p.getMaritalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus").setCode("zz").setDisplay("FOO");
+		p.getMaritalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus").setCode("A").setDisplay("FOO");
 		IIdType id = myClient.create().resource(p).execute().getId();
 
 		p = myClient.read().resource(Patient.class).withId(id).execute();
