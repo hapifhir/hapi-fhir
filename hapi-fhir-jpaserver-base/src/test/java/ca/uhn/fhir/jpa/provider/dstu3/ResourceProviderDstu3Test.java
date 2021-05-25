@@ -5,14 +5,17 @@ import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.provider.r4.ResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
@@ -25,6 +28,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -79,6 +83,7 @@ import org.hl7.fhir.dstu3.model.Encounter.EncounterLocationComponent;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterStatus;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.EpisodeOfCare;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
@@ -117,6 +122,7 @@ import org.hl7.fhir.dstu3.model.Task;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.codesystems.DeviceStatus;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
@@ -145,6 +151,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -663,6 +670,58 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/bryn-bundle.json"), StandardCharsets.UTF_8);
 		Validate.notNull(input);
 		ourClient.create().resource(input).execute().getResource();
+	}
+
+	@Test
+	public void testUrlSearchWithNoStoreHeader() throws IOException {
+		submitBundle("/dstu3/no-store-header/patient-bundle.json");
+		submitBundle("/dstu3/no-store-header/practitioner-bundle.json");
+		submitBundle("/dstu3/no-store-header/episodeofcare-bundle.json");
+
+		Bundle responseBundle;
+
+		responseBundle = ourClient
+			.search()
+			.forResource(EpisodeOfCare.class)
+			.where(new StringClientParam("_id").matches().value("ECC19005O3"))
+			.where(new StringClientParam("_include").matches().value("*"))
+			.where(new StringClientParam("_revinclude").matches().value("*"))
+			.where(new StringClientParam("_count").matches().value("300"))
+			.returnBundle(Bundle.class)
+			.encodedJson()
+			.execute();
+		String bundleContents = "\n * " + responseBundle.getEntry().stream().map(t->t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.joining("\n * "));
+		assertEquals(3, responseBundle.getEntry().size(), bundleContents);
+
+		runInTransaction(()->{
+			ourLog.info("Resources:\n * {}", myResourceTableDao
+				.findAll()
+				.stream()
+				.sorted(((o1, o2) -> (int) (o1.getId() - o2.getId())))
+				.map(t->t.getId() + " - " + t.getIdDt().toUnqualifiedVersionless().getValue())
+				.collect(Collectors.joining("\n * ")));
+		});
+
+		// Now try the exact same search again but using the Cache-Control no-store Header
+		responseBundle = ourClient
+			.search()
+			.forResource(EpisodeOfCare.class)
+			.where(new StringClientParam("_id").matches().value("ECC19005O3"))
+			.where(new StringClientParam("_include").matches().value("*"))
+			.where(new StringClientParam("_revinclude").matches().value("*"))
+			.where(new StringClientParam("_count").matches().value("300"))
+			.cacheControl(new CacheControlDirective().setNoStore(true))
+			.returnBundle(Bundle.class)
+			.encodedJson()
+			.execute();
+		bundleContents = "\n * " + responseBundle.getEntry().stream().map(t->t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.joining("\n * "));
+		assertEquals(3, responseBundle.getEntry().size(), bundleContents);
+	}
+
+	private void submitBundle(String bundleName) throws IOException {
+		String input = IOUtils.toString(getClass().getResourceAsStream(bundleName), StandardCharsets.UTF_8);
+		Validate.notNull(input);
+		ourClient.transaction().withBundle(input).execute();
 	}
 
 	@Test
