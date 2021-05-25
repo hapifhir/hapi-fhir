@@ -42,6 +42,8 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -82,7 +84,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Service
 public class IdHelperService {
 	private static final String RESOURCE_PID = "RESOURCE_PID";
-
+	private static final Logger ourLog = LoggerFactory.getLogger(IdHelperService.class);
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired
@@ -142,7 +144,7 @@ public class IdHelperService {
 				retVal = new ResourcePersistentId(resolveResourceIdentity(theRequestPartitionId, theResourceType, theId).getResourceId());
 			} else {
 				String key = toForcedIdToPidKey(theRequestPartitionId, theResourceType, theId);
-				retVal = myMemoryCacheService.get(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, t -> new ResourcePersistentId(resolveResourceIdentity(theRequestPartitionId, theResourceType, theId).getResourceId()));
+				retVal = myMemoryCacheService.getThenPutAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, t -> new ResourcePersistentId(resolveResourceIdentity(theRequestPartitionId, theResourceType, theId).getResourceId()));
 			}
 
 		} else {
@@ -252,7 +254,6 @@ public class IdHelperService {
 		return retVal;
 	}
 
-
 	public Optional<String> translatePidIdToForcedIdWithCache(ResourcePersistentId theId) {
 		return myMemoryCacheService.get(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theId.getIdAsLong(), pid -> myForcedIdDao.findByResourcePid(pid).map(t -> t.getForcedId()));
 	}
@@ -334,7 +335,7 @@ public class IdHelperService {
 
 					if (!myDaoConfig.isDeleteEnabled()) {
 						String key = resourceType + "/" + forcedId;
-						myMemoryCacheService.put(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, key, lookup);
+						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, key, lookup);
 					}
 				}
 			}
@@ -378,7 +379,7 @@ public class IdHelperService {
 					theTarget.add(t);
 					if (!myDaoConfig.isDeleteEnabled()) {
 						String nextKey = Long.toString(t.getResourceId());
-						myMemoryCacheService.put(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey, t);
+						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey, t);
 					}
 				});
 
@@ -386,12 +387,11 @@ public class IdHelperService {
 	}
 
 	/**
-	 *
 	 * Given a set of PIDs, return a set of public FHIR Resource IDs.
 	 * This function will resolve a forced ID if it resolves, and if it fails to resolve to a forced it, will just return the pid
 	 * Example:
 	 * Let's say we have Patient/1(pid == 1), Patient/pat1 (pid == 2), Patient/3 (pid == 3), their pids would resolve as follows:
-	 *
+	 * <p>
 	 * [1,2,3] -> ["1","pat1","3"]
 	 *
 	 * @param thePids The Set of pids you would like to resolve to external FHIR Resource IDs.
@@ -408,6 +408,7 @@ public class IdHelperService {
 		return resolvedResourceIds;
 
 	}
+
 	public Map<Long, Optional<String>> translatePidsToForcedIds(Set<Long> thePids) {
 		Map<Long, Optional<String>> retVal = new HashMap<>(myMemoryCacheService.getAllPresent(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, thePids));
 
@@ -423,7 +424,7 @@ public class IdHelperService {
 				Long nextResourcePid = forcedId.getResourceId();
 				Optional<String> nextForcedId = Optional.of(forcedId.getForcedId());
 				retVal.put(nextResourcePid, nextForcedId);
-				myMemoryCacheService.put(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, nextResourcePid, nextForcedId);
+				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, nextResourcePid, nextForcedId);
 			}
 		});
 
@@ -433,7 +434,7 @@ public class IdHelperService {
 			.collect(Collectors.toList());
 		for (Long nextResourcePid : remainingPids) {
 			retVal.put(nextResourcePid, Optional.empty());
-			myMemoryCacheService.put(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, nextResourcePid, Optional.empty());
+			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, nextResourcePid, Optional.empty());
 		}
 
 		return retVal;
@@ -491,11 +492,11 @@ public class IdHelperService {
 	 */
 	public void addResolvedPidToForcedId(ResourcePersistentId theResourcePersistentId, @Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, @Nullable String theForcedId) {
 		if (theForcedId != null) {
-			myMemoryCacheService.put(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theResourcePersistentId.getIdAsLong(), Optional.of(theForcedId));
+			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theResourcePersistentId.getIdAsLong(), Optional.of(theForcedId));
 			String key = toForcedIdToPidKey(theRequestPartitionId, theResourceType, theForcedId);
-			myMemoryCacheService.put(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, theResourcePersistentId);
-		}else {
-			myMemoryCacheService.put(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theResourcePersistentId.getIdAsLong(), Optional.empty());
+			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, theResourcePersistentId);
+		} else {
+			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theResourcePersistentId.getIdAsLong(), Optional.empty());
 		}
 	}
 

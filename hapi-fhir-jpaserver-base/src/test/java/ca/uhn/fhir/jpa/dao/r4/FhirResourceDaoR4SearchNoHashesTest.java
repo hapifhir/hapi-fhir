@@ -2966,7 +2966,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			params.addInclude(Organization.INCLUDE_PARTOF.asRecursive());
 			List<IIdType> resources = toUnqualifiedVersionlessIds(myOrganizationDao.search(params));
 			ourLog.info(resources.toString());
-			assertThat(resources, contains(orgId, parentOrgId, parentParentOrgId));
+			assertThat(resources, containsInAnyOrder(orgId, parentOrgId, parentParentOrgId));
 		}
 	}
 
@@ -3048,7 +3048,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			params.add(Patient.SP_FAMILY, new StringParam("Tester_" + methodName + "_P1"));
 			params.addInclude(new Include("*").asRecursive());
 			List<IIdType> resources = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(resources, contains(patientId, orgId, parentOrgId, parentParentOrgId));
+			assertThat(resources, containsInAnyOrder(patientId, orgId, parentOrgId, parentParentOrgId));
 		}
 	}
 

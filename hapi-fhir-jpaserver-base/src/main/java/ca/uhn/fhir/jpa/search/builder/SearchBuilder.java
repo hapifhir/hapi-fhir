@@ -115,6 +115,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -752,12 +753,12 @@ public class SearchBuilder implements ISearchBuilder {
 	 * so it can't be Collections.emptySet() or some such thing
 	 */
 	@Override
-	public HashSet<ResourcePersistentId> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<ResourcePersistentId> theMatches, Set<Include> theRevIncludes,
+	public Set<ResourcePersistentId> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<ResourcePersistentId> theMatches, Set<Include> theIncludes,
 																	  boolean theReverseMode, DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest) {
 		if (theMatches.size() == 0) {
 			return new HashSet<>();
 		}
-		if (theRevIncludes == null || theRevIncludes.isEmpty()) {
+		if (theIncludes == null || theIncludes.isEmpty()) {
 			return new HashSet<>();
 		}
 		String searchPidFieldName = theReverseMode ? "myTargetResourcePid" : "mySourceResourcePid";
@@ -770,7 +771,7 @@ public class SearchBuilder implements ISearchBuilder {
 		List<ResourcePersistentId> nextRoundMatches = new ArrayList<>(theMatches);
 		HashSet<ResourcePersistentId> allAdded = new HashSet<>();
 		HashSet<ResourcePersistentId> original = new HashSet<>(theMatches);
-		ArrayList<Include> includes = new ArrayList<>(theRevIncludes);
+		ArrayList<Include> includes = new ArrayList<>(theIncludes);
 
 		int roundCounts = 0;
 		StopWatch w = new StopWatch();
@@ -787,7 +788,18 @@ public class SearchBuilder implements ISearchBuilder {
 					iter.remove();
 				}
 
+				// Account for _include=*
 				boolean matchAll = "*".equals(nextInclude.getValue());
+
+				// Account for _include=[resourceType]:*
+				String wantResourceType = null;
+				if (!matchAll) {
+					if (nextInclude.getParamName().equals("*")) {
+						wantResourceType = nextInclude.getParamType();
+						matchAll = true;
+					}
+				}
+
 				if (matchAll) {
 					StringBuilder sqlBuilder = new StringBuilder();
 					sqlBuilder.append("SELECT r.").append(findPidFieldName);
@@ -797,11 +809,27 @@ public class SearchBuilder implements ISearchBuilder {
 					sqlBuilder.append(" FROM ResourceLink r WHERE r.");
 					sqlBuilder.append(searchPidFieldName);
 					sqlBuilder.append(" IN (:target_pids)");
+
+					// Technically if the request is a qualified star (e.g. _include=Observation:*) we
+					// should always be checking the source resource type on the resource link. We don't
+					// actually index that column though by default, so in order to try and be efficient
+					// we don't actually include it for includes (but we do for revincludes). This is
+					// because for an include it doesn't really make sense to include a different
+					// resource type than the one you are searching on.
+					if (wantResourceType != null && theReverseMode) {
+						sqlBuilder.append(" AND r.mySourceResourceType = :want_resource_type");
+					} else {
+						wantResourceType = null;
+					}
+
 					String sql = sqlBuilder.toString();
 					List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, getMaximumPageSize());
 					for (Collection<ResourcePersistentId> nextPartition : partitions) {
 						TypedQuery<?> q = theEntityManager.createQuery(sql, Object[].class);
 						q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
+						if (wantResourceType != null) {
+							q.setParameter("want_resource_type", wantResourceType);
+						}
 						List<?> results = q.getResultList();
 						for (Object nextRow : results) {
 							if (nextRow == null) {
@@ -905,7 +933,6 @@ public class SearchBuilder implements ISearchBuilder {
 			nextRoundMatches.clear();
 			for (ResourcePersistentId next : pidsToInclude) {
 				if (original.contains(next) == false && allAdded.contains(next) == false) {
-					theMatches.add(next);
 					nextRoundMatches.add(next);
 				}
 			}
@@ -921,24 +948,25 @@ public class SearchBuilder implements ISearchBuilder {
 		// This can be used to remove results from the search result details before
 		// the user has a chance to know that they were in the results
 		if (allAdded.size() > 0) {
-			List<ResourcePersistentId> includedPidList = new ArrayList<>(allAdded);
-			JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(includedPidList, () -> this);
-			HookParams params = new HookParams()
-				.add(IPreResourceAccessDetails.class, accessDetails)
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 
-			for (int i = includedPidList.size() - 1; i >= 0; i--) {
-				if (accessDetails.isDontReturnResourceAtIndex(i)) {
-					ResourcePersistentId value = includedPidList.remove(i);
-					if (value != null) {
-						theMatches.remove(value);
+			if (JpaInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, myInterceptorBroadcaster, theRequest)) {
+				List<ResourcePersistentId> includedPidList = new ArrayList<>(allAdded);
+				JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(includedPidList, () -> this);
+				HookParams params = new HookParams()
+					.add(IPreResourceAccessDetails.class, accessDetails)
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+
+				for (int i = includedPidList.size() - 1; i >= 0; i--) {
+					if (accessDetails.isDontReturnResourceAtIndex(i)) {
+						ResourcePersistentId value = includedPidList.remove(i);
+						if (value != null) {
+							allAdded.remove(value);
+						}
 					}
 				}
 			}
-
-			allAdded = new HashSet<>(includedPidList);
 		}
 
 		return allAdded;

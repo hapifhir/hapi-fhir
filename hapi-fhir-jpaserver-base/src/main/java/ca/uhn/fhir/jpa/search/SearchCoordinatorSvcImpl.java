@@ -533,12 +533,14 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			 * individually for pages as we return them to clients
 			 */
 			final Set<ResourcePersistentId> includedPids = new HashSet<>();
+
+			includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
 			if (theParams.getEverythingMode() == null) {
 				includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
 			}
-			includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
 
 			List<ResourcePersistentId> includedPidsList = new ArrayList<>(includedPids);
+			pids.addAll(includedPidsList);
 
 			List<IBaseResource> resources = new ArrayList<>();
 			theSb.loadResourcesByPid(pids, includedPidsList, resources, false, theRequestDetails);
@@ -1250,9 +1252,12 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		theSearch.setStatus(SearchStatusEnum.LOADING);
 		theSearch.setSearchQueryString(theQueryString, theRequestPartitionId);
 
-		for (Include next : theParams.getIncludes()) {
-			theSearch.addInclude(new SearchInclude(theSearch, next.getValue(), false, next.isRecurse()));
+		if (theParams.hasIncludes()) {
+			for (Include next : theParams.getIncludes()) {
+				theSearch.addInclude(new SearchInclude(theSearch, next.getValue(), false, next.isRecurse()));
+			}
 		}
+
 		for (Include next : theParams.getRevIncludes()) {
 			theSearch.addInclude(new SearchInclude(theSearch, next.getValue(), true, next.isRecurse()));
 		}
