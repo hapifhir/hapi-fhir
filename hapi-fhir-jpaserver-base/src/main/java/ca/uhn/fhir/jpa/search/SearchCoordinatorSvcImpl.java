@@ -522,12 +522,14 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			 * individually for pages as we return them to clients
 			 */
 			final Set<ResourcePersistentId> includedPids = new HashSet<>();
+
+			includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
 			if (theParams.getEverythingMode() == null) {
 				includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
 			}
-			includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
 
 			List<ResourcePersistentId> includedPidsList = new ArrayList<>(includedPids);
+			pids.addAll(includedPidsList);
 
 			List<IBaseResource> resources = new ArrayList<>();
 			theSb.loadResourcesByPid(pids, includedPidsList, resources, false, theRequestDetails);

@@ -371,6 +371,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		}
 
 		List<ResourcePersistentId> includedPidList = new ArrayList<>(includedPids);
+		thePids.addAll(includedPidList);
 
 		// Execute the query and make sure we return distinct results
 		List<IBaseResource> resources = new ArrayList<>();

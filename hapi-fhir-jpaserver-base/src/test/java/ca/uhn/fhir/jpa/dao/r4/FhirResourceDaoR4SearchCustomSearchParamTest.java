@@ -498,7 +498,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.addInclude(new Include("Patient:attending", true));
 		results = myAppointmentDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources, contains(appId.getValue(), p2id.getValue(), p1id.getValue()));
+		assertThat(foundResources, containsInAnyOrder(appId.getValue(), p2id.getValue(), p1id.getValue()));
 
 	}
 

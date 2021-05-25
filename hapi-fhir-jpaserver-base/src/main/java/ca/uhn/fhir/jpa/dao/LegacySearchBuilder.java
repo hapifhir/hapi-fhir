@@ -807,11 +807,6 @@ public class LegacySearchBuilder implements ISearchBuilder {
 					pidsToInclude = new HashSet<>(filterResourceIdsByLastUpdated(theEntityManager, theLastUpdated, pidsToInclude));
 				}
 			}
-			for (ResourcePersistentId next : pidsToInclude) {
-				if (original.contains(next) == false && allAdded.contains(next) == false) {
-					theMatches.add(next);
-				}
-			}
 
 			addedSomeThisRound = allAdded.addAll(pidsToInclude);
 			nextRoundMatches = pidsToInclude;
@@ -833,16 +828,16 @@ public class LegacySearchBuilder implements ISearchBuilder {
 				.addIfMatchesType(ServletRequestDetails.class, theRequest);
 			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 
+			allAdded = new HashSet<>(includedPidList);
+
 			for (int i = includedPidList.size() - 1; i >= 0; i--) {
 				if (accessDetails.isDontReturnResourceAtIndex(i)) {
 					ResourcePersistentId value = includedPidList.remove(i);
 					if (value != null) {
-						theMatches.remove(value);
+						allAdded.remove(value);
 					}
 				}
 			}
-
-			allAdded = new HashSet<>(includedPidList);
 		}
 
 		return allAdded;
@@ -1050,6 +1045,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 					myNext = NO_MORE;
 					break;
 				}
+				myCurrentPids.addAll(newPids);
 				myCurrentIterator = newPids.iterator();
 			}
 		}
