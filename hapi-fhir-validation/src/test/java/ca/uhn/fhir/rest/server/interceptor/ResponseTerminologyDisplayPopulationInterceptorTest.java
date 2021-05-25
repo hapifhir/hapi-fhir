@@ -2,6 +2,8 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ResponseTerminologyDisplayPopulationInterceptorTest {
 
@@ -51,6 +54,19 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest {
 	}
 
 	@Test
+	public void testPopulateCoding_Read_NullableValidationSupport() {
+		myServerExtension.getRestfulServer().registerInterceptor(new ResponseTerminologyDisplayPopulationInterceptor(new NullableValidationSupport(myCtx)));
+
+		Patient p = new Patient();
+		p.getMaritalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus").setCode("A");
+		IIdType id = myClient.create().resource(p).execute().getId();
+
+		p = myClient.read().resource(Patient.class).withId(id).execute();
+		assertEquals(1, p.getMaritalStatus().getCoding().size());
+		assertNull(p.getMaritalStatus().getCoding().get(0).getDisplay());
+	}
+
+	@Test
 	public void testPopulateCoding_Search() {
 		myServerExtension.getRestfulServer().registerInterceptor(new ResponseTerminologyDisplayPopulationInterceptor(myCtx.getValidationSupport()));
 
@@ -63,6 +79,21 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest {
 		p = (Patient) bundle.getEntry().get(0).getResource();
 		assertEquals(1, p.getMaritalStatus().getCoding().size());
 		assertEquals("Annulled", p.getMaritalStatus().getCoding().get(0).getDisplay());
+	}
+
+	@Test
+	public void testPopulateCoding_Search_NullableValidationSupport() {
+		myServerExtension.getRestfulServer().registerInterceptor(new ResponseTerminologyDisplayPopulationInterceptor(new NullableValidationSupport(myCtx)));
+
+		Patient p = new Patient();
+		p.getMaritalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus").setCode("A");
+		IIdType id = myClient.create().resource(p).execute().getId();
+
+		Bundle bundle = myClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
+		assertEquals(1, bundle.getEntry().size());
+		p = (Patient) bundle.getEntry().get(0).getResource();
+		assertEquals(1, p.getMaritalStatus().getCoding().size());
+		assertNull(p.getMaritalStatus().getCoding().get(0).getDisplay());
 	}
 
 	@Test
@@ -89,6 +120,25 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest {
 		p = myClient.read().resource(Patient.class).withId(id).execute();
 		assertEquals(1, p.getMaritalStatus().getCoding().size());
 		assertEquals(null, p.getMaritalStatus().getCoding().get(0).getDisplay());
+	}
+
+	private static class NullableValidationSupport implements IValidationSupport {
+
+		private static FhirContext myStaticCtx;
+
+		NullableValidationSupport(FhirContext theCtx) {
+			myStaticCtx = theCtx;
+		}
+
+		@Override
+		public FhirContext getFhirContext() {
+			return myStaticCtx;
+		}
+
+		@Override
+		public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+			return true;
+		}
 	}
 
 }
