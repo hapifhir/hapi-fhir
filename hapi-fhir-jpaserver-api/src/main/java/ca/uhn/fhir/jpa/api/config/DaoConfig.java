@@ -236,6 +236,7 @@ public class DaoConfig {
 	 * @since 5.5.0
 	 */
 	private boolean myEnableTaskBulkExportJobExecution;
+	private boolean myMassIngestionMode;
 
 	/**
 	 * Constructor
@@ -2343,6 +2344,15 @@ public class DaoConfig {
 	 */
 	public boolean isEnableTaskResourceReindexing() {
 		return myEnableTaskResourceReindexing;
+	}
+
+	// FIXME: document
+	public void setMassIngestionMode(boolean theMassIngestionMode) {
+		myMassIngestionMode = theMassIngestionMode;
+	}
+
+	public boolean isMassIngestionMode() {
+		return myMassIngestionMode;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

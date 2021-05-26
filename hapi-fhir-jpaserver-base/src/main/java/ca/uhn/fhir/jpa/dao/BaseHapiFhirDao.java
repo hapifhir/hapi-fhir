@@ -661,6 +661,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (thePerformIndexing && changed == false) {
 			if (theEntity.getId() == null) {
 				changed = true;
+			} else if (myDaoConfig.isMassIngestionMode()) {
+
+				// Don't check existing - We'll rely on the SHA256 hash only
+
 			} else {
 				ResourceHistoryTable currentHistoryVersion = theEntity.getCurrentVersionEntity();
 				if (currentHistoryVersion == null) {
@@ -681,6 +685,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		return retVal;
 	}
+
+	@Autowired
+	private DaoConfig myDaoConfig;
 
 	@SuppressWarnings("unchecked")
 	private <R extends IBaseResource> R populateResourceMetadataHapi(Class<R> theResourceType, IBaseResourceEntity theEntity, Collection<? extends BaseTag> theTagList, boolean theForHistoryOperation, IResource res, Long theVersion) {

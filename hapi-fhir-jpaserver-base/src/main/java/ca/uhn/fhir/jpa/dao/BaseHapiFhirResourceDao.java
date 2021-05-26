@@ -1619,7 +1619,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				"Invalid resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] of type[" + entity.getResourceType() + "] - Does not match expected [" + getResourceName() + "]");
 		}
 
-		IBaseResource oldResource = toResource(entity, false);
+		IBaseResource oldResource;
+		if (myDaoConfig.isMassIngestionMode()) {
+			oldResource = null;
+		} else {
+			oldResource = toResource(entity, false);
+		}
 
 		/*
 		 * Mark the entity as not deleted - This is also done in the actual updateInternal()
