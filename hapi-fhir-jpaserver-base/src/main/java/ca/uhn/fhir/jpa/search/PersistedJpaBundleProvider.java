@@ -41,7 +41,7 @@ import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.util.InterceptorUtil;
-import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -171,7 +171,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 				.add(IPreResourceAccessDetails.class, accessDetails)
 				.add(RequestDetails.class, myRequest)
 				.addIfMatchesType(ServletRequestDetails.class, myRequest);
-			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 
 			for (int i = retVal.size() - 1; i >= 0; i--) {
 				if (accessDetails.isDontReturnResourceAtIndex(i)) {
@@ -187,7 +187,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 				.add(IPreResourceShowDetails.class, showDetails)
 				.add(RequestDetails.class, myRequest)
 				.addIfMatchesType(ServletRequestDetails.class, myRequest);
-			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 			retVal = showDetails.toList();
 		}
 

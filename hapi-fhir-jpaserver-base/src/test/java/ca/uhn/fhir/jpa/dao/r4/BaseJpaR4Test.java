@@ -573,6 +573,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		return dao.update(theResource, mySrd).getId().toUnqualifiedVersionless();
 	}
 
+	protected String encode(IBaseResource theResource) {
+		return myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource);
+	}
+
 	@Override
 	public FhirContext getFhirContext() {
 		return myFhirCtx;

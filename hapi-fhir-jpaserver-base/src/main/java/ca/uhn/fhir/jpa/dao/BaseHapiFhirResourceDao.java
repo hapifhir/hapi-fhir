@@ -57,7 +57,7 @@ import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu2.resource.ListResource;
@@ -1156,7 +1156,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.add(IPreResourceAccessDetails.class, accessDetails)
 				.add(RequestDetails.class, theRequest)
 				.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 			if (accessDetails.isDontReturnResourceAtIndex(0)) {
 				throw new ResourceNotFoundException(theId);
 			}
@@ -1169,7 +1169,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.add(IPreResourceShowDetails.class, showDetails)
 				.add(RequestDetails.class, theRequest)
 				.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 			//noinspection unchecked
 			retVal = (T) showDetails.getResource(0);
 		}
@@ -1700,6 +1700,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		FhirValidator validator = getContext().newValidator();
 
+		validator.setInterceptorBraodcaster(CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest));
 		validator.registerValidatorModule(getInstanceValidator());
 		validator.registerValidatorModule(new IdChecker(theMode));
 

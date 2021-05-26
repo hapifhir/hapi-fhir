@@ -39,7 +39,7 @@ import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
-import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -526,7 +526,7 @@ public abstract class BaseTransactionProcessor {
 		transactionStopWatch.endCurrentTask();
 
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
-		if (JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequestDetails)) {
+		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequestDetails)) {
 			String taskDurations = transactionStopWatch.formatTaskDurations();
 			StorageProcessingMessage message = new StorageProcessingMessage();
 			message.setMessage("Transaction timing:\n" + taskDurations);
@@ -534,7 +534,7 @@ public abstract class BaseTransactionProcessor {
 				.add(RequestDetails.class, theRequestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 				.add(StorageProcessingMessage.class, message);
-			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_INFO, params);
+			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_INFO, params);
 		}
 
 		return response;
@@ -955,7 +955,7 @@ public abstract class BaseTransactionProcessor {
 			for (Map.Entry<Pointcut, HookParams> nextEntry : deferredBroadcastEvents.entries()) {
 				Pointcut nextPointcut = nextEntry.getKey();
 				HookParams nextParams = nextEntry.getValue();
-				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, nextPointcut, nextParams);
+				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, nextPointcut, nextParams);
 			}
 
 			DeferredInterceptorBroadcasts deferredInterceptorBroadcasts = new DeferredInterceptorBroadcasts(deferredBroadcastEvents);
@@ -965,7 +965,7 @@ public abstract class BaseTransactionProcessor {
 				.add(DeferredInterceptorBroadcasts.class, deferredInterceptorBroadcasts)
 				.add(TransactionDetails.class, theTransactionDetails)
 				.add(IBaseBundle.class, theResponse);
-			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_TRANSACTION_PROCESSED, params);
+			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_TRANSACTION_PROCESSED, params);
 
 			theTransactionDetails.deferredBroadcastProcessingFinished();
 

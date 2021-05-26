@@ -19,21 +19,27 @@ package ca.uhn.fhir.validation;
  * limitations under the License.
  * #L%
  */
-import java.util.*;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.validation.schematron.SchematronProvider;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.validation.schematron.SchematronProvider;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 
 /**
  * Resource validator, which checks resources for compliance against various validation schemes (schemas, schematrons, profiles, etc.)
- * 
+ *
  * <p>
  * To obtain a resource validator, call {@link FhirContext#newValidator()}
  * </p>
- * 
+ *
  * <p>
  * <b>Thread safety note:</b> This class is thread safe, so you may register or unregister validator modules at any time. Individual modules are not guaranteed to be thread safe however. Reconfigure
  * them with caution.
@@ -46,6 +52,7 @@ public class FhirValidator {
 	private static volatile Boolean ourPhPresentOnClasspath;
 	private final FhirContext myContext;
 	private List<IValidatorModule> myValidators = new ArrayList<>();
+	private IInterceptorBroadcaster myInterceptorBraodcaster;
 
 	/**
 	 * Constructor (this should not be called directly, but rather {@link FhirContext#newValidator()} should be called to obtain an instance of {@link FhirValidator})
@@ -65,7 +72,7 @@ public class FhirValidator {
 				registerValidatorModule(theInstance);
 			}
 		} else {
-			for (Iterator<IValidatorModule> iter = myValidators.iterator(); iter.hasNext();) {
+			for (Iterator<IValidatorModule> iter = myValidators.iterator(); iter.hasNext(); ) {
 				IValidatorModule next = iter.next();
 				if (next.getClass().equals(type)) {
 					unregisterValidatorModule(next);
@@ -93,6 +100,16 @@ public class FhirValidator {
 
 	/**
 	 * Should the validator validate the resource against the base schema (the schema provided with the FHIR distribution itself)
+	 *
+	 * @return Returns a referens to <code>this<code> for method chaining
+	 */
+	public synchronized FhirValidator setValidateAgainstStandardSchema(boolean theValidateAgainstStandardSchema) {
+		addOrRemoveValidator(theValidateAgainstStandardSchema, SchemaBaseValidator.class, new SchemaBaseValidator(myContext));
+		return this;
+	}
+
+	/**
+	 * Should the validator validate the resource against the base schema (the schema provided with the FHIR distribution itself)
 	 */
 	public synchronized boolean isValidateAgainstStandardSchematron() {
 		if (!ourPhPresentOnClasspath) {
@@ -105,35 +122,8 @@ public class FhirValidator {
 	}
 
 	/**
-	 * Add a new validator module to this validator. You may register as many modules as you like at any time.
-	 * 
-	 * @param theValidator
-	 *           The validator module. Must not be null.
-	 * @return Returns a reference to <code>this</code> for easy method chaining.
-	 */
-	public synchronized FhirValidator registerValidatorModule(IValidatorModule theValidator) {
-		Validate.notNull(theValidator, "theValidator must not be null");
-		ArrayList<IValidatorModule> newValidators = new ArrayList<IValidatorModule>(myValidators.size() + 1);
-		newValidators.addAll(myValidators);
-		newValidators.add(theValidator);
-
-		myValidators = newValidators;
-		return this;
-	}
-
-	/**
-	 * Should the validator validate the resource against the base schema (the schema provided with the FHIR distribution itself)
-	 * 
-	 * @return Returns a referens to <code>this<code> for method chaining
-	 */
-	public synchronized  FhirValidator setValidateAgainstStandardSchema(boolean theValidateAgainstStandardSchema) {
-		addOrRemoveValidator(theValidateAgainstStandardSchema, SchemaBaseValidator.class, new SchemaBaseValidator(myContext));
-		return this;
-	}
-
-	/**
 	 * Should the validator validate the resource against the base schematron (the schematron provided with the FHIR distribution itself)
-	 * 
+	 *
 	 * @return Returns a referens to <code>this<code> for method chaining
 	 */
 	public synchronized FhirValidator setValidateAgainstStandardSchematron(boolean theValidateAgainstStandardSchematron) {
@@ -150,10 +140,25 @@ public class FhirValidator {
 	}
 
 	/**
+	 * Add a new validator module to this validator. You may register as many modules as you like at any time.
+	 *
+	 * @param theValidator The validator module. Must not be null.
+	 * @return Returns a reference to <code>this</code> for easy method chaining.
+	 */
+	public synchronized FhirValidator registerValidatorModule(IValidatorModule theValidator) {
+		Validate.notNull(theValidator, "theValidator must not be null");
+		ArrayList<IValidatorModule> newValidators = new ArrayList<IValidatorModule>(myValidators.size() + 1);
+		newValidators.addAll(myValidators);
+		newValidators.add(theValidator);
+
+		myValidators = newValidators;
+		return this;
+	}
+
+	/**
 	 * Removes a validator module from this validator. You may register as many modules as you like, and remove them at any time.
-	 * 
-	 * @param theValidator
-	 *           The validator module. Must not be null.
+	 *
+	 * @param theValidator The validator module. Must not be null.
 	 */
 	public synchronized void unregisterValidatorModule(IValidatorModule theValidator) {
 		Validate.notNull(theValidator, "theValidator must not be null");
@@ -175,12 +180,10 @@ public class FhirValidator {
 	}
 
 
-
 	/**
-	 * Validates a resource instance returning a {@link ca.uhn.fhir.validation.ValidationResult} which contains the results.
+	 * Validates a resource instance returning a {@link ValidationResult} which contains the results.
 	 *
-	 * @param theResource
-	 *           the resource to validate
+	 * @param theResource the resource to validate
 	 * @return the results of validation
 	 * @since 0.7
 	 */
@@ -189,10 +192,9 @@ public class FhirValidator {
 	}
 
 	/**
-	 * Validates a resource instance returning a {@link ca.uhn.fhir.validation.ValidationResult} which contains the results.
+	 * Validates a resource instance returning a {@link ValidationResult} which contains the results.
 	 *
-	 * @param theResource
-	 *           the resource to validate
+	 * @param theResource the resource to validate
 	 * @return the results of validation
 	 * @since 1.1
 	 */
@@ -201,12 +203,10 @@ public class FhirValidator {
 	}
 
 	/**
-	 * Validates a resource instance returning a {@link ca.uhn.fhir.validation.ValidationResult} which contains the results.
+	 * Validates a resource instance returning a {@link ValidationResult} which contains the results.
 	 *
-	 * @param theResource
-	 *           the resource to validate
-	 * @param theOptions
-	 *       Optionally provides options to the validator
+	 * @param theResource the resource to validate
+	 * @param theOptions  Optionally provides options to the validator
 	 * @return the results of validation
 	 * @since 4.0.0
 	 */
@@ -221,16 +221,32 @@ public class FhirValidator {
 			next.validateResource(ctx);
 		}
 
-		return ctx.toResult();
+		ValidationResult result = ctx.toResult();
+		result = invokeValidationCompletedHooks(theResource, null, result);
+		return result;
+	}
+
+	private ValidationResult invokeValidationCompletedHooks(IBaseResource theResourceParsed, String theResourceRaw, ValidationResult theValidationResult) {
+		if (myInterceptorBraodcaster != null) {
+			if (myInterceptorBraodcaster.hasHooks(Pointcut.VALIDATION_COMPLETED)) {
+				HookParams params = new HookParams()
+					.add(IBaseResource.class, theResourceParsed)
+					.add(String.class, theResourceRaw)
+					.add(ValidationResult.class, theValidationResult);
+				Object newResult = myInterceptorBraodcaster.callHooksAndReturnObject(Pointcut.VALIDATION_COMPLETED, params);
+				if (newResult != null) {
+					theValidationResult = (ValidationResult) newResult;
+				}
+			}
+		}
+		return theValidationResult;
 	}
 
 	/**
-	 * Validates a resource instance returning a {@link ca.uhn.fhir.validation.ValidationResult} which contains the results.
+	 * Validates a resource instance returning a {@link ValidationResult} which contains the results.
 	 *
-	 * @param theResource
-	 *           the resource to validate
-	 * @param theOptions
-	 *       Optionally provides options to the validator
+	 * @param theResource the resource to validate
+	 * @param theOptions  Optionally provides options to the validator
 	 * @return the results of validation
 	 * @since 4.0.0
 	 */
@@ -245,6 +261,17 @@ public class FhirValidator {
 			next.validateResource(ctx);
 		}
 
-		return ctx.toResult();
+		ValidationResult result = ctx.toResult();
+		result = invokeValidationCompletedHooks(null, theResource, result);
+		return result;
+	}
+
+	/**
+	 * Optionally supplies an interceptor broadcaster that will be used to invoke validation related Pointcut events
+	 *
+	 * @since 5.5.0
+	 */
+	public void setInterceptorBraodcaster(IInterceptorBroadcaster theInterceptorBraodcaster) {
+		myInterceptorBraodcaster = theInterceptorBraodcaster;
 	}
 }

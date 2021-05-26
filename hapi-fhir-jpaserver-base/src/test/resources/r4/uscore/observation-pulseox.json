@@ -1,0 +1,92 @@
+{
+	"resourceType": "Observation",
+	"id": "satO2-fiO2",
+	"meta": {
+		"profile": [
+			"http://hl7.org/fhir/us/core/StructureDefinition/us-core-pulse-oximetry"
+		]
+	},
+	"text": {
+		"status": "generated",
+		"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative</b></p><p><b>id</b>: satO2-fiO2</p><p><b>meta</b>: </p><p><b>identifier</b>: o1223435-10</p><p></p><p><b>category</b>: <span title=\"Codes: {http://terminology.hl7.org/CodeSystem/observation-category vital-signs}\">Vital Signs</span></p><p><b>code</b>: <span title=\"Codes: {http://loinc.org 2708-6}, {http://loinc.org 59408-5}, {urn:iso:std:iso:11073:10101 150456}\">Oxygen saturation in Arterial blood</span></p><p><b>subject</b>: <a href=\"Patient-example.html\">Generated Summary: id: example; Medical Record Number = 1032702 (USUAL); active; Amy V. Shaw , Amy V. Baxter ; ph: 555-555-5555(HOME), amy.shaw@example.com; gender: female; birthDate: 1987-02-20</a></p><p><b>effective</b>: Dec 5, 2014, 8:30:10 AM</p><p><b>value</b>: 95 %</p><p><b>interpretation</b>: <span title=\"Codes: {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation N}\">Normal (applies to non-numeric results)</span></p><p><b>device</b>: <span>Acme Pulse Oximeter 2000</span></p><h3>ReferenceRanges</h3><table class=\"grid\"><tr><td>-</td><td><b>Low</b></td><td><b>High</b></td></tr><tr><td>*</td><td>90 %</td><td>99 %</td></tr></table><h3>Components</h3><table class=\"grid\"><tr><td>-</td><td><b>Code</b></td><td><b>Value[x]</b></td></tr><tr><td>*</td><td><span title=\"Codes: {http://loinc.org 3151-8}\">Inhaled oxygen flow rate</span></td><td>6 liters/min</td></tr></table></div>"
+	},
+	"identifier": [
+		{
+			"system": "http://goodcare.org/observation/id",
+			"value": "o1223435-10"
+		}
+	],
+	"status": "final",
+	"category": [
+		{
+			"coding": [
+				{
+					"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+					"code": "vital-signs",
+					"display": "Vital Signs"
+				}
+			],
+			"text": "Vital Signs"
+		}
+	],
+	"code": {
+		"coding": [
+			{
+				"system": "http://loinc.org",
+				"code": "2708-6",
+				"display": "Oxygen saturation in Arterial blood"
+			},
+			{
+				"system": "http://loinc.org",
+				"code": "59408-5",
+				"display": "Oxygen saturation in Arterial blood by Pulse oximetry"
+			},
+			{
+				"system": "urn:iso:std:iso:11073:10101",
+				"code": "150456",
+				"display": "MDC_PULS_OXIM_SAT_O2"
+			}
+		]
+	},
+	"subject": {
+		"reference": "Patient/AmyBaxter"
+	},
+	"effectiveDateTime": "2014-12-05T09:30:10+01:00",
+	"valueQuantity": {
+		"value": 95,
+		"unit": "%",
+		"system": "http://unitsofmeasure.org",
+		"code": "%"
+	},
+	"interpretation": [
+		{
+			"coding": [
+				{
+					"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+					"code": "N",
+					"display": "Normal"
+				}
+			],
+			"text": "Normal (applies to non-numeric results)"
+		}
+	],
+	"device": {
+		"display": "Acme Pulse Oximeter 2000"
+	},
+	"referenceRange": [
+		{
+			"low": {
+				"value": 90,
+				"unit": "%",
+				"system": "http://unitsofmeasure.org",
+				"code": "%"
+			},
+			"high": {
+				"value": 99,
+				"unit": "%",
+				"system": "http://unitsofmeasure.org",
+				"code": "%"
+			}
+		}
+	]
+}

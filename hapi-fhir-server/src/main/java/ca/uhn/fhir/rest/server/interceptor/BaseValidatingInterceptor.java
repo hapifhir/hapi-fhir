@@ -21,18 +21,23 @@ package ca.uhn.fhir.rest.server.interceptor;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.validation.*;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.text.StrLookup;
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +60,7 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 	 */
 	public static final String DEFAULT_RESPONSE_HEADER_VALUE = "${row}:${col} ${severity} ${message} (${location})";
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseValidatingInterceptor.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseValidatingInterceptor.class);
 
 	private Integer myAddResponseIssueHeaderOnSeverity = null;
 	private Integer myAddResponseOutcomeHeaderOnSeverity = null;
@@ -68,6 +73,7 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 	private String myResponseOutcomeHeaderName = provideDefaultResponseHeaderName();
 
 	private List<IValidatorModule> myValidatorModules;
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	private void addResponseIssueHeader(RequestDetails theRequestDetails, SingleValidationMessage theNext) {
 		// Perform any string substitutions from the message format
@@ -279,6 +285,10 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 	 */
 	protected ValidationResult validate(T theRequest, RequestDetails theRequestDetails) {
 		FhirValidator validator = theRequestDetails.getServer().getFhirContext().newValidator();
+
+		IInterceptorBroadcaster interceptorBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		validator.setInterceptorBraodcaster(interceptorBroadcaster);
+
 		if (myValidatorModules != null) {
 			for (IValidatorModule next : myValidatorModules) {
 				validator.registerValidatorModule(next);
@@ -355,6 +365,14 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 		postProcessResult(theRequestDetails, validationResult);
 		
 		return validationResult;
+	}
+
+	/**
+	 * This can be used to specify an interceptor to broadcast validation events through. This
+	 * is mostly intended for the
+	 */
+	public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBroadcaster) {
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
 	}
 
 	private static class MyLookup extends StrLookup<String> {

@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.validation.ValidationResult;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 
 import javax.annotation.Nonnull;
@@ -45,6 +46,7 @@ import java.util.Set;
  * <li>SERVER_xxx: Hooks on the HAPI FHIR Server framework</li>
  * <li>SUBSCRIPTION_xxx: Hooks on the HAPI FHIR Subscription framework</li>
  * <li>STORAGE_xxx: Hooks on the storage engine</li>
+ * <li>VALIDATION_xxx: Hooks on the HAPI FHIR Validation framework</li>
  * <li>JPA_PERFTRACE_xxx: Performance tracing hooks on the JPA server</li>
  * </ul>
  * </p>
@@ -1850,6 +1852,37 @@ public enum Pointcut implements IPointcut {
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),
+
+	/**
+	 * <b>Validation Hook:</b>
+	 * This hook is called after validation has completed, regardless of whether the validation was successful or failed.
+	 * Typically this is used to modify validation results.
+	 * <p>
+	 * <b>Note on validation Pointcuts:</b> The HAPI FHIR interceptor framework is a part of the client and server frameworks and
+	 * not a part of the core FhirContext. Therefore this Pointcut is invoked by the
+	 * </p>
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * org.hl7.fhir.instance.model.api.IBaseResource - The resource being validated, if a parsed version is available (null otherwise)
+	 * </li>
+	 * <li>
+	 * java.lang.String - The resource being validated, if a raw version is available (null otherwise)
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.validation.ValidationResult - The outcome of the validation. Hooks methods should not modify this object, but they can return a new one.
+	 * </li>
+	 * </ul>
+	 * </p>
+	 * Hook methods may return an instance of {@link ca.uhn.fhir.validation.ValidationResult} if they wish to override the validation results, or they may return <code>null</code> or <code>void</code> otherwise.
+	 */
+	VALIDATION_COMPLETED(ValidationResult.class,
+		"org.hl7.fhir.instance.model.api.IBaseResource",
+		"java.lang.String",
+		"ca.uhn.fhir.validation.ValidationResult"
+	),
+
 
 	/**
 	 * <b>MDM(EMPI) Hook:</b>

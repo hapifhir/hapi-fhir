@@ -12,7 +12,7 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedCons
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
@@ -100,7 +100,7 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 		// Interceptor call: SUBSCRIPTION_RESOURCE_MODIFIED
 		HookParams params = new HookParams()
 			.add(ResourceModifiedMessage.class, msg);
-		boolean outcome = JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, params);
+		boolean outcome = CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, params);
 		if (!outcome) {
 			return;
 		}
