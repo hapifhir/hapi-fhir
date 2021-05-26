@@ -241,6 +241,7 @@ public class DaoConfig {
 	 */
 	private boolean myEnableTaskBulkExportJobExecution;
 	private boolean myAccountForDateIndexNulls;
+	private boolean myTriggerSubscriptionsForNonVersioningChanges;
 
 	/**
 	 * Constructor
@@ -2394,6 +2395,26 @@ public class DaoConfig {
 	 */
 	public boolean isAccountForDateIndexNulls() {
 		return myAccountForDateIndexNulls;
+	}
+
+	/**
+	 * If set to true (default is false) then subscriptions will be triggered for resource updates even if they
+	 * do not trigger a new version (e.g. $meta-add and $meta-delete).
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isTriggerSubscriptionsForNonVersioningChanges() {
+		return myTriggerSubscriptionsForNonVersioningChanges;
+	}
+
+	/**
+	 * If set to true (default is false) then subscriptions will be triggered for resource updates even if they
+	 * do not trigger a new version (e.g. $meta-add and $meta-delete).
+	 *
+	 * @since 5.5.0
+	 */
+	public void setTriggerSubscriptionsForNonVersioningChanges(boolean theTriggerSubscriptionsForNonVersioningChanges) {
+		myTriggerSubscriptionsForNonVersioningChanges = theTriggerSubscriptionsForNonVersioningChanges;
 	}
 
 	public enum StoreMetaSourceInformationEnum {
