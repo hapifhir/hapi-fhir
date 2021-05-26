@@ -47,7 +47,6 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 	@Test
 	public void testRevIncludesPaged_SyncSearchWithCount() {
 		createOrganizationWithReferencingEpisodesOfCare(10);
-		myDaoConfig.setMaximumIncludesToLoadPerPage(5);
 
 		SearchParameterMap map = SearchParameterMap.newSynchronous()
 			.setCount(10)
@@ -55,7 +54,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 			.addRevInclude(new Include("*").setRecurse(true));
 		IBundleProvider results = myOrganizationDao.search(map);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
-		Collection<Matcher<String>> expected = IntStream.range(0, 7).mapToObj(t -> equalTo("EpisodeOfCare/EOC-" + t)).collect(Collectors.toList());
+		Collection<Matcher<String>> expected = IntStream.range(0, 10).mapToObj(t -> equalTo("EpisodeOfCare/EOC-" + t)).collect(Collectors.toList());
 		expected.add(equalTo("Organization/ORG-0"));
 		expected.add(equalTo("Organization/ORG-P"));
 		assertThat(ids.toString(), ids, new IsIterableContainingInAnyOrder(expected));
@@ -79,6 +78,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 			"EpisodeOfCare/EOC-1",
 			"EpisodeOfCare/EOC-2",
 			"EpisodeOfCare/EOC-3",
+			"EpisodeOfCare/EOC-4",
 			"Organization/ORG-0"
 		));
 	}

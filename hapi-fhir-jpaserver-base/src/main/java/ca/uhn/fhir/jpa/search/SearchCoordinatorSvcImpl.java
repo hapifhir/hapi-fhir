@@ -532,18 +532,15 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			 * On the other hand for async queries we load includes/revincludes
 			 * individually for pages as we return them to clients
 			 */
-			final Set<ResourcePersistentId> includedPids = new HashSet<>();
 
-			int maxIncludes = myDaoConfig.getMaximumIncludesToLoadPerPage();
-			if (theParams.getCount() != null) {
-				maxIncludes = theParams.getCount();
+			Integer maxIncludes = myDaoConfig.getMaximumIncludesToLoadPerPage();
+			final Set<ResourcePersistentId> includedPids = theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes);
+
+			if (maxIncludes != null) {
+				maxIncludes -= includedPids.size();
 			}
-			maxIncludes -= pids.size();
 
-			includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes));
-			maxIncludes -= includedPids.size();
-
-			if (theParams.getEverythingMode() == null && maxIncludes > 0) {
+			if (theParams.getEverythingMode() == null && (maxIncludes == null || maxIncludes > 0)) {
 				includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes));
 			}
 
