@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import com.google.common.annotations.VisibleForTesting;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -70,6 +71,14 @@ public class ReadOnlySearchParamCache {
 
 	public RuntimeSearchParam getByUrl(String theUrl) {
 		return myUrlToParam.get(theUrl);
+	}
+
+	/**
+	 * Do not call outside of unit tests!
+	 */
+	@VisibleForTesting
+	public Map<String, Map<String, RuntimeSearchParam>> getSpMapForUnitTest() {
+		return myResourceNameToSpNameToSp;
 	}
 
 	public static ReadOnlySearchParamCache fromFhirContext(FhirContext theFhirContext) {

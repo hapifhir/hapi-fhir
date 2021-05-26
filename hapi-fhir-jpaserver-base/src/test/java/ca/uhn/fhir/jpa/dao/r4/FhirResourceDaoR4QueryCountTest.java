@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -7,6 +8,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQuery;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -34,7 +36,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -1560,6 +1564,20 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 	@Test
 	public void testMassIngestionMode_TransactionWithChanges2() throws IOException {
+		Map<String, Map<String, RuntimeSearchParam>> sps = mySearchParamRegistry.getSpMapForUnitTest();
+		for (Map<String, RuntimeSearchParam> nextMap : sps.values()) {
+			for (Iterator<Map.Entry<String, RuntimeSearchParam>> iter = nextMap.entrySet().iterator(); iter.hasNext(); ) {
+				Map.Entry<String, RuntimeSearchParam> next = iter.next();
+				if (next.getValue().getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
+					continue;
+				}
+				if (next.getKey().equals("identifier")) {
+					continue;
+				}
+				iter.remove();
+			}
+		}
+
 		myDaoConfig.setDeleteEnabled(false);
 		myDaoConfig.setMatchUrlCache(true);
 		myDaoConfig.setMassIngestionMode(true);
@@ -1574,15 +1592,15 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(new SystemRequestDetails(), loadResourceFromClasspath(Bundle.class, "/r4/eob-bundle.json"));
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(13, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(29, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(25, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(7, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(new SystemRequestDetails(), loadResourceFromClasspath(Bundle.class, "/r4/eob-bundle.json"));
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(30, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(20, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());

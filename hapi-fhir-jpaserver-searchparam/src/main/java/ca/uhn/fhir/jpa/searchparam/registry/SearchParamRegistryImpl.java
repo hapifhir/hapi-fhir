@@ -313,4 +313,10 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	public void resetForUnitTest() {
 		handleInit(Collections.emptyList());
 	}
+
+	@VisibleForTesting
+	public Map<String, Map<String, RuntimeSearchParam>> getSpMapForUnitTest() {
+		return myActiveSearchParams.getSpMapForUnitTest();
+	}
+
 }
