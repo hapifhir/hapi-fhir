@@ -20,8 +20,10 @@ package ca.uhn.fhir.jpa.delete.job;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.BatchConstants;
 import ca.uhn.fhir.jpa.delete.model.ParsedDeleteExpungeRecord;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.Step;
@@ -49,22 +51,23 @@ import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME;
 @Configuration
 public class DeleteExpungeJobConfig {
 
-	public static final String JOB_PARAM_COMMIT_INTERVAL = "commitInterval";
-	public static final String JOB_UUID_PARAMETER = "jobUUID";
+	public static final String JOB_PARAM_URL_LIST = "urlList";
+	// FIXME KHS remove
+	public static final String JOB_UUID_PARAMETER = "uuid";
 
+	@Autowired
+	private FhirContext myFhirContext;
 	@Autowired
 	private StepBuilderFactory myStepBuilderFactory;
-
 	@Autowired
 	private JobBuilderFactory myJobBuilderFactory;
-
 	@Autowired
 	@Qualifier(BatchConstants.JOB_LAUNCHING_TASK_EXECUTOR)
 	private TaskExecutor myTaskExecutor;
 
 	@Bean(name = DELETE_EXPUNGE_JOB_NAME)
 	@Lazy
-	public Job deleteExpungeJob() throws Exception {
+	public Job deleteExpungeJob(FhirContext theFhirContext, MatchUrlService theMatchUrlService) throws Exception {
 		// FIXME KHS implement this.  Current thinking:
 		// 1. validate URLs are valid
 		// 2. Create 1 step for each URL
@@ -74,15 +77,15 @@ public class DeleteExpungeJobConfig {
 		// 2.4 Update total count deleted
 
 		return myJobBuilderFactory.get(DELETE_EXPUNGE_JOB_NAME)
-			.validator(deleteExpungeJobParameterValidator())
+			.validator(deleteExpungeJobParameterValidator(theFhirContext, theMatchUrlService))
 			.start(deleteExpungePartitionStep())
 			.next(deleteExpungeCloseJobStep())
 			.build();
 	}
 
 	@Bean
-	public JobParametersValidator deleteExpungeJobParameterValidator() {
-		return new DeleteExpungeJobParameterValidator();
+	public JobParametersValidator deleteExpungeJobParameterValidator(FhirContext theFhirContext, MatchUrlService theMatchUrlService) {
+		return new DeleteExpungeJobParameterValidator(theFhirContext, theMatchUrlService);
 	}
 
 	@Bean

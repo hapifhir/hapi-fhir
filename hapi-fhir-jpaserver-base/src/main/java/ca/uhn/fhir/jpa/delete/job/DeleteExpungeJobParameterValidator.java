@@ -20,51 +20,53 @@ package ca.uhn.fhir.jpa.delete.job;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
-import ca.uhn.fhir.jpa.dao.data.IBulkImportJobDao;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.delete.model.UrlListJson;
 import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.JobParametersValidator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.List;
 import java.util.Optional;
+
+import static ca.uhn.fhir.jpa.delete.job.DeleteExpungeJobConfig.JOB_PARAM_URL_LIST;
 
 /**
  * This class will prevent a job from running if the UUID does not exist or is invalid.
  */
 public class DeleteExpungeJobParameterValidator implements JobParametersValidator {
+	private final FhirContext myFhirContext;
+	private final MatchUrlService myMatchUrlService;
 
-	@Autowired
-	private IBulkImportJobDao myBulkImportJobDao;
-	@Autowired
-	private PlatformTransactionManager myTransactionManager;
+	public DeleteExpungeJobParameterValidator(FhirContext theFhirContext, MatchUrlService theMatchUrlService) {
+		myFhirContext = theFhirContext;
+		myMatchUrlService = theMatchUrlService;
+	}
 
 	@Override
 	public void validate(JobParameters theJobParameters) throws JobParametersInvalidException {
 		if (theJobParameters == null) {
-			throw new JobParametersInvalidException("This job needs Parameters: [jobUUID]");
+			throw new JobParametersInvalidException("This job requires Parameters: [urlList]");
 		}
 
-		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-		String errorMessage = txTemplate.execute(tx -> {
-			StringBuilder errorBuilder = new StringBuilder();
-			String jobUUID = theJobParameters.getString(DeleteExpungeJobConfig.JOB_UUID_PARAMETER);
-			Optional<BulkImportJobEntity> oJob = myBulkImportJobDao.findByJobId(jobUUID);
-			if (!StringUtils.isBlank(jobUUID) && !oJob.isPresent()) {
-				errorBuilder.append("There is no persisted job that exists with UUID: ");
-				errorBuilder.append(jobUUID);
-				errorBuilder.append(". ");
+		UrlListJson urlListJson = UrlListJson.fromJson(theJobParameters.getString(JOB_PARAM_URL_LIST));
+		for (String url : urlListJson.getUrlList()) {
+			RuntimeResourceDefinition resourceDefinition;
+			resourceDefinition = UrlUtil.parseUrlResourceType(myFhirContext, url);
+			try {
+				myMatchUrlService.translateMatchUrl(url, resourceDefinition);
+			} catch (UnsupportedOperationException e) {
+				throw new JobParametersInvalidException("Failed to parse " + ProviderConstants.OPERATION_DELETE_EXPUNGE + " " + JOB_PARAM_URL_LIST + " item " + url + ": " + e.getMessage());
 			}
-
-			return errorBuilder.toString();
-		});
-
-		if (!StringUtils.isEmpty(errorMessage)) {
-			throw new JobParametersInvalidException(errorMessage);
 		}
 	}
 }
