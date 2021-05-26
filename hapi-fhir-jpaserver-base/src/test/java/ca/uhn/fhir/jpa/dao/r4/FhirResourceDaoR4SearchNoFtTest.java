@@ -104,6 +104,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -2022,6 +2023,40 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		}
 
 	}
+
+
+	@Test
+	public void testDateOnPeriod_NoEnd() {
+		Patient pt = new Patient();
+		pt.setId("PT");
+		pt.setActive(true);
+		myPatientDao.update(pt);
+
+		// Should match
+		Procedure proc = new Procedure();
+		proc.setId("A");
+		proc.setPerformed(new Period().setStartElement(new DateTimeType("2021-03-16T23:50:06-04:00")));
+		myProcedureDao.update(proc);
+
+		// Shouldn't match
+		proc = new Procedure();
+		proc.setId("B");
+		proc.setPerformed(new Period().setStartElement(new DateTimeType("2021-12-31T23:50:06-04:00")));
+		myProcedureDao.update(proc);
+
+		//  https://fhir-ns-qa.fmcna.com/STU3/fhirapi/Procedure?_id=PR-5000609747-20210316235006&patient=P5000609747&date=ge2021-03-15&date=le2021-03-18
+		SearchParameterMap map = new SearchParameterMap();
+		map.add("_id", new TokenParam("A"));
+		map.add("patient", new ReferenceParam("PT"));
+		map.add("date", new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2021-03-15"));
+		map.add("date", new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, "2021-03-18"));
+		IBundleProvider outcome = myProcedureDao.search(map);
+		List<String> ids = toUnqualifiedIdValues(outcome);
+		assertThat(ids, contains("Procedure/A"));
+
+
+	}
+
 
 
 	@Test
