@@ -46,9 +46,9 @@ import java.util.List;
 import java.util.Objects;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.ALL_PARTITIONS_NAME;
-import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.doCallHooks;
-import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.doCallHooksAndReturnObject;
-import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.hasHooks;
+import static ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster.doCallHooks;
+import static ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster.doCallHooksAndReturnObject;
+import static ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster.hasHooks;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
