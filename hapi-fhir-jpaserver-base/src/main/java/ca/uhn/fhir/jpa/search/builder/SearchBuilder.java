@@ -63,7 +63,7 @@ import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
-import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -253,6 +253,9 @@ public class SearchBuilder implements ISearchBuilder {
 		init(theParams, theSearchUuid, theRequestPartitionId);
 
 		ArrayList<SearchQueryExecutor> queries = createQuery(myParams, null, null, null, true, theRequest, null);
+		if (queries.isEmpty()) {
+			return Collections.emptyIterator();
+		}
 		try (SearchQueryExecutor queryExecutor = queries.get(0)) {
 			return Lists.newArrayList(queryExecutor.next()).iterator();
 		}
@@ -328,7 +331,7 @@ public class SearchBuilder implements ISearchBuilder {
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest)
 					.add(SearchRuntimeDetails.class, theSearchRuntimeDetails);
-				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE, params);
+				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE, params);
 			}
 
 			if (pids.isEmpty()) {
@@ -949,14 +952,14 @@ public class SearchBuilder implements ISearchBuilder {
 		// the user has a chance to know that they were in the results
 		if (allAdded.size() > 0) {
 
-			if (JpaInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, myInterceptorBroadcaster, theRequest)) {
+			if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, myInterceptorBroadcaster, theRequest)) {
 				List<ResourcePersistentId> includedPidList = new ArrayList<>(allAdded);
 				JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(includedPidList, () -> this);
 				HookParams params = new HookParams()
 					.add(IPreResourceAccessDetails.class, accessDetails)
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest);
-				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 
 				for (int i = includedPidList.size() - 1; i >= 0; i--) {
 					if (accessDetails.isDontReturnResourceAtIndex(i)) {
@@ -1057,7 +1060,7 @@ public class SearchBuilder implements ISearchBuilder {
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest)
 					.add(StorageProcessingMessage.class, msg);
-				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
 
 				theQueryStack3.addPredicateCompositeUnique(indexString, myRequestPartitionId);
 
@@ -1179,8 +1182,8 @@ public class SearchBuilder implements ISearchBuilder {
 				myStillNeedToFetchIncludes = true;
 			}
 
-			myHavePerfTraceFoundIdHook = JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, myInterceptorBroadcaster, myRequest);
-			myHaveRawSqlHooks = JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_RAW_SQL, myInterceptorBroadcaster, myRequest);
+			myHavePerfTraceFoundIdHook = CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, myInterceptorBroadcaster, myRequest);
+			myHaveRawSqlHooks = CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_RAW_SQL, myInterceptorBroadcaster, myRequest);
 
 		}
 
@@ -1236,7 +1239,7 @@ public class SearchBuilder implements ISearchBuilder {
 								HookParams params = new HookParams()
 									.add(Integer.class, System.identityHashCode(this))
 									.add(Object.class, nextLong);
-								JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, params);
+								CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, params);
 							}
 
 							if (nextLong != null) {
@@ -1263,7 +1266,7 @@ public class SearchBuilder implements ISearchBuilder {
 											.add(RequestDetails.class, myRequest)
 											.addIfMatchesType(ServletRequestDetails.class, myRequest)
 											.add(StorageProcessingMessage.class, message);
-										JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
+										CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
 
 										initializeIteratorQuery(myOffset, myMaxResultsToFetch);
 									}
@@ -1305,7 +1308,7 @@ public class SearchBuilder implements ISearchBuilder {
 						.add(RequestDetails.class, myRequest)
 						.addIfMatchesType(ServletRequestDetails.class, myRequest)
 						.add(SqlQueryList.class, capturedQueries);
-					JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_RAW_SQL, params);
+					CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_RAW_SQL, params);
 				}
 			}
 
@@ -1314,7 +1317,7 @@ public class SearchBuilder implements ISearchBuilder {
 					.add(RequestDetails.class, myRequest)
 					.addIfMatchesType(ServletRequestDetails.class, myRequest)
 					.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED, params);
+				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED, params);
 				myFirst = false;
 			}
 
@@ -1323,7 +1326,7 @@ public class SearchBuilder implements ISearchBuilder {
 					.add(RequestDetails.class, myRequest)
 					.addIfMatchesType(ServletRequestDetails.class, myRequest)
 					.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, params);
+				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, params);
 			}
 
 		}

@@ -45,7 +45,7 @@ import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.InterceptorUtil;
-import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
@@ -316,7 +316,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			.add(RequestDetails.class, theRequestDetails)
 			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 			.add(SearchParameterMap.class, theParams);
-		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
+		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(theResourceType).getImplementingClass();
 		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(theCallingDao, theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
@@ -400,7 +400,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 //			.add(RequestDetails.class, theRequestDetails)
 //			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 //			.add(SearchParameterMap.class, theParams);
-//		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
+//		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
 
 		SearchTask task = new SearchTask(theSearch, theCallingDao, theParams, theResourceType, theRequestDetails, theRequestPartitionId);
 		myIdToSearchTask.put(theSearch.getUuid(), task);
@@ -424,7 +424,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				.add(SearchParameterMap.class, theParams)
 				.add(RequestDetails.class, theRequestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-			Object outcome = JpaInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH, params);
+			Object outcome = CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH, params);
 			if (Boolean.FALSE.equals(outcome)) {
 				return null;
 			}
@@ -441,7 +441,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				.add(SearchParameterMap.class, theParams)
 				.add(RequestDetails.class, theRequestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED, params);
+			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED, params);
 
 			return myPersistedJpaBundleProviderFactory.newInstance(theRequestDetails, searchToUse.getUuid());
 		});
@@ -515,7 +515,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				.add(IPreResourceAccessDetails.class, accessDetails)
 				.add(RequestDetails.class, theRequestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 
 			for (int i = pids.size() - 1; i >= 0; i--) {
 				if (accessDetails.isDontReturnResourceAtIndex(i)) {
@@ -854,7 +854,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 							.add(IPreResourceAccessDetails.class, accessDetails)
 							.add(RequestDetails.class, mySearchRuntimeDetails.getRequestDetails())
 							.addIfMatchesType(ServletRequestDetails.class, mySearchRuntimeDetails.getRequestDetails());
-						JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+						CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 
 						for (int i = unsyncedPids.size() - 1; i >= 0; i--) {
 							if (accessDetails.isDontReturnResourceAtIndex(i)) {
@@ -974,13 +974,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						.add(RequestDetails.class, myRequest)
 						.addIfMatchesType(ServletRequestDetails.class, myRequest)
 						.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-					JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, params);
+					CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, params);
 				} else {
 					HookParams params = new HookParams()
 						.add(RequestDetails.class, myRequest)
 						.addIfMatchesType(ServletRequestDetails.class, myRequest)
 						.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-					JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, params);
+					CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, params);
 				}
 
 				ourLog.trace("Have completed search for [{}{}] and found {} resources in {}ms - Status is {}", mySearch.getResourceType(), mySearch.getSearchQueryString(), mySyncedPids.size(), sw.getMillis(), mySearch.getStatus());
@@ -1028,7 +1028,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					.add(RequestDetails.class, myRequest)
 					.addIfMatchesType(ServletRequestDetails.class, myRequest)
 					.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FAILED, params);
+				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FAILED, params);
 
 				saveSearch();
 				span.captureException(t);
@@ -1072,7 +1072,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				ourLog.trace("Performing count");
 				ISearchBuilder sb = newSearchBuilder();
 				Iterator<Long> countIterator = sb.createCountQuery(myParams, mySearch.getUuid(), myRequest, myRequestPartitionId);
-				Long count = countIterator.next();
+				Long count = countIterator.hasNext() ? countIterator.next() : 0;
 				ourLog.trace("Got count {}", count);
 
 				TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
