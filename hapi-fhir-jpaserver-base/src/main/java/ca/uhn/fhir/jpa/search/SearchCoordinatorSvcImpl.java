@@ -1072,7 +1072,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				ourLog.trace("Performing count");
 				ISearchBuilder sb = newSearchBuilder();
 				Iterator<Long> countIterator = sb.createCountQuery(myParams, mySearch.getUuid(), myRequest, myRequestPartitionId);
-				Long count = countIterator.next();
+				Long count = countIterator.hasNext() ? countIterator.next() : 0;
 				ourLog.trace("Got count {}", count);
 
 				TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
