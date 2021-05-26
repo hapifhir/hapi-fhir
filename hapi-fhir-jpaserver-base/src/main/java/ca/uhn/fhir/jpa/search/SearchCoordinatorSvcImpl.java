@@ -400,7 +400,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 //			.add(RequestDetails.class, theRequestDetails)
 //			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 //			.add(SearchParameterMap.class, theParams);
-//		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
+//		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
 
 		SearchTask task = new SearchTask(theSearch, theCallingDao, theParams, theResourceType, theRequestDetails, theRequestPartitionId);
 		myIdToSearchTask.put(theSearch.getUuid(), task);

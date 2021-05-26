@@ -949,7 +949,7 @@ public class SearchBuilder implements ISearchBuilder {
 		// the user has a chance to know that they were in the results
 		if (allAdded.size() > 0) {
 
-			if (JpaInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, myInterceptorBroadcaster, theRequest)) {
+			if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, myInterceptorBroadcaster, theRequest)) {
 				List<ResourcePersistentId> includedPidList = new ArrayList<>(allAdded);
 				JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(includedPidList, () -> this);
 				HookParams params = new HookParams()

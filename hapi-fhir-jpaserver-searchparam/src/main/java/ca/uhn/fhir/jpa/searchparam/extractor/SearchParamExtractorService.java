@@ -469,8 +469,8 @@ public class SearchParamExtractorService {
 	}
 
 	@VisibleForTesting
-	void setInterceptorBroadcasterForUnitTest(IInterceptorBroadcaster theJpaInterceptorBroadcaster) {
-		myInterceptorBroadcaster = theJpaInterceptorBroadcaster;
+	void setInterceptorBroadcasterForUnitTest(IInterceptorBroadcaster theInterceptorBroadcaster) {
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
 	}
 
 	@Nonnull
