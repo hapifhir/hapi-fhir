@@ -2024,43 +2024,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	}
 
-	// FIXME: make OR searching configurable
-	@Test
-	public void testDateOnPeriod_NoEnd() {
-		Patient pt = new Patient();
-		pt.setId("PT");
-		pt.setActive(true);
-		myPatientDao.update(pt);
-
-		// Should match
-		Procedure proc = new Procedure();
-		proc.setId("A");
-		proc.setSubject(new Reference("Patient/PT"));
-		proc.setPerformed(new Period().setStartElement(new DateTimeType("2021-03-16T23:50:06-04:00")));
-		myProcedureDao.update(proc);
-
-		// Shouldn't match
-		proc = new Procedure();
-		proc.setId("B");
-		proc.setSubject(new Reference("Patient/PT"));
-		proc.setPerformed(new Period().setStartElement(new DateTimeType("2021-12-31T23:50:06-04:00")));
-		myProcedureDao.update(proc);
-
-		//  https://example.com/STU3/fhirapi/Procedure?_id=PR-5000609747-20210316235006&patient=P5000609747&date=ge2021-03-15&date=le2021-03-18
-		SearchParameterMap map = SearchParameterMap.newSynchronous()
-			.add("_id", new TokenParam("A"))
-			.add("patient", new ReferenceParam("PT"))
-			.add("date", new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2021-03-15"))
-			.add("date", new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, "2021-03-18"));
-		myCaptureQueriesListener.clear();
-		IBundleProvider outcome = myProcedureDao.search(map);
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		List<String> ids = toUnqualifiedIdValues(outcome);
-		assertThat(ids, contains("Procedure/A"));
-
-
-	}
-
 
 	@Test
 	public void testDateRangeOnPeriod_SearchByDateTime_NoUpperBound() {

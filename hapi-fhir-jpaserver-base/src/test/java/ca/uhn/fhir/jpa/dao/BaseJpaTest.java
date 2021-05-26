@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
@@ -151,6 +152,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
 	@Autowired
+	protected IResourceIndexedSearchParamDateDao myResourceIndexedSearchParamDateDao;
+	@Autowired
 	private IdHelperService myIdHelperService;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
@@ -236,6 +239,12 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void logAllResourceLinks() {
 		runInTransaction(() -> {
 			ourLog.info("Resource Links:\n * {}", myResourceLinkDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected void logAllDateIndexes() {
+		runInTransaction(() -> {
+			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 	}
 

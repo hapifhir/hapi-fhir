@@ -534,9 +534,17 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			 */
 			final Set<ResourcePersistentId> includedPids = new HashSet<>();
 
-			includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
-			if (theParams.getEverythingMode() == null) {
-				includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
+			int maxIncludes = myDaoConfig.getMaximumIncludesToLoadPerPage();
+			if (theParams.getCount() != null) {
+				maxIncludes = theParams.getCount();
+			}
+			maxIncludes -= pids.size();
+
+			includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes));
+			maxIncludes -= includedPids.size();
+
+			if (theParams.getEverythingMode() == null && maxIncludes > 0) {
+				includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes));
 			}
 
 			List<ResourcePersistentId> includedPidsList = new ArrayList<>(includedPids);
