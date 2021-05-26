@@ -253,6 +253,9 @@ public class SearchBuilder implements ISearchBuilder {
 		init(theParams, theSearchUuid, theRequestPartitionId);
 
 		ArrayList<SearchQueryExecutor> queries = createQuery(myParams, null, null, null, true, theRequest, null);
+		if (queries.isEmpty()) {
+			return Collections.emptyIterator();
+		}
 		try (SearchQueryExecutor queryExecutor = queries.get(0)) {
 			return Lists.newArrayList(queryExecutor.next()).iterator();
 		}

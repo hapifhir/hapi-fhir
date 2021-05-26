@@ -4,6 +4,9 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.gclient.ICriterion;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Narrative;
@@ -107,6 +110,24 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 
 		assertEquals(new Integer(104), outcome.getTotalElement().getValue());
 		assertEquals(10, outcome.getEntry().size());
+	}
+
+	/**
+	 * Test zero counts
+	 */
+	@Test
+	public void testSearchNoHitsWithTotalAccurateSpecifiedAsDefault() {
+		myDaoConfig.setDefaultTotalMode(SearchTotalModeEnum.ACCURATE);
+
+		Bundle outcome = myClient
+			.search()
+			.forResource(Patient.class)
+			.where(new StringClientParam(Patient.SP_RES_ID).matches().value("non-existent-id"))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(new Integer(0), outcome.getTotalElement().getValue());
+		assertEquals(0, outcome.getEntry().size());
 	}
 
 	/**
