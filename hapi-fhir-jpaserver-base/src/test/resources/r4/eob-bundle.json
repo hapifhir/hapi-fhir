@@ -1,0 +1,659 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [{
+    "resource": {
+      "resourceType": "ExplanationOfBenefit",
+      "identifier": [{
+        "type": {
+          "coding": [{
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+            "code": "payerid"
+          }]
+        },
+        "system": "https://hl7.org/fhir/sid/payerid",
+        "value": "37470269207"
+      }, {
+        "type": {
+          "coding": [{
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+            "code": "uc"
+          }]
+        },
+        "system": "https://hl7.org/fhir/sid/claimid",
+        "value": "208676340"
+      }],
+      "status": "active",
+      "type": {
+        "coding": [{
+          "system": "http://terminology.hl7.org/CodeSystem/claim-type",
+          "code": "professional"
+        }]
+      },
+      "use": "claim",
+      "patient": {
+        "reference": "Patient/7ba514fa-6ec2-3203-ef80-2d142a88bb1d"
+      },
+      "billablePeriod": {
+        "start": "2021-01-06",
+        "end": "2021-01-06"
+      },
+      "created": "2021-01-06T00:00:00-08:00",
+      "insurer": {
+        "reference": "Organization/4772bdd0-7f10-d3d1-458c-db66eb2b0d17"
+      },
+      "provider": {
+        "reference": "Organization/330cfdc3-22d4-6946-bd37-4ac82e5b48c5"
+      },
+      "related": [{
+        "relationship": {
+          "coding": [{
+            "system": "http://terminology.hl7.org/CodeSystem/ex-relatedclaimrelationship",
+            "code": "prior"
+          }]
+        },
+        "reference": {
+          "type": {
+            "coding": [{
+              "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+              "code": "uc"
+            }]
+          },
+          "value": "208676157"
+        }
+      }],
+      "payee": {
+        "type": {
+          "coding": [{
+            "system": "http://terminology.hl7.org/CodeSystem/payeetype",
+            "code": "provider"
+          }],
+          "text": "Claim paid to Provider"
+        },
+        "party": {
+          "reference": "Organization/330cfdc3-22d4-6946-bd37-4ac82e5b48c5"
+        }
+      },
+      "facility": {
+        "reference": "Location/48f91ece-c048-6b55-0e37-782630e9c4d0"
+      },
+      "outcome": "complete",
+      "disposition": "PAID",
+      "careTeam": [{
+        "sequence": 1,
+        "provider": {
+          "reference": "Practitioner/dbb4fe06-98c4-e8de-3eef-f1b42e07509b"
+        },
+        "responsible": true,
+        "role": {
+          "coding": [{
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+            "code": "performing"
+          }]
+        }
+      }],
+      "supportingInfo": [{
+        "sequence": 1,
+        "category": {
+          "coding": [{
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+            "code": "clmrecvddate"
+          }]
+        },
+        "timingDate": "2021-01-06"
+      }, {
+        "sequence": 2,
+        "category": {
+          "coding": [{
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+            "code": "noncontracted"
+          }]
+        }
+      }],
+      "diagnosis": [{
+        "sequence": 1,
+        "diagnosisCodeableConcept": {
+          "coding": [{
+            "system": "http://hl7.org/fhir/sid/icd-10-cm",
+            "code": "R50.9"
+          }]
+        },
+        "type": [{
+          "coding": [{
+            "system": "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
+            "code": "principal"
+          }]
+        }]
+      }],
+      "procedure": [{
+        "sequence": 1,
+        "date": "2021-01-06T00:00:00-08:00",
+        "procedureCodeableConcept": {
+          "coding": [{
+            "system": "http://www.ama-assn.org/go/cpt",
+            "code": "99283",
+            "display": "Emergency department visit for moderate problem"
+          }],
+          "text": "EMERGENCY DEPARTMENT VISIT MODERATE SEVERITY"
+        }
+      }],
+      "insurance": [{
+        "focal": true,
+        "coverage": {
+          "reference": "urn:uuid:f556ad3d-e1a3-46f2-91d5-fd3ff57c1cef"
+        }
+      }],
+      "item": [{
+        "sequence": 1,
+        "diagnosisSequence": [1],
+        "procedureSequence": [1],
+        "productOrService": {
+          "coding": [{
+            "system": "http://www.ama-assn.org/go/cpt",
+            "code": "99283",
+            "display": "Emergency department visit for moderate problem"
+          }],
+          "text": "EMERGENCY DEPARTMENT VISIT MODERATE SEVERITY"
+        },
+        "servicedPeriod": {
+          "start": "2021-01-06",
+          "end": "2021-01-06"
+        },
+        "locationCodeableConcept": {
+          "coding": [{
+            "system": "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set",
+            "code": "23"
+          }]
+        },
+        "quantity": {
+          "value": -1,
+          "unit": "Units",
+          "system": "http://unitsofmeasure.org",
+          "code": "[arb'U]"
+        },
+        "net": {
+          "value": -2000000.0
+        },
+        "adjudication": [{
+          "category": {
+            "coding": [{
+              "system": "http://terminology.hl7.org/CodeSystem/adjudication",
+              "code": "submitted"
+            }]
+          },
+          "amount": {
+            "value": -2000000.00,
+            "currency": "USD"
+          }
+        }, {
+          "category": {
+            "coding": [{
+              "system": "http://terminology.hl7.org/CodeSystem/adjudication",
+              "code": "benefit"
+            }]
+          },
+          "amount": {
+            "value": -2000000.00,
+            "currency": "USD"
+          }
+        }, {
+          "category": {
+            "coding": [{
+              "system": "http://terminology.hl7.org/CodeSystem/adjudication",
+              "code": "copay"
+            }]
+          },
+          "amount": {
+            "value": 0.00,
+            "currency": "USD"
+          }
+        }, {
+          "category": {
+            "coding": [{
+              "system": "http://terminology.hl7.org/CodeSystem/adjudication",
+              "code": "deductible"
+            }]
+          },
+          "amount": {
+            "value": 0.00,
+            "currency": "USD"
+          }
+        }, {
+          "category": {
+            "coding": [{
+              "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+              "code": "coinsurance"
+            }]
+          },
+          "amount": {
+            "value": 0.00,
+            "currency": "USD"
+          }
+        }, {
+          "category": {
+            "coding": [{
+              "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+              "code": "memberliability"
+            }]
+          },
+          "amount": {
+            "value": 0.00,
+            "currency": "USD"
+          }
+        }, {
+          "category": {
+            "coding": [{
+              "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+              "code": "noncovered"
+            }]
+          },
+          "amount": {
+            "value": 0.00,
+            "currency": "USD"
+          }
+        }, {
+          "category": {
+            "coding": [{
+              "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+              "code": "priorpayerpaid"
+            }]
+          },
+          "amount": {
+            "value": 0.00,
+            "currency": "USD"
+          }
+        }, {
+          "category": {
+            "coding": [{
+              "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+              "code": "paidtoprovider"
+            }]
+          },
+          "amount": {
+            "value": -2000000.00,
+            "currency": "USD"
+          }
+        }, {
+          "category": {
+            "coding": [{
+              "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus",
+              "code": "outofnetwork"
+            }]
+          },
+          "amount": {
+            "value": -2000000.00,
+            "currency": "USD"
+          }
+        }]
+      }],
+      "total": [{
+        "category": {
+          "coding": [{
+            "system": "http://terminology.hl7.org/CodeSystem/adjudication",
+            "code": "submitted"
+          }]
+        },
+        "amount": {
+          "value": -2000000.00,
+          "currency": "USD"
+        }
+      }, {
+        "category": {
+          "coding": [{
+            "system": "http://terminology.hl7.org/CodeSystem/adjudication",
+            "code": "benefit"
+          }]
+        },
+        "amount": {
+          "value": -2000000.00,
+          "currency": "USD"
+        }
+      }, {
+        "category": {
+          "coding": [{
+            "system": "http://terminology.hl7.org/CodeSystem/adjudication",
+            "code": "copay"
+          }]
+        },
+        "amount": {
+          "value": 0.00,
+          "currency": "USD"
+        }
+      }, {
+        "category": {
+          "coding": [{
+            "system": "http://terminology.hl7.org/CodeSystem/adjudication",
+            "code": "deductible"
+          }]
+        },
+        "amount": {
+          "value": 0.00,
+          "currency": "USD"
+        }
+      }, {
+        "category": {
+          "coding": [{
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+            "code": "coinsurance"
+          }]
+        },
+        "amount": {
+          "value": 0.00,
+          "currency": "USD"
+        }
+      }, {
+        "category": {
+          "coding": [{
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+            "code": "memberliability"
+          }]
+        },
+        "amount": {
+          "value": 0.00,
+          "currency": "USD"
+        }
+      }, {
+        "category": {
+          "coding": [{
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+            "code": "noncovered"
+          }]
+        },
+        "amount": {
+          "value": 0.00,
+          "currency": "USD"
+        }
+      }, {
+        "category": {
+          "coding": [{
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+            "code": "priorpayerpaid"
+          }]
+        },
+        "amount": {
+          "value": 0.00,
+          "currency": "USD"
+        }
+      }, {
+        "category": {
+          "coding": [{
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+            "code": "paidtoprovider"
+          }]
+        },
+        "amount": {
+          "value": -2000000.00,
+          "currency": "USD"
+        }
+      }],
+      "payment": {
+        "date": "2021-01-11",
+        "amount": {
+          "value": -2000000.00,
+          "currency": "USD"
+        }
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "ExplanationOfBenefit?identifier=37470269207"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "7ba514fa-6ec2-3203-ef80-2d142a88bb1d",
+      "meta": {
+        "lastUpdated": "2021-05-22",
+        "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"]
+      },
+      "identifier": [{
+        "type": {
+          "coding": [{
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MR"
+          }]
+        },
+        "system": "https://foo.org/front-door",
+        "value": "A0A0A0A0"
+      }],
+      "name": [{
+        "use": "usual",
+        "text": "Rhrg Tapymgr",
+        "family": "Tapymgr",
+        "given": ["Rhrg"]
+      }],
+      "gender": "male",
+      "birthDate": "1982-05-05",
+      "address": [{
+        "use": "home",
+        "type": "postal",
+        "line": ["300 GAVEN ST"],
+        "city": "SAN FRANCISCO",
+        "state": "CA",
+        "postalCode": "94134-1113"
+      }]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Patient/7ba514fa-6ec2-3203-ef80-2d142a88bb1d"
+    }
+  }, {
+    "fullUrl": "urn:uuid:f556ad3d-e1a3-46f2-91d5-fd3ff57c1cef",
+    "resource": {
+      "resourceType": "Coverage",
+      "meta": {
+        "lastUpdated": "2021-05-22",
+        "profile": ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage"]
+      },
+      "identifier": [{
+        "type": {
+          "coding": [{
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "FILL"
+          }]
+        },
+        "system": "https://hl7.org/fhir/sid/coverageid",
+        "value": "A0A0A0A0-000088006"
+      }],
+      "status": "active",
+      "type": {
+        "coding": [{
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "HMO",
+          "display": "health maintenance organization policy"
+        }],
+        "text": "HMO - HMO COMMERCIAL-HMO"
+      },
+      "subscriberId": "110066672294",
+      "beneficiary": {
+        "reference": "Patient/7ba514fa-6ec2-3203-ef80-2d142a88bb1d"
+      },
+      "relationship": {
+        "coding": [{
+          "system": "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
+          "code": "self",
+          "display": "Self"
+        }],
+        "text": "The Beneficiary is the Subscriber"
+      },
+      "period": {
+        "start": "2018-07-01"
+      },
+      "class": [{
+        "type": {
+          "coding": [{
+            "system": "http://terminology.hl7.org/CodeSystem/coverage-class",
+            "code": "group",
+            "display": "Group"
+          }],
+          "text": "An employee group"
+        },
+        "value": "88006",
+        "name": "JEFFCO PAINTING & COATING JEFFCO PAINTING & COATING-HMO"
+      }]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Coverage?identifier=A0A0A0A0-000088006"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Organization",
+      "id": "330cfdc3-22d4-6946-bd37-4ac82e5b48c5",
+      "meta": {
+        "lastUpdated": "2021-05-22",
+        "profile": ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization"]
+      },
+      "identifier": [{
+        "type": {
+          "coding": [{
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+            "code": "npi"
+          }]
+        },
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "1649794157"
+      }, {
+        "type": {
+          "coding": [{
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "TAX"
+          }]
+        },
+        "system": "urn:oid:2.16.840.1.113883.4.4",
+        "value": "821883948"
+      }],
+      "active": true,
+      "type": [{
+        "coding": [{
+          "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+          "code": "prov"
+        }]
+      }],
+      "name": "OU MEDICAL CENTER",
+      "address": [{
+        "use": "work",
+        "type": "physical",
+        "line": ["PO BOX 277362"],
+        "city": "ATLANTA",
+        "state": "GA",
+        "postalCode": "30384-9998",
+        "country": "USA"
+      }]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Organization/330cfdc3-22d4-6946-bd37-4ac82e5b48c5"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Organization",
+      "id": "4772bdd0-7f10-d3d1-458c-db66eb2b0d17",
+      "meta": {
+        "lastUpdated": "2021-05-22",
+        "profile": ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization"]
+      },
+      "active": true,
+      "type": [{
+        "coding": [{
+          "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+          "code": "pay",
+          "display": "Payer"
+        }]
+      }],
+      "name": "FOO",
+      "telecom": [{
+        "system": "phone",
+        "value": "1-800-000-0000",
+        "use": "work"
+      }],
+      "address": [{
+        "use": "work",
+        "type": "postal",
+        "line": ["NATIONAL CLAIMS ADMINISTRATION NORTHERN CALIFORNIA", "PO Box 629028"],
+        "city": "El Dorado Hills",
+        "state": "CA",
+        "postalCode": "95762-9028"
+      }]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Organization/4772bdd0-7f10-d3d1-458c-db66eb2b0d17"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Practitioner",
+      "id": "dbb4fe06-98c4-e8de-3eef-f1b42e07509b",
+      "meta": {
+        "lastUpdated": "2021-05-22",
+        "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"]
+      },
+      "identifier": [{
+        "use": "usual",
+        "type": {
+          "coding": [{
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "NPI"
+          }]
+        },
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "1649794157"
+      }],
+      "name": [{
+        "use": "usual",
+        "text": "OU MEDICAL CENTER",
+        "family": "OU MEDICAL CENTER"
+      }],
+      "address": [{
+        "use": "work",
+        "line": ["1200 EVERETT DRIVE"],
+        "city": "OKLAHOMA CITY",
+        "state": "OK",
+        "postalCode": "73104-5047"
+      }]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Practitioner/dbb4fe06-98c4-e8de-3eef-f1b42e07509b"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Location",
+      "id": "48f91ece-c048-6b55-0e37-782630e9c4d0",
+      "meta": {
+        "lastUpdated": "2021-05-22"
+      },
+      "identifier": [{
+        "use": "usual",
+        "type": {
+          "coding": [{
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "NPI"
+          }]
+        },
+        "value": "PIN12181422"
+      }],
+      "status": "active",
+      "name": "OU MED CTR - CHILDRENS HOSPITAL",
+      "mode": "kind",
+      "type": [{
+        "coding": [{
+          "system": "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set",
+          "code": "99"
+        }]
+      }],
+      "address": {
+        "use": "work",
+        "type": "physical",
+        "line": ["1200 EVERETT DRIVE"],
+        "city": "OKLAHOMA CITY",
+        "state": "OK",
+        "postalCode": "73104-5047"
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Location/48f91ece-c048-6b55-0e37-782630e9c4d0"
+    }
+  }]
+}
