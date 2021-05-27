@@ -387,10 +387,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return myConfig;
 	}
 
-	public void setConfig(DaoConfig theConfig) {
-		myConfig = theConfig;
-	}
-
 	@Override
 	public FhirContext getContext() {
 		return myContext;
@@ -609,7 +605,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 
 			boolean skipUpdatingTags = false;
-			if (myDaoConfig.isMassIngestionMode() && theEntity.isHasTags()) {
+			if (myConfig.isMassIngestionMode() && theEntity.isHasTags()) {
 				skipUpdatingTags = true;
 			}
 
@@ -668,7 +664,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (thePerformIndexing && changed == false) {
 			if (theEntity.getId() == null) {
 				changed = true;
-			} else if (myDaoConfig.isMassIngestionMode()) {
+			} else if (myConfig.isMassIngestionMode()) {
 
 				// Don't check existing - We'll rely on the SHA256 hash only
 
@@ -692,9 +688,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		return retVal;
 	}
-
-	@Autowired
-	private DaoConfig myDaoConfig;
 
 	@SuppressWarnings("unchecked")
 	private <R extends IBaseResource> R populateResourceMetadataHapi(Class<R> theResourceType, IBaseResourceEntity theEntity, Collection<? extends BaseTag> theTagList, boolean theForHistoryOperation, IResource res, Long theVersion) {
@@ -1735,7 +1728,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	@VisibleForTesting
 	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
+		myConfig = theDaoConfig;
 	}
 
 	/**

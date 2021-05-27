@@ -151,8 +151,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
-	@Autowired
-	protected DaoConfig myDaoConfig;
 	@Autowired(required = false)
 	protected IFulltextSearchSvc mySearchDao;
 	@Autowired
@@ -236,7 +234,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		if (myDaoConfig.getResourceServerIdStrategy() == DaoConfig.IdStrategyEnum.UUID) {
+		if (getConfig().getResourceServerIdStrategy() == DaoConfig.IdStrategyEnum.UUID) {
 			theResource.setId(UUID.randomUUID().toString());
 			theResource.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED, Boolean.TRUE);
 		}
@@ -304,7 +302,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				createForcedIdIfNeeded(entity, theResource.getIdElement(), true);
 				serverAssignedId = true;
 			} else {
-				switch (myDaoConfig.getResourceClientIdStrategy()) {
+				switch (getConfig().getResourceClientIdStrategy()) {
 					case NOT_ALLOWED:
 						throw new ResourceNotFoundException(
 							getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedIdNotAllowed", theResource.getIdElement().getIdPart()));
@@ -344,7 +342,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		theResource.setId(entity.getIdDt());
 		if (serverAssignedId) {
-			switch (myDaoConfig.getResourceClientIdStrategy()) {
+			switch (getConfig().getResourceClientIdStrategy()) {
 				case NOT_ALLOWED:
 				case ALPHANUMERIC:
 					break;
@@ -550,7 +548,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		Set<ResourcePersistentId> resourceIds = myMatchResourceUrlService.search(paramMap, myResourceType, theRequest);
 
 		if (resourceIds.size() > 1) {
-			if (!myDaoConfig.isAllowMultipleDelete()) {
+			if (!getConfig().isAllowMultipleDelete()) {
 				throw new PreconditionFailedException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "DELETE", theUrl, resourceIds.size()));
 			}
 		}
@@ -563,7 +561,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	private DeleteMethodOutcome deleteExpunge(String theUrl, RequestDetails theTheRequest, Set<ResourcePersistentId> theResourceIds) {
-		if (!myDaoConfig.isExpungeEnabled() || !myDaoConfig.isDeleteExpungeEnabled()) {
+		if (!getConfig().isExpungeEnabled() || !getConfig().isDeleteExpungeEnabled()) {
 			throw new MethodNotAllowedException("_expunge is not enabled on this server");
 		}
 
@@ -643,7 +641,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	private void validateDeleteEnabled() {
-		if (!myDaoConfig.isDeleteEnabled()) {
+		if (!getConfig().isDeleteEnabled()) {
 			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "deleteBlockedBecauseDisabled");
 			throw new PreconditionFailedException(msg);
 		}
@@ -764,7 +762,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	private void validateExpungeEnabled() {
-		if (!myDaoConfig.isExpungeEnabled()) {
+		if (!getConfig().isExpungeEnabled()) {
 			throw new MethodNotAllowedException("$expunge is not enabled on this server");
 		}
 	}
@@ -870,7 +868,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			return;
 		}
 
-		if (myDaoConfig.isMarkResourcesForReindexingUponSearchParameterChange()) {
+		if (getConfig().isMarkResourcesForReindexingUponSearchParameterChange()) {
 
 			String expression = defaultString(theExpression);
 
@@ -1065,7 +1063,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@PostConstruct
 	@Override
 	public void start() {
-		assert myDaoConfig != null;
+		assert getConfig() != null;
 		
 		ourLog.debug("Starting resource DAO for type: {}", getResourceName());
 		myInstanceValidator = getApplicationContext().getBean(IInstanceValidatorModule.class);
@@ -1351,7 +1349,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new MethodNotAllowedException("Searching with _contained mode enabled is not enabled on this server");
 		}
 
-		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
+		if (getConfig().getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
 			for (List<List<IQueryParameterType>> nextAnds : theParams.values()) {
 				for (List<? extends IQueryParameterType> nextOrs : nextAnds) {
 					for (IQueryParameterType next : nextOrs) {
@@ -1416,10 +1414,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			notifyInterceptors(RestOperationTypeEnum.SEARCH_TYPE, requestDetails);
 
 			if (theRequest.isSubRequest()) {
-				Integer max = myDaoConfig.getMaximumSearchResultCountInTransaction();
+				Integer max = getConfig().getMaximumSearchResultCountInTransaction();
 				if (max != null) {
 					Validate.inclusiveBetween(1, Integer.MAX_VALUE, max, "Maximum search result count in transaction ust be a positive integer");
-					theParams.setLoadSynchronousUpTo(myDaoConfig.getMaximumSearchResultCountInTransaction());
+					theParams.setLoadSynchronousUpTo(getConfig().getMaximumSearchResultCountInTransaction());
 				}
 			}
 
@@ -1449,7 +1447,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest) {
 		return myTransactionService.execute(theRequest, tx -> {
-			theParams.setLoadSynchronousUpTo(myDaoConfig.getInternalSynchronousSearchSize());
+			theParams.setLoadSynchronousUpTo(getConfig().getInternalSynchronousSearchSize());
 
 			ISearchBuilder builder = mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
 
@@ -1622,7 +1620,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		IBaseResource oldResource;
-		if (myDaoConfig.isMassIngestionMode()) {
+		if (getConfig().isMassIngestionMode()) {
 			oldResource = null;
 		} else {
 			oldResource = toResource(entity, false);
@@ -1696,7 +1694,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			// Validate that there are no resources pointing to the candidate that
 			// would prevent deletion
 			DeleteConflictList deleteConflicts = new DeleteConflictList();
-			if (myDaoConfig.isEnforceReferentialIntegrityOnDelete()) {
+			if (getConfig().isEnforceReferentialIntegrityOnDelete()) {
 				myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, true, theRequest, new TransactionDetails());
 			}
 			DeleteConflictService.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
@@ -1766,7 +1764,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	private void validateGivenIdIsAppropriateToRetrieveResource(IIdType theId, BaseHasResource entity) {
 		if (entity.getForcedId() != null) {
-			if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
+			if (getConfig().getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
 				if (theId.isIdPartValidLong()) {
 					// This means that the resource with the given numeric ID exists, but it has a "forced ID", meaning that
 					// as far as the outside world is concerned, the given ID doesn't exist (it's just an internal pointer
@@ -1787,11 +1785,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			// Note- Throw a HAPI FHIR exception here so that hibernate doesn't try to translate it into a database exception
 			throw new InvalidRequestException("Incorrect resource type (" + theId.getResourceType() + ") for this DAO, wanted: " + myResourceName);
 		}
-	}
-
-	@VisibleForTesting
-	public void setDaoConfig(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
 	}
 
 	private static class IdChecker implements IValidatorModule {

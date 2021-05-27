@@ -236,11 +236,10 @@ public class GiantTransactionPerfTest {
 
 		myEobDao = new JpaResourceDao<>();
 		myEobDao.setContext(myCtx);
-		myEobDao.setConfig(myDaoConfig);
+		myEobDao.setDaoConfigForUnitTest(myDaoConfig);
 		myEobDao.setResourceType(ExplanationOfBenefit.class);
 		myEobDao.setApplicationContext(myAppCtx);
 		myEobDao.setTransactionService(myHapiTransactionService);
-		myEobDao.setDaoConfig(myDaoConfig);
 		myEobDao.setRequestPartitionHelperService(new MockRequestPartitionHelperSvc());
 		myEobDao.setEntityManager(myEntityManager);
 		myEobDao.setSearchParamWithInlineReferencesExtractor(mySearchParamWithInlineReferencesExtractor);
