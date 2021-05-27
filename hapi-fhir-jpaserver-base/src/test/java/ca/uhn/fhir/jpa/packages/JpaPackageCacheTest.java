@@ -14,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Locale;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -112,6 +114,16 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 	@Test
 	public void testSavePackageCorrectFhirVersion() {
 
+	}
+
+	@Test
+	public void testPackageIdHandlingIsNotCaseSensitive() throws IOException {
+		String packageNameAllLowercase = "hl7.fhir.us.davinci-cdex";
+		String packageNameUppercase = packageNameAllLowercase.toUpperCase(Locale.ROOT);
+		InputStream stream = IgInstallerDstu3Test.class.getResourceAsStream("/packages/package-davinci-cdex-0.2.0.tgz");
+
+		// The package has the ID in lower-case, so for the test we input the first parameter in upper-case & check that no error is thrown
+		assertDoesNotThrow(() -> myPackageCacheManager.addPackageToCache(packageNameUppercase, "0.2.0", stream, packageNameAllLowercase));
 	}
 
 }
