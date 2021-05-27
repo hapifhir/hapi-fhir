@@ -16,6 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.validation.constraints.Null;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -77,6 +79,12 @@ public class DaoConfig {
 	public static final int DEFAULT_MAX_EXPANSION_SIZE = 1000;
 	public static final HistoryCountModeEnum DEFAULT_HISTORY_COUNT_MODE = HistoryCountModeEnum.CACHED_ONLY_WITHOUT_OFFSET;
 	/**
+	 * This constant applies to task enablement, e.g. {@link #setEnableTaskStaleSearchCleanup(boolean)}.
+	 * <p>
+	 * By default, all are enabled.
+	 */
+	public static final boolean DEFAULT_ENABLE_TASKS = true;
+	/**
 	 * Default value for {@link #setMaximumSearchResultCountInTransaction(Integer)}
 	 *
 	 * @see #setMaximumSearchResultCountInTransaction(Integer)
@@ -86,19 +94,11 @@ public class DaoConfig {
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
 	private static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
 	private static final int DEFAULT_MAXIMUM_DELETE_CONFLICT_COUNT = 60;
-
-	/**
-	 * This constant applies to task enablement, e.g. {@link #setEnableTaskStaleSearchCleanup(boolean)}.
-	 *
-	 * By default, all are enabled.
-	 */
-	public static final boolean DEFAULT_ENABLE_TASKS = true;
-
 	/**
 	 * Child Configurations
 	 */
 	private static final Integer DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE = 10000;
-
+	public static final int DEFAULT_MAXIMUM_INCLUDES_TO_LOAD_PER_PAGE = 1000;
 	private final ModelConfig myModelConfig = new ModelConfig();
 	/**
 	 * Do not change default of {@code 0}!
@@ -106,6 +106,12 @@ public class DaoConfig {
 	 * @since 4.1.0
 	 */
 	private final int myPreExpandValueSetsDefaultOffset = 0;
+
+	/**
+	 * @since 5.5.0
+	 */
+	@Nullable
+	private Integer myMaximumIncludesToLoadPerPage = DEFAULT_MAXIMUM_INCLUDES_TO_LOAD_PER_PAGE;
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
 	/**
 	 * update setter javadoc if default changes
@@ -165,7 +171,6 @@ public class DaoConfig {
 	private StoreMetaSourceInformationEnum myStoreMetaSourceInformation = StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID;
 	private HistoryCountModeEnum myHistoryCountMode = DEFAULT_HISTORY_COUNT_MODE;
 	private int myInternalSynchronousSearchSize = DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE;
-
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -223,7 +228,6 @@ public class DaoConfig {
 	 * @since 5.5.0
 	 */
 	private boolean myEnableTaskStaleSearchCleanup;
-
 	/**
 	 * @since 5.5.0
 	 */
@@ -236,6 +240,8 @@ public class DaoConfig {
 	 * @since 5.5.0
 	 */
 	private boolean myEnableTaskBulkExportJobExecution;
+	private boolean myAccountForDateIndexNulls;
+	private boolean myTriggerSubscriptionsForNonVersioningChanges;
 
 	/**
 	 * Constructor
@@ -257,6 +263,29 @@ public class DaoConfig {
 			ourLog.info("Status based reindexing is DISABLED");
 			setStatusBasedReindexingDisabled(true);
 		}
+	}
+
+	/**
+	 * Specifies the maximum number of <code>_include</code> and <code>_revinclude</code> results to return in a
+	 * single page of results. The default is <code>1000</code>, and <code>null</code> may be used
+	 * to indicate that there is no limit.
+	 *
+	 * @since 5.5.0
+	 */
+	@Nullable
+	public Integer getMaximumIncludesToLoadPerPage() {
+		return myMaximumIncludesToLoadPerPage;
+	}
+
+	/**
+	 * Specifies the maximum number of <code>_include</code> and <code>_revinclude</code> results to return in a
+	 * single page of results. The default is <code>1000</code>, and <code>null</code> may be used
+	 * to indicate that there is no limit.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setMaximumIncludesToLoadPerPage(@Nullable Integer theMaximumIncludesToLoadPerPage) {
+		myMaximumIncludesToLoadPerPage = theMaximumIncludesToLoadPerPage;
 	}
 
 	/**
@@ -2221,10 +2250,11 @@ public class DaoConfig {
 
 	/**
 	 * <p>
-	 *    This determines the internal search size that is run synchronously during operations such as:
-	 *    1. Delete with _expunge parameter.
-	 *    2. Searching for Code System IDs by System and Code
+	 * This determines the internal search size that is run synchronously during operations such as:
+	 * 1. Delete with _expunge parameter.
+	 * 2. Searching for Code System IDs by System and Code
 	 * </p>
+	 *
 	 * @since 5.4.0
 	 */
 	public Integer getInternalSynchronousSearchSize() {
@@ -2233,10 +2263,11 @@ public class DaoConfig {
 
 	/**
 	 * <p>
-	 *    This determines the internal search size that is run synchronously during operations such as:
-	 *    1. Delete with _expunge parameter.
-	 *    2. Searching for Code System IDs by System and Code
+	 * This determines the internal search size that is run synchronously during operations such as:
+	 * 1. Delete with _expunge parameter.
+	 * 2. Searching for Code System IDs by System and Code
 	 * </p>
+	 *
 	 * @since 5.4.0
 	 */
 	public void setInternalSynchronousSearchSize(Integer theInternalSynchronousSearchSize) {
@@ -2270,8 +2301,8 @@ public class DaoConfig {
 	 *
 	 * @since 5.5.0
 	 */
-	public void setEnableTaskBulkExportJobExecution(boolean theEnableTaskBulkExportJobExecution) {
-		myEnableTaskBulkExportJobExecution = theEnableTaskBulkExportJobExecution;
+	public boolean isEnableTaskBulkExportJobExecution() {
+		return myEnableTaskBulkExportJobExecution;
 	}
 
 	/**
@@ -2280,10 +2311,9 @@ public class DaoConfig {
 	 *
 	 * @since 5.5.0
 	 */
-	public boolean isEnableTaskBulkExportJobExecution() {
-		return myEnableTaskBulkExportJobExecution;
+	public void setEnableTaskBulkExportJobExecution(boolean theEnableTaskBulkExportJobExecution) {
+		myEnableTaskBulkExportJobExecution = theEnableTaskBulkExportJobExecution;
 	}
-
 
 	/**
 	 * If this is enabled (this is the default), this server will attempt to pre-expand any ValueSets that
@@ -2331,8 +2361,8 @@ public class DaoConfig {
 	 *
 	 * @since 5.5.0
 	 */
-	public void setEnableTaskResourceReindexing(boolean theEnableTaskResourceReindexing) {
-		myEnableTaskResourceReindexing = theEnableTaskResourceReindexing;
+	public boolean isEnableTaskResourceReindexing() {
+		return myEnableTaskResourceReindexing;
 	}
 
 	/**
@@ -2341,8 +2371,50 @@ public class DaoConfig {
 	 *
 	 * @since 5.5.0
 	 */
-	public boolean isEnableTaskResourceReindexing() {
-		return myEnableTaskResourceReindexing;
+	public void setEnableTaskResourceReindexing(boolean theEnableTaskResourceReindexing) {
+		myEnableTaskResourceReindexing = theEnableTaskResourceReindexing;
+	}
+
+	/**
+	 * If set to true (default is false), date indexes will account for null values in the range columns. As of 5.3.0
+	 * we no longer place null values in these columns, but legacy data may exist that still has these values. Note that
+	 * enabling this results in more complexity in the search SQL.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setAccountForDateIndexNulls(boolean theAccountForDateIndexNulls) {
+		myAccountForDateIndexNulls = theAccountForDateIndexNulls;
+	}
+
+	/**
+	 * If set to true (default is false), date indexes will account for null values in the range columns. As of 5.3.0
+	 * we no longer place null values in these columns, but legacy data may exist that still has these values. Note that
+	 * enabling this results in more complexity in the search SQL.
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isAccountForDateIndexNulls() {
+		return myAccountForDateIndexNulls;
+	}
+
+	/**
+	 * If set to true (default is false) then subscriptions will be triggered for resource updates even if they
+	 * do not trigger a new version (e.g. $meta-add and $meta-delete).
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isTriggerSubscriptionsForNonVersioningChanges() {
+		return myTriggerSubscriptionsForNonVersioningChanges;
+	}
+
+	/**
+	 * If set to true (default is false) then subscriptions will be triggered for resource updates even if they
+	 * do not trigger a new version (e.g. $meta-add and $meta-delete).
+	 *
+	 * @since 5.5.0
+	 */
+	public void setTriggerSubscriptionsForNonVersioningChanges(boolean theTriggerSubscriptionsForNonVersioningChanges) {
+		myTriggerSubscriptionsForNonVersioningChanges = theTriggerSubscriptionsForNonVersioningChanges;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

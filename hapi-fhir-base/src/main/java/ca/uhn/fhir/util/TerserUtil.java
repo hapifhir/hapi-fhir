@@ -28,12 +28,10 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
@@ -47,18 +45,12 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public final class TerserUtil {
 
-	private static final Logger ourLog = getLogger(TerserUtil.class);
-
 	public static final String FIELD_NAME_IDENTIFIER = "identifier";
-
-	private static final String EQUALS_DEEP = "equalsDeep";
-
 	/**
 	 * Exclude for id, identifier and meta fields of a resource.
 	 */
 	public static final Collection<String> IDS_AND_META_EXCLUDES =
 		Collections.unmodifiableSet(Stream.of("id", "identifier", "meta").collect(Collectors.toSet()));
-
 	/**
 	 * Exclusion predicate for id, identifier, meta fields.
 	 */
@@ -68,7 +60,6 @@ public final class TerserUtil {
 			return !IDS_AND_META_EXCLUDES.contains(s);
 		}
 	};
-
 	/**
 	 * Exclusion predicate for id/identifier, meta and fields with empty values. This ensures that source / target resources,
 	 * empty source fields will not results in erasure of target fields.
@@ -84,7 +75,6 @@ public final class TerserUtil {
 			return !isSourceFieldEmpty;
 		}
 	};
-
 	/**
 	 * Exclusion predicate for keeping all fields.
 	 */
@@ -94,6 +84,8 @@ public final class TerserUtil {
 			return true;
 		}
 	};
+	private static final Logger ourLog = getLogger(TerserUtil.class);
+	private static final String EQUALS_DEEP = "equalsDeep";
 
 	private TerserUtil() {
 	}
@@ -448,9 +440,11 @@ public final class TerserUtil {
 	private static void replaceField(FhirTerser theTerser, IBaseResource theFrom, IBaseResource theTo, BaseRuntimeChildDefinition childDefinition) {
 		List<IBase> fromValues = childDefinition.getAccessor().getValues(theFrom);
 		List<IBase> toValues = childDefinition.getAccessor().getValues(theTo);
-		clear(toValues);
+		if (fromValues != toValues) {
+			clear(toValues);
 
-		mergeFields(theTerser, theTo, childDefinition, fromValues, toValues);
+			mergeFields(theTerser, theTo, childDefinition, fromValues, toValues);
+		}
 	}
 
 	/**

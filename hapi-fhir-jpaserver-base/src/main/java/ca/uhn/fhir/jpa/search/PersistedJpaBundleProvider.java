@@ -411,8 +411,12 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		Set<ResourcePersistentId> includedPids = new HashSet<>();
 
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
-			includedPids.addAll(theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated(), myUuid, myRequest));
-			includedPids.addAll(theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated(), myUuid, myRequest));
+			Integer maxIncludes = myDaoConfig.getMaximumIncludesToLoadPerPage();
+			includedPids.addAll(theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated(), myUuid, myRequest, maxIncludes));
+			if (maxIncludes != null) {
+				maxIncludes -= includedPids.size();
+			}
+			includedPids.addAll(theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated(), myUuid, myRequest, maxIncludes));
 		}
 
 		List<ResourcePersistentId> includedPidList = new ArrayList<>(includedPids);
@@ -439,6 +443,11 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@VisibleForTesting
 	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
 		myDaoRegistry = theDaoRegistry;
+	}
+
+	@VisibleForTesting
+	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
+		myDaoConfig = theDaoConfig;
 	}
 
 	@VisibleForTesting

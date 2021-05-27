@@ -197,34 +197,52 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 		if (operation == SearchFilterParser.CompareOperation.lt) {
 			// use lower bound first
 			if (lowerBoundInstant != null) {
-					// the value has been reduced one in this case
-					lb = theBuilder.lessThanOrEqualTo(theFrom.get(lowValueField), genericLowerBound);
+				// the value has been reduced one in this case
+				lb = theBuilder.lessThanOrEqualTo(theFrom.get(lowValueField), genericLowerBound);
+				if (myDaoConfig.isAccountForDateIndexNulls()) {
+					lb = theBuilder.or(lb, theBuilder.lessThanOrEqualTo(theFrom.get(highValueField), genericLowerBound));
+				}
 			} else {
 				if (upperBoundInstant != null) {
 					ub = theBuilder.lessThanOrEqualTo(theFrom.get(lowValueField), genericUpperBound);
+					if (myDaoConfig.isAccountForDateIndexNulls()) {
+						ub = theBuilder.or(ub, theBuilder.lessThanOrEqualTo(theFrom.get(highValueField), genericUpperBound));
+					}
 				} else {
 					throw new InvalidRequestException("lowerBound and upperBound value not correctly specified for compare theOperation");
 				}
 			}
 		} else if (operation == SearchFilterParser.CompareOperation.le) {
-				// use lower bound first
-				if (lowerBoundInstant != null) {
-					lb = theBuilder.lessThanOrEqualTo(theFrom.get(lowValueField), genericLowerBound);
-				} else {
-					if (upperBoundInstant != null) {
-						ub = theBuilder.lessThanOrEqualTo(theFrom.get(lowValueField), genericUpperBound);
-					} else {
-						throw new InvalidRequestException("lowerBound and upperBound value not correctly specified for compare theOperation");
-					}
+			// use lower bound first
+			if (lowerBoundInstant != null) {
+				lb = theBuilder.lessThanOrEqualTo(theFrom.get(lowValueField), genericLowerBound);
+				if (myDaoConfig.isAccountForDateIndexNulls()) {
+					lb = theBuilder.or(lb, theBuilder.lessThanOrEqualTo(theFrom.get(highValueField), genericLowerBound));
 				}
+			} else {
+				if (upperBoundInstant != null) {
+					ub = theBuilder.lessThanOrEqualTo(theFrom.get(lowValueField), genericUpperBound);
+					if (myDaoConfig.isAccountForDateIndexNulls()) {
+						ub = theBuilder.or(ub, theBuilder.lessThanOrEqualTo(theFrom.get(highValueField), genericUpperBound));
+					}
+				} else {
+					throw new InvalidRequestException("lowerBound and upperBound value not correctly specified for compare theOperation");
+				}
+			}
 		} else if (operation == SearchFilterParser.CompareOperation.gt) {
 			// use upper bound first, e.g value between 6 and 10
 			// gt7 true,    10>7, gt11 false,  10>11 false, gt5 true,    10>5
 			if (upperBoundInstant != null) {
 				ub = theBuilder.greaterThanOrEqualTo(theFrom.get(highValueField), genericUpperBound);
+				if (myDaoConfig.isAccountForDateIndexNulls()) {
+					ub = theBuilder.or(ub, theBuilder.greaterThanOrEqualTo(theFrom.get(lowValueField), genericUpperBound));
+				}
 			} else {
 				if (lowerBoundInstant != null) {
 					lb = theBuilder.greaterThanOrEqualTo(theFrom.get(highValueField), genericLowerBound);
+					if (myDaoConfig.isAccountForDateIndexNulls()) {
+						lb = theBuilder.or(lb, theBuilder.greaterThanOrEqualTo(theFrom.get(lowValueField), genericLowerBound));
+					}
 				} else {
 					throw new InvalidRequestException("upperBound and lowerBound value not correctly specified for compare theOperation");
 				}
@@ -233,10 +251,16 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 			// use upper bound first, e.g value between 6 and 10
 			// gt7 true,    10>7, gt11 false,  10>11 false, gt5 true,    10>5
 			if (upperBoundInstant != null) {
-				ub = theBuilder.greaterThanOrEqualTo(theFrom.get(highValueField), genericUpperBound);;
+				ub = theBuilder.greaterThanOrEqualTo(theFrom.get(highValueField), genericUpperBound);
+				if (myDaoConfig.isAccountForDateIndexNulls()) {
+					ub = theBuilder.or(ub, theBuilder.greaterThanOrEqualTo(theFrom.get(lowValueField), genericUpperBound));
+				}
 			} else {
 				if (lowerBoundInstant != null) {
 					lb = theBuilder.greaterThanOrEqualTo(theFrom.get(highValueField), genericLowerBound);
+					if (myDaoConfig.isAccountForDateIndexNulls()) {
+						lb = theBuilder.or(lb, theBuilder.greaterThanOrEqualTo(theFrom.get(lowValueField), genericLowerBound));
+					}
 				} else {
 					throw new InvalidRequestException("upperBound and lowerBound value not correctly specified for compare theOperation");
 				}

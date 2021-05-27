@@ -331,6 +331,19 @@ class TerserUtilTest {
 	}
 
 	@Test
+	public void testReplaceFields_SameValues() {
+		Patient p1 = new Patient();
+		p1.addName().setFamily("Doe");
+		Patient p2 = new Patient();
+		p2.setName(p1.getName());
+
+		TerserUtil.replaceField(ourFhirContext, "name", p1, p2);
+
+		assertEquals(1, p2.getName().size());
+		assertEquals("Doe", p2.getName().get(0).getFamily());
+	}
+
+	@Test
 	public void testReplaceFieldsByPredicate() {
 		Patient p1 = new Patient();
 		p1.addName().setFamily("Doe");
