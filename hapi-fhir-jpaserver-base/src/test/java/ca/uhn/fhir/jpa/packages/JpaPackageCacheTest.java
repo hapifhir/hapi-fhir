@@ -4,6 +4,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import org.hl7.fhir.utilities.npm.NpmPackage;
@@ -18,6 +19,7 @@ import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class JpaPackageCacheTest extends BaseJpaR4Test {
@@ -123,7 +125,15 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		InputStream stream = IgInstallerDstu3Test.class.getResourceAsStream("/packages/package-davinci-cdex-0.2.0.tgz");
 
 		// The package has the ID in lower-case, so for the test we input the first parameter in upper-case & check that no error is thrown
-		assertDoesNotThrow(() -> myPackageCacheManager.addPackageToCache(packageNameUppercase, "0.2.0", stream, packageNameAllLowercase));
+		assertDoesNotThrow(() -> myPackageCacheManager.addPackageToCache(packageNameUppercase, "0.2.0", stream, "hl7.fhir.us.davinci-cdex"));
+	}
+
+	@Test
+	public void testNonMatchingPackageIdsCauseError() throws IOException {
+		String incorrectPackageName = "hl7.fhir.us.davinci-nonsense";
+		InputStream stream = IgInstallerDstu3Test.class.getResourceAsStream("/packages/package-davinci-cdex-0.2.0.tgz");
+
+		assertThrows(InvalidRequestException.class, () -> myPackageCacheManager.addPackageToCache(incorrectPackageName, "0.2.0", stream, "hl7.fhir.us.davinci-cdex"));
 	}
 
 }
