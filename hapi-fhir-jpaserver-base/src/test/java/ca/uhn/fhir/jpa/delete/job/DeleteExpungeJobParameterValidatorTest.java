@@ -46,7 +46,7 @@ class DeleteExpungeJobParameterValidatorTest {
 	@Test
 	public void testValidate() throws JobParametersInvalidException, JsonProcessingException {
 		// setup
-		JobParameters parameters = buildJobParameters("Patient?address=memory", "Patient?name=smith");
+		JobParameters parameters = DeleteExpungeParamUtil.buildJobParameters("Patient?address=memory", "Patient?name=smith");
 		when(myMatchUrlService.translateMatchUrl(any(), any())).thenReturn(new SearchParameterMap());
 
 		// execute
@@ -57,7 +57,7 @@ class DeleteExpungeJobParameterValidatorTest {
 
 	@Test
 	public void testValidateBadType() throws JobParametersInvalidException, JsonProcessingException {
-		JobParameters parameters = buildJobParameters("Buffy?vampire=false");
+		JobParameters parameters = DeleteExpungeParamUtil.buildJobParameters("Buffy?vampire=false");
 
 		try {
 			mySvc.validate(parameters);
@@ -67,12 +67,4 @@ class DeleteExpungeJobParameterValidatorTest {
 		}
 	}
 
-	@Nonnull
-	private JobParameters buildJobParameters(String... theUrls) {
-		Map<String, JobParameter> map = new HashMap<>();
-		UrlListJson urlListJson = UrlListJson.fromUrlStrings(theUrls);
-		map.put(JOB_PARAM_URL_LIST, new JobParameter(urlListJson.toString()));
-		JobParameters parameters = new JobParameters(map);
-		return parameters;
-	}
 }

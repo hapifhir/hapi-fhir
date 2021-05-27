@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.delete.job;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.BatchConstants;
 import ca.uhn.fhir.jpa.delete.model.ParsedDeleteExpungeRecord;
+import ca.uhn.fhir.jpa.delete.model.UrlListJson;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersValidator;
@@ -33,10 +34,16 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.partition.PartitionHandler;
 import org.springframework.batch.core.partition.support.TaskExecutorPartitionHandler;
+import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.core.step.builder.TaskletStepBuilder;
+import org.springframework.batch.core.step.tasklet.Tasklet;
+import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.repeat.CompletionPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -54,6 +61,7 @@ public class DeleteExpungeJobConfig {
 	public static final String JOB_PARAM_URL_LIST = "urlList";
 	// FIXME KHS remove
 	public static final String JOB_UUID_PARAMETER = "uuid";
+	public static final String DELETE_EXPUNGE_URL_LIST_STEP = "deleteExpungeUrlListStep";
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -78,104 +86,41 @@ public class DeleteExpungeJobConfig {
 
 		return myJobBuilderFactory.get(DELETE_EXPUNGE_JOB_NAME)
 			.validator(deleteExpungeJobParameterValidator(theFhirContext, theMatchUrlService))
-			.start(deleteExpungePartitionStep())
-			.next(deleteExpungeCloseJobStep())
+			.start(deleteExpungeUrlListStep())
 			.build();
+	}
+
+	@Bean
+	@JobScope
+	public Step deleteExpungeUrlListStep() {
+		return myStepBuilderFactory.get(DELETE_EXPUNGE_URL_LIST_STEP)
+			.<String, String>chunk(1)
+			.reader(urlListReader())
+			.processor(deleteExpungeProcessor())
+			.writer(deleteExpungeResultWriter())
+			.build();
+	}
+
+	@Bean
+	@StepScope
+	public UrlListReader urlListReader() {
+		return new UrlListReader();
+	}
+
+	@Bean
+	@StepScope
+	public DeleteExpungeProcessor deleteExpungeProcessor() {
+		return new DeleteExpungeProcessor();
+	}
+
+	@Bean
+	@StepScope
+	public DeleteExpungeResultWriter deleteExpungeResultWriter() {
+		return new DeleteExpungeResultWriter();
 	}
 
 	@Bean
 	public JobParametersValidator deleteExpungeJobParameterValidator(FhirContext theFhirContext, MatchUrlService theMatchUrlService) {
 		return new DeleteExpungeJobParameterValidator(theFhirContext, theMatchUrlService);
 	}
-
-	@Bean
-	public CreateDeleteExpungeEntityTasklet createDeleteExpungeEntityTasklet() {
-		return new CreateDeleteExpungeEntityTasklet();
-	}
-
-	@Bean
-	@JobScope
-	public ActivateDeleteExpungeEntityStepListener activateDeleteExpungeEntityStepListener() {
-		return new ActivateDeleteExpungeEntityStepListener();
-	}
-
-	@Bean
-	public Step deleteExpungePartitionStep() throws Exception {
-		return myStepBuilderFactory.get("deleteExpungePartitionStep")
-			.partitioner("deleteExpungePartitionStep", deleteExpungePartitioner())
-			.partitionHandler(partitionHandler())
-			.listener(activateDeleteExpungeEntityStepListener())
-			.gridSize(10)
-			.build();
-	}
-
-	private PartitionHandler partitionHandler() throws Exception {
-		assert myTaskExecutor != null;
-
-		TaskExecutorPartitionHandler retVal = new TaskExecutorPartitionHandler();
-		retVal.setStep(deleteExpungeProcessFilesStep());
-		retVal.setTaskExecutor(myTaskExecutor);
-		retVal.afterPropertiesSet();
-		return retVal;
-	}
-
-	@Bean
-	public Step deleteExpungeCloseJobStep() {
-		return myStepBuilderFactory.get("deleteExpungeCloseJobStep")
-			.tasklet(deleteExpungeJobCloser())
-			.build();
-	}
-
-	@Bean
-	@JobScope
-	public DeleteExpungeJobCloser deleteExpungeJobCloser() {
-		return new DeleteExpungeJobCloser();
-	}
-
-	@Bean
-	@JobScope
-	public DeleteExpungePartitioner deleteExpungePartitioner() {
-		return new DeleteExpungePartitioner();
-	}
-
-
-	@Bean
-	public Step deleteExpungeProcessFilesStep() {
-		CompletionPolicy completionPolicy = completionPolicy();
-
-		return myStepBuilderFactory.get("deleteExpungeProcessFilesStep")
-			.<ParsedDeleteExpungeRecord, ParsedDeleteExpungeRecord>chunk(completionPolicy)
-			.reader(deleteExpungeFileReader())
-			.writer(deleteExpungeFileWriter())
-			.listener(deleteExpungeStepListener())
-			.listener(completionPolicy)
-			.build();
-	}
-
-	@Bean
-	@StepScope
-	public CompletionPolicy completionPolicy() {
-		return new DeleteExpungeProcessStepCompletionPolicy();
-	}
-	
-	@Bean
-	@StepScope
-	public ItemWriter<ParsedDeleteExpungeRecord> deleteExpungeFileWriter() {
-		return new DeleteExpungeFileWriter();
-	}
-
-	@Bean
-	@StepScope
-	public DeleteExpungeFileReader deleteExpungeFileReader() {
-		return new DeleteExpungeFileReader();
-	}
-	
-	@Bean
-	@StepScope
-	public DeleteExpungeStepListener deleteExpungeStepListener() {
-		return new DeleteExpungeStepListener();
-	}
-
-
-
 }

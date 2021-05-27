@@ -22,15 +22,17 @@ package ca.uhn.fhir.jpa.batch;
 
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imprt.job.BulkImportJobConfig;
+import ca.uhn.fhir.jpa.delete.job.DeleteExpungeJobConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
 //When you define a new batch job, add it here.
 @Import({
-		  CommonBatchJobConfig.class,
-		  BulkExportJobConfig.class,
-		  BulkImportJobConfig.class
+	CommonBatchJobConfig.class,
+	BulkExportJobConfig.class,
+	BulkImportJobConfig.class,
+	DeleteExpungeJobConfig.class
 })
 public class BatchJobsConfig {
 	public static final String BULK_IMPORT_JOB_NAME = "bulkImportJob";
