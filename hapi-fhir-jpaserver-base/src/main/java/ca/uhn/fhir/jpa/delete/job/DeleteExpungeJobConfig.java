@@ -22,8 +22,6 @@ package ca.uhn.fhir.jpa.delete.job;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.BatchConstants;
-import ca.uhn.fhir.jpa.delete.model.ParsedDeleteExpungeRecord;
-import ca.uhn.fhir.jpa.delete.model.UrlListJson;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersValidator;
@@ -32,18 +30,8 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.core.partition.PartitionHandler;
-import org.springframework.batch.core.partition.support.TaskExecutorPartitionHandler;
-import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.core.step.builder.TaskletStepBuilder;
-import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.repeat.CompletionPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -95,7 +83,7 @@ public class DeleteExpungeJobConfig {
 	public Step deleteExpungeUrlListStep() {
 		return myStepBuilderFactory.get(DELETE_EXPUNGE_URL_LIST_STEP)
 			.<String, String>chunk(1)
-			.reader(urlListReader())
+			.reader(reverseCronologicalBatchResourcePidReader())
 			.processor(deleteExpungeProcessor())
 			.writer(deleteExpungeResultWriter())
 			.build();
@@ -103,8 +91,8 @@ public class DeleteExpungeJobConfig {
 
 	@Bean
 	@StepScope
-	public UrlListReader urlListReader() {
-		return new UrlListReader();
+	public ReverseCronologicalBatchResourcePidReader reverseCronologicalBatchResourcePidReader() {
+		return new ReverseCronologicalBatchResourcePidReader();
 	}
 
 	@Bean
