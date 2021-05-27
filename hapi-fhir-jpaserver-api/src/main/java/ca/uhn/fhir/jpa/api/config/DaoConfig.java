@@ -211,7 +211,7 @@ public class DaoConfig {
 	/**
 	 * @since 5.2.0
 	 */
-	private boolean myUseLegacySearchBuilder = true;
+	private boolean myUseLegacySearchBuilder = false;
 	/**
 	 * update setter javadoc if default changes
 	 */

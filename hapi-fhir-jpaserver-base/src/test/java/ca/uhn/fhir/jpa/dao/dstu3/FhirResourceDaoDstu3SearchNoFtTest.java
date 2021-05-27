@@ -3733,7 +3733,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		myCaptureQueriesListener.logSelectQueries();
 		List<SqlQuery> queries = myCaptureQueriesListener.getSelectQueries();
 		assertThat(queries, hasSize(2));
-		assertTrue(queries.get(0).getSql(true, false).contains("SP_VALUE_HIGH_DATE_ORDINAL<='20210318'"));
+		assertTrue(queries.get(0).getSql(true, false).contains("SP_VALUE_HIGH_DATE_ORDINAL <= '20210318'"));
 	}
 
 	private String toStringMultiline(List<?> theResults) {
