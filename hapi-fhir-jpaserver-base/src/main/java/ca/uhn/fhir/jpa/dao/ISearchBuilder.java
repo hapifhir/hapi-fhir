@@ -34,7 +34,6 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -49,7 +48,7 @@ public interface ISearchBuilder {
 	void loadResourcesByPid(Collection<ResourcePersistentId> thePids, Collection<ResourcePersistentId> theIncludedPids, List<IBaseResource> theResourceListToPopulate, boolean theForHistoryOperation, RequestDetails theDetails);
 
 	Set<ResourcePersistentId> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<ResourcePersistentId> theMatches, Set<Include> theRevIncludes, boolean theReverseMode,
-																	 DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest);
+														DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest, Integer theMaxCount);
 
 	/**
 	 * How many results may be fetched at once

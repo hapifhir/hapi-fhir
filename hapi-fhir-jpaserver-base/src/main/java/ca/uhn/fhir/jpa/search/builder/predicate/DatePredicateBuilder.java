@@ -136,8 +136,14 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 			// use lower bound first
 			if (lowerBoundInstant != null) {
 				lb = theFrom.createPredicate(lowValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericLowerBound);
+				if (myDaoConfig.isAccountForDateIndexNulls()) {
+					lb = ComboCondition.or(lb, theFrom.createPredicate(highValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericLowerBound));
+				}
 			} else if (upperBoundInstant != null) {
 				ub = theFrom.createPredicate(lowValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound);
+				if (myDaoConfig.isAccountForDateIndexNulls()) {
+					ub = ComboCondition.or(ub, theFrom.createPredicate(highValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericLowerBound));
+				}
 			} else {
 				throw new InvalidRequestException("lowerBound and upperBound value not correctly specified for comparing " + theOperation);
 			}
@@ -145,8 +151,14 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 			// use upper bound first, e.g value between 6 and 10
 			if (upperBoundInstant != null) {
 				ub = theFrom.createPredicate(highValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericUpperBound);
+				if (myDaoConfig.isAccountForDateIndexNulls()) {
+					ub = ComboCondition.or(ub, theFrom.createPredicate(lowValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound));
+				}
 			} else if (lowerBoundInstant != null) {
 				lb = theFrom.createPredicate(highValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound);
+				if (myDaoConfig.isAccountForDateIndexNulls()) {
+					lb = ComboCondition.or(lb, theFrom.createPredicate(lowValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound));
+				}
 			} else {
 				throw new InvalidRequestException("upperBound and lowerBound value not correctly specified for compare theOperation");
 			}

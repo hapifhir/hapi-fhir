@@ -532,11 +532,16 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			 * On the other hand for async queries we load includes/revincludes
 			 * individually for pages as we return them to clients
 			 */
-			final Set<ResourcePersistentId> includedPids = new HashSet<>();
 
-			includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
-			if (theParams.getEverythingMode() == null) {
-				includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
+			Integer maxIncludes = myDaoConfig.getMaximumIncludesToLoadPerPage();
+			final Set<ResourcePersistentId> includedPids = theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes);
+
+			if (maxIncludes != null) {
+				maxIncludes -= includedPids.size();
+			}
+
+			if (theParams.getEverythingMode() == null && (maxIncludes == null || maxIncludes > 0)) {
+				includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes));
 			}
 
 			List<ResourcePersistentId> includedPidsList = new ArrayList<>(includedPids);

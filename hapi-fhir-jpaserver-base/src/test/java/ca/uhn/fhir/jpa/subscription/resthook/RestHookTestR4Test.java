@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
@@ -48,6 +49,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		ourLog.info("@AfterEach");
 		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+		myDaoConfig.setTriggerSubscriptionsForNonVersioningChanges(new DaoConfig().isTriggerSubscriptionsForNonVersioningChanges());
 	}
 
 	@Test
@@ -277,6 +279,108 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 			int changes = this.mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
 			assertEquals(0, changes);
 		}
+	}
+
+	@Test
+	public void testRestHookSubscriptionMetaAddDoesntTriggerNewDelivery() throws Exception {
+		String payload = "application/fhir+json";
+
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
+
+		createSubscription(criteria1, payload);
+		createSubscription(criteria2, payload);
+		waitForActivatedSubscriptionCount(2);
+
+		Observation obs = sendObservation(code, "SNOMED-CT");
+
+		// Should see 1 subscription notification
+		waitForQueueToDrain();
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(1, ourUpdatedObservations);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
+
+		// Send a meta-add
+		obs.setId(obs.getIdElement().toUnqualifiedVersionless());
+		myClient.meta().add().onResource(obs.getIdElement()).meta(new Meta().addTag("http://blah", "blah", null)).execute();
+
+		obs = myClient.read().resource(Observation.class).withId(obs.getIdElement().toUnqualifiedVersionless()).execute();
+		Coding tag = obs.getMeta().getTag("http://blah", "blah");
+		assertNotNull(tag);
+
+		// Should be no further deliveries
+		Thread.sleep(1000);
+		waitForQueueToDrain();
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(1, ourUpdatedObservations);
+
+		// Send a meta-delete
+		obs.setId(obs.getIdElement().toUnqualifiedVersionless());
+		myClient.meta().delete().onResource(obs.getIdElement()).meta(new Meta().addTag("http://blah", "blah", null)).execute();
+
+		obs = myClient.read().resource(Observation.class).withId(obs.getIdElement().toUnqualifiedVersionless()).execute();
+		tag = obs.getMeta().getTag("http://blah", "blah");
+		assertNull(tag);
+
+		// Should be no further deliveries
+		Thread.sleep(1000);
+		waitForQueueToDrain();
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(1, ourUpdatedObservations);
+
+	}
+
+	@Test
+	public void testRestHookSubscriptionMetaAddDoesTriggerNewDeliveryIfConfiguredToDoSo() throws Exception {
+		myDaoConfig.setTriggerSubscriptionsForNonVersioningChanges(true);
+
+		String payload = "application/fhir+json";
+
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
+
+		createSubscription(criteria1, payload);
+		createSubscription(criteria2, payload);
+		waitForActivatedSubscriptionCount(2);
+
+		Observation obs = sendObservation(code, "SNOMED-CT");
+
+		// Should see 1 subscription notification
+		waitForQueueToDrain();
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(1, ourUpdatedObservations);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
+
+		// Send a meta-add
+		obs.setId(obs.getIdElement().toUnqualifiedVersionless());
+		myClient.meta().add().onResource(obs.getIdElement()).meta(new Meta().addTag("http://blah", "blah", null)).execute();
+
+		obs = myClient.read().resource(Observation.class).withId(obs.getIdElement().toUnqualifiedVersionless()).execute();
+		Coding tag = obs.getMeta().getTag("http://blah", "blah");
+		assertNotNull(tag);
+
+		// Should be no further deliveries
+		Thread.sleep(1000);
+		waitForQueueToDrain();
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(3, ourUpdatedObservations);
+
+		// Send a meta-delete
+		obs.setId(obs.getIdElement().toUnqualifiedVersionless());
+		myClient.meta().delete().onResource(obs.getIdElement()).meta(new Meta().addTag("http://blah", "blah", null)).execute();
+
+		obs = myClient.read().resource(Observation.class).withId(obs.getIdElement().toUnqualifiedVersionless()).execute();
+		tag = obs.getMeta().getTag("http://blah", "blah");
+		assertNull(tag);
+
+		// Should be no further deliveries
+		Thread.sleep(1000);
+		waitForQueueToDrain();
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(5, ourUpdatedObservations);
+
 	}
 
 	@Test

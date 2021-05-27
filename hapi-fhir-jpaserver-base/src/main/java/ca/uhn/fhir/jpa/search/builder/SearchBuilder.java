@@ -115,7 +115,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -757,7 +756,7 @@ public class SearchBuilder implements ISearchBuilder {
 	 */
 	@Override
 	public Set<ResourcePersistentId> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<ResourcePersistentId> theMatches, Set<Include> theIncludes,
-																	  boolean theReverseMode, DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest) {
+																 boolean theReverseMode, DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest, Integer theMaxCount) {
 		if (theMatches.size() == 0) {
 			return new HashSet<>();
 		}
@@ -832,6 +831,9 @@ public class SearchBuilder implements ISearchBuilder {
 						q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
 						if (wantResourceType != null) {
 							q.setParameter("want_resource_type", wantResourceType);
+						}
+						if (theMaxCount != null) {
+							q.setMaxResults(theMaxCount);
 						}
 						List<?> results = q.getResultList();
 						for (Object nextRow : results) {
@@ -909,6 +911,9 @@ public class SearchBuilder implements ISearchBuilder {
 								q.setParameter("target_resource_types", param.getTargets());
 							}
 							List<?> results = q.getResultList();
+							if (theMaxCount != null) {
+								q.setMaxResults(theMaxCount);
+							}
 							for (Object resourceLink : results) {
 								if (resourceLink != null) {
 									ResourcePersistentId persistentId;
@@ -941,6 +946,11 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 
 			addedSomeThisRound = allAdded.addAll(pidsToInclude);
+
+			if (theMaxCount != null && allAdded.size() >= theMaxCount) {
+				break;
+			}
+
 		} while (includes.size() > 0 && nextRoundMatches.size() > 0 && addedSomeThisRound);
 
 		allAdded.removeAll(original);
@@ -1124,7 +1134,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 				if (myCurrentIterator == null) {
 					Set<Include> includes = Collections.singleton(new Include("*", true));
-					Set<ResourcePersistentId> newPids = loadIncludes(myContext, myEntityManager, myCurrentPids, includes, false, getParams().getLastUpdated(), mySearchUuid, myRequest);
+					Set<ResourcePersistentId> newPids = loadIncludes(myContext, myEntityManager, myCurrentPids, includes, false, getParams().getLastUpdated(), mySearchUuid, myRequest, null);
 					myCurrentIterator = newPids.iterator();
 				}
 
