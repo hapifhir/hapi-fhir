@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2676
+title: "When performing non-query cache JPA searches (i.e. searches with `Cache-Control: no-store`)
+   the loading of `_include` and `_revinclude` will now factor the maximum include count."

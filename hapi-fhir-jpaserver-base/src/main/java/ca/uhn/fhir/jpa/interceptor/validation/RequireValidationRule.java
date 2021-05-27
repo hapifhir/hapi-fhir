@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.interceptor.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.validation.ValidatorResourceFetcher;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ValidationResultEnrichingInterceptor;
@@ -43,11 +45,14 @@ import java.util.List;
 
 class RequireValidationRule extends BaseTypedRule {
 	private final FhirInstanceValidator myValidator;
+	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 	private ResultSeverityEnum myRejectOnSeverity = ResultSeverityEnum.ERROR;
 	private List<TagOnSeverity> myTagOnSeverity = Collections.emptyList();
 
-	public RequireValidationRule(FhirContext theFhirContext, String theType, IValidationSupport theValidationSupport, ValidatorResourceFetcher theValidatorResourceFetcher) {
+	public RequireValidationRule(FhirContext theFhirContext, String theType, IValidationSupport theValidationSupport, ValidatorResourceFetcher theValidatorResourceFetcher, IInterceptorBroadcaster theInterceptorBroadcaster) {
 		super(theFhirContext, theType);
+
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
 
 		myValidator = new FhirInstanceValidator(theValidationSupport);
 		myValidator.setValidatorResourceFetcher(theValidatorResourceFetcher);
@@ -63,6 +68,7 @@ class RequireValidationRule extends BaseTypedRule {
 	public RuleEvaluation evaluate(RequestDetails theRequestDetails, @Nonnull IBaseResource theResource) {
 
 		FhirValidator validator = getFhirContext().newValidator();
+		validator.setInterceptorBraodcaster(CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails));
 		validator.registerValidatorModule(myValidator);
 		ValidationResult outcome = validator.validateWithResult(theResource);
 

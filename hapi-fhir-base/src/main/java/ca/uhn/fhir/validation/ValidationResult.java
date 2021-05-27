@@ -149,4 +149,11 @@ public class ValidationResult {
 	public String toString() {
 		return "ValidationResult{" + "messageCount=" + myMessages.size() + ", isSuccessful=" + myIsSuccessful + ", description='" + toDescription() + '\'' + '}';
 	}
+
+	/**
+	 * @since 5.5.0
+	 */
+	public FhirContext getContext() {
+		return myCtx;
+	}
 }
