@@ -211,7 +211,7 @@ public class DaoConfig {
 	/**
 	 * @since 5.2.0
 	 */
-	private boolean myUseLegacySearchBuilder = false;
+	private boolean myUseLegacySearchBuilder = true;
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -241,7 +241,7 @@ public class DaoConfig {
 	 * @since 5.5.0
 	 */
 	private boolean myEnableTaskBulkExportJobExecution;
-	private boolean myAccountForDateIndexNulls;
+	private boolean myAccountForDateIndexNulls = true;
 	private boolean myTriggerSubscriptionsForNonVersioningChanges;
 
 	/**

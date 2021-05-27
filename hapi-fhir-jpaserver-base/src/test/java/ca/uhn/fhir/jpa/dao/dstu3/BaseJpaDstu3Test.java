@@ -93,6 +93,7 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.PractitionerRole;
+import org.hl7.fhir.dstu3.model.Procedure;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
@@ -265,6 +266,9 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myProcedureRequestDaoDstu3")
 	protected IFhirResourceDao<ProcedureRequest> myProcedureRequestDao;
+	@Autowired
+	@Qualifier("myProcedureDaoDstu3")
+	protected IFhirResourceDao<Procedure> myProcedureDao;
 	@Autowired
 	@Qualifier("myQuestionnaireDaoDstu3")
 	protected IFhirResourceDao<Questionnaire> myQuestionnaireDao;
