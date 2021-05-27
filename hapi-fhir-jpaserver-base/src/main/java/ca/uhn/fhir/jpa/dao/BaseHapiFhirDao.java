@@ -1733,6 +1733,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		ourDisableIncrementOnUpdateForUnitTest = theDisableIncrementOnUpdateForUnitTest;
 	}
 
+	@VisibleForTesting
+	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
+		myDaoConfig = theDaoConfig;
+	}
+
 	/**
 	 * Do not call this method outside of unit tests
 	 */

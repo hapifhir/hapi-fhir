@@ -176,6 +176,7 @@ public class GiantTransactionPerfTest {
 
 		mySystemDao = new FhirSystemDaoR4();
 		mySystemDao.setTransactionProcessorForUnitTest(myTransactionProcessor);
+		mySystemDao.setDaoConfigForUnitTest(myDaoConfig);
 		mySystemDao.start();
 
 		when(myAppCtx.getBean(eq(IInstanceValidatorModule.class))).thenReturn(myInstanceValidatorSvc);
@@ -247,6 +248,7 @@ public class GiantTransactionPerfTest {
 		myEobDao.setSearchParamRegistry(mySearchParamRegistry);
 		myEobDao.setSearchParamPresenceSvc(mySearchParamPresenceSvc);
 		myEobDao.setDaoSearchParamSynchronizer(myDaoSearchParamSynchronizer);
+		myEobDao.setDaoConfigForUnitTest(myDaoConfig);
 		myEobDao.start();
 
 		myDaoRegistry.setResourceDaos(Lists.newArrayList(myEobDao));

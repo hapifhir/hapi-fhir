@@ -204,7 +204,7 @@ public class IdHelperService {
 
 			} else {
 
-				String partitionIdStringForKey = RequestPartitionId.stringifyForKey(theRequestPartitionId);
+//				String partitionIdStringForKey = RequestPartitionId.stringifyForKey(theRequestPartitionId);
 				for (Iterator<String> idIterator = nextIds.iterator(); idIterator.hasNext(); ) {
 					String nextId = idIterator.next();
 					String key = toForcedIdToPidKey(theRequestPartitionId, nextResourceType, nextId);

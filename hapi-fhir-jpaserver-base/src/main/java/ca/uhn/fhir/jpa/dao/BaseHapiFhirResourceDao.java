@@ -1065,6 +1065,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@PostConstruct
 	@Override
 	public void start() {
+		assert myDaoConfig != null;
+		
 		ourLog.debug("Starting resource DAO for type: {}", getResourceName());
 		myInstanceValidator = getApplicationContext().getBean(IInstanceValidatorModule.class);
 		myTxTemplate = new TransactionTemplate(myPlatformTransactionManager);
