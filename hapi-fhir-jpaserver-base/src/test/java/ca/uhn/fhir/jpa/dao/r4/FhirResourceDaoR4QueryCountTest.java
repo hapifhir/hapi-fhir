@@ -1568,56 +1568,5 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		//		assertEquals(3, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		//		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 	}
-
-
-	@Test
-	public void testMassIngestionMode_TransactionWithChanges2() throws IOException {
-		Map<String, Map<String, RuntimeSearchParam>> sps = mySearchParamRegistry.getSpMapForUnitTest();
-		for (Map<String, RuntimeSearchParam> nextMap : sps.values()) {
-			for (Iterator<Map.Entry<String, RuntimeSearchParam>> iter = nextMap.entrySet().iterator(); iter.hasNext(); ) {
-				Map.Entry<String, RuntimeSearchParam> next = iter.next();
-				if (next.getValue().getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
-					continue;
-				}
-				if (next.getKey().equals("identifier")) {
-					continue;
-				}
-				iter.remove();
-			}
-		}
-
-		myDaoConfig.setDeleteEnabled(false);
-		myDaoConfig.setMatchUrlCache(true);
-		myDaoConfig.setMassIngestionMode(true);
-		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
-		myModelConfig.setRespectVersionsForSearchIncludes(true);
-		myModelConfig.setAutoVersionReferenceAtPaths(
-			"ExplanationOfBenefit.patient",
-			"ExplanationOfBenefit.insurance.coverage"
-		);
-
-//		mySearchParamRegistry.getActiveSearchParams()
-
-		myCaptureQueriesListener.clear();
-		mySystemDao.transaction(new SystemRequestDetails(), loadResourceFromClasspath(Bundle.class, "/r4/eob-bundle.json"));
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(13, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(25, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(7, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
-
-		myCaptureQueriesListener.clear();
-		mySystemDao.transaction(new SystemRequestDetails(), loadResourceFromClasspath(Bundle.class, "/r4/eob-bundle.json"));
-		assertEquals(15, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
-
-//		assertEquals(37, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-//		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-//		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-//		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
-	}
-
-
+	
 }

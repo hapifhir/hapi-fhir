@@ -73,14 +73,6 @@ public class ReadOnlySearchParamCache {
 		return myUrlToParam.get(theUrl);
 	}
 
-	/**
-	 * Do not call outside of unit tests!
-	 */
-	@VisibleForTesting
-	public Map<String, Map<String, RuntimeSearchParam>> getSpMapForUnitTest() {
-		return myResourceNameToSpNameToSp;
-	}
-
 	public static ReadOnlySearchParamCache fromFhirContext(FhirContext theFhirContext) {
 		ReadOnlySearchParamCache retval = new ReadOnlySearchParamCache();
 

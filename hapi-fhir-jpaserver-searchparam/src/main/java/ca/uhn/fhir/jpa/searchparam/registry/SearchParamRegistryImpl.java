@@ -45,8 +45,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nullable;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.ArrayList;
@@ -312,11 +312,6 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	@VisibleForTesting
 	public void resetForUnitTest() {
 		handleInit(Collections.emptyList());
-	}
-
-	@VisibleForTesting
-	public Map<String, Map<String, RuntimeSearchParam>> getSpMapForUnitTest() {
-		return myActiveSearchParams.getSpMapForUnitTest();
 	}
 
 }
