@@ -259,7 +259,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
-		assertEquals(3, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(4, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
@@ -1568,5 +1568,5 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		//		assertEquals(3, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		//		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 	}
-	
+
 }
