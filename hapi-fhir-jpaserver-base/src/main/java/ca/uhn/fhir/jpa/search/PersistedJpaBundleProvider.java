@@ -446,6 +446,11 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	}
 
 	@VisibleForTesting
+	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
+		myDaoConfig = theDaoConfig;
+	}
+
+	@VisibleForTesting
 	public void setSearchBuilderFactoryForUnitTest(SearchBuilderFactory theSearchBuilderFactory) {
 		mySearchBuilderFactory = theSearchBuilderFactory;
 	}

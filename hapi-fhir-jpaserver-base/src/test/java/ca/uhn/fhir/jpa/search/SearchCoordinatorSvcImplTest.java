@@ -320,6 +320,7 @@ public class SearchCoordinatorSvcImplTest {
 			SearchCoordinatorSvcImpl.SearchTask searchTask = t.getArgument(2, SearchCoordinatorSvcImpl.SearchTask.class);
 			ISearchBuilder searchBuilder = t.getArgument(3, ISearchBuilder.class);
 			PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, searchTask, searchBuilder, requestDetails);
+			retVal.setDaoConfigForUnitTest(new DaoConfig());
 			retVal.setTxManagerForUnitTest(myTxManager);
 			retVal.setSearchCoordinatorSvcForUnitTest(mySvc);
 			return retVal;
@@ -509,6 +510,7 @@ public class SearchCoordinatorSvcImplTest {
 		provider.setDaoRegistryForUnitTest(myDaoRegistry);
 		provider.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
 		provider.setSearchCoordinatorSvcForUnitTest(mySvc);
+		provider.setDaoConfigForUnitTest(new DaoConfig());
 		resources = provider.getResources(20, 40);
 		assertEquals(20, resources.size());
 		assertEquals("30", resources.get(0).getIdElement().getValueAsString());
@@ -527,6 +529,7 @@ public class SearchCoordinatorSvcImplTest {
 		provider.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
 		provider.setDaoRegistryForUnitTest(myDaoRegistry);
 		provider.setSearchCoordinatorSvcForUnitTest(mySvc);
+		provider.setDaoConfigForUnitTest(new DaoConfig());
 		return provider;
 	}
 
