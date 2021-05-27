@@ -47,6 +47,17 @@ public class IdentifierMatcherR4Test extends BaseMatcherR4Test {
 	}
 
 	@Test
+	public void testIdentifierMatchWithNoValues() {
+		Identifier left = new Identifier().setSystem(MATCHING_SYSTEM);
+		Identifier right = new Identifier().setSystem(MATCHING_SYSTEM);
+
+		MdmMatcherJson matcher = new MdmMatcherJson().setAlgorithm(MdmMatcherEnum.IDENTIFIER).setIdentifierSystem(MATCHING_SYSTEM);
+		MdmFieldMatchJson fieldMatch = new MdmFieldMatchJson().setMatcher(matcher);
+
+		assertFalse(fieldMatch.match(ourFhirContext, left, right).match);
+	}
+
+	@Test
 	public void testIdentifierNamedSystemMatch() {
 		Identifier left = new Identifier().setSystem(MATCHING_SYSTEM).setValue(MATCHING_VALUE);
 		Identifier right = new Identifier().setSystem(MATCHING_SYSTEM).setValue(MATCHING_VALUE);
