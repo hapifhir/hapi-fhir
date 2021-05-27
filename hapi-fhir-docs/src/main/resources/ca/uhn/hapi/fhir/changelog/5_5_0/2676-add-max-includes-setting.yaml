@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2676
+title: "A new setting has been added to the DaoConfig that allows the maximum number of
+  `_include` and `_revinclude` resources to be added to a single search page result."

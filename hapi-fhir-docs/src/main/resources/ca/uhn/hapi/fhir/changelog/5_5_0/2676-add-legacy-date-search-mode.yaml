@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2676
+title: "A new config option has been added to the DaoConfig that causes generated SQL statements to
+   account for potential null values in HAPI FHIR JPA date index rows. Nulls are no longer ever
+   used in this table after HAPI FHIR 5.3.0, but legacy data may still have nulls."

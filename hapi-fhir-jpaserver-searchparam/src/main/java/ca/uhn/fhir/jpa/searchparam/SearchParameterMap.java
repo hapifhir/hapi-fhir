@@ -211,8 +211,9 @@ public class SearchParameterMap implements Serializable {
 		return myCount;
 	}
 
-	public void setCount(Integer theCount) {
+	public SearchParameterMap setCount(Integer theCount) {
 		myCount = theCount;
+		return this;
 	}
 
 	public Integer getOffset() {
