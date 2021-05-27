@@ -171,11 +171,7 @@ public class DaoConfig {
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
 	private boolean myFilterParameterEnabled = false;
 	private StoreMetaSourceInformationEnum myStoreMetaSourceInformation = StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID;
-<<<<<<< HEAD
-=======
-	private HistoryCountModeEnum myHistoryCountMode = DEFAULT_HISTORY_COUNT_MODE;
 	private int myInternalSynchronousSearchSize = DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE;
->>>>>>> c8c596aff4 (Fix date search on period with no end (#2676))
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -186,12 +182,6 @@ public class DaoConfig {
 	 * @since 4.1.0
 	 */
 	private boolean myPreExpandValueSets = true;
-	/**
-	 * Do not change default of {@code 0}!
-	 *
-	 * @since 4.1.0
-	 */
-	private int myPreExpandValueSetsDefaultOffset = 0;
 	/**
 	 * Do not change default of {@code 1000}!
 	 *
@@ -222,8 +212,6 @@ public class DaoConfig {
 	 * @since 5.2.0
 	 */
 	private boolean myUseLegacySearchBuilder = false;
-<<<<<<< HEAD
-=======
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -295,52 +283,6 @@ public class DaoConfig {
 	 */
 	public void setMaximumIncludesToLoadPerPage(@Nullable Integer theMaximumIncludesToLoadPerPage) {
 		myMaximumIncludesToLoadPerPage = theMaximumIncludesToLoadPerPage;
-	}
-
-	/**
-	 * When performing a FHIR history operation, a <code>Bundle.total</code> value is included in the
-	 * response, indicating the total number of history entries. This response is calculated using a
-	 * SQL COUNT query statement which can be expensive. This setting allows the results of the count
-	 * query to be cached, resulting in a much lighter load on the server, at the expense of
-	 * returning total values that may be slightly out of date. Total counts can also be disabled,
-	 * or forced to always be accurate.
-	 * <p>
-	 * In {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET} mode, a loading cache is used to fetch the value,
-	 * meaning that only one thread per JVM will fetch the count, and others will block while waiting
-	 * for the cache to load, avoiding excessive load on the database.
-	 * </p>
-	 * <p>
-	 * Default is {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET}
-	 * </p>
-	 *
-	 * @since 5.4.0
-	 */
-	public HistoryCountModeEnum getHistoryCountMode() {
-		return myHistoryCountMode;
-	}
-
-	/**
-	 * When performing a FHIR history operation, a <code>Bundle.total</code> value is included in the
-	 * response, indicating the total number of history entries. This response is calculated using a
-	 * SQL COUNT query statement which can be expensive. This setting allows the results of the count
-	 * query to be cached, resulting in a much lighter load on the server, at the expense of
-	 * returning total values that may be slightly out of date. Total counts can also be disabled,
-	 * or forced to always be accurate.
-	 * <p>
-	 * In {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET} mode, a loading cache is used to fetch the value,
-	 * meaning that only one thread per JVM will fetch the count, and others will block while waiting
-	 * for the cache to load, avoiding excessive load on the database.
-	 * </p>
-	 * <p>
-	 * Default is {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET}
-	 * </p>
-	 *
-	 * @since 5.4.0
-	 */
-	public void setHistoryCountMode(@Nonnull HistoryCountModeEnum theHistoryCountMode) {
-
-		Validate.notNull(theHistoryCountMode, "theHistoryCountMode must not be null");
-		myHistoryCountMode = theHistoryCountMode;
 	}
 
 	/**

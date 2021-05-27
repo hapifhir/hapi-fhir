@@ -782,7 +782,18 @@ public class SearchBuilder implements ISearchBuilder {
 					iter.remove();
 				}
 
+				// Account for _include=*
 				boolean matchAll = "*".equals(nextInclude.getValue());
+
+				// Account for _include=[resourceType]:*
+				String wantResourceType = null;
+				if (!matchAll) {
+					if (nextInclude.getParamName().equals("*")) {
+						wantResourceType = nextInclude.getParamType();
+						matchAll = true;
+					}
+				}
+
 				if (matchAll) {
 					StringBuilder sqlBuilder = new StringBuilder();
 					sqlBuilder.append("SELECT r.").append(findPidFieldName);
