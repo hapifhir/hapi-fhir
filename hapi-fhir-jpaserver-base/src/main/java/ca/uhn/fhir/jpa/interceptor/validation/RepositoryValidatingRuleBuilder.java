@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.interceptor.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.validation.ValidatorResourceFetcher;
 import ca.uhn.fhir.rest.server.interceptor.ValidationResultEnrichingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -54,6 +55,8 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 	private IValidationSupport myValidationSupport;
 	@Autowired
 	private ValidatorResourceFetcher myValidatorResourceFetcher;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	/**
 	 * Begin a new rule for a specific resource type.
@@ -171,7 +174,7 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 		 * @see ValidationResultEnrichingInterceptor
 		 */
 		public FinalizedRequireValidationRule requireValidationToDeclaredProfiles() {
-			RequireValidationRule rule = new RequireValidationRule(myFhirContext, myType, myValidationSupport, myValidatorResourceFetcher);
+			RequireValidationRule rule = new RequireValidationRule(myFhirContext, myType, myValidationSupport, myValidatorResourceFetcher, myInterceptorBroadcaster);
 			myRules.add(rule);
 			return new FinalizedRequireValidationRule(rule);
 		}
@@ -248,6 +251,7 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 			}
 
 			/**
+			 * Specifies the minimum validation result severity that should cause a rejection. For example, if
 			 * Specifies the minimum validation result severity that should cause a rejection. For example, if
 			 * this is set to <code>ERROR</code> (which is the default), any validation results with a severity
 			 * of <code>ERROR</code> or <code>FATAL</code> will cause the create/update operation to be rejected and

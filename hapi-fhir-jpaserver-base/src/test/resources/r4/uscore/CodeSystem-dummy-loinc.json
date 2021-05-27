@@ -1,0 +1,33 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "loinc",
+  "url": "http://loinc.org",
+  "version": "20160128",
+  "name": "LOINC",
+  "title": "ACME Codes for Cholesterol in Serum/Plasma",
+  "status": "active",
+  "experimental": true,
+  "date": "2016-01-28",
+  "publisher": "Acme Co",
+  "description": "This is an example code system that includes all the ACME codes for serum/plasma cholesterol from v2.36.",
+  "caseSensitive": true,
+  "content": "complete",
+  "concept": [
+    {
+      "code" : "59408-5",
+      "display" : "Oxygen saturation in Arterial blood by Pulse oximetry"
+    },
+    {
+      "code" : "3151-8",
+      "display" : "Inhaled oxygen flow rate"
+    },
+    {
+      "code": "2708-6",
+      "display": "Oxygen saturation in Arterial blood"
+    },
+    {
+      "code": "3150-0",
+      "display": "Inhaled oxygen concentration"
+    }
+  ]
+}

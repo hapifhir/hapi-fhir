@@ -474,6 +474,8 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		myStructureDefinitionDao.create(sd);
 
 		Patient p = new Patient();
+		p.getText().getDiv().setValue("<div>hello</div>");
+		p.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		p.getMeta().addProfile("http://hl7.org/fhir/StructureDefinition/MyPatient421");
 		p.setActive(true);
 

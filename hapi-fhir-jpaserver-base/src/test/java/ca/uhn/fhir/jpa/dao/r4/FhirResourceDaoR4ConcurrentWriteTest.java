@@ -25,6 +25,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
@@ -147,12 +148,12 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 			creator.run();
 		}
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			Map<String, Integer> counts = new TreeMap<>();
 			myResourceTableDao
 				.findAll()
 				.stream()
-				.forEach(t->{
+				.forEach(t -> {
 					counts.putIfAbsent(t.getResourceType(), 0);
 					int value = counts.get(t.getResourceType());
 					value++;
@@ -164,7 +165,6 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		});
 
 	}
-
 
 
 	@Test
@@ -600,6 +600,65 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
+
+	}
+
+
+	@Test
+	public void testTransactionWithCreateClientAssignedIdAndReferenceToThatId() {
+		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
+		myDaoConfig.setDeleteEnabled(false);
+
+		ServletRequestDetails srd = mock(ServletRequestDetails.class);
+		String value = UserRequestRetryVersionConflictsInterceptor.RETRY + "; " + UserRequestRetryVersionConflictsInterceptor.MAX_RETRIES + "=10";
+		when(srd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.singletonList(value));
+		when(srd.getUserData()).thenReturn(new HashMap<>());
+		when(srd.getServer()).thenReturn(new RestfulServer(myFhirCtx));
+		when(srd.getInterceptorBroadcaster()).thenReturn(new InterceptorService());
+
+		List<Future<?>> futures = new ArrayList<>();
+		int repetitionCount = 3;
+		for (int i = 0; i < repetitionCount; i++) {
+			String patientId = "PATIENT" + i;
+
+			Runnable task = () -> {
+				BundleBuilder bb = new BundleBuilder(myFhirCtx);
+
+				Patient p = new Patient();
+				p.setId(patientId);
+				p.setActive(true);
+				bb.addTransactionUpdateEntry(p);
+
+				Observation obs = new Observation();
+				obs.setSubject(new Reference("Patient/" + patientId));
+				bb.addTransactionCreateEntry(obs);
+
+				ourLog.info("Submitting transaction");
+				mySystemDao.transaction(srd, (Bundle) bb.getBundle());
+			};
+
+			for (int j = 0; j < 5; j++) {
+				Future<?> future = myExecutor.submit(task);
+				futures.add(future);
+			}
+		}
+
+		// Look for failures
+		for (Future<?> next : futures) {
+			try {
+				next.get();
+				ourLog.info("Future produced success");
+			} catch (Exception e) {
+				ourLog.info("Future produced exception: {}", e.toString());
+				throw new AssertionError("Failed with message: " + e.toString(), e);
+			}
+		}
+
+		// Make sure we saved the object
+		for (int i = 0; i < repetitionCount; i++) {
+			Patient patient = myPatientDao.read(new IdType("Patient/PATIENT0"));
+			assertEquals(true, patient.getActive());
+		}
 
 	}
 

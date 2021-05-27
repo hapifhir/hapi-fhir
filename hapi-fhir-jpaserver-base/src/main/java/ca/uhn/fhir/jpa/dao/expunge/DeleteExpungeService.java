@@ -30,7 +30,7 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
-import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -87,7 +87,7 @@ public class DeleteExpungeService {
 			.add(RequestDetails.class, theRequest)
 			.addIfMatchesType(ServletRequestDetails.class, theRequest)
 			.add(String.class, theUrl);
-		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRE_DELETE_EXPUNGE, params);
+		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRE_DELETE_EXPUNGE, params);
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
 		txTemplate.executeWithoutResult(t -> validateOkToDeleteAndExpunge(thePids));
@@ -172,7 +172,7 @@ public class DeleteExpungeService {
 			.add(AtomicLong.class, theExpungedEntitiesCount)
 			.add(RequestDetails.class, theRequest)
 			.addIfMatchesType(ServletRequestDetails.class, theRequest);
-		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRE_DELETE_EXPUNGE_PID_LIST, params);
+		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRE_DELETE_EXPUNGE_PID_LIST, params);
 
 		String pidListString = thePids.toString().replace("[", "(").replace("]", ")");
 		List<ResourceForeignKey> resourceForeignKeys = myResourceTableFKProvider.getResourceForeignKeys();

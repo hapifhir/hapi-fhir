@@ -46,7 +46,7 @@ import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -291,7 +291,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			.add(RequestDetails.class, theRequest)
 			.addIfMatchesType(ServletRequestDetails.class, theRequest)
 			.add(StorageProcessingMessage.class, msg);
-		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
+		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
 	}
 
 

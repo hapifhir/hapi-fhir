@@ -104,6 +104,38 @@ class TerserUtilTest {
 	}
 
 	@Test
+	void testCloneIdentifiers() {
+		Patient p1 = new Patient();
+		p1.addIdentifier(new Identifier().setSystem("uri:mi").setValue("123456"));
+		p1.addIdentifier(new Identifier().setSystem("uri:mdi").setValue("287351247K"));
+		p1.addIdentifier(new Identifier().setSystem("uri:cdns").setValue("654841918"));
+		p1.addIdentifier(new Identifier().setSystem("uri:ssn").setValue("855191882"));
+		p1.addName().setFamily("Sat").addGiven("Joe");
+
+		Patient p2 = new Patient();
+		TerserUtil.mergeField(ourFhirContext, ourFhirContext.newTerser(), "identifier", p1, p2);
+
+		assertEquals(4, p2.getIdentifier().size());
+		assertTrue(p2.getName().isEmpty());
+	}
+
+	@Test
+	void testReplaceIdentifiers() {
+		Patient p1 = new Patient();
+		p1.addIdentifier(new Identifier().setSystem("uri:mi").setValue("123456"));
+		p1.addIdentifier(new Identifier().setSystem("uri:mdi").setValue("287351247K"));
+		p1.addIdentifier(new Identifier().setSystem("uri:cdns").setValue("654841918"));
+		p1.addIdentifier(new Identifier().setSystem("uri:ssn").setValue("855191882"));
+		p1.addName().setFamily("Sat").addGiven("Joe");
+
+		Patient p2 = new Patient();
+		TerserUtil.replaceField(ourFhirContext, "identifier", p1, p2);
+
+		assertEquals(4, p2.getIdentifier().size());
+		assertTrue(p2.getName().isEmpty());
+	}
+
+	@Test
 	void testCloneWithNonPrimitves() {
 		Patient p1 = new Patient();
 		Patient p2 = new Patient();
@@ -299,6 +331,19 @@ class TerserUtilTest {
 	}
 
 	@Test
+	public void testReplaceFields_SameValues() {
+		Patient p1 = new Patient();
+		p1.addName().setFamily("Doe");
+		Patient p2 = new Patient();
+		p2.setName(p1.getName());
+
+		TerserUtil.replaceField(ourFhirContext, "name", p1, p2);
+
+		assertEquals(1, p2.getName().size());
+		assertEquals("Doe", p2.getName().get(0).getFamily());
+	}
+
+	@Test
 	public void testReplaceFieldsByPredicate() {
 		Patient p1 = new Patient();
 		p1.addName().setFamily("Doe");
@@ -314,6 +359,7 @@ class TerserUtilTest {
 		// expect p2 to have "Doe" and MALE after replace
 		assertEquals(1, p2.getName().size());
 		assertEquals("Doe", p2.getName().get(0).getFamily());
+
 		assertEquals(Enumerations.AdministrativeGender.MALE, p2.getGender());
 		assertEquals(dob, p2.getBirthDate());
 	}

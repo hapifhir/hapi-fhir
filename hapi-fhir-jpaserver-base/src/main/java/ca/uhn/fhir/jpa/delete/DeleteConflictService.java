@@ -31,7 +31,7 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -121,7 +121,7 @@ public class DeleteConflictService {
 			.add(RequestDetails.class, theRequest)
 			.addIfMatchesType(ServletRequestDetails.class, theRequest)
 			.add(TransactionDetails.class, theTransactionDetails);
-		return (DeleteConflictOutcome) JpaInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS, hooks);
+		return (DeleteConflictOutcome) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS, hooks);
 	}
 
 	private void addConflictsToList(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, List<ResourceLink> theResultList) {

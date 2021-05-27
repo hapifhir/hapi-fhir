@@ -6,13 +6,14 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
@@ -25,6 +26,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*-
  * #%L
@@ -55,6 +58,8 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
+	@Autowired
+	private DaoConfig myDaoConfig;
 
 	private volatile MessageChannel myMatchingChannel;
 
@@ -87,6 +92,16 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
 	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequest) {
 		startIfNeeded();
+		if (!myDaoConfig.isTriggerSubscriptionsForNonVersioningChanges()) {
+			if (theOldResource != null && theNewResource != null) {
+				String oldVersion = theOldResource.getIdElement().getVersionIdPart();
+				String newVersion = theNewResource.getIdElement().getVersionIdPart();
+				if (isNotBlank(oldVersion) && isNotBlank(newVersion) && oldVersion.equals(newVersion)) {
+					return;
+				}
+			}
+		}
+
 		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE, theRequest);
 	}
 
@@ -100,7 +115,7 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 		// Interceptor call: SUBSCRIPTION_RESOURCE_MODIFIED
 		HookParams params = new HookParams()
 			.add(ResourceModifiedMessage.class, msg);
-		boolean outcome = JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, params);
+		boolean outcome = CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, params);
 		if (!outcome) {
 			return;
 		}

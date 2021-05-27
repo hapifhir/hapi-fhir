@@ -67,7 +67,7 @@ public class SearchParameterCanonicalizer {
 		myFhirContext = theFhirContext;
 	}
 
-	protected RuntimeSearchParam canonicalizeSearchParameter(IBaseResource theSearchParameter) {
+	public RuntimeSearchParam canonicalizeSearchParameter(IBaseResource theSearchParameter) {
 		RuntimeSearchParam retVal;
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU2:

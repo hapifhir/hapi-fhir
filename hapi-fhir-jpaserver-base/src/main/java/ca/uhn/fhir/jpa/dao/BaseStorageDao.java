@@ -37,7 +37,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
@@ -247,7 +247,7 @@ public abstract class BaseStorageDao {
 				.add(IPreResourceAccessDetails.class, accessDetails)
 				.add(RequestDetails.class, theRequest)
 				.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			JpaInterceptorBroadcaster.doCallHooks(getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+			CompositeInterceptorBroadcaster.doCallHooks(getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 			if (accessDetails.isDontReturnResourceAtIndex(0)) {
 				outcome.setResource(null);
 			}
@@ -264,7 +264,7 @@ public abstract class BaseStorageDao {
 					.add(IPreResourceShowDetails.class, showDetails)
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest);
-				JpaInterceptorBroadcaster.doCallHooks(getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+				CompositeInterceptorBroadcaster.doCallHooks(getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 				outcome.setResource(showDetails.getResource(0));
 			}
 		});
@@ -285,7 +285,7 @@ public abstract class BaseStorageDao {
 					.add(IPreResourceAccessDetails.class, accessDetails)
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest);
-				JpaInterceptorBroadcaster.doCallHooks(getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+				CompositeInterceptorBroadcaster.doCallHooks(getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 				if (accessDetails.isDontReturnResourceAtIndex(0)) {
 					outcome.setResource(null);
 				}
@@ -302,7 +302,7 @@ public abstract class BaseStorageDao {
 						.add(IPreResourceShowDetails.class, showDetails)
 						.add(RequestDetails.class, theRequest)
 						.addIfMatchesType(ServletRequestDetails.class, theRequest);
-					JpaInterceptorBroadcaster.doCallHooks(getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+					CompositeInterceptorBroadcaster.doCallHooks(getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 					outcome.setResource(showDetails.getResource(0));
 				}
 			});
@@ -316,7 +316,7 @@ public abstract class BaseStorageDao {
 		if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts(thePointcut)) {
 			theTransactionDetails.addDeferredInterceptorBroadcast(thePointcut, theParams);
 		} else {
-			JpaInterceptorBroadcaster.doCallHooks(getInterceptorBroadcaster(), theRequestDetails, thePointcut, theParams);
+			CompositeInterceptorBroadcaster.doCallHooks(getInterceptorBroadcaster(), theRequestDetails, thePointcut, theParams);
 		}
 	}
 

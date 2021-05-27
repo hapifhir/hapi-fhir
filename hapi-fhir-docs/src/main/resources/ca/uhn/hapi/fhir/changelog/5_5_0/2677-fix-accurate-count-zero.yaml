@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2674
+title: "When myDaoConfig.setDefaultTotalMode(SearchTotalModeEnum.ACCURATE) and there are zero search results on an _id search,
+An Index Out of Bounds error was thrown.  This has been corrected."
