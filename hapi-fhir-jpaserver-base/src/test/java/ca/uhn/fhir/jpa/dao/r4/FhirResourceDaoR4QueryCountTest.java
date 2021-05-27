@@ -1512,11 +1512,17 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 			"ExplanationOfBenefit.insurance.coverage"
 		);
 
+		Patient warmUpPt = new Patient();
+		warmUpPt.getMeta().addProfile("http://foo");
+		warmUpPt.setActive(true);
+		myPatientDao.create(warmUpPt);
+
 		AtomicInteger ai = new AtomicInteger(0);
 		Supplier<Bundle> supplier = () -> {
 			BundleBuilder bb = new BundleBuilder(myFhirCtx);
 
 			Coverage coverage = new Coverage();
+			coverage.getMeta().addProfile("http://foo");
 			coverage.setId(IdType.newRandomUuid());
 			coverage.addIdentifier().setSystem("http://coverage").setValue("12345");
 			coverage.setStatus(Coverage.CoverageStatus.ACTIVE);
@@ -1524,12 +1530,14 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 			bb.addTransactionUpdateEntry(coverage).conditional("Coverage?identifier=http://coverage|12345");
 
 			Patient patient = new Patient();
+			patient.getMeta().addProfile("http://foo");
 			patient.setId("Patient/PATIENT-A");
 			patient.setActive(true);
 			patient.addName().setFamily("SMITH").addGiven("JAMES" + ai.incrementAndGet());
 			bb.addTransactionUpdateEntry(patient);
 
 			ExplanationOfBenefit eob = new ExplanationOfBenefit();
+			eob.getMeta().addProfile("http://foo");
 			eob.addIdentifier().setSystem("http://eob").setValue("12345");
 			eob.addInsurance().setCoverage(new Reference(coverage.getId()));
 			eob.getPatient().setReference(patient.getId());
@@ -1600,7 +1608,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(new SystemRequestDetails(), loadResourceFromClasspath(Bundle.class, "/r4/eob-bundle.json"));
-		assertEquals(20, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(15, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());

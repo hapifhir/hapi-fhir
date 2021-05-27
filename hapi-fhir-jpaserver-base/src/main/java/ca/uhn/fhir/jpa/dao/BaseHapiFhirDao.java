@@ -608,49 +608,56 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			}
 
-			Set<ResourceTag> allDefs = new HashSet<>();
-			Set<ResourceTag> allTagsOld = getAllTagDefinitions(theEntity);
-
-			if (theResource instanceof IResource) {
-				extractTagsHapi(theTransactionDetails, (IResource) theResource, theEntity, allDefs);
-			} else {
-				extractTagsRi(theTransactionDetails, (IAnyResource) theResource, theEntity, allDefs);
+			boolean skipUpdatingTags = false;
+			if (myDaoConfig.isMassIngestionMode() && theEntity.isHasTags()) {
+				skipUpdatingTags = true;
 			}
 
-			RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
-			if (def.isStandardType() == false) {
-				String profile = def.getResourceProfile("");
-				if (isNotBlank(profile)) {
-					TagDefinition profileDef = getTagOrNull(theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null);
+			if (!skipUpdatingTags) {
+				Set<ResourceTag> allDefs = new HashSet<>();
+				Set<ResourceTag> allTagsOld = getAllTagDefinitions(theEntity);
 
-					ResourceTag tag = theEntity.addTag(profileDef);
-					allDefs.add(tag);
-					theEntity.setHasTags(true);
-				}
-			}
-
-			Set<ResourceTag> allTagsNew = getAllTagDefinitions(theEntity);
-			Set<TagDefinition> allDefsPresent = new HashSet<>();
-			allTagsNew.forEach(tag -> {
-
-				// Don't keep duplicate tags
-				if (!allDefsPresent.add(tag.getTag())) {
-					theEntity.getTags().remove(tag);
+				if (theResource instanceof IResource) {
+					extractTagsHapi(theTransactionDetails, (IResource) theResource, theEntity, allDefs);
+				} else {
+					extractTagsRi(theTransactionDetails, (IAnyResource) theResource, theEntity, allDefs);
 				}
 
-				// Drop any tags that have been removed
-				if (!allDefs.contains(tag)) {
-					if (shouldDroppedTagBeRemovedOnUpdate(theRequest, tag)) {
-						theEntity.getTags().remove(tag);
+				RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
+				if (def.isStandardType() == false) {
+					String profile = def.getResourceProfile("");
+					if (isNotBlank(profile)) {
+						TagDefinition profileDef = getTagOrNull(theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null);
+
+						ResourceTag tag = theEntity.addTag(profileDef);
+						allDefs.add(tag);
+						theEntity.setHasTags(true);
 					}
 				}
 
-			});
+				Set<ResourceTag> allTagsNew = getAllTagDefinitions(theEntity);
+				Set<TagDefinition> allDefsPresent = new HashSet<>();
+				allTagsNew.forEach(tag -> {
 
-			if (!allTagsOld.equals(allTagsNew)) {
-				changed = true;
+					// Don't keep duplicate tags
+					if (!allDefsPresent.add(tag.getTag())) {
+						theEntity.getTags().remove(tag);
+					}
+
+					// Drop any tags that have been removed
+					if (!allDefs.contains(tag)) {
+						if (shouldDroppedTagBeRemovedOnUpdate(theRequest, tag)) {
+							theEntity.getTags().remove(tag);
+						}
+					}
+
+				});
+
+				if (!allTagsOld.equals(allTagsNew)) {
+					changed = true;
+				}
+				theEntity.setHasTags(!allTagsNew.isEmpty());
 			}
-			theEntity.setHasTags(!allTagsNew.isEmpty());
 
 		} else {
 			theEntity.setHashSha256(null);
