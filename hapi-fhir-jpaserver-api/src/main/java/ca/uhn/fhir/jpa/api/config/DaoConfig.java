@@ -14,6 +14,9 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.validation.constraints.Null;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -74,6 +77,12 @@ public class DaoConfig {
 	// update setter javadoc if default changes
 	public static final int DEFAULT_MAX_EXPANSION_SIZE = 1000;
 	/**
+	 * This constant applies to task enablement, e.g. {@link #setEnableTaskStaleSearchCleanup(boolean)}.
+	 * <p>
+	 * By default, all are enabled.
+	 */
+	public static final boolean DEFAULT_ENABLE_TASKS = true;
+	/**
 	 * Default value for {@link #setMaximumSearchResultCountInTransaction(Integer)}
 	 *
 	 * @see #setMaximumSearchResultCountInTransaction(Integer)
@@ -83,17 +92,23 @@ public class DaoConfig {
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
 	private static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
 	private static final int DEFAULT_MAXIMUM_DELETE_CONFLICT_COUNT = 60;
-	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
 	/**
 	 * Child Configurations
 	 */
-
-	private ModelConfig myModelConfig = new ModelConfig();
-
+	private static final Integer DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE = 10000;
+	public static final int DEFAULT_MAXIMUM_INCLUDES_TO_LOAD_PER_PAGE = 1000;
+	private final ModelConfig myModelConfig = new ModelConfig();
 	/**
 	 * update setter javadoc if default changes
 	 */
-	private Long myTranslationCachesExpireAfterWriteInMinutes = DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES;
+	private final int myPreExpandValueSetsDefaultOffset = 0;
+
+	/**
+	 * @since 5.5.0
+	 */
+	@Nullable
+	private Integer myMaximumIncludesToLoadPerPage = DEFAULT_MAXIMUM_INCLUDES_TO_LOAD_PER_PAGE;
+	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -156,6 +171,11 @@ public class DaoConfig {
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
 	private boolean myFilterParameterEnabled = false;
 	private StoreMetaSourceInformationEnum myStoreMetaSourceInformation = StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID;
+<<<<<<< HEAD
+=======
+	private HistoryCountModeEnum myHistoryCountMode = DEFAULT_HISTORY_COUNT_MODE;
+	private int myInternalSynchronousSearchSize = DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE;
+>>>>>>> c8c596aff4 (Fix date search on period with no end (#2676))
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -202,6 +222,39 @@ public class DaoConfig {
 	 * @since 5.2.0
 	 */
 	private boolean myUseLegacySearchBuilder = false;
+<<<<<<< HEAD
+=======
+	/**
+	 * update setter javadoc if default changes
+	 */
+	@Nonnull
+	private Long myTranslationCachesExpireAfterWriteInMinutes = DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES;
+	/**
+	 * @since 5.4.0
+	 */
+	private boolean myMatchUrlCache;
+	/**
+	 * @since 5.5.0
+	 */
+	private boolean myEnableTaskBulkImportJobExecution;
+	/**
+	 * @since 5.5.0
+	 */
+	private boolean myEnableTaskStaleSearchCleanup;
+	/**
+	 * @since 5.5.0
+	 */
+	private boolean myEnableTaskPreExpandValueSets;
+	/**
+	 * @since 5.5.0
+	 */
+	private boolean myEnableTaskResourceReindexing;
+	/**
+	 * @since 5.5.0
+	 */
+	private boolean myEnableTaskBulkExportJobExecution;
+	private boolean myAccountForDateIndexNulls;
+	private boolean myTriggerSubscriptionsForNonVersioningChanges;
 
 	/**
 	 * Constructor
@@ -219,6 +272,75 @@ public class DaoConfig {
 			ourLog.info("Status based reindexing is DISABLED");
 			setStatusBasedReindexingDisabled(true);
 		}
+	}
+
+	/**
+	 * Specifies the maximum number of <code>_include</code> and <code>_revinclude</code> results to return in a
+	 * single page of results. The default is <code>1000</code>, and <code>null</code> may be used
+	 * to indicate that there is no limit.
+	 *
+	 * @since 5.5.0
+	 */
+	@Nullable
+	public Integer getMaximumIncludesToLoadPerPage() {
+		return myMaximumIncludesToLoadPerPage;
+	}
+
+	/**
+	 * Specifies the maximum number of <code>_include</code> and <code>_revinclude</code> results to return in a
+	 * single page of results. The default is <code>1000</code>, and <code>null</code> may be used
+	 * to indicate that there is no limit.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setMaximumIncludesToLoadPerPage(@Nullable Integer theMaximumIncludesToLoadPerPage) {
+		myMaximumIncludesToLoadPerPage = theMaximumIncludesToLoadPerPage;
+	}
+
+	/**
+	 * When performing a FHIR history operation, a <code>Bundle.total</code> value is included in the
+	 * response, indicating the total number of history entries. This response is calculated using a
+	 * SQL COUNT query statement which can be expensive. This setting allows the results of the count
+	 * query to be cached, resulting in a much lighter load on the server, at the expense of
+	 * returning total values that may be slightly out of date. Total counts can also be disabled,
+	 * or forced to always be accurate.
+	 * <p>
+	 * In {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET} mode, a loading cache is used to fetch the value,
+	 * meaning that only one thread per JVM will fetch the count, and others will block while waiting
+	 * for the cache to load, avoiding excessive load on the database.
+	 * </p>
+	 * <p>
+	 * Default is {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET}
+	 * </p>
+	 *
+	 * @since 5.4.0
+	 */
+	public HistoryCountModeEnum getHistoryCountMode() {
+		return myHistoryCountMode;
+	}
+
+	/**
+	 * When performing a FHIR history operation, a <code>Bundle.total</code> value is included in the
+	 * response, indicating the total number of history entries. This response is calculated using a
+	 * SQL COUNT query statement which can be expensive. This setting allows the results of the count
+	 * query to be cached, resulting in a much lighter load on the server, at the expense of
+	 * returning total values that may be slightly out of date. Total counts can also be disabled,
+	 * or forced to always be accurate.
+	 * <p>
+	 * In {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET} mode, a loading cache is used to fetch the value,
+	 * meaning that only one thread per JVM will fetch the count, and others will block while waiting
+	 * for the cache to load, avoiding excessive load on the database.
+	 * </p>
+	 * <p>
+	 * Default is {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET}
+	 * </p>
+	 *
+	 * @since 5.4.0
+	 */
+	public void setHistoryCountMode(@Nonnull HistoryCountModeEnum theHistoryCountMode) {
+
+		Validate.notNull(theHistoryCountMode, "theHistoryCountMode must not be null");
+		myHistoryCountMode = theHistoryCountMode;
 	}
 
 	/**
@@ -2085,6 +2207,175 @@ public class DaoConfig {
 	@Deprecated
 	public void setPreloadBlobFromInputStream(Boolean thePreloadBlobFromInputStream) {
 		// ignore
+	}
+
+	/**
+	 * <p>
+	 * This determines the internal search size that is run synchronously during operations such as:
+	 * 1. Delete with _expunge parameter.
+	 * 2. Searching for Code System IDs by System and Code
+	 * </p>
+	 *
+	 * @since 5.4.0
+	 */
+	public Integer getInternalSynchronousSearchSize() {
+		return myInternalSynchronousSearchSize;
+	}
+
+	/**
+	 * <p>
+	 * This determines the internal search size that is run synchronously during operations such as:
+	 * 1. Delete with _expunge parameter.
+	 * 2. Searching for Code System IDs by System and Code
+	 * </p>
+	 *
+	 * @since 5.4.0
+	 */
+	public void setInternalSynchronousSearchSize(Integer theInternalSynchronousSearchSize) {
+		myInternalSynchronousSearchSize = theInternalSynchronousSearchSize;
+	}
+
+
+	/**
+	 * If this is enabled (this is the default), this server will attempt to activate and run <b>Bulk Import</b>
+	 * batch jobs. Otherwise, this server will not.
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isEnableTaskBulkImportJobExecution() {
+		return myEnableTaskBulkImportJobExecution;
+	}
+
+	/**
+	 * If this is enabled (this is the default), this server will attempt to activate and run <b>Bulk Import</b>
+	 * batch jobs. Otherwise, this server will not.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setEnableTaskBulkImportJobExecution(boolean theEnableTaskBulkImportJobExecution) {
+		myEnableTaskBulkImportJobExecution = theEnableTaskBulkImportJobExecution;
+	}
+
+	/**
+	 * If this is enabled (this is the default), this server will attempt to activate and run <b>Bulk Export</b>
+	 * batch jobs. Otherwise, this server will not.
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isEnableTaskBulkExportJobExecution() {
+		return myEnableTaskBulkExportJobExecution;
+	}
+
+	/**
+	 * If this is enabled (this is the default), this server will attempt to activate and run <b>Bulk Export</b>
+	 * batch jobs. Otherwise, this server will not.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setEnableTaskBulkExportJobExecution(boolean theEnableTaskBulkExportJobExecution) {
+		myEnableTaskBulkExportJobExecution = theEnableTaskBulkExportJobExecution;
+	}
+
+	/**
+	 * If this is enabled (this is the default), this server will attempt to pre-expand any ValueSets that
+	 * have been uploaded and are not yet pre-expanded. Otherwise, this server will not.
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isEnableTaskPreExpandValueSets() {
+		return myEnableTaskPreExpandValueSets;
+	}
+
+	/**
+	 * If this is enabled (this is the default), this server will attempt to pre-expand any ValueSets that
+	 * have been uploaded and are not yet pre-expanded. Otherwise, this server will not.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setEnableTaskPreExpandValueSets(boolean theEnableTaskPreExpandValueSets) {
+		myEnableTaskPreExpandValueSets = theEnableTaskPreExpandValueSets;
+	}
+
+	/**
+	 * If this is enabled (this is the default), this server will periodically scan for and try to delete
+	 * stale searches in the database. Otherwise, this server will not.
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isEnableTaskStaleSearchCleanup() {
+		return myEnableTaskStaleSearchCleanup;
+	}
+
+	/**
+	 * If this is enabled (this is the default), this server will periodically scan for and try to delete
+	 * stale searches in the database. Otherwise, this server will not.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setEnableTaskStaleSearchCleanup(boolean theEnableTaskStaleSearchCleanup) {
+		myEnableTaskStaleSearchCleanup = theEnableTaskStaleSearchCleanup;
+	}
+
+	/**
+	 * If this is enabled (this is the default), this server will attempt to run resource reindexing jobs.
+	 * Otherwise, this server will not.
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isEnableTaskResourceReindexing() {
+		return myEnableTaskResourceReindexing;
+	}
+
+	/**
+	 * If this is enabled (this is the default), this server will attempt to run resource reindexing jobs.
+	 * Otherwise, this server will not.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setEnableTaskResourceReindexing(boolean theEnableTaskResourceReindexing) {
+		myEnableTaskResourceReindexing = theEnableTaskResourceReindexing;
+	}
+
+	/**
+	 * If set to true (default is false), date indexes will account for null values in the range columns. As of 5.3.0
+	 * we no longer place null values in these columns, but legacy data may exist that still has these values. Note that
+	 * enabling this results in more complexity in the search SQL.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setAccountForDateIndexNulls(boolean theAccountForDateIndexNulls) {
+		myAccountForDateIndexNulls = theAccountForDateIndexNulls;
+	}
+
+	/**
+	 * If set to true (default is false), date indexes will account for null values in the range columns. As of 5.3.0
+	 * we no longer place null values in these columns, but legacy data may exist that still has these values. Note that
+	 * enabling this results in more complexity in the search SQL.
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isAccountForDateIndexNulls() {
+		return myAccountForDateIndexNulls;
+	}
+
+	/**
+	 * If set to true (default is false) then subscriptions will be triggered for resource updates even if they
+	 * do not trigger a new version (e.g. $meta-add and $meta-delete).
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isTriggerSubscriptionsForNonVersioningChanges() {
+		return myTriggerSubscriptionsForNonVersioningChanges;
+	}
+
+	/**
+	 * If set to true (default is false) then subscriptions will be triggered for resource updates even if they
+	 * do not trigger a new version (e.g. $meta-add and $meta-delete).
+	 *
+	 * @since 5.5.0
+	 */
+	public void setTriggerSubscriptionsForNonVersioningChanges(boolean theTriggerSubscriptionsForNonVersioningChanges) {
+		myTriggerSubscriptionsForNonVersioningChanges = theTriggerSubscriptionsForNonVersioningChanges;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

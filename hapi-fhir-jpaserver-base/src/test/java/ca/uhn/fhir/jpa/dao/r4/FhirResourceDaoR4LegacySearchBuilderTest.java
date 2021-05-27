@@ -100,6 +100,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -180,6 +181,7 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 		myDaoConfig.setUseLegacySearchBuilder(false);
+		myDaoConfig.setAccountForDateIndexNulls(false);
 	}
 
 	@BeforeEach
@@ -567,7 +569,7 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 			ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
-		SearchParameterMap map =  SearchParameterMap.newSynchronous();
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add(MedicationAdministration.SP_MEDICATION, new ReferenceAndListParam().addAnd(new ReferenceOrListParam().add(new ReferenceParam("code", "04823543"))));
 
 		myCaptureQueriesListener.clear();
@@ -577,6 +579,188 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 
 		assertThat(ids, contains(moId.getValue()));
 	}
+
+
+	/**
+	 * Simulate data that had been loaded in before we started adding placeholder dates to complete the range
+	 */
+	@Test
+	public void testDateOnPeriod_NoEnd_NoMaxValueInDatabase_NonLegacySearchBuilder() {
+		myDaoConfig.setUseLegacySearchBuilder(false);
+		myDaoConfig.setAccountForDateIndexNulls(true);
+
+		Patient pt = new Patient();
+		pt.setId("PT");
+		pt.setActive(true);
+		myPatientDao.update(pt);
+
+		// Should match
+		Procedure proc = new Procedure();
+		proc.setId("A");
+		proc.setSubject(new Reference("Patient/PT"));
+		proc.setPerformed(new Period().setStartElement(new DateTimeType("2021-03-16T23:50:06-04:00")));
+		myProcedureDao.update(proc);
+
+		// Shouldn't match
+		proc = new Procedure();
+		proc.setId("B");
+		proc.setSubject(new Reference("Patient/PT"));
+		proc.setPerformed(new Period().setStartElement(new DateTimeType("2021-12-31T23:50:06-04:00")));
+		myProcedureDao.update(proc);
+
+		logAllDateIndexes();
+
+		runInTransaction(() -> {
+			myEntityManager.createQuery("UPDATE ResourceIndexedSearchParamDate d SET d.myValueHigh = NULL").executeUpdate();
+			myEntityManager.createQuery("UPDATE ResourceIndexedSearchParamDate d SET d.myValueHighDateOrdinal = NULL").executeUpdate();
+		});
+
+		logAllDateIndexes();
+
+		SearchParameterMap map;
+		IBundleProvider outcome;
+		List<String> ids;
+
+		// >= date / <= date
+		map = SearchParameterMap.newSynchronous()
+			.add("_id", new TokenParam("A"))
+			.add("patient", new ReferenceParam("PT"))
+			.add("date", new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2021-03-15"))
+			.add("date", new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, "2021-03-18"));
+		myCaptureQueriesListener.clear();
+		outcome = myProcedureDao.search(map);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		ids = toUnqualifiedVersionlessIdValues(outcome);
+		assertThat(ids, contains("Procedure/A"));
+
+		// > date / < date
+		map = SearchParameterMap.newSynchronous()
+			.add("_id", new TokenParam("A"))
+			.add("patient", new ReferenceParam("PT"))
+			.add("date", new DateParam(ParamPrefixEnum.GREATERTHAN, "2021-03-15"))
+			.add("date", new DateParam(ParamPrefixEnum.LESSTHAN, "2021-03-18"));
+		myCaptureQueriesListener.clear();
+		outcome = myProcedureDao.search(map);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		ids = toUnqualifiedVersionlessIdValues(outcome);
+		assertThat(ids, contains("Procedure/A"));
+
+		// >= datetime / <= datetime
+		map = SearchParameterMap.newSynchronous()
+			.add("_id", new TokenParam("A"))
+			.add("patient", new ReferenceParam("PT"))
+			.add("date", new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2021-03-15T00:11:22Z"))
+			.add("date", new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, "2021-03-18T00:11:22Z"));
+		myCaptureQueriesListener.clear();
+		outcome = myProcedureDao.search(map);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		ids = toUnqualifiedVersionlessIdValues(outcome);
+		assertThat(ids, contains("Procedure/A"));
+
+		// > datetime / < datetime
+		map = SearchParameterMap.newSynchronous()
+			.add("_id", new TokenParam("A"))
+			.add("patient", new ReferenceParam("PT"))
+			.add("date", new DateParam(ParamPrefixEnum.GREATERTHAN, "2021-03-15T00:11:22Z"))
+			.add("date", new DateParam(ParamPrefixEnum.LESSTHAN, "2021-03-18T00:11:22Z"));
+		myCaptureQueriesListener.clear();
+		outcome = myProcedureDao.search(map);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		ids = toUnqualifiedVersionlessIdValues(outcome);
+		assertThat(ids, contains("Procedure/A"));
+	}
+
+
+	/**
+	 * Simulate data that had been loaded in before we started adding placeholder dates to complete the range
+	 */
+	@Test
+	public void testDateOnPeriod_NoEnd_NoMaxValueInDatabase_LegacySearchBuilder() {
+		myDaoConfig.setUseLegacySearchBuilder(true);
+		myDaoConfig.setAccountForDateIndexNulls(true);
+
+		Patient pt = new Patient();
+		pt.setId("PT");
+		pt.setActive(true);
+		myPatientDao.update(pt);
+
+		// Should match
+		Procedure proc = new Procedure();
+		proc.setId("A");
+		proc.setSubject(new Reference("Patient/PT"));
+		proc.setPerformed(new Period().setStartElement(new DateTimeType("2021-03-16T23:50:06-04:00")));
+		myProcedureDao.update(proc);
+
+		// Shouldn't match
+		proc = new Procedure();
+		proc.setId("B");
+		proc.setSubject(new Reference("Patient/PT"));
+		proc.setPerformed(new Period().setStartElement(new DateTimeType("2021-12-31T23:50:06-04:00")));
+		myProcedureDao.update(proc);
+
+		logAllDateIndexes();
+
+		runInTransaction(() -> {
+			myEntityManager.createQuery("UPDATE ResourceIndexedSearchParamDate d SET d.myValueHigh = NULL").executeUpdate();
+			myEntityManager.createQuery("UPDATE ResourceIndexedSearchParamDate d SET d.myValueHighDateOrdinal = NULL").executeUpdate();
+		});
+
+		logAllDateIndexes();
+
+		SearchParameterMap map;
+		IBundleProvider outcome;
+		List<String> ids;
+
+		// >= date / <= date
+		map = SearchParameterMap.newSynchronous()
+			.add("_id", new TokenParam("A"))
+			.add("patient", new ReferenceParam("PT"))
+			.add("date", new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2021-03-15"))
+			.add("date", new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, "2021-03-18"));
+		myCaptureQueriesListener.clear();
+		outcome = myProcedureDao.search(map);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		ids = toUnqualifiedVersionlessIdValues(outcome);
+		assertThat(ids, contains("Procedure/A"));
+
+		// > date / < date
+		map = SearchParameterMap.newSynchronous()
+			.add("_id", new TokenParam("A"))
+			.add("patient", new ReferenceParam("PT"))
+			.add("date", new DateParam(ParamPrefixEnum.GREATERTHAN, "2021-03-15"))
+			.add("date", new DateParam(ParamPrefixEnum.LESSTHAN, "2021-03-18"));
+		myCaptureQueriesListener.clear();
+		outcome = myProcedureDao.search(map);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		ids = toUnqualifiedVersionlessIdValues(outcome);
+		assertThat(ids, contains("Procedure/A"));
+
+		// >= datetime / <= datetime
+		map = SearchParameterMap.newSynchronous()
+			.add("_id", new TokenParam("A"))
+			.add("patient", new ReferenceParam("PT"))
+			.add("date", new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2021-03-15T00:11:22Z"))
+			.add("date", new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, "2021-03-18T00:11:22Z"));
+		myCaptureQueriesListener.clear();
+		outcome = myProcedureDao.search(map);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		ids = toUnqualifiedVersionlessIdValues(outcome);
+		assertThat(ids, contains("Procedure/A"));
+
+		// > datetime / < datetime
+		map = SearchParameterMap.newSynchronous()
+			.add("_id", new TokenParam("A"))
+			.add("patient", new ReferenceParam("PT"))
+			.add("date", new DateParam(ParamPrefixEnum.GREATERTHAN, "2021-03-15T00:11:22Z"))
+			.add("date", new DateParam(ParamPrefixEnum.LESSTHAN, "2021-03-18T00:11:22Z"));
+		myCaptureQueriesListener.clear();
+		outcome = myProcedureDao.search(map);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		ids = toUnqualifiedVersionlessIdValues(outcome);
+		assertThat(ids, contains("Procedure/A"));
+	}
+
+
 
 	@Test
 	public void testEmptyChain() {
@@ -735,8 +919,8 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 		pat2.getManagingOrganization().setReferenceElement(orgId);
 		IIdType patId2 = myPatientDao.create(pat2, mySrd).getId().toUnqualifiedVersionless();
 
-		runInTransaction(()->{
-			ourLog.info("Links:\n * {}", myResourceLinkDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		runInTransaction(() -> {
+			ourLog.info("Links:\n * {}", myResourceLinkDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 		// All patient IDs
@@ -3678,8 +3862,8 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam2");
 		myPatientDao.create(patient, mySrd);
 
-		runInTransaction(()->{
-			ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().filter(t->t.getParamName().equals("identifier")).map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		runInTransaction(() -> {
+			ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().filter(t -> t.getParamName().equals("identifier")).map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 		{
@@ -3721,8 +3905,8 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 			female = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
 		}
 
-		runInTransaction(()->{
-			ourLog.info("Tokens:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		runInTransaction(() -> {
+			ourLog.info("Tokens:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 		List<String> patients;
@@ -5211,9 +5395,9 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 		c3.getEncounter().setReference(e3Id);
 		myCommunicationDao.create(c3);
 
-		runInTransaction(()->{
-			ourLog.info("Links:\n * {}", myResourceLinkDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
-			ourLog.info("Dates:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		runInTransaction(() -> {
+			ourLog.info("Links:\n * {}", myResourceLinkDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Dates:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 		SearchParameterMap map;
