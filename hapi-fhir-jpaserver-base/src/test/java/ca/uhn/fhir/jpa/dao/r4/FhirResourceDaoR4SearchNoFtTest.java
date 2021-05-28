@@ -4426,7 +4426,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertEquals(2, countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
 			assertEquals(2, countMatches(searchQuery.toLowerCase(), "hash_identity"), searchQuery);
 			// - query is changed 'or' is removed
-			assertEquals(2, countMatches(searchQuery.toLowerCase(), "sp_value_low"), searchQuery);
+			assertEquals(4, countMatches(searchQuery.toLowerCase(), "sp_value_low"), searchQuery);
 		}
 
 		// Period search
