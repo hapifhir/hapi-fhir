@@ -275,10 +275,10 @@ public class TestRestfulServer extends RestfulServer {
 		 * OpenAPI
 		 */
 		registerInterceptor(new OpenApiInterceptor());
-        
+
 		// Logging for request type
 		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
-		loggingInterceptor.setMessageFormat("ContentType / Accept for ${operationType}: ${requestHeader.content-type} / ${requestHeader.accept}");
+		loggingInterceptor.setMessageFormat("${operationType} Content-Type: ${requestHeader.content-type} - Accept: ${responseEncodingNoDefault} \"${requestHeader.accept}\" - Agent: ${requestHeader.user-agent}");
 		registerInterceptor(loggingInterceptor);
 
 	}
