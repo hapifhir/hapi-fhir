@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
@@ -123,4 +124,5 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	protected String getResourceName() {
 		return null;
 	}
+
 }

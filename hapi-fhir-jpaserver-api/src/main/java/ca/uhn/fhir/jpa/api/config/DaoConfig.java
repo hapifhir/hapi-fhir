@@ -240,6 +240,7 @@ public class DaoConfig {
 	 * @since 5.5.0
 	 */
 	private boolean myEnableTaskBulkExportJobExecution;
+	private boolean myMassIngestionMode;
 	private boolean myAccountForDateIndexNulls;
 	private boolean myTriggerSubscriptionsForNonVersioningChanges;
 
@@ -2363,6 +2364,40 @@ public class DaoConfig {
 	 */
 	public boolean isEnableTaskResourceReindexing() {
 		return myEnableTaskResourceReindexing;
+	}
+
+	/**
+	 * If this is enabled (disabled by default), Mass Ingestion Mode is enabled. In this mode, a number of
+	 * runtime checks are disabled. This mode is designed for rapid backloading of data while the system is not
+	 * being otherwise used.
+	 *
+	 * In this mode:
+	 *
+	 * - Tags/Profiles/Security Labels will not be updated on existing resources that already have them
+	 * - Resources modification checks will be skipped in favour of a simple hash check
+	 * - Extra resource ID caching is enabled
+	 *
+	 * @since 5.5.0
+	 */
+	public void setMassIngestionMode(boolean theMassIngestionMode) {
+		myMassIngestionMode = theMassIngestionMode;
+	}
+
+	/**
+	 * If this is enabled (disabled by default), Mass Ingestion Mode is enabled. In this mode, a number of
+	 * runtime checks are disabled. This mode is designed for rapid backloading of data while the system is not
+	 * being otherwise used.
+	 *
+	 * In this mode:
+	 *
+	 * - Tags/Profiles/Security Labels will not be updated on existing resources that already have them
+	 * - Resources modification checks will be skipped in favour of a simple hash check
+	 * - Extra resource ID caching is enabled
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isMassIngestionMode() {
+		return myMassIngestionMode;
 	}
 
 	/**

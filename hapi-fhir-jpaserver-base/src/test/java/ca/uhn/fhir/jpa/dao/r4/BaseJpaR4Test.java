@@ -79,6 +79,7 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.parser.IParser;
@@ -473,6 +474,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected ITermConceptMapDao myTermConceptMapDao;
 	@Autowired
 	protected ITermConceptMapGroupElementTargetDao myTermConceptMapGroupElementTargetDao;
+	@Autowired
+	protected MemoryCacheService myMemoryCacheService;
 	@Autowired
 	protected ICacheWarmingSvc myCacheWarmingSvc;
 	protected IServerInterceptor myInterceptor;

@@ -1142,7 +1142,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			myPatientDao.create(pt).getId().getIdPartAsLong();
 		}
 
-
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_ORGANIZATION, new ReferenceOrListParam()
@@ -1162,8 +1161,40 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			.map(t -> t.getSql(true, false))
 			.collect(Collectors.toList());
 
-		// Forced ID resolution
+		// No resolution of the forced IDs since they should already be in the
+		// cache from the original write operation. So:
+		// 1 - perform the search
+		// 2 - load the results
+		assertEquals(2, queries.size());
+
+		// The search itself
 		String resultingQueryNotFormatted = queries.get(0);
+		assertEquals(1, StringUtils.countMatches(resultingQueryNotFormatted, "Patient.managingOrganization"), resultingQueryNotFormatted);
+		assertThat(resultingQueryNotFormatted, matchesPattern(".*TARGET_RESOURCE_ID IN \\('[0-9]+','[0-9]+','[0-9]+','[0-9]+','[0-9]+'\\).*"));
+
+		// Ensure that the search actually worked
+		assertEquals(5, search.size().intValue());
+
+		/*
+		 * Now clear the caches and make sure the lookup works as expected
+		 */
+
+		myMemoryCacheService.invalidateAllCaches();
+		myCaptureQueriesListener.clear();
+		search = myPatientDao.search(map);
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		queries = myCaptureQueriesListener
+			.getSelectQueriesForCurrentThread()
+			.stream()
+			.map(t -> t.getSql(true, false))
+			.collect(Collectors.toList());
+
+		// The first query is the forced ID resolution this time
+		assertEquals(3, queries.size());
+
+		// Forced ID resolution
+		resultingQueryNotFormatted = queries.get(0);
 		assertThat(resultingQueryNotFormatted, containsString("RESOURCE_TYPE='Organization'"));
 		assertThat(resultingQueryNotFormatted, containsString("FORCED_ID in ('ORG0' , 'ORG1' , 'ORG2' , 'ORG3' , 'ORG4')"));
 
