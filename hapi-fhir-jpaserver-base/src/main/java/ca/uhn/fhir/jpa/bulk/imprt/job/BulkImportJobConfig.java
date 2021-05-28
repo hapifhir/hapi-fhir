@@ -41,6 +41,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.core.task.TaskExecutor;
 
 import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.BULK_IMPORT_JOB_NAME;
+import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.BULK_IMPORT_PROCESSING_STEP;
 
 /**
  * Spring batch Job configuration file. Contains all necessary plumbing to run a
@@ -66,7 +67,7 @@ public class BulkImportJobConfig {
 	public Job bulkImportJob() throws Exception {
 		return myJobBuilderFactory.get(BULK_IMPORT_JOB_NAME)
 			.validator(bulkImportJobParameterValidator())
-			.start(bulkImportPartitionStep())
+			.start(bulkImportProcessingStep())
 			.next(bulkImportCloseJobStep())
 			.build();
 	}
@@ -88,9 +89,9 @@ public class BulkImportJobConfig {
 	}
 
 	@Bean
-	public Step bulkImportPartitionStep() throws Exception {
-		return myStepBuilderFactory.get("bulkImportPartitionStep")
-			.partitioner("bulkImportPartitionStep", bulkImportPartitioner())
+	public Step bulkImportProcessingStep() throws Exception {
+		return myStepBuilderFactory.get(BULK_IMPORT_PROCESSING_STEP)
+			.partitioner(BULK_IMPORT_PROCESSING_STEP, bulkImportPartitioner())
 			.partitionHandler(partitionHandler())
 			.listener(activateBulkImportEntityStepListener())
 			.gridSize(10)

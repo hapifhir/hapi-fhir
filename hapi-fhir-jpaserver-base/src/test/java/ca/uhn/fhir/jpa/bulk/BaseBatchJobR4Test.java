@@ -40,6 +40,8 @@ public class BaseBatchJobR4Test extends BaseJpaR4Test {
 		List<JobExecution> bulkExportExecutions = bulkExport.stream().flatMap(jobInstance -> myJobExplorer.getJobExecutions(jobInstance).stream()).collect(Collectors.toList());
 		awaitJobCompletions(bulkExportExecutions);
 
+		// Return the final state
+		bulkExportExecutions = bulkExport.stream().flatMap(jobInstance -> myJobExplorer.getJobExecutions(jobInstance).stream()).collect(Collectors.toList());
 		return bulkExportExecutions;
 	}
 
