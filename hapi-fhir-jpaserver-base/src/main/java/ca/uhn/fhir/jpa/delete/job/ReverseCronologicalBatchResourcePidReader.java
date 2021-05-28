@@ -54,17 +54,25 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 			urlIndex = new Long(executionContext.getLong(CURRENT_URL_INDEX)).intValue();
 		}
 		for (int index = 0; index < myUrlList.size(); ++index) {
-			String lowKey = lowKey(index);
-			if (executionContext.containsKey(lowKey)) {
-				myThresholdLowByUrlIndex.put(index, Instant.ofEpochSecond(executionContext.getLong(lowKey)));
-			} else {
-				// FIXME KHS
+			{
+				String lowKey = lowKey(index);
+				Instant lowValue;
+				if (executionContext.containsKey(lowKey)) {
+					lowValue = Instant.ofEpochSecond(executionContext.getLong(lowKey)));
+				} else {
+					// FIXME KHS
+				}
+				myThresholdLowByUrlIndex.put(index, lowValue);
 			}
-			String highKey = highKey(index);
-			if (executionContext.containsKey(highKey)) {
-				myThresholdHighByUrlIndex.put(index, Instant.ofEpochSecond(executionContext.getLong(highKey)));
-			} else {
-				// FIXME KHS
+			{
+				String highKey = highKey(index);
+				Instant highValue;
+				if (executionContext.containsKey(highKey)) {
+					highValue = Instant.ofEpochSecond(executionContext.getLong(highKey));
+				} else {
+					// FIXME KHS
+				}
+				myThresholdHighByUrlIndex.put(index, highValue);
 			}
 		}
 	}
