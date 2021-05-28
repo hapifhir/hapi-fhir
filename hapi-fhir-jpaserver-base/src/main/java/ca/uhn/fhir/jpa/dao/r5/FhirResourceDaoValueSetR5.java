@@ -79,7 +79,7 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 												 boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
 
-		if (myDaoConfig.isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
+		if (getConfig().isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
 			if (retVal.getDeleted() == null) {
 				ValueSet valueSet = (ValueSet) theResource;
 				myTerminologySvc.storeTermValueSet(retVal, org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSet));

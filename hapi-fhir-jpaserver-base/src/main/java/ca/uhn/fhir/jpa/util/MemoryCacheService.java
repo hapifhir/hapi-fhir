@@ -64,25 +64,35 @@ public class MemoryCacheService {
 		for (CacheEnum next : CacheEnum.values()) {
 
 			long timeoutSeconds;
+			int maximumSize;
+
 			switch (next) {
 				case CONCEPT_TRANSLATION:
 				case CONCEPT_TRANSLATION_REVERSE:
 					timeoutSeconds = myDaoConfig.getTranslationCachesExpireAfterWriteInMinutes() * 1000;
+					maximumSize = 10000;
 					break;
-				case HISTORY_COUNT:
-				case TAG_DEFINITION:
-				case PERSISTENT_ID:
-				case RESOURCE_LOOKUP:
 				case PID_TO_FORCED_ID:
 				case FORCED_ID_TO_PID:
 				case MATCH_URL:
+					timeoutSeconds = 60;
+					maximumSize = 10000;
+					if (myDaoConfig.isMassIngestionMode()) {
+						timeoutSeconds = 3000;
+						maximumSize = 100000;
+					}
+					break;
+				case HISTORY_COUNT:
+				case TAG_DEFINITION:
+				case RESOURCE_LOOKUP:
 				case RESOURCE_CONDITIONAL_CREATE_VERSION:
 				default:
 					timeoutSeconds = 60;
+					maximumSize = 10000;
 					break;
 			}
 
-			Cache<Object, Object> nextCache = Caffeine.newBuilder().expireAfterWrite(timeoutSeconds, TimeUnit.MINUTES).maximumSize(10000).build();
+			Cache<Object, Object> nextCache = Caffeine.newBuilder().expireAfterWrite(timeoutSeconds, TimeUnit.MINUTES).maximumSize(maximumSize).build();
 			myCaches.put(next, nextCache);
 		}
 
@@ -163,7 +173,6 @@ public class MemoryCacheService {
 	public enum CacheEnum {
 
 		TAG_DEFINITION(TagDefinitionCacheKey.class),
-		PERSISTENT_ID(String.class),
 		RESOURCE_LOOKUP(String.class),
 		FORCED_ID_TO_PID(String.class),
 		PID_TO_FORCED_ID(Long.class),

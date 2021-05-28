@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import com.google.common.annotations.VisibleForTesting;
 
 import java.util.Collections;
 import java.util.HashMap;
