@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.delete.job;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.BatchConstants;
+import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
+import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersValidator;
@@ -36,6 +38,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.task.TaskExecutor;
+
+import java.util.List;
 
 import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME;
 
@@ -82,7 +86,7 @@ public class DeleteExpungeJobConfig {
 	@JobScope
 	public Step deleteExpungeUrlListStep() {
 		return myStepBuilderFactory.get(DELETE_EXPUNGE_URL_LIST_STEP)
-			.<String, String>chunk(1)
+			.<List<Long>, List<String>>chunk(1)
 			.reader(reverseCronologicalBatchResourcePidReader())
 			.processor(deleteExpungeProcessor())
 			.writer(deleteExpungeResultWriter())
@@ -103,8 +107,8 @@ public class DeleteExpungeJobConfig {
 
 	@Bean
 	@StepScope
-	public DeleteExpungeResultWriter deleteExpungeResultWriter() {
-		return new DeleteExpungeResultWriter();
+	public SqlExecutorWriter deleteExpungeResultWriter() {
+		return new SqlExecutorWriter();
 	}
 
 	@Bean

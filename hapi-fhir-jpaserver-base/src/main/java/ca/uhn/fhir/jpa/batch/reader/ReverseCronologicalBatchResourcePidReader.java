@@ -1,6 +1,8 @@
-package ca.uhn.fhir.jpa.delete.job;
+package ca.uhn.fhir.jpa.batch.reader;
 
+import ca.uhn.fhir.jpa.delete.job.DeleteExpungeJobConfig;
 import ca.uhn.fhir.jpa.delete.model.UrlListJson;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemStream;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +26,8 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	// 		job.setThresholdHigh(DateUtils.addMinutes(new Date(), 5));
 	private Map<Integer, Instant> myThresholdHighByUrlIndex = new HashMap<>();
 	private Map<Integer, Instant> myThresholdLowByUrlIndex = new HashMap<>();
+	// FIXME KHS remove
+	public static int counter = 0;
 
 	@Autowired
 	public void setUrlList(@Value("#{jobParameters['" + DeleteExpungeJobConfig.JOB_PARAM_URL_LIST + "']}") String theUrlListString) {
@@ -46,6 +51,13 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 
 	private List<Long> getNextBatch(int theUrlIndex) {
 		// FIXME KHS
+		List<Long> retval = new ArrayList<>();
+		++counter;
+		if (counter % 5 != 0) {
+			retval.add(49L);
+			retval.add(2401L);
+		}
+		return retval;
 	}
 
 	@Override
@@ -54,27 +66,17 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 			urlIndex = new Long(executionContext.getLong(CURRENT_URL_INDEX)).intValue();
 		}
 		for (int index = 0; index < myUrlList.size(); ++index) {
-			{
-				String lowKey = lowKey(index);
-				Instant lowValue;
-				if (executionContext.containsKey(lowKey)) {
-					lowValue = Instant.ofEpochSecond(executionContext.getLong(lowKey)));
-				} else {
-					// FIXME KHS
-				}
-				myThresholdLowByUrlIndex.put(index, lowValue);
-			}
-			{
-				String highKey = highKey(index);
-				Instant highValue;
-				if (executionContext.containsKey(highKey)) {
-					highValue = Instant.ofEpochSecond(executionContext.getLong(highKey));
-				} else {
-					// FIXME KHS
-				}
-				myThresholdHighByUrlIndex.put(index, highValue);
-			}
+			setThreshold(executionContext, myThresholdLowByUrlIndex, index, lowKey(index), Instant.MIN);
+			setThreshold(executionContext, myThresholdHighByUrlIndex, index, highKey(index), Instant.MAX);
 		}
+	}
+
+	private void setThreshold(ExecutionContext executionContext, Map<Integer, Instant> theThresholdMap, int theIndex, String theKey, Instant theDefaultValue) {
+		Instant value = theDefaultValue;
+		if (executionContext.containsKey(theKey)) {
+			value = Instant.ofEpochSecond(executionContext.getLong(theKey));
+		}
+		theThresholdMap.put(theIndex, value);
 	}
 
 	private static String lowKey(int theIndex) {
