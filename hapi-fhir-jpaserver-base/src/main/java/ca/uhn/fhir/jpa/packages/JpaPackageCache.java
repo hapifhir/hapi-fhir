@@ -195,7 +195,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		ourLog.info("Parsing package .tar.gz ({} bytes) from {}", bytes.length, theSourceDesc);
 
 		NpmPackage npmPackage = NpmPackage.fromPackage(new ByteArrayInputStream(bytes));
-		if (!npmPackage.id().equals(thePackageId)) {
+		if (!npmPackage.id().equalsIgnoreCase(thePackageId)) {
 			throw new InvalidRequestException("Package ID " + npmPackage.id() + " doesn't match expected: " + thePackageId);
 		}
 		if (!PackageVersionComparator.isEquivalent(thePackageVersionId, npmPackage.version())) {
