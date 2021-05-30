@@ -26,7 +26,9 @@ import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
+import org.springframework.batch.core.jsr.RetryListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.retry.ExhaustedRetryException;
 
 import javax.annotation.Nonnull;
 
@@ -36,7 +38,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * This class sets the job status to ERROR if any failures occur while actually
  * generating the export files.
  */
-public class BulkImportStepListener implements StepExecutionListener {
+public class BulkImportStepListener implements StepExecutionListener, RetryListener {
 
 	@Autowired
 	private IBulkDataImportSvc myBulkDataImportSvc;
@@ -55,9 +57,24 @@ public class BulkImportStepListener implements StepExecutionListener {
 				jobUuid = theStepExecution.getJobExecution().getExecutionContext().getString(BulkExportJobConfig.JOB_UUID_PARAMETER);
 			}
 			assert isNotBlank(jobUuid);
-			String exitDescription = theStepExecution.getExitStatus().getExitDescription();
-			myBulkDataImportSvc.setJobToStatus(jobUuid, BulkImportJobStatusEnum.ERROR, exitDescription);
+
+			StringBuilder message = new StringBuilder();
+			message.append("Job: ").append(theStepExecution.getExecutionContext().getString(BulkImportPartitioner.JOB_DESCRIPTION)).append("\n");
+			message.append("File: ").append(theStepExecution.getExecutionContext().getString(BulkImportPartitioner.FILE_DESCRIPTION)).append("\n");
+			for (Throwable next : theStepExecution.getFailureExceptions()) {
+				if (next instanceof ExhaustedRetryException) {
+					next = next.getCause(); // ExhaustedRetryException is a spring exception that wraps the real one
+				}
+				String nextErrorMessage = next.toString();
+				message.append("Error: ").append(nextErrorMessage).append("\n");
+			}
+
+			myBulkDataImportSvc.setJobToStatus(jobUuid, BulkImportJobStatusEnum.ERROR, message.toString());
+
+			// Replace the built-in error message with a better one
+			return ExitStatus.FAILED.addExitDescription(message.toString());
 		}
+
 		return theStepExecution.getExitStatus();
 	}
 }

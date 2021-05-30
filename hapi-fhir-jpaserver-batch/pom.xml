@@ -19,12 +19,10 @@
 		<dependency>
 			<groupId>org.springframework.batch</groupId>
 			<artifactId>spring-batch-core</artifactId>
-			<version>${spring_batch_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.batch</groupId>
 			<artifactId>spring-batch-infrastructure</artifactId>
-			<version>${spring_batch_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.data</groupId>

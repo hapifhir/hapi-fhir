@@ -29,6 +29,16 @@ public class BulkImportJobFileJson implements IModelJson {
 	private String myTenantName;
 	@JsonProperty("contents")
 	private String myContents;
+	@JsonProperty("description")
+	private String myDescription;
+
+	public String getDescription() {
+		return myDescription;
+	}
+
+	public void setDescription(String theDescription) {
+		myDescription = theDescription;
+	}
 
 	public String getTenantName() {
 		return myTenantName;

@@ -814,7 +814,7 @@
 		<spring_version>5.3.6</spring_version>
 		<!-- FYI: Spring Data JPA 2.1.9 causes test failures due to unexpected cascading deletes -->
 		<spring_data_version>2.5.0</spring_data_version>
-		<spring_batch_version>4.3.2</spring_batch_version>
+		<spring_batch_version>4.3.3</spring_batch_version>
 		<spring_boot_version>2.4.4</spring_boot_version>
 		<spring_retry_version>1.2.2.RELEASE</spring_retry_version>
 
@@ -1763,7 +1763,17 @@
 				<artifactId>spring-websocket</artifactId>
 				<version>${spring_version}</version>
 			</dependency>
-			<dependency>
+            <dependency>
+                <groupId>org.springframework.batch</groupId>
+                <artifactId>spring-batch-core</artifactId>
+                <version>${spring_batch_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.batch</groupId>
+                <artifactId>spring-batch-infrastructure</artifactId>
+                <version>${spring_batch_version}</version>
+            </dependency>
+            <dependency>
 				<groupId>org.springframework.retry</groupId>
 				<artifactId>spring-retry</artifactId>
 				<version>${spring_retry_version}</version>
