@@ -40,9 +40,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
-import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -53,7 +51,6 @@ import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -68,6 +65,7 @@ import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.FhirTerser;
@@ -113,7 +111,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -123,6 +121,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public abstract class BaseTransactionProcessor {
 
 	public static final String URN_PREFIX = "urn:";
+	public static final Pattern UNQUALIFIED_MATCH_URL_START = Pattern.compile("^[a-zA-Z0-9_]+=");
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessor.class);
 	private BaseHapiFhirDao myDao;
 	@Autowired
@@ -995,15 +994,15 @@ public abstract class BaseTransactionProcessor {
 	 * in the database. This is trickier than you'd think because of a couple of possibilities during the
 	 * save:
 	 * * There may be resources that have not changed (e.g. an update/PUT with a resource body identical
-	 *   to what is already in the database)
+	 * to what is already in the database)
 	 * * There may be resources with auto-versioned references, meaning we're replacing certain references
-	 *   in the resource with a versioned references, referencing the current version at the time of the
-	 *   transaction processing
+	 * in the resource with a versioned references, referencing the current version at the time of the
+	 * transaction processing
 	 * * There may by auto-versioned references pointing to these unchanged targets
-	 *
+	 * <p>
 	 * If we're not doing any auto-versioned references, we'll just iterate through all resources in the
 	 * transaction and save them one at a time.
-	 *
+	 * <p>
 	 * However, if we have any auto-versioned references we do this in 2 passes: First the resources from the
 	 * transaction that don't have any auto-versioned references are stored. We do them first since there's
 	 * a chance they may be a NOP and we'll need to account for their version number not actually changing.
@@ -1178,12 +1177,23 @@ public abstract class BaseTransactionProcessor {
 			.stream()
 			.filter(t -> !t.isNop())
 			.filter(t -> t.getEntity() instanceof ResourceTable)
+			.filter(t -> t.getEntity().getDeleted() == null)
 			.filter(t -> t.getResource() != null)
-			.forEach(t->resourceToIndexedParams.put(t.getResource(), new ResourceIndexedSearchParams((ResourceTable) t.getEntity())));
+			.forEach(t -> resourceToIndexedParams.put(t.getResource(), new ResourceIndexedSearchParams((ResourceTable) t.getEntity())));
 
 		for (Map.Entry<String, Class<? extends IBaseResource>> nextEntry : conditionalRequestUrls.entrySet()) {
 			String matchUrl = nextEntry.getKey();
 			if (isNotBlank(matchUrl)) {
+				if (matchUrl.startsWith("?") || (!matchUrl.contains("?") && UNQUALIFIED_MATCH_URL_START.matcher(matchUrl).find())) {
+					StringBuilder b = new StringBuilder();
+					b.append(myContext.getResourceType(nextEntry.getValue()));
+					if (!matchUrl.startsWith("?")) {
+						b.append("?");
+					}
+					b.append(matchUrl);
+					matchUrl = b.toString();
+				}
+
 				if (!myInMemoryResourceMatcher.canBeEvaluatedInMemory(matchUrl).supported()) {
 					continue;
 				}
@@ -1192,6 +1202,12 @@ public abstract class BaseTransactionProcessor {
 				for (Map.Entry<IBaseResource, ResourceIndexedSearchParams> entries : resourceToIndexedParams.entrySet()) {
 					ResourceIndexedSearchParams indexedParams = entries.getValue();
 					IBaseResource resource = entries.getKey();
+
+					String resourceType = myContext.getResourceType(resource);
+					if (!matchUrl.startsWith(resourceType + "?")) {
+						continue;
+					}
+
 					if (myInMemoryResourceMatcher.match(matchUrl, resource, indexedParams).matched()) {
 						counter++;
 						if (counter > 1) {
