@@ -62,6 +62,9 @@ public class MatchResourceUrlService {
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
 
+	/**
+	 * Note that this will only return a maximum of 2 results!!
+	 */
 	public <R extends IBaseResource> Set<ResourcePersistentId> processMatchUrl(String theMatchUrl, Class<R> theResourceType, RequestDetails theRequest) {
 		if (myDaoConfig.getMatchUrlCache()) {
 			ResourcePersistentId existing = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.MATCH_URL, theMatchUrl);
@@ -75,7 +78,7 @@ public class MatchResourceUrlService {
 		if (paramMap.isEmpty() && paramMap.getLastUpdated() == null) {
 			throw new InvalidRequestException("Invalid match URL[" + theMatchUrl + "] - URL has no search parameters");
 		}
-		paramMap.setLoadSynchronous(true);
+		paramMap.setLoadSynchronousUpTo(2);
 
 		Set<ResourcePersistentId> retVal = search(paramMap, theResourceType, theRequest);
 
