@@ -253,6 +253,10 @@ public abstract class BaseConfig {
 		return new BatchJobSubmitterImpl();
 	}
 
+	@Bean
+	public BatchJobRegisterer batchJobRegisterer() {
+		return new BatchJobRegisterer();
+	}
 
 	@Lazy
 	@Bean

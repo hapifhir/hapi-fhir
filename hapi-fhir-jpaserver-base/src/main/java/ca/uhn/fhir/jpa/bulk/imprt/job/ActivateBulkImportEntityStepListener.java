@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.bulk.imprt.job;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
+import org.elasticsearch.client.enrich.ExecutePolicyResponse;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
