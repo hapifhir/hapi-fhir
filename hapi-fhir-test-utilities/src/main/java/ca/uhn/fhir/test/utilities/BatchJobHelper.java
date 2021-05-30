@@ -2,10 +2,10 @@ package ca.uhn.fhir.test.utilities;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.batch.core.BatchStatus;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,6 +40,8 @@ public class BatchJobHelper {
 		List<JobExecution> bulkExportExecutions = bulkExport.stream().flatMap(jobInstance -> myJobExplorer.getJobExecutions(jobInstance).stream()).collect(Collectors.toList());
 		awaitJobCompletions(bulkExportExecutions);
 
+		// Return the final state
+		bulkExportExecutions = bulkExport.stream().flatMap(jobInstance -> myJobExplorer.getJobExecutions(jobInstance).stream()).collect(Collectors.toList());
 		return bulkExportExecutions;
 	}
 

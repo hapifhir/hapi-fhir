@@ -37,6 +37,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public class BulkImportPartitioner implements Partitioner {
 	public static final String FILE_INDEX = "fileIndex";
+	public static final String FILE_DESCRIPTION = "fileDescription";
+	public static final String JOB_DESCRIPTION = "jobDescription";
 	public static final String ROW_PROCESSING_MODE = "rowProcessingMode";
 
 	private static final Logger ourLog = getLogger(BulkImportPartitioner.class);
@@ -56,12 +58,16 @@ public class BulkImportPartitioner implements Partitioner {
 
 		for (int i = 0; i < job.getFileCount(); i++) {
 
+			String fileDescription = myBulkDataImportSvc.getFileDescription(myJobUUID, i);
+
 			ExecutionContext context = new ExecutionContext();
 			context.putString(BulkExportJobConfig.JOB_UUID_PARAMETER, myJobUUID);
 			context.putInt(FILE_INDEX, i);
 			context.put(ROW_PROCESSING_MODE, job.getProcessingMode());
+			context.put(JOB_DESCRIPTION, job.getJobDescription());
+			context.put(FILE_DESCRIPTION, fileDescription);
 
-			String key = "FILE" + i;
+			String key = "FILE" + i + ":" + fileDescription;
 			retVal.put(key, context);
 		}
 

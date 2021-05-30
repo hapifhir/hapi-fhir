@@ -90,4 +90,9 @@ public interface IBulkDataImportSvc {
 	 * Delete all input files associated with a particular job
 	 */
 	void deleteJobFiles(String theJobId);
+
+	/**
+	 * Fetch just the file description for the given file
+	 */
+	String getFileDescription(String theJobId, int theFileIndex);
 }

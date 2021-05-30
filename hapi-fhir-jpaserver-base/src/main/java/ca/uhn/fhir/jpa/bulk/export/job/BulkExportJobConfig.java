@@ -169,7 +169,7 @@ public class BulkExportJobConfig {
 
 	@Bean
 	public Step bulkExportGenerateResourceFilesStep() {
-		return myStepBuilderFactory.get("bulkExportGenerateResourceFilesStep")
+		return myStepBuilderFactory.get(BatchJobsConfig.BULK_EXPORT_GENERATE_RESOURCE_FILES_STEP)
 			.<List<ResourcePersistentId>, List<IBaseResource>>chunk(CHUNK_SIZE) //1000 resources per generated file, as the reader returns 10 resources at a time.
 			.reader(bulkItemReader())
 			.processor(myPidToIBaseResourceProcessor)
@@ -217,7 +217,7 @@ public class BulkExportJobConfig {
 	@Bean
 	public Step bulkExportPartitionStep() {
 		return myStepBuilderFactory.get("partitionStep")
-			.partitioner("bulkExportGenerateResourceFilesStep", bulkExportResourceTypePartitioner())
+			.partitioner(BatchJobsConfig.BULK_EXPORT_GENERATE_RESOURCE_FILES_STEP, bulkExportResourceTypePartitioner())
 			.step(bulkExportGenerateResourceFilesStep())
 			.build();
 	}

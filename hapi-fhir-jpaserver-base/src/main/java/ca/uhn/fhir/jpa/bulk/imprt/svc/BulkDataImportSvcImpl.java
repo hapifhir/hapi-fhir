@@ -245,6 +245,14 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 			.orElseThrow(() -> new IllegalArgumentException("Invalid index " + theFileIndex + " for job " + theJobId));
 	}
 
+	@Transactional
+	@Override
+	public String getFileDescription(String theJobId, int theFileIndex) {
+		BulkImportJobEntity job = findJobByJobId(theJobId);
+
+		return myJobFileDao.findFileDescriptionForJob(job, theFileIndex).orElse("");
+	}
+
 	@Override
 	@Transactional
 	public void deleteJobFiles(String theJobId) {
@@ -282,6 +290,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 			jobFile.setJob(job);
 			jobFile.setContents(nextFile.getContents());
 			jobFile.setTenantName(nextFile.getTenantName());
+			jobFile.setFileDescription(nextFile.getDescription());
 			jobFile.setFileSequence(nextSequence++);
 			myJobFileDao.save(jobFile);
 		}
