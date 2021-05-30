@@ -27,14 +27,9 @@ import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportDaoSvc;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
@@ -98,23 +93,7 @@ public class BulkExportJobConfig {
 			.start(createBulkExportEntityStep())
 			.next(bulkExportPartitionStep())
 			.next(closeJobStep())
-			.listener(bulkExportJobListener())
 			.build();
-	}
-
-	private JobExecutionListener bulkExportJobListener() {
-		return new JobExecutionListener() {
-			@Override
-			public void beforeJob(JobExecution jobExecution) {
-				jobExecution.getExitStatus();
-			}
-
-			@Override
-			public void afterJob(JobExecution jobExecution) {
-				String foo = jobExecution.getExitStatus().getExitCode();
-				foo.toString();
-			}
-		};
 	}
 
 	@Bean
@@ -240,22 +219,7 @@ public class BulkExportJobConfig {
 		return myStepBuilderFactory.get("partitionStep")
 			.partitioner(BatchJobsConfig.BULK_EXPORT_GENERATE_RESOURCE_FILES_STEP, bulkExportResourceTypePartitioner())
 			.step(bulkExportGenerateResourceFilesStep())
-			.listener(jobStepExecutionListener())
 			.build();
-	}
-
-	private StepExecutionListener jobStepExecutionListener() {
-		return new StepExecutionListener() {
-			@Override
-			public void beforeStep(StepExecution stepExecution) {
-
-			}
-
-			@Override
-			public ExitStatus afterStep(StepExecution stepExecution) {
-				return stepExecution.getExitStatus();
-			}
-		};
 	}
 
 	@Bean
