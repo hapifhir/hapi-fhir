@@ -1,0 +1,10 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions
+(dependent HAPI modules listed in brackets):
+<ul>
+<li>Spring (JPA): 5.3.6 -> 5.3.7</li>
+</ul>
+"
+
