@@ -39,6 +39,9 @@ import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -97,6 +100,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -109,6 +113,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -138,6 +143,8 @@ public abstract class BaseTransactionProcessor {
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private ModelConfig myModelConfig;
+	@Autowired
+	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
 	@PostConstruct
 	public void start() {
@@ -937,7 +944,9 @@ public abstract class BaseTransactionProcessor {
 			if (conditionalRequestUrls.size() > 0) {
 				theTransactionStopWatch.startTask("Check for conflicts in conditional resources");
 			}
-			validateNoDuplicates(theRequest, theActionName, conditionalRequestUrls);
+			if (!myDaoConfig.isMassIngestionMode()) {
+				validateNoDuplicates(theRequest, theActionName, conditionalRequestUrls, theIdToPersistedOutcome.values());
+			}
 			theTransactionStopWatch.endCurrentTask();
 
 			for (IIdType next : theAllIds) {
@@ -1162,15 +1171,34 @@ public abstract class BaseTransactionProcessor {
 		}
 	}
 
-	private void validateNoDuplicates(RequestDetails theRequest, String theActionName, Map<String, Class<? extends IBaseResource>> conditionalRequestUrls) {
+	private void validateNoDuplicates(RequestDetails theRequest, String theActionName, Map<String, Class<? extends IBaseResource>> conditionalRequestUrls, Collection<DaoMethodOutcome> thePersistedOutcomes) {
+
+		IdentityHashMap<IBaseResource, ResourceIndexedSearchParams> resourceToIndexedParams = new IdentityHashMap<>(thePersistedOutcomes.size());
+		thePersistedOutcomes
+			.stream()
+			.filter(t -> !t.isNop())
+			.filter(t -> t.getEntity() instanceof ResourceTable)
+			.filter(t -> t.getResource() != null)
+			.forEach(t->resourceToIndexedParams.put(t.getResource(), new ResourceIndexedSearchParams((ResourceTable) t.getEntity())));
+
 		for (Map.Entry<String, Class<? extends IBaseResource>> nextEntry : conditionalRequestUrls.entrySet()) {
 			String matchUrl = nextEntry.getKey();
-			Class<? extends IBaseResource> resType = nextEntry.getValue();
 			if (isNotBlank(matchUrl)) {
-				Set<ResourcePersistentId> val = myMatchResourceUrlService.processMatchUrl(matchUrl, resType, theRequest);
-				if (val.size() > 1) {
-					throw new InvalidRequestException(
-						"Unable to process " + theActionName + " - Request would cause multiple resources to match URL: \"" + matchUrl + "\". Does transaction request contain duplicates?");
+				if (!myInMemoryResourceMatcher.canBeEvaluatedInMemory(matchUrl).supported()) {
+					continue;
+				}
+
+				int counter = 0;
+				for (Map.Entry<IBaseResource, ResourceIndexedSearchParams> entries : resourceToIndexedParams.entrySet()) {
+					ResourceIndexedSearchParams indexedParams = entries.getValue();
+					IBaseResource resource = entries.getKey();
+					if (myInMemoryResourceMatcher.match(matchUrl, resource, indexedParams).matched()) {
+						counter++;
+						if (counter > 1) {
+							throw new InvalidRequestException(
+								"Unable to process " + theActionName + " - Request would cause multiple resources to match URL: \"" + matchUrl + "\". Does transaction request contain duplicates?");
+						}
+					}
 				}
 			}
 		}

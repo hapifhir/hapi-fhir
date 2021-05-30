@@ -714,7 +714,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, bundleCreator.get());
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
@@ -775,7 +775,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, bundleCreator.get());
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
@@ -1550,7 +1551,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
 //		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(5, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(13, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(3, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
