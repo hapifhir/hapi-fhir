@@ -1447,7 +1447,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest) {
 		return myTransactionService.execute(theRequest, tx -> {
-			theParams.setLoadSynchronousUpTo(getConfig().getInternalSynchronousSearchSize());
+
+			if (theParams.getLoadSynchronousUpTo() != null) {
+				theParams.setLoadSynchronousUpTo(Math.min(getConfig().getInternalSynchronousSearchSize(), theParams.getLoadSynchronousUpTo()));
+			} else {
+				theParams.setLoadSynchronousUpTo(getConfig().getInternalSynchronousSearchSize());
+			}
 
 			ISearchBuilder builder = mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
 
@@ -1573,7 +1578,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				entity = myEntityManager.find(ResourceTable.class, pid.getId());
 				resourceId = entity.getIdDt();
 			} else {
-				return create(resource, null, thePerformIndexing, theTransactionDetails, theRequest);
+				DaoMethodOutcome outcome = create(resource, null, thePerformIndexing, theTransactionDetails, theRequest);
+
+				// Pre-cache the match URL
+				if (outcome.getPersistentId() != null) {
+					myMatchResourceUrlService.matchUrlResolved(theMatchUrl, outcome.getPersistentId());
+				}
+
+				return outcome;
 			}
 		} else {
 			/*

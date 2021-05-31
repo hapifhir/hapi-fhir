@@ -726,7 +726,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		Subscription subscription2 = createSubscription(criteria2, payload);
 		waitForActivatedSubscriptionCount(2);
 
-		ourLog.info("** About to send obervation");
+		ourLog.info("** About to send observation");
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 
 		// Should see 1 subscription notification
@@ -798,7 +798,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		createSubscription(criteria1, payload);
 		waitForActivatedSubscriptionCount(1);
 
-		ourLog.info("** About to send obervation");
+		ourLog.info("** About to send observation");
 
 		Observation observation = new Observation();
 		observation.addIdentifier().setSystem("foo").setValue("bar1");
@@ -820,7 +820,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 			.setResource(observation)
 			.setFullUrl(observation.getId())
 			.getRequest()
-			.setUrl("Obervation?identifier=foo|bar1")
+			.setUrl("Observation?identifier=foo|bar1")
 			.setMethod(Bundle.HTTPVerb.PUT);
 		requestBundle.addEntry()
 			.setResource(patient)
