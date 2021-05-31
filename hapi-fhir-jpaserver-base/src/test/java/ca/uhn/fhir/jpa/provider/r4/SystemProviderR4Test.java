@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.rp.r4.BinaryResourceProvider;
@@ -55,7 +56,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -65,26 +65,23 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.in;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -280,7 +277,6 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			assertEquals(200, http.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(http);
-			;
 		}
 
 	}
@@ -767,18 +763,22 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	@Test
 	public void testDeleteExpungeOperation() {
 		// setup
-		Patient patient1 = new Patient();
-		patient1.setActive(true);
-		Patient patient2 = new Patient();
-		patient1.setActive(false);
-		IIdType patient1Id = myClient.create().resource(patient1).execute().getId().toUnqualifiedVersionless();
-		IIdType patient2Id = myClient.create().resource(patient2).execute().getId().toUnqualifiedVersionless();
-		Observation obs1 = new Observation();
-		obs1.setSubject(new Reference(patient1Id));
-		IIdType obsId = myClient.create().resource(obs1).execute().getId();
-		Observation obs2 = new Observation();
-		obs2.setSubject(new Reference(patient2Id));
-		IIdType obs2Id = myClient.create().resource(obs2).execute().getId();
+		Patient patientActive = new Patient();
+		patientActive.setActive(true);
+
+		Patient patientInactive = new Patient();
+		patientInactive.setActive(false);
+
+		IIdType pKeepId = myClient.create().resource(patientActive).execute().getId();
+		IIdType pDelId = myClient.create().resource(patientInactive).execute().getId();
+
+		Observation obsActive = new Observation();
+		obsActive.setSubject(new Reference(pKeepId.toUnqualifiedVersionless()));
+		IIdType oKeepId = myClient.create().resource(obsActive).execute().getId();
+
+		Observation obsInactive = new Observation();
+		obsInactive.setSubject(new Reference(pDelId.toUnqualifiedVersionless()));
+		IIdType obsDelId = myClient.create().resource(obsInactive).execute().getId();
 
 		// validate setup
 		assertEquals(2, myClient.search().forResource("Patient").returnBundle(Bundle.class).execute().getTotal());
@@ -798,11 +798,18 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			.execute();
 
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		myBatchJobHelper.awaitAllBulkJobCompletions(BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME);
 
 		// validate
-		myBatchJobHelper.awaitAllBulkJobCompletions(ProviderConstants.OPERATION_DELETE_EXPUNGE);
-		assertEquals(1, myClient.search().forResource("Patient").returnBundle(Bundle.class).execute().getTotal());
-		assertEquals(1, myClient.search().forResource("Observation").returnBundle(Bundle.class).execute().getTotal());
+		Bundle patientBundle = myClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
+		List<Patient> patients = BundleUtil.toListOfResourcesOfType(myFhirCtx, patientBundle, Patient.class);
+		assertThat(patients, hasSize(1));
+		assertEquals(pKeepId, patients.get(0).getIdElement());
+
+		Bundle obsBundle = myClient.search().forResource("Observation").returnBundle(Bundle.class).execute();
+		List<Observation> observations = BundleUtil.toListOfResourcesOfType(myFhirCtx, obsBundle, Observation.class);
+		assertThat(observations, hasSize(1));
+		assertEquals(oKeepId, observations.get(0).getIdElement());
 	}
 
 	@AfterAll

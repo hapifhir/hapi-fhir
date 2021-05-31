@@ -58,11 +58,11 @@ import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME;
 @Configuration
 public class DeleteExpungeJobConfig {
 
-	public static final String JOB_PARAM_URL_LIST = "url-list";
-	public static final String JOB_PARAM_SEARCH_COUNT = "search-count";
+	public static final String JOB_PARAM_URL_LIST = "urlList";
+	public static final String JOB_PARAM_SEARCH_COUNT = "searchCount";
 	// FIXME KHS remove
 	public static final String JOB_UUID_PARAMETER = "uuid";
-	public static final String DELETE_EXPUNGE_URL_LIST_STEP = "delete-expunge-url-list-step";
+	public static final String DELETE_EXPUNGE_URL_LIST_STEP = "deleteExpungeUrlListStep";
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -98,7 +98,7 @@ public class DeleteExpungeJobConfig {
 			.<List<Long>, List<String>>chunk(1)
 			.reader(reverseCronologicalBatchResourcePidReader())
 			.processor(deleteExpungeProcessor())
-			.writer(deleteExpungeResultWriter())
+			.writer(sqlExecutorWriter())
 			.build();
 	}
 
@@ -116,7 +116,7 @@ public class DeleteExpungeJobConfig {
 
 	@Bean
 	@StepScope
-	public SqlExecutorWriter deleteExpungeResultWriter() {
+	public SqlExecutorWriter sqlExecutorWriter() {
 		return new SqlExecutorWriter();
 	}
 

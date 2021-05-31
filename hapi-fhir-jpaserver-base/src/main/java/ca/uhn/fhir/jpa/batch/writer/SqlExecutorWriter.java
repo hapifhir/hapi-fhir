@@ -21,13 +21,11 @@ public class SqlExecutorWriter implements ItemWriter<List<String>> {
 		long totalChanges = 0;
 		for (List<String> sqlList : theSqlLists) {
 			ourLog.info("Executing {} sql commands", sqlList.size());
-			long changes = 0;
 			for (String sql : sqlList) {
 				ourLog.info(">>> Executing sql " + sql);
-				changes += myEntityManager.createNativeQuery(sql).executeUpdate();
+				totalChanges += myEntityManager.createNativeQuery(sql).executeUpdate();
 			}
-			ourLog.info("{} records changed", changes);
 		}
-		ourLog.info("TOTAL: {} records changed", totalChanges);
+		ourLog.info("{} records changed", totalChanges);
 	}
 }
