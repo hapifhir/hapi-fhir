@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
@@ -10,7 +9,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -49,7 +47,6 @@ import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
-import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.EpisodeOfCare;
 import org.hl7.fhir.r4.model.IdType;
@@ -88,12 +85,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.emptyString;
@@ -104,7 +99,6 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -833,7 +827,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		request.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient?identifier=foo");
 
 		try {
-			runInTransaction(()->{
+			runInTransaction(() -> {
 				mySystemDao.transactionNested(mySrd, request);
 			});
 			fail();
@@ -885,6 +879,128 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertThat(respEntry.getStatus(), startsWith("404"));
 
 	}
+
+	@Test
+	public void testTransactionWithConditionalCreates_IdenticalMatchUrlsDifferentTypes_Unqualified() {
+		BundleBuilder bb = new BundleBuilder(myFhirCtx);
+		Patient pt = new Patient();
+		pt.addIdentifier().setSystem("foo").setValue("bar");
+		bb.addTransactionCreateEntry(pt).conditional("identifier=foo|bar");
+		Observation obs = new Observation();
+		obs.addIdentifier().setSystem("foo").setValue("bar");
+		bb.addTransactionCreateEntry(obs).conditional("identifier=foo|bar");
+
+		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) bb.getBundle());
+		assertEquals("201 Created", outcome.getEntry().get(0).getResponse().getStatus());
+		assertThat(outcome.getEntry().get(0).getResponse().getLocation(), matchesPattern(".*Patient/[0-9]+/_history/1"));
+		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), matchesPattern(".*Observation/[0-9]+/_history/1"));
+
+		// Take 2
+
+		bb = new BundleBuilder(myFhirCtx);
+		pt = new Patient();
+		pt.addIdentifier().setSystem("foo").setValue("bar");
+		bb.addTransactionCreateEntry(pt).conditional("identifier=foo|bar");
+		obs = new Observation();
+		obs.addIdentifier().setSystem("foo").setValue("bar");
+		bb.addTransactionCreateEntry(obs).conditional("identifier=foo|bar");
+
+		outcome = mySystemDao.transaction(mySrd, (Bundle) bb.getBundle());
+		assertEquals("200 OK", outcome.getEntry().get(0).getResponse().getStatus());
+		assertThat(outcome.getEntry().get(0).getResponse().getLocation(), matchesPattern(".*Patient/[0-9]+/_history/1"));
+		assertEquals("200 OK", outcome.getEntry().get(1).getResponse().getStatus());
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), matchesPattern(".*Observation/[0-9]+/_history/1"));
+
+	}
+
+
+	@Test
+	public void testTransactionWithConditionalCreates_IdenticalMatchUrlsDifferentTypes_Qualified() {
+		BundleBuilder bb = new BundleBuilder(myFhirCtx);
+		Patient pt = new Patient();
+		pt.addIdentifier().setSystem("foo").setValue("bar");
+		bb.addTransactionCreateEntry(pt).conditional("Patient?identifier=foo|bar");
+		Observation obs = new Observation();
+		obs.addIdentifier().setSystem("foo").setValue("bar");
+		bb.addTransactionCreateEntry(obs).conditional("Observation?identifier=foo|bar");
+
+		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) bb.getBundle());
+		assertEquals("201 Created", outcome.getEntry().get(0).getResponse().getStatus());
+		assertThat(outcome.getEntry().get(0).getResponse().getLocation(), matchesPattern(".*Patient/[0-9]+/_history/1"));
+		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), matchesPattern(".*Observation/[0-9]+/_history/1"));
+
+		// Take 2
+
+		bb = new BundleBuilder(myFhirCtx);
+		pt = new Patient();
+		pt.addIdentifier().setSystem("foo").setValue("bar");
+		bb.addTransactionCreateEntry(pt).conditional("Patient?identifier=foo|bar");
+		obs = new Observation();
+		obs.addIdentifier().setSystem("foo").setValue("bar");
+		bb.addTransactionCreateEntry(obs).conditional("Observation?identifier=foo|bar");
+
+		outcome = mySystemDao.transaction(mySrd, (Bundle) bb.getBundle());
+		assertEquals("200 OK", outcome.getEntry().get(0).getResponse().getStatus());
+		assertThat(outcome.getEntry().get(0).getResponse().getLocation(), matchesPattern(".*Patient/[0-9]+/_history/1"));
+		assertEquals("200 OK", outcome.getEntry().get(1).getResponse().getStatus());
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), matchesPattern(".*Observation/[0-9]+/_history/1"));
+
+	}
+
+
+	@Test
+	public void testTransactionWithConditionalCreate_NoResourceTypeInUrl() {
+		BundleBuilder bb = new BundleBuilder(myFhirCtx);
+		Patient pt = new Patient();
+		pt.setActive(true);
+		bb.addTransactionCreateEntry(pt).conditional("active=true");
+		pt = new Patient();
+		pt.setActive(false);
+		bb.addTransactionCreateEntry(pt).conditional("active=false");
+
+		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) bb.getBundle());
+		assertEquals("201 Created", outcome.getEntry().get(0).getResponse().getStatus());
+		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
+
+		// Take 2
+
+		bb = new BundleBuilder(myFhirCtx);
+		pt = new Patient();
+		pt.setActive(true);
+		bb.addTransactionCreateEntry(pt).conditional("active=true");
+		pt = new Patient();
+		pt.setActive(false);
+		bb.addTransactionCreateEntry(pt).conditional("active=false");
+
+		Bundle outcome2 = mySystemDao.transaction(mySrd, (Bundle) bb.getBundle());
+		assertEquals("200 OK", outcome2.getEntry().get(0).getResponse().getStatus());
+		assertEquals("200 OK", outcome2.getEntry().get(1).getResponse().getStatus());
+
+		assertThat(outcome.getEntry().get(0).getResponse().getLocation(), endsWith("/_history/1"));
+		assertThat(outcome.getEntry().get(1).getResponse().getLocation(), endsWith("/_history/1"));
+		assertEquals(outcome.getEntry().get(0).getResponse().getLocation(), outcome2.getEntry().get(0).getResponse().getLocation());
+		assertEquals(outcome.getEntry().get(1).getResponse().getLocation(), outcome2.getEntry().get(1).getResponse().getLocation());
+
+		// Take 3
+
+		bb = new BundleBuilder(myFhirCtx);
+		pt = new Patient();
+		pt.setActive(true);
+		bb.addTransactionCreateEntry(pt).conditional("?active=true");
+		pt = new Patient();
+		pt.setActive(false);
+		bb.addTransactionCreateEntry(pt).conditional("?active=false");
+
+		Bundle outcome3 = mySystemDao.transaction(mySrd, (Bundle) bb.getBundle());
+		assertEquals("200 OK", outcome3.getEntry().get(0).getResponse().getStatus());
+		assertEquals("200 OK", outcome3.getEntry().get(1).getResponse().getStatus());
+		assertEquals(outcome.getEntry().get(0).getResponse().getLocation(), outcome3.getEntry().get(0).getResponse().getLocation());
+		assertEquals(outcome.getEntry().get(1).getResponse().getLocation(), outcome3.getEntry().get(1).getResponse().getLocation());
+
+	}
+
 
 	@Test
 	public void testTransactionNoContained() throws IOException {

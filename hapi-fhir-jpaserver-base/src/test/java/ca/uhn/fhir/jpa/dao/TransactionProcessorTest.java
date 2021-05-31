@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
@@ -53,6 +54,8 @@ public class TransactionProcessorTest {
 	private HapiTransactionService myHapiTransactionService;
 	@MockBean
 	private ModelConfig myModelConfig;
+	@MockBean
+	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
 	@MockBean(answer = Answers.RETURNS_DEEP_STUBS)
 	private SessionImpl mySession;
