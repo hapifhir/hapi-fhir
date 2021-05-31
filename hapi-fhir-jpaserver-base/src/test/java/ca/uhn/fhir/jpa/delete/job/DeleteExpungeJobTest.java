@@ -18,6 +18,8 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import java.util.List;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -55,7 +57,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
 		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
 
-		JobParameters jobParameters = DeleteExpungeParamUtil.buildJobParameters("Observation?subject.active=false", "Patient?active=false");
+		JobParameters jobParameters = DeleteExpungeJobConfig.buildJobParameters("Observation?subject.active=false", "Patient?active=false");
 
 		// execute
 		JobExecution jobExecution = myBatchJobSubmitter.runJob(myDeleteExpungeJob, jobParameters);

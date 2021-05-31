@@ -28,7 +28,9 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhir.rest.server.provider.DeleteExpungeProvider;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -69,6 +71,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -98,6 +102,11 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	private static String ourServerBase;
 	private IGenericClient myClient;
 	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
+
+	@Autowired
+	private DeleteExpungeProvider myDeleteExpungeProvider;
+	@Autowired
+	private BatchJobHelper myBatchJobHelper;
 
 	@SuppressWarnings("deprecation")
 	@AfterEach
@@ -136,7 +145,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			RestfulServer restServer = new RestfulServer(ourCtx);
 			restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp, locationRp, binaryRp, diagnosticReportRp, diagnosticOrderRp, practitionerRp);
 
-			restServer.setPlainProviders(mySystemProvider);
+			restServer.setPlainProviders(mySystemProvider, myDeleteExpungeProvider);
 
 			ourServer = new Server(0);
 
@@ -780,12 +789,18 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "/Patient?active=false");
 
 		// execute
-		Parameters result = myClient.operation().onServer().named(ProviderConstants.OPERATION_DELETE_EXPUNGE).withParameters(input).execute();
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
+
+		Parameters response = myClient
+			.operation()
+			.onServer()
+			.named(ProviderConstants.OPERATION_DELETE_EXPUNGE)
+			.withParameters(input)
+			.execute();
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
 		// validate
-		// FIXME KHS assert result
-		// FIXME await until job done
+		myBatchJobHelper.awaitAllBulkJobCompletions(ProviderConstants.OPERATION_DELETE_EXPUNGE);
 		assertEquals(1, myClient.search().forResource("Patient").returnBundle(Bundle.class).execute().getTotal());
 		assertEquals(1, myClient.search().forResource("Observation").returnBundle(Bundle.class).execute().getTotal());
 	}

@@ -6,7 +6,9 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.jsonldjava.shaded.com.google.common.collect.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +16,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
+
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -42,7 +47,7 @@ class DeleteExpungeJobParameterValidatorTest {
 	@Test
 	public void testValidate() throws JobParametersInvalidException, JsonProcessingException {
 		// setup
-		JobParameters parameters = DeleteExpungeParamUtil.buildJobParameters("Patient?address=memory", "Patient?name=smith");
+		JobParameters parameters = DeleteExpungeJobConfig.buildJobParameters("Patient?address=memory", "Patient?name=smith");
 		ResourceSearch resourceSearch = new ResourceSearch(ourFhirContext.getResourceDefinition("Patient"), new SearchParameterMap());
 		when(myMatchUrlService.getResourceSearch(anyString())).thenReturn(resourceSearch);
 		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(true);
@@ -55,7 +60,7 @@ class DeleteExpungeJobParameterValidatorTest {
 
 	@Test
 	public void testValidateBadType() throws JobParametersInvalidException, JsonProcessingException {
-		JobParameters parameters = DeleteExpungeParamUtil.buildJobParameters("Patient?address=memory");
+		JobParameters parameters = DeleteExpungeJobConfig.buildJobParameters("Patient?address=memory");
 		ResourceSearch resourceSearch = new ResourceSearch(ourFhirContext.getResourceDefinition("Patient"), new SearchParameterMap());
 		when(myMatchUrlService.getResourceSearch(anyString())).thenReturn(resourceSearch);
 		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(false);

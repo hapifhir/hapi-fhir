@@ -21,8 +21,8 @@ public class UrlListJson implements IModelJson {
 	@JsonProperty("urlList")
 	List<String> myUrlList;
 
-	public static UrlListJson fromUrlStrings(String... elements) {
-		return new UrlListJson().setUrlList(Lists.newArrayList(elements));
+	public static UrlListJson fromUrlStrings(List<String> elements) {
+		return new UrlListJson().setUrlList(elements);
 	}
 
 	public static UrlListJson fromJson(String theJson) {

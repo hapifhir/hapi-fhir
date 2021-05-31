@@ -25,8 +25,12 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch.BatchConstants;
 import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
 import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
+import ca.uhn.fhir.jpa.delete.model.UrlListJson;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import com.google.common.collect.Lists;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -40,7 +44,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.task.TaskExecutor;
 
+import javax.annotation.Nonnull;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME;
 
@@ -116,5 +123,18 @@ public class DeleteExpungeJobConfig {
 	@Bean
 	public JobParametersValidator deleteExpungeJobParameterValidator(FhirContext theFhirContext, MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
 		return new DeleteExpungeJobParameterValidator(theFhirContext, theMatchUrlService, theDaoRegistry);
+	}
+
+	@Nonnull
+	public static JobParameters buildJobParameters(String... theUrls) {
+		return buildJobParameters(Lists.newArrayList(theUrls));
+	}
+	@Nonnull
+	public static JobParameters buildJobParameters(List<String> theUrlList) {
+		Map<String, JobParameter> map = new HashMap<>();
+		UrlListJson urlListJson = UrlListJson.fromUrlStrings(theUrlList);
+		map.put(JOB_PARAM_URL_LIST, new JobParameter(urlListJson.toString()));
+		JobParameters parameters = new JobParameters(map);
+		return parameters;
 	}
 }

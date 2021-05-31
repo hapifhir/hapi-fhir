@@ -296,7 +296,8 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		myBatchJobHelper.awaitAllBulkJobCompletions(
 			BatchJobsConfig.BULK_EXPORT_JOB_NAME,
 			BatchJobsConfig.PATIENT_BULK_EXPORT_JOB_NAME,
-			BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME
+			BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME,
+			BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME
 		);
 	}
 
