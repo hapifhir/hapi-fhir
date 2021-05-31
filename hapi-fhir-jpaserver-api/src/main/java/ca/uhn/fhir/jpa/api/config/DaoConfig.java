@@ -215,7 +215,7 @@ public class DaoConfig {
 	 * update setter javadoc if default changes
 	 */
 	@Nonnull
-	private Long myTranslationCachesExpireAfterWriteInMinutes = DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES;
+	private final Long myTranslationCachesExpireAfterWriteInMinutes = DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES;
 	/**
 	 * @since 5.4.0
 	 */
@@ -2271,9 +2271,8 @@ public class DaoConfig {
 
 	/**
 	 * <p>
-	 * This determines the internal search size that is run synchronously during operations such as:
-	 * 1. Delete with _expunge parameter.
-	 * 2. Searching for Code System IDs by System and Code
+	 * This determines the internal search size that is run synchronously during operations such as searching for
+	 * Code System IDs by System and Code
 	 * </p>
 	 *
 	 * @since 5.4.0
@@ -2284,9 +2283,8 @@ public class DaoConfig {
 
 	/**
 	 * <p>
-	 * This determines the internal search size that is run synchronously during operations such as:
-	 * 1. Delete with _expunge parameter.
-	 * 2. Searching for Code System IDs by System and Code
+	 * This determines the internal search size that is run synchronously during operations such as searching for
+	 * Code System IDs by System and Code
 	 * </p>
 	 *
 	 * @since 5.4.0

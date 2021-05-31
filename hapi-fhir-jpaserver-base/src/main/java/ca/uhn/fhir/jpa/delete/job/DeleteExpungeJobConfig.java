@@ -126,14 +126,28 @@ public class DeleteExpungeJobConfig {
 	}
 
 	@Nonnull
+	public static JobParameters buildJobParameters(Long theSearchCount, String... theUrls) {
+		return buildJobParameters(theSearchCount, Lists.newArrayList(theUrls));
+	}
+
+	@Nonnull
 	public static JobParameters buildJobParameters(String... theUrls) {
 		return buildJobParameters(Lists.newArrayList(theUrls));
 	}
+
 	@Nonnull
 	public static JobParameters buildJobParameters(List<String> theUrlList) {
+		return buildJobParameters(null, theUrlList);
+	}
+
+	@Nonnull
+	public static JobParameters buildJobParameters(Long theSearchCount, List<String> theUrlList) {
 		Map<String, JobParameter> map = new HashMap<>();
 		UrlListJson urlListJson = UrlListJson.fromUrlStrings(theUrlList);
 		map.put(JOB_PARAM_URL_LIST, new JobParameter(urlListJson.toString()));
+		if (theSearchCount != null) {
+			map.put(JOB_PARAM_SEARCH_COUNT, new JobParameter(theSearchCount));
+		}
 		JobParameters parameters = new JobParameters(map);
 		return parameters;
 	}

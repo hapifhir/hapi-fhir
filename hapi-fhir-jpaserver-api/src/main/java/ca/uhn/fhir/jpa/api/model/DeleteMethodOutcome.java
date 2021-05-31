@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.api.model;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import java.util.List;
 
@@ -34,6 +35,13 @@ public class DeleteMethodOutcome extends MethodOutcome {
 	private List<ResourceTable> myDeletedEntities;
 	private long myExpungedResourcesCount;
 	private long myExpungedEntitiesCount;
+
+	public DeleteMethodOutcome() {
+	}
+
+	public DeleteMethodOutcome(IBaseOperationOutcome theBaseOperationOutcome) {
+		super(theBaseOperationOutcome);
+	}
 
 	public List<ResourceTable> getDeletedEntities() {
 		return myDeletedEntities;

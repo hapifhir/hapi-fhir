@@ -2,13 +2,15 @@ package ca.uhn.fhir.rest.server.provider;
 
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.server.BaseR4ServerTest;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobInstance;
+import org.springframework.batch.core.JobParameters;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,11 +18,10 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TestDeleteExpungeProvider extends BaseR4ServerTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(TestDeleteExpungeProvider.class);
-	private MyDeleteExpungeJobSubmitter mySvc = new MyDeleteExpungeJobSubmitter();
+public class DeleteExpungeProviderTest extends BaseR4ServerTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeProviderTest.class);
+	private final MyDeleteExpungeJobSubmitter mySvc = new MyDeleteExpungeJobSubmitter();
 	private Parameters myReturnParameters;
 
 	@BeforeEach
@@ -36,10 +37,12 @@ public class TestDeleteExpungeProvider extends BaseR4ServerTest {
 		Parameters input = new Parameters();
 		String url1 = "Patient?active=false";
 		String url2 = "Patient?active=false";
+		Long batchSize = 2401L;
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, url1);
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, url2);
+		input.addParameter(ProviderConstants.OPERATION_DELETE_BATCH_SIZE, new DecimalType(batchSize));
 
-		DeleteExpungeProvider provider = new DeleteExpungeProvider(mySvc);
+		DeleteExpungeProvider provider = new DeleteExpungeProvider(myCtx, mySvc);
 		startServer(provider);
 
 		Parameters response = myClient
@@ -50,23 +53,28 @@ public class TestDeleteExpungeProvider extends BaseR4ServerTest {
 			.execute();
 
 		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		assertTrue(response.getParameterBool("success"));
-		assertThat(mySvc.calledWith, hasSize(2));
-		assertEquals(url1, mySvc.calledWith.get(0));
-		assertEquals(url2, mySvc.calledWith.get(1));
+		DecimalType jobId = (DecimalType) response.getParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID);
+		assertEquals(123L, jobId.getValue().longValue());
+		assertThat(mySvc.calledWithUrls, hasSize(2));
+		assertEquals(url1, mySvc.calledWithUrls.get(0));
+		assertEquals(url2, mySvc.calledWithUrls.get(1));
+		assertEquals(batchSize, mySvc.calledWithBatchSize);
 	}
 
 	private class MyDeleteExpungeJobSubmitter implements IDeleteExpungeJobSubmitter {
-		public List<String> calledWith;
+		public Long calledWithBatchSize;
+		public List<String> calledWithUrls;
 
 		@Override
-		public IBaseParameters submitJob(List<IPrimitiveType<String>> theUrlsToExpungeDelete) {
-			theUrlsToExpungeDelete.forEach(t -> calledWith.add(t.getValue()));
-			return myReturnParameters;
+		public JobExecution submitJob(Long theBatchSize, List<String> theUrlsToExpungeDelete) {
+			calledWithBatchSize = theBatchSize;
+			calledWithUrls = theUrlsToExpungeDelete;
+			JobInstance instance = new JobInstance(123L, "jobName");
+			return new JobExecution(instance, new JobParameters());
 		}
 
 		public void reset() {
-			calledWith = new ArrayList<>();
+			calledWithUrls = new ArrayList<>();
 		}
 	}
 }

@@ -22,4 +22,8 @@ public class ResourceSearch {
 	public String getResourceName() {
 		return myRuntimeResourceDefinition.getName();
 	}
+
+	public boolean isDeleteExpunge() {
+		return mySearchParameterMap.isDeleteExpunge();
+	}
 }

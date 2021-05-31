@@ -97,6 +97,7 @@ class ReverseCronologicalBatchResourcePidReaderTest {
 		assertNull(myReader.read());
 	}
 
+
 	@Test
 	public void test1x3start() throws Exception {
 		when(myPatientDao.searchForIds(any(), any()))

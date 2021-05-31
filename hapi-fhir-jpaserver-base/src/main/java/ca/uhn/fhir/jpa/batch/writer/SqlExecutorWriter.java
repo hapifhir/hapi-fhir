@@ -17,12 +17,11 @@ public class SqlExecutorWriter implements ItemWriter<List<String>> {
 
 	@Override
 	public void write(List<? extends List<String>> theSqlLists) throws Exception {
-		ourLog.info("Executing {} lists of sql", theSqlLists.size());
 		long totalChanges = 0;
 		for (List<String> sqlList : theSqlLists) {
 			ourLog.info("Executing {} sql commands", sqlList.size());
 			for (String sql : sqlList) {
-				ourLog.info(">>> Executing sql " + sql);
+				ourLog.trace("Executing sql " + sql);
 				totalChanges += myEntityManager.createNativeQuery(sql).executeUpdate();
 			}
 		}

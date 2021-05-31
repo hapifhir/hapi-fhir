@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -166,11 +167,12 @@ public class SearchParameterMap implements Serializable {
 		return this;
 	}
 
-	private void addLastUpdateParam(StringBuilder b, DateParam date) {
+	private void addLastUpdateParam(StringBuilder b, ParamPrefixEnum thePrefix, DateParam date) {
 		if (date != null && isNotBlank(date.getValueAsString())) {
 			addUrlParamSeparator(b);
 			b.append(Constants.PARAM_LASTUPDATED);
 			b.append('=');
+			b.append(thePrefix.getValue());
 			b.append(date.getValueAsString());
 		}
 	}
@@ -472,9 +474,9 @@ public class SearchParameterMap implements Serializable {
 
 		if (getLastUpdated() != null) {
 			DateParam lb = getLastUpdated().getLowerBound();
-			addLastUpdateParam(b, lb);
+			addLastUpdateParam(b, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, lb);
 			DateParam ub = getLastUpdated().getUpperBound();
-			addLastUpdateParam(b, ub);
+			addLastUpdateParam(b, ParamPrefixEnum.LESSTHAN_OR_EQUALS, ub);
 		}
 
 		if (getCount() != null) {

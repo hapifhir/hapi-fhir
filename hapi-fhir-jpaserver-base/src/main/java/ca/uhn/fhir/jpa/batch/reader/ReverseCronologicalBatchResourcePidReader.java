@@ -16,6 +16,8 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemStream;
@@ -31,10 +33,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ReverseCronologicalBatchResourcePidReader implements ItemReader<List<Long>>, ItemStream {
+	public static final Integer DEFAULT_SEARCH_COUNT = 100;
 	private static final String CURRENT_URL_INDEX = "current.url-index";
 	private static final String CURRENT_THRESHOLD_LOW = "current.threshold-low";
 	private static final String CURRENT_THRESHOLD_HIGH = "current.threshold-high";
-	private static final Integer DEFAULT_SEARCH_COUNT = 100;
+	private static final Logger ourLog = LoggerFactory.getLogger(ReverseCronologicalBatchResourcePidReader.class);
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -84,8 +87,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 			map.setLastUpdated(new DateRangeParam().setUpperBoundInclusive(Date.from(highThreshold)));
 		}
 
-		map.setCount(mySearchCount);
-		map.setLoadSynchronous(true);
+		map.setLoadSynchronousUpTo(mySearchCount);
 		SortSpec sort = new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.DESC);
 		map.setSort(sort);
 
@@ -94,6 +96,11 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 		List<Long> retval = dao.searchForIds(map, buildSystemRequestDetails()).stream()
 			.map(ResourcePersistentId::getIdAsLong)
 			.collect(Collectors.toList());
+
+		if (ourLog.isDebugEnabled()) {
+			ourLog.debug("Search for {}{} returned {} results", resourceSearch.getResourceName(), map.toNormalizedQueryString(myFhirContext), retval.size());
+			ourLog.debug("Results: {}", retval);
+		}
 
 		if (!retval.isEmpty()) {
 			// Adjust the high threshold to be the earliest resource in the batch we found

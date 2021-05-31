@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
-import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.explore.JobExplorer;
 
 import java.util.ArrayList;
@@ -16,6 +16,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class BatchJobHelper {
@@ -57,4 +59,22 @@ public class BatchJobHelper {
 			return jobExecution.getStatus() == BatchStatus.COMPLETED || jobExecution.getStatus() == BatchStatus.FAILED;
 		});
 	}
+
+	public int getReadCount(Long theJobId) {
+		StepExecution stepExecution = getStepExecution(theJobId);
+		return stepExecution.getReadCount();
+	}
+
+	public int getWriteCount(Long theJobId) {
+		StepExecution stepExecution = getStepExecution(theJobId);
+		return stepExecution.getWriteCount();
+	}
+
+	private StepExecution getStepExecution(Long theJobId) {
+		JobExecution jobExecution = myJobExplorer.getJobExecution(theJobId);
+		Collection<StepExecution> stepExecutions = jobExecution.getStepExecutions();
+		assertThat(stepExecutions, hasSize(1));
+		return stepExecutions.iterator().next();
+	}
+
 }

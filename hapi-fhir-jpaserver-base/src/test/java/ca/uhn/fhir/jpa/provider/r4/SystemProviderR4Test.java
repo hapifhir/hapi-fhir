@@ -16,8 +16,10 @@ import ca.uhn.fhir.jpa.rp.r4.PatientResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.PractitionerResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.ServiceRequestResourceProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -56,6 +58,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -763,13 +766,17 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	@Test
 	public void testDeleteExpungeOperation() {
 		// setup
+		for (int i = 0; i < 12; ++i) {
+			Patient patient = new Patient();
+			patient.setActive(false);
+			MethodOutcome result = myClient.create().resource(patient).execute();
+		}
 		Patient patientActive = new Patient();
 		patientActive.setActive(true);
+		IIdType pKeepId = myClient.create().resource(patientActive).execute().getId();
 
 		Patient patientInactive = new Patient();
 		patientInactive.setActive(false);
-
-		IIdType pKeepId = myClient.create().resource(patientActive).execute().getId();
 		IIdType pDelId = myClient.create().resource(patientInactive).execute().getId();
 
 		Observation obsActive = new Observation();
@@ -781,12 +788,14 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		IIdType obsDelId = myClient.create().resource(obsInactive).execute().getId();
 
 		// validate setup
-		assertEquals(2, myClient.search().forResource("Patient").returnBundle(Bundle.class).execute().getTotal());
-		assertEquals(2, myClient.search().forResource("Observation").returnBundle(Bundle.class).execute().getTotal());
+		assertEquals(14, getAllResourcesOfType("Patient").getTotal());
+		assertEquals(2, getAllResourcesOfType("Observation").getTotal());
 
 		Parameters input = new Parameters();
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "/Observation?subject.active=false");
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "/Patient?active=false");
+		int batchSize = 2;
+		input.addParameter(ProviderConstants.OPERATION_DELETE_BATCH_SIZE, new DecimalType(batchSize));
 
 		// execute
 
@@ -800,16 +809,31 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		myBatchJobHelper.awaitAllBulkJobCompletions(BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME);
 
+		DecimalType jobIdPrimitive = (DecimalType) response.getParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID);
+		Long jobId = jobIdPrimitive.getValue().longValue();
+
+		// 1 observation
+		// + 12/batchSize inactive patients
+		// + 1 patient with id pDelId
+		// = 1 + 6 + 1 = 8
+		assertEquals(8, myBatchJobHelper.getReadCount(jobId));
+		assertEquals(8, myBatchJobHelper.getWriteCount(jobId));
+
 		// validate
-		Bundle patientBundle = myClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
+		Bundle obsBundle = getAllResourcesOfType("Observation");
+		List<Observation> observations = BundleUtil.toListOfResourcesOfType(myFhirCtx, obsBundle, Observation.class);
+		assertThat(observations, hasSize(1));
+		assertEquals(oKeepId, observations.get(0).getIdElement());
+
+		Bundle patientBundle = getAllResourcesOfType("Patient");
 		List<Patient> patients = BundleUtil.toListOfResourcesOfType(myFhirCtx, patientBundle, Patient.class);
 		assertThat(patients, hasSize(1));
 		assertEquals(pKeepId, patients.get(0).getIdElement());
 
-		Bundle obsBundle = myClient.search().forResource("Observation").returnBundle(Bundle.class).execute();
-		List<Observation> observations = BundleUtil.toListOfResourcesOfType(myFhirCtx, obsBundle, Observation.class);
-		assertThat(observations, hasSize(1));
-		assertEquals(oKeepId, observations.get(0).getIdElement());
+	}
+
+	private Bundle getAllResourcesOfType(String theResourceName) {
+		return myClient.search().forResource(theResourceName).cacheControl(new CacheControlDirective().setNoCache(true)).returnBundle(Bundle.class).execute();
 	}
 
 	@AfterAll
