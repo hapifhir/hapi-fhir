@@ -99,7 +99,7 @@ public class HapiTransactionService {
 		 		 * thrown by one of the client threads, so we auto-retry in order to avoid
 		 		 * annopying spurious failures for the client.
 		 		 */
-				if (e.getMessage().contains("HFJ_TAG_DEF")) {
+				if (e.getMessage().contains("HFJ_TAG_DEF") || e.getMessage().contains("hfj_tag_def")) {
 					maxRetries = 3;
 				}
 
