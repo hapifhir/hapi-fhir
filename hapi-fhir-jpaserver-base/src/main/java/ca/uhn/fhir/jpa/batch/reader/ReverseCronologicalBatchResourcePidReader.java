@@ -9,16 +9,13 @@ import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemStream;
@@ -49,7 +46,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	private List<String> myUrlList;
 	private Integer mySearchCount = DEFAULT_SEARCH_COUNT;
 	private int urlIndex = 0;
-	private Map<Integer, Instant> myThresholdHighByUrlIndex = new HashMap<>();
+	private final Map<Integer, Instant> myThresholdHighByUrlIndex = new HashMap<>();
 
 	@Autowired
 	public void setUrlList(@Value("#{jobParameters['" + DeleteExpungeJobConfig.JOB_PARAM_URL_LIST + "']}") String theUrlListString) {
@@ -59,7 +56,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 
 	// FIXME KHS test
 	@Autowired
-	public void setUrlList(@Value("#{jobParameters['" + DeleteExpungeJobConfig.JOB_PARAM_SEARCH_COUNT + "']}") Integer theSearchCount) {
+	public void setSearchCount(@Value("#{jobParameters['" + DeleteExpungeJobConfig.JOB_PARAM_SEARCH_COUNT + "']}") Integer theSearchCount) {
 		mySearchCount = theSearchCount;
 	}
 
@@ -94,7 +91,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 
 		// Perform the search
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceSearch.getResourceName());
-		List<Long> retval = dao.searchForIds(map, new SystemRequestDetails()).stream()
+		List<Long> retval = dao.searchForIds(map, buildSystemRequestDetails()).stream()
 			.map(ResourcePersistentId::getIdAsLong)
 			.collect(Collectors.toList());
 
@@ -106,6 +103,11 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 		}
 
 		return retval;
+	}
+
+	@NotNull
+	private SystemRequestDetails buildSystemRequestDetails() {
+		return new SystemRequestDetails();
 	}
 
 	@Override
