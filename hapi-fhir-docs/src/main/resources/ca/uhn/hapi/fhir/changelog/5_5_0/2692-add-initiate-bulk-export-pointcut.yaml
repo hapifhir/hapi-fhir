@@ -1,0 +1,4 @@
+---
+type: add
+issue: 2692
+title: "A new Pointcut has been added that is invoked when a new Bulk Export is initiated."
