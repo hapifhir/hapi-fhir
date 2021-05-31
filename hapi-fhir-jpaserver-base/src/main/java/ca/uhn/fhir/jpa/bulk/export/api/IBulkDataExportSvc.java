@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.bulk.export.api;
  */
 
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.transaction.Transactional;
@@ -37,7 +38,7 @@ public interface IBulkDataExportSvc {
 
 	JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions);
 
-	JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions, Boolean useCache);
+	JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions, Boolean useCache, RequestDetails theRequestDetails);
 
 	JobInfo getJobInfoOrThrowResourceNotFound(String theJobId);
 
