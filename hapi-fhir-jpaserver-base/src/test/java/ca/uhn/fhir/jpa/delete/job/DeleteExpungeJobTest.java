@@ -5,7 +5,12 @@ import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
@@ -15,6 +20,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DeleteExpungeJobTest extends BaseJpaR4Test {
 	@Autowired
@@ -25,16 +31,39 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 	@Autowired
 	private BatchJobHelper myBatchJobHelper;
 
+	// FIXME KHS get working with partitions
 	@Test
 	public void testDeleteExpunge() throws Exception {
 		// setup
-		JobParameters jobParameters = DeleteExpungeParamUtil.buildJobParameters("Patient?address=memory", "Patient?name=smith");
-		JobExecution jobExecution = myBatchJobSubmitter.runJob(myDeleteExpungeJob, jobParameters);
+		Patient patientActive = new Patient();
+		patientActive.setActive(true);
+		IIdType pKeepId = myPatientDao.create(patientActive).getId().toUnqualifiedVersionless();
+
+		Patient patientInactive = new Patient();
+		patientInactive.setActive(false);
+		IIdType pDelId = myPatientDao.create(patientInactive).getId().toUnqualifiedVersionless();
+
+		Observation obsActive = new Observation();
+		obsActive.setSubject(new Reference(pKeepId));
+		IIdType oKeepId = myObservationDao.create(obsActive).getId().toUnqualifiedVersionless();
+
+		Observation obsInactive = new Observation();
+		obsInactive.setSubject(new Reference(pDelId));
+		IIdType oDelId = myObservationDao.create(obsInactive).getId().toUnqualifiedVersionless();
+
+		// validate precondition
+		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+
+		JobParameters jobParameters = DeleteExpungeParamUtil.buildJobParameters("Observation?subject.active=false", "Patient?active=false");
 
 		// execute
+		JobExecution jobExecution = myBatchJobSubmitter.runJob(myDeleteExpungeJob, jobParameters);
+
 		myBatchJobHelper.awaitJobCompletion(jobExecution);
 
 		// validate
-		// FIXME KHS
+		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(1, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
 	}
 }

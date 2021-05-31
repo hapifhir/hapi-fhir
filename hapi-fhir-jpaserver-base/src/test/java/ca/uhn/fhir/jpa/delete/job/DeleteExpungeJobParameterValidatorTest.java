@@ -1,30 +1,24 @@
 package ca.uhn.fhir.jpa.delete.job;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.delete.model.UrlListJson;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 
-import javax.annotation.Nonnull;
-import java.util.HashMap;
-import java.util.Map;
-
-import static ca.uhn.fhir.jpa.delete.job.DeleteExpungeJobConfig.JOB_PARAM_URL_LIST;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,36 +29,42 @@ class DeleteExpungeJobParameterValidatorTest {
 
 	@Mock
 	MatchUrlService myMatchUrlService;
+	@Mock
+	DaoRegistry myDaoRegistry;
 
 	DeleteExpungeJobParameterValidator mySvc;
 
 	@BeforeEach
 	public void initMocks() {
-		mySvc = new DeleteExpungeJobParameterValidator(ourFhirContext, myMatchUrlService);
+		mySvc = new DeleteExpungeJobParameterValidator(ourFhirContext, myMatchUrlService, myDaoRegistry);
 	}
 
 	@Test
 	public void testValidate() throws JobParametersInvalidException, JsonProcessingException {
 		// setup
 		JobParameters parameters = DeleteExpungeParamUtil.buildJobParameters("Patient?address=memory", "Patient?name=smith");
-		when(myMatchUrlService.translateMatchUrl(any(), any())).thenReturn(new SearchParameterMap());
+		ResourceSearch resourceSearch = new ResourceSearch(ourFhirContext.getResourceDefinition("Patient"), new SearchParameterMap());
+		when(myMatchUrlService.getResourceSearch(anyString())).thenReturn(resourceSearch);
+		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(true);
 
 		// execute
 		mySvc.validate(parameters);
 		// verify
-		verify(myMatchUrlService, times(2)).translateMatchUrl(any(), any());
+		verify(myMatchUrlService, times(2)).getResourceSearch(anyString());
 	}
 
 	@Test
 	public void testValidateBadType() throws JobParametersInvalidException, JsonProcessingException {
-		JobParameters parameters = DeleteExpungeParamUtil.buildJobParameters("Buffy?vampire=false");
+		JobParameters parameters = DeleteExpungeParamUtil.buildJobParameters("Patient?address=memory");
+		ResourceSearch resourceSearch = new ResourceSearch(ourFhirContext.getResourceDefinition("Patient"), new SearchParameterMap());
+		when(myMatchUrlService.getResourceSearch(anyString())).thenReturn(resourceSearch);
+		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(false);
 
 		try {
 			mySvc.validate(parameters);
 			fail();
-		} catch (DataFormatException e) {
-			assertEquals("Unknown resource name \"Buffy\" (this name is not known in FHIR version \"R4\")", e.getMessage());
+		} catch (JobParametersInvalidException e) {
+			assertEquals("The resource type Patient is not supported on this server.", e.getMessage());
 		}
 	}
-
 }

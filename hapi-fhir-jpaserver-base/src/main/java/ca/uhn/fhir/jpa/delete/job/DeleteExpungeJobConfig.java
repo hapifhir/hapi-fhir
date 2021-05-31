@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.delete.job;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch.BatchConstants;
 import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
 import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
@@ -50,10 +51,11 @@ import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME;
 @Configuration
 public class DeleteExpungeJobConfig {
 
-	public static final String JOB_PARAM_URL_LIST = "urlList";
+	public static final String JOB_PARAM_URL_LIST = "url-list";
+	public static final String JOB_PARAM_SEARCH_COUNT = "search-count";
 	// FIXME KHS remove
 	public static final String JOB_UUID_PARAMETER = "uuid";
-	public static final String DELETE_EXPUNGE_URL_LIST_STEP = "deleteExpungeUrlListStep";
+	public static final String DELETE_EXPUNGE_URL_LIST_STEP = "delete-expunge-url-list-step";
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -67,7 +69,7 @@ public class DeleteExpungeJobConfig {
 
 	@Bean(name = DELETE_EXPUNGE_JOB_NAME)
 	@Lazy
-	public Job deleteExpungeJob(FhirContext theFhirContext, MatchUrlService theMatchUrlService) throws Exception {
+	public Job deleteExpungeJob(FhirContext theFhirContext, MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) throws Exception {
 		// FIXME KHS implement this.  Current thinking:
 		// 1. validate URLs are valid
 		// 2. Create 1 step for each URL
@@ -77,7 +79,7 @@ public class DeleteExpungeJobConfig {
 		// 2.4 Update total count deleted
 
 		return myJobBuilderFactory.get(DELETE_EXPUNGE_JOB_NAME)
-			.validator(deleteExpungeJobParameterValidator(theFhirContext, theMatchUrlService))
+			.validator(deleteExpungeJobParameterValidator(theFhirContext, theMatchUrlService, theDaoRegistry))
 			.start(deleteExpungeUrlListStep())
 			.build();
 	}
@@ -112,7 +114,7 @@ public class DeleteExpungeJobConfig {
 	}
 
 	@Bean
-	public JobParametersValidator deleteExpungeJobParameterValidator(FhirContext theFhirContext, MatchUrlService theMatchUrlService) {
-		return new DeleteExpungeJobParameterValidator(theFhirContext, theMatchUrlService);
+	public JobParametersValidator deleteExpungeJobParameterValidator(FhirContext theFhirContext, MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
+		return new DeleteExpungeJobParameterValidator(theFhirContext, theMatchUrlService, theDaoRegistry);
 	}
 }

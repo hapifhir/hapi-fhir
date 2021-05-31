@@ -21,22 +21,14 @@ package ca.uhn.fhir.jpa.delete.job;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.delete.model.UrlListJson;
-import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
+import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import ca.uhn.fhir.util.UrlUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.JobParametersValidator;
-import org.springframework.transaction.support.TransactionTemplate;
-
-import java.util.List;
-import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.delete.job.DeleteExpungeJobConfig.JOB_PARAM_URL_LIST;
 
@@ -46,10 +38,12 @@ import static ca.uhn.fhir.jpa.delete.job.DeleteExpungeJobConfig.JOB_PARAM_URL_LI
 public class DeleteExpungeJobParameterValidator implements JobParametersValidator {
 	private final FhirContext myFhirContext;
 	private final MatchUrlService myMatchUrlService;
+	private final DaoRegistry myDaoRegistry;
 
-	public DeleteExpungeJobParameterValidator(FhirContext theFhirContext, MatchUrlService theMatchUrlService) {
+	public DeleteExpungeJobParameterValidator(FhirContext theFhirContext, MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
 		myFhirContext = theFhirContext;
 		myMatchUrlService = theMatchUrlService;
+		myDaoRegistry = theDaoRegistry;
 	}
 
 	@Override
@@ -60,10 +54,12 @@ public class DeleteExpungeJobParameterValidator implements JobParametersValidato
 
 		UrlListJson urlListJson = UrlListJson.fromJson(theJobParameters.getString(JOB_PARAM_URL_LIST));
 		for (String url : urlListJson.getUrlList()) {
-			RuntimeResourceDefinition resourceDefinition;
-			resourceDefinition = UrlUtil.parseUrlResourceType(myFhirContext, url);
 			try {
-				myMatchUrlService.translateMatchUrl(url, resourceDefinition);
+				ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(url);
+				String resourceName = resourceSearch.getResourceName();
+				if (!myDaoRegistry.isResourceTypeSupported(resourceName)) {
+					throw new JobParametersInvalidException("The resource type " + resourceName + " is not supported on this server.");
+				}
 			} catch (UnsupportedOperationException e) {
 				throw new JobParametersInvalidException("Failed to parse " + ProviderConstants.OPERATION_DELETE_EXPUNGE + " " + JOB_PARAM_URL_LIST + " item " + url + ": " + e.getMessage());
 			}
