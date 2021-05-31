@@ -25,7 +25,12 @@ public class DefaultProfileValidationSupportTest {
 		assertNull(mySvc.fetchStructureDefinition("Extension2"));
 
 	}
-	
+
+	@Test
+	public void testFlushAndFetchConformanceResources() {
+		mySvc.flush();
+		mySvc.fetchAllConformanceResources();
+	}
 	
 	@AfterAll
 	public static void afterClassClearContext() {
