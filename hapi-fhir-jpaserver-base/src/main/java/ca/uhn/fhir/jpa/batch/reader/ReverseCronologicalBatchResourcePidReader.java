@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.batch.reader;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.delete.job.DeleteExpungeJobConfig;
 import ca.uhn.fhir.jpa.delete.model.UrlListJson;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -34,6 +33,8 @@ import java.util.stream.Collectors;
 
 public class ReverseCronologicalBatchResourcePidReader implements ItemReader<List<Long>>, ItemStream {
 	public static final Integer DEFAULT_SEARCH_COUNT = 100;
+	public static final String JOB_PARAM_URL_LIST = "url-list";
+	public static final String JOB_PARAM_SEARCH_COUNT = "search-count";
 	private static final String CURRENT_URL_INDEX = "current.url-index";
 	private static final String CURRENT_THRESHOLD_LOW = "current.threshold-low";
 	private static final String CURRENT_THRESHOLD_HIGH = "current.threshold-high";
@@ -48,28 +49,28 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 
 	private List<String> myUrlList;
 	private Integer mySearchCount = DEFAULT_SEARCH_COUNT;
-	private int urlIndex = 0;
+	private int myUrlIndex = 0;
 	private final Map<Integer, Instant> myThresholdHighByUrlIndex = new HashMap<>();
 
 	@Autowired
-	public void setUrlList(@Value("#{jobParameters['" + DeleteExpungeJobConfig.JOB_PARAM_URL_LIST + "']}") String theUrlListString) {
+	public void setUrlList(@Value("#{jobParameters['" + JOB_PARAM_URL_LIST + "']}") String theUrlListString) {
 		UrlListJson urlListJson = UrlListJson.fromJson(theUrlListString);
 		myUrlList = urlListJson.getUrlList();
 	}
 
 	// FIXME KHS test
 	@Autowired
-	public void setSearchCount(@Value("#{jobParameters['" + DeleteExpungeJobConfig.JOB_PARAM_SEARCH_COUNT + "']}") Integer theSearchCount) {
+	public void setSearchCount(@Value("#{jobParameters['" + JOB_PARAM_SEARCH_COUNT + "']}") Integer theSearchCount) {
 		mySearchCount = theSearchCount;
 	}
 
 	@Override
 	public List<Long> read() throws Exception {
-		while (urlIndex < myUrlList.size()) {
+		while (myUrlIndex < myUrlList.size()) {
 			List<Long> nextBatch;
-			nextBatch = getNextBatch(urlIndex);
+			nextBatch = getNextBatch(myUrlIndex);
 			if (nextBatch.isEmpty()) {
-				++urlIndex;
+				++myUrlIndex;
 				continue;
 			}
 
@@ -106,7 +107,8 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 			// Adjust the high threshold to be the earliest resource in the batch we found
 			Long pidOfOldestResourceInBatch = retval.get(retval.size() - 1);
 			IBaseResource earliestResource = dao.readByPid(new ResourcePersistentId(pidOfOldestResourceInBatch));
-			myThresholdHighByUrlIndex.put(urlIndex, earliestResource.getMeta().getLastUpdated().toInstant());
+			myThresholdHighByUrlIndex.put(myUrlIndex, earliestResource.getMeta().getLastUpdated().toInstant());
+
 		}
 
 		return retval;
@@ -120,7 +122,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	@Override
 	public void open(ExecutionContext executionContext) throws ItemStreamException {
 		if (executionContext.containsKey(CURRENT_URL_INDEX)) {
-			urlIndex = new Long(executionContext.getLong(CURRENT_URL_INDEX)).intValue();
+			myUrlIndex = new Long(executionContext.getLong(CURRENT_URL_INDEX)).intValue();
 		}
 		for (int index = 0; index < myUrlList.size(); ++index) {
 			String key = highKey(index);
@@ -130,17 +132,13 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 		}
 	}
 
-	private static String lowKey(int theIndex) {
-		return CURRENT_THRESHOLD_LOW + "." + theIndex;
-	}
-
 	private static String highKey(int theIndex) {
 		return CURRENT_THRESHOLD_HIGH + "." + theIndex;
 	}
 
 	@Override
 	public void update(ExecutionContext executionContext) throws ItemStreamException {
-		executionContext.putLong(CURRENT_URL_INDEX, urlIndex);
+		executionContext.putLong(CURRENT_URL_INDEX, myUrlIndex);
 		for (int index = 0; index < myUrlList.size(); ++index) {
 			Instant instant = myThresholdHighByUrlIndex.get(index);
 			if (instant != null) {

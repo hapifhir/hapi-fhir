@@ -2,13 +2,11 @@ package ca.uhn.fhir.jpa.dao.expunge;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
-import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
+import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
+import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -20,6 +18,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -27,14 +26,9 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 class DeleteExpungeDaoTest extends BaseJpaR4Test {
-
 	@Autowired
 	DaoConfig myDaoConfig;
 	@Autowired
@@ -46,7 +40,6 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		myDaoConfig.setExpungeEnabled(true);
 		myDaoConfig.setDeleteExpungeEnabled(true);
 		myDaoConfig.setInternalSynchronousSearchSize(new DaoConfig().getInternalSynchronousSearchSize());
-
 	}
 
 	@AfterEach
@@ -67,15 +60,19 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		patient.setManagingOrganization(new Reference(organizationId));
 		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
-		try {
-			myOrganizationDao.deleteByUrl("Organization?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
-			fail();
-		} catch (InvalidRequestException e) {
-
-			assertEquals(e.getMessage(), "DELETE with _expunge=true failed.  Unable to delete " + organizationId.toVersionless() + " because " + patientId.toVersionless() + " refers to it via the path Patient.managingOrganization");
-		}
+		DeleteMethodOutcome outcome = myOrganizationDao.deleteByUrl("Organization?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
+		Long jobExecutionId = jobExecutionIdFromOutcome(outcome);
+		JobExecution job = myBatchJobHelper.awaitJobExecution(jobExecutionId);
+		assertEquals(BatchStatus.FAILED, job.getStatus());
+		assertThat(job.getExitStatus().getExitDescription(), containsString("DELETE with _expunge=true failed.  Unable to delete " + organizationId.toVersionless() + " because " + patientId.toVersionless() + " refers to it via the path Patient.managingOrganization"));
 	}
 
+	private Long jobExecutionIdFromOutcome(DeleteMethodOutcome theResult) {
+		OperationOutcome operationOutcome = (OperationOutcome) theResult.getOperationOutcome();
+		String diagnostics = operationOutcome.getIssueFirstRep().getDiagnostics();
+		String[] parts = diagnostics.split("Delete job submitted with id ");
+		return Long.valueOf(parts[1]);
+	}
 
 	@Test
 	public void testDeleteWithExpungeFailsIfConflictsAreGeneratedByMultiplePartitions() {
@@ -96,13 +93,11 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 
 		//When
 		myDaoConfig.setExpungeBatchSize(10);
-		try {
-			myOrganizationDao.deleteByUrl("Organization?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
-			fail();
-		} catch (InvalidRequestException e) {
-			//Then
-			assertThat(e.getMessage(), is(containsString("DELETE with _expunge=true failed.  Unable to delete ")));
-		}
+		DeleteMethodOutcome outcome = myOrganizationDao.deleteByUrl("Organization?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
+		Long jobId = jobExecutionIdFromOutcome(outcome);
+		JobExecution job = myBatchJobHelper.awaitJobExecution(jobId);
+		assertEquals(BatchStatus.FAILED, job.getStatus());
+		assertThat(job.getExitStatus().getExitDescription(), containsString("DELETE with _expunge=true failed.  Unable to delete "));
 	}
 
 	@Test
@@ -115,30 +110,16 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		myPatientDao.create(otherPatient);
 
 		//When
-		OperationOutcome operationOutcome = (OperationOutcome) myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd).getOperationOutcome();
+		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
 
-		assertThat(operationOutcome.getIssueFirstRep().getDiagnostics(), startsWith("Delete job submitted"));
-		awaitJobCompletion();
+		Long jobExecutionId = jobExecutionIdFromOutcome(outcome);
+		JobExecution job = myBatchJobHelper.awaitJobExecution(jobExecutionId);
+		// FIXME KHS why didn't setting the batch size to 1 affect our read count?
+		assertEquals(2, myBatchJobHelper.getReadCount(jobExecutionId));
+		assertEquals(2, myBatchJobHelper.getWriteCount(jobExecutionId));
 
-		// FIXME Assert on number of reads and writes
-
-		IBundleProvider remaining = myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true));
-
-		//Then
-		assertThat(remaining.size(), is(equalTo(1)));
-
-		//When
-		myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
-		awaitJobCompletion();
-
-		remaining = myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true));
-
-		//Then
-		assertThat(remaining.size(), is(equalTo(0)));
-	}
-
-	private List<JobExecution> awaitJobCompletion() {
-		return myBatchJobHelper.awaitAllBulkJobCompletions(BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME);
+		assertEquals(6, job.getExecutionContext().getLong(SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED));
+		assertEquals(2, job.getExecutionContext().getLong(PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED));
 	}
 
 	@Test
@@ -152,11 +133,14 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		IIdType childId = myPatientDao.create(child).getId().toUnqualifiedVersionless();
 
 		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
-		awaitJobCompletion();
+		Long jobExecutionId = jobExecutionIdFromOutcome(outcome);
+		JobExecution job = myBatchJobHelper.awaitJobExecution(jobExecutionId);
 
-		// FIXME KHS add these outputs to job execution context
-		assertEquals(2, outcome.getExpungedResourcesCount());
-		assertEquals(7, outcome.getExpungedEntitiesCount());
+		assertEquals(2, myBatchJobHelper.getReadCount(jobExecutionId));
+		assertEquals(2, myBatchJobHelper.getWriteCount(jobExecutionId));
+
+		assertEquals(6, job.getExecutionContext().getLong(SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED));
+		assertEquals(2, job.getExecutionContext().getLong(PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED));
 	}
 
 }

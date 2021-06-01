@@ -30,7 +30,7 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.JobParametersValidator;
 
-import static ca.uhn.fhir.jpa.delete.job.DeleteExpungeJobConfig.JOB_PARAM_URL_LIST;
+import static ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader.JOB_PARAM_URL_LIST;
 
 /**
  * This class will prevent a job from running if the UUID does not exist or is invalid.

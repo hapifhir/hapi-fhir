@@ -31,21 +31,27 @@ public class BatchJobHelper {
 	public List<JobExecution> awaitAllBulkJobCompletions(String... theJobNames) {
 		assert theJobNames.length > 0;
 
-		List<JobInstance> bulkExport = new ArrayList<>();
+		List<JobInstance> matchingJobInstances = new ArrayList<>();
 		for (String nextName : theJobNames) {
-			bulkExport.addAll(myJobExplorer.findJobInstancesByJobName(nextName, 0, 100));
+			matchingJobInstances.addAll(myJobExplorer.findJobInstancesByJobName(nextName, 0, 100));
 		}
-		if (bulkExport.isEmpty()) {
+		if (matchingJobInstances.isEmpty()) {
 			List<String> wantNames = Arrays.asList(theJobNames);
 			List<String> haveNames = myJobExplorer.getJobNames();
 			fail("There are no jobs running - Want names " + wantNames + " and have names " + haveNames);
 		}
-		List<JobExecution> bulkExportExecutions = bulkExport.stream().flatMap(jobInstance -> myJobExplorer.getJobExecutions(jobInstance).stream()).collect(Collectors.toList());
-		awaitJobCompletions(bulkExportExecutions);
+		List<JobExecution> matchingExecutions = matchingJobInstances.stream().flatMap(jobInstance -> myJobExplorer.getJobExecutions(jobInstance).stream()).collect(Collectors.toList());
+		awaitJobCompletions(matchingExecutions);
 
 		// Return the final state
-		bulkExportExecutions = bulkExport.stream().flatMap(jobInstance -> myJobExplorer.getJobExecutions(jobInstance).stream()).collect(Collectors.toList());
-		return bulkExportExecutions;
+		matchingExecutions = matchingJobInstances.stream().flatMap(jobInstance -> myJobExplorer.getJobExecutions(jobInstance).stream()).collect(Collectors.toList());
+		return matchingExecutions;
+	}
+
+	public JobExecution awaitJobExecution(Long theJobExecutionId) {
+		JobExecution jobExecution = myJobExplorer.getJobExecution(theJobExecutionId);
+		awaitJobCompletion(jobExecution);
+		return myJobExplorer.getJobExecution(theJobExecutionId);
 	}
 
 	protected void awaitJobCompletions(Collection<JobExecution> theJobs) {
@@ -60,18 +66,18 @@ public class BatchJobHelper {
 		});
 	}
 
-	public int getReadCount(Long theJobId) {
-		StepExecution stepExecution = getStepExecution(theJobId);
+	public int getReadCount(Long theJobExecutionId) {
+		StepExecution stepExecution = getStepExecution(theJobExecutionId);
 		return stepExecution.getReadCount();
 	}
 
-	public int getWriteCount(Long theJobId) {
-		StepExecution stepExecution = getStepExecution(theJobId);
+	public int getWriteCount(Long theJobExecutionId) {
+		StepExecution stepExecution = getStepExecution(theJobExecutionId);
 		return stepExecution.getWriteCount();
 	}
 
-	private StepExecution getStepExecution(Long theJobId) {
-		JobExecution jobExecution = myJobExplorer.getJobExecution(theJobId);
+	private StepExecution getStepExecution(Long theJobExecutionId) {
+		JobExecution jobExecution = myJobExplorer.getJobExecution(theJobExecutionId);
 		Collection<StepExecution> stepExecutions = jobExecution.getStepExecutions();
 		assertThat(stepExecutions, hasSize(1));
 		return stepExecutions.iterator().next();

@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.batch.writer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.item.ItemWriter;
 
 import javax.persistence.EntityManager;
@@ -12,19 +14,28 @@ import java.util.List;
 public class SqlExecutorWriter implements ItemWriter<List<String>> {
 	private static final Logger ourLog = LoggerFactory.getLogger(SqlExecutorWriter.class);
 
+	public static final String ENTITY_TOTAL_UPDATED_OR_DELETED = "entity.total.updated-or-deleted";
+
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
+	private Long totalUpdated = 0L;
+	private StepExecution myStepExecution;
+
+	@BeforeStep
+	public void setStepExecution(StepExecution stepExecution) {
+		myStepExecution = stepExecution;
+	}
 
 	@Override
 	public void write(List<? extends List<String>> theSqlLists) throws Exception {
-		long totalChanges = 0;
 		for (List<String> sqlList : theSqlLists) {
 			ourLog.info("Executing {} sql commands", sqlList.size());
 			for (String sql : sqlList) {
 				ourLog.trace("Executing sql " + sql);
-				totalChanges += myEntityManager.createNativeQuery(sql).executeUpdate();
+				totalUpdated += myEntityManager.createNativeQuery(sql).executeUpdate();
+				myStepExecution.getExecutionContext().putLong(ENTITY_TOTAL_UPDATED_OR_DELETED, totalUpdated);
 			}
 		}
-		ourLog.info("{} records changed", totalChanges);
+		ourLog.debug("{} records updated", totalUpdated);
 	}
 }

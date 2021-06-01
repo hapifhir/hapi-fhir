@@ -33,7 +33,9 @@ import java.util.List;
 public class DeleteMethodOutcome extends MethodOutcome {
 
 	private List<ResourceTable> myDeletedEntities;
+	@Deprecated
 	private long myExpungedResourcesCount;
+	@Deprecated
 	private long myExpungedEntitiesCount;
 
 	public DeleteMethodOutcome() {
@@ -47,24 +49,35 @@ public class DeleteMethodOutcome extends MethodOutcome {
 		return myDeletedEntities;
 	}
 
+	/**
+	 * Use {@link ca.uhn.fhir.jpa.delete.job.DeleteExpungeJobConfig#EXPUNGED_ENTITIES_COUNT}
+	 */
+	@Deprecated
 	public DeleteMethodOutcome setDeletedEntities(List<ResourceTable> theDeletedEntities) {
 		myDeletedEntities = theDeletedEntities;
 		return this;
 	}
 
+	/**
+	 * Use {@link ca.uhn.fhir.jpa.delete.job.DeleteExpungeJobConfig#EXPUNGED_RESOURCES_COUNT}
+	 */
+	@Deprecated
 	public long getExpungedResourcesCount() {
 		return myExpungedResourcesCount;
 	}
 
+	@Deprecated
 	public DeleteMethodOutcome setExpungedResourcesCount(long theExpungedResourcesCount) {
 		myExpungedResourcesCount = theExpungedResourcesCount;
 		return this;
 	}
 
+	@Deprecated
 	public long getExpungedEntitiesCount() {
 		return myExpungedEntitiesCount;
 	}
 
+	@Deprecated
 	public DeleteMethodOutcome setExpungedEntitiesCount(long theExpungedEntitiesCount) {
 		myExpungedEntitiesCount = theExpungedEntitiesCount;
 		return this;

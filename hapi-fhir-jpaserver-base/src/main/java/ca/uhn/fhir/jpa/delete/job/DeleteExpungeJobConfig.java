@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.delete.job;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch.BatchConstants;
+import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
 import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
 import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
 import ca.uhn.fhir.jpa.delete.model.UrlListJson;
@@ -34,9 +35,9 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -57,15 +58,8 @@ import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME;
  */
 @Configuration
 public class DeleteExpungeJobConfig {
+	public static final String DELETE_EXPUNGE_URL_LIST_STEP_NAME = "delete-expunge-url-list-step";
 
-	public static final String JOB_PARAM_URL_LIST = "urlList";
-	public static final String JOB_PARAM_SEARCH_COUNT = "searchCount";
-	// FIXME KHS remove
-	public static final String JOB_UUID_PARAMETER = "uuid";
-	public static final String DELETE_EXPUNGE_URL_LIST_STEP = "deleteExpungeUrlListStep";
-
-	@Autowired
-	private FhirContext myFhirContext;
 	@Autowired
 	private StepBuilderFactory myStepBuilderFactory;
 	@Autowired
@@ -91,15 +85,34 @@ public class DeleteExpungeJobConfig {
 			.build();
 	}
 
+	@Nonnull
+	public static JobParameters buildJobParameters(Long theSearchCount, List<String> theUrlList) {
+		Map<String, JobParameter> map = new HashMap<>();
+		UrlListJson urlListJson = UrlListJson.fromUrlStrings(theUrlList);
+		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_URL_LIST, new JobParameter(urlListJson.toString()));
+		if (theSearchCount != null) {
+			map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_SEARCH_COUNT, new JobParameter(theSearchCount));
+		}
+		JobParameters parameters = new JobParameters(map);
+		return parameters;
+	}
+
 	@Bean
-	@JobScope
 	public Step deleteExpungeUrlListStep() {
-		return myStepBuilderFactory.get(DELETE_EXPUNGE_URL_LIST_STEP)
+		return myStepBuilderFactory.get(DELETE_EXPUNGE_URL_LIST_STEP_NAME)
 			.<List<Long>, List<String>>chunk(1)
 			.reader(reverseCronologicalBatchResourcePidReader())
 			.processor(deleteExpungeProcessor())
 			.writer(sqlExecutorWriter())
+			.listener(pidCountRecorderListener())
+			.listener(promotionListener())
 			.build();
+	}
+
+	@Bean
+	@StepScope
+	public PidReaderCounterListener pidCountRecorderListener() {
+		return new PidReaderCounterListener();
 	}
 
 	@Bean
@@ -140,15 +153,12 @@ public class DeleteExpungeJobConfig {
 		return buildJobParameters(null, theUrlList);
 	}
 
-	@Nonnull
-	public static JobParameters buildJobParameters(Long theSearchCount, List<String> theUrlList) {
-		Map<String, JobParameter> map = new HashMap<>();
-		UrlListJson urlListJson = UrlListJson.fromUrlStrings(theUrlList);
-		map.put(JOB_PARAM_URL_LIST, new JobParameter(urlListJson.toString()));
-		if (theSearchCount != null) {
-			map.put(JOB_PARAM_SEARCH_COUNT, new JobParameter(theSearchCount));
-		}
-		JobParameters parameters = new JobParameters(map);
-		return parameters;
+	@Bean
+	public ExecutionContextPromotionListener promotionListener() {
+		ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
+
+		listener.setKeys(new String[]{SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED, PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED});
+
+		return listener;
 	}
 }

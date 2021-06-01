@@ -1,16 +1,21 @@
 package ca.uhn.fhir.jpa.delete.job;
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceForeignKey;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 /**
  * Input: list of pids of resources to be deleted and expunged
@@ -21,9 +26,17 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 
 	@Autowired
 	ResourceTableFKProvider myResourceTableFKProvider;
+	@Autowired
+	DaoConfig myDaoConfig;
+	@Autowired
+	IdHelperService myIdHelper;
+	@Autowired
+	IResourceLinkDao myResourceLinkDao;
 
 	@Override
 	public List<String> process(List<Long> thePids) throws Exception {
+		validateOkToDeleteAndExpunge(thePids);
+
 		List<String> retval = new ArrayList<>();
 
 		String pidListString = thePids.toString().replace("[", "(").replace("]", ")");
@@ -37,6 +50,46 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 		ResourceForeignKey resourceTablePk = new ResourceForeignKey("HFJ_RESOURCE", "RES_ID");
 		retval.add(deleteRecordsByColumnSql(pidListString, resourceTablePk));
 		return retval;
+	}
+
+	public void validateOkToDeleteAndExpunge(List<Long> thePids) {
+		if (!myDaoConfig.isEnforceReferentialIntegrityOnDelete()) {
+			ourLog.info("Referential integrity on delete disabled.  Skipping referential integrity check.");
+			return;
+		}
+
+		List<ResourceLink> conflictResourceLinks = Collections.synchronizedList(new ArrayList<>());
+		findResourceLinksWithTargetPidIn(thePids, thePids, conflictResourceLinks);
+
+		if (conflictResourceLinks.isEmpty()) {
+			return;
+		}
+
+		ResourceLink firstConflict = conflictResourceLinks.get(0);
+
+		//NB-GGG: We previously instantiated these ID values from firstConflict.getSourceResource().getIdDt(), but in a situation where we
+		//actually had to run delete conflict checks in multiple partitions, the executor service starts its own sessions on a per thread basis, and by the time
+		//we arrive here, those sessions are closed. So instead, we resolve them from PIDs, which are eagerly loaded.
+		String sourceResourceId = myIdHelper.resourceIdFromPidOrThrowException(firstConflict.getSourceResourcePid()).toVersionless().getValue();
+		String targetResourceId = myIdHelper.resourceIdFromPidOrThrowException(firstConflict.getTargetResourcePid()).toVersionless().getValue();
+
+		throw new InvalidRequestException("DELETE with _expunge=true failed.  Unable to delete " +
+			targetResourceId + " because " + sourceResourceId + " refers to it via the path " + firstConflict.getSourcePath());
+	}
+
+	public void findResourceLinksWithTargetPidIn(List<Long> theAllTargetPids, List<Long> theSomeTargetPids, List<ResourceLink> theConflictResourceLinks) {
+		// We only need to find one conflict, so if we found one already in an earlier partition run, we can skip the rest of the searches
+		if (theConflictResourceLinks.isEmpty()) {
+			List<ResourceLink> conflictResourceLinks = myResourceLinkDao.findWithTargetPidIn(theSomeTargetPids).stream()
+				// Filter out resource links for which we are planning to delete the source.
+				// theAllTargetPids contains a list of all the pids we are planning to delete.  So we only want
+				// to consider a link to be a conflict if the source of that link is not in theAllTargetPids.
+				.filter(link -> !theAllTargetPids.contains(link.getSourceResourcePid()))
+				.collect(Collectors.toList());
+
+			// We do this in two steps to avoid lock contention on this synchronized list
+			theConflictResourceLinks.addAll(conflictResourceLinks);
+		}
 	}
 
 	private String deleteRecordsByColumnSql(String thePidListString, ResourceForeignKey theResourceForeignKey) {
