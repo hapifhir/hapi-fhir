@@ -31,7 +31,6 @@ public class DeleteExpungeProvider {
 		@OperationParam(name = ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, typeName = "string", min = 1) List<IPrimitiveType<String>> theUrlsToDeleteExpunge,
 		@OperationParam(name = ProviderConstants.OPERATION_DELETE_BATCH_SIZE, typeName = "decimal", min = 1) IPrimitiveType<BigDecimal> theBatchSize,
 		// FIXME KHS use request details for partition
-		// FIXME KHS Add parameter for search count
 		RequestDetails theRequestDetails
 	) {
 		try {

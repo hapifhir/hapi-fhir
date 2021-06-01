@@ -32,9 +32,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ReverseCronologicalBatchResourcePidReader implements ItemReader<List<Long>>, ItemStream {
-	public static final Integer DEFAULT_SEARCH_COUNT = 100;
+	public static final Integer DEFAULT_BATCH_SIZE = 100;
 	public static final String JOB_PARAM_URL_LIST = "url-list";
-	public static final String JOB_PARAM_SEARCH_COUNT = "search-count";
+	public static final String JOB_PARAM_BATCH_SIZE = "batch-size";
 	public static final String JOB_PARAM_START_TIME = "start-time";
 	private static final String CURRENT_URL_INDEX = "current.url-index";
 	private static final String CURRENT_THRESHOLD_LOW = "current.threshold-low";
@@ -49,7 +49,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	private DaoRegistry myDaoRegistry;
 
 	private List<String> myUrlList;
-	private Integer mySearchCount = DEFAULT_SEARCH_COUNT;
+	private Integer myBatchSize = DEFAULT_BATCH_SIZE;
 	private Instant myStartTime;
 	private int myUrlIndex = 0;
 	private final Map<Integer, Instant> myThresholdHighByUrlIndex = new HashMap<>();
@@ -61,8 +61,8 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	}
 
 	@Autowired
-	public void setSearchCount(@Value("#{jobParameters['" + JOB_PARAM_SEARCH_COUNT + "']}") Integer theSearchCount) {
-		mySearchCount = theSearchCount;
+	public void setBatchSize(@Value("#{jobParameters['" + JOB_PARAM_BATCH_SIZE + "']}") Integer theBatchSize) {
+		myBatchSize = theBatchSize;
 	}
 
 	@Autowired
@@ -91,7 +91,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 
 		map.setLastUpdated(new DateRangeParam().setUpperBoundInclusive(Date.from(myThresholdHighByUrlIndex.get(theUrlIndex))));
 
-		map.setLoadSynchronousUpTo(mySearchCount);
+		map.setLoadSynchronousUpTo(myBatchSize);
 		SortSpec sort = new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.DESC);
 		map.setSort(sort);
 
