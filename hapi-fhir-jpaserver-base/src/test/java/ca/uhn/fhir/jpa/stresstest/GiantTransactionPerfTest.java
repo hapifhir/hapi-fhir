@@ -176,6 +176,7 @@ public class GiantTransactionPerfTest {
 
 		mySystemDao = new FhirSystemDaoR4();
 		mySystemDao.setTransactionProcessorForUnitTest(myTransactionProcessor);
+		mySystemDao.setDaoConfigForUnitTest(myDaoConfig);
 		mySystemDao.start();
 
 		when(myAppCtx.getBean(eq(IInstanceValidatorModule.class))).thenReturn(myInstanceValidatorSvc);
@@ -235,11 +236,10 @@ public class GiantTransactionPerfTest {
 
 		myEobDao = new JpaResourceDao<>();
 		myEobDao.setContext(myCtx);
-		myEobDao.setConfig(myDaoConfig);
+		myEobDao.setDaoConfigForUnitTest(myDaoConfig);
 		myEobDao.setResourceType(ExplanationOfBenefit.class);
 		myEobDao.setApplicationContext(myAppCtx);
 		myEobDao.setTransactionService(myHapiTransactionService);
-		myEobDao.setDaoConfig(myDaoConfig);
 		myEobDao.setRequestPartitionHelperService(new MockRequestPartitionHelperSvc());
 		myEobDao.setEntityManager(myEntityManager);
 		myEobDao.setSearchParamWithInlineReferencesExtractor(mySearchParamWithInlineReferencesExtractor);
@@ -247,6 +247,7 @@ public class GiantTransactionPerfTest {
 		myEobDao.setSearchParamRegistry(mySearchParamRegistry);
 		myEobDao.setSearchParamPresenceSvc(mySearchParamPresenceSvc);
 		myEobDao.setDaoSearchParamSynchronizer(myDaoSearchParamSynchronizer);
+		myEobDao.setDaoConfigForUnitTest(myDaoConfig);
 		myEobDao.start();
 
 		myDaoRegistry.setResourceDaos(Lists.newArrayList(myEobDao));

@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.BanUnsupportedHttpMethodsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.FhirPathFilterInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhirtest.config.TestDstu2Config;
@@ -274,6 +275,12 @@ public class TestRestfulServer extends RestfulServer {
 		 * OpenAPI
 		 */
 		registerInterceptor(new OpenApiInterceptor());
+
+		// Logging for request type
+		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
+		loggingInterceptor.setMessageFormat("${operationType} Content-Type: ${requestHeader.content-type} - Accept: ${responseEncodingNoDefault} \"${requestHeader.accept}\" - Agent: ${requestHeader.user-agent}");
+		registerInterceptor(loggingInterceptor);
+
 	}
 
 	/**

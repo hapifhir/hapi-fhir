@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.validation.constraints.Null;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -84,6 +83,7 @@ public class DaoConfig {
 	 * By default, all are enabled.
 	 */
 	public static final boolean DEFAULT_ENABLE_TASKS = true;
+	public static final int DEFAULT_MAXIMUM_INCLUDES_TO_LOAD_PER_PAGE = 1000;
 	/**
 	 * Default value for {@link #setMaximumSearchResultCountInTransaction(Integer)}
 	 *
@@ -98,7 +98,6 @@ public class DaoConfig {
 	 * Child Configurations
 	 */
 	private static final Integer DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE = 10000;
-	public static final int DEFAULT_MAXIMUM_INCLUDES_TO_LOAD_PER_PAGE = 1000;
 	private final ModelConfig myModelConfig = new ModelConfig();
 	/**
 	 * Do not change default of {@code 0}!
@@ -129,6 +128,7 @@ public class DaoConfig {
 	private boolean myEnforceReferentialIntegrityOnWrite = true;
 	private SearchTotalModeEnum myDefaultTotalMode = null;
 	private int myEverythingIncludesFetchPageSize = 50;
+	private int myBulkImportMaxRetryCount = 10;
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -240,6 +240,7 @@ public class DaoConfig {
 	 * @since 5.5.0
 	 */
 	private boolean myEnableTaskBulkExportJobExecution;
+	private boolean myMassIngestionMode;
 	private boolean myAccountForDateIndexNulls;
 	private boolean myTriggerSubscriptionsForNonVersioningChanges;
 
@@ -263,6 +264,26 @@ public class DaoConfig {
 			ourLog.info("Status based reindexing is DISABLED");
 			setStatusBasedReindexingDisabled(true);
 		}
+	}
+
+	/**
+	 * Specifies the maximum number of times that a chunk will be retried during bulk import
+	 * processes before giving up.
+	 *
+	 * @since 5.5.0
+	 */
+	public int getBulkImportMaxRetryCount() {
+		return myBulkImportMaxRetryCount;
+	}
+
+	/**
+	 * Specifies the maximum number of times that a chunk will be retried during bulk import
+	 * processes before giving up.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setBulkImportMaxRetryCount(int theBulkImportMaxRetryCount) {
+		myBulkImportMaxRetryCount = theBulkImportMaxRetryCount;
 	}
 
 	/**
@@ -2376,14 +2397,37 @@ public class DaoConfig {
 	}
 
 	/**
-	 * If set to true (default is false), date indexes will account for null values in the range columns. As of 5.3.0
-	 * we no longer place null values in these columns, but legacy data may exist that still has these values. Note that
-	 * enabling this results in more complexity in the search SQL.
+	 * If this is enabled (disabled by default), Mass Ingestion Mode is enabled. In this mode, a number of
+	 * runtime checks are disabled. This mode is designed for rapid backloading of data while the system is not
+	 * being otherwise used.
+	 * <p>
+	 * In this mode:
+	 * <p>
+	 * - Tags/Profiles/Security Labels will not be updated on existing resources that already have them
+	 * - Resources modification checks will be skipped in favour of a simple hash check
+	 * - Extra resource ID caching is enabled
 	 *
 	 * @since 5.5.0
 	 */
-	public void setAccountForDateIndexNulls(boolean theAccountForDateIndexNulls) {
-		myAccountForDateIndexNulls = theAccountForDateIndexNulls;
+	public boolean isMassIngestionMode() {
+		return myMassIngestionMode;
+	}
+
+	/**
+	 * If this is enabled (disabled by default), Mass Ingestion Mode is enabled. In this mode, a number of
+	 * runtime checks are disabled. This mode is designed for rapid backloading of data while the system is not
+	 * being otherwise used.
+	 * <p>
+	 * In this mode:
+	 * <p>
+	 * - Tags/Profiles/Security Labels will not be updated on existing resources that already have them
+	 * - Resources modification checks will be skipped in favour of a simple hash check
+	 * - Extra resource ID caching is enabled
+	 *
+	 * @since 5.5.0
+	 */
+	public void setMassIngestionMode(boolean theMassIngestionMode) {
+		myMassIngestionMode = theMassIngestionMode;
 	}
 
 	/**
@@ -2395,6 +2439,17 @@ public class DaoConfig {
 	 */
 	public boolean isAccountForDateIndexNulls() {
 		return myAccountForDateIndexNulls;
+	}
+
+	/**
+	 * If set to true (default is false), date indexes will account for null values in the range columns. As of 5.3.0
+	 * we no longer place null values in these columns, but legacy data may exist that still has these values. Note that
+	 * enabling this results in more complexity in the search SQL.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setAccountForDateIndexNulls(boolean theAccountForDateIndexNulls) {
+		myAccountForDateIndexNulls = theAccountForDateIndexNulls;
 	}
 
 	/**

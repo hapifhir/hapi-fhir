@@ -37,6 +37,9 @@ public interface IBulkImportJobFileDao extends JpaRepository<BulkImportJobFileEn
 	@Query("SELECT f FROM BulkImportJobFileEntity f WHERE f.myJob = :job AND f.myFileSequence = :fileIndex")
 	Optional<BulkImportJobFileEntity> findForJob(@Param("job") BulkImportJobEntity theJob, @Param("fileIndex") int theFileIndex);
 
+	@Query("SELECT f.myFileDescription FROM BulkImportJobFileEntity f WHERE f.myJob = :job AND f.myFileSequence = :fileIndex")
+	Optional<String> findFileDescriptionForJob(@Param("job") BulkImportJobEntity theJob, @Param("fileIndex") int theFileIndex);
+
 	@Query("SELECT f.myId FROM BulkImportJobFileEntity f WHERE f.myJob.myJobId = :jobId ORDER BY f.myFileSequence ASC")
 	List<Long> findAllIdsForJob(@Param("jobId") String theJobId);
 

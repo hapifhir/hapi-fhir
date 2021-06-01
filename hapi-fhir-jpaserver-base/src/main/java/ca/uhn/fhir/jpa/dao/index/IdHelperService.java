@@ -42,6 +42,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -144,7 +145,14 @@ public class IdHelperService {
 				retVal = new ResourcePersistentId(resolveResourceIdentity(theRequestPartitionId, theResourceType, theId).getResourceId());
 			} else {
 				String key = toForcedIdToPidKey(theRequestPartitionId, theResourceType, theId);
-				retVal = myMemoryCacheService.getThenPutAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, t -> new ResourcePersistentId(resolveResourceIdentity(theRequestPartitionId, theResourceType, theId).getResourceId()));
+				retVal = myMemoryCacheService.getThenPutAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, t -> {
+					List<IIdType> ids = Collections.singletonList(new IdType(theResourceType, theId));
+					List<ResourcePersistentId> resolvedIds = resolveResourcePersistentIdsWithCache(theRequestPartitionId, ids);
+					if (resolvedIds.isEmpty()) {
+						throw new ResourceNotFoundException(ids.get(0));
+					}
+					return resolvedIds.get(0);
+				});
 			}
 
 		} else {
@@ -196,14 +204,14 @@ public class IdHelperService {
 
 			} else {
 
-				String partitionIdStringForKey = RequestPartitionId.stringifyForKey(theRequestPartitionId);
+//				String partitionIdStringForKey = RequestPartitionId.stringifyForKey(theRequestPartitionId);
 				for (Iterator<String> idIterator = nextIds.iterator(); idIterator.hasNext(); ) {
 					String nextId = idIterator.next();
-					String key = partitionIdStringForKey + "/" + nextResourceType + "/" + nextId;
-					Long nextCachedPid = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.PERSISTENT_ID, key);
+					String key = toForcedIdToPidKey(theRequestPartitionId, nextResourceType, nextId);
+					ResourcePersistentId nextCachedPid = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key);
 					if (nextCachedPid != null) {
 						idIterator.remove();
-						retVal.add(new ResourcePersistentId(nextCachedPid));
+						retVal.add(nextCachedPid);
 					}
 				}
 
@@ -224,10 +232,11 @@ public class IdHelperService {
 					for (Object[] nextView : views) {
 						String forcedId = (String) nextView[0];
 						Long pid = (Long) nextView[1];
-						retVal.add(new ResourcePersistentId(pid));
+						ResourcePersistentId persistentId = new ResourcePersistentId(pid);
+						retVal.add(persistentId);
 
-						String key = partitionIdStringForKey + "/" + nextResourceType + "/" + forcedId;
-						myMemoryCacheService.put(MemoryCacheService.CacheEnum.PERSISTENT_ID, key, pid);
+						String key = toForcedIdToPidKey(theRequestPartitionId, nextResourceType, forcedId);
+						myMemoryCacheService.put(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, persistentId);
 					}
 				}
 

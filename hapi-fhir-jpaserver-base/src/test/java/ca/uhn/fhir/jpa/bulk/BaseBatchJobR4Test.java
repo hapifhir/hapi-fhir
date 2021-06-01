@@ -1,12 +1,17 @@
 package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import org.junit.jupiter.api.AfterEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.repository.dao.JobExecutionDao;
+import org.springframework.batch.core.repository.dao.JobInstanceDao;
+import org.springframework.batch.core.repository.dao.MapJobExecutionDao;
+import org.springframework.batch.core.repository.dao.MapJobInstanceDao;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -24,6 +29,16 @@ public class BaseBatchJobR4Test extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseBatchJobR4Test.class);
 	@Autowired
 	private JobExplorer myJobExplorer;
+//	@Autowired
+//	private JobExecutionDao myMapJobExecutionDao;
+//	@Autowired
+//	private JobInstanceDao myMapJobInstanceDao;
+//
+//	@AfterEach
+//	public void after() {
+//		((MapJobExecutionDao)myMapJobExecutionDao).clear();
+//		((MapJobInstanceDao)myMapJobInstanceDao).clear();
+//	}
 
 	protected List<JobExecution> awaitAllBulkJobCompletions(String... theJobNames) {
 		assert theJobNames.length > 0;
@@ -40,6 +55,8 @@ public class BaseBatchJobR4Test extends BaseJpaR4Test {
 		List<JobExecution> bulkExportExecutions = bulkExport.stream().flatMap(jobInstance -> myJobExplorer.getJobExecutions(jobInstance).stream()).collect(Collectors.toList());
 		awaitJobCompletions(bulkExportExecutions);
 
+		// Return the final state
+		bulkExportExecutions = bulkExport.stream().flatMap(jobInstance -> myJobExplorer.getJobExecutions(jobInstance).stream()).collect(Collectors.toList());
 		return bulkExportExecutions;
 	}
 

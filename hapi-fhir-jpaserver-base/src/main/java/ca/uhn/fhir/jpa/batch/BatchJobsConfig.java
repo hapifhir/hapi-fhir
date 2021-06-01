@@ -25,6 +25,10 @@ import ca.uhn.fhir.jpa.bulk.imprt.job.BulkImportJobConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 @Configuration
 //When you define a new batch job, add it here.
 @Import({
@@ -33,8 +37,40 @@ import org.springframework.context.annotation.Import;
 		  BulkImportJobConfig.class
 })
 public class BatchJobsConfig {
-	public static final String BULK_IMPORT_JOB_NAME = "bulkImportJob";
+
+	/*
+	 * Bulk Export
+	 */
+
 	public static final String BULK_EXPORT_JOB_NAME = "bulkExportJob";
 	public static final String GROUP_BULK_EXPORT_JOB_NAME = "groupBulkExportJob";
 	public static final String PATIENT_BULK_EXPORT_JOB_NAME = "patientBulkExportJob";
+	public static final String BULK_EXPORT_GENERATE_RESOURCE_FILES_STEP = "bulkExportGenerateResourceFilesStep";
+
+	/*
+	 * Bulk Import
+	 */
+
+	public static final String BULK_IMPORT_JOB_NAME = "bulkImportJob";
+	public static final String BULK_IMPORT_PROCESSING_STEP = "bulkImportProcessingStep";
+
+	/**
+	 * This Set contains the step names across all job types that are appropriate for
+	 * someone to look at the write count for that given step in order to determine the
+	 * number of processed records.
+	 *
+	 * This is provided since a job might have multiple steps that the same data passes
+	 * through, so you can't just sum up the total of all of them.
+	 *
+	 * For any given batch job type, there should only be one step name in this set
+	 */
+	public static final Set<String> RECORD_PROCESSING_STEP_NAMES;
+
+	static {
+		HashSet<String> recordProcessingStepNames = new HashSet<>();
+		recordProcessingStepNames.add(BULK_IMPORT_PROCESSING_STEP);
+		recordProcessingStepNames.add(BULK_EXPORT_GENERATE_RESOURCE_FILES_STEP);
+		RECORD_PROCESSING_STEP_NAMES = Collections.unmodifiableSet(recordProcessingStepNames);
+	}
+
 }

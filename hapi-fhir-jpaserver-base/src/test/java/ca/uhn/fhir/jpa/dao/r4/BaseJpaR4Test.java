@@ -79,6 +79,7 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.parser.IParser;
@@ -163,6 +164,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -472,6 +474,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected ITermConceptMapGroupElementTargetDao myTermConceptMapGroupElementTargetDao;
 	@Autowired
+	protected MemoryCacheService myMemoryCacheService;
+	@Autowired
 	protected ICacheWarmingSvc myCacheWarmingSvc;
 	protected IServerInterceptor myInterceptor;
 	@Autowired
@@ -528,7 +532,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	public void beforeCreateInterceptor() {
 		myInterceptor = mock(IServerInterceptor.class);
 
-		myPerformanceTracingLoggingInterceptor = new PerformanceTracingLoggingInterceptor();
+		myPerformanceTracingLoggingInterceptor = new PerformanceTracingLoggingInterceptor(Level.DEBUG);
 		myInterceptorRegistry.registerInterceptor(myPerformanceTracingLoggingInterceptor);
 	}
 

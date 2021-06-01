@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -49,6 +50,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 public class InMemoryResourceMatcher {
 
@@ -73,6 +75,8 @@ public class InMemoryResourceMatcher {
 	public InMemoryMatchResult match(String theCriteria, IBaseResource theResource, ResourceIndexedSearchParams theSearchParams) {
 		RuntimeResourceDefinition resourceDefinition;
 		if (theResource == null) {
+			Validate.isTrue(!theCriteria.startsWith("?"), "Invalid match URL format (must match \"[resourceType]?[params]\")");
+			Validate.isTrue(theCriteria.contains("?"), "Invalid match URL format (must match \"[resourceType]?[params]\")");
 			resourceDefinition = UrlUtil.parseUrlResourceType(myFhirContext, theCriteria);
 		} else {
 			resourceDefinition = myFhirContext.getResourceDefinition(theResource);

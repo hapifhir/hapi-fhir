@@ -59,6 +59,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 	@Index(name = "IDX_RES_TYPE", columnList = "RES_TYPE"),
 	@Index(name = "IDX_INDEXSTATUS", columnList = "SP_INDEX_STATUS")
 })
+@NamedEntityGraph(name = "Resource.noJoins")
 public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource, IResourceLookup {
 	public static final int RESTYPE_LEN = 40;
 	private static final int MAX_LANGUAGE_LENGTH = 20;
@@ -691,12 +692,14 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	@Override
 	public IdDt getIdDt() {
-		if (getForcedId() == null) {
+		if (getTransientForcedId() != null) {
+			// Avoid a join query if possible
+			return new IdDt(getResourceType() + '/' + getTransientForcedId() + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		} else if (getForcedId() == null) {
 			Long id = this.getResourceId();
 			return new IdDt(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		} else {
-			// Avoid a join query if possible
-			String forcedId = getTransientForcedId() != null ? getTransientForcedId() : getForcedId().getForcedId();
+			String forcedId = getForcedId().getForcedId();
 			return new IdDt(getResourceType() + '/' + forcedId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		}
 	}

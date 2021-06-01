@@ -1,10 +1,14 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQuery;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -14,7 +18,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CareTeam;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
@@ -27,12 +35,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
@@ -48,6 +61,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myDaoConfig.setDeleteEnabled(new DaoConfig().isDeleteEnabled());
 		myDaoConfig.setMatchUrlCache(new DaoConfig().getMatchUrlCache());
 		myDaoConfig.setHistoryCountMode(DaoConfig.DEFAULT_HISTORY_COUNT_MODE);
+		myDaoConfig.setMassIngestionMode(new DaoConfig().isMassIngestionMode());
+		myModelConfig.setAutoVersionReferenceAtPaths(new ModelConfig().getAutoVersionReferenceAtPaths());
+		myModelConfig.setRespectVersionsForSearchIncludes(new ModelConfig().isRespectVersionsForSearchIncludes());
+		myFhirCtx.getParserOptions().setStripVersionsFromReferences(true);
 	}
 
 	@BeforeEach
@@ -537,7 +554,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		assertEquals(1, myObservationDao.search(map).size().intValue());
 		// Resolve forced ID, Perform search, load result
-		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertNoPartitionSelectors();
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
@@ -579,7 +596,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		assertEquals(1, myObservationDao.search(map).size().intValue());
 		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 		// Resolve forced ID, Perform search, load result
-		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
@@ -698,7 +715,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, bundleCreator.get());
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
@@ -759,7 +776,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, bundleCreator.get());
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
@@ -776,6 +794,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(3, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+
+		// Make sure the match URL query uses a small limit
+		String matchUrlQuery = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
+		assertThat(matchUrlQuery, containsString("t0.HASH_SYS_AND_VALUE = '-4132452001562191669'"));
+		assertThat(matchUrlQuery, containsString("limit '2'"));
 
 		runInTransaction(()->{
 			List<String> types = myResourceTableDao.findAll().stream().map(t -> t.getResourceType()).collect(Collectors.toList());
@@ -830,9 +853,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
-		assertEquals(5, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
-		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 		// Pass 2
@@ -1483,5 +1506,74 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 	}
 
+
+	@Test
+	public void testMassIngestionMode_TransactionWithChanges() {
+		myDaoConfig.setDeleteEnabled(false);
+		myDaoConfig.setMatchUrlCache(true);
+		myDaoConfig.setMassIngestionMode(true);
+		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myModelConfig.setRespectVersionsForSearchIncludes(true);
+		myModelConfig.setAutoVersionReferenceAtPaths(
+			"ExplanationOfBenefit.patient",
+			"ExplanationOfBenefit.insurance.coverage"
+		);
+
+		Patient warmUpPt = new Patient();
+		warmUpPt.getMeta().addProfile("http://foo");
+		warmUpPt.setActive(true);
+		myPatientDao.create(warmUpPt);
+
+		AtomicInteger ai = new AtomicInteger(0);
+		Supplier<Bundle> supplier = () -> {
+			BundleBuilder bb = new BundleBuilder(myFhirCtx);
+
+			Coverage coverage = new Coverage();
+			coverage.getMeta().addProfile("http://foo");
+			coverage.setId(IdType.newRandomUuid());
+			coverage.addIdentifier().setSystem("http://coverage").setValue("12345");
+			coverage.setStatus(Coverage.CoverageStatus.ACTIVE);
+			coverage.setType(new CodeableConcept().addCoding(new Coding("http://coverage-type", "12345", null)));
+			bb.addTransactionUpdateEntry(coverage).conditional("Coverage?identifier=http://coverage|12345");
+
+			Patient patient = new Patient();
+			patient.getMeta().addProfile("http://foo");
+			patient.setId("Patient/PATIENT-A");
+			patient.setActive(true);
+			patient.addName().setFamily("SMITH").addGiven("JAMES" + ai.incrementAndGet());
+			bb.addTransactionUpdateEntry(patient);
+
+			ExplanationOfBenefit eob = new ExplanationOfBenefit();
+			eob.getMeta().addProfile("http://foo");
+			eob.addIdentifier().setSystem("http://eob").setValue("12345");
+			eob.addInsurance().setCoverage(new Reference(coverage.getId()));
+			eob.getPatient().setReference(patient.getId());
+			eob.setCreatedElement(new DateTimeType("2021-01-01T12:12:12Z"));
+			bb.addTransactionUpdateEntry(eob).conditional("ExplanationOfBenefit?identifier=http://eob|12345");
+
+			return (Bundle) bb.getBundle();
+		};
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
+//		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(13, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(11, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+		//		assertEquals(15, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		//		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		//		assertEquals(3, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		//		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+	}
 
 }

@@ -250,8 +250,16 @@ public class UrlUtil {
 	}
 
 	public static RuntimeResourceDefinition parseUrlResourceType(FhirContext theCtx, String theUrl) throws DataFormatException {
-		int paramIndex = theUrl.indexOf('?');
-		String resourceName = theUrl.substring(0, paramIndex);
+		String url = theUrl;
+		int paramIndex = url.indexOf('?');
+
+		// Change pattern of "Observation/?param=foo" into "Observation?param=foo"
+		if (paramIndex > 0 && url.charAt(paramIndex - 1) == '/') {
+			url = url.substring(0, paramIndex - 1) + url.substring(paramIndex);
+			paramIndex--;
+		}
+
+		String resourceName = url.substring(0, paramIndex);
 		if (resourceName.contains("/")) {
 			resourceName = resourceName.substring(resourceName.lastIndexOf('/') + 1);
 		}

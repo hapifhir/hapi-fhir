@@ -43,7 +43,16 @@ public class PerformanceTracingLoggingInterceptor {
 	 * Constructor that logs to this class with a level of INFO
 	 */
 	public PerformanceTracingLoggingInterceptor() {
-		this(ourLog, Level.INFO);
+		this(Level.INFO);
+	}
+
+	/**
+	 * Constructor that logs with a specific level
+	 *
+	 * @since 5.5.0
+	 */
+	public PerformanceTracingLoggingInterceptor(Level theLevel) {
+		this(ourLog, theLevel);
 	}
 
 	/**

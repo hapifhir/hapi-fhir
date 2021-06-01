@@ -387,10 +387,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return myConfig;
 	}
 
-	public void setConfig(DaoConfig theConfig) {
-		myConfig = theConfig;
-	}
-
 	@Override
 	public FhirContext getContext() {
 		return myContext;
@@ -608,49 +604,56 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			}
 
-			Set<ResourceTag> allDefs = new HashSet<>();
-			Set<ResourceTag> allTagsOld = getAllTagDefinitions(theEntity);
-
-			if (theResource instanceof IResource) {
-				extractTagsHapi(theTransactionDetails, (IResource) theResource, theEntity, allDefs);
-			} else {
-				extractTagsRi(theTransactionDetails, (IAnyResource) theResource, theEntity, allDefs);
+			boolean skipUpdatingTags = false;
+			if (myConfig.isMassIngestionMode() && theEntity.isHasTags()) {
+				skipUpdatingTags = true;
 			}
 
-			RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
-			if (def.isStandardType() == false) {
-				String profile = def.getResourceProfile("");
-				if (isNotBlank(profile)) {
-					TagDefinition profileDef = getTagOrNull(theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null);
+			if (!skipUpdatingTags) {
+				Set<ResourceTag> allDefs = new HashSet<>();
+				Set<ResourceTag> allTagsOld = getAllTagDefinitions(theEntity);
 
-					ResourceTag tag = theEntity.addTag(profileDef);
-					allDefs.add(tag);
-					theEntity.setHasTags(true);
-				}
-			}
-
-			Set<ResourceTag> allTagsNew = getAllTagDefinitions(theEntity);
-			Set<TagDefinition> allDefsPresent = new HashSet<>();
-			allTagsNew.forEach(tag -> {
-
-				// Don't keep duplicate tags
-				if (!allDefsPresent.add(tag.getTag())) {
-					theEntity.getTags().remove(tag);
+				if (theResource instanceof IResource) {
+					extractTagsHapi(theTransactionDetails, (IResource) theResource, theEntity, allDefs);
+				} else {
+					extractTagsRi(theTransactionDetails, (IAnyResource) theResource, theEntity, allDefs);
 				}
 
-				// Drop any tags that have been removed
-				if (!allDefs.contains(tag)) {
-					if (shouldDroppedTagBeRemovedOnUpdate(theRequest, tag)) {
-						theEntity.getTags().remove(tag);
+				RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
+				if (def.isStandardType() == false) {
+					String profile = def.getResourceProfile("");
+					if (isNotBlank(profile)) {
+						TagDefinition profileDef = getTagOrNull(theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null);
+
+						ResourceTag tag = theEntity.addTag(profileDef);
+						allDefs.add(tag);
+						theEntity.setHasTags(true);
 					}
 				}
 
-			});
+				Set<ResourceTag> allTagsNew = getAllTagDefinitions(theEntity);
+				Set<TagDefinition> allDefsPresent = new HashSet<>();
+				allTagsNew.forEach(tag -> {
 
-			if (!allTagsOld.equals(allTagsNew)) {
-				changed = true;
+					// Don't keep duplicate tags
+					if (!allDefsPresent.add(tag.getTag())) {
+						theEntity.getTags().remove(tag);
+					}
+
+					// Drop any tags that have been removed
+					if (!allDefs.contains(tag)) {
+						if (shouldDroppedTagBeRemovedOnUpdate(theRequest, tag)) {
+							theEntity.getTags().remove(tag);
+						}
+					}
+
+				});
+
+				if (!allTagsOld.equals(allTagsNew)) {
+					changed = true;
+				}
+				theEntity.setHasTags(!allTagsNew.isEmpty());
 			}
-			theEntity.setHasTags(!allTagsNew.isEmpty());
 
 		} else {
 			theEntity.setHashSha256(null);
@@ -661,6 +664,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (thePerformIndexing && changed == false) {
 			if (theEntity.getId() == null) {
 				changed = true;
+			} else if (myConfig.isMassIngestionMode()) {
+
+				// Don't check existing - We'll rely on the SHA256 hash only
+
 			} else {
 				ResourceHistoryTable currentHistoryVersion = theEntity.getCurrentVersionEntity();
 				if (currentHistoryVersion == null) {
@@ -1717,6 +1724,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@VisibleForTesting
 	public static void setDisableIncrementOnUpdateForUnitTest(boolean theDisableIncrementOnUpdateForUnitTest) {
 		ourDisableIncrementOnUpdateForUnitTest = theDisableIncrementOnUpdateForUnitTest;
+	}
+
+	@VisibleForTesting
+	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
+		myConfig = theDaoConfig;
 	}
 
 	/**
