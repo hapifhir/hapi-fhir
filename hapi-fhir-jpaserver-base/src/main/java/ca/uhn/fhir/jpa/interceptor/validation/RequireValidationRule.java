@@ -68,7 +68,7 @@ class RequireValidationRule extends BaseTypedRule {
 	public RuleEvaluation evaluate(RequestDetails theRequestDetails, @Nonnull IBaseResource theResource) {
 
 		FhirValidator validator = getFhirContext().newValidator();
-		validator.setInterceptorBraodcaster(CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails));
+		validator.setInterceptorBroadcaster(CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails));
 		validator.registerValidatorModule(myValidator);
 		ValidationResult outcome = validator.validateWithResult(theResource);
 
