@@ -36,7 +36,7 @@ public class DeleteExpungeProvider {
 	) {
 		try {
 			List<String> urls = theUrlsToDeleteExpunge.stream().map(IPrimitiveType::getValue).collect(Collectors.toList());
-			JobExecution jobExecution = myDeleteExpungeJobSubmitter.submitJob(theBatchSize.getValue().longValue(), urls);
+			JobExecution jobExecution = myDeleteExpungeJobSubmitter.submitJob(theBatchSize.getValue().intValue(), urls);
 			IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
 			ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID, jobExecution.getJobId());
 			return retval;

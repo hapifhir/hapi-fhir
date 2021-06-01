@@ -49,7 +49,6 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	private DaoRegistry myDaoRegistry;
 
 	private List<String> myUrlList;
-	// FIXME KHS is this default ever used?
 	private Integer mySearchCount = DEFAULT_SEARCH_COUNT;
 	private Instant myStartTime;
 	private int myUrlIndex = 0;

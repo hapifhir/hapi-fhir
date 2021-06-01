@@ -95,8 +95,6 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 		assertTrue(activateJobOutcome);
 
 		List<JobExecution> executions = awaitAllBulkImportJobCompletion();
-		// FIXME KHS can we assert on this?
-//		assertEquals(1, executions.size());
 		assertEquals("testFlow_TransactionRows", executions.get(0).getJobParameters().getString(BulkExportJobConfig.JOB_DESCRIPTION));
 
 		runInTransaction(() -> {

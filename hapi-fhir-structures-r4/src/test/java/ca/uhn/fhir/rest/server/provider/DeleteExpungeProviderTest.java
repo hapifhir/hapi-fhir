@@ -37,7 +37,7 @@ public class DeleteExpungeProviderTest extends BaseR4ServerTest {
 		Parameters input = new Parameters();
 		String url1 = "Patient?active=false";
 		String url2 = "Patient?active=false";
-		Long batchSize = 2401L;
+		Integer batchSize = 2401;
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, url1);
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, url2);
 		input.addParameter(ProviderConstants.OPERATION_DELETE_BATCH_SIZE, new DecimalType(batchSize));
@@ -62,11 +62,11 @@ public class DeleteExpungeProviderTest extends BaseR4ServerTest {
 	}
 
 	private class MyDeleteExpungeJobSubmitter implements IDeleteExpungeJobSubmitter {
-		public Long calledWithBatchSize;
+		public Integer calledWithBatchSize;
 		public List<String> calledWithUrls;
 
 		@Override
-		public JobExecution submitJob(Long theBatchSize, List<String> theUrlsToExpungeDelete) {
+		public JobExecution submitJob(Integer theBatchSize, List<String> theUrlsToExpungeDelete) {
 			calledWithBatchSize = theBatchSize;
 			calledWithUrls = theUrlsToExpungeDelete;
 			JobInstance instance = new JobInstance(123L, "jobName");

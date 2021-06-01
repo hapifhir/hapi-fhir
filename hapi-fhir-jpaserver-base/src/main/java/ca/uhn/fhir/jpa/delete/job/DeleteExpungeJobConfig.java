@@ -81,13 +81,13 @@ public class DeleteExpungeJobConfig {
 	}
 
 	@Nonnull
-	public static JobParameters buildJobParameters(Long theSearchCount, List<String> theUrlList) {
+	public static JobParameters buildJobParameters(Integer theSearchCount, List<String> theUrlList) {
 		Map<String, JobParameter> map = new HashMap<>();
 		UrlListJson urlListJson = UrlListJson.fromUrlStrings(theUrlList);
 		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_URL_LIST, new JobParameter(urlListJson.toString()));
 		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_START_TIME, new JobParameter(DateUtils.addMinutes(new Date(), MINUTES_IN_FUTURE_TO_DELETE_FROM)));
 		if (theSearchCount != null) {
-			map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_SEARCH_COUNT, new JobParameter(theSearchCount));
+			map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_SEARCH_COUNT, new JobParameter(theSearchCount.longValue()));
 		}
 		JobParameters parameters = new JobParameters(map);
 		return parameters;
@@ -135,18 +135,8 @@ public class DeleteExpungeJobConfig {
 	}
 
 	@Nonnull
-	public static JobParameters buildJobParameters(Long theSearchCount, String... theUrls) {
-		return buildJobParameters(theSearchCount, Lists.newArrayList(theUrls));
-	}
-
-	@Nonnull
 	public static JobParameters buildJobParameters(String... theUrls) {
-		return buildJobParameters(Lists.newArrayList(theUrls));
-	}
-
-	@Nonnull
-	public static JobParameters buildJobParameters(List<String> theUrlList) {
-		return buildJobParameters(null, theUrlList);
+		return buildJobParameters(ReverseCronologicalBatchResourcePidReader.DEFAULT_SEARCH_COUNT, Lists.newArrayList(theUrls));
 	}
 
 	@Bean

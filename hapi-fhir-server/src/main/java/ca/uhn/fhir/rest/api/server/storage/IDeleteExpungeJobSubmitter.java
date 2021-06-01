@@ -12,5 +12,5 @@ public interface IDeleteExpungeJobSubmitter {
 	 * @return the executing jon
 	 * @throws JobParametersInvalidException
 	 */
-	JobExecution submitJob(Long theBatchSize, List<String> theUrlsToDeleteExpunge) throws JobParametersInvalidException;
+	JobExecution submitJob(Integer theBatchSize, List<String> theUrlsToDeleteExpunge) throws JobParametersInvalidException;
 }
