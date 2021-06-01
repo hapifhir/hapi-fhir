@@ -23,6 +23,9 @@ package ca.uhn.fhir.jpa.bulk.export.svc;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -45,8 +48,10 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -295,12 +300,23 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	@Transactional
 	@Override
 	public JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions) {
-		return submitJob(theBulkDataExportOptions, true);
+		return submitJob(theBulkDataExportOptions, true, null);
 	}
+
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Transactional
 	@Override
-	public JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions, Boolean useCache) {
+	public JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions, Boolean useCache, RequestDetails theRequestDetails) {
+
+		// Interceptor call: STORAGE_INITIATE_BULK_EXPORT
+		HookParams params = new HookParams()
+			.add(BulkDataExportOptions.class, theBulkDataExportOptions)
+			.add(RequestDetails.class, theRequestDetails)
+			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_INITIATE_BULK_EXPORT, params);
+
 		String outputFormat = Constants.CT_FHIR_NDJSON;
 		if (isNotBlank(theBulkDataExportOptions.getOutputFormat())) {
 			outputFormat = theBulkDataExportOptions.getOutputFormat();

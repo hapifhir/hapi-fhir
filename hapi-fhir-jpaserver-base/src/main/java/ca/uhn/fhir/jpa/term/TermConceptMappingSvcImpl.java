@@ -505,8 +505,12 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 					while (scrollableResultsIterator.hasNext()) {
 						TermConceptMapGroupElement nextElement = scrollableResultsIterator.next();
 
-						// TODO: The invocation of the size() below does not seem to be necessary but for some reason, removing it causes tests in TerminologySvcImplR4Test to fail.
-						nextElement.getConceptMapGroupElementTargets().size();
+						/* TODO: The invocation of the size() below does not seem to be necessary but for some reason,
+						 * but removing it causes tests in TerminologySvcImplR4Test to fail. We use the outcome
+						 * in a trace log to avoid ErrorProne flagging an unused return value.
+						 */
+						int size = nextElement.getConceptMapGroupElementTargets().size();
+						ourLog.trace("Have {} targets", size);
 
 						myEntityManager.detach(nextElement);
 

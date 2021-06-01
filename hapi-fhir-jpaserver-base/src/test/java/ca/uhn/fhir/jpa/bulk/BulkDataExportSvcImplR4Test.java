@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.bulk;
 
+import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
@@ -24,6 +25,7 @@ import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -46,6 +48,8 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
@@ -71,8 +75,13 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
@@ -163,6 +172,30 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			assertEquals(0, myBulkExportCollectionDao.count());
 			assertEquals(0, myBulkExportCollectionFileDao.count());
 		});
+
+	}
+
+	@Test
+	public void testSubmit_InterceptorCalled() {
+		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_INITIATE_BULK_EXPORT, interceptor);
+		try {
+
+			BulkDataExportOptions options = new BulkDataExportOptions();
+			options.setResourceTypes(Sets.newHashSet("Patient", "Observation"));
+			options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+			myBulkDataExportSvc.submitJob(options, true, mySrd);
+
+			ArgumentCaptor<HookParams> paramsCaptor = ArgumentCaptor.forClass(HookParams.class);
+			verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_INITIATE_BULK_EXPORT), paramsCaptor.capture());
+
+			HookParams captured = paramsCaptor.getValue();
+			assertSame(options, captured.get(BulkDataExportOptions.class));
+			assertSame(mySrd, captured.get(RequestDetails.class));
+
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
 
 	}
 
@@ -1039,23 +1072,23 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		BulkDataExportOptions options = new BulkDataExportOptions();
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
 		options.setResourceTypes(Sets.newHashSet("Procedure"));
-		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.submitJob(options, true);
-		IBulkDataExportSvc.JobInfo jobInfo1 = myBulkDataExportSvc.submitJob(options, true);
-		IBulkDataExportSvc.JobInfo jobInfo2 = myBulkDataExportSvc.submitJob(options, true);
-		IBulkDataExportSvc.JobInfo jobInfo3 = myBulkDataExportSvc.submitJob(options, true);
-		IBulkDataExportSvc.JobInfo jobInfo4 = myBulkDataExportSvc.submitJob(options, true);
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.submitJob(options, true, null);
+		IBulkDataExportSvc.JobInfo jobInfo1 = myBulkDataExportSvc.submitJob(options, true, null);
+		IBulkDataExportSvc.JobInfo jobInfo2 = myBulkDataExportSvc.submitJob(options, true, null);
+		IBulkDataExportSvc.JobInfo jobInfo3 = myBulkDataExportSvc.submitJob(options, true, null);
+		IBulkDataExportSvc.JobInfo jobInfo4 = myBulkDataExportSvc.submitJob(options, true, null);
 
 		//Cached should have all identical Job IDs.
 		String initialJobId = jobInfo.getJobId();
 		boolean allMatch = Stream.of(jobInfo, jobInfo1, jobInfo2, jobInfo3, jobInfo4).allMatch(job -> job.getJobId().equals(initialJobId));
 		assertTrue(allMatch);
 
-		IBulkDataExportSvc.JobInfo jobInfo5 = myBulkDataExportSvc.submitJob(options, false);
-		IBulkDataExportSvc.JobInfo jobInfo6 = myBulkDataExportSvc.submitJob(options, false);
-		IBulkDataExportSvc.JobInfo jobInfo7 = myBulkDataExportSvc.submitJob(options, false);
-		IBulkDataExportSvc.JobInfo jobInfo8 = myBulkDataExportSvc.submitJob(options, false);
+		IBulkDataExportSvc.JobInfo jobInfo5 = myBulkDataExportSvc.submitJob(options, false, null);
+		IBulkDataExportSvc.JobInfo jobInfo6 = myBulkDataExportSvc.submitJob(options, false, null);
+		IBulkDataExportSvc.JobInfo jobInfo7 = myBulkDataExportSvc.submitJob(options, false, null);
+		IBulkDataExportSvc.JobInfo jobInfo8 = myBulkDataExportSvc.submitJob(options, false, null);
 		Thread.sleep(100L); //stupid commit timings.
-		IBulkDataExportSvc.JobInfo jobInfo9 = myBulkDataExportSvc.submitJob(options, false);
+		IBulkDataExportSvc.JobInfo jobInfo9 = myBulkDataExportSvc.submitJob(options, false, null);
 
 		//First non-cached should retrieve new ID.
 		assertThat(initialJobId, is(not(equalTo(jobInfo5.getJobId()))));
@@ -1066,9 +1099,10 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertEquals(uniqueJobIds.size(), jobIds.size());
 
 		//Now if we create another one and ask for the cache, we should get the most-recently-insert entry.
-		IBulkDataExportSvc.JobInfo jobInfo10 = myBulkDataExportSvc.submitJob(options, true);
+		IBulkDataExportSvc.JobInfo jobInfo10 = myBulkDataExportSvc.submitJob(options, true, null);
 		assertThat(jobInfo10.getJobId(), is(equalTo(jobInfo9.getJobId())));
 	}
+
 	@Test
 	public void testBulkExportWritesToDEFAULTPartitionWhenPartitioningIsEnabled() {
 		myPartitionSettings.setPartitioningEnabled(true);

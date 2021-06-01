@@ -5,6 +5,7 @@
 (dependent HAPI modules listed in brackets):
 <ul>
 <li>Spring (JPA): 5.3.6 -> 5.3.7</li>
+<li>Spring Boot (JPA Starter): 2.4.4 -> 2.5.0</li>
 </ul>
 "
 
