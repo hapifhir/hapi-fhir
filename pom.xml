@@ -732,6 +732,10 @@
 			<id>jarimayenburg</id>
 			<name>Jari Maijenburg</name>
 		</developer>
+		<developer>
+			<id>rbhman</id>
+			<name>Bruno Hedman</name>
+		</developer>
 	</developers>
 
 	<licenses>
