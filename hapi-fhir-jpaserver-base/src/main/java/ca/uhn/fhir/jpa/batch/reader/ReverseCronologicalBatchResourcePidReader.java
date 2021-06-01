@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.batch.reader;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.delete.model.UrlListJson;
@@ -35,7 +36,7 @@ import java.util.stream.Collectors;
  * This Spring Batch reader takes 4 parameters:
  * {@link #JOB_PARAM_URL_LIST}: A list of URLs to searchfor
  * {@link #JOB_PARAM_TENANT_ID}: The tenant to perform the search with (or null)
- * {@link #JOB_PARAM_BATCH_SIZE}: The number of resources to return with each search
+ * {@link #JOB_PARAM_BATCH_SIZE}: The number of resources to return with each search.  If ommitted, {@link DaoConfig#getExpungeBatchSize} will be used.
  * {@link #JOB_PARAM_START_TIME}: The latest timestamp of resources to search for
  * <p>
  * The reader will return at most {@link #JOB_PARAM_BATCH_SIZE} pids every time it is called, or null
@@ -51,8 +52,6 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	public static final String JOB_PARAM_START_TIME = "start-time";
 	public static final String JOB_PARAM_TENANT_ID = "tenant-id";
 
-	public static final Integer DEFAULT_BATCH_SIZE = 100;
-
 	private static final String CURRENT_URL_INDEX = "current.url-index";
 	private static final String CURRENT_THRESHOLD_HIGH = "current.threshold-high";
 	private static final Logger ourLog = LoggerFactory.getLogger(ReverseCronologicalBatchResourcePidReader.class);
@@ -63,9 +62,11 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	private MatchUrlService myMatchUrlService;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private DaoConfig myDaoConfig;
 
 	private List<String> myUrlList;
-	private Integer myBatchSize = DEFAULT_BATCH_SIZE;
+	private Integer myBatchSize;
 	private Instant myStartTime;
 	private int myUrlIndex = 0;
 	private final Map<Integer, Instant> myThresholdHighByUrlIndex = new HashMap<>();
@@ -147,6 +148,9 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 
 	@Override
 	public void open(ExecutionContext executionContext) throws ItemStreamException {
+		if (myBatchSize == null) {
+			myBatchSize = myDaoConfig.getExpungeBatchSize();
+		}
 		if (executionContext.containsKey(CURRENT_URL_INDEX)) {
 			myUrlIndex = new Long(executionContext.getLong(CURRENT_URL_INDEX)).intValue();
 		}
