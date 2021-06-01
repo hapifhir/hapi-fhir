@@ -50,7 +50,6 @@ public class ResourceReferenceInfo {
 		myResource = theElement;
 		if (thePathToElement != null && !thePathToElement.isEmpty()) {
 			StringBuilder sb = new StringBuilder();
-			thePathToElement.iterator();
 			for (Iterator<String> iterator = thePathToElement.iterator(); iterator.hasNext();) {
 				sb.append(iterator.next());
 				if (iterator.hasNext())
