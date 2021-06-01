@@ -129,4 +129,7 @@ X-Retry-On-Version-Conflict: retry; max-retries=100
 
 # Controlling Delete with Expunge size
 
-During the delete with expunge operation there is an internal synchronous search which locates all the resources to be deleted. The default maximum size of this search is 10000. This can be configured via the [Internal Synchronous Search Size](/hapi-fhir/apidocs/hapi-fhir-jpaserver-api/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setInternalSynchronousSearchSize(java.lang.Integer)) property.
+Delete with expunge submits a job to delete and expunge the requested resources. This is done in batches. If the DELETE
+?_expunge=true syntax is used to trigger the delete expunge, then the batch size will be determined by the value
+of [Expunge Batch Size](/hapi-fhir/apidocs/hapi-fhir-jpaserver-api/ca/uhn/fhir/jpa/api/config/DaoConfig.html#getExpungeBatchSize(java.lang.Integer))
+property.

@@ -1572,7 +1572,8 @@ public class DaoConfig {
 
 	/**
 	 * The expunge batch size (default 800) determines the number of records deleted within a single transaction by the
-	 * expunge operation.
+	 * expunge operation.  When expunging via DELETE ?_expunge=true, then this value determines the batch size for
+	 * the number of resources deleted and expunged at a time.
 	 */
 	public int getExpungeBatchSize() {
 		return myExpungeBatchSize;
@@ -1580,7 +1581,8 @@ public class DaoConfig {
 
 	/**
 	 * The expunge batch size (default 800) determines the number of records deleted within a single transaction by the
-	 * expunge operation.
+	 * expunge operation.  When expunging via DELETE ?_expunge=true, then this value determines the batch size for
+	 * the number of resources deleted and expunged at a time.
 	 */
 	public void setExpungeBatchSize(int theExpungeBatchSize) {
 		myExpungeBatchSize = theExpungeBatchSize;
