@@ -161,7 +161,6 @@ public class MatchUrlService {
 		return ReflectionUtil.newInstance(clazz);
 	}
 
-	// TODO KHS use this in other places where the resource def and search param map are parsed together
 	public ResourceSearch getResourceSearch(String theUrl) {
 		RuntimeResourceDefinition resourceDefinition;
 		resourceDefinition = UrlUtil.parseUrlResourceType(myFhirContext, theUrl);

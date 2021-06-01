@@ -11,6 +11,12 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import java.util.List;
 
+/**
+ * This Spring Batch writer accepts a list of SQL commands and executes them.
+ * The total number of entities updated or deleted is stored in the execution context
+ * with the key {@link #ENTITY_TOTAL_UPDATED_OR_DELETED}.  The entire list is committed within a
+ * single transaction (provided by Spring Batch).
+ */
 public class SqlExecutorWriter implements ItemWriter<List<String>> {
 	private static final Logger ourLog = LoggerFactory.getLogger(SqlExecutorWriter.class);
 

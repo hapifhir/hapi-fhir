@@ -26,8 +26,8 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 
 	@Override
 	@Transactional(Transactional.TxType.NEVER)
-	public JobExecution submitJob(Integer theBatchSize, String theTenantId, List<String> theUrlsToExpungeDelete) throws JobParametersInvalidException {
-		JobParameters jobParameters = DeleteExpungeJobConfig.buildJobParameters(theBatchSize, theTenantId, theUrlsToExpungeDelete);
+	public JobExecution submitJob(Integer theBatchSize, String theTenantId, List<String> theUrlsToDeleteExpunge) throws JobParametersInvalidException {
+		JobParameters jobParameters = DeleteExpungeJobConfig.buildJobParameters(theBatchSize, theTenantId, theUrlsToDeleteExpunge);
 		return myBatchJobSubmitter.runJob(myDeleteExpungeJob, jobParameters);
 	}
 }

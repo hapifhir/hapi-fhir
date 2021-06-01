@@ -31,14 +31,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * This Spring Batch reader takes 4 parameters:
+ * {@link #JOB_PARAM_URL_LIST}: A list of URLs to searchfor
+ * {@link #JOB_PARAM_TENANT_ID}: The tenant to perform the search with (or null)
+ * {@link #JOB_PARAM_BATCH_SIZE}: The number of resources to return with each search
+ * {@link #JOB_PARAM_START_TIME}: The latest timestamp of resources to search for
+ * <p>
+ * The reader will return at most {@link #JOB_PARAM_BATCH_SIZE} pids every time it is called, or null
+ * once no more matching resources are available.  It returns the resources in reverse chronological order
+ * and stores where it's at in the Spring Batch execution context with the key {@link #CURRENT_THRESHOLD_HIGH}
+ * appended with "." and the index number of the url list item it has gotten up to.  This is to permit
+ * restarting jobs that use this reader so it can pick up where it left off.
+ */
 public class ReverseCronologicalBatchResourcePidReader implements ItemReader<List<Long>>, ItemStream {
-	public static final Integer DEFAULT_BATCH_SIZE = 100;
+
 	public static final String JOB_PARAM_URL_LIST = "url-list";
 	public static final String JOB_PARAM_BATCH_SIZE = "batch-size";
 	public static final String JOB_PARAM_START_TIME = "start-time";
 	public static final String JOB_PARAM_TENANT_ID = "tenant-id";
+
+	public static final Integer DEFAULT_BATCH_SIZE = 100;
+
 	private static final String CURRENT_URL_INDEX = "current.url-index";
-	private static final String CURRENT_THRESHOLD_LOW = "current.threshold-low";
 	private static final String CURRENT_THRESHOLD_HIGH = "current.threshold-high";
 	private static final Logger ourLog = LoggerFactory.getLogger(ReverseCronologicalBatchResourcePidReader.class);
 

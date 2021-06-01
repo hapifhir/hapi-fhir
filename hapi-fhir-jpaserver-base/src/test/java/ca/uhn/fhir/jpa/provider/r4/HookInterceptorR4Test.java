@@ -141,6 +141,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		assertEquals(savedPatientPid.longValue(), pid.get());
 	}
 
+
 	@Test
 	public void testSTORAGE_PRECOMMIT_RESOURCE_UPDATED_hasCorrectPid() {
 		AtomicLong pidOld = new AtomicLong();

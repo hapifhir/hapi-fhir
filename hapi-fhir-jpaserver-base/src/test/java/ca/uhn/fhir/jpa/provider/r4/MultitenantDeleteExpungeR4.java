@@ -58,7 +58,7 @@ public class MultitenantDeleteExpungeR4 extends BaseMultitenantResourceProviderR
 		assertEquals(1, myBatchJobHelper.getReadCount(jobId));
 		assertEquals(1, myBatchJobHelper.getWriteCount(jobId));
 
-		// validate only the false patient in TENANT_B should be removed
+		// validate only the false patient in TENANT_B is removed
 		assertEquals(2, getAllPatientsInTenant(TENANT_A).getTotal());
 		assertEquals(1, getAllPatientsInTenant(TENANT_B).getTotal());
 		assertEquals(0, getAllPatientsInTenant(DEFAULT_PARTITION_NAME).getTotal());

@@ -81,7 +81,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	ResourceCountCache myResourceCountsCache;
 	private TerminologyUploaderProvider myTerminologyUploaderProvider;
 
-
 	public BaseResourceProviderR4Test() {
 		super();
 	}

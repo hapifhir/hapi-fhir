@@ -37,7 +37,7 @@ class DeleteExpungeJobParameterValidatorTest {
 
 	@BeforeEach
 	public void initMocks() {
-		mySvc = new DeleteExpungeJobParameterValidator(ourFhirContext, myMatchUrlService, myDaoRegistry);
+		mySvc = new DeleteExpungeJobParameterValidator(myMatchUrlService, myDaoRegistry);
 	}
 
 	@Test

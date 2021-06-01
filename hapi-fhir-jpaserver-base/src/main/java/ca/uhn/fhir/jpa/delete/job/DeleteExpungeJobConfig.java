@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.delete.job;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.batch.BatchConstants;
 import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
 import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
 import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
@@ -39,11 +38,9 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.core.task.TaskExecutor;
 
 import javax.annotation.Nonnull;
 import java.util.Date;
@@ -66,9 +63,6 @@ public class DeleteExpungeJobConfig {
 	private StepBuilderFactory myStepBuilderFactory;
 	@Autowired
 	private JobBuilderFactory myJobBuilderFactory;
-	@Autowired
-	@Qualifier(BatchConstants.JOB_LAUNCHING_TASK_EXECUTOR)
-	private TaskExecutor myTaskExecutor;
 
 	@Bean(name = DELETE_EXPUNGE_JOB_NAME)
 	@Lazy
@@ -133,7 +127,7 @@ public class DeleteExpungeJobConfig {
 
 	@Bean
 	public JobParametersValidator deleteExpungeJobParameterValidator(FhirContext theFhirContext, MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
-		return new DeleteExpungeJobParameterValidator(theFhirContext, theMatchUrlService, theDaoRegistry);
+		return new DeleteExpungeJobParameterValidator(theMatchUrlService, theDaoRegistry);
 	}
 
 	@Bean

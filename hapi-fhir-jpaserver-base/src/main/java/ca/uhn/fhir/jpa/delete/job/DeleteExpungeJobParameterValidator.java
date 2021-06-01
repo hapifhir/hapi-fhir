@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.delete.job;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.delete.model.UrlListJson;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -33,15 +32,13 @@ import org.springframework.batch.core.JobParametersValidator;
 import static ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader.JOB_PARAM_URL_LIST;
 
 /**
- * This class will prevent a job from running if the UUID does not exist or is invalid.
+ * This class will prevent a job from running any of the provided URLs are not valid on this server.
  */
 public class DeleteExpungeJobParameterValidator implements JobParametersValidator {
-	private final FhirContext myFhirContext;
 	private final MatchUrlService myMatchUrlService;
 	private final DaoRegistry myDaoRegistry;
 
-	public DeleteExpungeJobParameterValidator(FhirContext theFhirContext, MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
-		myFhirContext = theFhirContext;
+	public DeleteExpungeJobParameterValidator(MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
 		myMatchUrlService = theMatchUrlService;
 		myDaoRegistry = theDaoRegistry;
 	}

@@ -50,7 +50,7 @@ public class DeleteMethodOutcome extends MethodOutcome {
 	}
 
 	/**
-	 * Use {@link ca.uhn.fhir.jpa.delete.job.DeleteExpungeJobConfig#EXPUNGED_ENTITIES_COUNT}
+	 * Use {@link ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter#ENTITY_TOTAL_UPDATED_OR_DELETED}
 	 */
 	@Deprecated
 	public DeleteMethodOutcome setDeletedEntities(List<ResourceTable> theDeletedEntities) {
@@ -59,7 +59,7 @@ public class DeleteMethodOutcome extends MethodOutcome {
 	}
 
 	/**
-	 * Use {@link ca.uhn.fhir.jpa.delete.job.DeleteExpungeJobConfig#EXPUNGED_RESOURCES_COUNT}
+	 * Use {@link  ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener#RESOURCE_TOTAL_PROCESSED}
 	 */
 	@Deprecated
 	public long getExpungedResourcesCount() {

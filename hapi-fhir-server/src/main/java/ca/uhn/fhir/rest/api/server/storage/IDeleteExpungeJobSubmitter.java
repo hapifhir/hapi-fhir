@@ -9,8 +9,8 @@ public interface IDeleteExpungeJobSubmitter {
 	/**
 	 * @param theBatchSize           For each pass, when synchronously searching for resources, limit the number of matching resources to this number
 	 * @param theUrlsToDeleteExpunge A list of strings of the form "/Patient?active=true"
-	 * @param theTenantId
-	 * @return the executing jon
+	 * @param theTenantId            The tenant to perform the searches on
+	 * @return The Spring Batch JobExecution that was started to run this batch job
 	 * @throws JobParametersInvalidException
 	 */
 	JobExecution submitJob(Integer theBatchSize, String theTenantId, List<String> theUrlsToDeleteExpunge) throws JobParametersInvalidException;

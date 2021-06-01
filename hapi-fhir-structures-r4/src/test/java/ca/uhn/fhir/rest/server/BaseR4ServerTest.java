@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -13,7 +12,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.jupiter.api.AfterEach;
 
 public class BaseR4ServerTest {
-	protected FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R4);
+	protected FhirContext myCtx = FhirContext.forR4Cached();
 	private Server myServer;
 	protected IGenericClient myClient;
 	protected String myBaseUrl;

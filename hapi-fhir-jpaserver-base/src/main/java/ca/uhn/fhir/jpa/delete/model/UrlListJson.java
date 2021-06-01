@@ -6,16 +6,13 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.JobParameter;
 
-import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Serialize a list of URLs so Spring Batch can store it as a String
+ */
 public class UrlListJson implements IModelJson {
-	private static final Logger ourLog = LoggerFactory.getLogger(UrlListJson.class);
 	static final ObjectMapper ourObjectMapper = new ObjectMapper();
 
 	@JsonProperty("urlList")
