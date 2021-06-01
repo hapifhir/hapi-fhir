@@ -59,15 +59,18 @@ public class DeleteExpungeProviderTest extends BaseR4ServerTest {
 		assertEquals(url1, mySvc.calledWithUrls.get(0));
 		assertEquals(url2, mySvc.calledWithUrls.get(1));
 		assertEquals(batchSize, mySvc.calledWithBatchSize);
+		assertEquals(null, mySvc.calledWithTenant);
 	}
 
 	private class MyDeleteExpungeJobSubmitter implements IDeleteExpungeJobSubmitter {
 		public Integer calledWithBatchSize;
+		public String calledWithTenant;
 		public List<String> calledWithUrls;
 
 		@Override
-		public JobExecution submitJob(Integer theBatchSize, List<String> theUrlsToExpungeDelete) {
+		public JobExecution submitJob(Integer theBatchSize, String theTenantId, List<String> theUrlsToExpungeDelete) {
 			calledWithBatchSize = theBatchSize;
+			calledWithTenant = theTenantId;
 			calledWithUrls = theUrlsToExpungeDelete;
 			JobInstance instance = new JobInstance(123L, "jobName");
 			return new JobExecution(instance, new JobParameters());

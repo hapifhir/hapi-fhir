@@ -9,8 +9,9 @@ public interface IDeleteExpungeJobSubmitter {
 	/**
 	 * @param theBatchSize           For each pass, when synchronously searching for resources, limit the number of matching resources to this number
 	 * @param theUrlsToDeleteExpunge A list of strings of the form "/Patient?active=true"
+	 * @param theTenantId
 	 * @return the executing jon
 	 * @throws JobParametersInvalidException
 	 */
-	JobExecution submitJob(Integer theBatchSize, List<String> theUrlsToDeleteExpunge) throws JobParametersInvalidException;
+	JobExecution submitJob(Integer theBatchSize, String theTenantId, List<String> theUrlsToDeleteExpunge) throws JobParametersInvalidException;
 }

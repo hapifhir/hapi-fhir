@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
 import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
 import ca.uhn.fhir.jpa.delete.model.UrlListJson;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameter;
@@ -81,13 +80,16 @@ public class DeleteExpungeJobConfig {
 	}
 
 	@Nonnull
-	public static JobParameters buildJobParameters(Integer theBatchSize, List<String> theUrlList) {
+	public static JobParameters buildJobParameters(Integer theBatchSize, String theTenantId, List<String> theUrlList) {
 		Map<String, JobParameter> map = new HashMap<>();
 		UrlListJson urlListJson = UrlListJson.fromUrlStrings(theUrlList);
 		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_URL_LIST, new JobParameter(urlListJson.toString()));
 		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_START_TIME, new JobParameter(DateUtils.addMinutes(new Date(), MINUTES_IN_FUTURE_TO_DELETE_FROM)));
 		if (theBatchSize != null) {
 			map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_BATCH_SIZE, new JobParameter(theBatchSize.longValue()));
+		}
+		if (theTenantId != null) {
+			map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_TENANT_ID, new JobParameter(theTenantId));
 		}
 		JobParameters parameters = new JobParameters(map);
 		return parameters;
@@ -132,11 +134,6 @@ public class DeleteExpungeJobConfig {
 	@Bean
 	public JobParametersValidator deleteExpungeJobParameterValidator(FhirContext theFhirContext, MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
 		return new DeleteExpungeJobParameterValidator(theFhirContext, theMatchUrlService, theDaoRegistry);
-	}
-
-	@Nonnull
-	public static JobParameters buildJobParameters(String... theUrls) {
-		return buildJobParameters(ReverseCronologicalBatchResourcePidReader.DEFAULT_BATCH_SIZE, Lists.newArrayList(theUrls));
 	}
 
 	@Bean

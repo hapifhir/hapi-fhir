@@ -29,13 +29,16 @@ public class DeleteExpungeProvider {
 	@Operation(name = ProviderConstants.OPERATION_DELETE_EXPUNGE, idempotent = false)
 	public IBaseParameters deleteExpunge(
 		@OperationParam(name = ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, typeName = "string", min = 1) List<IPrimitiveType<String>> theUrlsToDeleteExpunge,
-		@OperationParam(name = ProviderConstants.OPERATION_DELETE_BATCH_SIZE, typeName = "decimal", min = 1) IPrimitiveType<BigDecimal> theBatchSize,
-		// FIXME KHS use request details for partition
+		@OperationParam(name = ProviderConstants.OPERATION_DELETE_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
 		RequestDetails theRequestDetails
 	) {
 		try {
 			List<String> urls = theUrlsToDeleteExpunge.stream().map(IPrimitiveType::getValue).collect(Collectors.toList());
-			JobExecution jobExecution = myDeleteExpungeJobSubmitter.submitJob(theBatchSize.getValue().intValue(), urls);
+			Integer batchSize = null;
+			if (theBatchSize != null && !theBatchSize.isEmpty()) {
+				batchSize = theBatchSize.getValue().intValue();
+			}
+			JobExecution jobExecution = myDeleteExpungeJobSubmitter.submitJob(batchSize, theRequestDetails.getTenantId(), urls);
 			IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
 			ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID, jobExecution.getJobId());
 			return retval;

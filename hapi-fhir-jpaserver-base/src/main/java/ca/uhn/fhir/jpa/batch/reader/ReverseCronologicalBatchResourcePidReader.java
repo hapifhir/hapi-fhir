@@ -36,6 +36,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	public static final String JOB_PARAM_URL_LIST = "url-list";
 	public static final String JOB_PARAM_BATCH_SIZE = "batch-size";
 	public static final String JOB_PARAM_START_TIME = "start-time";
+	public static final String JOB_PARAM_TENANT_ID = "tenant-id";
 	private static final String CURRENT_URL_INDEX = "current.url-index";
 	private static final String CURRENT_THRESHOLD_LOW = "current.threshold-low";
 	private static final String CURRENT_THRESHOLD_HIGH = "current.threshold-high";
@@ -53,6 +54,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	private Instant myStartTime;
 	private int myUrlIndex = 0;
 	private final Map<Integer, Instant> myThresholdHighByUrlIndex = new HashMap<>();
+	private String myTenantId;
 
 	@Autowired
 	public void setUrlList(@Value("#{jobParameters['" + JOB_PARAM_URL_LIST + "']}") String theUrlListString) {
@@ -68,6 +70,11 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	@Autowired
 	public void setStartTime(@Value("#{jobParameters['" + JOB_PARAM_START_TIME + "']}") Date theStartTime) {
 		myStartTime = theStartTime.toInstant();
+	}
+
+	@Autowired
+	public void setTenantId(@Value("#{jobParameters['" + JOB_PARAM_TENANT_ID + "']}") String theTenantId) {
+		myTenantId = theTenantId;
 	}
 
 	@Override
@@ -111,7 +118,6 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 			Long pidOfOldestResourceInBatch = retval.get(retval.size() - 1);
 			IBaseResource earliestResource = dao.readByPid(new ResourcePersistentId(pidOfOldestResourceInBatch));
 			myThresholdHighByUrlIndex.put(myUrlIndex, earliestResource.getMeta().getLastUpdated().toInstant());
-
 		}
 
 		return retval;
@@ -119,7 +125,9 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 
 	@NotNull
 	private SystemRequestDetails buildSystemRequestDetails() {
-		return new SystemRequestDetails();
+		SystemRequestDetails retval = new SystemRequestDetails();
+		retval.setTenantId(myTenantId);
+		return retval;
 	}
 
 	@Override

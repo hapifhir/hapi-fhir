@@ -564,14 +564,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return deletePidList(theUrl, resourceIds, deleteConflicts, theRequest);
 	}
 
-	private DeleteMethodOutcome deleteExpunge(String theUrl, RequestDetails theTheRequest) {
+	private DeleteMethodOutcome deleteExpunge(String theUrl, RequestDetails theRequest) {
 		if (!getConfig().isExpungeEnabled() || !getConfig().isDeleteExpungeEnabled()) {
 			throw new MethodNotAllowedException("_expunge is not enabled on this server");
 		}
 
 		List<String> urlsToDeleteExpunge = Collections.singletonList(theUrl);
 		try {
-			JobExecution jobExecution = myDeleteExpungeJobSubmitter.submitJob(getConfig().getExpungeBatchSize(), urlsToDeleteExpunge);
+			JobExecution jobExecution = myDeleteExpungeJobSubmitter.submitJob(getConfig().getExpungeBatchSize(), theRequest.getTenantId(), urlsToDeleteExpunge);
 			return new DeleteMethodOutcome(createInfoOperationOutcome("Delete job submitted with id " + jobExecution.getId()));
 		} catch (JobParametersInvalidException e) {
 			throw new InvalidRequestException("Invalid Delete Expunge Request: " + e.getMessage(), e);

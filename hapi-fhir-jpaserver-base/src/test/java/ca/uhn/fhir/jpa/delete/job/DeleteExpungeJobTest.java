@@ -2,11 +2,10 @@ package ca.uhn.fhir.jpa.delete.job;
 
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
+import com.github.jsonldjava.shaded.com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
@@ -18,10 +17,8 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.util.List;
+import javax.annotation.Nonnull;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DeleteExpungeJobTest extends BaseJpaR4Test {
@@ -33,7 +30,6 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 	@Autowired
 	private BatchJobHelper myBatchJobHelper;
 
-	// FIXME KHS get working with partitions
 	@Test
 	public void testDeleteExpunge() throws Exception {
 		// setup
@@ -57,7 +53,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
 		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
 
-		JobParameters jobParameters = DeleteExpungeJobConfig.buildJobParameters("Observation?subject.active=false", "Patient?active=false");
+		JobParameters jobParameters = buildJobParameters("Observation?subject.active=false", "Patient?active=false");
 
 		// execute
 		JobExecution jobExecution = myBatchJobSubmitter.runJob(myDeleteExpungeJob, jobParameters);
@@ -67,5 +63,10 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		// validate
 		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
 		assertEquals(1, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+	}
+
+	@Nonnull
+	private JobParameters buildJobParameters(String... theUrls) {
+		return DeleteExpungeJobConfig.buildJobParameters(null, null, Lists.newArrayList(theUrls));
 	}
 }

@@ -75,5 +75,8 @@ public class BatchJobsConfig {
 		RECORD_PROCESSING_STEP_NAMES = Collections.unmodifiableSet(recordProcessingStepNames);
 	}
 
+	/**
+	 * Delete Expunge
+	 */
 	public static final String DELETE_EXPUNGE_JOB_NAME = "deleteExpungeJob";
 }
