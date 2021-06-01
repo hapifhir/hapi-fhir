@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.delete.job;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.dao.expunge.PartitionRunner;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceForeignKey;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
@@ -11,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,10 +35,12 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 	IdHelperService myIdHelper;
 	@Autowired
 	IResourceLinkDao myResourceLinkDao;
+	@Autowired
+	PartitionRunner myPartitionRunner;
 
 	@Override
 	public List<String> process(List<Long> thePids) throws Exception {
-		validateOkToDeleteAndExpunge(thePids);
+		validateOkToDeleteAndExpunge(new SliceImpl<>(thePids));
 
 		List<String> retval = new ArrayList<>();
 
@@ -52,14 +57,14 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 		return retval;
 	}
 
-	public void validateOkToDeleteAndExpunge(List<Long> thePids) {
+	public void validateOkToDeleteAndExpunge(Slice<Long> thePids) {
 		if (!myDaoConfig.isEnforceReferentialIntegrityOnDelete()) {
 			ourLog.info("Referential integrity on delete disabled.  Skipping referential integrity check.");
 			return;
 		}
 
 		List<ResourceLink> conflictResourceLinks = Collections.synchronizedList(new ArrayList<>());
-		findResourceLinksWithTargetPidIn(thePids, thePids, conflictResourceLinks);
+		myPartitionRunner.runInPartitionedThreads(thePids, someTargetPids -> findResourceLinksWithTargetPidIn(thePids.getContent(), someTargetPids, conflictResourceLinks));
 
 		if (conflictResourceLinks.isEmpty()) {
 			return;

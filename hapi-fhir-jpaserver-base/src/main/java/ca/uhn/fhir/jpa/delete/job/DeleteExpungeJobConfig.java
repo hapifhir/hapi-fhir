@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
 import ca.uhn.fhir.jpa.delete.model.UrlListJson;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -46,6 +47,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.core.task.TaskExecutor;
 
 import javax.annotation.Nonnull;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +61,7 @@ import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME;
 @Configuration
 public class DeleteExpungeJobConfig {
 	public static final String DELETE_EXPUNGE_URL_LIST_STEP_NAME = "delete-expunge-url-list-step";
+	private static final int MINUTES_IN_FUTURE_TO_DELETE_FROM = 1;
 
 	@Autowired
 	private StepBuilderFactory myStepBuilderFactory;
@@ -71,14 +74,6 @@ public class DeleteExpungeJobConfig {
 	@Bean(name = DELETE_EXPUNGE_JOB_NAME)
 	@Lazy
 	public Job deleteExpungeJob(FhirContext theFhirContext, MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) throws Exception {
-		// FIXME KHS implement this.  Current thinking:
-		// 1. validate URLs are valid
-		// 2. Create 1 step for each URL
-		// 2.1 For each URL:
-		// 2.2 Count the total number of resources to be deleted, and get date of oldest one.
-		// 2.3 Search forward by date in batches of BATCH_SIZE (configurable, default 100,000), delete expunge them, update the date.
-		// 2.4 Update total count deleted
-
 		return myJobBuilderFactory.get(DELETE_EXPUNGE_JOB_NAME)
 			.validator(deleteExpungeJobParameterValidator(theFhirContext, theMatchUrlService, theDaoRegistry))
 			.start(deleteExpungeUrlListStep())
@@ -90,6 +85,7 @@ public class DeleteExpungeJobConfig {
 		Map<String, JobParameter> map = new HashMap<>();
 		UrlListJson urlListJson = UrlListJson.fromUrlStrings(theUrlList);
 		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_URL_LIST, new JobParameter(urlListJson.toString()));
+		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_START_TIME, new JobParameter(DateUtils.addMinutes(new Date(), MINUTES_IN_FUTURE_TO_DELETE_FROM)));
 		if (theSearchCount != null) {
 			map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_SEARCH_COUNT, new JobParameter(theSearchCount));
 		}

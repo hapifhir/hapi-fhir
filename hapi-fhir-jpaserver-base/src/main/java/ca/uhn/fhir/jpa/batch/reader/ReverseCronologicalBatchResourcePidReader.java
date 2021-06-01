@@ -35,6 +35,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	public static final Integer DEFAULT_SEARCH_COUNT = 100;
 	public static final String JOB_PARAM_URL_LIST = "url-list";
 	public static final String JOB_PARAM_SEARCH_COUNT = "search-count";
+	public static final String JOB_PARAM_START_TIME = "start-time";
 	private static final String CURRENT_URL_INDEX = "current.url-index";
 	private static final String CURRENT_THRESHOLD_LOW = "current.threshold-low";
 	private static final String CURRENT_THRESHOLD_HIGH = "current.threshold-high";
@@ -48,7 +49,9 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	private DaoRegistry myDaoRegistry;
 
 	private List<String> myUrlList;
+	// FIXME KHS is this default ever used?
 	private Integer mySearchCount = DEFAULT_SEARCH_COUNT;
+	private Instant myStartTime;
 	private int myUrlIndex = 0;
 	private final Map<Integer, Instant> myThresholdHighByUrlIndex = new HashMap<>();
 
@@ -58,10 +61,14 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 		myUrlList = urlListJson.getUrlList();
 	}
 
-	// FIXME KHS test
 	@Autowired
 	public void setSearchCount(@Value("#{jobParameters['" + JOB_PARAM_SEARCH_COUNT + "']}") Integer theSearchCount) {
 		mySearchCount = theSearchCount;
+	}
+
+	@Autowired
+	public void setStartTime(@Value("#{jobParameters['" + JOB_PARAM_START_TIME + "']}") Date theStartTime) {
+		myStartTime = theStartTime.toInstant();
 	}
 
 	@Override
@@ -83,10 +90,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(myUrlList.get(theUrlIndex));
 		SearchParameterMap map = resourceSearch.getSearchParameterMap();
 
-		Instant highThreshold = myThresholdHighByUrlIndex.get(theUrlIndex);
-		if (highThreshold != null) {
-			map.setLastUpdated(new DateRangeParam().setUpperBoundInclusive(Date.from(highThreshold)));
-		}
+		map.setLastUpdated(new DateRangeParam().setUpperBoundInclusive(Date.from(myThresholdHighByUrlIndex.get(theUrlIndex))));
 
 		map.setLoadSynchronousUpTo(mySearchCount);
 		SortSpec sort = new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.DESC);
@@ -128,6 +132,8 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 			String key = highKey(index);
 			if (executionContext.containsKey(key)) {
 				myThresholdHighByUrlIndex.put(index, Instant.ofEpochSecond(executionContext.getLong(key)));
+			} else {
+				myThresholdHighByUrlIndex.put(index, myStartTime);
 			}
 		}
 	}
