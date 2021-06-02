@@ -109,7 +109,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 			}
 
 			if (theRequest instanceof SystemRequestDetails) {
-				requestPartitionId = getSystemRequestPartitionId(theRequest, nonPartitionableResource);
+				requestPartitionId = getSystemRequestPartitionId((SystemRequestDetails) theRequest, nonPartitionableResource);
 				// Interceptor call: STORAGE_PARTITION_IDENTIFY_READ
 			} else if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_READ, myInterceptorBroadcaster, theRequest)) {
 				HookParams params = new HookParams()
@@ -129,7 +129,6 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	}
 
 	/**
-	 *
 	 * For system requests, read partition from tenant ID if present, otherwise set to DEFAULT. If the resource they are attempting to partition
 	 * is non-partitionable scream in the logs and set the partition to DEFAULT.
 	 *
@@ -137,7 +136,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	 * @param theNonPartitionableResource
 	 * @return
 	 */
-	private RequestPartitionId getSystemRequestPartitionId(RequestDetails theRequest, boolean theNonPartitionableResource) {
+	private RequestPartitionId getSystemRequestPartitionId(SystemRequestDetails theRequest, boolean theNonPartitionableResource) {
 		RequestPartitionId requestPartitionId;
 		requestPartitionId = getSystemRequestPartitionId(theRequest);
 		if (theNonPartitionableResource && !requestPartitionId.isDefaultPartition()) {
@@ -148,7 +147,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 	/**
 	 * Determine the partition for a System Call (defined by the fact that the request is of type SystemRequestDetails)
-	 *
+	 * <p>
 	 * 1. If the tenant ID is set to the constant for all partitions, return all partitions
 	 * 2. If there is a tenant ID set in the request, use it.
 	 * 3. Otherwise, return the Default Partition.
@@ -157,7 +156,10 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	 * @return the {@link RequestPartitionId} to be used for this request.
 	 */
 	@Nonnull
-	private RequestPartitionId getSystemRequestPartitionId(@Nonnull RequestDetails theRequest) {
+	private RequestPartitionId getSystemRequestPartitionId(@Nonnull SystemRequestDetails theRequest) {
+		if (theRequest.getRequestPartitionId() != null) {
+			return theRequest.getRequestPartitionId();
+		}
 		if (theRequest.getTenantId() != null) {
 			if (theRequest.getTenantId().equals(ALL_PARTITIONS_NAME)) {
 				return RequestPartitionId.allPartitions();
@@ -186,7 +188,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 			}
 
 			if (theRequest instanceof SystemRequestDetails) {
-				requestPartitionId = getSystemRequestPartitionId(theRequest, nonPartitionableResource);
+				requestPartitionId = getSystemRequestPartitionId((SystemRequestDetails) theRequest, nonPartitionableResource);
 			} else {
 				//This is an external Request (e.g. ServletRequestDetails) so we want to figure out the partition via interceptor.
 				HookParams params = new HookParams()// Interceptor call: STORAGE_PARTITION_IDENTIFY_CREATE
