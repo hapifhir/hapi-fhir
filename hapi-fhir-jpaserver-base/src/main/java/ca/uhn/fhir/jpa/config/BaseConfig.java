@@ -851,6 +851,11 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
+	public DeleteExpungeService deleteExpungeService() {
+		return new DeleteExpungeService();
+	}
+
+	@Bean
 	public PartitionRunner partitionRunner(DaoConfig theDaoConfig) {
 		return new PartitionRunner(theDaoConfig);
 	}
