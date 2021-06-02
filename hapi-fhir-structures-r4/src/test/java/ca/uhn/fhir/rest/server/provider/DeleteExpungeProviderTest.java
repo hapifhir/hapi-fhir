@@ -19,6 +19,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class DeleteExpungeProviderTest extends BaseR4ServerTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeProviderTest.class);
@@ -60,7 +61,7 @@ public class DeleteExpungeProviderTest extends BaseR4ServerTest {
 		assertEquals(url1, mySvc.calledWithUrls.get(0));
 		assertEquals(url2, mySvc.calledWithUrls.get(1));
 		assertEquals(batchSize, mySvc.calledWithBatchSize);
-		assertEquals(null, mySvc.calledWithRequestDetails);
+		assertNotNull(mySvc.calledWithRequestDetails);
 	}
 
 	private class MyDeleteExpungeJobSubmitter implements IDeleteExpungeJobSubmitter {

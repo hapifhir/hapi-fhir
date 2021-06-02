@@ -1,13 +1,11 @@
 package ca.uhn.fhir.jpa.delete.job;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.github.jsonldjava.shaded.com.google.common.collect.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,10 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
-
-import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -46,7 +40,7 @@ class DeleteExpungeJobParameterValidatorTest {
 	@Test
 	public void testValidate() throws JobParametersInvalidException, JsonProcessingException {
 		// setup
-		JobParameters parameters = buildJobParameters("Patient?address=memory", "Patient?name=smith");
+		JobParameters parameters = DeleteExpungeJobParameterUtil.buildJobParameters("Patient?address=memory", "Patient?name=smith");
 		ResourceSearch resourceSearch = new ResourceSearch(ourFhirContext.getResourceDefinition("Patient"), new SearchParameterMap());
 		when(myMatchUrlService.getResourceSearch(anyString())).thenReturn(resourceSearch);
 		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(true);
@@ -59,7 +53,7 @@ class DeleteExpungeJobParameterValidatorTest {
 
 	@Test
 	public void testValidateBadType() throws JobParametersInvalidException, JsonProcessingException {
-		JobParameters parameters = buildJobParameters("Patient?address=memory");
+		JobParameters parameters = DeleteExpungeJobParameterUtil.buildJobParameters("Patient?address=memory");
 		ResourceSearch resourceSearch = new ResourceSearch(ourFhirContext.getResourceDefinition("Patient"), new SearchParameterMap());
 		when(myMatchUrlService.getResourceSearch(anyString())).thenReturn(resourceSearch);
 		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(false);
@@ -71,14 +65,4 @@ class DeleteExpungeJobParameterValidatorTest {
 			assertEquals("The resource type Patient is not supported on this server.", e.getMessage());
 		}
 	}
-
-	@Nonnull
-	private JobParameters buildJobParameters(String... theUrls) {
-		List<RequestPartitionId> requestPartitionIds = new ArrayList<>();
-		for (int i = 0; i < theUrls.length; ++i) {
-			requestPartitionIds.add(RequestPartitionId.fromPartitionName("TENANT_A"));
-		}
-		return DeleteExpungeJobConfig.buildJobParameters(2401, Lists.newArrayList(theUrls), requestPartitionIds);
-	}
-
 }

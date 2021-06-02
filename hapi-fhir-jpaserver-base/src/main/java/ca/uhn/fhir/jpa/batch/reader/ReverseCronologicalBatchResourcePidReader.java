@@ -73,8 +73,8 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	private final Map<Integer, Instant> myThresholdHighByUrlIndex = new HashMap<>();
 
 	@Autowired
-	public void setUrls(@Value("#{jobParameters['" + JOB_PARAM_REQUEST_LIST + "']}") String theUrlListString) {
-		RequestListJson requestListJson = RequestListJson.fromJson(theUrlListString);
+	public void setUrls(@Value("#{jobParameters['" + JOB_PARAM_REQUEST_LIST + "']}") String theRequestListJson) {
+		RequestListJson requestListJson = RequestListJson.fromJson(theRequestListJson);
 		myUrls = requestListJson.getUrls();
 		myRequestPartitionIds = requestListJson.getRequestPartitionIds();
 	}
