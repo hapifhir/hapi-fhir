@@ -21,17 +21,18 @@ package ca.uhn.fhir.rest.server.interceptor;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
-import ca.uhn.fhir.validation.*;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
+import ca.uhn.fhir.validation.SingleValidationMessage;
+import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.text.StrLookup;
 import org.apache.commons.lang3.text.StrSubstitutor;
@@ -73,7 +74,7 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 	private String myResponseOutcomeHeaderName = provideDefaultResponseHeaderName();
 
 	private List<IValidatorModule> myValidatorModules;
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	private FhirValidator myValidator;
 
 	private void addResponseIssueHeader(RequestDetails theRequestDetails, SingleValidationMessage theNext) {
 		// Perform any string substitutions from the message format
@@ -87,14 +88,32 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 		theRequestDetails.getResponse().addHeader(myResponseIssueHeaderName, headerValue);
 	}
 
+	/**
+	 * Specify a validator module to use.
+	 *
+	 * @see #setValidator(FhirValidator)
+	 */
 	public BaseValidatingInterceptor<T> addValidatorModule(IValidatorModule theModule) {
 		Validate.notNull(theModule, "theModule must not be null");
+		Validate.isTrue(myValidator == null, "Can not specify both a validator and validator modules. Only one needs to be supplied.");
 		if (getValidatorModules() == null) {
-			setValidatorModules(new ArrayList<IValidatorModule>());
+			setValidatorModules(new ArrayList<>());
 		}
 		getValidatorModules().add(theModule);
 		return this;
 	}
+
+	/**
+	 * Provides the validator to use. This can be used as an alternative to {@link #addValidatorModule(IValidatorModule)}
+	 *
+	 * @see #addValidatorModule(IValidatorModule)
+	 * @see #setValidatorModules(List)
+	 */
+	public void setValidator(FhirValidator theValidator) {
+		Validate.isTrue(theValidator == null || getValidatorModules() == null || getValidatorModules().isEmpty(), "Can not specify both a validator and validator modules. Only one needs to be supplied.");
+		myValidator = theValidator;
+	}
+
 
 	abstract ValidationResult doValidate(FhirValidator theValidator, T theRequest);
 
@@ -116,11 +135,29 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 	}
 
 	/**
+	 * If the validation produces a result with at least the given severity, a header with the name
+	 * specified by {@link #setResponseOutcomeHeaderName(String)} will be added containing a JSON encoded
+	 * OperationOutcome resource containing the validation results.
+	 */
+	public void setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum theAddResponseOutcomeHeaderOnSeverity) {
+		myAddResponseOutcomeHeaderOnSeverity = theAddResponseOutcomeHeaderOnSeverity != null ? theAddResponseOutcomeHeaderOnSeverity.ordinal() : null;
+	}
+
+	/**
 	 * The maximum length for an individual header. If an individual header would be written exceeding this length,
 	 * the header value will be truncated.
 	 */
 	public int getMaximumHeaderLength() {
 		return myMaximumHeaderLength;
+	}
+
+	/**
+	 * The maximum length for an individual header. If an individual header would be written exceeding this length,
+	 * the header value will be truncated. Value must be greater than 100.
+	 */
+	public void setMaximumHeaderLength(int theMaximumHeaderLength) {
+		Validate.isTrue(theMaximumHeaderLength >= 100, "theMaximumHeadeerLength must be >= 100");
+		myMaximumHeaderLength = theMaximumHeaderLength;
 	}
 
 	/**
@@ -130,8 +167,21 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 		return myResponseOutcomeHeaderName;
 	}
 
+	/**
+	 * The name of the header specified by {@link #setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum)}
+	 */
+	public void setResponseOutcomeHeaderName(String theResponseOutcomeHeaderName) {
+		Validate.notEmpty(theResponseOutcomeHeaderName, "theResponseOutcomeHeaderName can not be empty or null");
+		myResponseOutcomeHeaderName = theResponseOutcomeHeaderName;
+	}
+
 	public List<IValidatorModule> getValidatorModules() {
 		return myValidatorModules;
+	}
+
+	public void setValidatorModules(List<IValidatorModule> theValidatorModules) {
+		Validate.isTrue(myValidator == null || theValidatorModules == null || theValidatorModules.isEmpty(), "Can not specify both a validator and validator modules. Only one needs to be supplied.");
+		myValidatorModules = theValidatorModules;
 	}
 
 	/**
@@ -146,36 +196,6 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 		return myIgnoreValidatorExceptions;
 	}
 
-	abstract String provideDefaultResponseHeaderName();
-
-	/**
-	 * Sets the minimum severity at which an issue detected by the validator will result in a header being added to the
-	 * response. Default is {@link ResultSeverityEnum#INFORMATION}. Set to <code>null</code> to disable this behaviour.
-	 * 
-	 * @see #setResponseHeaderName(String)
-	 * @see #setResponseHeaderValue(String)
-	 */
-	public void setAddResponseHeaderOnSeverity(ResultSeverityEnum theSeverity) {
-		myAddResponseIssueHeaderOnSeverity = theSeverity != null ? theSeverity.ordinal() : null;
-	}
-
-	/**
-	 * If the validation produces a result with at least the given severity, a header with the name
-	 * specified by {@link #setResponseOutcomeHeaderName(String)} will be added containing a JSON encoded
-	 * OperationOutcome resource containing the validation results.
-	 */
-	public void setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum theAddResponseOutcomeHeaderOnSeverity) {
-		myAddResponseOutcomeHeaderOnSeverity = theAddResponseOutcomeHeaderOnSeverity != null ? theAddResponseOutcomeHeaderOnSeverity.ordinal() : null;
-	}
-
-	/**
-	 * Sets the minimum severity at which an issue detected by the validator will fail/reject the request. Default is
-	 * {@link ResultSeverityEnum#ERROR}. Set to <code>null</code> to disable this behaviour.
-	 */
-	public void setFailOnSeverity(ResultSeverityEnum theSeverity) {
-		myFailOnSeverity = theSeverity != null ? theSeverity.ordinal() : null;
-	}
-
 	/**
 	 * If set to <code>true</code> (default is <code>false</code>) this interceptor
 	 * will exit immediately and allow processing to continue if the validator throws
@@ -188,18 +208,30 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 		myIgnoreValidatorExceptions = theIgnoreValidatorExceptions;
 	}
 
+	abstract String provideDefaultResponseHeaderName();
+
 	/**
-	 * The maximum length for an individual header. If an individual header would be written exceeding this length,
-	 * the header value will be truncated. Value must be greater than 100.
+	 * Sets the minimum severity at which an issue detected by the validator will result in a header being added to the
+	 * response. Default is {@link ResultSeverityEnum#INFORMATION}. Set to <code>null</code> to disable this behaviour.
+	 *
+	 * @see #setResponseHeaderName(String)
+	 * @see #setResponseHeaderValue(String)
 	 */
-	public void setMaximumHeaderLength(int theMaximumHeaderLength) {
-		Validate.isTrue(theMaximumHeaderLength >= 100, "theMaximumHeadeerLength must be >= 100");
-		myMaximumHeaderLength = theMaximumHeaderLength;
+	public void setAddResponseHeaderOnSeverity(ResultSeverityEnum theSeverity) {
+		myAddResponseIssueHeaderOnSeverity = theSeverity != null ? theSeverity.ordinal() : null;
+	}
+
+	/**
+	 * Sets the minimum severity at which an issue detected by the validator will fail/reject the request. Default is
+	 * {@link ResultSeverityEnum#ERROR}. Set to <code>null</code> to disable this behaviour.
+	 */
+	public void setFailOnSeverity(ResultSeverityEnum theSeverity) {
+		myFailOnSeverity = theSeverity != null ? theSeverity.ordinal() : null;
 	}
 
 	/**
 	 * Sets the name of the response header to add validation failures to
-	 * 
+	 *
 	 * @see #setAddResponseHeaderOnSeverity(ResultSeverityEnum)
 	 */
 	protected void setResponseHeaderName(String theResponseHeaderName) {
@@ -240,7 +272,7 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 	 * <td>The validation message</td>
 	 * </tr>
 	 * </table>
-	 * 
+	 *
 	 * @see #DEFAULT_RESPONSE_HEADER_VALUE
 	 * @see #setAddResponseHeaderOnSeverity(ResultSeverityEnum)
 	 */
@@ -258,45 +290,36 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 	}
 
 	/**
-	 * The name of the header specified by {@link #setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum)}
-	 */
-	public void setResponseOutcomeHeaderName(String theResponseOutcomeHeaderName) {
-		Validate.notEmpty(theResponseOutcomeHeaderName, "theResponseOutcomeHeaderName can not be empty or null");
-		myResponseOutcomeHeaderName = theResponseOutcomeHeaderName;
-	}
-
-	public void setValidatorModules(List<IValidatorModule> theValidatorModules) {
-		myValidatorModules = theValidatorModules;
-	}
-
-	/**
 	 * Hook for subclasses (e.g. add a tag (coding) to an incoming resource when a given severity appears in the
 	 * ValidationResult).
 	 */
-	protected void postProcessResult(RequestDetails theRequestDetails, ValidationResult theValidationResult) { }
+	protected void postProcessResult(RequestDetails theRequestDetails, ValidationResult theValidationResult) {
+	}
 
 	/**
 	 * Hook for subclasses on failure (e.g. add a response header to an incoming resource upon rejection).
 	 */
-	protected void postProcessResultOnFailure(RequestDetails theRequestDetails, ValidationResult theValidationResult) { }
+	protected void postProcessResultOnFailure(RequestDetails theRequestDetails, ValidationResult theValidationResult) {
+	}
 
 	/**
 	 * Note: May return null
 	 */
 	protected ValidationResult validate(T theRequest, RequestDetails theRequestDetails) {
-		FhirValidator validator = theRequestDetails.getServer().getFhirContext().newValidator();
-
-		IInterceptorBroadcaster interceptorBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
-		validator.setInterceptorBraodcaster(interceptorBroadcaster);
-
-		if (myValidatorModules != null) {
-			for (IValidatorModule next : myValidatorModules) {
-				validator.registerValidatorModule(next);
-			}
-		}
-
 		if (theRequest == null) {
 			return null;
+		}
+
+		FhirValidator validator;
+		if (myValidator != null) {
+			validator = myValidator;
+		} else {
+			validator = theRequestDetails.getServer().getFhirContext().newValidator();
+			if (myValidatorModules != null) {
+				for (IValidatorModule next : myValidatorModules) {
+					validator.registerValidatorModule(next);
+				}
+			}
 		}
 
 		ValidationResult validationResult;
@@ -308,7 +331,7 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 				return null;
 			}
 			if (e instanceof BaseServerResponseException) {
-				throw (BaseServerResponseException)e;
+				throw (BaseServerResponseException) e;
 			}
 			throw new InternalErrorException(e);
 		}
@@ -363,16 +386,8 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 		}
 
 		postProcessResult(theRequestDetails, validationResult);
-		
-		return validationResult;
-	}
 
-	/**
-	 * This can be used to specify an interceptor to broadcast validation events through. This
-	 * is mostly intended for the
-	 */
-	public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBroadcaster) {
-		myInterceptorBroadcaster = theInterceptorBroadcaster;
+		return validationResult;
 	}
 
 	private static class MyLookup extends StrLookup<String> {
