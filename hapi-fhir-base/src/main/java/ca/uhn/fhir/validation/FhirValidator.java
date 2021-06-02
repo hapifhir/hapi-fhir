@@ -271,7 +271,7 @@ public class FhirValidator {
 	 *
 	 * @since 5.5.0
 	 */
-	public void setInterceptorBraodcaster(IInterceptorBroadcaster theInterceptorBraodcaster) {
+	public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBraodcaster) {
 		myInterceptorBraodcaster = theInterceptorBraodcaster;
 	}
 }
