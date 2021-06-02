@@ -571,7 +571,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		List<String> urlsToDeleteExpunge = Collections.singletonList(theUrl);
 		try {
-			JobExecution jobExecution = myDeleteExpungeJobSubmitter.submitJob(getConfig().getExpungeBatchSize(), theRequest.getTenantId(), urlsToDeleteExpunge);
+			JobExecution jobExecution = myDeleteExpungeJobSubmitter.submitJob(getConfig().getExpungeBatchSize(), theRequest, urlsToDeleteExpunge);
 			return new DeleteMethodOutcome(createInfoOperationOutcome("Delete job submitted with id " + jobExecution.getId()));
 		} catch (JobParametersInvalidException e) {
 			throw new InvalidRequestException("Invalid Delete Expunge Request: " + e.getMessage(), e);

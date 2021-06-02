@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.provider;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.server.BaseR4ServerTest;
 import org.hl7.fhir.r4.model.DecimalType;
@@ -59,18 +60,18 @@ public class DeleteExpungeProviderTest extends BaseR4ServerTest {
 		assertEquals(url1, mySvc.calledWithUrls.get(0));
 		assertEquals(url2, mySvc.calledWithUrls.get(1));
 		assertEquals(batchSize, mySvc.calledWithBatchSize);
-		assertEquals(null, mySvc.calledWithTenant);
+		assertEquals(null, mySvc.calledWithRequestDetails);
 	}
 
 	private class MyDeleteExpungeJobSubmitter implements IDeleteExpungeJobSubmitter {
 		public Integer calledWithBatchSize;
-		public String calledWithTenant;
+		public RequestDetails calledWithRequestDetails;
 		public List<String> calledWithUrls;
 
 		@Override
-		public JobExecution submitJob(Integer theBatchSize, String theTenantId, List<String> theUrlsToExpungeDelete) {
+		public JobExecution submitJob(Integer theBatchSize, RequestDetails theRequestDetails, List<String> theUrlsToExpungeDelete) {
 			calledWithBatchSize = theBatchSize;
-			calledWithTenant = theTenantId;
+			calledWithRequestDetails = theRequestDetails;
 			calledWithUrls = theUrlsToExpungeDelete;
 			JobInstance instance = new JobInstance(123L, "jobName");
 			return new JobExecution(instance, new JobParameters());

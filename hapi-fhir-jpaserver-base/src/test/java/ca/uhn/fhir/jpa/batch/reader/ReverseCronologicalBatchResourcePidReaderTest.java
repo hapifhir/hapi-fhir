@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.delete.model.UrlListJson;
+import ca.uhn.fhir.jpa.delete.model.RequestListJson;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -57,10 +57,10 @@ class ReverseCronologicalBatchResourcePidReaderTest {
 
 	@BeforeEach
 	public void before() throws JsonProcessingException {
-		UrlListJson urlListJson = new UrlListJson();
-		urlListJson.setUrlList(Lists.newArrayList(URL_A, URL_B, URL_C));
+		RequestListJson requestListJson = new RequestListJson();
+		requestListJson.setUrls(Lists.newArrayList(URL_A, URL_B, URL_C));
 		ObjectMapper mapper = new ObjectMapper();
-		myReader.setUrlList(mapper.writeValueAsString(urlListJson));
+		myReader.setUrls(mapper.writeValueAsString(requestListJson));
 
 		SearchParameterMap map = new SearchParameterMap();
 		RuntimeResourceDefinition patientResDef = ourFhirContext.getResourceDefinition("Patient");

@@ -1,10 +1,11 @@
 package ca.uhn.fhir.jpa.batch.reader;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.delete.model.UrlListJson;
+import ca.uhn.fhir.jpa.delete.model.RequestListJson;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
 
 /**
  * This Spring Batch reader takes 4 parameters:
- * {@link #JOB_PARAM_URL_LIST}: A list of URLs to searchfor
+ * {@link #JOB_PARAM_REQUEST_LIST}: A list of URLs to searchfor
  * {@link #JOB_PARAM_TENANT_ID}: The tenant to perform the search with (or null)
  * {@link #JOB_PARAM_BATCH_SIZE}: The number of resources to return with each search.  If ommitted, {@link DaoConfig#getExpungeBatchSize} will be used.
  * {@link #JOB_PARAM_START_TIME}: The latest timestamp of resources to search for
@@ -47,10 +48,9 @@ import java.util.stream.Collectors;
  */
 public class ReverseCronologicalBatchResourcePidReader implements ItemReader<List<Long>>, ItemStream {
 
-	public static final String JOB_PARAM_URL_LIST = "url-list";
+	public static final String JOB_PARAM_REQUEST_LIST = "url-list";
 	public static final String JOB_PARAM_BATCH_SIZE = "batch-size";
 	public static final String JOB_PARAM_START_TIME = "start-time";
-	public static final String JOB_PARAM_TENANT_ID = "tenant-id";
 
 	private static final String CURRENT_URL_INDEX = "current.url-index";
 	private static final String CURRENT_THRESHOLD_HIGH = "current.threshold-high";
@@ -65,17 +65,18 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	@Autowired
 	private DaoConfig myDaoConfig;
 
-	private List<String> myUrlList;
+	private List<String> myUrls;
+	private List<RequestPartitionId> myRequestPartitionIds;
 	private Integer myBatchSize;
 	private Instant myStartTime;
 	private int myUrlIndex = 0;
 	private final Map<Integer, Instant> myThresholdHighByUrlIndex = new HashMap<>();
-	private String myTenantId;
 
 	@Autowired
-	public void setUrlList(@Value("#{jobParameters['" + JOB_PARAM_URL_LIST + "']}") String theUrlListString) {
-		UrlListJson urlListJson = UrlListJson.fromJson(theUrlListString);
-		myUrlList = urlListJson.getUrlList();
+	public void setUrls(@Value("#{jobParameters['" + JOB_PARAM_REQUEST_LIST + "']}") String theUrlListString) {
+		RequestListJson requestListJson = RequestListJson.fromJson(theUrlListString);
+		myUrls = requestListJson.getUrls();
+		myRequestPartitionIds = requestListJson.getRequestPartitionIds();
 	}
 
 	@Autowired
@@ -88,14 +89,9 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 		myStartTime = theStartTime.toInstant();
 	}
 
-	@Autowired
-	public void setTenantId(@Value("#{jobParameters['" + JOB_PARAM_TENANT_ID + "']}") String theTenantId) {
-		myTenantId = theTenantId;
-	}
-
 	@Override
 	public List<Long> read() throws Exception {
-		while (myUrlIndex < myUrlList.size()) {
+		while (myUrlIndex < myUrls.size()) {
 			List<Long> nextBatch;
 			nextBatch = getNextBatch(myUrlIndex);
 			if (nextBatch.isEmpty()) {
@@ -109,7 +105,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	}
 
 	private List<Long> getNextBatch(int theUrlIndex) {
-		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(myUrlList.get(theUrlIndex));
+		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(myUrls.get(theUrlIndex));
 		SearchParameterMap map = resourceSearch.getSearchParameterMap();
 
 		map.setLastUpdated(new DateRangeParam().setUpperBoundInclusive(Date.from(myThresholdHighByUrlIndex.get(theUrlIndex))));
@@ -142,7 +138,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	@NotNull
 	private SystemRequestDetails buildSystemRequestDetails() {
 		SystemRequestDetails retval = new SystemRequestDetails();
-		retval.setTenantId(myTenantId);
+		retval.setRequestPartitionId(myRequestPartitionIds.get(myUrlIndex));
 		return retval;
 	}
 
@@ -154,7 +150,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 		if (executionContext.containsKey(CURRENT_URL_INDEX)) {
 			myUrlIndex = new Long(executionContext.getLong(CURRENT_URL_INDEX)).intValue();
 		}
-		for (int index = 0; index < myUrlList.size(); ++index) {
+		for (int index = 0; index < myUrls.size(); ++index) {
 			String key = highKey(index);
 			if (executionContext.containsKey(key)) {
 				myThresholdHighByUrlIndex.put(index, Instant.ofEpochSecond(executionContext.getLong(key)));
@@ -171,7 +167,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	@Override
 	public void update(ExecutionContext executionContext) throws ItemStreamException {
 		executionContext.putLong(CURRENT_URL_INDEX, myUrlIndex);
-		for (int index = 0; index < myUrlList.size(); ++index) {
+		for (int index = 0; index < myUrls.size(); ++index) {
 			Instant instant = myThresholdHighByUrlIndex.get(index);
 			if (instant != null) {
 				executionContext.putLong(highKey(index), instant.getEpochSecond());

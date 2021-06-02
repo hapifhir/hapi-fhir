@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.delete.job;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
@@ -16,6 +17,8 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -71,7 +74,11 @@ class DeleteExpungeJobParameterValidatorTest {
 
 	@Nonnull
 	private JobParameters buildJobParameters(String... theUrls) {
-		return DeleteExpungeJobConfig.buildJobParameters(2401, "TENANT_A", Lists.newArrayList(theUrls));
+		List<RequestPartitionId> requestPartitionIds = new ArrayList<>();
+		for (int i = 0; i < theUrls.length; ++i) {
+			requestPartitionIds.add(RequestPartitionId.fromPartitionName("TENANT_A"));
+		}
+		return DeleteExpungeJobConfig.buildJobParameters(2401, Lists.newArrayList(theUrls), requestPartitionIds);
 	}
 
 }

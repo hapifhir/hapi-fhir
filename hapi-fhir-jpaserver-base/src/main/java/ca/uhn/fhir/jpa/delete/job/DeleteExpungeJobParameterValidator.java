@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.delete.job;
  */
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.delete.model.UrlListJson;
+import ca.uhn.fhir.jpa.delete.model.RequestListJson;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -29,7 +29,7 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.JobParametersValidator;
 
-import static ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader.JOB_PARAM_URL_LIST;
+import static ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader.JOB_PARAM_REQUEST_LIST;
 
 /**
  * This class will prevent a job from running any of the provided URLs are not valid on this server.
@@ -49,8 +49,8 @@ public class DeleteExpungeJobParameterValidator implements JobParametersValidato
 			throw new JobParametersInvalidException("This job requires Parameters: [urlList]");
 		}
 
-		UrlListJson urlListJson = UrlListJson.fromJson(theJobParameters.getString(JOB_PARAM_URL_LIST));
-		for (String url : urlListJson.getUrlList()) {
+		RequestListJson requestListJson = RequestListJson.fromJson(theJobParameters.getString(JOB_PARAM_REQUEST_LIST));
+		for (String url : requestListJson.getUrls()) {
 			try {
 				ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(url);
 				String resourceName = resourceSearch.getResourceName();
@@ -58,7 +58,7 @@ public class DeleteExpungeJobParameterValidator implements JobParametersValidato
 					throw new JobParametersInvalidException("The resource type " + resourceName + " is not supported on this server.");
 				}
 			} catch (UnsupportedOperationException e) {
-				throw new JobParametersInvalidException("Failed to parse " + ProviderConstants.OPERATION_DELETE_EXPUNGE + " " + JOB_PARAM_URL_LIST + " item " + url + ": " + e.getMessage());
+				throw new JobParametersInvalidException("Failed to parse " + ProviderConstants.OPERATION_DELETE_EXPUNGE + " " + JOB_PARAM_REQUEST_LIST + " item " + url + ": " + e.getMessage());
 			}
 		}
 	}

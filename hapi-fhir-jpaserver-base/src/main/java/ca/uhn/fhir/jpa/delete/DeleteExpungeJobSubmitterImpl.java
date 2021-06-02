@@ -1,9 +1,14 @@
 package ca.uhn.fhir.jpa.delete;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.delete.job.DeleteExpungeJobConfig;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
@@ -13,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter {
@@ -23,11 +29,26 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 	private Job myDeleteExpungeJob;
 	@Autowired
 	FhirContext myFhirContext;
+	@Autowired
+	MatchUrlService myMatchUrlService;
+	@Autowired
+	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@Override
 	@Transactional(Transactional.TxType.NEVER)
-	public JobExecution submitJob(Integer theBatchSize, String theTenantId, List<String> theUrlsToDeleteExpunge) throws JobParametersInvalidException {
-		JobParameters jobParameters = DeleteExpungeJobConfig.buildJobParameters(theBatchSize, theTenantId, theUrlsToDeleteExpunge);
+	public JobExecution submitJob(Integer theBatchSize, RequestDetails theRequest, List<String> theUrlsToDeleteExpunge) throws JobParametersInvalidException {
+		List<RequestPartitionId> requestPartitionIds = requestPartitionIdsFromRequestAndUrls(theRequest, theUrlsToDeleteExpunge);
+		JobParameters jobParameters = DeleteExpungeJobConfig.buildJobParameters(theBatchSize, theUrlsToDeleteExpunge, requestPartitionIds);
 		return myBatchJobSubmitter.runJob(myDeleteExpungeJob, jobParameters);
+	}
+
+	private List<RequestPartitionId> requestPartitionIdsFromRequestAndUrls(RequestDetails theRequest, List<String> theUrlsToDeleteExpunge) {
+		List<RequestPartitionId> retval = new ArrayList<>();
+		for (String url : theUrlsToDeleteExpunge) {
+			ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(url);
+			RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequest, resourceSearch.getResourceName());
+			retval.add(requestPartitionId);
+		}
+		return retval;
 	}
 }

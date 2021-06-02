@@ -38,7 +38,7 @@ public class DeleteExpungeProvider {
 			if (theBatchSize != null && !theBatchSize.isEmpty()) {
 				batchSize = theBatchSize.getValue().intValue();
 			}
-			JobExecution jobExecution = myDeleteExpungeJobSubmitter.submitJob(batchSize, theRequestDetails.getTenantId(), urls);
+			JobExecution jobExecution = myDeleteExpungeJobSubmitter.submitJob(batchSize, theRequestDetails, urls);
 			IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
 			ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID, jobExecution.getJobId());
 			return retval;

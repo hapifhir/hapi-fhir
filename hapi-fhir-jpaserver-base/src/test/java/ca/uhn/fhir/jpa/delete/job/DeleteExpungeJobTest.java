@@ -67,6 +67,6 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 
 	@Nonnull
 	private JobParameters buildJobParameters(String... theUrls) {
-		return DeleteExpungeJobConfig.buildJobParameters(null, null, Lists.newArrayList(theUrls));
+		return DeleteExpungeJobConfig.buildJobParameters(null, Lists.newArrayList(theUrls), null);
 	}
 }
