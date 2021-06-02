@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.partition;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -33,6 +34,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -122,7 +124,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 			validateRequestPartitionNotNull(requestPartitionId, Pointcut.STORAGE_PARTITION_IDENTIFY_READ);
 
-			return validateNormalizeAndNotifyHooksForRead(requestPartitionId, theRequest);
+			return validateNormalizeAndNotifyHooksForRead(requestPartitionId, theRequest, theResourceType);
 		}
 
 		return RequestPartitionId.allPartitions();
@@ -206,7 +208,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 			String resourceName = myFhirContext.getResourceType(theResource);
 			validateSinglePartitionForCreate(requestPartitionId, resourceName, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE);
 
-			return validateNormalizeAndNotifyHooksForRead(requestPartitionId, theRequest);
+			return validateNormalizeAndNotifyHooksForRead(requestPartitionId, theRequest, theResourceType);
 		}
 
 		return RequestPartitionId.allPartitions();
@@ -220,7 +222,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	 * If the partition has both, they are validated to ensure that they correspond.
 	 */
 	@Nonnull
-	private RequestPartitionId validateNormalizeAndNotifyHooksForRead(@Nonnull RequestPartitionId theRequestPartitionId, RequestDetails theRequest) {
+	private RequestPartitionId validateNormalizeAndNotifyHooksForRead(@Nonnull RequestPartitionId theRequestPartitionId, RequestDetails theRequest, String theResourceType) {
 		RequestPartitionId retVal = theRequestPartitionId;
 
 		if (retVal.getPartitionNames() != null) {
@@ -231,11 +233,15 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 		// Note: It's still possible that the partition only has a date but no name/id
 
-		HookParams params = new HookParams()
-			.add(RequestPartitionId.class, retVal)
-			.add(RequestDetails.class, theRequest)
-			.addIfMatchesType(ServletRequestDetails.class, theRequest);
-		doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_SELECTED, params);
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_SELECTED)) {
+			RuntimeResourceDefinition runtimeResourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
+			HookParams params = new HookParams()
+				.add(RequestPartitionId.class, retVal)
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest)
+				.add(RuntimeResourceDefinition.class, runtimeResourceDefinition);
+			doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_SELECTED, params);
+		}
 
 		return retVal;
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IPointcut;
@@ -73,11 +74,10 @@ public class MultitenantDeleteExpungeR4 extends BaseMultitenantResourceProviderR
 		assertThat(interceptor.requestDetails.get(0), isA(ServletRequestDetails.class));
 		assertThat(interceptor.requestDetails.get(1), isA(SystemRequestDetails.class));
 		assertThat(interceptor.requestDetails.get(2), isA(SystemRequestDetails.class));
+		assertEquals("Patient", interceptor.resourceDefs.get(0).getName());
+		assertEquals("Patient", interceptor.resourceDefs.get(1).getName());
+		assertEquals("Patient", interceptor.resourceDefs.get(2).getName());
 		myInterceptorRegistry.unregisterInterceptor(interceptor);
-
-		// FIXME KHS
-//		assertEquals(TENANT_B_ID, partitionId.getPartitionIds().get(0).intValue());
-//		assertEquals(TENANT_B, partitionId.getPartitionNames().get(0));
 
 		DecimalType jobIdPrimitive = (DecimalType) response.getParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID);
 		Long jobId = jobIdPrimitive.getValue().longValue();
@@ -101,11 +101,13 @@ public class MultitenantDeleteExpungeR4 extends BaseMultitenantResourceProviderR
 	private static class MyInterceptor implements IAnonymousInterceptor {
 		public List<RequestPartitionId> requestPartitionIds = new ArrayList<>();
 		public List<RequestDetails> requestDetails = new ArrayList<>();
+		public List<RuntimeResourceDefinition> resourceDefs = new ArrayList<>();
 
 		@Override
 		public void invoke(IPointcut thePointcut, HookParams theArgs) {
 			requestPartitionIds.add(theArgs.get(RequestPartitionId.class));
 			requestDetails.add(theArgs.get(RequestDetails.class));
+			resourceDefs.add(theArgs.get(RuntimeResourceDefinition.class));
 		}
 	}
 }
