@@ -2,28 +2,33 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.DEFAULT_PARTITION_NAME;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 public class MultitenantDeleteExpungeR4 extends BaseMultitenantResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(MultitenantDeleteExpungeR4.class);
@@ -48,8 +53,7 @@ public class MultitenantDeleteExpungeR4 extends BaseMultitenantResourceProviderR
 		Parameters input = new Parameters();
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "/Patient?active=false");
 
-
-		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
+		MyInterceptor interceptor = new MyInterceptor();
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PARTITION_SELECTED, interceptor);
 		// execute
 
@@ -63,13 +67,17 @@ public class MultitenantDeleteExpungeR4 extends BaseMultitenantResourceProviderR
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		myBatchJobHelper.awaitAllBulkJobCompletions(BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME);
+		assertThat(interceptor.requestPartitionIds, hasSize(3));
+		interceptor.requestPartitionIds.forEach(id -> assertEquals(TENANT_B_ID, id.getFirstPartitionIdOrNull()));
+		interceptor.requestPartitionIds.forEach(id -> assertEquals(TENANT_B, id.getFirstPartitionNameOrNull()));
+		assertThat(interceptor.requestDetails.get(0), isA(ServletRequestDetails.class));
+		assertThat(interceptor.requestDetails.get(1), isA(SystemRequestDetails.class));
+		assertThat(interceptor.requestDetails.get(2), isA(SystemRequestDetails.class));
+		myInterceptorRegistry.unregisterInterceptor(interceptor);
 
-		ArgumentCaptor<HookParams> captor = ArgumentCaptor.forClass(HookParams.class);
-		verify(interceptor, times(3)).invoke(eq(Pointcut.STORAGE_PARTITION_SELECTED), captor.capture());
-
-		RequestPartitionId partitionId = captor.getValue().get(RequestPartitionId.class);
-		assertEquals(TENANT_B_ID, partitionId.getPartitionIds().get(0).intValue());
-		assertEquals(TENANT_B, partitionId.getPartitionNames().get(0));
+		// FIXME KHS
+//		assertEquals(TENANT_B_ID, partitionId.getPartitionIds().get(0).intValue());
+//		assertEquals(TENANT_B, partitionId.getPartitionNames().get(0));
 
 		DecimalType jobIdPrimitive = (DecimalType) response.getParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID);
 		Long jobId = jobIdPrimitive.getValue().longValue();
@@ -88,5 +96,16 @@ public class MultitenantDeleteExpungeR4 extends BaseMultitenantResourceProviderR
 		myTenantClientInterceptor.setTenantId(theTenantId);
 
 		return myClient.search().forResource("Patient").cacheControl(new CacheControlDirective().setNoCache(true)).returnBundle(Bundle.class).execute();
+	}
+
+	private static class MyInterceptor implements IAnonymousInterceptor {
+		public List<RequestPartitionId> requestPartitionIds = new ArrayList<>();
+		public List<RequestDetails> requestDetails = new ArrayList<>();
+
+		@Override
+		public void invoke(IPointcut thePointcut, HookParams theArgs) {
+			requestPartitionIds.add(theArgs.get(RequestPartitionId.class));
+			requestDetails.add(theArgs.get(RequestDetails.class));
+		}
 	}
 }
