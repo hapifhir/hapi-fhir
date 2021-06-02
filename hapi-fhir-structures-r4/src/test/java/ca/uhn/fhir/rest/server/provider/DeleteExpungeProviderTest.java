@@ -37,12 +37,14 @@ public class DeleteExpungeProviderTest extends BaseR4ServerTest {
 	public void testDeleteExpunge() throws Exception {
 		// setup
 		Parameters input = new Parameters();
-		String url1 = "Patient?active=false";
+		String url1 = "Observation?status=active";
 		String url2 = "Patient?active=false";
 		Integer batchSize = 2401;
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, url1);
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, url2);
 		input.addParameter(ProviderConstants.OPERATION_DELETE_BATCH_SIZE, new DecimalType(batchSize));
+
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		DeleteExpungeProvider provider = new DeleteExpungeProvider(myCtx, mySvc);
 		startServer(provider);
