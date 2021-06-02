@@ -8,15 +8,13 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.validation.ValidationMessageSuppressingInterceptor;
-import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.junit.jupiter.api.AfterEach;
@@ -82,11 +80,13 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 		upload("/r4/uscore/CodeSystem-dummy-loinc.json");
 		upload("/r4/uscore/StructureDefinition-us-core-pulse-oximetry.json");
 
+		FhirValidator validator = myFhirCtx.newValidator();
+		validator.setInterceptorBroadcaster(myInterceptorRegistry);
+		validator.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
 
 		RequestValidatingInterceptor requestInterceptor = new RequestValidatingInterceptor();
 		requestInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
-		requestInterceptor.setValidatorModules(Collections.singletonList(new FhirInstanceValidator(myValidationSupport)));
-		requestInterceptor.setInterceptorBroadcaster(myInterceptorRegistry);
+		requestInterceptor.setValidator(validator);
 		ourRestServer.registerInterceptor(requestInterceptor);
 
 

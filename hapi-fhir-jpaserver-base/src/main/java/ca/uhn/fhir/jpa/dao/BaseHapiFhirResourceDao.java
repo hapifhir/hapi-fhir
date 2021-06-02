@@ -1727,7 +1727,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		FhirValidator validator = getContext().newValidator();
 
-		validator.setInterceptorBraodcaster(CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest));
+		validator.setInterceptorBroadcaster(CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest));
 		validator.registerValidatorModule(getInstanceValidator());
 		validator.registerValidatorModule(new IdChecker(theMode));
 
