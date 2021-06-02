@@ -108,6 +108,27 @@ public class ProviderConstants {
 	public static final String OPERATION_EXPUNGE = "$expunge";
 
 	/**
+	 * Parameter name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE_PARAM_LIMIT = "limit";
+	/**
+	 * Parameter name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES = "expungeDeletedResources";
+	/**
+	 * Parameter name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS = "expungePreviousVersions";
+	/**
+	 * Parameter name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING = "expungeEverything";
+	/**
+	 * Output parameter name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT = "count";
+
+	/**
 	 * Operation name for the $delete-expunge operation
 	 */
 	public static final String OPERATION_DELETE_EXPUNGE = "$delete-expunge";

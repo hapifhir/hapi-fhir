@@ -45,30 +45,35 @@ public class JpaConstants {
 	@Deprecated
 	public static final String OPERATION_EXPUNGE = ProviderConstants.OPERATION_EXPUNGE;
 	/**
-	 * @deprecated Replace with {@link #OPERATION_EXPUNGE}
+	 * @deprecated Replace with {@link ProviderConstants#OPERATION_EXPUNGE}
 	 */
 	@Deprecated
 	public static final String OPERATION_NAME_EXPUNGE = ProviderConstants.OPERATION_EXPUNGE;
 	/**
-	 * Parameter name for the $expunge operation
+	 * @deprecated Replace with {@link ProviderConstants#OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT}
 	 */
-	public static final String OPERATION_EXPUNGE_PARAM_LIMIT = "limit";
+	@Deprecated
+	public static final String OPERATION_EXPUNGE_PARAM_LIMIT = ProviderConstants.OPERATION_EXPUNGE_PARAM_LIMIT;
 	/**
-	 * Parameter name for the $expunge operation
+	 * @deprecated Replace with {@link ProviderConstants#OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT}
 	 */
-	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES = "expungeDeletedResources";
+	@Deprecated
+	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES = ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES;
 	/**
-	 * Parameter name for the $expunge operation
+	 * @deprecated Replace with {@link ProviderConstants#OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT}
 	 */
-	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS = "expungePreviousVersions";
+	@Deprecated
+	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS = ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS;
 	/**
-	 * Parameter name for the $expunge operation
+	 * @deprecated Replace with {@link ProviderConstants#OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT}
 	 */
-	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING = "expungeEverything";
+	@Deprecated
+	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING = ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING;
 	/**
-	 * Output parameter name for the $expunge operation
+	 * @deprecated Replace with {@link ProviderConstants#OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT}
 	 */
-	public static final String OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT = "count";
+	@Deprecated
+	public static final String OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT = ProviderConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT;
 	/**
 	 * Header name for the "X-Meta-Snapshot-Mode" header, which
 	 * specifies that properties in meta (tags, profiles, security labels)
