@@ -20,6 +20,10 @@ package ca.uhn.fhir.interceptor.model;
  * #L%
  */
 
+import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -41,12 +45,17 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 /**
  * @since 5.0.0
  */
-public class RequestPartitionId {
-
+public class RequestPartitionId implements IModelJson {
 	private static final RequestPartitionId ALL_PARTITIONS = new RequestPartitionId();
+	private static final ObjectMapper ourObjectMapper = new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+
+	@JsonProperty("partitionDate")
 	private final LocalDate myPartitionDate;
+	@JsonProperty("allPartitions")
 	private final boolean myAllPartitions;
+	@JsonProperty("partitionIds")
 	private final List<Integer> myPartitionIds;
+	@JsonProperty("partitionNames")
 	private final List<String> myPartitionNames;
 
 	/**
@@ -78,6 +87,10 @@ public class RequestPartitionId {
 		myPartitionNames = null;
 		myPartitionIds = null;
 		myAllPartitions = true;
+	}
+
+	public static RequestPartitionId fromJson(String theJson) throws JsonProcessingException {
+		return ourObjectMapper.readValue(theJson, RequestPartitionId.class);
 	}
 
 	public boolean isAllPartitions() {
@@ -307,5 +320,9 @@ public class RequestPartitionId {
 				.collect(Collectors.joining(" "));
 		}
 		return retVal;
+	}
+
+	public String asJson() throws JsonProcessingException {
+		return ourObjectMapper.writeValueAsString(this);
 	}
 }
