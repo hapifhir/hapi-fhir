@@ -148,7 +148,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	 * We assume that if we have RequestDetails, then this was an HTTP request and not an internal one.
 	 */
 	private boolean isInternalRequest(RequestDetails theRequestDetails) {
-		return theRequestDetails == null;
+		return theRequestDetails == null || theRequestDetails instanceof SystemRequestDetails;
 	}
 
 	private void forbidIfMdmManagedTagIsPresent(IBaseResource theResource) {
