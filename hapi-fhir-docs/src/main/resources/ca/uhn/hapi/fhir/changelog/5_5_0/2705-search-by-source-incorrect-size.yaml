@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2705
+title: "When searching by source, if deleted resources are matched, the search returned an incorrect size.  This has been corrected."
