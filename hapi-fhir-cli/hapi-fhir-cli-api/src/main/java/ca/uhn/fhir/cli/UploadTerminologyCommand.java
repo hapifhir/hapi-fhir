@@ -73,7 +73,6 @@ public class UploadTerminologyCommand extends BaseCommand {
 		addRequiredOption(options, "u", "url", true, "The code system URL associated with this upload (e.g. " + ITermLoaderSvc.SCT_URI + ")");
 		addOptionalOption(options, "d", "data", true, "Local file to use to upload (can be a raw file or a ZIP containing the raw file)");
 		addOptionalOption(options, "m", "mode", true, "The upload mode: SNAPSHOT (default), ADD, REMOVE");
-		addOptionalOption(options, "c", "file", true, "An optional local file to supply as the CodeSystem resource associated with this upload");
 		addBasicAuthOption(options);
 		addVerboseLoggingOption(options);
 
@@ -109,25 +108,6 @@ public class UploadTerminologyCommand extends BaseCommand {
 			client.registerInterceptor(new LoggingInterceptor(true));
 		}
 
-		if (theCommandLine.hasOption("c")) {
-			String codeSystemFile = theCommandLine.getOptionValue("c");
-			ourLog.info("Adding CodeSystem resource file: {}", codeSystemFile);
-
-			String contents;
-			try (FileInputStream fileInputStream = new FileInputStream(codeSystemFile)) {
-				contents = IOUtils.toString(fileInputStream, Charsets.UTF_8);
-			} catch (IOException theE) {
-				throw new ParseException("Could not load file: " + codeSystemFile);
-			}
-			EncodingEnum encoding = EncodingEnum.detectEncodingNoDefault(contents);
-			if (encoding == null) {
-				throw new ParseException("Could not detect FHIR encoding for file: " + codeSystemFile);
-			}
-
-			CodeSystem resource = encoding.newParser(myFhirCtx).parseResource(CodeSystem.class, contents);
-			ParametersUtil.addParameterToParameters(myFhirCtx, inputParameters, TerminologyUploaderProvider.PARAM_CODESYSTEM, resource);
-		}
-
 		switch (mode) {
 			case SNAPSHOT:
 				invokeOperation(termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM);
@@ -143,6 +123,10 @@ public class UploadTerminologyCommand extends BaseCommand {
 	}
 
 	private void invokeOperation(String theTermUrl, String[] theDatafile, IGenericClient theClient, IBaseParameters theInputParameters, String theOperationName) throws ParseException {
+		boolean isDeltaOperation =
+			theOperationName.equals(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD) ||
+				theOperationName.equals(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE);
+
 		ParametersUtil.addParameterToParametersUri(myFhirCtx, theInputParameters, TerminologyUploaderProvider.PARAM_SYSTEM, theTermUrl);
 
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -154,19 +138,37 @@ public class UploadTerminologyCommand extends BaseCommand {
 			for (String nextDataFile : theDatafile) {
 
 				try (FileInputStream fileInputStream = new FileInputStream(nextDataFile)) {
-					if (nextDataFile.endsWith(".csv") || nextDataFile.endsWith(".properties") || nextDataFile.endsWith(".json") || nextDataFile.endsWith(".xml")) {
+					boolean isFhirType = nextDataFile.endsWith(".json") || nextDataFile.endsWith(".xml");
+					if (nextDataFile.endsWith(".csv") || nextDataFile.endsWith(".properties") || isFhirType) {
 
-						ourLog.info("Compressing and adding file: {}", nextDataFile);
-						ZipEntry nextEntry = new ZipEntry(stripPath(nextDataFile));
-						zipOutputStream.putNextEntry(nextEntry);
+						if (isDeltaOperation && isFhirType) {
 
-						CountingInputStream countingInputStream = new CountingInputStream(fileInputStream);
-						IOUtils.copy(countingInputStream, zipOutputStream);
-						haveCompressedContents = true;
-						compressedSourceBytesCount += countingInputStream.getCount();
+							ourLog.info("Adding CodeSystem resource file: {}", nextDataFile);
 
-						zipOutputStream.flush();
-						ourLog.info("Finished compressing {}", nextDataFile);
+							String contents = IOUtils.toString(fileInputStream, Charsets.UTF_8);
+							EncodingEnum encoding = EncodingEnum.detectEncodingNoDefault(contents);
+							if (encoding == null) {
+								throw new ParseException("Could not detect FHIR encoding for file: " + nextDataFile);
+							}
+
+							CodeSystem resource = encoding.newParser(myFhirCtx).parseResource(CodeSystem.class, contents);
+							ParametersUtil.addParameterToParameters(myFhirCtx, theInputParameters, TerminologyUploaderProvider.PARAM_CODESYSTEM, resource);
+
+						} else {
+
+							ourLog.info("Compressing and adding file: {}", nextDataFile);
+							ZipEntry nextEntry = new ZipEntry(stripPath(nextDataFile));
+							zipOutputStream.putNextEntry(nextEntry);
+
+							CountingInputStream countingInputStream = new CountingInputStream(fileInputStream);
+							IOUtils.copy(countingInputStream, zipOutputStream);
+							haveCompressedContents = true;
+							compressedSourceBytesCount += countingInputStream.getCount();
+
+							zipOutputStream.flush();
+							ourLog.info("Finished compressing {}", nextDataFile);
+
+						}
 
 					} else if (nextDataFile.endsWith(".zip")) {
 
