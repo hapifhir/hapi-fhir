@@ -145,4 +145,9 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 	public void setSystemDao(IFhirSystemDao<Bundle, Meta> mySystemDao) {
 		this.mySystemDao = mySystemDao;
 	}
+
+	@Override
+	protected boolean searchParamEnabled(String theSearchParam) {
+		return !Constants.PARAM_FILTER.equals(theSearchParam) || myDaoConfig.isFilterParameterEnabled();
+	}
 }
