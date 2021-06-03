@@ -83,6 +83,12 @@ Note that the path and exact filename of the terminology files will likely need 
 ./hapi-fhir-cli upload-terminology -d Downloads/LOINC_2.54_MULTI-AXIAL_HIERARCHY.zip -d Downloads/LOINC_2.54_Text.zip -f dstu3 -t http://localhost:8080/baseDstu3 -u http://loinc.org
 ```
 
+### ICD-10-CM
+
+```
+./hapi-fhir-cli upload-terminology -d Downloads/LOINC_2.54_MULTI-AXIAL_HIERARCHY.zip -d icd10cm_tabular_2021.xml -f dstu3 -t http://localhost:8080/baseDstu3 -u http://hl7.org/fhir/sid/icd-10-cm
+```
+
 # Migrate Database
 
 The `migrate-database` command may be used to Migrate a database schema when upgrading a [HAPI FHIR JPA](/docs/server_jpa/introduction.html) project from one version of HAPI	FHIR to another version.
