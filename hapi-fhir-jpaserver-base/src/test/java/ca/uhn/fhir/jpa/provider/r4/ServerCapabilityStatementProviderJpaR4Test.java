@@ -1,8 +1,9 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
-import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -12,22 +13,19 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProviderR4Test {
 
@@ -117,6 +115,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 	public void after() throws Exception {
 		super.after();
 		ourCapabilityStatementProvider.setRestResourceRevIncludesEnabled(ServerCapabilityStatementProvider.DEFAULT_REST_RESOURCE_REV_INCLUDES_ENABLED);
+		myDaoConfig.setFilterParameterEnabled(new DaoConfig().isFilterParameterEnabled());
 	}
 
 
@@ -257,6 +256,13 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 		assertThat(supportedProfiles.toString(), supportedProfiles, containsInAnyOrder(
 			"https://fhir.nhs.uk/R4/StructureDefinition/UKCore-Patient"
 		));
+	}
+
+	@Test
+	public void testFilterProperlyReported() {
+		myDaoConfig.setFilterParameterEnabled(false);
+		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
+		assertThat(findSearchParams(cs, "Patient", Constants.PARAM_FILTER), hasSize(0));
 	}
 
 	@Nonnull

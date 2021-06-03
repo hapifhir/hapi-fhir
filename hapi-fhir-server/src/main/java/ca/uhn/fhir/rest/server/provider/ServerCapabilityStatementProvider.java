@@ -391,8 +391,9 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 					searchParamRegistry = mySearchParamRegistry;
 					searchParams = new HashMap<>(mySearchParamRegistry.getActiveSearchParams(resourceName));
 					for (Entry<String, RuntimeSearchParam> nextBuiltInSp : serverConfiguration.getActiveSearchParams(resourceName).entrySet()) {
-						if (nextBuiltInSp.getKey().startsWith("_") && !searchParams.containsKey(nextBuiltInSp.getKey())) {
-							searchParams.put(nextBuiltInSp.getKey(), nextBuiltInSp.getValue());
+						String key = nextBuiltInSp.getKey();
+						if (key.startsWith("_") && !searchParams.containsKey(key) && searchParamEnabled(key)) {
+							searchParams.put(key, nextBuiltInSp.getValue());
 						}
 					}
 				} else {
@@ -532,6 +533,15 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		postProcess(terser, retVal);
 
 		return retVal;
+	}
+
+	/**
+	 *
+	 * @param theSearchParam
+	 * @return true if theSearchParam is enabled on this server
+	 */
+	protected boolean searchParamEnabled(String theSearchParam) {
+		return true;
 	}
 
 	private void addSearchMethodIfSearchIsNamedQuery(RequestDetails theRequestDetails, Bindings theBindings, FhirTerser theTerser, Set<String> theOperationNamesAlreadyAdded, IBase theElementToAddTo, SearchMethodBinding theSearchMethodBinding) {
