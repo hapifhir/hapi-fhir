@@ -1277,7 +1277,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	/**
-	 * Reads a requet ID from the request headers via the {@link Constants#HEADER_REQUEST_ID}
+	 * Reads a request ID from the request headers via the {@link Constants#HEADER_REQUEST_ID}
 	 * header, or generates one if none is supplied.
 	 * <p>
 	 * Note that the generated request ID is a random 64-bit long integer encoded as
@@ -1286,18 +1286,11 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * </p>
 	 */
 	protected String getOrCreateRequestId(HttpServletRequest theRequest) {
-		String requestId = theRequest.getHeader(Constants.HEADER_REQUEST_ID);
-		if (isNotBlank(requestId)) {
-			for (char nextChar : requestId.toCharArray()) {
-				if (!Character.isLetterOrDigit(nextChar)) {
-					if (nextChar != '.' && nextChar != '-' && nextChar != '_' && nextChar != ' ') {
-						requestId = null;
-						break;
-					}
-				}
-			}
-		}
+		String requestId = ServletRequestTracing.maybeGetRequestId(theRequest);
 
+		// TODO can we delete this and newRequestId()
+		//  and use ServletRequestTracing.getOrGenerateRequestId() instead?
+		//  newRequestId() is protected.  Do you think anyone actually overrode it?
 		if (isBlank(requestId)) {
 			int requestIdLength = Constants.REQUEST_ID_LENGTH;
 			requestId = newRequestId(requestIdLength);
