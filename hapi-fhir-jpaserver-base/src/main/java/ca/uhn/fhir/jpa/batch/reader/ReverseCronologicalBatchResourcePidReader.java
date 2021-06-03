@@ -72,8 +72,8 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	public static final String JOB_PARAM_BATCH_SIZE = "batch-size";
 	public static final String JOB_PARAM_START_TIME = "start-time";
 
-	private static final String CURRENT_URL_INDEX = "current.url-index";
-	private static final String CURRENT_THRESHOLD_HIGH = "current.threshold-high";
+	public static final String CURRENT_URL_INDEX = "current.url-index";
+	public static final String CURRENT_THRESHOLD_HIGH = "current.threshold-high";
 	private static final Logger ourLog = LoggerFactory.getLogger(ReverseCronologicalBatchResourcePidReader.class);
 
 	@Autowired
