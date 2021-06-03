@@ -31,8 +31,8 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class MultitenantDeleteExpungeR4 extends BaseMultitenantResourceProviderR4Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(MultitenantDeleteExpungeR4.class);
+public class MultitenantDeleteExpungeR4Test extends BaseMultitenantResourceProviderR4Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(MultitenantDeleteExpungeR4Test.class);
 
 	@Autowired
 	private BatchJobHelper myBatchJobHelper;

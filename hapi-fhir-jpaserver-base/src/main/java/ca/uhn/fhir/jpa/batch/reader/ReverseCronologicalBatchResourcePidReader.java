@@ -46,7 +46,6 @@ import org.springframework.batch.item.ItemStreamException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -88,9 +87,9 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	private List<String> myUrls;
 	private List<RequestPartitionId> myRequestPartitionIds;
 	private Integer myBatchSize;
-	private Instant myStartTime;
+	private final Map<Integer, Date> myThresholdHighByUrlIndex = new HashMap<>();
 	private int myUrlIndex = 0;
-	private final Map<Integer, Instant> myThresholdHighByUrlIndex = new HashMap<>();
+	private Date myStartTime;
 
 	@Autowired
 	public void setUrls(@Value("#{jobParameters['" + JOB_PARAM_REQUEST_LIST + "']}") String theRequestListJson) {
@@ -106,7 +105,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 
 	@Autowired
 	public void setStartTime(@Value("#{jobParameters['" + JOB_PARAM_START_TIME + "']}") Date theStartTime) {
-		myStartTime = theStartTime.toInstant();
+		myStartTime = theStartTime;
 	}
 
 	@Override
@@ -128,7 +127,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(myUrls.get(theUrlIndex));
 		SearchParameterMap map = resourceSearch.getSearchParameterMap();
 
-		map.setLastUpdated(new DateRangeParam().setUpperBoundInclusive(Date.from(myThresholdHighByUrlIndex.get(theUrlIndex))));
+		map.setLastUpdated(new DateRangeParam().setUpperBoundInclusive(myThresholdHighByUrlIndex.get(theUrlIndex)));
 
 		map.setLoadSynchronousUpTo(myBatchSize);
 		SortSpec sort = new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.DESC);
@@ -149,7 +148,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 			// Adjust the high threshold to be the earliest resource in the batch we found
 			Long pidOfOldestResourceInBatch = retval.get(retval.size() - 1);
 			IBaseResource earliestResource = dao.readByPid(new ResourcePersistentId(pidOfOldestResourceInBatch));
-			myThresholdHighByUrlIndex.put(myUrlIndex, earliestResource.getMeta().getLastUpdated().toInstant());
+			myThresholdHighByUrlIndex.put(myUrlIndex, earliestResource.getMeta().getLastUpdated());
 		}
 
 		return retval;
@@ -173,7 +172,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 		for (int index = 0; index < myUrls.size(); ++index) {
 			String key = highKey(index);
 			if (executionContext.containsKey(key)) {
-				myThresholdHighByUrlIndex.put(index, Instant.ofEpochSecond(executionContext.getLong(key)));
+				myThresholdHighByUrlIndex.put(index, new Date(executionContext.getLong(key)));
 			} else {
 				myThresholdHighByUrlIndex.put(index, myStartTime);
 			}
@@ -188,9 +187,9 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	public void update(ExecutionContext executionContext) throws ItemStreamException {
 		executionContext.putLong(CURRENT_URL_INDEX, myUrlIndex);
 		for (int index = 0; index < myUrls.size(); ++index) {
-			Instant instant = myThresholdHighByUrlIndex.get(index);
-			if (instant != null) {
-				executionContext.putLong(highKey(index), instant.getEpochSecond());
+			Date date = myThresholdHighByUrlIndex.get(index);
+			if (date != null) {
+				executionContext.putLong(highKey(index), date.getTime());
 			}
 		}
 	}
