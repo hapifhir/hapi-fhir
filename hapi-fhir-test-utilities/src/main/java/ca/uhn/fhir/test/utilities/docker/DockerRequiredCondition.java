@@ -30,14 +30,18 @@ import org.testcontainers.DockerClientFactory;
  * Execution condition which will skip test classes that require docker if it is not present on the host machine
  */
 public class DockerRequiredCondition implements ExecutionCondition {
+	public static final String AVAILABLE_MSG = "Docker is installed so we can run these tests!";
+	public static final String UNAVAILABLE_MSG = "It appears as though docker is not installed on the host machine!";
 
 	@Override
 	public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext theExtensionContext) {
 		try {
-			DockerClientFactory.instance().isDockerAvailable();
-			return ConditionEvaluationResult.enabled("Docker is installed so we can run these tests!");
+			boolean isDockerAvailable = DockerClientFactory.instance().isDockerAvailable();
+			return isDockerAvailable
+				? ConditionEvaluationResult.enabled(AVAILABLE_MSG)
+				: ConditionEvaluationResult.disabled(UNAVAILABLE_MSG);
 		} catch (Exception e) {
-			return ConditionEvaluationResult.disabled("It appears as though docker is not installed on the host machine!");
+			return ConditionEvaluationResult.disabled(UNAVAILABLE_MSG);
 		}
 	}
 }
