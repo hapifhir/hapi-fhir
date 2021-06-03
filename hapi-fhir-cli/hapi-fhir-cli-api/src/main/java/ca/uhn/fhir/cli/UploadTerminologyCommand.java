@@ -114,8 +114,8 @@ public class UploadTerminologyCommand extends BaseCommand {
 			ourLog.info("Adding CodeSystem resource file: {}", codeSystemFile);
 
 			String contents;
-			try {
-				contents = IOUtils.toString(new FileInputStream(codeSystemFile), Charsets.UTF_8);
+			try (FileInputStream fileInputStream = new FileInputStream(codeSystemFile)) {
+				contents = IOUtils.toString(fileInputStream, Charsets.UTF_8);
 			} catch (IOException theE) {
 				throw new ParseException("Could not load file: " + codeSystemFile);
 			}
