@@ -261,7 +261,6 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 	@Test
 	public void testFilterProperlyReported() {
 		myDaoConfig.setFilterParameterEnabled(false);
-		mySearchParamRegistry.forceRefresh();
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
 		assertThat(findSearchParams(cs, "Patient", Constants.PARAM_FILTER), hasSize(0));
 	}
