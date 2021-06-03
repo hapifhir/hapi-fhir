@@ -559,9 +559,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				bundleProvider.setSize(count.intValue());
 			} else {
 				Integer queryCount = getQueryCount(theLoadSynchronousUpTo, theParams);
-				if (queryCount == null || queryCount > pids.size()) {
+				if (queryCount == null || queryCount > resources.size()) {
 					// No limit, last page or everything was fetched within the limit
-					bundleProvider.setSize(getTotalCount(queryCount, theParams.getOffset(), pids.size()));
+					bundleProvider.setSize(getTotalCount(queryCount, theParams.getOffset(), resources.size()));
 				} else {
 					bundleProvider.setSize(null);
 				}
