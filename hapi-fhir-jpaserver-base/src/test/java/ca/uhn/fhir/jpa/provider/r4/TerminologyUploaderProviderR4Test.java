@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.ClasspathUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Attachment;
@@ -95,6 +96,25 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Test
+	public void testUploadIcd10cm() {
+		byte[] packageBytes = ClasspathUtil.loadResourceAsByteArray("/icd/icd10cm_tabular_2021.xml");
+
+		Parameters respParam = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named("upload-external-code-system")
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.ICD10CM_URI))
+			.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("icd10cm_tabular_2021.xml").setData(packageBytes))
+			.execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
+		assertThat(((Reference) respParam.getParameter().get(2).getValue()).getReference(), matchesPattern("CodeSystem\\/[a-zA-Z0-9\\.\\-]+"));
+	}
+
+		@Test
 	public void testUploadLoinc() throws Exception {
 		byte[] packageBytes = createLoincZip();
 
