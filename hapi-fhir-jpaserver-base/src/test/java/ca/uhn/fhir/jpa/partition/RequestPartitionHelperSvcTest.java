@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.partition;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -26,6 +27,8 @@ class RequestPartitionHelperSvcTest {
 	IPartitionLookupSvc myPartitionLookupSvc;
 	@Mock
 	FhirContext myFhirContext;
+	@Mock
+	IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@InjectMocks
 	RequestPartitionHelperSvc mySvc = new RequestPartitionHelperSvc();

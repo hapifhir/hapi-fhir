@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.batch.reader;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.delete.model.RequestListJson;
@@ -42,6 +43,7 @@ class ReverseCronologicalBatchResourcePidReaderTest {
 	static String URL_B = "b";
 	static String URL_C = "c";
 	static Set<ResourcePersistentId> emptySet = Collections.emptySet();
+	static RequestPartitionId partId = RequestPartitionId.defaultPartition();
 
 	Patient myPatient;
 
@@ -59,6 +61,7 @@ class ReverseCronologicalBatchResourcePidReaderTest {
 	public void before() throws JsonProcessingException {
 		RequestListJson requestListJson = new RequestListJson();
 		requestListJson.setUrls(Lists.newArrayList(URL_A, URL_B, URL_C));
+		requestListJson.setRequestPartitionIds(Lists.newArrayList(partId, partId, partId));
 		ObjectMapper mapper = new ObjectMapper();
 		myReader.setUrls(mapper.writeValueAsString(requestListJson));
 

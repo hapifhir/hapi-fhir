@@ -131,5 +131,5 @@ X-Retry-On-Version-Conflict: retry; max-retries=100
 
 Delete with expunge submits a job to delete and expunge the requested resources. This is done in batches. If the DELETE
 ?_expunge=true syntax is used to trigger the delete expunge, then the batch size will be determined by the value
-of [Expunge Batch Size](/hapi-fhir/apidocs/hapi-fhir-jpaserver-api/ca/uhn/fhir/jpa/api/config/DaoConfig.html#getExpungeBatchSize(java.lang.Integer))
+of [Expunge Batch Size](/apidocs/hapi-fhir-jpaserver-api/ca/uhn/fhir/jpa/api/config/DaoConfig.html#getExpungeBatchSize())
 property.
