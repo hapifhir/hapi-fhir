@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
@@ -112,6 +113,9 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	@AfterEach
 	public void after() {
 		myClient.unregisterInterceptor(mySimpleHeaderInterceptor);
+		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+		myDaoConfig.setDeleteExpungeEnabled(new DaoConfig().isDeleteExpungeEnabled());
 	}
 
 	@BeforeEach
@@ -765,6 +769,10 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testDeleteExpungeOperation() {
+		myDaoConfig.setAllowMultipleDelete(true);
+		myDaoConfig.setExpungeEnabled(true);
+		myDaoConfig.setDeleteExpungeEnabled(true);
+
 		// setup
 		for (int i = 0; i < 12; ++i) {
 			Patient patient = new Patient();
