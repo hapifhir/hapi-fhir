@@ -167,13 +167,13 @@ public class SearchParameterMap implements Serializable {
 		return this;
 	}
 
-	private void addLastUpdateParam(StringBuilder b, ParamPrefixEnum thePrefix, DateParam date) {
-		if (date != null && isNotBlank(date.getValueAsString())) {
-			addUrlParamSeparator(b);
-			b.append(Constants.PARAM_LASTUPDATED);
-			b.append('=');
-			b.append(thePrefix.getValue());
-			b.append(date.getValueAsString());
+	private void addLastUpdateParam(StringBuilder theBuilder, ParamPrefixEnum thePrefix, DateParam theDateParam) {
+		if (theDateParam != null && isNotBlank(theDateParam.getValueAsString())) {
+			addUrlParamSeparator(theBuilder);
+			theBuilder.append(Constants.PARAM_LASTUPDATED);
+			theBuilder.append('=');
+			theBuilder.append(thePrefix.getValue());
+			theBuilder.append(theDateParam.getValueAsString());
 		}
 	}
 
