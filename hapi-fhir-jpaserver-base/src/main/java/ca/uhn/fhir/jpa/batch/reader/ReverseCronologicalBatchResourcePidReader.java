@@ -111,7 +111,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	public List<Long> read() throws Exception {
 		while (myUrlIndex < myUrls.size()) {
 			List<Long> nextBatch;
-			nextBatch = getNextBatch(myUrlIndex);
+			nextBatch = getNextBatch();
 			if (nextBatch.isEmpty()) {
 				++myUrlIndex;
 				continue;
@@ -122,15 +122,9 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 		return null;
 	}
 
-	private List<Long> getNextBatch(int theUrlIndex) {
-		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(myUrls.get(theUrlIndex));
-		SearchParameterMap map = resourceSearch.getSearchParameterMap();
-
-		map.setLastUpdated(new DateRangeParam().setUpperBoundInclusive(myThresholdHighByUrlIndex.get(theUrlIndex)));
-
-		map.setLoadSynchronousUpTo(myBatchSize);
-		SortSpec sort = new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.DESC);
-		map.setSort(sort);
+	private List<Long> getNextBatch() {
+		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(myUrls.get(myUrlIndex));
+		SearchParameterMap map = buildSearchParameterMap(resourceSearch);
 
 		// Perform the search
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceSearch.getResourceName());
@@ -151,6 +145,15 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 		}
 
 		return retval;
+	}
+
+	@NotNull
+	private SearchParameterMap buildSearchParameterMap(ResourceSearch resourceSearch) {
+		SearchParameterMap map = resourceSearch.getSearchParameterMap();
+		map.setLastUpdated(new DateRangeParam().setUpperBoundInclusive(myThresholdHighByUrlIndex.get(myUrlIndex)));
+		map.setLoadSynchronousUpTo(myBatchSize);
+		map.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.DESC));
+		return map;
 	}
 
 	@NotNull
