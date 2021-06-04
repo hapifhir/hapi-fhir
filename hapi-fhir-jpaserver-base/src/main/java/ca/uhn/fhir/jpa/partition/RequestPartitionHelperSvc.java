@@ -34,7 +34,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -134,9 +133,6 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	 * For system requests, read partition from tenant ID if present, otherwise set to DEFAULT. If the resource they are attempting to partition
 	 * is non-partitionable scream in the logs and set the partition to DEFAULT.
 	 *
-	 * @param theRequest
-	 * @param theNonPartitionableResource
-	 * @return
 	 */
 	private RequestPartitionId getSystemRequestPartitionId(SystemRequestDetails theRequest, boolean theNonPartitionableResource) {
 		RequestPartitionId requestPartitionId;

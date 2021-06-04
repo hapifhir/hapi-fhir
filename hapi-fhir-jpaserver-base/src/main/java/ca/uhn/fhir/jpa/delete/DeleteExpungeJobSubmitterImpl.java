@@ -62,6 +62,9 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 		return myBatchJobSubmitter.runJob(myDeleteExpungeJob, jobParameters);
 	}
 
+	/**
+	 * This method will throw an exception if the user is not allowed to add the requested resource type on the partition determined by the request
+	 */
 	private List<RequestPartitionId> requestPartitionIdsFromRequestAndUrls(RequestDetails theRequest, List<String> theUrlsToDeleteExpunge) {
 		List<RequestPartitionId> retval = new ArrayList<>();
 		for (String url : theUrlsToDeleteExpunge) {

@@ -54,8 +54,7 @@ import java.util.stream.Collectors;
 
 /**
  * This Spring Batch reader takes 4 parameters:
- * {@link #JOB_PARAM_REQUEST_LIST}: A list of URLs to searchfor
- * {@link #JOB_PARAM_TENANT_ID}: The tenant to perform the search with (or null)
+ * {@link #JOB_PARAM_REQUEST_LIST}: A list of URLs to search for along with the partitions those searches should be performed on
  * {@link #JOB_PARAM_BATCH_SIZE}: The number of resources to return with each search.  If ommitted, {@link DaoConfig#getExpungeBatchSize} will be used.
  * {@link #JOB_PARAM_START_TIME}: The latest timestamp of resources to search for
  * <p>

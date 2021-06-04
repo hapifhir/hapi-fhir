@@ -26,6 +26,9 @@ import org.springframework.batch.core.annotation.BeforeStep;
 
 import java.util.List;
 
+/**
+ * Add the number of pids processed to the execution context so we can track progress of the job
+ */
 public class PidReaderCounterListener {
 	public static final String RESOURCE_TOTAL_PROCESSED = "resource.total.processed";
 

@@ -31,7 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 
 /**
- * Serialize a list of URLs so Spring Batch can store it as a String
+ * Serialize a list of URLs and parition ids so Spring Batch can store it as a String
  */
 public class RequestListJson implements IModelJson {
 	static final ObjectMapper ourObjectMapper = new ObjectMapper();
