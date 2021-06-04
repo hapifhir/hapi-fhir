@@ -52,7 +52,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testDeleteExpungeThrowExceptionIfLink() {
+	public void testDeleteExpungeThrowExceptionIfForeignKeyLinksExists() {
 		Organization organization = new Organization();
 		organization.setName("FOO");
 		IIdType organizationId = myOrganizationDao.create(organization).getId().toUnqualifiedVersionless();
