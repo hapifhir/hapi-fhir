@@ -21,7 +21,11 @@ package ca.uhn.fhir.jpa.delete;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.delete.job.DeleteExpungeJobConfig;
@@ -30,6 +34,9 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
@@ -53,11 +60,27 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 	MatchUrlService myMatchUrlService;
 	@Autowired
 	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	@Autowired
+	DaoConfig myDaoConfig;
+	@Autowired
+	IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Override
 	@Transactional(Transactional.TxType.NEVER)
 	public JobExecution submitJob(Integer theBatchSize, RequestDetails theRequest, List<String> theUrlsToDeleteExpunge) throws JobParametersInvalidException {
 		List<RequestPartitionId> requestPartitionIds = requestPartitionIdsFromRequestAndUrls(theRequest, theUrlsToDeleteExpunge);
+		if (!myDaoConfig.canDeleteExpunge()) {
+			throw new ForbiddenOperationException("Delete with Expunge is not enabled on this server.");
+		}
+
+		for (String url : theUrlsToDeleteExpunge) {
+			HookParams params = new HookParams()
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest)
+				.add(String.class, url);
+			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRE_DELETE_EXPUNGE, params);
+		}
+
 		JobParameters jobParameters = DeleteExpungeJobConfig.buildJobParameters(theBatchSize, theUrlsToDeleteExpunge, requestPartitionIds);
 		return myBatchJobSubmitter.runJob(myDeleteExpungeJob, jobParameters);
 	}

@@ -17,12 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /*
  * #%L
@@ -2470,6 +2465,10 @@ public class DaoConfig {
 	 */
 	public void setTriggerSubscriptionsForNonVersioningChanges(boolean theTriggerSubscriptionsForNonVersioningChanges) {
 		myTriggerSubscriptionsForNonVersioningChanges = theTriggerSubscriptionsForNonVersioningChanges;
+	}
+
+	public boolean canDeleteExpunge() {
+		return isAllowMultipleDelete() && isExpungeEnabled() && isDeleteExpungeEnabled();
 	}
 
 	public enum StoreMetaSourceInformationEnum {
