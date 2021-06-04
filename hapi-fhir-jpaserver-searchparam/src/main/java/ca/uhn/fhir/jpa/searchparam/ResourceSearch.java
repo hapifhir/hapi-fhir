@@ -22,6 +22,9 @@ package ca.uhn.fhir.jpa.searchparam;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 
+/**
+ * A resource type along with a search parameter map.  Everything you need to perform a search!
+ */
 public class ResourceSearch {
 	private final RuntimeResourceDefinition myRuntimeResourceDefinition;
 	private final SearchParameterMap mySearchParameterMap;
