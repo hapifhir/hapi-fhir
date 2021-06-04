@@ -31,6 +31,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.codehaus.stax2.XMLOutputFactory2;
 import org.codehaus.stax2.io.EscapingWriterFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -1863,10 +1864,19 @@ public class XmlUtil {
 	}
 
 	public static Document parseDocument(String theInput) throws IOException, SAXException {
+		StringReader reader = new StringReader(theInput);
+		return parseDocument(reader);
+	}
+
+	public static Document parseDocument(Reader reader) throws SAXException, IOException {
+		return parseDocument(reader, true);
+	}
+
+	public static Document parseDocument(Reader theReader, boolean theNamespaceAware) throws SAXException, IOException {
 		DocumentBuilder builder;
 		try {
 			DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-			docBuilderFactory.setNamespaceAware(true);
+			docBuilderFactory.setNamespaceAware(theNamespaceAware);
 			docBuilderFactory.setXIncludeAware(false);
 			docBuilderFactory.setExpandEntityReferences(false);
 			try {
@@ -1885,9 +1895,22 @@ public class XmlUtil {
 			throw new ConfigurationException(e);
 		}
 
-		InputSource src = new InputSource(new StringReader(theInput));
+		InputSource src = new InputSource(theReader);
 		return builder.parse(src);
 	}
+
+
+	public static List<Element> getChildrenByTagName(Element theParent, String theName) {
+		List<Element> nodeList = new ArrayList<Element>();
+		for (Node child = theParent.getFirstChild(); child != null; child = child.getNextSibling()) {
+			if (child.getNodeType() == Node.ELEMENT_NODE && theName.equals(child.getNodeName())) {
+				nodeList.add((Element) child);
+			}
+		}
+
+		return nodeList;
+	}
+
 
 	public static String encodeDocument(Node theElement) throws TransformerException {
 		return encodeDocument(theElement, false);

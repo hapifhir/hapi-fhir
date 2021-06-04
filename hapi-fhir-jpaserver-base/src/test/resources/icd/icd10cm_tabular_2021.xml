@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ICD10CM.tabular>
+  <version>2021</version>
+  <introduction>
+    <introSection type="title">
+      <title>ICD-10-CM TABULAR LIST of DISEASES and INJURIES</title>
+    </introSection>
+  </introduction>
+  <chapter>
+    <name>1</name>
+    <desc>Certain infectious and parasitic diseases (A00-B99)</desc>
+    <sectionIndex>
+      <sectionRef first="A00" last="A09" id="A00-A09">
+         Intestinal infectious diseases
+      </sectionRef>
+    </sectionIndex>
+    <section id="A00-A09">
+      <desc>Intestinal infectious diseases (A00-A09)</desc>
+      <diag>
+        <name>A00</name>
+        <desc>Cholera</desc>
+        <diag>
+          <name>A00.0</name>
+          <desc>Cholera due to Vibrio cholerae 01, biovar cholerae</desc>
+          <inclusionTerm>
+            <note>Classical cholera</note>
+          </inclusionTerm>
+        </diag>
+        <diag>
+          <name>A00.1</name>
+          <desc>Cholera due to Vibrio cholerae 01, biovar eltor</desc>
+          <inclusionTerm>
+            <note>Cholera eltor</note>
+          </inclusionTerm>
+        </diag>
+        <diag>
+          <name>A00.9</name>
+          <desc>Cholera, unspecified</desc>
+        </diag>
+      </diag>
+      <diag>
+        <name>A01</name>
+        <desc>Typhoid and paratyphoid fevers</desc>
+        <diag>
+          <name>A01.0</name>
+          <desc>Typhoid fever</desc>
+          <inclusionTerm>
+            <note>Infection due to Salmonella typhi</note>
+          </inclusionTerm>
+          <diag>
+            <name>A01.00</name>
+            <desc>Typhoid fever, unspecified</desc>
+          </diag>
+          <diag>
+            <name>A01.01</name>
+            <desc>Typhoid meningitis</desc>
+          </diag>
+          <diag>
+            <name>A01.02</name>
+            <desc>Typhoid fever with heart involvement</desc>
+            <inclusionTerm>
+              <note>Typhoid endocarditis</note>
+              <note>Typhoid myocarditis</note>
+            </inclusionTerm>
+          </diag>
+          <diag>
+            <name>A01.03</name>
+            <desc>Typhoid pneumonia</desc>
+          </diag>
+          <diag>
+            <name>A01.04</name>
+            <desc>Typhoid arthritis</desc>
+          </diag>
+          <diag>
+            <name>A01.05</name>
+            <desc>Typhoid osteomyelitis</desc>
+          </diag>
+          <diag>
+            <name>A01.09</name>
+            <desc>Typhoid fever with other complications</desc>
+          </diag>
+        </diag>
+        <diag>
+          <name>A01.1</name>
+          <desc>Paratyphoid fever A</desc>
+        </diag>
+        <diag>
+          <name>A01.2</name>
+          <desc>Paratyphoid fever B</desc>
+        </diag>
+        <diag>
+          <name>A01.3</name>
+          <desc>Paratyphoid fever C</desc>
+        </diag>
+        <diag>
+          <name>A01.4</name>
+          <desc>Paratyphoid fever, unspecified</desc>
+          <inclusionTerm>
+            <note>Infection due to Salmonella paratyphi NOS</note>
+          </inclusionTerm>
+        </diag>
+      </diag>
+    </section>
+  </chapter>
+</ICD10CM.tabular>

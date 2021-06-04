@@ -36,6 +36,7 @@ public interface ITermLoaderSvc {
 	String IMGTHLA_URI = "http://www.ebi.ac.uk/ipd/imgt/hla";
 	String LOINC_URI = "http://loinc.org";
 	String SCT_URI = "http://snomed.info/sct";
+	String ICD10CM_URI = "http://hl7.org/fhir/sid/icd-10-cm";
 	String IEEE_11073_10101_URI = "urn:iso:std:iso:11073:10101";
 
 	UploadStatistics loadImgthla(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
@@ -43,6 +44,8 @@ public interface ITermLoaderSvc {
 	UploadStatistics loadLoinc(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
 	UploadStatistics loadSnomedCt(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
+
+	UploadStatistics loadIcd10cm(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
 	UploadStatistics loadCustom(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 

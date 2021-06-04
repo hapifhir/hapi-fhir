@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
+import ca.uhn.fhir.jpa.term.icd10cm.Icd10CmLoader;
 import ca.uhn.fhir.jpa.term.loinc.LoincAnswerListHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincAnswerListLinkHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincDocumentOntologyHandler;
@@ -53,6 +54,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.xml.sax.SAXException;
 
 import javax.annotation.Nonnull;
 import javax.validation.constraints.NotNull;
@@ -69,6 +71,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -258,6 +261,40 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 			return processSnomedCtFiles(descriptors, theRequestDetails);
 		}
+	}
+
+	@Override
+	public UploadStatistics loadIcd10cm(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
+		ourLog.info("Beginning ICD-10-cm processing");
+
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(ICD10CM_URI);
+		cs.setName("ICD-10-CM");
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
+		int count = 0;
+
+		try (LoadedFileDescriptors compressedDescriptors = new LoadedFileDescriptors(theFiles)) {
+			for (FileDescriptor nextDescriptor : compressedDescriptors.getUncompressedFileDescriptors()) {
+				if (nextDescriptor.getFilename().toLowerCase(Locale.US).endsWith(".xml")) {
+					try (InputStream inputStream = nextDescriptor.getInputStream()) {
+						InputStreamReader reader = new InputStreamReader(inputStream, Charsets.UTF_8);
+						Icd10CmLoader loader = new Icd10CmLoader(codeSystemVersion);
+						loader.load(reader);
+						count += loader.getConceptCount();
+					}
+				}
+			}
+		} catch (IOException | SAXException e) {
+			throw new InternalErrorException(e);
+		}
+
+		cs.setVersion(codeSystemVersion.getCodeSystemVersionId());
+
+		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, cs, null, null);
+		return new UploadStatistics(count, target);
 	}
 
 	@Override
