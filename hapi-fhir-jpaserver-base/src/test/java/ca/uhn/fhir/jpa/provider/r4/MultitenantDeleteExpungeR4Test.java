@@ -6,6 +6,7 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
@@ -17,6 +18,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +39,24 @@ public class MultitenantDeleteExpungeR4Test extends BaseMultitenantResourceProvi
 
 	@Autowired
 	private BatchJobHelper myBatchJobHelper;
+
+	@BeforeEach
+	@Override
+	public void before() throws Exception {
+		super.before();
+		myDaoConfig.setAllowMultipleDelete(true);
+		myDaoConfig.setExpungeEnabled(true);
+		myDaoConfig.setDeleteExpungeEnabled(true);
+	}
+
+	@AfterEach
+	@Override
+	public void after() throws Exception {
+		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+		myDaoConfig.setDeleteExpungeEnabled(new DaoConfig().isDeleteExpungeEnabled());
+		super.after();
+	}
 
 	@Test
 	public void testDeleteExpungeOperation() {
