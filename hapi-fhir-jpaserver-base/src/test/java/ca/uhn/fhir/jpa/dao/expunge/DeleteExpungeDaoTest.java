@@ -53,6 +53,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 
 	@Test
 	public void testDeleteExpungeThrowExceptionIfForeignKeyLinksExists() {
+		// setup
 		Organization organization = new Organization();
 		organization.setName("FOO");
 		IIdType organizationId = myOrganizationDao.create(organization).getId().toUnqualifiedVersionless();
@@ -61,9 +62,12 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		patient.setManagingOrganization(new Reference(organizationId));
 		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
+		// execute
 		DeleteMethodOutcome outcome = myOrganizationDao.deleteByUrl("Organization?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
 		Long jobExecutionId = jobExecutionIdFromOutcome(outcome);
 		JobExecution job = myBatchJobHelper.awaitJobExecution(jobExecutionId);
+
+		// validate
 		assertEquals(BatchStatus.FAILED, job.getStatus());
 		assertThat(job.getExitStatus().getExitDescription(), containsString("DELETE with _expunge=true failed.  Unable to delete " + organizationId.toVersionless() + " because " + patientId.toVersionless() + " refers to it via the path Patient.managingOrganization"));
 	}
@@ -79,7 +83,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 	public void testDeleteWithExpungeFailsIfConflictsAreGeneratedByMultiplePartitions() {
 		//See https://github.com/hapifhir/hapi-fhir/issues/2661
 
-		//Given
+		// setup
 		BundleBuilder builder = new BundleBuilder(myFhirCtx);
 		for (int i = 0; i < 20; i++) {
 			Organization o = new Organization();
@@ -91,12 +95,14 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 			builder.addTransactionUpdateEntry(p);
 		}
 		mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
-
-		//When
 		myDaoConfig.setExpungeBatchSize(10);
+
+		// execute
 		DeleteMethodOutcome outcome = myOrganizationDao.deleteByUrl("Organization?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
 		Long jobId = jobExecutionIdFromOutcome(outcome);
 		JobExecution job = myBatchJobHelper.awaitJobExecution(jobId);
+
+		// validate
 		assertEquals(BatchStatus.FAILED, job.getStatus());
 		assertThat(job.getExitStatus().getExitDescription(), containsString("DELETE with _expunge=true failed.  Unable to delete "));
 	}
@@ -146,9 +152,9 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		assertEquals(10, job.getExecutionContext().getLong(PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED));
 	}
 
-
 	@Test
 	public void testDeleteExpungeNoThrowExceptionWhenLinkInSearchResults() {
+		// setup
 		Patient mom = new Patient();
 		IIdType momId = myPatientDao.create(mom).getId().toUnqualifiedVersionless();
 
@@ -157,10 +163,12 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		child.addLink().setOther(new Reference(mom));
 		IIdType childId = myPatientDao.create(child).getId().toUnqualifiedVersionless();
 
+		//execute
 		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
 		Long jobExecutionId = jobExecutionIdFromOutcome(outcome);
 		JobExecution job = myBatchJobHelper.awaitJobExecution(jobExecutionId);
 
+		// validate
 		assertEquals(1, myBatchJobHelper.getReadCount(jobExecutionId));
 		assertEquals(1, myBatchJobHelper.getWriteCount(jobExecutionId));
 
