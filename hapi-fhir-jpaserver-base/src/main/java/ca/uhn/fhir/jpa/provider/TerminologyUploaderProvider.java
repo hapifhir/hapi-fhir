@@ -127,14 +127,17 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 			UploadStatistics stats;
 			switch (codeSystemUrl) {
-				case ITermLoaderSvc.SCT_URI:
-					stats = myTerminologyLoaderSvc.loadSnomedCt(localFiles, theRequestDetails);
+				case ITermLoaderSvc.ICD10CM_URI:
+					stats = myTerminologyLoaderSvc.loadIcd10cm(localFiles, theRequestDetails);
+					break;
+				case ITermLoaderSvc.IMGTHLA_URI:
+					stats = myTerminologyLoaderSvc.loadImgthla(localFiles, theRequestDetails);
 					break;
 				case ITermLoaderSvc.LOINC_URI:
 					stats = myTerminologyLoaderSvc.loadLoinc(localFiles, theRequestDetails);
 					break;
-				case ITermLoaderSvc.IMGTHLA_URI:
-					stats = myTerminologyLoaderSvc.loadImgthla(localFiles, theRequestDetails);
+				case ITermLoaderSvc.SCT_URI:
+					stats = myTerminologyLoaderSvc.loadSnomedCt(localFiles, theRequestDetails);
 					break;
 				default:
 					stats = myTerminologyLoaderSvc.loadCustom(codeSystemUrl, localFiles, theRequestDetails);
@@ -395,7 +398,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		return retVal;
 	}
 
-	private static class FileBackedFileDescriptor implements ITermLoaderSvc.FileDescriptor {
+	public static class FileBackedFileDescriptor implements ITermLoaderSvc.FileDescriptor {
 		private final File myNextFile;
 
 		public FileBackedFileDescriptor(File theNextFile) {

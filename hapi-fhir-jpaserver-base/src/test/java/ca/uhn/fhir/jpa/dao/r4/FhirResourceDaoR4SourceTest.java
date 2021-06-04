@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -12,6 +13,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.apache.commons.text.RandomStringGenerator;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
@@ -216,6 +218,31 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 			assertEquals(e.getMessage(), "The _source parameter is disabled on this server");
 		}
+	}
+
+	@Test
+	public void deleteWithSource() {
+		Patient patient = new Patient();
+		String patientId = "Patient/pt-001";
+		patient.setId(patientId);
+		String source = "urn:source:0";
+		patient.getMeta().setSource(source);
+		patient.addName().setFamily("Presley");
+		myPatientDao.update(patient);
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_SOURCE, new StringParam(source));
+		{
+			IBundleProvider result = myPatientDao.search(map);
+			assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(patientId));
+		}
+		myPatientDao.delete(new IdType(patientId));
+		{
+			myCaptureQueriesListener.clear();
+			IBundleProvider result = myPatientDao.search(map);
+			myCaptureQueriesListener.logSelectQueries();
+			assertEquals(0, result.size());
+		}
+
 	}
 
 	public static void assertConflictException(String theResourceType, ResourceVersionConflictException e) {
