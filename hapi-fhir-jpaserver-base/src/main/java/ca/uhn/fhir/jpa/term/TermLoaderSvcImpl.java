@@ -279,8 +279,8 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		try (LoadedFileDescriptors compressedDescriptors = new LoadedFileDescriptors(theFiles)) {
 			for (FileDescriptor nextDescriptor : compressedDescriptors.getUncompressedFileDescriptors()) {
 				if (nextDescriptor.getFilename().toLowerCase(Locale.US).endsWith(".xml")) {
-					try (InputStream inputStream = nextDescriptor.getInputStream()) {
-						InputStreamReader reader = new InputStreamReader(inputStream, Charsets.UTF_8);
+					try (InputStream inputStream = nextDescriptor.getInputStream();
+						  InputStreamReader reader = new InputStreamReader(inputStream, Charsets.UTF_8) ) {
 						Icd10CmLoader loader = new Icd10CmLoader(codeSystemVersion);
 						loader.load(reader);
 						count += loader.getConceptCount();
