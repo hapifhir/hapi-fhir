@@ -23,14 +23,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class DeleteExpungeProviderTest extends BaseR4ServerTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeProviderTest.class);
-	private final MyDeleteExpungeJobSubmitter mySvc = new MyDeleteExpungeJobSubmitter();
+	private final MyDeleteExpungeJobSubmitter myTestJobSubmitter = new MyDeleteExpungeJobSubmitter();
 	private Parameters myReturnParameters;
 
 	@BeforeEach
 	public void reset() {
 		myReturnParameters = new Parameters();
 		myReturnParameters.addParameter("success", true);
-		mySvc.reset();
+		myTestJobSubmitter.reset();
 	}
 
 	@Test
@@ -46,7 +46,7 @@ public class DeleteExpungeProviderTest extends BaseR4ServerTest {
 
 		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
-		DeleteExpungeProvider provider = new DeleteExpungeProvider(myCtx, mySvc);
+		DeleteExpungeProvider provider = new DeleteExpungeProvider(myCtx, myTestJobSubmitter);
 		startServer(provider);
 
 		Parameters response = myClient
@@ -59,11 +59,11 @@ public class DeleteExpungeProviderTest extends BaseR4ServerTest {
 		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		DecimalType jobId = (DecimalType) response.getParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID);
 		assertEquals(123L, jobId.getValue().longValue());
-		assertThat(mySvc.calledWithUrls, hasSize(2));
-		assertEquals(url1, mySvc.calledWithUrls.get(0));
-		assertEquals(url2, mySvc.calledWithUrls.get(1));
-		assertEquals(batchSize, mySvc.calledWithBatchSize);
-		assertNotNull(mySvc.calledWithRequestDetails);
+		assertThat(myTestJobSubmitter.calledWithUrls, hasSize(2));
+		assertEquals(url1, myTestJobSubmitter.calledWithUrls.get(0));
+		assertEquals(url2, myTestJobSubmitter.calledWithUrls.get(1));
+		assertEquals(batchSize, myTestJobSubmitter.calledWithBatchSize);
+		assertNotNull(myTestJobSubmitter.calledWithRequestDetails);
 	}
 
 	private class MyDeleteExpungeJobSubmitter implements IDeleteExpungeJobSubmitter {

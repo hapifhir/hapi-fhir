@@ -145,7 +145,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			RestfulServer restServer = new RestfulServer(ourCtx);
 			restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp, locationRp, binaryRp, diagnosticReportRp, diagnosticOrderRp, practitionerRp);
 
-			restServer.setPlainProviders(mySystemProvider, myDeleteExpungeProvider);
+			restServer.registerProviders(mySystemProvider, myDeleteExpungeProvider);
 
 			ourServer = new Server(0);
 
@@ -811,6 +811,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 		DecimalType jobIdPrimitive = (DecimalType) response.getParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID);
 		Long jobId = jobIdPrimitive.getValue().longValue();
+
+		// validate
 
 		// 1 observation
 		// + 12/batchSize inactive patients
