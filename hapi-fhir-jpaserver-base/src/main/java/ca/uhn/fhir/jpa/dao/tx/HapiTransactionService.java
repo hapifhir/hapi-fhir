@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.annotations.VisibleForTesting;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,10 +45,10 @@ public class HapiTransactionService {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiTransactionService.class);
 	@Autowired
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
-	private PlatformTransactionManager myTransactionManager;
-	private TransactionTemplate myTxTemplate;
+	protected PlatformTransactionManager myTransactionManager;
+	protected TransactionTemplate myTxTemplate;
 
 	@VisibleForTesting
 	public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBroadcaster) {
@@ -73,15 +74,7 @@ public class HapiTransactionService {
 		for (int i = 0; ; i++) {
 			try {
 
-				try {
-					return myTxTemplate.execute(theCallback);
-				} catch (MyException e) {
-					if (e.getCause() instanceof RuntimeException) {
-						throw (RuntimeException) e.getCause();
-					} else {
-						throw new InternalErrorException(e);
-					}
-				}
+				return doExecuteCallback(theCallback);
 
 			} catch (ResourceVersionConflictException | DataIntegrityViolationException e) {
 				ourLog.debug("Version conflict detected", e);
@@ -127,6 +120,19 @@ public class HapiTransactionService {
 			}
 		}
 
+	}
+
+	@Nullable
+	protected <T> T doExecuteCallback(TransactionCallback<T> theCallback) {
+		try {
+			return myTxTemplate.execute(theCallback);
+		} catch (MyException e) {
+			if (e.getCause() instanceof RuntimeException) {
+				throw (RuntimeException) e.getCause();
+			} else {
+				throw new InternalErrorException(e);
+			}
+		}
 	}
 
 	/**
