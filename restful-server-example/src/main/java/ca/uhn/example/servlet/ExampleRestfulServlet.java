@@ -25,7 +25,7 @@ public class ExampleRestfulServlet extends RestfulServer {
 	 * Constructor
 	 */
 	public ExampleRestfulServlet() {
-		super(FhirContext.forDstu2()); // Support DSTU2
+		super(FhirContext.forR4()); // Support R4
 	}
 	
 	/**

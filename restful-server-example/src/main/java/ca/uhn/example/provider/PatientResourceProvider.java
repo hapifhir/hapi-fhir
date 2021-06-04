@@ -1,21 +1,21 @@
 package ca.uhn.example.provider;
 
+import java.util.Date;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
-import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
+import org.hl7.fhir.r4.model.Patient;
+
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -55,11 +55,11 @@ public class PatientResourceProvider implements IResourceProvider {
 		Patient patient = new Patient();
 		patient.setId(Long.toString(resourceId));
 		patient.addIdentifier();
-		patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
+		patient.getIdentifier().get(0).setSystem("urn:hapitest:mrns");
 		patient.getIdentifier().get(0).setValue("00002");
-		patient.addName().addFamily("Test");
+		patient.addName().setFamily("Test");
 		patient.getName().get(0).addGiven("PatientOne");
-		patient.setGender(AdministrativeGenderEnum.FEMALE);
+		patient.setGender(AdministrativeGender.MALE);
 
 		LinkedList<Patient> list = new LinkedList<Patient>();
 		list.add(patient);
@@ -78,27 +78,17 @@ public class PatientResourceProvider implements IResourceProvider {
 	 *            The ID of the patient to retrieve
 	 */
 	private void addNewVersion(Patient thePatient, Long theId) {
-		InstantDt publishedDate;
 		if (!myIdToPatientVersions.containsKey(theId)) {
 			myIdToPatientVersions.put(theId, new LinkedList<Patient>());
-			publishedDate = InstantDt.withCurrentTime();
-		} else {
-			Patient currentPatitne = myIdToPatientVersions.get(theId).getLast();
-			Map<ResourceMetadataKeyEnum<?>, Object> resourceMetadata = currentPatitne.getResourceMetadata();
-			publishedDate = (InstantDt) resourceMetadata.get(ResourceMetadataKeyEnum.PUBLISHED);
-		}
+		} 
 
-		/*
-		 * PUBLISHED time will always be set to the time that the first version was stored. UPDATED time is set to the time that the new version was stored.
-		 */
-		thePatient.getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, publishedDate);
-		thePatient.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, InstantDt.withCurrentTime());
+		
 
 		Deque<Patient> existingVersions = myIdToPatientVersions.get(theId);
+    String newVersion = Integer.toString(existingVersions.size()+1);
+    thePatient.getMeta().setLastUpdated(new Date());    
+    thePatient.getMeta().setVersionId(newVersion);
 
-		// We just use the current number of versions as the next version number
-		String newVersion = Integer.toString(existingVersions.size());
-		
 		// Create an ID with the new version and assign it back to the resource
 		IdDt newId = new IdDt("Patient", Long.toString(theId), newVersion);
 		thePatient.setId(newId);
@@ -133,7 +123,7 @@ public class PatientResourceProvider implements IResourceProvider {
 	 * @return This method returns a list of Patients. This list may contain multiple matching resources, or it may also be empty.
 	 */
 	@Search()
-	public List<Patient> findPatientsByName(@RequiredParam(name = Patient.SP_FAMILY) StringDt theFamilyName) {
+	public List<Patient> findPatientsByName(@RequiredParam(name = Patient.SP_FAMILY) String theFamilyName) {
 		LinkedList<Patient> retVal = new LinkedList<Patient>();
 
 		/*
@@ -141,12 +131,11 @@ public class PatientResourceProvider implements IResourceProvider {
 		 */
 		for (Deque<Patient> nextPatientList : myIdToPatientVersions.values()) {
 			Patient nextPatient = nextPatientList.getLast();
-			NAMELOOP: for (HumanNameDt nextName : nextPatient.getName()) {
-				for (StringDt nextFamily : nextName.getFamily()) {
+			NAMELOOP: for (HumanName nextName : nextPatient.getName()) {
+				  String nextFamily = nextName.getFamily();
 					if (theFamilyName.equals(nextFamily)) {
 						retVal.add(nextPatient);
 						break NAMELOOP;
-					}
 				}
 			}
 		}
@@ -186,7 +175,7 @@ public class PatientResourceProvider implements IResourceProvider {
 	 * @return Returns a resource matching this identifier, or null if none exists.
 	 */
 	@Read(version = true)
-	public Patient readPatient(@IdParam IdDt theId) {
+	public Patient readPatient(@IdParam IdType theId) {
 		Deque<Patient> retVal;
 		try {
 			retVal = myIdToPatientVersions.get(theId.getIdPartAsLong());
@@ -201,7 +190,8 @@ public class PatientResourceProvider implements IResourceProvider {
 			return retVal.getLast();
 		} else {
 			for (Patient nextVersion : retVal) {
-				String nextVersionId = nextVersion.getId().getVersionIdPart();
+			  IdDt nextVersionIdDt = new IdDt(nextVersion.getId());
+				String nextVersionId = nextVersionIdDt.getVersionIdPart();
 				if (theId.getVersionIdPart().equals(nextVersionId)) {
 					return nextVersion;
 				}
@@ -223,7 +213,7 @@ public class PatientResourceProvider implements IResourceProvider {
 	 * @return This method returns a "MethodOutcome"
 	 */
 	@Update()
-	public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient thePatient) {
+	public MethodOutcome updatePatient(@IdParam IdType theId, @ResourceParam Patient thePatient) {
 		validateResource(thePatient);
 
 		Long id;
@@ -255,9 +245,10 @@ public class PatientResourceProvider implements IResourceProvider {
 		/*
 		 * Our server will have a rule that patients must have a family name or we will reject them
 		 */
-		if (thePatient.getNameFirstRep().getFamilyFirstRep().isEmpty()) {
+		if (thePatient.getNameFirstRep().getFamily().isEmpty()) {
 			OperationOutcome outcome = new OperationOutcome();
-			outcome.addIssue().setSeverity(IssueSeverityEnum.FATAL).setDetails("No family name provided, Patient resources must have at least one family name.");
+			CodeableConcept codeableConcept = new CodeableConcept().setText("No family name provided, Patient resources must have at least one family name.");
+			outcome.addIssue().setSeverity(IssueSeverity.FATAL).setDetails(codeableConcept);
 			throw new UnprocessableEntityException(outcome);
 		}
 	}
