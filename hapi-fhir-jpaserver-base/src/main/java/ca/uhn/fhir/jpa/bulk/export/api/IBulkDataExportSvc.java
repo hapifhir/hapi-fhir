@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.bulk.export.api;
 
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.transaction.Transactional;
@@ -36,6 +37,10 @@ public interface IBulkDataExportSvc {
 	@Transactional(value = Transactional.TxType.NEVER)
 	void purgeExpiredFiles();
 
+	/**
+	 * Deprecated - Use {@link #submitJob(BulkDataExportOptions, Boolean, RequestDetails)} instead
+	 */
+	@Deprecated
 	JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions);
 
 	JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions, Boolean useCache, RequestDetails theRequestDetails);

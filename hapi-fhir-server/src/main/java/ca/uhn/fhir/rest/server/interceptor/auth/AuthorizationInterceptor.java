@@ -27,6 +27,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import com.google.common.collect.Lists;
@@ -68,6 +69,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Interceptor
 public class AuthorizationInterceptor implements IRuleApplier {
 
+	public static final String REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS = AuthorizationInterceptor.class.getName() + "_BulkDataExportOptions";
 	private static final AtomicInteger ourInstanceCount = new AtomicInteger(0);
 	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptor.class);
 	private final int myInstanceIndex = ourInstanceCount.incrementAndGet();
@@ -350,6 +352,15 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	public void hookDeleteExpunge(RequestDetails theRequestDetails, Pointcut thePointcut) {
 		applyRulesAndFailIfDeny(theRequestDetails.getRestOperationType(), theRequestDetails, null, null, null, thePointcut);
 	}
+
+	@Hook(Pointcut.STORAGE_INITIATE_BULK_EXPORT)
+	public void initiateBulkExport(RequestDetails theRequestDetails, BulkDataExportOptions theBulkExportOptions, Pointcut thePointcut) {
+		if (theRequestDetails != null) {
+			theRequestDetails.setAttribute(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, theBulkExportOptions);
+		}
+		applyRulesAndFailIfDeny(theRequestDetails.getRestOperationType(), theRequestDetails, null, null, null, thePointcut);
+	}
+
 
 	private void checkPointcutAndFailIfDeny(RequestDetails theRequestDetails, Pointcut thePointcut, @Nonnull IBaseResource theInputResource) {
 		applyRulesAndFailIfDeny(theRequestDetails.getRestOperationType(), theRequestDetails, theInputResource, theInputResource.getIdElement(), null, thePointcut);

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.bulk.export.api;
+package ca.uhn.fhir.rest.api.server.bulk;
 
 /*-
  * #%L

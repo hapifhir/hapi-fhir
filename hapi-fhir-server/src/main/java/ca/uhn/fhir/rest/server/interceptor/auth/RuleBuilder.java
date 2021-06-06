@@ -31,6 +31,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -309,6 +310,11 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		@Override
 		public IAuthRuleBuilderGraphQL graphQL() {
 			return new RuleBuilderGraphQL();
+		}
+
+		@Override
+		public IAuthRuleBuilderRuleBulkExport bulkExport() {
+			return new RuleBuilderBulkExport();
 		}
 
 		private class RuleBuilderRuleConditional implements IAuthRuleBuilderRuleConditional {
@@ -700,6 +706,55 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				rule.setMode(myRuleMode);
 				myRules.add(rule);
 				return new RuleBuilderFinished(rule);
+			}
+		}
+
+		private class RuleBuilderBulkExport implements IAuthRuleBuilderRuleBulkExport {
+
+			@Override
+			public IAuthRuleBuilderRuleBulkExportWithTarget groupExportOnGroup(@Nonnull String theFocusResourceId) {
+				RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
+				rule.setAppliesToGroupExportOnGroup(theFocusResourceId);
+				rule.setMode(myRuleMode);
+				myRules.add(rule);
+
+				return new RuleBuilderBulkExportWithTarget(rule);
+			}
+
+			@Override
+			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnGroup(@Nonnull String theFocusResourceId) {
+				RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
+				rule.setAppliesToPatientExportOnGroup(theFocusResourceId);
+				rule.setMode(myRuleMode);
+				myRules.add(rule);
+
+				return new RuleBuilderBulkExportWithTarget(rule);
+			}
+
+			@Override
+			public IAuthRuleBuilderRuleBulkExportWithTarget systemExport() {
+				RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
+				rule.setAppliesToSystem();
+				rule.setMode(myRuleMode);
+				myRules.add(rule);
+
+				return new RuleBuilderBulkExportWithTarget(rule);
+			}
+
+			private class RuleBuilderBulkExportWithTarget extends RuleBuilderFinished implements IAuthRuleBuilderRuleBulkExportWithTarget {
+				private final RuleBulkExportImpl myRule;
+
+				private RuleBuilderBulkExportWithTarget(RuleBulkExportImpl theRule) {
+					super(theRule);
+					myRule = theRule;
+
+				}
+
+				@Override
+				public IAuthRuleBuilderRuleBulkExportWithTarget withResourceTypes(Collection<String> theResourceTypes) {
+					myRule.setResourceTypes(theResourceTypes);
+					return this;
+				}
 			}
 		}
 	}

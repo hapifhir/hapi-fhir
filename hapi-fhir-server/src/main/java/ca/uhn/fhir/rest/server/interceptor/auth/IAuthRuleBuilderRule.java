@@ -121,4 +121,10 @@ public interface IAuthRuleBuilderRule {
 	 */
 	IAuthRuleBuilderGraphQL graphQL();
 
+	/**
+	 * This rule permits the user to initiate a FHIR bulk export
+	 *
+	 * @since 5.5.0
+	 */
+	IAuthRuleBuilderRuleBulkExport bulkExport();
 }
