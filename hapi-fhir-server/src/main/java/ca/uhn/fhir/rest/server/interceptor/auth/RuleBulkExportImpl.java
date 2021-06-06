@@ -61,7 +61,10 @@ public class RuleBulkExportImpl extends BaseRule {
 		}
 
 		if (myResourceTypes != null && !myResourceTypes.isEmpty()) {
-			for (String next : myResourceTypes) {
+			if (options.getResourceTypes() == null) {
+				return null;
+			}
+			for (String next : options.getResourceTypes()) {
 				if (!myResourceTypes.contains(next)) {
 					return null;
 				}
