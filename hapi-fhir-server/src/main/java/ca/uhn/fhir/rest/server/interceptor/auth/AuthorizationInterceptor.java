@@ -355,10 +355,11 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 	@Hook(Pointcut.STORAGE_INITIATE_BULK_EXPORT)
 	public void initiateBulkExport(RequestDetails theRequestDetails, BulkDataExportOptions theBulkExportOptions, Pointcut thePointcut) {
+		RestOperationTypeEnum restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
 		if (theRequestDetails != null) {
 			theRequestDetails.setAttribute(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, theBulkExportOptions);
 		}
-		applyRulesAndFailIfDeny(theRequestDetails.getRestOperationType(), theRequestDetails, null, null, null, thePointcut);
+		applyRulesAndFailIfDeny(restOperationType, theRequestDetails, null, null, null, thePointcut);
 	}
 
 
