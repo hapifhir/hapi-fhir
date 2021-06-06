@@ -264,6 +264,51 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	}
 
+
+
+	@Test
+	public void testBulkExport_AuthorizeAny() {
+
+		AuthorizationInterceptor authInterceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().bulkExport().any().andThen()
+					.build();
+			}
+		};
+		myInterceptorRegistry.registerInterceptor(authInterceptor);
+
+		/*
+		 * System export
+		 */
+		{
+			BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
+			bulkDataExportOptions.setGroupId(new IdType("Group/456"));
+			bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+
+			ServletRequestDetails requestDetails = new ServletRequestDetails().setServletRequest(new MockHttpServletRequest());
+			IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, requestDetails);
+			assertEquals(BulkExportJobStatusEnum.SUBMITTED, jobDetails.getStatus());
+		}
+
+		/*
+		 * Patient export
+		 */
+		{
+			BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
+			bulkDataExportOptions.setGroupId(new IdType("Group/456"));
+			bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+
+			ServletRequestDetails requestDetails = new ServletRequestDetails().setServletRequest(new MockHttpServletRequest());
+			IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, requestDetails);
+			assertEquals(BulkExportJobStatusEnum.SUBMITTED, jobDetails.getStatus());
+		}
+
+
+
+	}
+
 	@Test
 	public void testBulkExport_SpecificResourceTypesEnforced() {
 

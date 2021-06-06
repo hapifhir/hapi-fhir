@@ -1,5 +1,25 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+/*-
+ * #%L
+ * HAPI FHIR - Server Framework
+ * %%
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -18,6 +38,7 @@ public class RuleBulkExportImpl extends BaseRule {
 	private String myGroupId;
 	private BulkDataExportOptions.ExportStyle myWantExportStyle;
 	private Collection<String> myResourceTypes;
+	private boolean myWantAnyStyle;
 
 	RuleBulkExportImpl(String theRuleName) {
 		super(theRuleName);
@@ -35,7 +56,7 @@ public class RuleBulkExportImpl extends BaseRule {
 
 		BulkDataExportOptions options = (BulkDataExportOptions) theRequestDetails.getAttribute(AuthorizationInterceptor.REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS);
 
-		if (options.getExportStyle() != myWantExportStyle) {
+		if (!myWantAnyStyle && options.getExportStyle() != myWantExportStyle) {
 			return null;
 		}
 
@@ -47,7 +68,7 @@ public class RuleBulkExportImpl extends BaseRule {
 			}
 		}
 
-		if (myWantExportStyle == BulkDataExportOptions.ExportStyle.SYSTEM) {
+		if (myWantAnyStyle || myWantExportStyle == BulkDataExportOptions.ExportStyle.SYSTEM) {
 			return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 		}
 
@@ -80,4 +101,7 @@ public class RuleBulkExportImpl extends BaseRule {
 		myResourceTypes = theResourceTypes;
 	}
 
+	public void setAppliesToAny() {
+		myWantAnyStyle = true;
+	}
 }

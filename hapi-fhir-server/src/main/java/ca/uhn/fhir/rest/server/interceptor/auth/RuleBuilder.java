@@ -741,6 +741,16 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				return new RuleBuilderBulkExportWithTarget(rule);
 			}
 
+			@Override
+			public IAuthRuleBuilderRuleBulkExportWithTarget any() {
+				RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
+				rule.setAppliesToAny();
+				rule.setMode(myRuleMode);
+				myRules.add(rule);
+
+				return new RuleBuilderBulkExportWithTarget(rule);
+			}
+
 			private class RuleBuilderBulkExportWithTarget extends RuleBuilderFinished implements IAuthRuleBuilderRuleBulkExportWithTarget {
 				private final RuleBulkExportImpl myRule;
 
