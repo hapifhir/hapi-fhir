@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.interceptor.auth.*;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import com.google.common.collect.Lists;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
@@ -191,6 +192,19 @@ public class AuthorizationInterceptors {
 			}
 		};
 		//END SNIPPET: patchAll
+
+
+		//START SNIPPET: bulkExport
+		new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().bulkExport().systemExport().withResourceTypes(Lists.newArrayList("Patient", "Encounter", "Observation"))
+					.build();
+			}
+		};
+		//END SNIPPET: bulkExport
+
 
 	}
 

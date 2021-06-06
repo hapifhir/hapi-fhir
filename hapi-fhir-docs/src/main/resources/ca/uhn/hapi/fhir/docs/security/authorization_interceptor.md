@@ -23,7 +23,7 @@ The AuthorizationInterceptor is used by subclassing it and then registering your
 
 The AuthorizationInterceptor works by examining the client request in order to determine whether "write" operations are legal, and looks at the response from the server in order to determine whether "read" operations are legal.
 
-## Authorizing Read Operations
+# Authorizing Read Operations
 
 When authorizing a read operation, the AuthorizationInterceptor always allows client code to execute and generate a response. It then examines the response that would be returned before actually returning it to the client, and if rules do not permit that data to be shown to the client the interceptor aborts the request.
 
@@ -33,7 +33,7 @@ See the following diagram for an example of how this works.
 
 <img src="/hapi-fhir/docs/images/hapi_authorizationinterceptor_read_normal.svg" alt="Write Authorization"/>
 
-## Authorizing Write Operations
+# Authorizing Write Operations
 
 Write operations (create, update, etc.) are typically authorized by the interceptor by examining the parsed URL and making a decision about whether to authorize the operation before allowing Resource Provider code to proceed. This means that client code will not have a chance to execute and create resources that the client does not have permissions to create.
 
@@ -41,9 +41,10 @@ See the following diagram for an example of how this works.
 
 <img src="/hapi-fhir/docs/images/hapi_authorizationinterceptor_write_normal.svg" alt="Write Authorization"/>
 
+
 <a name="authorizing-sub-operations"/>
 
-## Authorizing Sub-Operations
+# Authorizing Sub-Operations
 
 There are a number of situations where the REST framework doesn't actually know exactly what operation is going to be performed by the implementing server code. For example, if your server implements a <code>conditional update</code> operation, the server might not know which resource is actually being updated until the server code is executed.
 
@@ -55,7 +56,7 @@ In this type of situation, it is important to manually notify the interceptor ch
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/AuthorizationInterceptors.java|conditionalUpdate}}
 ``` 
 
-## Authorizing Patch Operations
+# Authorizing Patch Operations
 
 The FHIR [patch](http://hl7.org/fhir/http.html#patch) operation presents a challenge for authorization, as the incoming request often contains very little detail about what is being modified.
 
@@ -67,7 +68,7 @@ This should be combined with server support for [Authorizing Sub-Operations](#au
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/AuthorizationInterceptors.java|patchAll}}
 ``` 
 
-## Authorizing Multitenant Servers
+# Authorizing Multitenant Servers
 
 The AuthorizationInterceptor has the ability to direct individual rules as only applying to a single tenant in a multitenant server. The following example shows such a rule.
 
@@ -75,3 +76,10 @@ The AuthorizationInterceptor has the ability to direct individual rules as only 
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/AuthorizationInterceptors.java|authorizeTenantAction}}
 ```
 
+# Authorizing Bulk Export Operations
+
+AuthorizationInterceptor can be used to provide nuanced control over the kinds of Bulk Export operations that a user can initiate when using the JPA Server.
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/AuthorizationInterceptors.java|bulkExport}}
+```
