@@ -107,6 +107,38 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testRevIncludesPagedSyncSearch() {
+		int eocCount = 10;
+//		myDaoConfig.setMaximumIncludesToLoadPerPage(5);
+
+		createOrganizationWithReferencingEpisodesOfCare(eocCount);
+
+		SearchParameterMap map = new SearchParameterMap()
+			.add("_id", new TokenParam("ORG-0"))
+			.addRevInclude(EpisodeOfCare.INCLUDE_ORGANIZATION);
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myOrganizationDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(ids.toString(), ids, containsInAnyOrder(
+			"EpisodeOfCare/EOC-0",
+			"EpisodeOfCare/EOC-1",
+			"EpisodeOfCare/EOC-2",
+			"EpisodeOfCare/EOC-3",
+			"EpisodeOfCare/EOC-4",
+			"EpisodeOfCare/EOC-5",
+			"EpisodeOfCare/EOC-6",
+			"EpisodeOfCare/EOC-7",
+			"EpisodeOfCare/EOC-8",
+			"EpisodeOfCare/EOC-9",
+			"Organization/ORG-0"
+		));
+
+
+
+	}
+
 	private void createOrganizationWithReferencingEpisodesOfCare(int theEocCount) {
 		Organization org = new Organization();
 		org.setId("Organization/ORG-P");

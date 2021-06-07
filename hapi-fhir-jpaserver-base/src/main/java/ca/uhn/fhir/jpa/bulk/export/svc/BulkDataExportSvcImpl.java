@@ -32,7 +32,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
-import ca.uhn.fhir.jpa.bulk.export.api.BulkDataExportOptions;
+import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
@@ -52,6 +52,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -80,9 +81,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.bulk.export.api.BulkDataExportOptions.ExportStyle.GROUP;
-import static ca.uhn.fhir.jpa.bulk.export.api.BulkDataExportOptions.ExportStyle.PATIENT;
-import static ca.uhn.fhir.jpa.bulk.export.api.BulkDataExportOptions.ExportStyle.SYSTEM;
+import static ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions.ExportStyle.GROUP;
+import static ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions.ExportStyle.PATIENT;
+import static ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions.ExportStyle.SYSTEM;
 import static ca.uhn.fhir.util.UrlUtil.escapeUrlParam;
 import static ca.uhn.fhir.util.UrlUtil.escapeUrlParams;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -299,6 +300,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	@Transactional
 	@Override
+	@Deprecated
 	public JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions) {
 		return submitJob(theBulkDataExportOptions, true, null);
 	}
@@ -310,13 +312,6 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	@Override
 	public JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions, Boolean useCache, RequestDetails theRequestDetails) {
 
-		// Interceptor call: STORAGE_INITIATE_BULK_EXPORT
-		HookParams params = new HookParams()
-			.add(BulkDataExportOptions.class, theBulkDataExportOptions)
-			.add(RequestDetails.class, theRequestDetails)
-			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_INITIATE_BULK_EXPORT, params);
-
 		String outputFormat = Constants.CT_FHIR_NDJSON;
 		if (isNotBlank(theBulkDataExportOptions.getOutputFormat())) {
 			outputFormat = theBulkDataExportOptions.getOutputFormat();
@@ -324,6 +319,13 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		if (!Constants.CTS_NDJSON.contains(outputFormat)) {
 			throw new InvalidRequestException("Invalid output format: " + theBulkDataExportOptions.getOutputFormat());
 		}
+
+		// Interceptor call: STORAGE_INITIATE_BULK_EXPORT
+		HookParams params = new HookParams()
+			.add(BulkDataExportOptions.class, theBulkDataExportOptions)
+			.add(RequestDetails.class, theRequestDetails)
+			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_INITIATE_BULK_EXPORT, params);
 
 		// TODO GGG KS can we encode BulkDataExportOptions as a JSON string as opposed to this request string.  Feels like it would be a more extensible encoding...
 		//Probably yes, but this will all need to be rebuilt when we remove this bridge entity
@@ -445,7 +447,9 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	}
 
 	private JobInfo toSubmittedJobInfo(BulkExportJobEntity theJob) {
-		return new JobInfo().setJobId(theJob.getJobId());
+		return new JobInfo()
+			.setJobId(theJob.getJobId())
+			.setStatus(theJob.getStatus());
 	}
 
 	private void updateExpiry(BulkExportJobEntity theJob) {

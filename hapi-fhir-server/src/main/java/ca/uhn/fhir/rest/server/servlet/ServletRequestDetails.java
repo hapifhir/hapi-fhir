@@ -170,8 +170,9 @@ public class ServletRequestDetails extends RequestDetails {
 		this.myServer = theServer;
 	}
 
-	public void setServletRequest(HttpServletRequest myServletRequest) {
+	public ServletRequestDetails setServletRequest(HttpServletRequest myServletRequest) {
 		this.myServletRequest = myServletRequest;
+		return this;
 	}
 
 	public void setServletResponse(HttpServletResponse myServletResponse) {
