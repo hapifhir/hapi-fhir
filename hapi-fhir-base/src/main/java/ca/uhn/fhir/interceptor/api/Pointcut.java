@@ -1038,7 +1038,7 @@ public enum Pointcut implements IPointcut {
 	 */
 	STORAGE_INITIATE_BULK_EXPORT(
 		void.class,
-		"ca.uhn.fhir.jpa.bulk.export.api.BulkDataExportOptions",
+		"ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),

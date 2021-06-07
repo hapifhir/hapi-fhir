@@ -1,0 +1,4 @@
+---
+type: add
+issue: 2712
+title: "AuthorizationInterceptor can now be used to authorize bulk export requests"

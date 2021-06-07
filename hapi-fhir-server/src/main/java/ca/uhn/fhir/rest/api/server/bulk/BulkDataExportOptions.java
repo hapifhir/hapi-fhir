@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.bulk.export.api;
+package ca.uhn.fhir.rest.api.server.bulk;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%

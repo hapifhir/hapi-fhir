@@ -113,7 +113,9 @@ public class HapiTransactionService {
 				}
 
 				if (maxRetries > 0) {
-					ourLog.info("Max retries ({}) exceeded for version conflict", maxRetries);
+					String msg = "Max retries (" + maxRetries + ") exceeded for version conflict: " + e.getMessage();
+					ourLog.info(msg, maxRetries);
+					throw new ResourceVersionConflictException(msg);
 				}
 
 				throw e;
