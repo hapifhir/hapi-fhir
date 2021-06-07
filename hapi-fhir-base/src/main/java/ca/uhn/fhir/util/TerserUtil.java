@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Triple;
@@ -178,7 +179,7 @@ public final class TerserUtil {
 				continue;
 			}
 
-			IBase newFieldValue = childDefinition.getChildByName(theField).newInstance();
+			IBase newFieldValue = newElement(childDefinition, theFromFieldValue, null);
 			terser.cloneInto(theFromFieldValue, newFieldValue, true);
 
 			try {
@@ -524,13 +525,32 @@ public final class TerserUtil {
 		return childDefinition;
 	}
 
+	/**
+	 * Creates a new element taking into consideration elements with choice that are not directly retrievable by element
+	 * name
+	 *
+	 * @param theChildDefinition  Child to create a new instance for
+	 * @param theFromFieldValue   The base parent field
+	 * @param theConstructorParam Optional constructor param
+	 * @return Returns the new element with the given value if configured
+	 */
+	private static IBase newElement(BaseRuntimeChildDefinition theChildDefinition, IBase theFromFieldValue, Object theConstructorParam) {
+		BaseRuntimeElementDefinition runtimeElementDefinition;
+		if (theChildDefinition instanceof RuntimeChildChoiceDefinition) {
+			runtimeElementDefinition = theChildDefinition.getChildElementDefinitionByDatatype(theFromFieldValue.getClass());
+		} else {
+			runtimeElementDefinition = theChildDefinition.getChildByName(theChildDefinition.getElementName());
+		}
+		return (theConstructorParam == null) ? runtimeElementDefinition.newInstance() : runtimeElementDefinition.newInstance(theConstructorParam);
+	}
+
 	private static void mergeFields(FhirTerser theTerser, IBaseResource theTo, BaseRuntimeChildDefinition childDefinition, List<IBase> theFromFieldValues, List<IBase> theToFieldValues) {
 		for (IBase theFromFieldValue : theFromFieldValues) {
 			if (contains(theFromFieldValue, theToFieldValues)) {
 				continue;
 			}
 
-			IBase newFieldValue = childDefinition.getChildByName(childDefinition.getElementName()).newInstance();
+			IBase newFieldValue = newElement(childDefinition, theFromFieldValue, null);
 			if (theFromFieldValue instanceof IPrimitiveType) {
 				try {
 					Method copyMethod = getMethod(theFromFieldValue, "copy");
