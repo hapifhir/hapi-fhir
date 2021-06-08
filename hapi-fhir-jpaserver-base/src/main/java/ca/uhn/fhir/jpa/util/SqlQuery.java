@@ -26,7 +26,6 @@ import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -93,11 +92,7 @@ public class SqlQuery {
 			}
 		}
 
-		if (mySize > 1) {
-			retVal += "\nsize: " + mySize + "\n";
-		}
 		return trim(retVal);
-
 	}
 
 	public StackTraceElement[] getStackTrace() {

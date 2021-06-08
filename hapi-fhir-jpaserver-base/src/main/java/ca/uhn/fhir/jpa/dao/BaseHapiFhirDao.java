@@ -137,6 +137,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -668,6 +669,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 				// Don't check existing - We'll rely on the SHA256 hash only
 
+			} else if (theEntity.getVersion() == 1L && theEntity.getCurrentVersionEntity() == null) {
+
+				// No previous version if this is the first version
+
 			} else {
 				ResourceHistoryTable currentHistoryVersion = theEntity.getCurrentVersionEntity();
 				if (currentHistoryVersion == null) {
@@ -1152,11 +1157,20 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);
 
 		} else {
+
 			// CREATE or UPDATE
-			existingParams = new ResourceIndexedSearchParams(entity);
+
+			// FIXME: use better key
+			IdentityHashMap<ResourceTable, ResourceIndexedSearchParams> existingSearchParams = theTransactionDetails.getOrCreateUserData("prev", ()->new IdentityHashMap<>());
+			existingParams = existingSearchParams.get(entity);
+			if (existingParams == null) {
+				existingParams = new ResourceIndexedSearchParams(entity);
+				existingSearchParams.put(entity, existingParams);
+			}
 			entity.setDeleted(null);
 
-			if (thePerformIndexing) {
+			// FIXME: remove if statement?
+			if (thePerformIndexing || true) {
 
 				newParams = new ResourceIndexedSearchParams();
 				mySearchParamWithInlineReferencesExtractor.populateFromResource(newParams, theTransactionDetails, entity, theResource, existingParams, theRequest);
@@ -1205,7 +1219,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		}
 
-		if (thePerformIndexing && changed != null && !changed.isChanged() && !theForceUpdate && myConfig.isSuppressUpdatesWithNoChange()) {
+		if (thePerformIndexing && changed != null && !changed.isChanged() && !theForceUpdate && myConfig.isSuppressUpdatesWithNoChange() && entity.getVersion() != 1L) {
 			ourLog.debug("Resource {} has not changed", entity.getIdDt().toUnqualified().getValue());
 			if (theResource != null) {
 				updateResourceMetadata(entity, theResource);
