@@ -111,7 +111,7 @@ public class SearchParamWithInlineReferencesExtractor {
 		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
-	public void populateFromResource(ResourceIndexedSearchParams theParams, TransactionDetails theTransactionDetails, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest) {
+	public void populateFromResource(ResourceIndexedSearchParams theParams, TransactionDetails theTransactionDetails, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest, boolean theFailOnInvalidReference) {
 		extractInlineReferences(theResource, theRequest);
 
 		RequestPartitionId partitionId;
@@ -121,7 +121,7 @@ public class SearchParamWithInlineReferencesExtractor {
 			partitionId = RequestPartitionId.allPartitions();
 		}
 
-		mySearchParamExtractorService.extractFromResource(partitionId, theRequest, theParams, theEntity, theResource, theTransactionDetails, true);
+		mySearchParamExtractorService.extractFromResource(partitionId, theRequest, theParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference);
 
 		Set<Map.Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).entrySet();
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {

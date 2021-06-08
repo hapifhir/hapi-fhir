@@ -187,8 +187,7 @@ public class IdHelperService {
 			theIds
 				.stream()
 				.filter(IdHelperService::isValidPid)
-				.map(IIdType::getIdPartAsLong)
-				.map(ResourcePersistentId::new)
+				.map(t-> new ResourcePersistentId(t.getIdPartAsLong()).setAssociatedResourceId(t))
 				.forEach(retVal::add);
 		}
 

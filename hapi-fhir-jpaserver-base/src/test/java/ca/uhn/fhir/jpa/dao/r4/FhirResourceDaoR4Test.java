@@ -279,7 +279,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			table.setIndexStatus(null);
 			table.setDeleted(new Date());
 			table = myResourceTableDao.saveAndFlush(table);
-			ResourceHistoryTable newHistory = table.toHistory();
+			ResourceHistoryTable newHistory = table.toHistory(true);
 			ResourceHistoryTable currentHistory = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(table.getId(), 1L);
 			newHistory.setEncoding(currentHistory.getEncoding());
 			newHistory.setResource(currentHistory.getResource());

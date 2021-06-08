@@ -83,13 +83,27 @@ public class TransactionDetails {
 	}
 
 	/**
+	 * Was the given resource ID resolved previously in this transaction as not existing
+	 */
+	public boolean isResolvedResourceIdEmpty(IIdType theId) {
+		if (myResolvedResourceIds != null) {
+			if (myResolvedResourceIds.containsKey(theId.toVersionless().getValue())) {
+				if (myResolvedResourceIds.get(theId.toVersionless().getValue()) == null) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+
+	/**
 	 * A <b>Resolved Resource ID</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>" or
 	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
 	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
 	 */
-	public void addResolvedResourceId(IIdType theResourceId, ResourcePersistentId thePersistentId) {
+	public void addResolvedResourceId(IIdType theResourceId, @Nullable ResourcePersistentId thePersistentId) {
 		assert theResourceId != null;
-		assert thePersistentId != null;
 
 		if (myResolvedResourceIds.isEmpty()) {
 			myResolvedResourceIds = new HashMap<>();

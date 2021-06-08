@@ -105,7 +105,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			Set<String> foundIds = new HashSet<>();
 			List<ResourcePersistentId> outcome = myIdHelperService.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), idsToPreResolve);
 			for (ResourcePersistentId next : outcome) {
-				foundIds.add(next.getAssociatedResourceId().getValue());
+				foundIds.add(next.getAssociatedResourceId().toUnqualifiedVersionless().getValue());
 				theTransactionDetails.addResolvedResourceId(next.getAssociatedResourceId(), next);
 			}
 			for (IIdType next : idsToPreResolve) {

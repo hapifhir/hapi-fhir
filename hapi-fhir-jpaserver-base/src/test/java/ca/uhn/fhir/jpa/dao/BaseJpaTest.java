@@ -630,7 +630,7 @@ public abstract class BaseJpaTest extends BaseTest {
 				throw new Error(theE);
 			}
 		}
-		if (sw.getMillis() >= 16000) {
+		if (sw.getMillis() >= 16000 || theList.size() > theTarget) {
 			String describeResults = theList
 				.stream()
 				.map(t -> {

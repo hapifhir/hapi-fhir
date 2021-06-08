@@ -129,6 +129,22 @@ public class DaoConfig {
 	private SearchTotalModeEnum myDefaultTotalMode = null;
 	private int myEverythingIncludesFetchPageSize = 50;
 	private int myBulkImportMaxRetryCount = 10;
+
+	/**
+	 * FIXME: document
+	 */
+	public boolean isNonVersionedTags() {
+		return myNonVersionedTags;
+	}
+
+	/**
+	 * FIXME: document
+	 */
+	public void setNonVersionedTags(boolean theNonVersionedTags) {
+		myNonVersionedTags = theNonVersionedTags;
+	}
+
+	private boolean myNonVersionedTags = false;
 	/**
 	 * update setter javadoc if default changes
 	 */
