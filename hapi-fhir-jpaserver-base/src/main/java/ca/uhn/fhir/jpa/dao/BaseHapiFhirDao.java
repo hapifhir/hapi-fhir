@@ -1170,7 +1170,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			entity.setDeleted(null);
 
 			// FIXME: remove if statement?
-			if (thePerformIndexing || true) {
+			if (thePerformIndexing || ((ResourceTable) theEntity).getVersion() == 1) {
 
 				newParams = new ResourceIndexedSearchParams();
 				mySearchParamWithInlineReferencesExtractor.populateFromResource(newParams, theTransactionDetails, entity, theResource, existingParams, theRequest);

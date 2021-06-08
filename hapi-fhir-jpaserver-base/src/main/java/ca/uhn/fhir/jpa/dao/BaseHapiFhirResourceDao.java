@@ -341,7 +341,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// Perform actual DB update
 		ResourceTable updatedEntity = updateEntity(theRequest, theResource, entity, null, thePerformIndexing, thePerformIndexing, theTransactionDetails, false, thePerformIndexing);
 
+		IIdType id = myFhirContext.getVersion().newIdType().setValue(updatedEntity.getIdDt().toUnqualifiedVersionless().getValue());
+		theTransactionDetails.addResolvedResourceId(id, new ResourcePersistentId(updatedEntity.getResourceId()));
+
 		theResource.setId(entity.getIdDt());
+
 		if (serverAssignedId) {
 			switch (getConfig().getResourceClientIdStrategy()) {
 				case NOT_ALLOWED:
