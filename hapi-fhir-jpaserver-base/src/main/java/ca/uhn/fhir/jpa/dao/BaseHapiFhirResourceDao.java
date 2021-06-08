@@ -342,7 +342,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ResourceTable updatedEntity = updateEntity(theRequest, theResource, entity, null, thePerformIndexing, thePerformIndexing, theTransactionDetails, false, thePerformIndexing);
 
 		IIdType id = myFhirContext.getVersion().newIdType().setValue(updatedEntity.getIdDt().toUnqualifiedVersionless().getValue());
-		theTransactionDetails.addResolvedResourceId(id, new ResourcePersistentId(updatedEntity.getResourceId()));
+		ResourcePersistentId persistentId = new ResourcePersistentId(updatedEntity.getResourceId());
+		theTransactionDetails.addResolvedResourceId(id, persistentId);
+		if (entity.getForcedId() != null) {
+			myIdHelperService.addResolvedPidToForcedId(persistentId, theRequestPartitionId, updatedEntity.getResourceType(), updatedEntity.getForcedId().getForcedId());
+		}
 
 		theResource.setId(entity.getIdDt());
 
@@ -406,7 +410,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			forcedId = updatedEntity.getForcedId().getForcedId();
 		}
 		if (myIdHelperService != null) {
-			myIdHelperService.addResolvedPidToForcedId(new ResourcePersistentId(updatedEntity.getResourceId()), theRequestPartitionId, getResourceName(), forcedId);
+			myIdHelperService.addResolvedPidToForcedId(persistentId, theRequestPartitionId, getResourceName(), forcedId);
 		}
 
 		ourLog.debug(msg);
