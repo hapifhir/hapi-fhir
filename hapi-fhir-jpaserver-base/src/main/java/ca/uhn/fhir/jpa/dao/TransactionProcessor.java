@@ -20,12 +20,24 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.Validate;
+import org.apache.jena.rdf.model.ModelCon;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +47,17 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.endsWith;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class TransactionProcessor extends BaseTransactionProcessor {
 
@@ -46,6 +66,10 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	private EntityManager myEntityManager;
 	@Autowired(required = false)
 	private HapiFhirHibernateJpaDialect myHapiFhirHibernateJpaDialect;
+	@Autowired
+	private IdHelperService myIdHelperService;
+	@Autowired
+	private PartitionSettings myDaoConfig;
 
 	public void setEntityManagerForUnitTest(EntityManager theEntityManager) {
 		myEntityManager = theEntityManager;
@@ -58,8 +82,45 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		Validate.notNull(myEntityManager);
 	}
 
-
 	@Override
+	protected Map<IBase, IIdType> doTransactionWriteOperations(final RequestDetails theRequest, String theActionName, TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
+																				  Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder, List<IBase> theEntries, StopWatch theTransactionStopWatch) {
+
+		if (!myDaoConfig.isPartitioningEnabled()) {
+			ITransactionProcessorVersionAdapter versionAdapter = getVersionAdapter();
+			List<IIdType> idsToPreResolve = new ArrayList<>();
+			for (IBase nextEntry : theEntries) {
+				IBaseResource resource = versionAdapter.getResource(nextEntry);
+				if (resource != null) {
+					String fullUrl = versionAdapter.getFullUrl(nextEntry);
+					boolean isPlaceholder = defaultString(fullUrl).startsWith("urn:");
+					if (!isPlaceholder) {
+						if (resource.getIdElement().hasIdPart() && resource.getIdElement().hasResourceType()) {
+							idsToPreResolve.add(resource.getIdElement());
+						}
+					}
+				}
+			}
+
+			Set<String> foundIds = new HashSet<>();
+			List<ResourcePersistentId> outcome = myIdHelperService.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), idsToPreResolve);
+			for (ResourcePersistentId next : outcome) {
+				foundIds.add(next.getAssociatedResourceId().getValue());
+				theTransactionDetails.addResolvedResourceId(next.getAssociatedResourceId(), next);
+			}
+			for (IIdType next : idsToPreResolve) {
+				if (!foundIds.contains(next.toUnqualifiedVersionless().getValue())) {
+					theTransactionDetails.addResolvedResourceId(next.toUnqualifiedVersionless(), null);
+				}
+			}
+
+		}
+
+		return super.doTransactionWriteOperations(theRequest, theActionName, theTransactionDetails, theAllIds, theIdSubstitutions, theIdToPersistedOutcome, theResponse, theOriginalRequestOrder, theEntries, theTransactionStopWatch);
+	}
+
+
+		@Override
 	protected void flushSession(Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome) {
 		try {
 			int insertionCount;

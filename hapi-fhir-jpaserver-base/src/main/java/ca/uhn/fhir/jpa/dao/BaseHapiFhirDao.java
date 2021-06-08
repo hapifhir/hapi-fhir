@@ -1259,7 +1259,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 * Create history entry
 		 */
 		if (theCreateNewHistoryEntry) {
-			final ResourceHistoryTable historyEntry = entity.toHistory();
+			final ResourceHistoryTable historyEntry = entity.toHistory(!getConfig().isNonVersionedTags());
 			historyEntry.setEncoding(changed.getEncoding());
 			historyEntry.setResource(changed.getResource());
 

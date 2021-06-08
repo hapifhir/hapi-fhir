@@ -145,6 +145,15 @@ public abstract class BaseTransactionProcessor {
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
+	public ITransactionProcessorVersionAdapter getVersionAdapter() {
+		return myVersionAdapter;
+	}
+
+	@VisibleForTesting
+	public void setVersionAdapter(ITransactionProcessorVersionAdapter theVersionAdapter) {
+		myVersionAdapter = theVersionAdapter;
+	}
+
 	@PostConstruct
 	public void start() {
 		ourLog.trace("Starting transaction processor");
@@ -285,11 +294,6 @@ public abstract class BaseTransactionProcessor {
 		} finally {
 			BaseHapiFhirDao.clearRequestAsProcessingSubRequest(theRequestDetails);
 		}
-	}
-
-	@VisibleForTesting
-	public void setVersionAdapter(ITransactionProcessorVersionAdapter theVersionAdapter) {
-		myVersionAdapter = theVersionAdapter;
 	}
 
 	@VisibleForTesting
@@ -582,8 +586,8 @@ public abstract class BaseTransactionProcessor {
 		myModelConfig = theModelConfig;
 	}
 
-	private Map<IBase, IIdType> doTransactionWriteOperations(final RequestDetails theRequest, String theActionName, TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
-																				Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder, List<IBase> theEntries, StopWatch theTransactionStopWatch) {
+	protected Map<IBase, IIdType> doTransactionWriteOperations(final RequestDetails theRequest, String theActionName, TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
+																				  Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder, List<IBase> theEntries, StopWatch theTransactionStopWatch) {
 
 		theTransactionDetails.beginAcceptingDeferredInterceptorBroadcasts(
 			Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED,

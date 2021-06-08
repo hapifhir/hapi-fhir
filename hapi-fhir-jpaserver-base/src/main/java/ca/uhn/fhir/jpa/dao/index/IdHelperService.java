@@ -194,7 +194,7 @@ public class IdHelperService {
 
 		ListMultimap<String, String> typeToIds = organizeIdsByResourceType(theIds);
 
-		for (Map.Entry<String, Collection<String>> nextEntry : typeToIds.asMap().entrySet()) {
+		for (Map.Entry<String, Collection<String>> nextEntry : new HashMap<>(typeToIds.asMap()).entrySet()) {
 			String nextResourceType = nextEntry.getKey();
 			Collection<String> nextIds = nextEntry.getValue();
 			if (isBlank(nextResourceType)) {
@@ -204,7 +204,7 @@ public class IdHelperService {
 
 			} else {
 
-//				String partitionIdStringForKey = RequestPartitionId.stringifyForKey(theRequestPartitionId);
+
 				for (Iterator<String> idIterator = nextIds.iterator(); idIterator.hasNext(); ) {
 					String nextId = idIterator.next();
 					String key = toForcedIdToPidKey(theRequestPartitionId, nextResourceType, nextId);
@@ -232,11 +232,14 @@ public class IdHelperService {
 					for (Object[] nextView : views) {
 						String forcedId = (String) nextView[0];
 						Long pid = (Long) nextView[1];
+
 						ResourcePersistentId persistentId = new ResourcePersistentId(pid);
+						populateAssociatedResourceId(nextResourceType, forcedId, persistentId);
+
 						retVal.add(persistentId);
 
 						String key = toForcedIdToPidKey(theRequestPartitionId, nextResourceType, forcedId);
-						myMemoryCacheService.put(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, persistentId);
+						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, persistentId);
 					}
 				}
 
@@ -244,6 +247,12 @@ public class IdHelperService {
 		}
 
 		return retVal;
+	}
+
+	private void populateAssociatedResourceId(String nextResourceType, String forcedId, ResourcePersistentId persistentId) {
+		IIdType resourceId = myFhirCtx.getVersion().newIdType();
+		resourceId.setValue(nextResourceType + "/" + forcedId);
+		persistentId.setAssociatedResourceId(resourceId);
 	}
 
 	/**
@@ -501,6 +510,10 @@ public class IdHelperService {
 	 */
 	public void addResolvedPidToForcedId(ResourcePersistentId theResourcePersistentId, @Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, @Nullable String theForcedId) {
 		if (theForcedId != null) {
+			if (theResourcePersistentId.getAssociatedResourceId() == null) {
+				populateAssociatedResourceId(theResourceType, theForcedId, theResourcePersistentId);
+			}
+
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theResourcePersistentId.getIdAsLong(), Optional.of(theForcedId));
 			String key = toForcedIdToPidKey(theRequestPartitionId, theResourceType, theForcedId);
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, theResourcePersistentId);

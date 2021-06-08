@@ -48,8 +48,8 @@ public class FhirResourceDaoSubscriptionDstu3 extends BaseHapiFhirResourceDao<Su
 	}
 
 	@Override
-	public Long getSubscriptionTablePidForSubscriptionResource(IIdType theId, RequestDetails theRequest) {
-		ResourceTable entity = readEntityLatestVersion(theId, theRequest);
+	public Long getSubscriptionTablePidForSubscriptionResource(IIdType theId, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+		ResourceTable entity = readEntityLatestVersion(theId, theRequest, theTransactionDetails);
 		SubscriptionTable table = mySubscriptionTableDao.findOneByResourcePid(entity.getId());
 		if (table == null) {
 			return null;
