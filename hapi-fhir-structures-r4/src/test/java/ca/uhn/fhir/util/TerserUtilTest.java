@@ -2,7 +2,6 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import org.checkerframework.checker.units.qual.A;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
@@ -23,6 +22,73 @@ import static org.junit.jupiter.api.Assertions.*;
 class TerserUtilTest {
 
 	private FhirContext ourFhirContext = FhirContext.forR4();
+	private static final String SAMPLE_PERSON = "{\n" +
+		"        \"resourceType\": \"Patient\",\n" +
+		"        \"extension\": [\n" +
+		"          {\n" +
+		"            \"url\": \"http://hl7.org/fhir/us/core/StructureDefinition/us-core-race\",\n" +
+		"            \"valueCoding\": {\n" +
+		"              \"system\": \"MyInternalRace\",\n" +
+		"              \"code\": \"X\",\n" +
+		"              \"display\": \"Eks\"\n" +
+		"            }\n" +
+		"          },\n" +
+		"          {\n" +
+		"            \"url\": \"http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity'\",\n" +
+		"            \"valueCoding\": {\n" +
+		"              \"system\": \"MyInternalEthnicity\",\n" +
+		"              \"display\": \"NNN\"\n" +
+		"            }\n" +
+		"          }\n" +
+		"        ],\n" +
+		"        \"identifier\": [\n" +
+		"          {\n" +
+		"            \"system\": \"http://example.org/member_id\",\n" +
+		"            \"value\": \"123123\"\n" +
+		"          },\n" +
+		"          {\n" +
+		"            \"system\": \"http://example.org/medicaid_id\",\n" +
+		"            \"value\": \"12312323123Z\"\n" +
+		"          },\n" +
+		"          {\n" +
+		"            \"system\": \"http://example.org/CDNS_id\",\n" +
+		"            \"value\": \"123123123E\"\n" +
+		"          },\n" +
+		"          {\n" +
+		"            \"system\": \"http://example.org/SSN\"\n" +
+		"          }\n" +
+		"        ],\n" +
+		"        \"active\": true,\n" +
+		"        \"name\": [\n" +
+		"          {\n" +
+		"            \"family\": \"TestFamily\",\n" +
+		"            \"given\": [\n" +
+		"              \"Given\"\n" +
+		"            ]\n" +
+		"          }\n" +
+		"        ],\n" +
+		"        \"telecom\": [\n" +
+		"          {\n" +
+		"            \"system\": \"email\",\n" +
+		"            \"value\": \"email@email.io\"\n" +
+		"          },\n" +
+		"          {\n" +
+		"            \"system\": \"phone\",\n" +
+		"            \"value\": \"123123231\"\n" +
+		"          },\n" +
+		"          {\n" +
+		"            \"system\": \"phone\",\n" +
+		"            \"value\": \"1231232312\"\n" +
+		"          },\n" +
+		"          {\n" +
+		"            \"system\": \"phone\",\n" +
+		"            \"value\": \"1231232314\"\n" +
+		"          }\n" +
+		"        ],\n" +
+		"        \"gender\": \"male\",\n" +
+		"        \"birthDate\": \"1900-01-01\",\n" +
+		"        \"deceasedBoolean\": true\n" +
+		"      }";
 
 	@Test
 	void testCloneEidIntoResource() {
@@ -38,6 +104,30 @@ class TerserUtilTest {
 		assertEquals(1, p2.getIdentifier().size());
 		assertEquals(p1.getIdentifier().get(0).getSystem(), p2.getIdentifier().get(0).getSystem());
 		assertEquals(p1.getIdentifier().get(0).getValue(), p2.getIdentifier().get(0).getValue());
+	}
+
+	@Test
+	void testReplaceBooleanField() {
+		Patient p1 = ourFhirContext.newJsonParser().parseResource(Patient.class, SAMPLE_PERSON);
+
+		Patient p2 = new Patient();
+		TerserUtil.replaceFields(ourFhirContext, p1, p2, TerserUtil.EXCLUDE_IDS_AND_META);
+
+		assertTrue(p2.hasDeceased());
+		assertTrue("true".equals(p2.getDeceased().primitiveValue()));
+		assertEquals(2, p2.getExtension().size());
+	}
+
+	@Test
+	void testMergeBooleanField() {
+		Patient p1 = ourFhirContext.newJsonParser().parseResource(Patient.class, SAMPLE_PERSON);
+
+		Patient p2 = new Patient();
+		TerserUtil.mergeAllFields(ourFhirContext, p1, p2);
+
+		assertTrue(p2.hasDeceased());
+		assertTrue("true".equals(p2.getDeceased().primitiveValue()));
+		assertEquals(2, p2.getExtension().size());
 	}
 
 	@Test
