@@ -145,6 +145,11 @@ public abstract class BaseTransactionProcessor {
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
+	@VisibleForTesting
+	public void setDaoConfig(DaoConfig theDaoConfig) {
+		myDaoConfig = theDaoConfig;
+	}
+
 	public ITransactionProcessorVersionAdapter getVersionAdapter() {
 		return myVersionAdapter;
 	}
@@ -1067,7 +1072,7 @@ public abstract class BaseTransactionProcessor {
 			if (!nextId.hasIdPart()) {
 				if (resourceReference.getResource() != null) {
 					IIdType targetId = resourceReference.getResource().getIdElement();
-					if (targetId.getValue() == null) {
+					if (targetId.getValue() == null || targetId.getValue().startsWith("#")) {
 						// This means it's a contained resource
 						continue;
 					} else if (theIdSubstitutions.containsValue(targetId)) {
@@ -1258,7 +1263,6 @@ public abstract class BaseTransactionProcessor {
 		return dao;
 	}
 
-
 	private String toResourceName(Class<? extends IBaseResource> theResourceType) {
 		return myContext.getResourceType(theResourceType);
 	}
@@ -1316,11 +1320,6 @@ public abstract class BaseTransactionProcessor {
 			}
 		}
 		return null;
-	}
-
-	@VisibleForTesting
-	public void setDaoConfig(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
 	}
 
 	public interface ITransactionProcessorVersionAdapter<BUNDLE extends IBaseBundle, BUNDLEENTRY extends IBase> {

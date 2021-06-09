@@ -21,19 +21,16 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.util.StopWatch;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
-import org.apache.jena.rdf.model.ModelCon;
-import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -56,8 +53,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.endsWith;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class TransactionProcessor extends BaseTransactionProcessor {
 
@@ -69,7 +64,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	@Autowired
 	private IdHelperService myIdHelperService;
 	@Autowired
-	private PartitionSettings myDaoConfig;
+	private PartitionSettings myPartitionSettings;
 
 	public void setEntityManagerForUnitTest(EntityManager theEntityManager) {
 		myEntityManager = theEntityManager;
@@ -86,7 +81,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	protected Map<IBase, IIdType> doTransactionWriteOperations(final RequestDetails theRequest, String theActionName, TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
 																				  Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder, List<IBase> theEntries, StopWatch theTransactionStopWatch) {
 
-		if (!myDaoConfig.isPartitioningEnabled()) {
+		// FIXME: can this be partition aware?
+		if (!myPartitionSettings.isPartitioningEnabled()) {
 			ITransactionProcessorVersionAdapter versionAdapter = getVersionAdapter();
 			List<IIdType> idsToPreResolve = new ArrayList<>();
 			for (IBase nextEntry : theEntries) {
@@ -120,7 +116,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	}
 
 
-		@Override
+	@Override
 	protected void flushSession(Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome) {
 		try {
 			int insertionCount;
@@ -148,4 +144,13 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	}
 
 
+	@VisibleForTesting
+	public void setPartitionSettingsForUnitTest(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
+	}
+
+	@VisibleForTesting
+	public void setIdHelperServiceForUnitTest(IdHelperService theIdHelperService) {
+		myIdHelperService = theIdHelperService;
+	}
 }

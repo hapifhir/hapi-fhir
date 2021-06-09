@@ -61,6 +61,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myModelConfig.setAutoVersionReferenceAtPaths(new ModelConfig().getAutoVersionReferenceAtPaths());
 		myModelConfig.setRespectVersionsForSearchIncludes(new ModelConfig().isRespectVersionsForSearchIncludes());
 		myFhirCtx.getParserOptions().setStripVersionsFromReferences(true);
+		myDaoConfig.setNonVersionedTags(new DaoConfig().isNonVersionedTags());
 	}
 
 	@BeforeEach

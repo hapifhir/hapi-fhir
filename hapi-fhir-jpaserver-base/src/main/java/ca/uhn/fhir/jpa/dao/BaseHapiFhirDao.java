@@ -395,6 +395,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	@Autowired
 	public void setContext(FhirContext theContext) {
+		super.myFhirContext = theContext;
 		myContext = theContext;
 	}
 
@@ -1189,7 +1190,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					// to match a resource and then update it in a way that it no longer
 					// matches. We could certainly make this configurable though in the
 					// future.
-					if (entity.getVersion() <= 1L && entity.getCreatedByMatchUrl() != null) {
+					if (entity.getVersion() <= 1L && entity.getCreatedByMatchUrl() != null && thePerformIndexing) {
 						verifyMatchUrlForConditionalCreate(theResource, entity.getCreatedByMatchUrl(), entity, newParams);
 					}
 

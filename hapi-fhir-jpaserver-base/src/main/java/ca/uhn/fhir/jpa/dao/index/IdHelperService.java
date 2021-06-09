@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
@@ -50,6 +51,13 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -167,6 +175,9 @@ public class IdHelperService {
 		return RequestPartitionId.stringifyForKey(theRequestPartitionId) + "/" + theResourceType + "/" + theId;
 	}
 
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	private EntityManager myEntityManager;
+
 	/**
 	 * Given a collection of resource IDs (resource type + id), resolves the internal persistent IDs.
 	 * <p>
@@ -181,7 +192,52 @@ public class IdHelperService {
 			return Collections.emptyList();
 		}
 
-		List<ResourcePersistentId> retVal = new ArrayList<>();
+		List<ResourcePersistentId> retVal = new ArrayList<>(theIds.size());
+
+		List<IIdType> idsToCheck = new ArrayList<>(theIds);
+		for (IIdType nextId : theIds) {
+			if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
+				if (nextId.isIdPartValidLong()) {
+					retVal.add(new ResourcePersistentId(nextId.getIdPartAsLong()).setAssociatedResourceId(nextId));
+					continue;
+				}
+			}
+
+			idsToCheck.add(nextId);
+		}
+
+		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<ForcedId> criteriaQuery = cb.createQuery(ForcedId.class);
+		Root<ForcedId> from = criteriaQuery.from(ForcedId.class);
+//		criteriaQuery.where()
+
+		if (idsToCheck.size() > 0) {
+			List<Predicate> predicates = new ArrayList<>(idsToCheck.size());
+			for (IIdType next : idsToCheck) {
+
+				Predicate typeCriteria = cb.equal(from.get("myResourceType").as(String.class), next.getResourceType());
+				Predicate idCriteria = cb.equal(from.get("myForcedId").as(String.class), next.getIdPart());
+				Predicate fullForcedIdCriteria;
+
+				if (theRequestPartitionId.isAllPartitions()) {
+					fullForcedIdCriteria = cb.and(typeCriteria, idCriteria);
+				} else if (theRequestPartitionId.isDefaultPartition()) {
+					Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue").as(Integer.class));
+					fullForcedIdCriteria = cb.and(typeCriteria, idCriteria, partitionIdCriteria);
+				} else {
+					Predicate partitionIdCriteria = from.get("myPartitionIdValue").as(Integer.class).in(theRequestPartitionId.getPartitionIds());
+					fullForcedIdCriteria = cb.and(typeCriteria, idCriteria, partitionIdCriteria);
+				}
+				predicates.add(fullForcedIdCriteria);
+			}
+
+			criteriaQuery.where(cb.or(predicates.toArray(new Predicate[0])));
+
+
+
+		}
+
+
 
 		if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
 			theIds
