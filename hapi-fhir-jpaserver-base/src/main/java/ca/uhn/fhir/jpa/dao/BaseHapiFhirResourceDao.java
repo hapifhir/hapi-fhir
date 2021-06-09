@@ -57,7 +57,6 @@ import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu2.resource.ListResource;
@@ -91,6 +90,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
@@ -260,7 +260,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		entity.setVersion(1);
 
 		if (isNotBlank(theIfNoneExist)) {
-			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theIfNoneExist, myResourceType, theRequest);
+			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theIfNoneExist, myResourceType, theTransactionDetails, theRequest);
 			if (match.size() > 1) {
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "CREATE", theIfNoneExist, match.size());
 				throw new PreconditionFailedException(msg);
@@ -366,7 +366,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		if (theIfNoneExist != null) {
 			// Pre-cache the match URL
-			myMatchResourceUrlService.matchUrlResolved(theIfNoneExist, new ResourcePersistentId(entity.getResourceId()));
+			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, theIfNoneExist, new ResourcePersistentId(entity.getResourceId()));
 		}
 
 		// FIXME: remove?
@@ -1024,7 +1024,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ResourceTable entityToUpdate;
 		if (isNotBlank(theConditionalUrl)) {
 
-			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theConditionalUrl, myResourceType, theRequest);
+			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theConditionalUrl, myResourceType, theTransactionDetails, theRequest);
 			if (match.size() > 1) {
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "PATCH", theConditionalUrl, match.size());
 				throw new PreconditionFailedException(msg);
@@ -1074,7 +1074,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public void start() {
 		assert getConfig() != null;
-		
+
 		ourLog.debug("Starting resource DAO for type: {}", getResourceName());
 		myInstanceValidator = getApplicationContext().getBean(IInstanceValidatorModule.class);
 		myTxTemplate = new TransactionTemplate(myPlatformTransactionManager);
@@ -1583,7 +1583,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		IIdType resourceId;
 		if (isNotBlank(theMatchUrl)) {
-			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theMatchUrl, myResourceType, theRequest);
+			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theMatchUrl, myResourceType, theTransactionDetails, theRequest);
 			if (match.size() > 1) {
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "UPDATE", theMatchUrl, match.size());
 				throw new PreconditionFailedException(msg);
@@ -1596,7 +1596,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 				// Pre-cache the match URL
 				if (outcome.getPersistentId() != null) {
-					myMatchResourceUrlService.matchUrlResolved(theMatchUrl, outcome.getPersistentId());
+					myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, theMatchUrl, outcome.getPersistentId());
 				}
 
 				return outcome;

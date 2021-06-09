@@ -31,19 +31,21 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Set;
 
@@ -65,12 +67,18 @@ public class MatchResourceUrlService {
 	/**
 	 * Note that this will only return a maximum of 2 results!!
 	 */
-	public <R extends IBaseResource> Set<ResourcePersistentId> processMatchUrl(String theMatchUrl, Class<R> theResourceType, RequestDetails theRequest) {
-		if (myDaoConfig.getMatchUrlCache()) {
-			ResourcePersistentId existing = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.MATCH_URL, theMatchUrl);
-			if (existing != null) {
-				return Collections.singleton(existing);
-			}
+	public <R extends IBaseResource> Set<ResourcePersistentId> processMatchUrl(String theMatchUrl, Class<R> theResourceType, TransactionDetails theTransactionDetails, RequestDetails theRequest) {
+		ResourcePersistentId resolvedInTransaction = theTransactionDetails.getResolvedMatchUrls().get(theMatchUrl);
+		if (resolvedInTransaction != null) {
+			return Collections.singleton(resolvedInTransaction);
+		}
+		if (theTransactionDetails.getResolvedMatchUrls().containsKey(theMatchUrl)) {
+			return Collections.emptySet();
+		}
+
+		ResourcePersistentId resolvedInCache = processMatchUrlUsingCacheOnly(theMatchUrl);
+		if (resolvedInCache != null) {
+			return Collections.singleton(resolvedInCache);
 		}
 
 		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceType);
@@ -88,6 +96,15 @@ public class MatchResourceUrlService {
 		}
 
 		return retVal;
+	}
+
+	@Nullable
+	public ResourcePersistentId processMatchUrlUsingCacheOnly(String theMatchUrl) {
+		ResourcePersistentId existing = null;
+		if (myDaoConfig.getMatchUrlCache()) {
+			existing = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.MATCH_URL, theMatchUrl);
+		}
+		return existing;
 	}
 
 	public <R extends IBaseResource> Set<ResourcePersistentId> search(SearchParameterMap theParamMap, Class<R> theResourceType, RequestDetails theRequest) {
@@ -113,9 +130,10 @@ public class MatchResourceUrlService {
 	}
 
 
-	public void matchUrlResolved(String theMatchUrl, ResourcePersistentId theResourcePersistentId) {
+	public void matchUrlResolved(TransactionDetails theTransactionDetails, String theMatchUrl, ResourcePersistentId theResourcePersistentId) {
 		Validate.notBlank(theMatchUrl);
 		Validate.notNull(theResourcePersistentId);
+		theTransactionDetails.addResolvedMatchUrl(theMatchUrl, theResourcePersistentId);
 		if (myDaoConfig.getMatchUrlCache()) {
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, theMatchUrl, theResourcePersistentId);
 		}

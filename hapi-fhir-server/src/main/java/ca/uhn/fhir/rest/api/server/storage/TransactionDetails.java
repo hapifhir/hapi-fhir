@@ -52,6 +52,7 @@ public class TransactionDetails {
 
 	private final Date myTransactionDate;
 	private Map<String, ResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
+	private Map<String, ResourcePersistentId> myResolvedMatchUrls = Collections.emptyMap();
 	private Map<String, Object> myUserData;
 	private ListMultimap<Pointcut, HookParams> myDeferredInterceptorBroadcasts;
 	private EnumSet<Pointcut> myDeferredInterceptorBroadcastPointcuts;
@@ -109,6 +110,24 @@ public class TransactionDetails {
 			myResolvedResourceIds = new HashMap<>();
 		}
 		myResolvedResourceIds.put(theResourceId.toVersionless().getValue(), thePersistentId);
+	}
+
+	public Map<String, ResourcePersistentId> getResolvedMatchUrls() {
+		return myResolvedMatchUrls;
+	}
+
+	/**
+	 * A <b>Resolved Conditional URL</b> is a mapping between a conditional URL (e.g. "<code>Patient?identifier=foo|bar</code>" or
+	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
+	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
+	 */
+	public void addResolvedMatchUrl(String theConditionalUrl, @Nullable ResourcePersistentId thePersistentId) {
+		assert theConditionalUrl != null;
+
+		if (myResolvedMatchUrls.isEmpty()) {
+			myResolvedMatchUrls = new HashMap<>();
+		}
+		myResolvedMatchUrls.put(theConditionalUrl, thePersistentId);
 	}
 
 	/**

@@ -206,6 +206,13 @@ public class IdHelperService {
 				}
 			}
 
+			String key = toForcedIdToPidKey(theRequestPartitionId, nextId.getResourceType(), nextId.getIdPart());
+			ResourcePersistentId cachedId = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key);
+			if (cachedId != null) {
+				retVal.add(cachedId);
+				continue;
+			}
+
 			idsToCheck.add(nextId);
 		}
 

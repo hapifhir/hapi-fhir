@@ -68,6 +68,8 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
+		myDaoConfig.setMassIngestionMode(new DaoConfig().isMassIngestionMode());
+		myDaoConfig.setMatchUrlCache(new DaoConfig().getMatchUrlCache());
 	}
 
 	@BeforeEach
