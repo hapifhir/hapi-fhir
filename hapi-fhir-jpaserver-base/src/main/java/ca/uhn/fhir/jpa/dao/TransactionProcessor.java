@@ -21,10 +21,13 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -44,6 +47,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceException;
+import javax.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -65,6 +69,10 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	private IdHelperService myIdHelperService;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+	@Autowired
+	private IResourceTableDao myResourceTableDao;
+	@Autowired
+	private DaoConfig myDaoConfig;
 
 	public void setEntityManagerForUnitTest(EntityManager theEntityManager) {
 		myEntityManager = theEntityManager;
@@ -100,9 +108,13 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 			Set<String> foundIds = new HashSet<>();
 			List<ResourcePersistentId> outcome = myIdHelperService.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), idsToPreResolve);
+			List<Long> idsToPreFetch = new ArrayList<>();
 			for (ResourcePersistentId next : outcome) {
 				foundIds.add(next.getAssociatedResourceId().toUnqualifiedVersionless().getValue());
 				theTransactionDetails.addResolvedResourceId(next.getAssociatedResourceId(), next);
+				if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY || !next.getAssociatedResourceId().isIdPartValidLong()) {
+					idsToPreFetch.add(next.getIdAsLong());
+				}
 			}
 			for (IIdType next : idsToPreResolve) {
 				if (!foundIds.contains(next.toUnqualifiedVersionless().getValue())) {
@@ -110,11 +122,40 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				}
 			}
 
+			/*
+			 * Pre-fetch the resources we're touching in this transaction in mass - this reduced the
+			 * number of database round trips
+			 */
+			if (idsToPreFetch.size() > 2) {
+				List<ResourceTable> loadedResourceTableEntries = preFetchIndexes(idsToPreFetch, "forcedId", "myForcedId");
+
+				if (loadedResourceTableEntries.stream().filter(t->t.isParamsStringPopulated()).count() > 1) {
+					preFetchIndexes(idsToPreFetch, "string", "myParamsString");
+				}
+				if (loadedResourceTableEntries.stream().filter(t->t.isParamsTokenPopulated()).count() > 1) {
+					preFetchIndexes(idsToPreFetch, "token", "myParamsToken");
+				}
+				if (loadedResourceTableEntries.stream().filter(t->t.isParamsDatePopulated()).count() > 1) {
+					preFetchIndexes(idsToPreFetch, "date", "myParamsDate");
+				}
+				if (loadedResourceTableEntries.stream().filter(t->t.isHasLinks()).count() > 1) {
+					preFetchIndexes(idsToPreFetch, "resourceLinks", "myResourceLinks");
+				}
+
+			}
+
 		}
 
 		return super.doTransactionWriteOperations(theRequest, theActionName, theTransactionDetails, theAllIds, theIdSubstitutions, theIdToPersistedOutcome, theResponse, theOriginalRequestOrder, theEntries, theTransactionStopWatch);
 	}
 
+	private List<ResourceTable> preFetchIndexes(List<Long> ids, String typeDesc, String fieldName) {
+		TypedQuery<ResourceTable> query = myEntityManager.createQuery("FROM ResourceTable r LEFT JOIN FETCH r." + fieldName + " WHERE r.myId IN ( :IDS )", ResourceTable.class);
+		query.setParameter("IDS", ids);
+		List<ResourceTable> indexFetchOutcome = query.getResultList();
+		ourLog.info("Pre-fetched {} {}} indexes", indexFetchOutcome.size(), typeDesc); // FIXME: make debug
+		return indexFetchOutcome;
+	}
 
 	@Override
 	protected void flushSession(Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome) {

@@ -60,6 +60,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
@@ -2548,7 +2549,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		ourLog.info("Search SQL:\n{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID IN ('1')"), searchSql);
+		assertEquals(1, StringUtils.countMatches(searchSql.toUpperCase(Locale.US), "PARTITION_ID IN ('1')"), searchSql);
 		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
 
 		// Same query, different partition
@@ -2583,7 +2584,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID IS NULL"), searchSql);
+		assertEquals(1, StringUtils.countMatches(searchSql.toUpperCase(Locale.US), "PARTITION_ID IS NULL"), searchSql);
 		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
 
 		// Same query, different partition

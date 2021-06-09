@@ -54,6 +54,7 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -63,6 +64,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -94,6 +96,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class IdHelperService {
 	private static final String RESOURCE_PID = "RESOURCE_PID";
 	private static final Logger ourLog = LoggerFactory.getLogger(IdHelperService.class);
+	public static final Predicate[] EMPTY_PREDICATE_ARRAY = new Predicate[0];
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired
@@ -194,7 +197,7 @@ public class IdHelperService {
 
 		List<ResourcePersistentId> retVal = new ArrayList<>(theIds.size());
 
-		List<IIdType> idsToCheck = new ArrayList<>(theIds);
+		Set<IIdType> idsToCheck = new HashSet<>(theIds.size());
 		for (IIdType nextId : theIds) {
 			if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
 				if (nextId.isIdPartValidLong()) {
@@ -206,99 +209,48 @@ public class IdHelperService {
 			idsToCheck.add(nextId);
 		}
 
-		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<ForcedId> criteriaQuery = cb.createQuery(ForcedId.class);
-		Root<ForcedId> from = criteriaQuery.from(ForcedId.class);
-//		criteriaQuery.where()
-
 		if (idsToCheck.size() > 0) {
+			CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
+			CriteriaQuery<ForcedId> criteriaQuery = cb.createQuery(ForcedId.class);
+			Root<ForcedId> from = criteriaQuery.from(ForcedId.class);
+
 			List<Predicate> predicates = new ArrayList<>(idsToCheck.size());
 			for (IIdType next : idsToCheck) {
 
-				Predicate typeCriteria = cb.equal(from.get("myResourceType").as(String.class), next.getResourceType());
+				List<Predicate> andPredicates = new ArrayList<>(3);
+
+				if (isNotBlank(next.getResourceType())) {
+					Predicate typeCriteria = cb.equal(from.get("myResourceType").as(String.class), next.getResourceType());
+					andPredicates.add(typeCriteria);
+				}
+
 				Predicate idCriteria = cb.equal(from.get("myForcedId").as(String.class), next.getIdPart());
-				Predicate fullForcedIdCriteria;
+				andPredicates.add(idCriteria);
 
-				if (theRequestPartitionId.isAllPartitions()) {
-					fullForcedIdCriteria = cb.and(typeCriteria, idCriteria);
-				} else if (theRequestPartitionId.isDefaultPartition()) {
+				if (theRequestPartitionId.isDefaultPartition()) {
 					Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue").as(Integer.class));
-					fullForcedIdCriteria = cb.and(typeCriteria, idCriteria, partitionIdCriteria);
-				} else {
+					andPredicates.add(partitionIdCriteria);
+				} else if (!theRequestPartitionId.isAllPartitions()) {
 					Predicate partitionIdCriteria = from.get("myPartitionIdValue").as(Integer.class).in(theRequestPartitionId.getPartitionIds());
-					fullForcedIdCriteria = cb.and(typeCriteria, idCriteria, partitionIdCriteria);
+					andPredicates.add(partitionIdCriteria);
 				}
-				predicates.add(fullForcedIdCriteria);
+
+				predicates.add(cb.and(andPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
 			}
 
-			criteriaQuery.where(cb.or(predicates.toArray(new Predicate[0])));
+			criteriaQuery.where(cb.or(predicates.toArray(EMPTY_PREDICATE_ARRAY)));
 
+			TypedQuery<ForcedId> query = myEntityManager.createQuery(criteriaQuery);
+			List<ForcedId> results = query.getResultList();
+			for (ForcedId nextId : results) {
+				ResourcePersistentId persistentId = new ResourcePersistentId(nextId.getResourceId());
+				populateAssociatedResourceId(nextId.getResourceType(), nextId.getForcedId(), persistentId);
+				retVal.add(persistentId);
 
-
-		}
-
-
-
-		if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
-			theIds
-				.stream()
-				.filter(IdHelperService::isValidPid)
-				.map(t-> new ResourcePersistentId(t.getIdPartAsLong()).setAssociatedResourceId(t))
-				.forEach(retVal::add);
-		}
-
-		ListMultimap<String, String> typeToIds = organizeIdsByResourceType(theIds);
-
-		for (Map.Entry<String, Collection<String>> nextEntry : new HashMap<>(typeToIds.asMap()).entrySet()) {
-			String nextResourceType = nextEntry.getKey();
-			Collection<String> nextIds = nextEntry.getValue();
-			if (isBlank(nextResourceType)) {
-
-				List<Long> views = myForcedIdDao.findByForcedId(nextIds);
-				views.forEach(t -> retVal.add(new ResourcePersistentId(t)));
-
-			} else {
-
-
-				for (Iterator<String> idIterator = nextIds.iterator(); idIterator.hasNext(); ) {
-					String nextId = idIterator.next();
-					String key = toForcedIdToPidKey(theRequestPartitionId, nextResourceType, nextId);
-					ResourcePersistentId nextCachedPid = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key);
-					if (nextCachedPid != null) {
-						idIterator.remove();
-						retVal.add(nextCachedPid);
-					}
-				}
-
-				if (nextIds.size() > 0) {
-
-					Collection<Object[]> views;
-					if (theRequestPartitionId.isAllPartitions()) {
-						views = myForcedIdDao.findByTypeAndForcedId(nextResourceType, nextIds);
-					} else {
-						if (theRequestPartitionId.isDefaultPartition()) {
-							views = myForcedIdDao.findByTypeAndForcedIdInPartitionNull(nextResourceType, nextIds);
-						} else if (theRequestPartitionId.hasDefaultPartitionId()) {
-							views = myForcedIdDao.findByTypeAndForcedIdInPartitionIdsOrNullPartition(nextResourceType, nextIds, theRequestPartitionId.getPartitionIds());
-						} else {
-							views = myForcedIdDao.findByTypeAndForcedIdInPartitionIds(nextResourceType, nextIds, theRequestPartitionId.getPartitionIds());
-						}
-					}
-					for (Object[] nextView : views) {
-						String forcedId = (String) nextView[0];
-						Long pid = (Long) nextView[1];
-
-						ResourcePersistentId persistentId = new ResourcePersistentId(pid);
-						populateAssociatedResourceId(nextResourceType, forcedId, persistentId);
-
-						retVal.add(persistentId);
-
-						String key = toForcedIdToPidKey(theRequestPartitionId, nextResourceType, forcedId);
-						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, persistentId);
-					}
-				}
-
+				String key = toForcedIdToPidKey(theRequestPartitionId, nextId.getResourceType(), nextId.getForcedId());
+				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, persistentId);
 			}
+
 		}
 
 		return retVal;

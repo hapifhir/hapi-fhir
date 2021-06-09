@@ -402,9 +402,11 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("myDoctor", new ReferenceParam("A"));
+		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myPatientDao.search(params);
 		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
 		ourLog.info("IDS: " + ids);
+		myCaptureQueriesListener.logSelectQueries();
 		assertThat(ids, Matchers.contains(pid.getValue()));
 	}
 
