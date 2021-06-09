@@ -1706,13 +1706,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setIfNoneExist("Patient?identifier=urn%3Asystem%7C" + methodName);
 
-		try {
-			mySystemDao.transaction(mySrd, request);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals(e.getMessage(),
-				"Unable to process Transaction - Request would cause multiple resources to match URL: \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateWithDuplicateMatchUrl01\". Does transaction request contain duplicates?");
-		}
+		mySystemDao.transaction(mySrd, request);
+		assertEquals(1, logAllResources());
+		assertEquals(1, logAllResourceVersions());
 	}
 
 	@Test
@@ -1828,7 +1824,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid match URL[A] - URL has no search parameters", e.getMessage());
+			assertEquals("Invalid match URL[Observation?A] - URL has no search parameters", e.getMessage());
 		}
 	}
 
@@ -2406,13 +2402,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.setMethod(HTTPVerb.POST)
 			.setIfNoneExist("Encounter?identifier=urn:foo|12345");
 
-		try {
-			mySystemDao.transaction(mySrd, inputBundle);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("Unable to process Transaction - Request would cause multiple resources to match URL: \"Encounter?identifier=urn:foo|12345\". Does transaction request contain duplicates?",
-				e.getMessage());
-		}
+		mySystemDao.transaction(mySrd, inputBundle);
+		assertEquals(1, logAllResources());
+		assertEquals(1, logAllResourceVersions());
 	}
 
 	@Test
@@ -2437,14 +2429,10 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.setMethod(HTTPVerb.PUT)
 			.setUrl("Encounter?identifier=urn:foo|12345");
 
-		try {
-			mySystemDao.transaction(mySrd, inputBundle);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("Unable to process Transaction - Request would cause multiple resources to match URL: \"Encounter?identifier=urn:foo|12345\". Does transaction request contain duplicates?",
-				e.getMessage());
-		}
+		mySystemDao.transaction(mySrd, inputBundle);
 
+		assertEquals(1, logAllResources());
+		assertEquals(1, logAllResourceVersions());
 	}
 
 	@Test

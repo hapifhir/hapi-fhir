@@ -177,6 +177,7 @@ public class GiantTransactionPerfTest {
 		myTransactionProcessor.setDaoRegistry(myDaoRegistry);
 		myTransactionProcessor.setPartitionSettingsForUnitTest(myPartitionSettings);
 		myTransactionProcessor.setIdHelperServiceForUnitTest(myIdHelperService);
+		myTransactionProcessor.setFhirContextForUnitTest(myCtx);
 		myTransactionProcessor.start();
 
 		mySystemDao = new FhirSystemDaoR4();
