@@ -31,7 +31,6 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -76,7 +75,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TransactionProcessor extends BaseTransactionProcessor {
 
-	public static final Pattern SINGLE_PARAMETER_MATCH_URL_PATTERN = Pattern.compile("^[^?]*[?][a-z0-9-]+=[^&,]+$");
+	public static final Pattern SINGLE_PARAMETER_MATCH_URL_PATTERN = Pattern.compile("^[^?]+[?][a-z0-9-]+=[^&,]+$");
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessor.class);
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
@@ -178,8 +177,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					String verb = versionAdapter.getEntryRequestVerb(myFhirContext, nextEntry);
 					String requestUrl = versionAdapter.getEntryRequestUrl(nextEntry);
 					String requestIfNoneExist = versionAdapter.getEntryIfNoneExist(nextEntry);
+					String resourceType = myFhirContext.getResourceType(resource);
 					if ("PUT".equals(verb) && requestUrl != null && requestUrl.contains("?")) {
-						ResourcePersistentId cachedId = myMatchResourceUrlService.processMatchUrlUsingCacheOnly(requestUrl);
+						ResourcePersistentId cachedId = myMatchResourceUrlService.processMatchUrlUsingCacheOnly(resourceType, requestUrl);
 						if (cachedId != null) {
 							idsToPreFetch.add(cachedId.getIdAsLong());
 						} else if (SINGLE_PARAMETER_MATCH_URL_PATTERN.matcher(requestUrl).matches()) {
@@ -188,7 +188,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 							searchParameterMapsToResolve.add(new MatchUrlToResolve(requestUrl, matchUrlSearchMap, resourceDefinition));
 						}
 					} else if ("POST".equals(verb) && requestIfNoneExist != null && requestIfNoneExist.contains("?")) {
-						ResourcePersistentId cachedId = myMatchResourceUrlService.processMatchUrlUsingCacheOnly(requestIfNoneExist);
+						ResourcePersistentId cachedId = myMatchResourceUrlService.processMatchUrlUsingCacheOnly(resourceType, requestIfNoneExist);
 						if (cachedId != null) {
 							idsToPreFetch.add(cachedId.getIdAsLong());
 						} else if (SINGLE_PARAMETER_MATCH_URL_PATTERN.matcher(requestIfNoneExist).matches()) {
@@ -252,13 +252,13 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 						for (MatchUrlToResolve nextSearchParameterMap : searchParameterMapsToResolve) {
 							if (nextSearchParameterMap.myHashSystemAndValue != null && nextSearchParameterMap.myHashSystemAndValue.equals(nextResult.getHashSystemAndValue())) {
 								idsToPreFetch.add(nextResult.getResourcePid());
-								myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, nextSearchParameterMap.myRequestUrl, new ResourcePersistentId(nextResult.getResourcePid()));
+								myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, nextSearchParameterMap.myResourceDefinition.getName(), nextSearchParameterMap.myRequestUrl, new ResourcePersistentId(nextResult.getResourcePid()));
 								theTransactionDetails.addResolvedMatchUrl(nextSearchParameterMap.myRequestUrl, new ResourcePersistentId(nextResult.getResourcePid()));
 								nextSearchParameterMap.myResolved = true;
 							}
 							if (nextSearchParameterMap.myHashValue != null && nextSearchParameterMap.myHashValue.equals(nextResult.getHashValue())) {
 								idsToPreFetch.add(nextResult.getResourcePid());
-								myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, nextSearchParameterMap.myRequestUrl, new ResourcePersistentId(nextResult.getResourcePid()));
+								myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, nextSearchParameterMap.myResourceDefinition.getName(), nextSearchParameterMap.myRequestUrl, new ResourcePersistentId(nextResult.getResourcePid()));
 								theTransactionDetails.addResolvedMatchUrl(nextSearchParameterMap.myRequestUrl, new ResourcePersistentId(nextResult.getResourcePid()));
 								nextSearchParameterMap.myResolved = true;
 							}

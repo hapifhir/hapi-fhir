@@ -615,6 +615,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		createUniqueCompositeSp();
 		createRequestId();
 
+		addReadPartition(myPartitionId);
+		addReadPartition(myPartitionId);
 		addCreatePartition(myPartitionId, myPartitionDate);
 		addCreatePartition(myPartitionId, myPartitionDate);
 
@@ -2555,7 +2557,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		ourLog.info("Search SQL:\n{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertEquals(1, StringUtils.countMatches(searchSql.toUpperCase(Locale.US), "PARTITION_ID IN ('1')"), searchSql);
-		assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
 
 		// Same query, different partition
 		addReadPartition(2);
@@ -2590,7 +2592,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
 		assertEquals(1, StringUtils.countMatches(searchSql.toUpperCase(Locale.US), "PARTITION_ID IS NULL"), searchSql);
-		assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
 
 		// Same query, different partition
 		addReadPartition(2);

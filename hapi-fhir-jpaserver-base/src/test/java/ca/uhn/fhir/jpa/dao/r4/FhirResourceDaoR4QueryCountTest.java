@@ -64,7 +64,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myModelConfig.setAutoVersionReferenceAtPaths(new ModelConfig().getAutoVersionReferenceAtPaths());
 		myModelConfig.setRespectVersionsForSearchIncludes(new ModelConfig().isRespectVersionsForSearchIncludes());
 		myFhirCtx.getParserOptions().setStripVersionsFromReferences(true);
-		myDaoConfig.setNonVersionedTags(new DaoConfig().isNonVersionedTags());
+		myDaoConfig.setTagStorageMode(new DaoConfig().getTagStorageMode());
 	}
 
 	@BeforeEach
@@ -1812,7 +1812,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myDaoConfig.setMassIngestionMode(true);
 		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
 		myModelConfig.setRespectVersionsForSearchIncludes(true);
-		myDaoConfig.setNonVersionedTags(true); // FIXME: doc for kp
+		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.NON_VERSIONED); // FIXME: doc for kp
 		myModelConfig.setAutoVersionReferenceAtPaths(
 			"ExplanationOfBenefit.patient",
 			"ExplanationOfBenefit.insurance.coverage"

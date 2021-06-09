@@ -49,6 +49,8 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Set;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 @Service
 public class MatchResourceUrlService {
 	@Autowired
@@ -68,23 +70,25 @@ public class MatchResourceUrlService {
 	 * Note that this will only return a maximum of 2 results!!
 	 */
 	public <R extends IBaseResource> Set<ResourcePersistentId> processMatchUrl(String theMatchUrl, Class<R> theResourceType, TransactionDetails theTransactionDetails, RequestDetails theRequest) {
-		ResourcePersistentId resolvedInTransaction = theTransactionDetails.getResolvedMatchUrls().get(theMatchUrl);
+		String resourceType = myContext.getResourceType(theResourceType);
+		String matchUrl = massageForStorage(resourceType, theMatchUrl);
+		ResourcePersistentId resolvedInTransaction = theTransactionDetails.getResolvedMatchUrls().get(matchUrl);
 		if (resolvedInTransaction != null) {
 			return Collections.singleton(resolvedInTransaction);
 		}
-		if (theTransactionDetails.getResolvedMatchUrls().containsKey(theMatchUrl)) {
+		if (theTransactionDetails.getResolvedMatchUrls().containsKey(matchUrl)) {
 			return Collections.emptySet();
 		}
 
-		ResourcePersistentId resolvedInCache = processMatchUrlUsingCacheOnly(theMatchUrl);
+		ResourcePersistentId resolvedInCache = processMatchUrlUsingCacheOnly(resourceType, matchUrl);
 		if (resolvedInCache != null) {
 			return Collections.singleton(resolvedInCache);
 		}
 
 		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceType);
-		SearchParameterMap paramMap = myMatchUrlService.translateMatchUrl(theMatchUrl, resourceDef);
+		SearchParameterMap paramMap = myMatchUrlService.translateMatchUrl(matchUrl, resourceDef);
 		if (paramMap.isEmpty() && paramMap.getLastUpdated() == null) {
-			throw new InvalidRequestException("Invalid match URL[" + theMatchUrl + "] - URL has no search parameters");
+			throw new InvalidRequestException("Invalid match URL[" + matchUrl + "] - URL has no search parameters");
 		}
 		paramMap.setLoadSynchronousUpTo(2);
 
@@ -92,17 +96,30 @@ public class MatchResourceUrlService {
 
 		if (myDaoConfig.getMatchUrlCache() && retVal.size() == 1) {
 			ResourcePersistentId pid = retVal.iterator().next();
-			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, theMatchUrl, pid);
+			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, pid);
 		}
 
 		return retVal;
 	}
 
+	private String massageForStorage(String theResourceType, String theMatchUrl) {
+		Validate.notBlank(theMatchUrl, "theMatchUrl must not be null or blank");
+		int questionMarkIdx = theMatchUrl.indexOf("?");
+		if (questionMarkIdx > 0) {
+			return theMatchUrl;
+		}
+		if (questionMarkIdx == 0) {
+			return theResourceType + theMatchUrl;
+		}
+		return theResourceType + "?" + theMatchUrl;
+	}
+
 	@Nullable
-	public ResourcePersistentId processMatchUrlUsingCacheOnly(String theMatchUrl) {
+	public ResourcePersistentId processMatchUrlUsingCacheOnly(String theResourceType, String theMatchUrl) {
 		ResourcePersistentId existing = null;
 		if (myDaoConfig.getMatchUrlCache()) {
-			existing = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.MATCH_URL, theMatchUrl);
+			String matchUrl = massageForStorage(theResourceType, theMatchUrl);
+			existing = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl);
 		}
 		return existing;
 	}
@@ -130,12 +147,14 @@ public class MatchResourceUrlService {
 	}
 
 
-	public void matchUrlResolved(TransactionDetails theTransactionDetails, String theMatchUrl, ResourcePersistentId theResourcePersistentId) {
+	public void matchUrlResolved(TransactionDetails theTransactionDetails, String theResourceType, String theMatchUrl, ResourcePersistentId theResourcePersistentId) {
 		Validate.notBlank(theMatchUrl);
 		Validate.notNull(theResourcePersistentId);
-		theTransactionDetails.addResolvedMatchUrl(theMatchUrl, theResourcePersistentId);
+		String matchUrl = massageForStorage(theResourceType, theMatchUrl);
+		theTransactionDetails.addResolvedMatchUrl(matchUrl, theResourcePersistentId);
 		if (myDaoConfig.getMatchUrlCache()) {
-			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, theMatchUrl, theResourcePersistentId);
+			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, theResourcePersistentId);
 		}
 	}
+
 }

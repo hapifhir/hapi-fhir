@@ -366,7 +366,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		if (theIfNoneExist != null) {
 			// Pre-cache the match URL
-			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, theIfNoneExist, new ResourcePersistentId(entity.getResourceId()));
+			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theIfNoneExist, new ResourcePersistentId(entity.getResourceId()));
 		}
 
 		// FIXME: remove?
@@ -1596,7 +1596,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 				// Pre-cache the match URL
 				if (outcome.getPersistentId() != null) {
-					myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, theMatchUrl, outcome.getPersistentId());
+					myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theMatchUrl, outcome.getPersistentId());
 				}
 
 				return outcome;
