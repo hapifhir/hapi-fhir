@@ -58,7 +58,6 @@ import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
-import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -84,6 +83,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.MetaUtil;
@@ -186,6 +186,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseHapiFhirDao.class);
 	private static final Map<FhirVersionEnum, FhirContext> ourRetrievalContexts = new HashMap<>();
 	private static final String PROCESSING_SUB_REQUEST = "BaseHapiFhirDao.processingSubRequest";
+	private static final String TRANSACTION_DETAILS_CACHE_KEY_EXISTING_SEARCH_PARAMS = BaseHapiFhirDao.class.getName() + "_EXISTING_SEARCH_PARAMS";
 	private static boolean ourValidationDisabledForUnitTest;
 	private static boolean ourDisableIncrementOnUpdateForUnitTest = false;
 
@@ -1161,8 +1162,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			// CREATE or UPDATE
 
-			// FIXME: use better key
-			IdentityHashMap<ResourceTable, ResourceIndexedSearchParams> existingSearchParams = theTransactionDetails.getOrCreateUserData("prev", ()->new IdentityHashMap<>());
+			IdentityHashMap<ResourceTable, ResourceIndexedSearchParams> existingSearchParams = theTransactionDetails.getOrCreateUserData(TRANSACTION_DETAILS_CACHE_KEY_EXISTING_SEARCH_PARAMS, () -> new IdentityHashMap<>());
 			existingParams = existingSearchParams.get(entity);
 			if (existingParams == null) {
 				existingParams = new ResourceIndexedSearchParams(entity);
@@ -1170,7 +1170,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 			entity.setDeleted(null);
 
-			// FIXME: remove if statement?
+			// TODO: is this IF statement always true? Try removing it
 			if (thePerformIndexing || ((ResourceTable) theEntity).getVersion() == 1) {
 
 				newParams = new ResourceIndexedSearchParams();
@@ -1591,6 +1591,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		// nothing yet
 	}
 
+	@VisibleForTesting
+	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
+		myConfig = theDaoConfig;
+	}
+
 	private class AddTagDefinitionToCacheAfterCommitSynchronization implements TransactionSynchronization {
 
 		private final TagDefinition myTagDefinition;
@@ -1740,11 +1745,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@VisibleForTesting
 	public static void setDisableIncrementOnUpdateForUnitTest(boolean theDisableIncrementOnUpdateForUnitTest) {
 		ourDisableIncrementOnUpdateForUnitTest = theDisableIncrementOnUpdateForUnitTest;
-	}
-
-	@VisibleForTesting
-	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
-		myConfig = theDaoConfig;
 	}
 
 	/**

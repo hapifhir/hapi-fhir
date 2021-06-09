@@ -369,16 +369,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theIfNoneExist, new ResourcePersistentId(entity.getResourceId()));
 		}
 
-		// FIXME: remove?
-//		/*
-//		 * If we aren't indexing (meaning we're probably executing a sub-operation within a transaction),
-//		 * we'll manually increase the version. This is important because we want the updated version number
-//		 * to be reflected in the resource shared with interceptors
-//		 */
-//		if (!thePerformIndexing) {
-//			incrementId(theResource, entity, theResource.getIdElement());
-//		}
-
 		// Update the version/last updated in the resource so that interceptors get
 		// the correct version
 		updateResourceMetadata(entity, theResource);

@@ -319,7 +319,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		TypedQuery<ResourceTable> query = myEntityManager.createQuery("FROM ResourceTable r LEFT JOIN FETCH r." + fieldName + " WHERE r.myId IN ( :IDS )", ResourceTable.class);
 		query.setParameter("IDS", ids);
 		List<ResourceTable> indexFetchOutcome = query.getResultList();
-		ourLog.info("Pre-fetched {} {}} indexes", indexFetchOutcome.size(), typeDesc); // FIXME: make debug
+		ourLog.debug("Pre-fetched {} {}} indexes", indexFetchOutcome.size(), typeDesc);
 		return indexFetchOutcome;
 	}
 

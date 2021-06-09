@@ -45,7 +45,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -756,7 +755,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 			obsB.addNote().setText("Foo " + counter.incrementAndGet()); // changes every time
 			bb.addTransactionUpdateEntry(obsB);
 
-			return (Bundle)bb.getBundle();
+			return (Bundle) bb.getBundle();
 		};
 
 		ourLog.info("About to start transaction");
@@ -850,7 +849,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 			obsD.addNote().setText("Foo " + counter.incrementAndGet()); // changes every time
 			bb.addTransactionUpdateEntry(obsD).conditional("Observation?code=bar4");
 
-			return (Bundle)bb.getBundle();
+			return (Bundle) bb.getBundle();
 		};
 
 		ourLog.info("About to start transaction");
@@ -913,9 +912,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 	}
-
-
-
 
 
 	@Test
@@ -1812,7 +1808,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		myDaoConfig.setMassIngestionMode(true);
 		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
 		myModelConfig.setRespectVersionsForSearchIncludes(true);
-		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.NON_VERSIONED); // FIXME: doc for kp
+		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.NON_VERSIONED);
 		myModelConfig.setAutoVersionReferenceAtPaths(
 			"ExplanationOfBenefit.patient",
 			"ExplanationOfBenefit.insurance.coverage"

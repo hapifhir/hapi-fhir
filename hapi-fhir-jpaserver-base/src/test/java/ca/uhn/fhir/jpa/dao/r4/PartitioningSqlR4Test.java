@@ -2728,8 +2728,6 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	}
 
 
-	// FIXME: add a transaction test to make sure partitions indicators are present in the transaction pre-fetch query
-
 	@Test
 	public void testUpdate_ResourcePreExistsInWrongPartition() {
 		IIdType patientId = createPatient(withPutPartition(null), withId("ONE"), withBirthdate("2020-01-01"));
