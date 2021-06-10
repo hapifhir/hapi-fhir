@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  */
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.IRecordHandler;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -37,7 +37,7 @@ import java.util.Properties;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.*;
 import static org.apache.commons.lang3.StringUtils.*;
 
-public abstract class BaseLoincHandler implements IRecordHandler {
+public abstract class BaseLoincHandler implements IZipContentsHandlerCsv {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseLoincHandler.class);
 	public static final String LOINC_COPYRIGHT_STATEMENT = "This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/";
 

@@ -24,7 +24,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.IRecordHandler;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import org.apache.commons.csv.CSVRecord;
 
 import java.util.Map;
@@ -32,7 +32,7 @@ import java.util.Map;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class LoincHierarchyHandler implements IRecordHandler {
+public class LoincHierarchyHandler implements IZipContentsHandlerCsv {
 
    private Map<String, TermConcept> myCode2Concept;
    private TermCodeSystemVersion myCodeSystemVersion;

@@ -3,10 +3,15 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_PRIMARY_DEFAULT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -105,5 +110,27 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		});
 
 	}
+
+	/**
+	 * Loinc distro includes loinc.xml as of 2.70
+	 */
+	@Test
+	public void testLoincDistrbutionWithLoincXml() throws IOException {
+
+		// Add the loinc.xml file
+		myFiles.addFileZip("/loinc/", "loinc.xml");
+
+		// Load LOINC marked as version 2.67
+		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, null);
+
+		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		IBundleProvider codeSystems = myCodeSystemDao.search(SearchParameterMap.newSynchronous());
+		assertEquals(1, codeSystems.size());
+		CodeSystem codeSystem = (CodeSystem) codeSystems.getResources(0,1).get(0);
+		assertEquals("LOINC Code System (Testing Copy)", codeSystem.getTitle());
+	}
+
 
 }

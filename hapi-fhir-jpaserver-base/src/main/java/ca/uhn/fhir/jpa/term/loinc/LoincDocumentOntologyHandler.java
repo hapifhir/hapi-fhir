@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.IRecordHandler;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -36,7 +36,7 @@ import java.util.Properties;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class LoincDocumentOntologyHandler extends BaseLoincHandler implements IRecordHandler {
+public class LoincDocumentOntologyHandler extends BaseLoincHandler implements IZipContentsHandlerCsv {
 
 	public static final String DOCUMENT_ONTOLOGY_CODES_VS_ID = "loinc-document-ontology";
 	public static final String DOCUMENT_ONTOLOGY_CODES_VS_URI = "http://loinc.org/vs/loinc-document-ontology";

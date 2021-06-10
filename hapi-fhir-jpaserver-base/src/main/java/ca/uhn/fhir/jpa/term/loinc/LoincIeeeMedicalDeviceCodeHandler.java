@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.IRecordHandler;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -36,7 +36,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYS
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class LoincIeeeMedicalDeviceCodeHandler extends BaseLoincHandler implements IRecordHandler {
+public class LoincIeeeMedicalDeviceCodeHandler extends BaseLoincHandler implements IZipContentsHandlerCsv {
 
 	public static final String LOINC_IEEE_CM_ID = "loinc-to-ieee-11073-10101";
 	public static final String LOINC_IEEE_CM_URI = "http://loinc.org/cm/loinc-to-ieee-11073-10101";

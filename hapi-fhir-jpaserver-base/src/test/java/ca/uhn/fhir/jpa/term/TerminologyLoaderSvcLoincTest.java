@@ -626,7 +626,9 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	}
 
 	public static void addLoincMandatoryFilesWithPropertiesFileToZip(ZipCollectionBuilder theFiles, String thePropertiesFile) throws IOException {
-		theFiles.addFileZip("/loinc/", thePropertiesFile);
+		if (thePropertiesFile != null) {
+			theFiles.addFileZip("/loinc/", thePropertiesFile);
+		}
 		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
 		addBaseLoincMandatoryFilesToZip(theFiles, true);
