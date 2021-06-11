@@ -7,27 +7,23 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.security.PortUtil;
-import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,56 +46,23 @@ import static org.mockito.Mockito.when;
  */
 public class PagingTest {
 
-	private static RestfulServer myRestfulServer;
+	private FhirContext ourContext = FhirContext.forR4();
+	@RegisterExtension
+	public RestfulServerExtension myServerExtension = new RestfulServerExtension(ourContext);
+
 	private static SimpleBundleProvider ourBundleProvider;
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourContext;
-	private static FhirContext ourCtx = FhirContext.forR4();
-	private static int ourPort;
-	private static Server ourServer;
-	private IPagingProvider myPagingProvider;
-	private RequestDetails myRequestDetails;
+
+	private final IPagingProvider pagingProvider = mock(IPagingProvider.class);
 
 	@BeforeAll
 	public static void beforeClass() throws Exception {
-		ourContext = FhirContext.forR4();
-
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
-
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		myRestfulServer = new RestfulServer(ourCtx);
-		myRestfulServer.setResourceProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(myRestfulServer);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		ourServer.start();
-
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
 	}
 
-	@BeforeEach
-	public void before() {
-		myPagingProvider = mock(IPagingProvider.class);
-		myRestfulServer.setPagingProvider(myPagingProvider);
-		when(myPagingProvider.canStoreSearchResults()).thenReturn(true);
-	}
-
-	private void initBundleProvider(int theResourceQty) {
-		List<IBaseResource> retVal = new ArrayList<>();
-		for (int i = 0; i < theResourceQty; i++) {
-			Patient patient = new Patient();
-			patient.setId("" + i);
-			patient.addName().setFamily("" + i);
-			retVal.add(patient);
-		}
-		ourBundleProvider = new SimpleBundleProvider(retVal);
-	}
 
 	/**
 	 * Reproduced: https://github.com/hapifhir/hapi-fhir/issues/2509
@@ -108,22 +71,25 @@ public class PagingTest {
 	 * last page has the correct offset
 	 */
 	@Test()
-	public void test_previous_link_last_page_when_bunlde_size_equals_page_size_plus_one() throws Exception {
+	public void testPreviousLinkLastPageWhenBundleSizeEqualsPageSizePlusOne() throws Exception {
 		initBundleProvider(21);
-		when(myPagingProvider.getDefaultPageSize()).thenReturn(10);
-		when(myPagingProvider.getMaximumPageSize()).thenReturn(50);
-		when(myPagingProvider.storeResultList(any(RequestDetails.class), any(IBundleProvider.class))).thenReturn("ABCD");
-		when(myPagingProvider.retrieveResultList(any(RequestDetails.class), anyString())).thenReturn(ourBundleProvider);
+		myServerExtension.getRestfulServer().registerProvider(new DummyPatientResourceProvider());
+		myServerExtension.getRestfulServer().setPagingProvider(pagingProvider);
+
+		when(pagingProvider.canStoreSearchResults()).thenReturn(true);
+		when(pagingProvider.getDefaultPageSize()).thenReturn(10);
+		when(pagingProvider.getMaximumPageSize()).thenReturn(50);
+		when(pagingProvider.storeResultList(any(RequestDetails.class), any(IBundleProvider.class))).thenReturn("ABCD");
+		when(pagingProvider.retrieveResultList(any(RequestDetails.class), anyString())).thenReturn(ourBundleProvider);
 
 		String nextLink;
-		String base = "http://localhost:" + ourPort;
-		{
-			HttpGet httpGet = new HttpGet(base + "/Patient?");
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), CHARSET_UTF8);
-			IOUtils.closeQuietly(status.getEntity().getContent());
+		String base = "http://localhost:" + myServerExtension.getPort();
+		HttpGet get = new HttpGet(base + "/Patient?");
+		String responseContent;
+		try (CloseableHttpResponse resp = ourClient.execute(get)) {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
 			assertEquals(10, bundle.getEntry().size());
 
@@ -137,15 +103,11 @@ public class PagingTest {
 			checkParam(nextLink, Constants.PARAM_PAGINGOFFSET, "10");
 			checkParam(nextLink, Constants.PARAM_COUNT, "10");
 		}
-		{
-			HttpGet httpGet = new HttpGet(nextLink);
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), CHARSET_UTF8);
-			IOUtils.closeQuietly(status.getEntity().getContent());
+		try (CloseableHttpResponse resp = ourClient.execute(new HttpGet(nextLink))) {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
-
 			assertEquals(10, bundle.getEntry().size());
 
 			String linkPrev = bundle.getLink(IBaseBundle.LINK_PREV).getUrl();
@@ -163,15 +125,11 @@ public class PagingTest {
 			checkParam(nextLink, Constants.PARAM_PAGINGOFFSET, "20");
 			checkParam(nextLink, Constants.PARAM_COUNT, "10");
 		}
-		{
-			HttpGet httpGet = new HttpGet(nextLink);
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), CHARSET_UTF8);
-			IOUtils.closeQuietly(status.getEntity().getContent());
+		try (CloseableHttpResponse resp = ourClient.execute(new HttpGet(nextLink))) {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
-
 			assertEquals(1, bundle.getEntry().size());
 
 			String linkPrev = bundle.getLink(IBaseBundle.LINK_PREV).getUrl();
@@ -182,7 +140,7 @@ public class PagingTest {
 			String linkSelf = bundle.getLink(IBaseBundle.LINK_SELF).getUrl();
 			assertNotNull(linkSelf, "'self' link is not present");
 			checkParam(linkSelf, Constants.PARAM_PAGINGOFFSET, "20");
-//			assertTrue(linkSelf.contains(Constants.PARAM_COUNT + "=1"));
+			//			assertTrue(linkSelf.contains(Constants.PARAM_COUNT + "=1"));
 
 			assertNull(bundle.getLink(IBaseBundle.LINK_NEXT));
 		}
@@ -197,11 +155,18 @@ public class PagingTest {
 		assertEquals(theExpectedValue, paramValue.get());
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
-		TestUtil.clearAllStaticFieldsForUnitTest();
+
+	private void initBundleProvider(int theResourceQty) {
+		List<IBaseResource> retVal = new ArrayList<>();
+		for (int i = 0; i < theResourceQty; i++) {
+			Patient patient = new Patient();
+			patient.setId("" + i);
+			patient.addName().setFamily("" + i);
+			retVal.add(patient);
+		}
+		ourBundleProvider = new SimpleBundleProvider(retVal);
 	}
+
 
 	/**
 	 * Created by dsotnikov on 2/25/2014.
