@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.term.loinc;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
-import ca.uhn.fhir.jpa.term.IRecordHandler;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.csv.CSVRecord;
@@ -36,7 +36,7 @@ import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class LoincPartLinkHandler implements IRecordHandler {
+public class LoincPartLinkHandler implements IZipContentsHandlerCsv {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(LoincPartLinkHandler.class);
 	private final Map<String, TermConcept> myCode2Concept;

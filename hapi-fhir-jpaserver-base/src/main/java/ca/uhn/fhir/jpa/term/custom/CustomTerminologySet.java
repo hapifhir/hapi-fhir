@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.term.custom;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
-import ca.uhn.fhir.jpa.term.IRecordHandler;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import ca.uhn.fhir.jpa.term.LoadedFileDescriptors;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -133,14 +133,14 @@ public class CustomTerminologySet {
 
 		final Map<String, TermConcept> code2concept = new LinkedHashMap<>();
 		// Concepts
-		IRecordHandler conceptHandler = new ConceptHandler(code2concept);
+		IZipContentsHandlerCsv conceptHandler = new ConceptHandler(code2concept);
 
-		TermLoaderSvcImpl.iterateOverZipFile(theDescriptors, TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE, conceptHandler, ',', QuoteMode.NON_NUMERIC, false);
+		TermLoaderSvcImpl.iterateOverZipFileCsv(theDescriptors, TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE, conceptHandler, ',', QuoteMode.NON_NUMERIC, false);
 
 		if (theDescriptors.hasFile(TermLoaderSvcImpl.CUSTOM_PROPERTIES_FILE)) {
 			Map<String, List<TermConceptProperty>> theCode2property = new LinkedHashMap<>();
-			IRecordHandler propertyHandler = new PropertyHandler(theCode2property);
-			TermLoaderSvcImpl.iterateOverZipFile(theDescriptors, TermLoaderSvcImpl.CUSTOM_PROPERTIES_FILE, propertyHandler, ',', QuoteMode.NON_NUMERIC, false);
+			IZipContentsHandlerCsv propertyHandler = new PropertyHandler(theCode2property);
+			TermLoaderSvcImpl.iterateOverZipFileCsv(theDescriptors, TermLoaderSvcImpl.CUSTOM_PROPERTIES_FILE, propertyHandler, ',', QuoteMode.NON_NUMERIC, false);
 			for (TermConcept termConcept : code2concept.values()) {
 				if (!theCode2property.isEmpty() &&  theCode2property.get(termConcept.getCode()) != null) {
 					theCode2property.get(termConcept.getCode()).forEach(property -> {
@@ -158,8 +158,8 @@ public class CustomTerminologySet {
 
 			// Hierarchy
 			if (theDescriptors.hasFile(TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE)) {
-				IRecordHandler hierarchyHandler = new HierarchyHandler(code2concept);
-				TermLoaderSvcImpl.iterateOverZipFile(theDescriptors, TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE, hierarchyHandler, ',', QuoteMode.NON_NUMERIC, false);
+				IZipContentsHandlerCsv hierarchyHandler = new HierarchyHandler(code2concept);
+				TermLoaderSvcImpl.iterateOverZipFileCsv(theDescriptors, TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE, hierarchyHandler, ',', QuoteMode.NON_NUMERIC, false);
 			}
 
 			Map<String, Integer> codesInOrder = new HashMap<>();

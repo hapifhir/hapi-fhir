@@ -21,19 +21,16 @@ package ca.uhn.fhir.jpa.term.loinc;
  */
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.IRecordHandler;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import org.apache.commons.csv.CSVRecord;
-import org.hl7.fhir.r4.model.ValueSet;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class LoincAnswerListLinkHandler implements IRecordHandler {
+public class LoincAnswerListLinkHandler implements IZipContentsHandlerCsv {
 
 	private final Map<String, TermConcept> myCode2Concept;
 

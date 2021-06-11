@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.IRecordHandler;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -32,7 +32,7 @@ import java.util.*;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class LoincUniversalOrderSetHandler extends BaseLoincHandler implements IRecordHandler {
+public class LoincUniversalOrderSetHandler extends BaseLoincHandler implements IZipContentsHandlerCsv {
 
 	public static final String VS_ID_BASE = "loinc-universal-order-set";
 	public static final String VS_URI = "http://loinc.org/vs/loinc-universal-order-set";
