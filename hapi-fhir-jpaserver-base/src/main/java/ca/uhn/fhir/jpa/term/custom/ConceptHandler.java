@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.term.custom;
  */
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.IRecordHandler;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.Validate;
@@ -33,7 +33,7 @@ import java.util.Map;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ConceptHandler implements IRecordHandler {
+public class ConceptHandler implements IZipContentsHandlerCsv {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ConceptHandler.class);
 	public static final String CODE = "CODE";

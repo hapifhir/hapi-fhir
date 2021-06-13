@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  */
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.IRecordHandler;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.csv.CSVRecord;
@@ -38,7 +38,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPT
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class LoincPartRelatedCodeMappingHandler extends BaseLoincHandler implements IRecordHandler {
+public class LoincPartRelatedCodeMappingHandler extends BaseLoincHandler implements IZipContentsHandlerCsv {
 
 	public static final String LOINC_SCT_PART_MAP_ID = "loinc-parts-to-snomed-ct";
 	public static final String LOINC_SCT_PART_MAP_URI = "http://loinc.org/cm/loinc-parts-to-snomed-ct";

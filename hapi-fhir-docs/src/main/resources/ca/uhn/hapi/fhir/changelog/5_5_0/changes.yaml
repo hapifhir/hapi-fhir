@@ -6,6 +6,7 @@
 <ul>
 <li>Spring (JPA): 5.3.6 -> 5.3.7</li>
 <li>Spring Boot (JPA Starter): 2.4.4 -> 2.5.0</li>
+<li>Jetty (CLI): 9.4.39.v20210325 -> 9.4.42.v20210604</li>
 </ul>
 "
 

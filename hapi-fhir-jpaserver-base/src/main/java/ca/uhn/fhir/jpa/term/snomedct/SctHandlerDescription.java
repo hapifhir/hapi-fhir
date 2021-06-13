@@ -22,14 +22,14 @@ package ca.uhn.fhir.jpa.term.snomedct;
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.IRecordHandler;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import org.apache.commons.csv.CSVRecord;
 
 import java.util.Map;
 import java.util.Set;
 
-public final class SctHandlerDescription implements IRecordHandler {
+public final class SctHandlerDescription implements IZipContentsHandlerCsv {
    private final Map<String, TermConcept> myCode2concept;
    private final TermCodeSystemVersion myCodeSystemVersion;
    private final Map<String, TermConcept> myId2concept;
