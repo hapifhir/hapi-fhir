@@ -148,16 +148,19 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		List<IBaseResource> resourceList;
 		Integer numTotalResults = theResult.size();
 
+		int pageSize;
 		if (requestOffset != null || !theServer.canStoreSearchResults()) {
 			if (theLimit != null) {
-				numToReturn = theLimit;
+				pageSize = theLimit;
 			} else {
 				if (theServer.getDefaultPageSize() != null) {
-					numToReturn = theServer.getDefaultPageSize();
+					pageSize = theServer.getDefaultPageSize();
 				} else {
-					numToReturn = numTotalResults != null ? numTotalResults : Integer.MAX_VALUE;
+					pageSize = numTotalResults != null ? numTotalResults : Integer.MAX_VALUE;
 				}
 			}
+			numToReturn = pageSize;
+
 			if (requestOffset != null) {
 				// When offset query is done theResult already contains correct amount (+ their includes etc.) so return everything
 				resourceList = theResult.getResources(0, Integer.MAX_VALUE);
@@ -171,10 +174,11 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		} else {
 			IPagingProvider pagingProvider = theServer.getPagingProvider();
 			if (theLimit == null || theLimit.equals(0)) {
-				numToReturn = pagingProvider.getDefaultPageSize();
+				pageSize = pagingProvider.getDefaultPageSize();
 			} else {
-				numToReturn = Math.min(pagingProvider.getMaximumPageSize(), theLimit);
+				pageSize = Math.min(pagingProvider.getMaximumPageSize(), theLimit);
 			}
+			numToReturn = pageSize;
 
 			if (numTotalResults != null) {
 				numToReturn = Math.min(numToReturn, numTotalResults - theOffset);
@@ -247,8 +251,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), offset + numToReturn, numToReturn, theRequest.getParameters()));
 			}
 			if (offset > 0) {
-				int start = Math.max(0, offset - numToReturn);
-				links.setPrev(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), start, numToReturn, theRequest.getParameters()));
+				int start = Math.max(0, theOffset - pageSize);
+				links.setPrev(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), start, pageSize, theRequest.getParameters()));
 			}
 		} else if (isNotBlank(theResult.getCurrentPageId())) {
 			// We're doing named pages
@@ -271,8 +275,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 					links.setNext((RestfulServerUtils.createPagingLink(links, theRequest, searchId, theOffset + numToReturn, numToReturn, theRequest.getParameters())));
 				}
 				if (theOffset > 0) {
-				int start = Math.max(0, theOffset - numToReturn);
-					links.setPrev(RestfulServerUtils.createPagingLink(links, theRequest, searchId, start, numToReturn, theRequest.getParameters()));
+					int start = Math.max(0, theOffset - pageSize);
+					links.setPrev(RestfulServerUtils.createPagingLink(links, theRequest, searchId, start, pageSize, theRequest.getParameters()));
 				}
 			}
 		}
