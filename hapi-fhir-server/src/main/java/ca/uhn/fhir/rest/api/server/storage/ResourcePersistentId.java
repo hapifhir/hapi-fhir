@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.api.server.storage;
  */
 
 import ca.uhn.fhir.util.ObjectUtil;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,9 +33,9 @@ import java.util.Optional;
  * a Long, a String, or something else.
  */
 public class ResourcePersistentId {
-
 	private Object myId;
 	private Long myVersion;
+	private IIdType myAssociatedResourceId;
 
 	public ResourcePersistentId(Object theId) {
 		this(theId, null);
@@ -48,6 +49,15 @@ public class ResourcePersistentId {
 		assert !(theId instanceof Optional);
 		myId = theId;
 		myVersion = theVersion;
+	}
+
+	public IIdType getAssociatedResourceId() {
+		return myAssociatedResourceId;
+	}
+
+	public ResourcePersistentId setAssociatedResourceId(IIdType theAssociatedResourceId) {
+		myAssociatedResourceId = theAssociatedResourceId;
+		return this;
 	}
 
 	@Override

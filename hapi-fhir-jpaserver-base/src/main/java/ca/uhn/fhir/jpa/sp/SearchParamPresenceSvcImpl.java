@@ -54,7 +54,8 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 	}
 
 	@Override
-	public AddRemoveCount updatePresence(ResourceTable theResource, Map<String, Boolean> theParamNameToPresence) {
+	public AddRemoveCount
+	updatePresence(ResourceTable theResource, Map<String, Boolean> theParamNameToPresence) {
 		AddRemoveCount retVal = new AddRemoveCount();
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
 			return retVal;

@@ -378,6 +378,9 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 		b.append(new InstantType(new Date(theQuery.getQueryTimestamp())).getValueAsString());
 		b.append(" took ").append(StopWatch.formatMillis(theQuery.getElapsedTime()));
 		b.append(" on Thread: ").append(theQuery.getThreadName());
+		if (theQuery.getSize() > 1) {
+			b.append("\nExecution Count: ").append(theQuery.getSize()).append(" (parameters shown are for first execution)");
+		}
 		b.append("\nSQL:\n").append(formattedSql);
 		if (theQuery.getStackTrace() != null) {
 			b.append("\nStack:\n   ");

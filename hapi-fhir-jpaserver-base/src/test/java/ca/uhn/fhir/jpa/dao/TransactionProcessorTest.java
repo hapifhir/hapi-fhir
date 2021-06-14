@@ -5,9 +5,13 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hibernate.Session;
@@ -56,6 +60,14 @@ public class TransactionProcessorTest {
 	private ModelConfig myModelConfig;
 	@MockBean
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
+	@MockBean
+	private IdHelperService myIdHelperService;
+	@MockBean
+	private PartitionSettings myPartitionSettings;
+	@MockBean
+	private MatchUrlService myMatchUrlService;
+	@MockBean
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@MockBean(answer = Answers.RETURNS_DEEP_STUBS)
 	private SessionImpl mySession;

@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
@@ -131,6 +132,8 @@ public class GiantTransactionPerfTest {
 	private MockResourceHistoryTableDao myResourceHistoryTableDao;
 	private SearchParamPresenceSvcImpl mySearchParamPresenceSvc;
 	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
+	@Mock
+	private IdHelperService myIdHelperService;
 
 	@AfterEach
 	public void afterEach() {
@@ -172,6 +175,9 @@ public class GiantTransactionPerfTest {
 		myTransactionProcessor.setModelConfig(myDaoConfig.getModelConfig());
 		myTransactionProcessor.setHapiTransactionService(myHapiTransactionService);
 		myTransactionProcessor.setDaoRegistry(myDaoRegistry);
+		myTransactionProcessor.setPartitionSettingsForUnitTest(myPartitionSettings);
+		myTransactionProcessor.setIdHelperServiceForUnitTest(myIdHelperService);
+		myTransactionProcessor.setFhirContextForUnitTest(myCtx);
 		myTransactionProcessor.start();
 
 		mySystemDao = new FhirSystemDaoR4();
@@ -248,6 +254,7 @@ public class GiantTransactionPerfTest {
 		myEobDao.setSearchParamPresenceSvc(mySearchParamPresenceSvc);
 		myEobDao.setDaoSearchParamSynchronizer(myDaoSearchParamSynchronizer);
 		myEobDao.setDaoConfigForUnitTest(myDaoConfig);
+		myEobDao.setIdHelperSvcForUnitTest(myIdHelperService);
 		myEobDao.start();
 
 		myDaoRegistry.setResourceDaos(Lists.newArrayList(myEobDao));

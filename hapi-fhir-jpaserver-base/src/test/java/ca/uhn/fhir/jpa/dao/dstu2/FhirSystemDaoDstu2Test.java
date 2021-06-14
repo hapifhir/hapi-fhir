@@ -429,19 +429,11 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerbEnum.POST).setIfNoneExist("Patient?identifier=urn%3Asystem%7C" + methodName);
 
-		try {
-			myCaptureQueriesListener.clear();
-			mySystemDao.transaction(mySrd, request);
-			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, request);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
-			runInTransaction(()->{
-				ourLog.info("Tokens:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
-			});
-
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals(e.getMessage(), "Unable to process Transaction - Request would cause multiple resources to match URL: \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateWithDuplicateMatchUrl01\". Does transaction request contain duplicates?");
-		}
+		assertEquals(1, logAllResources());
 	}
 
 	@Test

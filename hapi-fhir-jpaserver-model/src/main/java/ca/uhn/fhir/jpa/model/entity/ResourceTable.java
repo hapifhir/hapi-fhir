@@ -604,7 +604,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myNarrativeText = theNarrativeText;
 	}
 
-	public ResourceHistoryTable toHistory() {
+	public ResourceHistoryTable toHistory(boolean theCreateVersionTags) {
 		ResourceHistoryTable retVal = new ResourceHistoryTable();
 
 		retVal.setResourceId(myId);
@@ -623,7 +623,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		retVal.getTags().clear();
 
 		retVal.setHasTags(isHasTags());
-		if (isHasTags()) {
+		if (isHasTags() && theCreateVersionTags) {
 			for (ResourceTag next : getTags()) {
 				retVal.addTag(next);
 			}

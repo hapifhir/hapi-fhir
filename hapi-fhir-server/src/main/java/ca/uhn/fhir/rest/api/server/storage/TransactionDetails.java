@@ -28,6 +28,7 @@ import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Date;
@@ -50,8 +51,11 @@ import java.util.function.Supplier;
  */
 public class TransactionDetails {
 
+	public static final ResourcePersistentId NOT_FOUND = new ResourcePersistentId(-1L);
+
 	private final Date myTransactionDate;
 	private Map<String, ResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
+	private Map<String, ResourcePersistentId> myResolvedMatchUrls = Collections.emptyMap();
 	private Map<String, Object> myUserData;
 	private ListMultimap<Pointcut, HookParams> myDeferredInterceptorBroadcasts;
 	private EnumSet<Pointcut> myDeferredInterceptorBroadcastPointcuts;
@@ -83,18 +87,51 @@ public class TransactionDetails {
 	}
 
 	/**
+	 * Was the given resource ID resolved previously in this transaction as not existing
+	 */
+	public boolean isResolvedResourceIdEmpty(IIdType theId) {
+		if (myResolvedResourceIds != null) {
+			if (myResolvedResourceIds.containsKey(theId.toVersionless().getValue())) {
+				if (myResolvedResourceIds.get(theId.toVersionless().getValue()) == null) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+
+	/**
 	 * A <b>Resolved Resource ID</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>" or
 	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
 	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
 	 */
-	public void addResolvedResourceId(IIdType theResourceId, ResourcePersistentId thePersistentId) {
+	public void addResolvedResourceId(IIdType theResourceId, @Nullable ResourcePersistentId thePersistentId) {
 		assert theResourceId != null;
-		assert thePersistentId != null;
 
 		if (myResolvedResourceIds.isEmpty()) {
 			myResolvedResourceIds = new HashMap<>();
 		}
 		myResolvedResourceIds.put(theResourceId.toVersionless().getValue(), thePersistentId);
+	}
+
+	public Map<String, ResourcePersistentId> getResolvedMatchUrls() {
+		return myResolvedMatchUrls;
+	}
+
+	/**
+	 * A <b>Resolved Conditional URL</b> is a mapping between a conditional URL (e.g. "<code>Patient?identifier=foo|bar</code>" or
+	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
+	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
+	 */
+	public void addResolvedMatchUrl(String theConditionalUrl, @Nonnull ResourcePersistentId thePersistentId) {
+		Validate.notBlank(theConditionalUrl);
+		Validate.notNull(thePersistentId);
+
+		if (myResolvedMatchUrls.isEmpty()) {
+			myResolvedMatchUrls = new HashMap<>();
+		}
+		myResolvedMatchUrls.put(theConditionalUrl, thePersistentId);
 	}
 
 	/**

@@ -231,7 +231,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p = myPatientDao.read(new IdType("Patient/" + firstClientAssignedId));
 		assertEquals(true, p.getActive());
 
-		// Not create a client assigned numeric ID
+		// Now create a client assigned numeric ID
 		p = new Patient();
 		p.setId("Patient/" + newId);
 		p.addName().setFamily("FAM");

@@ -85,6 +85,10 @@ public class DaoConfig {
 	public static final boolean DEFAULT_ENABLE_TASKS = true;
 	public static final int DEFAULT_MAXIMUM_INCLUDES_TO_LOAD_PER_PAGE = 1000;
 	/**
+	 * @since 5.5.0
+	 */
+	public static final TagStorageModeEnum DEFAULT_TAG_STORAGE_MODE = TagStorageModeEnum.VERSIONED;
+	/**
 	 * Default value for {@link #setMaximumSearchResultCountInTransaction(Integer)}
 	 *
 	 * @see #setMaximumSearchResultCountInTransaction(Integer)
@@ -129,6 +133,7 @@ public class DaoConfig {
 	private SearchTotalModeEnum myDefaultTotalMode = null;
 	private int myEverythingIncludesFetchPageSize = 50;
 	private int myBulkImportMaxRetryCount = 10;
+	private TagStorageModeEnum myTagStorageMode = DEFAULT_TAG_STORAGE_MODE;
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -219,7 +224,7 @@ public class DaoConfig {
 	/**
 	 * @since 5.4.0
 	 */
-	private boolean myMatchUrlCache;
+	private boolean myMatchUrlCacheEnabled;
 	/**
 	 * @since 5.5.0
 	 */
@@ -264,6 +269,26 @@ public class DaoConfig {
 			ourLog.info("Status based reindexing is DISABLED");
 			setStatusBasedReindexingDisabled(true);
 		}
+	}
+
+	/**
+	 * Sets the tag storage mode for the server. Default is {@link TagStorageModeEnum#VERSIONED}.
+	 *
+	 * @since 5.5.0
+	 */
+	@Nonnull
+	public TagStorageModeEnum getTagStorageMode() {
+		return myTagStorageMode;
+	}
+
+	/**
+	 * Sets the tag storage mode for the server. Default is {@link TagStorageModeEnum#VERSIONED}.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setTagStorageMode(@Nonnull TagStorageModeEnum theTagStorageMode) {
+		Validate.notNull(theTagStorageMode, "theTagStorageMode must not be null");
+		myTagStorageMode = theTagStorageMode;
 	}
 
 	/**
@@ -421,9 +446,25 @@ public class DaoConfig {
 	 * Default is <code>false</code>
 	 *
 	 * @since 5.4.0
+	 * @deprecated Deprecated in 5.5.0. Use {@link #isMatchUrlCacheEnabled()} instead (the name of this method is misleading)
 	 */
+	@Deprecated
 	public boolean getMatchUrlCache() {
-		return myMatchUrlCache;
+		return myMatchUrlCacheEnabled;
+	}
+
+	/**
+	 * If enabled, resolutions for match URLs (e.g. conditional create URLs, conditional update URLs, etc) will be
+	 * cached in an in-memory cache. This cache can have a noticeable improvement on write performance on servers
+	 * where conditional operations are frequently performed, but note that this cache will not be
+	 * invalidated based on updates to resources so this may have detrimental effects.
+	 * <p>
+	 * Default is <code>false</code>
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isMatchUrlCacheEnabled() {
+		return getMatchUrlCache();
 	}
 
 	/**
@@ -435,9 +476,25 @@ public class DaoConfig {
 	 * Default is <code>false</code>
 	 *
 	 * @since 5.4.0
+	 * @deprecated Deprecated in 5.5.0. Use {@link #setMatchUrlCacheEnabled(boolean)} instead (the name of this method is misleading)
 	 */
+	@Deprecated
 	public void setMatchUrlCache(boolean theMatchUrlCache) {
-		myMatchUrlCache = theMatchUrlCache;
+		myMatchUrlCacheEnabled = theMatchUrlCache;
+	}
+
+	/**
+	 * If enabled, resolutions for match URLs (e.g. conditional create URLs, conditional update URLs, etc) will be
+	 * cached in an in-memory cache. This cache can have a noticeable improvement on write performance on servers
+	 * where conditional operations are frequently performed, but note that this cache will not be
+	 * invalidated based on updates to resources so this may have detrimental effects.
+	 * <p>
+	 * Default is <code>false</code>
+	 *
+	 * @since 5.5.0
+	 */
+	public void setMatchUrlCacheEnabled(boolean theMatchUrlCache) {
+		setMatchUrlCache(theMatchUrlCache);
 	}
 
 	/**
@@ -2548,4 +2605,17 @@ public class DaoConfig {
 		ANY
 	}
 
+	public enum TagStorageModeEnum {
+
+		/**
+		 * A separate set of tags is stored for each resource version
+		 */
+		VERSIONED,
+
+		/**
+		 * A single set of tags is shared by all resource versions
+		 */
+		NON_VERSIONED
+
+	}
 }

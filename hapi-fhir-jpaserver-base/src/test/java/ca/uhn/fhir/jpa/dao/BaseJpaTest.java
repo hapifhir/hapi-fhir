@@ -11,14 +11,17 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
@@ -162,6 +165,10 @@ public abstract class BaseJpaTest extends BaseTest {
 	private IValidationSupport myJpaPersistedValidationSupport;
 	@Autowired
 	private FhirInstanceValidator myFhirInstanceValidator;
+	@Autowired
+	private IResourceTableDao myResourceTableDao;
+	@Autowired
+	private IResourceHistoryTableDao myResourceHistoryTableDao;
 
 	@AfterEach
 	public void afterPerformCleanup() {
@@ -239,6 +246,22 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void logAllResourceLinks() {
 		runInTransaction(() -> {
 			ourLog.info("Resource Links:\n * {}", myResourceLinkDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected int logAllResources() {
+		return runInTransaction(() -> {
+			List<ResourceTable> resources = myResourceTableDao.findAll();
+			ourLog.info("Resources:\n * {}", resources.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			return resources.size();
+		});
+	}
+
+	protected int logAllResourceVersions() {
+		return runInTransaction(() -> {
+			List<ResourceTable> resources = myResourceTableDao.findAll();
+			ourLog.info("Resources Versions:\n * {}", resources.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			return resources.size();
 		});
 	}
 
@@ -630,7 +653,7 @@ public abstract class BaseJpaTest extends BaseTest {
 				throw new Error(theE);
 			}
 		}
-		if (sw.getMillis() >= 16000) {
+		if (sw.getMillis() >= 16000 || theList.size() > theTarget) {
 			String describeResults = theList
 				.stream()
 				.map(t -> {
