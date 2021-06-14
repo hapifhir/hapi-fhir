@@ -26,8 +26,8 @@ import ca.uhn.fhir.jpa.dao.data.ISubscriptionTableDao;
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
@@ -48,8 +48,8 @@ public class FhirResourceDaoSubscriptionR4 extends BaseHapiFhirResourceDao<Subsc
 	}
 
 	@Override
-	public Long getSubscriptionTablePidForSubscriptionResource(IIdType theId, RequestDetails theRequest) {
-		ResourceTable entity = readEntityLatestVersion(theId, theRequest);
+	public Long getSubscriptionTablePidForSubscriptionResource(IIdType theId, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+		ResourceTable entity = readEntityLatestVersion(theId, theRequest, theTransactionDetails);
 		SubscriptionTable table = mySubscriptionTableDao.findOneByResourcePid(entity.getId());
 		if (table == null) {
 			return null;
@@ -72,7 +72,7 @@ public class FhirResourceDaoSubscriptionR4 extends BaseHapiFhirResourceDao<Subsc
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
 
 		if (theDeletedTimestampOrNull != null) {
-			Long subscriptionId = getSubscriptionTablePidForSubscriptionResource(theEntity.getIdDt(), theRequest);
+			Long subscriptionId = getSubscriptionTablePidForSubscriptionResource(theEntity.getIdDt(), theRequest, theTransactionDetails);
 			if (subscriptionId != null) {
 				mySubscriptionTableDao.deleteAllForSubscription(retVal);
 			}

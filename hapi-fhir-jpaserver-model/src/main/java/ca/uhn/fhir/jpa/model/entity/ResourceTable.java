@@ -23,9 +23,9 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.search.ResourceTableRoutingBinder;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -604,7 +604,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myNarrativeText = theNarrativeText;
 	}
 
-	public ResourceHistoryTable toHistory() {
+	public ResourceHistoryTable toHistory(boolean theCreateVersionTags) {
 		ResourceHistoryTable retVal = new ResourceHistoryTable();
 
 		retVal.setResourceId(myId);
@@ -623,7 +623,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		retVal.getTags().clear();
 
 		retVal.setHasTags(isHasTags());
-		if (isHasTags()) {
+		if (isHasTags() && theCreateVersionTags) {
 			for (ResourceTag next : getTags()) {
 				retVal.addTag(next);
 			}

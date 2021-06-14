@@ -184,7 +184,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		myHashIdentity = theHashIdentity;
 	}
 
-	Long getHashSystemAndValue() {
+	public Long getHashSystemAndValue() {
 		return myHashSystemAndValue;
 	}
 
@@ -192,7 +192,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		myHashSystemAndValue = theHashSystemAndValue;
 	}
 
-	Long getHashValue() {
+	public Long getHashValue() {
 		return myHashValue;
 	}
 

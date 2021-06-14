@@ -11,14 +11,17 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
@@ -162,6 +165,10 @@ public abstract class BaseJpaTest extends BaseTest {
 	private IValidationSupport myJpaPersistedValidationSupport;
 	@Autowired
 	private FhirInstanceValidator myFhirInstanceValidator;
+	@Autowired
+	private IResourceTableDao myResourceTableDao;
+	@Autowired
+	private IResourceHistoryTableDao myResourceHistoryTableDao;
 
 	@AfterEach
 	public void afterPerformCleanup() {
@@ -239,6 +246,41 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void logAllResourceLinks() {
 		runInTransaction(() -> {
 			ourLog.info("Resource Links:\n * {}", myResourceLinkDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	@SuppressWarnings("BusyWait")
+	public static void waitForSize(int theTarget, List<?> theList) {
+		StopWatch sw = new StopWatch();
+		while (theList.size() != theTarget && sw.getMillis() <= 16000) {
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException theE) {
+				throw new Error(theE);
+			}
+		}
+		if (sw.getMillis() >= 16000 || theList.size() > theTarget) {
+			String describeResults = theList
+				.stream()
+				.map(t -> {
+					if (t == null) {
+						return "null";
+					}
+					if (t instanceof IBaseResource) {
+						return ((IBaseResource) t).getIdElement().getValue();
+					}
+					return t.toString();
+				})
+				.collect(Collectors.joining(", "));
+			fail("Size " + theList.size() + " is != target " + theTarget + " - Got: " + describeResults);
+		}
+	}
+
+	protected int logAllResources() {
+		return runInTransaction(() -> {
+			List<ResourceTable> resources = myResourceTableDao.findAll();
+			ourLog.info("Resources:\n * {}", resources.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			return resources.size();
 		});
 	}
 
@@ -478,33 +520,12 @@ public abstract class BaseJpaTest extends BaseTest {
 		Thread.sleep(500);
 	}
 
-	protected TermValueSetConceptDesignation assertTermConceptContainsDesignation(TermValueSetConcept theConcept, String theLanguage, String theUseSystem, String theUseCode, String theUseDisplay, String theDesignationValue) {
-		Stream<TermValueSetConceptDesignation> stream = theConcept.getDesignations().stream();
-		if (theLanguage != null) {
-			stream = stream.filter(designation -> theLanguage.equalsIgnoreCase(designation.getLanguage()));
-		}
-		if (theUseSystem != null) {
-			stream = stream.filter(designation -> theUseSystem.equalsIgnoreCase(designation.getUseSystem()));
-		}
-		if (theUseCode != null) {
-			stream = stream.filter(designation -> theUseCode.equalsIgnoreCase(designation.getUseCode()));
-		}
-		if (theUseDisplay != null) {
-			stream = stream.filter(designation -> theUseDisplay.equalsIgnoreCase(designation.getUseDisplay()));
-		}
-		if (theDesignationValue != null) {
-			stream = stream.filter(designation -> theDesignationValue.equalsIgnoreCase(designation.getValue()));
-		}
-
-		Optional<TermValueSetConceptDesignation> first = stream.findFirst();
-		if (!first.isPresent()) {
-			String failureMessage = String.format("Concept %s did not contain designation [%s|%s|%s|%s|%s] ", theConcept.toString(), theLanguage, theUseSystem, theUseCode, theUseDisplay, theDesignationValue);
-			fail(failureMessage);
-			return null;
-		} else {
-			return first.get();
-		}
-
+	protected int logAllResourceVersions() {
+		return runInTransaction(() -> {
+			List<ResourceTable> resources = myResourceTableDao.findAll();
+			ourLog.info("Resources Versions:\n * {}", resources.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			return resources.size();
+		});
 	}
 
 	protected TermValueSetConcept assertTermValueSetContainsConceptAndIsInDeclaredOrder(TermValueSet theValueSet, String theSystem, String theCode, String theDisplay, Integer theDesignationCount) {
@@ -620,31 +641,33 @@ public abstract class BaseJpaTest extends BaseTest {
 		return retVal;
 	}
 
-	@SuppressWarnings("BusyWait")
-	public static void waitForSize(int theTarget, List<?> theList) {
-		StopWatch sw = new StopWatch();
-		while (theList.size() != theTarget && sw.getMillis() <= 16000) {
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException theE) {
-				throw new Error(theE);
-			}
+	protected TermValueSetConceptDesignation assertTermConceptContainsDesignation(TermValueSetConcept theConcept, String theLanguage, String theUseSystem, String theUseCode, String theUseDisplay, String theDesignationValue) {
+		Stream<TermValueSetConceptDesignation> stream = theConcept.getDesignations().stream();
+		if (theLanguage != null) {
+			stream = stream.filter(designation -> theLanguage.equalsIgnoreCase(designation.getLanguage()));
 		}
-		if (sw.getMillis() >= 16000) {
-			String describeResults = theList
-				.stream()
-				.map(t -> {
-					if (t == null) {
-						return "null";
-					}
-					if (t instanceof IBaseResource) {
-						return ((IBaseResource) t).getIdElement().getValue();
-					}
-					return t.toString();
-				})
-				.collect(Collectors.joining(", "));
-			fail("Size " + theList.size() + " is != target " + theTarget + " - Got: " + describeResults);
+		if (theUseSystem != null) {
+			stream = stream.filter(designation -> theUseSystem.equalsIgnoreCase(designation.getUseSystem()));
 		}
+		if (theUseCode != null) {
+			stream = stream.filter(designation -> theUseCode.equalsIgnoreCase(designation.getUseCode()));
+		}
+		if (theUseDisplay != null) {
+			stream = stream.filter(designation -> theUseDisplay.equalsIgnoreCase(designation.getUseDisplay()));
+		}
+		if (theDesignationValue != null) {
+			stream = stream.filter(designation -> theDesignationValue.equalsIgnoreCase(designation.getValue()));
+		}
+
+		Optional<TermValueSetConceptDesignation> first = stream.findFirst();
+		if (!first.isPresent()) {
+			String failureMessage = String.format("Concept %s did not contain designation [%s|%s|%s|%s|%s] ", theConcept, theLanguage, theUseSystem, theUseCode, theUseDisplay, theDesignationValue);
+			fail(failureMessage);
+			return null;
+		} else {
+			return first.get();
+		}
+
 	}
 
 	public static void waitForSize(int theTarget, Callable<Number> theCallable) throws Exception {

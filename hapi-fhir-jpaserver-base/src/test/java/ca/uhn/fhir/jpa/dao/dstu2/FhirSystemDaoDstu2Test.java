@@ -38,18 +38,15 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -429,19 +426,11 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerbEnum.POST).setIfNoneExist("Patient?identifier=urn%3Asystem%7C" + methodName);
 
-		try {
-			myCaptureQueriesListener.clear();
-			mySystemDao.transaction(mySrd, request);
-			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, request);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
-			runInTransaction(()->{
-				ourLog.info("Tokens:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
-			});
-
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals(e.getMessage(), "Unable to process Transaction - Request would cause multiple resources to match URL: \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateWithDuplicateMatchUrl01\". Does transaction request contain duplicates?");
-		}
+		assertEquals(1, logAllResources());
 	}
 
 	@Test
