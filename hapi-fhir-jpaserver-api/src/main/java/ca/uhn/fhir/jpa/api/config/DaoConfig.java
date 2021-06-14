@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu2.model.Subscription;
@@ -17,7 +18,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /*
  * #%L
@@ -2469,6 +2475,26 @@ public class DaoConfig {
 
 	public boolean canDeleteExpunge() {
 		return isAllowMultipleDelete() && isExpungeEnabled() && isDeleteExpungeEnabled();
+	}
+
+	public String cannotDeleteExpungeReason() {
+		List<String> reasons = new ArrayList<>();
+		if (!isAllowMultipleDelete()) {
+			reasons.add("Multiple Delete");
+		}
+		if (!isExpungeEnabled()) {
+			reasons.add("Expunge");
+		}
+		if (!isDeleteExpungeEnabled()) {
+			reasons.add("Delete Expunge");
+		}
+		String retval = "Delete Expunge is not supported on this server.  ";
+		if (reasons.size() == 1) {
+			retval += reasons.get(0) + " is disabled.";
+		} else {
+			retval += "The following configurations are disabled: " + StringUtils.join(reasons, ", ");
+		}
+		return retval;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

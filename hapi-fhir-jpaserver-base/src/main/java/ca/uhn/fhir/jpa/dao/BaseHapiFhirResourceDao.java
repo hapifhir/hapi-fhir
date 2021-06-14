@@ -566,7 +566,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	private DeleteMethodOutcome deleteExpunge(String theUrl, RequestDetails theRequest) {
 		if (!getConfig().canDeleteExpunge()) {
-			throw new MethodNotAllowedException("_expunge is not enabled on this server");
+			throw new MethodNotAllowedException("_expunge is not enabled on this server: " + getConfig().cannotDeleteExpungeReason());
 		}
 
 		List<String> urlsToDeleteExpunge = Collections.singletonList(theUrl);

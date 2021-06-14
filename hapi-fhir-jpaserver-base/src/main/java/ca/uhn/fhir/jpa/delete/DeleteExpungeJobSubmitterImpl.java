@@ -70,7 +70,7 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 	public JobExecution submitJob(Integer theBatchSize, RequestDetails theRequest, List<String> theUrlsToDeleteExpunge) throws JobParametersInvalidException {
 		List<RequestPartitionId> requestPartitionIds = requestPartitionIdsFromRequestAndUrls(theRequest, theUrlsToDeleteExpunge);
 		if (!myDaoConfig.canDeleteExpunge()) {
-			throw new ForbiddenOperationException("Delete Expunge is not enabled on this server.");
+			throw new ForbiddenOperationException("Delete Expunge not allowed:  " + myDaoConfig.cannotDeleteExpungeReason());
 		}
 
 		for (String url : theUrlsToDeleteExpunge) {
