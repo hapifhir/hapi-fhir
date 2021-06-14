@@ -24,6 +24,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hl7.fhir.r4.model.ResourceType.Patient;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings({"unchecked", "Duplicates"})
 public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
@@ -87,16 +88,30 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSearchWithIDAndIncludeDoesNotCauseNPE() {
+	public void testSearchWithIncludeSpecDoesNotCauseNPE() {
 		createPatientWithReferencingCarePlan(1);
 
+		// First verify it with the "." syntax
 		SearchParameterMap map = SearchParameterMap.newSynchronous()
 			.addInclude(new Include("CarePlan.patient"));
-		IBundleProvider results = myCarePlanDao.search(map);
-		List<String> ids = toUnqualifiedVersionlessIdValues(results);
-		Collection<Matcher<String>> expected = IntStream.range(0, 1).mapToObj(t -> equalTo("Patient/PAT-1" + t)).collect(Collectors.toList());
-		expected.add(equalTo("Patient/PAT-1"));
-		assertThat(ids.toString(), ids, new IsIterableContainingInAnyOrder(expected));
+		try {
+			IBundleProvider results = myCarePlanDao.search(map);
+			List<String> ids = toUnqualifiedVersionlessIdValues(results);
+			assertThat(ids.toString(), ids, containsInAnyOrder("CarePlan/CP-1"));
+		} catch (Exception e) {
+			fail();
+		}
+
+		// Next verify it with the ":" syntax
+		SearchParameterMap map2 = SearchParameterMap.newSynchronous()
+			.addInclude(new Include("CarePlan:patient"));
+		try {
+			IBundleProvider results = myCarePlanDao.search(map2);
+			List<String> ids = toUnqualifiedVersionlessIdValues(results);
+			assertThat(ids.toString(), ids, containsInAnyOrder("CarePlan/CP-1", "Patient/PAT-1"));
+		} catch (Exception e) {
+			fail();
+		}
 	}
 
 	@Test
@@ -180,7 +195,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		patient.setId("Patient/PAT-1");
 		myPatientDao.update(patient);
 
-		for (int i = 0; i < theCount; i++) {
+		for (int i = 1; i <= theCount; i++) {
 			CarePlan carePlan = new CarePlan();
 			carePlan.setId("CarePlan/CP-" + i);
 			carePlan.getSubject().setReference("Patient/PAT-1");
