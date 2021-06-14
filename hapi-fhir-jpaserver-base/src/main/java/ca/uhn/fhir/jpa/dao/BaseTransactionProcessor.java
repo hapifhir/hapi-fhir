@@ -680,9 +680,13 @@ public abstract class BaseTransactionProcessor {
 
 					nextResourceId = res.getIdElement();
 
-					if (!nextResourceId.hasIdPart()) {
-						if (isNotBlank(myVersionAdapter.getFullUrl(nextReqEntry))) {
-							nextResourceId = newIdType(myVersionAdapter.getFullUrl(nextReqEntry));
+					String fullUrl = myVersionAdapter.getFullUrl(nextReqEntry);
+					if (isNotBlank(fullUrl)) {
+						IIdType fullUrlIdType = newIdType(fullUrl);
+						if (isPlaceholder(fullUrlIdType)) {
+							nextResourceId = fullUrlIdType;
+						} else if (!nextResourceId.hasIdPart()) {
+							nextResourceId = fullUrlIdType;
 						}
 					}
 
