@@ -275,7 +275,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					for (MatchUrlToResolve nextSearchParameterMap : searchParameterMapsToResolve) {
 						// No matches
 						if (!nextSearchParameterMap.myResolved) {
-							theTransactionDetails.addResolvedMatchUrl(nextSearchParameterMap.myRequestUrl, null);
+							theTransactionDetails.addResolvedMatchUrl(nextSearchParameterMap.myRequestUrl, TransactionDetails.NOT_FOUND);
 						}
 					}
 

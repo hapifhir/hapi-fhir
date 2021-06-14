@@ -224,7 +224,7 @@ public class DaoConfig {
 	/**
 	 * @since 5.4.0
 	 */
-	private boolean myMatchUrlCache;
+	private boolean myMatchUrlCacheEnabled;
 	/**
 	 * @since 5.5.0
 	 */
@@ -446,9 +446,25 @@ public class DaoConfig {
 	 * Default is <code>false</code>
 	 *
 	 * @since 5.4.0
+	 * @deprecated Deprecated in 5.5.0. Use {@link #isMatchUrlCacheEnabled()} instead (the name of this method is misleading)
 	 */
+	@Deprecated
 	public boolean getMatchUrlCache() {
-		return myMatchUrlCache;
+		return myMatchUrlCacheEnabled;
+	}
+
+	/**
+	 * If enabled, resolutions for match URLs (e.g. conditional create URLs, conditional update URLs, etc) will be
+	 * cached in an in-memory cache. This cache can have a noticeable improvement on write performance on servers
+	 * where conditional operations are frequently performed, but note that this cache will not be
+	 * invalidated based on updates to resources so this may have detrimental effects.
+	 * <p>
+	 * Default is <code>false</code>
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isMatchUrlCacheEnabled() {
+		return getMatchUrlCache();
 	}
 
 	/**
@@ -460,9 +476,25 @@ public class DaoConfig {
 	 * Default is <code>false</code>
 	 *
 	 * @since 5.4.0
+	 * @deprecated Deprecated in 5.5.0. Use {@link #setMatchUrlCacheEnabled(boolean)} instead (the name of this method is misleading)
 	 */
+	@Deprecated
 	public void setMatchUrlCache(boolean theMatchUrlCache) {
-		myMatchUrlCache = theMatchUrlCache;
+		myMatchUrlCacheEnabled = theMatchUrlCache;
+	}
+
+	/**
+	 * If enabled, resolutions for match URLs (e.g. conditional create URLs, conditional update URLs, etc) will be
+	 * cached in an in-memory cache. This cache can have a noticeable improvement on write performance on servers
+	 * where conditional operations are frequently performed, but note that this cache will not be
+	 * invalidated based on updates to resources so this may have detrimental effects.
+	 * <p>
+	 * Default is <code>false</code>
+	 *
+	 * @since 5.5.0
+	 */
+	public void setMatchUrlCacheEnabled(boolean theMatchUrlCache) {
+		setMatchUrlCache(theMatchUrlCache);
 	}
 
 	/**

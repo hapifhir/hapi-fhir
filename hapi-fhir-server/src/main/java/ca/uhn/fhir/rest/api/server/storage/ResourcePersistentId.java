@@ -33,7 +33,6 @@ import java.util.Optional;
  * a Long, a String, or something else.
  */
 public class ResourcePersistentId {
-
 	private Object myId;
 	private Long myVersion;
 	private IIdType myAssociatedResourceId;

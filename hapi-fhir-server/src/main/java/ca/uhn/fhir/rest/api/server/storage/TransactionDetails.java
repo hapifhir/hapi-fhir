@@ -28,6 +28,7 @@ import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Date;
@@ -49,6 +50,8 @@ import java.util.function.Supplier;
  * @since 5.0.0
  */
 public class TransactionDetails {
+
+	public static final ResourcePersistentId NOT_FOUND = new ResourcePersistentId(-1L);
 
 	private final Date myTransactionDate;
 	private Map<String, ResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
@@ -121,8 +124,9 @@ public class TransactionDetails {
 	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
 	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
 	 */
-	public void addResolvedMatchUrl(String theConditionalUrl, @Nullable ResourcePersistentId thePersistentId) {
-		assert theConditionalUrl != null;
+	public void addResolvedMatchUrl(String theConditionalUrl, @Nonnull ResourcePersistentId thePersistentId) {
+		Validate.notBlank(theConditionalUrl);
+		Validate.notNull(thePersistentId);
 
 		if (myResolvedMatchUrls.isEmpty()) {
 			myResolvedMatchUrls = new HashMap<>();

@@ -399,9 +399,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (updatedEntity.getForcedId() != null) {
 			forcedId = updatedEntity.getForcedId().getForcedId();
 		}
-		if (myIdHelperService != null) {
-			myIdHelperService.addResolvedPidToForcedId(persistentId, theRequestPartitionId, getResourceName(), forcedId);
-		}
+		myIdHelperService.addResolvedPidToForcedId(persistentId, theRequestPartitionId, getResourceName(), forcedId);
 
 		ourLog.debug(msg);
 		return outcome;

@@ -72,12 +72,14 @@ public class MatchResourceUrlService {
 	public <R extends IBaseResource> Set<ResourcePersistentId> processMatchUrl(String theMatchUrl, Class<R> theResourceType, TransactionDetails theTransactionDetails, RequestDetails theRequest) {
 		String resourceType = myContext.getResourceType(theResourceType);
 		String matchUrl = massageForStorage(resourceType, theMatchUrl);
+
 		ResourcePersistentId resolvedInTransaction = theTransactionDetails.getResolvedMatchUrls().get(matchUrl);
 		if (resolvedInTransaction != null) {
-			return Collections.singleton(resolvedInTransaction);
-		}
-		if (theTransactionDetails.getResolvedMatchUrls().containsKey(matchUrl)) {
-			return Collections.emptySet();
+			if (resolvedInTransaction == TransactionDetails.NOT_FOUND) {
+				return Collections.emptySet();
+			} else {
+				return Collections.singleton(resolvedInTransaction);
+			}
 		}
 
 		ResourcePersistentId resolvedInCache = processMatchUrlUsingCacheOnly(resourceType, matchUrl);
@@ -94,7 +96,7 @@ public class MatchResourceUrlService {
 
 		Set<ResourcePersistentId> retVal = search(paramMap, theResourceType, theRequest);
 
-		if (myDaoConfig.getMatchUrlCache() && retVal.size() == 1) {
+		if (myDaoConfig.isMatchUrlCacheEnabled() && retVal.size() == 1) {
 			ResourcePersistentId pid = retVal.iterator().next();
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, pid);
 		}
@@ -152,7 +154,7 @@ public class MatchResourceUrlService {
 		Validate.notNull(theResourcePersistentId);
 		String matchUrl = massageForStorage(theResourceType, theMatchUrl);
 		theTransactionDetails.addResolvedMatchUrl(matchUrl, theResourcePersistentId);
-		if (myDaoConfig.getMatchUrlCache()) {
+		if (myDaoConfig.isMatchUrlCacheEnabled()) {
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, theResourcePersistentId);
 		}
 	}
