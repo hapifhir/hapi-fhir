@@ -2217,12 +2217,9 @@
 						<dependency>
 							<groupId>com.puppycrawl.tools</groupId>
 							<artifactId>checkstyle</artifactId>
-							<version>8.42</version>
+							<version>8.43</version>
 						</dependency>
 					</dependencies>
-					<configuration>
-						<configLocation>${project.basedir}/src/checkstyle/checkstyle.xml</configLocation>
-					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

@@ -19,6 +19,7 @@ import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -965,22 +966,31 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		cs.addConcept().setCode("code1");
 		cs.addConcept().setCode("code2");
 		cs.addConcept().setCode("code3");
+		cs.addConcept().setCode("code4");
+		cs.addConcept().setCode("code5");
 		myCodeSystemDao.update(cs);
 
 		// Vs in reverse order
 		ValueSet vs = new ValueSet();
 		vs.setId("vs");
 		vs.setUrl("http://vs");
-		vs.getCompose().addInclude().setSystem("http://cs").addConcept().setCode("code3");
-		vs.getCompose().addInclude().setSystem("http://cs").addConcept().setCode("code2");
-		vs.getCompose().addInclude().setSystem("http://cs").addConcept().setCode("code1");
+		// Add some codes in separate compose sections, and some more codes in a single compose section.
+		// Order should be preserved for all of them.
+		vs.getCompose().addInclude().setSystem("http://cs")
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code5")));
+		vs.getCompose().addInclude().setSystem("http://cs")
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code4")));
+		vs.getCompose().addInclude().setSystem("http://cs")
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code3")))
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code2")))
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code1")));
 		myValueSetDao.update(vs);
 
 		// Non Pre-Expanded
 		ValueSet outcome = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
 		assertEquals("ValueSet \"ValueSet.url[http://vs]\" has not yet been pre-expanded. Performing in-memory expansion without parameters. Current status: NOT_EXPANDED | The ValueSet is waiting to be picked up and pre-expanded by a scheduled task.", outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
 		assertThat(toCodes(outcome).toString(), toCodes(outcome), contains(
-			"code3", "code2", "code1"
+			"code5", "code4", "code3", "code2", "code1"
 			));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -991,7 +1001,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals("ValueSet was expanded using a pre-calculated expansion", outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
 		assertThat(toCodes(outcome).toString(), toCodes(outcome), contains(
-			"code3", "code2", "code1"
+			"code5", "code4", "code3", "code2", "code1"
 		));
 
 	}

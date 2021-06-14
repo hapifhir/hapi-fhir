@@ -140,6 +140,25 @@
 					</ignoredResourcePatterns>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>checkstyle</goal>
+						</goals>
+						<configuration>
+							<failsOnError>true</failsOnError>
+							<enableRulesSummary>true</enableRulesSummary>
+							<enableSeveritySummary>true</enableSeveritySummary>
+							<consoleOutput>true</consoleOutput>
+							<configLocation>${project.basedir}/../src/checkstyle/checkstyle.xml</configLocation>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
