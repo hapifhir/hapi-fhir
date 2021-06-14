@@ -254,6 +254,7 @@ public class GiantTransactionPerfTest {
 		myEobDao.setSearchParamPresenceSvc(mySearchParamPresenceSvc);
 		myEobDao.setDaoSearchParamSynchronizer(myDaoSearchParamSynchronizer);
 		myEobDao.setDaoConfigForUnitTest(myDaoConfig);
+		myEobDao.setIdHelperSvcForUnitTest(myIdHelperService);
 		myEobDao.start();
 
 		myDaoRegistry.setResourceDaos(Lists.newArrayList(myEobDao));

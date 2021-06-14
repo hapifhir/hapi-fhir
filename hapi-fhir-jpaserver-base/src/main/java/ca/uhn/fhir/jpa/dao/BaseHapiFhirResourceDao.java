@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.expunge.DeleteExpungeService;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
@@ -1801,6 +1802,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			// Note- Throw a HAPI FHIR exception here so that hibernate doesn't try to translate it into a database exception
 			throw new InvalidRequestException("Incorrect resource type (" + theId.getResourceType() + ") for this DAO, wanted: " + myResourceName);
 		}
+	}
+
+	@VisibleForTesting
+	public void setIdHelperSvcForUnitTest(IdHelperService theIdHelperService) {
+		myIdHelperService = theIdHelperService;
 	}
 
 	private static class IdChecker implements IValidatorModule {
