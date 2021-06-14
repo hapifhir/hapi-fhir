@@ -936,7 +936,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ourLog.debug("Processed metaAddOperation on {} in {}ms", theResourceId, w.getMillisAndRestart());
 
 		@SuppressWarnings("unchecked")
-		MT retVal = metaGetOperation(theMetaAdd.getClass(), theResourceId, theRequest);
+		MT retVal = (MT) metaGetOperation(theMetaAdd.getClass(), theResourceId, theRequest);
 		return retVal;
 	}
 
@@ -971,7 +971,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ourLog.debug("Processed metaDeleteOperation on {} in {}ms", theResourceId.getValue(), w.getMillisAndRestart());
 
 		@SuppressWarnings("unchecked")
-		MT retVal = metaGetOperation(theMetaDel.getClass(), theResourceId, theRequest);
+		MT retVal = (MT) metaGetOperation(theMetaDel.getClass(), theResourceId, theRequest);
 		return retVal;
 	}
 
