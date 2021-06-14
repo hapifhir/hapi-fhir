@@ -137,6 +137,20 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertEquals(response0.getId(), response1.getId());
 
 		// Pretend the search was errored out
+		markSearchErrored();
+
+		// Perform the search again (shouldn't return the errored out search)
+		Bundle response3 = myClient.search()
+			.forResource("Patient")
+			.where(Patient.NAME.matches().value("Hello"))
+			.returnBundle(Bundle.class)
+			.execute();
+		assertEquals(1, response3.getEntry().size());
+		assertNotEquals(response0.getId(), response3.getId());
+
+	}
+
+	private void markSearchErrored() {
 		while (true) {
 			try {
 				runInTransaction(() -> {
@@ -152,16 +166,6 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 				continue;
 			}
 		}
-
-		// Perform the search again (shouldn't return the errored out search)
-		Bundle response3 = myClient.search()
-			.forResource("Patient")
-			.where(Patient.NAME.matches().value("Hello"))
-			.returnBundle(Bundle.class)
-			.execute();
-		assertEquals(1, response3.getEntry().size());
-		assertNotEquals(response0.getId(), response3.getId());
-
 	}
 
 	@Test
@@ -184,13 +188,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertEquals(1, response0.getEntry().size());
 
 		// Pretend the search was errored out
-		runInTransaction(() -> {
-			assertEquals(1L, mySearchEntityDao.count());
-			Search search = mySearchEntityDao.findAll().iterator().next();
-			search.setStatus(SearchStatusEnum.FAILED);
-			search.setFailureMessage("Some Failure Message");
-			search.setFailureCode(501);
-		});
+		markSearchErrored();
 
 		// Request the second page
 		try {
