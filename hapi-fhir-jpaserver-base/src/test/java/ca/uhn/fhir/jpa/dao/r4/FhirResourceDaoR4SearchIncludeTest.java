@@ -7,8 +7,10 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hamcrest.Matcher;
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
+import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.EpisodeOfCare;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +23,7 @@ import java.util.stream.IntStream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hl7.fhir.r4.model.ResourceType.Patient;
 
 @SuppressWarnings({"unchecked", "Duplicates"})
 public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
@@ -81,6 +84,19 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 			"EpisodeOfCare/EOC-4",
 			"Organization/ORG-0"
 		));
+	}
+
+	@Test
+	public void testSearchWithIDAndIncludeDoesNotCauseNPE() {
+		createPatientWithReferencingCarePlan(1);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous()
+			.addInclude(new Include("CarePlan.patient"));
+		IBundleProvider results = myCarePlanDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		Collection<Matcher<String>> expected = IntStream.range(0, 1).mapToObj(t -> equalTo("Patient/PAT-1" + t)).collect(Collectors.toList());
+		expected.add(equalTo("Patient/PAT-1"));
+		assertThat(ids.toString(), ids, new IsIterableContainingInAnyOrder(expected));
 	}
 
 	@Test
@@ -156,6 +172,19 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 			eoc.setId("EpisodeOfCare/EOC-" + i);
 			eoc.getManagingOrganization().setReference("Organization/ORG-0");
 			myEpisodeOfCareDao.update(eoc);
+		}
+	}
+
+	private void createPatientWithReferencingCarePlan(int theCount) {
+		org.hl7.fhir.r4.model.Patient patient = new Patient();
+		patient.setId("Patient/PAT-1");
+		myPatientDao.update(patient);
+
+		for (int i = 0; i < theCount; i++) {
+			CarePlan carePlan = new CarePlan();
+			carePlan.setId("CarePlan/CP-" + i);
+			carePlan.getSubject().setReference("Patient/PAT-1");
+			myCarePlanDao.update(carePlan);
 		}
 	}
 }
