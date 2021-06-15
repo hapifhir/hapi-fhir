@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.batch.processors;
+package ca.uhn.fhir.jpa.batch.processor;
 
 /*-
  * #%L

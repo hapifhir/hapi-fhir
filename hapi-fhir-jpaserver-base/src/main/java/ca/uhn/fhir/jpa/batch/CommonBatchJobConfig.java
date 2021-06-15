@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.batch;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.batch.processors.GoldenResourceAnnotatingProcessor;
-import ca.uhn.fhir.jpa.batch.processors.PidToIBaseResourceProcessor;
+import ca.uhn.fhir.jpa.batch.processor.GoldenResourceAnnotatingProcessor;
+import ca.uhn.fhir.jpa.batch.processor.PidToIBaseResourceProcessor;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

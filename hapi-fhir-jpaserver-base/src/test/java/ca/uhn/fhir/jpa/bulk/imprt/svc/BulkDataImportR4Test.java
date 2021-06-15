@@ -5,7 +5,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.bulk.BaseBatchJobR4Test;
+import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
@@ -13,12 +13,14 @@ import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobFileDao;
+import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
 import ca.uhn.fhir.jpa.entity.BulkImportJobFileEntity;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -54,7 +56,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-public class BulkDataImportR4Test extends BaseBatchJobR4Test implements ITestDataBuilder {
+public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuilder {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataImportR4Test.class);
 	@Autowired
@@ -67,6 +69,8 @@ public class BulkDataImportR4Test extends BaseBatchJobR4Test implements ITestDat
 	private JobExplorer myJobExplorer;
 	@Autowired
 	private JobRegistry myJobRegistry;
+	@Autowired
+	private BatchJobHelper myBatchJobHelper;
 
 	@AfterEach
 	public void after() {
@@ -90,7 +94,7 @@ public class BulkDataImportR4Test extends BaseBatchJobR4Test implements ITestDat
 		boolean activateJobOutcome = mySvc.activateNextReadyJob();
 		assertTrue(activateJobOutcome);
 
-		List<JobExecution> executions = awaitAllBulkJobCompletions();
+		List<JobExecution> executions = awaitAllBulkImportJobCompletion();
 		assertEquals("testFlow_TransactionRows", executions.get(0).getJobParameters().getString(BulkExportJobConfig.JOB_DESCRIPTION));
 
 		runInTransaction(() -> {
@@ -127,7 +131,7 @@ public class BulkDataImportR4Test extends BaseBatchJobR4Test implements ITestDat
 		boolean activateJobOutcome = mySvc.activateNextReadyJob();
 		assertTrue(activateJobOutcome);
 
-		awaitAllBulkJobCompletions();
+		awaitAllBulkImportJobCompletion();
 
 		ArgumentCaptor<HookParams> paramsCaptor = ArgumentCaptor.forClass(HookParams.class);
 		verify(interceptor, times(50)).invoke(any(), paramsCaptor.capture());
@@ -207,8 +211,8 @@ public class BulkDataImportR4Test extends BaseBatchJobR4Test implements ITestDat
 		assertEquals(true, job.isRestartable());
 	}
 
-	protected List<JobExecution> awaitAllBulkJobCompletions() {
-		return awaitAllBulkJobCompletions(BULK_IMPORT_JOB_NAME);
+	protected List<JobExecution> awaitAllBulkImportJobCompletion() {
+		return myBatchJobHelper.awaitAllBulkJobCompletions(BatchJobsConfig.BULK_IMPORT_JOB_NAME);
 	}
 
 	@Interceptor
@@ -223,7 +227,5 @@ public class BulkDataImportR4Test extends BaseBatchJobR4Test implements ITestDat
 				throw new InternalErrorException(ERROR_MESSAGE);
 			}
 		}
-
 	}
-
 }

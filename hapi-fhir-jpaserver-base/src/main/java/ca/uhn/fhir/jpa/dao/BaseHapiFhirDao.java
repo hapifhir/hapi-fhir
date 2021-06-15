@@ -607,10 +607,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			}
 
-			boolean skipUpdatingTags = false;
-			if (myConfig.isMassIngestionMode() && theEntity.isHasTags()) {
-				skipUpdatingTags = true;
-			}
+			boolean skipUpdatingTags = myConfig.isMassIngestionMode() && theEntity.isHasTags();
 
 			if (!skipUpdatingTags) {
 				Set<ResourceTag> allDefs = new HashSet<>();

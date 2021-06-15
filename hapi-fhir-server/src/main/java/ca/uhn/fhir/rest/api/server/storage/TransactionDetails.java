@@ -92,9 +92,7 @@ public class TransactionDetails {
 	public boolean isResolvedResourceIdEmpty(IIdType theId) {
 		if (myResolvedResourceIds != null) {
 			if (myResolvedResourceIds.containsKey(theId.toVersionless().getValue())) {
-				if (myResolvedResourceIds.get(theId.toVersionless().getValue()) == null) {
-					return true;
-				}
+				return myResolvedResourceIds.get(theId.toVersionless().getValue()) == null;
 			}
 		}
 		return false;
@@ -172,7 +170,7 @@ public class TransactionDetails {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T getOrCreateUserData(String theKey, Supplier<T> theSupplier) {
-		T retVal = (T) getUserData(theKey);
+		T retVal = getUserData(theKey);
 		if (retVal == null) {
 			retVal = theSupplier.get();
 			putUserData(theKey, retVal);

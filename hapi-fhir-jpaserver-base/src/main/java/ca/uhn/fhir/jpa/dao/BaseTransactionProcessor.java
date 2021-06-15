@@ -1145,10 +1145,7 @@ public abstract class BaseTransactionProcessor {
 
 		IBasePersistedResource updateOutcome = null;
 		if (updatedEntities.contains(nextOutcome.getEntity())) {
-			boolean forceUpdateVersion = false;
-			if (!theReferencesToAutoVersion.isEmpty()) {
-				forceUpdateVersion = true;
-			}
+			boolean forceUpdateVersion = !theReferencesToAutoVersion.isEmpty();
 
 			updateOutcome = jpaDao.updateInternal(theRequest, nextResource, true, forceUpdateVersion, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource(), theTransactionDetails);
 		} else if (!nonUpdatedEntities.contains(nextOutcome.getId())) {

@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  */
 
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
-import ca.uhn.fhir.jpa.batch.processors.GoldenResourceAnnotatingProcessor;
-import ca.uhn.fhir.jpa.batch.processors.PidToIBaseResourceProcessor;
+import ca.uhn.fhir.jpa.batch.processor.GoldenResourceAnnotatingProcessor;
+import ca.uhn.fhir.jpa.batch.processor.PidToIBaseResourceProcessor;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportDaoSvc;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;

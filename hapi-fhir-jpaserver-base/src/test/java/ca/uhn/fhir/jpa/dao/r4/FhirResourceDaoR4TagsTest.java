@@ -112,7 +112,7 @@ public class FhirResourceDaoR4TagsTest extends BaseJpaR4Test {
 		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 
 		// Version 2
-		 patient = (Patient) history.getResources(0, 999).get(0);
+		patient = (Patient) history.getResources(0, 999).get(0);
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile2"));
 		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 	}
@@ -140,7 +140,6 @@ public class FhirResourceDaoR4TagsTest extends BaseJpaR4Test {
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile2"));
 		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 	}
-
 
 
 	private void initializeNonVersioned() {

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -2652,7 +2653,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			obsD.addNote().setText("Foo " + counter.incrementAndGet()); // changes every time
 			bb.addTransactionUpdateEntry(obsD).conditional("Observation?code=bar4");
 
-			return (Bundle)bb.getBundle();
+			return (Bundle) bb.getBundle();
 		};
 
 		ourLog.info("About to start transaction");
@@ -3063,6 +3064,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			RequestPartitionId partitionId = captor.getValue().get(RequestPartitionId.class);
 			assertEquals(1, partitionId.getPartitionIds().get(0).intValue());
 			assertEquals("PART-1", partitionId.getPartitionNames().get(0));
+			assertEquals("Patient", captor.getValue().get(RuntimeResourceDefinition.class).getName());
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);

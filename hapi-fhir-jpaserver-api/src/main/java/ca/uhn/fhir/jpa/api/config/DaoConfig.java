@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu2.model.Subscription;
@@ -220,7 +221,7 @@ public class DaoConfig {
 	 * update setter javadoc if default changes
 	 */
 	@Nonnull
-	private Long myTranslationCachesExpireAfterWriteInMinutes = DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES;
+	private final Long myTranslationCachesExpireAfterWriteInMinutes = DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES;
 	/**
 	 * @since 5.4.0
 	 */
@@ -461,10 +462,12 @@ public class DaoConfig {
 	 * <p>
 	 * Default is <code>false</code>
 	 *
-	 * @since 5.5.0
+	 * @since 5.4.0
+	 * @deprecated Deprecated in 5.5.0. Use {@link #setMatchUrlCacheEnabled(boolean)} instead (the name of this method is misleading)
 	 */
-	public boolean isMatchUrlCacheEnabled() {
-		return getMatchUrlCache();
+	@Deprecated
+	public void setMatchUrlCache(boolean theMatchUrlCache) {
+		myMatchUrlCacheEnabled = theMatchUrlCache;
 	}
 
 	/**
@@ -475,12 +478,10 @@ public class DaoConfig {
 	 * <p>
 	 * Default is <code>false</code>
 	 *
-	 * @since 5.4.0
-	 * @deprecated Deprecated in 5.5.0. Use {@link #setMatchUrlCacheEnabled(boolean)} instead (the name of this method is misleading)
+	 * @since 5.5.0
 	 */
-	@Deprecated
-	public void setMatchUrlCache(boolean theMatchUrlCache) {
-		myMatchUrlCacheEnabled = theMatchUrlCache;
+	public boolean isMatchUrlCacheEnabled() {
+		return getMatchUrlCache();
 	}
 
 	/**
@@ -1629,7 +1630,8 @@ public class DaoConfig {
 
 	/**
 	 * The expunge batch size (default 800) determines the number of records deleted within a single transaction by the
-	 * expunge operation.
+	 * expunge operation.  When expunging via DELETE ?_expunge=true, then this value determines the batch size for
+	 * the number of resources deleted and expunged at a time.
 	 */
 	public int getExpungeBatchSize() {
 		return myExpungeBatchSize;
@@ -1637,7 +1639,8 @@ public class DaoConfig {
 
 	/**
 	 * The expunge batch size (default 800) determines the number of records deleted within a single transaction by the
-	 * expunge operation.
+	 * expunge operation.  When expunging via DELETE ?_expunge=true, then this value determines the batch size for
+	 * the number of resources deleted and expunged at a time.
 	 */
 	public void setExpungeBatchSize(int theExpungeBatchSize) {
 		myExpungeBatchSize = theExpungeBatchSize;
@@ -2328,9 +2331,8 @@ public class DaoConfig {
 
 	/**
 	 * <p>
-	 * This determines the internal search size that is run synchronously during operations such as:
-	 * 1. Delete with _expunge parameter.
-	 * 2. Searching for Code System IDs by System and Code
+	 * This determines the internal search size that is run synchronously during operations such as searching for
+	 * Code System IDs by System and Code
 	 * </p>
 	 *
 	 * @since 5.4.0
@@ -2341,9 +2343,8 @@ public class DaoConfig {
 
 	/**
 	 * <p>
-	 * This determines the internal search size that is run synchronously during operations such as:
-	 * 1. Delete with _expunge parameter.
-	 * 2. Searching for Code System IDs by System and Code
+	 * This determines the internal search size that is run synchronously during operations such as searching for
+	 * Code System IDs by System and Code
 	 * </p>
 	 *
 	 * @since 5.4.0
@@ -2527,6 +2528,30 @@ public class DaoConfig {
 	 */
 	public void setTriggerSubscriptionsForNonVersioningChanges(boolean theTriggerSubscriptionsForNonVersioningChanges) {
 		myTriggerSubscriptionsForNonVersioningChanges = theTriggerSubscriptionsForNonVersioningChanges;
+	}
+
+	public boolean canDeleteExpunge() {
+		return isAllowMultipleDelete() && isExpungeEnabled() && isDeleteExpungeEnabled();
+	}
+
+	public String cannotDeleteExpungeReason() {
+		List<String> reasons = new ArrayList<>();
+		if (!isAllowMultipleDelete()) {
+			reasons.add("Multiple Delete");
+		}
+		if (!isExpungeEnabled()) {
+			reasons.add("Expunge");
+		}
+		if (!isDeleteExpungeEnabled()) {
+			reasons.add("Delete Expunge");
+		}
+		String retval = "Delete Expunge is not supported on this server.  ";
+		if (reasons.size() == 1) {
+			retval += reasons.get(0) + " is disabled.";
+		} else {
+			retval += "The following configurations are disabled: " + StringUtils.join(reasons, ", ");
+		}
+		return retval;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

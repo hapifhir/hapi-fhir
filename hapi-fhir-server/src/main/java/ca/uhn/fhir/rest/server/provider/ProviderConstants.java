@@ -89,7 +89,7 @@ public class ProviderConstants {
 	public static final String OPERATION_MDM_SUBMIT = "$mdm-submit";
 	public static final String MDM_BATCH_RUN_CRITERIA = "criteria" ;
 	public static final String OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT = "submitted" ;
-   public static final String OPERATION_MDM_CLEAR_OUT_PARAM_DELETED_COUNT = "deleted";
+	public static final String OPERATION_MDM_CLEAR_OUT_PARAM_DELETED_COUNT = "deleted";
 	public static final String MDM_BATCH_RUN_RESOURCE_TYPE = "resourceType";
 
 	/**
@@ -98,7 +98,53 @@ public class ProviderConstants {
 	public static final String CQL_EVALUATE_MEASURE = "$evaluate-measure";
 
 	/**
-	*  Operation name for the $meta operation
-	* */
+	 *  Operation name for the $meta operation
+	 */
 	public static final String OPERATION_META = "$meta";
+
+	/**
+	 *  Operation name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE = "$expunge";
+
+	/**
+	 * Parameter name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE_PARAM_LIMIT = "limit";
+	/**
+	 * Parameter name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES = "expungeDeletedResources";
+	/**
+	 * Parameter name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS = "expungePreviousVersions";
+	/**
+	 * Parameter name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING = "expungeEverything";
+	/**
+	 * Output parameter name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT = "count";
+
+	/**
+	 * Operation name for the $delete-expunge operation
+	 */
+	public static final String OPERATION_DELETE_EXPUNGE = "$delete-expunge";
+
+	/**
+	 * url of resources to delete for the $delete-expunge operation
+	 */
+	public static final String OPERATION_DELETE_EXPUNGE_URL = "url";
+
+	/**
+	 * Number of resources to delete at a time for the $delete-expunge operation
+	 */
+	public static final String OPERATION_DELETE_BATCH_SIZE = "batchSize";
+
+	/**
+	 * The Spring Batch job id of the delete expunge job created by a $delete-expunge operation
+	 */
+	public static final String OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID = "jobId";
 }

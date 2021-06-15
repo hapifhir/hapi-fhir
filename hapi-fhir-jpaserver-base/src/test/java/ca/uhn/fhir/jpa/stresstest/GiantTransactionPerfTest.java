@@ -512,8 +512,8 @@ public class GiantTransactionPerfTest {
 	}
 
 	private class MockEntityManager implements EntityManager {
-		private List<Object> myPersistCount = new ArrayList<>();
-		private List<Object> myMergeCount = new ArrayList<>();
+		private final List<Object> myPersistCount = new ArrayList<>();
+		private final List<Object> myMergeCount = new ArrayList<>();
 		private long ourNextId = 0L;
 		private int myFlushCount;
 

@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.searchparam;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
@@ -50,11 +49,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class MatchUrlService {
 
 	@Autowired
-	private FhirContext myContext;
+	private FhirContext myFhirContext;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
-	@Autowired
-	private ModelConfig myModelConfig;
 
 	public SearchParameterMap translateMatchUrl(String theMatchUrl, RuntimeResourceDefinition theResourceDefinition, Flag... theFlags) {
 		SearchParameterMap paramMap = new SearchParameterMap();
@@ -98,12 +95,12 @@ public class MatchUrlService {
 						throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Can not have more than 2 " + Constants.PARAM_LASTUPDATED + " parameter repetitions");
 					} else {
 						DateRangeParam p1 = new DateRangeParam();
-						p1.setValuesAsQueryTokens(myContext, nextParamName, paramList);
+						p1.setValuesAsQueryTokens(myFhirContext, nextParamName, paramList);
 						paramMap.setLastUpdated(p1);
 					}
 				}
 			} else if (Constants.PARAM_HAS.equals(nextParamName)) {
-				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.HAS, nextParamName, paramList);
+				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(myFhirContext, RestSearchParameterTypeEnum.HAS, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			} else if (Constants.PARAM_COUNT.equals(nextParamName)) {
 				if (paramList != null && paramList.size() > 0 && paramList.get(0).size() > 0) {
@@ -128,15 +125,15 @@ public class MatchUrlService {
 					throw new InvalidRequestException("Invalid parameter chain: " + nextParamName + paramList.get(0).getQualifier());
 				}
 				IQueryParameterAnd<?> type = newInstanceAnd(nextParamName);
-				type.setValuesAsQueryTokens(myContext, nextParamName, (paramList));
+				type.setValuesAsQueryTokens(myFhirContext, nextParamName, (paramList));
 				paramMap.add(nextParamName, type);
 			} else if (Constants.PARAM_SOURCE.equals(nextParamName)) {
-				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.TOKEN, nextParamName, paramList);
+				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(myFhirContext, RestSearchParameterTypeEnum.TOKEN, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			} else if (JpaConstants.PARAM_DELETE_EXPUNGE.equals(nextParamName)) {
 				paramMap.setDeleteExpunge(true);
 			} else if (Constants.PARAM_LIST.equals(nextParamName)) {
-				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.TOKEN, nextParamName, paramList);
+				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(myFhirContext, RestSearchParameterTypeEnum.TOKEN, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			} else if (nextParamName.startsWith("_")) {
 				// ignore these since they aren't search params (e.g. _sort)
@@ -147,7 +144,7 @@ public class MatchUrlService {
 						"Failed to parse match URL[" + theMatchUrl + "] - Resource type " + theResourceDefinition.getName() + " does not have a parameter with name: " + nextParamName);
 				}
 
-				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(mySearchParamRegistry, myContext, paramDef, nextParamName, paramList);
+				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(mySearchParamRegistry, myFhirContext, paramDef, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			}
 		}
@@ -162,6 +159,13 @@ public class MatchUrlService {
 	public IQueryParameterType newInstanceType(String theParamType) {
 		Class<? extends IQueryParameterType> clazz = ResourceMetaParams.RESOURCE_META_PARAMS.get(theParamType);
 		return ReflectionUtil.newInstance(clazz);
+	}
+
+	public ResourceSearch getResourceSearch(String theUrl) {
+		RuntimeResourceDefinition resourceDefinition;
+		resourceDefinition = UrlUtil.parseUrlResourceType(myFhirContext, theUrl);
+		SearchParameterMap searchParameterMap = translateMatchUrl(theUrl, resourceDefinition);
+		return new ResourceSearch(resourceDefinition, searchParameterMap);
 	}
 
 	public abstract static class Flag {

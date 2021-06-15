@@ -49,8 +49,6 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Set;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 @Service
 public class MatchResourceUrlService {
 	@Autowired
@@ -138,7 +136,7 @@ public class MatchResourceUrlService {
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
 		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {
 			StorageProcessingMessage message = new StorageProcessingMessage();
-			message.setMessage("Processed conditional resource URL with " + retVal.size() + " result(s) in " + sw.toString());
+			message.setMessage("Processed conditional resource URL with " + retVal.size() + " result(s) in " + sw);
 			HookParams params = new HookParams()
 				.add(RequestDetails.class, theRequest)
 				.addIfMatchesType(ServletRequestDetails.class, theRequest)

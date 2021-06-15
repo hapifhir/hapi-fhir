@@ -74,7 +74,7 @@ public class TransactionProcessorTest {
 
 	@BeforeEach
 	public void before() {
-		when(myHapiTransactionService.execute(any(), any())).thenAnswer(t->{
+		when(myHapiTransactionService.execute(any(), any())).thenAnswer(t -> {
 			TransactionCallback callback = t.getArgument(1, TransactionCallback.class);
 			return callback.doInTransaction(null);
 		});

@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
@@ -58,8 +59,21 @@ public class SystemRequestDetails extends RequestDetails {
 
 	private ListMultimap<String, String> myHeaders;
 
+	/**
+	 * If a SystemRequestDetails has a RequestPartitionId, it will take precedence over the tenantId
+	 */
+	private RequestPartitionId myRequestPartitionId;
+
 	public SystemRequestDetails(IInterceptorBroadcaster theInterceptorBroadcaster) {
 		super(theInterceptorBroadcaster);
+	}
+
+	public RequestPartitionId getRequestPartitionId() {
+		return myRequestPartitionId;
+	}
+
+	public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
+		myRequestPartitionId = theRequestPartitionId;
 	}
 
 	@Override

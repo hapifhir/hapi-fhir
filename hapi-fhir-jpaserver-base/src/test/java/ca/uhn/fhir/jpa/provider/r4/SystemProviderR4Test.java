@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.rp.r4.BinaryResourceProvider;
@@ -15,8 +17,10 @@ import ca.uhn.fhir.jpa.rp.r4.PatientResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.PractitionerResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.ServiceRequestResourceProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -28,6 +32,9 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhir.rest.server.provider.DeleteExpungeProvider;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -61,24 +68,24 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.in;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -97,10 +104,18 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	private IGenericClient myClient;
 	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
 
+	@Autowired
+	private DeleteExpungeProvider myDeleteExpungeProvider;
+	@Autowired
+	private BatchJobHelper myBatchJobHelper;
+
 	@SuppressWarnings("deprecation")
 	@AfterEach
 	public void after() {
 		myClient.unregisterInterceptor(mySimpleHeaderInterceptor);
+		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+		myDaoConfig.setDeleteExpungeEnabled(new DaoConfig().isDeleteExpungeEnabled());
 	}
 
 	@BeforeEach
@@ -134,7 +149,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			RestfulServer restServer = new RestfulServer(ourCtx);
 			restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp, locationRp, binaryRp, diagnosticReportRp, diagnosticOrderRp, practitionerRp);
 
-			restServer.setPlainProviders(mySystemProvider);
+			restServer.registerProviders(mySystemProvider, myDeleteExpungeProvider);
 
 			ourServer = new Server(0);
 
@@ -269,7 +284,6 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			assertEquals(200, http.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(http);
-			;
 		}
 
 	}
@@ -753,6 +767,84 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		}
 	}
 
+	@Test
+	public void testDeleteExpungeOperation() {
+		myDaoConfig.setAllowMultipleDelete(true);
+		myDaoConfig.setExpungeEnabled(true);
+		myDaoConfig.setDeleteExpungeEnabled(true);
+
+		// setup
+		for (int i = 0; i < 12; ++i) {
+			Patient patient = new Patient();
+			patient.setActive(false);
+			MethodOutcome result = myClient.create().resource(patient).execute();
+		}
+		Patient patientActive = new Patient();
+		patientActive.setActive(true);
+		IIdType pKeepId = myClient.create().resource(patientActive).execute().getId();
+
+		Patient patientInactive = new Patient();
+		patientInactive.setActive(false);
+		IIdType pDelId = myClient.create().resource(patientInactive).execute().getId();
+
+		Observation obsActive = new Observation();
+		obsActive.setSubject(new Reference(pKeepId.toUnqualifiedVersionless()));
+		IIdType oKeepId = myClient.create().resource(obsActive).execute().getId();
+
+		Observation obsInactive = new Observation();
+		obsInactive.setSubject(new Reference(pDelId.toUnqualifiedVersionless()));
+		IIdType obsDelId = myClient.create().resource(obsInactive).execute().getId();
+
+		// validate setup
+		assertEquals(14, getAllResourcesOfType("Patient").getTotal());
+		assertEquals(2, getAllResourcesOfType("Observation").getTotal());
+
+		Parameters input = new Parameters();
+		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "/Observation?subject.active=false");
+		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "/Patient?active=false");
+		int batchSize = 2;
+		input.addParameter(ProviderConstants.OPERATION_DELETE_BATCH_SIZE, new DecimalType(batchSize));
+
+		// execute
+
+		Parameters response = myClient
+			.operation()
+			.onServer()
+			.named(ProviderConstants.OPERATION_DELETE_EXPUNGE)
+			.withParameters(input)
+			.execute();
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		myBatchJobHelper.awaitAllBulkJobCompletions(BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME);
+
+		DecimalType jobIdPrimitive = (DecimalType) response.getParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID);
+		Long jobId = jobIdPrimitive.getValue().longValue();
+
+		// validate
+
+		// 1 observation
+		// + 12/batchSize inactive patients
+		// + 1 patient with id pDelId
+		// = 1 + 6 + 1 = 8
+		assertEquals(8, myBatchJobHelper.getReadCount(jobId));
+		assertEquals(8, myBatchJobHelper.getWriteCount(jobId));
+
+		// validate
+		Bundle obsBundle = getAllResourcesOfType("Observation");
+		List<Observation> observations = BundleUtil.toListOfResourcesOfType(myFhirCtx, obsBundle, Observation.class);
+		assertThat(observations, hasSize(1));
+		assertEquals(oKeepId, observations.get(0).getIdElement());
+
+		Bundle patientBundle = getAllResourcesOfType("Patient");
+		List<Patient> patients = BundleUtil.toListOfResourcesOfType(myFhirCtx, patientBundle, Patient.class);
+		assertThat(patients, hasSize(1));
+		assertEquals(pKeepId, patients.get(0).getIdElement());
+
+	}
+
+	private Bundle getAllResourcesOfType(String theResourceName) {
+		return myClient.search().forResource(theResourceName).cacheControl(new CacheControlDirective().setNoCache(true)).returnBundle(Bundle.class).execute();
+	}
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
