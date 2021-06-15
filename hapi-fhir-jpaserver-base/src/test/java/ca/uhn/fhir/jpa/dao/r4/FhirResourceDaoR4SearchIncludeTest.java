@@ -7,8 +7,10 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hamcrest.Matcher;
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
+import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.EpisodeOfCare;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +23,8 @@ import java.util.stream.IntStream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hl7.fhir.r4.model.ResourceType.Patient;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings({"unchecked", "Duplicates"})
 public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
@@ -84,6 +88,33 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testSearchWithIncludeSpecDoesNotCauseNPE() {
+		createPatientWithReferencingCarePlan(1);
+
+		// First verify it with the "." syntax
+		SearchParameterMap map = SearchParameterMap.newSynchronous()
+			.addInclude(new Include("CarePlan.patient"));
+		try {
+			IBundleProvider results = myCarePlanDao.search(map);
+			List<String> ids = toUnqualifiedVersionlessIdValues(results);
+			assertThat(ids.toString(), ids, containsInAnyOrder("CarePlan/CP-1"));
+		} catch (Exception e) {
+			fail();
+		}
+
+		// Next verify it with the ":" syntax
+		SearchParameterMap map2 = SearchParameterMap.newSynchronous()
+			.addInclude(new Include("CarePlan:patient"));
+		try {
+			IBundleProvider results = myCarePlanDao.search(map2);
+			List<String> ids = toUnqualifiedVersionlessIdValues(results);
+			assertThat(ids.toString(), ids, containsInAnyOrder("CarePlan/CP-1", "Patient/PAT-1"));
+		} catch (Exception e) {
+			fail();
+		}
+	}
+
+	@Test
 	public void testRevIncludesPaged_AsyncSearch() {
 		int eocCount = 10;
 		myDaoConfig.setMaximumIncludesToLoadPerPage(5);
@@ -124,6 +155,19 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 			eoc.setId("EpisodeOfCare/EOC-" + i);
 			eoc.getManagingOrganization().setReference("Organization/ORG-0");
 			myEpisodeOfCareDao.update(eoc);
+		}
+	}
+
+	private void createPatientWithReferencingCarePlan(int theCount) {
+		org.hl7.fhir.r4.model.Patient patient = new Patient();
+		patient.setId("Patient/PAT-1");
+		myPatientDao.update(patient);
+
+		for (int i = 1; i <= theCount; i++) {
+			CarePlan carePlan = new CarePlan();
+			carePlan.setId("CarePlan/CP-" + i);
+			carePlan.getSubject().setReference("Patient/PAT-1");
+			myCarePlanDao.update(carePlan);
 		}
 	}
 }
