@@ -2799,7 +2799,7 @@
 								<id>validate</id>
 								<phase>generate-sources</phase>
 								<configuration>
-									<configLocation>src/checkstyle/checkstyle_config_nofixmes.xml</configLocation>
+									<configLocation>${maven.multiModuleProjectDirectory}/src/checkstyle/checkstyle_config_nofixmes.xml</configLocation>
 									<encoding>UTF-8</encoding>
 									<consoleOutput>true</consoleOutput>
 									<failOnViolation>true</failOnViolation>

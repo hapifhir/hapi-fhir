@@ -154,7 +154,7 @@
 							<enableRulesSummary>true</enableRulesSummary>
 							<enableSeveritySummary>true</enableSeveritySummary>
 							<consoleOutput>true</consoleOutput>
-							<configLocation>${project.basedir}/../src/checkstyle/checkstyle.xml</configLocation>
+							<configLocation>${maven.multiModuleProjectDirectory}/src/checkstyle/checkstyle.xml</configLocation>
 						</configuration>
 					</execution>
 				</executions>
