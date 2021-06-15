@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.delete.model.PartitionedUrl;
 import ca.uhn.fhir.jpa.delete.model.RequestListJson;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
@@ -60,8 +61,7 @@ class ReverseCronologicalBatchResourcePidReaderTest {
 	@BeforeEach
 	public void before() throws JsonProcessingException {
 		RequestListJson requestListJson = new RequestListJson();
-		requestListJson.setUrls(Lists.newArrayList(URL_A, URL_B, URL_C));
-		requestListJson.setRequestPartitionIds(Lists.newArrayList(partId, partId, partId));
+		requestListJson.setPartitionedUrls(Lists.newArrayList(new PartitionedUrl(URL_A, partId), new PartitionedUrl(URL_B, partId), new PartitionedUrl(URL_C, partId)));
 		ObjectMapper mapper = new ObjectMapper();
 		myReader.setUrls(mapper.writeValueAsString(requestListJson));
 

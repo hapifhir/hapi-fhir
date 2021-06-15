@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.delete.job;
  */
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.delete.model.PartitionedUrl;
 import ca.uhn.fhir.jpa.delete.model.RequestListJson;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
@@ -50,7 +51,8 @@ public class DeleteExpungeJobParameterValidator implements JobParametersValidato
 		}
 
 		RequestListJson requestListJson = RequestListJson.fromJson(theJobParameters.getString(JOB_PARAM_REQUEST_LIST));
-		for (String url : requestListJson.getUrls()) {
+		for (PartitionedUrl partitionedUrl : requestListJson.getPartitionedUrls()) {
+			String url = partitionedUrl.getUrl();
 			try {
 				ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(url);
 				String resourceName = resourceSearch.getResourceName();
