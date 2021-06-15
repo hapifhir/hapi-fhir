@@ -159,6 +159,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 					search.setStatus(SearchStatusEnum.FAILED);
 					search.setFailureMessage("Some Failure Message");
 					search.setFailureCode(501);
+					mySearchEntityDao.save(search);
 				});
 				break;
 			} catch (ResourceVersionConflictException e) {
@@ -186,6 +187,9 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			.count(1)
 			.execute();
 		assertEquals(1, response0.getEntry().size());
+
+		// Make sure it works for now
+		myClient.loadPage().next(response0).execute();
 
 		// Pretend the search was errored out
 		markSearchErrored();
