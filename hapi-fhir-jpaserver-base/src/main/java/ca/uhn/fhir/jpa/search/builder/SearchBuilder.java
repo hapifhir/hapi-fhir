@@ -796,7 +796,7 @@ public class SearchBuilder implements ISearchBuilder {
 				// Account for _include=[resourceType]:*
 				String wantResourceType = null;
 				if (!matchAll) {
-					if (nextInclude.getParamName() != null && nextInclude.getParamName().equals("*")) {
+					if ("*".equals(nextInclude.getParamName())) {
 						wantResourceType = nextInclude.getParamType();
 						matchAll = true;
 					}
