@@ -90,7 +90,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	private Date myStartTime;
 
 	@Autowired
-	public void setUrls(@Value("#{jobParameters['" + JOB_PARAM_REQUEST_LIST + "']}") String theRequestListJson) {
+	public void setRequestListJson(@Value("#{jobParameters['" + JOB_PARAM_REQUEST_LIST + "']}") String theRequestListJson) {
 		RequestListJson requestListJson = RequestListJson.fromJson(theRequestListJson);
 		myPartitionedUrls = requestListJson.getPartitionedUrls();
 	}

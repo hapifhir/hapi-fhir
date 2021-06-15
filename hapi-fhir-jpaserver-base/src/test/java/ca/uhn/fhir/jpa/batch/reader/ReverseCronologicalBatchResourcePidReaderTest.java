@@ -63,7 +63,8 @@ class ReverseCronologicalBatchResourcePidReaderTest {
 		RequestListJson requestListJson = new RequestListJson();
 		requestListJson.setPartitionedUrls(Lists.newArrayList(new PartitionedUrl(URL_A, partId), new PartitionedUrl(URL_B, partId), new PartitionedUrl(URL_C, partId)));
 		ObjectMapper mapper = new ObjectMapper();
-		myReader.setUrls(mapper.writeValueAsString(requestListJson));
+		String requestListJsonString = mapper.writeValueAsString(requestListJson);
+		myReader.setRequestListJson(requestListJsonString);
 
 		SearchParameterMap map = new SearchParameterMap();
 		RuntimeResourceDefinition patientResDef = ourFhirContext.getResourceDefinition("Patient");

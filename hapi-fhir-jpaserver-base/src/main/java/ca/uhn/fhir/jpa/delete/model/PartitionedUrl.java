@@ -11,6 +11,9 @@ public class PartitionedUrl implements IModelJson {
 	@JsonProperty("requestPartitionId")
 	private RequestPartitionId myRequestPartitionId;
 
+	public PartitionedUrl() {
+	}
+
 	public PartitionedUrl(String theUrl, RequestPartitionId theRequestPartitionId) {
 		myUrl = theUrl;
 		myRequestPartitionId = theRequestPartitionId;
@@ -20,17 +23,15 @@ public class PartitionedUrl implements IModelJson {
 		return myUrl;
 	}
 
-	public PartitionedUrl setUrl(String theUrl) {
+	public void setUrl(String theUrl) {
 		myUrl = theUrl;
-		return this;
 	}
 
 	public RequestPartitionId getRequestPartitionId() {
 		return myRequestPartitionId;
 	}
 
-	public PartitionedUrl setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
+	public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
 		myRequestPartitionId = theRequestPartitionId;
-		return this;
 	}
 }
