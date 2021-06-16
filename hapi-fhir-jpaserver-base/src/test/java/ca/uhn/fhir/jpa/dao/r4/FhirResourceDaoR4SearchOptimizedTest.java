@@ -21,6 +21,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -54,6 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
@@ -672,7 +674,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		for (Future<Throwable> next : futures) {
 			Throwable t = next.get();
 			if (t != null) {
-				throw t;
+				String stackTrace = ExceptionUtils.getStackTrace(t);
+				fail(t.toString() + "\n" + stackTrace);
 			}
 		}
 		executor.shutdownNow();
