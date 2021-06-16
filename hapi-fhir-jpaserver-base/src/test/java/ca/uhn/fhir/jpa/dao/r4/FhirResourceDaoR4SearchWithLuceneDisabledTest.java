@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
@@ -13,6 +14,7 @@ import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.term.ValueSetExpansionR4Test;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -32,6 +34,7 @@ import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CompartmentDefinition;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Condition;
@@ -60,6 +63,9 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -261,6 +267,44 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 		} catch (NullPointerException e) {
 			assertEquals("", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testExpandValueSetPreservesExplicitOrder() {
+		CodeSystem cs = new CodeSystem();
+		cs.setId("cs");
+		cs.setUrl("http://cs");
+		cs.addConcept().setCode("code1");
+		cs.addConcept().setCode("code2");
+		cs.addConcept().setCode("code3");
+		cs.addConcept().setCode("code4");
+		cs.addConcept().setCode("code5");
+		myCodeSystemDao.update(cs);
+
+		// Vs in reverse order
+		ValueSet vs = new ValueSet();
+		vs.setId("vs");
+		vs.setUrl("http://vs");
+		// Add some codes in separate compose sections, and some more codes in a single compose section.
+		// Order should be preserved for all of them.
+		vs.getCompose().addInclude().setSystem("http://cs")
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code5")));
+		vs.getCompose().addInclude().setSystem("http://cs")
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code4")));
+		vs.getCompose().addInclude().setSystem("http://cs")
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code3")))
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code2")))
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code1")));
+		myValueSetDao.update(vs);
+
+		// Non Pre-Expanded
+		ValueSet outcome = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
+		assertEquals("ValueSet \"ValueSet.url[http://vs]\" has not yet been pre-expanded. Performing in-memory expansion without parameters. Current status: NOT_EXPANDED | The ValueSet is waiting to be picked up and pre-expanded by a scheduled task.", outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
+		assertThat(ValueSetExpansionR4Test.toCodes(outcome).toString(), ValueSetExpansionR4Test.toCodes(outcome), contains(
+			"code5", "code4", "code3", "code2", "code1"
+		));
+
+
 	}
 
 	@Test

@@ -132,6 +132,7 @@ import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.comparator.Comparators;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -938,7 +939,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			}
 		});
 
-		PredicateFinalStep expansionStep = buildExpansionPredicate(theIncludeOrExclude, predicate);
+		List<String> codes = theIncludeOrExclude
+			.getConcept()
+			.stream()
+			.filter(Objects::nonNull)
+			.map(ValueSet.ConceptReferenceComponent::getCode)
+			.filter(StringUtils::isNotBlank)
+			.collect(Collectors.toList());
+
+		PredicateFinalStep expansionStep = buildExpansionPredicate(codes, predicate);
 		final PredicateFinalStep finishedQuery;
 		if (expansionStep == null) {
 			finishedQuery = step;
@@ -973,9 +982,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			}
 		}
 
-//		jpaQuery.setMaxResults(maxResultsPerBatch);
-//		jpaQuery.setFirstResult(theQueryIndex * maxResultsPerBatch);
-
 		ourLog.debug("Beginning batch expansion for {} with max results per batch: {}", (theAdd ? "inclusion" : "exclusion"), maxResultsPerBatch);
 
 		StopWatch swForBatch = new StopWatch();
@@ -984,9 +990,22 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		SearchQuery<TermConcept> termConceptsQuery = searchSession.search(TermConcept.class)
 			.where(f -> finishedQuery).toQuery();
 
-		System.out.println("About to query:" + termConceptsQuery.queryString());
+		ourLog.trace("About to query: {}", termConceptsQuery.queryString());
 		List<TermConcept> termConcepts = termConceptsQuery.fetchHits(theQueryIndex * maxResultsPerBatch, maxResultsPerBatch);
 
+		// If the include section had multiple codes, return the codes in the same order
+		if (codes.size() > 1) {
+			termConcepts = new ArrayList<>(termConcepts);
+			Map<String, Integer> codeToIndex = new HashMap<>(codes.size());
+			for (int i = 0; i < codes.size(); i++) {
+				codeToIndex.put(codes.get(i), i);
+			}
+			termConcepts.sort(((o1, o2) -> {
+				Integer idx1 = codeToIndex.get(o1.getCode());
+				Integer idx2 = codeToIndex.get(o2.getCode());
+				return Comparators.nullsHigh().compare(idx1, idx2);
+			}));
+		}
 
 		int resultsInBatch = termConcepts.size();
 		int firstResult = theQueryIndex * maxResultsPerBatch;// TODO GGG HS we lose the ability to check the index of the first result, so just best-guessing it here.
@@ -1027,17 +1046,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	/**
 	 * Helper method which builds a predicate for the expansion
 	 */
-	private PredicateFinalStep buildExpansionPredicate(ValueSet.ConceptSetComponent theTheIncludeOrExclude, SearchPredicateFactory thePredicate) {
+	private PredicateFinalStep buildExpansionPredicate(List<String> theCodes, SearchPredicateFactory thePredicate) {
 		PredicateFinalStep expansionStep;
 		/*
 		 * Include/Exclude Concepts
 		 */
-		List<Term> codes = theTheIncludeOrExclude
-			.getConcept()
+		List<Term> codes = theCodes
 			.stream()
-			.filter(Objects::nonNull)
-			.map(ValueSet.ConceptReferenceComponent::getCode)
-			.filter(StringUtils::isNotBlank)
 			.map(t -> new Term("myCode", t))
 			.collect(Collectors.toList());
 

@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -136,13 +137,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertEquals(response0.getId(), response1.getId());
 
 		// Pretend the search was errored out
-		runInTransaction(() -> {
-			assertEquals(1L, mySearchEntityDao.count());
-			Search search = mySearchEntityDao.findAll().iterator().next();
-			search.setStatus(SearchStatusEnum.FAILED);
-			search.setFailureMessage("Some Failure Message");
-			search.setFailureCode(501);
-		});
+		markSearchErrored();
 
 		// Perform the search again (shouldn't return the errored out search)
 		Bundle response3 = myClient.search()
@@ -153,6 +148,25 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertEquals(1, response3.getEntry().size());
 		assertNotEquals(response0.getId(), response3.getId());
 
+	}
+
+	private void markSearchErrored() {
+		while (true) {
+			try {
+				runInTransaction(() -> {
+					assertEquals(1L, mySearchEntityDao.count());
+					Search search = mySearchEntityDao.findAll().iterator().next();
+					search.setStatus(SearchStatusEnum.FAILED);
+					search.setFailureMessage("Some Failure Message");
+					search.setFailureCode(501);
+					mySearchEntityDao.save(search);
+				});
+				break;
+			} catch (ResourceVersionConflictException e) {
+				ourLog.warn("Conflict while updating search: " + e);
+				continue;
+			}
+		}
 	}
 
 	@Test
@@ -174,14 +188,11 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			.execute();
 		assertEquals(1, response0.getEntry().size());
 
+		// Make sure it works for now
+		myClient.loadPage().next(response0).execute();
+
 		// Pretend the search was errored out
-		runInTransaction(() -> {
-			assertEquals(1L, mySearchEntityDao.count());
-			Search search = mySearchEntityDao.findAll().iterator().next();
-			search.setStatus(SearchStatusEnum.FAILED);
-			search.setFailureMessage("Some Failure Message");
-			search.setFailureCode(501);
-		});
+		markSearchErrored();
 
 		// Request the second page
 		try {

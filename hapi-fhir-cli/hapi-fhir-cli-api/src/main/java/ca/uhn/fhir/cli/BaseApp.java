@@ -36,6 +36,7 @@ import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.AnsiConsole;
 import org.slf4j.LoggerFactory;
 
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.fusesource.jansi.Ansi.ansi;
 
 @SuppressWarnings("WeakerAccess")
@@ -67,17 +69,27 @@ public abstract class BaseApp {
 
 	private void logAppHeader() {
 		System.out.flush();
-		System.out.println("------------------------------------------------------------");
+		String msg = "------------------------------------------------------------";
+		printMessageToStdout(msg);
 		logProductName();
-		System.out.println("------------------------------------------------------------");
-		System.out.println("Process ID                      : " + ManagementFactory.getRuntimeMXBean().getName());
-		System.out.println("Max configured JVM memory (Xmx) : " + FileHelper.getFileSizeDisplay(Runtime.getRuntime().maxMemory(), 1));
-		System.out.println("Detected Java version           : " + System.getProperty("java.version"));
-		System.out.println("------------------------------------------------------------");
+		printMessageToStdout("------------------------------------------------------------");
+		printMessageToStdout("Process ID                      : " + ManagementFactory.getRuntimeMXBean().getName());
+		printMessageToStdout("Max configured JVM memory (Xmx) : " + FileHelper.getFileSizeDisplay(Runtime.getRuntime().maxMemory(), 1));
+		printMessageToStdout("Detected Java version           : " + System.getProperty("java.version"));
+		printMessageToStdout("------------------------------------------------------------");
+	}
+
+	private void printMessageToStdout(String theMsg) {
+		PrintStream out = System.out;
+		if (isNotBlank(theMsg)) {
+			out.println(theMsg);
+		} else {
+			out.println();
+		}
 	}
 
 	protected void logProductName() {
-		System.out.println("\ud83d\udd25 " + ansi().bold() + " " + provideProductName() + ansi().boldOff() + " " + provideProductVersion() + " - Command Line Tool");
+		printMessageToStdout("\ud83d\udd25 " + ansi().bold() + " " + provideProductName() + ansi().boldOff() + " " + provideProductVersion() + " - Command Line Tool");
 	}
 
 	private void logCommandUsage(BaseCommand theCommand) {
@@ -99,32 +111,32 @@ public abstract class BaseApp {
 		}
 
 		// Usage
-		System.out.println("Usage:");
-		System.out.println("  " + provideCommandName() + " " + theCommand.getCommandName() + " [options]");
-		System.out.println();
+		printMessageToStdout("Usage:");
+		printMessageToStdout("  " + provideCommandName() + " " + theCommand.getCommandName() + " [options]");
+		printMessageToStdout("");
 
 		// Description
 		String wrapped = WordUtils.wrap(theCommand.getCommandDescription(), columns);
-		System.out.println(wrapped);
-		System.out.println();
+		printMessageToStdout(wrapped);
+		printMessageToStdout("");
 
 		// Usage Notes
 		List<String> usageNotes = theCommand.provideUsageNotes();
 		for (String next : usageNotes) {
 			wrapped = WordUtils.wrap(next, columns);
-			System.out.println(wrapped);
-			System.out.println();
+			printMessageToStdout(wrapped);
+			printMessageToStdout("");
 		}
 
 		// Options
-		System.out.println("Options:");
+		printMessageToStdout("Options:");
 		HelpFormatter fmt = new HelpFormatter();
 		PrintWriter pw = new PrintWriter(System.out);
 		fmt.printOptions(pw, columns, getOptions(theCommand), 2, 2);
 		pw.flush();
 
 		// That's it!
-		System.out.println();
+		printMessageToStdout("");
 	}
 
 	private Options getOptions(BaseCommand theCommand) {
@@ -135,10 +147,10 @@ public abstract class BaseApp {
 
 	private void logUsage() {
 		logAppHeader();
-		System.out.println("Usage:");
-		System.out.println("  " + provideCommandName() + " {command} [options]");
-		System.out.println();
-		System.out.println("Commands:");
+		printMessageToStdout("Usage:");
+		printMessageToStdout("  " + provideCommandName() + " {command} [options]");
+		printMessageToStdout("");
+		printMessageToStdout("Commands:");
 
 		int longestCommandLength = 0;
 		for (BaseCommand next : ourCommands) {
@@ -151,12 +163,12 @@ public abstract class BaseApp {
 			for (int i = 1; i < rightParts.length; i++) {
 				rightParts[i] = StringUtils.leftPad("", left.length() + 3) + rightParts[i];
 			}
-			System.out.println(ansi().bold().fg(Ansi.Color.GREEN) + left + ansi().boldOff().fg(Ansi.Color.WHITE) + " - " + ansi().bold() + StringUtils.join(rightParts, LINESEP));
+			printMessageToStdout(ansi().bold().fg(Ansi.Color.GREEN) + left + ansi().boldOff().fg(Ansi.Color.WHITE) + " - " + ansi().bold() + StringUtils.join(rightParts, LINESEP));
 		}
-		System.out.println();
-		System.out.println(ansi().boldOff().fg(Ansi.Color.WHITE) + "See what options are available:");
-		System.out.println("  " + provideCommandName() + " help {command}");
-		System.out.println();
+		printMessageToStdout("");
+		printMessageToStdout(ansi().boldOff().fg(Ansi.Color.WHITE) + "See what options are available:");
+		printMessageToStdout("  " + provideCommandName() + " help {command}");
+		printMessageToStdout("");
 	}
 
 	protected abstract String provideCommandName();
@@ -235,8 +247,8 @@ public abstract class BaseApp {
 
 		if (command == null) {
 			String message = "Unrecognized command: " + ansi().bold().fg(Ansi.Color.RED) + theArgs[0] + ansi().boldOff().fg(Ansi.Color.WHITE);
-			System.out.println(message);
-			System.out.println();
+			printMessageToStdout(message);
+			printMessageToStdout("");
 			logUsage();
 			exitDueToProblem(message);
 			return;
