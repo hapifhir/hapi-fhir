@@ -51,7 +51,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Interceptor
 public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer {
-	private final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
