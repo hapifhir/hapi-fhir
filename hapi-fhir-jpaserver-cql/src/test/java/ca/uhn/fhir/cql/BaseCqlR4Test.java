@@ -4,15 +4,22 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cql.common.provider.CqlProviderTestBase;
 import ca.uhn.fhir.cql.config.CqlR4Config;
 import ca.uhn.fhir.cql.config.TestCqlConfig;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.util.BundleUtil;
-
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.MeasureReport;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +31,13 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {CqlR4Config.class, TestCqlConfig.class, SubscriptionProcessorConfig.class})
 public class BaseCqlR4Test extends BaseJpaR4Test implements CqlProviderTestBase {
-	Logger ourLog = LoggerFactory.getLogger(BaseCqlR4Test.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseCqlR4Test.class);
 
 	@Autowired
 	protected
@@ -39,6 +47,23 @@ public class BaseCqlR4Test extends BaseJpaR4Test implements CqlProviderTestBase 
 	FhirContext myFhirContext;
 	@Autowired
 	IFhirSystemDao mySystemDao;
+	protected final SystemRequestDetails mySrd = new SystemRequestDetails();
+	private final MyTestInterceptor myInterceptor = new MyTestInterceptor();
+	@Autowired
+	IInterceptorService myIInterceptorService;
+	@Autowired
+	PartitionSettings myPartitionSettings;
+
+	@BeforeEach
+	public void registerInterceptor() {
+		myIInterceptorService.registerInterceptor(myInterceptor);
+		myPartitionSettings.setPartitioningEnabled(true);
+	}
+
+	@AfterEach
+	public void unregisterInterceptor() {
+		myIInterceptorService.unregisterInterceptor(myInterceptor);
+	}
 
 	@Override
 	public FhirContext getFhirContext() {
@@ -66,7 +91,7 @@ public class BaseCqlR4Test extends BaseJpaR4Test implements CqlProviderTestBase 
 				if (filename.contains("bundle")) {
 					loadBundle(filename);
 				} else {
-					loadResource(filename);
+					loadResource(filename, mySrd);
 				}
 				count++;
 			} else {
@@ -76,18 +101,29 @@ public class BaseCqlR4Test extends BaseJpaR4Test implements CqlProviderTestBase 
 		return count;
 	}
 
-	protected Bundle parseBundle(String theLocation) throws IOException  {
+	protected Bundle parseBundle(String theLocation) throws IOException {
 		String json = stringFromResource(theLocation);
 		Bundle bundle = (Bundle) myFhirContext.newJsonParser().parseResource(json);
 		return bundle;
 	}
 
-	protected Bundle loadBundle(Bundle bundle) {
-		return (Bundle) mySystemDao.transaction(null, bundle);
+	protected Bundle loadBundle(Bundle bundle, RequestDetails theRequestDetails) {
+		return (Bundle) mySystemDao.transaction(theRequestDetails, bundle);
 	}
- 
+
 	protected Bundle loadBundle(String theLocation) throws IOException {
 		Bundle bundle = parseBundle(theLocation);
-		return loadBundle(bundle);
+		return loadBundle(bundle, mySrd);
+	}
+
+	private static class MyTestInterceptor {
+		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
+		public void partitionIdentifyRead(RequestPartitionId theRequestPartitionId, ServletRequestDetails theRequestDetails) {
+			if (theRequestDetails == null) {
+				ourLog.info("oops");
+			}
+			assertNotNull(theRequestPartitionId);
+			assertNotNull(theRequestDetails);
+		}
 	}
 }

@@ -3,6 +3,7 @@ package ca.uhn.fhir.cql.common.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -20,14 +21,14 @@ public interface CqlProviderTestBase {
 
 	DaoRegistry getDaoRegistry();
 
-	default IBaseResource loadResource(String theLocation) throws IOException {
+	default IBaseResource loadResource(String theLocation, RequestDetails theRequestDetails) throws IOException {
 		String json = stringFromResource(theLocation);
 		IBaseResource resource = getFhirContext().newJsonParser().parseResource(json);
 		IFhirResourceDao<IBaseResource> dao = getDaoRegistry().getResourceDao(resource.getIdElement().getResourceType());
 		if (dao == null) {
 			return null;
 		} else {
-			dao.update(resource);
+			dao.update(resource, theRequestDetails);
 			return resource;
 		}
 	}

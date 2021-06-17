@@ -1,16 +1,8 @@
 package ca.uhn.fhir.cql.r4;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
+import ca.uhn.fhir.cql.BaseCqlR4Test;
+import ca.uhn.fhir.cql.r4.provider.MeasureOperationsProvider;
+import ca.uhn.fhir.util.BundleUtil;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -24,9 +16,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import ca.uhn.fhir.cql.BaseCqlR4Test;
-import ca.uhn.fhir.cql.r4.provider.MeasureOperationsProvider;
-import ca.uhn.fhir.util.BundleUtil;
+import java.io.IOException;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class CqlMeasureEvaluationR4Test extends BaseCqlR4Test {
 	Logger ourLog = LoggerFactory.getLogger(CqlMeasureEvaluationR4Test.class);
@@ -36,7 +35,7 @@ public class CqlMeasureEvaluationR4Test extends BaseCqlR4Test {
 
 	protected void testMeasureBundle(String theLocation) throws IOException {
 		Bundle bundle = parseBundle(theLocation);
-		loadBundle(bundle);
+		loadBundle(bundle, mySrd);
 
 		List<Measure> measures = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Measure.class);
 		if (measures == null || measures.isEmpty()) {
@@ -62,11 +61,11 @@ public class CqlMeasureEvaluationR4Test extends BaseCqlR4Test {
 		this.ourLog.info("Measure: %s, Patient: %s, Start: %s, End: %s", measureId, patientId, periodStart, periodEnd);
 
 		MeasureReport actual = this.myMeasureOperationsProvider.evaluateMeasure(new IdType("Measure", measureId),
-				periodStart, periodEnd, null,
-				// TODO: These are all individual reports
-				"patient", patientId,
-				// TODO: Generalize these parameters into a Parameters resource
-				null, null, null, null, null, null);
+			periodStart, periodEnd, null,
+			// TODO: These are all individual reports
+			"patient", patientId,
+			// TODO: Generalize these parameters into a Parameters resource
+			null, null, null, null, null, null, mySrd);
 
 		compareMeasureReport(expected, actual);
 	}

@@ -47,10 +47,10 @@ public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestB
 	@Test
 	public void testHedisIGEvaluateMeasureWithTimeframe() throws IOException {
 		loadBundles();
-		loadResource("r4/hedis-ig/library-asf-logic.json");
-		loadResource("r4/hedis-ig/measure-asf.json");
+		loadResource("r4/hedis-ig/library-asf-logic.json", mySrd);
+		loadResource("r4/hedis-ig/measure-asf.json", mySrd);
 		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, periodStart, periodEnd, measure, "patient",
-			patient, null, null, null, null, null, null);
+			patient, null, null, null, null, null, null, mySrd);
 		// Assert it worked
 		assertThat(report.getGroup(), hasSize(1));
 		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
@@ -60,10 +60,10 @@ public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestB
 	@Test
 	public void testHedisIGEvaluateMeasureNoTimeframe() throws IOException {
 		loadBundles();
-		loadResource("r4/hedis-ig/library-asf-logic.json");
-		loadResource("r4/hedis-ig/measure-asf.json");
+		loadResource("r4/hedis-ig/library-asf-logic.json", mySrd);
+		loadResource("r4/hedis-ig/measure-asf.json", mySrd);
 		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, null, null, measure, "patient",
-			patient, null, null, null, null, null, null);
+			patient, null, null, null, null, null, null, mySrd);
 		// Assert it worked
 		assertThat(report.getGroup(), hasSize(1));
 		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));

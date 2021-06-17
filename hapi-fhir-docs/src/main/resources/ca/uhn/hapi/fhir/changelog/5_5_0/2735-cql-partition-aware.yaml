@@ -1,0 +1,4 @@
+---
+type: add
+issue: 2735
+title: "The $evaluate-measure now works on a partitioned server."
