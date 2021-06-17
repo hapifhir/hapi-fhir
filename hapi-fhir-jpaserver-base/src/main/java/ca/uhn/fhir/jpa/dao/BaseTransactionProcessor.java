@@ -689,6 +689,8 @@ public abstract class BaseTransactionProcessor {
 
 					nextResourceId = res.getIdElement();
 
+					// If we have a placeholder in the fullUrl entry, that always takes precedence since
+					// we'll need to use that for resolving the placeholders later
 					String fullUrl = myVersionAdapter.getFullUrl(nextReqEntry);
 					if (isNotBlank(fullUrl)) {
 						IIdType fullUrlIdType = newIdType(fullUrl);

@@ -32,7 +32,7 @@ import java.util.Optional;
  * #L%
  */
 
-public interface IResourceReindexJobDao extends JpaRepository<ResourceReindexJobEntity, Long> {
+public interface IResourceReindexJobDao extends JpaRepository<ResourceReindexJobEntity, Long>, IHapiFhirJpaRepository {
 
 	@Modifying
 	@Query("UPDATE ResourceReindexJobEntity j SET j.myDeleted = true WHERE j.myResourceType = :type")

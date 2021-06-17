@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
+import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
@@ -3438,7 +3439,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		p.addName().setFamily("A1");
 		myPatientDao.create(p);
 
-		assertEquals(0, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
 
 		SearchParameterMap map = new SearchParameterMap();
 		StringOrListParam or = new StringOrListParam();
@@ -3449,7 +3450,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		map.add(Patient.SP_NAME, or);
 		IBundleProvider results = myPatientDao.search(map);
 		assertEquals(1, results.getResources(0, 10).size());
-		assertEquals(1, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(1, mySearchEntityDao.count()));
 
 		map = new SearchParameterMap();
 		or = new StringOrListParam();
@@ -3462,7 +3463,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		results = myPatientDao.search(map);
 		assertEquals(1, results.getResources(0, 10).size());
 		// We expect a new one because we don't cache the search URL for very long search URLs
-		assertEquals(2, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(2, mySearchEntityDao.count()));
 
 	}
 
@@ -3550,7 +3551,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		p.addName().setFamily("A1");
 		myPatientDao.create(p);
 
-		assertEquals(0, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
 
 		SearchParameterMap map = new SearchParameterMap();
 		StringOrListParam or = new StringOrListParam();
@@ -3561,7 +3562,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		map.add(Patient.SP_NAME, or);
 		IBundleProvider results = myPatientDao.search(map);
 		assertEquals(1, results.getResources(0, 10).size());
-		assertEquals(1, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(1, mySearchEntityDao.count()));
 
 		map = new SearchParameterMap();
 		or = new StringOrListParam();
@@ -3572,7 +3573,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		map.add(Patient.SP_NAME, or);
 		results = myPatientDao.search(map);
 		assertEquals(1, results.getResources(0, 10).size());
-		assertEquals(1, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(1, mySearchEntityDao.count()));
 
 	}
 

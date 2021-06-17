@@ -272,10 +272,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				ResourcePersistentId pid = match.iterator().next();
 
 				Supplier<LazyDaoMethodOutcome.EntityAndResource> entitySupplier = () -> {
-					ResourceTable foundEntity = myEntityManager.find(ResourceTable.class, pid.getId());
-					IBaseResource resource = toResource(foundEntity, false);
-					theResource.setId(resource.getIdElement().getValue());
-					return new LazyDaoMethodOutcome.EntityAndResource(foundEntity, resource);
+					return myTxTemplate.execute(tx -> {
+						ResourceTable foundEntity = myEntityManager.find(ResourceTable.class, pid.getId());
+						IBaseResource resource = toResource(foundEntity, false);
+						theResource.setId(resource.getIdElement().getValue());
+						return new LazyDaoMethodOutcome.EntityAndResource(foundEntity, resource);
+					});
 				};
 
 				Supplier<IIdType> idSupplier = () -> {

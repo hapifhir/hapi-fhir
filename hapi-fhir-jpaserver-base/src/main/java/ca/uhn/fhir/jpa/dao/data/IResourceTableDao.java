@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Date;
@@ -33,7 +35,8 @@ import java.util.Map;
  * #L%
  */
 
-public interface IResourceTableDao extends JpaRepository<ResourceTable, Long> {
+@Transactional(propagation = Propagation.MANDATORY)
+public interface IResourceTableDao extends JpaRepository<ResourceTable, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT t.myId FROM ResourceTable t WHERE t.myDeleted IS NOT NULL")
 	Slice<Long> findIdsOfDeletedResources(Pageable thePageable);

@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobParametersBuilder;
 import ca.uhn.fhir.jpa.bulk.export.job.GroupBulkExportJobParametersBuilder;
@@ -26,6 +25,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -1265,6 +1265,6 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		mdmLink.setUpdated(new Date());
 		mdmLink.setVersion("1");
-		myMdmLinkDao.save(mdmLink);
+		runInTransaction(() -> myMdmLinkDao.save(mdmLink));
 	}
 }

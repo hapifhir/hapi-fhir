@@ -12,7 +12,9 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 
@@ -24,7 +26,19 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
 	@Autowired
 	private IFulltextSearchSvc mySearchDao;
-	
+
+	@Test
+	public void testDaoCallRequiresTransaction() {
+
+		try {
+			myResourceTableDao.count();
+		} catch (AssertionFailedError e) {
+			// good
+		}
+
+		assert !TransactionSynchronizationManager.isActualTransactionActive();
+	}
+
 	@Test
 	public void testContentSearch() {
 		Long id1;

@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -50,6 +51,7 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 
 	@Override
 	@Nonnull
+	@Transactional
 	public ResourceVersionMap getVersionMap(String theResourceName, SearchParameterMap theSearchParamMap) {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceName);
 

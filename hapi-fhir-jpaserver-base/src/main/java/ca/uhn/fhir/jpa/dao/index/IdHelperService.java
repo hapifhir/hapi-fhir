@@ -47,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -118,6 +119,8 @@ public class IdHelperService {
 	 */
 	@Nonnull
 	public IResourceLookup resolveResourceIdentity(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId) throws ResourceNotFoundException {
+		assert TransactionSynchronizationManager.isSynchronizationActive();
+
 		// We only pass 1 input in so only 0..1 will come back
 		IdDt id = new IdDt(theResourceType, theResourceId);
 		Collection<IResourceLookup> matches = translateForcedIdToPids(theRequestPartitionId, Collections.singletonList(id));
@@ -147,6 +150,7 @@ public class IdHelperService {
 	@Nonnull
 	public ResourcePersistentId resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId) {
 		Validate.notNull(theId, "theId must not be null");
+		assert TransactionSynchronizationManager.isSynchronizationActive();
 
 		ResourcePersistentId retVal;
 		if (myDaoConfig.getResourceClientIdStrategy() == DaoConfig.ClientIdStrategyEnum.ANY || !isValidPid(theId)) {
@@ -187,6 +191,8 @@ public class IdHelperService {
 	 */
 	@Nonnull
 	public List<ResourcePersistentId> resolveResourcePersistentIdsWithCache(RequestPartitionId theRequestPartitionId, List<IIdType> theIds) {
+		assert TransactionSynchronizationManager.isSynchronizationActive();
+
 		theIds.forEach(id -> Validate.isTrue(id.hasIdPart()));
 
 		if (theIds.isEmpty()) {
@@ -428,6 +434,8 @@ public class IdHelperService {
 	 * @return A Set of strings representing the FHIR IDs of the pids.
 	 */
 	public Set<String> translatePidsToFhirResourceIds(Set<Long> thePids) {
+		assert TransactionSynchronizationManager.isSynchronizationActive();
+
 		Map<Long, Optional<String>> pidToForcedIdMap = translatePidsToForcedIds(thePids);
 
 		//If the result of the translation is an empty optional, it means there is no forced id, and we can use the PID as the resource ID.
@@ -440,6 +448,8 @@ public class IdHelperService {
 	}
 
 	public Map<Long, Optional<String>> translatePidsToForcedIds(Set<Long> thePids) {
+		assert TransactionSynchronizationManager.isSynchronizationActive();
+
 		Map<Long, Optional<String>> retVal = new HashMap<>(myMemoryCacheService.getAllPresent(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, thePids));
 
 		List<Long> remainingPids = thePids

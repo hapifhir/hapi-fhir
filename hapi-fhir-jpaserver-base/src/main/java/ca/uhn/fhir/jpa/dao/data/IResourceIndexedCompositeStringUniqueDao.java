@@ -28,7 +28,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface IResourceIndexedCompositeStringUniqueDao extends JpaRepository<ResourceIndexedCompositeStringUnique, Long> {
+public interface IResourceIndexedCompositeStringUniqueDao extends JpaRepository<ResourceIndexedCompositeStringUnique, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT r FROM ResourceIndexedCompositeStringUnique r WHERE r.myIndexString = :str")
 	ResourceIndexedCompositeStringUnique findByQueryString(@Param("str") String theQueryString);
