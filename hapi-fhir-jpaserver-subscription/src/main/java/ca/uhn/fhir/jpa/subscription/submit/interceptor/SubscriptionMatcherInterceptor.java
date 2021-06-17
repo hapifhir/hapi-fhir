@@ -13,8 +13,8 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedCons
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -51,7 +51,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Interceptor
 public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer {
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
+	private final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
@@ -72,6 +72,10 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 
 	@EventListener(classes = {ContextRefreshedEvent.class})
 	public void startIfNeeded() {
+		if (myDaoConfig.getSupportedSubscriptionTypes().isEmpty()) {
+			ourLog.debug("Subscriptions are disabled on this server.  Skipping {} channel creation.", SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME);
+			return;
+		}
 		if (myMatchingChannel == null) {
 			myMatchingChannel = mySubscriptionChannelFactory.newMatchingSendingChannel(SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME, null);
 		}
