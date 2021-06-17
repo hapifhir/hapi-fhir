@@ -89,6 +89,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// Add bulk import file description
 		version.onTable("HFJ_BLK_IMPORT_JOBFILE")
 			.addColumn("20210528.1", "FILE_DESCRIPTION").nullable().type(ColumnTypeEnum.STRING, 500);
+
+		// Bump ConceptMap display lengths
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
+			.modifyColumn("20210617.1","TARGET_DISPLAY").nullable().withType(ColumnTypeEnum.STRING, 500);
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
+			.modifyColumn("20210617.2", "SOURCE_DISPLAY").nullable().withType(ColumnTypeEnum.STRING, 500);
 	}
 
 	private void init540() {
