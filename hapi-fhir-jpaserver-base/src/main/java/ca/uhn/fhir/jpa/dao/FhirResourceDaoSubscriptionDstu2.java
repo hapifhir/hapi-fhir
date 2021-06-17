@@ -25,9 +25,9 @@ import ca.uhn.fhir.jpa.dao.data.ISubscriptionTableDao;
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,8 +51,8 @@ public class FhirResourceDaoSubscriptionDstu2 extends BaseHapiFhirResourceDao<Su
 	}
 
 	@Override
-	public Long getSubscriptionTablePidForSubscriptionResource(IIdType theId, RequestDetails theRequest) {
-		ResourceTable entity = readEntityLatestVersion(theId, theRequest);
+	public Long getSubscriptionTablePidForSubscriptionResource(IIdType theId, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+		ResourceTable entity = readEntityLatestVersion(theId, theRequest, theTransactionDetails);
 		SubscriptionTable table = mySubscriptionTableDao.findOneByResourcePid(entity.getId());
 		if (table == null) {
 			return null;

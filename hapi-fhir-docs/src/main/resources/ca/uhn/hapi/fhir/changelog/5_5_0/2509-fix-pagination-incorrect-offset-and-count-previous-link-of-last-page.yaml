@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2509
+backport: 5.4.1
+title: "Pagination returned incorrect offset and count in the previous link of the last page
+      when total element count was one more than multiple of page size. Problem is now fixed"

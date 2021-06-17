@@ -145,6 +145,20 @@ public abstract class BaseTransactionProcessor {
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
+	@VisibleForTesting
+	public void setDaoConfig(DaoConfig theDaoConfig) {
+		myDaoConfig = theDaoConfig;
+	}
+
+	public ITransactionProcessorVersionAdapter getVersionAdapter() {
+		return myVersionAdapter;
+	}
+
+	@VisibleForTesting
+	public void setVersionAdapter(ITransactionProcessorVersionAdapter theVersionAdapter) {
+		myVersionAdapter = theVersionAdapter;
+	}
+
 	@PostConstruct
 	public void start() {
 		ourLog.trace("Starting transaction processor");
@@ -285,11 +299,6 @@ public abstract class BaseTransactionProcessor {
 		} finally {
 			BaseHapiFhirDao.clearRequestAsProcessingSubRequest(theRequestDetails);
 		}
-	}
-
-	@VisibleForTesting
-	public void setVersionAdapter(ITransactionProcessorVersionAdapter theVersionAdapter) {
-		myVersionAdapter = theVersionAdapter;
 	}
 
 	@VisibleForTesting
@@ -582,8 +591,8 @@ public abstract class BaseTransactionProcessor {
 		myModelConfig = theModelConfig;
 	}
 
-	private Map<IBase, IIdType> doTransactionWriteOperations(final RequestDetails theRequest, String theActionName, TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
-																				Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder, List<IBase> theEntries, StopWatch theTransactionStopWatch) {
+	protected Map<IBase, IIdType> doTransactionWriteOperations(final RequestDetails theRequest, String theActionName, TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
+																				  Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder, List<IBase> theEntries, StopWatch theTransactionStopWatch) {
 
 		theTransactionDetails.beginAcceptingDeferredInterceptorBroadcasts(
 			Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED,
@@ -1067,7 +1076,7 @@ public abstract class BaseTransactionProcessor {
 			if (!nextId.hasIdPart()) {
 				if (resourceReference.getResource() != null) {
 					IIdType targetId = resourceReference.getResource().getIdElement();
-					if (targetId.getValue() == null) {
+					if (targetId.getValue() == null || targetId.getValue().startsWith("#")) {
 						// This means it's a contained resource
 						continue;
 					} else if (theIdSubstitutions.containsValue(targetId)) {
@@ -1136,10 +1145,7 @@ public abstract class BaseTransactionProcessor {
 
 		IBasePersistedResource updateOutcome = null;
 		if (updatedEntities.contains(nextOutcome.getEntity())) {
-			boolean forceUpdateVersion = false;
-			if (!theReferencesToAutoVersion.isEmpty()) {
-				forceUpdateVersion = true;
-			}
+			boolean forceUpdateVersion = !theReferencesToAutoVersion.isEmpty();
 
 			updateOutcome = jpaDao.updateInternal(theRequest, nextResource, true, forceUpdateVersion, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource(), theTransactionDetails);
 		} else if (!nonUpdatedEntities.contains(nextOutcome.getId())) {
@@ -1258,7 +1264,6 @@ public abstract class BaseTransactionProcessor {
 		return dao;
 	}
 
-
 	private String toResourceName(Class<? extends IBaseResource> theResourceType) {
 		return myContext.getResourceType(theResourceType);
 	}
@@ -1316,11 +1321,6 @@ public abstract class BaseTransactionProcessor {
 			}
 		}
 		return null;
-	}
-
-	@VisibleForTesting
-	public void setDaoConfig(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
 	}
 
 	public interface ITransactionProcessorVersionAdapter<BUNDLE extends IBaseBundle, BUNDLEENTRY extends IBase> {

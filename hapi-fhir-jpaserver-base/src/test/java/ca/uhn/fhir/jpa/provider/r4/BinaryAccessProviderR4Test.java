@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -20,7 +21,13 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Attachment;
+import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,10 +40,19 @@ import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
@@ -606,11 +622,11 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 		// Now expunge
 		Parameters parameters = new Parameters();
-		parameters.addParameter().setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES).setValue(new BooleanType(true));
+		parameters.addParameter().setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES).setValue(new BooleanType(true));
 		myClient
 			.operation()
 			.onInstance(id)
-			.named(JpaConstants.OPERATION_EXPUNGE)
+			.named(ProviderConstants.OPERATION_EXPUNGE)
 			.withParameters(parameters)
 			.execute();
 

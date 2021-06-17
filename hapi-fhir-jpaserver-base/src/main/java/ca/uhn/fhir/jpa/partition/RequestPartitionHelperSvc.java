@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.partition;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -109,7 +110,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 			}
 
 			if (theRequest instanceof SystemRequestDetails) {
-				requestPartitionId = getSystemRequestPartitionId(theRequest, nonPartitionableResource);
+				requestPartitionId = getSystemRequestPartitionId((SystemRequestDetails) theRequest, nonPartitionableResource);
 				// Interceptor call: STORAGE_PARTITION_IDENTIFY_READ
 			} else if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_READ, myInterceptorBroadcaster, theRequest)) {
 				HookParams params = new HookParams()
@@ -122,22 +123,18 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 			validateRequestPartitionNotNull(requestPartitionId, Pointcut.STORAGE_PARTITION_IDENTIFY_READ);
 
-			return validateNormalizeAndNotifyHooksForRead(requestPartitionId, theRequest);
+			return validateNormalizeAndNotifyHooksForRead(requestPartitionId, theRequest, theResourceType);
 		}
 
 		return RequestPartitionId.allPartitions();
 	}
 
 	/**
-	 *
 	 * For system requests, read partition from tenant ID if present, otherwise set to DEFAULT. If the resource they are attempting to partition
 	 * is non-partitionable scream in the logs and set the partition to DEFAULT.
 	 *
-	 * @param theRequest
-	 * @param theNonPartitionableResource
-	 * @return
 	 */
-	private RequestPartitionId getSystemRequestPartitionId(RequestDetails theRequest, boolean theNonPartitionableResource) {
+	private RequestPartitionId getSystemRequestPartitionId(SystemRequestDetails theRequest, boolean theNonPartitionableResource) {
 		RequestPartitionId requestPartitionId;
 		requestPartitionId = getSystemRequestPartitionId(theRequest);
 		if (theNonPartitionableResource && !requestPartitionId.isDefaultPartition()) {
@@ -148,7 +145,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 	/**
 	 * Determine the partition for a System Call (defined by the fact that the request is of type SystemRequestDetails)
-	 *
+	 * <p>
 	 * 1. If the tenant ID is set to the constant for all partitions, return all partitions
 	 * 2. If there is a tenant ID set in the request, use it.
 	 * 3. Otherwise, return the Default Partition.
@@ -157,7 +154,10 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	 * @return the {@link RequestPartitionId} to be used for this request.
 	 */
 	@Nonnull
-	private RequestPartitionId getSystemRequestPartitionId(@Nonnull RequestDetails theRequest) {
+	private RequestPartitionId getSystemRequestPartitionId(@Nonnull SystemRequestDetails theRequest) {
+		if (theRequest.getRequestPartitionId() != null) {
+			return theRequest.getRequestPartitionId();
+		}
 		if (theRequest.getTenantId() != null) {
 			if (theRequest.getTenantId().equals(ALL_PARTITIONS_NAME)) {
 				return RequestPartitionId.allPartitions();
@@ -186,7 +186,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 			}
 
 			if (theRequest instanceof SystemRequestDetails) {
-				requestPartitionId = getSystemRequestPartitionId(theRequest, nonPartitionableResource);
+				requestPartitionId = getSystemRequestPartitionId((SystemRequestDetails) theRequest, nonPartitionableResource);
 			} else {
 				//This is an external Request (e.g. ServletRequestDetails) so we want to figure out the partition via interceptor.
 				HookParams params = new HookParams()// Interceptor call: STORAGE_PARTITION_IDENTIFY_CREATE
@@ -204,7 +204,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 			String resourceName = myFhirContext.getResourceType(theResource);
 			validateSinglePartitionForCreate(requestPartitionId, resourceName, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE);
 
-			return validateNormalizeAndNotifyHooksForRead(requestPartitionId, theRequest);
+			return validateNormalizeAndNotifyHooksForRead(requestPartitionId, theRequest, theResourceType);
 		}
 
 		return RequestPartitionId.allPartitions();
@@ -218,7 +218,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	 * If the partition has both, they are validated to ensure that they correspond.
 	 */
 	@Nonnull
-	private RequestPartitionId validateNormalizeAndNotifyHooksForRead(@Nonnull RequestPartitionId theRequestPartitionId, RequestDetails theRequest) {
+	private RequestPartitionId validateNormalizeAndNotifyHooksForRead(@Nonnull RequestPartitionId theRequestPartitionId, RequestDetails theRequest, String theResourceType) {
 		RequestPartitionId retVal = theRequestPartitionId;
 
 		if (retVal.getPartitionNames() != null) {
@@ -229,11 +229,15 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 		// Note: It's still possible that the partition only has a date but no name/id
 
-		HookParams params = new HookParams()
-			.add(RequestPartitionId.class, retVal)
-			.add(RequestDetails.class, theRequest)
-			.addIfMatchesType(ServletRequestDetails.class, theRequest);
-		doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_SELECTED, params);
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_SELECTED)) {
+			RuntimeResourceDefinition runtimeResourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
+			HookParams params = new HookParams()
+				.add(RequestPartitionId.class, retVal)
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest)
+				.add(RuntimeResourceDefinition.class, runtimeResourceDefinition);
+			doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_SELECTED, params);
+		}
 
 		return retVal;
 

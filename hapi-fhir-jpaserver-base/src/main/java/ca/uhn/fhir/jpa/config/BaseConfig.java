@@ -61,6 +61,7 @@ import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderUri;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictFinderService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
+import ca.uhn.fhir.jpa.delete.DeleteExpungeJobSubmitterImpl;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
@@ -132,9 +133,11 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.validation.JpaResourceLoader;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
+import ca.uhn.fhir.rest.server.provider.DeleteExpungeProvider;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -526,6 +529,18 @@ public abstract class BaseConfig {
 	@Lazy
 	public BulkDataExportProvider bulkDataExportProvider() {
 		return new BulkDataExportProvider();
+	}
+
+	@Bean
+	@Lazy
+	public IDeleteExpungeJobSubmitter myDeleteExpungeJobSubmitter() {
+		return new DeleteExpungeJobSubmitterImpl();
+	}
+
+	@Bean
+	@Lazy
+	public DeleteExpungeProvider deleteExpungeProvider(FhirContext theFhirContext, IDeleteExpungeJobSubmitter theDeleteExpungeJobSubmitter) {
+		return new DeleteExpungeProvider(theFhirContext, theDeleteExpungeJobSubmitter);
 	}
 
 	@Bean

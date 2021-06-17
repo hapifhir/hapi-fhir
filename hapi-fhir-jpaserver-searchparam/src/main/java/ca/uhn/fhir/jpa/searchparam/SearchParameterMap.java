@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -166,12 +167,13 @@ public class SearchParameterMap implements Serializable {
 		return this;
 	}
 
-	private void addLastUpdateParam(StringBuilder b, DateParam date) {
-		if (date != null && isNotBlank(date.getValueAsString())) {
-			addUrlParamSeparator(b);
-			b.append(Constants.PARAM_LASTUPDATED);
-			b.append('=');
-			b.append(date.getValueAsString());
+	private void addLastUpdateParam(StringBuilder theBuilder, ParamPrefixEnum thePrefix, DateParam theDateParam) {
+		if (theDateParam != null && isNotBlank(theDateParam.getValueAsString())) {
+			addUrlParamSeparator(theBuilder);
+			theBuilder.append(Constants.PARAM_LASTUPDATED);
+			theBuilder.append('=');
+			theBuilder.append(thePrefix.getValue());
+			theBuilder.append(theDateParam.getValueAsString());
 		}
 	}
 
@@ -472,9 +474,9 @@ public class SearchParameterMap implements Serializable {
 
 		if (getLastUpdated() != null) {
 			DateParam lb = getLastUpdated().getLowerBound();
-			addLastUpdateParam(b, lb);
+			addLastUpdateParam(b, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, lb);
 			DateParam ub = getLastUpdated().getUpperBound();
-			addLastUpdateParam(b, ub);
+			addLastUpdateParam(b, ParamPrefixEnum.LESSTHAN_OR_EQUALS, ub);
 		}
 
 		if (getCount() != null) {

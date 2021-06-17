@@ -21,6 +21,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -38,6 +39,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
@@ -54,6 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
@@ -672,7 +675,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		for (Future<Throwable> next : futures) {
 			Throwable t = next.get();
 			if (t != null) {
-				throw t;
+				String stackTrace = ExceptionUtils.getStackTrace(t);
+				fail(t.toString() + "\n" + stackTrace);
 			}
 		}
 		executor.shutdownNow();
@@ -1196,12 +1200,12 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		// Forced ID resolution
 		resultingQueryNotFormatted = queries.get(0);
 		assertThat(resultingQueryNotFormatted, containsString("RESOURCE_TYPE='Organization'"));
-		assertThat(resultingQueryNotFormatted, containsString("FORCED_ID in ('ORG0' , 'ORG1' , 'ORG2' , 'ORG3' , 'ORG4')"));
+		assertThat(resultingQueryNotFormatted, containsString("forcedid0_.RESOURCE_TYPE='Organization' and forcedid0_.FORCED_ID='ORG1' or forcedid0_.RESOURCE_TYPE='Organization' and forcedid0_.FORCED_ID='ORG2'"));
 
 		// The search itself
 		resultingQueryNotFormatted = queries.get(1);
 		assertEquals(1, StringUtils.countMatches(resultingQueryNotFormatted, "Patient.managingOrganization"), resultingQueryNotFormatted);
-		assertThat(resultingQueryNotFormatted, matchesPattern(".*TARGET_RESOURCE_ID IN \\('[0-9]+','[0-9]+','[0-9]+','[0-9]+','[0-9]+'\\).*"));
+		assertThat(resultingQueryNotFormatted.toUpperCase(Locale.US), matchesPattern(".*TARGET_RESOURCE_ID IN \\('[0-9]+','[0-9]+','[0-9]+','[0-9]+','[0-9]+'\\).*"));
 
 		// Ensure that the search actually worked
 		assertEquals(5, search.size().intValue());

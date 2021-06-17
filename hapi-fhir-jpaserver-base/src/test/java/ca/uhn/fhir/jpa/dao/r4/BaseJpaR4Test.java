@@ -32,8 +32,6 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamQuantityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamQuantityNormalizedDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
@@ -788,7 +786,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 		Optional<ValueSet.ConceptReferenceDesignationComponent> first = stream.findFirst();
 		if (!first.isPresent()) {
-			String failureMessage = String.format("Concept %s did not contain designation [%s|%s|%s|%s|%s] ", theConcept.toString(), theLanguage, theUseSystem, theUseCode, theUseDisplay, theDesignationValue);
+			String failureMessage = String.format("Concept %s did not contain designation [%s|%s|%s|%s|%s] ", theConcept, theLanguage, theUseSystem, theUseCode, theUseDisplay, theDesignationValue);
 			fail(failureMessage);
 			return null;
 		} else {

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -39,11 +40,13 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -51,6 +54,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -60,6 +64,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
@@ -609,6 +616,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		createUniqueCompositeSp();
 		createRequestId();
 
+		addReadPartition(myPartitionId);
+		addReadPartition(myPartitionId);
 		addCreatePartition(myPartitionId, myPartitionDate);
 		addCreatePartition(myPartitionId, myPartitionDate);
 
@@ -2548,7 +2557,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		ourLog.info("Search SQL:\n{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID IN ('1')"), searchSql);
+		assertEquals(1, StringUtils.countMatches(searchSql.toUpperCase(Locale.US), "PARTITION_ID IN ('1')"), searchSql);
 		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
 
 		// Same query, different partition
@@ -2583,7 +2592,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID IS NULL"), searchSql);
+		assertEquals(1, StringUtils.countMatches(searchSql.toUpperCase(Locale.US), "PARTITION_ID IS NULL"), searchSql);
 		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
 
 		// Same query, different partition
@@ -2598,6 +2607,127 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertThat(ids, Matchers.empty());
 
 	}
+
+	@Test
+	public void testTransaction_MultipleConditionalUpdates() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+
+		AtomicInteger counter = new AtomicInteger(0);
+		Supplier<Bundle> input = () -> {
+			BundleBuilder bb = new BundleBuilder(myFhirCtx);
+
+			Patient pt = new Patient();
+			pt.setId(IdType.newRandomUuid());
+			pt.addIdentifier().setSystem("http://foo").setValue("123");
+			bb.addTransactionCreateEntry(pt).conditional("Patient?identifier=http://foo|123");
+
+			Observation obsA = new Observation();
+			obsA.getSubject().setReference(pt.getId());
+			obsA.getCode().addCoding().setSystem("http://foo").setCode("bar1");
+			obsA.setValue(new Quantity(null, 1, "http://unitsofmeasure.org", "kg", "kg"));
+			obsA.setEffective(new DateTimeType(new Date()));
+			obsA.addNote().setText("Foo " + counter.incrementAndGet()); // changes every time
+			bb.addTransactionUpdateEntry(obsA).conditional("Observation?code=http://foo|bar1");
+
+			Observation obsB = new Observation();
+			obsB.getSubject().setReference(pt.getId());
+			obsB.getCode().addCoding().setSystem("http://foo").setCode("bar2");
+			obsB.setValue(new Quantity(null, 1, "http://unitsofmeasure.org", "kg", "kg"));
+			obsB.setEffective(new DateTimeType(new Date()));
+			obsB.addNote().setText("Foo " + counter.incrementAndGet()); // changes every time
+			bb.addTransactionUpdateEntry(obsB).conditional("Observation?code=http://foo|bar2");
+
+			Observation obsC = new Observation();
+			obsC.getSubject().setReference(pt.getId());
+			obsC.getCode().addCoding().setSystem("http://foo").setCode("bar3");
+			obsC.setValue(new Quantity(null, 1, "http://unitsofmeasure.org", "kg", "kg"));
+			obsC.setEffective(new DateTimeType(new Date()));
+			obsC.addNote().setText("Foo " + counter.incrementAndGet()); // changes every time
+			bb.addTransactionUpdateEntry(obsC).conditional("Observation?code=bar3");
+
+			Observation obsD = new Observation();
+			obsD.getSubject().setReference(pt.getId());
+			obsD.getCode().addCoding().setSystem("http://foo").setCode("bar4");
+			obsD.setValue(new Quantity(null, 1, "http://unitsofmeasure.org", "kg", "kg"));
+			obsD.setEffective(new DateTimeType(new Date()));
+			obsD.addNote().setText("Foo " + counter.incrementAndGet()); // changes every time
+			bb.addTransactionUpdateEntry(obsD).conditional("Observation?code=bar4");
+
+			return (Bundle) bb.getBundle();
+		};
+
+		ourLog.info("About to start transaction");
+
+		for (int i = 0; i < 20; i++) {
+			addReadPartition(1);
+		}
+		for (int i = 0; i < 8; i++) {
+			addCreatePartition(1, null);
+		}
+
+		// Pre-fetch the partition ID from the partition lookup table
+		createPatient(withPartition(1), withActiveTrue());
+
+		myCaptureQueriesListener.clear();
+		Bundle outcome = mySystemDao.transaction(mySrd, input.get());
+		ourLog.info("Resp: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), containsString("resourcein0_.HASH_SYS_AND_VALUE='-4132452001562191669' and (resourcein0_.PARTITION_ID in ('1'))"));
+		myCaptureQueriesListener.logInsertQueries();
+		assertEquals(6, myCaptureQueriesListener.countInsertQueries());
+		myCaptureQueriesListener.logUpdateQueries();
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+
+		/*
+		 * Run a second time
+		 */
+
+		myCaptureQueriesListener.clear();
+		outcome = mySystemDao.transaction(mySrd, input.get());
+		ourLog.info("Resp: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(11, myCaptureQueriesListener.countSelectQueries());
+		myCaptureQueriesListener.logInsertQueries();
+		assertEquals(1, myCaptureQueriesListener.countInsertQueries());
+		myCaptureQueriesListener.logUpdateQueries();
+		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+
+		/*
+		 * Third time with mass ingestion mode enabled
+		 */
+		myDaoConfig.setMassIngestionMode(true);
+		myDaoConfig.setMatchUrlCache(true);
+
+		myCaptureQueriesListener.clear();
+		outcome = mySystemDao.transaction(mySrd, input.get());
+		ourLog.info("Resp: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(6, myCaptureQueriesListener.countSelectQueries());
+		myCaptureQueriesListener.logInsertQueries();
+		assertEquals(1, myCaptureQueriesListener.countInsertQueries());
+		myCaptureQueriesListener.logUpdateQueries();
+		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+
+		/*
+		 * Fourth time with mass ingestion mode enabled
+		 */
+
+		myCaptureQueriesListener.clear();
+		outcome = mySystemDao.transaction(mySrd, input.get());
+		ourLog.info("Resp: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
+		myCaptureQueriesListener.logInsertQueries();
+		assertEquals(1, myCaptureQueriesListener.countInsertQueries());
+		myCaptureQueriesListener.logUpdateQueries();
+		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+	}
+
 
 	@Test
 	public void testUpdate_ResourcePreExistsInWrongPartition() {
@@ -2934,6 +3064,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			RequestPartitionId partitionId = captor.getValue().get(RequestPartitionId.class);
 			assertEquals(1, partitionId.getPartitionIds().get(0).intValue());
 			assertEquals("PART-1", partitionId.getPartitionNames().get(0));
+			assertEquals("Patient", captor.getValue().get(RuntimeResourceDefinition.class).getName());
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);

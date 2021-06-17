@@ -12,7 +12,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.jupiter.api.AfterEach;
 
 public class BaseR4ServerTest {
-	private FhirContext myCtx = FhirContext.forR4();
+	protected FhirContext myCtx = FhirContext.forR4Cached();
 	private Server myServer;
 	protected IGenericClient myClient;
 	protected String myBaseUrl;

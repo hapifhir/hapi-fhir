@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -37,9 +38,9 @@ public class PublicSecurityInterceptor extends AuthorizationInterceptor {
 				.deny().operation().named(JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM).onServer().andAllowAllResponses().andThen()
 				.deny().operation().named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD).atAnyLevel().andAllowAllResponses().andThen()
 				.deny().operation().named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE).atAnyLevel().andAllowAllResponses().andThen()
-				.deny().operation().named(JpaConstants.OPERATION_EXPUNGE).onServer().andAllowAllResponses().andThen()
-				.deny().operation().named(JpaConstants.OPERATION_EXPUNGE).onAnyType().andAllowAllResponses().andThen()
-				.deny().operation().named(JpaConstants.OPERATION_EXPUNGE).onAnyInstance().andAllowAllResponses().andThen()
+				.deny().operation().named(ProviderConstants.OPERATION_EXPUNGE).onServer().andAllowAllResponses().andThen()
+				.deny().operation().named(ProviderConstants.OPERATION_EXPUNGE).onAnyType().andAllowAllResponses().andThen()
+				.deny().operation().named(ProviderConstants.OPERATION_EXPUNGE).onAnyInstance().andAllowAllResponses().andThen()
 				.allowAll()
 				.build();
 		}

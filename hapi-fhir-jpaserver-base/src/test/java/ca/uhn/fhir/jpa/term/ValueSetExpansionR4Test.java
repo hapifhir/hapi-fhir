@@ -19,6 +19,7 @@ import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
@@ -38,6 +39,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -444,11 +446,6 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertThat(lastSelectQuery, containsString(" like '%display value 9%'"));
 	}
 
-	@Nonnull
-	public List<String> toCodes(ValueSet theExpandedValueSet) {
-		return theExpandedValueSet.getExpansion().getContains().stream().map(t -> t.getCode()).collect(Collectors.toList());
-	}
-
 	@SuppressWarnings("SpellCheckingInspection")
 	@Test
 	public void testExpandTermValueSetAndChildren() throws Exception {
@@ -513,7 +510,6 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		assertEquals(3, expandedValueSet.getExpansion().getContains().size());
 	}
-
 
 	@Test
 	public void testExpandExistingValueSetNotPreExpanded() throws Exception {
@@ -870,7 +866,6 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertEquals("Unknown CodeSystem URI \"http://unknown-system\" referenced from ValueSet", extensionByUrl.getValueAsPrimitive().getValueAsString());
 	}
 
-
 	@Test
 	public void testExpandTermValueSetAndChildrenWithOffsetAndCountWithClientAssignedId() throws Exception {
 		myDaoConfig.setPreExpandValueSets(true);
@@ -953,6 +948,54 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myTermSvc.expandValueSet(null, vs, myValueSetCodeAccumulator);
 		verify(myValueSetCodeAccumulator, times(9)).includeConceptWithDesignations(anyString(), anyString(), nullable(String.class), anyCollection(), nullable(Long.class), nullable(String.class));
+	}
+
+	@Test
+	public void testExpandValueSetPreservesExplicitOrder() {
+		CodeSystem cs = new CodeSystem();
+		cs.setId("cs");
+		cs.setUrl("http://cs");
+		cs.addConcept().setCode("code1");
+		cs.addConcept().setCode("code2");
+		cs.addConcept().setCode("code3");
+		cs.addConcept().setCode("code4");
+		cs.addConcept().setCode("code5");
+		myCodeSystemDao.update(cs);
+
+		// Vs in reverse order
+		ValueSet vs = new ValueSet();
+		vs.setId("vs");
+		vs.setUrl("http://vs");
+		// Add some codes in separate compose sections, and some more codes in a single compose section.
+		// Order should be preserved for all of them.
+		vs.getCompose().addInclude().setSystem("http://cs")
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code5")));
+		vs.getCompose().addInclude().setSystem("http://cs")
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code4")));
+		vs.getCompose().addInclude().setSystem("http://cs")
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code3")))
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code2")))
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code1")));
+		myValueSetDao.update(vs);
+
+		// Non Pre-Expanded
+		ValueSet outcome = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
+		assertEquals("ValueSet \"ValueSet.url[http://vs]\" has not yet been pre-expanded. Performing in-memory expansion without parameters. Current status: NOT_EXPANDED | The ValueSet is waiting to be picked up and pre-expanded by a scheduled task.", outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
+		assertThat(toCodes(outcome).toString(), toCodes(outcome), contains(
+			"code5", "code4", "code3", "code2", "code1"
+		));
+
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		// Pre-Expanded
+		myCaptureQueriesListener.clear();
+		outcome = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals("ValueSet was expanded using a pre-calculated expansion", outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
+		assertThat(toCodes(outcome).toString(), toCodes(outcome), contains(
+			"code5", "code4", "code3", "code2", "code1"
+		));
+
 	}
 
 	@Test
@@ -1429,6 +1472,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 			assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum", 0);
 		});
+	}
+
+	@Nonnull
+	public static List<String> toCodes(ValueSet theExpandedValueSet) {
+		return theExpandedValueSet.getExpansion().getContains().stream().map(t -> t.getCode()).collect(Collectors.toList());
 	}
 
 
