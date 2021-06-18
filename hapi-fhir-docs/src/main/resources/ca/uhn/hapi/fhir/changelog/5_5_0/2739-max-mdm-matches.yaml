@@ -1,5 +1,5 @@
 ---
 type: fix
 issue: 2739
-title: "Too many mdm candidates matching could result in an OutOfMemoryError.  Candidate matching is now limited to the
+title: "Too many MDM candidates matching could result in an OutOfMemoryError.  Candidate matching is now limited to the
 value of IMdmSettings.getCandidateSearchLimit(), default 10000."
