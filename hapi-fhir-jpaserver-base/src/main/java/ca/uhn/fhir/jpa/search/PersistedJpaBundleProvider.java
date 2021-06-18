@@ -147,12 +147,12 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	/**
 	 * Perform a history search
 	 */
-	private List<IBaseResource> doHistoryInTransaction(int theFromIndex, int theToIndex) {
+	private List<IBaseResource> doHistoryInTransaction(Integer theOffset, int theFromIndex, int theToIndex) {
 
 		HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(mySearchEntity.getResourceType(), mySearchEntity.getResourceId(), mySearchEntity.getLastUpdatedLow(), mySearchEntity.getLastUpdatedHigh());
 
 		RequestPartitionId partitionId = getRequestPartitionId();
-		List<ResourceHistoryTable> results = historyBuilder.fetchEntities(partitionId, theFromIndex, theToIndex);
+		List<ResourceHistoryTable> results = historyBuilder.fetchEntities(partitionId, theOffset, theFromIndex, theToIndex);
 
 		List<IBaseResource> retVal = new ArrayList<>();
 		for (ResourceHistoryTable next : results) {
@@ -321,7 +321,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 		switch (mySearchEntity.getSearchType()) {
 			case HISTORY:
-				return template.execute(theStatus -> doHistoryInTransaction(theFromIndex, theToIndex));
+				return template.execute(theStatus -> doHistoryInTransaction(mySearchEntity.getOffset(), theFromIndex, theToIndex));
 			case SEARCH:
 			case EVERYTHING:
 			default:

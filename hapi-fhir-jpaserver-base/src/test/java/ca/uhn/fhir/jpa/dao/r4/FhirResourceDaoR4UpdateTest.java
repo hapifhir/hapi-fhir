@@ -538,7 +538,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		 * Get history
 		 */
 
-		IBundleProvider historyBundle = myPatientDao.history(outcome.getId(), null, null, mySrd);
+		IBundleProvider historyBundle = myPatientDao.history(outcome.getId(), null, null, null, mySrd);
 
 		assertEquals(2, historyBundle.size().intValue());
 

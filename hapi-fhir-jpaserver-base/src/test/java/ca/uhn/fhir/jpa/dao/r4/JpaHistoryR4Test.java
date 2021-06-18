@@ -48,7 +48,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		 */
 
 		myCaptureQueriesListener.clear();
-		IBundleProvider history = myPatientDao.history(null, null, new SystemRequestDetails());
+		IBundleProvider history = myPatientDao.history(null, null, null, new SystemRequestDetails());
 
 		// Simulate the server requesting the Bundle.total value
 		assertEquals(null, history.size());
@@ -75,7 +75,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		 */
 
 		myCaptureQueriesListener.clear();
-		IBundleProvider history = myPatientDao.history(null, null, new SystemRequestDetails());
+		IBundleProvider history = myPatientDao.history(null, null, null, new SystemRequestDetails());
 
 		// Simulate the server requesting the Bundle.total value
 		assertEquals(20, history.sizeOrThrowNpe());
@@ -95,7 +95,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		 */
 
 		myCaptureQueriesListener.clear();
-		history = myPatientDao.history(null, null, new SystemRequestDetails());
+		history = myPatientDao.history(null, null, null, new SystemRequestDetails());
 
 		// Simulate the server requesting the Bundle.total value
 		assertEquals(20, history.sizeOrThrowNpe());
@@ -121,7 +121,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		 */
 
 		myCaptureQueriesListener.clear();
-		IBundleProvider history = myPatientDao.history(null, null, new SystemRequestDetails());
+		IBundleProvider history = myPatientDao.history(null, null, null, new SystemRequestDetails());
 
 		// Simulate the server requesting the Bundle.total value
 		assertEquals(20, history.sizeOrThrowNpe());
@@ -143,7 +143,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		 */
 
 		myCaptureQueriesListener.clear();
-		history = myPatientDao.history(null, null, new SystemRequestDetails());
+		history = myPatientDao.history(null, null, null, new SystemRequestDetails());
 
 		// Simulate the server requesting the Bundle.total value
 		assertEquals(20, history.sizeOrThrowNpe());
@@ -171,7 +171,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		 */
 
 		myCaptureQueriesListener.clear();
-		IBundleProvider history = myPatientDao.history(null, new Date(), new SystemRequestDetails());
+		IBundleProvider history = myPatientDao.history(null, new Date(), null, new SystemRequestDetails());
 
 		// No count since there is an offset
 		assertEquals(null, history.size());
@@ -196,7 +196,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		 */
 
 		myCaptureQueriesListener.clear();
-		IBundleProvider history = mySystemDao.history(null, null, new SystemRequestDetails());
+		IBundleProvider history = mySystemDao.history(null, null, null, new SystemRequestDetails());
 
 		// Simulate the server requesting the Bundle.total value
 		assertEquals(20, history.sizeOrThrowNpe());
@@ -218,7 +218,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		 */
 
 		myCaptureQueriesListener.clear();
-		history = mySystemDao.history(null, null, new SystemRequestDetails());
+		history = mySystemDao.history(null, null, null, new SystemRequestDetails());
 
 		// Simulate the server requesting the Bundle.total value
 		assertEquals(20, history.sizeOrThrowNpe());
@@ -244,7 +244,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		ExecutorService threadPool = Executors.newFixedThreadPool(20);
 		try {
 			Runnable task = () -> {
-				IBundleProvider history = mySystemDao.history(null, null, new SystemRequestDetails());
+				IBundleProvider history = mySystemDao.history(null, null, null, new SystemRequestDetails());
 				assertEquals(20, history.sizeOrThrowNpe());
 				assertEquals(20, history.getResources(0, 999).size());
 			};

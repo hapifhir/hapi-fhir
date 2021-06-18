@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.collections4.comparators.ReverseComparator;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -12,7 +11,6 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -124,7 +122,7 @@ public class FhirDaoConcurrencyDstu3Test extends BaseJpaDstu3SystemTest {
 		Long currentVersion = currentPatient.getIdElement().getVersionIdPartAsLong();
 		ourLog.info("Current version: {}", currentVersion);
 
-		IBundleProvider historyBundle = myPatientDao.history(new IdType("Patient/PID"),null,null,mySrd);
+		IBundleProvider historyBundle = myPatientDao.history(new IdType("Patient/PID"), null, null, null, mySrd);
 		List<IBaseResource> resources = historyBundle.getResources(0, 1000);
 		List<Long> versions = new ArrayList<>();
 		for (IBaseResource next : resources) {
@@ -142,7 +140,6 @@ public class FhirDaoConcurrencyDstu3Test extends BaseJpaDstu3SystemTest {
 		assertEquals(currentVersion, lastVersion, message);
 
 	}
-
 
 
 }

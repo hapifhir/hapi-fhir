@@ -30,6 +30,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 import java.io.Serializable;
@@ -142,6 +143,13 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Lob
 	@Column(name = "SEARCH_PARAM_MAP", nullable = true)
 	private byte[] mySearchParameterMap;
+
+	/**
+	 * This isn't currently persisted in the DB as it's only used for history. We could
+	 * change this if needed in the future.
+	 */
+	@Transient
+	private Integer myOffset;
 
 	/**
 	 * Constructor
@@ -386,6 +394,14 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Override
 	public void setCannotBeReused() {
 		mySearchQueryStringHash = null;
+	}
+
+	public void setOffset(Integer theOffset) {
+		myOffset = theOffset;
+	}
+
+	public Integer getOffset() {
+		return myOffset;
 	}
 
 	@Nonnull

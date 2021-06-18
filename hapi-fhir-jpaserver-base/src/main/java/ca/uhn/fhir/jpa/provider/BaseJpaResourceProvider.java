@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Offset;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Patch;
@@ -107,6 +108,7 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	@History
 	public IBundleProvider getHistoryForResourceInstance(
 		HttpServletRequest theRequest,
+		@Offset Integer theOffset,
 		@IdParam IIdType theId,
 		@Since Date theSince,
 		@At DateRangeParam theAt,
@@ -115,7 +117,7 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 		startRequest(theRequest);
 		try {
 			DateRangeParam sinceOrAt = processSinceOrAt(theSince, theAt);
-			return myDao.history(theId, sinceOrAt.getLowerBoundAsInstant(), sinceOrAt.getUpperBoundAsInstant(), theRequestDetails);
+			return myDao.history(theId, sinceOrAt.getLowerBoundAsInstant(), sinceOrAt.getUpperBoundAsInstant(), theOffset, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}
@@ -124,13 +126,14 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	@History
 	public IBundleProvider getHistoryForResourceType(
 		HttpServletRequest theRequest,
+		@Offset Integer theOffset,
 		@Since Date theSince,
 		@At DateRangeParam theAt,
 		RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
 			DateRangeParam sinceOrAt = processSinceOrAt(theSince, theAt);
-			return myDao.history(sinceOrAt.getLowerBoundAsInstant(), sinceOrAt.getUpperBoundAsInstant(), theRequestDetails);
+			return myDao.history(sinceOrAt.getLowerBoundAsInstant(), sinceOrAt.getUpperBoundAsInstant(), theOffset, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}

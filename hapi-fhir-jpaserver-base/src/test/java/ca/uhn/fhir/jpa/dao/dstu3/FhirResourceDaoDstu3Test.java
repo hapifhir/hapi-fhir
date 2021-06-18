@@ -899,7 +899,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	public void testDeleteResource() {
 		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
 
-		int initialHistory = myPatientDao.history(null, null, mySrd).size();
+		int initialHistory = myPatientDao.history(null, null, null, mySrd).size();
 
 		IIdType id1;
 		IIdType id2;
@@ -942,7 +942,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			// good
 		}
 
-		IBundleProvider history = myPatientDao.history(null, null, mySrd);
+		IBundleProvider history = myPatientDao.history(null, null, null, mySrd);
 		assertEquals(4 + initialHistory, history.size().intValue());
 		List<IBaseResource> resources = history.getResources(0, 4);
 		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) resources.get(0)));
@@ -1051,7 +1051,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			// ok
 		}
 
-		IBundleProvider history = myPatientDao.history(id, null, null, mySrd);
+		IBundleProvider history = myPatientDao.history(id, null, null, null, mySrd);
 		assertEquals(2, history.size().intValue());
 
 		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(0, 1).get(0)));
@@ -1275,7 +1275,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			idv2 = myPatientDao.update(patient, mySrd).getId();
 		}
 
-		List<Patient> patients = toList(myPatientDao.history(idv1.toVersionless(), null, null, mySrd));
+		List<Patient> patients = toList(myPatientDao.history(idv1.toVersionless(), null, null, null, mySrd));
 		assertTrue(patients.size() == 2);
 		// Newest first
 		assertEquals("Patient/testHistoryByForcedId/_history/2", patients.get(0).getIdElement().toUnqualified().getValue());
@@ -1310,7 +1310,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 
 		// By instance
-		IBundleProvider history = myPatientDao.history(id, null, null, mySrd);
+		IBundleProvider history = myPatientDao.history(id, null, null, null, mySrd);
 		assertEquals(fullSize + 1, history.size().intValue());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
@@ -1319,7 +1319,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 
 		// By type
-		history = myPatientDao.history(null, null, mySrd);
+		history = myPatientDao.history(null, null, null, mySrd);
 		assertEquals(fullSize + 1, history.size().intValue());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
@@ -1328,7 +1328,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 
 		// By server
-		history = mySystemDao.history(null, null, mySrd);
+		history = mySystemDao.history(null, null, null, mySrd);
 		assertEquals(fullSize + 1, history.size().intValue());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
@@ -1341,7 +1341,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		 */
 
 		// By instance
-		history = myPatientDao.history(id, middleDate, null, mySrd);
+		history = myPatientDao.history(id, middleDate, null, null, mySrd);
 		assertEquals(halfSize, history.size().intValue());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
@@ -1350,7 +1350,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 
 		// By type
-		history = myPatientDao.history(middleDate, null, mySrd);
+		history = myPatientDao.history(middleDate, null, null, mySrd);
 		assertEquals(halfSize, history.size().intValue());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
@@ -1359,7 +1359,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 
 		// By server
-		history = mySystemDao.history(middleDate, null, mySrd);
+		history = mySystemDao.history(middleDate, null, null, mySrd);
 		assertEquals(halfSize, history.size().intValue());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
@@ -1377,7 +1377,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		halfSize++;
 
 		// By instance
-		history = myPatientDao.history(id, null, null, mySrd);
+		history = myPatientDao.history(id, null, null, null, mySrd);
 		assertEquals(fullSize + 1, history.size().intValue());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
@@ -1386,7 +1386,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 
 		// By type
-		history = myPatientDao.history(null, null, mySrd);
+		history = myPatientDao.history(null, null, null, mySrd);
 		assertEquals(fullSize + 1, history.size().intValue());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
@@ -1395,7 +1395,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 
 		// By server
-		history = mySystemDao.history(null, null, mySrd);
+		history = mySystemDao.history(null, null, null, mySrd);
 		assertEquals(fullSize + 1, history.size().intValue());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
@@ -1408,7 +1408,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		 */
 
 		// By instance
-		history = myPatientDao.history(id, middleDate, null, mySrd);
+		history = myPatientDao.history(id, middleDate, null, null, mySrd);
 		assertEquals(halfSize, history.size().intValue());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
@@ -1417,7 +1417,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 
 		// By type
-		history = myPatientDao.history(middleDate, null, mySrd);
+		history = myPatientDao.history(middleDate, null, null, mySrd);
 		assertEquals(halfSize, history.size().intValue());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
@@ -1426,7 +1426,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 
 		// By server
-		history = mySystemDao.history(middleDate, null, mySrd);
+		history = mySystemDao.history(middleDate, null, null, mySrd);
 		assertEquals(halfSize, history.size().intValue());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
@@ -1445,7 +1445,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		inPatient.getMeta().addProfile("http://example.com/1");
 		IIdType id = myPatientDao.create(inPatient, mySrd).getId().toUnqualifiedVersionless();
 
-		IBundleProvider history = myPatientDao.history(null, null, mySrd);
+		IBundleProvider history = myPatientDao.history(null, null, null, mySrd);
 		assertEquals(1, history.size().intValue());
 		Patient outPatient = (Patient) history.getResources(0, 1).get(0);
 		assertEquals("version1", inPatient.getName().get(0).getFamily());
@@ -1459,7 +1459,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		inPatient.getMeta().addProfile("http://example.com/2");
 		myPatientDao.metaAddOperation(id, inPatient.getMeta(), mySrd);
 
-		history = myPatientDao.history(null, null, mySrd);
+		history = myPatientDao.history(null, null, null, mySrd);
 		assertEquals(1, history.size().intValue());
 		outPatient = (Patient) history.getResources(0, 1).get(0);
 		assertEquals("version1", inPatient.getName().get(0).getFamily());
@@ -1475,7 +1475,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		inPatient.getName().get(0).setFamily("version2");
 		myPatientDao.update(inPatient, mySrd);
 
-		history = myPatientDao.history(null, null, mySrd);
+		history = myPatientDao.history(null, null, null, mySrd);
 		assertEquals(2, history.size().intValue());
 		outPatient = (Patient) history.getResources(0, 2).get(0);
 		assertEquals("version2", outPatient.getName().get(0).getFamily());
@@ -1501,7 +1501,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		patient.setId(id);
 		myPatientDao.update(patient, mySrd);
 
-		IBundleProvider history = myPatientDao.history(id, null, null, mySrd);
+		IBundleProvider history = myPatientDao.history(id, null, null, null, mySrd);
 		List<IBaseResource> entries = history.getResources(0, 3);
 		ourLog.info(entries.get(0).getIdElement() + " - " + entries.get(0).getMeta().getLastUpdated());
 		ourLog.info(entries.get(1).getIdElement() + " - " + entries.get(1).getMeta().getLastUpdated());
@@ -1545,13 +1545,13 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		List<String> idValues;
 
-		idValues = toUnqualifiedIdValues(myPatientDao.history(id, preDates.get(0), preDates.get(3), mySrd));
+		idValues = toUnqualifiedIdValues(myPatientDao.history(id, preDates.get(0), preDates.get(3), null, mySrd));
 		assertThat(idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
 
-		idValues = toUnqualifiedIdValues(myPatientDao.history(preDates.get(0), preDates.get(3), mySrd));
+		idValues = toUnqualifiedIdValues(myPatientDao.history(preDates.get(0), preDates.get(3), null, mySrd));
 		assertThat(idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
 
-		idValues = toUnqualifiedIdValues(mySystemDao.history(preDates.get(0), preDates.get(3), mySrd));
+		idValues = toUnqualifiedIdValues(mySystemDao.history(preDates.get(0), preDates.get(3), null, mySrd));
 		assertThat(idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
 	}
 
@@ -1572,7 +1572,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		// No since
 
-		IBundleProvider history = myPatientDao.history(null, null, mySrd);
+		IBundleProvider history = myPatientDao.history(null, null, null, mySrd);
 		assertEquals(1, history.size().intValue());
 		Patient outPatient = (Patient) history.getResources(0, 1).get(0);
 		assertEquals("version1", inPatient.getName().get(0).getFamily());
@@ -1581,7 +1581,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		// Before since
 
-		history = myPatientDao.history(before, null, mySrd);
+		history = myPatientDao.history(before, null, null, mySrd);
 		assertEquals(1, history.size().intValue());
 		outPatient = (Patient) history.getResources(0, 1).get(0);
 		assertEquals("version1", inPatient.getName().get(0).getFamily());
@@ -1590,7 +1590,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		// After since
 
-		history = myPatientDao.history(after, null, mySrd);
+		history = myPatientDao.history(after, null, null, mySrd);
 		assertEquals(0, history.size().intValue());
 
 	}
@@ -1598,7 +1598,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testHistoryWithInvalidId() throws Exception {
 		try {
-			myPatientDao.history(new IdType("Patient/FOOFOOFOO"), null, null, mySrd);
+			myPatientDao.history(new IdType("Patient/FOOFOOFOO"), null, null, null, mySrd);
 			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals("Resource Patient/FOOFOOFOO is not known", e.getMessage());
