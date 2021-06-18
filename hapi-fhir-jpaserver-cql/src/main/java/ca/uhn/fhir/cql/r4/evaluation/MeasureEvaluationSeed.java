@@ -25,6 +25,7 @@ import ca.uhn.fhir.cql.common.helper.UsingHelper;
 import ca.uhn.fhir.cql.common.provider.EvaluationProviderFactory;
 import ca.uhn.fhir.cql.common.provider.LibraryResolutionProvider;
 import ca.uhn.fhir.cql.r4.helper.LibraryHelper;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.tuple.Triple;
 import org.cqframework.cql.elm.execution.Library;
 import org.hl7.fhir.r4.model.Measure;
@@ -74,13 +75,13 @@ public class MeasureEvaluationSeed {
 	}
 
 	public void setup(Measure measure, String periodStart, String periodEnd, String productLine, String source,
-			String user, String pass) {
+							String user, String pass, RequestDetails theRequestDetails) {
 		this.measure = measure;
 
-		this.libraryHelper.loadLibraries(measure, this.libraryLoader, this.libraryResourceProvider);
+		this.libraryHelper.loadLibraries(measure, this.libraryLoader, this.libraryResourceProvider, theRequestDetails);
 
 		// resolve primary library
-		Library library = this.libraryHelper.resolvePrimaryLibrary(measure, libraryLoader, this.libraryResourceProvider);
+		Library library = this.libraryHelper.resolvePrimaryLibrary(measure, libraryLoader, this.libraryResourceProvider, theRequestDetails);
 
 
 		// resolve execution context
@@ -109,7 +110,7 @@ public class MeasureEvaluationSeed {
 
 		for (Triple<String, String, String> def : usingDefs) {
 			this.dataProvider = this.providerFactory.createDataProvider(def.getLeft(), def.getMiddle(),
-					terminologyProvider);
+				terminologyProvider, theRequestDetails);
 			context.registerDataProvider(def.getRight(), dataProvider);
 		}
 

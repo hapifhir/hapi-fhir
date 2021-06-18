@@ -23,7 +23,9 @@ package ca.uhn.fhir.cql.r4.provider;
 import ca.uhn.fhir.cql.common.provider.LibraryResolutionProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
@@ -54,9 +56,9 @@ public class LibraryResolutionProviderImpl implements LibraryResolutionProvider<
 	}
 
 	@Override
-	public Library resolveLibraryById(String libraryId) {
+	public Library resolveLibraryById(String libraryId, RequestDetails theRequestDetails) {
 		try {
-			return myLibraryDao.read(new IdType(libraryId));
+			return myLibraryDao.read(new IdType(libraryId), theRequestDetails);
 		} catch (Exception e) {
 			throw new IllegalArgumentException(String.format("Could not resolve library id %s", libraryId));
 		}
@@ -64,7 +66,7 @@ public class LibraryResolutionProviderImpl implements LibraryResolutionProvider<
 
 	@Override
 	public Library resolveLibraryByName(String libraryName, String libraryVersion) {
-		Iterable<org.hl7.fhir.r4.model.Library> libraries = getLibrariesByName(libraryName);
+		Iterable<org.hl7.fhir.r4.model.Library> libraries = getLibrariesByName(libraryName, new SystemRequestDetails());
 		org.hl7.fhir.r4.model.Library library = LibraryResolutionProvider.selectFromList(libraries, libraryVersion,
 			x -> x.getVersion());
 
@@ -76,7 +78,7 @@ public class LibraryResolutionProviderImpl implements LibraryResolutionProvider<
 	}
 
 	@Override
-	public Library resolveLibraryByCanonicalUrl(String url) {
+	public Library resolveLibraryByCanonicalUrl(String url, RequestDetails theRequestDetails) {
 		Objects.requireNonNull(url, "url must not be null");
 
 		String[] parts = url.split("\\|");
@@ -92,7 +94,7 @@ public class LibraryResolutionProviderImpl implements LibraryResolutionProvider<
 			map.add("version", new TokenParam(version));
 		}
 
-		ca.uhn.fhir.rest.api.server.IBundleProvider bundleProvider = myLibraryDao.search(map);
+		ca.uhn.fhir.rest.api.server.IBundleProvider bundleProvider = myLibraryDao.search(map, theRequestDetails);
 
 		if (bundleProvider.size() == null || bundleProvider.size() == 0) {
 			return null;
@@ -101,11 +103,11 @@ public class LibraryResolutionProviderImpl implements LibraryResolutionProvider<
 		return LibraryResolutionProvider.selectFromList(resolveLibraries(resourceList), version, x -> x.getVersion());
 	}
 
-	private Iterable<org.hl7.fhir.r4.model.Library> getLibrariesByName(String name) {
+	private Iterable<org.hl7.fhir.r4.model.Library> getLibrariesByName(String name, RequestDetails theRequestDetails) {
 		// Search for libraries by name
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add("name", new StringParam(name, true));
-		ca.uhn.fhir.rest.api.server.IBundleProvider bundleProvider = myLibraryDao.search(map);
+		ca.uhn.fhir.rest.api.server.IBundleProvider bundleProvider = myLibraryDao.search(map, theRequestDetails);
 
 		if (bundleProvider.size() == null || bundleProvider.size() == 0) {
 			return new ArrayList<>();

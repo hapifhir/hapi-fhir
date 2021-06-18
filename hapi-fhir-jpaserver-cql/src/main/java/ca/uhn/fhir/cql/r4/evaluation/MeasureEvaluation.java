@@ -26,6 +26,7 @@ import ca.uhn.fhir.cql.r4.builder.MeasureReportBuilder;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.cqframework.cql.elm.execution.ExpressionDef;
 import org.cqframework.cql.elm.execution.FunctionDef;
@@ -77,15 +78,15 @@ public class MeasureEvaluation {
 		this.measurementPeriod = measurementPeriod;
 	}
 
-	public MeasureReport evaluatePatientMeasure(Measure measure, Context context, String patientId) {
+	public MeasureReport evaluatePatientMeasure(Measure measure, Context context, String patientId, RequestDetails theRequestDetails) {
 		logger.info("Generating individual report");
 
 		if (patientId == null) {
-			return evaluatePopulationMeasure(measure, context);
+			return evaluatePopulationMeasure(measure, context, theRequestDetails);
 		}
 
 		Iterable<Object> patientRetrieve = provider.retrieve("Patient", "id", patientId, "Patient", null, null, null,
-				null, null, null, null, null);
+			null, null, null, null, null);
 		Patient patient = null;
 		if (patientRetrieve.iterator().hasNext()) {
 			patient = (Patient) patientRetrieve.iterator().next();
@@ -93,42 +94,42 @@ public class MeasureEvaluation {
 
 		boolean isSingle = true;
 		return evaluate(measure, context, patient == null ? Collections.emptyList() : Collections.singletonList(patient),
-				MeasureReport.MeasureReportType.INDIVIDUAL, isSingle);
+			MeasureReport.MeasureReportType.INDIVIDUAL, isSingle);
 	}
 
-	public MeasureReport evaluateSubjectListMeasure(Measure measure, Context context, String practitionerRef) {
+	public MeasureReport evaluateSubjectListMeasure(Measure measure, Context context, String practitionerRef, RequestDetails theRequestDetails) {
 		logger.info("Generating patient-list report");
 
-		List<Patient> patients = practitionerRef == null ? getAllPatients() : getPractitionerPatients(practitionerRef);
+		List<Patient> patients = practitionerRef == null ? getAllPatients(theRequestDetails) : getPractitionerPatients(practitionerRef, theRequestDetails);
 		boolean isSingle = false;
 		return evaluate(measure, context, patients, MeasureReport.MeasureReportType.SUBJECTLIST, isSingle);
 	}
 
-	private List<Patient> getPractitionerPatients(String practitionerRef) {
+	private List<Patient> getPractitionerPatients(String practitionerRef, RequestDetails theRequestDetails) {
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add("general-practitioner", new ReferenceParam(
 			practitionerRef.startsWith("Practitioner/") ? practitionerRef : "Practitioner/" + practitionerRef));
 
 		List<Patient> patients = new ArrayList<>();
-		IBundleProvider patientProvider = registry.getResourceDao("Patient").search(map);
+		IBundleProvider patientProvider = registry.getResourceDao("Patient").search(map, theRequestDetails);
 		List<IBaseResource> patientList = patientProvider.getAllResources();
 		patientList.forEach(x -> patients.add((Patient) x));
 		return patients;
 	}
 
-	private List<Patient> getAllPatients() {
+	private List<Patient> getAllPatients(RequestDetails theRequestDetails) {
 		List<Patient> patients = new ArrayList<>();
-		IBundleProvider patientProvider = registry.getResourceDao("Patient").search(SearchParameterMap.newSynchronous());
+		IBundleProvider patientProvider = registry.getResourceDao("Patient").search(SearchParameterMap.newSynchronous(), theRequestDetails);
 		List<IBaseResource> patientList = patientProvider.getAllResources();
 		patientList.forEach(x -> patients.add((Patient) x));
 		return patients;
 	}
 
-	public MeasureReport evaluatePopulationMeasure(Measure measure, Context context) {
+	public MeasureReport evaluatePopulationMeasure(Measure measure, Context context, RequestDetails theRequestDetails) {
 		logger.info("Generating summary report");
 
 		boolean isSingle = false;
-		return evaluate(measure, context, getAllPatients(), MeasureReport.MeasureReportType.SUMMARY, isSingle);
+		return evaluate(measure, context, getAllPatients(theRequestDetails), MeasureReport.MeasureReportType.SUMMARY, isSingle);
 	}
 
 	@SuppressWarnings("unchecked")
