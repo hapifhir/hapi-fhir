@@ -28,7 +28,6 @@ public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestB
 	private static final String patient = "Patient/Patient-6529";
 	private static final String periodStart = "2000-01-01";
 	private static final String periodEnd = "2019-12-31";
-	private static final Object syncObject = new Object();
 	private static boolean bundlesLoaded = false;
 
 	@Autowired

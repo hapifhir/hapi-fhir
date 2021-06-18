@@ -20,11 +20,8 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.mdm.svc.MdmSearchParamSvc;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.json.MdmFilterSearchParamJson;
@@ -54,13 +51,11 @@ public class MdmCandidateSearchSvc {
 	@Autowired
 	private IMdmSettings myMdmSettings;
 	@Autowired
-	private MdmSearchParamSvc myMdmSearchParamSvc;
-	@Autowired
-	private DaoRegistry myDaoRegistry;
-	@Autowired
 	private IdHelperService myIdHelperService;
 	@Autowired
 	private MdmCandidateSearchCriteriaBuilderSvc myMdmCandidateSearchCriteriaBuilderSvc;
+	@Autowired
+	private CandidateSearcher myCandidateSearcher;
 
 	public MdmCandidateSearchSvc() {
 	}
@@ -128,15 +123,11 @@ public class MdmCandidateSearchSvc {
 		ourLog.debug("Searching for {} candidates with {}", theResourceType, resourceCriteria);
 
 		//2.
-		SearchParameterMap searchParameterMap = myMdmSearchParamSvc.mapFromCriteria(theResourceType, resourceCriteria);
-
-		searchParameterMap.setLoadSynchronous(true);
-
-		//TODO MDM this will blow up under large scale i think.
-		//3.
-		IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theResourceType);
-		IBundleProvider search = resourceDao.search(searchParameterMap);
-		List<IBaseResource> resources = search.getAllResources();
+		Optional<IBundleProvider> bundleProvider = myCandidateSearcher.search(theResourceType, resourceCriteria);
+		if (!bundleProvider.isPresent()) {
+			throw new ConfigurationException("More than " + myMdmSettings.getCandidateSearchLimit() + " candidate matches found for " + resourceCriteria + ".  Aborting mdm matching.");
+		}
+		List<IBaseResource> resources = bundleProvider.get().getAllResources();
 
 		int initialSize = theMatchedPidsToResources.size();
 
