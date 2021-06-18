@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
+import ca.uhn.fhir.jpa.mdm.svc.candidate.TooManyCandidatesException;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Patient;
@@ -90,7 +90,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 			createActivePatient();
 			myMdmCandidateSearchSvc.findCandidates("Patient", newJane);
 			fail();
-		} catch (ConfigurationException e) {
+		} catch (TooManyCandidatesException e) {
 			assertEquals("More than 3 candidate matches found for Patient?identifier=http%3A%2F%2Fa.tv%2F%7CID.JANE.123&active=true.  Aborting mdm matching.", e.getMessage());
 		}
 	}
