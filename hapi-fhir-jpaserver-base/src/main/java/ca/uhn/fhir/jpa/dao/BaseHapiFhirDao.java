@@ -467,11 +467,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return retVal;
 	}
 
-	protected IBundleProvider history(RequestDetails theRequest, String theResourceType, Long theResourcePid, Date theRangeStartInclusive, Date theRangeEndInclusive) {
+	protected IBundleProvider history(RequestDetails theRequest, String theResourceType, Long theResourcePid, Date theRangeStartInclusive, Date theRangeEndInclusive, Integer theOffset) {
 
 		String resourceName = defaultIfBlank(theResourceType, null);
 
 		Search search = new Search();
+		search.setOffset(theOffset);
 		search.setDeleted(false);
 		search.setCreated(new Date());
 		search.setLastUpdated(theRangeStartInclusive, theRangeEndInclusive);

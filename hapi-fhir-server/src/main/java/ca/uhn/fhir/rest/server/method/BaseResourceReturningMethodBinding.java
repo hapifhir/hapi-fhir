@@ -161,7 +161,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			}
 			numToReturn = pageSize;
 
-			if (requestOffset != null) {
+			if (requestOffset != null && !isOffsetModeHistory()) {
 				// When offset query is done theResult already contains correct amount (+ their includes etc.) so return everything
 				resourceList = theResult.getResources(0, Integer.MAX_VALUE);
 			} else if (numToReturn > 0) {
@@ -238,7 +238,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		BundleLinks links = new BundleLinks(theRequest.getFhirServerBase(), theIncludes, RestfulServerUtils.prettyPrintResponse(theServer, theRequest), theBundleType);
 		links.setSelf(theLinkSelf);
 
-		if (requestOffset != null || (!theServer.canStoreSearchResults() && !isEverythingOperation(theRequest))) {
+		if (requestOffset != null || (!theServer.canStoreSearchResults() && !isEverythingOperation(theRequest)) || isOffsetModeHistory()) {
 			int offset = requestOffset != null ? requestOffset : 0;
 			// Paging without caching
 			// We're doing requestOffset pages
@@ -286,6 +286,10 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 		return bundleFactory.getResourceBundle();
 
+	}
+
+	protected boolean isOffsetModeHistory() {
+		return false;
 	}
 
 	private boolean isEverythingOperation(RequestDetails theRequest) {

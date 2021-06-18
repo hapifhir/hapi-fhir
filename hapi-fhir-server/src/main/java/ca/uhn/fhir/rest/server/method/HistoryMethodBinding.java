@@ -103,6 +103,11 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		return ReturnTypeEnum.BUNDLE;
 	}
 
+	@Override
+	protected boolean isOffsetModeHistory() {
+		return true;
+	}
+
 	// ObjectUtils.equals is replaced by a JDK7 method..
 	@Override
 	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
