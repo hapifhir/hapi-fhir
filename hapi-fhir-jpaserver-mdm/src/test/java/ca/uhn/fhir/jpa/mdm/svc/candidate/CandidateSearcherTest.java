@@ -61,6 +61,7 @@ class CandidateSearcherTest {
 		// validate
 		assertTrue(map.isLoadSynchronous());
 		assertEquals(candidateSearchLimit, map.getLoadSynchronousUpTo());
-		assertTrue(result.isPresent() == offset < 0);
+		boolean shouldNotFailBecauseOfTooManyMatches = offset < 0;
+		assertTrue(result.isPresent() == shouldNotFailBecauseOfTooManyMatches);
 	}
 }
