@@ -2754,7 +2754,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		addReadPartition(1);
 		myCaptureQueriesListener.clear();
-		IBundleProvider results = myPatientDao.history(id, null, null, mySrd);
+		IBundleProvider results = myPatientDao.history(id, null, null, null, mySrd);
 		assertEquals(2, results.sizeOrThrowNpe());
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids, contains(id.withVersion("2").getValue(), id.withVersion("1").getValue()));
@@ -2791,7 +2791,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		addReadPartition(2);
 		try {
-			myPatientDao.history(id, null, null, mySrd);
+			myPatientDao.history(id, null, null, null, mySrd);
 			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
@@ -2811,7 +2811,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		addReadDefaultPartition();
 		myCaptureQueriesListener.clear();
-		IBundleProvider results = myPatientDao.history(id, null, null, mySrd);
+		IBundleProvider results = myPatientDao.history(id, null, null, null, mySrd);
 		assertEquals(2, results.sizeOrThrowNpe());
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids, contains(id.withVersion("2").getValue(), id.withVersion("1").getValue()));
@@ -2847,7 +2847,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		addReadAllPartitions();
 		myCaptureQueriesListener.clear();
-		IBundleProvider results = myPatientDao.history(id, null, null, mySrd);
+		IBundleProvider results = myPatientDao.history(id, null, null, null, mySrd);
 		assertEquals(2, results.sizeOrThrowNpe());
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids, contains(id.withVersion("2").getValue(), id.withVersion("1").getValue()));
@@ -2857,7 +2857,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testHistory_Server() {
 		addReadAllPartitions();
 		try {
-			mySystemDao.history(null, null, mySrd).size();
+			mySystemDao.history(null, null, null, mySrd).size();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Type- and Server- level history operation not supported across partitions on partitioned server", e.getMessage());
@@ -2876,7 +2876,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		addReadPartition(1);
 		myCaptureQueriesListener.clear();
-		IBundleProvider results = mySystemDao.history(null, null, mySrd);
+		IBundleProvider results = mySystemDao.history(null, null, null, mySrd);
 		assertEquals(2, results.sizeOrThrowNpe());
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids, contains(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue()));
@@ -2908,7 +2908,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		addReadDefaultPartition();
 		myCaptureQueriesListener.clear();
-		IBundleProvider results = mySystemDao.history(null, null, mySrd);
+		IBundleProvider results = mySystemDao.history(null, null, null, mySrd);
 		assertEquals(2, results.sizeOrThrowNpe());
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids, contains(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue()));
@@ -2945,7 +2945,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		{
 			addReadPartition(2, null);
 			myCaptureQueriesListener.clear();
-			IBundleProvider results = mySystemDao.history(null, null, mySrd);
+			IBundleProvider results = mySystemDao.history(null, null, null, mySrd);
 			assertEquals(4, results.sizeOrThrowNpe());
 			List<String> ids = toUnqualifiedVersionlessIdValues(results);
 			assertThat(ids, contains(id22, id21, idNull2, idNull1));
@@ -2955,7 +2955,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		{
 			addReadPartition(2, 3);
 			myCaptureQueriesListener.clear();
-			IBundleProvider results = mySystemDao.history(null, null, mySrd);
+			IBundleProvider results = mySystemDao.history(null, null, null, mySrd);
 			assertEquals(4, results.sizeOrThrowNpe());
 			List<String> ids = toUnqualifiedVersionlessIdValues(results);
 			assertThat(ids, contains(id32, id22, id31, id21));
@@ -2967,7 +2967,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testHistory_Type_AllPartitions() {
 		addReadAllPartitions();
 		try {
-			myPatientDao.history(null, null, mySrd).size();
+			myPatientDao.history(null, null, null, mySrd).size();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Type- and Server- level history operation not supported across partitions on partitioned server", e.getMessage());
@@ -2986,7 +2986,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		addReadPartition(1);
 		myCaptureQueriesListener.clear();
-		IBundleProvider results = myPatientDao.history(null, null, mySrd);
+		IBundleProvider results = myPatientDao.history(null, null, null, mySrd);
 		assertEquals(2, results.sizeOrThrowNpe());
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids, contains(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue()));
@@ -3018,7 +3018,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		addReadDefaultPartition();
 		myCaptureQueriesListener.clear();
-		IBundleProvider results = myPatientDao.history(null, null, mySrd);
+		IBundleProvider results = myPatientDao.history(null, null, null, mySrd);
 		assertEquals(2, results.sizeOrThrowNpe());
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids, contains(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue()));

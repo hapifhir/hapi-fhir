@@ -54,7 +54,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
+@SuppressWarnings({"deprecation", "Duplicates"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
@@ -267,7 +267,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 				ourLog.info("Future produced success");
 			} catch (Exception e) {
 				ourLog.info("Future produced exception: {}", e.toString());
-				throw new AssertionError("Failed with message: " + e.toString(), e);
+				throw new AssertionError("Failed with message: " + e, e);
 			}
 		}
 
@@ -397,7 +397,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 				ourLog.info("Future produced success");
 			} catch (Exception e) {
 				ourLog.info("Future produced exception: {}", e.toString());
-				throw new AssertionError("Failed with message: " + e.toString(), e);
+				throw new AssertionError("Failed with message: " + e, e);
 			}
 		}
 
@@ -449,12 +449,12 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 				ourLog.info("Future produced success");
 			} catch (Exception e) {
 				ourLog.info("Future produced exception: {}", e.toString());
-				throw new AssertionError("Failed with message: " + e.toString(), e);
+				throw new AssertionError("Failed with message: " + e, e);
 			}
 		}
 
 		// Make sure we saved the object
-		IBundleProvider patient = myPatientDao.history(patientId, null, null, null);
+		IBundleProvider patient = myPatientDao.history(patientId, null, null, null, null);
 		assertThat(patient.sizeOrThrowNpe(), greaterThanOrEqualTo(3));
 
 	}
@@ -485,8 +485,8 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 					// this is expected since we're not retrying
 					ourLog.info("Version conflict (expected): {}", e.getCause().toString());
 				} else {
-					ourLog.info("Future produced exception: {}", e.toString());
-					throw new AssertionError("Failed with message: " + e.toString(), e);
+					ourLog.info("Future produced exception: {}", e);
+					throw new AssertionError("Failed with message: " + e, e);
 				}
 			}
 		}
@@ -521,8 +521,8 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 					// this is expected since we're not retrying
 					ourLog.info("Version conflict (expected): {}", e.getCause().toString());
 				} else {
-					ourLog.info("Future produced exception: {}", e.toString());
-					throw new AssertionError("Failed with message: " + e.toString(), e);
+					ourLog.info("Future produced exception: {}", e);
+					throw new AssertionError("Failed with message: " + e, e);
 				}
 			}
 		}
@@ -561,8 +561,8 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 					// this is expected since we're not retrying
 					ourLog.info("Version conflict (expected): {}", e.getCause().toString());
 				} else {
-					ourLog.info("Future produced exception: {}", e.toString());
-					throw new AssertionError("Failed with message: " + e.toString(), e);
+					ourLog.info("Future produced exception: {}", e);
+					throw new AssertionError("Failed with message: " + e, e);
 				}
 			}
 		}
@@ -616,7 +616,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 				ourLog.info("Future produced success");
 			} catch (Exception e) {
 				ourLog.info("Future produced exception: {}", e.toString());
-				throw new AssertionError("Failed with message: " + e.toString(), e);
+				throw new AssertionError("Failed with message: " + e, e);
 			}
 		}
 
@@ -668,7 +668,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 				ourLog.info("Future produced success");
 			} catch (Exception e) {
 				ourLog.info("Future produced exception: {}", e.toString());
-				throw new AssertionError("Failed with message: " + e.toString(), e);
+				throw new AssertionError("Failed with message: " + e, e);
 			}
 		}
 
@@ -726,7 +726,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 				ourLog.info("Future produced success");
 			} catch (Exception e) {
 				ourLog.info("Future produced exception: {}", e.toString());
-				throw new AssertionError("Failed with message: " + e.toString(), e);
+				throw new AssertionError("Failed with message: " + e, e);
 			}
 		}
 

@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -82,36 +83,38 @@ public class MeasureOperationsProvider {
 													 @OperationParam(name = "lastReceivedOn") String lastReceivedOn,
 													 @OperationParam(name = "source") String source,
 													 @OperationParam(name = "user") String user,
-													 @OperationParam(name = "pass") String pass) throws InternalErrorException, FHIRException {
+													 @OperationParam(name = "pass") String pass,
+													 RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
 		LibraryLoader libraryLoader = this.libraryHelper.createLibraryLoader(this.libraryResolutionProvider);
+
 		MeasureEvaluationSeed seed = new MeasureEvaluationSeed(this.factory, libraryLoader,
-				this.libraryResolutionProvider, this.libraryHelper);
-		Measure measure = myMeasureDao.read(theId);
+			this.libraryResolutionProvider, this.libraryHelper);
+		Measure measure = myMeasureDao.read(theId, theRequestDetails);
 
 		if (measure == null) {
 			throw new RuntimeException("Could not find Measure/" + theId.getIdPart());
 		}
 
-		seed.setup(measure, periodStart, periodEnd, productLine, source, user, pass);
+		seed.setup(measure, periodStart, periodEnd, productLine, source, user, pass, theRequestDetails);
 
 		// resolve report type
 		MeasureEvaluation evaluator = new MeasureEvaluation(seed.getDataProvider(), this.registry,
-				seed.getMeasurementPeriod());
+			seed.getMeasurementPeriod());
 		if (reportType != null) {
 			switch (reportType) {
 				case "patient":
-					return evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef);
+					return evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef, theRequestDetails);
 				case "patient-list":
-					return evaluator.evaluateSubjectListMeasure(seed.getMeasure(), seed.getContext(), practitionerRef);
+					return evaluator.evaluateSubjectListMeasure(seed.getMeasure(), seed.getContext(), practitionerRef, theRequestDetails);
 				case "population":
-					return evaluator.evaluatePopulationMeasure(seed.getMeasure(), seed.getContext());
+					return evaluator.evaluatePopulationMeasure(seed.getMeasure(), seed.getContext(), theRequestDetails);
 				default:
 					throw new IllegalArgumentException("Invalid report type: " + reportType);
 			}
 		}
 
 		// default report type is patient
-		MeasureReport report = evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef);
+		MeasureReport report = evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef, theRequestDetails);
 		if (productLine != null) {
 			Extension ext = new Extension();
 			ext.setUrl("http://hl7.org/fhir/us/cqframework/cqfmeasures/StructureDefinition/cqfm-productLine");

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.cql;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.cql.common.helper.PartitionHelper;
 import ca.uhn.fhir.cql.common.provider.CqlProviderTestBase;
 import ca.uhn.fhir.cql.config.CqlR4Config;
 import ca.uhn.fhir.cql.config.TestCqlConfig;
@@ -8,15 +9,17 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.util.BundleUtil;
-
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.test.utilities.RequestDetailsHelper;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.MeasureReport;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -24,12 +27,16 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {CqlR4Config.class, TestCqlConfig.class, SubscriptionProcessorConfig.class})
+@ContextConfiguration(classes = {CqlR4Config.class, TestCqlConfig.class, SubscriptionProcessorConfig.class, BaseCqlR4Test.Config.class})
 public class BaseCqlR4Test extends BaseJpaR4Test implements CqlProviderTestBase {
-	Logger ourLog = LoggerFactory.getLogger(BaseCqlR4Test.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseCqlR4Test.class);
+
+	protected final RequestDetails myRequestDetails = RequestDetailsHelper.newServletRequestDetails();
+	@Autowired
+	@RegisterExtension
+	protected PartitionHelper myPartitionHelper;
 
 	@Autowired
 	protected
@@ -39,16 +46,6 @@ public class BaseCqlR4Test extends BaseJpaR4Test implements CqlProviderTestBase 
 	FhirContext myFhirContext;
 	@Autowired
 	IFhirSystemDao mySystemDao;
-
-	@Override
-	public FhirContext getFhirContext() {
-		return myFhirContext;
-	}
-
-	@Override
-	public DaoRegistry getDaoRegistry() {
-		return myDaoRegistry;
-	}
 
 	protected int loadDataFromDirectory(String theDirectoryName) throws IOException {
 		int count = 0;
@@ -66,7 +63,7 @@ public class BaseCqlR4Test extends BaseJpaR4Test implements CqlProviderTestBase 
 				if (filename.contains("bundle")) {
 					loadBundle(filename);
 				} else {
-					loadResource(filename);
+					loadResource(filename, myRequestDetails);
 				}
 				count++;
 			} else {
@@ -76,18 +73,36 @@ public class BaseCqlR4Test extends BaseJpaR4Test implements CqlProviderTestBase 
 		return count;
 	}
 
-	protected Bundle parseBundle(String theLocation) throws IOException  {
+	@Override
+	public FhirContext getFhirContext() {
+		return myFhirContext;
+	}
+
+	@Override
+	public DaoRegistry getDaoRegistry() {
+		return myDaoRegistry;
+	}
+
+	protected Bundle loadBundle(String theLocation) throws IOException {
+		Bundle bundle = parseBundle(theLocation);
+		return loadBundle(bundle, myRequestDetails);
+	}
+
+	protected Bundle parseBundle(String theLocation) throws IOException {
 		String json = stringFromResource(theLocation);
 		Bundle bundle = (Bundle) myFhirContext.newJsonParser().parseResource(json);
 		return bundle;
 	}
 
-	protected Bundle loadBundle(Bundle bundle) {
-		return (Bundle) mySystemDao.transaction(null, bundle);
+	protected Bundle loadBundle(Bundle bundle, RequestDetails theRequestDetails) {
+		return (Bundle) mySystemDao.transaction(theRequestDetails, bundle);
 	}
- 
-	protected Bundle loadBundle(String theLocation) throws IOException {
-		Bundle bundle = parseBundle(theLocation);
-		return loadBundle(bundle);
+
+	@Configuration
+	static class Config {
+		@Bean
+		public PartitionHelper myPartitionHelper() {
+			return new PartitionHelper();
+		}
 	}
 }

@@ -4,9 +4,6 @@ import ca.uhn.fhir.cql.BaseCqlDstu3Test;
 import ca.uhn.fhir.cql.common.provider.CqlProviderFactory;
 import ca.uhn.fhir.cql.dstu3.provider.MeasureOperationsProvider;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.rp.dstu3.LibraryResourceProvider;
-import ca.uhn.fhir.jpa.rp.dstu3.MeasureResourceProvider;
-import ca.uhn.fhir.jpa.rp.dstu3.ValueSetResourceProvider;
 import ca.uhn.fhir.util.StopWatch;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -26,6 +23,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(CqlProviderDstu3Test.class);
@@ -37,12 +35,6 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 	@Autowired
 	CqlProviderFactory myCqlProviderFactory;
 	@Autowired
-	private LibraryResourceProvider myLibraryResourceProvider;
-	@Autowired
-	private MeasureResourceProvider myMeasureResourceProvider;
-	@Autowired
-	private ValueSetResourceProvider myValueSetResourceProvider;
-	@Autowired
 	private MeasureOperationsProvider myMeasureOperationsProvider;
 
 	@BeforeEach
@@ -51,8 +43,8 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 		loadBundle("dstu3/hedis-ig/hedis-valuesets-bundle.json");
 
 		// Load libraries
-		loadResource("dstu3/hedis-ig/library/library-fhir-model-definition.json");
-		loadResource("dstu3/hedis-ig/library/library-fhir-helpers.json");
+		loadResource("dstu3/hedis-ig/library/library-fhir-model-definition.json", myRequestDetails);
+		loadResource("dstu3/hedis-ig/library/library-fhir-helpers.json", myRequestDetails);
 	}
 
 	/*
@@ -80,9 +72,9 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 	 */
 	@Test
 	public void testHedisIGEvaluatePatientMeasure() throws IOException {
-		loadResource("dstu3/hedis-ig/library/library-asf-logic.json");
+		loadResource("dstu3/hedis-ig/library/library-asf-logic.json", myRequestDetails);
 		// Load the measure for ASF: Unhealthy Alcohol Use Screening and Follow-up (ASF)
-		loadResource("dstu3/hedis-ig/measure-asf.json");
+		loadResource("dstu3/hedis-ig/measure-asf.json", myRequestDetails);
 		Bundle result = loadBundle("dstu3/hedis-ig/test-patient-6529-data.json");
 		assertNotNull(result);
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
@@ -96,8 +88,9 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 		String periodEnd = "2003-12-31";
 
 		// First run to absorb startup costs
+		myPartitionHelper.clear();
 		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, null,
-			patient, null, null, null, null, null, null);
+			patient, null, null, null, null, null, null, myRequestDetails);
 		// Assert it worked
 		assertThat(report.getGroup(), hasSize(1));
 		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
@@ -108,17 +101,18 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 		StopWatch sw = new StopWatch();
 		for (int i = 0; i < runCount; ++i) {
 			myMeasureOperationsProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, null,
-				patient, null, null, null, null, null, null);
+				patient, null, null, null, null, null, null, myRequestDetails);
 		}
 
 		ourLog.info("Called evaluateMeasure() {} times: average time per call: {}", runCount, sw.formatMillisPerOperation(runCount));
+		assertTrue(myPartitionHelper.wasCalled());
 	}
 
 	@Test
 	public void testHedisIGEvaluatePopulationMeasure() throws IOException {
-		loadResource("dstu3/hedis-ig/library/library-asf-logic.json");
+		loadResource("dstu3/hedis-ig/library/library-asf-logic.json", myRequestDetails);
 		// Load the measure for ASF: Unhealthy Alcohol Use Screening and Follow-up (ASF)
-		loadResource("dstu3/hedis-ig/measure-asf.json");
+		loadResource("dstu3/hedis-ig/measure-asf.json", myRequestDetails);
 		loadBundle("dstu3/hedis-ig/test-patient-6529-data.json");
 		// Add a second patient with the same data
 		loadBundle("dstu3/hedis-ig/test-patient-9999-x-data.json");
@@ -129,7 +123,7 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 
 		// First run to absorb startup costs
 		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, "population",
-			null, null, null, null, null, null, null);
+			null, null, null, null, null, null, null, myRequestDetails);
 		// Assert it worked
 		assertThat(report.getGroup(), hasSize(1));
 		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
@@ -140,7 +134,7 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 		StopWatch sw = new StopWatch();
 		for (int i = 0; i < runCount; ++i) {
 			myMeasureOperationsProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, "population",
-				null, null, null, null, null, null, null);
+				null, null, null, null, null, null, null, myRequestDetails);
 		}
 
 		ourLog.info("Called evaluateMeasure() {} times: average time per call: {}", runCount, sw.formatMillisPerOperation(runCount));

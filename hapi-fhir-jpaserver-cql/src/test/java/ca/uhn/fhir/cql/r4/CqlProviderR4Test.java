@@ -18,6 +18,7 @@ import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestBase {
 	private static final Logger ourLog = LoggerFactory.getLogger(CqlProviderR4Test.class);
@@ -47,11 +48,15 @@ public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestB
 	@Test
 	public void testHedisIGEvaluateMeasureWithTimeframe() throws IOException {
 		loadBundles();
-		loadResource("r4/hedis-ig/library-asf-logic.json");
-		loadResource("r4/hedis-ig/measure-asf.json");
+		loadResource("r4/hedis-ig/library-asf-logic.json", myRequestDetails);
+		loadResource("r4/hedis-ig/measure-asf.json", myRequestDetails);
+
+		myPartitionHelper.clear();
 		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, periodStart, periodEnd, measure, "patient",
-			patient, null, null, null, null, null, null);
+			patient, null, null, null, null, null, null, myRequestDetails);
+
 		// Assert it worked
+		assertTrue(myPartitionHelper.wasCalled());
 		assertThat(report.getGroup(), hasSize(1));
 		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
@@ -60,11 +65,15 @@ public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestB
 	@Test
 	public void testHedisIGEvaluateMeasureNoTimeframe() throws IOException {
 		loadBundles();
-		loadResource("r4/hedis-ig/library-asf-logic.json");
-		loadResource("r4/hedis-ig/measure-asf.json");
+		loadResource("r4/hedis-ig/library-asf-logic.json", myRequestDetails);
+		loadResource("r4/hedis-ig/measure-asf.json", myRequestDetails);
+
+		myPartitionHelper.clear();
 		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, null, null, measure, "patient",
-			patient, null, null, null, null, null, null);
+			patient, null, null, null, null, null, null, myRequestDetails);
+
 		// Assert it worked
+		assertTrue(myPartitionHelper.wasCalled());
 		assertThat(report.getGroup(), hasSize(1));
 		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));

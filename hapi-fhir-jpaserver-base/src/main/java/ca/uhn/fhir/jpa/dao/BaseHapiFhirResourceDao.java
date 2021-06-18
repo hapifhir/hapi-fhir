@@ -831,20 +831,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	@Transactional
-	public IBundleProvider history(Date theSince, Date theUntil, RequestDetails theRequestDetails) {
+	public IBundleProvider history(Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails) {
 		// Notify interceptors
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails);
 		notifyInterceptors(RestOperationTypeEnum.HISTORY_TYPE, requestDetails);
 
 		StopWatch w = new StopWatch();
-		IBundleProvider retVal = super.history(theRequestDetails, myResourceName, null, theSince, theUntil);
+		IBundleProvider retVal = super.history(theRequestDetails, myResourceName, null, theSince, theUntil, theOffset);
 		ourLog.debug("Processed history on {} in {}ms", myResourceName, w.getMillisAndRestart());
 		return retVal;
 	}
 
 	@Override
 	@Transactional
-	public IBundleProvider history(final IIdType theId, final Date theSince, Date theUntil, RequestDetails theRequest) {
+	public IBundleProvider history(final IIdType theId, final Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequest) {
 		if (theRequest != null) {
 			// Notify interceptors
 			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequest, getResourceName(), theId);
@@ -856,7 +856,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		IIdType id = theId.withResourceType(myResourceName).toUnqualifiedVersionless();
 		BaseHasResource entity = readEntity(id, theRequest);
 
-		IBundleProvider retVal = super.history(theRequest, myResourceName, entity.getId(), theSince, theUntil);
+		IBundleProvider retVal = super.history(theRequest, myResourceName, entity.getId(), theSince, theUntil, theOffset);
 
 		ourLog.debug("Processed history on {} in {}ms", id, w.getMillisAndRestart());
 		return retVal;

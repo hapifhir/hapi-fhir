@@ -439,7 +439,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 		runInTransaction(() -> {
-			IBundleProvider history = mySystemDao.history(null, null, null);
+			IBundleProvider history = mySystemDao.history(null, null, null, null);
 			assertEquals(3, history.getResources(0, 99).size());
 		});
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -456,7 +456,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		// Second time should leverage forced ID cache
 		myCaptureQueriesListener.clear();
 		runInTransaction(() -> {
-			IBundleProvider history = mySystemDao.history(null, null, null);
+			IBundleProvider history = mySystemDao.history(null, null, null, null);
 			assertEquals(3, history.getResources(0, 99).size());
 		});
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -503,7 +503,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 		runInTransaction(() -> {
-			IBundleProvider history = mySystemDao.history(null, null, null);
+			IBundleProvider history = mySystemDao.history(null, null, null, null);
 			assertEquals(3, history.getResources(0, 3).size());
 		});
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -519,7 +519,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		// Second time should leverage forced ID cache
 		myCaptureQueriesListener.clear();
 		runInTransaction(() -> {
-			IBundleProvider history = mySystemDao.history(null, null, null);
+			IBundleProvider history = mySystemDao.history(null, null, null, null);
 			assertEquals(3, history.getResources(0, 3).size());
 		});
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();

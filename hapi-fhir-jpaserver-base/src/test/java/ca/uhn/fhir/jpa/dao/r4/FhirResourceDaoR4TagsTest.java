@@ -17,7 +17,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
+@SuppressWarnings({"Duplicates"})
 public class FhirResourceDaoR4TagsTest extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4TagsTest.class);
@@ -86,7 +86,7 @@ public class FhirResourceDaoR4TagsTest extends BaseJpaR4Test {
 	public void testStoreAndRetrieveVersionedTags_History() {
 		initializeVersioned();
 
-		IBundleProvider history = myPatientDao.history(null, null, mySrd);
+		IBundleProvider history = myPatientDao.history(null, null, null, mySrd);
 
 		// Version 1
 		Patient patient = (Patient) history.getResources(0, 999).get(1);
@@ -104,7 +104,7 @@ public class FhirResourceDaoR4TagsTest extends BaseJpaR4Test {
 	public void testStoreAndRetrieveNonVersionedTags_History() {
 		initializeNonVersioned();
 
-		IBundleProvider history = myPatientDao.history(null, null, mySrd);
+		IBundleProvider history = myPatientDao.history(null, null, null, mySrd);
 
 		// Version 1
 		Patient patient = (Patient) history.getResources(0, 999).get(1);
