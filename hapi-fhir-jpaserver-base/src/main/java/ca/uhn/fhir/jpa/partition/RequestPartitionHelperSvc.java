@@ -345,8 +345,8 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 	}
 
-	private void validateRequestPartitionNotNull(RequestPartitionId theTheRequestPartitionId, Pointcut theThePointcut) {
-		if (theTheRequestPartitionId == null) {
+	private void validateRequestPartitionNotNull(RequestPartitionId theRequestPartitionId, Pointcut theThePointcut) {
+		if (theRequestPartitionId == null) {
 			throw new InternalErrorException("No interceptor provided a value for pointcut: " + theThePointcut);
 		}
 	}

@@ -35,7 +35,7 @@ public class CqlMeasureEvaluationR4Test extends BaseCqlR4Test {
 
 	protected void testMeasureBundle(String theLocation) throws IOException {
 		Bundle bundle = parseBundle(theLocation);
-		loadBundle(bundle, mySrd);
+		loadBundle(bundle, myRequestDetails);
 
 		List<Measure> measures = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Measure.class);
 		if (measures == null || measures.isEmpty()) {
@@ -65,7 +65,7 @@ public class CqlMeasureEvaluationR4Test extends BaseCqlR4Test {
 			// TODO: These are all individual reports
 			"patient", patientId,
 			// TODO: Generalize these parameters into a Parameters resource
-			null, null, null, null, null, null, mySrd);
+			null, null, null, null, null, null, myRequestDetails);
 
 		compareMeasureReport(expected, actual);
 	}

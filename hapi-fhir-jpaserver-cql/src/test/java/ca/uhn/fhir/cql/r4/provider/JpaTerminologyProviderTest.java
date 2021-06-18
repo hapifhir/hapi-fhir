@@ -31,7 +31,7 @@ public class JpaTerminologyProviderTest extends BaseCqlR4Test {
 	@BeforeEach
 	public void before() throws IOException {
 		// Load executable (i.e. "pre-expanded") value set
-		loadResource("r4/provider/test-executable-value-set.json", mySrd);
+		loadResource("r4/provider/test-executable-value-set.json", myRequestDetails);
 	}
 
 	@Test
