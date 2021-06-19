@@ -247,7 +247,7 @@ public class InMemoryResourceMatcherR5Test {
 	@Test
 	public void testTodayTomorrow() {
 		Observation futureObservation = new Observation();
-		Instant nextWeek = Instant.now().plus(Duration.ofDays(1));
+		Instant nextWeek = Instant.now().plus(Duration.ofDays(7));
 		futureObservation.setEffective(new DateTimeType(Date.from(nextWeek)));
 		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
 
