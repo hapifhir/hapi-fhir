@@ -21,16 +21,17 @@ package ca.uhn.fhir.jpa.mdm.broker;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.log.Logs;
-import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmResourceFilteringSvc;
+import ca.uhn.fhir.jpa.mdm.svc.candidate.TooManyCandidatesException;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
@@ -72,6 +73,9 @@ public class MdmMessageHandler implements MessageHandler {
 			if (myMdmResourceFilteringSvc.shouldBeProcessed(getResourceFromPayload(msg))) {
 				matchMdmAndUpdateLinks(msg);
 			}
+		} catch (TooManyCandidatesException e) {
+			ourLog.error(e.getMessage(), e);
+			// skip this one with an error message and continue processing
 		} catch (Exception e) {
 			ourLog.error("Failed to handle MDM Matching Resource:", e);
 			throw e;
@@ -97,6 +101,7 @@ public class MdmMessageHandler implements MessageHandler {
 			}
 		}catch (Exception e) {
 			log(mdmContext, "Failure during MDM processing: " + e.getMessage(), e);
+			mdmContext.addTransactionLogMessage(e.getMessage());
 		} finally {
 
 			// Interceptor call: MDM_AFTER_PERSISTED_RESOURCE_CHECKED
