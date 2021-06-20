@@ -17,6 +17,11 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * This interceptor uses semaphores to avoid multiple concurrent FHIR transaction
+ * bundles from processing the same records at the same time, avoiding concurrency
+ * issues.
+ */
 @Interceptor
 public class TransactionConcurrencySemaphoreInterceptor {
 
