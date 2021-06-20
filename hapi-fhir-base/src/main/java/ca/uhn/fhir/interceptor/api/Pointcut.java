@@ -1614,6 +1614,56 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
+	 * Invoked during a FHIR transaction, immediately before processing all write operations (i.e. immediately
+	 * before a database transaction will be opened)
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails - Contains details about the transaction that is about to start
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE(void.class,
+		"ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails",
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
+	),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked during a FHIR transaction, immediately after processing all write operations (i.e. immediately
+	 * after the transaction has been committed or rolled back). This hook will always be called if
+	 * {@link #STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE} has been called, regardless of whether the operation
+	 * succeeded or failed.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails - Contains details about the transaction that is about to start
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	STORAGE_TRANSACTION_WRITE_OPERATIONS_POST(void.class,
+		"ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails",
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
+	),
+
+	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked when a resource delete operation is about to fail due to referential integrity checks. Intended for use with {@literal ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor}.
 	 * <p>
 	 * Hooks will have access to the list of resources that have references to the resource being deleted.

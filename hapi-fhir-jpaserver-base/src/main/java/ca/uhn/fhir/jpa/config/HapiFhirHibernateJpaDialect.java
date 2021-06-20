@@ -117,7 +117,8 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 			}
 		}
 
-		return super.convertHibernateAccessException(theException);
+		DataAccessException retVal = super.convertHibernateAccessException(theException);
+		return retVal;
 	}
 
 }

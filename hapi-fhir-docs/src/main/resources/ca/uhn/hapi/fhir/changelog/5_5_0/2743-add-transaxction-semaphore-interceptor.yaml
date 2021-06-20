@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2743
+title: "A new interceptor has been added for JPA servers that uses semaphores to avoid multiple concurrent
+  FHIR transactions from trying to create/update the same resource at the same time. This can improve
+  overall performance when writing many concurrent transactions since it avoids the need for retries."
