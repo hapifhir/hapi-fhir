@@ -29,6 +29,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 
 import javax.persistence.EntityManager;
@@ -38,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -75,8 +77,8 @@ public class TransactionProcessorTest {
 	@BeforeEach
 	public void before() {
 		when(myHapiTransactionService.execute(any(), any(), any())).thenAnswer(t -> {
-			TransactionCallback callback = t.getArgument(1, TransactionCallback.class);
-			return callback.doInTransaction(null);
+			TransactionCallback<?> callback = t.getArgument(2, TransactionCallback.class);
+			return callback.doInTransaction(mock(TransactionStatus.class));
 		});
 
 		myTransactionProcessor.setEntityManagerForUnitTest(myEntityManager);
