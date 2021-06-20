@@ -24,6 +24,8 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -65,11 +67,11 @@ public class HapiTransactionService {
 		myTxTemplate = new TransactionTemplate(myTransactionManager);
 	}
 
-	public <T> T execute(RequestDetails theRequestDetails, TransactionCallback<T> theCallback) {
-		return execute(theRequestDetails, theCallback, null);
+	public <T> T execute(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, TransactionCallback<T> theCallback) {
+		return execute(theRequestDetails, theTransactionDetails, theCallback, null);
 	}
 
-	public <T> T execute(RequestDetails theRequestDetails, TransactionCallback<T> theCallback, Runnable theOnRollback) {
+	public <T> T execute(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, TransactionCallback<T> theCallback, Runnable theOnRollback) {
 
 		for (int i = 0; ; i++) {
 			try {
@@ -108,7 +110,14 @@ public class HapiTransactionService {
 				}
 
 				if (i < maxRetries) {
+					theTransactionDetails.getRollbackUndoActions().forEach(t->t.run());
+					theTransactionDetails.clearRollbackUndoActions();
+					theTransactionDetails.clearResolvedItems();
+					theTransactionDetails.clearUserData(BaseHapiFhirDao.XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
+					theTransactionDetails.clearUserData(BaseHapiFhirDao.XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
 					sleepAtLeast(250, false);
+
+					ourLog.info("About to start a transaction retry due to conflict or constraint error");
 					continue;
 				}
 
