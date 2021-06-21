@@ -212,6 +212,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	public void testTransactionCreates_WithConcurrencySemaphore_DontLockOnCachedMatchUrlsForConditionalCreate() throws ExecutionException, InterruptedException {
 		myDaoConfig.setMatchUrlCacheEnabled(true);
 		myInterceptorRegistry.registerInterceptor(myConcurrencySemaphoreInterceptor);
+		myConcurrencySemaphoreInterceptor.setLogWaits(true);
 
 		Runnable creator = ()->{
 			BundleBuilder bb = new BundleBuilder(myFhirCtx);
