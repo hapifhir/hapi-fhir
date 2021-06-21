@@ -115,7 +115,7 @@ public class TransactionConcurrencySemaphoreInterceptor {
 				}
 			}
 
-			theTransactionDetails.putUserData(HELD_SEMAPHORES, heldSemaphores);
+		theTransactionDetails.putUserData(HELD_SEMAPHORES, heldSemaphores);
 
 		} finally {
 			if (locked.get()) {
@@ -148,7 +148,7 @@ public class TransactionConcurrencySemaphoreInterceptor {
 				ourLog.trace("Acquired semaphore {} on request URL: {}", semaphore, nextUrl);
 				theHeldSemaphores.add(semaphore);
 				thePendingAndHeldSemaphores.put(nextUrl, null);
-			} else {
+				} else {
 				thePendingAndHeldSemaphores.put(nextUrl, semaphore);
 			}
 		}
