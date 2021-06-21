@@ -55,7 +55,7 @@ public class TermConceptMapGroupElement implements Serializable {
 	@Column(name = "SOURCE_CODE", nullable = false, length = TermConcept.MAX_CODE_LENGTH)
 	private String myCode;
 
-	@Column(name = "SOURCE_DISPLAY", length = TermConcept.MAX_DESC_LENGTH)
+	@Column(name = "SOURCE_DISPLAY", length = TermConcept.MAX_DISP_LENGTH)
 	private String myDisplay;
 
 	@OneToMany(mappedBy = "myConceptMapGroupElement")
@@ -114,7 +114,7 @@ public class TermConceptMapGroupElement implements Serializable {
 	}
 
 	public TermConceptMapGroupElement setDisplay(String theDisplay) {
-		myDisplay = left(theDisplay, TermConcept.MAX_DESC_LENGTH);
+		myDisplay = left(theDisplay, TermConcept.MAX_DISP_LENGTH);
 		return this;
 	}
 
