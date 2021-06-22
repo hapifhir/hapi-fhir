@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PartitioningSqlR4Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PartitioningSqlR4IT.class);
 	static final String PARTITION_1 = "PART-1";
 	static final String PARTITION_2 = "PART-2";
 	static final String PARTITION_3 = "PART-3";

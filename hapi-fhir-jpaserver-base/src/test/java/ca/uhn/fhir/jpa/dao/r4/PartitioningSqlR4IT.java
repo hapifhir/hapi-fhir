@@ -77,8 +77,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @SuppressWarnings({"unchecked", "ConstantConditions"})
-public class PartitioningSqlR4Test extends BasePartitioningR4Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(PartitioningSqlR4Test.class);
+public class PartitioningSqlR4IT extends BasePartitioningR4Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(PartitioningSqlR4IT.class);
 
 	@Test
 	public void testCreateSearchParameter_DefaultPartition() {
