@@ -307,6 +307,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		final String queryString = theParams.toNormalizedQueryString(myContext);
 		ourLog.debug("Registering new search {}", searchUuid);
+
 		Search search = new Search();
 		populateSearchEntity(theParams, theResourceType, searchUuid, queryString, search, theRequestPartitionId);
 
@@ -317,6 +318,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 			.add(SearchParameterMap.class, theParams);
 		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
+
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(theResourceType).getImplementingClass();
 		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(theCallingDao, theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
@@ -466,6 +468,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		// Execute the query and make sure we return distinct results
 		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+		txTemplate.setReadOnly(theParams.isLoadSynchronous());
 		return txTemplate.execute(t -> {
 
 			// Load the results synchronously

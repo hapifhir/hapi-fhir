@@ -22,17 +22,20 @@ package ca.uhn.fhir.jpa.util;
 
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
+import net.ttddyy.dsproxy.listener.MethodExecutionContext;
 import net.ttddyy.dsproxy.proxy.ParameterSetOperation;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuilder.SingleQueryExecution {
+public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuilder.SingleQueryExecution, ProxyDataSourceBuilder.SingleMethodExecution {
 
 	private boolean myCaptureQueryStackTrace = false;
 
@@ -88,4 +91,34 @@ public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuild
 
 	protected abstract Queue<SqlQuery> provideQueryList();
 
+	@Nullable
+	protected abstract AtomicInteger provideCommitCounter();
+
+	@Nullable
+	protected abstract AtomicInteger provideRollbackCounter();
+
+	@Override
+	public void execute(MethodExecutionContext executionContext) {
+				AtomicInteger counter = null;
+		switch (executionContext.getMethod().getName()) {
+			case "commit":
+				counter = provideCommitCounter();
+				break;
+			case "rollback":
+				counter = provideRollbackCounter();
+				break;
+		}
+
+		if (counter != null) {
+			counter.incrementAndGet();
+		}
+	}
+
+	public int countCommits() {
+		return provideCommitCounter().get();
+	}
+
+	public int countRollbacks() {
+		return provideRollbackCounter().get();
+	}
 }

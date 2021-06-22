@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -141,7 +142,16 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	IBaseResource createBundleFromBundleProvider(IRestfulServer<?> theServer, RequestDetails theRequest, Integer theLimit, String theLinkSelf, Set<Include> theIncludes,
 																IBundleProvider theResult, int theOffset, BundleTypeEnum theBundleType, EncodingEnum theLinkEncoding, String theSearchId) {
 		IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
-		final Integer requestOffset = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_OFFSET);
+		final Integer offset;
+		Integer limit = theLimit;
+
+		if (theResult.getCurrentPageOffset() != null) {
+			offset = theResult.getCurrentPageOffset();
+			limit = theResult.getCurrentPageSize();
+			Validate.notNull(limit, "IBundleProvider returned a non-null offset, but did not return a non-null page size");
+		} else {
+			offset = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_OFFSET);
+		}
 
 		int numToReturn;
 		String searchId = null;
@@ -149,9 +159,9 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		Integer numTotalResults = theResult.size();
 
 		int pageSize;
-		if (requestOffset != null || !theServer.canStoreSearchResults()) {
-			if (theLimit != null) {
-				pageSize = theLimit;
+		if (offset != null || !theServer.canStoreSearchResults()) {
+			if (limit != null) {
+				pageSize = limit;
 			} else {
 				if (theServer.getDefaultPageSize() != null) {
 					pageSize = theServer.getDefaultPageSize();
@@ -161,7 +171,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			}
 			numToReturn = pageSize;
 
-			if (requestOffset != null && !isOffsetModeHistory()) {
+			if ((offset != null && !isOffsetModeHistory()) || theResult.getCurrentPageOffset() != null) {
 				// When offset query is done theResult already contains correct amount (+ their includes etc.) so return everything
 				resourceList = theResult.getResources(0, Integer.MAX_VALUE);
 			} else if (numToReturn > 0) {
@@ -173,10 +183,10 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 		} else {
 			IPagingProvider pagingProvider = theServer.getPagingProvider();
-			if (theLimit == null || theLimit.equals(0)) {
+			if (limit == null || ((Integer) limit).equals(0)) {
 				pageSize = pagingProvider.getDefaultPageSize();
 			} else {
-				pageSize = Math.min(pagingProvider.getMaximumPageSize(), theLimit);
+				pageSize = Math.min(pagingProvider.getMaximumPageSize(), limit);
 			}
 			numToReturn = pageSize;
 
@@ -238,19 +248,27 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		BundleLinks links = new BundleLinks(theRequest.getFhirServerBase(), theIncludes, RestfulServerUtils.prettyPrintResponse(theServer, theRequest), theBundleType);
 		links.setSelf(theLinkSelf);
 
-		if (requestOffset != null || (!theServer.canStoreSearchResults() && !isEverythingOperation(theRequest)) || isOffsetModeHistory()) {
-			int offset = requestOffset != null ? requestOffset : 0;
+		if (theResult.getCurrentPageOffset() != null) {
+
+			if (isNotBlank(theResult.getNextPageId())) {
+				links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), offset + limit, limit, theRequest.getParameters()));
+			}
+			if (isNotBlank(theResult.getPreviousPageId())) {
+				links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), Math.max(offset - limit, 0), limit, theRequest.getParameters()));
+			}
+
+		} if (offset != null || (!theServer.canStoreSearchResults() && !isEverythingOperation(theRequest)) || isOffsetModeHistory()) {
 			// Paging without caching
-			// We're doing requestOffset pages
+			// We're doing offset pages
 			int requestedToReturn = numToReturn;
 			if (theServer.getPagingProvider() == null) {
 				// There is no paging provider at all, so assume we're querying up to all the results we need every time
 				requestedToReturn += offset;
 			}
 			if (numTotalResults == null || requestedToReturn < numTotalResults) {
-				links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), offset + numToReturn, numToReturn, theRequest.getParameters()));
+				links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), defaultIfNull(offset, 0) + numToReturn, numToReturn, theRequest.getParameters()));
 			}
-			if (offset > 0) {
+			if (offset != null && offset > 0) {
 				int start = Math.max(0, theOffset - pageSize);
 				links.setPrev(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), start, pageSize, theRequest.getParameters()));
 			}

@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -52,6 +53,8 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	private static final int CAPACITY = 1000;
 	private static final Logger ourLog = LoggerFactory.getLogger(CircularQueueCaptureQueriesListener.class);
 	private Queue<SqlQuery> myQueries;
+	private AtomicInteger myCommitCounter;
+	private AtomicInteger myRollbackCounter;
 
 	/**
 	 * Constructor
@@ -65,11 +68,23 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 		return myQueries;
 	}
 
+	@Override
+	protected AtomicInteger provideCommitCounter() {
+		return myCommitCounter;
+	}
+
+	@Override
+	protected AtomicInteger provideRollbackCounter() {
+		return myRollbackCounter;
+	}
+
 	/**
 	 * Clear all stored queries
 	 */
 	public void clear() {
 		myQueries.clear();
+		myCommitCounter.set(0);
+		myRollbackCounter.set(0);
 	}
 
 	/**
@@ -77,6 +92,8 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 */
 	public void startCollecting() {
 		myQueries = Queues.synchronizedQueue(new CircularFifoQueue<>(CAPACITY));
+		myCommitCounter = new AtomicInteger(0);
+		myRollbackCounter = new AtomicInteger(0);
 	}
 
 	/**
@@ -84,6 +101,8 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 */
 	public void stopCollecting() {
 		myQueries = null;
+		myCommitCounter = null;
+		myRollbackCounter = null;
 	}
 
 	/**
