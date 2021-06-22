@@ -40,17 +40,39 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBi
 import org.hl7.fhir.r4.model.Coding;
 
 import javax.annotation.Nonnull;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.*;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
-@Indexed(routingBinder=@RoutingBinderRef(type =  DeferConceptIndexingRoutingBinder.class))
+@Indexed(routingBinder = @RoutingBinderRef(type = DeferConceptIndexingRoutingBinder.class))
 @Table(name = "TRM_CONCEPT", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_CONCEPT_CS_CODE", columnNames = {"CODESYSTEM_PID", "CODEVAL"})
 }, indexes = {
@@ -60,6 +82,7 @@ import static org.apache.commons.lang3.StringUtils.length;
 public class TermConcept implements Serializable {
 	public static final int MAX_CODE_LENGTH = 500;
 	public static final int MAX_DESC_LENGTH = 400;
+	public static final int MAX_DISP_LENGTH = 500;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermConcept.class);
 	private static final long serialVersionUID = 1L;
 

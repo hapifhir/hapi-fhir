@@ -27,7 +27,18 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +66,7 @@ public class TermConceptMapGroupElement implements Serializable {
 	@Column(name = "SOURCE_CODE", nullable = false, length = TermConcept.MAX_CODE_LENGTH)
 	private String myCode;
 
-	@Column(name = "SOURCE_DISPLAY", length = TermConcept.MAX_DESC_LENGTH)
+	@Column(name = "SOURCE_DISPLAY", length = TermConcept.MAX_DISP_LENGTH)
 	private String myDisplay;
 
 	@OneToMany(mappedBy = "myConceptMapGroupElement")
@@ -114,7 +125,7 @@ public class TermConceptMapGroupElement implements Serializable {
 	}
 
 	public TermConceptMapGroupElement setDisplay(String theDisplay) {
-		myDisplay = left(theDisplay, TermConcept.MAX_DESC_LENGTH);
+		myDisplay = left(theDisplay, TermConcept.MAX_DISP_LENGTH);
 		return this;
 	}
 

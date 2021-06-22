@@ -28,7 +28,19 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import java.io.Serializable;
 
 import static org.apache.commons.lang3.StringUtils.length;
@@ -55,7 +67,7 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 	@Column(name = "TARGET_CODE", nullable = false, length = TermConcept.MAX_CODE_LENGTH)
 	private String myCode;
 
-	@Column(name = "TARGET_DISPLAY", nullable = true, length = TermConcept.MAX_DESC_LENGTH)
+	@Column(name = "TARGET_DISPLAY", nullable = true, length = TermConcept.MAX_DISP_LENGTH)
 	private String myDisplay;
 
 	@Enumerated(EnumType.STRING)

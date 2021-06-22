@@ -86,6 +86,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		forcedId.dropIndex("20210516.1", "IDX_FORCEDID_TYPE_FID").onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
 		forcedId.addIndex("20210516.2", "IDX_FORCEDID_TYPE_FID").unique(true).includeColumns("RESOURCE_PID").withColumns("RESOURCE_TYPE", "FORCED_ID").onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
 
+		// Bump ConceptMap display lengths
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
+			.modifyColumn("20210617.1", "TARGET_DISPLAY").nullable().withType(ColumnTypeEnum.STRING, 500);
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
+			.modifyColumn("20210617.2", "SOURCE_DISPLAY").nullable().withType(ColumnTypeEnum.STRING, 500);
+
 	}
 
 	private void init540() {
