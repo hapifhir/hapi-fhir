@@ -70,10 +70,16 @@ public final class MdmResourceUtil {
 	}
 
 	private static boolean resourceHasTag(IBaseResource theTheBaseResource, String theSystem, String theCode) {
+		if (theTheBaseResource == null) {
+			return false;
+		}
 		return theTheBaseResource.getMeta().getTag(theSystem, theCode) != null;
 	}
 
 	private static boolean resourceHasTagWithSystem(IBaseResource theTheBaseResource, String theSystem) {
+		if (theTheBaseResource == null) {
+			return false;
+		}
 		return theTheBaseResource.getMeta().getTag().stream().anyMatch(tag -> tag.getSystem().equalsIgnoreCase(theSystem));
 	}
 

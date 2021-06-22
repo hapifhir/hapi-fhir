@@ -43,12 +43,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class MdmStorageInterceptor implements IMdmStorageInterceptor {
+
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmStorageInterceptor.class);
+
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;
 	@Autowired
@@ -63,13 +67,21 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void blockManualResourceManipulationOnCreate(IBaseResource theBaseResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+		ourLog.debug("Starting pre-storage resource created hook for {}, {}, {}", theBaseResource, theRequestDetails, theServletRequestDetails);
+		if (theBaseResource == null) {
+			ourLog.warn("Attempting to block golden resource manipulation on a null resource");
+			return;
+		}
+
 		//If running in single EID mode, forbid multiple eids.
 		if (myMdmSettings.isPreventMultipleEids()) {
+			ourLog.debug("Forbidding multiple EIDs on ", theBaseResource);
 			forbidIfHasMultipleEids(theBaseResource);
 		}
 
 		// TODO GGG MDM find a better way to identify internal calls?
 		if (isInternalRequest(theRequestDetails)) {
+			ourLog.debug("Internal request - completed processing");
 			return;
 		}
 
@@ -78,8 +90,16 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
 	public void blockManualGoldenResourceManipulationOnUpdate(IBaseResource theOldResource, IBaseResource theUpdatedResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+		ourLog.debug("Starting pre-storage resource updated hook for {}, {}, {}, {}", theOldResource, theUpdatedResource, theRequestDetails, theServletRequestDetails);
+
+		if (theUpdatedResource == null) {
+			ourLog.warn("Attempting to block golden resource manipulation on a null resource");
+			return;
+		}
+
 		//If running in single EID mode, forbid multiple eids.
 		if (myMdmSettings.isPreventMultipleEids()) {
+			ourLog.debug("Forbidding multiple EIDs on ", theUpdatedResource);
 			forbidIfHasMultipleEids(theUpdatedResource);
 		}
 
@@ -92,10 +112,16 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 		}
 
 		if (isInternalRequest(theRequestDetails)) {
+			ourLog.debug("Internal request - completed processing");
 			return;
 		}
-		forbidIfMdmManagedTagIsPresent(theOldResource);
-		forbidModifyingMdmTag(theUpdatedResource, theOldResource);
+
+		if (theOldResource != null) {
+			forbidIfMdmManagedTagIsPresent(theOldResource);
+			forbidModifyingMdmTag(theUpdatedResource, theOldResource);
+		} else {
+			ourLog.warn("Null theOldResource for {} {}", theUpdatedResource == null ? "null updated resource" : theUpdatedResource.getIdElement(), theRequestDetails);
+		}
 
 		if (myMdmSettings.isPreventEidUpdates()) {
 			forbidIfModifyingExternalEidOnTarget(theUpdatedResource, theOldResource);
@@ -111,8 +137,15 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	}
 
 	private void forbidIfModifyingExternalEidOnTarget(IBaseResource theNewResource, IBaseResource theOldResource) {
-		List<CanonicalEID> newExternalEids = myEIDHelper.getExternalEid(theNewResource);
-		List<CanonicalEID> oldExternalEids = myEIDHelper.getExternalEid(theOldResource);
+		List<CanonicalEID> newExternalEids = Collections.emptyList();
+		List<CanonicalEID> oldExternalEids = Collections.emptyList();
+		if (theNewResource != null) {
+			newExternalEids = myEIDHelper.getExternalEid(theNewResource);
+		}
+		if (theOldResource != null) {
+			oldExternalEids = myEIDHelper.getExternalEid(theOldResource);
+		}
+
 		if (oldExternalEids.isEmpty()) {
 			return;
 		}
@@ -152,6 +185,11 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	}
 
 	private void forbidIfMdmManagedTagIsPresent(IBaseResource theResource) {
+		if (theResource == null) {
+			ourLog.warn("Attempting to forbid MDM on a null resource");
+			return;
+		}
+
 		if (MdmResourceUtil.isMdmManaged(theResource)) {
 			throwModificationBlockedByMdm();
 		}
