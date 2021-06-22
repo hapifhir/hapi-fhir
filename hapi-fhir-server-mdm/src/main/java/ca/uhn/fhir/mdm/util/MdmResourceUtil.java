@@ -69,18 +69,18 @@ public final class MdmResourceUtil {
 		return resourceHasTag(theBaseResource, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED);
 	}
 
-	private static boolean resourceHasTag(IBaseResource theTheBaseResource, String theSystem, String theCode) {
-		if (theTheBaseResource == null) {
+	private static boolean resourceHasTag(IBaseResource theBaseResource, String theSystem, String theCode) {
+		if (theBaseResource == null) {
 			return false;
 		}
-		return theTheBaseResource.getMeta().getTag(theSystem, theCode) != null;
+		return theBaseResource.getMeta().getTag(theSystem, theCode) != null;
 	}
 
-	private static boolean resourceHasTagWithSystem(IBaseResource theTheBaseResource, String theSystem) {
-		if (theTheBaseResource == null) {
+	private static boolean resourceHasTagWithSystem(IBaseResource theBaseResource, String theSystem) {
+		if (theBaseResource == null) {
 			return false;
 		}
-		return theTheBaseResource.getMeta().getTag().stream().anyMatch(tag -> tag.getSystem().equalsIgnoreCase(theSystem));
+		return theBaseResource.getMeta().getTag().stream().anyMatch(tag -> tag.getSystem().equalsIgnoreCase(theSystem));
 	}
 
 	private static Optional<? extends IBaseCoding> getTagWithSystem(IBaseResource theResource, String theSystem) {
