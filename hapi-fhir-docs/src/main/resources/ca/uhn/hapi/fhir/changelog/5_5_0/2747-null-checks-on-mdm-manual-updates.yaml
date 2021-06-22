@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2747
+title: "Added null checks to MDM resource interceptor in order to avoid NPEs."
