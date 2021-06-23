@@ -2299,7 +2299,6 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			SearchParameterMap params = new SearchParameterMap();
 			params.add("_profile", new UriParam("http://" + methodName));
 
-			logAllTokenIndexes();
 			myCaptureQueriesListener.clear();
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myOrganizationDao.search(params));
 			myCaptureQueriesListener.logSelectQueries();

@@ -91,7 +91,7 @@ public class FhirResourceDaoR4TagsTest extends BaseJpaR4Test {
 	public void testStoreAndRetrieveVersionedTags_History() {
 		initializeVersioned();
 
-		IBundleProvider history = myPatientDao.history(null, null, null, mySrd);
+		IBundleProvider history = myPatientDao.history( null, null, mySrd);
 
 		// Version 1
 		Patient patient = (Patient) history.getResources(0, 999).get(1);
@@ -109,7 +109,7 @@ public class FhirResourceDaoR4TagsTest extends BaseJpaR4Test {
 	public void testStoreAndRetrieveNonVersionedTags_History() {
 		initializeNonVersioned();
 
-		IBundleProvider history = myPatientDao.history(null, null, null, mySrd);
+		IBundleProvider history = myPatientDao.history(null, null, mySrd);
 
 		// Version 1
 		Patient patient = (Patient) history.getResources(0, 999).get(1);
@@ -214,8 +214,6 @@ public class FhirResourceDaoR4TagsTest extends BaseJpaR4Test {
 
 		createPatientsForInlineSearchTests();
 
-		logAllTokenIndexes();
-
 		// Perform a search
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add("_tag", new TokenParam("http://tag1", "vtag1"));
@@ -235,8 +233,6 @@ public class FhirResourceDaoR4TagsTest extends BaseJpaR4Test {
 		mySearchParamRegistry.forceRefresh();
 
 		createPatientsForInlineSearchTests();
-
-		logAllTokenIndexes();
 
 		// Perform a search
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
@@ -266,8 +262,6 @@ public class FhirResourceDaoR4TagsTest extends BaseJpaR4Test {
 		mySearchParamRegistry.forceRefresh();
 
 		createPatientsForInlineSearchTests();
-
-		logAllTokenIndexes();
 
 		// Perform a search
 		SearchParameterMap map = SearchParameterMap.newSynchronous();

@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.UUID;
 
@@ -24,6 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4SearchSqlTest.class);
+	@Autowired
+	private MemoryCacheService myMemoryCacheService;
 
 	@AfterEach
 	public void after() {
@@ -41,7 +45,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		myPatientDao.search(map);
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
-		assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_STRING t0 WHERE ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?))", sql);
+		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 LEFT OUTER JOIN HFJ_SPIDX_STRING t0 ON (t1.RES_ID = t0.RES_ID) WHERE ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?))", sql);
 
 	}
 
@@ -117,7 +121,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		// Query 1 - Find resources: Just a standard token search in this mode
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
-		assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)", sql);
+		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 LEFT OUTER JOIN HFJ_SPIDX_TOKEN t0 ON (t1.RES_ID = t0.RES_ID) WHERE (t0.HASH_VALUE = ?)", sql);
 		// Query 2 - Load resourece contents
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(false, false);
 		assertThat(sql, containsString("where resourcese0_.RES_ID in (?)"));
