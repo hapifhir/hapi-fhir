@@ -44,7 +44,9 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +78,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@TestMethodOrder(MethodOrderer.MethodName.class)
 public class NpmR4Test extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(NpmR4Test.class);
