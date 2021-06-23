@@ -3,9 +3,12 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -23,12 +26,14 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"Duplicates"})
-public class FhirResourceDaoR4TagsTest extends BaseJpaR4Test {
+public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4TagsTest.class);
 
+	@Override
 	@AfterEach
-	public final void after() {
+	public final void after() throws Exception {
+		super.after();
 		myDaoConfig.setTagStorageMode(DaoConfig.DEFAULT_TAG_STORAGE_MODE);
 	}
 
@@ -217,9 +222,7 @@ public class FhirResourceDaoR4TagsTest extends BaseJpaR4Test {
 		logAllTokenIndexes();
 
 		// Perform a search
-		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		map.add("_tag", new TokenParam("http://tag1", "vtag1"));
-		IBundleProvider outcome = myPatientDao.search(map, mySrd);
+		Bundle outcome = myClient.search().forResource("Patient").where(new TokenClientParam("_tag").exactly().systemAndCode("http://tag1", "vtag1")).returnBundle(Bundle.class).execute();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder("Patient/A", "Patient/B"));
 
 		validatePatientSearchResultsForInlineTags(outcome);
@@ -239,11 +242,8 @@ public class FhirResourceDaoR4TagsTest extends BaseJpaR4Test {
 		logAllTokenIndexes();
 
 		// Perform a search
-		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		map.add("_profile", new TokenParam("http://profile1"));
-		IBundleProvider outcome = myPatientDao.search(map, mySrd);
+		Bundle outcome = myClient.search().forResource("Patient").where(new TokenClientParam("_profile").exactly().code("http://profile1")).returnBundle(Bundle.class).execute();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder("Patient/A", "Patient/B"));
-
 		validatePatientSearchResultsForInlineTags(outcome);
 	}
 
@@ -270,21 +270,19 @@ public class FhirResourceDaoR4TagsTest extends BaseJpaR4Test {
 		logAllTokenIndexes();
 
 		// Perform a search
-		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		map.add("_security", new TokenParam("http://sec1", "vsec1"));
-		IBundleProvider outcome = myPatientDao.search(map, mySrd);
+		Bundle outcome = myClient.search().forResource("Patient").where(new TokenClientParam("_security").exactly().systemAndCode("http://sec1", "vsec1")).returnBundle(Bundle.class).execute();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder("Patient/A", "Patient/B"));
 
 		validatePatientSearchResultsForInlineTags(outcome);
 	}
 
-	private void validatePatientSearchResultsForInlineTags(IBundleProvider outcome) {
+	private void validatePatientSearchResultsForInlineTags(Bundle outcome) {
 		Patient patient;
-		patient = (Patient) outcome.getResources(0, 1).get(0);
+		patient = (Patient) outcome.getEntry().get(0).getResource();
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile1"));
 		assertThat(toTags(patient).toString(), toTags(patient), contains("http://tag1|vtag1|dtag1"));
 		assertThat(toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
-		patient = (Patient) outcome.getResources(1, 2).get(0);
+		patient = (Patient) outcome.getEntry().get(1).getResource();
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile1"));
 		assertThat(toTags(patient).toString(), toTags(patient), contains("http://tag1|vtag1|dtag1"));
 		assertThat(toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
@@ -375,7 +373,7 @@ public class FhirResourceDaoR4TagsTest extends BaseJpaR4Test {
 			searchParameter.addBase(next);
 		}
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setType(Enumerations.SearchParamType.URI);
 		searchParameter.setCode("_profile");
 		searchParameter.setName("Profile");
 		searchParameter.setExpression("meta.profile");
