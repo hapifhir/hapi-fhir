@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import com.google.common.collect.Lists;
@@ -30,15 +31,10 @@ import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
-	private static final Logger ourLog = LoggerFactory.getLogger(TagPredicateBuilder.class);
 
 	private final DbColumn myColumnResId;
 	private final DbTable myTagDefinitionTable;
@@ -72,13 +68,13 @@ public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
 
 		List<Condition> orPredicates = Lists.newArrayList();
 		for (Pair<String, String> next : theTokens) {
-			Condition codePredicate = BinaryCondition.equalTo(myTagDefinitionColumnTagCode, generatePlaceholder(next.getRight()));
-			if (isNotBlank(next.getLeft())) {
-				Condition systemPredicate = BinaryCondition.equalTo(myTagDefinitionColumnTagSystem, generatePlaceholder(next.getLeft()));
-				orPredicates.add(ComboCondition.and(typePredicate, systemPredicate, codePredicate));
-			} else {
-				orPredicates.add(ComboCondition.and(typePredicate, codePredicate));
+			String system = next.getLeft();
+			if (theTagType == TagTypeEnum.PROFILE) {
+				system = BaseHapiFhirDao.NS_JPA_PROFILE;
 			}
+			Condition systemPredicate = BinaryCondition.equalTo(myTagDefinitionColumnTagSystem, generatePlaceholder(system));
+			Condition codePredicate = BinaryCondition.equalTo(myTagDefinitionColumnTagCode, generatePlaceholder(next.getRight()));
+			orPredicates.add(ComboCondition.and(typePredicate, systemPredicate, codePredicate));
 		}
 
 		return ComboCondition.or(orPredicates.toArray(new Condition[0]));

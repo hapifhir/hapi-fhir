@@ -1,10 +1,15 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.TokenParam;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -142,6 +147,174 @@ public class FhirResourceDaoR4TagsTest extends BaseJpaR4Test {
 	}
 
 
+	@Test
+	public void testInlineTags_StoreAndRetrieve() {
+		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
+
+		// Store a first version
+		Patient patient = new Patient();
+		patient.setId("Patient/A");
+		patient.getMeta().addProfile("http://profile1");
+		patient.getMeta().addTag("http://tag1", "vtag1", "dtag1");
+		patient.getMeta().addSecurity("http://sec1", "vsec1", "dsec1");
+		patient.setActive(true);
+		myPatientDao.update(patient, mySrd);
+
+		runInTransaction(()->{
+			assertEquals(0, myResourceTagDao.count());
+			assertEquals(0, myResourceHistoryTagDao.count());
+			assertEquals(0, myTagDefinitionDao.count());
+		});
+
+		// Read it back
+		patient = myPatientDao.read(new IdType("Patient/A/_history/1"), mySrd);
+		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile1"));
+		assertThat(toTags(patient).toString(), toTags(patient), contains("http://tag1|vtag1|dtag1"));
+		assertThat(toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
+
+		// Store a second version
+		patient = new Patient();
+		patient.setId("Patient/A");
+		patient.getMeta().addProfile("http://profile2");
+		patient.getMeta().addTag("http://tag2", "vtag2", "dtag2");
+		patient.getMeta().addSecurity("http://sec2", "vsec2", "dsec2");
+		patient.setActive(true);
+		myPatientDao.update(patient, mySrd);
+
+		runInTransaction(()->{
+			assertEquals(0, myResourceTagDao.count());
+			assertEquals(0, myResourceHistoryTagDao.count());
+			assertEquals(0, myTagDefinitionDao.count());
+		});
+
+		// First version should have only the initial tags
+		patient = myPatientDao.read(new IdType("Patient/A/_history/1"), mySrd);
+		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile1"));
+		assertThat(toTags(patient).toString(), toTags(patient), contains("http://tag1|vtag1|dtag1"));
+		assertThat(toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
+
+		// Second version should have both sets of tags (but only the new profile since these deliberately aren't copied forward)
+		patient = myPatientDao.read(new IdType("Patient/A/_history/2"), mySrd);
+		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile2"));
+		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+		assertThat(toSecurityLabels(patient).toString(), toSecurityLabels(patient), containsInAnyOrder("http://sec1|vsec1|dsec1", "http://sec2|vsec2|dsec2"));
+
+	}
+
+
+	@Test
+	public void testInlineTags_Search_Tag() {
+		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
+
+		SearchParameter searchParameter = createResourceTagSearchParameter();
+		ourLog.info("SearchParam:\n{}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		mySearchParameterDao.update(searchParameter, mySrd);
+		mySearchParamRegistry.forceRefresh();
+
+		createPatientsForInlineSearchTests();
+
+		logAllTokenIndexes();
+
+		// Perform a search
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add("_tag", new TokenParam("http://tag1", "vtag1"));
+		IBundleProvider outcome = myPatientDao.search(map, mySrd);
+		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder("Patient/A", "Patient/B"));
+
+		validatePatientSearchResultsForInlineTags(outcome);
+	}
+
+	@Test
+	public void testInlineTags_Search_Profile() {
+		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
+
+		SearchParameter searchParameter = createSearchParamForInlineResourceProfile();
+		ourLog.info("SearchParam:\n{}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		mySearchParameterDao.update(searchParameter, mySrd);
+		mySearchParamRegistry.forceRefresh();
+
+		createPatientsForInlineSearchTests();
+
+		logAllTokenIndexes();
+
+		// Perform a search
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add("_profile", new TokenParam("http://profile1"));
+		IBundleProvider outcome = myPatientDao.search(map, mySrd);
+		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder("Patient/A", "Patient/B"));
+
+		validatePatientSearchResultsForInlineTags(outcome);
+	}
+
+	@Test
+	public void testInlineTags_Search_Security() {
+		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
+
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setId("SearchParameter/resource-security");
+		for (String next : myFhirCtx.getResourceTypes().stream().sorted().collect(Collectors.toList())) {
+			searchParameter.addBase(next);
+		}
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setCode("_security");
+		searchParameter.setName("Security");
+		searchParameter.setExpression("meta.security");
+		ourLog.info("SearchParam:\n{}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		mySearchParameterDao.update(searchParameter, mySrd);
+		mySearchParamRegistry.forceRefresh();
+
+		createPatientsForInlineSearchTests();
+
+		logAllTokenIndexes();
+
+		// Perform a search
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add("_security", new TokenParam("http://sec1", "vsec1"));
+		IBundleProvider outcome = myPatientDao.search(map, mySrd);
+		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder("Patient/A", "Patient/B"));
+
+		validatePatientSearchResultsForInlineTags(outcome);
+	}
+
+	private void validatePatientSearchResultsForInlineTags(IBundleProvider outcome) {
+		Patient patient;
+		patient = (Patient) outcome.getResources(0, 1).get(0);
+		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile1"));
+		assertThat(toTags(patient).toString(), toTags(patient), contains("http://tag1|vtag1|dtag1"));
+		assertThat(toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
+		patient = (Patient) outcome.getResources(1, 2).get(0);
+		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile1"));
+		assertThat(toTags(patient).toString(), toTags(patient), contains("http://tag1|vtag1|dtag1"));
+		assertThat(toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
+	}
+
+	private void createPatientsForInlineSearchTests() {
+		Patient patient = new Patient();
+		patient.setId("Patient/A");
+		patient.getMeta().addProfile("http://profile1");
+		patient.getMeta().addTag("http://tag1", "vtag1", "dtag1");
+		patient.getMeta().addSecurity("http://sec1", "vsec1", "dsec1");
+		patient.setActive(true);
+		myPatientDao.update(patient, mySrd);
+
+		patient = new Patient();
+		patient.setId("Patient/B");
+		patient.getMeta().addProfile("http://profile1");
+		patient.getMeta().addTag("http://tag1", "vtag1", "dtag1");
+		patient.getMeta().addSecurity("http://sec1", "vsec1", "dsec1");
+		patient.setActive(true);
+		myPatientDao.update(patient, mySrd);
+
+		patient = new Patient();
+		patient.setId("Patient/NO");
+		patient.getMeta().addProfile("http://profile99");
+		patient.getMeta().addTag("http://tag99", "vtag99", "dtag99");
+		patient.getMeta().addSecurity("http://sec99", "vsec99", "dsec99");
+		patient.setActive(true);
+		myPatientDao.update(patient, mySrd);
+	}
+
 	private void initializeNonVersioned() {
 		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.NON_VERSIONED);
 
@@ -184,8 +357,43 @@ public class FhirResourceDaoR4TagsTest extends BaseJpaR4Test {
 	}
 
 	@Nonnull
+	private List<String> toSecurityLabels(Patient patient) {
+		return patient.getMeta().getSecurity().stream().map(t -> t.getSystem() + "|" + t.getCode() + "|" + t.getDisplay()).collect(Collectors.toList());
+	}
+
+	@Nonnull
 	private List<String> toProfiles(Patient patient) {
 		return patient.getMeta().getProfile().stream().map(t -> t.getValue()).collect(Collectors.toList());
+	}
+
+	@Nonnull
+	public static SearchParameter createSearchParamForInlineResourceProfile() {
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setId("SearchParameter/resource-profile");
+		for (String next : FhirContext.forR4Cached().getResourceTypes().stream().sorted().collect(Collectors.toList())) {
+			searchParameter.addBase(next);
+		}
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setCode("_profile");
+		searchParameter.setName("Profile");
+		searchParameter.setExpression("meta.profile");
+		return searchParameter;
+	}
+
+	@Nonnull
+	public static SearchParameter createResourceTagSearchParameter() {
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setId("SearchParameter/resource-tag");
+		for (String next : FhirContext.forR4Cached().getResourceTypes().stream().sorted().collect(Collectors.toList())) {
+			searchParameter.addBase(next);
+		}
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setCode("_tag");
+		searchParameter.setName("Tag");
+		searchParameter.setExpression("meta.tag");
+		return searchParameter;
 	}
 
 }

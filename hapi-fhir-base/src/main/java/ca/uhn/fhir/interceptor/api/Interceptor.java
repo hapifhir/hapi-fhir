@@ -27,7 +27,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation declares a bean as a subscription interceptor
+ * This annotation declares a bean as a subscription interceptor. This interceptor
+ * is not mandatory for interceptor classes, but is added as a marker by convention.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
