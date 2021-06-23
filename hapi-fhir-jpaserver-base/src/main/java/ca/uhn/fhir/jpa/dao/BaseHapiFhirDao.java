@@ -113,6 +113,8 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -122,6 +124,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import javax.validation.constraints.Null;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 import java.util.ArrayList;
@@ -413,32 +416,32 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		Pair<String, String> key = Pair.of(theScheme, theTerm);
 		return myMemoryCacheService.get(MemoryCacheService.CacheEnum.TAG_DEFINITION, key, k -> {
 
-			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-			CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
-			Root<TagDefinition> from = cq.from(TagDefinition.class);
+				CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+				CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
+				Root<TagDefinition> from = cq.from(TagDefinition.class);
 
-			if (isNotBlank(theScheme)) {
-				cq.where(
-					builder.and(
-						builder.equal(from.get("myTagType"), theTagType),
-						builder.equal(from.get("mySystem"), theScheme),
-						builder.equal(from.get("myCode"), theTerm)));
-			} else {
-				cq.where(
-					builder.and(
-						builder.equal(from.get("myTagType"), theTagType),
-						builder.isNull(from.get("mySystem")),
-						builder.equal(from.get("myCode"), theTerm)));
-			}
+				if (isNotBlank(theScheme)) {
+					cq.where(
+						builder.and(
+							builder.equal(from.get("myTagType"), theTagType),
+							builder.equal(from.get("mySystem"), theScheme),
+							builder.equal(from.get("myCode"), theTerm)));
+				} else {
+					cq.where(
+						builder.and(
+							builder.equal(from.get("myTagType"), theTagType),
+							builder.isNull(from.get("mySystem")),
+							builder.equal(from.get("myCode"), theTerm)));
+				}
 
-			TypedQuery<TagDefinition> q = myEntityManager.createQuery(cq);
-			try {
+				TypedQuery<TagDefinition> q = myEntityManager.createQuery(cq);
+				try {
 				return q.getSingleResult();
-			} catch (NoResultException e) {
+				} catch (NoResultException e) {
 				TagDefinition retVal = new TagDefinition(theTagType, theScheme, theTerm, theLabel);
-				myEntityManager.persist(retVal);
-				return retVal;
-			}
+					myEntityManager.persist(retVal);
+		return retVal;
+	}
 
 		});
 	}
@@ -519,7 +522,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 				IBaseMetaType meta = theResource.getMeta();
 				boolean hasExtensions = false;
-				IBaseExtension<?,?> sourceExtension = null;
+				IBaseExtension<?, ?> sourceExtension = null;
 				if (meta instanceof IBaseHasExtensions) {
 					List<? extends IBaseExtension<?, ?>> extensions = ((IBaseHasExtensions) meta).getExtension();
 					if (!extensions.isEmpty()) {
@@ -543,10 +546,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 					}
 				}
-				if (hasExtensions) {
-					excludeElements.add(resourceType + ".meta.profile");
-					excludeElements.add(resourceType + ".meta.tag");
-					excludeElements.add(resourceType + ".meta.security");
+
+				boolean inlineTagMode = getConfig().getTagStorageMode() == DaoConfig.TagStorageModeEnum.INLINE;
+				if (hasExtensions || inlineTagMode) {
+					if (!inlineTagMode) {
+						excludeElements.add(resourceType + ".meta.profile");
+						excludeElements.add(resourceType + ".meta.tag");
+						excludeElements.add(resourceType + ".meta.security");
+					}
 					excludeElements.add(resourceType + ".meta.versionId");
 					excludeElements.add(resourceType + ".meta.lastUpdated");
 					excludeElements.add(resourceType + ".meta.source");
@@ -583,49 +590,54 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			}
 
-			Set<ResourceTag> allDefs = new HashSet<>();
-			Set<ResourceTag> allTagsOld = getAllTagDefinitions(theEntity);
+			boolean skipUpdatingTags = myConfig.isMassIngestionMode() && theEntity.isHasTags();
+			skipUpdatingTags |= myConfig.getTagStorageMode() == DaoConfig.TagStorageModeEnum.INLINE;
 
-			if (theResource instanceof IResource) {
+			if (!skipUpdatingTags) {
+				Set<ResourceTag> allDefs = new HashSet<>();
+				Set<ResourceTag> allTagsOld = getAllTagDefinitions(theEntity);
+
+				if (theResource instanceof IResource) {
 				extractTagsHapi((IResource) theResource, theEntity, allDefs);
-			} else {
+				} else {
 				extractTagsRi((IAnyResource) theResource, theEntity, allDefs);
-			}
+				}
 
-			RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
-			if (def.isStandardType() == false) {
-				String profile = def.getResourceProfile("");
-				if (isNotBlank(profile)) {
+				RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
+				if (def.isStandardType() == false) {
+					String profile = def.getResourceProfile("");
+					if (isNotBlank(profile)) {
 					TagDefinition profileDef = getTagOrNull(TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null);
 
-					ResourceTag tag = theEntity.addTag(profileDef);
-					allDefs.add(tag);
-					theEntity.setHasTags(true);
-				}
-			}
-
-			Set<ResourceTag> allTagsNew = getAllTagDefinitions(theEntity);
-			Set<TagDefinition> allDefsPresent = new HashSet<>();
-			allTagsNew.forEach(tag -> {
-
-				// Don't keep duplicate tags
-				if (!allDefsPresent.add(tag.getTag())) {
-					theEntity.getTags().remove(tag);
-				}
-
-				// Drop any tags that have been removed
-				if (!allDefs.contains(tag)) {
-					if (shouldDroppedTagBeRemovedOnUpdate(theRequest, tag)) {
-						theEntity.getTags().remove(tag);
+						ResourceTag tag = theEntity.addTag(profileDef);
+						allDefs.add(tag);
+						theEntity.setHasTags(true);
 					}
 				}
 
-			});
+				Set<ResourceTag> allTagsNew = getAllTagDefinitions(theEntity);
+				Set<TagDefinition> allDefsPresent = new HashSet<>();
+				allTagsNew.forEach(tag -> {
 
-			if (!allTagsOld.equals(allTagsNew)) {
-				changed = true;
+					// Don't keep duplicate tags
+					if (!allDefsPresent.add(tag.getTag())) {
+						theEntity.getTags().remove(tag);
+					}
+
+					// Drop any tags that have been removed
+					if (!allDefs.contains(tag)) {
+						if (shouldDroppedTagBeRemovedOnUpdate(theRequest, tag)) {
+							theEntity.getTags().remove(tag);
+						}
+					}
+
+				});
+
+				if (!allTagsOld.equals(allTagsNew)) {
+					changed = true;
+				}
+				theEntity.setHasTags(!allTagsNew.isEmpty());
 			}
-			theEntity.setHasTags(!allTagsNew.isEmpty());
 
 		} else {
 			theEntity.setHashSha256(null);
@@ -658,7 +670,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	@SuppressWarnings("unchecked")
-	private <R extends IBaseResource> R populateResourceMetadataHapi(Class<R> theResourceType, IBaseResourceEntity theEntity, Collection<? extends BaseTag> theTagList, boolean theForHistoryOperation, IResource res, Long theVersion) {
+	private <R extends IBaseResource> R populateResourceMetadataHapi(Class<R> theResourceType, IBaseResourceEntity theEntity, @Nullable Collection<? extends BaseTag> theTagList, boolean theForHistoryOperation, IResource res, Long theVersion) {
 		R retVal = (R) res;
 		if (theEntity.getDeleted() != null) {
 			res = (IResource) myContext.getResourceDefinition(theResourceType).newInstance();
@@ -687,45 +699,45 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		ResourceMetadataKeyEnum.UPDATED.put(res, theEntity.getUpdated());
 		IDao.RESOURCE_PID.put(res, theEntity.getResourceId());
 
-		Collection<? extends BaseTag> tags = theTagList;
-		if (theEntity.isHasTags()) {
-			TagList tagList = new TagList();
-			List<IBaseCoding> securityLabels = new ArrayList<>();
-			List<IdDt> profiles = new ArrayList<>();
-			for (BaseTag next : tags) {
-				switch (next.getTag().getTagType()) {
-					case PROFILE:
-						profiles.add(new IdDt(next.getTag().getCode()));
-						break;
-					case SECURITY_LABEL:
-						IBaseCoding secLabel = (IBaseCoding) myContext.getVersion().newCodingDt();
-						secLabel.setSystem(next.getTag().getSystem());
-						secLabel.setCode(next.getTag().getCode());
-						secLabel.setDisplay(next.getTag().getDisplay());
-						securityLabels.add(secLabel);
-						break;
-					case TAG:
-						tagList.add(new Tag(next.getTag().getSystem(), next.getTag().getCode(), next.getTag().getDisplay()));
-						break;
+		if (theTagList != null) {
+			if (theEntity.isHasTags()) {
+				TagList tagList = new TagList();
+				List<IBaseCoding> securityLabels = new ArrayList<>();
+				List<IdDt> profiles = new ArrayList<>();
+				for (BaseTag next : theTagList) {
+					switch (next.getTag().getTagType()) {
+						case PROFILE:
+							profiles.add(new IdDt(next.getTag().getCode()));
+							break;
+						case SECURITY_LABEL:
+							IBaseCoding secLabel = (IBaseCoding) myContext.getVersion().newCodingDt();
+							secLabel.setSystem(next.getTag().getSystem());
+							secLabel.setCode(next.getTag().getCode());
+							secLabel.setDisplay(next.getTag().getDisplay());
+							securityLabels.add(secLabel);
+							break;
+						case TAG:
+							tagList.add(new Tag(next.getTag().getSystem(), next.getTag().getCode(), next.getTag().getDisplay()));
+							break;
+					}
+				}
+				if (tagList.size() > 0) {
+					ResourceMetadataKeyEnum.TAG_LIST.put(res, tagList);
+				}
+				if (securityLabels.size() > 0) {
+					ResourceMetadataKeyEnum.SECURITY_LABELS.put(res, toBaseCodingList(securityLabels));
+				}
+				if (profiles.size() > 0) {
+					ResourceMetadataKeyEnum.PROFILES.put(res, profiles);
 				}
 			}
-			if (tagList.size() > 0) {
-				ResourceMetadataKeyEnum.TAG_LIST.put(res, tagList);
-			}
-			if (securityLabels.size() > 0) {
-				ResourceMetadataKeyEnum.SECURITY_LABELS.put(res, toBaseCodingList(securityLabels));
-			}
-			if (profiles.size() > 0) {
-				ResourceMetadataKeyEnum.PROFILES.put(res, profiles);
-			}
 		}
-
 
 		return retVal;
 	}
 
 	@SuppressWarnings("unchecked")
-	private <R extends IBaseResource> R populateResourceMetadataRi(Class<R> theResourceType, IBaseResourceEntity theEntity, Collection<? extends BaseTag> theTagList, boolean theForHistoryOperation, IAnyResource res, Long theVersion) {
+	private <R extends IBaseResource> R populateResourceMetadataRi(Class<R> theResourceType, IBaseResourceEntity theEntity, @Nullable Collection<? extends BaseTag> theTagList, boolean theForHistoryOperation, IAnyResource res, Long theVersion) {
 		R retVal = (R) res;
 		if (theEntity.getDeleted() != null) {
 			res = (IAnyResource) myContext.getResourceDefinition(theResourceType).newInstance();
@@ -747,9 +759,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 		}
 
-		res.getMeta().getTag().clear();
-		res.getMeta().getProfile().clear();
-		res.getMeta().getSecurity().clear();
 		res.getMeta().setLastUpdated(null);
 		res.getMeta().setVersionId(null);
 
@@ -759,10 +768,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		res.getMeta().setLastUpdated(theEntity.getUpdatedDate());
 		IDao.RESOURCE_PID.put(res, theEntity.getResourceId());
 
-		Collection<? extends BaseTag> tags = theTagList;
-
-		if (theEntity.isHasTags()) {
-			for (BaseTag next : tags) {
+		if (theTagList != null) {
+			res.getMeta().getTag().clear();
+			res.getMeta().getProfile().clear();
+			res.getMeta().getSecurity().clear();
+			for (BaseTag next : theTagList) {
 				switch (next.getTag().getTagType()) {
 					case PROFILE:
 						res.getMeta().addProfile(next.getTag().getCode());
@@ -880,7 +890,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		// 1. get resource, it's encoding and the tags if any
 		byte[] resourceBytes;
 		ResourceEncodingEnum resourceEncoding;
-		Collection<? extends BaseTag> myTagList;
+		@Nullable
+		Collection<? extends BaseTag> tagList = Collections.emptyList();
 		long version;
 		String provenanceSourceUri = null;
 		String provenanceRequestId = null;
@@ -889,10 +900,20 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			ResourceHistoryTable history = (ResourceHistoryTable) theEntity;
 			resourceBytes = history.getResource();
 			resourceEncoding = history.getEncoding();
-			if (history.isHasTags()) {
-				myTagList = history.getTags();
-			} else {
-				myTagList = Collections.emptyList();
+			switch (getConfig().getTagStorageMode()) {
+				case VERSIONED:
+				default:
+					if (history.isHasTags()) {
+						tagList = history.getTags();
+					}
+					break;
+				case NON_VERSIONED:
+					if (history.getResourceTable().isHasTags()) {
+						tagList = history.getResourceTable().getTags();
+					}
+					break;
+				case INLINE:
+					tagList = null;
 			}
 			version = history.getVersion();
 			if (history.getProvenance() != null) {
@@ -915,10 +936,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 			resourceBytes = history.getResource();
 			resourceEncoding = history.getEncoding();
-			if (resource.isHasTags()) {
-				myTagList = resource.getTags();
-			} else {
-				myTagList = Collections.emptyList();
+			switch (getConfig().getTagStorageMode()) {
+				case VERSIONED:
+				case NON_VERSIONED:
+					if (resource.isHasTags()) {
+						tagList = resource.getTags();
+					} else {
+						tagList = Collections.emptyList();
+					}
+					break;
+				case INLINE:
+					tagList = null;
+					break;
 			}
 			version = history.getVersion();
 			if (history.getProvenance() != null) {
@@ -933,10 +962,19 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			version = view.getVersion();
 			provenanceRequestId = view.getProvenanceRequestId();
 			provenanceSourceUri = view.getProvenanceSourceUri();
-			if (theTagList == null)
-				myTagList = new HashSet<>();
-			else
-				myTagList = theTagList;
+			switch (getConfig().getTagStorageMode()) {
+				case VERSIONED:
+				case NON_VERSIONED:
+					if (theTagList != null) {
+						tagList = theTagList;
+					} else {
+						tagList = Collections.emptyList();
+					}
+					break;
+				case INLINE:
+					tagList = null;
+					break;
+			}
 		} else {
 			// something wrong
 			return null;
@@ -947,16 +985,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		// 3. Use the appropriate custom type if one is specified in the context
 		Class<R> resourceType = theResourceType;
-		if (myContext.hasDefaultTypeForProfile()) {
-			for (BaseTag nextTag : myTagList) {
-				if (nextTag.getTag().getTagType() == TagTypeEnum.PROFILE) {
-					String profile = nextTag.getTag().getCode();
-					if (isNotBlank(profile)) {
-						Class<? extends IBaseResource> newType = myContext.getDefaultTypeForProfile(profile);
-						if (newType != null && theResourceType.isAssignableFrom(newType)) {
-							ourLog.debug("Using custom type {} for profile: {}", newType.getName(), profile);
-							resourceType = (Class<R>) newType;
-							break;
+		if (tagList != null) {
+			if (myContext.hasDefaultTypeForProfile()) {
+				for (BaseTag nextTag : tagList) {
+					if (nextTag.getTag().getTagType() == TagTypeEnum.PROFILE) {
+						String profile = nextTag.getTag().getCode();
+						if (isNotBlank(profile)) {
+							Class<? extends IBaseResource> newType = myContext.getDefaultTypeForProfile(profile);
+							if (newType != null && theResourceType.isAssignableFrom(newType)) {
+								ourLog.debug("Using custom type {} for profile: {}", newType.getName(), profile);
+								resourceType = (Class<R>) newType;
+								break;
+							}
 						}
 					}
 				}
@@ -998,10 +1038,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		// 5. fill MetaData
 		if (retVal instanceof IResource) {
 			IResource res = (IResource) retVal;
-			retVal = populateResourceMetadataHapi(resourceType, theEntity, myTagList, theForHistoryOperation, res, version);
+			retVal = populateResourceMetadataHapi(resourceType, theEntity, tagList, theForHistoryOperation, res, version);
 		} else {
 			IAnyResource res = (IAnyResource) retVal;
-			retVal = populateResourceMetadataRi(resourceType, theEntity, myTagList, theForHistoryOperation, res, version);
+			retVal = populateResourceMetadataRi(resourceType, theEntity, tagList, theForHistoryOperation, res, version);
 		}
 
 		// 6. Handle source (provenance)
@@ -1112,7 +1152,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		} else {
 			// CREATE or UPDATE
-			existingParams = new ResourceIndexedSearchParams(entity);
+				existingParams = new ResourceIndexedSearchParams(entity);
 			entity.setDeleted(null);
 
 			if (thePerformIndexing) {

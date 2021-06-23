@@ -225,6 +225,27 @@ public class FhirContext {
 
 	}
 
+	/**
+	 * @since 5.5.0
+	 */
+	public static FhirContext forDstu3Cached() {
+		return forCached(FhirVersionEnum.DSTU3);
+	}
+
+	/**
+	 * @since 5.5.0
+	 */
+	public static FhirContext forR4Cached() {
+		return forCached(FhirVersionEnum.R4);
+	}
+
+	/**
+	 * @since 5.5.0
+	 */
+	public static FhirContext forR5Cached() {
+		return forCached(FhirVersionEnum.R5);
+	}
+
 	private String createUnknownResourceNameError(final String theResourceName, final FhirVersionEnum theVersion) {
 		return getLocalizer().getMessage(FhirContext.class, "unknownResourceName", theResourceName, theVersion);
 	}

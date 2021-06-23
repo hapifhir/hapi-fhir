@@ -74,6 +74,18 @@ public class DaoConfig {
 	)));
 	// update setter javadoc if default changes
 	public static final int DEFAULT_MAX_EXPANSION_SIZE = 1000;
+	public static final HistoryCountModeEnum DEFAULT_HISTORY_COUNT_MODE = HistoryCountModeEnum.CACHED_ONLY_WITHOUT_OFFSET;
+	/**
+	 * This constant applies to task enablement, e.g. {@link #setEnableTaskStaleSearchCleanup(boolean)}.
+	 * <p>
+	 * By default, all are enabled.
+	 */
+	public static final boolean DEFAULT_ENABLE_TASKS = true;
+	public static final int DEFAULT_MAXIMUM_INCLUDES_TO_LOAD_PER_PAGE = 1000;
+	/**
+	 * @since 5.5.0
+	 */
+	public static final TagStorageModeEnum DEFAULT_TAG_STORAGE_MODE = TagStorageModeEnum.VERSIONED;
 	/**
 	 * Default value for {@link #setMaximumSearchResultCountInTransaction(Integer)}
 	 *
@@ -112,6 +124,8 @@ public class DaoConfig {
 	private boolean myEnforceReferentialIntegrityOnWrite = true;
 	private SearchTotalModeEnum myDefaultTotalMode = null;
 	private int myEverythingIncludesFetchPageSize = 50;
+	private int myBulkImportMaxRetryCount = 10;
+	private TagStorageModeEnum myTagStorageMode = DEFAULT_TAG_STORAGE_MODE;
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -218,6 +232,115 @@ public class DaoConfig {
 	}
 
 	/**
+	 * Sets the tag storage mode for the server. Default is {@link TagStorageModeEnum#VERSIONED}.
+	 *
+	 * @since 5.5.0
+	 */
+	@Nonnull
+	public TagStorageModeEnum getTagStorageMode() {
+		return myTagStorageMode;
+	}
+
+	/**
+	 * Sets the tag storage mode for the server. Default is {@link TagStorageModeEnum#VERSIONED}.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setTagStorageMode(@Nonnull TagStorageModeEnum theTagStorageMode) {
+		Validate.notNull(theTagStorageMode, "theTagStorageMode must not be null");
+		myTagStorageMode = theTagStorageMode;
+	}
+
+	/**
+	 * Specifies the maximum number of times that a chunk will be retried during bulk import
+	 * processes before giving up.
+	 *
+	 * @since 5.5.0
+	 */
+	public int getBulkImportMaxRetryCount() {
+		return myBulkImportMaxRetryCount;
+	}
+
+	/**
+	 * Specifies the maximum number of times that a chunk will be retried during bulk import
+	 * processes before giving up.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setBulkImportMaxRetryCount(int theBulkImportMaxRetryCount) {
+		myBulkImportMaxRetryCount = theBulkImportMaxRetryCount;
+	}
+
+	/**
+	 * Specifies the maximum number of <code>_include</code> and <code>_revinclude</code> results to return in a
+	 * single page of results. The default is <code>1000</code>, and <code>null</code> may be used
+	 * to indicate that there is no limit.
+	 *
+	 * @since 5.5.0
+	 */
+	@Nullable
+	public Integer getMaximumIncludesToLoadPerPage() {
+		return myMaximumIncludesToLoadPerPage;
+	}
+
+	/**
+	 * Specifies the maximum number of <code>_include</code> and <code>_revinclude</code> results to return in a
+	 * single page of results. The default is <code>1000</code>, and <code>null</code> may be used
+	 * to indicate that there is no limit.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setMaximumIncludesToLoadPerPage(@Nullable Integer theMaximumIncludesToLoadPerPage) {
+		myMaximumIncludesToLoadPerPage = theMaximumIncludesToLoadPerPage;
+	}
+
+	/**
+	 * When performing a FHIR history operation, a <code>Bundle.total</code> value is included in the
+	 * response, indicating the total number of history entries. This response is calculated using a
+	 * SQL COUNT query statement which can be expensive. This setting allows the results of the count
+	 * query to be cached, resulting in a much lighter load on the server, at the expense of
+	 * returning total values that may be slightly out of date. Total counts can also be disabled,
+	 * or forced to always be accurate.
+	 * <p>
+	 * In {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET} mode, a loading cache is used to fetch the value,
+	 * meaning that only one thread per JVM will fetch the count, and others will block while waiting
+	 * for the cache to load, avoiding excessive load on the database.
+	 * </p>
+	 * <p>
+	 * Default is {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET}
+	 * </p>
+	 *
+	 * @since 5.4.0
+	 */
+	public HistoryCountModeEnum getHistoryCountMode() {
+		return myHistoryCountMode;
+	}
+
+	/**
+	 * When performing a FHIR history operation, a <code>Bundle.total</code> value is included in the
+	 * response, indicating the total number of history entries. This response is calculated using a
+	 * SQL COUNT query statement which can be expensive. This setting allows the results of the count
+	 * query to be cached, resulting in a much lighter load on the server, at the expense of
+	 * returning total values that may be slightly out of date. Total counts can also be disabled,
+	 * or forced to always be accurate.
+	 * <p>
+	 * In {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET} mode, a loading cache is used to fetch the value,
+	 * meaning that only one thread per JVM will fetch the count, and others will block while waiting
+	 * for the cache to load, avoiding excessive load on the database.
+	 * </p>
+	 * <p>
+	 * Default is {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET}
+	 * </p>
+	 *
+	 * @since 5.4.0
+	 */
+	public void setHistoryCountMode(@Nonnull HistoryCountModeEnum theHistoryCountMode) {
+
+		Validate.notNull(theHistoryCountMode, "theHistoryCountMode must not be null");
+		myHistoryCountMode = theHistoryCountMode;
+	}
+
+	/**
 	 * If set to <code>true</code> (default is <code>false</code>) the <code>$lastn</code> operation will be enabled for
 	 * indexing Observation resources. This operation involves creating a special set of tables in ElasticSearch for
 	 * discovering Observation resources. Enabling this setting increases the amount of storage space required, and can
@@ -263,6 +386,75 @@ public class DaoConfig {
 	 */
 	public void setUseLegacySearchBuilder(boolean theUseLegacySearchBuilder) {
 		myUseLegacySearchBuilder = theUseLegacySearchBuilder;
+	}
+
+	/**
+	 * Specifies the duration in minutes for which values will be retained after being
+	 * written to the terminology translation cache. Defaults to 60.
+	 */
+	@Nonnull
+	public Long getTranslationCachesExpireAfterWriteInMinutes() {
+		return myTranslationCachesExpireAfterWriteInMinutes;
+	}
+
+	/**
+	 * If enabled, resolutions for match URLs (e.g. conditional create URLs, conditional update URLs, etc) will be
+	 * cached in an in-memory cache. This cache can have a noticeable improvement on write performance on servers
+	 * where conditional operations are frequently performed, but note that this cache will not be
+	 * invalidated based on updates to resources so this may have detrimental effects.
+	 * <p>
+	 * Default is <code>false</code>
+	 *
+	 * @since 5.4.0
+	 * @deprecated Deprecated in 5.5.0. Use {@link #isMatchUrlCacheEnabled()} instead (the name of this method is misleading)
+	 */
+	@Deprecated
+	public boolean getMatchUrlCache() {
+		return myMatchUrlCacheEnabled;
+	}
+
+	/**
+	 * If enabled, resolutions for match URLs (e.g. conditional create URLs, conditional update URLs, etc) will be
+	 * cached in an in-memory cache. This cache can have a noticeable improvement on write performance on servers
+	 * where conditional operations are frequently performed, but note that this cache will not be
+	 * invalidated based on updates to resources so this may have detrimental effects.
+	 * <p>
+	 * Default is <code>false</code>
+	 *
+	 * @since 5.4.0
+	 * @deprecated Deprecated in 5.5.0. Use {@link #setMatchUrlCacheEnabled(boolean)} instead (the name of this method is misleading)
+	 */
+	@Deprecated
+	public void setMatchUrlCache(boolean theMatchUrlCache) {
+		myMatchUrlCacheEnabled = theMatchUrlCache;
+	}
+
+	/**
+	 * If enabled, resolutions for match URLs (e.g. conditional create URLs, conditional update URLs, etc) will be
+	 * cached in an in-memory cache. This cache can have a noticeable improvement on write performance on servers
+	 * where conditional operations are frequently performed, but note that this cache will not be
+	 * invalidated based on updates to resources so this may have detrimental effects.
+	 * <p>
+	 * Default is <code>false</code>
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isMatchUrlCacheEnabled() {
+		return getMatchUrlCache();
+	}
+
+	/**
+	 * If enabled, resolutions for match URLs (e.g. conditional create URLs, conditional update URLs, etc) will be
+	 * cached in an in-memory cache. This cache can have a noticeable improvement on write performance on servers
+	 * where conditional operations are frequently performed, but note that this cache will not be
+	 * invalidated based on updates to resources so this may have detrimental effects.
+	 * <p>
+	 * Default is <code>false</code>
+	 *
+	 * @since 5.5.0
+	 */
+	public void setMatchUrlCacheEnabled(boolean theMatchUrlCache) {
+		setMatchUrlCache(theMatchUrlCache);
 	}
 
 	/**
@@ -611,7 +803,7 @@ public class DaoConfig {
 	 * to not index missing field.
 	 * </p>
 	 * <p>
-	 * The following index may need to be added into the indexed tables such as <code>HFJ_SPIDX_TOKEN</code> 
+	 * The following index may need to be added into the indexed tables such as <code>HFJ_SPIDX_TOKEN</code>
 	 * to improve the search performance while <code>:missing</code> is enabled.
 	 * <code>RES_TYPE, SP_NAME, SP_MISSING</code>
 	 * </p>
@@ -2155,4 +2347,24 @@ public class DaoConfig {
 		ANY
 	}
 
+	public enum TagStorageModeEnum {
+
+		/**
+		 * A separate set of tags is stored for each resource version
+		 */
+		VERSIONED,
+
+		/**
+		 * A single set of tags is shared by all resource versions
+		 */
+		NON_VERSIONED,
+
+		/**
+		 * Tags are stored directly in the resource body (in the {@link ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable}
+		 * entry for the resource, meaning that they are not indexed separately, and are versioned with the rest
+		 * of the resource.
+		 */
+		INLINE
+
+	}
 }
