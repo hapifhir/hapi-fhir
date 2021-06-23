@@ -2640,7 +2640,14 @@ public class DaoConfig {
 		/**
 		 * A single set of tags is shared by all resource versions
 		 */
-		NON_VERSIONED
+		NON_VERSIONED,
+
+		/**
+		 * Tags are stored directly in the resource body (in the {@link ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable}
+		 * entry for the resource, meaning that they are not indexed separately, and are versioned with the rest
+		 * of the resource.
+		 */
+		INLINE
 
 	}
 }
