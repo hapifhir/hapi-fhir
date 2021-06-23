@@ -615,6 +615,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 
 			boolean skipUpdatingTags = myConfig.isMassIngestionMode() && theEntity.isHasTags();
+			skipUpdatingTags |= myConfig.getTagStorageMode() == DaoConfig.TagStorageModeEnum.INLINE;
 
 			if (!skipUpdatingTags) {
 				Set<ResourceTag> allDefs = new HashSet<>();
@@ -967,10 +968,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 			resourceBytes = history.getResource();
 			resourceEncoding = history.getEncoding();
-			if (resource.isHasTags()) {
-				tagList = resource.getTags();
-			} else {
-				tagList = Collections.emptyList();
+			switch (getConfig().getTagStorageMode()) {
+				case VERSIONED:
+				case NON_VERSIONED:
+					if (resource.isHasTags()) {
+						tagList = resource.getTags();
+					} else {
+						tagList = Collections.emptyList();
+					}
+					break;
+				case INLINE:
+					tagList = null;
+					break;
 			}
 			version = history.getVersion();
 			if (history.getProvenance() != null) {
@@ -985,10 +994,19 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			version = view.getVersion();
 			provenanceRequestId = view.getProvenanceRequestId();
 			provenanceSourceUri = view.getProvenanceSourceUri();
-			if (theTagList == null)
-				tagList = new HashSet<>();
-			else
-				tagList = theTagList;
+			switch (getConfig().getTagStorageMode()) {
+				case VERSIONED:
+				case NON_VERSIONED:
+					if (theTagList != null) {
+						tagList = theTagList;
+					} else {
+						tagList = Collections.emptyList();
+					}
+					break;
+				case INLINE:
+					tagList = null;
+					break;
+			}
 		} else {
 			// something wrong
 			return null;

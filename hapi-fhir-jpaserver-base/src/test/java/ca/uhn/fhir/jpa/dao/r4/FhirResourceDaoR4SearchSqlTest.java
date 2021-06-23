@@ -114,16 +114,13 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		SearchParameterMap map = SearchParameterMap.newSynchronous()
 			.add(Constants.PARAM_PROFILE, new TokenParam(code));
 		IBundleProvider outcome = myPatientDao.search(map);
-		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
-		// Query 1 - Find resources: Make sure we search for tag type+system+code always
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		// Query 1 - Find resources: Just a standard token search in this mode
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
-		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_RES_TAG t1 ON (t0.RES_ID = t1.RES_ID) LEFT OUTER JOIN HFJ_TAG_DEF t2 ON (t1.TAG_ID = t2.TAG_ID) WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t2.TAG_TYPE = ?) AND (t2.TAG_SYSTEM = ?) AND (t2.TAG_CODE = ?)))", sql);
+		assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)", sql);
 		// Query 2 - Load resourece contents
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(false, false);
 		assertThat(sql, containsString("where resourcese0_.RES_ID in (?)"));
-		// Query 3 - Load tags and defintions
-		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(false, false);
-		assertThat(sql, containsString("from HFJ_RES_TAG resourceta0_ inner join HFJ_TAG_DEF"));
 
 		assertThat(toUnqualifiedVersionlessIds(outcome), Matchers.contains(id));
 

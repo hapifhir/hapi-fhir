@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.search.builder;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
@@ -1079,131 +1078,139 @@ public class QueryStack {
 			case Constants.PARAM_TAG:
 			case Constants.PARAM_PROFILE:
 			case Constants.PARAM_SECURITY:
-				return createPredicateTag(theSourceJoinColumn, theAndOrParams, theParamName, theRequestPartitionId);
+				if (myDaoConfig.getTagStorageMode() == DaoConfig.TagStorageModeEnum.INLINE) {
+					return createPredicateSearchParameter(theSourceJoinColumn, theResourceName, theParamName, theAndOrParams, theRequest, theRequestPartitionId, theSearchContainedMode);
+				} else {
+					return createPredicateTag(theSourceJoinColumn, theAndOrParams, theParamName, theRequestPartitionId);
+				}
 
 			case Constants.PARAM_SOURCE:
 				return createPredicateSourceForAndList(theSourceJoinColumn, theAndOrParams);
 
 			default:
-
-				List<Condition> andPredicates = new ArrayList<>();
-				RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
-				if (nextParamDef != null) {
-
-					if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isIncludePartitionInSearchHashes()) {
-						if (theRequestPartitionId.isAllPartitions()) {
-							throw new PreconditionFailedException("This server is not configured to support search against all partitions");
-						}
-					}
-
-					switch (nextParamDef.getParamType()) {
-						case DATE:
-							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								// FT: 2021-01-18 use operation 'gt', 'ge', 'le' or 'lt'
-								// to create the predicateDate instead of generic one with operation = null
-								SearchFilterParser.CompareOperation operation = null;
-								if (nextAnd.size() > 0) {
-									DateParam param = (DateParam) nextAnd.get(0);
-									operation = toOperation(param.getPrefix());
-								}
-								andPredicates.add(createPredicateDate(theSourceJoinColumn, theResourceName, null, nextParamDef, nextAnd, operation, theRequestPartitionId));
-								//andPredicates.add(createPredicateDate(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, null, theRequestPartitionId));
-							}
-							break;
-						case QUANTITY:
-							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								SearchFilterParser.CompareOperation operation = null;
-								if (nextAnd.size() > 0) {
-									QuantityParam param = (QuantityParam) nextAnd.get(0);
-									operation = toOperation(param.getPrefix());
-								}
-								andPredicates.add(createPredicateQuantity(theSourceJoinColumn, theResourceName, null, nextParamDef, nextAnd, operation, theRequestPartitionId));
-							}
-							break;
-						case REFERENCE:
-							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								if (theSearchContainedMode.equals(SearchContainedModeEnum.TRUE))
-									andPredicates.add(createPredicateReferenceForContainedResource(theSourceJoinColumn, theResourceName, theParamName, nextParamDef, nextAnd, null, theRequest, theRequestPartitionId));
-								else
-									andPredicates.add(createPredicateReference(theSourceJoinColumn, theResourceName, theParamName, nextAnd, null, theRequest, theRequestPartitionId));
-							}
-							break;
-						case STRING:
-							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								andPredicates.add(createPredicateString(theSourceJoinColumn, theResourceName, null, nextParamDef, nextAnd, SearchFilterParser.CompareOperation.sw, theRequestPartitionId));
-							}
-							break;
-						case TOKEN:
-							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								if ("Location.position".equals(nextParamDef.getPath())) {
-									andPredicates.add(createPredicateCoords(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, theRequestPartitionId));
-								} else {
-									andPredicates.add(createPredicateToken(theSourceJoinColumn, theResourceName, null, nextParamDef, nextAnd, null, theRequestPartitionId));
-								}
-							}
-							break;
-						case NUMBER:
-							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								andPredicates.add(createPredicateNumber(theSourceJoinColumn, theResourceName, null, nextParamDef, nextAnd, null, theRequestPartitionId));
-							}
-							break;
-						case COMPOSITE:
-							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								andPredicates.add(createPredicateComposite(theSourceJoinColumn, theResourceName, null, nextParamDef, nextAnd, theRequestPartitionId));
-							}
-							break;
-						case URI:
-							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								andPredicates.add(createPredicateUri(theSourceJoinColumn, theResourceName, null, nextParamDef, nextAnd, SearchFilterParser.CompareOperation.eq, theRequest, theRequestPartitionId));
-							}
-							break;
-						case HAS:
-						case SPECIAL:
-							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								if ("Location.position".equals(nextParamDef.getPath())) {
-									andPredicates.add(createPredicateCoords(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, theRequestPartitionId));
-								}
-							}
-							break;
-					}
-				} else {
-					// These are handled later
-					if (!Constants.PARAM_CONTENT.equals(theParamName) && !Constants.PARAM_TEXT.equals(theParamName)) {
-						if (Constants.PARAM_FILTER.equals(theParamName)) {
-
-							// Parse the predicates enumerated in the _filter separated by AND or OR...
-							if (theAndOrParams.get(0).get(0) instanceof StringParam) {
-								String filterString = ((StringParam) theAndOrParams.get(0).get(0)).getValue();
-								SearchFilterParser.Filter filter;
-								try {
-									filter = SearchFilterParser.parse(filterString);
-								} catch (SearchFilterParser.FilterSyntaxException theE) {
-									throw new InvalidRequestException("Error parsing _filter syntax: " + theE.getMessage());
-								}
-								if (filter != null) {
-
-									if (!myDaoConfig.isFilterParameterEnabled()) {
-										throw new InvalidRequestException(Constants.PARAM_FILTER + " parameter is disabled on this server");
-									}
-
-									Condition predicate = createPredicateFilter(this, filter, theResourceName, theRequest, theRequestPartitionId);
-									if (predicate != null) {
-										mySqlBuilder.addPredicate(predicate);
-									}
-								}
-							}
-
-						} else {
-							String msg = myFhirContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSearchParameter", theParamName, theResourceName, mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(theResourceName));
-							throw new InvalidRequestException(msg);
-						}
-					}
-				}
-
-				return toAndPredicate(andPredicates);
+				return createPredicateSearchParameter(theSourceJoinColumn, theResourceName, theParamName, theAndOrParams, theRequest, theRequestPartitionId, theSearchContainedMode);
 
 		}
 
+	}
+
+	@Nullable
+	private Condition createPredicateSearchParameter(@Nullable DbColumn theSourceJoinColumn, String theResourceName, String theParamName, List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest, RequestPartitionId theRequestPartitionId, SearchContainedModeEnum theSearchContainedMode) {
+		List<Condition> andPredicates = new ArrayList<>();
+		RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
+		if (nextParamDef != null) {
+
+			if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isIncludePartitionInSearchHashes()) {
+				if (theRequestPartitionId.isAllPartitions()) {
+					throw new PreconditionFailedException("This server is not configured to support search against all partitions");
+				}
+			}
+
+			switch (nextParamDef.getParamType()) {
+				case DATE:
+					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+						// FT: 2021-01-18 use operation 'gt', 'ge', 'le' or 'lt'
+						// to create the predicateDate instead of generic one with operation = null
+						SearchFilterParser.CompareOperation operation = null;
+						if (nextAnd.size() > 0) {
+							DateParam param = (DateParam) nextAnd.get(0);
+							operation = toOperation(param.getPrefix());
+						}
+						andPredicates.add(createPredicateDate(theSourceJoinColumn, theResourceName, null, nextParamDef, nextAnd, operation, theRequestPartitionId));
+						//andPredicates.add(createPredicateDate(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, null, theRequestPartitionId));
+					}
+					break;
+				case QUANTITY:
+					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+						SearchFilterParser.CompareOperation operation = null;
+						if (nextAnd.size() > 0) {
+							QuantityParam param = (QuantityParam) nextAnd.get(0);
+							operation = toOperation(param.getPrefix());
+						}
+						andPredicates.add(createPredicateQuantity(theSourceJoinColumn, theResourceName, null, nextParamDef, nextAnd, operation, theRequestPartitionId));
+					}
+					break;
+				case REFERENCE:
+					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+						if (theSearchContainedMode.equals(SearchContainedModeEnum.TRUE))
+							andPredicates.add(createPredicateReferenceForContainedResource(theSourceJoinColumn, theResourceName, theParamName, nextParamDef, nextAnd, null, theRequest, theRequestPartitionId));
+						else
+							andPredicates.add(createPredicateReference(theSourceJoinColumn, theResourceName, theParamName, nextAnd, null, theRequest, theRequestPartitionId));
+					}
+					break;
+				case STRING:
+					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+						andPredicates.add(createPredicateString(theSourceJoinColumn, theResourceName, null, nextParamDef, nextAnd, SearchFilterParser.CompareOperation.sw, theRequestPartitionId));
+					}
+					break;
+				case TOKEN:
+					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+						if ("Location.position".equals(nextParamDef.getPath())) {
+							andPredicates.add(createPredicateCoords(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, theRequestPartitionId));
+						} else {
+							andPredicates.add(createPredicateToken(theSourceJoinColumn, theResourceName, null, nextParamDef, nextAnd, null, theRequestPartitionId));
+						}
+					}
+					break;
+				case NUMBER:
+					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+						andPredicates.add(createPredicateNumber(theSourceJoinColumn, theResourceName, null, nextParamDef, nextAnd, null, theRequestPartitionId));
+					}
+					break;
+				case COMPOSITE:
+					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+						andPredicates.add(createPredicateComposite(theSourceJoinColumn, theResourceName, null, nextParamDef, nextAnd, theRequestPartitionId));
+					}
+					break;
+				case URI:
+					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+						andPredicates.add(createPredicateUri(theSourceJoinColumn, theResourceName, null, nextParamDef, nextAnd, SearchFilterParser.CompareOperation.eq, theRequest, theRequestPartitionId));
+					}
+					break;
+				case HAS:
+				case SPECIAL:
+					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+						if ("Location.position".equals(nextParamDef.getPath())) {
+							andPredicates.add(createPredicateCoords(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, theRequestPartitionId));
+						}
+					}
+					break;
+			}
+		} else {
+			// These are handled later
+			if (!Constants.PARAM_CONTENT.equals(theParamName) && !Constants.PARAM_TEXT.equals(theParamName)) {
+				if (Constants.PARAM_FILTER.equals(theParamName)) {
+
+					// Parse the predicates enumerated in the _filter separated by AND or OR...
+					if (theAndOrParams.get(0).get(0) instanceof StringParam) {
+						String filterString = ((StringParam) theAndOrParams.get(0).get(0)).getValue();
+						SearchFilterParser.Filter filter;
+						try {
+							filter = SearchFilterParser.parse(filterString);
+						} catch (SearchFilterParser.FilterSyntaxException theE) {
+							throw new InvalidRequestException("Error parsing _filter syntax: " + theE.getMessage());
+						}
+						if (filter != null) {
+
+							if (!myDaoConfig.isFilterParameterEnabled()) {
+								throw new InvalidRequestException(Constants.PARAM_FILTER + " parameter is disabled on this server");
+							}
+
+							Condition predicate = createPredicateFilter(this, filter, theResourceName, theRequest, theRequestPartitionId);
+							if (predicate != null) {
+								mySqlBuilder.addPredicate(predicate);
+							}
+						}
+					}
+
+				} else {
+					String msg = myFhirContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSearchParameter", theParamName, theResourceName, mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(theResourceName));
+					throw new InvalidRequestException(msg);
+				}
+			}
+		}
+
+		return toAndPredicate(andPredicates);
 	}
 
 	public void addPredicateCompositeUnique(String theIndexString, RequestPartitionId theRequestPartitionId) {

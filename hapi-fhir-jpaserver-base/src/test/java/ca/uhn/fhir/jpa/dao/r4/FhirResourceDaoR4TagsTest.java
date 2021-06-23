@@ -193,11 +193,12 @@ public class FhirResourceDaoR4TagsTest extends BaseJpaR4Test {
 		assertThat(toTags(patient).toString(), toTags(patient), contains("http://tag1|vtag1|dtag1"));
 		assertThat(toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
 
-		// Second version should have both sets of tags (but only the new profile since these deliberately aren't copied forward)
+		// Second version should have the new set of tags
+		// TODO: We could copy these forward like we do for non-inline mode. Perhaps in the future.
 		patient = myPatientDao.read(new IdType("Patient/A/_history/2"), mySrd);
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile2"));
-		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
-		assertThat(toSecurityLabels(patient).toString(), toSecurityLabels(patient), containsInAnyOrder("http://sec1|vsec1|dsec1", "http://sec2|vsec2|dsec2"));
+		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag2|vtag2|dtag2"));
+		assertThat(toSecurityLabels(patient).toString(), toSecurityLabels(patient), containsInAnyOrder("http://sec2|vsec2|dsec2"));
 
 	}
 
