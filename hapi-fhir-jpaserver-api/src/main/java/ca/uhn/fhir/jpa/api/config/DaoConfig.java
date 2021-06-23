@@ -74,7 +74,6 @@ public class DaoConfig {
 	)));
 	// update setter javadoc if default changes
 	public static final int DEFAULT_MAX_EXPANSION_SIZE = 1000;
-	public static final HistoryCountModeEnum DEFAULT_HISTORY_COUNT_MODE = HistoryCountModeEnum.CACHED_ONLY_WITHOUT_OFFSET;
 	/**
 	 * This constant applies to task enablement, e.g. {@link #setEnableTaskStaleSearchCleanup(boolean)}.
 	 * <p>
@@ -215,6 +214,7 @@ public class DaoConfig {
 	 * @since 5.2.0
 	 */
 	private boolean myUseLegacySearchBuilder = false;
+	private boolean myMatchUrlCacheEnabled;
 
 	/**
 	 * Constructor
@@ -271,74 +271,6 @@ public class DaoConfig {
 		myBulkImportMaxRetryCount = theBulkImportMaxRetryCount;
 	}
 
-	/**
-	 * Specifies the maximum number of <code>_include</code> and <code>_revinclude</code> results to return in a
-	 * single page of results. The default is <code>1000</code>, and <code>null</code> may be used
-	 * to indicate that there is no limit.
-	 *
-	 * @since 5.5.0
-	 */
-	@Nullable
-	public Integer getMaximumIncludesToLoadPerPage() {
-		return myMaximumIncludesToLoadPerPage;
-	}
-
-	/**
-	 * Specifies the maximum number of <code>_include</code> and <code>_revinclude</code> results to return in a
-	 * single page of results. The default is <code>1000</code>, and <code>null</code> may be used
-	 * to indicate that there is no limit.
-	 *
-	 * @since 5.5.0
-	 */
-	public void setMaximumIncludesToLoadPerPage(@Nullable Integer theMaximumIncludesToLoadPerPage) {
-		myMaximumIncludesToLoadPerPage = theMaximumIncludesToLoadPerPage;
-	}
-
-	/**
-	 * When performing a FHIR history operation, a <code>Bundle.total</code> value is included in the
-	 * response, indicating the total number of history entries. This response is calculated using a
-	 * SQL COUNT query statement which can be expensive. This setting allows the results of the count
-	 * query to be cached, resulting in a much lighter load on the server, at the expense of
-	 * returning total values that may be slightly out of date. Total counts can also be disabled,
-	 * or forced to always be accurate.
-	 * <p>
-	 * In {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET} mode, a loading cache is used to fetch the value,
-	 * meaning that only one thread per JVM will fetch the count, and others will block while waiting
-	 * for the cache to load, avoiding excessive load on the database.
-	 * </p>
-	 * <p>
-	 * Default is {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET}
-	 * </p>
-	 *
-	 * @since 5.4.0
-	 */
-	public HistoryCountModeEnum getHistoryCountMode() {
-		return myHistoryCountMode;
-	}
-
-	/**
-	 * When performing a FHIR history operation, a <code>Bundle.total</code> value is included in the
-	 * response, indicating the total number of history entries. This response is calculated using a
-	 * SQL COUNT query statement which can be expensive. This setting allows the results of the count
-	 * query to be cached, resulting in a much lighter load on the server, at the expense of
-	 * returning total values that may be slightly out of date. Total counts can also be disabled,
-	 * or forced to always be accurate.
-	 * <p>
-	 * In {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET} mode, a loading cache is used to fetch the value,
-	 * meaning that only one thread per JVM will fetch the count, and others will block while waiting
-	 * for the cache to load, avoiding excessive load on the database.
-	 * </p>
-	 * <p>
-	 * Default is {@link HistoryCountModeEnum#CACHED_ONLY_WITHOUT_OFFSET}
-	 * </p>
-	 *
-	 * @since 5.4.0
-	 */
-	public void setHistoryCountMode(@Nonnull HistoryCountModeEnum theHistoryCountMode) {
-
-		Validate.notNull(theHistoryCountMode, "theHistoryCountMode must not be null");
-		myHistoryCountMode = theHistoryCountMode;
-	}
 
 	/**
 	 * If set to <code>true</code> (default is <code>false</code>) the <code>$lastn</code> operation will be enabled for
@@ -388,14 +320,6 @@ public class DaoConfig {
 		myUseLegacySearchBuilder = theUseLegacySearchBuilder;
 	}
 
-	/**
-	 * Specifies the duration in minutes for which values will be retained after being
-	 * written to the terminology translation cache. Defaults to 60.
-	 */
-	@Nonnull
-	public Long getTranslationCachesExpireAfterWriteInMinutes() {
-		return myTranslationCachesExpireAfterWriteInMinutes;
-	}
 
 	/**
 	 * If enabled, resolutions for match URLs (e.g. conditional create URLs, conditional update URLs, etc) will be

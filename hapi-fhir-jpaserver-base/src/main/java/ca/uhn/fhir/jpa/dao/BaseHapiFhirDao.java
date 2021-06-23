@@ -590,7 +590,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			}
 
-			boolean skipUpdatingTags = myConfig.isMassIngestionMode() && theEntity.isHasTags();
+			boolean skipUpdatingTags = false;
 			skipUpdatingTags |= myConfig.getTagStorageMode() == DaoConfig.TagStorageModeEnum.INLINE;
 
 			if (!skipUpdatingTags) {
