@@ -28,11 +28,14 @@ import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
 
@@ -69,12 +72,21 @@ public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
 		List<Condition> orPredicates = Lists.newArrayList();
 		for (Pair<String, String> next : theTokens) {
 			String system = next.getLeft();
+			String code = next.getRight();
+
 			if (theTagType == TagTypeEnum.PROFILE) {
 				system = BaseHapiFhirDao.NS_JPA_PROFILE;
 			}
-			Condition systemPredicate = BinaryCondition.equalTo(myTagDefinitionColumnTagSystem, generatePlaceholder(system));
-			Condition codePredicate = BinaryCondition.equalTo(myTagDefinitionColumnTagCode, generatePlaceholder(next.getRight()));
-			orPredicates.add(ComboCondition.and(typePredicate, systemPredicate, codePredicate));
+
+			Condition codePredicate = BinaryCondition.equalTo(myTagDefinitionColumnTagCode, generatePlaceholder(code));
+			if (isNotBlank(system)) {
+				Condition systemPredicate = BinaryCondition.equalTo(myTagDefinitionColumnTagSystem, generatePlaceholder(system));
+				orPredicates.add(ComboCondition.and(typePredicate, systemPredicate, codePredicate));
+			} else {
+				// Note: We don't have an index for this combo, which means that this may not perform
+				// well on MySQL (and maybe others) without an added index
+				orPredicates.add(ComboCondition.and(typePredicate, codePredicate));
+			}
 		}
 
 		return ComboCondition.or(orPredicates.toArray(new Condition[0]));
