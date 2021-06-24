@@ -41,6 +41,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -52,7 +54,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class MemoryCacheService {
 
 	@Autowired
-	private DaoConfig myDaoConfig;
+	DaoConfig myDaoConfig;
 
 	private EnumMap<CacheEnum, Cache<?, ?>> myCaches;
 
@@ -69,16 +71,16 @@ public class MemoryCacheService {
 			switch (next) {
 				case CONCEPT_TRANSLATION:
 				case CONCEPT_TRANSLATION_REVERSE:
-					timeoutSeconds = myDaoConfig.getTranslationCachesExpireAfterWriteInMinutes() * 1000;
+					timeoutSeconds = SECONDS.convert(myDaoConfig.getTranslationCachesExpireAfterWriteInMinutes(), MINUTES);
 					maximumSize = 10000;
 					break;
 				case PID_TO_FORCED_ID:
 				case FORCED_ID_TO_PID:
 				case MATCH_URL:
-					timeoutSeconds = 60;
+					timeoutSeconds = SECONDS.convert(1, MINUTES);
 					maximumSize = 10000;
 					if (myDaoConfig.isMassIngestionMode()) {
-						timeoutSeconds = 3000;
+						timeoutSeconds = SECONDS.convert(50, MINUTES);
 						maximumSize = 100000;
 					}
 					break;
@@ -87,12 +89,16 @@ public class MemoryCacheService {
 				case RESOURCE_LOOKUP:
 				case RESOURCE_CONDITIONAL_CREATE_VERSION:
 				default:
-					timeoutSeconds = 60;
+					timeoutSeconds = SECONDS.convert(1, MINUTES);
 					maximumSize = 10000;
 					break;
 			}
 
-			Cache<Object, Object> nextCache = Caffeine.newBuilder().expireAfterWrite(timeoutSeconds, TimeUnit.MINUTES).maximumSize(maximumSize).build();
+			Cache<Object, Object> nextCache = Caffeine.newBuilder()
+				.expireAfterWrite(timeoutSeconds, SECONDS)
+				.maximumSize(maximumSize)
+				.build();
+
 			myCaches.put(next, nextCache);
 		}
 
