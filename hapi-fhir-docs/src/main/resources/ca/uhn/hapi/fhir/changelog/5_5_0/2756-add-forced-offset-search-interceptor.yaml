@@ -1,0 +1,7 @@
+---
+type: add
+issue: 2756
+title: "A new interceptor has been addeed to the JPA server called `ForceOffsetSearchModeInterceptor`. This
+  interceptor forces all searches to be offset searches, instead of relying on the query cache. This means
+  that FHIR search operations will never result in any database write, which can be good for highly
+  concurrent servers."
