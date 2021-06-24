@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -112,12 +113,12 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		// Search
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = SearchParameterMap.newSynchronous()
-			.add(Constants.PARAM_PROFILE, new TokenParam(code));
+			.add(Constants.PARAM_PROFILE, new UriParam(code));
 		IBundleProvider outcome = myPatientDao.search(map);
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		// Query 1 - Find resources: Just a standard token search in this mode
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
-		assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)", sql);
+		assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_URI t0 WHERE (t0.HASH_URI = ?)", sql);
 		// Query 2 - Load resourece contents
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(false, false);
 		assertThat(sql, containsString("where resourcese0_.RES_ID in (?)"));
