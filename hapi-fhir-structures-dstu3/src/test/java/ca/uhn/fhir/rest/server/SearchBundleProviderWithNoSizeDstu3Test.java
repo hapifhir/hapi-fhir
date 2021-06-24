@@ -62,11 +62,12 @@ public class SearchBundleProviderWithNoSizeDstu3Test {
 		Bundle respBundle;
 		
 		ourLastBundleProvider = mock(IBundleProvider.class); 
+		when(ourLastBundleProvider.getCurrentPageOffset()).thenReturn(null);
 		when(ourLastBundleProvider.size()).thenReturn(null);
 		when(ourLastBundleProvider.getResources(any(int.class), any(int.class))).then(new Answer<List<IBaseResource>>() {
 			@Override
 			public List<IBaseResource> answer(InvocationOnMock theInvocation) throws Throwable {
-				int from =(Integer)theInvocation.getArguments()[0]; 
+				int from =(Integer)theInvocation.getArguments()[0];
 				int to =(Integer)theInvocation.getArguments()[1];
 				ArrayList<IBaseResource> retVal = Lists.newArrayList();
 				for (int i = from; i < to; i++) {
