@@ -55,7 +55,7 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 	@Column(name = "TARGET_CODE", nullable = false, length = TermConcept.MAX_CODE_LENGTH)
 	private String myCode;
 
-	@Column(name = "TARGET_DISPLAY", nullable = true, length = TermConcept.MAX_DESC_LENGTH)
+	@Column(name = "TARGET_DISPLAY", nullable = true, length = TermConcept.MAX_DISP_LENGTH)
 	private String myDisplay;
 
 	@Enumerated(EnumType.STRING)

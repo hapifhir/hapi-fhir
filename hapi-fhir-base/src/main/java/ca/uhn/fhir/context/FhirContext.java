@@ -225,14 +225,23 @@ public class FhirContext {
 
 	}
 
+	/**
+	 * @since 5.5.0
+	 */
 	public static FhirContext forDstu3Cached() {
 		return forCached(FhirVersionEnum.DSTU3);
 	}
 
+	/**
+	 * @since 5.5.0
+	 */
 	public static FhirContext forR4Cached() {
 		return forCached(FhirVersionEnum.R4);
 	}
 
+	/**
+	 * @since 5.5.0
+	 */
 	public static FhirContext forR5Cached() {
 		return forCached(FhirVersionEnum.R5);
 	}

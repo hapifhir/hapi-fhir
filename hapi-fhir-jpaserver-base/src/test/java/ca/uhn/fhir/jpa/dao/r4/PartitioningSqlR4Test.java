@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.Constants;
@@ -46,6 +47,7 @@ import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
@@ -56,6 +58,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -73,6 +76,7 @@ import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.startsWith;
@@ -2572,6 +2576,41 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertThat(ids, Matchers.empty());
 
 	}
+
+
+	@Test
+	public void testSearch_TokenParam_CodeInValueSet() {
+
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://cs");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("A");
+		cs.addConcept().setCode("B");
+		myCodeSystemDao.create(cs, new SystemRequestDetails());
+
+		ValueSet vs = new ValueSet();
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs");
+		myValueSetDao.create(vs, new SystemRequestDetails());
+
+		createObservation(withPutPartition(1), withId("OBS1"), withObservationCode("http://cs", "A"));
+		createObservation(withPutPartition(1), withId("OBS2"), withObservationCode("http://cs", "B"));
+		createObservation(withPutPartition(1), withId("OBS3"), withObservationCode("http://cs", "C"));
+
+		logAllTokenIndexes();
+
+		myCaptureQueriesListener.clear();
+		addReadPartitions(PARTITION_1);
+		SearchParameterMap map = SearchParameterMap.newSynchronous("code", new TokenParam("http://vs").setModifier(TokenParamModifier.IN));
+		IBundleProvider outcome = myObservationDao.search(map, mySrd);
+		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(actual, containsInAnyOrder("Observation/OBS1", "Observation/OBS2"));
+
+	}
+
 
 	@Test
 	public void testSearch_RefParam_TargetForcedId_SearchDefaultPartition() {

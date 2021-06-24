@@ -246,6 +246,9 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		if (getPartitionId() != null) {
+			b.append("partitionId", getPartitionId().getPartitionId());
+		}
 		b.append("resourceType", getResourceType());
 		b.append("paramName", getParamName());
 		if (isMissing()) {

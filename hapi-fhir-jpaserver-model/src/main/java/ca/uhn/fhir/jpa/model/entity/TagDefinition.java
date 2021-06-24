@@ -48,36 +48,32 @@ import java.util.Collection;
 public class TagDefinition implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
 	@Column(name = "TAG_CODE", length = 200)
 	private String myCode;
-
 	@Column(name = "TAG_DISPLAY", length = 200)
 	private String myDisplay;
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_TAGDEF_ID")
 	@SequenceGenerator(name = "SEQ_TAGDEF_ID", sequenceName = "SEQ_TAGDEF_ID")
 	@Column(name = "TAG_ID")
 	private Long myId;
-
 	@OneToMany(cascade = {}, fetch = FetchType.LAZY, mappedBy = "myTag")
 	private Collection<ResourceTag> myResources;
-
 	@OneToMany(cascade = {}, fetch = FetchType.LAZY, mappedBy = "myTag")
 	private Collection<ResourceHistoryTag> myResourceVersions;
-
 	@Column(name = "TAG_SYSTEM", length = 200)
 	private String mySystem;
-
 	@Column(name = "TAG_TYPE", nullable = false)
 	@Enumerated(EnumType.ORDINAL)
 	private TagTypeEnum myTagType;
-
 	@Transient
 	private transient Integer myHashCode;
 
+	/**
+	 * Constructor
+	 */
 	public TagDefinition() {
+		super();
 	}
 
 	public TagDefinition(TagTypeEnum theTagType, String theSystem, String theCode, String theDisplay) {

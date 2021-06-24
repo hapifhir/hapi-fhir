@@ -21,24 +21,23 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
-	private static final Logger ourLog = LoggerFactory.getLogger(TagPredicateBuilder.class);
 
 	private final DbColumn myColumnResId;
 	private final DbTable myTagDefinitionTable;
@@ -72,11 +71,20 @@ public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
 
 		List<Condition> orPredicates = Lists.newArrayList();
 		for (Pair<String, String> next : theTokens) {
-			Condition codePredicate = BinaryCondition.equalTo(myTagDefinitionColumnTagCode, generatePlaceholder(next.getRight()));
-			if (isNotBlank(next.getLeft())) {
-				Condition systemPredicate = BinaryCondition.equalTo(myTagDefinitionColumnTagSystem, generatePlaceholder(next.getLeft()));
+			String system = next.getLeft();
+			String code = next.getRight();
+
+			if (theTagType == TagTypeEnum.PROFILE) {
+				system = BaseHapiFhirDao.NS_JPA_PROFILE;
+			}
+
+			Condition codePredicate = BinaryCondition.equalTo(myTagDefinitionColumnTagCode, generatePlaceholder(code));
+			if (isNotBlank(system)) {
+				Condition systemPredicate = BinaryCondition.equalTo(myTagDefinitionColumnTagSystem, generatePlaceholder(system));
 				orPredicates.add(ComboCondition.and(typePredicate, systemPredicate, codePredicate));
 			} else {
+				// Note: We don't have an index for this combo, which means that this may not perform
+				// well on MySQL (and maybe others) without an added index
 				orPredicates.add(ComboCondition.and(typePredicate, codePredicate));
 			}
 		}
