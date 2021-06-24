@@ -61,7 +61,8 @@ public class SearchBundleProviderWithNoSizeR4Test {
 	public void testBundleProviderReturnsNoSize() throws Exception {
 		Bundle respBundle;
 		
-		ourLastBundleProvider = mock(IBundleProvider.class); 
+		ourLastBundleProvider = mock(IBundleProvider.class);
+		when(ourLastBundleProvider.getCurrentPageOffset()).thenReturn(null);
 		when(ourLastBundleProvider.size()).thenReturn(null);
 		when(ourLastBundleProvider.getResources(any(int.class), any(int.class))).then(new Answer<List<IBaseResource>>() {
 			@Override
