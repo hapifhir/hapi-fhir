@@ -73,7 +73,6 @@ class MemoryCacheServiceTest {
 
 		// when we spill the cache, and have delayed calculation.
 		final boolean[] canProceed = new boolean[]{ false };
-		List<SlowFastJob> jobs = new ArrayList<>();
 		List<SlowFastJob> slowJobs = new ArrayList<>();
 		List<SlowFastJob> fastJobs = new ArrayList<>();
 		for (int i = 0; i < 1000; i++) {
@@ -85,7 +84,6 @@ class MemoryCacheServiceTest {
 			} else {
 				fastJobs.add(job);
 			}
-			jobs.add(job);
 			job.submit(executor);
 		}
 
@@ -134,7 +132,9 @@ class MemoryCacheServiceTest {
 					try {
 						Thread.sleep(100);
 						ourLog.debug("yawn " + myValue);
-					} catch (InterruptedException e) { }
+					} catch (InterruptedException e) {
+						// empty
+					}
 				}
 			}
 			return myValue;

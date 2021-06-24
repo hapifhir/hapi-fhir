@@ -23,13 +23,10 @@ package ca.uhn.fhir.jpa.util;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.TranslationQuery;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -38,7 +35,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -169,7 +165,7 @@ public class MemoryCacheService {
 	}
 
 	public void invalidateAllCaches() {
-		myCaches.values().forEach(t -> t.invalidateAll());
+		myCaches.values().forEach(Cache::invalidateAll);
 	}
 
 	private <K, T> Cache<K, T> getCache(CacheEnum theCache) {
