@@ -263,7 +263,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			// Paging without caching
 			// We're doing offset pages
 			int requestedToReturn = numToReturn;
-			if (theServer.getPagingProvider() == null) {
+			if (theServer.getPagingProvider() == null && offset != null) {
 				// There is no paging provider at all, so assume we're querying up to all the results we need every time
 				requestedToReturn += offset;
 			}
