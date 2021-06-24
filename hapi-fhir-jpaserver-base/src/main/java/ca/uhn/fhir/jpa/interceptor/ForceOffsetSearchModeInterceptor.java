@@ -6,7 +6,12 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import org.apache.commons.lang3.Validate;
 
-// FIXME: document
+/**
+ * This interceptor for the HAPI FHIR JPA server forces all queries to
+ * be performed as offset queries. This means that the query cache will
+ * not be used and searches will never result in any writes to the
+ * database.
+ */
 @Interceptor
 public class ForceOffsetSearchModeInterceptor {
 

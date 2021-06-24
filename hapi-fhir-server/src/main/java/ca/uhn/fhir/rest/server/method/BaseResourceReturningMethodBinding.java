@@ -257,7 +257,9 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), Math.max(offset - limit, 0), limit, theRequest.getParameters()));
 			}
 
-		} if (offset != null || (!theServer.canStoreSearchResults() && !isEverythingOperation(theRequest)) || isOffsetModeHistory()) {
+		}
+
+		if (offset != null || (!theServer.canStoreSearchResults() && !isEverythingOperation(theRequest)) || isOffsetModeHistory()) {
 			// Paging without caching
 			// We're doing offset pages
 			int requestedToReturn = numToReturn;
@@ -266,7 +268,9 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				requestedToReturn += offset;
 			}
 			if (numTotalResults == null || requestedToReturn < numTotalResults) {
-				links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), defaultIfNull(offset, 0) + numToReturn, numToReturn, theRequest.getParameters()));
+				if (!resourceList.isEmpty()) {
+					links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), defaultIfNull(offset, 0) + numToReturn, numToReturn, theRequest.getParameters()));
+				}
 			}
 			if (offset != null && offset > 0) {
 				int start = Math.max(0, theOffset - pageSize);

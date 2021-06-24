@@ -324,8 +324,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		sb.setFetchSize(mySyncSize);
 
 		final Integer loadSynchronousUpTo = getLoadSynchronousUpToOrNull(theCacheControlDirective);
+		boolean isOffsetQuery = theParams.isOffsetQuery();
 
-		if (theParams.isLoadSynchronous() || loadSynchronousUpTo != null) {
+		if (theParams.isLoadSynchronous() || loadSynchronousUpTo != null || isOffsetQuery) {
 			ourLog.debug("Search {} is loading in synchronous mode", searchUuid);
 			return executeQuery(theResourceType, theParams, theRequestDetails, searchUuid, sb, loadSynchronousUpTo, theRequestPartitionId);
 		}
@@ -468,7 +469,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		// Execute the query and make sure we return distinct results
 		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		txTemplate.setReadOnly(theParams.isLoadSynchronous());
+		txTemplate.setReadOnly(theParams.isLoadSynchronous() || theParams.isOffsetQuery());
 		return txTemplate.execute(t -> {
 
 			// Load the results synchronously
@@ -557,6 +558,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			resources = InterceptorUtil.fireStoragePreshowResource(resources, theRequestDetails, myInterceptorBroadcaster);
 
 			SimpleBundleProvider bundleProvider = new SimpleBundleProvider(resources);
+			if (theParams.isOffsetQuery()) {
+				bundleProvider.setCurrentPageOffset(theParams.getOffset());
+				bundleProvider.setCurrentPageSize(theParams.getCount());
+			}
 
 			if (wantCount) {
 				bundleProvider.setSize(count.intValue());

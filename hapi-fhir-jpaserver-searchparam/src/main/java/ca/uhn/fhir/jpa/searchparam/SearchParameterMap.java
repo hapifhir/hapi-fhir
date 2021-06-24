@@ -631,6 +631,15 @@ public class SearchParameterMap implements Serializable {
 		}
 	}
 
+	/**
+	 * Returns true if {@link #getOffset()} and {@link #getCount()} both return a non null response
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isOffsetQuery() {
+		return getOffset() != null && getCount() != null;
+	}
+
 	public enum EverythingModeEnum {
 		/*
 		 * Don't reorder! We rely on the ordinals
