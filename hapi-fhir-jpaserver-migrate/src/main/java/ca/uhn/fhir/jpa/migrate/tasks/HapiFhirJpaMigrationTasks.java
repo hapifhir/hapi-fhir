@@ -98,7 +98,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.modifyColumn("20210617.2", "SOURCE_DISPLAY").nullable().withType(ColumnTypeEnum.STRING, 500);
 
 		version.onTable("HFJ_BLK_EXPORT_JOB")
-			.modifyColumn("20210624.1","REQUEST").nonNullable().withType(ColumnTypeEnum.STRING, 1000);
+			.modifyColumn("20210624.1","REQUEST").nonNullable().withType(ColumnTypeEnum.STRING, 1024);
 	}
 
 	private void init540() {
