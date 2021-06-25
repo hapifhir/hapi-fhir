@@ -134,6 +134,14 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 		return getQueriesStartingWith(theStart, null);
 	}
 
+	public int getCommitCount() {
+		return myCommitCounter.get();
+	}
+
+	public int getRollbackCount() {
+		return myRollbackCounter.get();
+	}
+
 	/**
 	 * Returns all SELECT queries executed on the current thread - Index 0 is oldest
 	 */
