@@ -307,6 +307,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		final String queryString = theParams.toNormalizedQueryString(myContext);
 		ourLog.debug("Registering new search {}", searchUuid);
+
 		Search search = new Search();
 		populateSearchEntity(theParams, theResourceType, searchUuid, queryString, search, theRequestPartitionId);
 
@@ -317,13 +318,15 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 			.add(SearchParameterMap.class, theParams);
 		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
+
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(theResourceType).getImplementingClass();
 		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(theCallingDao, theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
 
 		final Integer loadSynchronousUpTo = getLoadSynchronousUpToOrNull(theCacheControlDirective);
+		boolean isOffsetQuery = theParams.isOffsetQuery();
 
-		if (theParams.isLoadSynchronous() || loadSynchronousUpTo != null) {
+		if (theParams.isLoadSynchronous() || loadSynchronousUpTo != null || isOffsetQuery) {
 			ourLog.debug("Search {} is loading in synchronous mode", searchUuid);
 			return executeQuery(theResourceType, theParams, theRequestDetails, searchUuid, sb, loadSynchronousUpTo, theRequestPartitionId);
 		}
@@ -466,6 +469,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		// Execute the query and make sure we return distinct results
 		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+		txTemplate.setReadOnly(theParams.isLoadSynchronous() || theParams.isOffsetQuery());
 		return txTemplate.execute(t -> {
 
 			// Load the results synchronously
@@ -554,6 +558,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			resources = InterceptorUtil.fireStoragePreshowResource(resources, theRequestDetails, myInterceptorBroadcaster);
 
 			SimpleBundleProvider bundleProvider = new SimpleBundleProvider(resources);
+			if (theParams.isOffsetQuery()) {
+				bundleProvider.setCurrentPageOffset(theParams.getOffset());
+				bundleProvider.setCurrentPageSize(theParams.getCount());
+			}
 
 			if (wantCount) {
 				bundleProvider.setSize(count.intValue());

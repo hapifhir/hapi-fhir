@@ -89,6 +89,25 @@ public interface IBundleProvider {
 	}
 
 	/**
+	 * If the results in this bundle were produced using an offset query (as opposed to a query using
+	 * continuation pointers, page IDs, etc.) the page offset can be returned here. The server
+	 * should then attempt to form paging links that use <code>_offset</code> instead of
+	 * opaque page IDs.
+	 */
+	default Integer getCurrentPageOffset() {
+		return null;
+	}
+
+	/**
+	 * If {@link #getCurrentPageOffset()} returns a non-null value, this method must also return
+	 * the actual page size used
+	 */
+	default Integer getCurrentPageSize() {
+		return null;
+	}
+
+
+	/**
 	 * Returns the instant as of which this result was created. The
 	 * result of this value is used to populate the <code>lastUpdated</code>
 	 * value on search result/history result bundles.
@@ -194,4 +213,5 @@ public interface IBundleProvider {
 		Validate.notNull(retVal, "size() returned null");
 		return retVal;
 	}
+
 }

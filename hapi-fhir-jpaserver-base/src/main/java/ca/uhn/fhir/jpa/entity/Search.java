@@ -145,17 +145,27 @@ public class Search implements ICachedSearchDetails, Serializable {
 	private byte[] mySearchParameterMap;
 
 	/**
-	 * This isn't currently persisted in the DB as it's only used for history. We could
+	 * This isn't currently persisted in the DB as it's only used for offset mode. We could
 	 * change this if needed in the future.
 	 */
 	@Transient
 	private Integer myOffset;
+	/**
+	 * This isn't currently persisted in the DB as it's only used for offset mode. We could
+	 * change this if needed in the future.
+	 */
+	@Transient
+	private Integer mySizeModeSize;
 
 	/**
 	 * Constructor
 	 */
 	public Search() {
 		super();
+	}
+
+	public Integer getSizeModeSize() {
+		return mySizeModeSize;
 	}
 
 	@Override
@@ -396,12 +406,12 @@ public class Search implements ICachedSearchDetails, Serializable {
 		mySearchQueryStringHash = null;
 	}
 
-	public void setOffset(Integer theOffset) {
-		myOffset = theOffset;
-	}
-
 	public Integer getOffset() {
 		return myOffset;
+	}
+
+	public void setOffset(Integer theOffset) {
+		myOffset = theOffset;
 	}
 
 	@Nonnull
