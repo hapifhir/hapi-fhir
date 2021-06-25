@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.util.VersionEnum;
+import org.checkerframework.checker.units.qual.C;
 
 import java.util.Arrays;
 import java.util.List;
@@ -95,6 +96,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.modifyColumn("20210617.1","TARGET_DISPLAY").nullable().withType(ColumnTypeEnum.STRING, 500);
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
 			.modifyColumn("20210617.2", "SOURCE_DISPLAY").nullable().withType(ColumnTypeEnum.STRING, 500);
+
+		version.onTable("HFJ_BLK_EXPORT_JOB")
+			.modifyColumn("20210624.1","REQUEST").nonNullable().withType(ColumnTypeEnum.STRING, 1024);
 	}
 
 	private void init540() {
