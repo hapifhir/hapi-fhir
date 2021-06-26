@@ -630,4 +630,24 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	void setAppliesToDeleteExpunge(boolean theAppliesToDeleteExpunge) {
 		myAppliesToDeleteExpunge = theAppliesToDeleteExpunge;
 	}
+
+	public void addClassifierCompartmentOwner(IIdType theOwner) {
+		List<IIdType> newList = new ArrayList<>(myClassifierCompartmentOwners);
+		newList.add(theOwner);
+		myClassifierCompartmentOwners = newList;
+	}
+
+	public boolean matches(AppliesTypeEnum theAppliesTo, Collection<IIdType> theAppliesToInstances, Set<String> theAppliesToTypes, String theCompartmentName) {
+		switch (theAppliesTo) {
+			case TYPES:
+				return theAppliesToTypes.equals(myAppliesToTypes) && theCompartmentName.equals(myClassifierCompartmentName);
+			case INSTANCES:
+				return theAppliesToInstances.equals(myAppliesToInstances) && theCompartmentName.equals(myClassifierCompartmentName);
+			case ALL_RESOURCES:
+				return theCompartmentName.equals(myClassifierCompartmentName);
+			default:
+				// no more cases
+				return false;
+		}
+	}
 }

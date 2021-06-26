@@ -1458,6 +1458,52 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Test
+	public void testReadCompartmentTwoPatientIds() {
+		Patient patient1 = new Patient();
+		patient1.setActive(true);
+		IIdType p1id = myPatientDao.create(patient1).getId().toUnqualifiedVersionless();
+
+		Patient patient2 = new Patient();
+		patient2.setActive(true);
+		IIdType p2id = myPatientDao.create(patient2).getId().toUnqualifiedVersionless();
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow()
+					.read()
+					.resourcesOfType(Patient.class)
+					.inCompartment("Patient", p1id)
+					.andThen()
+					.allow()
+					.read()
+					.resourcesOfType(Patient.class)
+					.inCompartment("Patient", p2id)
+					.andThen()
+					.denyAll()
+					.build();
+			}
+		});
+
+		{
+			String url = "/Patient?_id=" + p1id.getIdPart();
+			Bundle result = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
+			assertEquals(1, result.getTotal());
+		}
+		{
+			String url = "/Patient?_id=" + p2id.getIdPart();
+			Bundle result = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
+			assertEquals(1, result.getTotal());
+		}
+		{
+			String url = "/Patient?_id=" + p1id.getIdPart() + "," + p2id.getIdPart();
+			Bundle result = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
+			assertEquals(2, result.getTotal());
+		}
+	}
+
+	@Test
 	public void testDeleteExpungeBlocked() {
 		// Create Patient, and Observation that refers to it
 		Patient patient = new Patient();
