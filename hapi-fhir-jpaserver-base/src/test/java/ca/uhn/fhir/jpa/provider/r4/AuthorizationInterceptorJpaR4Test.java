@@ -38,6 +38,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
@@ -1473,12 +1474,12 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				return new RuleBuilder()
 					.allow()
 					.read()
-					.resourcesOfType(Patient.class)
+					.allResources()
 					.inCompartment("Patient", p1id)
 					.andThen()
 					.allow()
 					.read()
-					.resourcesOfType(Patient.class)
+					.allResources()
 					.inCompartment("Patient", p2id)
 					.andThen()
 					.denyAll()
@@ -1502,6 +1503,62 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			assertEquals(2, result.getTotal());
 		}
 	}
+
+
+	@Test
+	public void testReadCompartmentTwoPatientIdsTwoEOBs() {
+		Patient patient1 = new Patient();
+		patient1.setActive(true);
+		IIdType p1id = myPatientDao.create(patient1).getId().toUnqualifiedVersionless();
+
+		ExplanationOfBenefit eob1 = new ExplanationOfBenefit();
+		eob1.setPatient(new Reference(p1id));
+		myExplanationOfBenefitDao.create(eob1);
+
+		Patient patient2 = new Patient();
+		patient2.setActive(true);
+		IIdType p2id = myPatientDao.create(patient2).getId().toUnqualifiedVersionless();
+
+		ExplanationOfBenefit eob2 = new ExplanationOfBenefit();
+		eob2.setPatient(new Reference(p2id));
+		myExplanationOfBenefitDao.create(eob2);
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow()
+					.read()
+					.allResources()
+					.inCompartment("Patient", p1id)
+					.andThen()
+					.allow()
+					.read()
+					.allResources()
+					.inCompartment("Patient", p2id)
+					.andThen()
+					.denyAll()
+					.build();
+			}
+		});
+
+		{
+			String url = "/ExplanationOfBenefit?patient=" + p1id.getIdPart();
+			Bundle result = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
+			assertEquals(1, result.getTotal());
+		}
+		{
+			String url = "/ExplanationOfBenefit?patient=" + p2id.getIdPart();
+			Bundle result = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
+			assertEquals(1, result.getTotal());
+		}
+		{
+			String url = "/ExplanationOfBenefit?patient=" + p1id.getIdPart() + "," + p2id.getIdPart();
+			Bundle result = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
+			assertEquals(2, result.getTotal());
+		}
+	}
+
 
 	@Test
 	public void testDeleteExpungeBlocked() {
