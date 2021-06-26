@@ -1486,12 +1486,21 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			}
 		});
 
-		String p1Url = "/Patient?_id=" + p1id.getIdPart();
-		myClient.search().byUrl(p1Url).returnBundle(Bundle.class).execute();
-		String p2Url = "/Patient?_id=" + p2id.getIdPart();
-		myClient.search().byUrl(p2Url).returnBundle(Bundle.class).execute();
-		String pBothUrl = "/Patient?_id=" + p1id.getIdPart() + "," + p2id.getIdPart();
-		myClient.search().byUrl(pBothUrl).returnBundle(Bundle.class).execute();
+		{
+			String url = "/Patient?_id=" + p1id.getIdPart();
+			Bundle result = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
+			assertEquals(1, result.getTotal());
+		}
+		{
+			String url = "/Patient?_id=" + p2id.getIdPart();
+			Bundle result = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
+			assertEquals(1, result.getTotal());
+		}
+		{
+			String url = "/Patient?_id=" + p1id.getIdPart() + "," + p2id.getIdPart();
+			Bundle result = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
+			assertEquals(2, result.getTotal());
+		}
 	}
 
 	@Test
