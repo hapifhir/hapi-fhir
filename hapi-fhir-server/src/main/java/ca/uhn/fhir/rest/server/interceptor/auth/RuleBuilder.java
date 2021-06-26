@@ -507,7 +507,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					Validate.notBlank(theCompartmentName, "theCompartmentName must not be null");
 					Validate.notNull(theOwner, "theOwner must not be null");
 					validateOwner(theOwner);
-					Optional<RuleImplOp> oRule = findRuleByTypesAndCompartment(theCompartmentName);
+					Optional<RuleImplOp> oRule = findRuleByAppliesToAndCompartmentName(theCompartmentName);
 					if (oRule.isPresent()) {
 						RuleImplOp rule = oRule.get();
 						rule.addClassifierCompartmentOwner(theOwner);
@@ -519,7 +519,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					return finished();
 				}
 
-				private Optional<RuleImplOp> findRuleByTypesAndCompartment(String theCompartmentName) {
+				private Optional<RuleImplOp> findRuleByAppliesToAndCompartmentName(String theCompartmentName) {
 					return myRules.stream()
 						.filter(RuleImplOp.class::isInstance)
 						.map(RuleImplOp.class::cast)
