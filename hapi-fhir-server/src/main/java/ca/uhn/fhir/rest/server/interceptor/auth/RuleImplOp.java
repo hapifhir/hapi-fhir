@@ -630,4 +630,14 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	void setAppliesToDeleteExpunge(boolean theAppliesToDeleteExpunge) {
 		myAppliesToDeleteExpunge = theAppliesToDeleteExpunge;
 	}
+
+	public String getClassifierCompartmentName() {
+		return myClassifierCompartmentName;
+	}
+
+	public void addClassifierCompartmentOwner(IIdType theOwner) {
+		List<IIdType> newList = new ArrayList<>(myClassifierCompartmentOwners);
+		newList.add(theOwner);
+		myClassifierCompartmentOwners = newList;
+	}
 }

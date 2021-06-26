@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -46,7 +47,7 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 public class RuleBuilder implements IAuthRuleBuilder {
 
 	private static final ConcurrentHashMap<Class<? extends IBaseResource>, String> ourTypeToName = new ConcurrentHashMap<>();
-	private ArrayList<IAuthRule> myRules;
+	private final ArrayList<IAuthRule> myRules;
 	private IAuthRuleBuilderRule myAllow;
 	private IAuthRuleBuilderRule myDeny;
 
@@ -227,10 +228,18 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		}
 	}
 
+	private Optional<RuleImplOp> findRuleByCompartment(String theCompartmentName) {
+		return myRules.stream()
+			.filter(RuleImplOp.class::isInstance)
+			.map(RuleImplOp.class::cast)
+			.filter(rule -> theCompartmentName.equals(rule.getClassifierCompartmentName()))
+			.findFirst();
+	}
+
 	private class RuleBuilderRule implements IAuthRuleBuilderRule {
 
-		private PolicyEnum myRuleMode;
-		private String myRuleName;
+		private final PolicyEnum myRuleMode;
+		private final String myRuleName;
 		private RuleBuilderRuleOp myReadRuleBuilder;
 		private RuleBuilderRuleOp myWriteRuleBuilder;
 
@@ -321,7 +330,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 			private AppliesTypeEnum myAppliesTo;
 			private Set<String> myAppliesToTypes;
-			private RestOperationTypeEnum myOperationType;
+			private final RestOperationTypeEnum myOperationType;
 
 			RuleBuilderRuleConditional(RestOperationTypeEnum theOperationType) {
 				myOperationType = theOperationType;
@@ -506,6 +515,12 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					Validate.notBlank(theCompartmentName, "theCompartmentName must not be null");
 					Validate.notNull(theOwner, "theOwner must not be null");
 					validateOwner(theOwner);
+					Optional<RuleImplOp> oRule = findRuleByCompartment(theCompartmentName);
+					if (oRule.isPresent()) {
+						RuleImplOp rule = oRule.get();
+						rule.addClassifierCompartmentOwner(theOwner);
+						return new RuleBuilderFinished(rule);
+					}
 					myInCompartmentName = theCompartmentName;
 					myInCompartmentOwners = Collections.singletonList(theOwner);
 					myClassifierType = ClassifierTypeEnum.IN_COMPARTMENT;
@@ -546,7 +561,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 			private class RuleBuilderRuleOperationNamed implements IAuthRuleBuilderOperationNamed {
 
-				private String myOperationName;
+				private final String myOperationName;
 
 				RuleBuilderRuleOperationNamed(String theOperationName) {
 					if (theOperationName != null && !theOperationName.startsWith("$")) {

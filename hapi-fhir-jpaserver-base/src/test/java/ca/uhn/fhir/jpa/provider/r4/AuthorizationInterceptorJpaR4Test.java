@@ -1458,6 +1458,43 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Test
+	public void testReadCompartmentTwoPatientIds() {
+		Patient patient1 = new Patient();
+		patient1.setActive(true);
+		IIdType p1id = myPatientDao.create(patient1).getId().toUnqualifiedVersionless();
+
+		Patient patient2 = new Patient();
+		patient2.setActive(true);
+		IIdType p2id = myPatientDao.create(patient2).getId().toUnqualifiedVersionless();
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow()
+					.read()
+					.resourcesOfType(Patient.class)
+					.inCompartment("Patient", p1id)
+					.andThen()
+					.allow()
+					.read()
+					.resourcesOfType(Patient.class)
+					.inCompartment("Patient", p2id)
+					.andThen()
+					.denyAll()
+					.build();
+			}
+		});
+
+		String p1Url = "/Patient?_id=" + p1id.getIdPart();
+		myClient.search().byUrl(p1Url).returnBundle(Bundle.class).execute();
+		String p2Url = "/Patient?_id=" + p2id.getIdPart();
+		myClient.search().byUrl(p2Url).returnBundle(Bundle.class).execute();
+		String pBothUrl = "/Patient?_id=" + p1id.getIdPart() + "," + p2id.getIdPart();
+		myClient.search().byUrl(pBothUrl).returnBundle(Bundle.class).execute();
+	}
+
+	@Test
 	public void testDeleteExpungeBlocked() {
 		// Create Patient, and Observation that refers to it
 		Patient patient = new Patient();
