@@ -637,7 +637,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		myClassifierCompartmentOwners = newList;
 	}
 
-	public boolean matchesTypesAndCompartment(AppliesTypeEnum theAppliesTo, Collection<IIdType> theAppliesToInstances, Set<String> theAppliesToTypes, String theCompartmentName) {
+	public boolean matches(AppliesTypeEnum theAppliesTo, Collection<IIdType> theAppliesToInstances, Set<String> theAppliesToTypes, String theCompartmentName) {
 		switch (theAppliesTo) {
 			case TYPES:
 				return theAppliesToTypes.equals(myAppliesToTypes) && theCompartmentName.equals(myClassifierCompartmentName);

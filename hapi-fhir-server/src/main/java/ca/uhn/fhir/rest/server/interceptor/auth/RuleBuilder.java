@@ -523,7 +523,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					return myRules.stream()
 						.filter(RuleImplOp.class::isInstance)
 						.map(RuleImplOp.class::cast)
-						.filter(rule -> rule.matchesTypesAndCompartment(myAppliesTo, myAppliesToInstances, myAppliesToTypes, theCompartmentName))
+						.filter(rule -> rule.matches(myAppliesTo, myAppliesToInstances, myAppliesToTypes, theCompartmentName))
 						.findFirst();
 				}
 
