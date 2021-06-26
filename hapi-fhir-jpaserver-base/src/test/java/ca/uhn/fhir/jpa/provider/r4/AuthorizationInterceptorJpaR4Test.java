@@ -1523,6 +1523,14 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		eob2.setPatient(new Reference(p2id));
 		myExplanationOfBenefitDao.create(eob2);
 
+		Patient patient3 = new Patient();
+		patient3.setActive(true);
+		IIdType p3id = myPatientDao.create(patient3).getId().toUnqualifiedVersionless();
+
+		ExplanationOfBenefit eob3 = new ExplanationOfBenefit();
+		eob3.setPatient(new Reference(p3id));
+		myExplanationOfBenefitDao.create(eob3);
+
 		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1557,6 +1565,16 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			Bundle result = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
 			assertEquals(2, result.getTotal());
 		}
+		{
+			String url = "/ExplanationOfBenefit?patient=" + p1id.getIdPart() + "," + p3id.getIdPart();
+			try {
+				Bundle result = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
+				fail();
+			} catch (ForbiddenOperationException e) {
+				assertThat(e.getMessage(), startsWith("HTTP 403 Forbidden: Access denied by rule"));
+			}
+		}
+
 	}
 
 
