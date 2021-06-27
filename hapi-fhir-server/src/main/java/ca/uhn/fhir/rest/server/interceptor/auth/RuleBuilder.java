@@ -507,23 +507,23 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					Validate.notBlank(theCompartmentName, "theCompartmentName must not be null");
 					Validate.notNull(theOwner, "theOwner must not be null");
 					validateOwner(theOwner);
-					Optional<RuleImplOp> oRule = findRuleByAppliesToAndCompartmentName(theCompartmentName);
+					myClassifierType = ClassifierTypeEnum.IN_COMPARTMENT;
+					myInCompartmentName = theCompartmentName;
+					Optional<RuleImplOp> oRule = findMatchingRule();
 					if (oRule.isPresent()) {
 						RuleImplOp rule = oRule.get();
 						rule.addClassifierCompartmentOwner(theOwner);
 						return new RuleBuilderFinished(rule);
 					}
-					myInCompartmentName = theCompartmentName;
 					myInCompartmentOwners = Collections.singletonList(theOwner);
-					myClassifierType = ClassifierTypeEnum.IN_COMPARTMENT;
 					return finished();
 				}
 
-				private Optional<RuleImplOp> findRuleByAppliesToAndCompartmentName(String theCompartmentName) {
+				private Optional<RuleImplOp> findMatchingRule() {
 					return myRules.stream()
 						.filter(RuleImplOp.class::isInstance)
 						.map(RuleImplOp.class::cast)
-						.filter(rule -> rule.matches(myAppliesTo, myAppliesToInstances, myAppliesToTypes, theCompartmentName))
+						.filter(rule -> rule.matches(myRuleOp, myAppliesTo, myAppliesToInstances, myAppliesToTypes, myClassifierType, myInCompartmentName))
 						.findFirst();
 				}
 
