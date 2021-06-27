@@ -509,7 +509,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					validateOwner(theOwner);
 					myClassifierType = ClassifierTypeEnum.IN_COMPARTMENT;
 					myInCompartmentName = theCompartmentName;
-					Optional<RuleImplOp> oRule = findRuleByAppliesToAndCompartmentName();
+					Optional<RuleImplOp> oRule = findMatchingRule();
 					if (oRule.isPresent()) {
 						RuleImplOp rule = oRule.get();
 						rule.addClassifierCompartmentOwner(theOwner);
@@ -519,7 +519,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					return finished();
 				}
 
-				private Optional<RuleImplOp> findRuleByAppliesToAndCompartmentName() {
+				private Optional<RuleImplOp> findMatchingRule() {
 					return myRules.stream()
 						.filter(RuleImplOp.class::isInstance)
 						.map(RuleImplOp.class::cast)
