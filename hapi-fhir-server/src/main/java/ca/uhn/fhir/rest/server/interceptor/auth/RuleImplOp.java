@@ -524,7 +524,6 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 								} else if (getMode() == PolicyEnum.ALLOW) {
 									return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 								}
-								break;
 							}
 						}
 					}
@@ -546,13 +545,16 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			String[] values = theSearchParams.get(theSearchParamName);
 			if (values != null) {
 				for (String nextParameterValue : values) {
-					if (nextParameterValue.equals(theCompartmentOwner.getValue())) {
-						verdict = newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
-						break;
-					}
-					if (nextParameterValue.equals(theCompartmentOwner.getIdPart())) {
-						verdict = newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
-						break;
+					QualifiedParamList orParamList = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, nextParameterValue);
+					for (String next : orParamList) {
+						if (next.equals(theCompartmentOwner.getValue())) {
+							verdict = newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+							break;
+						}
+						if (next.equals(theCompartmentOwner.getIdPart())) {
+							verdict = newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+							break;
+						}
 					}
 				}
 			}
