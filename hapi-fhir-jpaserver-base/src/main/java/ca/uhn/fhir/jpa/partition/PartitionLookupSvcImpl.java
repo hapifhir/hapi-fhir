@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.partition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -52,6 +53,8 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitionLookupSvcImpl.class);
 
 	@Autowired
+	private PartitionSettings myPartitionSettings;
+	@Autowired
 	private PlatformTransactionManager myTxManager;
 	@Autowired
 	private IPartitionDao myPartitionDao;
@@ -61,6 +64,13 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	private TransactionTemplate myTxTemplate;
 	@Autowired
 	private FhirContext myFhirCtx;
+
+	/**
+	 * Constructor
+	 */
+	public PartitionLookupSvcImpl() {
+		super();
+	}
 
 	@Override
 	@PostConstruct
@@ -79,6 +89,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	@Override
 	public PartitionEntity getPartitionByName(String theName) {
 		Validate.notBlank(theName, "The name must not be null or blank");
+		Validate.isTrue(!myPartitionSettings.isUnnamedPartitionMode());
 		if (JpaConstants.DEFAULT_PARTITION_NAME.equals(theName)) {
 			return null;
 		}
@@ -88,6 +99,9 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	@Override
 	public PartitionEntity getPartitionById(Integer thePartitionId) {
 		validatePartitionIdSupplied(myFhirCtx, thePartitionId);
+		if (myPartitionSettings.isUnnamedPartitionMode()) {
+			return new PartitionEntity().setId(thePartitionId);
+		}
 		return myIdToPartitionCache.get(thePartitionId);
 	}
 

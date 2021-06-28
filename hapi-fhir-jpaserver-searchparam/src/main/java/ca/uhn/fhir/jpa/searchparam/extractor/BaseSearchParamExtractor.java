@@ -41,10 +41,10 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.StringUtil;
@@ -65,6 +65,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.NonSI;
@@ -535,17 +536,22 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	protected abstract IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath);
 
+	protected FhirContext getContext() {
+		return myContext;
+	}
+
 	@VisibleForTesting
 	public void setContext(FhirContext theContext) {
 		myContext = theContext;
 	}
 
-	protected FhirContext getContext() {
-		return myContext;
-	}
-
 	protected ModelConfig getModelConfig() {
 		return myModelConfig;
+	}
+
+	@VisibleForTesting
+	public void setModelConfig(ModelConfig theModelConfig) {
+		myModelConfig = theModelConfig;
 	}
 
 	@VisibleForTesting
@@ -573,7 +579,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			theParams.add(nextEntity);
 		}
 	}
-
 
 	private void addQuantity_QuantityNormalized(String theResourceType, Set<ResourceIndexedSearchParamQuantityNormalized> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
 		Optional<IPrimitiveType<BigDecimal>> valueField = myQuantityValueValueChild.getAccessor().getFirstValueOrNull(theValue);
@@ -608,7 +613,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 	}
 
-
 	private void addQuantity_MoneyNormalized(String theResourceType, Set<ResourceIndexedSearchParamQuantityNormalized> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
 		Optional<IPrimitiveType<BigDecimal>> valueField = myMoneyValueChild.getAccessor().getFirstValueOrNull(theValue);
 		if (valueField.isPresent() && valueField.get().getValue() != null) {
@@ -623,7 +627,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 	}
 
-
 	private void addQuantity_Range(String theResourceType, Set<ResourceIndexedSearchParamQuantity> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
 		Optional<IBase> low = myRangeLowValueChild.getAccessor().getFirstValueOrNull(theValue);
 		low.ifPresent(theIBase -> addQuantity_Quantity(theResourceType, theParams, theSearchParam, theIBase));
@@ -631,7 +634,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		Optional<IBase> high = myRangeHighValueChild.getAccessor().getFirstValueOrNull(theValue);
 		high.ifPresent(theIBase -> addQuantity_Quantity(theResourceType, theParams, theSearchParam, theIBase));
 	}
-
 
 	private void addQuantity_RangeNormalized(String theResourceType, Set<ResourceIndexedSearchParamQuantityNormalized> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
 		Optional<IBase> low = myRangeLowValueChild.getAccessor().getFirstValueOrNull(theValue);
@@ -655,11 +657,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
 			}
 		}
-	}
-
-	@VisibleForTesting
-	public void setModelConfig(ModelConfig theModelConfig) {
-		myModelConfig = theModelConfig;
 	}
 
 	protected boolean shouldIndexTextComponentOfToken(RuntimeSearchParam theSearchParam) {
@@ -974,7 +971,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	 * (e.g. "#3") or by resource (e.g. "new Reference(patientInstance)"). The FHIRPath evaluator only understands the
 	 * first way, so if there is any chance of the FHIRPath evaluator needing to descend across references, we
 	 * have to assign values to those references before indexing.
-	 *
+	 * <p>
 	 * Doing this cleanup isn't hugely expensive, but it's not completely free either so we only do it
 	 * if we think there's actually a chance
 	 */
@@ -1095,7 +1092,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			if (!thePaths.contains("|")) {
 				return new String[]{thePaths};
 			}
-			return SPLIT_R4.split(thePaths);
+			return splitPathsR4(thePaths);
 		} else {
 			if (!thePaths.contains("|") && !thePaths.contains(" or ")) {
 				return new String[]{thePaths};
@@ -1236,23 +1233,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	}
 
-	private static class CompositeExtractor<T> implements IExtractor<T> {
-
-		private final IExtractor<T> myExtractor0;
-		private final IExtractor<T> myExtractor1;
-
-		private CompositeExtractor(IExtractor<T> theExtractor0, IExtractor<T> theExtractor1) {
-			myExtractor0 = theExtractor0;
-			myExtractor1 = theExtractor1;
-		}
-
-		@Override
-		public void extract(SearchParamSet<T> theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath, boolean theWantLocalReferences) {
-			myExtractor0.extract(theParams, theSearchParam, theValue, thePath, theWantLocalReferences);
-			myExtractor1.extract(theParams, theSearchParam, theValue, thePath, theWantLocalReferences);
-		}
-	}
-
 	private class ResourceLinkExtractor implements IExtractor<PathAndRef> {
 
 		private PathAndRef myPathAndRef = null;
@@ -1308,9 +1288,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					}
 
 					if (nextId == null ||
-							nextId.isEmpty() ||
-							nextId.getValue().startsWith("urn:")) {
-							return;
+						nextId.isEmpty() ||
+						nextId.getValue().startsWith("urn:")) {
+						return;
 					}
 					if (!theWantLocalReferences) {
 						if (nextId.getValue().startsWith("#"))
@@ -1422,7 +1402,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 							dates.add(start);
 						}
 						if (end != null) {
-						dates.add(end);
+							dates.add(end);
 						}
 					}
 				}
@@ -1542,6 +1522,28 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					break;
 			}
 		}
+	}
+
+	private static class CompositeExtractor<T> implements IExtractor<T> {
+
+		private final IExtractor<T> myExtractor0;
+		private final IExtractor<T> myExtractor1;
+
+		private CompositeExtractor(IExtractor<T> theExtractor0, IExtractor<T> theExtractor1) {
+			myExtractor0 = theExtractor0;
+			myExtractor1 = theExtractor1;
+		}
+
+		@Override
+		public void extract(SearchParamSet<T> theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath, boolean theWantLocalReferences) {
+			myExtractor0.extract(theParams, theSearchParam, theValue, thePath, theWantLocalReferences);
+			myExtractor1.extract(theParams, theSearchParam, theValue, thePath, theWantLocalReferences);
+		}
+	}
+
+	@Nonnull
+	public static String[] splitPathsR4(@Nonnull String thePaths) {
+		return SPLIT_R4.split(thePaths);
 	}
 
 	public static boolean tokenTextIndexingEnabledForSearchParam(ModelConfig theModelConfig, RuntimeSearchParam theSearchParam) {

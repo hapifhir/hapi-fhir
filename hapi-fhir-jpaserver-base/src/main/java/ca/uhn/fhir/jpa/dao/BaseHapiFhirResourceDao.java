@@ -259,7 +259,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
-		entity.setPartitionId(theRequestPartitionId);
+		entity.setPartitionId(myPartitionHelperSvc.toStoragePartition(theRequestPartitionId));
 		entity.setCreatedByMatchUrl(theIfNoneExist);
 		entity.setVersion(1);
 
@@ -1619,7 +1619,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			assert resourceId != null;
 			assert resourceId.hasIdPart();
 
-			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequest, getResourceName());
+			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(theRequest, theResource, getResourceName());
 
 			boolean create = false;
 
