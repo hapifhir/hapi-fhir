@@ -1848,6 +1848,7 @@ public enum Pointcut implements IPointcut {
 	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
+	 * <li>ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails - Contains details about what is being read</li>
 	 * </ul>
 	 * <p>
 	 * Hooks must return an instance of <code>ca.uhn.fhir.interceptor.model.RequestPartitionId</code>.
@@ -1858,7 +1859,8 @@ public enum Pointcut implements IPointcut {
 		"ca.uhn.fhir.interceptor.model.RequestPartitionId",
 		// Params
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
-		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails"
 	),
 
 	/**

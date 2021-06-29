@@ -127,7 +127,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			for (IBase nextEntry : theEntries) {
 				IBaseResource resource = versionAdapter.getResource(nextEntry);
 				if (resource != null) {
-					RequestPartitionId requestPartition = myRequestPartitionSvc.determineReadPartitionForRequest(theRequest, myFhirContext.getResourceType(resource));
+					RequestPartitionId requestPartition = myRequestPartitionSvc.determineCreatePartitionForRequest(theRequest, resource, myFhirContext.getResourceType(resource));
 					requestPartitionIdsForAllEntries.add(requestPartition);
 				}
 			}

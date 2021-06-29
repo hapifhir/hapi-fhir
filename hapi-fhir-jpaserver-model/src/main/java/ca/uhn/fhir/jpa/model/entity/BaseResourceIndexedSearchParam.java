@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -35,7 +34,6 @@ import com.google.common.hash.Hashing;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 
-import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -153,11 +151,6 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 
 	public abstract IQueryParameterType toQueryParameterType();
 
-	@Override
-	public void setPartitionId(@Nullable RequestPartitionId theRequestPartitionId) {
-		super.setPartitionId(theRequestPartitionId);
-	}
-
 	public boolean matches(IQueryParameterType theParam) {
 		throw new UnsupportedOperationException("No parameter matcher for " + theParam);
 	}
@@ -171,13 +164,13 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		return this;
 	}
 
+	public ModelConfig getModelConfig() {
+		return myModelConfig;
+	}
+
 	public BaseResourceIndexedSearchParam setModelConfig(ModelConfig theModelConfig) {
 		myModelConfig = theModelConfig;
 		return this;
-	}
-
-	public ModelConfig getModelConfig() {
-		return myModelConfig;
 	}
 
 	public static long calculateHashIdentity(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, String theResourceType, String theParamName) {

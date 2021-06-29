@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
@@ -168,6 +169,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
 	@Autowired
+	private IResourceTagDao myResourceTagDao;
+	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 
 	@AfterEach
@@ -293,6 +296,12 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void logAllTokenIndexes() {
 		runInTransaction(() -> {
 			ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected void logAllResourceTags() {
+		runInTransaction(() -> {
+			ourLog.info("Token tags:\n * {}", myResourceTagDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 	}
 

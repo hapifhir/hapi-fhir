@@ -48,7 +48,7 @@ public class FhirResourceDaoObservationDstu3 extends BaseHapiFhirResourceDaoObse
 
 		updateSearchParamsForLastn(theSearchParameterMap, theRequestDetails);
 
-		RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, getResourceName());
+		RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequestDetails, getResourceName(), theSearchParameterMap);
 		return mySearchCoordinatorSvc.registerSearch(this, theSearchParameterMap, getResourceName(), new CacheControlDirective().parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL)), theRequestDetails, requestPartitionId);
 	}
 

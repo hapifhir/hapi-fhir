@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,7 +44,7 @@ class RequestPartitionHelperSvcTest {
 		when(myPartitionLookupSvc.getPartitionById(PARTITION_ID)).thenReturn(ourPartitionEntity);
 
 		// execute
-		RequestPartitionId result = mySvc.determineReadPartitionForRequest(srd, "Patient");
+		RequestPartitionId result = mySvc.determineReadPartitionForRequestForRead(srd, "Patient", new IdType("Patient/123"));
 
 		// verify
 		assertEquals(PARTITION_ID, result.getFirstPartitionIdOrNull());

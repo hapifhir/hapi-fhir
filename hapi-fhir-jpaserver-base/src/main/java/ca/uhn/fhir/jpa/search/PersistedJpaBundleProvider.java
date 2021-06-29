@@ -54,6 +54,7 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -151,7 +152,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 		HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(mySearchEntity.getResourceType(), mySearchEntity.getResourceId(), mySearchEntity.getLastUpdatedLow(), mySearchEntity.getLastUpdatedHigh());
 
-		RequestPartitionId partitionId = getRequestPartitionId();
+		RequestPartitionId partitionId = getRequestPartitionIdForHistory();
 		List<ResourceHistoryTable> results = historyBuilder.fetchEntities(partitionId, theOffset, theFromIndex, theToIndex);
 
 		List<IBaseResource> retVal = new ArrayList<>();
@@ -196,13 +197,13 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	}
 
 	@Nonnull
-	private RequestPartitionId getRequestPartitionId() {
+	private RequestPartitionId getRequestPartitionIdForHistory() {
 		if (myRequestPartitionId == null) {
 			if (mySearchEntity.getResourceId() != null) {
 				// If we have an ID, we've already checked the partition and made sure it's appropriate
 				myRequestPartitionId = RequestPartitionId.allPartitions();
 			} else {
-				myRequestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(myRequest, mySearchEntity.getResourceType());
+				myRequestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(myRequest, mySearchEntity.getResourceType(), null);
 			}
 		}
 		return myRequestPartitionId;
@@ -271,7 +272,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 		Function<MemoryCacheService.HistoryCountKey, Integer> supplier = k -> new TransactionTemplate(myTxManager).execute(t -> {
 			HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(mySearchEntity.getResourceType(), mySearchEntity.getResourceId(), mySearchEntity.getLastUpdatedLow(), mySearchEntity.getLastUpdatedHigh());
-			Long count = historyBuilder.fetchCount(getRequestPartitionId());
+			Long count = historyBuilder.fetchCount(getRequestPartitionIdForHistory());
 			return count.intValue();
 		});
 

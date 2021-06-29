@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -71,6 +72,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder.replaceDefaultPartitionIdIfNonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -179,6 +181,9 @@ public class IdHelperService {
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
 
+	@Autowired
+	private PartitionSettings myPartitionSettings;
+
 	/**
 	 * Given a collection of resource IDs (resource type + id), resolves the internal persistent IDs.
 	 * <p>
@@ -232,12 +237,20 @@ public class IdHelperService {
 				Predicate idCriteria = cb.equal(from.get("myForcedId").as(String.class), next.getIdPart());
 				andPredicates.add(idCriteria);
 
-				if (theRequestPartitionId.isDefaultPartition()) {
+				if (theRequestPartitionId.isDefaultPartition() && myPartitionSettings.getDefaultPartitionId() == null) {
 					Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue").as(Integer.class));
 					andPredicates.add(partitionIdCriteria);
 				} else if (!theRequestPartitionId.isAllPartitions()) {
-					Predicate partitionIdCriteria = from.get("myPartitionIdValue").as(Integer.class).in(theRequestPartitionId.getPartitionIds());
-					andPredicates.add(partitionIdCriteria);
+					List<Integer> partitionIds = theRequestPartitionId.getPartitionIds();
+					partitionIds = replaceDefaultPartitionIdIfNonNull(myPartitionSettings, partitionIds);
+
+					if (partitionIds.size() > 1) {
+						Predicate partitionIdCriteria = from.get("myPartitionIdValue").as(Integer.class).in(partitionIds);
+						andPredicates.add(partitionIdCriteria);
+					} else {
+						Predicate partitionIdCriteria = cb.equal(from.get("myPartitionIdValue").as(Integer.class), partitionIds.get(0));
+						andPredicates.add(partitionIdCriteria);
+					}
 				}
 
 				predicates.add(cb.and(andPredicates.toArray(EMPTY_PREDICATE_ARRAY)));

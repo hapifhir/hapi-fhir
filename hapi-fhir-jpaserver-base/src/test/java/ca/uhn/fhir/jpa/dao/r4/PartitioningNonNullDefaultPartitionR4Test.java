@@ -1,97 +1,25 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
-import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.entity.ResourceTag;
-import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.util.SqlQuery;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateAndListParam;
-import ca.uhn.fhir.rest.param.DateOrListParam;
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.HasAndListParam;
-import ca.uhn.fhir.rest.param.HasOrListParam;
-import ca.uhn.fhir.rest.param.HasParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.TokenParamModifier;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.BundleBuilder;
-import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.PractitionerRole;
-import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.SearchParameter;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
-import static org.apache.commons.lang3.StringUtils.countMatches;
+import java.util.List;
+
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @SuppressWarnings({"unchecked", "ConstantConditions"})
 public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR4Test {
@@ -114,7 +42,8 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 	}
 
 	@Test
-	public void testCreateAndSearch() {
+	public void testCreateAndSearch_NonPartitionable() {
+		addCreateDefaultPartition();
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -122,14 +51,114 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 		sp.setCode("extpatorg");
 		sp.setName("extpatorg");
 		sp.setExpression("Patient.extension('http://patext').value.as(Reference)");
-		Long id = mySearchParameterDao.create(sp).getId().getIdPartAsLong();
+		Long id = mySearchParameterDao.create(sp, mySrd).getId().getIdPartAsLong();
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(id).orElseThrow(IllegalArgumentException::new);
 			assertEquals(1, resourceTable.getPartitionId().getPartitionId().intValue());
 		});
+
+		// Search on Token
+		addReadDefaultPartition();
+		List<String> outcome = toUnqualifiedVersionlessIdValues(mySearchParameterDao.search(SearchParameterMap.newSynchronous().add("code", new TokenParam("extpatorg")), mySrd));
+		assertThat(outcome, Matchers.contains("SearchParameter/" + id));
+
+		// Search on All Resources
+		addReadDefaultPartition();
+		outcome = toUnqualifiedVersionlessIdValues(mySearchParameterDao.search(SearchParameterMap.newSynchronous(), mySrd));
+		assertThat(outcome, Matchers.contains("SearchParameter/" + id));
+
 	}
 
+	@Test
+	public void testCreateAndSearch_NonPartitionable_ForcedId() {
+		addCreateDefaultPartition();
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/A");
+		sp.addBase("Patient");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.setCode("extpatorg");
+		sp.setName("extpatorg");
+		sp.setExpression("Patient.extension('http://patext').value.as(Reference)");
+		mySearchParameterDao.update(sp, mySrd);
+
+		runInTransaction(() -> {
+			ResourceTable resourceTable = myResourceTableDao.findAll().get(0);
+			assertEquals(1, resourceTable.getPartitionId().getPartitionId().intValue());
+		});
+
+		// Search on Token
+		addReadDefaultPartition();
+		List<String> outcome = toUnqualifiedVersionlessIdValues(mySearchParameterDao.search(SearchParameterMap.newSynchronous().add("code", new TokenParam("extpatorg")), mySrd));
+		assertThat(outcome, Matchers.contains("SearchParameter/A"));
+
+		// Search on All Resources
+		addReadDefaultPartition();
+		outcome = toUnqualifiedVersionlessIdValues(mySearchParameterDao.search(SearchParameterMap.newSynchronous(), mySrd));
+		assertThat(outcome, Matchers.contains("SearchParameter/A"));
+
+	}
+
+	@Test
+	public void testCreateAndSearch_Partitionable_ForcedId() {
+		addCreateDefaultPartition();
+		Patient patient = new Patient();
+		patient.setId("A");
+		patient.addIdentifier().setSystem("http://foo").setValue("123");
+		patient.setActive(true);
+		myPatientDao.update(patient, mySrd);
+
+		runInTransaction(() -> {
+			ResourceTable resourceTable = myResourceTableDao.findAll().get(0);
+			assertEquals(1, resourceTable.getPartitionId().getPartitionId().intValue());
+		});
+
+		// Search on Token
+		addReadDefaultPartition();
+		List<String> outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous().add("identifier", new TokenParam("http://foo", "123")), mySrd));
+		assertThat(outcome, Matchers.contains("Patient/A"));
+
+		// Search on All Resources
+		addReadDefaultPartition();
+		outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd));
+		assertThat(outcome, Matchers.contains("Patient/A"));
+
+	}
+
+
+	@Test
+	public void testCreateAndSearch_Partitionable() {
+		addCreateDefaultPartition();
+		Patient patient = new Patient();
+		patient.getMeta().addTag().setSystem("http://foo").setCode("TAG");
+		patient.addIdentifier().setSystem("http://foo").setValue("123");
+		patient.setActive(true);
+		Long id = myPatientDao.create(patient, mySrd).getId().getIdPartAsLong();
+
+		logAllResourceTags();
+
+		runInTransaction(() -> {
+			ResourceTable resourceTable = myResourceTableDao.findById(id).orElseThrow(IllegalArgumentException::new);
+			assertEquals(1, resourceTable.getPartitionId().getPartitionId().intValue());
+		});
+
+		// Search on Token
+		addReadDefaultPartition();
+		List<String> outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous().add("identifier", new TokenParam("http://foo", "123")), mySrd));
+		assertThat(outcome, Matchers.contains("Patient/" + id));
+
+		// Search on Tag
+		addReadDefaultPartition();
+		outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous().add("_tag", new TokenParam("http://foo", "TAG")), mySrd));
+		assertThat(outcome, Matchers.contains("Patient/" + id));
+
+		// Search on All Resources
+		addReadDefaultPartition();
+		outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd));
+		assertThat(outcome, Matchers.contains("Patient/" + id));
+
+	}
 
 
 }

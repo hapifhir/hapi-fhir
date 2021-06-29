@@ -25,9 +25,11 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -98,7 +100,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	 */
 	@Nonnull
 	@Override
-	public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType) {
+	public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType, ReadPartitionIdRequestDetails theDetails) {
 		RequestPartitionId requestPartitionId;
 
 		boolean nonPartitionableResource = myNonPartitionableResourceNames.contains(theResourceType);
@@ -115,7 +117,8 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 			} else if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_READ, myInterceptorBroadcaster, theRequest)) {
 				HookParams params = new HookParams()
 					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest);
+					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(ReadPartitionIdRequestDetails.class, theDetails);
 				requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_READ, params);
 			} else {
 				requestPartitionId = null;
@@ -208,6 +211,16 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 		}
 
 		return RequestPartitionId.allPartitions();
+	}
+
+	@Nonnull
+	@Override
+	public PartitionablePartitionId toStoragePartition(@Nonnull RequestPartitionId theRequestPartitionId) {
+		Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
+		if (partitionId == null) {
+			partitionId = myPartitionSettings.getDefaultPartitionId();
+		}
+		return new PartitionablePartitionId(partitionId, theRequestPartitionId.getPartitionDate());
 	}
 
 	/**

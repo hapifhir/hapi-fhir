@@ -39,6 +39,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	static final String PARTITION_2 = "PART-2";
 	static final String PARTITION_3 = "PART-3";
 	static final String PARTITION_4 = "PART-4";
+
 	protected MyReadWriteInterceptor myPartitionInterceptor;
 	protected LocalDate myPartitionDate;
 	protected LocalDate myPartitionDate2;
@@ -55,6 +56,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
 		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
 		myPartitionSettings.setAllowReferencesAcrossPartitions(new PartitionSettings().getAllowReferencesAcrossPartitions());
+		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
 
 		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof MyReadWriteInterceptor);
 		myInterceptor = null;
@@ -135,6 +137,10 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myHaveDroppedForcedIdUniqueConstraint = true;
 	}
 
+	protected void addCreatePartition(Integer thePartitionId) {
+		addCreatePartition(thePartitionId, null);
+	}
+
 	protected void addCreatePartition(Integer thePartitionId, LocalDate thePartitionDate) {
 		Validate.notNull(thePartitionId);
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(thePartitionId, thePartitionDate);
@@ -178,18 +184,6 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			if (thePartitionId != null) {
 				addCreatePartition(thePartitionId, null);
 			} else {
-				addCreateDefaultPartition();
-			}
-		};
-	}
-
-	protected Consumer<IBaseResource> withPutPartition(Integer thePartitionId) {
-		return t -> {
-			if (thePartitionId != null) {
-				addReadPartition(thePartitionId);
-				addCreatePartition(thePartitionId, null);
-			} else {
-				addReadDefaultPartition();
 				addCreateDefaultPartition();
 			}
 		};

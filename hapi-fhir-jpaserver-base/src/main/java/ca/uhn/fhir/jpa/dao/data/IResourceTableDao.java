@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /*
  * #%L
@@ -94,4 +95,11 @@ public interface IResourceTableDao extends JpaRepository<ResourceTable, Long> {
 
 	@Query("SELECT t.myVersion FROM ResourceTable t WHERE t.myId = :pid")
 	Long findCurrentVersionByPid(@Param("pid") Long thePid);
+
+	@Query("SELECT t FROM ResourceTable t LEFT JOIN FETCH t.myForcedId WHERE t.myPartitionId.myPartitionId IS NULL AND t.myId = :pid")
+	Optional<ResourceTable> readByPartitionIdNull(@Param("pid") Long theResourceId);
+
+	@Query("SELECT t FROM ResourceTable t LEFT JOIN FETCH t.myForcedId WHERE t.myPartitionId.myPartitionId = :partitionId AND t.myId = :pid")
+	Optional<ResourceTable> readByPartitionId(@Param("partitionId") int thePartitionId, @Param("pid") Long theResourceId);
+
 }

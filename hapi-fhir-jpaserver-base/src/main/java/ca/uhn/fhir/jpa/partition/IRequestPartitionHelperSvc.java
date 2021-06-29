@@ -20,10 +20,13 @@ package ca.uhn.fhir.jpa.partition;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -31,11 +34,30 @@ import javax.annotation.Nullable;
 public interface IRequestPartitionHelperSvc {
 
 	@Nonnull
-	RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType);
+	RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType, @Nonnull ReadPartitionIdRequestDetails theDetails);
+
+	@Nonnull
+	default RequestPartitionId determineReadPartitionForRequestForRead(RequestDetails theRequest, String theResourceType, IIdType theId) {
+		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forRead(theResourceType, theId);
+		return determineReadPartitionForRequest(theRequest, theResourceType, details);
+	}
+
+	@Nonnull
+	default RequestPartitionId determineReadPartitionForRequestForSearchType(RequestDetails theRequest, String theResourceType, SearchParameterMap theParams) {
+		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forSearchType(theResourceType, theParams);
+		return determineReadPartitionForRequest(theRequest, theResourceType, details);
+	}
+
+	@Nonnull
+	default RequestPartitionId determineReadPartitionForRequestForHistory(RequestDetails theRequest, String theResourceType, IIdType theIdType) {
+		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forHistory(theResourceType, theIdType);
+		return determineReadPartitionForRequest(theRequest, theResourceType, details);
+	}
 
 	@Nonnull
 	RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType);
 
 	@Nonnull
 	PartitionablePartitionId toStoragePartition(@Nonnull RequestPartitionId theRequestPartitionId);
+
 }
