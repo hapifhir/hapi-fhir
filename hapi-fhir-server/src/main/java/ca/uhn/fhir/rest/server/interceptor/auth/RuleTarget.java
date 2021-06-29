@@ -13,21 +13,26 @@ public class RuleTarget {
 	IBaseResource resource;
 	Collection<IIdType> resourceIds = null;
 	String resourceType = null;
-	private Map<String, String[]> searchParams = null;
+	private Map<String, String[]> mySearchParams = null;
 
 	public Map<String, String[]> getSearchParams() {
-		return searchParams;
+		return mySearchParams;
 	}
 
 	public void setSearchParams(RequestDetails theRequestDetails) {
-		searchParams = new HashMap<>();
-		for (Map.Entry<String, String[]> entry : theRequestDetails.getParameters().entrySet()) {
+		mySearchParams = stripMdmSuffix(theRequestDetails.getParameters());
+	}
+
+	private Map<String, String[]> stripMdmSuffix(Map<String, String[]> theParameters) {
+		Map<String, String[]> retval = new HashMap<>();
+		for (Map.Entry<String, String[]> entry : theParameters.entrySet()) {
 			String key = entry.getKey();
 			String[] value = entry.getValue();
 			if (key.endsWith(Constants.PARAMQUALIFIER_MDM)) {
 				key = key.split(Constants.PARAMQUALIFIER_MDM)[0];
 			}
-			searchParams.put(key, value);
+			retval.put(key, value);
 		}
+		return retval;
 	}
 }
