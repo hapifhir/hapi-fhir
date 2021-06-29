@@ -28,9 +28,9 @@ import java.util.stream.Stream;
 
 public interface IMdmControllerSvc {
 
-	Stream<MdmLinkJson> queryLinks(@Nullable String theGoldenResourceId, @Nullable String theSourceResourceId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext);
+	Stream<MdmLinkJson> queryLinks(@Nullable String theGoldenResourceId, @Nullable String theSourceResourceId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext, int theOffset, int theCount);
 
-	Stream<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmTransactionContext);
+	Stream<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmTransactionContext, int theOffset, int theCount);
 
 	void notDuplicateGoldenResource(String theGoldenResourceId, String theTargetGoldenResourceId, MdmTransactionContext theMdmTransactionContext);
 

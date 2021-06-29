@@ -33,6 +33,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -286,8 +289,9 @@ public class MdmLinkDaoSvc {
 	 * @param theExampleLink The MDM link containing the data we would like to search for.
 	 * @return a list of {@link MdmLink} entities which match the example.
 	 */
-	public List<MdmLink> findMdmLinkByExample(Example<MdmLink> theExampleLink) {
-		return myMdmLinkDao.findAll(theExampleLink);
+	public Page<MdmLink> findMdmLinkByExample(Example<MdmLink> theExampleLink, int theOffset, int theCount) {
+		PageRequest of = PageRequest.of(theOffset / theCount, theCount);
+		return myMdmLinkDao.findAll(theExampleLink, of);
 	}
 
 	/**

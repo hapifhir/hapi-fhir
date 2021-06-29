@@ -29,9 +29,11 @@ import ca.uhn.fhir.mdm.api.MatchedTarget;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -39,6 +41,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -57,6 +60,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
+
+import static ca.uhn.fhir.rest.api.Constants.PARAM_COUNT;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
 
 public class MdmProviderDstu3Plus extends BaseMdmProvider {
 
@@ -189,22 +195,43 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	public IBaseParameters queryLinks(@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theGoldenResourceId,
 												 @OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theResourceId,
 												 @OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_MATCH_RESULT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theMatchResult,
-												 @OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_LINK_SOURCE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theLinkSource,
+												 @OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_LINK_SOURCE, min = 0, max = 1, typeName = "string")
+														 IPrimitiveType<String> theLinkSource,
+
+												 @Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
+												 @OperationParam(name = PARAM_OFFSET)
+														 UnsignedIntType theOffset,
+												 @Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
+												 @OperationParam(name = Constants.PARAM_COUNT)
+														 UnsignedIntType theCount,
+
 												 ServletRequestDetails theRequestDetails) {
+		validatePagingParameters(theOffset, theCount);
 
 		Stream<MdmLinkJson> mdmLinkJson = myMdmControllerSvc.queryLinks(extractStringOrNull(theGoldenResourceId),
 			extractStringOrNull(theResourceId), extractStringOrNull(theMatchResult), extractStringOrNull(theLinkSource),
 			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.QUERY_LINKS,
-				getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId))
+				getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId)), theOffset.getValue(), theCount.getValue()
 		);
 		return parametersFromMdmLinks(mdmLinkJson, true);
 	}
 
+	private void validatePagingParameters(UnsignedIntType theOffset, UnsignedIntType theCount) {
+		String errorMessage = "";
+		if (theOffset!= null && theOffset.getValue() < 0) {
+				errorMessage += PARAM_OFFSET + " must be greater than or equal to 0. ";
+		}
+		if (theCount != null && theCount.getValue() <= 0 ) {
+			errorMessage += PARAM_COUNT + " must be greater than 0.";
+		}
+		if (StringUtils.isNotEmpty(errorMessage)) {
+			throw new InvalidRequestException(errorMessage);
+		}
+	}
+
 	@Operation(name = ProviderConstants.MDM_DUPLICATE_GOLDEN_RESOURCES, idempotent = true)
 	public IBaseParameters getDuplicateGoldenResources(ServletRequestDetails theRequestDetails) {
-		Stream<MdmLinkJson> possibleDuplicates = myMdmControllerSvc.getDuplicateGoldenResources(
-			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.DUPLICATE_GOLDEN_RESOURCES, (String) null)
-		);
+		Stream<MdmLinkJson> possibleDuplicates = myMdmControllerSvc.getDuplicateGoldenResources(createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.DUPLICATE_GOLDEN_RESOURCES, (String) null),0,10);
 		return parametersFromMdmLinks(possibleDuplicates, false);
 	}
 

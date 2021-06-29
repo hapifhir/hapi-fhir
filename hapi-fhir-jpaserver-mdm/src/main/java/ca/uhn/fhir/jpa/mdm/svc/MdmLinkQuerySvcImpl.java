@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
 
 import java.util.stream.Stream;
 
@@ -46,17 +47,16 @@ public class MdmLinkQuerySvcImpl implements IMdmLinkQuerySvc {
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
 
 	@Override
-	public Stream<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext) {
+	public Stream<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, int theOffset, int theCount) {
 		Example<MdmLink> exampleLink = exampleLinkFromParameters(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource);
-		return myMdmLinkDaoSvc.findMdmLinkByExample(exampleLink).stream()
-			.filter(mdmLink -> mdmLink.getMatchResult() != MdmMatchResultEnum.POSSIBLE_DUPLICATE)
-			.map(this::toJson);
+		Page<MdmLink> mdmLinkByExample = myMdmLinkDaoSvc.findMdmLinkByExample(exampleLink, theOffset, theCount);
+		return mdmLinkByExample.stream().map(this::toJson);
 	}
 
 	@Override
-	public Stream<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext) {
+	public Stream<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, int theOffset, int theCount) {
 		Example<MdmLink> exampleLink = exampleLinkFromParameters(null, null, MdmMatchResultEnum.POSSIBLE_DUPLICATE, null);
-		return myMdmLinkDaoSvc.findMdmLinkByExample(exampleLink).stream().map(this::toJson);
+		return myMdmLinkDaoSvc.findMdmLinkByExample(exampleLink, theOffset, theCount).stream().map(this::toJson);
 	}
 
 	private MdmLinkJson toJson(MdmLink theLink) {
