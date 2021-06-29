@@ -886,7 +886,7 @@ public class QueryStack {
 			ResourceTablePredicateBuilder resourceTablePredicateBuilder = mySqlBuilder.getOrCreateResourceTablePredicateBuilder();
 			StringPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.STRING, theSourceJoinColumn, paramName, () -> mySqlBuilder.addStringPredicateBuilder(theSourceJoinColumn)).getResult();
 
-			return createPredicateParamMissingForNonReference(resourceTablePredicateBuilder, join, theList.get(0).getMissing(), theRequestPartitionId);
+			return createPredicateParamMissingForNonReference(resourceTablePredicateBuilder, join, paramName, theList.get(0).getMissing(), theRequestPartitionId);
 		}
 
 		StringPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.STRING, theSourceJoinColumn, paramName, () -> mySqlBuilder.addStringPredicateBuilder(theSourceJoinColumn)).getResult();
@@ -900,17 +900,21 @@ public class QueryStack {
 		return join.combineWithRequestPartitionIdPredicate(theRequestPartitionId, toOrPredicate(codePredicates));
 	}
 
-	private Condition createPredicateParamMissingForNonReference(ResourceTablePredicateBuilder theResourceTablePredicateBuilder, BaseSearchParamPredicateBuilder theJoin, Boolean theMissing, RequestPartitionId theRequestPartitionId) {
+	private Condition createPredicateParamMissingForNonReference(ResourceTablePredicateBuilder theResourceTablePredicateBuilder, BaseSearchParamPredicateBuilder theJoin, String theParamName, Boolean theMissing, RequestPartitionId theRequestPartitionId) {
 		BinaryCondition joinCondition = BinaryCondition.equalTo(theJoin.getResourceIdColumn(), theResourceTablePredicateBuilder.getResourceIdColumn());
 
 		SelectQuery subquery = new SelectQuery();
 		subquery.addFromTable(theJoin.getTable());
 		subquery.addCustomColumns(1);
-		subquery.addCondition(joinCondition);
+		Condition condition = ComboCondition.and(joinCondition,
+			BinaryCondition.equalTo(theJoin.getColumnParamName(), theJoin.generatePlaceholder(theParamName)
+			));
+		subquery.addCondition(condition);
 		Condition unaryCondition = UnaryCondition.exists(subquery);
 		if (theMissing) {
 			unaryCondition = new NotCondition(unaryCondition);
 		}
+
 		return theResourceTablePredicateBuilder.combineWithRequestPartitionIdPredicate(theRequestPartitionId, unaryCondition);
 	}
 
@@ -1050,7 +1054,7 @@ public class QueryStack {
 			ResourceTablePredicateBuilder resourceTablePredicateBuilder = mySqlBuilder.getOrCreateResourceTablePredicateBuilder();
 			TokenPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.TOKEN, theSourceJoinColumn, paramName, () -> mySqlBuilder.addTokenPredicateBuilder(theSourceJoinColumn)).getResult();
 
-			return createPredicateParamMissingForNonReference(resourceTablePredicateBuilder, join, theList.get(0).getMissing(), theRequestPartitionId);
+			return createPredicateParamMissingForNonReference(resourceTablePredicateBuilder, join, paramName, theList.get(0).getMissing(), theRequestPartitionId);
 		}
 
 		TokenPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.TOKEN, theSourceJoinColumn, paramName, () -> mySqlBuilder.addTokenPredicateBuilder(theSourceJoinColumn)).getResult();

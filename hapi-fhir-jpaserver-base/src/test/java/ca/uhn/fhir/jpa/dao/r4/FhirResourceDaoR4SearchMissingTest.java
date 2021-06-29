@@ -462,6 +462,7 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().addGiven("Jane");
 			missing = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 		{
@@ -489,7 +490,9 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			StringParam param = new StringParam();
 			param.setMissing(true);
 			params.add(Patient.SP_FAMILY, param);
+			myCaptureQueriesListener.clear();
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
+			myCaptureQueriesListener.logSelectQueries();
 			assertThat(patients, containsInRelativeOrder(missing));
 			assertThat(patients, not(containsInRelativeOrder(notMissing)));
 		}

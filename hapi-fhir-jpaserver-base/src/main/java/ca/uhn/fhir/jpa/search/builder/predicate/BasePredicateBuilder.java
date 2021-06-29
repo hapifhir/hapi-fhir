@@ -60,7 +60,7 @@ public class BasePredicateBuilder {
 	}
 
 	@Nonnull
-	String generatePlaceholder(Object theInput) {
+	public String generatePlaceholder(Object theInput) {
 		return mySearchSqlBuilder.generatePlaceholder(theInput);
 	}
 
