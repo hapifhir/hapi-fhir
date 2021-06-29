@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2758
+title: "The internal cache for tags, concepts, and others had longer or shorter expiry times than was intended.
+        This has been corrected."

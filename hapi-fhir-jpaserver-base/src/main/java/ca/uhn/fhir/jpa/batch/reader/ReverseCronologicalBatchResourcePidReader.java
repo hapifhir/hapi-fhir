@@ -36,7 +36,6 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ExecutionContext;
@@ -46,6 +45,7 @@ import org.springframework.batch.item.ItemStreamException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import javax.annotation.Nonnull;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -145,7 +145,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 		return retval;
 	}
 
-	@NotNull
+	@Nonnull
 	private SearchParameterMap buildSearchParameterMap(ResourceSearch resourceSearch) {
 		SearchParameterMap map = resourceSearch.getSearchParameterMap();
 		map.setLastUpdated(new DateRangeParam().setUpperBoundInclusive(myThresholdHighByUrlIndex.get(myUrlIndex)));
@@ -154,7 +154,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 		return map;
 	}
 
-	@NotNull
+	@Nonnull
 	private SystemRequestDetails buildSystemRequestDetails() {
 		SystemRequestDetails retval = new SystemRequestDetails();
 		retval.setRequestPartitionId(myPartitionedUrls.get(myUrlIndex).getRequestPartitionId());
