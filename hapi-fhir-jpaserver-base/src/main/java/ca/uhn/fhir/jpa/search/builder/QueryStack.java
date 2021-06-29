@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.BaseSearchParamPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CompositeUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
@@ -85,9 +86,11 @@ import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.Expression;
 import com.healthmarketscience.sqlbuilder.InCondition;
+import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.OrderObject;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.Subquery;
+import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
@@ -879,11 +882,14 @@ public class QueryStack {
 
 		String paramName = getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
 
-		StringPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.STRING, theSourceJoinColumn, paramName, () -> mySqlBuilder.addStringPredicateBuilder(theSourceJoinColumn)).getResult();
-
 		if (theList.get(0).getMissing() != null) {
-			return join.createPredicateParamMissingForNonReference(theResourceName, paramName, theList.get(0).getMissing(), theRequestPartitionId);
+			ResourceTablePredicateBuilder resourceTablePredicateBuilder = mySqlBuilder.getOrCreateResourceTablePredicateBuilder();
+			StringPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.STRING, theSourceJoinColumn, paramName, () -> mySqlBuilder.addStringPredicateBuilder(theSourceJoinColumn)).getResult();
+
+			return createPredicateParamMissingForNonReference(resourceTablePredicateBuilder, join, theList.get(0).getMissing(), theRequestPartitionId);
 		}
+
+		StringPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.STRING, theSourceJoinColumn, paramName, () -> mySqlBuilder.addStringPredicateBuilder(theSourceJoinColumn)).getResult();
 
 		List<Condition> codePredicates = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
@@ -892,6 +898,20 @@ public class QueryStack {
 		}
 
 		return join.combineWithRequestPartitionIdPredicate(theRequestPartitionId, toOrPredicate(codePredicates));
+	}
+
+	private Condition createPredicateParamMissingForNonReference(ResourceTablePredicateBuilder theResourceTablePredicateBuilder, BaseSearchParamPredicateBuilder theJoin, Boolean theMissing, RequestPartitionId theRequestPartitionId) {
+		BinaryCondition joinCondition = BinaryCondition.equalTo(theJoin.getResourceIdColumn(), theResourceTablePredicateBuilder.getResourceIdColumn());
+
+		SelectQuery subquery = new SelectQuery();
+		subquery.addFromTable(theJoin.getTable());
+		subquery.addCustomColumns(1);
+		subquery.addCondition(joinCondition);
+		Condition unaryCondition = UnaryCondition.exists(subquery);
+		if (theMissing) {
+			unaryCondition = new NotCondition(unaryCondition);
+		}
+		return theResourceTablePredicateBuilder.combineWithRequestPartitionIdPredicate(theRequestPartitionId, unaryCondition);
 	}
 
 	public Condition createPredicateTag(@Nullable DbColumn theSourceJoinColumn, List<List<IQueryParameterType>> theList, String theParamName, RequestPartitionId theRequestPartitionId) {
@@ -1026,12 +1046,14 @@ public class QueryStack {
 		}
 
 		String paramName = getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
+		if (theList.get(0).getMissing() != null) {
+			ResourceTablePredicateBuilder resourceTablePredicateBuilder = mySqlBuilder.getOrCreateResourceTablePredicateBuilder();
+			TokenPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.TOKEN, theSourceJoinColumn, paramName, () -> mySqlBuilder.addTokenPredicateBuilder(theSourceJoinColumn)).getResult();
+
+			return createPredicateParamMissingForNonReference(resourceTablePredicateBuilder, join, theList.get(0).getMissing(), theRequestPartitionId);
+		}
 
 		TokenPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.TOKEN, theSourceJoinColumn, paramName, () -> mySqlBuilder.addTokenPredicateBuilder(theSourceJoinColumn)).getResult();
-
-		if (theList.get(0).getMissing() != null) {
-			return join.createPredicateParamMissingForNonReference(theResourceName, paramName, theList.get(0).getMissing(), theRequestPartitionId);
-		}
 
 		Condition predicate = join.createPredicateToken(tokens, theResourceName, theSpnamePrefix, theSearchParam, theOperation, theRequestPartitionId);
 		return join.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
