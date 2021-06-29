@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -30,6 +31,11 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+/**
+ * This interceptor allows JPA servers to be partitioned by Patient ID. It selects the compartment for read/create operations
+ * based on the patient ID associated with the resource (and uses a default compartment ID for any resources
+ * not in the patient compartment).
+ */
 @Interceptor
 public class PatientIdPartitionInterceptor {
 
@@ -157,21 +163,54 @@ public class PatientIdPartitionInterceptor {
 		return idPart;
 	}
 
+
+	/**
+	 * Return a partition or throw an error for FHIR operations that can not be used with this interceptor
+	 */
 	protected RequestPartitionId provideUnsupportedQueryResponse(ReadPartitionIdRequestDetails theRequestDetails) {
 		throw new InvalidRequestException("This server is not able to handle this request of type " + theRequestDetails.getRestOperationType());
 	}
 
 
+	/**
+	 * Generate the partition for a given patient resource ID. This method may be overridden in subclasses, but it
+	 * may be easier to override {@link #providePartitionIdForPatientId(RequestDetails, String)} instead.
+	 */
 	@Nonnull
-	protected RequestPartitionId provideCompartmentMemberInstanceResponse(String theResourceIdPart) {
-		return RequestPartitionId.fromPartitionId(theResourceIdPart.hashCode());
+	protected RequestPartitionId provideCompartmentMemberInstanceResponse(RequestDetails theRequestDetails, String theResourceIdPart) {
+		int partitionId = providePartitionIdForPatientId(theRequestDetails, theResourceIdPart);
+		return RequestPartitionId.fromPartitionId(partitionId);
 	}
 
+	/**
+	 * Translates an ID (e.g. "ABC") into a compartment ID number.
+	 *
+	 * The default implementation of this method returns:
+	 * <code>Math.abs(theResourceIdPart.hashCode()) % 15000</code>.
+	 *
+	 * This logic can be replaced with other logic of your choosing.
+	 */
+	@SuppressWarnings("unused")
+	protected int providePartitionIdForPatientId(RequestDetails theRequestDetails, String theResourceIdPart) {
+		return Math.abs(theResourceIdPart.hashCode()) % 15000;
+	}
+
+	/**
+	 * Return a compartment ID (or throw an exception) when an attempt is made to search for a resource that is
+	 * in the patient compartment, but without any search parameter identifying which compartment to search.
+	 *
+	 * E.g. this method will be called for the search <code>Observation?code=foo</code> since the patient
+	 * is not identified in the URL.
+	 */
 	@Nonnull
 	protected RequestPartitionId provideNonCompartmentMemberInstanceResponse(IBaseResource theResource) {
 		throw new PreconditionFailedException("Resource of type " + myFhirContext.getResourceType(theResource) + " has no values placing it in the Patient compartment");
 	}
 
+	/**
+	 * Return a compartment ID (or throw an exception) when storing/reading resource types that
+	 * are not in the patient compartment (e.g. ValueSet).
+	 */
 	@SuppressWarnings("unused")
 	@Nonnull
 	protected RequestPartitionId provideNonCompartmentMemberTypeResponse(IBaseResource theResource) {

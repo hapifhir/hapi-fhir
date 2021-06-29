@@ -261,6 +261,26 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 
 	@Test
+	public void testCreateInvalidUnquotedExtensionUrl() {
+		SearchParameter fooSp = new SearchParameter();
+		fooSp.setCode("foo");
+		fooSp.setType(Enumerations.SearchParamType.STRING);
+		fooSp.setTitle("FOO SP");
+		fooSp.setExpression("Patient.extension.where(url=http://foo).value");
+		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		fooSp.addBase("Patient");
+		try {
+			mySearchParameterDao.create(fooSp, mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("The token : is not expected here"));
+		}
+
+	}
+
+
+	@Test
 	public void testCreateInvalidNoBase() {
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.setCode("foo");
@@ -276,7 +296,6 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 			assertEquals("SearchParameter.base is missing", e.getMessage());
 		}
 	}
-
 
 
 	@Test
