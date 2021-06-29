@@ -20,11 +20,11 @@ import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,6 +34,7 @@ import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_ID;
 
 /*
  * #%L
@@ -91,10 +92,8 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
-		IBaseResource appliesToResource;
-		Collection<IIdType> appliesToResourceId = null;
-		String appliesToResourceType = null;
-		Map<String, String[]> appliesToSearchParams = null;
+		RuleTarget target = new RuleTarget();
+
 		switch (myOp) {
 			case READ:
 				if (theOutputResource == null) {
@@ -102,8 +101,8 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					switch (theOperation) {
 						case READ:
 						case VREAD:
-							appliesToResourceId = Collections.singleton(theInputResourceId);
-							appliesToResourceType = theInputResourceId.getResourceType();
+							target.resourceIds = Collections.singleton(theInputResourceId);
+							target.resourceType = theInputResourceId.getResourceType();
 							break;
 						case SEARCH_SYSTEM:
 						case HISTORY_SYSTEM:
@@ -115,47 +114,28 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							if (theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
 								return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 							}
-							appliesToResourceType = theRequestDetails.getResourceName();
-							appliesToSearchParams = theRequestDetails.getParameters();
+							target.resourceType = theRequestDetails.getResourceName();
+							target.setSearchParams(theRequestDetails);
 
 							/*
 							 * If this is a search with an "_id" parameter, we can treat this
 							 * as a read for the given resource ID(s)
 							 */
-							if (theRequestDetails.getParameters().containsKey("_id")) {
-								String[] idValues = theRequestDetails.getParameters().get("_id");
-								appliesToResourceId = new ArrayList<>();
-
-								for (String nextIdValue : idValues) {
-									QualifiedParamList orParamList = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, nextIdValue);
-									for (String next : orParamList) {
-										IIdType nextId = ctx.getVersion().newIdType().setValue(next);
-										if (nextId.hasIdPart()) {
-											if (!nextId.hasResourceType()) {
-												nextId = nextId.withResourceType(appliesToResourceType);
-											}
-											if (nextId.getResourceType().equals(appliesToResourceType)) {
-												appliesToResourceId.add(nextId);
-											}
-										}
-									}
-								}
-								if (appliesToResourceId.isEmpty()) {
-									appliesToResourceId = null;
-								}
+							if (theRequestDetails.getParameters().containsKey(SP_RES_ID)) {
+								setTargetFromResourceId(theRequestDetails, ctx, target);
 							}
 							break;
 						case HISTORY_TYPE:
 							if (theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
 								return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 							}
-							appliesToResourceType = theRequestDetails.getResourceName();
+							target.resourceType = theRequestDetails.getResourceName();
 							break;
 						case HISTORY_INSTANCE:
 							if (theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
 								return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 							}
-							appliesToResourceId = Collections.singleton(theInputResourceId);
+							target.resourceIds = Collections.singleton(theInputResourceId);
 							break;
 						case GET_PAGE:
 							return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
@@ -182,9 +162,9 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							return null;
 					}
 				}
-				appliesToResource = theOutputResource;
+				target.resource = theOutputResource;
 				if (theOutputResource != null) {
-					appliesToResourceId = Collections.singleton(theOutputResource.getIdElement());
+					target.resourceIds = Collections.singleton(theOutputResource.getIdElement());
 				}
 				break;
 			case WRITE:
@@ -198,15 +178,15 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					case DELETE_TAGS:
 					case META_ADD:
 					case META_DELETE:
-						appliesToResource = theInputResource;
+						target.resource = theInputResource;
 						if (theInputResourceId != null) {
-							appliesToResourceId = Collections.singletonList(theInputResourceId);
+							target.resourceIds = Collections.singletonList(theInputResourceId);
 						}
 						break;
 					case PATCH:
-						appliesToResource = null;
+						target.resource = null;
 						if (theInputResourceId != null) {
-							appliesToResourceId = Collections.singletonList(theInputResourceId);
+							target.resourceIds = Collections.singletonList(theInputResourceId);
 						} else {
 							return null;
 						}
@@ -220,9 +200,9 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					return null;
 				}
 				if (theOperation == RestOperationTypeEnum.CREATE) {
-					appliesToResource = theInputResource;
+					target.resource = theInputResource;
 					if (theInputResourceId != null) {
-						appliesToResourceId = Collections.singletonList(theInputResourceId);
+						target.resourceIds = Collections.singletonList(theInputResourceId);
 					}
 				} else {
 					return null;
@@ -248,130 +228,16 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 						return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 					}
 
-					appliesToResource = theInputResource;
-					appliesToResourceId = Collections.singleton(theInputResourceId);
+					target.resource = theInputResource;
+					target.resourceIds = Collections.singleton(theInputResourceId);
 				} else {
 					return null;
 				}
 				break;
 			case GRAPHQL:
-				if (theOperation == RestOperationTypeEnum.GRAPHQL_REQUEST) {
-
-					// Make sure that the requestor actually has sufficient access to see the given resource
-					if (isResourceAccess(thePointcut)) {
-						return null;
-					}
-
-					return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
-				} else {
-					return null;
-				}
+				return applyRuleToGraphQl(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, thePointcut);
 			case TRANSACTION:
-				if (!(theOperation == RestOperationTypeEnum.TRANSACTION)) {
-					return null;
-				}
-				if (theInputResource != null && requestAppliesToTransaction(ctx, myOp, theInputResource)) {
-					if (getMode() == PolicyEnum.DENY) {
-						return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
-					}
-					List<BundleEntryParts> inputResources = BundleUtil.toListOfEntries(ctx, (IBaseBundle) theInputResource);
-					Verdict verdict = null;
-
-					boolean allComponentsAreGets = true;
-					for (BundleEntryParts nextPart : inputResources) {
-
-						IBaseResource inputResource = nextPart.getResource();
-						IIdType inputResourceId = null;
-						if (isNotBlank(nextPart.getUrl())) {
-
-							UrlUtil.UrlParts parts = UrlUtil.parseUrl(nextPart.getUrl());
-
-							inputResourceId = theRequestDetails.getFhirContext().getVersion().newIdType();
-							inputResourceId.setParts(null, parts.getResourceType(), parts.getResourceId(), null);
-						}
-
-						RestOperationTypeEnum operation;
-						if (nextPart.getRequestType() == RequestTypeEnum.GET) {
-							continue;
-						} else {
-							allComponentsAreGets = false;
-						}
-						if (nextPart.getRequestType() == RequestTypeEnum.POST) {
-							operation = RestOperationTypeEnum.CREATE;
-						} else if (nextPart.getRequestType() == RequestTypeEnum.PUT) {
-							operation = RestOperationTypeEnum.UPDATE;
-						} else if (nextPart.getRequestType() == RequestTypeEnum.DELETE) {
-							operation = RestOperationTypeEnum.DELETE;
-						} else if (nextPart.getRequestType() == RequestTypeEnum.PATCH) {
-							operation = RestOperationTypeEnum.PATCH;
-						} else if (nextPart.getRequestType() == null && theRequestDetails.getServer().getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU3 && BundleUtil.isDstu3TransactionPatch(theRequestDetails.getFhirContext(), nextPart.getResource())) {
-							// This is a workaround for the fact that there is no PATCH verb in DSTU3's bundle entry verb type ValueSet.
-							// See BundleUtil#isDstu3TransactionPatch
-							operation = RestOperationTypeEnum.PATCH;
-						} else {
-
-							throw new InvalidRequestException("Can not handle transaction with operation of type " + nextPart.getRequestType());
-						}
-
-						/*
-						 * This is basically just being conservative - Be careful of transactions containing
-						 * nested operations and nested transactions. We block them by default. At some point
-						 * it would be nice to be more nuanced here.
-						 */
-						if (nextPart.getResource() != null) {
-							RuntimeResourceDefinition resourceDef = ctx.getResourceDefinition(nextPart.getResource());
-							if ("Parameters".equals(resourceDef.getName()) || "Bundle".equals(resourceDef.getName())) {
-								throw new InvalidRequestException("Can not handle transaction with nested resource of type " + resourceDef.getName());
-							}
-						}
-
-						String previousFixedConditionalUrl = theRequestDetails.getFixedConditionalUrl();
-						theRequestDetails.setFixedConditionalUrl(nextPart.getConditionalUrl());
-
-						Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(operation, theRequestDetails, inputResource, inputResourceId, null, thePointcut);
-
-						theRequestDetails.setFixedConditionalUrl(previousFixedConditionalUrl);
-
-						if (newVerdict == null) {
-							continue;
-						} else if (verdict == null) {
-							verdict = newVerdict;
-						} else if (verdict.getDecision() == PolicyEnum.ALLOW && newVerdict.getDecision() == PolicyEnum.DENY) {
-							verdict = newVerdict;
-						}
-					}
-
-					/*
-					 * If we're handling a transaction with all gets and nothing else, we'll
-					 * be applying security on the way out
-					 */
-					if (allComponentsAreGets) {
-						return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
-					}
-
-					return verdict;
-				} else if (theOutputResource != null) {
-
-					List<IBaseResource> outputResources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(theOutputResource, theRequestDetails.getFhirContext());
-
-					Verdict verdict = null;
-					for (IBaseResource nextResource : outputResources) {
-						if (nextResource == null) {
-							continue;
-						}
-						Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(RestOperationTypeEnum.READ, theRequestDetails, null, null, nextResource, thePointcut);
-						if (newVerdict == null) {
-							continue;
-						} else if (verdict == null) {
-							verdict = newVerdict;
-						} else if (verdict.getDecision() == PolicyEnum.ALLOW && newVerdict.getDecision() == PolicyEnum.DENY) {
-							verdict = newVerdict;
-						}
-					}
-					return verdict;
-				} else {
-					return null;
-				}
+				return applyRuleToTransaction(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier, thePointcut, ctx);
 			case ALL:
 				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 			case METADATA:
@@ -386,49 +252,25 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 		switch (myAppliesTo) {
 			case INSTANCES:
-				if (appliesToResourceId != null && appliesToResourceId.size() > 0) {
-					int haveMatches = 0;
-					for (IIdType requestAppliesToResource : appliesToResourceId) {
-
-						for (IIdType next : myAppliesToInstances) {
-							if (isNotBlank(next.getResourceType())) {
-								if (!next.getResourceType().equals(requestAppliesToResource.getResourceType())) {
-									continue;
-								}
-							}
-							if (!next.getIdPart().equals(requestAppliesToResource.getIdPart())) {
-								continue;
-							}
-							haveMatches++;
-							break;
-						}
-
-					}
-
-					if (haveMatches == appliesToResourceId.size()) {
-						return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
-					}
-				}
-
-				return null;
+				return applyRuleToInstances(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, target);
 			case ALL_RESOURCES:
-				if (appliesToResourceType != null) {
+				if (target.resourceType != null) {
 					if (myClassifierType == ClassifierTypeEnum.ANY_ID) {
 						return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 					}
 				}
 				break;
 			case TYPES:
-				if (appliesToResource != null) {
+				if (target.resource != null) {
 					if (myClassifierType == ClassifierTypeEnum.ANY_ID) {
-						String type = theRequestDetails.getFhirContext().getResourceType(appliesToResource);
+						String type = theRequestDetails.getFhirContext().getResourceType(target.resource);
 						if (myAppliesToTypes.contains(type) == false) {
 							return null;
 						}
 					}
 				}
-				if (appliesToResourceId != null) {
-					for (IIdType nextRequestAppliesToResourceId : appliesToResourceId) {
+				if (target.resourceIds != null) {
+					for (IIdType nextRequestAppliesToResourceId : target.resourceIds) {
 						if (nextRequestAppliesToResourceId.hasResourceType()) {
 							String nextRequestAppliesToResourceIdType = nextRequestAppliesToResourceId.getResourceType();
 							if (myAppliesToTypes.contains(nextRequestAppliesToResourceIdType) == false) {
@@ -437,8 +279,8 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 						}
 					}
 				}
-				if (appliesToResourceType != null) {
-					if (!myAppliesToTypes.contains(appliesToResourceType)) {
+				if (target.resourceType != null) {
+					if (!myAppliesToTypes.contains(target.resourceType)) {
 						return null;
 					}
 					if (myClassifierType == ClassifierTypeEnum.ANY_ID) {
@@ -456,87 +298,268 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			case ANY_ID:
 				break;
 			case IN_COMPARTMENT:
-				FhirTerser t = ctx.newTerser();
-				boolean foundMatch = false;
-
-				if (appliesToResourceId != null && appliesToResourceId.size() > 0) {
-					boolean haveOwnersForAll = appliesToResourceId
-						.stream()
-						.allMatch(n -> myClassifierCompartmentOwners.contains(n.toUnqualifiedVersionless()));
-					if (haveOwnersForAll) {
-						foundMatch = true;
-					}
-				}
-
-				for (IIdType next : myClassifierCompartmentOwners) {
-					if (appliesToResource != null) {
-						if (t.isSourceInCompartmentForTarget(myClassifierCompartmentName, appliesToResource, next)) {
-							foundMatch = true;
-							break;
-						}
-					}
-
-					/*
-					 * If the client has permission to read compartment
-					 * Patient/ABC, then a search for Patient?_id=Patient/ABC
-					 * should be permitted. This is kind of a one-off case, but
-					 * it makes sense.
-					 */
-					if (next.getResourceType().equals(appliesToResourceType)) {
-						Verdict verdict = checkForSearchParameterMatchingCompartmentAndReturnSuccessfulVerdictOrNull(appliesToSearchParams, next, IAnyResource.SP_RES_ID, theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
-						if (verdict != null) {
-							return verdict;
-						}
-					}
-
-					/*
-					 * If we're trying to read a resource that could potentially be
-					 * in the given compartment, we'll let the request through and
-					 * catch any issues on the response.
-					 *
-					 * This is less than perfect, but it's the best we can do-
-					 * If the user is allowed to see compartment "Patient/123" and
-					 * the client is requesting to read a CarePlan, there is nothing
-					 * in the request URL that indicates whether or not the CarePlan
-					 * might be in the given compartment.
-					 */
-					if (isNotBlank(appliesToResourceType)) {
-						RuntimeResourceDefinition sourceDef = theRequestDetails.getFhirContext().getResourceDefinition(appliesToResourceType);
-						String compartmentOwnerResourceType = next.getResourceType();
-						if (!StringUtils.equals(appliesToResourceType, compartmentOwnerResourceType)) {
-							List<RuntimeSearchParam> params = sourceDef.getSearchParamsForCompartmentName(compartmentOwnerResourceType);
-							if (!params.isEmpty()) {
-
-								/*
-								 * If this is a search, we can at least check whether
-								 * the client has requested a search parameter that
-								 * would match the given compartment. In this case, this
-								 * is a very effective mechanism.
-								 */
-								if (appliesToSearchParams != null && !theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
-									for (RuntimeSearchParam nextRuntimeSearchParam : params) {
-										String name = nextRuntimeSearchParam.getName();
-										Verdict verdict = checkForSearchParameterMatchingCompartmentAndReturnSuccessfulVerdictOrNull(appliesToSearchParams, next, name, theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
-										if (verdict != null) {
-											return verdict;
-										}
-									}
-								} else if (getMode() == PolicyEnum.ALLOW) {
-									return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
-								}
-							}
-						}
-					}
-				}
-				if (!foundMatch) {
-					return null;
-				}
-				break;
+				return applyRuleToCompartment(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theFlags, ctx, target);
 			default:
 				throw new IllegalStateException("Unable to apply security to event of applies to type " + myAppliesTo);
 		}
 
 		return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+	}
+
+	@Nullable
+	private Verdict applyRuleToGraphQl(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, Pointcut thePointcut) {
+		if (theOperation == RestOperationTypeEnum.GRAPHQL_REQUEST) {
+
+			// Make sure that the requestor actually has sufficient access to see the given resource
+			if (isResourceAccess(thePointcut)) {
+				return null;
+			}
+
+			return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+		} else {
+			return null;
+		}
+	}
+
+	@Nullable
+	private Verdict applyRuleToCompartment(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, Set<AuthorizationFlagsEnum> theFlags, FhirContext ctx, RuleTarget target) {
+		FhirTerser t = ctx.newTerser();
+		boolean foundMatch = false;
+
+		if (target.resourceIds != null && target.resourceIds.size() > 0) {
+			boolean haveOwnersForAll = target.resourceIds
+				.stream()
+				.allMatch(n -> myClassifierCompartmentOwners.contains(n.toUnqualifiedVersionless()));
+			if (haveOwnersForAll) {
+				foundMatch = true;
+			}
+		}
+
+		for (IIdType next : myClassifierCompartmentOwners) {
+			if (target.resource != null) {
+				if (t.isSourceInCompartmentForTarget(myClassifierCompartmentName, target.resource, next)) {
+					foundMatch = true;
+					break;
+				}
+			}
+
+			/*
+			 * If the client has permission to read compartment
+			 * Patient/ABC, then a search for Patient?_id=Patient/ABC
+			 * should be permitted. This is kind of a one-off case, but
+			 * it makes sense.
+			 */
+			if (next.getResourceType().equals(target.resourceType)) {
+				Verdict verdict = checkForSearchParameterMatchingCompartmentAndReturnSuccessfulVerdictOrNull(target.getSearchParams(), next, SP_RES_ID, theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+				if (verdict != null) {
+					return verdict;
+				}
+			}
+
+			/*
+			 * If we're trying to read a resource that could potentially be
+			 * in the given compartment, we'll let the request through and
+			 * catch any issues on the response.
+			 *
+			 * This is less than perfect, but it's the best we can do-
+			 * If the user is allowed to see compartment "Patient/123" and
+			 * the client is requesting to read a CarePlan, there is nothing
+			 * in the request URL that indicates whether or not the CarePlan
+			 * might be in the given compartment.
+			 */
+			if (isNotBlank(target.resourceType)) {
+				RuntimeResourceDefinition sourceDef = theRequestDetails.getFhirContext().getResourceDefinition(target.resourceType);
+				String compartmentOwnerResourceType = next.getResourceType();
+				if (!StringUtils.equals(target.resourceType, compartmentOwnerResourceType)) {
+					List<RuntimeSearchParam> params = sourceDef.getSearchParamsForCompartmentName(compartmentOwnerResourceType);
+					if (!params.isEmpty()) {
+
+						/*
+						 * If this is a search, we can at least check whether
+						 * the client has requested a search parameter that
+						 * would match the given compartment. In this case, this
+						 * is a very effective mechanism.
+						 */
+						if (target.getSearchParams() != null && !theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
+							for (RuntimeSearchParam nextRuntimeSearchParam : params) {
+								String name = nextRuntimeSearchParam.getName();
+								Verdict verdict = checkForSearchParameterMatchingCompartmentAndReturnSuccessfulVerdictOrNull(target.getSearchParams(), next, name, theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+								if (verdict != null) {
+									return verdict;
+								}
+							}
+						} else if (getMode() == PolicyEnum.ALLOW) {
+							return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+						}
+					}
+				}
+			}
+		}
+		if (!foundMatch) {
+			return null;
+		}
+		return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+	}
+
+	@Nullable
+	private Verdict applyRuleToInstances(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, RuleTarget target) {
+		if (target.resourceIds != null && target.resourceIds.size() > 0) {
+			int haveMatches = 0;
+			for (IIdType requestAppliesToResource : target.resourceIds) {
+
+				for (IIdType next : myAppliesToInstances) {
+					if (isNotBlank(next.getResourceType())) {
+						if (!next.getResourceType().equals(requestAppliesToResource.getResourceType())) {
+							continue;
+						}
+					}
+					if (!next.getIdPart().equals(requestAppliesToResource.getIdPart())) {
+						continue;
+					}
+					haveMatches++;
+					break;
+				}
+
+			}
+
+			if (haveMatches == target.resourceIds.size()) {
+				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+			}
+		}
+
+		return null;
+	}
+
+	@Nullable
+	private Verdict applyRuleToTransaction(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier, Pointcut thePointcut, FhirContext ctx) {
+		if (!(theOperation == RestOperationTypeEnum.TRANSACTION)) {
+			return null;
+		}
+		if (theInputResource != null && requestAppliesToTransaction(ctx, myOp, theInputResource)) {
+			if (getMode() == PolicyEnum.DENY) {
+				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+			}
+			List<BundleEntryParts> inputResources = BundleUtil.toListOfEntries(ctx, (IBaseBundle) theInputResource);
+			Verdict verdict = null;
+
+			boolean allComponentsAreGets = true;
+			for (BundleEntryParts nextPart : inputResources) {
+
+				IBaseResource inputResource = nextPart.getResource();
+				IIdType inputResourceId = null;
+				if (isNotBlank(nextPart.getUrl())) {
+
+					UrlUtil.UrlParts parts = UrlUtil.parseUrl(nextPart.getUrl());
+
+					inputResourceId = theRequestDetails.getFhirContext().getVersion().newIdType();
+					inputResourceId.setParts(null, parts.getResourceType(), parts.getResourceId(), null);
+				}
+
+				RestOperationTypeEnum operation;
+				if (nextPart.getRequestType() == RequestTypeEnum.GET) {
+					continue;
+				} else {
+					allComponentsAreGets = false;
+				}
+				if (nextPart.getRequestType() == RequestTypeEnum.POST) {
+					operation = RestOperationTypeEnum.CREATE;
+				} else if (nextPart.getRequestType() == RequestTypeEnum.PUT) {
+					operation = RestOperationTypeEnum.UPDATE;
+				} else if (nextPart.getRequestType() == RequestTypeEnum.DELETE) {
+					operation = RestOperationTypeEnum.DELETE;
+				} else if (nextPart.getRequestType() == RequestTypeEnum.PATCH) {
+					operation = RestOperationTypeEnum.PATCH;
+				} else if (nextPart.getRequestType() == null && theRequestDetails.getServer().getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU3 && BundleUtil.isDstu3TransactionPatch(theRequestDetails.getFhirContext(), nextPart.getResource())) {
+					// This is a workaround for the fact that there is no PATCH verb in DSTU3's bundle entry verb type ValueSet.
+					// See BundleUtil#isDstu3TransactionPatch
+					operation = RestOperationTypeEnum.PATCH;
+				} else {
+
+					throw new InvalidRequestException("Can not handle transaction with operation of type " + nextPart.getRequestType());
+				}
+
+				/*
+				 * This is basically just being conservative - Be careful of transactions containing
+				 * nested operations and nested transactions. We block them by default. At some point
+				 * it would be nice to be more nuanced here.
+				 */
+				if (nextPart.getResource() != null) {
+					RuntimeResourceDefinition resourceDef = ctx.getResourceDefinition(nextPart.getResource());
+					if ("Parameters".equals(resourceDef.getName()) || "Bundle".equals(resourceDef.getName())) {
+						throw new InvalidRequestException("Can not handle transaction with nested resource of type " + resourceDef.getName());
+					}
+				}
+
+				String previousFixedConditionalUrl = theRequestDetails.getFixedConditionalUrl();
+				theRequestDetails.setFixedConditionalUrl(nextPart.getConditionalUrl());
+
+				Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(operation, theRequestDetails, inputResource, inputResourceId, null, thePointcut);
+
+				theRequestDetails.setFixedConditionalUrl(previousFixedConditionalUrl);
+
+				if (newVerdict == null) {
+					continue;
+				} else if (verdict == null) {
+					verdict = newVerdict;
+				} else if (verdict.getDecision() == PolicyEnum.ALLOW && newVerdict.getDecision() == PolicyEnum.DENY) {
+					verdict = newVerdict;
+				}
+			}
+
+			/*
+			 * If we're handling a transaction with all gets and nothing else, we'll
+			 * be applying security on the way out
+			 */
+			if (allComponentsAreGets) {
+				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+			}
+
+			return verdict;
+		} else if (theOutputResource != null) {
+
+			List<IBaseResource> outputResources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(theOutputResource, theRequestDetails.getFhirContext());
+
+			Verdict verdict = null;
+			for (IBaseResource nextResource : outputResources) {
+				if (nextResource == null) {
+					continue;
+				}
+				Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(RestOperationTypeEnum.READ, theRequestDetails, null, null, nextResource, thePointcut);
+				if (newVerdict == null) {
+					continue;
+				} else if (verdict == null) {
+					verdict = newVerdict;
+				} else if (verdict.getDecision() == PolicyEnum.ALLOW && newVerdict.getDecision() == PolicyEnum.DENY) {
+					verdict = newVerdict;
+				}
+			}
+			return verdict;
+		} else {
+			return null;
+		}
+	}
+
+	private void setTargetFromResourceId(RequestDetails theRequestDetails, FhirContext ctx, RuleTarget target) {
+		String[] idValues = theRequestDetails.getParameters().get(SP_RES_ID);
+		target.resourceIds = new ArrayList<>();
+
+		for (String nextIdValue : idValues) {
+			QualifiedParamList orParamList = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, nextIdValue);
+			for (String next : orParamList) {
+				IIdType nextId = ctx.getVersion().newIdType().setValue(next);
+				if (nextId.hasIdPart()) {
+					if (!nextId.hasResourceType()) {
+						nextId = nextId.withResourceType(target.resourceType);
+					}
+					if (nextId.getResourceType().equals(target.resourceType)) {
+						target.resourceIds.add(nextId);
+					}
+				}
+			}
+		}
+		if (target.resourceIds.isEmpty()) {
+			target.resourceIds = null;
+		}
 	}
 
 	private Verdict checkForSearchParameterMatchingCompartmentAndReturnSuccessfulVerdictOrNull(Map<String, String[]> theSearchParams, IIdType theCompartmentOwner, String theSearchParamName, RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource) {
