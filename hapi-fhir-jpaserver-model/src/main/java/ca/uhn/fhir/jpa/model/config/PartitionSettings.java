@@ -94,11 +94,22 @@ public class PartitionSettings {
 		myAllowReferencesAcrossPartitions = theAllowReferencesAcrossPartitions;
 	}
 
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>), partitions will be unnamed and all IDs from {@link Integer#MIN_VALUE} through
+	 * {@link Integer#MAX_VALUE} will be allowed without needing to be created ahead of time.
+	 *
+	 * @since 5.5.0
+	 */
 	public boolean isUnnamedPartitionMode() {
 		return myUnnamedPartitionMode;
 	}
 
-	// FIXME: document
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>), partitions will be unnamed and all IDs from {@link Integer#MIN_VALUE} through
+	 * {@link Integer#MAX_VALUE} will be allowed without needing to be created ahead of time.
+	 *
+	 * @since 5.5.0
+	 */
 	public void setUnnamedPartitionMode(boolean theUnnamedPartitionMode) {
 		myUnnamedPartitionMode = theUnnamedPartitionMode;
 	}
