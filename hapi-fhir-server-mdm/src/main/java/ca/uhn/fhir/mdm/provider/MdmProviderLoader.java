@@ -49,8 +49,6 @@ public class MdmProviderLoader {
 	private IMdmExpungeSvc myMdmExpungeSvc;
 	@Autowired
 	private IMdmSubmitSvc myMdmSubmitSvc;
-	@Autowired
-	private IPagingProvider myPagingProvider;
 
 	private BaseMdmProvider myMdmProvider;
 
@@ -59,7 +57,7 @@ public class MdmProviderLoader {
 			case DSTU3:
 			case R4:
 				myResourceProviderFactory.addSupplier(() -> {
-					myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmExpungeSvc, myMdmSubmitSvc, myPagingProvider);
+					myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmExpungeSvc, myMdmSubmitSvc);
 					return myMdmProvider;
 				});
 				break;

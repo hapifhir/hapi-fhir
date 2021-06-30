@@ -31,8 +31,6 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 	private IMdmSubmitSvc myMdmSubmitSvc;
 	@Autowired
 	private MdmSettings myMdmSettings;
-	@Autowired
-	private IPagingProvider myPagingProvider;
 
 	private String defaultScript;
 
@@ -46,7 +44,7 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 
 	@BeforeEach
 	public void before() {
-		myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmExpungeSvc, myMdmSubmitSvc, myPagingProvider);
+		myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmExpungeSvc, myMdmSubmitSvc);
 		defaultScript = myMdmSettings.getScriptText();
 	}
 	@AfterEach

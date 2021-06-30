@@ -28,7 +28,6 @@ import ca.uhn.fhir.mdm.api.paging.MdmPageLinkTuple;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -39,10 +38,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.data.domain.Page;
 
-import java.util.Arrays;
-
-import static ca.uhn.fhir.rest.api.Constants.PARAM_COUNT;
-import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
 
 public abstract class BaseMdmProvider {
 
