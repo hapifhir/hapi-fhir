@@ -18,16 +18,18 @@ Or if you are making a POST request
 ```http request
 POST http://example.com/$mdm-query-links
 ```
-You could use request body
+
+With request body: 
+
 ```json
 {
   "resourceType": "Parameters",
   "parameter": [ {
     "name": "_offset",
-    "valueInt": 0
+    "valueInteger": 0
   }, {
     "name": "_count",
-    "valueInt": 2
+    "valueInteger": 2
   } ]
 }
 ```
