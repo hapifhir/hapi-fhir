@@ -6,9 +6,9 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
@@ -72,7 +72,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		try {
 			myPatientDao.create(patient);
 			fail();
-		} catch (PreconditionFailedException e) {
+		} catch (MethodNotAllowedException e) {
 			assertEquals("Resource of type Patient has no values placing it in the Patient compartment", e.getMessage());
 		}
 	}
@@ -117,8 +117,8 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		assertTrue(patient.getActive());
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(3, myCaptureQueriesListener.getSelectQueries().size());
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false,false), containsString("forcedid0_.PARTITION_ID in (?)"));
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false,false), containsString("where resourceta0_.PARTITION_ID=? and resourceta0_.RES_ID=?"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("forcedid0_.PARTITION_ID in (?)"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false), containsString("where resourceta0_.PARTITION_ID=? and resourceta0_.RES_ID=?"));
 	}
 
 	@Test
@@ -130,8 +130,8 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		assertEquals(1, outcome.size());
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(3, myCaptureQueriesListener.getSelectQueries().size());
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false,false), containsString("forcedid0_.PARTITION_ID in (?)"));
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false,false), containsString("t0.PARTITION_ID = ?"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("forcedid0_.PARTITION_ID in (?)"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false), containsString("t0.PARTITION_ID = ?"));
 	}
 
 	@Test
@@ -144,7 +144,17 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		assertEquals(1, outcome.size());
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(2, myCaptureQueriesListener.getSelectQueries().size());
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false,false), containsString("SELECT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.PARTITION_ID = ?)"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("SELECT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.PARTITION_ID = ?)"));
+
+		// Typed
+		myCaptureQueriesListener.clear();
+		ReferenceParam referenceParam = new ReferenceParam();
+		referenceParam.setValueAsQueryToken(myFhirCtx, "subject", ":Patient", "A");
+		outcome = myObservationDao.search(SearchParameterMap.newSynchronous("subject", referenceParam), mySrd);
+		assertEquals(1, outcome.size());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(2, myCaptureQueriesListener.getSelectQueries().size());
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("SELECT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.PARTITION_ID = ?)"));
 	}
 
 	@Test
@@ -155,9 +165,57 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		myCaptureQueriesListener.clear();
 		try {
 			myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd);
-		} catch (InvalidRequestException e) {
+		} catch (MethodNotAllowedException e) {
 			assertEquals("This server is not able to handle this request of type SEARCH_TYPE", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testSearchObservation_MultipleCompartmentMembership() {
+		createPatientA();
+		createObservationB();
+
+		// Multiple ANDs
+		try {
+			myObservationDao.search(SearchParameterMap.newSynchronous()
+					.add("subject", new TokenParam("http://foo", "1"))
+					.add("subject", new TokenParam("http://foo", "2"))
+				, mySrd);
+		} catch (MethodNotAllowedException e) {
+			assertEquals("Multiple values for parameter subject is not supported in patient compartment mode", e.getMessage());
+		}
+
+		// Multiple ORs
+		try {
+			myObservationDao.search(SearchParameterMap.newSynchronous()
+				.add(
+					"subject", new TokenOrListParam("http://foo", "1", "2")
+				), mySrd);
+		} catch (MethodNotAllowedException e) {
+			assertEquals("Multiple values for parameter subject is not supported in patient compartment mode", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testSearchObservation_ChainedValue() {
+		createPatientA();
+		createObservationB();
+
+		// Chain
+		try {
+			myObservationDao.search(SearchParameterMap.newSynchronous().add("subject", new ReferenceParam("identifier", "http://foo|123")), mySrd);
+		} catch (MethodNotAllowedException e) {
+			assertEquals("The parameter subject.identifier is not supported in patient compartment mode", e.getMessage());
+		}
+
+
+		// Missing
+		try {
+			myObservationDao.search(SearchParameterMap.newSynchronous().add("subject", new ReferenceParam("Patient/ABC").setMdmExpand(true)), mySrd);
+		} catch (MethodNotAllowedException e) {
+			assertEquals("The parameter subject:mdm is not supported in patient compartment mode", e.getMessage());
+		}
+
 	}
 
 	/**
@@ -172,7 +230,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		assertEquals(1, outcome.size());
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(2, myCaptureQueriesListener.getSelectQueries().size());
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false,false), containsString("t0.PARTITION_ID = ?"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("t0.PARTITION_ID = ?"));
 	}
 
 	private void createOrganizationC() {

@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -165,11 +166,12 @@ public class PatientIdPartitionInterceptor {
 			if (idParamOrList.size() == 1) {
 				IQueryParameterType idParam = idParamOrList.get(0);
 				if (isNotBlank(idParam.getQueryParameterQualifier())) {
-					return null;
+					throw new MethodNotAllowedException("The parameter " + theParamName + idParam.getQueryParameterQualifier() + " is not supported in patient compartment mode");
 				}
 				if (idParam instanceof ReferenceParam) {
-					if (((ReferenceParam) idParam).getChain() != null) {
-						return null;
+					String chain = ((ReferenceParam) idParam).getChain();
+					if (chain != null) {
+						throw new MethodNotAllowedException("The parameter " + theParamName + "." + chain + " is not supported in patient compartment mode");
 					}
 				}
 
@@ -177,7 +179,11 @@ public class PatientIdPartitionInterceptor {
 				if (!id.hasResourceType() || id.getResourceType().equals(theResourceType)) {
 					idPart = id.getIdPart();
 				}
+			} else if (idParamOrList.size() > 1) {
+				throw new MethodNotAllowedException("Multiple values for parameter " + theParamName + " is not supported in patient compartment mode");
 			}
+		} else if (idParamAndList != null && idParamAndList.size() > 1) {
+			throw new MethodNotAllowedException("Multiple values for parameter " + theParamName + " is not supported in patient compartment mode");
 		}
 		return idPart;
 	}
@@ -187,7 +193,7 @@ public class PatientIdPartitionInterceptor {
 	 * Return a partition or throw an error for FHIR operations that can not be used with this interceptor
 	 */
 	protected RequestPartitionId provideUnsupportedQueryResponse(ReadPartitionIdRequestDetails theRequestDetails) {
-		throw new InvalidRequestException("This server is not able to handle this request of type " + theRequestDetails.getRestOperationType());
+		throw new MethodNotAllowedException("This server is not able to handle this request of type " + theRequestDetails.getRestOperationType());
 	}
 
 
@@ -223,7 +229,7 @@ public class PatientIdPartitionInterceptor {
 	 */
 	@Nonnull
 	protected RequestPartitionId provideNonCompartmentMemberInstanceResponse(IBaseResource theResource) {
-		throw new PreconditionFailedException("Resource of type " + myFhirContext.getResourceType(theResource) + " has no values placing it in the Patient compartment");
+		throw new MethodNotAllowedException("Resource of type " + myFhirContext.getResourceType(theResource) + " has no values placing it in the Patient compartment");
 	}
 
 	/**

@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
@@ -43,6 +44,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 	@AfterEach
 	public void disablePartitioning() {
 		myPartitionSettings.setPartitioningEnabled(false);
+		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
 		myInterceptorService.unregisterInterceptor(myRequestTenantPartitionInterceptor);
 	}
 
