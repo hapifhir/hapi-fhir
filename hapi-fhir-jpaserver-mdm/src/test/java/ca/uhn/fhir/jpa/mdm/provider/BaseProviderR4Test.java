@@ -7,6 +7,7 @@ import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.provider.MdmProviderDstu3Plus;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -29,6 +30,8 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 	private IMdmSubmitSvc myMdmSubmitSvc;
 	@Autowired
 	private MdmSettings myMdmSettings;
+	@Autowired
+	private IRestfulServerDefaults myRestfulServerDefaults;
 
 	private String defaultScript;
 
@@ -42,7 +45,7 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 
 	@BeforeEach
 	public void before() {
-		myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmExpungeSvc, myMdmSubmitSvc);
+		myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmExpungeSvc, myMdmSubmitSvc, myRestfulServerDefaults);
 		defaultScript = myMdmSettings.getScriptText();
 	}
 	@AfterEach

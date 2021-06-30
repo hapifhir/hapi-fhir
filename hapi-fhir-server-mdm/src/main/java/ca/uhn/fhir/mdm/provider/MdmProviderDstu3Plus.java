@@ -28,6 +28,7 @@ import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
+import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -35,6 +36,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -52,6 +54,8 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
+import org.springframework.data.domain.Page;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
@@ -59,17 +63,19 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
 
-import static ca.uhn.fhir.rest.api.Constants.PARAM_COUNT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class MdmProviderDstu3Plus extends BaseMdmProvider {
+	private static final Logger ourLog = getLogger(MdmProviderDstu3Plus.class);
+
 
 	private final IMdmControllerSvc myMdmControllerSvc;
 	private final IMdmMatchFinderSvc myMdmMatchFinderSvc;
 	private final IMdmExpungeSvc myMdmExpungeSvc;
 	private final IMdmSubmitSvc myMdmSubmitSvc;
+	private final IRestfulServerDefaults myRestfulServerDefaults;
 
 	/**
 	 * Constructor
@@ -77,12 +83,13 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	 * Note that this is not a spring bean. Any necessary injections should
 	 * happen in the constructor
 	 */
-	public MdmProviderDstu3Plus(FhirContext theFhirContext, IMdmControllerSvc theMdmControllerSvc, IMdmMatchFinderSvc theMdmMatchFinderSvc, IMdmExpungeSvc theMdmExpungeSvc, IMdmSubmitSvc theMdmSubmitSvc) {
+	public MdmProviderDstu3Plus(FhirContext theFhirContext, IMdmControllerSvc theMdmControllerSvc, IMdmMatchFinderSvc theMdmMatchFinderSvc, IMdmExpungeSvc theMdmExpungeSvc, IMdmSubmitSvc theMdmSubmitSvc, IRestfulServerDefaults theRestfulServerDefaults) {
 		super(theFhirContext);
 		myMdmControllerSvc = theMdmControllerSvc;
 		myMdmMatchFinderSvc = theMdmMatchFinderSvc;
 		myMdmExpungeSvc = theMdmExpungeSvc;
 		myMdmSubmitSvc = theMdmSubmitSvc;
+		myRestfulServerDefaults = theRestfulServerDefaults;
 	}
 
 	@Operation(name = ProviderConstants.EMPI_MATCH, typeName = "Patient")
@@ -199,40 +206,38 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 														 IPrimitiveType<String> theLinkSource,
 
 												 @Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
-												 @OperationParam(name = PARAM_OFFSET)
+												 @OperationParam(name = PARAM_OFFSET, min = 0, max = 1)
 														 UnsignedIntType theOffset,
 												 @Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
-												 @OperationParam(name = Constants.PARAM_COUNT)
+												 @OperationParam(name = Constants.PARAM_COUNT, min = 0, max = 1)
 														 UnsignedIntType theCount,
 
 												 ServletRequestDetails theRequestDetails) {
-		validatePagingParameters(theOffset, theCount);
-
-		Stream<MdmLinkJson> mdmLinkJson = myMdmControllerSvc.queryLinks(extractStringOrNull(theGoldenResourceId),
+		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, myRestfulServerDefaults);
+		Page<MdmLinkJson> mdmLinkJson = myMdmControllerSvc.queryLinks(extractStringOrNull(theGoldenResourceId),
 			extractStringOrNull(theResourceId), extractStringOrNull(theMatchResult), extractStringOrNull(theLinkSource),
 			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.QUERY_LINKS,
-				getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId)), theOffset.getValue(), theCount.getValue()
-		);
-		return parametersFromMdmLinks(mdmLinkJson, true);
+				getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId)), mdmPageRequest);
+
+		return parametersFromMdmLinks(mdmLinkJson, true, theRequestDetails, mdmPageRequest);
 	}
 
-	private void validatePagingParameters(UnsignedIntType theOffset, UnsignedIntType theCount) {
-		String errorMessage = "";
-		if (theOffset!= null && theOffset.getValue() < 0) {
-				errorMessage += PARAM_OFFSET + " must be greater than or equal to 0. ";
-		}
-		if (theCount != null && theCount.getValue() <= 0 ) {
-			errorMessage += PARAM_COUNT + " must be greater than 0.";
-		}
-		if (StringUtils.isNotEmpty(errorMessage)) {
-			throw new InvalidRequestException(errorMessage);
-		}
-	}
 
 	@Operation(name = ProviderConstants.MDM_DUPLICATE_GOLDEN_RESOURCES, idempotent = true)
-	public IBaseParameters getDuplicateGoldenResources(ServletRequestDetails theRequestDetails) {
-		Stream<MdmLinkJson> possibleDuplicates = myMdmControllerSvc.getDuplicateGoldenResources(createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.DUPLICATE_GOLDEN_RESOURCES, (String) null),0,10);
-		return parametersFromMdmLinks(possibleDuplicates, false);
+	public IBaseParameters getDuplicateGoldenResources(
+		@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
+		@OperationParam(name = PARAM_OFFSET, min = 0, max = 1)
+			UnsignedIntType theOffset,
+		@Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
+		@OperationParam(name = Constants.PARAM_COUNT, min = 0, max = 1)
+			UnsignedIntType theCount,
+		ServletRequestDetails theRequestDetails) {
+
+		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, myRestfulServerDefaults);
+
+		Page<MdmLinkJson> possibleDuplicates = myMdmControllerSvc.getDuplicateGoldenResources(createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.DUPLICATE_GOLDEN_RESOURCES, (String) null), mdmPageRequest);
+
+		return parametersFromMdmLinks(possibleDuplicates, false, theRequestDetails, mdmPageRequest);
 	}
 
 	@Operation(name = ProviderConstants.MDM_NOT_DUPLICATE)
@@ -260,7 +265,6 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		ServletRequestDetails theRequestDetails) {
 		String criteria = convertStringTypeToString(theCriteria);
 		String resourceType = convertStringTypeToString(theResourceType);
-
 		long submittedCount;
 		if (resourceType != null) {
 			submittedCount = myMdmSubmitSvc.submitSourceResourceTypeToMdm(resourceType, criteria);

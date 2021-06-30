@@ -20,15 +20,15 @@ package ca.uhn.fhir.mdm.api;
  * #L%
  */
 
+import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import org.hl7.fhir.instance.model.api.IIdType;
-
-import java.util.stream.Stream;
+import org.springframework.data.domain.Page;
 
 /**
  * This service supports the MDM operation providers for those services that return multiple MDM links.
  */
 public interface IMdmLinkQuerySvc {
-	Stream<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, int theOffset, int theCount);
-	Stream<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, int theOffset, int theCount);
+	Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest);
+	Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest);
 }

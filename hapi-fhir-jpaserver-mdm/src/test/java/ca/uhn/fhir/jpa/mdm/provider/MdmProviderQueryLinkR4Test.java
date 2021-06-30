@@ -90,7 +90,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 			ourLog.warn("Search at offset {} took {}ms",offset, sw.getMillisAndRestart());
 			ourLog.warn("Found source resource IDs: {}", sourceResourceIds);
 			offset += count;
-			assertThat(parameter.size(), is(lessThanOrEqualTo(2)));
+			assertThat(parameter.size(), is(lessThanOrEqualTo(3)));
 
 			//We have stopped finding patients.
 			if (StringUtils.isEmpty(sourceResourceIds)) {

@@ -24,6 +24,7 @@ import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
+import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
@@ -35,8 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 
-import java.util.stream.Stream;
-
 public class MdmLinkQuerySvcImpl implements IMdmLinkQuerySvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmLinkQuerySvcImpl.class);
@@ -47,16 +46,19 @@ public class MdmLinkQuerySvcImpl implements IMdmLinkQuerySvc {
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
 
 	@Override
-	public Stream<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, int theOffset, int theCount) {
+	public Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest) {
 		Example<MdmLink> exampleLink = exampleLinkFromParameters(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource);
-		Page<MdmLink> mdmLinkByExample = myMdmLinkDaoSvc.findMdmLinkByExample(exampleLink, theOffset, theCount);
-		return mdmLinkByExample.stream().map(this::toJson);
+		Page<MdmLink> mdmLinkByExample = myMdmLinkDaoSvc.findMdmLinkByExample(exampleLink, thePageRequest);
+		Page<MdmLinkJson> map = mdmLinkByExample.map(this::toJson);
+		return map;
 	}
 
 	@Override
-	public Stream<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, int theOffset, int theCount) {
+	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest) {
 		Example<MdmLink> exampleLink = exampleLinkFromParameters(null, null, MdmMatchResultEnum.POSSIBLE_DUPLICATE, null);
-		return myMdmLinkDaoSvc.findMdmLinkByExample(exampleLink, theOffset, theCount).stream().map(this::toJson);
+		Page<MdmLink> mdmLinkPage = myMdmLinkDaoSvc.findMdmLinkByExample(exampleLink, thePageRequest);
+		Page<MdmLinkJson> map = mdmLinkPage.map(this::toJson);
+		return map;
 	}
 
 	private MdmLinkJson toJson(MdmLink theLink) {
