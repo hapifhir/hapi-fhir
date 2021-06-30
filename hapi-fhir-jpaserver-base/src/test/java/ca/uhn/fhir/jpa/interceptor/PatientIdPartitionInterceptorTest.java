@@ -73,7 +73,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 			myPatientDao.create(patient);
 			fail();
 		} catch (MethodNotAllowedException e) {
-			assertEquals("Resource of type Patient has no values placing it in the Patient compartment", e.getMessage());
+			assertEquals("Patient resource IDs must be client-assigned in patient compartment mode", e.getMessage());
 		}
 	}
 

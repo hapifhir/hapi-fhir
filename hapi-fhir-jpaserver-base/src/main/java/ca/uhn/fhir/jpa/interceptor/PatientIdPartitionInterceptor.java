@@ -89,6 +89,9 @@ public class PatientIdPartitionInterceptor {
 		String compartmentIdentity;
 		if (resourceDef.getName().equals("Patient")) {
 			compartmentIdentity = theResource.getIdElement().getIdPart();
+			if (isBlank(compartmentIdentity)) {
+				throw new MethodNotAllowedException("Patient resource IDs must be client-assigned in patient compartment mode");
+			}
 		} else {
 			IFhirPath fhirPath = myFhirContext.newFhirPath();
 			compartmentIdentity = compartmentSps
@@ -103,11 +106,11 @@ public class PatientIdPartitionInterceptor {
 				.filter(t -> isNotBlank(t))
 				.findFirst()
 				.orElse(null);
+			if (isBlank(compartmentIdentity)) {
+				return provideNonCompartmentMemberInstanceResponse(theResource);
+			}
 		}
 
-		if (isBlank(compartmentIdentity)) {
-			return provideNonCompartmentMemberInstanceResponse(theResource);
-		}
 
 		return provideCompartmentMemberInstanceResponse(theRequestDetails, compartmentIdentity);
 	}
