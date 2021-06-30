@@ -24,12 +24,17 @@ public class MdmPageRequest {
 	private final int myOffset;
 	private final int myCount;
 
-	public MdmPageRequest(@Nullable UnsignedIntType theOffset, @Nullable UnsignedIntType theCount, IPagingProvider thePagingProvider) {
+	public MdmPageRequest(@Nullable UnsignedIntType theOffset, @Nullable UnsignedIntType theCount, int theDefaultPageSize, int theMaximumPageSize) {
 		myOffset = theOffset == null ? 0 : theOffset.getValue();
-		myCount = theCount == null
-			? thePagingProvider.getDefaultPageSize() : theCount.getValue() > thePagingProvider.getMaximumPageSize()
-			? thePagingProvider.getMaximumPageSize() : theCount.getValue();
+		myCount = theCount == null ? theDefaultPageSize : Math.min(theCount.getValue(), theMaximumPageSize);
+		validatePagingParameters(myOffset, myCount);
 
+		this.myPage = myOffset / myCount;
+	}
+
+	public MdmPageRequest(@Nullable Integer theOffset, @Nullable Integer theCount, int theDefaultPageSize, int theMaximumPageSize) {
+		myOffset = theOffset == null ? 0 : theOffset;
+		myCount = theCount == null ? theDefaultPageSize : Math.min(theCount, theMaximumPageSize);
 		validatePagingParameters(myOffset, myCount);
 
 		this.myPage = myOffset / myCount;

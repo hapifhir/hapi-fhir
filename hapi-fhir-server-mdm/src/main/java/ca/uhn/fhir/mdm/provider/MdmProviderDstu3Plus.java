@@ -213,7 +213,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 														 UnsignedIntType theCount,
 
 												 ServletRequestDetails theRequestDetails) {
-		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, myPagingProvider);
+		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, myPagingProvider.getDefaultPageSize(), myPagingProvider.getMaximumPageSize());
 		Page<MdmLinkJson> mdmLinkJson = myMdmControllerSvc.queryLinks(extractStringOrNull(theGoldenResourceId),
 			extractStringOrNull(theResourceId), extractStringOrNull(theMatchResult), extractStringOrNull(theLinkSource),
 			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.QUERY_LINKS,
@@ -233,7 +233,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			UnsignedIntType theCount,
 		ServletRequestDetails theRequestDetails) {
 
-		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, myPagingProvider);
+		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, myPagingProvider.getDefaultPageSize(), myPagingProvider.getMaximumPageSize());
 
 		Page<MdmLinkJson> possibleDuplicates = myMdmControllerSvc.getDuplicateGoldenResources(createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.DUPLICATE_GOLDEN_RESOURCES, (String) null), mdmPageRequest);
 
