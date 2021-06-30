@@ -40,7 +40,7 @@ public class FlywayMigrator extends BaseMigrator {
 	private static final Logger ourLog = LoggerFactory.getLogger(FlywayMigrator.class);
 
 	private final String myMigrationTableName;
-	private List<FlywayMigrationTask> myTasks = new ArrayList<>();
+	private final List<FlywayMigrationTask> myTasks = new ArrayList<>();
 
 	public FlywayMigrator(String theMigrationTableName, DataSource theDataSource, DriverTypeEnum theDriverType) {
 		this(theMigrationTableName);
@@ -76,7 +76,8 @@ public class FlywayMigrator extends BaseMigrator {
 			.table(myMigrationTableName)
 			.dataSource(theConnectionProperties.getDataSource())
 			.baselineOnMigrate(true)
-			.outOfOrder(isOutOfOrderPermitted())
+			// By default, migrations are allowed to be run out of order.  You can enforce strict order by setting strictOrder=true.
+			.outOfOrder(!isStrictOrder())
 			.javaMigrations(myTasks.toArray(new JavaMigration[0]))
 			.callbacks(getCallbacks().toArray(new Callback[0]))
 			.load();
