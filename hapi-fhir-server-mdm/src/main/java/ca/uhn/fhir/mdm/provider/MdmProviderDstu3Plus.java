@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -75,7 +76,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	private final IMdmMatchFinderSvc myMdmMatchFinderSvc;
 	private final IMdmExpungeSvc myMdmExpungeSvc;
 	private final IMdmSubmitSvc myMdmSubmitSvc;
-	private final IRestfulServerDefaults myRestfulServerDefaults;
+	private final IPagingProvider myPagingProvider;
 
 	/**
 	 * Constructor
@@ -83,13 +84,13 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	 * Note that this is not a spring bean. Any necessary injections should
 	 * happen in the constructor
 	 */
-	public MdmProviderDstu3Plus(FhirContext theFhirContext, IMdmControllerSvc theMdmControllerSvc, IMdmMatchFinderSvc theMdmMatchFinderSvc, IMdmExpungeSvc theMdmExpungeSvc, IMdmSubmitSvc theMdmSubmitSvc, IRestfulServerDefaults theRestfulServerDefaults) {
+	public MdmProviderDstu3Plus(FhirContext theFhirContext, IMdmControllerSvc theMdmControllerSvc, IMdmMatchFinderSvc theMdmMatchFinderSvc, IMdmExpungeSvc theMdmExpungeSvc, IMdmSubmitSvc theMdmSubmitSvc, IPagingProvider thePagingProvider) {
 		super(theFhirContext);
 		myMdmControllerSvc = theMdmControllerSvc;
 		myMdmMatchFinderSvc = theMdmMatchFinderSvc;
 		myMdmExpungeSvc = theMdmExpungeSvc;
 		myMdmSubmitSvc = theMdmSubmitSvc;
-		myRestfulServerDefaults = theRestfulServerDefaults;
+		myPagingProvider = thePagingProvider;
 	}
 
 	@Operation(name = ProviderConstants.EMPI_MATCH, typeName = "Patient")
@@ -213,7 +214,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 														 UnsignedIntType theCount,
 
 												 ServletRequestDetails theRequestDetails) {
-		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, myRestfulServerDefaults);
+		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, myPagingProvider);
 		Page<MdmLinkJson> mdmLinkJson = myMdmControllerSvc.queryLinks(extractStringOrNull(theGoldenResourceId),
 			extractStringOrNull(theResourceId), extractStringOrNull(theMatchResult), extractStringOrNull(theLinkSource),
 			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.QUERY_LINKS,
@@ -233,7 +234,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			UnsignedIntType theCount,
 		ServletRequestDetails theRequestDetails) {
 
-		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, myRestfulServerDefaults);
+		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, myPagingProvider);
 
 		Page<MdmLinkJson> possibleDuplicates = myMdmControllerSvc.getDuplicateGoldenResources(createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.DUPLICATE_GOLDEN_RESOURCES, (String) null), mdmPageRequest);
 

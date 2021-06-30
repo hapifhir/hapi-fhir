@@ -1,5 +1,6 @@
 package ca.uhn.fhir.mdm.api.paging;
 
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.StringUtils;
@@ -17,11 +18,17 @@ public class MdmPageRequest {
 	private int myPage;
 	private int myOffset;
 	private int myCount;
-	private IRestfulServerDefaults myRestfulServerDefaults;
+	private IPagingProvider	myPagingProvider;
 
-	public MdmPageRequest(UnsignedIntType theOffset, UnsignedIntType theCount, IRestfulServerDefaults theDefaults) {
+	public MdmPageRequest(UnsignedIntType theOffset, UnsignedIntType theCount, IPagingProvider thePagingProvider) {
+		myPagingProvider = thePagingProvider;
 		myOffset = theOffset == null ? 0 : theOffset.getValue();
-		myCount = theCount == null ? theDefaults.getDefaultPageSize() : theCount.getValue();
+		myCount = theCount == null ? myPagingProvider.getDefaultPageSize() : theCount.getValue();
+
+		if (myCount > myPagingProvider.getMaximumPageSize()) {
+			ourLog.debug("Reducing count {} to paging provider's maximum of {}", theCount, myPagingProvider.getMaximumPageSize());
+			myCount = myPagingProvider.getMaximumPageSize();
+		}
 		validatePagingParameters(myOffset, myCount);
 
 		this.myPage = myOffset / myCount;
@@ -39,9 +46,6 @@ public class MdmPageRequest {
 		}
 		if (theCount <= 0 ) {
 			errorMessage += PARAM_COUNT + " must be greater than 0.";
-		}
-		if (myRestfulServerDefaults.getMaximumPageSize() != null && theCount > myRestfulServerDefaults.getMaximumPageSize() ) {
-			ourLog.debug("Shrinking page size down to {}, as this is the maximum allowed.", myRestfulServerDefaults.getMaximumPageSize());
 		}
 		if (StringUtils.isNotEmpty(errorMessage)) {
 			throw new InvalidRequestException(errorMessage);

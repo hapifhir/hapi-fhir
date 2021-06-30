@@ -122,13 +122,15 @@ public abstract class BaseMdmProvider {
 
 	protected void addPagingParameters(IBaseParameters theParameters, Page<MdmLinkJson> theCurrentPage, ServletRequestDetails theServletRequestDetails, MdmPageRequest thePageRequest) {
 		MdmPageLinkTuple mdmPageLinkTuple = MdmPageLinkBuilder.buildMdmPageLinks(theServletRequestDetails, theCurrentPage, thePageRequest);
+
+		if (mdmPageLinkTuple.getPreviousLink().isPresent()) {
+			ParametersUtil.addParameterToParametersUri(myFhirContext, theParameters, "prev", mdmPageLinkTuple.getPreviousLink().get());
+		}
+
 		ParametersUtil.addParameterToParametersUri(myFhirContext, theParameters, "self", mdmPageLinkTuple.getSelfLink());
 
 		if (mdmPageLinkTuple.getNextLink().isPresent()) {
 			ParametersUtil.addParameterToParametersUri(myFhirContext, theParameters, "next", mdmPageLinkTuple.getNextLink().get());
-		}
-		if (mdmPageLinkTuple.getPreviousLink().isPresent()) {
-			ParametersUtil.addParameterToParametersUri(myFhirContext, theParameters, "prev", mdmPageLinkTuple.getPreviousLink().get());
 		}
 	}
 }

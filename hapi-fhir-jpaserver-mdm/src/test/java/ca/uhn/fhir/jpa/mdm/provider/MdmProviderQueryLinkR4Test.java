@@ -11,12 +11,14 @@ import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Type;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -86,17 +88,36 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		while (true)  {
 			Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, myLinkSource, new UnsignedIntType(offset), new UnsignedIntType(count), myRequestDetails);
 			List<Parameters.ParametersParameterComponent> parameter = result.getParameter();
-			String sourceResourceIds = parameter.stream().flatMap(p -> p.getPart().stream()).filter(part -> part.getName().equals("sourceResourceId")).map(part -> part.getValue().toString()).collect(Collectors.joining(","));
-			ourLog.warn("Search at offset {} took {}ms",offset, sw.getMillisAndRestart());
-			ourLog.warn("Found source resource IDs: {}", sourceResourceIds);
-			offset += count;
-			assertThat(parameter.size(), is(lessThanOrEqualTo(3)));
 
-			//We have stopped finding patients.
+
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
+			List<Parameters.ParametersParameterComponent> previousUrl = getParametersByName(result, "prev");
+			if (offset == 0) {
+				assertThat(previousUrl, hasSize(0));
+			} else {
+				assertThat(previousUrl, hasSize(1));
+			}
+
+			String sourceResourceIds = parameter.stream().flatMap(p -> p.getPart().stream()).filter(part -> part.getName().equals("sourceResourceId")).map(part -> part.getValue().toString()).collect(Collectors.joining(","));
+			ourLog.warn("Search at offset {} took {} ms",offset, sw.getMillisAndRestart());
+			ourLog.warn("Found source resource IDs: {}", sourceResourceIds);
+			List<Parameters.ParametersParameterComponent> mdmLink = getParametersByName(result, "link");
+			assertThat(mdmLink.size(), is(lessThanOrEqualTo(2)));
+
+			List<Parameters.ParametersParameterComponent> selfUrl = getParametersByName(result, "self");
+			assertThat(selfUrl.size(), is(equalTo(1)));
+			//We have stopped finding patients, make sure theres no next page
 			if (StringUtils.isEmpty(sourceResourceIds)) {
+				List<Parameters.ParametersParameterComponent> nextUrl= getParametersByName(result, "next");
+				assertThat(nextUrl.size(), is(equalTo(0)));
 				break;
 			}
+			offset += count;
 		}
+	}
+
+	private List<Parameters.ParametersParameterComponent> getParametersByName(Parameters theParams, String theName) {
+		return theParams.getParameter().stream().filter(p -> p.getName().equals(theName)).collect(Collectors.toList());
 	}
 
 	@Test
@@ -168,7 +189,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 
 	@Test
 	public void testQueryPossibleDuplicates() {
-		Parameters result = (Parameters) myMdmProvider.getDuplicateGoldenResources(myRequestDetails);
+		Parameters result = (Parameters) myMdmProvider.getDuplicateGoldenResources(new UnsignedIntType(0), new UnsignedIntType(10),myRequestDetails);
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 		List<Parameters.ParametersParameterComponent> list = result.getParameter();
 		assertThat(list, hasSize(1));
@@ -179,7 +200,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testNotDuplicate() {
 		{
-			Parameters result = (Parameters) myMdmProvider.getDuplicateGoldenResources(myRequestDetails);
+			Parameters result = (Parameters) myMdmProvider.getDuplicateGoldenResources(new UnsignedIntType(0), new UnsignedIntType(10),myRequestDetails);
 			List<Parameters.ParametersParameterComponent> list = result.getParameter();
 			assertThat(list, hasSize(1));
 		}
@@ -190,7 +211,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 			assertTrue(((BooleanType) (result.getParameterFirstRep().getValue())).booleanValue());
 		}
 
-		Parameters result = (Parameters) myMdmProvider.getDuplicateGoldenResources(myRequestDetails);
+		Parameters result = (Parameters) myMdmProvider.getDuplicateGoldenResources(new UnsignedIntType(0), new UnsignedIntType(10),myRequestDetails);
 		List<Parameters.ParametersParameterComponent> list = result.getParameter();
 		assertThat(list, hasSize(0));
 	}
