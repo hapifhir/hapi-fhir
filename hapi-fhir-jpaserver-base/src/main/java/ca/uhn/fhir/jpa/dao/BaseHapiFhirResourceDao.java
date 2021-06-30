@@ -40,7 +40,6 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
@@ -180,8 +179,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private Class<T> myResourceType;
 
 	@Autowired
-	private IRequestPartitionHelperSvc myPartitionHelperSvc;
-	@Autowired
 	private MemoryCacheService myMemoryCacheService;
 	private TransactionTemplate myTxTemplate;
 
@@ -260,7 +257,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
-		entity.setPartitionId(myPartitionHelperSvc.toStoragePartition(theRequestPartitionId));
+		entity.setPartitionId(myRequestPartitionHelperService.toStoragePartition(theRequestPartitionId));
 		entity.setCreatedByMatchUrl(theIfNoneExist);
 		entity.setVersion(1);
 
@@ -1219,11 +1216,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (requestPartitionId.isAllPartitions()) {
 			entity = myEntityManager.find(ResourceTable.class, pid.getIdAsLong());
 		} else {
-			PartitionablePartitionId storagePartition = myPartitionHelperSvc.toStoragePartition(requestPartitionId);
-			if (storagePartition.getPartitionId() == null) {
-				entity = myResourceTableDao.readByPartitionIdNull(pid.getIdAsLong()).orElse(null);
+			Set<Integer> readPartitions = myRequestPartitionHelperService.toReadPartitions(requestPartitionId);
+			if (readPartitions.size() == 1) {
+				if (readPartitions.contains(null)) {
+					entity = myResourceTableDao.readByPartitionIdNull(pid.getIdAsLong()).orElse(null);
+				} else {
+					entity = myResourceTableDao.readByPartitionId(readPartitions.iterator().next(), pid.getIdAsLong()).orElse(null);
+				}
 			} else {
-				entity = myResourceTableDao.readByPartitionId(storagePartition.getPartitionId(), pid.getIdAsLong()).orElse(null);
+				if (readPartitions.contains(null)) {
+					List<Integer> readPartitionsWithoutNull = readPartitions.stream().filter(t -> t != null).collect(Collectors.toList());
+					entity = myResourceTableDao.readByPartitionIdsOrNull(readPartitionsWithoutNull, pid.getIdAsLong()).orElse(null);
+				} else {
+					entity = myResourceTableDao.readByPartitionIds(readPartitions, pid.getIdAsLong()).orElse(null);
+				}
 			}
 		}
 
@@ -1402,7 +1408,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			cacheControlDirective.parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL));
 		}
 
-		RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequest, getResourceName(), theParams);
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequest, getResourceName(), theParams);
 		IBundleProvider retVal = mySearchCoordinatorSvc.registerSearch(this, theParams, getResourceName(), cacheControlDirective, theRequest, requestPartitionId);
 
 		if (retVal instanceof PersistedJpaBundleProvider) {

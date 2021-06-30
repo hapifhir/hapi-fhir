@@ -610,8 +610,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		createUniqueCompositeSp();
 		createRequestId();
 
-		addReadPartition(myPartitionId);
-		addReadPartition(myPartitionId);
+		addCreatePartition(myPartitionId, myPartitionDate);
+		addCreatePartition(myPartitionId, myPartitionDate);
 		addCreatePartition(myPartitionId, myPartitionDate);
 		addCreatePartition(myPartitionId, myPartitionDate);
 
@@ -812,8 +812,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			ourLog.info("Search SQL:\n{}", searchSql);
 
 			// Only the read columns should be used, no criteria use partition
-			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID as "));
-			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID as "), searchSql);
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID='1'"), searchSql);
 		}
 
 		// Read in null Partition
@@ -849,6 +849,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		// Two partitions - Found
 		{
 			myCaptureQueriesListener.clear();
+			myPartitionInterceptor.assertNoRemainingIds();
 			myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionNames(PARTITION_1, PARTITION_2));
 			IdType gotId1 = myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
 			assertEquals(patientId1, gotId1);
@@ -856,7 +857,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			// Only the read columns should be used, but no selectors on partition ID
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID as "), searchSql);
-			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID in ("), searchSql);
 		}
 
 		// Two partitions including default - Found
@@ -869,7 +870,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			// Only the read columns should be used, but no selectors on partition ID
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID as "), searchSql);
-			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID is null"), searchSql);
 		}
 
 		// Two partitions - Not Found
@@ -910,12 +911,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			// Only the read columns should be used, but no selectors on partition ID
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID as "), searchSql);
-			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID in ("), searchSql);
 		}
 
 		// Two partitions including default - Found
 		{
 			myCaptureQueriesListener.clear();
+			myPartitionInterceptor.assertNoRemainingIds();
 			myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionIds(1, null));
 			IdType gotId1 = myPatientDao.read(patientIdNull, mySrd).getIdElement().toUnqualifiedVersionless();
 			assertEquals(patientIdNull, gotId1);
@@ -923,7 +925,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			// Only the read columns should be used, but no selectors on partition ID
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID as "), searchSql);
-			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID is null"), searchSql);
 		}
 
 		// Two partitions - Not Found
@@ -965,7 +967,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 			// Only the read columns should be used, no criteria use partition
 			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID as "));
-			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID is null"));
 		}
 
 		// Read in wrong Partition
@@ -2709,10 +2711,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		ourLog.info("About to start transaction");
 
-		for (int i = 0; i < 20; i++) {
-			addReadPartition(1);
-		}
-		for (int i = 0; i < 8; i++) {
+		for (int i = 0; i < 28; i++) {
 			addCreatePartition(1, null);
 		}
 
@@ -2819,7 +2818,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		// Resolve resource
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("SQL:{}", searchSql);
-		assertEquals(0, countMatches(searchSql, "PARTITION_ID="), searchSql);
+		assertEquals(1, countMatches(searchSql, "PARTITION_ID="), searchSql);
 
 		// Fetch history resource
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);

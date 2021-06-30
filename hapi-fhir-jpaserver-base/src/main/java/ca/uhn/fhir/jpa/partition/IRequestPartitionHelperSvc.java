@@ -30,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Set;
 
 public interface IRequestPartitionHelperSvc {
 
@@ -60,4 +61,6 @@ public interface IRequestPartitionHelperSvc {
 	@Nonnull
 	PartitionablePartitionId toStoragePartition(@Nonnull RequestPartitionId theRequestPartitionId);
 
+	@Nonnull
+	Set<Integer> toReadPartitions(@Nonnull RequestPartitionId theRequestPartitionId);
 }

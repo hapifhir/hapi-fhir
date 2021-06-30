@@ -31,15 +31,15 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PartitioningSqlR4Test.class);
 	static final String PARTITION_1 = "PART-1";
 	static final String PARTITION_2 = "PART-2";
 	static final String PARTITION_3 = "PART-3";
 	static final String PARTITION_4 = "PART-4";
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PartitioningSqlR4Test.class);
 	protected MyReadWriteInterceptor myPartitionInterceptor;
 	protected LocalDate myPartitionDate;
 	protected LocalDate myPartitionDate2;
@@ -209,7 +209,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		@Override
 		public void assertNoRemainingIds() {
 			super.assertNoRemainingIds();
-			assertEquals(0, myReadRequestPartitionIds.size());
+			assertEquals(0, myReadRequestPartitionIds.size(), () -> "Found " + myReadRequestPartitionIds.size() + " READ partitions remaining in interceptor");
 		}
 
 	}
@@ -227,13 +227,14 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 		public RequestPartitionId PartitionIdentifyCreate(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
 			assertNotNull(theResource);
+			assertTrue(!myCreateRequestPartitionIds.isEmpty(), "No create partitions left in interceptor");
 			RequestPartitionId retVal = myCreateRequestPartitionIds.remove(0);
 			ourLog.info("Returning partition for create: {}", retVal);
 			return retVal;
 		}
 
 		public void assertNoRemainingIds() {
-			assertEquals(0, myCreateRequestPartitionIds.size());
+			assertEquals(0, myCreateRequestPartitionIds.size(), () -> "Still have " + myCreateRequestPartitionIds.size() + " CREATE partitions remaining in interceptor");
 		}
 
 	}

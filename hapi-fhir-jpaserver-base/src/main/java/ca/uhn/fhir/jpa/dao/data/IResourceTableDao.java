@@ -102,4 +102,9 @@ public interface IResourceTableDao extends JpaRepository<ResourceTable, Long> {
 	@Query("SELECT t FROM ResourceTable t LEFT JOIN FETCH t.myForcedId WHERE t.myPartitionId.myPartitionId = :partitionId AND t.myId = :pid")
 	Optional<ResourceTable> readByPartitionId(@Param("partitionId") int thePartitionId, @Param("pid") Long theResourceId);
 
+	@Query("SELECT t FROM ResourceTable t LEFT JOIN FETCH t.myForcedId WHERE (t.myPartitionId.myPartitionId IS NULL OR t.myPartitionId.myPartitionId IN (:partitionIds)) AND t.myId = :pid")
+	Optional<ResourceTable> readByPartitionIdsOrNull(@Param("partitionIds") Collection<Integer> thrValues, @Param("pid") Long theResourceId);
+
+	@Query("SELECT t FROM ResourceTable t LEFT JOIN FETCH t.myForcedId WHERE t.myPartitionId.myPartitionId IN (:partitionIds) AND t.myId = :pid")
+	Optional<ResourceTable> readByPartitionIds(@Param("partitionIds") Collection<Integer> thrValues, @Param("pid") Long theResourceId);
 }

@@ -88,6 +88,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.metamodel.Metamodel;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -844,6 +845,13 @@ public class GiantTransactionPerfTest {
 		@Nonnull
 		public PartitionablePartitionId toStoragePartition(@Nonnull RequestPartitionId theRequestPartitionId) {
 			return new PartitionablePartitionId(theRequestPartitionId.getFirstPartitionIdOrNull(), theRequestPartitionId.getPartitionDate());
+		}
+
+		@Nonnull
+		@Override
+		public Set<Integer> toReadPartitions(@Nonnull RequestPartitionId theRequestPartitionId) {
+			assert theRequestPartitionId.getPartitionIds().size() == 1;
+			return Collections.singleton(theRequestPartitionId.getFirstPartitionIdOrNull());
 		}
 
 
