@@ -695,7 +695,3 @@ This operation can also be done at the Instance level. When this is the case, th
 http://example.com/Patient/123/$mdm-submit
 http://example.com/Practitioner/456/$mdm-submit
 ```
-
-
-
-

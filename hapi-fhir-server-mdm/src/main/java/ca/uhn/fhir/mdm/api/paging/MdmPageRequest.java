@@ -1,7 +1,6 @@
 package ca.uhn.fhir.mdm.api.paging;
 
 import ca.uhn.fhir.rest.server.IPagingProvider;
-import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
@@ -12,6 +11,11 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_COUNT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
 import static org.slf4j.LoggerFactory.getLogger;
 
+/**
+ * This class is essentially just a data clump of offset + count, as well as the ability to convert itself into a standard
+ * {@link PageRequest} for spring data to use. The reason we don't use PageRequest natively is because it is concerned with `pages` and `counts`,
+ * but we are using `offset` and `count` which requires some minor translation.
+ */
 public class MdmPageRequest {
 	private static final Logger ourLog = getLogger(MdmPageRequest.class);
 
@@ -32,10 +36,6 @@ public class MdmPageRequest {
 		validatePagingParameters(myOffset, myCount);
 
 		this.myPage = myOffset / myCount;
-	}
-
-	public PageRequest toPageRequest() {
-		return PageRequest.of(this.myPage, this.myCount);
 	}
 
 	private void validatePagingParameters(int theOffset, int theCount) {
@@ -67,7 +67,12 @@ public class MdmPageRequest {
 	public int getNextOffset() {
 		return myOffset + myCount;
 	}
+
 	public int getPreviousOffset() {
 		return myOffset - myCount;
+	}
+
+	public PageRequest toPageRequest() {
+		return PageRequest.of(this.myPage, this.myCount);
 	}
 }
