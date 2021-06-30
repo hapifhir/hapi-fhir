@@ -2,13 +2,15 @@ package ca.uhn.fhir.mdm.api.paging;
 
 import java.util.Optional;
 
+/**
+ * Data clump class to keep the relevant paging URLs together for MDM.
+ */
 public class MdmPageLinkTuple {
 	private String myPreviousLink = null;
 	private String mySelfLink = null;
 	private String myNextLink = null;
 
-	MdmPageLinkTuple() {
-	}
+	MdmPageLinkTuple() {}
 
 	public Optional<String> getPreviousLink() {
 		return Optional.ofNullable(myPreviousLink);

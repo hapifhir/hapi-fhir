@@ -252,6 +252,9 @@ public class RestfulServerUtils {
 		return createLinkSelfWithoutGivenParameters(theServerBase, theRequest, null);
 	}
 
+	/**
+	 * This function will create a self link but omit any parameters passed in via the excludedParameterNames list.
+	 */
 	public static String createLinkSelfWithoutGivenParameters(String theServerBase, RequestDetails theRequest, List<String> excludedParameterNames) {
 		StringBuilder b = new StringBuilder();
 		b.append(theServerBase);

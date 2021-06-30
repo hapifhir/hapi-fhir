@@ -7,6 +7,8 @@ import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.slf4j.Logger;
 import org.springframework.data.domain.PageRequest;
 
+import javax.annotation.Nullable;
+
 import static ca.uhn.fhir.rest.api.Constants.PARAM_COUNT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -17,22 +19,17 @@ import static org.slf4j.LoggerFactory.getLogger;
  * but we are using `offset` and `count` which requires some minor translation.
  */
 public class MdmPageRequest {
-	private static final Logger ourLog = getLogger(MdmPageRequest.class);
 
-	private int myPage;
-	private int myOffset;
-	private int myCount;
-	private IPagingProvider	myPagingProvider;
+	private final int myPage;
+	private final int myOffset;
+	private final int myCount;
 
-	public MdmPageRequest(UnsignedIntType theOffset, UnsignedIntType theCount, IPagingProvider thePagingProvider) {
-		myPagingProvider = thePagingProvider;
+	public MdmPageRequest(@Nullable UnsignedIntType theOffset, @Nullable UnsignedIntType theCount, IPagingProvider thePagingProvider) {
 		myOffset = theOffset == null ? 0 : theOffset.getValue();
-		myCount = theCount == null ? myPagingProvider.getDefaultPageSize() : theCount.getValue();
+		myCount = theCount == null
+			? thePagingProvider.getDefaultPageSize() : theCount.getValue() > thePagingProvider.getMaximumPageSize()
+			? thePagingProvider.getMaximumPageSize() : theCount.getValue();
 
-		if (myCount > myPagingProvider.getMaximumPageSize()) {
-			ourLog.debug("Reducing count {} to paging provider's maximum of {}", theCount, myPagingProvider.getMaximumPageSize());
-			myCount = myPagingProvider.getMaximumPageSize();
-		}
 		validatePagingParameters(myOffset, myCount);
 
 		this.myPage = myOffset / myCount;

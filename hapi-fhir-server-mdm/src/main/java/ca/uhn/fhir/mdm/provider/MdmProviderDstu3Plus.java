@@ -198,7 +198,6 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		return retval;
 	}
 
-
 	@Operation(name = ProviderConstants.MDM_QUERY_LINKS, idempotent = true)
 	public IBaseParameters queryLinks(@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theGoldenResourceId,
 												 @OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theResourceId,
