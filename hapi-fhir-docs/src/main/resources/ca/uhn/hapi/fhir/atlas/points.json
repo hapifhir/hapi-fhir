@@ -369,6 +369,18 @@
 			"city": "London",
 			"lat": 51.507351,
 			"lon": -0.127758
+		},
+		{
+			"title": "Cortico Health Technologies Inc.",
+			"description": "Making health technology work in the service of patients, doctors and healthcare staff.",
+			"company": "Cortico Health Technologies Inc.",
+			"contactName": "Clark Van Oyen",
+			"contactEmail": "clark.van.oyen@coritco.health",
+			"link": "https://cortico.health",
+			"city": "Vancouver, BC",
+			"lat": 49.234000,
+			"lon": -123.065890,
+			"added": "2021-06-29"
 		}
 	]
 }
