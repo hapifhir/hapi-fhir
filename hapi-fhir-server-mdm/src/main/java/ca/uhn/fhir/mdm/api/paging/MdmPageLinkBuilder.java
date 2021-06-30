@@ -25,22 +25,27 @@ public final class MdmPageLinkBuilder {
 	 * @return the {@link MdmPageLinkTuple}
 	 */
 	public static MdmPageLinkTuple buildMdmPageLinks(ServletRequestDetails theServletRequestDetails, Page<MdmLinkJson> theCurrentPage, MdmPageRequest thePageRequest) {
-		MdmPageLinkTuple tuple = new MdmPageLinkTuple();
 		String urlWithoutPaging = RestfulServerUtils.createLinkSelfWithoutGivenParameters(theServletRequestDetails.getFhirServerBase(), theServletRequestDetails, Arrays.asList(PARAM_OFFSET, PARAM_COUNT));
-		tuple.setSelfLink(buildLinkWithOffsetAndCount(urlWithoutPaging, thePageRequest.getCount(), thePageRequest.getOffset()));
-		if (theCurrentPage.hasNext()) {
-			tuple.setNextLink(buildLinkWithOffsetAndCount(urlWithoutPaging,thePageRequest.getCount(), thePageRequest.getNextOffset()));
-		}
-		if (theCurrentPage.hasPrevious()) {
-			tuple.setPreviousLink(buildLinkWithOffsetAndCount(urlWithoutPaging,thePageRequest.getCount(), thePageRequest.getPreviousOffset()));
-		}
-		return tuple;
+		return buildMdmPageLinks(urlWithoutPaging, theCurrentPage, thePageRequest);
 	}
 
-	private static String buildLinkWithOffsetAndCount(String theStartingUrl, int theCount, int theOffset) {
+	public static MdmPageLinkTuple buildMdmPageLinks(String theUrlWithoutPaging, Page<MdmLinkJson> theCurrentPage, MdmPageRequest thePageRequest) {
+		MdmPageLinkTuple tuple = new MdmPageLinkTuple();
+		tuple.setSelfLink(buildLinkWithOffsetAndCount(theUrlWithoutPaging, thePageRequest.getCount(), thePageRequest.getOffset()));
+		if (theCurrentPage.hasNext()) {
+			tuple.setNextLink(buildLinkWithOffsetAndCount(theUrlWithoutPaging,thePageRequest.getCount(), thePageRequest.getNextOffset()));
+		}
+		if (theCurrentPage.hasPrevious()) {
+			tuple.setPreviousLink(buildLinkWithOffsetAndCount(theUrlWithoutPaging,thePageRequest.getCount(), thePageRequest.getPreviousOffset()));
+		}
+		return tuple;
+
+	}
+
+	public static String buildLinkWithOffsetAndCount(String theBaseUrl, int theCount, int theOffset) {
 		StringBuilder builder = new StringBuilder();
-		builder.append(theStartingUrl);
-		if (!theStartingUrl.contains("?")) {
+		builder.append(theBaseUrl);
+		if (!theBaseUrl.contains("?")) {
 			builder.append("?");
 		}
 		builder.append(PARAM_OFFSET).append("=").append(theOffset);
