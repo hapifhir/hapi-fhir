@@ -1213,10 +1213,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		BaseHasResource entity;
 		ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(requestPartitionId, getResourceName(), theId.getIdPart());
+		Set<Integer> readPartitions = null;
 		if (requestPartitionId.isAllPartitions()) {
 			entity = myEntityManager.find(ResourceTable.class, pid.getIdAsLong());
 		} else {
-			Set<Integer> readPartitions = myRequestPartitionHelperService.toReadPartitions(requestPartitionId);
+			readPartitions = myRequestPartitionHelperService.toReadPartitions(requestPartitionId);
 			if (readPartitions.size() == 1) {
 				if (readPartitions.contains(null)) {
 					entity = myResourceTableDao.readByPartitionIdNull(pid.getIdAsLong()).orElse(null);
@@ -1234,18 +1235,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		// Verify that the resource is for the correct partition
-		if (entity != null && !requestPartitionId.isAllPartitions()) {
-			if (entity.getPartitionId() != null && entity.getPartitionId().getPartitionId() != null) {
-				if (!requestPartitionId.hasPartitionId(entity.getPartitionId().getPartitionId())) {
-					ourLog.debug("Performing a read for PartitionId={} but entity has partition: {}", requestPartitionId, entity.getPartitionId());
-					entity = null;
-				}
-			} else {
-				// Entity Partition ID is null
-				if (!requestPartitionId.hasPartitionId(null)) {
-					ourLog.debug("Performing a read for PartitionId=null but entity has partition: {}", entity.getPartitionId());
-					entity = null;
-				}
+		if (entity != null && readPartitions != null) {
+			if (!readPartitions.contains(entity.getPartitionId().getPartitionId())) {
+				ourLog.debug("Performing a read for PartitionId={} but entity has partition: {}", requestPartitionId, entity.getPartitionId());
+				entity = null;
 			}
 		}
 

@@ -50,6 +50,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 
 		myPartitionSettings.setPartitioningEnabled(false);
 		myPartitionSettings.setUnnamedPartitionMode(new PartitionSettings().isUnnamedPartitionMode());
+		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
 	}
 
 

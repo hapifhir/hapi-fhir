@@ -4,6 +4,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
@@ -11,6 +12,8 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -25,9 +28,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class JpaPackageCacheTest extends BaseJpaR4Test {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(JpaPackageCacheTest.class);
 	@Autowired
 	private IHapiPackageCacheManager myPackageCacheManager;
-
 	@Autowired
 	private INpmPackageDao myPackageDao;
 	@Autowired
@@ -42,7 +45,6 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		myPartitionSettings.setPartitioningEnabled(false);
 		myInterceptorService.unregisterInterceptor(myRequestTenantPartitionInterceptor);
 	}
-
 
 	@Test
 	public void testSavePackage() throws IOException {
@@ -66,10 +68,11 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		}
 	}
 
-
 	@Test
 	public void testSaveAndDeletePackagePartitionsEnabled() throws IOException {
 		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setDefaultPartitionId(1);
+		myInterceptorService.registerInterceptor(new PatientIdPartitionInterceptor());
 		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
 
 		try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/basisprofil.de.tar.gz")) {
@@ -91,11 +94,12 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 			assertEquals("Unable to locate package basisprofil.de#99", e.getMessage());
 		}
 
+		logAllResources();
+
 		PackageDeleteOutcomeJson deleteOutcomeJson = myPackageCacheManager.uninstallPackage("basisprofil.de", "0.2.40");
 		List<String> deleteOutcomeMsgs = deleteOutcomeJson.getMessage();
 		assertEquals("Deleting package basisprofil.de#0.2.40", deleteOutcomeMsgs.get(0));
 	}
-
 
 	@Test
 	public void testSavePackageWithLongDescription() throws IOException {
@@ -113,14 +117,8 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 
 	}
 
-
 	@Test
-	public void testSavePackageCorrectFhirVersion() {
-
-	}
-
-	@Test
-	public void testPackageIdHandlingIsNotCaseSensitive() throws IOException {
+	public void testPackageIdHandlingIsNotCaseSensitive() {
 		String packageNameAllLowercase = "hl7.fhir.us.davinci-cdex";
 		String packageNameUppercase = packageNameAllLowercase.toUpperCase(Locale.ROOT);
 		InputStream stream = IgInstallerDstu3Test.class.getResourceAsStream("/packages/package-davinci-cdex-0.2.0.tgz");
@@ -132,7 +130,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 	@Test
 	public void testNonMatchingPackageIdsCauseError() throws IOException {
 		String incorrectPackageName = "hl7.fhir.us.davinci-nonsense";
-		try (InputStream stream =ClasspathUtil.loadResourceAsStream("/packages/package-davinci-cdex-0.2.0.tgz")) {
+		try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/package-davinci-cdex-0.2.0.tgz")) {
 			assertThrows(InvalidRequestException.class, () -> myPackageCacheManager.addPackageToCache(incorrectPackageName, "0.2.0", stream, "hl7.fhir.us.davinci-cdex"));
 		}
 	}

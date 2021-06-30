@@ -4,8 +4,10 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
@@ -20,6 +22,8 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings({"unchecked", "ConstantConditions"})
 public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR4Test {
@@ -157,6 +161,32 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 		addReadDefaultPartition();
 		outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd));
 		assertThat(outcome, Matchers.contains("Patient/" + id));
+
+	}
+
+
+
+	@Test
+	public void testRead_Partitionable() {
+		addCreateDefaultPartition();
+		Patient patient = new Patient();
+		patient.getMeta().addTag().setSystem("http://foo").setCode("TAG");
+		patient.addIdentifier().setSystem("http://foo").setValue("123");
+		patient.setActive(true);
+		Long id = myPatientDao.create(patient, mySrd).getId().getIdPartAsLong();
+
+		addReadDefaultPartition();
+		patient = myPatientDao.read(new IdType("Patient/" + id), mySrd);
+		assertTrue(patient.getActive());
+
+		// Wrong partition
+		addReadPartition(2);
+		try {
+			myPatientDao.read(new IdType("Patient/" + id), mySrd);
+			fail();
+		} catch (ResourceNotFoundException e) {
+			// good
+		}
 
 	}
 
