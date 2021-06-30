@@ -65,7 +65,9 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 	@Autowired
 	private IMdmSettings myMdmSettings;
 
-	private static final int BUFFER_SIZE = 100;
+	public static final int DEFAULT_BUFFER_SIZE = 100;
+
+	private int myBufferSize = DEFAULT_BUFFER_SIZE;
 
 	@Override
 	@Transactional
@@ -88,7 +90,8 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 
 		validateSourceType(theSourceResourceType);
 		SearchParameterMap spMap = myMdmSearchParamSvc.getSearchParameterMapFromCriteria(theSourceResourceType, theCriteria);
-		spMap.setLoadSynchronousUpTo(BUFFER_SIZE);
+		spMap.setLoadSynchronous(true);
+		spMap.setCount(myBufferSize);
 		ISearchBuilder searchBuilder = myMdmSearchParamSvc.generateSearchBuilderForType(theSourceResourceType);
 		return submitAllMatchingResourcesToMdmChannel(spMap, searchBuilder);
 	}
@@ -99,7 +102,7 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 		try (IResultIterator query = theSearchBuilder.createQuery(theSpMap, searchRuntimeDetails, null, RequestPartitionId.defaultPartition())) {
 			Collection<ResourcePersistentId> pidBatch;
 			do {
-				pidBatch = query.getNextResultBatch(BUFFER_SIZE);
+				pidBatch = query.getNextResultBatch(myBufferSize);
 				total += loadPidsAndSubmitToMdmChannel(theSearchBuilder, pidBatch);
 			} while (query.hasNext());
 		} catch (IOException theE) {
@@ -158,5 +161,10 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 		if(!myMdmSettings.getMdmRules().getMdmTypes().contains(theResourceType)) {
 			throw new InvalidRequestException(ProviderConstants.OPERATION_MDM_SUBMIT + " does not support resource type: " + theResourceType);
 		}
+	}
+
+	@Override
+	public void setBufferSize(int myBufferSize) {
+		this.myBufferSize = myBufferSize;
 	}
 }
