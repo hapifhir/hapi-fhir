@@ -32,6 +32,7 @@ class MdmBatchSvcImplIT extends BaseMdmR4Test {
 	public void after() throws IOException {
 		myInterceptorService.unregisterInterceptor(afterMdmLatch);
 		afterMdmLatch.clear();
+		myMdmSubmitSvc.setBufferSize(MdmSubmitSvcImpl.DEFAULT_BUFFER_SIZE);
 		super.after();
 	}
 
@@ -69,6 +70,7 @@ class MdmBatchSvcImplIT extends BaseMdmR4Test {
 		assertLinkCount(0);
 
 		//SUT
+		myMdmSubmitSvc.setBufferSize(5);
 		afterMdmLatch.runWithExpectedCount(10, () -> myMdmSubmitSvc.submitSourceResourceTypeToMdm("Patient", null));
 
 		assertLinkCount(10);
