@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
+import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +46,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSavePackage() throws IOException {
-		try (InputStream stream = IgInstallerDstu3Test.class.getResourceAsStream("/packages/basisprofil.de.tar.gz")) {
+		try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/basisprofil.de.tar.gz")) {
 			myPackageCacheManager.addPackageToCache("basisprofil.de", "0.2.40", stream, "basisprofil.de");
 		}
 
@@ -71,7 +72,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
 
-		try (InputStream stream = IgInstallerDstu3Test.class.getResourceAsStream("/packages/basisprofil.de.tar.gz")) {
+		try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/basisprofil.de.tar.gz")) {
 			myPackageCacheManager.addPackageToCache("basisprofil.de", "0.2.40", stream, "basisprofil.de");
 		}
 
@@ -98,7 +99,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSavePackageWithLongDescription() throws IOException {
-		try (InputStream stream = IgInstallerDstu3Test.class.getResourceAsStream("/packages/package-davinci-cdex-0.2.0.tgz")) {
+		try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/package-davinci-cdex-0.2.0.tgz")) {
 			myPackageCacheManager.addPackageToCache("hl7.fhir.us.davinci-cdex", "0.2.0", stream, "hl7.fhir.us.davinci-cdex");
 		}
 
@@ -131,9 +132,9 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 	@Test
 	public void testNonMatchingPackageIdsCauseError() throws IOException {
 		String incorrectPackageName = "hl7.fhir.us.davinci-nonsense";
-		InputStream stream = IgInstallerDstu3Test.class.getResourceAsStream("/packages/package-davinci-cdex-0.2.0.tgz");
-
-		assertThrows(InvalidRequestException.class, () -> myPackageCacheManager.addPackageToCache(incorrectPackageName, "0.2.0", stream, "hl7.fhir.us.davinci-cdex"));
+		try (InputStream stream =ClasspathUtil.loadResourceAsStream("/packages/package-davinci-cdex-0.2.0.tgz")) {
+			assertThrows(InvalidRequestException.class, () -> myPackageCacheManager.addPackageToCache(incorrectPackageName, "0.2.0", stream, "hl7.fhir.us.davinci-cdex"));
+		}
 	}
 
 }
