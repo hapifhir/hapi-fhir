@@ -58,7 +58,7 @@ public class PatientIdPartitionInterceptor {
 	}
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
-	public RequestPartitionId identifyForCreate(IBaseResource theResource) {
+	public RequestPartitionId identifyForCreate(IBaseResource theResource, RequestDetails theRequestDetails) {
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResource);
 		List<RuntimeSearchParam> compartmentSps = getCompartmentSearchParams(resourceDef);
 		if (compartmentSps.isEmpty()) {
@@ -88,37 +88,36 @@ public class PatientIdPartitionInterceptor {
 			return provideNonCompartmentMemberInstanceResponse(theResource);
 		}
 
-		return provideCompartmentMemberInstanceResponse(compartmentIdentity);
+		return provideCompartmentMemberInstanceResponse(theRequestDetails, compartmentIdentity);
 	}
 
 	@Nonnull
 	private List<RuntimeSearchParam> getCompartmentSearchParams(RuntimeResourceDefinition resourceDef) {
-		List<RuntimeSearchParam> compartmentSps = resourceDef
+		return resourceDef
 			.getSearchParams()
 			.stream()
 			.filter(param -> param.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
 			.filter(param -> param.getProvidesMembershipInCompartments() != null && param.getProvidesMembershipInCompartments().contains("Patient"))
 			.collect(Collectors.toList());
-		return compartmentSps;
 	}
 
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
-	public RequestPartitionId identifyForRead(ReadPartitionIdRequestDetails theRequestDetails) {
-		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theRequestDetails.getResourceType());
+	public RequestPartitionId identifyForRead(ReadPartitionIdRequestDetails theReadDetails, RequestDetails theRequestDetails) {
+		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theReadDetails.getResourceType());
 		List<RuntimeSearchParam> compartmentSps = getCompartmentSearchParams(resourceDef);
 		if (compartmentSps.isEmpty()) {
 			return provideNonCompartmentMemberTypeResponse(null);
 		}
 
-		if (theRequestDetails.getRestOperationType() == RestOperationTypeEnum.READ) {
-			if ("Patient".equals(theRequestDetails.getResourceType())) {
-				return provideCompartmentMemberInstanceResponse(theRequestDetails.getReadResourceId().getIdPart());
+		if (theReadDetails.getRestOperationType() == RestOperationTypeEnum.READ) {
+			if ("Patient".equals(theReadDetails.getResourceType())) {
+				return provideCompartmentMemberInstanceResponse(theRequestDetails, theReadDetails.getReadResourceId().getIdPart());
 			}
-		} else if (theRequestDetails.getRestOperationType() == RestOperationTypeEnum.SEARCH_TYPE) {
-			SearchParameterMap params = (SearchParameterMap) theRequestDetails.getSearchParams();
+		} else if (theReadDetails.getRestOperationType() == RestOperationTypeEnum.SEARCH_TYPE) {
+			SearchParameterMap params = (SearchParameterMap) theReadDetails.getSearchParams();
 			String idPart = null;
-			if ("Patient".equals(theRequestDetails.getResourceType())) {
+			if ("Patient".equals(theReadDetails.getResourceType())) {
 				idPart = getSingleResourceIdValueOrNull(params, "_id", "Patient");
 			} else {
 				for (RuntimeSearchParam nextCompartmentSp : compartmentSps) {
@@ -130,12 +129,12 @@ public class PatientIdPartitionInterceptor {
 			}
 
 			if (isNotBlank(idPart)) {
-				return provideCompartmentMemberInstanceResponse(idPart);
+				return provideCompartmentMemberInstanceResponse(theRequestDetails, idPart);
 			}
 
 		}
 
-		return provideUnsupportedQueryResponse(theRequestDetails);
+		return provideUnsupportedQueryResponse(theReadDetails);
 	}
 
 	private String getSingleResourceIdValueOrNull(SearchParameterMap theParams, String theParamName, String theResourceType) {
