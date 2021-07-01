@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4SystemTest;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -9,6 +10,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
@@ -120,6 +122,33 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("forcedid0_.PARTITION_ID in (?)"));
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false), containsString("where resourceta0_.PARTITION_ID=? and resourceta0_.RES_ID=?"));
 	}
+
+	@Test
+	public void testReadObservation_Good() {
+		createPatientA();
+
+		Observation obs = new Observation();
+		obs.getSubject().setReference("Patient/A");
+		Long id = myObservationDao.create(obs).getId().getIdPartAsLong();
+
+		myCaptureQueriesListener.clear();
+		Observation observation = myObservationDao.read(new IdType("Observation/" + id), mySrd);
+		//kaboom
+	}
+
+	@Test
+	public void testReadPatientHistory_Good() {
+		Patient patientA = createPatientA();
+		patientA.setGender(Enumerations.AdministrativeGender.MALE);
+		myPatientDao.update(patientA);
+
+
+		IdType patientVersionOne = new IdType("Patient", "A", "1");
+		myCaptureQueriesListener.clear();
+		Patient patient = myPatientDao.read(patientVersionOne);
+		fail("I Expect this to fail, as the PatientPartitionInterceptor should have RestOperationType VREAD but it is for some reason set to READ, despite being a versioned read.");
+	}
+
 
 	@Test
 	public void testSearchPatient_Good() {
@@ -247,11 +276,12 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		myObservationDao.update(obs);
 	}
 
-	private void createPatientA() {
+	private Patient createPatientA() {
 		Patient patient = new Patient();
 		patient.setId("Patient/A");
 		patient.setActive(true);
-		myPatientDao.update(patient);
+		DaoMethodOutcome update = myPatientDao.update(patient);
+		return (Patient)update.getResource();
 	}
 
 }
