@@ -26,10 +26,10 @@ With request body:
   "resourceType": "Parameters",
   "parameter": [ {
     "name": "_offset",
-    "valueInteger": 0
+    "valueInteger": 10
   }, {
     "name": "_count",
-    "valueInteger": 2
+    "valueInteger": 10
   } ]
 }
 ```
@@ -41,13 +41,13 @@ The returning response will contain links to the current, next, and previous pag
   "resourceType": "Parameters",
   "parameter": [ {
     "name": "prev",
-    "valueUri": "http://example.com/$mdm-query-links?_offset=8_count=2"
+    "valueUri": "http://example.com/$mdm-query-links?_offset=0&_count=10"
   }, {
     "name": "self",
-    "valueUri": "http://example.com/$mdm-query-links?_offset=10_count=2"
+    "valueUri": "http://example.com/$mdm-query-links?_offset=10&_count=10"
   }, {
     "name": "next",
-    "valueUri": "http://example.com/$mdm-query-links?_offset=12_count=2"
+    "valueUri": "http://example.com/$mdm-query-links?_offset=20&_count=10"
   },...(truncated) 
 ```
 
