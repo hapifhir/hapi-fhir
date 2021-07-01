@@ -272,7 +272,7 @@ public class RestfulServerUtils {
 			boolean first = true;
 			Map<String, String[]> parameters = theRequest.getParameters();
 			for (String nextParamName : new TreeSet<>(parameters.keySet())) {
-				if (excludedParameterNames != null && !excludedParameterNames.contains(nextParamName)) {
+				if (excludedParameterNames == null || !excludedParameterNames.contains(nextParamName)) {
 					for (String nextParamValue : parameters.get(nextParamName)) {
 						if (first) {
 							b.append('?');
