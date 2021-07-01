@@ -47,6 +47,8 @@ public final class MdmPageLinkBuilder {
 		builder.append(theBaseUrl);
 		if (!theBaseUrl.contains("?")) {
 			builder.append("?");
+		} else {
+			builder.append("&");
 		}
 		builder.append(PARAM_OFFSET).append("=").append(theOffset);
 		builder.append("&");
