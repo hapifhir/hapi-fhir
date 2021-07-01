@@ -31,20 +31,18 @@ import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.IPagingProvider;
-import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -207,11 +205,11 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 														 IPrimitiveType<String> theLinkSource,
 
 												 @Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
-												 @OperationParam(name = PARAM_OFFSET, min = 0, max = 1)
-														 UnsignedIntType theOffset,
+												 @OperationParam(name = PARAM_OFFSET, min = 0, max = 1, typeName = "integer")
+														 IPrimitiveType<Integer> theOffset,
 												 @Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
-												 @OperationParam(name = Constants.PARAM_COUNT, min = 0, max = 1)
-														 UnsignedIntType theCount,
+												 @OperationParam(name = Constants.PARAM_COUNT, min = 0, max = 1, typeName = "integer")
+														 IPrimitiveType<Integer> theCount,
 
 												 ServletRequestDetails theRequestDetails) {
 		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
@@ -223,15 +221,14 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		return parametersFromMdmLinks(mdmLinkJson, true, theRequestDetails, mdmPageRequest);
 	}
 
-
 	@Operation(name = ProviderConstants.MDM_DUPLICATE_GOLDEN_RESOURCES, idempotent = true)
 	public IBaseParameters getDuplicateGoldenResources(
 		@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
-		@OperationParam(name = PARAM_OFFSET, min = 0, max = 1)
-			UnsignedIntType theOffset,
+		@OperationParam(name = PARAM_OFFSET, min = 0, max = 1, typeName = "integer")
+			IPrimitiveType<Integer> theOffset,
 		@Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
-		@OperationParam(name = Constants.PARAM_COUNT, min = 0, max = 1)
-			UnsignedIntType theCount,
+		@OperationParam(name = Constants.PARAM_COUNT, min = 0, max = 1, typeName = "integer")
+			IPrimitiveType<Integer> theCount,
 		ServletRequestDetails theRequestDetails) {
 
 		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);

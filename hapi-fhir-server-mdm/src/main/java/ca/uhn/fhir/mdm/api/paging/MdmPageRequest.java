@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.springframework.data.domain.PageRequest;
 
@@ -24,7 +25,7 @@ public class MdmPageRequest {
 	private final int myOffset;
 	private final int myCount;
 
-	public MdmPageRequest(@Nullable UnsignedIntType theOffset, @Nullable UnsignedIntType theCount, int theDefaultPageSize, int theMaximumPageSize) {
+	public MdmPageRequest(@Nullable IPrimitiveType<Integer> theOffset, @Nullable IPrimitiveType<Integer> theCount, int theDefaultPageSize, int theMaximumPageSize) {
 		myOffset = theOffset == null ? 0 : theOffset.getValue();
 		myCount = theCount == null ? theDefaultPageSize : Math.min(theCount.getValue(), theMaximumPageSize);
 		validatePagingParameters(myOffset, myCount);

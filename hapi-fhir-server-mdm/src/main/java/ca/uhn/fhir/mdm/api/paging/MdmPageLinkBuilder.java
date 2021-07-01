@@ -49,6 +49,7 @@ public final class MdmPageLinkBuilder {
 			builder.append("?");
 		}
 		builder.append(PARAM_OFFSET).append("=").append(theOffset);
+		builder.append("&");
 		builder.append(PARAM_COUNT).append("=").append(theCount);
 		return builder.toString();
 	}
