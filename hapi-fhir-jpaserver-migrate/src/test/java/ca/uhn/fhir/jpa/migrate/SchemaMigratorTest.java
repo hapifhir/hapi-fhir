@@ -73,6 +73,7 @@ public class SchemaMigratorTest extends BaseTest {
 		schemaMigrator.migrate();
 
 		schemaMigrator = createSchemaMigrator("SOMETABLE", "create table SOMEOTHERTABLE (PID bigint not null, TEXTCOL varchar(255))", "1");
+		schemaMigrator.setStrictOrder(true);
 
 		try {
 			schemaMigrator.migrate();
@@ -80,7 +81,7 @@ public class SchemaMigratorTest extends BaseTest {
 		} catch (FlywayException e) {
 			assertThat(e.getMessage(), containsString("Detected resolved migration not applied to database: 1.1"));
 		}
-		schemaMigrator.setOutOfOrderPermitted(true);
+		schemaMigrator.setStrictOrder(false);
 		schemaMigrator.migrate();
 	}
 

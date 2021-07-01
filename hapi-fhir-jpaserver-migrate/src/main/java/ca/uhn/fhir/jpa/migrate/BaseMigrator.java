@@ -34,11 +34,11 @@ import java.util.Objects;
 public abstract class BaseMigrator implements IMigrator {
 	private boolean myDryRun;
 	private boolean myNoColumnShrink;
-	private boolean myOutOfOrderPermitted;
+	private final List<BaseTask.ExecutedStatement> myExecutedStatements = new ArrayList<>();
 	private boolean mySchemaWasInitialized;
 	private DriverTypeEnum myDriverType;
 	private DataSource myDataSource;
-	private List<BaseTask.ExecutedStatement> myExecutedStatements = new ArrayList<>();
+	private boolean myStrictOrder;
 	private List<Callback> myCallbacks = Collections.emptyList();
 
 	@Nonnull
@@ -83,12 +83,12 @@ public abstract class BaseMigrator implements IMigrator {
 		myDriverType = theDriverType;
 	}
 
-	public boolean isOutOfOrderPermitted() {
-		return myOutOfOrderPermitted;
+	public boolean isStrictOrder() {
+		return myStrictOrder;
 	}
 
-	public void setOutOfOrderPermitted(boolean theOutOfOrderPermitted) {
-		myOutOfOrderPermitted = theOutOfOrderPermitted;
+	public void setStrictOrder(boolean theStrictOrder) {
+		myStrictOrder = theStrictOrder;
 	}
 
 	public void addExecutedStatements(List theExecutedStatements) {
