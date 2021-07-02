@@ -350,7 +350,6 @@ public class ParametersUtil {
 		} else {
 			partChildElem.getChildByName("value[x]").getMutator().addValue(part, theValue);
 		}
-
 	}
 
 	public static void addPartResource(FhirContext theContext, IBase theParameter, String theName, IBaseResource theValue) {

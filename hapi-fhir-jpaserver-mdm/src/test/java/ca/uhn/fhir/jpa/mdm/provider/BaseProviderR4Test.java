@@ -7,6 +7,8 @@ import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.provider.MdmProviderDstu3Plus;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.AfterEach;

@@ -23,17 +23,21 @@ package ca.uhn.fhir.mdm.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.api.paging.MdmPageLinkBuilder;
+import ca.uhn.fhir.mdm.api.paging.MdmPageLinkTuple;
+import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.springframework.data.domain.Page;
 
-import java.util.stream.Stream;
 
 public abstract class BaseMdmProvider {
 
@@ -92,9 +96,9 @@ public abstract class BaseMdmProvider {
 		return theString.getValue();
 	}
 
-	protected IBaseParameters parametersFromMdmLinks(Stream<MdmLinkJson> theMdmLinkStream, boolean includeResultAndSource) {
+	protected IBaseParameters parametersFromMdmLinks(Page<MdmLinkJson> theMdmLinkStream, boolean includeResultAndSource, ServletRequestDetails theServletRequestDetails, MdmPageRequest thePageRequest) {
 		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
-
+		addPagingParameters(retval, theMdmLinkStream, theServletRequestDetails, thePageRequest);
 		theMdmLinkStream.forEach(mdmLink -> {
 			IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, retval, "link");
 			ParametersUtil.addPartString(myFhirContext, resultPart, "goldenResourceId", mdmLink.getGoldenResourceId());
@@ -111,4 +115,17 @@ public abstract class BaseMdmProvider {
 		return retval;
 	}
 
+	protected void addPagingParameters(IBaseParameters theParameters, Page<MdmLinkJson> theCurrentPage, ServletRequestDetails theServletRequestDetails, MdmPageRequest thePageRequest) {
+		MdmPageLinkTuple mdmPageLinkTuple = MdmPageLinkBuilder.buildMdmPageLinks(theServletRequestDetails, theCurrentPage, thePageRequest);
+
+		if (mdmPageLinkTuple.getPreviousLink().isPresent()) {
+			ParametersUtil.addParameterToParametersUri(myFhirContext, theParameters, "prev", mdmPageLinkTuple.getPreviousLink().get());
+		}
+
+		ParametersUtil.addParameterToParametersUri(myFhirContext, theParameters, "self", mdmPageLinkTuple.getSelfLink());
+
+		if (mdmPageLinkTuple.getNextLink().isPresent()) {
+			ParametersUtil.addParameterToParametersUri(myFhirContext, theParameters, "next", mdmPageLinkTuple.getNextLink().get());
+		}
+	}
 }

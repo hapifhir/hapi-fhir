@@ -4,6 +4,53 @@ MDM links are managed by MDM Operations. These operations are supplied by a [pla
 
 In cases where the operation changes data, if a resource id parameter contains a version (e.g. `Patient/123/_history/1`), then the operation will fail with a 409 CONFLICT if that is not the latest version of that resource.  This feature can be used to prevent update conflicts in an environment where multiple users are working on the same set of mdm links.
 
+## Pagination
+
+In both the `$query-links` operation, and the `$mdm-duplicate-golden-resources` paging is supported via `_count` and `_offset` parameters. By default, if you omit page information from your query, default pagination values will be used.
+The response will return you the next/self/previous links as part of the parameters response. Here are examples of pagination in these MDM queries.
+
+```http request
+GET http://example.com/$mdm-query-links?_offset=0&_count=2
+```
+
+Or if you are making a POST request
+
+```http request
+POST http://example.com/$mdm-query-links
+```
+
+With request body: 
+
+```json
+{
+  "resourceType": "Parameters",
+  "parameter": [ {
+    "name": "_offset",
+    "valueInteger": 10
+  }, {
+    "name": "_count",
+    "valueInteger": 10
+  } ]
+}
+```
+
+The returning response will contain links to the current, next, and previous pages. If there is no previous/next link, it means there is no previous/next page of data available.
+
+```text
+{
+  "resourceType": "Parameters",
+  "parameter": [ {
+    "name": "prev",
+    "valueUri": "http://example.com/$mdm-query-links?_offset=0&_count=10"
+  }, {
+    "name": "self",
+    "valueUri": "http://example.com/$mdm-query-links?_offset=10&_count=10"
+  }, {
+    "name": "next",
+    "valueUri": "http://example.com/$mdm-query-links?_offset=20&_count=10"
+  },...(truncated) 
+```
+
 ## Query links
 
 Use the `$mdm-query-links` operation to view MDM links. The results returned are based on the parameters provided. All parameters are optional.  This operation takes the following parameters:
@@ -50,6 +97,22 @@ Use the `$mdm-query-links` operation to view MDM links. The results returned are
                 AUTO, MANUAL.
             </td>
         </tr>
+        <tr>
+            <td>_offset</td>
+            <td>int</td>
+            <td>0..1</td>
+            <td>
+                the offset to begin returning records at.
+            </td>
+        </tr>
+        <tr>
+            <td>_count</td>
+            <td>int</td>
+            <td>0..1</td>
+            <td>
+                The number of links to be returned in a page. 
+            </td>
+        </tr>
     </tbody>
 </table>
 
@@ -58,7 +121,7 @@ Use the `$mdm-query-links` operation to view MDM links. The results returned are
 Use an HTTP GET like `http://example.com/$mdm-query-links?matchResult=POSSIBLE_MATCH` or an HTTP POST to the following URL to invoke this operation:
 
 ```url
-http://example.com/$mdm-query-links
+http://example.com/$mdm-query-links?_offset=10&_count=2
 ```
 
 The following request body could be used to find all POSSIBLE_MATCH links in the system:
@@ -67,6 +130,15 @@ The following request body could be used to find all POSSIBLE_MATCH links in the
 {
   "resourceType": "Parameters",
   "parameter": [ {
+     "name": "prev",
+     "valueUri": "http://example.com/$mdm-query-links?_offset=8_count=2"
+  }, {
+     "name": "self",
+     "valueUri": "http://example.com/$mdm-query-links?_offset=10_count=2"
+  }, {
+     "name": "next",
+     "valueUri": "http://example.com/$mdm-query-links?_offset=12_count=2"
+  }, {
     "name": "matchResult",
     "valueString": "POSSIBLE_MATCH"
   } ]
@@ -79,6 +151,15 @@ This operation returns a `Parameters` resource that looks like the following:
 {
   "resourceType": "Parameters",
   "parameter": [ {
+     "name": "prev",
+     "valueUri": "http://example.com$mdm-query-links?_offset=8_count=2"
+    },  {
+     "name": "self",
+     "valueUri": "http://example.com$mdm-query-links?_offset=10_count=10"
+    }, {
+     "name": "next",
+     "valueUri": "http://example.com$mdm-query-links?_offset=20_count=10"
+    }, {
     "name": "link",
     "part": [ {
       "name": "goldenResourceId",
@@ -118,6 +199,37 @@ Use an HTTP GET to the following URL to invoke this operation:
 ```url
 http://example.com/$mdm-duplicate-golden-resources
 ```
+
+The following is a table of the request parameters supported by this GET operation.
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Cardinality</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>_offset</td>
+            <td>int</td>
+            <td>0..1</td>
+            <td>
+                the offset to begin returning records at.
+            </td>
+        </tr>
+        <tr>
+            <td>_count</td>
+            <td>int</td>
+            <td>0..1</td>
+            <td>
+                The number of links to be returned in a page. 
+            </td>
+        </tr>
+    </tbody>
+</table>
 
 This operation returns `Parameters` similar to `$mdm-query-links`:
 

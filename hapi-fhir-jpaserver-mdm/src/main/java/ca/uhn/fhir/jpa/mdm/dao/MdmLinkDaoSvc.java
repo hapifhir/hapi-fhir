@@ -27,12 +27,14 @@ import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -286,8 +288,8 @@ public class MdmLinkDaoSvc {
 	 * @param theExampleLink The MDM link containing the data we would like to search for.
 	 * @return a list of {@link MdmLink} entities which match the example.
 	 */
-	public List<MdmLink> findMdmLinkByExample(Example<MdmLink> theExampleLink) {
-		return myMdmLinkDao.findAll(theExampleLink);
+	public Page<MdmLink> findMdmLinkByExample(Example<MdmLink> theExampleLink, MdmPageRequest thePageRequest) {
+		return myMdmLinkDao.findAll(theExampleLink, thePageRequest.toPageRequest());
 	}
 
 	/**
