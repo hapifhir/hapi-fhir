@@ -1285,7 +1285,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Nonnull
-	private ResourceTable readEntityLatestVersion(IIdType theId, @Nullable RequestPartitionId theRequestPartitionId, TransactionDetails theTransactionDetails) {
+	private ResourceTable readEntityLatestVersion(IIdType theId, @Nonnull RequestPartitionId theRequestPartitionId, TransactionDetails theTransactionDetails) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
 		if (theTransactionDetails.isResolvedResourceIdEmpty(theId.toUnqualifiedVersionless())) {

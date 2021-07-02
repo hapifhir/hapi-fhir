@@ -41,6 +41,13 @@ import javax.persistence.UniqueConstraint;
 @Entity()
 @Table(name = ForcedId.HFJ_FORCED_ID, uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_FORCEDID_RESID", columnNames = {"RESOURCE_PID"}),
+	/*
+	 * This index is called IDX_FORCEDID_TYPE_FID and guarantees
+	 * uniqueness of RESOURCE_TYPE,FORCED_ID. This doesn't make sense
+	 * for partitioned servers, so we replace it on those servers
+	 * with IDX_FORCEDID_TYPE_PFID covering
+	 * PARTITION_ID,RESOURCE_TYPE,FORCED_ID
+	 */
 	@UniqueConstraint(name = ForcedId.IDX_FORCEDID_TYPE_FID, columnNames = {"RESOURCE_TYPE", "FORCED_ID"})
 }, indexes = {
 	/*
@@ -116,11 +123,14 @@ public class ForcedId extends BasePartitionable {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("pid", myId)
-			.append("resourceType", myResourceType)
-			.append("forcedId", myForcedId)
-			.append("resourcePid", myResourcePid)
-			.toString();
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("pid", myId);
+		if (getPartitionId() != null) {
+			b.append("partitionId", getPartitionId().getPartitionId());
+		}
+		b.append("resourceType", myResourceType);
+		b.append("forcedId", myForcedId);
+		b.append("resourcePid", myResourcePid);
+		return b.toString();
 	}
 }

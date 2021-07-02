@@ -39,7 +39,7 @@ public interface IRequestPartitionHelperSvc {
 
 	@Nonnull
 	default RequestPartitionId determineReadPartitionForRequestForRead(RequestDetails theRequest, String theResourceType, IIdType theId) {
-		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forRead(theResourceType, theId);
+		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forRead(theResourceType, theId, theId.hasVersionIdPart());
 		return determineReadPartitionForRequest(theRequest, theResourceType, details);
 	}
 

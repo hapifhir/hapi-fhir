@@ -53,8 +53,9 @@ public class ReadPartitionIdRequestDetails {
 		return mySearchParams;
 	}
 
-	public static ReadPartitionIdRequestDetails forRead(String theResourceType, IIdType theId) {
-		return new ReadPartitionIdRequestDetails(theResourceType, RestOperationTypeEnum.READ, theId.withResourceType(theResourceType), null);
+	public static ReadPartitionIdRequestDetails forRead(String theResourceType, IIdType theId, boolean theIsVread) {
+		RestOperationTypeEnum op = theIsVread ? RestOperationTypeEnum.VREAD : RestOperationTypeEnum.READ;
+		return new ReadPartitionIdRequestDetails(theResourceType, op, theId.withResourceType(theResourceType), null);
 	}
 
 	public static ReadPartitionIdRequestDetails forSearchType(String theResourceType, Object theParams) {

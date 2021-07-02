@@ -323,6 +323,7 @@ public class IdHelperService {
 		}
 
 		List<IResourceLookup> retVal = new ArrayList<>();
+		RequestPartitionId requestPartitionId = replaceDefault(theRequestPartitionId);
 
 		if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
 			List<Long> pids = theId
@@ -331,7 +332,7 @@ public class IdHelperService {
 				.map(t -> t.getIdPartAsLong())
 				.collect(Collectors.toList());
 			if (!pids.isEmpty()) {
-				resolvePids(theRequestPartitionId, pids, retVal);
+				resolvePids(requestPartitionId, pids, retVal);
 			}
 		}
 
@@ -356,15 +357,15 @@ public class IdHelperService {
 				Collection<Object[]> views;
 				assert isNotBlank(nextResourceType);
 
-				if (theRequestPartitionId.isAllPartitions()) {
+				if (requestPartitionId.isAllPartitions()) {
 					views = myForcedIdDao.findAndResolveByForcedIdWithNoType(nextResourceType, nextIds);
 				} else {
-					if (theRequestPartitionId.isDefaultPartition()) {
+					if (requestPartitionId.isDefaultPartition()) {
 						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(nextResourceType, nextIds);
-					} else if (theRequestPartitionId.hasDefaultPartitionId()) {
-						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(nextResourceType, nextIds, theRequestPartitionId.getPartitionIdsWithoutDefault());
+					} else if (requestPartitionId.hasDefaultPartitionId()) {
+						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(nextResourceType, nextIds, requestPartitionId.getPartitionIdsWithoutDefault());
 					} else {
-						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(nextResourceType, nextIds, theRequestPartitionId.getPartitionIds());
+						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(nextResourceType, nextIds, requestPartitionId.getPartitionIds());
 					}
 				}
 
@@ -386,6 +387,20 @@ public class IdHelperService {
 		}
 
 		return retVal;
+	}
+
+	private RequestPartitionId replaceDefault(RequestPartitionId theRequestPartitionId) {
+		if (myPartitionSettings.getDefaultPartitionId() != null) {
+			if (theRequestPartitionId.hasDefaultPartitionId()) {
+				List<Integer> partitionIds = theRequestPartitionId
+					.getPartitionIds()
+					.stream()
+					.map(t -> t == null ? myPartitionSettings.getDefaultPartitionId() : t)
+					.collect(Collectors.toList());
+				return RequestPartitionId.fromPartitionIds(partitionIds);
+			}
+		}
+		return theRequestPartitionId;
 	}
 
 	private void resolvePids(@Nonnull RequestPartitionId theRequestPartitionId, List<Long> thePidsToResolve, List<IResourceLookup> theTarget) {
@@ -483,6 +498,11 @@ public class IdHelperService {
 		return retVal;
 	}
 
+	/**
+	 * @deprecated This method doesn't take a partition ID as input, so it is unsafe. It
+	 * should be reworked to include the partition ID before any new use is incorporated
+	 */
+	@Deprecated
 	@Nullable
 	public Long getPidOrNull(IBaseResource theResource) {
 		IAnyResource anyResource = (IAnyResource) theResource;
@@ -498,6 +518,11 @@ public class IdHelperService {
 		return retVal;
 	}
 
+	/**
+	 * @deprecated This method doesn't take a partition ID as input, so it is unsafe. It
+	 * should be reworked to include the partition ID before any new use is incorporated
+	 */
+	@Deprecated
 	@Nonnull
 	public Long getPidOrThrowException(IIdType theId) {
 		List<IIdType> ids = Collections.singletonList(theId);
@@ -505,6 +530,11 @@ public class IdHelperService {
 		return resourcePersistentIds.get(0).getIdAsLong();
 	}
 
+	/**
+	 * @deprecated This method doesn't take a partition ID as input, so it is unsafe. It
+	 * should be reworked to include the partition ID before any new use is incorporated
+	 */
+	@Deprecated
 	@Nonnull
 	public List<Long> getPidsOrThrowException(List<IIdType> theIds) {
 		List<ResourcePersistentId> resourcePersistentIds = this.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), theIds);

@@ -262,11 +262,13 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 	@Test
 	public void testCreateInvalidUnquotedExtensionUrl() {
+		String invalidExpression = "Patient.extension.where(url=http://foo).value";
+
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.setCode("foo");
 		fooSp.setType(Enumerations.SearchParamType.STRING);
 		fooSp.setTitle("FOO SP");
-		fooSp.setExpression("Patient.extension.where(url=http://foo).value");
+		fooSp.setExpression(invalidExpression);
 		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		fooSp.addBase("Patient");

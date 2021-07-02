@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 
+	public static final int ALTERNATE_DEFAULT_ID = -1;
 	private PatientIdPartitionInterceptor mySvc;
 	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
 
@@ -40,7 +41,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
-		myPartitionSettings.setDefaultPartitionId(-1);
+		myPartitionSettings.setDefaultPartitionId(ALTERNATE_DEFAULT_ID);
 
 
 	}
@@ -63,7 +64,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		runInTransaction(() -> {
 			ResourceTable pt = myResourceTableDao.findAll().iterator().next();
 			assertEquals("A", pt.getIdDt().getIdPart());
-			assertEquals("A".hashCode(), pt.getPartitionId().getPartitionId());
+			assertEquals(65, pt.getPartitionId().getPartitionId());
 		});
 	}
 
@@ -90,7 +91,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		runInTransaction(() -> {
 			ResourceTable observation = myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
 			assertEquals("Observation", observation.getResourceType());
-			assertEquals("A".hashCode(), observation.getPartitionId().getPartitionId());
+			assertEquals(65, observation.getPartitionId().getPartitionId());
 		});
 	}
 
@@ -106,7 +107,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		runInTransaction(() -> {
 			ResourceTable observation = myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
 			assertEquals("Organization", observation.getResourceType());
-			assertEquals(-1, observation.getPartitionId().getPartitionId().intValue());
+			assertEquals(ALTERNATE_DEFAULT_ID, observation.getPartitionId().getPartitionId().intValue());
 		});
 	}
 
@@ -131,9 +132,11 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		obs.getSubject().setReference("Patient/A");
 		Long id = myObservationDao.create(obs).getId().getIdPartAsLong();
 
-		myCaptureQueriesListener.clear();
-		Observation observation = myObservationDao.read(new IdType("Observation/" + id), mySrd);
-		//kaboom
+		try {
+			myObservationDao.read(new IdType("Observation/" + id), mySrd);
+		} catch (MethodNotAllowedException e) {
+			assertEquals("This server is not able to handle this request of type READ", e.getMessage());
+		}
 	}
 
 	@Test
@@ -146,7 +149,13 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		IdType patientVersionOne = new IdType("Patient", "A", "1");
 		myCaptureQueriesListener.clear();
 		Patient patient = myPatientDao.read(patientVersionOne);
-		fail("I Expect this to fail, as the PatientPartitionInterceptor should have RestOperationType VREAD but it is for some reason set to READ, despite being a versioned read.");
+		assertEquals("1", patient.getIdElement().getVersionIdPart());
+
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(4, myCaptureQueriesListener.getSelectQueries().size());
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("PARTITION_ID in (?)"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false), containsString("PARTITION_ID="));
+
 	}
 
 
@@ -262,11 +271,41 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("t0.PARTITION_ID = ?"));
 	}
 
-	private void createOrganizationC() {
+	@Test
+	public void testHistory_Instance() {
+		Organization org = createOrganizationC();
+		org.setName("name 2");
+
+		logAllResources();
+		logAllForcedIds();
+
+		myOrganizationDao.update(org);
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider outcome = myOrganizationDao.history(new IdType("Organization/C"), null, null, null, mySrd);
+		assertEquals(2, outcome.size());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(3, myCaptureQueriesListener.getSelectQueries().size());
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("PARTITION_ID in "));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false), containsString("PARTITION_ID="));
+	}
+
+	@Test
+	public void testHistory_Type() {
+		myOrganizationDao.history(null, null, null, mySrd);
+	}
+
+	@Test
+	public void testHistory_System() {
+		mySystemDao.history(null, null, null, mySrd);
+	}
+
+	private Organization createOrganizationC() {
 		Organization org = new Organization();
 		org.setId("C");
 		org.setName("Foo");
 		myOrganizationDao.update(org);
+		return org;
 	}
 
 	private void createObservationB() {

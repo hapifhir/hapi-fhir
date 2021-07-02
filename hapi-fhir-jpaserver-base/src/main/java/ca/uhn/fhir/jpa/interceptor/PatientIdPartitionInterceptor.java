@@ -32,13 +32,11 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
@@ -47,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -97,13 +96,13 @@ public class PatientIdPartitionInterceptor {
 			compartmentIdentity = compartmentSps
 				.stream()
 				.flatMap(param -> Arrays.stream(BaseSearchParamExtractor.splitPathsR4(param.getPath())))
-				.filter(path -> isNotBlank(path))
+				.filter(StringUtils::isNotBlank)
 				.map(path -> fhirPath.evaluateFirst(theResource, path, IBaseReference.class))
-				.filter(refOpt -> refOpt.isPresent())
-				.map(refOpt -> refOpt.get())
+				.filter(Optional::isPresent)
+				.map(Optional::get)
 				.map(t -> t.getReferenceElement().getValue())
 				.map(t -> new IdType(t).getIdPart())
-				.filter(t -> isNotBlank(t))
+				.filter(StringUtils::isNotBlank)
 				.findFirst()
 				.orElse(null);
 			if (isBlank(compartmentIdentity)) {
@@ -134,28 +133,36 @@ public class PatientIdPartitionInterceptor {
 			return provideNonCompartmentMemberTypeResponse(null);
 		}
 
-		if (theReadDetails.getRestOperationType() == RestOperationTypeEnum.READ) {
-			if ("Patient".equals(theReadDetails.getResourceType())) {
-				return provideCompartmentMemberInstanceResponse(theRequestDetails, theReadDetails.getReadResourceId().getIdPart());
-			}
-		} else if (theReadDetails.getRestOperationType() == RestOperationTypeEnum.SEARCH_TYPE) {
-			SearchParameterMap params = (SearchParameterMap) theReadDetails.getSearchParams();
-			String idPart = null;
-			if ("Patient".equals(theReadDetails.getResourceType())) {
-				idPart = getSingleResourceIdValueOrNull(params, "_id", "Patient");
-			} else {
-				for (RuntimeSearchParam nextCompartmentSp : compartmentSps) {
-					idPart = getSingleResourceIdValueOrNull(params, nextCompartmentSp.getName(), "Patient");
-					if (idPart != null) {
-						break;
+		//noinspection EnumSwitchStatementWhichMissesCases
+		switch (theReadDetails.getRestOperationType()) {
+			case READ:
+			case VREAD:
+				if ("Patient".equals(theReadDetails.getResourceType())) {
+					return provideCompartmentMemberInstanceResponse(theRequestDetails, theReadDetails.getReadResourceId().getIdPart());
+				}
+				break;
+			case SEARCH_TYPE:
+				SearchParameterMap params = (SearchParameterMap) theReadDetails.getSearchParams();
+				String idPart = null;
+				if ("Patient".equals(theReadDetails.getResourceType())) {
+					idPart = getSingleResourceIdValueOrNull(params, "_id", "Patient");
+				} else {
+					for (RuntimeSearchParam nextCompartmentSp : compartmentSps) {
+						idPart = getSingleResourceIdValueOrNull(params, nextCompartmentSp.getName(), "Patient");
+						if (idPart != null) {
+							break;
+						}
 					}
 				}
-			}
 
-			if (isNotBlank(idPart)) {
-				return provideCompartmentMemberInstanceResponse(theRequestDetails, idPart);
-			}
+				if (isNotBlank(idPart)) {
+					return provideCompartmentMemberInstanceResponse(theRequestDetails, idPart);
+				}
 
+				break;
+
+			default:
+				// nothing
 		}
 
 		return provideUnsupportedQueryResponse(theReadDetails);
@@ -212,10 +219,10 @@ public class PatientIdPartitionInterceptor {
 
 	/**
 	 * Translates an ID (e.g. "ABC") into a compartment ID number.
-	 *
+	 * <p>
 	 * The default implementation of this method returns:
 	 * <code>Math.abs(theResourceIdPart.hashCode()) % 15000</code>.
-	 *
+	 * <p>
 	 * This logic can be replaced with other logic of your choosing.
 	 */
 	@SuppressWarnings("unused")
@@ -226,7 +233,7 @@ public class PatientIdPartitionInterceptor {
 	/**
 	 * Return a compartment ID (or throw an exception) when an attempt is made to search for a resource that is
 	 * in the patient compartment, but without any search parameter identifying which compartment to search.
-	 *
+	 * <p>
 	 * E.g. this method will be called for the search <code>Observation?code=foo</code> since the patient
 	 * is not identified in the URL.
 	 */
