@@ -53,7 +53,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This interceptor allows JPA servers to be partitioned by Patient ID. It selects the compartment for read/create operations
- * based on the patient ID associated with the resource (and uses a default compartment ID for any resources
+ * based on the patient ID associated with the resource (and uses a default partition ID for any resources
  * not in the patient compartment).
  */
 @Interceptor
