@@ -165,6 +165,8 @@ public class AddressValidatingInterceptor {
 	}
 
 	protected boolean validateAddress(IBase theAddress, FhirContext theFhirContext) {
+		ExtensionUtil.clearExtensionsByUrl(theAddress, getExtensionUrl());
+
 		try {
 			AddressValidationResult validationResult = getAddressValidator().isValid(theAddress, theFhirContext);
 			ourLog.debug("Validated address {}", validationResult);
