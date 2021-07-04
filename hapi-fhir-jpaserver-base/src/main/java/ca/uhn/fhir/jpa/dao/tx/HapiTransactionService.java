@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import com.google.common.annotations.VisibleForTesting;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,10 +116,17 @@ public class HapiTransactionService {
 					theTransactionDetails.clearResolvedItems();
 					theTransactionDetails.clearUserData(BaseHapiFhirDao.XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
 					theTransactionDetails.clearUserData(BaseHapiFhirDao.XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
-					sleepAtLeast(250, false);
+					double sleepAmount = (250.0d * i) * Math.random();
+					long sleepAmountLong = (long) sleepAmount;
+					sleepAtLeast(sleepAmountLong, false);
 
-					ourLog.info("About to start a transaction retry due to conflict or constraint error");
+					ourLog.info("About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.", sleepAmountLong);
 					continue;
+				}
+
+				IBaseOperationOutcome oo = null;
+				if (e instanceof ResourceVersionConflictException) {
+					oo = ((ResourceVersionConflictException) e).getOperationOutcome();
 				}
 
 				if (maxRetries > 0) {
@@ -127,7 +135,7 @@ public class HapiTransactionService {
 					throw new ResourceVersionConflictException(msg);
 				}
 
-				throw e;
+				throw new ResourceVersionConflictException(e.getMessage(), e, oo);
 			}
 		}
 
