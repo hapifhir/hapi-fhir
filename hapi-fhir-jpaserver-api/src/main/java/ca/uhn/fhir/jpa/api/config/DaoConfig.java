@@ -56,9 +56,9 @@ public class DaoConfig {
 	 */
 	public static final String DISABLE_STATUS_BASED_REINDEX = "disable_status_based_reindex";
 	/**
-	 * Default value for {@link #setTranslationCachesExpireAfterWriteInMinutes(Long)}: 60 minutes
+	 * Default value for {@link #getTranslationCachesExpireAfterWriteInMinutes()}: 60 minutes
 	 *
-	 * @see #setTranslationCachesExpireAfterWriteInMinutes(Long)
+	 * @see #getTranslationCachesExpireAfterWriteInMinutes()
 	 */
 	public static final Long DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES = 60L;
 	/**
