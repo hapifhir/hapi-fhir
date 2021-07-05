@@ -39,18 +39,22 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
  * @since 0.7
  */
 public class ValidationResult {
+	public static final int ERROR_DISPLAY_LIMIT_DEFAULT = 1;
+
 	private final FhirContext myCtx;
 	private final boolean myIsSuccessful;
 	private final List<SingleValidationMessage> myMessages;
+
+	private int myErrorDisplayLimit = ERROR_DISPLAY_LIMIT_DEFAULT;
 
 	public ValidationResult(FhirContext theCtx, List<SingleValidationMessage> theMessages) {
 		boolean successful = true;
 		myCtx = theCtx;
 		myMessages = theMessages;
 		for (SingleValidationMessage next : myMessages) {
-			next.getSeverity();
 			if (next.getSeverity() == null || next.getSeverity().ordinal() > ResultSeverityEnum.WARNING.ordinal()) {
 				successful = false;
+				break;
 			}
 		}
 		myIsSuccessful = successful;
@@ -72,21 +76,35 @@ public class ValidationResult {
 		return myIsSuccessful;
 	}
 
+
 	private String toDescription() {
-		StringBuilder b = new StringBuilder(100);
-		if (myMessages.size() > 0) {
-			if (myMessages.get(0).getSeverity() != null) {
-				b.append(myMessages.get(0).getSeverity().name());
+		if (myMessages.isEmpty()) {
+			return "No issues";
+		}
+
+		StringBuilder b = new StringBuilder(100 * myMessages.size());
+		int shownMsgQty = Math.min(myErrorDisplayLimit, myMessages.size());
+		for (int i = 0; i < shownMsgQty; i++) {
+			SingleValidationMessage nextMsg = myMessages.get(i);
+			b.append(ourNewLine);
+			if (i == 0) {
+				if (shownMsgQty < myMessages.size()) {
+					b.append("(showing first ").append(shownMsgQty).append(" messages out of ")
+						.append(myMessages.size()).append(" total)").append(ourNewLine);
+				}
+			}
+			if (nextMsg.getSeverity() != null) {
+				b.append(nextMsg.getSeverity().name());
 				b.append(" - ");
 			}
-			b.append(myMessages.get(0).getMessage());
+			b.append(nextMsg.getMessage());
 			b.append(" - ");
-			b.append(myMessages.get(0).getLocationString());
-		} else {
-			b.append("No issues");
+			b.append(nextMsg.getLocationString());
 		}
+
 		return b.toString();
 	}
+
 
 	/**
 	 * @deprecated Use {@link #toOperationOutcome()} instead since this method returns a view.
@@ -156,4 +174,11 @@ public class ValidationResult {
 	public FhirContext getContext() {
 		return myCtx;
 	}
+
+	public int getErrorDisplayLimit() { return myErrorDisplayLimit; }
+
+	public void setErrorDisplayLimit(int theErrorDisplayLimit) { myErrorDisplayLimit = theErrorDisplayLimit; }
+
+
+	private static final String  ourNewLine = System.getProperty("line.separator");
 }

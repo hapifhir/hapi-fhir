@@ -80,18 +80,14 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 
 	@Override
 	public Options getOptions() {
-		Options options = new Options();
+		Options options = super.getOptions();
 
-		this.addFhirVersionOption(options);
-		addBaseUrlOption(options);
 		addRequiredOption(options, CONCEPTMAP_URL_PARAM, CONCEPTMAP_URL_PARAM_LONGOPT, CONCEPTMAP_URL_PARAM_NAME, CONCEPTMAP_URL_PARAM_DESC);
 		// </editor-fold desc="Additional parameters.">
 		addOptionalOption(options, SOURCE_VALUE_SET_PARAM, SOURCE_VALUE_SET_PARAM_LONGOPT, SOURCE_VALUE_SET_PARAM_NAME, SOURCE_VALUE_SET_PARAM_DESC);
 		addOptionalOption(options, TARGET_VALUE_SET_PARAM, TARGET_VALUE_SET_PARAM_LONGOPT, TARGET_VALUE_SET_PARAM_NAME, TARGET_VALUE_SET_PARAM_DESC);
 		// </editor-fold>
 		addRequiredOption(options, FILE_PARAM, FILE_PARAM_LONGOPT, FILE_PARAM_NAME, FILE_PARAM_DESC);
-		addBasicAuthOption(options);
-		addVerboseLoggingOption(options);
 
 		return options;
 	}

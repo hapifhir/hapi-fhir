@@ -1,37 +1,80 @@
 package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.impl.BaseClient;
+import ca.uhn.fhir.rest.client.impl.GenericClient;
+import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
+import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.VerboseLoggingInterceptor;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.google.common.base.Charsets;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.ReaderInputStream;
+import org.apache.derby.iapi.types.ReaderToUTF8Stream;
+import org.apache.http.HttpResponse;
+import org.apache.http.ProtocolVersion;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.message.BasicStatusLine;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
+import org.springframework.util.ReflectionUtils;
+import org.testcontainers.shaded.org.bouncycastle.util.Arrays;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.matchesPattern;
@@ -322,6 +365,139 @@ public class UploadTerminologyCommandTest extends BaseTest {
 		assertThat(listOfDescriptors.get(0).getFilename(), matchesPattern(".*\\.zip$"));
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
 	}
+
+	@Nested
+	public class HeaderPassthroughOptionTests {
+
+		@RegisterExtension
+		public final RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(myCtx);
+
+		private final String headerKey1 = "test-header-key-1";
+		private final String headerValue1 = "test header value-1";
+
+		private final CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
+		private final UploadTerminologyCommand testedCommand =
+			new RequestCapturingUploadTerminologyCommand(myCapturingInterceptor);
+
+		@BeforeEach
+		public void before() {
+			when(myTermLoaderSvc.loadCustom(eq("http://foo"), anyList(), any()))
+				.thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
+
+			TerminologyUploaderProvider provider = new TerminologyUploaderProvider(myCtx, myTermLoaderSvc);
+			myRestfulServerExtension.registerProvider(provider);
+		}
+
+
+		@Test
+		public void oneHeader() throws Exception {
+			String[] args = new String[] {
+				"-v", "r4",
+				"-m", "SNAPSHOT",
+				"-t", "http://localhost:" + myRestfulServerExtension.getPort(),
+				"-u", "http://foo",
+				"-d", myConceptsFileName,
+				"-d", myHierarchyFileName,
+				"-hp", "\"" + headerKey1 + ":" + headerValue1 + "\""
+			};
+
+			writeConceptAndHierarchyFiles();
+			final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
+			testedCommand.run(commandLine);
+
+			assertNotNull(myCapturingInterceptor.getLastRequest());
+			Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
+			assertFalse(allHeaders.isEmpty());
+
+			assertTrue(allHeaders.containsKey(headerKey1));
+			assertEquals(1, allHeaders.get(headerKey1).size());
+
+			assertThat(allHeaders.get(headerKey1), hasItems(headerValue1));
+		}
+
+
+		@Test
+		public void twoHeadersSameKey() throws Exception {
+			final String headerValue2 = "test header value-2";
+
+			String[] args = new String[] {
+				"-v", "r4",
+				"-m", "SNAPSHOT",
+				"-t", "http://localhost:" + myRestfulServerExtension.getPort(),
+				"-u", "http://foo",
+				"-d", myConceptsFileName,
+				"-d", myHierarchyFileName,
+				"-hp", "\"" + headerKey1 + ":" + headerValue1 + "\"",
+				"-hp", "\"" + headerKey1 + ":" + headerValue2 + "\""
+			};
+
+			writeConceptAndHierarchyFiles();
+			final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
+			testedCommand.run(commandLine);
+
+			assertNotNull(myCapturingInterceptor.getLastRequest());
+			Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
+			assertFalse(allHeaders.isEmpty());
+			assertEquals(2, allHeaders.get(headerKey1).size());
+
+			assertTrue(allHeaders.containsKey(headerKey1));
+			assertEquals(2, allHeaders.get(headerKey1).size());
+
+			assertEquals(headerValue1, allHeaders.get(headerKey1).get(0));
+			assertEquals(headerValue2, allHeaders.get(headerKey1).get(1));
+		}
+
+		@Test
+		public void twoHeadersDifferentKeys() throws Exception {
+			final String headerKey2 = "test-header-key-2";
+			final String headerValue2 = "test header value-2";
+
+			String[] args = new String[] {
+				"-v", "r4",
+				"-m", "SNAPSHOT",
+				"-t", "http://localhost:" + myRestfulServerExtension.getPort(),
+				"-u", "http://foo",
+				"-d", myConceptsFileName,
+				"-d", myHierarchyFileName,
+				"-hp", "\"" + headerKey1 + ":" + headerValue1 + "\"",
+				"-hp", "\"" + headerKey2 + ":" + headerValue2 + "\""
+			};
+
+			writeConceptAndHierarchyFiles();
+			final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
+			testedCommand.run(commandLine);
+
+			assertNotNull(myCapturingInterceptor.getLastRequest());
+			Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
+			assertFalse(allHeaders.isEmpty());
+
+			assertTrue(allHeaders.containsKey(headerKey1));
+			assertEquals(1, allHeaders.get(headerKey1).size());
+			assertThat(allHeaders.get(headerKey1), hasItems(headerValue1));
+
+			assertTrue(allHeaders.containsKey(headerKey2));
+			assertEquals(1, allHeaders.get(headerKey2).size());
+			assertThat(allHeaders.get(headerKey2), hasItems(headerValue2));
+		}
+
+
+		private class RequestCapturingUploadTerminologyCommand extends UploadTerminologyCommand {
+			private CapturingInterceptor myCapturingInterceptor;
+
+			public RequestCapturingUploadTerminologyCommand(CapturingInterceptor theCapturingInterceptor) {
+				myCapturingInterceptor = theCapturingInterceptor;
+			}
+
+			@Override
+			protected IGenericClient newClient(CommandLine theCommandLine) throws ParseException {
+				IGenericClient client = super.newClient(theCommandLine);
+				client.getInterceptorService().registerInterceptor(myCapturingInterceptor);
+				return client;
+			}
+		}
+	}
+
+
 
 	private void writeArchiveFile(File... theFiles) throws IOException {
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
