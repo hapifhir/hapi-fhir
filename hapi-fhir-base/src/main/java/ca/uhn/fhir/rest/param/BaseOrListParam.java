@@ -64,4 +64,7 @@ public abstract class BaseOrListParam<MT extends BaseOrListParam<?, ?>, PT exten
 		return myList.toString();
 	}
 
+	public int size() {
+		return myList.size();
+	}
 }

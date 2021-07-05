@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2766
+title: "A new JPA partitioning interceptor `PatientIdPartitionInterceptor` has been added. This interceptor uses the
+   ID of the patient associated with any resources in the patient compartment to generate a consistent
+   partition ID."

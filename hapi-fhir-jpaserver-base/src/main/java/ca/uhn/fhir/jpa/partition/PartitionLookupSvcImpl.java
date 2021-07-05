@@ -23,8 +23,10 @@ package ca.uhn.fhir.jpa.partition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -52,6 +54,8 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitionLookupSvcImpl.class);
 
 	@Autowired
+	private PartitionSettings myPartitionSettings;
+	@Autowired
 	private PlatformTransactionManager myTxManager;
 	@Autowired
 	private IPartitionDao myPartitionDao;
@@ -61,6 +65,13 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	private TransactionTemplate myTxTemplate;
 	@Autowired
 	private FhirContext myFhirCtx;
+
+	/**
+	 * Constructor
+	 */
+	public PartitionLookupSvcImpl() {
+		super();
+	}
 
 	@Override
 	@PostConstruct
@@ -79,6 +90,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	@Override
 	public PartitionEntity getPartitionByName(String theName) {
 		Validate.notBlank(theName, "The name must not be null or blank");
+		validateNotInUnnamedPartitionMode();
 		if (JpaConstants.DEFAULT_PARTITION_NAME.equals(theName)) {
 			return null;
 		}
@@ -88,6 +100,12 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	@Override
 	public PartitionEntity getPartitionById(Integer thePartitionId) {
 		validatePartitionIdSupplied(myFhirCtx, thePartitionId);
+		if (myPartitionSettings.isUnnamedPartitionMode()) {
+			return new PartitionEntity().setId(thePartitionId);
+		}
+		if (myPartitionSettings.getDefaultPartitionId() != null && myPartitionSettings.getDefaultPartitionId().equals(thePartitionId)) {
+			return new PartitionEntity().setId(thePartitionId).setName(JpaConstants.DEFAULT_PARTITION_NAME);
+		}
 		return myIdToPartitionCache.get(thePartitionId);
 	}
 
@@ -100,6 +118,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	@Override
 	@Transactional
 	public PartitionEntity createPartition(PartitionEntity thePartition) {
+		validateNotInUnnamedPartitionMode();
 		validateHaveValidPartitionIdAndName(thePartition);
 		validatePartitionNameDoesntAlreadyExist(thePartition.getName());
 
@@ -112,6 +131,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	@Override
 	@Transactional
 	public PartitionEntity updatePartition(PartitionEntity thePartition) {
+		validateNotInUnnamedPartitionMode();
 		validateHaveValidPartitionIdAndName(thePartition);
 
 		Optional<PartitionEntity> existingPartitionOpt = myPartitionDao.findById(thePartition.getId());
@@ -136,6 +156,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	@Transactional
 	public void deletePartition(Integer thePartitionId) {
 		validatePartitionIdSupplied(myFhirCtx, thePartitionId);
+		validateNotInUnnamedPartitionMode();
 
 		Optional<PartitionEntity> partition = myPartitionDao.findById(thePartitionId);
 		if (!partition.isPresent()) {
@@ -171,6 +192,12 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 			throw new InvalidRequestException(msg);
 		}
 
+	}
+
+	private void validateNotInUnnamedPartitionMode() {
+		if (myPartitionSettings.isUnnamedPartitionMode()) {
+			throw new MethodNotAllowedException("Can not invoke this operation in unnamed partition mode");
+		}
 	}
 
 	private class NameToPartitionCacheLoader implements @NonNull CacheLoader<String, PartitionEntity> {

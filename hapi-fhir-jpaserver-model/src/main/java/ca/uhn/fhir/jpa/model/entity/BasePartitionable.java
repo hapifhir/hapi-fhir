@@ -50,13 +50,4 @@ public class BasePartitionable implements Serializable {
 		myPartitionId = thePartitionId;
 	}
 
-	public void setPartitionId(@Nullable RequestPartitionId theRequestPartitionId) {
-		if (theRequestPartitionId != null) {
-			myPartitionId = new PartitionablePartitionId(theRequestPartitionId.getFirstPartitionIdOrNull(), theRequestPartitionId.getPartitionDate());
-		} else {
-			myPartitionId = null;
-		}
-	}
-
-
 }
