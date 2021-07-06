@@ -14,7 +14,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.MatcherAssert.assertThat;

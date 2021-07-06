@@ -20,17 +20,16 @@ package ca.uhn.fhir.validation;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import java.util.Collections;
 import java.util.List;
 
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.util.OperationOutcomeUtil;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Encapsulates the results of validation
