@@ -69,14 +69,30 @@ public abstract class BaseRequestGeneratingCommand extends BaseCommand {
 	@Override
 	protected IGenericClient newClient(CommandLine theCommandLine) throws ParseException {
 		IGenericClient client = super.newClient(theCommandLine);
+		registerHeaderPassthrough(theCommandLine, client);
+		return client;
+	}
 
+
+	@Override
+	protected IGenericClient newClientWithBaseUrl(CommandLine theCommandLine, String theBaseUrl,
+			String theBasicAuthOptionName, String theBearerTokenOptionName) throws ParseException {
+
+		IGenericClient client = super.newClientWithBaseUrl(
+			theCommandLine, theBaseUrl, theBasicAuthOptionName, theBearerTokenOptionName);
+		registerHeaderPassthrough(theCommandLine, client);
+
+		return client;
+	}
+
+
+	private void registerHeaderPassthrough(CommandLine theCommandLine, IGenericClient theClient) throws ParseException {
 		if (theCommandLine.hasOption(HEADER_PASSTHROUGH)) {
-			client.registerInterceptor(
+			theClient.registerInterceptor(
 				new AdditionalRequestHeadersInterceptor(
 					getAndParseOptionHeadersPassthrough(theCommandLine, HEADER_PASSTHROUGH)));
 		}
 
-		return client;
 	}
 
 	private void addHeaderPassthroughOption(Options theOptions) {
