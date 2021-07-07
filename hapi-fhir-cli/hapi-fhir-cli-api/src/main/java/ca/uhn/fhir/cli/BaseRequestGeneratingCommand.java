@@ -67,14 +67,6 @@ public abstract class BaseRequestGeneratingCommand extends BaseCommand {
 
 
 	@Override
-	protected IGenericClient newClient(CommandLine theCommandLine) throws ParseException {
-		IGenericClient client = super.newClient(theCommandLine);
-		registerHeaderPassthrough(theCommandLine, client);
-		return client;
-	}
-
-
-	@Override
 	protected IGenericClient newClientWithBaseUrl(CommandLine theCommandLine, String theBaseUrl,
 			String theBasicAuthOptionName, String theBearerTokenOptionName) throws ParseException {
 
