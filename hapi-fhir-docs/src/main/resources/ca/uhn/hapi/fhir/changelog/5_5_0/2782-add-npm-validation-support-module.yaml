@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2782
+title: "A new Validation Support Module has been added that can use NPM Packages to supply
+   validation conformance artifacts programatcally to the validator."
