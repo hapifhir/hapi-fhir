@@ -56,18 +56,25 @@ public class ClasspathUtil {
 
 	/**
 	 * Load a classpath resource, throw an {@link InternalErrorException} if not found
+	 *
+	 * @throws InternalErrorException If the resource can't be found
 	 */
 	@Nonnull
 	public static InputStream loadResourceAsStream(String theClasspath) {
-		InputStream retVal = ClasspathUtil.class.getResourceAsStream(theClasspath);
+		String classpath = theClasspath;
+		if (classpath.startsWith("classpath:")) {
+			classpath = classpath.substring("classpath:".length());
+		}
+
+		InputStream retVal = ClasspathUtil.class.getResourceAsStream(classpath);
 		if (retVal == null) {
-			if (theClasspath.startsWith("/")) {
-				retVal = ClasspathUtil.class.getResourceAsStream(theClasspath.substring(1));
+			if (classpath.startsWith("/")) {
+				retVal = ClasspathUtil.class.getResourceAsStream(classpath.substring(1));
 			} else {
-				retVal = ClasspathUtil.class.getResourceAsStream("/" + theClasspath);
+				retVal = ClasspathUtil.class.getResourceAsStream("/" + classpath);
 			}
 			if (retVal == null) {
-				throw new InternalErrorException("Unable to find classpath resource: " + theClasspath);
+				throw new InternalErrorException("Unable to find classpath resource: " + classpath);
 			}
 		}
 		return retVal;

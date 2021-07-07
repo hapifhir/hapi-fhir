@@ -59,6 +59,23 @@ to validate the resource. It will not work unless you include the
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ValidatorExamples.java|instanceValidator}}
 ```
 
+<a name="packages"/>
+
+# Validating Using Packages
+
+HAPI FHIR supports the use of FHIR NPM Packages for supplying validation artifacts.
+
+When using the HAPI FHIR [JPA Server](../server_jpa/) you can simply upload your packages into the JPA Server package registry and the contents will be made available to the validator.
+
+If you are using the validator as a standalone service (i.e. you are invoking it via a Java call) you will need to explcitly make your packages available to the validation support chain.
+
+The following example shows the use of [NpmPackageValidationSupport](./validation_support_modules.html#npmpackagevalidationsupport) to load a package and use it to validate a resource.
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/ValidatorExamples.java|npm}}
+```
+
+
 <a name="migrating-to-5x"></a>
 
 # Migrating to HAPI FHIR 5.x
