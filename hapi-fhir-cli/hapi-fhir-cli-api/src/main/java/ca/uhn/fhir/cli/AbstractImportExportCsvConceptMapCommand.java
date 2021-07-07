@@ -24,8 +24,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import com.google.common.collect.Sets;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.input.BOMInputStream;
@@ -39,13 +39,14 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isAllBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public abstract class AbstractImportExportCsvConceptMapCommand extends BaseCommand {
+public abstract class AbstractImportExportCsvConceptMapCommand extends BaseRequestGeneratingCommand {
 	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AbstractImportExportCsvConceptMapCommand.class);
 
@@ -63,14 +64,11 @@ public abstract class AbstractImportExportCsvConceptMapCommand extends BaseComma
 	protected FhirVersionEnum fhirVersion;
 	protected String file;
 
+
 	@Override
-	protected void addFhirVersionOption(Options theOptions) {
-		String versions = Arrays.stream(FhirVersionEnum.values())
-			.filter(t -> t != FhirVersionEnum.DSTU2_1 && t != FhirVersionEnum.DSTU2_HL7ORG && t != FhirVersionEnum.DSTU2)
-			.map(t -> t.name().toLowerCase())
-			.sorted()
-			.collect(Collectors.joining(", "));
-		addRequiredOption(theOptions, FHIR_VERSION_PARAM, FHIR_VERSION_PARAM_LONGOPT, FHIR_VERSION_PARAM_NAME, FHIR_VERSION_PARAM_DESC + versions);
+	protected Collection<Object> getFilterOutVersions() {
+		return Sets.newHashSet(FhirVersionEnum.DSTU2_1,
+			FhirVersionEnum.DSTU2_HL7ORG, FhirVersionEnum.DSTU2);
 	}
 
 	protected BufferedReader getBufferedReader() throws IOException {
@@ -139,7 +137,7 @@ public abstract class AbstractImportExportCsvConceptMapCommand extends BaseComma
 		process();
 	}
 
-	protected void parseAdditionalParameters(CommandLine theCommandLine) throws ParseException {}
+	protected void parseAdditionalParameters(CommandLine theCommandLine) {}
 
 	protected abstract void process() throws ParseException, ExecutionException;
 

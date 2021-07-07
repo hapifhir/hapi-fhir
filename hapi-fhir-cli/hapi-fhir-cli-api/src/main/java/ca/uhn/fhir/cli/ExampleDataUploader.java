@@ -23,6 +23,7 @@ package ca.uhn.fhir.cli;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -72,7 +73,7 @@ import java.util.zip.ZipInputStream;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class ExampleDataUploader extends BaseCommand {
+public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExampleDataUploader.class);
 
@@ -200,8 +201,8 @@ public class ExampleDataUploader extends BaseCommand {
 			ourLog.info("Found example {} - {} - {} chars", nextEntry.getName(), parsed.getClass().getSimpleName(), exampleString.length());
 
 			ValidationResult result = val.validateWithResult(parsed);
-			if (result.isSuccessful() == false) {
-				ourLog.info("FAILED to validate example {} - {}", nextEntry.getName(), result.toString());
+			if (! result.isSuccessful()) {
+				ourLog.info("FAILED to validate example {} - {}", nextEntry.getName(), result);
 				continue;
 			}
 
@@ -284,8 +285,8 @@ public class ExampleDataUploader extends BaseCommand {
 			ourLog.info("Found example {} - {} - {} chars", nextEntry.getName(), parsed.getClass().getSimpleName(), exampleString.length());
 
 			ValidationResult result = val.validateWithResult(parsed);
-			if (result.isSuccessful() == false) {
-				ourLog.info("FAILED to validate example {} - {}", nextEntry.getName(), result.toString());
+			if (! result.isSuccessful()) {
+				ourLog.info("FAILED to validate example {} - {}", nextEntry.getName(), result);
 				continue;
 			}
 
@@ -334,14 +335,8 @@ public class ExampleDataUploader extends BaseCommand {
 
 	@Override
 	public Options getOptions() {
-		Options options = new Options();
+		Options options = super.getOptions();
 		Option opt;
-
-		addFhirVersionOption(options);
-
-		opt = new Option("t", "target", true, "Base URL for the target server (e.g. \"http://example.com/fhir\")");
-		opt.setRequired(true);
-		options.addOption(opt);
 
 		opt = new Option("l", "limit", true, "Sets a limit to the number of resources the uploader will try to upload");
 		opt.setRequired(false);
@@ -356,9 +351,15 @@ public class ExampleDataUploader extends BaseCommand {
 		opt.setRequired(false);
 		options.addOption(opt);
 
-		addBasicAuthOption(options);
-
 		return options;
+	}
+
+
+	@Override
+	protected Collection<Object> getFilterOutVersions() {
+		Collection<Object> filterOutCollection = super.getFilterOutVersions();
+		filterOutCollection.add(FhirVersionEnum.R5);
+		return filterOutCollection;
 	}
 
 	private void processBundle(FhirContext ctx, IBaseBundle bundle) {
@@ -609,7 +610,7 @@ public class ExampleDataUploader extends BaseCommand {
 		String targetServer = theCommandLine.getOptionValue("t");
 		if (isBlank(targetServer)) {
 			throw new ParseException("No target server (-t) specified");
-		} else if (targetServer.startsWith("http") == false && targetServer.startsWith("file") == false) {
+		} else if (! targetServer.startsWith("http") && ! targetServer.startsWith("file")) {
 			throw new ParseException("Invalid target server specified, must begin with 'http' or 'file'");
 		}
 
@@ -697,7 +698,7 @@ public class ExampleDataUploader extends BaseCommand {
 					String nextTarget = nextRefResourceType + "/EX" + nextRefIdPart;
 					nextRef.getResourceReference().setResource(null);
 					nextRef.getResourceReference().setReference(nextTarget);
-					if (checkedTargets.add(nextTarget) == false) {
+					if (! checkedTargets.add(nextTarget)) {
 						continue;
 					}
 
