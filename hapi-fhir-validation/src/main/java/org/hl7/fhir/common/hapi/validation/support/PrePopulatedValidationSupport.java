@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +27,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class PrePopulatedValidationSupport extends BaseStaticResourceValidationSupport implements IValidationSupport {
 
-	private final FhirContext myFhirContext;
 	private final Map<String, IBaseResource> myCodeSystems;
 	private final Map<String, IBaseResource> myStructureDefinitions;
 	private final Map<String, IBaseResource> myValueSets;
@@ -55,7 +55,6 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 		Validate.notNull(theStructureDefinitions, "theStructureDefinitions must not be null");
 		Validate.notNull(theValueSets, "theValueSets must not be null");
 		Validate.notNull(theCodeSystems, "theCodeSystems must not be null");
-		myFhirContext = theFhirContext;
 		myStructureDefinitions = theStructureDefinitions;
 		myValueSets = theValueSets;
 		myCodeSystems = theCodeSystems;
@@ -82,7 +81,7 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 
 	private String processResourceAndReturnUrl(IBaseResource theCodeSystem, String theResourceName) {
 		Validate.notNull(theCodeSystem, "the" + theResourceName + " must not be null");
-		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theCodeSystem);
+		RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(theCodeSystem);
 		String actualResourceName = resourceDef.getName();
 		Validate.isTrue(actualResourceName.equals(theResourceName), "the" + theResourceName + " must be a " + theResourceName + " - Got: " + actualResourceName);
 
@@ -113,16 +112,16 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 		addToMap(theStructureDefinition, myStructureDefinitions, url);
 	}
 
-	private <T extends IBaseResource> void addToMap(T theStructureDefinition, Map<String, T> map, String theUrl) {
+	private <T extends IBaseResource> void addToMap(T theResource, Map<String, T> theMap, String theUrl) {
 		if (isNotBlank(theUrl)) {
-			map.put(theUrl, theStructureDefinition);
+			theMap.put(theUrl, theResource);
 
 			int lastSlashIdx = theUrl.lastIndexOf('/');
 			if (lastSlashIdx != -1) {
-				map.put(theUrl.substring(lastSlashIdx + 1), theStructureDefinition);
+				theMap.put(theUrl.substring(lastSlashIdx + 1), theResource);
 				int previousSlashIdx = theUrl.lastIndexOf('/', lastSlashIdx - 1);
 				if (previousSlashIdx != -1) {
-					map.put(theUrl.substring(previousSlashIdx + 1), theStructureDefinition);
+					theMap.put(theUrl.substring(previousSlashIdx + 1), theResource);
 				}
 			}
 
@@ -143,11 +142,32 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	 * </ul>
 	 * </p>
 	 */
-	public void addValueSet(ValueSet theValueSet) {
+	public void addValueSet(IBaseResource theValueSet) {
 		String url = processResourceAndReturnUrl(theValueSet, "ValueSet");
 		addToMap(theValueSet, myValueSets, url);
 	}
 
+
+	/**
+	 * @param theResource The resource. This method delegates to the type-specific methods (e.g. {@link #addCodeSystem(IBaseResource)})
+	 *                    and will do nothing if the resource type is not supported by this class.
+	 * @since 5.5.0
+	 */
+	public void addResource(@Nonnull IBaseResource theResource) {
+		Validate.notNull(theResource, "theResource must not be null");
+
+		switch (getFhirContext().getResourceType(theResource)) {
+			case "StructureDefinition":
+				addStructureDefinition(theResource);
+				break;
+			case "CodeSystem":
+				addCodeSystem(theResource);
+				break;
+			case "ValueSet":
+				addValueSet(theResource);
+				break;
+		}
+	}
 
 	@Override
 	public List<IBaseResource> fetchAllConformanceResources() {
@@ -159,7 +179,7 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	}
 
 	@Override
-	public List<IBaseResource> fetchAllStructureDefinitions() {
+	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions() {
 		return toList(myStructureDefinitions);
 	}
 
@@ -187,5 +207,4 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
 		return myValueSets.containsKey(theValueSetUrl);
 	}
-
 }
