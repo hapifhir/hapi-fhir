@@ -83,15 +83,15 @@ public class ValidationResult {
 
 		StringBuilder b = new StringBuilder(100 * myMessages.size());
 		int shownMsgQty = Math.min(myErrorDisplayLimit, myMessages.size());
+
+		if (shownMsgQty < myMessages.size()) {
+			b.append("(showing first ").append(shownMsgQty).append(" messages out of ")
+				.append(myMessages.size()).append(" total)").append(ourNewLine);
+		}
+
 		for (int i = 0; i < shownMsgQty; i++) {
 			SingleValidationMessage nextMsg = myMessages.get(i);
 			b.append(ourNewLine);
-			if (i == 0) {
-				if (shownMsgQty < myMessages.size()) {
-					b.append("(showing first ").append(shownMsgQty).append(" messages out of ")
-						.append(myMessages.size()).append(" total)").append(ourNewLine);
-				}
-			}
 			if (nextMsg.getSeverity() != null) {
 				b.append(nextMsg.getSeverity().name());
 				b.append(" - ");
