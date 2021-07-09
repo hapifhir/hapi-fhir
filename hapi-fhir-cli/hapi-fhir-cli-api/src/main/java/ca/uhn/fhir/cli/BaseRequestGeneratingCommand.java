@@ -115,7 +115,7 @@ public abstract class BaseRequestGeneratingCommand extends BaseCommand {
 	/**
 	 * @return Returns the optional pass-through header name and value
 	 */
-	protected Map<String, List<String>> getAndParseOptionHeadersPassthrough(
+	private Map<String, List<String>> getAndParseOptionHeadersPassthrough(
 		CommandLine theCommandLine, String theOptionName) throws ParseException {
 
 		if (! theCommandLine.hasOption(theOptionName)) {
