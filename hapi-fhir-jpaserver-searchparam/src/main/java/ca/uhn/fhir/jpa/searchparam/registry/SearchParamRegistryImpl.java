@@ -167,7 +167,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	private ReadOnlySearchParamCache getBuiltInSearchParams() {
 		if (myBuiltInSearchParams == null) {
-			myBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(myFhirContext);
+			myBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(myFhirContext, mySearchParameterCanonicalizer);
 		}
 		return myBuiltInSearchParams;
 	}

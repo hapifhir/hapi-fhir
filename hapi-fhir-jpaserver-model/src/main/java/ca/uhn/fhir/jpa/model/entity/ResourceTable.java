@@ -55,7 +55,6 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 @Entity
 @Table(name = "HFJ_RESOURCE", uniqueConstraints = {}, indexes = {
 	@Index(name = "IDX_RES_DATE", columnList = "RES_UPDATED"),
-	@Index(name = "IDX_RES_LANG", columnList = "RES_TYPE,RES_LANGUAGE"),
 	@Index(name = "IDX_RES_TYPE", columnList = "RES_TYPE"),
 	@Index(name = "IDX_INDEXSTATUS", columnList = "SP_INDEX_STATUS")
 })
@@ -100,6 +99,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Long myIndexStatus;
 
+	// TODO: Removed in 5.5.0. Drop in a future release.
 	@Column(name = "RES_LANGUAGE", length = MAX_LANGUAGE_LENGTH, nullable = true)
 	@OptimisticLock(excluded = true)
 	private String myLanguage;
@@ -299,17 +299,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	public void setIndexStatus(Long theIndexStatus) {
 		myIndexStatus = theIndexStatus;
-	}
-
-	public String getLanguage() {
-		return myLanguage;
-	}
-
-	public void setLanguage(String theLanguage) {
-		if (defaultString(theLanguage).length() > MAX_LANGUAGE_LENGTH) {
-			throw new UnprocessableEntityException("Language exceeds maximum length of " + MAX_LANGUAGE_LENGTH + " chars: " + theLanguage);
-		}
-		myLanguage = theLanguage;
 	}
 
 	public Collection<ResourceIndexedCompositeStringUnique> getParamsCompositeStringUnique() {

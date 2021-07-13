@@ -559,11 +559,6 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				myPredicateBuilder.addPredicateResourceId(theAndOrParams, theResourceName, theRequestPartitionId);
 				break;
 
-			case IAnyResource.SP_RES_LANGUAGE:
-				addPredicateLanguage(theAndOrParams,
-					null);
-				break;
-
 			case Constants.PARAM_HAS:
 				addPredicateHas(theResourceName, theAndOrParams, theRequest, theRequestPartitionId);
 				break;
@@ -733,9 +728,6 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				null,
 				theFilter.getValue());
 			return myPredicateBuilder.addPredicateResourceId(Collections.singletonList(Collections.singletonList(param)), myResourceName, theFilter.getOperation(), theRequestPartitionId);
-		} else if (theFilter.getParamPath().getName().equals(IAnyResource.SP_RES_LANGUAGE)) {
-			return addPredicateLanguage(Collections.singletonList(Collections.singletonList(new StringParam(theFilter.getValue()))),
-				theFilter.getOperation());
 		}
 
 		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, theFilter.getParamPath().getName());
@@ -826,45 +818,6 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 		qp.setValueAsQueryToken(myContext, theParam.getName(), theQualifier, theValueAsQueryToken);
 		return qp;
-	}
-
-	private Predicate addPredicateLanguage(List<List<IQueryParameterType>> theList,
-														SearchFilterParser.CompareOperation operation) {
-		for (List<? extends IQueryParameterType> nextList : theList) {
-
-			Set<String> values = new HashSet<>();
-			for (IQueryParameterType next : nextList) {
-				if (next instanceof StringParam) {
-					String nextValue = ((StringParam) next).getValue();
-					if (isBlank(nextValue)) {
-						continue;
-					}
-					values.add(nextValue);
-				} else {
-					throw new InternalErrorException("Language parameter must be of type " + StringParam.class.getCanonicalName() + " - Got " + next.getClass().getCanonicalName());
-				}
-			}
-
-			if (values.isEmpty()) {
-				continue;
-			}
-
-			Predicate predicate;
-			if ((operation == null) ||
-				(operation == SearchFilterParser.CompareOperation.eq)) {
-				predicate = myQueryStack.get("myLanguage").as(String.class).in(values);
-			} else if (operation == SearchFilterParser.CompareOperation.ne) {
-				predicate = myQueryStack.get("myLanguage").as(String.class).in(values).not();
-			} else {
-				throw new InvalidRequestException("Unsupported operator specified in language query, only \"eq\" and \"ne\" are supported");
-			}
-			myQueryStack.addPredicate(predicate);
-			if (operation != null) {
-				return predicate;
-			}
-		}
-
-		return null;
 	}
 
 	private void addPredicateSource(List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest) {

@@ -63,7 +63,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 public class SearchParamRegistryImplTest {
 	private static final FhirContext ourFhirContext = FhirContext.forR4();
-	private static final ReadOnlySearchParamCache ourBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(ourFhirContext);
+	private static final ReadOnlySearchParamCache ourBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(ourFhirContext, new SearchParameterCanonicalizer(ourFhirContext));
 
 	public static final int TEST_SEARCH_PARAMS = 3;
 	private static final List<ResourceTable> ourEntities;
@@ -77,7 +77,7 @@ public class SearchParamRegistryImplTest {
 			ourEntities.add(createEntity(ourLastId, 1));
 		}
 		ourResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(ourEntities);
-		ourBuiltinPatientSearchParamCount = ReadOnlySearchParamCache.fromFhirContext(ourFhirContext).getSearchParamMap("Patient").size();
+		ourBuiltinPatientSearchParamCount = ReadOnlySearchParamCache.fromFhirContext(ourFhirContext, new SearchParameterCanonicalizer(ourFhirContext)).getSearchParamMap("Patient").size();
 	}
 
 	@Autowired

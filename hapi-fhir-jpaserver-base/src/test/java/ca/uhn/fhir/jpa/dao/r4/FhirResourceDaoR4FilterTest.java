@@ -347,28 +347,6 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 	}
 
 
-	@Test
-	public void testLanguageComparatorEq() {
-
-		Patient p = new Patient();
-		p.setLanguage("en");
-		p.addName().setFamily("Smith").addGiven("John");
-		p.setBirthDateElement(new DateType("1955-01-01"));
-		p.setActive(true);
-		String id1 = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
-
-		SearchParameterMap map;
-		List<String> found;
-
-		map = new SearchParameterMap();
-		map.setLoadSynchronous(true);
-		map.add(Constants.PARAM_FILTER, new StringParam("_language eq en"));
-		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1));
-
-	}
-
-
 
 	@Test
 	public void testStringComparatorCo() {

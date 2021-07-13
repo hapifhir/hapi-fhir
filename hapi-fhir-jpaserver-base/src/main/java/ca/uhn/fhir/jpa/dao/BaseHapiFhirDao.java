@@ -1228,12 +1228,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					}
 
 					entity.setUpdated(theTransactionDetails.getTransactionDate());
-					if (theResource instanceof IResource) {
-						entity.setLanguage(((IResource) theResource).getLanguage().getValue());
-					} else {
-						entity.setLanguage(((IAnyResource) theResource).getLanguageElement().getValue());
-					}
-
 					newParams.populateResourceTableSearchParamsPresentFlags(entity);
 					entity.setIndexStatus(INDEX_STATUS_INDEXED);
 				}

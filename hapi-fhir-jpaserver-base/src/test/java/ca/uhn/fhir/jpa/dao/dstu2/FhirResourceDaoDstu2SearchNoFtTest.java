@@ -727,9 +727,6 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		params.add("_id", new StringDt("TEST"));
 		assertEquals(1, toList(myPatientDao.search(params)).size());
 
-		params.add("_language", new StringParam("TEST"));
-		assertEquals(1, toList(myPatientDao.search(params)).size());
-
 		params.add(Patient.SP_IDENTIFIER, new TokenParam("TEST", "TEST"));
 		assertEquals(1, toList(myPatientDao.search(params)).size());
 
@@ -742,9 +739,6 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		params.setLoadSynchronous(true);
 
 		params.add("_id", new StringDt("TEST"));
-		assertEquals(0, toList(myPatientDao.search(params)).size());
-
-		params.add("_language", new StringParam("TEST"));
 		assertEquals(0, toList(myPatientDao.search(params)).size());
 
 		params.add(Patient.SP_IDENTIFIER, new TokenParam("TEST", "TEST"));
@@ -764,148 +758,6 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			IBundleProvider retrieved = myPatientDao.search(params);
 			assertEquals(0, retrieved.size().intValue());
 		}
-	}
-
-	@Test
-	public void testSearchLanguageParam() {
-		IIdType id1;
-		{
-			Patient patient = new Patient();
-			patient.getLanguage().setValue("en_CA");
-			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			patient.addName().addFamily("testSearchLanguageParam").addGiven("Joe");
-			id1 = myPatientDao.create(patient, mySrd).getId();
-		}
-		IIdType id2;
-		{
-			Patient patient = new Patient();
-			patient.getLanguage().setValue("en_US");
-			patient.addIdentifier().setSystem("urn:system").setValue("002");
-			patient.addName().addFamily("testSearchLanguageParam").addGiven("John");
-			id2 = myPatientDao.create(patient, mySrd).getId();
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronous(true);
-			params.add(BaseResource.SP_RES_LANGUAGE, new StringParam("en_CA"));
-			List<IResource> patients = toList(myPatientDao.search(params));
-			assertEquals(1, patients.size());
-			assertEquals(id1.toUnqualifiedVersionless(), patients.get(0).getId().toUnqualifiedVersionless());
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronous(true);
-			params.add(BaseResource.SP_RES_LANGUAGE, new StringParam("en_US"));
-			List<Patient> patients = toList(myPatientDao.search(params));
-			assertEquals(1, patients.size());
-			assertEquals(id2.toUnqualifiedVersionless(), patients.get(0).getId().toUnqualifiedVersionless());
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronous(true);
-			params.add(BaseResource.SP_RES_LANGUAGE, new StringParam("en_GB"));
-			List<Patient> patients = toList(myPatientDao.search(params));
-			assertEquals(0, patients.size());
-		}
-	}
-
-	@Test
-	public void testSearchLanguageParamAndOr() {
-		IIdType id1;
-		{
-			Patient patient = new Patient();
-			patient.getLanguage().setValue("en_CA");
-			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			patient.addName().addFamily("testSearchLanguageParam").addGiven("Joe");
-			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
-
-		Date betweenTime = new Date();
-
-		IIdType id2;
-		{
-			Patient patient = new Patient();
-			patient.getLanguage().setValue("en_US");
-			patient.addIdentifier().setSystem("urn:system").setValue("002");
-			patient.addName().addFamily("testSearchLanguageParam").addGiven("John");
-			id2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronous(true);
-			params.add(BaseResource.SP_RES_LANGUAGE, new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("en_US")));
-			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1, id2));
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronous(true);
-			params.add(BaseResource.SP_RES_LANGUAGE, new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("en_US")));
-			params.setLastUpdated(new DateRangeParam(betweenTime, null));
-			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id2));
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronous(true);
-			params.add(BaseResource.SP_RES_LANGUAGE, new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("ZZZZ")));
-			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1));
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronous(true);
-			StringAndListParam and = new StringAndListParam();
-			and.addAnd(new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("ZZZZ")));
-			and.addAnd(new StringOrListParam().addOr(new StringParam("en_CA")));
-			params.add(BaseResource.SP_RES_LANGUAGE, and);
-			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1));
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronous(true);
-			StringAndListParam and = new StringAndListParam();
-			and.addAnd(new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("ZZZZ")));
-			and.addAnd(new StringOrListParam().addOr(new StringParam("ZZZZZ")));
-			params.add(BaseResource.SP_RES_LANGUAGE, and);
-			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), empty());
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronous(true);
-			StringAndListParam and = new StringAndListParam();
-			and.addAnd(new StringOrListParam().addOr(new StringParam("ZZZZZ")));
-			and.addAnd(new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("ZZZZ")));
-			params.add(BaseResource.SP_RES_LANGUAGE, and);
-			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), empty());
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronous(true);
-			StringAndListParam and = new StringAndListParam();
-			and.addAnd(new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("ZZZZ")));
-			and.addAnd(new StringOrListParam().addOr(new StringParam("")).addOr(new StringParam(null)));
-			params.add(BaseResource.SP_RES_LANGUAGE, and);
-			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1));
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronous(true);
-			params.add("_id", new StringParam(id1.getIdPart()));
-			StringAndListParam and = new StringAndListParam();
-			and.addAnd(new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("ZZZZ")));
-			and.addAnd(new StringOrListParam().addOr(new StringParam("")).addOr(new StringParam(null)));
-			params.add(BaseResource.SP_RES_LANGUAGE, and);
-			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1));
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronous(true);
-			StringAndListParam and = new StringAndListParam();
-			and.addAnd(new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("ZZZZ")));
-			and.addAnd(new StringOrListParam().addOr(new StringParam("")).addOr(new StringParam(null)));
-			params.add(BaseResource.SP_RES_LANGUAGE, and);
-			params.add("_id", new StringParam(id1.getIdPart()));
-			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1));
-		}
-
 	}
 
 	@Test
