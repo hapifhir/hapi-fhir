@@ -1,17 +1,9 @@
 package ca.uhn.fhir.cql.dstu3;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
+import ca.uhn.fhir.cql.BaseCqlDstu3Test;
+import ca.uhn.fhir.cql.dstu3.provider.MeasureOperationsProvider;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.util.BundleUtil;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.DateTimeType;
@@ -24,15 +16,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import ca.uhn.fhir.cql.BaseCqlDstu3Test;
-import ca.uhn.fhir.cql.dstu3.provider.MeasureOperationsProvider;
-import ca.uhn.fhir.util.BundleUtil;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class CqlMeasureEvaluationDstu3Test extends BaseCqlDstu3Test {
 	Logger ourLog = LoggerFactory.getLogger(CqlMeasureEvaluationDstu3Test.class);
 
 	@Autowired
 	MeasureOperationsProvider myMeasureOperationsProvider;
+	private final SystemRequestDetails mySrd = new SystemRequestDetails();
 
 	protected void testMeasureBundle(String theLocation) throws IOException {
 		Bundle bundle = parseBundle(theLocation);
@@ -62,11 +63,11 @@ public class CqlMeasureEvaluationDstu3Test extends BaseCqlDstu3Test {
 		this.ourLog.info("Measure: %s, Patient: %s, Start: %s, End: %s", measureId, patientId, periodStart, periodEnd);
 
 		MeasureReport actual = this.myMeasureOperationsProvider.evaluateMeasure(new IdType("Measure", measureId),
-				periodStart, periodEnd, null,
-				// TODO: These are all individual reports
-				"patient", patientId,
-				// TODO: Generalize these parameters into a Parameters resource
-				null, null, null, null, null, null);
+			periodStart, periodEnd, null,
+			// TODO: These are all individual reports
+			"patient", patientId,
+			// TODO: Generalize these parameters into a Parameters resource
+			null, null, null, null, null, null, mySrd);
 
 		compareMeasureReport(expected, actual);
 	}

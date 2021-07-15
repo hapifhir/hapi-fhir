@@ -2734,6 +2734,106 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
+	@Test
+	public void testHistoryPaging() {
+
+		Patient patient = new Patient();
+		patient.setId("Patient/A");
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+		patient.setActive(false);
+		myClient.update().resource(patient).execute();
+
+		sleepAtLeast(100);
+		Date midDate = new Date();
+		sleepAtLeast(100);
+
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+		patient.setActive(false);
+		myClient.update().resource(patient).execute();
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+		patient.setActive(false);
+		myClient.update().resource(patient).execute();
+
+		Bundle history = myClient
+			.history()
+			.onInstance("Patient/A")
+			.returnBundle(Bundle.class)
+			.prettyPrint()
+			.count(2)
+			.execute();
+
+		assertThat(toUnqualifiedIdValues(history).toString(), toUnqualifiedIdValues(history), contains(
+			"Patient/A/_history/6",
+			"Patient/A/_history/5"
+		));
+
+		history = myClient
+			.loadPage()
+			.next(history)
+			.execute();
+
+		assertThat(toUnqualifiedIdValues(history).toString(), toUnqualifiedIdValues(history), contains(
+			"Patient/A/_history/4",
+			"Patient/A/_history/3"
+		));
+
+		history = myClient
+			.loadPage()
+			.next(history)
+			.execute();
+
+		assertThat(toUnqualifiedIdValues(history).toString(), toUnqualifiedIdValues(history), contains(
+			"Patient/A/_history/2",
+			"Patient/A/_history/1"
+		));
+
+		history = myClient
+			.loadPage()
+			.next(history)
+			.execute();
+
+		assertEquals(0, history.getEntry().size());
+
+		/*
+		 * Try with a date offset
+		 */
+
+		history = myClient
+			.history()
+			.onInstance("Patient/A")
+			.returnBundle(Bundle.class)
+			.since(midDate)
+			.prettyPrint()
+			.count(2)
+			.execute();
+
+		assertThat(toUnqualifiedIdValues(history).toString(), toUnqualifiedIdValues(history), contains(
+			"Patient/A/_history/6",
+			"Patient/A/_history/5"
+		));
+
+		history = myClient
+			.loadPage()
+			.next(history)
+			.execute();
+
+		assertThat(toUnqualifiedIdValues(history).toString(), toUnqualifiedIdValues(history), contains(
+			"Patient/A/_history/4",
+			"Patient/A/_history/3"
+		));
+
+		history = myClient
+			.loadPage()
+			.next(history)
+			.execute();
+
+		assertEquals(0, history.getEntry().size());
+
+	}
+
 	// private void delete(String theResourceType, String theParamName, String theParamValue) {
 	// Bundle resources;
 	// do {

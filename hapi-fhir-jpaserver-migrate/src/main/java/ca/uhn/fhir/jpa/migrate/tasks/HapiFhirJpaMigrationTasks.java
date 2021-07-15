@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.util.VersionEnum;
+import org.checkerframework.checker.units.qual.C;
 
 import java.util.Arrays;
 import java.util.List;
@@ -89,6 +90,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// Add bulk import file description
 		version.onTable("HFJ_BLK_IMPORT_JOBFILE")
 			.addColumn("20210528.1", "FILE_DESCRIPTION").nullable().type(ColumnTypeEnum.STRING, 500);
+
+		// Bump ConceptMap display lengths
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
+			.modifyColumn("20210617.1","TARGET_DISPLAY").nullable().withType(ColumnTypeEnum.STRING, 500);
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
+			.modifyColumn("20210617.2", "SOURCE_DISPLAY").nullable().withType(ColumnTypeEnum.STRING, 500);
+
+		version.onTable("HFJ_BLK_EXPORT_JOB")
+			.modifyColumn("20210624.1","REQUEST").nonNullable().withType(ColumnTypeEnum.STRING, 1024);
+
+		version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
+			.modifyColumn("20210713.1","IDX_STRING").nonNullable().withType(ColumnTypeEnum.STRING, 500);
 	}
 
 	private void init540() {

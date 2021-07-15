@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -26,6 +27,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
+
+import java.io.IOException;
 
 public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR4ConceptMapTest.class);
@@ -169,6 +172,101 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals("Version 2", coding.getVersion());
 		part = getPartByName(param, "source");
 		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
+	}
+
+
+	@Test
+	public void testTranslateByCodeSystemsAndSourceCodeOneToOne_InBatchOperation() {
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+
+		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.BATCH);
+		bundle
+			.addEntry()
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.GET)
+			.setUrl("ConceptMap/$translate?system=" + CS_URL + "&code=12345" + "&targetsystem=" + CS_URL_2);
+
+		ourLog.info("Request:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		Bundle respBundle = myClient
+			.transaction()
+			.withBundle(bundle)
+			.execute();
+
+		ourLog.info("Response:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respBundle));
+
+		assertEquals(1, respBundle.getEntry().size());
+		Parameters respParams = (Parameters) respBundle.getEntry().get(0).getResource();
+
+		ParametersParameterComponent param = getParameterByName(respParams, "result");
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
+
+		param = getParameterByName(respParams, "message");
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
+
+		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
+
+		param = getParameterByName(respParams, "match");
+		assertEquals(3, param.getPart().size());
+		ParametersParameterComponent part = getPartByName(param, "equivalence");
+		assertEquals("equal", ((CodeType) part.getValue()).getCode());
+		part = getPartByName(param, "concept");
+		Coding coding = (Coding) part.getValue();
+		assertEquals("34567", coding.getCode());
+		assertEquals("Target Code 34567", coding.getDisplay());
+		assertFalse(coding.getUserSelected());
+		assertEquals(CS_URL_2, coding.getSystem());
+		assertEquals("Version 2", coding.getVersion());
+		part = getPartByName(param, "source");
+		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
+	}
+
+	@Test
+	public void testTranslateByCodeSystemsAndSourceCodeOneToOne_InBatchOperation2() throws IOException {
+		ConceptMap cm = loadResourceFromClasspath(ConceptMap.class, "/r4/conceptmap.json");
+		myConceptMapDao.update(cm);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.BATCH);
+		bundle
+			.addEntry()
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.GET)
+			.setUrl("ConceptMap/$translate?url=http://hl7.org/fhir/ConceptMap/CMapHie&system=http://fkcfhir.org/fhir/cs/FMCECCOrderAbbreviation&code=IMed_Janssen&targetsystem=http://fkcfhir.org/fhir/cs/FMCHIEOrderAbbreviation");
+
+		ourLog.info("Request:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		Bundle respBundle = myClient
+			.transaction()
+			.withBundle(bundle)
+			.execute();
+
+		ourLog.info("Response:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respBundle));
+
+		assertEquals(1, respBundle.getEntry().size());
+		Parameters respParams = (Parameters) respBundle.getEntry().get(0).getResource();
+
+		ParametersParameterComponent param = getParameterByName(respParams, "result");
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
+
+		param = getParameterByName(respParams, "message");
+		assertEquals("Matches found", ((StringType) param.getValue()).getValueAsString());
+
+		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
+
+		param = getParameterByName(respParams, "match");
+		assertEquals(3, param.getPart().size());
+		ParametersParameterComponent part = getPartByName(param, "equivalence");
+		assertEquals("equivalent", ((CodeType) part.getValue()).getCode());
+		part = getPartByName(param, "concept");
+		Coding coding = (Coding) part.getValue();
+		assertEquals("212", coding.getCode());
+		assertEquals("COVID-19 Vaccine,vecton-nr,rS-Ad26,PF,0.5mL", coding.getDisplay());
+		assertFalse(coding.getUserSelected());
+		assertEquals("http://fkcfhir.org/fhir/cs/FMCHIEOrderAbbreviation", coding.getSystem());
 	}
 
 	@Test

@@ -120,9 +120,9 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	Class<T> getResourceType();
 
-	IBundleProvider history(Date theSince, Date theUntil, RequestDetails theRequestDetails);
+	IBundleProvider history(Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails);
 
-	IBundleProvider history(IIdType theId, Date theSince, Date theUntil, RequestDetails theRequestDetails);
+	IBundleProvider history(IIdType theId, Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails);
 
 	/**
 	 * Not supported in DSTU1!

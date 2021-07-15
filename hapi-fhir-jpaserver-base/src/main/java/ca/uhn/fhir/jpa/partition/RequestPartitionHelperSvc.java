@@ -25,9 +25,11 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -45,6 +47,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.ALL_PARTITIONS_NAME;
 import static ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster.doCallHooks;
@@ -98,7 +102,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	 */
 	@Nonnull
 	@Override
-	public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType) {
+	public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType, ReadPartitionIdRequestDetails theDetails) {
 		RequestPartitionId requestPartitionId;
 
 		boolean nonPartitionableResource = myNonPartitionableResourceNames.contains(theResourceType);
@@ -115,7 +119,8 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 			} else if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_READ, myInterceptorBroadcaster, theRequest)) {
 				HookParams params = new HookParams()
 					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest);
+					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(ReadPartitionIdRequestDetails.class, theDetails);
 				requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_READ, params);
 			} else {
 				requestPartitionId = null;
@@ -208,6 +213,26 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 		}
 
 		return RequestPartitionId.allPartitions();
+	}
+
+	@Nonnull
+	@Override
+	public PartitionablePartitionId toStoragePartition(@Nonnull RequestPartitionId theRequestPartitionId) {
+		Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
+		if (partitionId == null) {
+			partitionId = myPartitionSettings.getDefaultPartitionId();
+		}
+		return new PartitionablePartitionId(partitionId, theRequestPartitionId.getPartitionDate());
+	}
+
+	@Nonnull
+	@Override
+	public Set<Integer> toReadPartitions(@Nonnull RequestPartitionId theRequestPartitionId) {
+		return theRequestPartitionId
+			.getPartitionIds()
+			.stream()
+			.map(t->t == null ? myPartitionSettings.getDefaultPartitionId() : t)
+			.collect(Collectors.toSet());
 	}
 
 	/**
@@ -345,8 +370,8 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 	}
 
-	private void validateRequestPartitionNotNull(RequestPartitionId theTheRequestPartitionId, Pointcut theThePointcut) {
-		if (theTheRequestPartitionId == null) {
+	private void validateRequestPartitionNotNull(RequestPartitionId theRequestPartitionId, Pointcut theThePointcut) {
+		if (theRequestPartitionId == null) {
 			throw new InternalErrorException("No interceptor provided a value for pointcut: " + theThePointcut);
 		}
 	}

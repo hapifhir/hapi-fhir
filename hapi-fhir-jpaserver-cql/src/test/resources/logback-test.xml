@@ -1,0 +1,76 @@
+<configuration>
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>TRACE</level>
+		</filter>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%file:%line] %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator" additivity="false"
+			  level="info">
+		<appender-ref ref="STDOUT"/>
+	</logger>
+
+	<logger name="ca.uhn.fhir.jpa.dao.FhirResourceDaoSubscriptionDstu2" additivity="false" level="info">
+		<appender-ref ref="STDOUT"/>
+	</logger>
+
+	<logger name="org.eclipse.jetty.websocket" additivity="false" level="info">
+		<appender-ref ref="STDOUT"/>
+	</logger>
+	<!-- TODO GGG HS can probably eventually disable this.  -->
+	<logger name="org.hibernate.search.backend.lucene.infostream" additivity="true" level="trace">
+		<appender-ref ref="STDOUT"/>
+	</logger>
+	<logger name="org.hibernate.search.query" additivity="true" level="trace">
+		<appender-ref ref="STDOUT"/>
+	</logger>
+	j
+	<logger name="org.hibernate.event.internal.DefaultPersistEventListener" additivity="true" level="info">
+		<appender-ref ref="STDOUT"/>
+	</logger>
+
+	<logger name="org.elasticsearch.client" additivity="true" level="trace">
+		<appender-ref ref="STDOUT"/>
+	</logger>
+
+	<logger name="org.eclipse" additivity="false" level="error">
+	</logger>
+
+	<logger name="ca.uhn.fhir.rest.client" additivity="false" level="info">
+		<appender-ref ref="STDOUT"/>
+	</logger>
+
+	<logger name="ca.uhn.fhir.jpa.dao" additivity="false" level="info">
+		<appender-ref ref="STDOUT"/>
+	</logger>
+
+	<!-- set to debug to enable term expansion logs -->
+	<logger name="ca.uhn.fhir.jpa.term" additivity="false" level="debug">
+		<appender-ref ref="STDOUT"/>
+	</logger>
+
+	<!-- Set to 'trace' to enable SQL logging -->
+	<logger name="org.hibernate.SQL" additivity="false" level="info">
+		<appender-ref ref="STDOUT"/>
+	</logger>
+	<!-- Set to 'trace' to enable SQL Value logging -->
+	<logger name="org.hibernate.type" additivity="false" level="info">
+		<appender-ref ref="STDOUT"/>
+	</logger>
+
+	<logger name="org.hibernate.search.elasticsearch.request" additivity="false" level="trace">
+		<appender-ref ref="STDOUT"/>
+	</logger>
+
+	<logger name="org.springframework.test.context.cache" additivity="false" level="debug">
+		<appender-ref ref="STDOUT"/>
+	</logger>
+
+	<root level="info">
+		<appender-ref ref="STDOUT"/>
+	</root>
+
+</configuration>

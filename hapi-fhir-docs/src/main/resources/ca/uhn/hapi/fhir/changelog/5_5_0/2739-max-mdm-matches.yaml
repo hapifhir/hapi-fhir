@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2739
+backport: 5.4.2
+title: "Too many MDM candidates matching could result in an OutOfMemoryError.  Candidate matching is now limited to the
+value of IMdmSettings.getCandidateSearchLimit(), default 10000."

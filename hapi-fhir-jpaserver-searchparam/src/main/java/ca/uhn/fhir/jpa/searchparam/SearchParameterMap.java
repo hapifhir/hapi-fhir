@@ -115,9 +115,9 @@ public class SearchParameterMap implements Serializable {
 		return this;
 	}
 
-	public void add(String theName, IQueryParameterAnd<?> theAnd) {
+	public SearchParameterMap add(String theName, IQueryParameterAnd<?> theAnd) {
 		if (theAnd == null) {
-			return;
+			return this;
 		}
 		if (!containsKey(theName)) {
 			put(theName, new ArrayList<>());
@@ -129,17 +129,19 @@ public class SearchParameterMap implements Serializable {
 			}
 			get(theName).add((List<IQueryParameterType>) next.getValuesAsQueryTokens());
 		}
+		return this;
 	}
 
-	public void add(String theName, IQueryParameterOr<?> theOr) {
+	public SearchParameterMap add(String theName, IQueryParameterOr<?> theOr) {
 		if (theOr == null) {
-			return;
+			return this;
 		}
 		if (!containsKey(theName)) {
 			put(theName, new ArrayList<>());
 		}
 
 		get(theName).add((List<IQueryParameterType>) theOr.getValuesAsQueryTokens());
+		return this;
 	}
 
 	public Collection<List<List<IQueryParameterType>>> values() {
@@ -629,6 +631,15 @@ public class SearchParameterMap implements Serializable {
 		} else {
 			this.mySearchContainedMode = theSearchContainedMode;
 		}
+	}
+
+	/**
+	 * Returns true if {@link #getOffset()} and {@link #getCount()} both return a non null response
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isOffsetQuery() {
+		return getOffset() != null && getCount() != null;
 	}
 
 	public enum EverythingModeEnum {

@@ -78,4 +78,12 @@ public interface IMdmSubmitSvc {
 	 * @param theMdmSettings Settings to set
 	 */
 	void setMdmSettings(IMdmSettings theMdmSettings);
+
+	/**
+	 * Buffer size for fetching results to add to MDM queue.
+	 *
+	 * @param theBufferSize
+	 */
+	public void setBufferSize(int theBufferSize);
+
 }

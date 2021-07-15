@@ -40,6 +40,7 @@ import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.CareTeam;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.EpisodeOfCare;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Immunization;
@@ -511,6 +512,63 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 			if ("Patient".equals(next.getResourceType())) {
 				assertThat(nextContents, containsString("\"id\":\"PAT3\""));
+				assertEquals(1, nextContents.split("\n").length);
+			} else {
+				fail(next.getResourceType());
+			}
+		}
+	}
+
+	@Test
+	public void testGenerateBulkExport_WithMultipleTypeFilters() {
+		// Create some resources to load
+		Patient p = new Patient();
+		p.setId("P999999990");
+		p.setActive(true);
+		myPatientDao.update(p);
+
+		EpisodeOfCare eoc = new EpisodeOfCare();
+		eoc.setId("E0");
+		eoc.getPatient().setReference("Patient/P999999990");
+		myEpisodeOfCareDao.update(eoc);
+
+		// Create a bulk job
+		HashSet<String> types = Sets.newHashSet("Patient", "EpisodeOfCare");
+		Set<String> typeFilters = Sets.newHashSet("Patient?_id=P999999990", "EpisodeOfCare?patient=P999999990");
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+		options.setResourceTypes(types);
+		options.setFilters(typeFilters);
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(options);
+		assertNotNull(jobDetails.getJobId());
+
+		// Check the status
+		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+		assertEquals(BulkExportJobStatusEnum.SUBMITTED, status.getStatus());
+		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=EpisodeOfCare,Patient&_typeFilter=Patient%3F_id%3DP999999990&_typeFilter=EpisodeOfCare%3Fpatient%3DP999999990", status.getRequest());
+
+		// Run a scheduled pass to build the export
+		myBulkDataExportSvc.buildExportFiles();
+
+		awaitAllBulkJobCompletions();
+
+		// Fetch the job again
+		status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+		assertEquals(BulkExportJobStatusEnum.COMPLETE, status.getStatus());
+		assertEquals(2, status.getFiles().size());
+
+		// Iterate over the files
+		for (IBulkDataExportSvc.FileEntry next : status.getFiles()) {
+			Binary nextBinary = myBinaryDao.read(next.getResourceId());
+			assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
+			String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
+			ourLog.info("Next contents for type {}:\n{}", next.getResourceType(), nextContents);
+
+			if ("Patient".equals(next.getResourceType())) {
+				assertThat(nextContents, containsString("\"id\":\"P999999990\""));
+				assertEquals(1, nextContents.split("\n").length);
+			} else if ("EpisodeOfCare".equals(next.getResourceType())) {
+				assertThat(nextContents, containsString("\"id\":\"E0\""));
 				assertEquals(1, nextContents.split("\n").length);
 			} else {
 				fail(next.getResourceType());

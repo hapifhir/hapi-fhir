@@ -55,4 +55,15 @@ public class ResourceVersionConflictException extends BaseServerResponseExceptio
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param theMessage
+	 *            The message
+	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
+	 */
+	public ResourceVersionConflictException(String theMessage, Throwable theCause, IBaseOperationOutcome theOperationOutcome) {
+		super(STATUS_CODE, theMessage, theCause, theOperationOutcome);
+	}
+
 }

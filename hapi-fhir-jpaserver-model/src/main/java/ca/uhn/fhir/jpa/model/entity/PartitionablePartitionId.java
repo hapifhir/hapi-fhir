@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -84,12 +85,12 @@ public class PartitionablePartitionId implements Cloneable {
 		return RequestPartitionId.fromPartitionId(getPartitionId(), getPartitionDate());
 	}
 
-	@Nullable
+	@Nonnull
 	public static RequestPartitionId toRequestPartitionId(@Nullable PartitionablePartitionId theRequestPartitionId) {
 		if (theRequestPartitionId != null) {
 			return theRequestPartitionId.toPartitionId();
 		} else {
-			return null;
+			return RequestPartitionId.defaultPartition();
 		}
 	}
 }

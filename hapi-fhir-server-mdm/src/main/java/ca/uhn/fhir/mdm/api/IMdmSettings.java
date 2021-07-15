@@ -52,4 +52,6 @@ public interface IMdmSettings {
 	default String getSupportedMdmTypes() {
 		return getMdmRules().getMdmTypes().stream().collect(Collectors.joining(", "));
 	}
+
+	int getCandidateSearchLimit();
 }

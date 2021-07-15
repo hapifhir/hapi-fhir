@@ -30,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
@@ -54,6 +55,7 @@ public class TransactionDetails {
 	public static final ResourcePersistentId NOT_FOUND = new ResourcePersistentId(-1L);
 
 	private final Date myTransactionDate;
+	private List<Runnable> myRollbackUndoActions = Collections.emptyList();
 	private Map<String, ResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
 	private Map<String, ResourcePersistentId> myResolvedMatchUrls = Collections.emptyMap();
 	private Map<String, Object> myUserData;
@@ -73,6 +75,39 @@ public class TransactionDetails {
 	 */
 	public TransactionDetails(Date theTransactionDate) {
 		myTransactionDate = theTransactionDate;
+	}
+
+	/**
+	 * Get the actions that should be executed if the transaction is rolled back
+	 *
+	 * @since 5.5.0
+	 */
+	public List<Runnable> getRollbackUndoActions() {
+		return Collections.unmodifiableList(myRollbackUndoActions);
+	}
+
+	/**
+	 * Add an action that should be executed if the transaction is rolled back
+	 *
+	 * @since 5.5.0
+	 */
+	public void addRollbackUndoAction(@Nonnull Runnable theRunnable) {
+		assert theRunnable != null;
+		if (myRollbackUndoActions.isEmpty()) {
+			myRollbackUndoActions = new ArrayList<>();
+		}
+		myRollbackUndoActions.add(theRunnable);
+	}
+
+	/**
+	 * Clears any previously added rollback actions
+	 *
+	 * @since 5.5.0
+	 */
+	public void clearRollbackUndoActions() {
+		if (!myRollbackUndoActions.isEmpty()) {
+			myRollbackUndoActions.clear();
+		}
 	}
 
 	/**
@@ -140,7 +175,18 @@ public class TransactionDetails {
 	}
 
 	/**
-	 * Sets an arbitraty object that will last the lifetime of the current transaction
+	 * Remove an item previously stored in user data
+	 *
+	 * @see #getUserData(String)
+	 */
+	public void clearUserData(String theKey) {
+		if (myUserData != null) {
+			myUserData.remove(theKey);
+		}
+	}
+
+	/**
+	 * Sets an arbitrary object that will last the lifetime of the current transaction
 	 *
 	 * @see #getUserData(String)
 	 */
@@ -241,6 +287,11 @@ public class TransactionDetails {
 
 	public void deferredBroadcastProcessingFinished() {
 		myIsPointcutDeferred = false;
+	}
+
+	public void clearResolvedItems() {
+		myResolvedResourceIds.clear();
+		myResolvedMatchUrls.clear();
 	}
 }
 

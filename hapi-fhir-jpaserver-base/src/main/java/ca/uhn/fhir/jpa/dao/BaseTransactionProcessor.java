@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -446,33 +447,7 @@ public abstract class BaseTransactionProcessor {
 		}
 		entries.sort(new TransactionSorter(placeholderIds));
 
-		/*
-		 * All of the write operations in the transaction (PUT, POST, etc.. basically anything
-		 * except GET) are performed in their own database transaction before we do the reads.
-		 * We do this because the reads (specifically the searches) often spawn their own
-		 * secondary database transaction and if we allow that within the primary
-		 * database transaction we can end up with deadlocks if the server is under
-		 * heavy load with lots of concurrent transactions using all available
-		 * database connections.
-		 */
-		TransactionCallback<Map<IBase, IIdType>> txCallback = status -> {
-			final Set<IIdType> allIds = new LinkedHashSet<>();
-			final Map<IIdType, IIdType> idSubstitutions = new HashMap<>();
-			final Map<IIdType, DaoMethodOutcome> idToPersistedOutcome = new HashMap<>();
-			Map<IBase, IIdType> retVal = doTransactionWriteOperations(theRequestDetails, theActionName, transactionDetails, allIds, idSubstitutions, idToPersistedOutcome, response, originalRequestOrder, entries, transactionStopWatch);
-
-			transactionStopWatch.startTask("Commit writes to database");
-			return retVal;
-		};
-		Map<IBase, IIdType> entriesToProcess = myHapiTransactionService.execute(theRequestDetails, txCallback);
-		transactionStopWatch.endCurrentTask();
-
-		for (Map.Entry<IBase, IIdType> nextEntry : entriesToProcess.entrySet()) {
-			String responseLocation = nextEntry.getValue().toUnqualified().getValue();
-			String responseEtag = nextEntry.getValue().getVersionIdPart();
-			myVersionAdapter.setResponseLocation(nextEntry.getKey(), responseLocation);
-			myVersionAdapter.setResponseETag(nextEntry.getKey(), responseEtag);
-		}
+		doTransactionWriteOperations(theRequestDetails, theActionName, transactionDetails, transactionStopWatch, response, originalRequestOrder, entries);
 
 		/*
 		 * Loop through the request and process any entries of type GET
@@ -553,6 +528,79 @@ public abstract class BaseTransactionProcessor {
 		}
 
 		return response;
+	}
+
+	/**
+	 * All of the write operations in the transaction (PUT, POST, etc.. basically anything
+	 * except GET) are performed in their own database transaction before we do the reads.
+	 * We do this because the reads (specifically the searches) often spawn their own
+	 * secondary database transaction and if we allow that within the primary
+	 * database transaction we can end up with deadlocks if the server is under
+	 * heavy load with lots of concurrent transactions using all available
+	 * database connections.
+	 */
+	private void doTransactionWriteOperations(RequestDetails theRequestDetails, String theActionName, TransactionDetails theTransactionDetails, StopWatch theTransactionStopWatch, IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder, List<IBase> theEntries) {
+		TransactionWriteOperationsDetails writeOperationsDetails = null;
+		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE, myInterceptorBroadcaster, theRequestDetails) ||
+			CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_POST, myInterceptorBroadcaster, theRequestDetails)) {
+
+			List<String> updateRequestUrls = new ArrayList<>();
+			List<String> conditionalCreateRequestUrls = new ArrayList<>();
+			for (IBase nextEntry : theEntries) {
+				String method = myVersionAdapter.getEntryRequestVerb(myContext, nextEntry);
+				if ("PUT".equals(method)) {
+					String requestUrl = myVersionAdapter.getEntryRequestUrl(nextEntry);
+					if (isNotBlank(requestUrl)) {
+						updateRequestUrls.add(requestUrl);
+					}
+				} else if ("POST".equals(method)) {
+					String requestUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextEntry);
+					if (isNotBlank(requestUrl) && requestUrl.contains("?")) {
+						conditionalCreateRequestUrls.add(requestUrl);
+					}
+				}
+			}
+
+			writeOperationsDetails = new TransactionWriteOperationsDetails();
+			writeOperationsDetails.setUpdateRequestUrls(updateRequestUrls);
+			writeOperationsDetails.setConditionalCreateRequestUrls(conditionalCreateRequestUrls);
+			HookParams params = new HookParams()
+				.add(TransactionDetails.class, theTransactionDetails)
+				.add(TransactionWriteOperationsDetails.class, writeOperationsDetails);
+			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE, params);
+
+		}
+
+		TransactionCallback<Map<IBase, IIdType>> txCallback = status -> {
+			final Set<IIdType> allIds = new LinkedHashSet<>();
+			final Map<IIdType, IIdType> idSubstitutions = new HashMap<>();
+			final Map<IIdType, DaoMethodOutcome> idToPersistedOutcome = new HashMap<>();
+			Map<IBase, IIdType> retVal = doTransactionWriteOperations(theRequestDetails, theActionName, theTransactionDetails, allIds, idSubstitutions, idToPersistedOutcome, theResponse, theOriginalRequestOrder, theEntries, theTransactionStopWatch);
+
+			theTransactionStopWatch.startTask("Commit writes to database");
+			return retVal;
+		};
+		Map<IBase, IIdType> entriesToProcess;
+
+		try {
+			entriesToProcess = myHapiTransactionService.execute(theRequestDetails, theTransactionDetails, txCallback);
+		} finally {
+			if (writeOperationsDetails != null) {
+				HookParams params = new HookParams()
+					.add(TransactionDetails.class, theTransactionDetails)
+					.add(TransactionWriteOperationsDetails.class, writeOperationsDetails);
+				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_POST, params);
+			}
+		}
+
+		theTransactionStopWatch.endCurrentTask();
+
+		for (Map.Entry<IBase, IIdType> nextEntry : entriesToProcess.entrySet()) {
+			String responseLocation = nextEntry.getValue().toUnqualified().getValue();
+			String responseEtag = nextEntry.getValue().getVersionIdPart();
+			myVersionAdapter.setResponseLocation(nextEntry.getKey(), responseLocation);
+			myVersionAdapter.setResponseETag(nextEntry.getKey(), responseEtag);
+		}
 	}
 
 	private boolean isValidVerb(String theVerb) {
@@ -893,7 +941,6 @@ public abstract class BaseTransactionProcessor {
 				theTransactionStopWatch.endCurrentTask();
 			}
 
-
 			/*
 			 * Make sure that there are no conflicts from deletions. E.g. we can't delete something
 			 * if something else has a reference to it.. Unless the thing that has a reference to it
@@ -1096,6 +1143,8 @@ public abstract class BaseTransactionProcessor {
 				}
 				if (newId != null) {
 					ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
+
+					addRollbackReferenceRestore(theTransactionDetails, resourceReference);
 					if (theReferencesToAutoVersion.contains(resourceReference)) {
 						resourceReference.setReference(newId.getValue());
 						resourceReference.setResource(null);
@@ -1110,6 +1159,7 @@ public abstract class BaseTransactionProcessor {
 				if (theReferencesToAutoVersion.contains(resourceReference)) {
 					DaoMethodOutcome outcome = theIdToPersistedOutcome.get(nextId);
 					if (!outcome.isNop() && !Boolean.TRUE.equals(outcome.getCreated())) {
+						addRollbackReferenceRestore(theTransactionDetails, resourceReference);
 						resourceReference.setReference(nextId.getValue());
 						resourceReference.setResource(null);
 					}
@@ -1128,6 +1178,10 @@ public abstract class BaseTransactionProcessor {
 			if (theIdSubstitutions.containsKey(nextUriString)) {
 				IIdType newId = theIdSubstitutions.get(nextUriString);
 				ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
+
+				String existingValue = nextRef.getValueAsString();
+				theTransactionDetails.addRollbackUndoAction(() -> nextRef.setValueAsString(existingValue));
+
 				nextRef.setValueAsString(newId.toVersionless().getValue());
 			} else {
 				ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
@@ -1180,6 +1234,11 @@ public abstract class BaseTransactionProcessor {
 			}
 
 		}
+	}
+
+	private void addRollbackReferenceRestore(TransactionDetails theTransactionDetails, IBaseReference resourceReference) {
+		String existingValue = resourceReference.getReferenceElement().getValue();
+		theTransactionDetails.addRollbackUndoAction(() -> resourceReference.setReference(existingValue));
 	}
 
 	private void validateNoDuplicates(RequestDetails theRequest, String theActionName, Map<String, Class<? extends IBaseResource>> conditionalRequestUrls, Collection<DaoMethodOutcome> thePersistedOutcomes) {

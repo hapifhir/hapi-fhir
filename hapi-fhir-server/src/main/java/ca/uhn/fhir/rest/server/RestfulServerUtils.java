@@ -249,6 +249,13 @@ public class RestfulServerUtils {
 
 
 	public static String createLinkSelf(String theServerBase, RequestDetails theRequest) {
+		return createLinkSelfWithoutGivenParameters(theServerBase, theRequest, null);
+	}
+
+	/**
+	 * This function will create a self link but omit any parameters passed in via the excludedParameterNames list.
+	 */
+	public static String createLinkSelfWithoutGivenParameters(String theServerBase, RequestDetails theRequest, List<String> excludedParameterNames) {
 		StringBuilder b = new StringBuilder();
 		b.append(theServerBase);
 
@@ -265,21 +272,24 @@ public class RestfulServerUtils {
 			boolean first = true;
 			Map<String, String[]> parameters = theRequest.getParameters();
 			for (String nextParamName : new TreeSet<>(parameters.keySet())) {
-				for (String nextParamValue : parameters.get(nextParamName)) {
-					if (first) {
-						b.append('?');
-						first = false;
-					} else {
-						b.append('&');
+				if (excludedParameterNames == null || !excludedParameterNames.contains(nextParamName)) {
+					for (String nextParamValue : parameters.get(nextParamName)) {
+						if (first) {
+							b.append('?');
+							first = false;
+						} else {
+							b.append('&');
+						}
+						b.append(UrlUtil.escapeUrlParam(nextParamName));
+						b.append('=');
+						b.append(UrlUtil.escapeUrlParam(nextParamValue));
 					}
-					b.append(UrlUtil.escapeUrlParam(nextParamName));
-					b.append('=');
-					b.append(UrlUtil.escapeUrlParam(nextParamValue));
 				}
 			}
 		}
 
 		return b.toString();
+
 	}
 
 	public static String createOffsetPagingLink(BundleLinks theBundleLinks, String requestPath, String tenantId, Integer theOffset, Integer theCount, Map<String, String[]> theRequestParameters) {

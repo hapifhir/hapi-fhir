@@ -315,7 +315,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		// Perform a history
 		SearchParameterMap map = new SearchParameterMap();
 		map.setSort(new SortSpec(Observation.SP_IDENTIFIER, SortOrderEnum.ASC));
-		IBundleProvider outcome = myObservationDao.history(null, null, mySrd);
+		IBundleProvider outcome = myObservationDao.history(null, null, null, mySrd);
 		ourLog.info("Search UUID: {}", outcome.getUuid());
 
 		// Fetch the first 10 (don't cross a fetch boundary)

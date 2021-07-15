@@ -57,7 +57,7 @@ import static org.apache.commons.lang3.StringUtils.left;
 })
 public class BulkExportJobEntity implements Serializable {
 
-	public static final int REQUEST_LENGTH = 500;
+	public static final int REQUEST_LENGTH = 1024;
 	public static final int STATUS_MESSAGE_LEN = 500;
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_BLKEXJOB_PID")

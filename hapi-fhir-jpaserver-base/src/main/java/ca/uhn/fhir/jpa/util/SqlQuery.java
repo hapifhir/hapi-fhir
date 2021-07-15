@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.util;
  */
 
 import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.lang3.Validate;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 
 import java.util.ArrayList;
@@ -37,14 +38,22 @@ public class SqlQuery {
 	private final long myElapsedTime;
 	private final StackTraceElement[] myStackTrace;
 	private final int mySize;
+	private final LanguageEnum myLanguage;
 
-	SqlQuery(String theSql, List<String> theParams, long theQueryTimestamp, long theElapsedTime, StackTraceElement[] theStackTraceElements, int theSize) {
+	public SqlQuery(String theSql, List<String> theParams, long theQueryTimestamp, long theElapsedTime, StackTraceElement[] theStackTraceElements, int theSize) {
+		this(theSql,  theParams,  theQueryTimestamp,  theElapsedTime,  theStackTraceElements, theSize, LanguageEnum.SQL);
+	}
+
+	public SqlQuery(String theSql, List<String> theParams, long theQueryTimestamp, long theElapsedTime, StackTraceElement[] theStackTraceElements, int theSize, LanguageEnum theLanguage) {
+		Validate.notNull(theLanguage, "theLanguage must not be null");
+
 		mySql = theSql;
 		myParams = Collections.unmodifiableList(theParams);
 		myQueryTimestamp = theQueryTimestamp;
 		myElapsedTime = theElapsedTime;
 		myStackTrace = theStackTraceElements;
 		mySize = theSize;
+		myLanguage = theLanguage;
 	}
 
 	public long getQueryTimestamp() {
@@ -63,14 +72,20 @@ public class SqlQuery {
 		return getSql(theInlineParams, theFormat, false);
 	}
 
+	public LanguageEnum getLanguage() {
+		return myLanguage;
+	}
+
 	public String getSql(boolean theInlineParams, boolean theFormat, boolean theSanitizeParams) {
 		String retVal = mySql;
 		if (theFormat) {
-			retVal = new BasicFormatterImpl().format(retVal);
+			if (getLanguage() == LanguageEnum.SQL) {
+				retVal = new BasicFormatterImpl().format(retVal);
 
-			// BasicFormatterImpl annoyingly adds a newline at the very start of its output
-			while (retVal.startsWith("\n")) {
-				retVal = retVal.substring(1);
+				// BasicFormatterImpl annoyingly adds a newline at the very start of its output
+				while (retVal.startsWith("\n")) {
+					retVal = retVal.substring(1);
+				}
 			}
 		}
 
@@ -102,4 +117,14 @@ public class SqlQuery {
 	public int getSize() {
 		return mySize;
 	}
+
+
+	public enum LanguageEnum {
+
+		SQL,
+		JSON
+
+	}
+
+
 }

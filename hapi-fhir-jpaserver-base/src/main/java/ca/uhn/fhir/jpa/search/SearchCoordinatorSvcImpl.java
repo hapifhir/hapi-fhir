@@ -45,7 +45,6 @@ import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.InterceptorUtil;
-import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
@@ -64,6 +63,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.method.PageMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.StopWatch;
@@ -103,7 +103,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -124,13 +123,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	public static final Integer INTEGER_0 = 0;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCoordinatorSvcImpl.class);
 	private final ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<>();
+	private final ExecutorService myExecutor;
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private EntityManager myEntityManager;
-	private final ExecutorService myExecutor;
 	private Integer myLoadingThrottleForUnitTests = null;
 	private long myMaxMillisToWaitForRemoteResults = DateUtils.MILLIS_PER_MINUTE;
 	private boolean myNeverUseLocalSearchForUnitTests;
@@ -272,7 +271,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					String resourceType = search.getResourceType();
 					SearchParameterMap params = search.getSearchParameterMap().orElseThrow(() -> new IllegalStateException("No map in PASSCOMPLET search"));
 					IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(resourceType);
-					RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, resourceType);
+					RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequestDetails, resourceType, params);
 					SearchContinuationTask task = new SearchContinuationTask(search, resourceDao, params, resourceType, theRequestDetails, requestPartitionId);
 					myIdToSearchTask.put(search.getUuid(), task);
 					myExecutor.submit(task);
@@ -307,6 +306,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		final String queryString = theParams.toNormalizedQueryString(myContext);
 		ourLog.debug("Registering new search {}", searchUuid);
+
 		Search search = new Search();
 		populateSearchEntity(theParams, theResourceType, searchUuid, queryString, search, theRequestPartitionId);
 
@@ -317,13 +317,15 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 			.add(SearchParameterMap.class, theParams);
 		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
+
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(theResourceType).getImplementingClass();
 		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(theCallingDao, theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
 
 		final Integer loadSynchronousUpTo = getLoadSynchronousUpToOrNull(theCacheControlDirective);
+		boolean isOffsetQuery = theParams.isOffsetQuery();
 
-		if (theParams.isLoadSynchronous() || loadSynchronousUpTo != null) {
+		if (theParams.isLoadSynchronous() || loadSynchronousUpTo != null || isOffsetQuery) {
 			ourLog.debug("Search {} is loading in synchronous mode", searchUuid);
 			return executeQuery(theResourceType, theParams, theRequestDetails, searchUuid, sb, loadSynchronousUpTo, theRequestPartitionId);
 		}
@@ -466,6 +468,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		// Execute the query and make sure we return distinct results
 		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+		txTemplate.setReadOnly(theParams.isLoadSynchronous() || theParams.isOffsetQuery());
 		return txTemplate.execute(t -> {
 
 			// Load the results synchronously
@@ -554,6 +557,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			resources = InterceptorUtil.fireStoragePreshowResource(resources, theRequestDetails, myInterceptorBroadcaster);
 
 			SimpleBundleProvider bundleProvider = new SimpleBundleProvider(resources);
+			if (theParams.isOffsetQuery()) {
+				bundleProvider.setCurrentPageOffset(theParams.getOffset());
+				bundleProvider.setCurrentPageSize(theParams.getCount());
+			}
 
 			if (wantCount) {
 				bundleProvider.setSize(count.intValue());

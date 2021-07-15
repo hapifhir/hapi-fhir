@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.api.dao;
 
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
+import ca.uhn.fhir.rest.annotation.Offset;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -53,7 +54,7 @@ public interface IFhirSystemDao<T, MT> extends IDao {
 	Map<String, Long> getResourceCountsFromCache();
 
 
-	IBundleProvider history(Date theDate, Date theUntil, RequestDetails theRequestDetails);
+	IBundleProvider history(Date theDate, Date theUntil, Integer theOffset, RequestDetails theRequestDetails);
 
 	/**
 	 * Not supported for DSTU1

@@ -42,13 +42,18 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.r4.model.CodeSystem;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class UploadTerminologyCommand extends BaseCommand {
+public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 	static final String UPLOAD_TERMINOLOGY = "upload-terminology";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UploadTerminologyCommand.class);
 	private static final long DEFAULT_TRANSFER_SIZE_LIMIT = 10 * FileUtils.ONE_MB;
@@ -66,15 +71,11 @@ public class UploadTerminologyCommand extends BaseCommand {
 
 	@Override
 	public Options getOptions() {
-		Options options = new Options();
+		Options options = super.getOptions();
 
-		addFhirVersionOption(options);
-		addBaseUrlOption(options);
 		addRequiredOption(options, "u", "url", true, "The code system URL associated with this upload (e.g. " + ITermLoaderSvc.SCT_URI + ")");
 		addOptionalOption(options, "d", "data", true, "Local file to use to upload (can be a raw file or a ZIP containing the raw file)");
 		addOptionalOption(options, "m", "mode", true, "The upload mode: SNAPSHOT (default), ADD, REMOVE");
-		addBasicAuthOption(options);
-		addVerboseLoggingOption(options);
 
 		return options;
 	}
@@ -101,33 +102,35 @@ public class UploadTerminologyCommand extends BaseCommand {
 			throw new ParseException("No data file provided");
 		}
 
-		IGenericClient client = super.newClient(theCommandLine);
-		IBaseParameters inputParameters = ParametersUtil.newInstance(myFhirCtx);
+		IGenericClient client = newClient(theCommandLine);
 
 		if (theCommandLine.hasOption(VERBOSE_LOGGING_PARAM)) {
 			client.registerInterceptor(new LoggingInterceptor(true));
 		}
 
+		String requestName = null;
 		switch (mode) {
 			case SNAPSHOT:
-				invokeOperation(termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM);
+				requestName = JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM;
 				break;
 			case ADD:
-				invokeOperation(termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD);
+				requestName = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD;
 				break;
 			case REMOVE:
-				invokeOperation(termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE);
+				requestName = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE;
 				break;
 		}
-
+		invokeOperation(termUrl, datafile, client, requestName);
 	}
 
-	private void invokeOperation(String theTermUrl, String[] theDatafile, IGenericClient theClient, IBaseParameters theInputParameters, String theOperationName) throws ParseException {
+	private void invokeOperation(String theTermUrl, String[] theDatafile, IGenericClient theClient, String theOperationName) throws ParseException {
+		IBaseParameters inputParameters = ParametersUtil.newInstance(myFhirCtx);
+
 		boolean isDeltaOperation =
 			theOperationName.equals(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD) ||
 				theOperationName.equals(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE);
 
-		ParametersUtil.addParameterToParametersUri(myFhirCtx, theInputParameters, TerminologyUploaderProvider.PARAM_SYSTEM, theTermUrl);
+		ParametersUtil.addParameterToParametersUri(myFhirCtx, inputParameters, TerminologyUploaderProvider.PARAM_SYSTEM, theTermUrl);
 
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream, Charsets.UTF_8);
@@ -152,7 +155,7 @@ public class UploadTerminologyCommand extends BaseCommand {
 							}
 
 							CodeSystem resource = encoding.newParser(myFhirCtx).parseResource(CodeSystem.class, contents);
-							ParametersUtil.addParameterToParameters(myFhirCtx, theInputParameters, TerminologyUploaderProvider.PARAM_CODESYSTEM, resource);
+							ParametersUtil.addParameterToParameters(myFhirCtx, inputParameters, TerminologyUploaderProvider.PARAM_CODESYSTEM, resource);
 
 						} else {
 
@@ -174,7 +177,7 @@ public class UploadTerminologyCommand extends BaseCommand {
 
 						ourLog.info("Adding ZIP file: {}", nextDataFile);
 						String fileName = "file:" + nextDataFile;
-						addFileToRequestBundle(theInputParameters, fileName, IOUtils.toByteArray(fileInputStream));
+						addFileToRequestBundle(inputParameters, fileName, IOUtils.toByteArray(fileInputStream));
 
 					} else {
 
@@ -194,13 +197,13 @@ public class UploadTerminologyCommand extends BaseCommand {
 			byte[] compressedBytes = byteArrayOutputStream.toByteArray();
 			ourLog.info("Compressed {} bytes in {} file(s) into {} bytes", FileUtil.formatFileSize(compressedSourceBytesCount), compressedFileCount, FileUtil.formatFileSize(compressedBytes.length));
 
-			addFileToRequestBundle(theInputParameters, "file:/files.zip", compressedBytes);
+			addFileToRequestBundle(inputParameters, "file:/files.zip", compressedBytes);
 		}
 
 		ourLog.info("Beginning upload - This may take a while...");
 
 		if (ourLog.isDebugEnabled() || "true".equals(System.getProperty("test"))) {
-			ourLog.info("Submitting parameters: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(theInputParameters));
+			ourLog.info("Submitting parameters: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inputParameters));
 		}
 
 		IBaseParameters response;
@@ -209,7 +212,7 @@ public class UploadTerminologyCommand extends BaseCommand {
 				.operation()
 				.onType(myFhirCtx.getResourceDefinition("CodeSystem").getImplementingClass())
 				.named(theOperationName)
-				.withParameters(theInputParameters)
+				.withParameters(inputParameters)
 				.execute();
 		} catch (BaseServerResponseException e) {
 			if (e.getOperationOutcome() != null) {
