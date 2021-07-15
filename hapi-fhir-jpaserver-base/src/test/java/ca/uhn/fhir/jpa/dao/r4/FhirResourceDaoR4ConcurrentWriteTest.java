@@ -155,12 +155,12 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 		}
 
+		logAllResourceLinks();
 		runInTransaction(() -> {
 			Map<String, Integer> counts = getResourceCountMap();
 
 			assertEquals(1, counts.get("Patient"), counts.toString());
 			assertEquals(1, counts.get("Observation"), counts.toString());
-			logAllResourceLinks();
 			assertEquals(6, myResourceLinkDao.count());
 			assertEquals(6, myResourceTableDao.count());
 			assertEquals(14, myResourceHistoryTableDao.count());
@@ -194,12 +194,12 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 		}
 
+		logAllResourceLinks();
 		runInTransaction(() -> {
 			Map<String, Integer> counts = getResourceCountMap();
 
 			assertEquals(1, counts.get("Patient"), counts.toString());
 			assertEquals(1, counts.get("Observation"), counts.toString());
-			logAllResourceLinks();
 			assertEquals(6, myResourceLinkDao.count());
 			assertEquals(6, myResourceTableDao.count());
 			assertEquals(14, myResourceHistoryTableDao.count());

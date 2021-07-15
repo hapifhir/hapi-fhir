@@ -114,7 +114,7 @@ public class FhirResourceDaoR4ValueSetMultiVersionTest extends BaseJpaR4Test {
 	public void testUpdateVersionedValueSets() {
 		Map<ValueSetVersions, DaoMethodOutcome> myValueSets = createVersionedValueSets();
 
-		TermValueSet termValueSet = runInTransaction(() -> {
+		runInTransaction(() -> {
 			assertEquals(3, myTermValueSetDao.findTermValueSetByUrl(PageRequest.of(0, 10), URL_MY_VALUE_SET).size());
 
 			TermValueSet vs = myTermValueSetDao.findTermValueSetByUrlAndNullVersion(URL_MY_VALUE_SET).orElseThrow(() -> new IllegalArgumentException("No TerValueSet found for " + URL_MY_VALUE_SET + " with null version"));
@@ -125,7 +125,6 @@ public class FhirResourceDaoR4ValueSetMultiVersionTest extends BaseJpaR4Test {
 
 			vs = myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v2").orElseThrow(() -> new IllegalArgumentException("No TerValueSet found for " + URL_MY_VALUE_SET + " version v2"));
 			assertEquals("ValueSet_v2", vs.getName());
-			return vs;
 		});
 
 		// Update ValueSets
@@ -148,7 +147,7 @@ public class FhirResourceDaoR4ValueSetMultiVersionTest extends BaseJpaR4Test {
 		runInTransaction(() -> assertEquals(3, myTermValueSetDao.findTermValueSetByUrl(PageRequest.of(0, 10), URL_MY_VALUE_SET).size()));
 
 		runInTransaction(() -> {
-			termValueSet = myTermValueSetDao.findTermValueSetByUrlAndNullVersion(URL_MY_VALUE_SET).orElseThrow(() -> new IllegalArgumentException("No TerValueSet found for " + URL_MY_VALUE_SET + " with null version"));
+			TermValueSet termValueSet = myTermValueSetDao.findTermValueSetByUrlAndNullVersion(URL_MY_VALUE_SET).orElseThrow(() -> new IllegalArgumentException("No TerValueSet found for " + URL_MY_VALUE_SET + " with null version"));
 			assertNotNull(nullVersion_resid);
 			assertNotNull(termValueSet.getResource());
 			assertEquals(nullVersion_resid, termValueSet.getResource().getId());
