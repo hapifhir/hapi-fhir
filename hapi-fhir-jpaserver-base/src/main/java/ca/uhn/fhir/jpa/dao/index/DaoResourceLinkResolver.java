@@ -231,6 +231,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 	 *
 	 * @param theValue Part of the URL to extract identifiers from
 	 * @return Returns the first available identifier in the canonical form or null if URL contains no identifier param
+	 * @throws IllegalArgumentException IllegalArgumentException is thrown in case identifier parameter can not be split using <code>system|value</code> pattern.
 	 */
 	protected CanonicalIdentifier extractIdentifierFromUrl(String theValue) {
 		int identifierIndex = theValue.indexOf("identifier=");
