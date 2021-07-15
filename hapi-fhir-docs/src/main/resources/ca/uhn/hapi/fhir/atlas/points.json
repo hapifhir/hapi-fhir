@@ -381,6 +381,17 @@
 			"lat": 49.234000,
 			"lon": -123.065890,
 			"added": "2021-06-29"
+		},
+		{
+			"title": "Innovattic",
+			"description": "Creating remote monitoring solutions for several hospitals in the Netherlands.",
+			"contactName": "Lauwerens Metz",
+			"contactEmail": "info@innovattic.com",
+			"link": "https://innovattic.com/",
+			"city": "Delft, The Netherlands",
+			"lat": 52.01804,
+			"lon": 4.354307,
+			"added": "2021-07-15"
 		}
 	]
 }
