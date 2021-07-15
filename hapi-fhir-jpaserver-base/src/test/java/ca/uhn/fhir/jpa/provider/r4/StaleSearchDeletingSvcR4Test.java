@@ -168,7 +168,11 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 		// It should take one pass to delete the search fully
 		runInTransaction(()-> {
 			assertEquals(1, mySearchEntityDao.count());
-			myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
+		});
+
+		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
+
+		runInTransaction(()-> {
 			assertEquals(0, mySearchEntityDao.count());
 		});
 	}

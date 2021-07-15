@@ -1,26 +1,24 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
-import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
@@ -32,7 +30,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
 		try {
 			myResourceTableDao.count();
-		} catch (AssertionFailedError e) {
+		} catch (InvalidDataAccessApiUsageException e) {
 			// good
 		}
 
@@ -73,7 +71,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		{
 			StringAndListParam content = new StringAndListParam();
 			content.addAnd(new StringOrListParam().addOr(new StringParam("AAAS")));
-			
+
 			map.add(Constants.PARAM_CONTENT, content);
 			List<ResourcePersistentId> found = mySearchDao.search(resourceName, map);
 			assertThat(ResourcePersistentId.toLongList(found), containsInAnyOrder(id1));
@@ -82,17 +80,17 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		{
 			StringAndListParam content = new StringAndListParam();
 			content.addAnd(new StringOrListParam().addOr(new StringParam("AAAS")).addOr(new StringParam("AAAB")));
-			
+
 			map.add(Constants.PARAM_CONTENT, content);
 			List<ResourcePersistentId> found = mySearchDao.search(resourceName, map);
 			assertThat(ResourcePersistentId.toLongList(found), containsInAnyOrder(id1, id2));
-		}		
+		}
 		// AND
 		{
 			StringAndListParam content = new StringAndListParam();
 			content.addAnd(new StringOrListParam().addOr(new StringParam("AAAS")));
 			content.addAnd(new StringOrListParam().addOr(new StringParam("CCC")));
-			
+
 			map.add(Constants.PARAM_CONTENT, content);
 			List<ResourcePersistentId> found = mySearchDao.search(resourceName, map);
 			assertThat(ResourcePersistentId.toLongList(found), containsInAnyOrder(id1));
@@ -102,7 +100,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 			StringAndListParam content = new StringAndListParam();
 			content.addAnd(new StringOrListParam().addOr(new StringParam("AAAB")).addOr(new StringParam("AAAS")));
 			content.addAnd(new StringOrListParam().addOr(new StringParam("CCC")));
-			
+
 			map.add(Constants.PARAM_CONTENT, content);
 			List<ResourcePersistentId> found = mySearchDao.search(resourceName, map);
 			assertThat(ResourcePersistentId.toLongList(found), containsInAnyOrder(id1, id2));
@@ -111,14 +109,14 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		{
 			StringAndListParam content = new StringAndListParam();
 			content.addAnd(new StringOrListParam().addOr(new StringParam("CCC")).addOr(new StringParam("DDD")));
-			
+
 			map.add(Constants.PARAM_CONTENT, content);
 			List<ResourcePersistentId> found = mySearchDao.search(null, map);
 			assertThat(ResourcePersistentId.toLongList(found), containsInAnyOrder(id1, id2, id3));
 		}
 
 	}
-	
+
 	@Test
 	public void testNarrativeSearch() {
 		Long id1;
@@ -146,7 +144,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		{
 			StringAndListParam content = new StringAndListParam();
 			content.addAnd(new StringOrListParam().addOr(new StringParam("AAAS")));
-			
+
 			map.add(Constants.PARAM_TEXT, content);
 			List<ResourcePersistentId> found = mySearchDao.search(resourceName, map);
 			assertThat(ResourcePersistentId.toLongList(found), containsInAnyOrder(id1));
@@ -155,17 +153,17 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		{
 			StringAndListParam content = new StringAndListParam();
 			content.addAnd(new StringOrListParam().addOr(new StringParam("AAAS")).addOr(new StringParam("AAAB")));
-			
+
 			map.add(Constants.PARAM_TEXT, content);
 			List<ResourcePersistentId> found = mySearchDao.search(resourceName, map);
 			assertThat(ResourcePersistentId.toLongList(found), containsInAnyOrder(id1, id2));
-		}		
+		}
 		// AND
 		{
 			StringAndListParam content = new StringAndListParam();
 			content.addAnd(new StringOrListParam().addOr(new StringParam("AAAS")));
 			content.addAnd(new StringOrListParam().addOr(new StringParam("CCC")));
-			
+
 			map.add(Constants.PARAM_TEXT, content);
 			List<ResourcePersistentId> found = mySearchDao.search(resourceName, map);
 			assertThat(ResourcePersistentId.toLongList(found), containsInAnyOrder(id1));
@@ -175,7 +173,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 			StringAndListParam content = new StringAndListParam();
 			content.addAnd(new StringOrListParam().addOr(new StringParam("AAAB")).addOr(new StringParam("AAAS")));
 			content.addAnd(new StringOrListParam().addOr(new StringParam("CCC")));
-			
+
 			map.add(Constants.PARAM_TEXT, content);
 			List<ResourcePersistentId> found = mySearchDao.search(resourceName, map);
 			assertThat(ResourcePersistentId.toLongList(found), containsInAnyOrder(id1, id2));
@@ -184,7 +182,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		{
 			StringAndListParam content = new StringAndListParam();
 			content.addAnd(new StringOrListParam().addOr(new StringParam("div")));
-			
+
 			map.add(Constants.PARAM_TEXT, content);
 			List<ResourcePersistentId> found = mySearchDao.search(resourceName, map);
 			assertThat(ResourcePersistentId.toLongList(found), empty());

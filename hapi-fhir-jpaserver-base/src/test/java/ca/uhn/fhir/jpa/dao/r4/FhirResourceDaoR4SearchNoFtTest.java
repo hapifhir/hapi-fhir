@@ -5425,7 +5425,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map.add(Patient.SP_NAME, or);
 		IBundleProvider results = myPatientDao.search(map);
 		assertEquals(1, results.getResources(0, 10).size());
-		assertEquals(1, mySearchEntityDao.count());
+		assertEquals(1, runInTransaction(()->mySearchEntityDao.count()));
 
 		map = new SearchParameterMap();
 		or = new StringOrListParam();
@@ -5436,7 +5436,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map.add(Patient.SP_NAME, or);
 		results = myPatientDao.search(map);
 		assertEquals(1, results.getResources(0, 10).size());
-		assertEquals(1, mySearchEntityDao.count());
+		assertEquals(1, runInTransaction(()->mySearchEntityDao.count()));
 
 	}
 
