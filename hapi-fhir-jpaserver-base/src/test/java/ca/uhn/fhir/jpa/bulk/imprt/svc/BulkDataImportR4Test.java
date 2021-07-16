@@ -170,8 +170,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 		String[] jobNames = new String[]{BULK_IMPORT_JOB_NAME};
 		assert jobNames.length > 0;
 
-		// FIXME: remove atMost
-		await().atMost(10000000, TimeUnit.MINUTES).until(() -> runInTransaction(() -> {
+		await().until(() -> runInTransaction(() -> {
 			JobInstance jobInstance = myJobExplorer.getLastJobInstance(BULK_IMPORT_JOB_NAME);
 			JobExecution jobExecution = myJobExplorer.getLastJobExecution(jobInstance);
 			ourLog.info("Exit status: {}", jobExecution.getExitStatus());
