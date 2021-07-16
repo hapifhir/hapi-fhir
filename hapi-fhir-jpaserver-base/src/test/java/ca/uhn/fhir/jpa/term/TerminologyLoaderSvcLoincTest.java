@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
@@ -29,6 +30,7 @@ import org.mockito.Mock;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -79,7 +81,6 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	@BeforeEach
 	public void before() {
 		mySvc = TermLoaderSvcImpl.withoutProxyCheck(myTermDeferredStorageSvc, myTermCodeSystemStorageSvc);
-
 		myFiles = new ZipCollectionBuilder();
 	}
 
@@ -98,7 +99,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	@Test
 	public void testLoadLoincWithMandatoryFilesOnly() throws Exception {
 		addLoincMandatoryFilesWithoutTop2000ToZip(myFiles);
-		verifyLoadLoinc(false);
+		verifyLoadLoinc(false, false);
 	}
 
 	@Test
@@ -136,12 +137,18 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 	}
 
-
-	private void verifyLoadLoinc() {
-		verifyLoadLoinc(true);
+	@Test
+	public void testLoadLoincWithConsumerName() throws Exception {
+		addLoincMandatoryFilesAndConsumerName(myFiles);
+		verifyLoadLoinc(false, true);
 	}
 
-	private void verifyLoadLoinc(boolean theIncludeTop2000) {
+	
+	private void verifyLoadLoinc() {
+		verifyLoadLoinc(true, false);
+	}
+
+	private void verifyLoadLoinc(boolean theIncludeTop2000, boolean theIncludeConsumerName) {
 		// Actually do the load
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
@@ -425,6 +432,14 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(2, vs.getCompose().getInclude().get(0).getConcept().size());
 		assertEquals("17424-3", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
 		assertEquals("13006-2", vs.getCompose().getInclude().get(0).getConcept().get(1).getCode());
+		
+		// Consumer Name
+		if (theIncludeConsumerName) {
+		    code = concepts.get("61438-8");
+		    verifiyConsumerName(code.getDesignations(), "Consumer Name 61438-8");
+		    code = concepts.get("17787-3");
+		    verifiyConsumerName(code.getDesignations(), "Consumer Name 17787-3");
+		}	
 	}
 
 	@Test
@@ -611,6 +626,14 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_DEFAULT.getCode());
 	}
 
+	public static void addLoincMandatoryFilesAndConsumerName(ZipCollectionBuilder theFiles) throws IOException {
+		addBaseLoincMandatoryFilesToZip(theFiles, true);
+		theFiles.addFileZip("/loinc/", "loincupload_singlepartlink.properties");
+		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_CONSUMER_NAME_FILE_DEFAULT.getCode());
+	}
+
+	
 	public static void addLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
 		addBaseLoincMandatoryFilesToZip(theFiles, true);
 		theFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
@@ -656,6 +679,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			theFiles.addFileZip("/loinc/", LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode());
 			theFiles.addFileZip("/loinc/", LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode());
 		}
+		
 	}
 
 	@Test
@@ -760,5 +784,12 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals("LP52960-9", doublyNestedChildCode.getChildren().get(2).getChild().getCode());
 	}
 
-
+	private static void verifiyConsumerName(Collection<TermConceptDesignation> designationList, String consumerName) {
+	    TermConceptDesignation consumerNameDest = null;
+	    for (TermConceptDesignation designation : designationList) {
+	    	if ("ConsumerName".equals(designation.getUseDisplay() ))
+	    		consumerNameDest = designation;
+	    }
+	    assertEquals(consumerName, consumerNameDest.getValue());
+	}
 }
