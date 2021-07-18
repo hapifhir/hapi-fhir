@@ -103,7 +103,6 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.term.icd10cm.Icd10CmLoader;
-import ca.uhn.fhir.jpa.term.loinc.LinguisticVariant;
 import ca.uhn.fhir.jpa.term.loinc.LoincAnswerListHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincAnswerListLinkHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincConsumerNameHandler;
@@ -539,7 +538,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		final List<ValueSet> valueSets = new ArrayList<>();
 		final List<ConceptMap> conceptMaps = new ArrayList<>();
 		
-		final List<LinguisticVariant> linguisticVariants = new ArrayList<>();
+		final List<LoincLinguisticVariantsHandler.LinguisticVariant> linguisticVariants = new ArrayList<>();
 
 		LoincXmlFileZipContentsHandler loincXmlHandler = new LoincXmlFileZipContentsHandler();
 		iterateOverZipFile(theDescriptors, "loinc.xml", false, false, loincXmlHandler);
@@ -657,7 +656,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		iterateOverZipFileCsvOptional(theDescriptors, theUploadProperties.getProperty(LOINC_LINGUISTIC_VARIANTS_FILE.getCode(), LOINC_LINGUISTIC_VARIANTS_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		String langFileName = null;
-		for (LinguisticVariant linguisticVariant : linguisticVariants) {
+		for (LoincLinguisticVariantsHandler.LinguisticVariant linguisticVariant : linguisticVariants) {
 			handler = new LoincLinguisticVariantHandler(code2concept, linguisticVariant.getLanguageCode());
 			langFileName = linguisticVariant.getLinguisticVariantFileName();
 			iterateOverZipFileCsvOptional(theDescriptors, theUploadProperties.getProperty(LOINC_LINGUISTIC_VARIANTS_PATH.getCode() + langFileName, LOINC_LINGUISTIC_VARIANTS_PATH_DEFAULT.getCode() + langFileName), handler, ',', QuoteMode.NON_NUMERIC, false);

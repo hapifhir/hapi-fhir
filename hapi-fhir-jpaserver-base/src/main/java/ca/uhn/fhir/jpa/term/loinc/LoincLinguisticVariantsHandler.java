@@ -5,6 +5,8 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import org.apache.commons.csv.CSVRecord;
 
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
@@ -62,6 +64,33 @@ public class LoincLinguisticVariantsHandler implements IZipContentsHandlerCsv {
 		
 		LinguisticVariant linguisticVariant = new LinguisticVariant(id, isoLanguage, isoCountry, languageName);
 		myLinguisticVariants.add(linguisticVariant);
+	}
+
+	public static class LinguisticVariant {
+
+		private String myId;
+		private String myIsoLanguage;
+		private String myIsoCountry;
+		private String myLanguageName;
+
+		public LinguisticVariant(@NotNull String theId, @NotNull String theIsoLanguage, @NotNull String theIsoCountry, @NotNull String theLanguageName) {
+			this.myId = theId;
+			this.myIsoLanguage = theIsoLanguage;
+			this.myIsoCountry = theIsoCountry;
+			this.myLanguageName = theLanguageName;
+		}
+
+		public String getLinguisticVariantFileName() {
+			return myIsoLanguage + myIsoCountry + myId + "LinguisticVariant.csv";
+		}
+
+		public String getLanguageName() {
+			return myLanguageName;
+		}
+		
+		public String getLanguageCode() {
+			return myIsoLanguage + "-" + myIsoCountry;
+		}
 	}
 
 }
