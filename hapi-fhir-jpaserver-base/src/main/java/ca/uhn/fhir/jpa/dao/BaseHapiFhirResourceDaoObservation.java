@@ -27,13 +27,15 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.*;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -76,8 +78,10 @@ public abstract class BaseHapiFhirResourceDaoObservation<T extends IBaseResource
 		theSearchParameterMap.setLastN(true);
 		SortSpec effectiveDtm = new SortSpec(getEffectiveParamName()).setOrder(SortOrderEnum.DESC);
 		SortSpec observationCode = new SortSpec(getCodeParamName()).setOrder(SortOrderEnum.ASC).setChain(effectiveDtm);
-		if(theSearchParameterMap.containsKey(getSubjectParamName()) || theSearchParameterMap.containsKey(getPatientParamName())) {
-			fixSubjectParamsOrderForLastn(theSearchParameterMap, theRequestDetails);
+		if (theSearchParameterMap.containsKey(getSubjectParamName()) || theSearchParameterMap.containsKey(getPatientParamName())) {
+
+			new TransactionTemplate(myPlatformTransactionManager).executeWithoutResult(tx -> fixSubjectParamsOrderForLastn(theSearchParameterMap, theRequestDetails));
+
 			theSearchParameterMap.setSort(new SortSpec(getSubjectParamName()).setOrder(SortOrderEnum.ASC).setChain(observationCode));
 		} else {
 			theSearchParameterMap.setSort(observationCode);
@@ -89,7 +93,7 @@ public abstract class BaseHapiFhirResourceDaoObservation<T extends IBaseResource
 		// the output. The reason for this is that observations are indexed by patient/subject forced ID, but then ordered in the
 		// final result set by subject/patient resource PID.
 		TreeMap<Long, IQueryParameterType> orderedSubjectReferenceMap = new TreeMap<>();
-		if(theSearchParameterMap.containsKey(getSubjectParamName())) {
+		if (theSearchParameterMap.containsKey(getSubjectParamName())) {
 
 			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequestDetails, getResourceName(), theSearchParameterMap);
 
@@ -123,8 +127,11 @@ public abstract class BaseHapiFhirResourceDaoObservation<T extends IBaseResource
 	}
 
 	abstract protected String getEffectiveParamName();
+
 	abstract protected String getCodeParamName();
+
 	abstract protected String getSubjectParamName();
+
 	abstract protected String getPatientParamName();
 
 }
