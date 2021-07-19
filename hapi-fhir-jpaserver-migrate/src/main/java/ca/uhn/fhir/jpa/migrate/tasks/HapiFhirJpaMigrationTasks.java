@@ -102,6 +102,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		version.onTable("HFJ_RESOURCE")
 			.dropIndex("20210709.1", "IDX_RES_LANG");
+
+		version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
+			.modifyColumn("20210713.1","IDX_STRING").nonNullable().withType(ColumnTypeEnum.STRING, 500);
+
 	}
 
 	private void init540() {
