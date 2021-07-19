@@ -308,7 +308,7 @@ public class SearchParameterCanonicalizer {
 		Set<String> targets = terser.getValues(theNextSp, "target", IPrimitiveType.class).stream().map(t -> t.getValueAsString()).collect(Collectors.toSet());
 
 		if (isBlank(name) || isBlank(path) || paramType == null) {
-			if ("_text".equals(name) || ) {
+			if ("_text".equals(name) || "_content".equals(name)) {
 				// ok
 			} else if (paramType != RestSearchParameterTypeEnum.COMPOSITE) {
 				return null;
