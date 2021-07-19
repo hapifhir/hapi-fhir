@@ -1,92 +1,12 @@
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
-import ca.uhn.fhir.jpa.entity.TermConceptProperty;
-import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
-import ca.uhn.fhir.jpa.term.icd10cm.Icd10CmLoader;
-import ca.uhn.fhir.jpa.term.loinc.LoincAnswerListHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincAnswerListLinkHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincConsumerNameHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincDocumentOntologyHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincGroupFileHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincGroupTermsFileHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincHierarchyHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincIeeeMedicalDeviceCodeHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincImagingDocumentCodeHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincParentGroupFileHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincPartHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincPartLinkHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincTop2000LabResultsSiHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincTop2000LabResultsUsHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincUniversalOrderSetHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincXmlFileZipContentsHandler;
-import ca.uhn.fhir.jpa.term.loinc.PartTypeAndPartName;
-import ca.uhn.fhir.jpa.term.snomedct.SctHandlerConcept;
-import ca.uhn.fhir.jpa.term.snomedct.SctHandlerDescription;
-import ca.uhn.fhir.jpa.term.snomedct.SctHandlerRelationship;
-import ca.uhn.fhir.jpa.util.Counter;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.ClasspathUtil;
-import ca.uhn.fhir.util.ValidateUtil;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Charsets;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.csv.QuoteMode;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.ValueSet;
-import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.xml.sax.SAXException;
-
-import javax.annotation.Nonnull;
-import javax.validation.constraints.NotNull;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
-import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONSUMER_NAME_FILE;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONSUMER_NAME_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_DOCUMENT_ONTOLOGY_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_FILE;
@@ -101,6 +21,10 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IEEE_ME
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_FILE;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_PATH;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_PATH_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PARENT_GROUP_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PARENT_GROUP_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_FILE;
@@ -122,10 +46,95 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_TOP2000
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONSUMER_NAME_FILE;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONSUMER_NAME_FILE_DEFAULT;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
+import javax.validation.constraints.NotNull;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.csv.QuoteMode;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.xml.sax.SAXException;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Charsets;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import ca.uhn.fhir.jpa.entity.TermConceptProperty;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
+import ca.uhn.fhir.jpa.term.icd10cm.Icd10CmLoader;
+import ca.uhn.fhir.jpa.term.loinc.LoincAnswerListHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincAnswerListLinkHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincConsumerNameHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincDocumentOntologyHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincGroupFileHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincGroupTermsFileHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincHierarchyHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincIeeeMedicalDeviceCodeHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincImagingDocumentCodeHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincLinguisticVariantHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincLinguisticVariantsHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincParentGroupFileHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincPartHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincPartLinkHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincTop2000LabResultsSiHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincTop2000LabResultsUsHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincUniversalOrderSetHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincXmlFileZipContentsHandler;
+import ca.uhn.fhir.jpa.term.loinc.PartTypeAndPartName;
+import ca.uhn.fhir.jpa.term.snomedct.SctHandlerConcept;
+import ca.uhn.fhir.jpa.term.snomedct.SctHandlerDescription;
+import ca.uhn.fhir.jpa.term.snomedct.SctHandlerRelationship;
+import ca.uhn.fhir.jpa.util.Counter;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.ValidateUtil;
 
 /*
  * #%L
@@ -238,7 +247,8 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				uploadProperties.getProperty(LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE.getCode(), LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode()),
 				
 				//-- optional consumer name
-				uploadProperties.getProperty(LOINC_CONSUMER_NAME_FILE.getCode(), LOINC_CONSUMER_NAME_FILE_DEFAULT.getCode())
+				uploadProperties.getProperty(LOINC_CONSUMER_NAME_FILE.getCode(), LOINC_CONSUMER_NAME_FILE_DEFAULT.getCode()),
+				uploadProperties.getProperty(LOINC_LINGUISTIC_VARIANTS_FILE.getCode(), LOINC_LINGUISTIC_VARIANTS_FILE_DEFAULT.getCode())
 			
 			);
 			descriptors.verifyOptionalFilesExist(optionalFilenameFragments);
@@ -527,6 +537,8 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		final Map<String, TermConcept> code2concept = new HashMap<>();
 		final List<ValueSet> valueSets = new ArrayList<>();
 		final List<ConceptMap> conceptMaps = new ArrayList<>();
+		
+		final List<LoincLinguisticVariantsHandler.LinguisticVariant> linguisticVariants = new ArrayList<>();
 
 		LoincXmlFileZipContentsHandler loincXmlHandler = new LoincXmlFileZipContentsHandler();
 		iterateOverZipFile(theDescriptors, "loinc.xml", false, false, loincXmlHandler);
@@ -638,7 +650,18 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		// Consumer Name
 		handler = new LoincConsumerNameHandler(code2concept);
 		iterateOverZipFileCsvOptional(theDescriptors, theUploadProperties.getProperty(LOINC_CONSUMER_NAME_FILE.getCode(), LOINC_CONSUMER_NAME_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
-	
+
+		// Linguistic Variants
+		handler = new LoincLinguisticVariantsHandler(linguisticVariants);
+		iterateOverZipFileCsvOptional(theDescriptors, theUploadProperties.getProperty(LOINC_LINGUISTIC_VARIANTS_FILE.getCode(), LOINC_LINGUISTIC_VARIANTS_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
+
+		String langFileName = null;
+		for (LoincLinguisticVariantsHandler.LinguisticVariant linguisticVariant : linguisticVariants) {
+			handler = new LoincLinguisticVariantHandler(code2concept, linguisticVariant.getLanguageCode());
+			langFileName = linguisticVariant.getLinguisticVariantFileName();
+			iterateOverZipFileCsvOptional(theDescriptors, theUploadProperties.getProperty(LOINC_LINGUISTIC_VARIANTS_PATH.getCode() + langFileName, LOINC_LINGUISTIC_VARIANTS_PATH_DEFAULT.getCode() + langFileName), handler, ',', QuoteMode.NON_NUMERIC, false);
+		}
+		
 		if (theCloseFiles) {
 			IOUtils.closeQuietly(theDescriptors);
 		}
@@ -661,7 +684,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		return new UploadStatistics(conceptCount, target);
 	}
-
+	
 	private ValueSet getValueSetLoincAll(Properties theUploadProperties) {
 		ValueSet retVal = new ValueSet();
 

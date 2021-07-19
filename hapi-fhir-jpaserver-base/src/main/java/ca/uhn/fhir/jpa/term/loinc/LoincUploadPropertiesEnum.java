@@ -121,6 +121,14 @@ public enum LoincUploadPropertiesEnum {
 	LOINC_CONSUMER_NAME_FILE("loinc.consumer.name.file"),
 	LOINC_CONSUMER_NAME_FILE_DEFAULT("AccessoryFiles/ConsumerName/ConsumerName.csv"),
 	
+	// Linguistic Variants
+	LOINC_LINGUISTIC_VARIANTS_FILE("loinc.linguistic.variants.file"),
+	LOINC_LINGUISTIC_VARIANTS_FILE_DEFAULT("AccessoryFiles/LinguisticVariants/LinguisticVariants.csv"),
+
+	// Linguistic Variants Folder Path which contains variants for different languages
+	LOINC_LINGUISTIC_VARIANTS_PATH("loinc.linguistic.variants.path"),
+	LOINC_LINGUISTIC_VARIANTS_PATH_DEFAULT("AccessoryFiles/LinguisticVariants/"),
+
 	/*
 	 * DUPLICATES
 	 */
