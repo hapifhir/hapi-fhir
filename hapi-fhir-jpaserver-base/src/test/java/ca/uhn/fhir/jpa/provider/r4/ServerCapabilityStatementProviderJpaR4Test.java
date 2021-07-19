@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.SearchParameter;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
@@ -35,6 +37,36 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProviderR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ServerCapabilityStatementProviderJpaR4Test.class);
+
+	@Test
+	public void testBuiltInSearchParameters() {
+		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
+		CapabilityStatement.CapabilityStatementRestResourceComponent resource = cs.getRest().get(0).getResource().get(0);
+		List<String> definitions = resource.getSearchParam()
+			.stream()
+			.filter(t -> isNotBlank(t.getDefinition()))
+			.map(t->t.getDefinition())
+			.sorted()
+			.collect(Collectors.toList());
+		assertThat(definitions.toString(), definitions, Matchers.contains(
+			"http://hl7.org/fhir/SearchParameter/Account-identifier",
+			"http://hl7.org/fhir/SearchParameter/Account-name",
+			"http://hl7.org/fhir/SearchParameter/Account-owner",
+			"http://hl7.org/fhir/SearchParameter/Account-patient",
+			"http://hl7.org/fhir/SearchParameter/Account-period",
+			"http://hl7.org/fhir/SearchParameter/Account-status",
+			"http://hl7.org/fhir/SearchParameter/Account-subject",
+			"http://hl7.org/fhir/SearchParameter/Account-type",
+			"http://hl7.org/fhir/SearchParameter/DomainResource-text",
+			"http://hl7.org/fhir/SearchParameter/Resource-content",
+			"http://hl7.org/fhir/SearchParameter/Resource-id",
+			"http://hl7.org/fhir/SearchParameter/Resource-lastUpdated",
+			"http://hl7.org/fhir/SearchParameter/Resource-profile",
+			"http://hl7.org/fhir/SearchParameter/Resource-security",
+			"http://hl7.org/fhir/SearchParameter/Resource-source",
+			"http://hl7.org/fhir/SearchParameter/Resource-tag"
+		));
+	}
 
 	@Test
 	public void testCorrectResourcesReflected() {
