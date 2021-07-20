@@ -515,6 +515,8 @@ public class IdHelperService {
 	@Deprecated
 	@Nullable
 	public Long getPidOrNull(IBaseResource theResource) {
+		assert TransactionSynchronizationManager.isSynchronizationActive();
+
 		IAnyResource anyResource = (IAnyResource) theResource;
 		Long retVal = (Long) anyResource.getUserData(RESOURCE_PID);
 		if (retVal == null) {
@@ -535,6 +537,8 @@ public class IdHelperService {
 	@Deprecated
 	@Nonnull
 	public Long getPidOrThrowException(IIdType theId) {
+		assert TransactionSynchronizationManager.isSynchronizationActive();
+
 		List<IIdType> ids = Collections.singletonList(theId);
 		List<ResourcePersistentId> resourcePersistentIds = this.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), ids);
 		return resourcePersistentIds.get(0).getIdAsLong();
@@ -547,6 +551,8 @@ public class IdHelperService {
 	@Deprecated
 	@Nonnull
 	public List<Long> getPidsOrThrowException(List<IIdType> theIds) {
+		assert TransactionSynchronizationManager.isSynchronizationActive();
+
 		List<ResourcePersistentId> resourcePersistentIds = this.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), theIds);
 		return resourcePersistentIds.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
 	}

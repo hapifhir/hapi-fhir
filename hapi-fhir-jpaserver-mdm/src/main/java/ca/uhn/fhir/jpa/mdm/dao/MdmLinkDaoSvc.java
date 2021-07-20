@@ -48,6 +48,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Transactional
 public class MdmLinkDaoSvc {
 
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
@@ -61,7 +62,6 @@ public class MdmLinkDaoSvc {
 	@Autowired
 	private FhirContext myFhirContext;
 
-	@Transactional
 	public MdmLink createOrUpdateLinkEntity(IBaseResource theGoldenResource, IBaseResource theSourceResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, @Nullable MdmTransactionContext theMdmTransactionContext) {
 		Long goldenResourcePid = myIdHelperService.getPidOrNull(theGoldenResource);
 		Long sourceResourcePid = myIdHelperService.getPidOrNull(theSourceResource);
@@ -232,7 +232,6 @@ public class MdmLinkDaoSvc {
 	 *
 	 * @return A list of Long representing the related Golden Resource Pids.
 	 */
-	@Transactional
 	public List<Long> deleteAllMdmLinksAndReturnGoldenResourcePids() {
 		List<MdmLink> all = myMdmLinkDao.findAll();
 		return deleteMdmLinksAndReturnGoldenResourcePids(all);
