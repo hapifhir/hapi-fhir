@@ -178,7 +178,7 @@ public class SearchParamRegistryImplTest {
 
 	@Test
 	void handleInit() {
-		assertEquals(25, mySearchParamRegistry.getActiveSearchParams("Patient").size());
+		assertEquals(31, mySearchParamRegistry.getActiveSearchParams("Patient").size());
 
 		IdDt idBad = new IdDt("SearchParameter/bad");
 		when(mySearchParamProvider.read(idBad)).thenThrow(new ResourceNotFoundException("id bad"));
@@ -191,7 +191,7 @@ public class SearchParamRegistryImplTest {
 		idList.add(idBad);
 		idList.add(idGood);
 		mySearchParamRegistry.handleInit(idList);
-		assertEquals(26, mySearchParamRegistry.getActiveSearchParams("Patient").size());
+		assertEquals(32, mySearchParamRegistry.getActiveSearchParams("Patient").size());
 	}
 
 	@Test
