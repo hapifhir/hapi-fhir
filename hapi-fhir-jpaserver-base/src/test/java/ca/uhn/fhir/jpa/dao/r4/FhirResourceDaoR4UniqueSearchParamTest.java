@@ -789,6 +789,89 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		}
 	}
 
+	private void createTestSp() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-test");
+		sp.setType(Enumerations.SearchParamType.DATE);
+		sp.setCode("test");
+		sp.setExpression("Patient.birthDate");
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+
+		mySearchParameterDao.update(sp);
+
+		mySearchParamRegistry.forceRefresh();
+
+		myMessages.clear();
+	}
+
+	private void createTestUniqueSp() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-test-unique");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-test");
+		sp.addExtension()
+			.setUrl(SearchParamConstants.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(true));
+
+		mySearchParameterDao.update(sp);
+
+		mySearchParamRegistry.forceRefresh();
+
+		myMessages.clear();
+	}
+
+	@Test
+	public void testUniqueIndexDoesNotContainDeletedEntries() {
+		myDaoConfig.setUniqueIndexesCheckedBeforeSave(false);
+
+		createTestSp();
+		createTestUniqueSp();
+
+		Patient pt1 = new Patient();
+		pt1.setGender(Enumerations.AdministrativeGender.MALE);
+		pt1.setBirthDateElement(new DateType("2011-01-01"));
+		IIdType pt1id = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+		myPatientDao.delete(pt1id);
+
+		// This will fail, because the deleted resource is indexed in the unique index
+		myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+	}
+
+	@Test
+	public void testCompositeIndexDoesNotCauseOtherParamsFindDeleted() {
+		myDaoConfig.setUniqueIndexesCheckedBeforeSave(false);
+
+		createTestSp();
+		createTestUniqueSp();
+
+		Patient pt1 = new Patient();
+		pt1.setGender(Enumerations.AdministrativeGender.MALE);
+		pt1.setBirthDateElement(new DateType("2011-01-01"));
+		IIdType pt1id = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap params = new SearchParameterMap()
+			.setLoadSynchronousUpTo(100)
+			.add("test", new DateParam("2011-01-01"));
+		IBundleProvider results = myPatientDao.search(params, mySrd);
+		assertThat(toUnqualifiedVersionlessIdValues(results), containsInAnyOrder(pt1id.getValue()));
+
+		myPatientDao.delete(pt1id);
+
+		// This search will fail, because composite indexing will index deleted resources and also
+		// case index the actual SearchParameter contain deleted resources
+		params = new SearchParameterMap()
+			.setLoadSynchronousUpTo(100)
+			.add("test", new DateParam("2011-01-01"));
+		results = myPatientDao.search(params, mySrd);
+		// This will fail, because after creating composite param, the 'test' searchparam will actually now find the deleted resource as well?
+		assertThat(toUnqualifiedVersionlessIdValues(results).isEmpty(), is(true));
+	}
+
 	@Test
 	public void testDuplicateUniqueValuesAreRejectedWithChecking_TestingEnabled() {
 		createUniqueBirthdateAndGenderSps();
