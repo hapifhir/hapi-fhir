@@ -81,6 +81,8 @@ public class ReadOnlySearchParamCache {
 	}
 
 	public static ReadOnlySearchParamCache fromFhirContext(FhirContext theFhirContext, SearchParameterCanonicalizer theCanonicalizer) {
+		assert theCanonicalizer != null;
+
 		ReadOnlySearchParamCache retVal = new ReadOnlySearchParamCache();
 
 		Set<String> resourceNames = theFhirContext.getResourceTypes();

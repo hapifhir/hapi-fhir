@@ -314,4 +314,12 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		handleInit(Collections.emptyList());
 	}
 
+	@VisibleForTesting
+	public void setSearchParameterCanonicalizerForUnitTest(SearchParameterCanonicalizer theSearchParameterCanonicalizerForUnitTest) {
+		mySearchParameterCanonicalizer = theSearchParameterCanonicalizerForUnitTest;
+	}
+
+	public SearchParameterCanonicalizer getSearchParameterCanonicalizerForUnitTest() {
+		return mySearchParameterCanonicalizerForUnitTest;
+	}
 }
