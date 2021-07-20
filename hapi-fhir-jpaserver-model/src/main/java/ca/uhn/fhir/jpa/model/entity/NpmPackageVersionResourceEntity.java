@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -155,6 +157,22 @@ public class NpmPackageVersionResourceEntity {
 
 	public void setCanonicalUrl(String theCanonicalUrl) {
 		myCanonicalUrl = theCanonicalUrl;
+	}
+
+	@Override
+	public String toString() {
+
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("myId", myId)
+			.append("myCanonicalUrl", myCanonicalUrl)
+			.append("myCanonicalVersion", myCanonicalVersion)
+			.append("myResourceType", myResourceType)
+			.append("myDirectory", myDirectory)
+			.append("myFilename", myFilename)
+			.append("myPackageVersion", myPackageVersion)
+			.append("myResSizeBytes", myResSizeBytes)
+			.append("myVersion", myVersion)
+			.toString();
 	}
 
 }
