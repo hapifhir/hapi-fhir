@@ -43,6 +43,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import java.util.Date;
+import java.util.List;
 
 @MappedSuperclass
 public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
@@ -180,6 +181,17 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 
 	public static long calculateHashIdentity(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName) {
 		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName);
+	}
+
+	public static long calculateHashIdentity(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, List<String> theAdditionalValues) {
+		String[] values = new String[theAdditionalValues.size() + 2];
+		values[0] = theResourceType;
+		values[1] = theParamName;
+		for (int i = 0; i < theAdditionalValues.size(); i++) {
+			values[i + 2] = theAdditionalValues.get(i);
+		}
+
+		return hash(thePartitionSettings, theRequestPartitionId, values);
 	}
 
 	/**

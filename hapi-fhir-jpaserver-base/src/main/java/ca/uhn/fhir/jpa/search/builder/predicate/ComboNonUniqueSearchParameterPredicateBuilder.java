@@ -26,22 +26,22 @@ import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 
-public class CompositeUniqueSearchParameterPredicateBuilder extends BaseSearchParamPredicateBuilder {
+public class ComboNonUniqueSearchParameterPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
-	private final DbColumn myColumnString;
+	private final DbColumn myColumnIndexString;
 
 	/**
 	 * Constructor
 	 */
-	public CompositeUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_IDX_CMP_STRING_UNIQ"));
+	public ComboNonUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_IDX_CMB_TOK_NU"));
 
-		myColumnString = getTable().addColumn("IDX_STRING");
+		myColumnIndexString = getTable().addColumn("IDX_STRING");
 	}
 
 
-	public Condition createPredicateIndexString(RequestPartitionId theRequestPartitionId, String theIndexString) {
-		BinaryCondition predicate = BinaryCondition.equalTo(myColumnString, generatePlaceholder(theIndexString));
+	public Condition createPredicateHashComplete(RequestPartitionId theRequestPartitionId, String theIndexString) {
+		BinaryCondition predicate = BinaryCondition.equalTo(myColumnIndexString, generatePlaceholder(theIndexString));
 		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 	}
 }

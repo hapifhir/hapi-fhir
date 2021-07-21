@@ -327,7 +327,7 @@ public class SearchParamExtractorR4Test {
 	public void testExtensionContainingReference() {
 		String path = "Patient.extension('http://patext').value.as(Reference)";
 
-		RuntimeSearchParam sp = new RuntimeSearchParam(null, null, "extpat", "Patient SP", path, RestSearchParameterTypeEnum.REFERENCE, new HashSet<>(), Sets.newHashSet("Patient"), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, false, null, null);
+		RuntimeSearchParam sp = new RuntimeSearchParam(null, null, "extpat", "Patient SP", path, RestSearchParameterTypeEnum.REFERENCE, new HashSet<>(), Sets.newHashSet("Patient"), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null);
 		mySearchParamRegistry.addSearchParam(sp);
 
 		Patient patient = new Patient();
@@ -440,7 +440,7 @@ public class SearchParamExtractorR4Test {
 		}
 
 		@Override
-		public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
+		public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -451,7 +451,7 @@ public class SearchParamExtractorR4Test {
 		}
 
 		@Override
-		public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
+		public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
 			throw new UnsupportedOperationException();
 		}
 
