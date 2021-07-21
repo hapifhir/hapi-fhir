@@ -56,7 +56,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	}
 
 	@Override
-	protected IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath) {
+	public IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath) {
 		return () -> {
 			List<IBase> values = new ArrayList<>();
 			List<Base> allValues = myFhirPathEngine.evaluate((Base) theResource, theSinglePath);
