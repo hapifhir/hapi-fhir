@@ -183,11 +183,6 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName);
 	}
 
-	public static long calculateHashIdentity(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, String theResourceType, String theParamName, List<String> theAdditionalValues) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
-		return calculateHashIdentity(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theAdditionalValues);
-	}
-
 	public static long calculateHashIdentity(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, List<String> theAdditionalValues) {
 		String[] values = new String[theAdditionalValues.size() + 2];
 		values[0] = theResourceType;

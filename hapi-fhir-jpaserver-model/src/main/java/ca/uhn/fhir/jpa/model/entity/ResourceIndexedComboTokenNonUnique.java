@@ -39,9 +39,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import java.util.Collections;
 
-import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.calculateHashIdentity;
+import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.hash;
 
 @Entity
 @Table(name = "HFJ_IDX_CMB_TOK_NU", indexes = {
@@ -66,12 +65,9 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 	@Column(name = "HASH_COMPLETE", nullable = false)
 	private Long myHashComplete;
 
-	@Transient
-	private transient String myResourceType;
-	@Transient
-	private transient String myParamName;
-	@Transient
-	private transient String myQueryString;
+	@Column(name = "IDX_STRING", nullable = false, length = ResourceIndexedComboStringUnique.MAX_STRING_LENGTH)
+	private transient String myIndexString;
+
 	@Transient
 	private transient PartitionSettings myPartitionSettings;
 
@@ -82,36 +78,18 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 		super();
 	}
 
-	public ResourceIndexedComboTokenNonUnique(PartitionSettings thePartitionSettings, ResourceTable theEntity, String theResourceType, String theParamName, String theQueryString) {
+	public ResourceIndexedComboTokenNonUnique(PartitionSettings thePartitionSettings, ResourceTable theEntity, String theQueryString) {
 		myPartitionSettings = thePartitionSettings;
 		myResource = theEntity;
-		myResourceType = theResourceType;
-		myParamName = theParamName;
-		myQueryString = theQueryString;
+		myIndexString = theQueryString;
 	}
 
-	public String getResourceType() {
-		return myResourceType;
+	public String getIndexString() {
+		return myIndexString;
 	}
 
-	public void setResourceType(String theResourceType) {
-		myResourceType = theResourceType;
-	}
-
-	public String getParamName() {
-		return myParamName;
-	}
-
-	public void setParamName(String theParamName) {
-		myParamName = theParamName;
-	}
-
-	public String getQueryString() {
-		return myQueryString;
-	}
-
-	public void setQueryString(String theQueryString) {
-		myQueryString = theQueryString;
+	public void setIndexString(String theIndexString) {
+		myIndexString = theIndexString;
 	}
 
 	@Override
@@ -149,12 +127,10 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 
 	@Override
 	public void calculateHashes() {
-		String resourceType = getResourceType();
-		String paramName = getParamName();
 		PartitionSettings partitionSettings = getPartitionSettings();
 		PartitionablePartitionId partitionId = getPartitionId();
-		String queryString = myQueryString;
-		setHashComplete(calculateHashComplete(resourceType, paramName, partitionSettings, partitionId, queryString));
+		String queryString = myIndexString;
+		setHashComplete(calculateHashComplete(partitionSettings, partitionId, queryString));
 	}
 
 	@Override
@@ -197,18 +173,18 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 		return new ToStringBuilder(this)
 			.append("id", myId)
 			.append("resourceId", myResourceId)
-			.append("resourceType", myResourceType)
-			.append("paramName", myParamName)
 			.append("hashComplete", myHashComplete)
+			.append("indexString", myIndexString)
 			.toString();
 	}
 
-	public static long calculateHashComplete(String resourceType, String paramName, PartitionSettings partitionSettings, PartitionablePartitionId partitionId, String queryString) {
-		return calculateHashIdentity(partitionSettings, partitionId, resourceType, paramName, Collections.singletonList(queryString));
+	public static long calculateHashComplete(PartitionSettings partitionSettings, PartitionablePartitionId thePartitionId, String queryString) {
+		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(thePartitionId);
+		return hash(partitionSettings, requestPartitionId, queryString);
 	}
 
-	public static long calculateHashComplete(String resourceType, String paramName, PartitionSettings partitionSettings, RequestPartitionId partitionId, String queryString) {
-		return calculateHashIdentity(partitionSettings, partitionId, resourceType, paramName, Collections.singletonList(queryString));
+	public static long calculateHashComplete(PartitionSettings partitionSettings, RequestPartitionId partitionId, String queryString) {
+		return hash(partitionSettings, partitionId, queryString);
 	}
 
 }

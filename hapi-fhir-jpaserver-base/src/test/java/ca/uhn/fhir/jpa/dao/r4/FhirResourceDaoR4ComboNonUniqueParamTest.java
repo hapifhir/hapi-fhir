@@ -25,7 +25,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class FhirResourceDaoR4ComboTokensParamTest extends BaseComboParamsR4Test {
+public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 
 	private void createNamesAndGenderSp() {
 		SearchParameter sp = new SearchParameter();
@@ -59,7 +59,6 @@ public class FhirResourceDaoR4ComboTokensParamTest extends BaseComboParamsR4Test
 		sp.setId("SearchParameter/patient-names-and-gender");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(PublicationStatus.ACTIVE);
-		sp.setCode("patient-names-and-gender");
 		sp.addBase("Patient");
 		sp.addComponent()
 			.setExpression("Patient")
@@ -95,7 +94,7 @@ public class FhirResourceDaoR4ComboTokensParamTest extends BaseComboParamsR4Test
 			List<ResourceIndexedComboTokenNonUnique> indexedTokens = myResourceIndexedComboTokensNonUniqueDao.findAll();
 			indexedTokens.sort(Comparator.comparing(t -> t.getId()));
 			assertEquals(2, indexedTokens.size());
-			assertEquals(-1700847249209384038L, indexedTokens.get(0).getHashComplete().longValue());
+			assertEquals(-2634469377090377342L, indexedTokens.get(0).getHashComplete().longValue());
 		});
 
 		myMessages.clear();
@@ -110,7 +109,7 @@ public class FhirResourceDaoR4ComboTokensParamTest extends BaseComboParamsR4Test
 		assertThat(actual, containsInAnyOrder(id1.toUnqualifiedVersionless().getValue()));
 
 		String sql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false);
-		assertEquals("SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '-1700847249209384038')", sql);
+		assertEquals("SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '-2634469377090377342')", sql);
 
 		logCapturedMessages();
 		assertThat(myMessages.toString(), containsString("INFO Using NON_UNIQUE index for query for search: Patient?family=FAMILY1&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1"));
@@ -133,7 +132,7 @@ public class FhirResourceDaoR4ComboTokensParamTest extends BaseComboParamsR4Test
 			List<ResourceIndexedComboTokenNonUnique> indexedTokens = myResourceIndexedComboTokensNonUniqueDao.findAll();
 			indexedTokens.sort(Comparator.comparing(t -> t.getId()));
 			assertEquals(2, indexedTokens.size());
-			assertEquals(-1700847249209384038L, indexedTokens.get(0).getHashComplete().longValue());
+			assertEquals(-2634469377090377342L, indexedTokens.get(0).getHashComplete().longValue());
 		});
 
 		myMessages.clear();
@@ -149,7 +148,7 @@ public class FhirResourceDaoR4ComboTokensParamTest extends BaseComboParamsR4Test
 		assertThat(actual, containsInAnyOrder(id1.toUnqualifiedVersionless().getValue()));
 
 		String sql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false);
-		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 LEFT OUTER JOIN HFJ_IDX_CMB_TOK_NU t0 ON (t1.RES_ID = t0.RES_ID) LEFT OUTER JOIN HFJ_SPIDX_DATE t2 ON (t1.RES_ID = t2.RES_ID) WHERE ((t0.HASH_COMPLETE = '-1700847249209384038') AND ((t2.HASH_IDENTITY = '5247847184787287691') AND ((t2.SP_VALUE_LOW_DATE_ORDINAL >= '20210202') AND (t2.SP_VALUE_HIGH_DATE_ORDINAL <= '20210202'))))", sql);
+		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 LEFT OUTER JOIN HFJ_IDX_CMB_TOK_NU t0 ON (t1.RES_ID = t0.RES_ID) LEFT OUTER JOIN HFJ_SPIDX_DATE t2 ON (t1.RES_ID = t2.RES_ID) WHERE ((t0.HASH_COMPLETE = '-2634469377090377342') AND ((t2.HASH_IDENTITY = '5247847184787287691') AND ((t2.SP_VALUE_LOW_DATE_ORDINAL >= '20210202') AND (t2.SP_VALUE_HIGH_DATE_ORDINAL <= '20210202'))))", sql);
 
 		logCapturedMessages();
 		assertThat(myMessages.toString(), containsString("INFO Using NON_UNIQUE index for query for search: Patient?family=FAMILY1&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1"));

@@ -174,7 +174,7 @@ public class SearchParamWithInlineReferencesExtractor {
 
 		for (String nextQueryString : queryStringsToPopulate) {
 			ourLog.trace("Adding composite unique SP: {}", nextQueryString);
-			theParams.myComboTokenNonUnique.add(new ResourceIndexedComboTokenNonUnique(myPartitionSettings, theEntity, theResourceType, theParam.getName(), nextQueryString));
+			theParams.myComboTokenNonUnique.add(new ResourceIndexedComboTokenNonUnique(myPartitionSettings, theEntity, nextQueryString));
 		}
 	}
 
