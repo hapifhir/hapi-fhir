@@ -44,7 +44,7 @@ import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.hash;
 
 @Entity
 @Table(name = "HFJ_IDX_CMB_TOK_NU", indexes = {
-	@Index(name = "IDX_IDXCMBTOKNU_HC", columnList = "HASH_COMPLETE", unique = false),
+	@Index(name = "IDX_IDXCMBTOKNU_STR", columnList = "IDX_STRING", unique = false),
 	@Index(name = "IDX_IDXCMBTOKNU_RES", columnList = "RES_ID", unique = false)
 })
 public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implements Comparable<ResourceIndexedComboTokenNonUnique> {
@@ -66,7 +66,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 	private Long myHashComplete;
 
 	@Column(name = "IDX_STRING", nullable = false, length = ResourceIndexedComboStringUnique.MAX_STRING_LENGTH)
-	private transient String myIndexString;
+	private String myIndexString;
 
 	@Transient
 	private transient PartitionSettings myPartitionSettings;

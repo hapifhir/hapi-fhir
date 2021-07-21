@@ -1111,7 +1111,7 @@ public class SearchBuilder implements ISearchBuilder {
 						theQueryStack3.addPredicateCompositeUnique(indexString, myRequestPartitionId);
 						break;
 					case NON_UNIQUE:
-						theQueryStack3.addPredicateCompositeNonUnique(indexString, comboParam.getName(), myRequestPartitionId);
+						theQueryStack3.addPredicateCompositeNonUnique(indexString, myRequestPartitionId);
 						break;
 				}
 

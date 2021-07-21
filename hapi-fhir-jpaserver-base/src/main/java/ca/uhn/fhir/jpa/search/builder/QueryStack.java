@@ -1220,9 +1220,9 @@ public class QueryStack {
 		mySqlBuilder.addPredicate(predicate);
 	}
 
-	public void addPredicateCompositeNonUnique(String theIndexString, String theParamName, RequestPartitionId theRequestPartitionId) {
+	public void addPredicateCompositeNonUnique(String theIndexString, RequestPartitionId theRequestPartitionId) {
 		ComboNonUniqueSearchParameterPredicateBuilder predicateBuilder = mySqlBuilder.addComboNonUniquePredicateBuilder();
-		Condition predicate = predicateBuilder.createPredicateHashComplete(theRequestPartitionId, theParamName, theIndexString);
+		Condition predicate = predicateBuilder.createPredicateHashComplete(theRequestPartitionId, theIndexString);
 		mySqlBuilder.addPredicate(predicate);
 	}
 
