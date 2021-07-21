@@ -102,6 +102,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	public IBaseParameters uploadSnapshot(
 		HttpServletRequest theServletRequest,
 		@OperationParam(name = PARAM_SYSTEM, min = 1, typeName = "uri") IPrimitiveType<String> theCodeSystemUrl,
+		@OperationParam(name = TermLoaderSvcImpl.MAKE_CURRENT_VERSION, min = 0, max = 1) IPrimitiveType<String> isMakeCurrentVersion,
 		@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles,
 		RequestDetails theRequestDetails
 	) {

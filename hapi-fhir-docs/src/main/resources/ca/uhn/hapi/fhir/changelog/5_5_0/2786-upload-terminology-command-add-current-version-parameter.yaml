@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2786
+title: "Add 'current-version' parameter to upload-terminology command to allow loading version
+   without becoming current. Available for LOINC uploads".

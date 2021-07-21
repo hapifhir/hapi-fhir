@@ -38,9 +38,11 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -49,10 +51,12 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,6 +152,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	public static final String CUSTOM_CONCEPTS_FILE = "concepts.csv";
 	public static final String CUSTOM_HIERARCHY_FILE = "hierarchy.csv";
 	public static final String CUSTOM_PROPERTIES_FILE = "properties.csv";
+	public static final String MAKE_CURRENT_VERSION = "isMakeCurrentVersion";
 	static final String IMGTHLA_HLA_NOM_TXT = "hla_nom.txt";
 	static final String IMGTHLA_HLA_XML = "hla.xml";
 	static final String CUSTOM_CODESYSTEM_JSON = "codesystem.json";
@@ -188,7 +193,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 	@Override
 	public UploadStatistics loadImgthla(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
+		try (LoadedFileDescriptors descriptors = getLoadedFileDescriptors(theFiles)) {
 			List<String> mandatoryFilenameFragments = Arrays.asList(
 				IMGTHLA_HLA_NOM_TXT,
 				IMGTHLA_HLA_XML
@@ -201,10 +206,22 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		}
 	}
 
+	@VisibleForTesting
+	LoadedFileDescriptors getLoadedFileDescriptors(List<FileDescriptor> theFiles) {
+		return new LoadedFileDescriptors(theFiles);
+	}
+
 	@Override
 	public UploadStatistics loadLoinc(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
+		try (LoadedFileDescriptors descriptors = getLoadedFileDescriptors(theFiles)) {
 			Properties uploadProperties = getProperties(descriptors, LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+
+			String codeSystemVersionId = uploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+			boolean isMakeCurrentVersion = getIsMakeCurrentVersion(theRequestDetails);
+			if (StringUtils.isBlank(codeSystemVersionId) && ! isMakeCurrentVersion) {
+				throw new InvalidRequestException("'" + LOINC_CODESYSTEM_VERSION.getCode() +
+					"' property is required when 'current-version' parameter is 'false'");
+			}
 
 			List<String> mandatoryFilenameFragments = Arrays.asList(
 				uploadProperties.getProperty(LOINC_ANSWERLIST_FILE.getCode(), LOINC_ANSWERLIST_FILE_DEFAULT.getCode()),
@@ -238,21 +255,47 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 			ourLog.info("Beginning LOINC processing");
 
+			if (isMakeCurrentVersion) {
+				if (codeSystemVersionId != null) {
+					processLoincFiles(descriptors, theRequestDetails, uploadProperties, false, isMakeCurrentVersion);
+					uploadProperties.remove(LOINC_CODESYSTEM_VERSION.getCode());
+				}
+				ourLog.info("Uploading CodeSystem and making it current version");
 
-			String codeSystemVersionId = uploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
-			if (codeSystemVersionId != null) {
-				// Load the code system with version and then remove the version property.
-				processLoincFiles(descriptors, theRequestDetails, uploadProperties, false);
-				uploadProperties.remove(LOINC_CODESYSTEM_VERSION.getCode());
+			} else {
+				ourLog.info("Uploading CodeSystem without updating current version");
 			}
-			// Load the same code system with null version. This will become the default version.
-			return processLoincFiles(descriptors, theRequestDetails, uploadProperties, true);
+			return processLoincFiles(descriptors, theRequestDetails, uploadProperties, true, isMakeCurrentVersion);
 		}
 	}
 
+	private boolean getIsMakeCurrentVersion(RequestDetails theRequestDetails) throws InvalidRequestException{
+		boolean defaultResponse = true;
+
+		IBaseResource requestResource = theRequestDetails.getResource();
+		if (requestResource == null)  return defaultResponse;
+
+		if (! (requestResource instanceof Parameters))  return defaultResponse;
+		Parameters parameters = (Parameters) theRequestDetails.getResource();
+
+		List<String> values = ParametersUtil.getNamedParameterValuesAsString(FhirContext.forR4(), parameters, MAKE_CURRENT_VERSION);
+		if (CollectionUtils.isEmpty(values))  return true;
+
+		if (values.size() > 1) {
+			throw new InvalidRequestException("Parameter '" + MAKE_CURRENT_VERSION + "' was specified more than once.");
+		}
+
+		if (! values.get(0).equalsIgnoreCase("false") && ! values.get(0).equalsIgnoreCase("true")) {
+			throw new InvalidRequestException("Parameter " + MAKE_CURRENT_VERSION + " only accepts values: ['true' or 'false']");
+		}
+
+		return Boolean.parseBoolean(values.get(0));
+	}
+
+
 	@Override
 	public UploadStatistics loadSnomedCt(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
+		try (LoadedFileDescriptors descriptors = getLoadedFileDescriptors(theFiles)) {
 
 			List<String> expectedFilenameFragments = Arrays.asList(
 				SCT_FILE_DESCRIPTION,
@@ -279,7 +322,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
 		int count = 0;
 
-		try (LoadedFileDescriptors compressedDescriptors = new LoadedFileDescriptors(theFiles)) {
+		try (LoadedFileDescriptors compressedDescriptors = getLoadedFileDescriptors(theFiles)) {
 			for (FileDescriptor nextDescriptor : compressedDescriptors.getUncompressedFileDescriptors()) {
 				if (nextDescriptor.getFilename().toLowerCase(Locale.US).endsWith(".xml")) {
 					try (InputStream inputStream = nextDescriptor.getInputStream();
@@ -296,13 +339,13 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		cs.setVersion(codeSystemVersion.getCodeSystemVersionId());
 
-		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, cs, null, null);
+		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, cs, null, null, true);
 		return new UploadStatistics(count, target);
 	}
 
 	@Override
 	public UploadStatistics loadCustom(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
+		try (LoadedFileDescriptors descriptors = getLoadedFileDescriptors(theFiles)) {
 			Optional<String> codeSystemContent = loadFile(descriptors, CUSTOM_CODESYSTEM_JSON, CUSTOM_CODESYSTEM_XML);
 			CodeSystem codeSystem;
 			if (codeSystemContent.isPresent()) {
@@ -321,7 +364,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			CustomTerminologySet terminologySet = CustomTerminologySet.load(descriptors, false);
 			TermCodeSystemVersion csv = terminologySet.toCodeSystemVersion();
 
-			IIdType target = storeCodeSystem(theRequestDetails, csv, codeSystem, null, null);
+			IIdType target = storeCodeSystem(theRequestDetails, csv, codeSystem, null, null, true);
 			return new UploadStatistics(terminologySet.getSize(), target);
 		}
 	}
@@ -330,7 +373,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	@Override
 	public UploadStatistics loadDeltaAdd(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
 		ourLog.info("Processing terminology delta ADD for system[{}] with files: {}", theSystem, theFiles.stream().map(t -> t.getFilename()).collect(Collectors.toList()));
-		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
+		try (LoadedFileDescriptors descriptors = getLoadedFileDescriptors(theFiles)) {
 			CustomTerminologySet terminologySet = CustomTerminologySet.load(descriptors, false);
 			return myCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(theSystem, terminologySet);
 		}
@@ -339,7 +382,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	@Override
 	public UploadStatistics loadDeltaRemove(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
 		ourLog.info("Processing terminology delta REMOVE for system[{}] with files: {}", theSystem, theFiles.stream().map(t -> t.getFilename()).collect(Collectors.toList()));
-		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
+		try (LoadedFileDescriptors descriptors = getLoadedFileDescriptors(theFiles)) {
 			CustomTerminologySet terminologySet = CustomTerminologySet.load(descriptors, true);
 			return myCodeSystemStorageSvc.applyDeltaCodeSystemsRemove(theSystem, terminologySet);
 		}
@@ -378,8 +421,9 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 	}
 
+	@VisibleForTesting
 	@NotNull
-	private Properties getProperties(LoadedFileDescriptors theDescriptors, String thePropertiesFile) {
+	Properties getProperties(LoadedFileDescriptors theDescriptors, String thePropertiesFile) {
 		Properties retVal = new Properties();
 
 		try (InputStream propertyStream = TermLoaderSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/loinc/loincupload.properties")) {
@@ -515,7 +559,9 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 //		return new UploadStatistics(conceptCount, target);
 	}
 
-	UploadStatistics processLoincFiles(LoadedFileDescriptors theDescriptors, RequestDetails theRequestDetails, Properties theUploadProperties, Boolean theCloseFiles) {
+	UploadStatistics processLoincFiles(LoadedFileDescriptors theDescriptors, RequestDetails theRequestDetails,
+			Properties theUploadProperties, Boolean theCloseFiles, boolean isMakeCurrentVersion) {
+
 		final TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
 		final Map<String, TermConcept> code2concept = new HashMap<>();
 		final List<ValueSet> valueSets = new ArrayList<>();
@@ -646,7 +692,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		int conceptCount = code2concept.size();
 		ourLog.info("Have {} total concepts, {} root concepts, {} ValueSets", conceptCount, rootConceptCount, valueSetCount);
 
-		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, loincCs, valueSets, conceptMaps);
+		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, loincCs, valueSets, conceptMaps, isMakeCurrentVersion);
 
 		return new UploadStatistics(conceptCount, target);
 	}
@@ -720,12 +766,14 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		cs.setName("SNOMED CT");
 		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, cs, null, null);
+		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, cs, null, null, true);
 
 		return new UploadStatistics(code2concept.size(), target);
 	}
 
-	private IIdType storeCodeSystem(RequestDetails theRequestDetails, final TermCodeSystemVersion theCodeSystemVersion, CodeSystem theCodeSystem, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
+	private IIdType storeCodeSystem(RequestDetails theRequestDetails, final TermCodeSystemVersion theCodeSystemVersion,
+			CodeSystem theCodeSystem, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, boolean isMakeCurrentVersion) {
+
 		Validate.isTrue(theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT);
 
 		List<ValueSet> valueSets = ObjectUtils.defaultIfNull(theValueSets, Collections.emptyList());
@@ -733,7 +781,8 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		IIdType retVal;
 		myDeferredStorageSvc.setProcessDeferred(false);
-		retVal = myCodeSystemStorageSvc.storeNewCodeSystemVersion(theCodeSystem, theCodeSystemVersion, theRequestDetails, valueSets, conceptMaps);
+		retVal = myCodeSystemStorageSvc.storeNewCodeSystemVersion(theCodeSystem, theCodeSystemVersion,
+			theRequestDetails, valueSets, conceptMaps, isMakeCurrentVersion);
 		myDeferredStorageSvc.setProcessDeferred(true);
 
 		return retVal;

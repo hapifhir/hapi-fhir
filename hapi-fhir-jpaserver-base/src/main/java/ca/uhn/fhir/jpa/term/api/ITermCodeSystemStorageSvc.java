@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.term.api;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -28,10 +27,12 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 /**
@@ -43,12 +44,44 @@ public interface ITermCodeSystemStorageSvc {
 
 	void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion);
 
-	void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable);
+
+	/**
+	 * Default implementation supports previous signature of method which was added theIsMakeItCurrentVersion parameter
+	 */
+	@Transactional
+	default void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName,
+			String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable) {
+
+		storeNewCodeSystemVersion(theCodeSystemResourcePid, theSystemUri, theSystemName, theSystemVersionId,
+			theCodeSystemVersion, theCodeSystemResourceTable, true);
+	}
+
+	void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName,
+		String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable,
+		boolean theIsMakeItCurrentVersion);
+
+
+
+	/**
+	 * Default implementation supports previous signature of method which was added theIsMakeItCurrentVersion parameter
+	 * @return Returns the ID of the created/updated code system
+	 */
+	@Transactional
+	default IIdType storeNewCodeSystemVersion(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource,
+			TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets,
+			List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps) {
+
+		return storeNewCodeSystemVersion(theCodeSystemResource, theCodeSystemVersion,
+			theRequestDetails, theValueSets, theConceptMaps, true);
+	}
 
 	/**
 	 * @return Returns the ID of the created/updated code system
 	 */
-	IIdType storeNewCodeSystemVersion(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets, List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps);
+	IIdType storeNewCodeSystemVersion(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource,
+		TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets,
+		List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps, boolean theIsMakeItCurrentVersion);
+
 
 	void storeNewCodeSystemVersionIfNeeded(CodeSystem theCodeSystem, ResourceTable theResourceEntity);
 
