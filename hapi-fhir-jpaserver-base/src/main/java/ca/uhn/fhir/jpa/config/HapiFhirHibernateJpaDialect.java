@@ -81,7 +81,7 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 				if (constraintName.contains(ResourceHistoryTable.IDX_RESVER_ID_VER)) {
 					throw new ResourceVersionConflictException(messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceVersionConstraintFailure"));
 				}
-				if (constraintName.contains(ResourceIndexedCompositeStringUnique.IDX_IDXCMPSTRUNIQ_STRING)) {
+				if (constraintName.contains(ResourceIndexedCompositeStringUnique.IDX_IDXCMPSTRUNIQ_TENANT_STR)) {
 					throw new ResourceVersionConflictException(messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceIndexedCompositeStringUniqueConstraintFailure"));
 				}
 				if (constraintName.contains(ForcedId.IDX_FORCEDID_TYPE_FID)) {

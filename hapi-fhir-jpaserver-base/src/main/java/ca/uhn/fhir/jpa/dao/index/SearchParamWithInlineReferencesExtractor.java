@@ -64,6 +64,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -310,7 +311,6 @@ public class SearchParamWithInlineReferencesExtractor {
 	}
 
 	public void storeCompositeStringUniques(ResourceIndexedSearchParams theParams, ResourceTable theEntity, ResourceIndexedSearchParams existingParams) {
-
 		// Store composite string uniques
 		if (myDaoConfig.isUniqueIndexesEnabled()) {
 			for (ResourceIndexedCompositeStringUnique next : myDaoSearchParamSynchronizer.subtract(existingParams.myCompositeStringUniques, theParams.myCompositeStringUniques)) {
@@ -321,9 +321,15 @@ public class SearchParamWithInlineReferencesExtractor {
 			boolean haveNewParams = false;
 			for (ResourceIndexedCompositeStringUnique next : myDaoSearchParamSynchronizer.subtract(theParams.myCompositeStringUniques, existingParams.myCompositeStringUniques)) {
 				if (myDaoConfig.isUniqueIndexesCheckedBeforeSave()) {
-					ResourceIndexedCompositeStringUnique existing = myResourceIndexedCompositeStringUniqueDao.findByQueryString(next.getIndexString());
-					if (existing != null) {
+					ResourceIndexedCompositeStringUnique existing;
+					if (myPartitionSettings.isPartitioningEnabled()) {
+						Integer partitionId = Objects.requireNonNull(theEntity.getPartitionId()).getPartitionId();
+						existing = myResourceIndexedCompositeStringUniqueDao.findByQueryStringInPartition(partitionId, next.getIndexString());
+					} else {
+						existing = myResourceIndexedCompositeStringUniqueDao.findByQueryString(next.getIndexString());
+					}
 
+					if (existing != null) {
 						String searchParameterId = "(unknown)";
 						if (next.getSearchParameterId() != null) {
 							searchParameterId = next.getSearchParameterId().toUnqualifiedVersionless().getValue();

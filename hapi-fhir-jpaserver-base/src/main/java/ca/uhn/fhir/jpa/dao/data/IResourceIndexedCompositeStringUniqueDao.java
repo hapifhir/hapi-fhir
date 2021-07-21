@@ -33,6 +33,9 @@ public interface IResourceIndexedCompositeStringUniqueDao extends JpaRepository<
 	@Query("SELECT r FROM ResourceIndexedCompositeStringUnique r WHERE r.myIndexString = :str")
 	ResourceIndexedCompositeStringUnique findByQueryString(@Param("str") String theQueryString);
 
+	@Query("SELECT r FROM ResourceIndexedCompositeStringUnique r WHERE r.myIndexString = :str AND r.myPartitionIdValue = :partitionId")
+	ResourceIndexedCompositeStringUnique findByQueryStringInPartition(@Param("partitionId") Integer partitionId, @Param("str") String theQueryString);
+
 	@Query("SELECT r FROM ResourceIndexedCompositeStringUnique r WHERE r.myResourceId = :resId")
 	List<ResourceIndexedCompositeStringUnique> findAllForResourceIdForUnitTest(@Param("resId") Long theResourceId);
 

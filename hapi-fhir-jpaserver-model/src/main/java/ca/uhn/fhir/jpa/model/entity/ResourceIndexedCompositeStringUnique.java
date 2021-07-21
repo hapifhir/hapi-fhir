@@ -28,18 +28,31 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity()
 @Table(name = "HFJ_IDX_CMP_STRING_UNIQ", indexes = {
-	@Index(name = ResourceIndexedCompositeStringUnique.IDX_IDXCMPSTRUNIQ_STRING, columnList = "IDX_STRING", unique = true),
-	@Index(name = ResourceIndexedCompositeStringUnique.IDX_IDXCMPSTRUNIQ_RESOURCE, columnList = "RES_ID", unique = false)
+	@Index(name = ResourceIndexedCompositeStringUnique.IDX_IDXCMPSTRUNIQ_STRING, columnList = "IDX_STRING", unique = false),
+	@Index(name = ResourceIndexedCompositeStringUnique.IDX_IDXCMPSTRUNIQ_RESOURCE, columnList = "RES_ID", unique = false),
+	@Index(name = ResourceIndexedCompositeStringUnique.IDX_IDXCMPSTRUNIQ_TENANT_STR, columnList = "IDX_STRING,PARTITION_ID", unique = true),
 })
 public class ResourceIndexedCompositeStringUnique extends BasePartitionable implements Comparable<ResourceIndexedCompositeStringUnique> {
 
 	public static final int MAX_STRING_LENGTH = 200;
 	public static final String IDX_IDXCMPSTRUNIQ_STRING = "IDX_IDXCMPSTRUNIQ_STRING";
 	public static final String IDX_IDXCMPSTRUNIQ_RESOURCE = "IDX_IDXCMPSTRUNIQ_RESOURCE";
+	public static final String IDX_IDXCMPSTRUNIQ_TENANT_STR = "IDX_IDXCMPSTRUNIQ_TENANT_STR";
 
 	@SequenceGenerator(name = "SEQ_IDXCMPSTRUNIQ_ID", sequenceName = "SEQ_IDXCMPSTRUNIQ_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_IDXCMPSTRUNIQ_ID")
