@@ -28,7 +28,8 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboTokensNonUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamCoordsDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamNumberDao;
@@ -97,7 +98,9 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	@Autowired
 	private IResourceIndexedSearchParamNumberDao myResourceIndexedSearchParamNumberDao;
 	@Autowired
-	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
+	private IResourceIndexedComboStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
+	@Autowired
+	private IResourceIndexedComboTokensNonUniqueDao myResourceIndexedComboTokensNonUniqueDao;
 	@Autowired
 	private IResourceLinkDao myResourceLinkDao;
 	@Autowired
@@ -291,8 +294,11 @@ public class ResourceExpungeService implements IResourceExpungeService {
 		if (resource == null || resource.isParamsTokenPopulated()) {
 			myResourceIndexedSearchParamTokenDao.deleteByResourceId(theResourceId);
 		}
-		if (resource == null || resource.isParamsCompositeStringUniquePresent()) {
+		if (resource == null || resource.isParamsComboStringUniquePresent()) {
 			myResourceIndexedCompositeStringUniqueDao.deleteByResourceId(theResourceId);
+		}
+		if (resource == null || resource.isParamsComboTokensNonUniquePresent()) {
+			myResourceIndexedComboTokensNonUniqueDao.deleteByResourceId(theResourceId);
 		}
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {
 			mySearchParamPresentDao.deleteByResourceId(theResourceId);

@@ -20,23 +20,15 @@ package ca.uhn.fhir.jpa.dao.data;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
-
-public interface IResourceIndexedCompositeStringUniqueDao extends JpaRepository<ResourceIndexedCompositeStringUnique, Long> {
-
-	@Query("SELECT r FROM ResourceIndexedCompositeStringUnique r WHERE r.myIndexString = :str")
-	ResourceIndexedCompositeStringUnique findByQueryString(@Param("str") String theQueryString);
-
-	@Query("SELECT r FROM ResourceIndexedCompositeStringUnique r WHERE r.myResourceId = :resId")
-	List<ResourceIndexedCompositeStringUnique> findAllForResourceIdForUnitTest(@Param("resId") Long theResourceId);
+public interface IResourceIndexedComboTokensNonUniqueDao extends JpaRepository<ResourceIndexedComboTokenNonUnique, Long> {
 
 	@Modifying
-	@Query("delete from ResourceIndexedCompositeStringUnique t WHERE t.myResourceId = :resid")
-	void deleteByResourceId(@Param("resid") Long theResourcePid);
+	@Query("DELETE FROM ResourceIndexedComboTokenNonUnique t WHERE t.myResourceId = :res_id")
+	void deleteByResourceId(@Param("res_id") Long theResourcePid);
 }

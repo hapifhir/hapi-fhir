@@ -170,7 +170,7 @@ class QueryRootEntryResourceTable extends QueryRootEntry {
 				join = myResourceTableRoot.join("mySearchParamPresents", JoinType.LEFT);
 				break;
 			case COMPOSITE_UNIQUE:
-				join = myResourceTableRoot.join("myParamsCompositeStringUnique", JoinType.LEFT);
+				join = myResourceTableRoot.join("myParamsComboStringUnique", JoinType.LEFT);
 				break;
 			case RESOURCE_TAGS:
 				join = myResourceTableRoot.join("myTags", JoinType.LEFT);

@@ -20,15 +20,11 @@ package ca.uhn.fhir.jpa.dao.index;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import com.google.common.annotations.VisibleForTesting;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
@@ -43,12 +39,6 @@ import java.util.List;
 public class DaoSearchParamSynchronizer {
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
-	@Autowired
-	private DaoConfig myDaoConfig;
-	@Autowired
-	private PartitionSettings myPartitionSettings;
-	@Autowired
-	private ModelConfig myModelConfig;
 
 	public AddRemoveCount synchronizeSearchParamsToDatabase(ResourceIndexedSearchParams theParams, ResourceTable theEntity, ResourceIndexedSearchParams existingParams) {
 		AddRemoveCount retVal = new AddRemoveCount();
@@ -62,6 +52,7 @@ public class DaoSearchParamSynchronizer {
 		synchronize(theEntity, retVal, theParams.myUriParams, existingParams.myUriParams);
 		synchronize(theEntity, retVal, theParams.myCoordsParams, existingParams.myCoordsParams);
 		synchronize(theEntity, retVal, theParams.myLinks, existingParams.myLinks);
+		synchronize(theEntity, retVal, theParams.myComboTokenNonUnique, existingParams.myComboTokenNonUnique);
 
 		// make sure links are indexed
 		theEntity.setResourceLinks(theParams.myLinks);

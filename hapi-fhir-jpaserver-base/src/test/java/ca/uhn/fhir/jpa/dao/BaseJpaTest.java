@@ -11,11 +11,21 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboTokensNonUniqueDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
+import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
@@ -155,6 +165,14 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	protected SubscriptionLoader mySubscriptionLoader;
 	@Autowired
+	protected IResourceLinkDao myResourceLinkDao;
+	@Autowired
+	protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
+	@Autowired
+	protected IResourceIndexedSearchParamDateDao myResourceIndexedSearchParamDateDao;
+	@Autowired
+	protected IResourceIndexedComboTokensNonUniqueDao myResourceIndexedComboTokensNonUniqueDao;
+	@Autowired
 	private IdHelperService myIdHelperService;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
@@ -163,6 +181,14 @@ public abstract class BaseJpaTest extends BaseTest {
 	private IValidationSupport myJpaPersistedValidationSupport;
 	@Autowired
 	private FhirInstanceValidator myFhirInstanceValidator;
+	@Autowired
+	private IResourceTableDao myResourceTableDao;
+	@Autowired
+	private IResourceTagDao myResourceTagDao;
+	@Autowired
+	private IResourceHistoryTableDao myResourceHistoryTableDao;
+	@Autowired
+	private IForcedIdDao myForcedIdDao;
 
 	@AfterEach
 	public void afterPerformCleanup() {
@@ -236,6 +262,52 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected abstract FhirContext getContext();
 
 	protected abstract PlatformTransactionManager getTxManager();
+
+	protected void logAllResourceLinks() {
+		runInTransaction(() -> {
+			ourLog.info("Resource Links:\n * {}", myResourceLinkDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected int logAllResources() {
+		return runInTransaction(() -> {
+			List<ResourceTable> resources = myResourceTableDao.findAll();
+			ourLog.info("Resources:\n * {}", resources.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			return resources.size();
+		});
+	}
+
+	protected int logAllForcedIds() {
+		return runInTransaction(() -> {
+			List<ForcedId> forcedIds = myForcedIdDao.findAll();
+			ourLog.info("Resources:\n * {}", forcedIds.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			return forcedIds.size();
+		});
+	}
+
+	protected void logAllDateIndexes() {
+		runInTransaction(() -> {
+			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected void logAllNonUniqueIndexes() {
+		runInTransaction(() -> {
+			ourLog.info("Non unique indexes:\n * {}", myResourceIndexedComboTokensNonUniqueDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected void logAllTokenIndexes() {
+		runInTransaction(() -> {
+			ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected void logAllResourceTags() {
+		runInTransaction(() -> {
+			ourLog.info("Token tags:\n * {}", myResourceTagDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+	}
 
 	public TransactionTemplate newTxTemplate() {
 		TransactionTemplate retVal = new TransactionTemplate(getTxManager());

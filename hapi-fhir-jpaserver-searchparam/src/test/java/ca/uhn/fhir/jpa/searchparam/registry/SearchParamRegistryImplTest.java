@@ -293,7 +293,7 @@ public class SearchParamRegistryImplTest {
 
 	@Test
 	public void testGetActiveUniqueSearchParams_Empty() {
-		assertThat(mySearchParamRegistry.getActiveUniqueSearchParams("Patient"), is(empty()));
+		assertThat(mySearchParamRegistry.getActiveComboSearchParams("Patient"), is(empty()));
 	}
 
 	@Test

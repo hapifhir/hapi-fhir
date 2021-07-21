@@ -27,7 +27,8 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.CompositeUniqueSearchParameterPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
@@ -101,12 +102,13 @@ public class SearchQueryBuilder {
 	private BaseJoiningPredicateBuilder myFirstPredicateBuilder;
 	private boolean dialectIsMsSql;
 	private boolean dialectIsMySql;
+	private boolean myNeedResourceTableRoot;
 
 	/**
 	 * Constructor
 	 */
 	public SearchQueryBuilder(FhirContext theFhirContext, ModelConfig theModelConfig, PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, SqlObjectFactory theSqlBuilderFactory, HibernatePropertiesProvider theDialectProvider, boolean theCountQuery) {
-		this(theFhirContext, theModelConfig, thePartitionSettings, theRequestPartitionId, theResourceType, theSqlBuilderFactory, UUID.randomUUID().toString() + "-", theDialectProvider.getDialect(), theCountQuery, new ArrayList<>());
+		this(theFhirContext, theModelConfig, thePartitionSettings, theRequestPartitionId, theResourceType, theSqlBuilderFactory, UUID.randomUUID() + "-", theDialectProvider.getDialect(), theCountQuery, new ArrayList<>());
 	}
 
 	/**
@@ -144,12 +146,20 @@ public class SearchQueryBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a Composite Unique search parameter
 	 */
-	public CompositeUniqueSearchParameterPredicateBuilder addCompositeUniquePredicateBuilder() {
-		CompositeUniqueSearchParameterPredicateBuilder retVal = mySqlBuilderFactory.newCompositeUniqueSearchParameterPredicateBuilder(this);
+	public ComboUniqueSearchParameterPredicateBuilder addComboUniquePredicateBuilder() {
+		ComboUniqueSearchParameterPredicateBuilder retVal = mySqlBuilderFactory.newComboUniqueSearchParameterPredicateBuilder(this);
 		addTable(retVal, null);
 		return retVal;
 	}
 
+	/**
+	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a Composite Unique search parameter
+	 */
+	public ComboNonUniqueSearchParameterPredicateBuilder addComboNonUniquePredicateBuilder() {
+		ComboNonUniqueSearchParameterPredicateBuilder retVal = mySqlBuilderFactory.newComboNonUniqueSearchParameterPredicateBuilder(this);
+		addTable(retVal, null);
+		return retVal;
+	}
 
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a COORDS search parameter
@@ -310,11 +320,16 @@ public class SearchQueryBuilder {
 			addJoin(fromTable, toTable, theSourceJoinColumn, toColumn);
 		} else {
 			if (myFirstPredicateBuilder == null) {
-				ResourceTablePredicateBuilder root;
-				if (thePredicateBuilder instanceof ResourceTablePredicateBuilder) {
-					root = (ResourceTablePredicateBuilder) thePredicateBuilder;
+
+				BaseJoiningPredicateBuilder root;
+				if (!myNeedResourceTableRoot) {
+					root = thePredicateBuilder;
 				} else {
-					root = mySqlBuilderFactory.resourceTable(this);
+					if (thePredicateBuilder instanceof ResourceTablePredicateBuilder) {
+						root = thePredicateBuilder;
+					} else {
+						root = mySqlBuilderFactory.resourceTable(this);
+					}
 				}
 
 				if (myCountQuery) {
@@ -325,7 +340,7 @@ public class SearchQueryBuilder {
 				mySelect.addFromTable(root.getTable());
 				myFirstPredicateBuilder = root;
 
-				if (thePredicateBuilder instanceof ResourceTablePredicateBuilder) {
+				if (!myNeedResourceTableRoot || (thePredicateBuilder instanceof ResourceTablePredicateBuilder)) {
 					return;
 				}
 			}
@@ -422,7 +437,6 @@ public class SearchQueryBuilder {
 					startOfQueryParameterIndex = bindOffsetParameter(bindVariables, offset, limitHandler, startOfQueryParameterIndex, bindLimitParametersFirst);
 					bindCountParameter(bindVariables, maxResultsToFetch, limitHandler, startOfQueryParameterIndex, bindLimitParametersFirst);
 				}
-
 			}
 		}
 
@@ -680,4 +694,15 @@ public class SearchQueryBuilder {
 		mySelect.addCustomOrderings(orderObject);
 	}
 
+	/**
+	 * If set to true (default is false), force the generated SQL to start
+	 * with the {@link ca.uhn.fhir.jpa.model.entity.ResourceTable HFJ_RESOURCE}
+	 * table at the root of the query.
+	 *
+	 * This seems to perform better if there are multiple joins on the
+	 * resource ID table.
+	 */
+	public void setNeedResourceTableRoot(boolean theNeedResourceTableRoot) {
+		myNeedResourceTableRoot = theNeedResourceTableRoot;
+	}
 }

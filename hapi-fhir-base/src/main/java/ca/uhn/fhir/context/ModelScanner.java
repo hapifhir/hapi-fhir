@@ -412,7 +412,7 @@ class ModelScanner {
 				if (theResourceDef.isStandardType()) {
 					url = "http://hl7.org/fhir/SearchParameter/" + theResourceDef.getName().toLowerCase() + "-" + searchParam.name();
 				}
-				RuntimeSearchParam param = new RuntimeSearchParam(null, url, searchParam.name(), searchParam.description(), searchParam.path(), paramType, providesMembershipInCompartments, toTargetList(searchParam.target()), RuntimeSearchParamStatusEnum.ACTIVE, false, components, base);
+				RuntimeSearchParam param = new RuntimeSearchParam(null, url, searchParam.name(), searchParam.description(), searchParam.path(), paramType, providesMembershipInCompartments, toTargetList(searchParam.target()), RuntimeSearchParamStatusEnum.ACTIVE, null, components, base);
 				theResourceDef.addSearchParam(param);
 				nameToParam.put(param.getName(), param);
 			}
