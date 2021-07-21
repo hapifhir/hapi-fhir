@@ -45,6 +45,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 	public void disablePartitioning() {
 		myPartitionSettings.setPartitioningEnabled(false);
 		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
+		myPartitionSettings.setUnnamedPartitionMode(false);
 		myInterceptorService.unregisterInterceptor(myRequestTenantPartitionInterceptor);
 	}
 
