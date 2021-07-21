@@ -213,7 +213,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		// Attempt to lookup via composite unique key.
 		if (isCompositeUniqueSpCandidate()) {
-			attemptCompositeUniqueSpProcessing(theQueryStack, theParams, theRequest);
+			attemptComboUniqueSpProcessing(theQueryStack, theParams, theRequest);
 		}
 
 		SearchContainedModeEnum searchContainedMode = theParams.getSearchContainedMode();
@@ -1009,7 +1009,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	private void attemptCompositeUniqueSpProcessing(QueryStack theQueryStack3, @Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
+	private void attemptComboUniqueSpProcessing(QueryStack theQueryStack3, @Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
 		// Since we're going to remove elements below
 		theParams.values().forEach(nextAndList -> ensureSubListsAreWritable(nextAndList));
 

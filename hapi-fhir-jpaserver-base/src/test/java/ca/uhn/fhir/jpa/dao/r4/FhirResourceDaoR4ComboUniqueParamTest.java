@@ -1,19 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
-import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.util.SpringObjectCaster;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -27,17 +19,12 @@ import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -57,56 +44,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
+public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4UniqueSearchParamTest.class);
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
-	private List<String> myMessages = new ArrayList<>();
-
-	@AfterEach
-	public void after() throws Exception {
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
-		myDaoConfig.setUniqueIndexesCheckedBeforeSave(new DaoConfig().isUniqueIndexesCheckedBeforeSave());
-		myDaoConfig.setSchedulingDisabled(new DaoConfig().isSchedulingDisabled());
-		myDaoConfig.setUniqueIndexesEnabled(new DaoConfig().isUniqueIndexesEnabled());
-		myDaoConfig.setReindexThreadCount(new DaoConfig().getReindexThreadCount());
-
-		ResourceReindexingSvcImpl svc = SpringObjectCaster.getTargetObject(myResourceReindexingSvc, ResourceReindexingSvcImpl.class);
-		svc.initExecutor();
-	}
-
-	@BeforeEach
-	public void before() {
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(true);
-		myDaoConfig.setSchedulingDisabled(true);
-		myDaoConfig.setUniqueIndexesEnabled(true);
-
-		myInterceptorBroadcaster = mock(IInterceptorBroadcaster.class);
-		when(mySrd.getInterceptorBroadcaster()).thenReturn(myInterceptorBroadcaster);
-		when(mySrd.getServer().getPagingProvider()).thenReturn(new DatabaseBackedPagingProvider());
-
-		when(myInterceptorBroadcaster.hasHooks(eq(Pointcut.JPA_PERFTRACE_WARNING))).thenReturn(true);
-		when(myInterceptorBroadcaster.hasHooks(eq(Pointcut.JPA_PERFTRACE_INFO))).thenReturn(true);
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.JPA_PERFTRACE_INFO), ArgumentMatchers.any(HookParams.class))).thenAnswer(t -> {
-			HookParams params = t.getArgument(1, HookParams.class);
-			myMessages.add("INFO " + params.get(StorageProcessingMessage.class).getMessage());
-			return null;
-		});
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.JPA_PERFTRACE_WARNING), ArgumentMatchers.any(HookParams.class))).thenAnswer(t -> {
-			HookParams params = t.getArgument(1, HookParams.class);
-			myMessages.add("WARN " + params.get(StorageProcessingMessage.class).getMessage());
-			return null;
-		});
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED), ArgumentMatchers.any(HookParams.class))).thenAnswer(t -> {
-			HookParams params = t.getArgument(1, HookParams.class);
-			myMessages.add("REUSING CACHED SEARCH");
-			return null;
-		});
-	}
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ComboUniqueParamTest.class);
 
 
 	private void createUniqueBirthdateAndGenderSps() {
@@ -1229,10 +1170,6 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 		assertEquals("Patient?name=FAMILY1&organization=Organization%2FORG", uniques.get(0).getIndexString());
 
-	}
-
-	private void logCapturedMessages() {
-		ourLog.info("Messages:\n  {}", String.join("\n  ", myMessages));
 	}
 
 	@Test

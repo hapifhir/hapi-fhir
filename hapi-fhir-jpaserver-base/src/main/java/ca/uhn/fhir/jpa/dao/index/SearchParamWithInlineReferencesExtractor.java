@@ -140,7 +140,7 @@ public class SearchParamWithInlineReferencesExtractor {
 		}
 
 		/*
-		 * Handle composites
+		 * Handle combo parameters
 		 */
 		extractCompositeStringUniques(theEntity, theParams);
 	}

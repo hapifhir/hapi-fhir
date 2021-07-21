@@ -198,6 +198,15 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedCompositeStringUnique> myParamsCompositeStringUnique;
 
+	// Added in 5.5.0 - Should make this a primitive Boolean at some point
+	@OptimisticLock(excluded = true)
+	@Column(name = "SP_CMPTOKS_PRESENT")
+	private Boolean myParamsCompositeTokensPresent = false;
+
+	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OptimisticLock(excluded = true)
+	private Collection<ResourceIndexedCompositeTokens> myParamsCompositeTokens;
+
 	@OneToMany(mappedBy = "mySourceResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceLink> myResourceLinks;

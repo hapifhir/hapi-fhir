@@ -99,6 +99,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		version.onTable("HFJ_BLK_EXPORT_JOB")
 			.modifyColumn("20210624.1","REQUEST").nonNullable().withType(ColumnTypeEnum.STRING, 1024);
+
+		version.onTable("HFJ_RESOURCE")
+			.addColumn("20210720.1", "SP_CMPTOKS_PRESENT").nullable().type(ColumnTypeEnum.BOOLEAN);
+
+		version.addIdGenerator("20210720.2", "SEQ_IDXCMPTOKS_ID");
+
+		Builder.BuilderAddTableByColumns cmpToks = version
+			.addTableByColumns("20210720.3", "HFJ_IDX_CMP_TOKS", "PID");
+		cmpToks.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+		cmpToks.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
+		cmpToks.addColumn("HASH_IDENTITY").nonNullable().type(ColumnTypeEnum.LONG);
+		cmpToks.addForeignKey("20210720.4", "FK_IDXCMPTOKS_RES_ID").toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
 	}
 
 	private void init540() {
