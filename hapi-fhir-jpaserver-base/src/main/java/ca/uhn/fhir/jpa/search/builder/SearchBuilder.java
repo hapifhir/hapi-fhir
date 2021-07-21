@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.builder;
  * #L%
  */
 
+import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -85,6 +86,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
@@ -119,6 +121,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -213,7 +216,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		// Attempt to lookup via composite unique key.
 		if (isCompositeUniqueSpCandidate()) {
-			attemptCompositeUniqueSpProcessing(theQueryStack, theParams, theRequest);
+			attemptComboUniqueSpProcessing(theQueryStack, theParams, theRequest);
 		}
 
 		SearchContainedModeEnum searchContainedMode = theParams.getSearchContainedMode();
@@ -366,7 +369,10 @@ public class SearchBuilder implements ISearchBuilder {
 		QueryStack queryStack3 = new QueryStack(theParams, myDaoConfig, myDaoConfig.getModelConfig(), myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
 
 		if (theParams.keySet().size() > 1 || theParams.getSort() != null || theParams.keySet().contains(Constants.PARAM_HAS)) {
-			sqlBuilder.setNeedResourceTableRoot(true);
+			List<RuntimeSearchParam> activeComboParams = mySearchParamRegistry.getActiveComboSearchParams(myResourceName, theParams.keySet());
+			if (activeComboParams.isEmpty()) {
+				sqlBuilder.setNeedResourceTableRoot(true);
+			}
 		}
 
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(myEntityManagerFactory.getDataSource());
@@ -1009,12 +1015,34 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	private void attemptCompositeUniqueSpProcessing(QueryStack theQueryStack3, @Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
-		// Since we're going to remove elements below
-		theParams.values().forEach(nextAndList -> ensureSubListsAreWritable(nextAndList));
+	private void attemptComboUniqueSpProcessing(QueryStack theQueryStack3, @Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
+		RuntimeSearchParam comboParam = null;
+		List<String> comboParamNames = null;
+		List<RuntimeSearchParam> exactMatchParams = mySearchParamRegistry.getActiveComboSearchParams(myResourceName, theParams.keySet());
+		if (exactMatchParams.size() > 0) {
+			comboParam = exactMatchParams.get(0);
+			comboParamNames = new ArrayList<>(theParams.keySet());
+		}
 
-		List<RuntimeSearchParam> activeUniqueSearchParams = mySearchParamRegistry.getActiveUniqueSearchParams(myResourceName, theParams.keySet());
-		if (activeUniqueSearchParams.size() > 0) {
+		if (comboParam == null) {
+			List<RuntimeSearchParam> candidateComboParams = mySearchParamRegistry.getActiveComboSearchParams(myResourceName);
+			for (RuntimeSearchParam nextCandidate : candidateComboParams) {
+				List<String> nextCandidateParamNames = JpaParamUtil
+					.resolveComponentParameters(mySearchParamRegistry, nextCandidate)
+					.stream()
+					.map(t -> t.getName())
+					.collect(Collectors.toList());
+				if (theParams.keySet().containsAll(nextCandidateParamNames)) {
+					comboParam = nextCandidate;
+					comboParamNames = nextCandidateParamNames;
+					break;
+				}
+			}
+		}
+
+		if (comboParam != null) {
+			// Since we're going to remove elements below
+			theParams.values().forEach(nextAndList -> ensureSubListsAreWritable(nextAndList));
 
 			StringBuilder sb = new StringBuilder();
 			sb.append(myResourceName);
@@ -1022,9 +1050,8 @@ public class SearchBuilder implements ISearchBuilder {
 
 			boolean first = true;
 
-			ArrayList<String> keys = new ArrayList<>(theParams.keySet());
-			Collections.sort(keys);
-			for (String nextParamName : keys) {
+			Collections.sort(comboParamNames);
+			for (String nextParamName : comboParamNames) {
 				List<List<IQueryParameterType>> nextValues = theParams.get(nextParamName);
 
 				nextParamName = UrlUtil.escapeUrlParam(nextParamName);
@@ -1047,6 +1074,13 @@ public class SearchBuilder implements ISearchBuilder {
 				List<? extends IQueryParameterType> nextAnd = nextValues.remove(0);
 				IQueryParameterType nextOr = nextAnd.remove(0);
 				String nextOrValue = nextOr.getValueAsQueryToken(myContext);
+
+				if (comboParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE) {
+					if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.STRING) {
+						nextOrValue = StringUtil.normalizeStringForSearchIndexing(nextOrValue);
+					}
+				}
+
 				nextOrValue = UrlUtil.escapeUrlParam(nextOrValue);
 
 				if (first) {
@@ -1061,18 +1095,25 @@ public class SearchBuilder implements ISearchBuilder {
 
 			if (sb != null) {
 				String indexString = sb.toString();
-				ourLog.debug("Checking for unique index for query: {}", indexString);
+				ourLog.debug("Checking for {} combo index for query: {}", comboParam.getComboSearchParamType(), indexString);
 
 				// Interceptor broadcast: JPA_PERFTRACE_INFO
 				StorageProcessingMessage msg = new StorageProcessingMessage()
-					.setMessage("Using unique index for query for search: " + indexString);
+					.setMessage("Using " + comboParam.getComboSearchParamType() + " index for query for search: " + indexString);
 				HookParams params = new HookParams()
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest)
 					.add(StorageProcessingMessage.class, msg);
 				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
 
-				theQueryStack3.addPredicateCompositeUnique(indexString, myRequestPartitionId);
+				switch (comboParam.getComboSearchParamType()) {
+					case UNIQUE:
+						theQueryStack3.addPredicateCompositeUnique(indexString, myRequestPartitionId);
+						break;
+					case NON_UNIQUE:
+						theQueryStack3.addPredicateCompositeNonUnique(indexString, myRequestPartitionId);
+						break;
+				}
 
 				// Remove any empty parameters remaining after this
 				theParams.clean();

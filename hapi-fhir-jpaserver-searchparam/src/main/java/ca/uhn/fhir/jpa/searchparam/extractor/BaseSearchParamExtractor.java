@@ -92,7 +92,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	public static final Set<String> COORDS_INDEX_PATHS;
 	private static final Pattern SPLIT = Pattern.compile("\\||( or )");
-	private static final Pattern SPLIT_R4 = Pattern.compile("\\|");
+	private static final Pattern SPLIT_R4 = Pattern.compile("\\s+\\|");
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSearchParamExtractor.class);
 
 	static {

@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboTokensNonUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
@@ -157,6 +158,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	protected IResourceIndexedSearchParamDateDao myResourceIndexedSearchParamDateDao;
 	@Autowired
+	protected IResourceIndexedComboTokensNonUniqueDao myResourceIndexedComboTokensNonUniqueDao;
+	@Autowired
 	private IdHelperService myIdHelperService;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
@@ -287,6 +290,12 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void logAllDateIndexes() {
 		runInTransaction(() -> {
 			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected void logAllNonUniqueIndexes() {
+		runInTransaction(() -> {
+			ourLog.info("Non unique indexes:\n * {}", myResourceIndexedComboTokensNonUniqueDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 	}
 

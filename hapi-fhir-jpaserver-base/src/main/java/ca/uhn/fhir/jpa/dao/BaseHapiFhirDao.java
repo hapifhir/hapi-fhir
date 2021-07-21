@@ -129,7 +129,6 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import javax.validation.constraints.Null;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 import java.util.ArrayList;
@@ -1404,7 +1403,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 
 				// Synchronize composite params
-				mySearchParamWithInlineReferencesExtractor.storeCompositeStringUniques(newParams, entity, existingParams);
+				mySearchParamWithInlineReferencesExtractor.storeUniqueComboParameters(newParams, entity, existingParams);
 			}
 		}
 
