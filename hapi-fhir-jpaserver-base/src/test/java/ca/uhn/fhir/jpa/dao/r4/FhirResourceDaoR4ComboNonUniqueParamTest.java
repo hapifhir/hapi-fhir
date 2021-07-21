@@ -32,7 +32,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		sp.setId("SearchParameter/patient-family");
 		sp.setType(Enumerations.SearchParamType.STRING);
 		sp.setCode("family");
-		sp.setExpression("Patient.name.family");
+		sp.setExpression("Patient.name.family + '|'");
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
 		mySearchParameterDao.update(sp);
@@ -94,12 +94,12 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 			List<ResourceIndexedComboTokenNonUnique> indexedTokens = myResourceIndexedComboTokensNonUniqueDao.findAll();
 			indexedTokens.sort(Comparator.comparing(t -> t.getId()));
 			assertEquals(2, indexedTokens.size());
-			assertEquals(-2634469377090377342L, indexedTokens.get(0).getHashComplete().longValue());
+			assertEquals(-7504889232313729794L, indexedTokens.get(0).getHashComplete().longValue());
 		});
 
 		myMessages.clear();
 		SearchParameterMap params = SearchParameterMap.newSynchronous();
-		params.add("family", new StringParam("fAmIlY1")); // weird casing to test normalization
+		params.add("family", new StringParam("fAmIlY1|")); // weird casing to test normalization
 		params.add("given", new StringParam("gIVEn1"));
 		params.add("gender", new TokenParam("http://hl7.org/fhir/administrative-gender", "male"));
 		myCaptureQueriesListener.clear();
@@ -109,10 +109,10 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		assertThat(actual, containsInAnyOrder(id1.toUnqualifiedVersionless().getValue()));
 
 		String sql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false);
-		assertEquals("SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.IDX_STRING = 'Patient?family=FAMILY1&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1')", sql);
+		assertEquals("SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.IDX_STRING = 'Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1')", sql);
 
 		logCapturedMessages();
-		assertThat(myMessages.toString(), containsString("INFO Using NON_UNIQUE index for query for search: Patient?family=FAMILY1&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1"));
+		assertThat(myMessages.toString(), containsString("[INFO Using NON_UNIQUE index for query for search: Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1]"));
 		myMessages.clear();
 
 		// Remove 1, add another
@@ -123,7 +123,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		assertNotNull(id3);
 
 		params = SearchParameterMap.newSynchronous();
-		params.add("family", new StringParam("fAmIlY1")); // weird casing to test normalization
+		params.add("family", new StringParam("fAmIlY1|")); // weird casing to test normalization
 		params.add("given", new StringParam("gIVEn1"));
 		params.add("gender", new TokenParam("http://hl7.org/fhir/administrative-gender", "male"));
 		results = myPatientDao.search(params, mySrd);
@@ -148,12 +148,12 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 			List<ResourceIndexedComboTokenNonUnique> indexedTokens = myResourceIndexedComboTokensNonUniqueDao.findAll();
 			indexedTokens.sort(Comparator.comparing(t -> t.getId()));
 			assertEquals(2, indexedTokens.size());
-			assertEquals(-2634469377090377342L, indexedTokens.get(0).getHashComplete().longValue());
+			assertEquals(-7504889232313729794L, indexedTokens.get(0).getHashComplete().longValue());
 		});
 
 		myMessages.clear();
 		SearchParameterMap params = SearchParameterMap.newSynchronous();
-		params.add("family", new StringParam("fAmIlY1")); // weird casing to test normalization
+		params.add("family", new StringParam("fAmIlY1|")); // weird casing to test normalization
 		params.add("given", new StringParam("gIVEn1"));
 		params.add("gender", new TokenParam("http://hl7.org/fhir/administrative-gender", "male"));
 		params.add("birthdate", new DateParam("2021-02-02"));
@@ -164,10 +164,10 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		assertThat(actual, containsInAnyOrder(id1.toUnqualifiedVersionless().getValue()));
 
 		String sql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false);
-		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 LEFT OUTER JOIN HFJ_IDX_CMB_TOK_NU t0 ON (t1.RES_ID = t0.RES_ID) LEFT OUTER JOIN HFJ_SPIDX_DATE t2 ON (t1.RES_ID = t2.RES_ID) WHERE ((t0.IDX_STRING = 'Patient?family=FAMILY1&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1') AND ((t2.HASH_IDENTITY = '5247847184787287691') AND ((t2.SP_VALUE_LOW_DATE_ORDINAL >= '20210202') AND (t2.SP_VALUE_HIGH_DATE_ORDINAL <= '20210202'))))", sql);
+		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 LEFT OUTER JOIN HFJ_IDX_CMB_TOK_NU t0 ON (t1.RES_ID = t0.RES_ID) LEFT OUTER JOIN HFJ_SPIDX_DATE t2 ON (t1.RES_ID = t2.RES_ID) WHERE ((t0.IDX_STRING = 'Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1') AND ((t2.HASH_IDENTITY = '5247847184787287691') AND ((t2.SP_VALUE_LOW_DATE_ORDINAL >= '20210202') AND (t2.SP_VALUE_HIGH_DATE_ORDINAL <= '20210202'))))", sql);
 
 		logCapturedMessages();
-		assertThat(myMessages.toString(), containsString("INFO Using NON_UNIQUE index for query for search: Patient?family=FAMILY1&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1"));
+		assertThat(myMessages.toString(), containsString("[INFO Using NON_UNIQUE index for query for search: Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1]"));
 		myMessages.clear();
 
 	}
