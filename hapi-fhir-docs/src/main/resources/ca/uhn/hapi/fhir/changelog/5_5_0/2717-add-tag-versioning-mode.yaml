@@ -1,5 +1,6 @@
 ---
 type: perf
+backport: 5.4.2
 issue: 2717
 title: "A new setting has been added to the DaoConfig called Tag Versioning Mode. This setting controls whether a single collection of
    tags/profiles/security labels is maintained across all versions of a single resource, or whether each version of the

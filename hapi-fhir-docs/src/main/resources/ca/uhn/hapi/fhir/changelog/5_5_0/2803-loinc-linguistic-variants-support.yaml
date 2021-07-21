@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2803
+title: "Allowed the optional inclusion of the LOINC Linguistic Variants archive in addition to 
+  the main LOINC distribution. If it is supplied, all linguistic variants files will be scanned, 
+  and all translations will be added to uploaded Concepts as additional designations"

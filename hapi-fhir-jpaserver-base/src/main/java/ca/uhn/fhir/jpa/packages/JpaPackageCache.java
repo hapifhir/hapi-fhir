@@ -472,6 +472,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	private IBaseResource loadPackageEntity(NpmPackageVersionResourceEntity contents) {
+		try {
+
 		ResourcePersistentId binaryPid = new ResourcePersistentId(contents.getResourceBinary().getId());
 		IBaseBinary binary = getBinaryDao().readByPid(binaryPid);
 		byte[] resourceContentsBytes = BinaryUtil.getOrCreateData(myCtx, binary).getValue();
@@ -479,6 +481,9 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		FhirContext packageContext = getFhirContext(contents.getFhirVersion());
 		return EncodingEnum.detectEncoding(resourceContents).newParser(packageContext).parseResource(resourceContents);
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to load package resource " + contents, e);
+		}
 	}
 
 	@Override
