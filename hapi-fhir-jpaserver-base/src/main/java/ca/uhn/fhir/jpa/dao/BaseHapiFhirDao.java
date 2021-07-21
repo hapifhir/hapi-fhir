@@ -1403,7 +1403,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 
 				// Synchronize composite params
-				mySearchParamWithInlineReferencesExtractor.storeComboParameters(newParams, entity, existingParams);
+				mySearchParamWithInlineReferencesExtractor.storeUniqueComboParameters(newParams, entity, existingParams);
 			}
 		}
 

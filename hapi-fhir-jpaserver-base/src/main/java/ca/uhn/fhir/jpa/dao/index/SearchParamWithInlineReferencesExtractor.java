@@ -383,27 +383,7 @@ public class SearchParamWithInlineReferencesExtractor {
 		myDaoSearchParamSynchronizer = theDaoSearchParamSynchronizer;
 	}
 
-	public void storeComboParameters(ResourceIndexedSearchParams theParams, ResourceTable theEntity, ResourceIndexedSearchParams theExistingParams) {
-		// FIXME: remove and rename this method
-//		/*
-//		 * Token Non Uniques
-//		 */
-//		for (ResourceIndexedComboTokenNonUnique next : myDaoSearchParamSynchronizer.subtract(theExistingParams.myComboTokenNonUnique, theParams.myComboTokenNonUnique)) {
-//			ourLog.debug("Removing unique index: {}", next);
-//			myEntityManager.remove(next);
-//			theEntity.getmyParamsComboTokensNonUnique().remove(next);
-//		}
-//		boolean haveNewTokenNonUniqueParams = false;
-//		for (ResourceIndexedComboTokenNonUnique next : myDaoSearchParamSynchronizer.subtract(theParams.myComboTokenNonUnique, theExistingParams.myComboTokenNonUnique)) {
-//			ourLog.debug("Persisting unique index: {}", next);
-//			myEntityManager.persist(next);
-//			haveNewTokenNonUniqueParams = true;
-//		}
-//		if (theParams.myComboTokenNonUnique.size() > 0 || haveNewTokenNonUniqueParams) {
-//			theEntity.setParamsComboStringUniquePresent(true);
-//		} else {
-//			theEntity.setParamsComboStringUniquePresent(false);
-//		}
+	public void storeUniqueComboParameters(ResourceIndexedSearchParams theParams, ResourceTable theEntity, ResourceIndexedSearchParams theExistingParams) {
 
 		/*
 		 * String Uniques
