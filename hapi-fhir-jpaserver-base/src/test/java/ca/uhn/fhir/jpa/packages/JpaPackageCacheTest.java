@@ -112,30 +112,28 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		myInterceptorService.registerInterceptor(new PatientIdPartitionInterceptor());
 		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
 
-		try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/basisprofil.de.tar.gz")) {
-			myPackageCacheManager.addPackageToCache("basisprofil.de", "0.2.40", stream, "basisprofil.de");
+		try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz")) {
+			myPackageCacheManager.addPackageToCache("hl7.fhir.uv.shorthand", "0.12.0", stream, "hl7.fhir.uv.shorthand");
 		}
 
 		NpmPackage pkg;
 
-		pkg = myPackageCacheManager.loadPackage("basisprofil.de", null);
-		assertEquals("0.2.40", pkg.version());
+		pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", null);
+		assertEquals("0.12.0", pkg.version());
 
-		pkg = myPackageCacheManager.loadPackage("basisprofil.de", "0.2.40");
-		assertEquals("0.2.40", pkg.version());
+		pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "0.12.0");
+		assertEquals("0.12.0", pkg.version());
 
 		try {
-			myPackageCacheManager.loadPackage("basisprofil.de", "99");
+			myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "99");
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("Unable to locate package basisprofil.de#99", e.getMessage());
+			assertEquals("Unable to locate package hl7.fhir.uv.shorthand#99", e.getMessage());
 		}
 
-		logAllResources();
-
-		PackageDeleteOutcomeJson deleteOutcomeJson = myPackageCacheManager.uninstallPackage("basisprofil.de", "0.2.40");
+		PackageDeleteOutcomeJson deleteOutcomeJson = myPackageCacheManager.uninstallPackage("hl7.fhir.uv.shorthand", "0.12.0");
 		List<String> deleteOutcomeMsgs = deleteOutcomeJson.getMessage();
-		assertEquals("Deleting package basisprofil.de#0.2.40", deleteOutcomeMsgs.get(0));
+		assertEquals("Deleting package hl7.fhir.uv.shorthand#0.12.0", deleteOutcomeMsgs.get(0));
 	}
 
 	@Test
