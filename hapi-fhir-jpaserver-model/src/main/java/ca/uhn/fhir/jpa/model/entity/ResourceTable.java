@@ -192,20 +192,20 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	// Added in 3.0.0 - Should make this a primitive Boolean at some point
 	@OptimisticLock(excluded = true)
 	@Column(name = "SP_CMPSTR_UNIQ_PRESENT")
-	private Boolean myParamsCompositeStringUniquePresent = false;
+	private Boolean myParamsComboStringUniquePresent = false;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
-	private Collection<ResourceIndexedCompositeStringUnique> myParamsCompositeStringUnique;
+	private Collection<ResourceIndexedComboStringUnique> myParamsComboStringUnique;
 
 	// Added in 5.5.0 - Should make this a primitive Boolean at some point
 	@OptimisticLock(excluded = true)
 	@Column(name = "SP_CMPTOKS_PRESENT")
-	private Boolean myParamsCompositeTokensPresent = false;
+	private Boolean myParamsComboTokensNonUniquePresent = false;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
-	private Collection<ResourceIndexedCompositeTokens> myParamsCompositeTokens;
+	private Collection<ResourceIndexedComboTokenNonUnique> myParamsComboTokensNonUnique;
 
 	@OneToMany(mappedBy = "mySourceResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
@@ -321,11 +321,18 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myLanguage = theLanguage;
 	}
 
-	public Collection<ResourceIndexedCompositeStringUnique> getParamsCompositeStringUnique() {
-		if (myParamsCompositeStringUnique == null) {
-			myParamsCompositeStringUnique = new ArrayList<>();
+	public Collection<ResourceIndexedComboStringUnique> getParamsComboStringUnique() {
+		if (myParamsComboStringUnique == null) {
+			myParamsComboStringUnique = new ArrayList<>();
 		}
-		return myParamsCompositeStringUnique;
+		return myParamsComboStringUnique;
+	}
+
+	public Collection<ResourceIndexedComboTokenNonUnique> getmyParamsComboTokensNonUnique() {
+		if (myParamsComboTokensNonUnique == null) {
+			myParamsComboTokensNonUnique = new ArrayList<>();
+		}
+		return myParamsComboTokensNonUnique;
 	}
 
 	public Collection<ResourceIndexedSearchParamCoords> getParamsCoords() {
@@ -503,15 +510,26 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myHasLinks = theHasLinks;
 	}
 
-	public boolean isParamsCompositeStringUniquePresent() {
-		if (myParamsCompositeStringUniquePresent == null) {
+	public boolean isParamsComboStringUniquePresent() {
+		if (myParamsComboStringUniquePresent == null) {
 			return false;
 		}
-		return myParamsCompositeStringUniquePresent;
+		return myParamsComboStringUniquePresent;
 	}
 
-	public void setParamsCompositeStringUniquePresent(boolean theParamsCompositeStringUniquePresent) {
-		myParamsCompositeStringUniquePresent = theParamsCompositeStringUniquePresent;
+	public void setParamsComboStringUniquePresent(boolean theParamsComboStringUniquePresent) {
+		myParamsComboStringUniquePresent = theParamsComboStringUniquePresent;
+	}
+
+	public boolean isParamsComboTokensNonUniquePresent() {
+		if (myParamsComboTokensNonUniquePresent == null) {
+			return false;
+		}
+		return myParamsComboTokensNonUniquePresent;
+	}
+
+	public void setParamsComboTokensNonUniquePresent(boolean theParamsComboTokensNonUniquePresent) {
+		myParamsComboStringUniquePresent = theParamsComboTokensNonUniquePresent;
 	}
 
 	public boolean isParamsCoordsPopulated() {

@@ -21,27 +21,30 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 
-public class CompositeUniqueSearchParameterPredicateBuilder extends BaseSearchParamPredicateBuilder {
+public class ComboNonUniqueSearchParameterPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
-	private final DbColumn myColumnString;
+	private final DbColumn myColumnHashComplete;
 
 	/**
 	 * Constructor
 	 */
-	public CompositeUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_IDX_CMP_STRING_UNIQ"));
+	public ComboNonUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_IDX_CMB_TOK_NU"));
 
-		myColumnString = getTable().addColumn("IDX_STRING");
+		myColumnHashComplete = getTable().addColumn("HASH_COMPLETE");
 	}
 
 
-	public Condition createPredicateIndexString(RequestPartitionId theRequestPartitionId, String theIndexString) {
-		BinaryCondition predicate = BinaryCondition.equalTo(myColumnString, generatePlaceholder(theIndexString));
+	public Condition createPredicateHashComplete(RequestPartitionId theRequestPartitionId, String theParamName, String theIndexString) {
+		long hash = ResourceIndexedComboTokenNonUnique.calculateHashComplete(getResourceType(), theParamName, getPartitionSettings(), getRequestPartitionId(), theIndexString);
+
+		BinaryCondition predicate = BinaryCondition.equalTo(myColumnHashComplete, generatePlaceholder(hash));
 		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 	}
 }

@@ -34,7 +34,8 @@ import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.CompositeUniqueSearchParameterPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
@@ -1214,10 +1215,17 @@ public class QueryStack {
 	}
 
 	public void addPredicateCompositeUnique(String theIndexString, RequestPartitionId theRequestPartitionId) {
-		CompositeUniqueSearchParameterPredicateBuilder predicateBuilder = mySqlBuilder.addCompositeUniquePredicateBuilder();
+		ComboUniqueSearchParameterPredicateBuilder predicateBuilder = mySqlBuilder.addComboUniquePredicateBuilder();
 		Condition predicate = predicateBuilder.createPredicateIndexString(theRequestPartitionId, theIndexString);
 		mySqlBuilder.addPredicate(predicate);
 	}
+
+	public void addPredicateCompositeNonUnique(String theIndexString, String theParamName, RequestPartitionId theRequestPartitionId) {
+		ComboNonUniqueSearchParameterPredicateBuilder predicateBuilder = mySqlBuilder.addComboNonUniquePredicateBuilder();
+		Condition predicate = predicateBuilder.createPredicateHashComplete(theRequestPartitionId, theParamName, theIndexString);
+		mySqlBuilder.addPredicate(predicate);
+	}
+
 
 	public void addPredicateEverythingOperation(String theResourceName, Long theTargetPid) {
 		ResourceLinkPredicateBuilder table = mySqlBuilder.addReferencePredicateBuilder(this, null);
