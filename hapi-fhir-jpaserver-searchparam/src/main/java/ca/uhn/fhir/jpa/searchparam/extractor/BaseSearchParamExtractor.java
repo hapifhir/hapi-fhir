@@ -534,8 +534,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return values;
 	}
 
-	protected abstract IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath);
-
 	protected FhirContext getContext() {
 		return myContext;
 	}

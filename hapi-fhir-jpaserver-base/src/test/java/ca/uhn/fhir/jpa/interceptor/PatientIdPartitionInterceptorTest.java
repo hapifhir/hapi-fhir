@@ -5,11 +5,13 @@ import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4SystemTest;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -18,6 +20,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -31,9 +34,12 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 	private PatientIdPartitionInterceptor mySvc;
 	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
 
+	@Autowired
+	private ISearchParamExtractor mySearchParamExtractor;
+
 	@BeforeEach
 	public void before() {
-		mySvc = new PatientIdPartitionInterceptor(myFhirCtx);
+		mySvc = new PatientIdPartitionInterceptor(myFhirCtx, mySearchParamExtractor);
 		myForceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
 
 		myInterceptorRegistry.registerInterceptor(mySvc);
@@ -91,6 +97,24 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		runInTransaction(() -> {
 			ResourceTable observation = myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
 			assertEquals("Observation", observation.getResourceType());
+			assertEquals(65, observation.getPartitionId().getPartitionId());
+		});
+	}
+
+	/**
+	 * Encounter.subject has a FHIRPath expression with a resolve() on it
+	 */
+	@Test
+	public void testCreateEncounter_ValidMembershipInCompartment() {
+		createPatientA();
+
+		Encounter encounter = new Encounter();
+		encounter.getSubject().setReference("Patient/A");
+		Long id = myEncounterDao.create(encounter).getId().getIdPartAsLong();
+
+		runInTransaction(() -> {
+			ResourceTable observation = myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
+			assertEquals("Encounter", observation.getResourceType());
 			assertEquals(65, observation.getPartitionId().getPartitionId());
 		});
 	}
