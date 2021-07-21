@@ -104,6 +104,40 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testSaveAndDeletePackageUnnamedPartitionsEnabled() throws IOException {
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setDefaultPartitionId(0);
+		myPartitionSettings.setUnnamedPartitionMode(true);
+		myInterceptorService.registerInterceptor(new PatientIdPartitionInterceptor());
+		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
+
+		try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/basisprofil.de.tar.gz")) {
+			myPackageCacheManager.addPackageToCache("basisprofil.de", "0.2.40", stream, "basisprofil.de");
+		}
+
+		NpmPackage pkg;
+
+		pkg = myPackageCacheManager.loadPackage("basisprofil.de", null);
+		assertEquals("0.2.40", pkg.version());
+
+		pkg = myPackageCacheManager.loadPackage("basisprofil.de", "0.2.40");
+		assertEquals("0.2.40", pkg.version());
+
+		try {
+			myPackageCacheManager.loadPackage("basisprofil.de", "99");
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals("Unable to locate package basisprofil.de#99", e.getMessage());
+		}
+
+		logAllResources();
+
+		PackageDeleteOutcomeJson deleteOutcomeJson = myPackageCacheManager.uninstallPackage("basisprofil.de", "0.2.40");
+		List<String> deleteOutcomeMsgs = deleteOutcomeJson.getMessage();
+		assertEquals("Deleting package basisprofil.de#0.2.40", deleteOutcomeMsgs.get(0));
+	}
+
+	@Test
 	public void testSavePackageWithLongDescription() throws IOException {
 		try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/package-davinci-cdex-0.2.0.tgz")) {
 			myPackageCacheManager.addPackageToCache("hl7.fhir.us.davinci-cdex", "0.2.0", stream, "hl7.fhir.us.davinci-cdex");
