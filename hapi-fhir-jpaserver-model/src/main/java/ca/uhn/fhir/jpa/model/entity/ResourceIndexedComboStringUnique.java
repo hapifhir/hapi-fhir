@@ -32,12 +32,12 @@ import javax.persistence.*;
 
 @Entity()
 @Table(name = "HFJ_IDX_CMP_STRING_UNIQ", indexes = {
-	@Index(name = ResourceIndexedCompositeStringUnique.IDX_IDXCMPSTRUNIQ_STRING, columnList = "IDX_STRING", unique = true),
-	@Index(name = ResourceIndexedCompositeStringUnique.IDX_IDXCMPSTRUNIQ_RESOURCE, columnList = "RES_ID", unique = false)
+	@Index(name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_STRING, columnList = "IDX_STRING", unique = true),
+	@Index(name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_RESOURCE, columnList = "RES_ID", unique = false)
 })
-public class ResourceIndexedCompositeStringUnique extends BasePartitionable implements Comparable<ResourceIndexedCompositeStringUnique> {
+public class ResourceIndexedComboStringUnique extends BasePartitionable implements Comparable<ResourceIndexedComboStringUnique> {
 
-	public static final int MAX_STRING_LENGTH = 200;
+	public static final int MAX_STRING_LENGTH = 500;
 	public static final String IDX_IDXCMPSTRUNIQ_STRING = "IDX_IDXCMPSTRUNIQ_STRING";
 	public static final String IDX_IDXCMPSTRUNIQ_RESOURCE = "IDX_IDXCMPSTRUNIQ_RESOURCE";
 
@@ -66,14 +66,14 @@ public class ResourceIndexedCompositeStringUnique extends BasePartitionable impl
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedCompositeStringUnique() {
+	public ResourceIndexedComboStringUnique() {
 		super();
 	}
 
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedCompositeStringUnique(ResourceTable theResource, String theIndexString, IIdType theSearchParameterId) {
+	public ResourceIndexedComboStringUnique(ResourceTable theResource, String theIndexString, IIdType theSearchParameterId) {
 		setResource(theResource);
 		setIndexString(theIndexString);
 		setPartitionId(theResource.getPartitionId());
@@ -81,7 +81,7 @@ public class ResourceIndexedCompositeStringUnique extends BasePartitionable impl
 	}
 
 	@Override
-	public int compareTo(ResourceIndexedCompositeStringUnique theO) {
+	public int compareTo(ResourceIndexedComboStringUnique theO) {
 		CompareToBuilder b = new CompareToBuilder();
 		b.append(myIndexString, theO.getIndexString());
 		return b.toComparison();
@@ -91,11 +91,11 @@ public class ResourceIndexedCompositeStringUnique extends BasePartitionable impl
 	public boolean equals(Object theO) {
 		if (this == theO) return true;
 
-		if (!(theO instanceof ResourceIndexedCompositeStringUnique)) {
+		if (!(theO instanceof ResourceIndexedComboStringUnique)) {
 			return false;
 		}
 
-		ResourceIndexedCompositeStringUnique that = (ResourceIndexedCompositeStringUnique) theO;
+		ResourceIndexedComboStringUnique that = (ResourceIndexedComboStringUnique) theO;
 
 		return new EqualsBuilder()
 			.append(myIndexString, that.myIndexString)

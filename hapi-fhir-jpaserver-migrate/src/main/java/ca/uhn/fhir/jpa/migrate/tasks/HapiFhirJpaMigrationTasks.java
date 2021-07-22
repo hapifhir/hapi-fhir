@@ -99,6 +99,24 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		version.onTable("HFJ_BLK_EXPORT_JOB")
 			.modifyColumn("20210624.1","REQUEST").nonNullable().withType(ColumnTypeEnum.STRING, 1024);
+
+		version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
+			.modifyColumn("20210713.1","IDX_STRING").nonNullable().withType(ColumnTypeEnum.STRING, 500);
+
+		version.onTable("HFJ_RESOURCE")
+			.addColumn("20210720.1", "SP_CMPTOKS_PRESENT").nullable().type(ColumnTypeEnum.BOOLEAN);
+
+		version.addIdGenerator("20210720.2", "SEQ_IDXCMBTOKNU_ID");
+
+		Builder.BuilderAddTableByColumns cmpToks = version
+			.addTableByColumns("20210720.3", "HFJ_IDX_CMB_TOK_NU", "PID");
+		cmpToks.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+		cmpToks.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
+		cmpToks.addColumn("HASH_COMPLETE").nonNullable().type(ColumnTypeEnum.LONG);
+		cmpToks.addColumn("IDX_STRING").nonNullable().type(ColumnTypeEnum.STRING, 500);
+		cmpToks.addForeignKey("20210720.4", "FK_IDXCMBTOKNU_RES_ID").toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
+		cmpToks.addIndex("20210720.5", "IDX_IDXCMBTOKNU_STR").unique(false).withColumns("IDX_STRING");
+		cmpToks.addIndex("20210720.6", "IDX_IDXCMBTOKNU_RES").unique(false).withColumns("RES_ID");
 	}
 
 	private void init540() {

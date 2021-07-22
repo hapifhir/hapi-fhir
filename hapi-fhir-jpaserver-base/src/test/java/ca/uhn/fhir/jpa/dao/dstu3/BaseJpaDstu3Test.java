@@ -17,7 +17,7 @@ import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestDstu3Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
@@ -150,7 +150,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("myCoverageDaoDstu3")
 	protected IFhirResourceDao<Coverage> myCoverageDao;
 	@Autowired
-	protected IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
+	protected IResourceIndexedComboStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
 	@Autowired
 	@Qualifier("myAllergyIntoleranceDaoDstu3")
 	protected IFhirResourceDao<AllergyIntolerance> myAllergyIntoleranceDao;

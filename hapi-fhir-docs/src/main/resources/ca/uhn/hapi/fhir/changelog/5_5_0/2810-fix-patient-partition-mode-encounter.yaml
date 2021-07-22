@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2810
+title: "An issue in the FHIRPath evaluator prevented Encounters from being stored when using the new
+  PatientIdPartitionInterceptor. This has been corrected."

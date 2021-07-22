@@ -26,7 +26,8 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
@@ -70,7 +71,8 @@ public final class ResourceIndexedSearchParams {
 	final public Collection<ResourceIndexedSearchParamUri> myUriParams = new ArrayList<>();
 	final public Collection<ResourceIndexedSearchParamCoords> myCoordsParams = new ArrayList<>();
 
-	final public Collection<ResourceIndexedCompositeStringUnique> myCompositeStringUniques = new HashSet<>();
+	final public Collection<ResourceIndexedComboStringUnique> myComboStringUniques = new HashSet<>();
+	final public Collection<ResourceIndexedComboTokenNonUnique> myComboTokenNonUnique = new HashSet<>();
 	final public Collection<ResourceLink> myLinks = new HashSet<>();
 	final public Set<String> myPopulatedResourceLinkParameters = new HashSet<>();
 
@@ -106,8 +108,11 @@ public final class ResourceIndexedSearchParams {
 			myLinks.addAll(theEntity.getResourceLinks());
 		}
 
-		if (theEntity.isParamsCompositeStringUniquePresent()) {
-			myCompositeStringUniques.addAll(theEntity.getParamsCompositeStringUnique());
+		if (theEntity.isParamsComboStringUniquePresent()) {
+			myComboStringUniques.addAll(theEntity.getParamsComboStringUnique());
+		}
+		if (theEntity.isParamsComboTokensNonUniquePresent()) {
+			myComboTokenNonUnique.addAll(theEntity.getmyParamsComboTokensNonUnique());
 		}
 	}
 
@@ -125,7 +130,7 @@ public final class ResourceIndexedSearchParams {
 		theEntity.setParamsDatePopulated(myDateParams.isEmpty() == false);
 		theEntity.setParamsUriPopulated(myUriParams.isEmpty() == false);
 		theEntity.setParamsCoordsPopulated(myCoordsParams.isEmpty() == false);
-		theEntity.setParamsCompositeStringUniquePresent(myCompositeStringUniques.isEmpty() == false);
+		theEntity.setParamsComboStringUniquePresent(myComboStringUniques.isEmpty() == false);
 		theEntity.setHasLinks(myLinks.isEmpty() == false);
 	}
 
@@ -305,7 +310,8 @@ public final class ResourceIndexedSearchParams {
 			", dateParams=" + myDateParams +
 			", uriParams=" + myUriParams +
 			", coordsParams=" + myCoordsParams +
-			", compositeStringUniques=" + myCompositeStringUniques +
+			", comboStringUniques=" + myComboStringUniques +
+			", comboTokenNonUniques=" + myComboTokenNonUnique +
 			", links=" + myLinks +
 			'}';
 	}
@@ -431,6 +437,9 @@ public final class ResourceIndexedSearchParams {
 		List<String> values = new ArrayList<>();
 		Set<String> queryStringsToPopulate = new HashSet<>();
 		extractCompositeStringUniquesValueChains(theResourceType, thePartsChoices, values, queryStringsToPopulate);
+
+		values.removeIf(StringUtils::isBlank);
+
 		return queryStringsToPopulate;
 	}
 

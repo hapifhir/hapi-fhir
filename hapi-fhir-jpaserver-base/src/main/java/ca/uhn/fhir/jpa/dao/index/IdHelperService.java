@@ -36,6 +36,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 import org.apache.commons.lang3.StringUtils;
@@ -389,9 +390,9 @@ public class IdHelperService {
 		return retVal;
 	}
 
-	private RequestPartitionId replaceDefault(RequestPartitionId theRequestPartitionId) {
+	RequestPartitionId replaceDefault(RequestPartitionId theRequestPartitionId) {
 		if (myPartitionSettings.getDefaultPartitionId() != null) {
-			if (theRequestPartitionId.hasDefaultPartitionId()) {
+			if (!theRequestPartitionId.isAllPartitions() && theRequestPartitionId.hasDefaultPartitionId()) {
 				List<Integer> partitionIds = theRequestPartitionId
 					.getPartitionIds()
 					.stream()
@@ -575,6 +576,11 @@ public class IdHelperService {
 		} else {
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theResourcePersistentId.getIdAsLong(), Optional.empty());
 		}
+	}
+
+	@VisibleForTesting
+	void setPartitionSettingsForUnitTest(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	public static boolean isValidPid(IIdType theId) {

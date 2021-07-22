@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
@@ -35,6 +36,7 @@ import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -45,6 +47,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERL
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_DUPLICATE_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONSUMER_NAME_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_DUPLICATE_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT;
@@ -53,6 +56,8 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_GROUP_T
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_PATH_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PARENT_GROUP_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_DEFAULT;
@@ -111,8 +116,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	@Mock
 	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
-	private Parameters parameters = new Parameters();
-
+	private Parameters myParameters = new Parameters();
 
 	@BeforeEach
 	public void before() {
@@ -120,15 +124,13 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		myFiles = new ZipCollectionBuilder();
 	}
 
-
-
 	@Nested
 	public class TestsUsingDefaultMakeCurrentVerionParameter {
 
 		@BeforeEach
 		public void before() {
-			parameters.addParameter().setName(MAKE_CURRENT_VERSION).setValue(new StringType("true"));
-			when(mySrd.getResource()).thenReturn(parameters);
+			myParameters.addParameter().setName(MAKE_CURRENT_VERSION).setValue(new StringType("true"));
+			when(mySrd.getResource()).thenReturn(myParameters);
 		}
 
 		@Test
@@ -146,7 +148,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		@Test
 		public void testLoadLoincWithMandatoryFilesOnly() throws Exception {
 			addLoincMandatoryFilesWithoutTop2000ToZip(myFiles);
-			verifyLoadLoinc(false);
+			verifyLoadLoinc(false, false);
 		}
 
 		@Test
@@ -184,18 +186,24 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 		}
 
-
-		private void verifyLoadLoinc() {
-			verifyLoadLoinc(true);
+		@Test
+		public void testLoadLoincWithConsumerNameAndLinguisticVariants() throws Exception {
+			addLoincMandatoryFilesAndConsumerNameAndLinguisticVariants(myFiles);
+			verifyLoadLoinc(false, true);
 		}
 
-		private void verifyLoadLoinc(boolean theIncludeTop2000) {
+
+		private void verifyLoadLoinc() {
+			verifyLoadLoinc(true, false);
+		}
+
+		private void verifyLoadLoinc(boolean theIncludeTop2000, boolean theIncludeConsumerNameAndLinguisticVariants) {
 			// Actually do the load
 			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
 			verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(
-				mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(),
-				myConceptMapCaptor.capture(), eq(true));
+				mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class),
+				myValueSetsCaptor.capture(), myConceptMapCaptor.capture(), eq(true));
 			Map<String, TermConcept> concepts = extractConcepts();
 			Map<String, ValueSet> valueSets = extractValueSets();
 			Map<String, ConceptMap> conceptMaps = extractConceptMaps();
@@ -475,6 +483,22 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			assertEquals(2, vs.getCompose().getInclude().get(0).getConcept().size());
 			assertEquals("17424-3", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
 			assertEquals("13006-2", vs.getCompose().getInclude().get(0).getConcept().get(1).getCode());
+
+			// Consumer Name
+			if (theIncludeConsumerNameAndLinguisticVariants) {
+				 code = concepts.get("61438-8");
+				 assertEquals(28, code.getDesignations().size());
+				 verifyConsumerName(code.getDesignations(), "Consumer Name 61438-8");
+				 verifyLinguisticVariant(code.getDesignations(), "de-AT", "Entlassungsbrief Ärztlich","Ergebnis","Zeitpunkt","{Setting}","Dokument","Dermatologie","DOC.ONTOLOGY","de shortname","de long common name","de related names 2","de linguistic variant display name");
+				 verifyLinguisticVariant(code.getDesignations(), "fr-CA", "Cellules de Purkinje cytoplasmique type 2 , IgG","Titre","Temps ponctuel","Sérum","Quantitatif","Immunofluorescence","Sérologie","","","","");
+				 verifyLinguisticVariant(code.getDesignations(), "zh-CN", "血流速度.收缩期.最大值","速度","时间点","大脑中动脉","定量型","超声.多普勒","产科学检查与测量指标.超声","","", "Cereb 动态 可用数量表示的;定量性;数值型;数量型;连续数值型标尺 大脑（Cerebral） 时刻;随机;随意;瞬间 术语\"cerebral\"指的是主要由中枢半球（大脑皮质和基底神经节）组成的那部分脑结构 流 流量;流速;流体 血;全血 血流量;血液流量 速度(距离/时间);速率;速率(距离/时间)","");
+				 code = concepts.get("17787-3");
+				 assertEquals(19, code.getDesignations().size());
+				 verifyConsumerName(code.getDesignations(), "Consumer Name 17787-3");
+				 verifyLinguisticVariant(code.getDesignations(), "de-AT", "","","","","","","","","","CoV OC43 RNA ql/SM P","Coronavirus OC43 RNA ql. /Sondermaterial PCR");
+				 verifyLinguisticVariant(code.getDesignations(), "fr-CA", "Virus respiratoire syncytial bovin","Présence-Seuil","Temps ponctuel","XXX","Ordinal","Culture spécifique à un microorganisme","Microbiologie","","","","");
+				 verifyLinguisticVariant(code.getDesignations(), "zh-CN", "血流速度.收缩期.最大值","速度","时间点","二尖瓣^胎儿","定量型","超声.多普勒","产科学检查与测量指标.超声","","","僧帽瓣 动态 可用数量表示的;定量性;数值型;数量型;连续数值型标尺 时刻;随机;随意;瞬间 流 流量;流速;流体 胎;超系统 - 胎儿 血;全血 血流量;血液流量 速度(距离/时间);速率;速率(距离/时间)","");
+			}
 		}
 
 		@Test
@@ -661,7 +685,6 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			}
 		}
 
-
 		@Test
 		public void testLoadLoincMultiaxialHierarchySupport() throws Exception {
 			addLoincMandatoryFilesToZip(myFiles);
@@ -670,8 +693,8 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
 			verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(
-				mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(),
-				myConceptMapCaptor.capture(), eq(true));
+				mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class),
+				myValueSetsCaptor.capture(), myConceptMapCaptor.capture(), eq(true));
 			Map<String, TermConcept> concepts = extractConcepts();
 
 			TermConcept code;
@@ -769,6 +792,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 
 
+
 	@Nested
 	public class CurrentVersionParameter {
 		private TermLoaderSvcImpl testedSvc;
@@ -778,12 +802,11 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		@SuppressWarnings("unchecked")
 		@Mock private final List<ITermLoaderSvc.FileDescriptor> mockFileDescriptorList = mock(List.class);
 
-		private final Parameters myParameters = new Parameters();
 
 		@BeforeEach
 		void beforeEachCurrentVersionParameterTest() {
 			testedSvc = spy(mySvc);
-			doReturn(mockFileDescriptors).when(testedSvc).getLoadedFileDescriptors(any());
+			doReturn(mockFileDescriptors).when(testedSvc).getLoadedFileDescriptors(mockFileDescriptorList);
 			doReturn(testProps).when(testedSvc).getProperties(any(), eq(LOINC_UPLOAD_PROPERTIES_FILE.getCode()));
 		}
 
@@ -865,11 +888,26 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 
 
+
+
+
 	public static void addLoincMandatoryFilesAndSinglePartLinkToZip(ZipCollectionBuilder theFiles) throws IOException {
 		addBaseLoincMandatoryFilesToZip(theFiles, true);
 		theFiles.addFileZip("/loinc/", "loincupload_singlepartlink.properties");
 		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_DEFAULT.getCode());
 	}
+
+	public static void addLoincMandatoryFilesAndConsumerNameAndLinguisticVariants(ZipCollectionBuilder theFiles) throws IOException {
+		addBaseLoincMandatoryFilesToZip(theFiles, true);
+		theFiles.addFileZip("/loinc/", "loincupload_singlepartlink.properties");
+		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_CONSUMER_NAME_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_LINGUISTIC_VARIANTS_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_LINGUISTIC_VARIANTS_PATH_DEFAULT.getCode() + "zhCN5LinguisticVariant.csv");
+		theFiles.addFileZip("/loinc/", LOINC_LINGUISTIC_VARIANTS_PATH_DEFAULT.getCode() + "deAT24LinguisticVariant.csv");
+		theFiles.addFileZip("/loinc/", LOINC_LINGUISTIC_VARIANTS_PATH_DEFAULT.getCode() + "frCA8LinguisticVariant.csv");
+	}
+
 
 	public static void addLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
 		addBaseLoincMandatoryFilesToZip(theFiles, true);
@@ -916,6 +954,88 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			theFiles.addFileZip("/loinc/", LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode());
 			theFiles.addFileZip("/loinc/", LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode());
 		}
+
 	}
 
+	private static void verifyConsumerName(Collection<TermConceptDesignation> designationList, String theConsumerName) {
+	    
+	    TermConceptDesignation consumerNameDesignation = null;
+	    for (TermConceptDesignation designation : designationList) {
+	    	if ("ConsumerName".equals(designation.getUseDisplay() )) {
+	    		consumerNameDesignation = designation;
+	    	}
+	    }
+	    assertEquals(theConsumerName, consumerNameDesignation.getValue());
+	}
+
+	private static void verifyLinguisticVariant(Collection<TermConceptDesignation> designationList, String theLanguage,
+			String theComponent, String theProperty, String theTimeAspct, String theSystem, String theScaleTyp,
+			String methodType, String theClass, String theShortName, String theLongCommonName, String theRelatedName2,
+			String theLinguisticVariantDisplayName) {
+
+		TermConceptDesignation componentDes = null;
+		TermConceptDesignation propertyDes = null;
+		TermConceptDesignation timeAspctDes = null;
+		TermConceptDesignation systemDes = null;
+		TermConceptDesignation scaleTypDes = null;
+
+		TermConceptDesignation methodTypDes = null;
+		TermConceptDesignation classDes = null;
+		TermConceptDesignation shortNameDes = null;
+		TermConceptDesignation longCommonNameDes = null;
+		TermConceptDesignation relatedNames2Des = null;
+		
+		TermConceptDesignation linguisticVariantDisplayNameDes = null;
+		
+		for (TermConceptDesignation designation : designationList) {
+			if (theLanguage.equals(designation.getLanguage())) {
+				
+				if ("COMPONENT".equals(designation.getUseDisplay())) 
+					componentDes = designation;
+				if ("PROPERTY".equals(designation.getUseDisplay())) 
+					propertyDes = designation;
+				if ("TIME_ASPCT".equals(designation.getUseDisplay())) 
+					timeAspctDes = designation;
+				if ("SYSTEM".equals(designation.getUseDisplay())) 
+					systemDes = designation;
+				if ("SCALE_TYP".equals(designation.getUseDisplay())) 
+					scaleTypDes = designation;
+				
+				if ("METHOD_TYP".equals(designation.getUseDisplay())) 
+					methodTypDes = designation;
+				if ("CLASS".equals(designation.getUseDisplay())) 
+					classDes = designation;
+				if ("SHORTNAME".equals(designation.getUseDisplay())) 
+					shortNameDes = designation;
+				if ("LONG_COMMON_NAME".equals(designation.getUseDisplay())) 
+					longCommonNameDes = designation;
+				if ("RELATEDNAMES2".equals(designation.getUseDisplay())) 
+					relatedNames2Des = designation;
+				
+				if ("LinguisticVariantDisplayName".equals(designation.getUseDisplay())) 
+					linguisticVariantDisplayNameDes = designation;
+			}
+		}
+		verifyDesignation(componentDes, ITermLoaderSvc.LOINC_URI, "COMPONENT", theComponent);
+		verifyDesignation(propertyDes, ITermLoaderSvc.LOINC_URI, "PROPERTY", theProperty);
+		verifyDesignation(timeAspctDes, ITermLoaderSvc.LOINC_URI, "TIME_ASPCT", theTimeAspct);
+		verifyDesignation(systemDes, ITermLoaderSvc.LOINC_URI, "SYSTEM", theSystem);
+		verifyDesignation(scaleTypDes, ITermLoaderSvc.LOINC_URI, "SCALE_TYP", theScaleTyp);
+		
+		verifyDesignation(methodTypDes, ITermLoaderSvc.LOINC_URI, "METHOD_TYP", methodType);
+		verifyDesignation(classDes, ITermLoaderSvc.LOINC_URI, "CLASS", theClass);
+		verifyDesignation(shortNameDes, ITermLoaderSvc.LOINC_URI, "SHORTNAME", theShortName);
+		verifyDesignation(longCommonNameDes, ITermLoaderSvc.LOINC_URI, "LONG_COMMON_NAME", theLongCommonName);
+		verifyDesignation(relatedNames2Des, ITermLoaderSvc.LOINC_URI, "RELATEDNAMES2", theRelatedName2);
+		
+		verifyDesignation(linguisticVariantDisplayNameDes, ITermLoaderSvc.LOINC_URI, "LinguisticVariantDisplayName", theLinguisticVariantDisplayName);
+	}
+	
+	private static void verifyDesignation(TermConceptDesignation theDesignation, String theUseSystem, String theUseCode, String theValue) {
+		if (theDesignation == null)
+			return;
+		assertEquals(theUseSystem, theDesignation.getUseSystem());
+		assertEquals(theUseCode, theDesignation.getUseCode());
+		assertEquals(theValue, theDesignation.getValue());
+	}
 }

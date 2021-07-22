@@ -188,6 +188,39 @@ public class BulkDataExportProviderTest {
 		assertThat(options.getFilters(), containsInAnyOrder("Patient?identifier=foo"));
 	}
 
+
+	@Test
+	public void testSuccessfulInitiateBulkRequest_Get_MultipleTypeFilters() throws IOException {
+
+		IBulkDataExportSvc.JobInfo jobInfo = new IBulkDataExportSvc.JobInfo()
+			.setJobId(A_JOB_ID);
+		when(myBulkDataExportSvc.submitJob(any(),any(), nullable(RequestDetails.class))).thenReturn(jobInfo);
+
+		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT
+			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
+			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Patient,EpisodeOfCare")
+			+ "&" + JpaConstants.PARAM_EXPORT_TYPE_FILTER + "=" + UrlUtil.escapeUrlParam("Patient?_id=P999999990")
+			+ "&" + JpaConstants.PARAM_EXPORT_TYPE_FILTER + "=" + UrlUtil.escapeUrlParam("EpisodeOfCare?patient=P999999990");
+
+		HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		ourLog.info("Request: {}", url);
+		try (CloseableHttpResponse response = myClient.execute(get)) {
+			ourLog.info("Response: {}", response.toString());
+
+			assertEquals(202, response.getStatusLine().getStatusCode());
+			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
+			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+		}
+
+		verify(myBulkDataExportSvc, times(1)).submitJob(myBulkDataExportOptionsCaptor.capture(), any(), nullable(RequestDetails.class));
+		BulkDataExportOptions options = myBulkDataExportOptionsCaptor.getValue();
+		assertEquals(Constants.CT_FHIR_NDJSON, options.getOutputFormat());
+		assertThat(options.getResourceTypes(), containsInAnyOrder("Patient", "EpisodeOfCare"));
+		assertThat(options.getSince(), nullValue());
+		assertThat(options.getFilters(), containsInAnyOrder("Patient?_id=P999999990", "EpisodeOfCare?patient=P999999990"));
+	}
+
 	@Test
 	public void testPollForStatus_BUILDING() throws IOException {
 
