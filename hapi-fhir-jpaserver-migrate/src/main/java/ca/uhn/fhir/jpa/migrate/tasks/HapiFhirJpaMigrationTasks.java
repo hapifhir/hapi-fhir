@@ -85,9 +85,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 //		forcedId.dropIndex("20210516.1", "IDX_FORCEDID_TYPE_FID").onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012).runEvenDuringSchemaInitialization();
 //		forcedId.addIndex("20210516.2", "IDX_FORCEDID_TYPE_FID").unique(true).includeColumns("RESOURCE_PID").withColumns("RESOURCE_TYPE", "FORCED_ID").onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012).runEvenDuringSchemaInitialization();
 
-		// Add bulk import file description
-		version.onTable("HFJ_BLK_IMPORT_JOBFILE")
-			.addColumn("20210528.1", "FILE_DESCRIPTION").nullable().type(ColumnTypeEnum.STRING, 500);
+//		// Add bulk import file description
+//		version.onTable("HFJ_BLK_IMPORT_JOBFILE")
+//			.addColumn("20210528.1", "FILE_DESCRIPTION").nullable().type(ColumnTypeEnum.STRING, 500);
 
 		// Bump ConceptMap display lengths
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
