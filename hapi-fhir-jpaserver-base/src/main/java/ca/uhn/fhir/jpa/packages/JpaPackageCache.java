@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.packages;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
@@ -331,7 +332,11 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			SystemRequestDetails requestDetails = new SystemRequestDetails();
-			requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
+			if (myPartitionSettings.isUnnamedPartitionMode() && myPartitionSettings.getDefaultPartitionId() != null) {
+				requestDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId()));
+			} else {
+				requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
+			}
 			return (ResourceTable) getBinaryDao().create(theResourceBinary, requestDetails).getEntity();
  		} else {
 			return (ResourceTable) getBinaryDao().create(theResourceBinary).getEntity();

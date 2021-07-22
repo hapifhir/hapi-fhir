@@ -359,7 +359,6 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	private IBundleProvider searchResource(IFhirResourceDao theDao, SearchParameterMap theMap) {
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			SystemRequestDetails requestDetails = new SystemRequestDetails();
-//			requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
 			return theDao.search(theMap, requestDetails);
 		} else {
 			return theDao.search(theMap);
@@ -369,7 +368,6 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	private void createResource(IFhirResourceDao theDao, IBaseResource theResource) {
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			SystemRequestDetails requestDetails = new SystemRequestDetails();
-			requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
 			theDao.create(theResource, requestDetails);
 		} else {
 			theDao.create(theResource);
@@ -379,7 +377,6 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	private DaoMethodOutcome updateResource(IFhirResourceDao theDao, IBaseResource theResource) {
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			SystemRequestDetails requestDetails = new SystemRequestDetails();
-			requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
 			return theDao.update(theResource, requestDetails);
 		} else {
 			return theDao.update(theResource);
