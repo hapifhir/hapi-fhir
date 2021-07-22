@@ -45,6 +45,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 	public void disablePartitioning() {
 		myPartitionSettings.setPartitioningEnabled(false);
 		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
+		myPartitionSettings.setUnnamedPartitionMode(false);
 		myInterceptorService.unregisterInterceptor(myRequestTenantPartitionInterceptor);
 	}
 
@@ -101,6 +102,38 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		PackageDeleteOutcomeJson deleteOutcomeJson = myPackageCacheManager.uninstallPackage("basisprofil.de", "0.2.40");
 		List<String> deleteOutcomeMsgs = deleteOutcomeJson.getMessage();
 		assertEquals("Deleting package basisprofil.de#0.2.40", deleteOutcomeMsgs.get(0));
+	}
+
+	@Test
+	public void testSaveAndDeletePackageUnnamedPartitionsEnabled() throws IOException {
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setDefaultPartitionId(0);
+		myPartitionSettings.setUnnamedPartitionMode(true);
+		myInterceptorService.registerInterceptor(new PatientIdPartitionInterceptor());
+		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
+
+		try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz")) {
+			myPackageCacheManager.addPackageToCache("hl7.fhir.uv.shorthand", "0.12.0", stream, "hl7.fhir.uv.shorthand");
+		}
+
+		NpmPackage pkg;
+
+		pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", null);
+		assertEquals("0.12.0", pkg.version());
+
+		pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "0.12.0");
+		assertEquals("0.12.0", pkg.version());
+
+		try {
+			myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "99");
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals("Unable to locate package hl7.fhir.uv.shorthand#99", e.getMessage());
+		}
+
+		PackageDeleteOutcomeJson deleteOutcomeJson = myPackageCacheManager.uninstallPackage("hl7.fhir.uv.shorthand", "0.12.0");
+		List<String> deleteOutcomeMsgs = deleteOutcomeJson.getMessage();
+		assertEquals("Deleting package hl7.fhir.uv.shorthand#0.12.0", deleteOutcomeMsgs.get(0));
 	}
 
 	@Test
