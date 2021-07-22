@@ -149,6 +149,7 @@ import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationDefinition;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
@@ -375,6 +376,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	@Qualifier("myOrganizationDaoR4")
 	protected IFhirResourceDao<Organization> myOrganizationDao;
+	@Autowired
+	@Qualifier("myOrganizationAffiliationDaoR4")
+	protected IFhirResourceDao<OrganizationAffiliation> myOrganizationAffiliationDao;
 	@Autowired
 	protected DatabaseBackedPagingProvider myPagingProvider;
 	@Autowired
