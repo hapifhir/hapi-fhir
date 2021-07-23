@@ -1,3 +1,3 @@
 ---
 type: add
-title: "Add support to run docker tests on Mac arm64 M1 machines"
+title: "Upgrade net.java.dev.jna to run docker tests on Mac arm64 M1 machines"
