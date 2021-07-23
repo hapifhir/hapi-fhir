@@ -41,6 +41,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -332,7 +333,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 
 
 	@Test
-	public void testLoadTransactionWithNoDetails() throws IOException {
+	public void testTransaction_NoRequestDetails() throws IOException {
 		Bundle input = loadResourceFromClasspath(Bundle.class, "/r4/load_bundle.json");
 
 		// Maybe in the future we'll make request details mandatory and if that
@@ -354,6 +355,111 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		assertThat(resourcesByType.get("Coverage"), contains(4267));
 		assertThat(resourcesByType.get("Organization"), contains(-1, -1));
 		assertThat(resourcesByType.get("Practitioner"), contains(-1, -1, -1));
+	}
+
+	@Test
+	public void testTransaction_SystemRequestDetails() throws IOException {
+		Bundle input = loadResourceFromClasspath(Bundle.class, "/r4/load_bundle.json");
+		myCaptureQueriesListener.clear();
+		Bundle outcome = mySystemDao.transaction(new SystemRequestDetails(), input);
+		myCaptureQueriesListener.logSelectQueries();
+		List<String> selectQueryStrings = myCaptureQueriesListener
+			.getSelectQueries()
+			.stream()
+			.map(t -> t.getSql(false, false).toUpperCase(Locale.US))
+			.filter(t -> !t.contains("FROM HFJ_TAG_DEF"))
+			.collect(Collectors.toList());
+		for (String next : selectQueryStrings) {
+			assertThat(next, either(containsString("PARTITION_ID =")).or(containsString("PARTITION_ID IN")));
+		}
+
+		ListMultimap<String, String> resourceIds = outcome
+			.getEntry()
+			.stream()
+			.collect(MultimapCollector.toMultimap(t -> new IdType(t.getResponse().getLocation()).toUnqualifiedVersionless().getResourceType(), t -> new IdType(t.getResponse().getLocation()).toUnqualifiedVersionless().getValue()));
+
+		String patientId = resourceIds.get("Patient").get(0);
+
+		Multimap<String, Integer> resourcesByType = runInTransaction(() -> {
+			logAllResources();
+			return myResourceTableDao.findAll().stream().collect(MultimapCollector.toMultimap(t->t.getResourceType(), t->t.getPartitionId().getPartitionId()));
+		});
+
+		assertThat(resourcesByType.get("Patient"), contains(4267));
+		assertThat(resourcesByType.get("ExplanationOfBenefit"), contains(4267));
+		assertThat(resourcesByType.get("Coverage"), contains(4267));
+		assertThat(resourcesByType.get("Organization"), contains(-1, -1));
+		assertThat(resourcesByType.get("Practitioner"), contains(-1, -1, -1));
+
+		// Try Searching
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(ExplanationOfBenefit.SP_PATIENT, new ReferenceParam(patientId));
+		map.addInclude(new Include("*"));
+		myCaptureQueriesListener.clear();
+		IBundleProvider result = myExplanationOfBenefitDao.search(map);
+		List<String> resultIds = toUnqualifiedVersionlessIdValues(result);
+		assertThat(resultIds.toString(), resultIds, containsInAnyOrder(
+			resourceIds.get("Coverage").get(0),
+			resourceIds.get("Organization").get(0),
+			resourceIds.get("ExplanationOfBenefit").get(0),
+			resourceIds.get("Patient").get(0),
+			resourceIds.get("Practitioner").get(0),
+			resourceIds.get("Practitioner").get(1),
+			resourceIds.get("Practitioner").get(2)
+		));
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
+		assertThat(selectQueries.get(0).getSql(true, false).toUpperCase(Locale.US), matchesPattern("SELECT.*FROM HFJ_RES_LINK.*WHERE.*PARTITION_ID = '4267'.*"));
+
+	}
+
+
+	@Test
+	public void testSearch() throws IOException {
+		Bundle input = loadResourceFromClasspath(Bundle.class, "/r4/load_bundle.json");
+		Bundle outcome = mySystemDao.transaction(new SystemRequestDetails(), input);
+
+		ListMultimap<String, String> resourceIds = outcome
+			.getEntry()
+			.stream()
+			.collect(MultimapCollector.toMultimap(t -> new IdType(t.getResponse().getLocation()).toUnqualifiedVersionless().getResourceType(), t -> new IdType(t.getResponse().getLocation()).toUnqualifiedVersionless().getValue()));
+
+		String patientId = resourceIds.get("Patient").get(0);
+
+		Multimap<String, Integer> resourcesByType = runInTransaction(() -> {
+			logAllResources();
+			return myResourceTableDao.findAll().stream().collect(MultimapCollector.toMultimap(t->t.getResourceType(), t->t.getPartitionId().getPartitionId()));
+		});
+
+		assertThat(resourcesByType.get("Patient"), contains(4267));
+		assertThat(resourcesByType.get("ExplanationOfBenefit"), contains(4267));
+		assertThat(resourcesByType.get("Coverage"), contains(4267));
+		assertThat(resourcesByType.get("Organization"), contains(-1, -1));
+		assertThat(resourcesByType.get("Practitioner"), contains(-1, -1, -1));
+
+		// Try Searching
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(ExplanationOfBenefit.SP_PATIENT, new ReferenceParam(patientId));
+		map.addInclude(new Include("*"));
+		myCaptureQueriesListener.clear();
+		IBundleProvider result = myExplanationOfBenefitDao.search(map);
+		List<String> resultIds = toUnqualifiedVersionlessIdValues(result);
+		assertThat(resultIds.toString(), resultIds, containsInAnyOrder(
+			resourceIds.get("Coverage").get(0),
+			resourceIds.get("Organization").get(0),
+			resourceIds.get("ExplanationOfBenefit").get(0),
+			resourceIds.get("Patient").get(0),
+			resourceIds.get("Practitioner").get(0),
+			resourceIds.get("Practitioner").get(1),
+			resourceIds.get("Practitioner").get(2)
+		));
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
+		assertThat(selectQueries.get(0).getSql(true, false).toUpperCase(Locale.US), matchesPattern("SELECT.*FROM HFJ_RES_LINK.*WHERE.*PARTITION_ID = '4267'.*"));
 
 	}
 
