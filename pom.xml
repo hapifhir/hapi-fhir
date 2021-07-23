@@ -822,6 +822,7 @@
 		<spring_retry_version>1.2.2.RELEASE</spring_retry_version>
 
 		<stax2_api_version>3.1.4</stax2_api_version>
+		<testcontainers_version>1.15.3</testcontainers_version>
 		<thymeleaf-version>3.0.12.RELEASE</thymeleaf-version>
 		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 
@@ -1593,7 +1594,20 @@
 						<groupId>org.yaml</groupId>
 						<artifactId>*</artifactId>
 					</exclusion>
+					<exclusion>
+						<!-- Elastic have repackaged net.java.dev.jna, but we need a newer version to support Mac ARM. Managed below. -->
+						<groupId>org.elasticsearch</groupId>
+						<artifactId>jna</artifactId>
+					</exclusion>
 				</exclusions>
+			</dependency>
+			<!--  Upgrade testcontainers and elasticsearch dependency for Mac M1 ARM64 support.
+			  We can delete this once testcontainers and elasticsearch upgrade. -->
+			<dependency>
+				<groupId>net.java.dev.jna</groupId>
+				<artifactId>jna</artifactId>
+				<version>5.8.0</version>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
@@ -1876,19 +1890,19 @@
 			<dependency>
 				<groupId>org.testcontainers</groupId>
 				<artifactId>testcontainers</artifactId>
-				<version>1.15.3</version>
+				<version>${testcontainers_version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.testcontainers</groupId>
 				<artifactId>elasticsearch</artifactId>
-				<version>1.15.3</version>
+				<version>${testcontainers_version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.testcontainers</groupId>
 				<artifactId>junit-jupiter</artifactId>
-				<version>1.15.3</version>
+				<version>${testcontainers_version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
