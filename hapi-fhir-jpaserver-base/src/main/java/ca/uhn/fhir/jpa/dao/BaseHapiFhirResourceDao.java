@@ -306,7 +306,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				serverAssignedId = true;
 			} else {
 				validateResourceIdCreation(theResource, theRequest);
-				createForcedIdIfNeeded(entity, theResource.getIdElement(), false);
+				boolean createForPureNumericIds = getConfig().getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC;
+				createForcedIdIfNeeded(entity, theResource.getIdElement(), createForPureNumericIds);
 				serverAssignedId = false;
 			}
 		} else {
