@@ -7,14 +7,21 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
+import ca.uhn.fhir.jpa.util.MultimapCollector;
+import ca.uhn.fhir.jpa.util.SqlQuery;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
@@ -25,9 +32,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -229,11 +243,9 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		createObservationB();
 
 		myCaptureQueriesListener.clear();
-		try {
-			myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd);
-		} catch (MethodNotAllowedException e) {
-			assertEquals("This server is not able to handle this request of type SEARCH_TYPE", e.getMessage());
-		}
+		myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd);
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE ((t0.RES_TYPE = 'Observation') AND (t0.RES_DELETED_AT IS NULL)) limit '10'", myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false));
 	}
 
 	@Test
@@ -318,14 +330,31 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false), containsString("PARTITION_ID="));
 	}
 
-	@Test
-	public void testLoadTransactionWithSystemRequestDetails() throws IOException {
-		Bundle input = loadResourceFromClasspath(Bundle.class, "/r4/load_bundle.json");
-		mySystemDao.transaction(new SystemRequestDetails(), input);
 
-		runInTransaction(()->{
+	@Test
+	public void testLoadTransactionWithNoDetails() throws IOException {
+		Bundle input = loadResourceFromClasspath(Bundle.class, "/r4/load_bundle.json");
+
+		// Maybe in the future we'll make request details mandatory and if that
+		// causes this to fail that's ok
+		Bundle outcome = mySystemDao.transaction(null, input);
+
+		ListMultimap<String, String> resourceIds = outcome
+			.getEntry()
+			.stream()
+			.collect(MultimapCollector.toMultimap(t -> new IdType(t.getResponse().getLocation()).toUnqualifiedVersionless().getResourceType(), t -> new IdType(t.getResponse().getLocation()).toUnqualifiedVersionless().getValue()));
+
+		Multimap<String, Integer> resourcesByType = runInTransaction(() -> {
 			logAllResources();
+			return myResourceTableDao.findAll().stream().collect(MultimapCollector.toMultimap(t->t.getResourceType(), t->t.getPartitionId().getPartitionId()));
 		});
+
+		assertThat(resourcesByType.get("Patient"), contains(4267));
+		assertThat(resourcesByType.get("ExplanationOfBenefit"), contains(4267));
+		assertThat(resourcesByType.get("Coverage"), contains(4267));
+		assertThat(resourcesByType.get("Organization"), contains(-1, -1));
+		assertThat(resourcesByType.get("Practitioner"), contains(-1, -1, -1));
+
 	}
 
 

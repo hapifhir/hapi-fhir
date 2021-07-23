@@ -212,15 +212,18 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * Search for IDs for processing a match URLs, etc.
 	 */
-	Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest);
+	default Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest) {
+		return searchForIds(theParams, theRequest, null);
+	}
 
 	/**
 	 * Search for IDs for processing a match URLs, etc.
 	 *
 	 * @param theConditionalCreateTarget If we're searching for IDs in order to satisfy a conditional
 	 *                                   create/update, this is the resource being searched for
+	 * @since 5.5.0
 	 */
-	default Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest, @Nullable IBaseResource theConditionalCreateTarget) {
+	default Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest, @Nullable IBaseResource theConditionalOperationTargetOrNull) {
 		return searchForIds(theParams, theRequest);
 	}
 
