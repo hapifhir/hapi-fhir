@@ -47,6 +47,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Collection;
 import java.util.Date;
@@ -212,6 +213,17 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * Search for IDs for processing a match URLs, etc.
 	 */
 	Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest);
+
+	/**
+	 * Search for IDs for processing a match URLs, etc.
+	 *
+	 * @param theConditionalCreateTarget If we're searching for IDs in order to satisfy a conditional
+	 *                                   create/update, this is the resource being searched for
+	 */
+	default Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest, @Nullable IBaseResource theConditionalCreateTarget) {
+		return searchForIds(theParams, theRequest);
+	}
+
 
 	/**
 	 * Takes a map of incoming raw search parameters and translates/parses them into

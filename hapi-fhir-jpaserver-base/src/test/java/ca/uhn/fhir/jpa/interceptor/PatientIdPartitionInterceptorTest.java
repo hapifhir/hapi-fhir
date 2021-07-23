@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4SystemTest;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -11,6 +12,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
@@ -21,6 +23,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -313,6 +317,17 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("PARTITION_ID in "));
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false), containsString("PARTITION_ID="));
 	}
+
+	@Test
+	public void testLoadTransactionWithSystemRequestDetails() throws IOException {
+		Bundle input = loadResourceFromClasspath(Bundle.class, "/r4/load_bundle.json");
+		mySystemDao.transaction(new SystemRequestDetails(), input);
+
+		runInTransaction(()->{
+			logAllResources();
+		});
+	}
+
 
 	@Test
 	public void testHistory_Type() {
