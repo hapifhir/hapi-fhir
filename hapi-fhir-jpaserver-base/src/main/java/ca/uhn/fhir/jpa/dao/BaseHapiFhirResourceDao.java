@@ -47,6 +47,7 @@ import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.patch.FhirPatch;
 import ca.uhn.fhir.jpa.patch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.patch.XmlPatchUtils;
@@ -126,7 +127,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
@@ -228,7 +228,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		if (isNotBlank(theResource.getIdElement().getIdPart())) {
 			if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
-				String message = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedId", theResource.getIdElement().getIdPart());
+				String message = getMessageSanitized("failedToCreateWithClientAssignedId", theResource.getIdElement().getIdPart());
 				throw new InvalidRequestException(message, createErrorOperationOutcome(message, "processing"));
 			} else {
 				// As of DSTU3, ID and version in the body should be ignored for a create/update
@@ -305,21 +305,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				createForcedIdIfNeeded(entity, theResource.getIdElement(), true);
 				serverAssignedId = true;
 			} else {
-				switch (getConfig().getResourceClientIdStrategy()) {
-					case NOT_ALLOWED:
-						throw new ResourceNotFoundException(
-							getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedIdNotAllowed", theResource.getIdElement().getIdPart()));
-					case ALPHANUMERIC:
-						if (theResource.getIdElement().isIdPartValidLong()) {
-							throw new InvalidRequestException(
-								getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getIdElement().getIdPart()));
-						}
-						createForcedIdIfNeeded(entity, theResource.getIdElement(), false);
-						break;
-					case ANY:
-						createForcedIdIfNeeded(entity, theResource.getIdElement(), true);
-						break;
-				}
+				validateResourceIdCreation(theResource, theRequest);
+				boolean createForPureNumericIds = getConfig().getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC;
+				createForcedIdIfNeeded(entity, theResource.getIdElement(), createForPureNumericIds);
 				serverAssignedId = false;
 			}
 		} else {
@@ -405,6 +393,32 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		ourLog.debug(msg);
 		return outcome;
+	}
+
+	void validateResourceIdCreation(T theResource, RequestDetails theRequest) {
+		DaoConfig.ClientIdStrategyEnum strategy = getConfig().getResourceClientIdStrategy();
+
+		if (strategy == DaoConfig.ClientIdStrategyEnum.NOT_ALLOWED) {
+			if (!isSystemRequest(theRequest)) {
+				throw new ResourceNotFoundException(
+					getMessageSanitized("failedToCreateWithClientAssignedIdNotAllowed", theResource.getIdElement().getIdPart()));
+			}
+		}
+
+		if (strategy == DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC) {
+			if (theResource.getIdElement().isIdPartValidLong()) {
+				throw new InvalidRequestException(
+					getMessageSanitized("failedToCreateWithClientAssignedNumericId", theResource.getIdElement().getIdPart()));
+			}
+		}
+	}
+
+	protected String getMessageSanitized(String theKey, String theIdPart) {
+		return getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, theKey, theIdPart);
+	}
+
+	private boolean isSystemRequest(RequestDetails theRequest) {
+		return theRequest instanceof SystemRequestDetails;
 	}
 
 	private IInstanceValidatorModule getInstanceValidator() {
@@ -632,7 +646,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		IBaseOperationOutcome oo;
 		if (deletedResources.isEmpty()) {
 			oo = OperationOutcomeUtil.newInstance(getContext());
-			String message = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "unableToDeleteNotFound", theUrl);
+			String message = getMessageSanitized("unableToDeleteNotFound", theUrl);
 			String severity = "warning";
 			String code = "not-found";
 			OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
