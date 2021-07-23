@@ -109,7 +109,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			// Handle system requests
 			//TODO GGG eventually, theRequest will not be allowed to be null here, and we will pass through SystemRequestDetails instead.
-			if (theRequest == null && nonPartitionableResource) {
+			if ((theRequest == null || theRequest instanceof SystemRequestDetails) && nonPartitionableResource) {
 				return RequestPartitionId.defaultPartition();
 			}
 
@@ -186,7 +186,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 			boolean nonPartitionableResource = myNonPartitionableResourceNames.contains(theResourceType);
 
 			//TODO GGG eventually, theRequest will not be allowed to be null here, and we will pass through SystemRequestDetails instead.
-			if (theRequest == null && nonPartitionableResource) {
+			if ((theRequest == null || theRequest instanceof SystemRequestDetails) && nonPartitionableResource) {
 				return RequestPartitionId.defaultPartition();
 			}
 
