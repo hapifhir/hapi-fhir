@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.delete.job;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterValidator;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -22,19 +23,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class DeleteExpungeJobParameterValidatorTest {
+class MultiUrlJobParameterValidatorTest {
 	static final FhirContext ourFhirContext = FhirContext.forR4Cached();
+	private static final String TEST_OP_NAME = "TEST_OPERATION_NAME";
 
 	@Mock
 	MatchUrlService myMatchUrlService;
 	@Mock
 	DaoRegistry myDaoRegistry;
 
-	DeleteExpungeJobParameterValidator mySvc;
+	MultiUrlJobParameterValidator mySvc;
 
 	@BeforeEach
 	public void initMocks() {
-		mySvc = new DeleteExpungeJobParameterValidator(myMatchUrlService, myDaoRegistry);
+		mySvc = new MultiUrlJobParameterValidator(TEST_OP_NAME, myMatchUrlService, myDaoRegistry);
 	}
 
 	@Test

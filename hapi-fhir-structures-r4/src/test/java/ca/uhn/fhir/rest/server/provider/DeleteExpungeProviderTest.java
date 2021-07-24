@@ -72,7 +72,7 @@ public class DeleteExpungeProviderTest extends BaseR4ServerTest {
 		public List<String> calledWithUrls;
 
 		@Override
-		public JobExecution submitJob(Integer theBatchSize, RequestDetails theRequestDetails, List<String> theUrlsToExpungeDelete) {
+		public JobExecution submitJob(Integer theBatchSize, List<String> theUrlsToExpungeDelete, RequestDetails theRequestDetails) {
 			calledWithBatchSize = theBatchSize;
 			calledWithRequestDetails = theRequestDetails;
 			calledWithUrls = theUrlsToExpungeDelete;

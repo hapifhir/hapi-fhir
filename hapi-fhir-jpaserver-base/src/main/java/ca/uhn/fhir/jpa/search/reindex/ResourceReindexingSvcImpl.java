@@ -36,12 +36,12 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
@@ -83,6 +83,11 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+/**
+ * @deprecated replaced with
+ * FIXME KHS
+ */
+@Deprecated
 public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 
 	private static final Date BEGINNING_OF_TIME = new Date(0);
@@ -96,7 +101,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 	private TransactionTemplate myTxTemplate;
-	private ThreadFactory myReindexingThreadFactory = new BasicThreadFactory.Builder().namingPattern("ResourceReindex-%d").build();
+	private final ThreadFactory myReindexingThreadFactory = new BasicThreadFactory.Builder().namingPattern("ResourceReindex-%d").build();
 	private ThreadPoolExecutor myTaskExecutor;
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
@@ -173,6 +178,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			rejectHandler
 		);
 	}
+
 	/**
 	 * A handler for rejected tasks that will have the caller block until space is available.
 	 * This was stolen from old hibernate search(5.X.X), as it has been removed in HS6. We can probably come up with a better solution though.
@@ -189,8 +195,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
 			try {
 				e.getQueue().put( r );
-			}
-			catch (InterruptedException e1) {
+			} catch (InterruptedException e1) {
 				ourLog.error("Interrupted Execption for task: {}",r, e1 );
 				Thread.currentThread().interrupt();
 			}
@@ -289,15 +294,15 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		ourLog.info("Cancelling and purging all resource reindexing jobs");
 		myIndexingLock.lock();
 		try {
-		myTxTemplate.execute(t -> {
-			myReindexJobDao.markAllOfTypeAsDeleted();
-			return null;
-		});
+			myTxTemplate.execute(t -> {
+				myReindexJobDao.markAllOfTypeAsDeleted();
+				return null;
+			});
 
-		myTaskExecutor.shutdown();
-		initExecutor();
+			myTaskExecutor.shutdown();
+			initExecutor();
 
-		expungeJobsMarkedAsDeleted();
+			expungeJobsMarkedAsDeleted();
 		} finally {
 			myIndexingLock.unlock();
 		}
@@ -387,7 +392,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		});
 		Validate.notNull(range);
 		int count = range.getNumberOfElements();
-		ourLog.info("Loaded {} resources for reindexing in {}", count, pageSw.toString());
+		ourLog.info("Loaded {} resources for reindexing in {}", count, pageSw);
 
 		// If we didn't find any results at all, mark as deleted
 		if (count == 0) {
@@ -446,7 +451,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			return null;
 		});
 
-		ourLog.info("Completed pass of reindex JOB[{}] - Indexed {} resources in {} ({} / sec) - Have indexed until: {}", theJob.getId(), count, sw.toString(), sw.formatThroughput(count, TimeUnit.SECONDS), new InstantType(newLow));
+		ourLog.info("Completed pass of reindex JOB[{}] - Indexed {} resources in {} ({} / sec) - Have indexed until: {}", theJob.getId(), count, sw, sw.formatThroughput(count, TimeUnit.SECONDS), new InstantType(newLow));
 		return counter.get();
 	}
 
@@ -465,7 +470,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		txTemplate.execute((TransactionCallback<Void>) theStatus -> {
-			ourLog.info("Marking resource with PID {} as indexing_failed", new Object[]{theId});
+			ourLog.info("Marking resource with PID {} as indexing_failed", theId);
 
 			myResourceTableDao.updateIndexStatus(theId, BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED);
 
@@ -492,7 +497,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamQuantityNormalized t WHERE t.myResourcePid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
-			
+
 			q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamString t WHERE t.myResourcePid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
@@ -578,7 +583,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 						return null;
 
 					} catch (Exception e) {
-						ourLog.error("Failed to index resource {}: {}", resourceTable.getIdDt(), e.toString(), e);
+						ourLog.error("Failed to index resource {}: {}", resourceTable.getIdDt(), e, e);
 						t.setRollbackOnly();
 						return e;
 					}

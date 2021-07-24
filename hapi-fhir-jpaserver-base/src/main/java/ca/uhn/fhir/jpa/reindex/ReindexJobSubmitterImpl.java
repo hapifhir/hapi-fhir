@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.delete;
+package ca.uhn.fhir.jpa.reindex;
 
 /*-
  * #%L
@@ -21,9 +21,7 @@ package ca.uhn.fhir.jpa.delete;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
@@ -33,10 +31,8 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
+import ca.uhn.fhir.rest.api.server.storage.IReindexJobSubmitter;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
@@ -48,12 +44,7 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter {
-	@Autowired
-	private IBatchJobSubmitter myBatchJobSubmitter;
-	@Autowired
-	@Qualifier(BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME)
-	private Job myDeleteExpungeJob;
+public class ReindexJobSubmitterImpl implements IReindexJobSubmitter {
 	@Autowired
 	FhirContext myFhirContext;
 	@Autowired
@@ -64,33 +55,30 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 	DaoConfig myDaoConfig;
 	@Autowired
 	IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Autowired
+	private IBatchJobSubmitter myBatchJobSubmitter;
+	@Autowired
+	@Qualifier(BatchJobsConfig.REINDEX_JOB_NAME)
+	private Job myReindexJob;
 
 	@Override
 	@Transactional(Transactional.TxType.NEVER)
-	public JobExecution submitJob(Integer theBatchSize, List<String> theUrlsToDeleteExpunge, RequestDetails theRequest) throws JobParametersInvalidException {
-		List<RequestPartitionId> requestPartitionIds = requestPartitionIdsFromRequestAndUrls(theRequest, theUrlsToDeleteExpunge);
-		if (!myDaoConfig.canDeleteExpunge()) {
-			throw new ForbiddenOperationException("Delete Expunge not allowed:  " + myDaoConfig.cannotDeleteExpungeReason());
+	public JobExecution submitJob(Integer theBatchSize, List<String> theUrlsToReindex, RequestDetails theRequest) throws JobParametersInvalidException {
+		List<RequestPartitionId> requestPartitionIds = requestPartitionIdsFromRequestAndUrls(theRequest, theUrlsToReindex);
+		if (!myDaoConfig.isReindexEnabled()) {
+			throw new ForbiddenOperationException("Reindexing is disabled on this server.");
 		}
 
-		for (String url : theUrlsToDeleteExpunge) {
-			HookParams params = new HookParams()
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest)
-				.add(String.class, url);
-			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRE_DELETE_EXPUNGE, params);
-		}
-
-		JobParameters jobParameters = MultiUrlProcessorJobConfig.buildJobParameters(theBatchSize, theUrlsToDeleteExpunge, requestPartitionIds);
-		return myBatchJobSubmitter.runJob(myDeleteExpungeJob, jobParameters);
+		JobParameters jobParameters = MultiUrlProcessorJobConfig.buildJobParameters(theBatchSize, theUrlsToReindex, requestPartitionIds);
+		return myBatchJobSubmitter.runJob(myReindexJob, jobParameters);
 	}
 
 	/**
 	 * This method will throw an exception if the user is not allowed to add the requested resource type on the partition determined by the request
 	 */
-	private List<RequestPartitionId> requestPartitionIdsFromRequestAndUrls(RequestDetails theRequest, List<String> theUrlsToDeleteExpunge) {
+	private List<RequestPartitionId> requestPartitionIdsFromRequestAndUrls(RequestDetails theRequest, List<String> theUrlsToReindex) {
 		List<RequestPartitionId> retval = new ArrayList<>();
-		for (String url : theUrlsToDeleteExpunge) {
+		for (String url : theUrlsToReindex) {
 			ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(url);
 			RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequest, resourceSearch.getResourceName(), null);
 			retval.add(requestPartitionId);

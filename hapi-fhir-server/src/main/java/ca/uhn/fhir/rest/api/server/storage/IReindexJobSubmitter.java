@@ -1,5 +1,5 @@
 package ca.uhn.fhir.rest.api.server.storage;
 
 // Tag interface for Spring wiring
-public interface IDeleteExpungeJobSubmitter extends IMultiUrlJobSubmitter {
+public interface IReindexJobSubmitter extends IMultiUrlJobSubmitter {
 }

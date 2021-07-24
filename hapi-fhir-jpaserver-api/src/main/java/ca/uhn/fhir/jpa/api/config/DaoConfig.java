@@ -217,6 +217,12 @@ public class DaoConfig {
 	 * @since 5.2.0
 	 */
 	private boolean myUseLegacySearchBuilder = false;
+
+	/**
+	 * @since 5.5.0
+	 */
+	private boolean myReindexEnabled = true;
+
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -1644,6 +1650,23 @@ public class DaoConfig {
 	 */
 	public void setExpungeBatchSize(int theExpungeBatchSize) {
 		myExpungeBatchSize = theExpungeBatchSize;
+	}
+
+	/**
+	 * If set to <code>false</code> (default is <code>true</code>), reindexing of resources will be disabled on this
+	 * server.
+	 */
+	public boolean isReindexEnabled() {
+		return myReindexEnabled;
+	}
+
+	/**
+	 * If set to <code>false</code> (default is <code>true</code>), reindexing of resources will be disabled on this
+	 * server.
+	 */
+
+	public void setReindexEnabled(boolean theReindexEnabled) {
+		myReindexEnabled = theReindexEnabled;
 	}
 
 	/**

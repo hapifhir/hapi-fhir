@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.delete.job;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.batch.job.MultiUrlProcessorJobConfig;
 import com.github.jsonldjava.shaded.com.google.common.collect.Lists;
 import org.springframework.batch.core.JobParameters;
 
@@ -18,6 +19,6 @@ public final class DeleteExpungeJobParameterUtil {
 		for (int i = 0; i < theUrls.length; ++i) {
 			requestPartitionIds.add(RequestPartitionId.defaultPartition());
 		}
-		return DeleteExpungeJobConfig.buildJobParameters(2401, Lists.newArrayList(theUrls), requestPartitionIds);
+		return MultiUrlProcessorJobConfig.buildJobParameters(2401, Lists.newArrayList(theUrls), requestPartitionIds);
 	}
 }

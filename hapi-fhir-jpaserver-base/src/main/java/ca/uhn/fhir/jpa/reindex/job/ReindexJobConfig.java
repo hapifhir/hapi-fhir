@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.delete.job;
+package ca.uhn.fhir.jpa.reindex.job;
 
 /*-
  * #%L
@@ -36,37 +36,37 @@ import org.springframework.context.annotation.Lazy;
 
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME;
+import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.REINDEX_JOB_NAME;
 
 /**
  * Spring batch Job configuration file. Contains all necessary plumbing to run a
  * Delete Expunge job.
  */
 @Configuration
-public class DeleteExpungeJobConfig extends MultiUrlProcessorJobConfig {
-	public static final String DELETE_EXPUNGE_URL_LIST_STEP_NAME = "delete-expunge-url-list-step";
+public class ReindexJobConfig extends MultiUrlProcessorJobConfig {
+	public static final String REINDEX_URL_LIST_STEP_NAME = "delete-expunge-url-list-step";
+	private static final int MINUTES_IN_FUTURE_TO_DELETE_FROM = 1;
 
 	@Autowired
 	private StepBuilderFactory myStepBuilderFactory;
 	@Autowired
 	private JobBuilderFactory myJobBuilderFactory;
 
-	@Bean(name = DELETE_EXPUNGE_JOB_NAME)
+	@Bean(name = REINDEX_JOB_NAME)
 	@Lazy
-	public Job deleteExpungeJob(FhirContext theFhirContext, MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
-		return myJobBuilderFactory.get(DELETE_EXPUNGE_JOB_NAME)
+	public Job reindexJob(FhirContext theFhirContext, MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
+		return myJobBuilderFactory.get(REINDEX_JOB_NAME)
 			.validator(multiUrlProcessorParameterValidator(theFhirContext, theMatchUrlService, theDaoRegistry))
-			.start(deleteExpungeUrlListStep())
+			.start(reindexUrlListStep())
 			.build();
 	}
 
 	@Bean
-	public Step deleteExpungeUrlListStep() {
-		return myStepBuilderFactory.get(DELETE_EXPUNGE_URL_LIST_STEP_NAME)
-			.<List<Long>, List<String>>chunk(1)
+	public Step reindexUrlListStep() {
+		return myStepBuilderFactory.get(REINDEX_URL_LIST_STEP_NAME)
+			.<List<Long>, List<Long>>chunk(1)
 			.reader(reverseCronologicalBatchResourcePidReader())
-			.processor(deleteExpungeProcessor())
-			.writer(sqlExecutorWriter())
+			.writer(reindexWriter())
 			.listener(pidCountRecorderListener())
 			.listener(promotionListener())
 			.build();
@@ -74,7 +74,7 @@ public class DeleteExpungeJobConfig extends MultiUrlProcessorJobConfig {
 
 	@Bean
 	@StepScope
-	public DeleteExpungeProcessor deleteExpungeProcessor() {
-		return new DeleteExpungeProcessor();
+	public ReindexWriter reindexWriter() {
+		return new ReindexWriter();
 	}
 }

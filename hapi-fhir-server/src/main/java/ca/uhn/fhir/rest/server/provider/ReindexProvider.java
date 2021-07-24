@@ -24,24 +24,24 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
+import ca.uhn.fhir.rest.api.server.storage.IReindexJobSubmitter;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-public class DeleteExpungeProvider extends BaseMultiUrlProcessor {
-	public DeleteExpungeProvider(FhirContext theFhirContext, IDeleteExpungeJobSubmitter theDeleteExpungeJobSubmitter) {
-		super(theFhirContext, theDeleteExpungeJobSubmitter);
+public class ReindexProvider extends BaseMultiUrlProcessor {
+	public ReindexProvider(FhirContext theFhirContext, IReindexJobSubmitter theReindexJobSubmitter) {
+		super(theFhirContext, theReindexJobSubmitter);
 	}
 
-	@Operation(name = ProviderConstants.OPERATION_DELETE_EXPUNGE, idempotent = false)
-	public IBaseParameters deleteExpunge(
-		@OperationParam(name = ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, typeName = "string", min = 1) List<IPrimitiveType<String>> theUrlsToDeleteExpunge,
-		@OperationParam(name = ProviderConstants.OPERATION_DELETE_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
+	@Operation(name = ProviderConstants.OPERATION_REINDEX, idempotent = false)
+	public IBaseParameters Reindex(
+		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_URL, typeName = "string", min = 1) List<IPrimitiveType<String>> theUrlsToReindex,
+		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
 		RequestDetails theRequestDetails
 	) {
-		return super.processUrls(theUrlsToDeleteExpunge, theBatchSize, theRequestDetails);
+		return super.processUrls(theUrlsToReindex, theBatchSize, theRequestDetails);
 	}
 }

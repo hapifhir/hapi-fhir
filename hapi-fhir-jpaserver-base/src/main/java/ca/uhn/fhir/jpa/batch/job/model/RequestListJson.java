@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.delete.model;
+package ca.uhn.fhir.jpa.batch.job.model;
 
 /*-
  * #%L

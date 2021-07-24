@@ -26,7 +26,6 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -43,6 +42,10 @@ public abstract class BaseJpaSystemProviderDstu2Plus<T, MT> extends BaseJpaSyste
 	@Operation(name = MARK_ALL_RESOURCES_FOR_REINDEXING, idempotent = false, returnParameters = {
 		@OperationParam(name = "status")
 	})
+	/**
+	 * @deprecated FIXME KHS
+	 */
+	@Deprecated
 	public IBaseResource markAllResourcesForReindexing(
 		@OperationParam(name="type", min = 0, max = 1, typeName = "code") IPrimitiveType<String> theType
 	) {
@@ -65,6 +68,10 @@ public abstract class BaseJpaSystemProviderDstu2Plus<T, MT> extends BaseJpaSyste
 	@Operation(name = PERFORM_REINDEXING_PASS, idempotent = false, returnParameters = {
 		@OperationParam(name = "status")
 	})
+	/**
+	 * @deprecated FIXME KHS
+	 */
+	@Deprecated
 	public IBaseResource performReindexingPass() {
 		Integer count = getResourceReindexingSvc().runReindexingPass();
 

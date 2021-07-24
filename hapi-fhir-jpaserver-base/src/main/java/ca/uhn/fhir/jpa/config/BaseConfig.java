@@ -83,6 +83,7 @@ import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.jpa.reindex.ReindexJobSubmitterImpl;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
 import ca.uhn.fhir.jpa.sched.HapiSchedulerServiceImpl;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
@@ -135,10 +136,12 @@ import ca.uhn.fhir.jpa.validation.JpaResourceLoader;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
+import ca.uhn.fhir.rest.api.server.storage.IReindexJobSubmitter;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import ca.uhn.fhir.rest.server.provider.DeleteExpungeProvider;
+import ca.uhn.fhir.rest.server.provider.ReindexProvider;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -540,8 +543,20 @@ public abstract class BaseConfig {
 
 	@Bean
 	@Lazy
+	public IReindexJobSubmitter myReindexJobSubmitter() {
+		return new ReindexJobSubmitterImpl();
+	}
+
+	@Bean
+	@Lazy
 	public DeleteExpungeProvider deleteExpungeProvider(FhirContext theFhirContext, IDeleteExpungeJobSubmitter theDeleteExpungeJobSubmitter) {
 		return new DeleteExpungeProvider(theFhirContext, theDeleteExpungeJobSubmitter);
+	}
+
+	@Bean
+	@Lazy
+	public ReindexProvider reindexProvider(FhirContext theFhirContext, IReindexJobSubmitter theReindexJobSubmitter) {
+		return new ReindexProvider(theFhirContext, theReindexJobSubmitter);
 	}
 
 	@Bean

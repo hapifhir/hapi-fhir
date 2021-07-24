@@ -147,4 +147,24 @@ public class ProviderConstants {
 	 * The Spring Batch job id of the delete expunge job created by a $delete-expunge operation
 	 */
 	public static final String OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID = "jobId";
+
+	/**
+	 * Operation name for the $delete-expunge operation
+	 */
+	public static final String OPERATION_REINDEX = "$reindex";
+
+	/**
+	 * url of resources to delete for the $delete-expunge operation
+	 */
+	public static final String OPERATION_REINDEX_URL = "url";
+
+	/**
+	 * Number of resources to delete at a time for the $delete-expunge operation
+	 */
+	public static final String OPERATION_REINDEX_BATCH_SIZE = "batchSize";
+
+	/**
+	 * The Spring Batch job id of the delete expunge job created by a $delete-expunge operation
+	 */
+	public static final String OPERATION_REINDEX_RESPONSE_JOB_ID = "jobId";
 }

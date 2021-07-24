@@ -79,4 +79,9 @@ public class BatchJobsConfig {
 	 * Delete Expunge
 	 */
 	public static final String DELETE_EXPUNGE_JOB_NAME = "deleteExpungeJob";
+
+	/**
+	 * Reindex
+	 */
+	public static final String REINDEX_JOB_NAME = "deleteExpungeJob";
 }
