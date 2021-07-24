@@ -30,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DeleteExpungeProvider extends BaseMultiUrlProcessor {
 	public DeleteExpungeProvider(FhirContext theFhirContext, IDeleteExpungeJobSubmitter theDeleteExpungeJobSubmitter) {
@@ -42,6 +43,7 @@ public class DeleteExpungeProvider extends BaseMultiUrlProcessor {
 		@OperationParam(name = ProviderConstants.OPERATION_DELETE_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
 		RequestDetails theRequestDetails
 	) {
-		return super.processUrls(theUrlsToDeleteExpunge, theBatchSize, theRequestDetails);
+		List<String> urls = theUrlsToDeleteExpunge.stream().map(IPrimitiveType::getValue).collect(Collectors.toList());
+		return super.processUrls(urls, theBatchSize, theRequestDetails);
 	}
 }

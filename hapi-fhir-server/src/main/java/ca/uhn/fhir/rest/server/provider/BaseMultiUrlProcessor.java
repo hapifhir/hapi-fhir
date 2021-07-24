@@ -12,7 +12,6 @@ import org.springframework.batch.core.JobParametersInvalidException;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class BaseMultiUrlProcessor {
 	private final FhirContext myFhirContext;
@@ -23,19 +22,23 @@ public class BaseMultiUrlProcessor {
 		myFhirContext = theFhirContext;
 	}
 
-	protected IBaseParameters processUrls(List<IPrimitiveType<String>> theUrlsToDeleteExpunge, IPrimitiveType<BigDecimal> theBatchSize, RequestDetails theRequestDetails) {
+	protected IBaseParameters processUrls(List<String> theUrlsToProcess, IPrimitiveType<BigDecimal> theBatchSize, RequestDetails theRequestDetails) {
 		try {
-			List<String> urls = theUrlsToDeleteExpunge.stream().map(IPrimitiveType::getValue).collect(Collectors.toList());
 			Integer batchSize = null;
 			if (theBatchSize != null && !theBatchSize.isEmpty()) {
 				batchSize = theBatchSize.getValue().intValue();
 			}
-			JobExecution jobExecution = myMultiUrlProcessorJobSubmitter.submitJob(batchSize, urls, theRequestDetails);
+			JobExecution jobExecution = myMultiUrlProcessorJobSubmitter.submitJob(batchSize, theUrlsToProcess, theRequestDetails);
 			IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
 			ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID, jobExecution.getJobId());
 			return retval;
 		} catch (JobParametersInvalidException e) {
 			throw new InvalidRequestException("Invalid job parameters: " + e.getMessage(), e);
 		}
+	}
+
+	protected IBaseParameters processEverything(IPrimitiveType<BigDecimal> theBatchSize, RequestDetails theRequestDetails) {
+		// FIXME KHS
+		return ParametersUtil.newInstance(myFhirContext);
 	}
 }

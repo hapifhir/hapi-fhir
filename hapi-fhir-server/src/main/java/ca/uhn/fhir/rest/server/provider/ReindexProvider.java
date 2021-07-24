@@ -29,6 +29,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ReindexProvider extends BaseMultiUrlProcessor {
@@ -36,12 +37,21 @@ public class ReindexProvider extends BaseMultiUrlProcessor {
 		super(theFhirContext, theReindexJobSubmitter);
 	}
 
+	// FIXME KHS test
 	@Operation(name = ProviderConstants.OPERATION_REINDEX, idempotent = false)
 	public IBaseParameters Reindex(
-		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_URL, typeName = "string", min = 1) List<IPrimitiveType<String>> theUrlsToReindex,
+		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_URL, typeName = "string", min = 0, max = 1) List<IPrimitiveType<String>> theUrlsToReindex,
 		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
+		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_EVERYTHING, typeName = "boolean", min = 0, max = 1) IPrimitiveType<Boolean> theEverything,
 		RequestDetails theRequestDetails
 	) {
-		return super.processUrls(theUrlsToReindex, theBatchSize, theRequestDetails);
+		Boolean everything = theEverything != null && theEverything.getValue();
+		List<String> urls = new ArrayList<>();
+		if (everything) {
+			return super.processEverything(theBatchSize, theRequestDetails);
+		} else {
+			theUrlsToReindex.stream().map(IPrimitiveType::getValue).forEach(urls::add);
+			return super.processUrls(urls, theBatchSize, theRequestDetails);
+		}
 	}
 }

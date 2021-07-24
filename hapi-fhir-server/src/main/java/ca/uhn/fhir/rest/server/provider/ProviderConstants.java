@@ -164,6 +164,11 @@ public class ProviderConstants {
 	public static final String OPERATION_REINDEX_BATCH_SIZE = "batchSize";
 
 	/**
+	 * Whether all resource types should be reindexed
+	 */
+	public static final String OPERATION_REINDEX_EVERYTHING = "everything";
+
+	/**
 	 * The Spring Batch job id of the delete expunge job created by a $delete-expunge operation
 	 */
 	public static final String OPERATION_REINDEX_RESPONSE_JOB_ID = "jobId";
