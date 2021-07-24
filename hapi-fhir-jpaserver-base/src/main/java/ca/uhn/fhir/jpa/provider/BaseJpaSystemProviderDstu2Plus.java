@@ -32,6 +32,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -43,7 +44,8 @@ public abstract class BaseJpaSystemProviderDstu2Plus<T, MT> extends BaseJpaSyste
 		@OperationParam(name = "status")
 	})
 	/**
-	 * @deprecated FIXME KHS
+	 * @deprecated
+	 * @see ca.uhn.fhir.rest.server.provider.ReindexProvider#Reindex(List, IPrimitiveType, RequestDetails)
 	 */
 	@Deprecated
 	public IBaseResource markAllResourcesForReindexing(
@@ -69,7 +71,8 @@ public abstract class BaseJpaSystemProviderDstu2Plus<T, MT> extends BaseJpaSyste
 		@OperationParam(name = "status")
 	})
 	/**
-	 * @deprecated FIXME KHS
+	 * @deprecated
+	 * @see ca.uhn.fhir.rest.server.provider.ReindexProvider#Reindex(List, IPrimitiveType, RequestDetails)
 	 */
 	@Deprecated
 	public IBaseResource performReindexingPass() {

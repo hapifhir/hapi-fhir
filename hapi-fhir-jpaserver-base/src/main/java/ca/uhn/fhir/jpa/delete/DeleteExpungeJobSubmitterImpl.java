@@ -29,9 +29,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.job.MultiUrlProcessorJobConfig;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
+import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
@@ -45,7 +43,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
 
 public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter {
@@ -57,18 +54,16 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 	@Autowired
 	FhirContext myFhirContext;
 	@Autowired
-	MatchUrlService myMatchUrlService;
-	@Autowired
-	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-	@Autowired
 	DaoConfig myDaoConfig;
+	@Autowired
+	PartitionedUrlValidator myPartitionedUrlValidator;
 	@Autowired
 	IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Override
 	@Transactional(Transactional.TxType.NEVER)
 	public JobExecution submitJob(Integer theBatchSize, List<String> theUrlsToDeleteExpunge, RequestDetails theRequest) throws JobParametersInvalidException {
-		List<RequestPartitionId> requestPartitionIds = requestPartitionIdsFromRequestAndUrls(theRequest, theUrlsToDeleteExpunge);
+		List<RequestPartitionId> requestPartitionIds = myPartitionedUrlValidator.requestPartitionIdsFromRequestAndUrls(theRequest, theUrlsToDeleteExpunge);
 		if (!myDaoConfig.canDeleteExpunge()) {
 			throw new ForbiddenOperationException("Delete Expunge not allowed:  " + myDaoConfig.cannotDeleteExpungeReason());
 		}
@@ -83,18 +78,5 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 
 		JobParameters jobParameters = MultiUrlProcessorJobConfig.buildJobParameters(theBatchSize, theUrlsToDeleteExpunge, requestPartitionIds);
 		return myBatchJobSubmitter.runJob(myDeleteExpungeJob, jobParameters);
-	}
-
-	/**
-	 * This method will throw an exception if the user is not allowed to add the requested resource type on the partition determined by the request
-	 */
-	private List<RequestPartitionId> requestPartitionIdsFromRequestAndUrls(RequestDetails theRequest, List<String> theUrlsToDeleteExpunge) {
-		List<RequestPartitionId> retval = new ArrayList<>();
-		for (String url : theUrlsToDeleteExpunge) {
-			ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(url);
-			RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequest, resourceSearch.getResourceName(), null);
-			retval.add(requestPartitionId);
-		}
-		return retval;
 	}
 }

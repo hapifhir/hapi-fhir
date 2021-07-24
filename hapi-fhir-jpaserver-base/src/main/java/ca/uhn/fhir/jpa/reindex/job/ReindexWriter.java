@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.reindex.job;
  * #L%
  */
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ca.uhn.fhir.jpa.search.reindex.ResourceReindexer;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -30,11 +30,15 @@ import java.util.List;
  * Input: list of pids of resources to be deleted and expunged
  * Output: list of sql statements to be executed
  */
+
 public class ReindexWriter implements ItemWriter<List<Long>> {
-	private static final Logger ourLog = LoggerFactory.getLogger(ReindexWriter.class);
+	@Autowired
+	ResourceReindexer myResourceReindexer;
 
 	@Override
-	public void write(List<? extends List<Long>> thePids) throws Exception {
-		// FIXME KHS
+	public void write(List<? extends List<Long>> thePidLists) throws Exception {
+		for (List<Long> pidList : thePidLists) {
+			pidList.forEach(pid -> myResourceReindexer.readAndReindexResourceByPid(pid));
+		}
 	}
 }

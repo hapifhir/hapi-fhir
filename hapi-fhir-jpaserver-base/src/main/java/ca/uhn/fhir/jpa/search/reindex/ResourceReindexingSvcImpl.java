@@ -21,24 +21,18 @@ package ca.uhn.fhir.jpa.search.reindex;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -47,8 +41,8 @@ import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.InstantType;
+import org.jetbrains.annotations.Nullable;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,12 +74,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
- * @deprecated replaced with
- * FIXME KHS
+ * @see ca.uhn.fhir.jpa.reindex.job.ReindexJobConfig
+ * @deprecated
  */
 @Deprecated
 public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
@@ -106,8 +99,6 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
 	@Autowired
-	private IResourceHistoryTableDao myResourceHistoryTableDao;
-	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private IForcedIdDao myForcedIdDao;
@@ -119,6 +110,8 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private ISchedulerService mySchedulerService;
+	@Autowired
+	private ResourceReindexer myResourceReindexer;
 
 	@VisibleForTesting
 	void setReindexJobDaoForUnitTest(IResourceReindexJobDao theReindexJobDao) {
@@ -532,63 +525,12 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			myCounter = theCounter;
 		}
 
-
-		@SuppressWarnings("unchecked")
-		private <T extends IBaseResource> void doReindex(ResourceTable theResourceTable, T theResource) {
-			RuntimeResourceDefinition resourceDefinition = myContext.getResourceDefinition(theResource.getClass());
-			Class<T> resourceClass = (Class<T>) resourceDefinition.getImplementingClass();
-			final IFhirResourceDao<T> dao = myDaoRegistry.getResourceDao(resourceClass);
-			dao.reindex(theResource, theResourceTable);
-
-			myCounter.incrementAndGet();
-		}
-
 		@Override
 		public Date call() {
 			Throwable reindexFailure;
+
 			try {
-				reindexFailure = myTxTemplate.execute(t -> {
-					ResourceTable resourceTable = myResourceTableDao.findById(myNextId).orElseThrow(IllegalStateException::new);
-					myUpdated = resourceTable.getUpdatedDate();
-
-					try {
-						/*
-						 * This part is because from HAPI 1.5 - 1.6 we changed the format of forced ID to be "type/id" instead of just "id"
-						 */
-						ForcedId forcedId = resourceTable.getForcedId();
-						if (forcedId != null) {
-							if (isBlank(forcedId.getResourceType())) {
-								ourLog.info("Updating resource {} forcedId type to {}", forcedId.getForcedId(), resourceTable.getResourceType());
-								forcedId.setResourceType(resourceTable.getResourceType());
-								myForcedIdDao.save(forcedId);
-							}
-						}
-
-						IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceTable.getResourceType());
-						long expectedVersion = resourceTable.getVersion();
-						IBaseResource resource = dao.readByPid(new ResourcePersistentId(resourceTable.getId()), true);
-
-						if (resource == null) {
-							throw new InternalErrorException("Could not find resource version " + resourceTable.getIdDt().toUnqualified().getValue() + " in database");
-						}
-
-						Long actualVersion = resource.getIdElement().getVersionIdPartAsLong();
-						if (actualVersion < expectedVersion) {
-							ourLog.warn("Resource {} version {} does not exist, renumbering version {}", resource.getIdElement().toUnqualifiedVersionless().getValue(), resource.getIdElement().getVersionIdPart(), expectedVersion);
-							myResourceHistoryTableDao.updateVersion(resourceTable.getId(), actualVersion, expectedVersion);
-						}
-
-						doReindex(resourceTable, resource);
-
-						return null;
-
-					} catch (Exception e) {
-						ourLog.error("Failed to index resource {}: {}", resourceTable.getIdDt(), e, e);
-						t.setRollbackOnly();
-						return e;
-					}
-				});
-
+				reindexFailure = readResourceAndReindex();
 			} catch (ResourceVersionConflictException e) {
 				/*
 				 * We reindex in multiple threads, so it's technically possible that two threads try
@@ -607,6 +549,27 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			}
 
 			return myUpdated;
+		}
+
+		@Nullable
+		private Throwable readResourceAndReindex() {
+			Throwable reindexFailure;
+			reindexFailure = myTxTemplate.execute(t -> {
+				ResourceTable resourceTable = myResourceTableDao.findById(myNextId).orElseThrow(IllegalStateException::new);
+				myUpdated = resourceTable.getUpdatedDate();
+
+				try {
+					myResourceReindexer.reindexResourceEntity(resourceTable);
+					myCounter.incrementAndGet();
+					return null;
+
+				} catch (Exception e) {
+					ourLog.error("Failed to index resource {}: {}", resourceTable.getIdDt(), e, e);
+					t.setRollbackOnly();
+					return e;
+				}
+			});
+			return reindexFailure;
 		}
 	}
 }

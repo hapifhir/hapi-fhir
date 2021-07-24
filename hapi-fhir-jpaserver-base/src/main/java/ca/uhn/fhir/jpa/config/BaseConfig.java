@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.batch.BatchConstants;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.config.NonPersistedBatchConfigurer;
+import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
 import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
@@ -537,8 +538,14 @@ public abstract class BaseConfig {
 
 	@Bean
 	@Lazy
-	public IDeleteExpungeJobSubmitter myDeleteExpungeJobSubmitter() {
+	public IDeleteExpungeJobSubmitter deleteExpungeJobSubmitter() {
 		return new DeleteExpungeJobSubmitterImpl();
+	}
+
+	@Bean
+	@Lazy
+	public PartitionedUrlValidator partitionedUrlValidator() {
+		return new PartitionedUrlValidator();
 	}
 
 	@Bean
