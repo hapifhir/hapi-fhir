@@ -29,8 +29,8 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ReindexProvider extends BaseMultiUrlProcessor {
 	public ReindexProvider(FhirContext theFhirContext, IReindexJobSubmitter theReindexJobSubmitter) {
@@ -46,11 +46,10 @@ public class ReindexProvider extends BaseMultiUrlProcessor {
 		RequestDetails theRequestDetails
 	) {
 		Boolean everything = theEverything != null && theEverything.getValue();
-		List<String> urls = new ArrayList<>();
 		if (everything) {
 			return super.processEverything(theBatchSize, theRequestDetails);
 		} else {
-			theUrlsToReindex.stream().map(IPrimitiveType::getValue).forEach(urls::add);
+			List<String> urls = theUrlsToReindex.stream().map(IPrimitiveType::getValue).collect(Collectors.toList());
 			return super.processUrls(urls, theBatchSize, theRequestDetails);
 		}
 	}

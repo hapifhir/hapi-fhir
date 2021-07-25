@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.batch;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imprt.job.BulkImportJobConfig;
 import ca.uhn.fhir.jpa.delete.job.DeleteExpungeJobConfig;
+import ca.uhn.fhir.jpa.reindex.job.ReindexJobConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -36,7 +37,8 @@ import java.util.Set;
 	CommonBatchJobConfig.class,
 	BulkExportJobConfig.class,
 	BulkImportJobConfig.class,
-	DeleteExpungeJobConfig.class
+	DeleteExpungeJobConfig.class,
+	ReindexJobConfig.class
 })
 public class BatchJobsConfig {
 
@@ -83,5 +85,5 @@ public class BatchJobsConfig {
 	/**
 	 * Reindex
 	 */
-	public static final String REINDEX_JOB_NAME = "deleteExpungeJob";
+	public static final String REINDEX_JOB_NAME = "reindexJob";
 }
