@@ -542,7 +542,7 @@
                 }
               ]
             },
-            "system": "https://healthy.kaiserpermanente.org/front-door",
+            "system": "https://example.org/front-door",
             "value": "412563524-CO"
           }
         ],
