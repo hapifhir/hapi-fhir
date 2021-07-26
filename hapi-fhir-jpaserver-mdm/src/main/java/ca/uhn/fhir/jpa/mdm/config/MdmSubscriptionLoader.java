@@ -22,14 +22,15 @@ package ca.uhn.fhir.jpa.mdm.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.mdm.api.MdmConstants;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Subscription;
@@ -86,10 +87,10 @@ public class MdmSubscriptionLoader {
 		}
 	}
 
-	private synchronized void updateIfNotPresent(IBaseResource theSubscription) {
+	synchronized void updateIfNotPresent(IBaseResource theSubscription) {
 		try {
 			mySubscriptionDao.read(theSubscription.getIdElement());
-		} catch (ResourceNotFoundException e) {
+		} catch (ResourceNotFoundException | ResourceGoneException e) {
 			ourLog.info("Creating subsription " + theSubscription.getIdElement());
 			mySubscriptionDao.update(theSubscription);
 		}
