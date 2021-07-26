@@ -69,7 +69,7 @@ public class ReindexJobConfig extends MultiUrlProcessorJobConfig {
 			.reader(reverseCronologicalBatchResourcePidReader())
 			.writer(reindexWriter())
 			.listener(pidCountRecorderListener())
-			.listener(promotionListener())
+			.listener(reindexPromotionListener())
 			.build();
 	}
 
@@ -80,7 +80,7 @@ public class ReindexJobConfig extends MultiUrlProcessorJobConfig {
 	}
 
 	@Bean
-	public ExecutionContextPromotionListener promotionListener() {
+	public ExecutionContextPromotionListener reindexPromotionListener() {
 		ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
 
 		listener.setKeys(new String[]{PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED});

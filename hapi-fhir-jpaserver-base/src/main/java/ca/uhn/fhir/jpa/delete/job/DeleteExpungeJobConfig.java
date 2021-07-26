@@ -71,12 +71,12 @@ public class DeleteExpungeJobConfig extends MultiUrlProcessorJobConfig {
 			.processor(deleteExpungeProcessor())
 			.writer(sqlExecutorWriter())
 			.listener(pidCountRecorderListener())
-			.listener(promotionListener())
+			.listener(deleteExpungePromotionListener())
 			.build();
 	}
 
 	@Bean
-	public ExecutionContextPromotionListener promotionListener() {
+	public ExecutionContextPromotionListener deleteExpungePromotionListener() {
 		ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
 
 		listener.setKeys(new String[]{SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED, PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED});
