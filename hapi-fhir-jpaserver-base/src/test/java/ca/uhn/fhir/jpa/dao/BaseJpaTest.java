@@ -109,6 +109,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @TestPropertySource(properties = {
@@ -239,9 +240,9 @@ public abstract class BaseJpaTest extends BaseTest {
 		when(mySrd.getInterceptorBroadcaster()).thenReturn(mySrdInterceptorService);
 		when(mySrd.getUserData()).thenReturn(new HashMap<>());
 		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(new ArrayList<>());
-		// FIXME KHS
-//		when(mySrd.getServer().getDefaultPageSize()).thenReturn(null);
-//		when(mySrd.getServer().getMaximumPageSize()).thenReturn(null);
+		// TODO enforce strict mocking everywhere
+		lenient().when(mySrd.getServer().getDefaultPageSize()).thenReturn(null);
+		lenient().when(mySrd.getServer().getMaximumPageSize()).thenReturn(null);
 	}
 
 	protected CountDownLatch registerLatchHookInterceptor(int theCount, Pointcut theLatchPointcut) {
