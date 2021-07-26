@@ -23,12 +23,15 @@ package ca.uhn.fhir.jpa.delete.job;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch.job.MultiUrlProcessorJobConfig;
+import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
+import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -70,6 +73,15 @@ public class DeleteExpungeJobConfig extends MultiUrlProcessorJobConfig {
 			.listener(pidCountRecorderListener())
 			.listener(promotionListener())
 			.build();
+	}
+
+	@Bean
+	public ExecutionContextPromotionListener promotionListener() {
+		ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
+
+		listener.setKeys(new String[]{SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED, PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED});
+
+		return listener;
 	}
 
 	@Bean

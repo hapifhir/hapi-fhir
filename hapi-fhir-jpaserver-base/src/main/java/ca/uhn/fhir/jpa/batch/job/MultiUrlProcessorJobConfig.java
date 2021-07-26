@@ -14,7 +14,6 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
 import org.springframework.context.annotation.Bean;
 
 import javax.annotation.Nonnull;
@@ -60,14 +59,5 @@ public class MultiUrlProcessorJobConfig {
 	@StepScope
 	public ReverseCronologicalBatchResourcePidReader reverseCronologicalBatchResourcePidReader() {
 		return new ReverseCronologicalBatchResourcePidReader();
-	}
-
-	@Bean
-	public ExecutionContextPromotionListener promotionListener() {
-		ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
-
-		listener.setKeys(new String[]{SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED, PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED});
-
-		return listener;
 	}
 }

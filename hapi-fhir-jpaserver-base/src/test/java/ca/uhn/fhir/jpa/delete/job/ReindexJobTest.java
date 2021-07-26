@@ -14,6 +14,8 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
@@ -23,6 +25,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ReindexJobTest extends BaseJpaR4Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(ReindexJobTest.class);
 	public static final String ALLELE_EXTENSION_URL = "http://hl7.org/fhir/StructureDefinition/observation-geneticsAlleleName";
 	public static final String ALLELE_SP = "alleleName";
 	private static final String TEST_ALLELE_VALUE = "HERC";
@@ -57,7 +60,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
-		// Now it should be indexed
+		// Now one of them should be indexed
 		assertEquals(1, countAlleleObservations());
 	}
 
@@ -83,10 +86,10 @@ public class ReindexJobTest extends BaseJpaR4Test {
 	}
 
 	private int countAlleleObservations() {
-		String url = "Observation?" + ALLELE_SP + "=" + TEST_ALLELE_VALUE + "&_summary=count";
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add(ALLELE_SP, new TokenParam(TEST_ALLELE_VALUE));
 		map.setSummaryMode(SummaryEnum.COUNT);
+		ourLog.info("Searching with url {}", map.toNormalizedQueryString(myFhirCtx));
 		IBundleProvider result = myObservationDao.search(map);
 		return result.size();
 	}

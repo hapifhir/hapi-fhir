@@ -23,12 +23,14 @@ package ca.uhn.fhir.jpa.reindex.job;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch.job.MultiUrlProcessorJobConfig;
+import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,12 +42,11 @@ import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.REINDEX_JOB_NAME;
 
 /**
  * Spring batch Job configuration file. Contains all necessary plumbing to run a
- * Delete Expunge job.
+ * Reindex job.
  */
 @Configuration
 public class ReindexJobConfig extends MultiUrlProcessorJobConfig {
-	public static final String REINDEX_URL_LIST_STEP_NAME = "delete-expunge-url-list-step";
-	private static final int MINUTES_IN_FUTURE_TO_DELETE_FROM = 1;
+	public static final String REINDEX_URL_LIST_STEP_NAME = "reindex-url-list-step";
 
 	@Autowired
 	private StepBuilderFactory myStepBuilderFactory;
@@ -76,5 +77,14 @@ public class ReindexJobConfig extends MultiUrlProcessorJobConfig {
 	@StepScope
 	public ReindexWriter reindexWriter() {
 		return new ReindexWriter();
+	}
+
+	@Bean
+	public ExecutionContextPromotionListener promotionListener() {
+		ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
+
+		listener.setKeys(new String[]{PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED});
+
+		return listener;
 	}
 }

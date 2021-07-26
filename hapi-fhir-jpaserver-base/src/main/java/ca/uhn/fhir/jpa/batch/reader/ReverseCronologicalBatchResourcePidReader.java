@@ -48,8 +48,10 @@ import org.springframework.beans.factory.annotation.Value;
 import javax.annotation.Nonnull;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -86,6 +88,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	private List<PartitionedUrl> myPartitionedUrls;
 	private Integer myBatchSize;
 	private final Map<Integer, Date> myThresholdHighByUrlIndex = new HashMap<>();
+	private final Map<Integer, Set<Long>> myAlreadyProcessedPidsWithHighDate = new HashMap<>();
 	private int myUrlIndex = 0;
 	private Date myStartTime;
 
@@ -130,19 +133,47 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 			.map(ResourcePersistentId::getIdAsLong)
 			.collect(Collectors.toList());
 
+		Set<Long> alreadyProcessed = myAlreadyProcessedPidsWithHighDate.get(myUrlIndex);
+		if (alreadyProcessed != null) {
+			ourLog.debug("Removing resources that have already been processed: {}", alreadyProcessed);
+			retval.removeAll(alreadyProcessed);
+		}
+
 		if (ourLog.isDebugEnabled()) {
 			ourLog.debug("Search for {}{} returned {} results", resourceSearch.getResourceName(), map.toNormalizedQueryString(myFhirContext), retval.size());
 			ourLog.debug("Results: {}", retval);
 		}
 
-		if (!retval.isEmpty()) {
-			// Adjust the high threshold to be the earliest resource in the batch we found
-			Long pidOfOldestResourceInBatch = retval.get(retval.size() - 1);
-			IBaseResource earliestResource = dao.readByPid(new ResourcePersistentId(pidOfOldestResourceInBatch));
-			myThresholdHighByUrlIndex.put(myUrlIndex, earliestResource.getMeta().getLastUpdated());
-		}
+		setThresholds(dao, retval);
 
 		return retval;
+	}
+
+	// FIXME KHS test
+	private void setThresholds(IFhirResourceDao<?> dao, List<Long> retval) {
+		if (retval.isEmpty()) {
+			return;
+		}
+
+		// Adjust the high threshold to be the earliest resource in the batch we found
+		Long pidOfOldestResourceInBatch = retval.get(retval.size() - 1);
+		myAlreadyProcessedPidsWithHighDate.computeIfAbsent(myUrlIndex, k -> new HashSet<>()).add(pidOfOldestResourceInBatch);
+		IBaseResource earliestResource = dao.readByPid(new ResourcePersistentId(pidOfOldestResourceInBatch));
+		Date earliestUpdatedDate = earliestResource.getMeta().getLastUpdated();
+		myThresholdHighByUrlIndex.put(myUrlIndex, earliestUpdatedDate);
+		if (retval.size() <= 1) {
+			return;
+		}
+
+		// There is more than one resource in this batch
+		for (int index = retval.size() - 2; index >= 0; --index) {
+			Long pid = retval.get(index);
+			IBaseResource resource = dao.readByPid(new ResourcePersistentId(pid));
+			if (!earliestUpdatedDate.equals((resource.getMeta().getLastUpdated()))) {
+				break;
+			}
+			myAlreadyProcessedPidsWithHighDate.get(myUrlIndex).add(pidOfOldestResourceInBatch);
+		}
 	}
 
 	@Nonnull
