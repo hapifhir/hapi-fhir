@@ -118,17 +118,6 @@ public class PatientIdPartitionInterceptor {
 		return provideCompartmentMemberInstanceResponse(theRequestDetails, compartmentIdentity);
 	}
 
-	@Nonnull
-	private List<RuntimeSearchParam> getCompartmentSearchParams(RuntimeResourceDefinition resourceDef) {
-		return resourceDef
-			.getSearchParams()
-			.stream()
-			.filter(param -> param.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
-			.filter(param -> param.getProvidesMembershipInCompartments() != null && param.getProvidesMembershipInCompartments().contains("Patient"))
-			.collect(Collectors.toList());
-	}
-
-
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
 	public RequestPartitionId identifyForRead(ReadPartitionIdRequestDetails theReadDetails, RequestDetails theRequestDetails) {
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theReadDetails.getResourceType());
@@ -169,7 +158,23 @@ public class PatientIdPartitionInterceptor {
 				// nothing
 		}
 
-		return provideUnsupportedQueryResponse(theReadDetails);
+		// If we couldn't identify a patient ID by the URL, let's try using the
+		// conditional target if we have one
+		if (theReadDetails.getConditionalTargetOrNull() != null) {
+			return identifyForCreate(theReadDetails.getConditionalTargetOrNull(), theRequestDetails);
+		}
+
+		return provideNonPatientSpecificQueryResponse(theReadDetails);
+	}
+
+	@Nonnull
+	private List<RuntimeSearchParam> getCompartmentSearchParams(RuntimeResourceDefinition resourceDef) {
+		return resourceDef
+			.getSearchParams()
+			.stream()
+			.filter(param -> param.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
+			.filter(param -> param.getProvidesMembershipInCompartments() != null && param.getProvidesMembershipInCompartments().contains("Patient"))
+			.collect(Collectors.toList());
 	}
 
 	private String getSingleResourceIdValueOrNull(SearchParameterMap theParams, String theParamName, String theResourceType) {
@@ -206,8 +211,8 @@ public class PatientIdPartitionInterceptor {
 	/**
 	 * Return a partition or throw an error for FHIR operations that can not be used with this interceptor
 	 */
-	protected RequestPartitionId provideUnsupportedQueryResponse(ReadPartitionIdRequestDetails theRequestDetails) {
-		throw new MethodNotAllowedException("This server is not able to handle this request of type " + theRequestDetails.getRestOperationType());
+	protected RequestPartitionId provideNonPatientSpecificQueryResponse(ReadPartitionIdRequestDetails theRequestDetails) {
+		return RequestPartitionId.allPartitions();
 	}
 
 

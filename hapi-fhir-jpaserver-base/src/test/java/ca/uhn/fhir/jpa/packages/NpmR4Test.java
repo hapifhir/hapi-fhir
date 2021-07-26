@@ -423,9 +423,9 @@ public class NpmR4Test extends BaseJpaR4Test {
 		myDaoConfig.setAllowExternalReferences(true);
 
 		byte[] bytes = loadClasspathBytes("/packages/test-draft-sample.tgz");
-		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.11.1", bytes);
+		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.onlydrafts/0.11.1", bytes);
 
-		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.onlydrafts").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
 		assertEquals(0, outcome.getResourcesInstalled().size(), outcome.getResourcesInstalled().toString());
 

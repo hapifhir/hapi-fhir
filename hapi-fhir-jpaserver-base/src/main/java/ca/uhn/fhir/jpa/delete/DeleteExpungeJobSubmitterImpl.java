@@ -30,6 +30,8 @@ import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.job.MultiUrlProcessorJobConfig;
 import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
@@ -53,6 +55,10 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 	private Job myDeleteExpungeJob;
 	@Autowired
 	FhirContext myFhirContext;
+	@Autowired
+	MatchUrlService myMatchUrlService;
+	@Autowired
+	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Autowired
 	DaoConfig myDaoConfig;
 	@Autowired

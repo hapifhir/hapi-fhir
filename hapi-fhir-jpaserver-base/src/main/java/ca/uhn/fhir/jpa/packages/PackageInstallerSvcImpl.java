@@ -27,22 +27,22 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -56,13 +56,14 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
+import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.hl7.fhir.utilities.npm.NpmPackage;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -226,7 +227,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					create(next, theOutcome);
 				} catch (Exception e) {
 					ourLog.warn("Failed to upload resource of type {} with ID {} - Error: {}", myFhirContext.getResourceType(next), next.getIdElement().getValue(), e.toString());
-					throw new ImplementationGuideInstallationException(String.format("Error installing IG %s#%s: %s", name, version, e.toString()), e);
+					throw new ImplementationGuideInstallationException(String.format("Error installing IG %s#%s: %s", name, version, e), e);
 				}
 
 			}
@@ -358,16 +359,23 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private IBundleProvider searchResource(IFhirResourceDao theDao, SearchParameterMap theMap) {
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			SystemRequestDetails requestDetails = new SystemRequestDetails();
+			SystemRequestDetails requestDetails = newSystemRequestDetails();
 			return theDao.search(theMap, requestDetails);
 		} else {
 			return theDao.search(theMap);
 		}
 	}
 
+	@Nonnull
+	private SystemRequestDetails newSystemRequestDetails() {
+		return
+			new SystemRequestDetails()
+				.setRequestPartitionId(RequestPartitionId.defaultPartition());
+	}
+
 	private void createResource(IFhirResourceDao theDao, IBaseResource theResource) {
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			SystemRequestDetails requestDetails = new SystemRequestDetails();
+			SystemRequestDetails requestDetails = newSystemRequestDetails();
 			theDao.create(theResource, requestDetails);
 		} else {
 			theDao.create(theResource);
@@ -376,7 +384,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private DaoMethodOutcome updateResource(IFhirResourceDao theDao, IBaseResource theResource) {
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			SystemRequestDetails requestDetails = new SystemRequestDetails();
+			SystemRequestDetails requestDetails = newSystemRequestDetails();
 			return theDao.update(theResource, requestDetails);
 		} else {
 			return theDao.update(theResource);
@@ -404,9 +412,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 		List<IPrimitiveType> statusTypes = myFhirContext.newFhirPath().evaluate(theResource, "status", IPrimitiveType.class);
 		if (statusTypes.size() > 0) {
-			if (!statusTypes.get(0).getValueAsString().equals("active")) {
-				return false;
-			}
+			return statusTypes.get(0).getValueAsString().equals("active");
 		}
 
 		return true;

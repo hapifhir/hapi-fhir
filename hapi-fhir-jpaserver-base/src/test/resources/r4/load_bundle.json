@@ -6,7 +6,7 @@
 			"resource": {
 				"resourceType": "ExplanationOfBenefit",
 				"meta": {
-					"lastUpdated": "2021-06-07",
+					"lastUpdated": "2021-06-30",
 					"profile": [
 						"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician"
 					]
@@ -22,7 +22,7 @@
 							]
 						},
 						"system": "https://hl7.org/fhir/sid/payerid",
-						"value": "37525500673"
+						"value": "5824473976"
 					},
 					{
 						"type": {
@@ -34,7 +34,7 @@
 							]
 						},
 						"system": "https://hl7.org/fhir/sid/claimid",
-						"value": "26723516"
+						"value": "1234094"
 					}
 				],
 				"status": "active",
@@ -48,18 +48,18 @@
 				},
 				"use": "claim",
 				"patient": {
-					"reference": "Patient/d16f4424-9703-23bf-8331-3fc4bceb0c21"
+					"reference": "Patient/d1a47e2c-509b-e326-deab-597e3f598ca5"
 				},
 				"billablePeriod": {
-					"start": "2018-01-09",
-					"end": "2018-01-09"
+					"start": "2017-01-08",
+					"end": "2017-01-08"
 				},
-				"created": "2018-01-08T00:00:00-08:00",
+				"created": "2017-01-11T00:00:00-08:00",
 				"insurer": {
-					"reference": "Organization/b77d3b98-03d8-1f0a-07b7-30b636c6ea9b"
+					"reference": "Organization/5954a17b-0779-334c-4f1c-e894e45d15fb"
 				},
 				"provider": {
-					"reference": "Organization/e03b46ec-94df-0849-49eb-f5bba0c024c2"
+					"reference": "Organization/68ae4f74-afdc-6242-c50e-02ef776d8e5d"
 				},
 				"payee": {
 					"type": {
@@ -70,18 +70,48 @@
 							}
 						],
 						"text": "Claim paid to VENDOR"
+					},
+					"party": {
+						"reference": "Organization/68ae4f74-afdc-6242-c50e-02ef776d8e5d"
 					}
 				},
-				"facility": {
-					"reference": "Location/11651884-37d2-eede-e1b9-059afd90811a"
-				},
 				"outcome": "complete",
-				"disposition": "DENIED",
+				"disposition": "PAID",
 				"careTeam": [
 					{
 						"sequence": 1,
 						"provider": {
-							"reference": "Practitioner/d2fc93e1-e1f8-c6d3-6c2c-9301f0e02c7c"
+							"reference": "Practitioner/23eccc61-ab67-bf8a-e464-6260f7989556"
+						},
+						"responsible": false,
+						"role": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+									"code": "primary"
+								}
+							]
+						}
+					},
+					{
+						"sequence": 2,
+						"provider": {
+							"reference": "Practitioner/dbbc9a06-f685-b481-d739-133755af138e"
+						},
+						"responsible": false,
+						"role": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+									"code": "referring"
+								}
+							]
+						}
+					},
+					{
+						"sequence": 3,
+						"provider": {
+							"reference": "Practitioner/39b9250c-0d01-cbb0-ea89-0de9c74af511"
 						},
 						"responsible": true,
 						"role": {
@@ -105,7 +135,7 @@
 								}
 							]
 						},
-						"timingDate": "2018-01-08"
+						"timingDate": "2017-01-11"
 					},
 					{
 						"sequence": 2,
@@ -121,7 +151,7 @@
 							"coding": [
 								{
 									"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus",
-									"code": "contracted"
+									"code": "other"
 								}
 							]
 						}
@@ -129,42 +159,32 @@
 				],
 				"diagnosis": [
 					{
-						"sequence": 1,
+						"sequence": 4,
 						"diagnosisCodeableConcept": {
 							"coding": [
 								{
 									"system": "http://hl7.org/fhir/sid/icd-10-cm",
-									"code": "M47.012",
-									"display": "ANT SPINAL ART COMPRESSION SYND CERVICAL REGION"
+									"code": "I27.2",
+									"display": "Other secondary pulmonary hypertension"
 								}
 							],
-							"text": "ANT SPINAL ART COMPRESSION SYND CERVICAL REGION"
-						},
-						"type": [
-							{
-								"coding": [
-									{
-										"system": "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
-										"code": "principal"
-									}
-								]
-							}
-						]
+							"text": "Other secondary pulmonary hypertension"
+						}
 					}
 				],
 				"procedure": [
 					{
 						"sequence": 1,
-						"date": "2018-01-08T00:00:00-08:00",
+						"date": "2017-01-08T00:00:00-08:00",
 						"procedureCodeableConcept": {
 							"coding": [
 								{
 									"system": "http://www.ama-assn.org/go/cpt",
-									"code": "L0454",
-									"display": "TLSO FLEX PREFAB SACROCOC-T9"
+									"code": "99233",
+									"display": "Subsequent hospital care for severe problem"
 								}
 							],
-							"text": "TLSO FLEXIBLE SC JUNCT TO T-9 PREFAB CUSTOM FIT"
+							"text": "SBSQ HOSPITAL CARE/DAY 35 MINUTES"
 						}
 					}
 				],
@@ -172,7 +192,7 @@
 					{
 						"focal": true,
 						"coverage": {
-							"reference": "urn:uuid:a8430b1b-1f26-44ea-8866-a605ebb48f21"
+							"reference": "urn:uuid:175dbf4a-7ee2-446d-9938-82eea27871a7"
 						}
 					}
 				],
@@ -180,7 +200,7 @@
 					{
 						"sequence": 1,
 						"diagnosisSequence": [
-							1
+							4
 						],
 						"procedureSequence": [
 							1
@@ -189,33 +209,21 @@
 							"coding": [
 								{
 									"system": "http://www.ama-assn.org/go/cpt",
-									"code": "L0454",
-									"display": "TLSO FLEX PREFAB SACROCOC-T9"
+									"code": "99233",
+									"display": "Subsequent hospital care for severe problem"
 								}
 							],
-							"text": "TLSO FLEXIBLE SC JUNCT TO T-9 PREFAB CUSTOM FIT"
+							"text": "SBSQ HOSPITAL CARE/DAY 35 MINUTES"
 						},
-						"modifier": [
-							{
-								"coding": [
-									{
-										"system": "http://www.ama-assn.org/go/cpt",
-										"code": "NU",
-										"display": "NEW EQUIPMENT"
-									}
-								],
-								"text": "NEW EQUIPMENT"
-							}
-						],
 						"servicedPeriod": {
-							"start": "2018-01-08",
-							"end": "2018-01-08"
+							"start": "2017-01-08",
+							"end": "2017-01-08"
 						},
 						"locationCodeableConcept": {
 							"coding": [
 								{
 									"system": "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set",
-									"code": "11"
+									"code": "99"
 								}
 							]
 						},
@@ -226,13 +234,9 @@
 							"code": "[arb'U]"
 						},
 						"net": {
-							"value": 704.26,
+							"value": 317.00,
 							"currency": "USD"
 						},
-						"noteNumber": [
-							1,
-							2
-						],
 						"adjudication": [
 							{
 								"category": {
@@ -244,7 +248,7 @@
 									]
 								},
 								"amount": {
-									"value": 704.26,
+									"value": 317.00,
 									"currency": "USD"
 								}
 							},
@@ -258,7 +262,7 @@
 									]
 								},
 								"amount": {
-									"value": 0,
+									"value": 124.69,
 									"currency": "USD"
 								}
 							},
@@ -272,7 +276,7 @@
 									]
 								},
 								"amount": {
-									"value": 0,
+									"value": 0.00,
 									"currency": "USD"
 								}
 							},
@@ -286,7 +290,7 @@
 									]
 								},
 								"amount": {
-									"value": 0,
+									"value": 124.69,
 									"currency": "USD"
 								}
 							},
@@ -300,7 +304,7 @@
 									]
 								},
 								"amount": {
-									"value": 0,
+									"value": 0.00,
 									"currency": "USD"
 								}
 							},
@@ -314,7 +318,7 @@
 									]
 								},
 								"amount": {
-									"value": 0,
+									"value": 124.69,
 									"currency": "USD"
 								}
 							},
@@ -328,7 +332,7 @@
 									]
 								},
 								"amount": {
-									"value": 0,
+									"value": 0.00,
 									"currency": "USD"
 								}
 							},
@@ -342,7 +346,7 @@
 									]
 								},
 								"amount": {
-									"value": 0,
+									"value": 0.00,
 									"currency": "USD"
 								}
 							},
@@ -356,7 +360,7 @@
 									]
 								},
 								"amount": {
-									"value": 0,
+									"value": 0.00,
 									"currency": "USD"
 								}
 							},
@@ -370,7 +374,7 @@
 									]
 								},
 								"amount": {
-									"value": 0,
+									"value": 0.00,
 									"currency": "USD"
 								}
 							}
@@ -388,7 +392,7 @@
 							]
 						},
 						"amount": {
-							"value": 704.26,
+							"value": 317.00,
 							"currency": "USD"
 						}
 					},
@@ -402,7 +406,7 @@
 							]
 						},
 						"amount": {
-							"value": 0,
+							"value": 124.69,
 							"currency": "USD"
 						}
 					},
@@ -416,7 +420,7 @@
 							]
 						},
 						"amount": {
-							"value": 0,
+							"value": 0.00,
 							"currency": "USD"
 						}
 					},
@@ -430,7 +434,7 @@
 							]
 						},
 						"amount": {
-							"value": 0,
+							"value": 124.69,
 							"currency": "USD"
 						}
 					},
@@ -444,7 +448,7 @@
 							]
 						},
 						"amount": {
-							"value": 0,
+							"value": 0.00,
 							"currency": "USD"
 						}
 					},
@@ -458,7 +462,7 @@
 							]
 						},
 						"amount": {
-							"value": 0,
+							"value": 124.69,
 							"currency": "USD"
 						}
 					},
@@ -472,7 +476,7 @@
 							]
 						},
 						"amount": {
-							"value": 0,
+							"value": 0.00,
 							"currency": "USD"
 						}
 					},
@@ -486,7 +490,7 @@
 							]
 						},
 						"amount": {
-							"value": 0,
+							"value": 0.00,
 							"currency": "USD"
 						}
 					},
@@ -500,42 +504,30 @@
 							]
 						},
 						"amount": {
-							"value": 0,
+							"value": 0.00,
 							"currency": "USD"
 						}
 					}
 				],
 				"payment": {
-					"date": "2021-01-22",
+					"date": "2017-02-02",
 					"amount": {
-						"value": 0,
+						"value": 0.00,
 						"currency": "USD"
 					}
-				},
-				"processNote": [
-					{
-						"number": 1,
-						"type": "display",
-						"text": "AUD02: DENY, NOT AUTHORIZED, PROVIDER LIABILITY"
-					},
-					{
-						"number": 2,
-						"type": "display",
-						"text": "BED08: DENY, PROCEDURE NOT COVERED"
-					}
-				]
+				}
 			},
 			"request": {
 				"method": "PUT",
-				"url": "ExplanationOfBenefit?identifier=37525500673"
+				"url": "ExplanationOfBenefit?identifier=5824473976"
 			}
 		},
 		{
 			"resource": {
 				"resourceType": "Patient",
-				"id": "d16f4424-9703-23bf-8331-3fc4bceb0c21",
+				"id": "d1a47e2c-509b-e326-deab-597e3f598ca5",
 				"meta": {
-					"lastUpdated": "2021-06-07",
+					"lastUpdated": "2021-06-30",
 					"profile": [
 						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
 					]
@@ -551,52 +543,52 @@
 							]
 						},
 						"system": "https://example.org/front-door",
-						"value": "1000116-GA"
+						"value": "412563524-CO"
 					}
 				],
 				"name": [
 					{
 						"use": "usual",
-						"text": "Gaabcseven Testing",
-						"family": "Testing",
+						"text": "HYOHWAN MGUIRRE",
+						"family": "MGUIRRE",
 						"given": [
-							"Gaabcsix"
+							"HYOHWAN"
 						]
 					}
 				],
 				"telecom": [
 					{
 						"system": "phone",
-						"value": "662-123-3456",
+						"value": "719-654-0220",
 						"use": "home"
 					}
 				],
-				"gender": "male",
-				"birthDate": "1961-01-01",
+				"gender": "unknown",
+				"birthDate": "1958-05-12",
 				"address": [
 					{
 						"use": "home",
 						"type": "postal",
 						"line": [
-							"TEST ADDRESS AVE, APT 234"
+							"20360 East 45Th Court",
+							"PO Box 523"
 						],
-						"city": "ATLANTA",
-						"state": "GA",
-						"postalCode": "30301"
+						"city": "COLORADO SPRINGS",
+						"postalCode": "80922-4166"
 					}
 				]
 			},
 			"request": {
 				"method": "PUT",
-				"url": "Patient/d16f4424-9703-23bf-8331-3fc4bceb0c21"
+				"url": "Patient/d1a47e2c-509b-e326-deab-597e3f598ca5"
 			}
 		},
 		{
-			"fullUrl": "urn:uuid:a8430b1b-1f26-44ea-8866-a605ebb48f21",
+			"fullUrl": "urn:uuid:175dbf4a-7ee2-446d-9938-82eea27871a7",
 			"resource": {
 				"resourceType": "Coverage",
 				"meta": {
-					"lastUpdated": "2021-06-07",
+					"lastUpdated": "2021-06-30",
 					"profile": [
 						"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage"
 					]
@@ -612,7 +604,7 @@
 							]
 						},
 						"system": "https://hl7.org/fhir/sid/coverageid",
-						"value": "1000116-GA-10159"
+						"value": "412563524-CO-80001"
 					}
 				],
 				"status": "active",
@@ -624,11 +616,11 @@
 							"display": "health maintenance organization policy"
 						}
 					],
-					"text": "COMMERCIAL HMO-HMO-Amb Accum"
+					"text": "HMO - HMO COMMERCIAL-HDHP-Signature"
 				},
-				"subscriberId": "1000116",
+				"subscriberId": "412563524",
 				"beneficiary": {
-					"reference": "Patient/d16f4424-9703-23bf-8331-3fc4bceb0c21"
+					"reference": "Patient/d1a47e2c-509b-e326-deab-597e3f598ca5"
 				},
 				"relationship": {
 					"coding": [
@@ -641,11 +633,12 @@
 					"text": "The Beneficiary is the Subscriber"
 				},
 				"period": {
-					"start": "2017-01-01"
+					"start": "2016-01-01",
+					"end": "2017-07-01"
 				},
 				"payor": [
 					{
-						"reference": "Organization/b77d3b98-03d8-1f0a-07b7-30b636c6ea9b"
+						"reference": "Organization/5954a17b-0779-334c-4f1c-e894e45d15fb"
 					}
 				],
 				"class": [
@@ -660,22 +653,22 @@
 							],
 							"text": "An employee group"
 						},
-						"value": "10159",
-						"name": "10159-100 STATE DEPTS, DFACS, HEALTH-NON-MEDICARE"
+						"value": "80001",
+						"name": "CS BRZ HDHP 5500/30%/0 ONX S-NON-MEDICARE"
 					}
 				]
 			},
 			"request": {
 				"method": "PUT",
-				"url": "Coverage?identifier=1000116-GA-10159"
+				"url": "Coverage?identifier=412563524-CO-80001"
 			}
 		},
 		{
 			"resource": {
 				"resourceType": "Organization",
-				"id": "e03b46ec-94df-0849-49eb-f5bba0c024c2",
+				"id": "68ae4f74-afdc-6242-c50e-02ef776d8e5d",
 				"meta": {
-					"lastUpdated": "2021-06-07",
+					"lastUpdated": "2021-06-30",
 					"profile": [
 						"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization"
 					]
@@ -690,7 +683,8 @@
 								}
 							]
 						},
-						"system": "http://hl7.org/fhir/sid/us-npi"
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "1407833767"
 					},
 					{
 						"type": {
@@ -701,8 +695,7 @@
 								}
 							]
 						},
-						"system": "urn:oid:2.16.840.1.113883.4.4",
-						"value": "330057155"
+						"system": "urn:oid:2.16.840.1.113883.4.4"
 					}
 				],
 				"active": true,
@@ -716,32 +709,31 @@
 						]
 					}
 				],
-				"name": "APRIA HEALTHCARE LLC",
+				"name": "PIKES PEAK NEPHROLOGY ASSOCIATES PC",
 				"address": [
 					{
 						"use": "work",
 						"type": "physical",
 						"line": [
-							"2508 SOLUTIONS CENTER"
+							"1914 LELARAY STREET"
 						],
-						"city": "CHICAGO",
-						"state": "IL",
-						"postalCode": "60677-2005",
+						"city": "COLORADO SPRINGS",
+						"postalCode": "80909",
 						"country": "USA"
 					}
 				]
 			},
 			"request": {
 				"method": "PUT",
-				"url": "Organization/e03b46ec-94df-0849-49eb-f5bba0c024c2"
+				"url": "Organization/68ae4f74-afdc-6242-c50e-02ef776d8e5d"
 			}
 		},
 		{
 			"resource": {
 				"resourceType": "Organization",
-				"id": "b77d3b98-03d8-1f0a-07b7-30b636c6ea9b",
+				"id": "5954a17b-0779-334c-4f1c-e894e45d15fb",
 				"meta": {
-					"lastUpdated": "2021-06-07",
+					"lastUpdated": "2021-06-30",
 					"profile": [
 						"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization"
 					]
@@ -758,7 +750,7 @@
 							]
 						},
 						"system": "https://hl7.org/fhir/sid/organizationid",
-						"value": "NATLTAP GA-KFHP-GA"
+						"value": "NATLTAP CO-KFHP-PAY-CO"
 					}
 				],
 				"active": true,
@@ -777,7 +769,7 @@
 				"telecom": [
 					{
 						"system": "phone",
-						"value": "1-888-865-5813",
+						"value": "1-800-382-4661",
 						"use": "work"
 					}
 				],
@@ -786,7 +778,7 @@
 						"use": "work",
 						"type": "postal",
 						"line": [
-							"NATIONAL CLAIMS ADMINISTRATION GEORGIA",
+							"NATIONAL CLAIMS ADMINISTRATION COLORADO",
 							"PO Box 629028"
 						],
 						"city": "El Dorado Hills",
@@ -797,15 +789,15 @@
 			},
 			"request": {
 				"method": "PUT",
-				"url": "Organization/b77d3b98-03d8-1f0a-07b7-30b636c6ea9b"
+				"url": "Organization/5954a17b-0779-334c-4f1c-e894e45d15fb"
 			}
 		},
 		{
 			"resource": {
 				"resourceType": "Practitioner",
-				"id": "d2fc93e1-e1f8-c6d3-6c2c-9301f0e02c7c",
+				"id": "23eccc61-ab67-bf8a-e464-6260f7989556",
 				"meta": {
-					"lastUpdated": "2021-06-07",
+					"lastUpdated": "2021-06-30",
 					"profile": [
 						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
 					]
@@ -822,40 +814,48 @@
 							]
 						},
 						"system": "http://hl7.org/fhir/sid/us-npi",
-						"value": "PIN2001487498"
+						"value": "1497983654"
 					}
 				],
 				"name": [
 					{
 						"use": "usual",
-						"text": "APRIA HEALTHCARE LLC",
-						"family": "APRIA HEALTHCARE LLC"
+						"text": "CASSIDY, HEATHER M (MD)",
+						"family": "CASSIDY",
+						"given": [
+							"HEATHER"
+						],
+						"suffix": [
+							"MD"
+						]
 					}
 				],
 				"address": [
 					{
 						"use": "work",
 						"line": [
-							"805 MARATHON PARKWAY",
-							"SUITE 160"
+							"Briargate",
+							"1405 Briargate Pkwy #141"
 						],
-						"city": "LAWRENCEVILLE",
-						"state": "GA",
-						"postalCode": "30046"
+						"city": "Colorado Springs",
+						"postalCode": "80920"
 					}
 				]
 			},
 			"request": {
 				"method": "PUT",
-				"url": "Practitioner/d2fc93e1-e1f8-c6d3-6c2c-9301f0e02c7c"
+				"url": "Practitioner/23eccc61-ab67-bf8a-e464-6260f7989556"
 			}
 		},
 		{
 			"resource": {
-				"resourceType": "Location",
-				"id": "11651884-37d2-eede-e1b9-059afd90811a",
+				"resourceType": "Practitioner",
+				"id": "dbbc9a06-f685-b481-d739-133755af138e",
 				"meta": {
-					"lastUpdated": "2021-06-07"
+					"lastUpdated": "2021-06-30",
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+					]
 				},
 				"identifier": [
 					{
@@ -868,36 +868,118 @@
 								}
 							]
 						},
-						"value": "PIN12120678"
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "1568467280"
+					},
+					{
+						"use": "usual",
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "TAX"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.4.4",
+						"value": "311669909"
 					}
 				],
-				"status": "active",
-				"name": "APRIA HEALTHCARE INC-30013",
-				"mode": "kind",
-				"type": [
+				"name": [
 					{
-						"coding": [
-							{
-								"system": "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set",
-								"code": "99"
-							}
+						"use": "usual",
+						"text": "MOHNSSEN, STEVEN R (MD)",
+						"family": "MOHNSSEN",
+						"given": [
+							"STEVEN"
+						],
+						"suffix": [
+							"MD"
 						]
 					}
 				],
-				"address": {
-					"use": "work",
-					"type": "physical",
-					"line": [
-						"594 SIGMAN RD STE 100"
-					],
-					"city": "CONYERS",
-					"state": "GA",
-					"postalCode": "30013-1365"
-				}
+				"address": [
+					{
+						"use": "work",
+						"line": [
+							"1725 E Boulder St",
+							"Ste 204"
+						],
+						"city": "Colorado Springs",
+						"postalCode": "80909"
+					}
+				]
 			},
 			"request": {
 				"method": "PUT",
-				"url": "Location/11651884-37d2-eede-e1b9-059afd90811a"
+				"url": "Practitioner/dbbc9a06-f685-b481-d739-133755af138e"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Practitioner",
+				"id": "39b9250c-0d01-cbb0-ea89-0de9c74af511",
+				"meta": {
+					"lastUpdated": "2021-06-30",
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+					]
+				},
+				"identifier": [
+					{
+						"use": "usual",
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "NPI"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "1679605265"
+					},
+					{
+						"use": "usual",
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "TAX"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.4.4",
+						"value": "840629252"
+					}
+				],
+				"name": [
+					{
+						"use": "usual",
+						"text": "ROSS, MICHAEL D (MD)",
+						"family": "ROSS",
+						"given": [
+							"MICHAEL"
+						],
+						"suffix": [
+							"MD"
+						]
+					}
+				],
+				"address": [
+					{
+						"use": "work",
+						"line": [
+							"1914 Lelaray St"
+						],
+						"city": "Colorado Springs",
+						"postalCode": "80909"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Practitioner/39b9250c-0d01-cbb0-ea89-0de9c74af511"
 			}
 		}
 	]

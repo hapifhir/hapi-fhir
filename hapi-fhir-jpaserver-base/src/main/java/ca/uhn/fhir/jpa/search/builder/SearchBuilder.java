@@ -57,14 +57,11 @@ import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryExecutor;
 import ca.uhn.fhir.jpa.search.builder.sql.SqlObjectFactory;
 import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
+import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
-import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
-import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -75,6 +72,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
@@ -85,6 +83,8 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -814,7 +814,9 @@ public class SearchBuilder implements ISearchBuilder {
 					if (findVersionFieldName != null) {
 						sqlBuilder.append(", r." + findVersionFieldName);
 					}
-					sqlBuilder.append(" FROM ResourceLink r WHERE r.");
+					sqlBuilder.append(" FROM ResourceLink r WHERE ");
+
+					sqlBuilder.append("r.");
 					sqlBuilder.append(searchPidFieldName);
 					sqlBuilder.append(" IN (:target_pids)");
 

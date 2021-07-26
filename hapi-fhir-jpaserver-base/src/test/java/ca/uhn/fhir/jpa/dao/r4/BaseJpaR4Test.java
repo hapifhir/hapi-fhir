@@ -506,6 +506,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 		myPagingProvider.setDefaultPageSize(BasePagingProvider.DEFAULT_DEFAULT_PAGE_SIZE);
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
+
+		myPartitionSettings.setPartitioningEnabled(false);
 	}
 
 	@AfterEach

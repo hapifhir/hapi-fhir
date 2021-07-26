@@ -49,6 +49,7 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
@@ -566,12 +567,10 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		/*
 		 * 20 should be prefetched since that's the initial page size
 		 */
-		await().until(() -> {
-			return runInTransaction(() -> {
-				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
-				return search.getNumFound() == 20;
-			});
-		});
+		await().until(() -> runInTransaction(() -> {
+			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
+			return search.getNumFound();
+		}), equalTo(20));
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			assertEquals(20, search.getNumFound());
@@ -676,7 +675,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			Throwable t = next.get();
 			if (t != null) {
 				String stackTrace = ExceptionUtils.getStackTrace(t);
-				fail(t.toString() + "\n" + stackTrace);
+				fail(t + "\n" + stackTrace);
 			}
 		}
 		executor.shutdownNow();
