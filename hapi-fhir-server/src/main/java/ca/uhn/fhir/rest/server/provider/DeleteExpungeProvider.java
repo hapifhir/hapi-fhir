@@ -44,6 +44,6 @@ public class DeleteExpungeProvider extends BaseMultiUrlProcessor {
 		RequestDetails theRequestDetails
 	) {
 		List<String> urls = theUrlsToDeleteExpunge.stream().map(IPrimitiveType::getValue).collect(Collectors.toList());
-		return super.processUrls(urls, theBatchSize, theRequestDetails);
+		return super.processUrls(urls, getBatchSize(theBatchSize), theRequestDetails);
 	}
 }

@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IReindexJobSubmitter;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -46,11 +47,12 @@ public class ReindexProvider extends BaseMultiUrlProcessor {
 		RequestDetails theRequestDetails
 	) {
 		Boolean everything = theEverything != null && theEverything.getValue();
+		@Nullable Integer batchSize = getBatchSize(theBatchSize);
 		if (everything) {
-			return super.processEverything(theBatchSize, theRequestDetails);
+			return super.processEverything(batchSize, theRequestDetails);
 		} else {
 			List<String> urls = theUrlsToReindex.stream().map(IPrimitiveType::getValue).collect(Collectors.toList());
-			return super.processUrls(urls, theBatchSize, theRequestDetails);
+			return super.processUrls(urls, batchSize, theRequestDetails);
 		}
 	}
 }

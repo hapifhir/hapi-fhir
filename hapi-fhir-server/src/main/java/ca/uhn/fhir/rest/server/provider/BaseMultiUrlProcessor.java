@@ -7,10 +7,12 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 public class BaseMultiUrlProcessor {
@@ -22,13 +24,9 @@ public class BaseMultiUrlProcessor {
 		myFhirContext = theFhirContext;
 	}
 
-	protected IBaseParameters processUrls(List<String> theUrlsToProcess, IPrimitiveType<BigDecimal> theBatchSize, RequestDetails theRequestDetails) {
+	protected IBaseParameters processUrls(List<String> theUrlsToProcess, Integer theBatchSize, RequestDetails theRequestDetails) {
 		try {
-			Integer batchSize = null;
-			if (theBatchSize != null && !theBatchSize.isEmpty()) {
-				batchSize = theBatchSize.getValue().intValue();
-			}
-			JobExecution jobExecution = myMultiUrlProcessorJobSubmitter.submitJob(batchSize, theUrlsToProcess, theRequestDetails);
+			JobExecution jobExecution = myMultiUrlProcessorJobSubmitter.submitJob(theBatchSize, theUrlsToProcess, theRequestDetails);
 			IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
 			ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID, jobExecution.getJobId());
 			return retval;
@@ -37,8 +35,23 @@ public class BaseMultiUrlProcessor {
 		}
 	}
 
-	protected IBaseParameters processEverything(IPrimitiveType<BigDecimal> theBatchSize, RequestDetails theRequestDetails) {
-		// FIXME KHS
-		return ParametersUtil.newInstance(myFhirContext);
+	protected IBaseParameters processEverything(Integer theBatchSize, RequestDetails theRequestDetails) {
+		try {
+			JobExecution jobExecution = myMultiUrlProcessorJobSubmitter.submitJob(theBatchSize, new ArrayList<>(), theRequestDetails);
+			IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
+			ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID, jobExecution.getJobId());
+			return retval;
+		} catch (JobParametersInvalidException e) {
+			throw new InvalidRequestException("Invalid job parameters: " + e.getMessage(), e);
+		}
+	}
+
+	@Nullable
+	protected Integer getBatchSize(IPrimitiveType<BigDecimal> theBatchSize) {
+		Integer batchSize = null;
+		if (theBatchSize != null && !theBatchSize.isEmpty()) {
+			batchSize = theBatchSize.getValue().intValue();
+		}
+		return batchSize;
 	}
 }
