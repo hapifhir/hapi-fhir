@@ -91,7 +91,7 @@ public abstract class BaseHapiFhirResourceDaoObservation<T extends IBaseResource
 		TreeMap<Long, IQueryParameterType> orderedSubjectReferenceMap = new TreeMap<>();
 		if(theSearchParameterMap.containsKey(getSubjectParamName())) {
 
-			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequestDetails, getResourceName(), theSearchParameterMap);
+			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequestDetails, getResourceName(), theSearchParameterMap, null);
 
 			List<List<IQueryParameterType>> patientParams = new ArrayList<>();
 			if (theSearchParameterMap.get(getPatientParamName()) != null) {

@@ -808,7 +808,9 @@ public class SearchBuilder implements ISearchBuilder {
 					if (findVersionFieldName != null) {
 						sqlBuilder.append(", r." + findVersionFieldName);
 					}
-					sqlBuilder.append(" FROM ResourceLink r WHERE r.");
+					sqlBuilder.append(" FROM ResourceLink r WHERE ");
+
+					sqlBuilder.append("r.");
 					sqlBuilder.append(searchPidFieldName);
 					sqlBuilder.append(" IN (:target_pids)");
 
