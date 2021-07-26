@@ -92,7 +92,7 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 		List<RequestPartitionId> retval = new ArrayList<>();
 		for (String url : theUrlsToDeleteExpunge) {
 			ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(url);
-			RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequest, resourceSearch.getResourceName(), null);
+			RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequest, resourceSearch.getResourceName(), null, null);
 			retval.add(requestPartitionId);
 		}
 		return retval;
