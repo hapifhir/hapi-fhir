@@ -125,8 +125,8 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
