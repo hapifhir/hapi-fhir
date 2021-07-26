@@ -81,7 +81,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 *                           won't be indexed and searches won't work.
 	 * @param theRequestDetails  TODO
 	 */
-	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing,  @Nonnull TransactionDetails theTransactionDetails, RequestDetails theRequestDetails);
+	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, @Nonnull TransactionDetails theTransactionDetails, RequestDetails theRequestDetails);
 
 	DaoMethodOutcome create(T theResource, String theIfNoneExist, RequestDetails theRequestDetails);
 
@@ -219,8 +219,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * Search for IDs for processing a match URLs, etc.
 	 *
-	 * @param theConditionalCreateTarget If we're searching for IDs in order to satisfy a conditional
-	 *                                   create/update, this is the resource being searched for
+	 * @param theConditionalOperationTargetOrNull If we're searching for IDs in order to satisfy a conditional
+	 *                                            create/update, this is the resource being searched for
 	 * @since 5.5.0
 	 */
 	default Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest, @Nullable IBaseResource theConditionalOperationTargetOrNull) {
@@ -264,7 +264,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @param theForceUpdateVersion Create a new version with the same contents as the current version even if the content hasn't changed (this is mostly useful for
 	 *                              resources mapping to external content such as external code systems)
 	 */
-	DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequestDetails,  @Nonnull TransactionDetails theTransactionDetails);
+	DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequestDetails, @Nonnull TransactionDetails theTransactionDetails);
 
 	/**
 	 * Not supported in DSTU1!
@@ -277,10 +277,11 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	/**
 	 * Delete a list of resource Pids
-	 * @param theUrl the original URL that triggered the delete
-	 * @param theResourceIds the ids of the resources to be deleted
+	 *
+	 * @param theUrl             the original URL that triggered the delete
+	 * @param theResourceIds     the ids of the resources to be deleted
 	 * @param theDeleteConflicts out parameter of conflicts preventing deletion
-	 * @param theRequest the request that initiated the request
+	 * @param theRequest         the request that initiated the request
 	 * @return response back to the client
 	 */
 	DeleteMethodOutcome deletePidList(String theUrl, Collection<ResourcePersistentId> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest);
@@ -288,8 +289,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * Returns the current version ID for the given resource
 	 */
-    default String getCurrentVersionId(IIdType theReferenceElement) {
-    	return read(theReferenceElement.toVersionless()).getIdElement().getVersionIdPart();
-	 }
+	default String getCurrentVersionId(IIdType theReferenceElement) {
+		return read(theReferenceElement.toVersionless()).getIdElement().getVersionIdPart();
+	}
 
 }
