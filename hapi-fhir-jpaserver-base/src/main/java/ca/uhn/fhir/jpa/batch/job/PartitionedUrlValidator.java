@@ -23,7 +23,7 @@ public class PartitionedUrlValidator {
 		List<RequestPartitionId> retval = new ArrayList<>();
 		for (String url : theUrlsToProcess) {
 			ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(url);
-			RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequest, resourceSearch.getResourceName(), null);
+			RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequest, resourceSearch.getResourceName(), resourceSearch.getSearchParameterMap(), null);
 			retval.add(requestPartitionId);
 		}
 		return retval;
