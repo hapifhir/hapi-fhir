@@ -35,7 +35,6 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
-import ca.uhn.fhir.jpa.stresstest.GiantTransactionPerfTest;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
@@ -240,8 +239,9 @@ public abstract class BaseJpaTest extends BaseTest {
 		when(mySrd.getInterceptorBroadcaster()).thenReturn(mySrdInterceptorService);
 		when(mySrd.getUserData()).thenReturn(new HashMap<>());
 		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(new ArrayList<>());
-		when(mySrd.getServer().getDefaultPageSize()).thenReturn(null);
-		when(mySrd.getServer().getMaximumPageSize()).thenReturn(null);
+		// FIXME KHS
+//		when(mySrd.getServer().getDefaultPageSize()).thenReturn(null);
+//		when(mySrd.getServer().getMaximumPageSize()).thenReturn(null);
 	}
 
 	protected CountDownLatch registerLatchHookInterceptor(int theCount, Pointcut theLatchPointcut) {

@@ -114,43 +114,13 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	private ResourceReindexer myResourceReindexer;
 
 	@VisibleForTesting
-	void setReindexJobDaoForUnitTest(IResourceReindexJobDao theReindexJobDao) {
-		myReindexJobDao = theReindexJobDao;
-	}
-
-	@VisibleForTesting
 	void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;
 	}
 
 	@VisibleForTesting
-	void setTxManagerForUnitTest(PlatformTransactionManager theTxManager) {
-		myTxManager = theTxManager;
-	}
-
-	@VisibleForTesting
-	void setResourceTableDaoForUnitTest(IResourceTableDao theResourceTableDao) {
-		myResourceTableDao = theResourceTableDao;
-	}
-
-	@VisibleForTesting
-	void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
-		myDaoRegistry = theDaoRegistry;
-	}
-
-	@VisibleForTesting
-	void setForcedIdDaoForUnitTest(IForcedIdDao theForcedIdDao) {
-		myForcedIdDao = theForcedIdDao;
-	}
-
-	@VisibleForTesting
 	void setContextForUnitTest(FhirContext theContext) {
 		myContext = theContext;
-	}
-
-	@VisibleForTesting
-	void setSchedulerServiceForUnitTest(ISchedulerService theSchedulerService) {
-		mySchedulerService = theSchedulerService;
 	}
 
 	@PostConstruct
@@ -344,8 +314,8 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	}
 
 	@VisibleForTesting
-	void setSearchParamRegistryForUnitTest(ISearchParamRegistry theSearchParamRegistry) {
-		mySearchParamRegistry = theSearchParamRegistry;
+	public void setResourceReindexerForUnitTest(ResourceReindexer theResourceReindexer) {
+		myResourceReindexer = theResourceReindexer;
 	}
 
 	private int runReindexJob(ResourceReindexJobEntity theJob) {

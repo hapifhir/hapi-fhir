@@ -30,8 +30,12 @@ public class ResourceReindexer {
 	private IResourceTableDao myResourceTableDao;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-	@Autowired
-	private FhirContext myFhirContext;
+
+	private final FhirContext myFhirContext;
+
+	public ResourceReindexer(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+	}
 
 	public void readAndReindexResourceByPid(Long theResourcePid) {
 		ResourceTable resourceTable = myResourceTableDao.findById(theResourcePid).orElseThrow(IllegalStateException::new);
@@ -69,7 +73,7 @@ public class ResourceReindexer {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends IBaseResource> void doReindex(ResourceTable theResourceTable, T theResource) {
+	<T extends IBaseResource> void doReindex(ResourceTable theResourceTable, T theResource) {
 		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theResource.getClass());
 		Class<T> resourceClass = (Class<T>) resourceDefinition.getImplementingClass();
 		final IFhirResourceDao<T> dao = myDaoRegistry.getResourceDao(resourceClass);
