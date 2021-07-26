@@ -62,6 +62,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
 		// Now one of them should be indexed
 		assertEquals(1, countAlleleObservations());
+		// FIXME KHS verify it is the right one (see IT)
 	}
 
 

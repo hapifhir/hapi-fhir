@@ -157,9 +157,14 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 
 		// Adjust the high threshold to be the earliest resource in the batch we found
 		Long pidOfOldestResourceInBatch = retval.get(retval.size() - 1);
-		myAlreadyProcessedPidsWithHighDate.computeIfAbsent(myUrlIndex, k -> new HashSet<>()).add(pidOfOldestResourceInBatch);
 		IBaseResource earliestResource = dao.readByPid(new ResourcePersistentId(pidOfOldestResourceInBatch));
 		Date earliestUpdatedDate = earliestResource.getMeta().getLastUpdated();
+
+		// The earliest date has changed, create a new cache to store pids with that date
+		if (myThresholdHighByUrlIndex.get(myUrlIndex) != earliestUpdatedDate) {
+			myAlreadyProcessedPidsWithHighDate.put(myUrlIndex, new HashSet<>());
+		}
+		myAlreadyProcessedPidsWithHighDate.get(myUrlIndex).add(pidOfOldestResourceInBatch);
 		myThresholdHighByUrlIndex.put(myUrlIndex, earliestUpdatedDate);
 		if (retval.size() <= 1) {
 			return;
