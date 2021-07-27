@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.delete.job;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterUtil;
 import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterValidator;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
@@ -42,7 +43,7 @@ class MultiUrlJobParameterValidatorTest {
 	@Test
 	public void testValidate() throws JobParametersInvalidException, JsonProcessingException {
 		// setup
-		JobParameters parameters = DeleteExpungeJobParameterUtil.buildJobParameters("Patient?address=memory", "Patient?name=smith");
+		JobParameters parameters = MultiUrlJobParameterUtil.buildJobParameters("Patient?address=memory", "Patient?name=smith");
 		ResourceSearch resourceSearch = new ResourceSearch(ourFhirContext.getResourceDefinition("Patient"), new SearchParameterMap());
 		when(myMatchUrlService.getResourceSearch(anyString())).thenReturn(resourceSearch);
 		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(true);
@@ -55,7 +56,7 @@ class MultiUrlJobParameterValidatorTest {
 
 	@Test
 	public void testValidateBadType() throws JobParametersInvalidException, JsonProcessingException {
-		JobParameters parameters = DeleteExpungeJobParameterUtil.buildJobParameters("Patient?address=memory");
+		JobParameters parameters = MultiUrlJobParameterUtil.buildJobParameters("Patient?address=memory");
 		ResourceSearch resourceSearch = new ResourceSearch(ourFhirContext.getResourceDefinition("Patient"), new SearchParameterMap());
 		when(myMatchUrlService.getResourceSearch(anyString())).thenReturn(resourceSearch);
 		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(false);

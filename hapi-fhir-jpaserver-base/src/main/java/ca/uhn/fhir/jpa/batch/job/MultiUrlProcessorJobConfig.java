@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.batch.job;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch.job.model.RequestListJson;
@@ -8,7 +7,6 @@ import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
 import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
 import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -23,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MultiUrlProcessorJobConfig {
-	private static final int MINUTES_IN_FUTURE_TO_PROCESS_FROM = 1;
+	public static final int MINUTES_IN_FUTURE_TO_PROCESS_FROM = 1;
 
 	@Nonnull
 	public static JobParameters buildJobParameters(Integer theBatchSize, List<String> theUrlList, List<RequestPartitionId> theRequestPartitionIds) {
@@ -39,8 +37,8 @@ public class MultiUrlProcessorJobConfig {
 	}
 
 	@Bean
-	public JobParametersValidator multiUrlProcessorParameterValidator(FhirContext theFhirContext, MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
-		return new MultiUrlJobParameterValidator(ProviderConstants.OPERATION_DELETE_EXPUNGE, theMatchUrlService, theDaoRegistry);
+	public JobParametersValidator multiUrlProcessorParameterValidator(String theOperationName, MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
+		return new MultiUrlJobParameterValidator(theOperationName, theMatchUrlService, theDaoRegistry);
 	}
 
 	@Bean

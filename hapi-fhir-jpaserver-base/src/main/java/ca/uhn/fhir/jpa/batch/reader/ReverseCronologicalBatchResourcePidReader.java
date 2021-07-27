@@ -67,6 +67,7 @@ import java.util.stream.Collectors;
  * restarting jobs that use this reader so it can pick up where it left off.
  */
 public class ReverseCronologicalBatchResourcePidReader implements ItemReader<List<Long>>, ItemStream {
+	private static final Logger ourLog = LoggerFactory.getLogger(ReverseCronologicalBatchResourcePidReader.class);
 
 	public static final String JOB_PARAM_REQUEST_LIST = "url-list";
 	public static final String JOB_PARAM_BATCH_SIZE = "batch-size";
@@ -74,7 +75,6 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 
 	public static final String CURRENT_URL_INDEX = "current.url-index";
 	public static final String CURRENT_THRESHOLD_HIGH = "current.threshold-high";
-	private static final Logger ourLog = LoggerFactory.getLogger(ReverseCronologicalBatchResourcePidReader.class);
 
 	@Autowired
 	private FhirContext myFhirContext;

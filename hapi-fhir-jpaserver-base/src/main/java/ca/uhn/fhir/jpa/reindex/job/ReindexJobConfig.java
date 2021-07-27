@@ -20,11 +20,11 @@ package ca.uhn.fhir.jpa.reindex.job;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch.job.MultiUrlProcessorJobConfig;
 import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -55,9 +55,9 @@ public class ReindexJobConfig extends MultiUrlProcessorJobConfig {
 
 	@Bean(name = REINDEX_JOB_NAME)
 	@Lazy
-	public Job reindexJob(FhirContext theFhirContext, MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
+	public Job reindexJob(MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
 		return myJobBuilderFactory.get(REINDEX_JOB_NAME)
-			.validator(multiUrlProcessorParameterValidator(theFhirContext, theMatchUrlService, theDaoRegistry))
+			.validator(multiUrlProcessorParameterValidator(ProviderConstants.OPERATION_REINDEX, theMatchUrlService, theDaoRegistry))
 			.start(reindexUrlListStep())
 			.build();
 	}

@@ -2,12 +2,16 @@ package ca.uhn.fhir.jpa.delete.job;
 
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterUtil;
+import ca.uhn.fhir.jpa.batch.job.MultiUrlProcessorJobConfig;
+import ca.uhn.fhir.jpa.batch.reader.CronologicalBatchAllResourcePidReader;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Observation;
@@ -18,9 +22,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -34,6 +43,9 @@ public class ReindexJobTest extends BaseJpaR4Test {
 	@Autowired
 	@Qualifier(BatchJobsConfig.REINDEX_JOB_NAME)
 	private Job myReindexJob;
+	@Autowired
+	@Qualifier(BatchJobsConfig.REINDEX_EVERYTHING_JOB_NAME)
+	private Job myReindexEverythingJob;
 	@Autowired
 	private BatchJobHelper myBatchJobHelper;
 
@@ -51,7 +63,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		// The searchparam value is on the observation, but it hasn't been indexed yet
 		assertEquals(0, countAlleleObservations());
 
-		JobParameters jobParameters = DeleteExpungeJobParameterUtil.buildJobParameters("Observation?status=final");
+		JobParameters jobParameters = MultiUrlJobParameterUtil.buildJobParameters("Observation?status=final");
 
 		// execute
 		JobExecution jobExecution = myBatchJobSubmitter.runJob(myReindexJob, jobParameters);
@@ -63,6 +75,43 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		// Now one of them should be indexed
 		assertEquals(1, countAlleleObservations());
 		// FIXME KHS verify it is the right one (see IT)
+	}
+
+
+	@Test
+	public void testReindexEverythingJob() throws Exception {
+		// setup
+
+		for (int i = 0; i < 50; ++i) {
+			createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL);
+		}
+
+		createAlleleSearchParameter();
+		mySearchParamRegistry.forceRefresh();
+
+		assertEquals(50, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+		// The searchparam value is on the observation, but it hasn't been indexed yet
+		assertEquals(0, countAlleleObservations());
+
+		JobParameters jobParameters = buildEverythingJobParameters(3L);
+
+		// execute
+		JobExecution jobExecution = myBatchJobSubmitter.runJob(myReindexEverythingJob, jobParameters);
+
+		myBatchJobHelper.awaitJobCompletion(jobExecution);
+
+		// validate
+		assertEquals(50, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+		// Now one of them should be indexed
+		assertEquals(50, countAlleleObservations());
+	}
+
+	private JobParameters buildEverythingJobParameters(Long theBatchSize) {
+		Map<String, JobParameter> map = new HashMap<>();
+		map.put(CronologicalBatchAllResourcePidReader.JOB_PARAM_START_TIME, new JobParameter(DateUtils.addMinutes(new Date(), MultiUrlProcessorJobConfig.MINUTES_IN_FUTURE_TO_PROCESS_FROM)));
+		map.put(CronologicalBatchAllResourcePidReader.JOB_PARAM_BATCH_SIZE, new JobParameter(theBatchSize.longValue()));
+		JobParameters parameters = new JobParameters(map);
+		return parameters;
 	}
 
 

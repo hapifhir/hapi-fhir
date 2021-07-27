@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.delete.job;
+package ca.uhn.fhir.jpa.reindex.job;
 
 /*-
  * #%L
@@ -20,12 +20,8 @@ package ca.uhn.fhir.jpa.delete.job;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.batch.job.MultiUrlProcessorJobConfig;
 import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
-import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.jpa.batch.reader.CronologicalBatchAllResourcePidReader;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -39,54 +35,64 @@ import org.springframework.context.annotation.Lazy;
 
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME;
+import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.REINDEX_EVERYTHING_JOB_NAME;
 
 /**
  * Spring batch Job configuration file. Contains all necessary plumbing to run a
- * Delete Expunge job.
+ * Reindex job.
  */
 @Configuration
-public class DeleteExpungeJobConfig extends MultiUrlProcessorJobConfig {
-	public static final String DELETE_EXPUNGE_URL_LIST_STEP_NAME = "delete-expunge-url-list-step";
+public class ReindexEverythingJobConfig {
+	public static final String REINDEX_EVERYTHING_STEP_NAME = "reindex-everything-step";
 
 	@Autowired
 	private StepBuilderFactory myStepBuilderFactory;
 	@Autowired
 	private JobBuilderFactory myJobBuilderFactory;
 
-	@Bean(name = DELETE_EXPUNGE_JOB_NAME)
+	@Bean(name = REINDEX_EVERYTHING_JOB_NAME)
 	@Lazy
-	public Job deleteExpungeJob(MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
-		return myJobBuilderFactory.get(DELETE_EXPUNGE_JOB_NAME)
-			.validator(multiUrlProcessorParameterValidator(ProviderConstants.OPERATION_DELETE_EXPUNGE, theMatchUrlService, theDaoRegistry))
-			.start(deleteExpungeUrlListStep())
+	public Job reindexJob() {
+		return myJobBuilderFactory.get(REINDEX_EVERYTHING_JOB_NAME)
+			.start(reindexEverythingStep())
 			.build();
 	}
 
 	@Bean
-	public Step deleteExpungeUrlListStep() {
-		return myStepBuilderFactory.get(DELETE_EXPUNGE_URL_LIST_STEP_NAME)
-			.<List<Long>, List<String>>chunk(1)
-			.reader(reverseCronologicalBatchResourcePidReader())
-			.processor(deleteExpungeProcessor())
-			.writer(sqlExecutorWriter())
+	public Step reindexEverythingStep() {
+		return myStepBuilderFactory.get(REINDEX_EVERYTHING_STEP_NAME)
+			.<List<Long>, List<Long>>chunk(1)
+			.reader(cronologicalBatchAllResourcePidReader())
+			.writer(reindexWriter())
 			.listener(pidCountRecorderListener())
-			.listener(deleteExpungePromotionListener())
+			.listener(reindexPromotionListener())
 			.build();
-	}
-
-	@Bean
-	public ExecutionContextPromotionListener deleteExpungePromotionListener() {
-		ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
-
-		listener.setKeys(new String[]{SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED, PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED});
-
-		return listener;
 	}
 
 	@Bean
 	@StepScope
-	public DeleteExpungeProcessor deleteExpungeProcessor() {
-		return new DeleteExpungeProcessor();
+	public CronologicalBatchAllResourcePidReader cronologicalBatchAllResourcePidReader() {
+		return new CronologicalBatchAllResourcePidReader();
+	}
+
+	@Bean
+	@StepScope
+	public ReindexWriter reindexWriter() {
+		return new ReindexWriter();
+	}
+
+	@Bean
+	@StepScope
+	public PidReaderCounterListener pidCountRecorderListener() {
+		return new PidReaderCounterListener();
+	}
+
+	@Bean
+	public ExecutionContextPromotionListener reindexPromotionListener() {
+		ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
+
+		listener.setKeys(new String[]{PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED});
+
+		return listener;
 	}
 }
