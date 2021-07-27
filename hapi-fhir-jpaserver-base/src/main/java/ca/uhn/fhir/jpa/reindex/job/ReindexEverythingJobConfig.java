@@ -64,8 +64,8 @@ public class ReindexEverythingJobConfig {
 			.<List<Long>, List<Long>>chunk(1)
 			.reader(cronologicalBatchAllResourcePidReader())
 			.writer(reindexWriter())
-			.listener(pidCountRecorderListener())
-			.listener(reindexPromotionListener())
+			.listener(reindexEverythingPidCountRecorderListener())
+			.listener(reindexEverythingPromotionListener())
 			.build();
 	}
 
@@ -83,12 +83,12 @@ public class ReindexEverythingJobConfig {
 
 	@Bean
 	@StepScope
-	public PidReaderCounterListener pidCountRecorderListener() {
+	public PidReaderCounterListener reindexEverythingPidCountRecorderListener() {
 		return new PidReaderCounterListener();
 	}
 
 	@Bean
-	public ExecutionContextPromotionListener reindexPromotionListener() {
+	public ExecutionContextPromotionListener reindexEverythingPromotionListener() {
 		ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
 
 		listener.setKeys(new String[]{PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED});

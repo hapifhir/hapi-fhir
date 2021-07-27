@@ -12,11 +12,10 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersInvalidException;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 public class BaseMultiUrlProcessor {
-	private final FhirContext myFhirContext;
+	protected final FhirContext myFhirContext;
 	private final IMultiUrlJobSubmitter myMultiUrlProcessorJobSubmitter;
 
 	public BaseMultiUrlProcessor(FhirContext theFhirContext, IMultiUrlJobSubmitter theMultiUrlProcessorJobSubmitter) {
@@ -27,17 +26,6 @@ public class BaseMultiUrlProcessor {
 	protected IBaseParameters processUrls(List<String> theUrlsToProcess, Integer theBatchSize, RequestDetails theRequestDetails) {
 		try {
 			JobExecution jobExecution = myMultiUrlProcessorJobSubmitter.submitJob(theBatchSize, theUrlsToProcess, theRequestDetails);
-			IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
-			ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID, jobExecution.getJobId());
-			return retval;
-		} catch (JobParametersInvalidException e) {
-			throw new InvalidRequestException("Invalid job parameters: " + e.getMessage(), e);
-		}
-	}
-
-	protected IBaseParameters processEverything(Integer theBatchSize, RequestDetails theRequestDetails) {
-		try {
-			JobExecution jobExecution = myMultiUrlProcessorJobSubmitter.submitJob(theBatchSize, new ArrayList<>(), theRequestDetails);
 			IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
 			ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID, jobExecution.getJobId());
 			return retval;

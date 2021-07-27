@@ -25,17 +25,24 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IReindexJobSubmitter;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParametersInvalidException;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ReindexProvider extends BaseMultiUrlProcessor {
+	private final IReindexJobSubmitter myReindexJobSubmitter;
+
 	public ReindexProvider(FhirContext theFhirContext, IReindexJobSubmitter theReindexJobSubmitter) {
 		super(theFhirContext, theReindexJobSubmitter);
+		myReindexJobSubmitter = theReindexJobSubmitter;
 	}
 
 	// FIXME KHS test
@@ -49,10 +56,23 @@ public class ReindexProvider extends BaseMultiUrlProcessor {
 		Boolean everything = theEverything != null && theEverything.getValue();
 		@Nullable Integer batchSize = getBatchSize(theBatchSize);
 		if (everything) {
-			return super.processEverything(batchSize, theRequestDetails);
+			return processEverything(batchSize, theRequestDetails);
 		} else {
 			List<String> urls = theUrlsToReindex.stream().map(IPrimitiveType::getValue).collect(Collectors.toList());
 			return super.processUrls(urls, batchSize, theRequestDetails);
 		}
 	}
+
+	private IBaseParameters processEverything(Integer theBatchSize, RequestDetails theRequestDetails) {
+		try {
+			JobExecution jobExecution = myReindexJobSubmitter.submitEverythingJob(theBatchSize, theRequestDetails);
+			IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
+			ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID, jobExecution.getJobId());
+			return retval;
+		} catch (JobParametersInvalidException e) {
+			throw new InvalidRequestException("Invalid job parameters: " + e.getMessage(), e);
+		}
+	}
+
+
 }
