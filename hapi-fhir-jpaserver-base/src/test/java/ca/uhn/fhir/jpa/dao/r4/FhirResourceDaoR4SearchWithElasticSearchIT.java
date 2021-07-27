@@ -165,23 +165,18 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		{
 			// first word
 			SearchParameterMap map = new SearchParameterMap();
-			TokenParam param = new TokenParam();
-			param.setValueAsQueryToken(myFhirCtx, "code", PARAMQUALIFIER_TOKEN_TEXT, "Body");
-			map.add("code", param);
+			map.add("code", new TokenParam("Body").setModifier(TokenParamModifier.TEXT));
 			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
 		}
 
 		{
 			// any word
 			SearchParameterMap map = new SearchParameterMap();
-			TokenParam param = new TokenParam();
-			param.setValueAsQueryToken(myFhirCtx, "code", PARAMQUALIFIER_TOKEN_TEXT, "weight");
-			map.add("code", param);
+			map.add("code", new TokenParam("weight").setModifier(TokenParamModifier.TEXT));
 			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
 		}
 
 	}
-
 
 	@Test
 	public void testExpandWithIsAInExternalValueSet() {
