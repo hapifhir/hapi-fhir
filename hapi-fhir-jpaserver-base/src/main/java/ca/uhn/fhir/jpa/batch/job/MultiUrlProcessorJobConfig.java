@@ -24,9 +24,10 @@ public class MultiUrlProcessorJobConfig {
 	public static final int MINUTES_IN_FUTURE_TO_PROCESS_FROM = 1;
 
 	@Nonnull
-	public static JobParameters buildJobParameters(Integer theBatchSize, List<String> theUrlList, List<RequestPartitionId> theRequestPartitionIds) {
+	public static JobParameters buildJobParameters(String theOperationName, Integer theBatchSize, List<String> theUrlList, List<RequestPartitionId> theRequestPartitionIds) {
 		Map<String, JobParameter> map = new HashMap<>();
 		RequestListJson requestListJson = RequestListJson.fromUrlStringsAndRequestPartitionIds(theUrlList, theRequestPartitionIds);
+		map.put(MultiUrlJobParameterValidator.JOB_PARAM_OPERATION_NAME, new JobParameter(theOperationName));
 		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_REQUEST_LIST, new JobParameter(requestListJson.toString()));
 		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_START_TIME, new JobParameter(DateUtils.addMinutes(new Date(), MultiUrlProcessorJobConfig.MINUTES_IN_FUTURE_TO_PROCESS_FROM)));
 		if (theBatchSize != null) {
@@ -37,8 +38,8 @@ public class MultiUrlProcessorJobConfig {
 	}
 
 	@Bean
-	public JobParametersValidator multiUrlProcessorParameterValidator(String theOperationName, MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
-		return new MultiUrlJobParameterValidator(theOperationName, theMatchUrlService, theDaoRegistry);
+	public JobParametersValidator multiUrlProcessorParameterValidator(MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
+		return new MultiUrlJobParameterValidator(theMatchUrlService, theDaoRegistry);
 	}
 
 	@Bean

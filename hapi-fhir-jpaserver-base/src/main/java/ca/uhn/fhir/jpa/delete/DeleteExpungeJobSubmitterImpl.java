@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import org.springframework.batch.core.Job;
@@ -82,7 +83,7 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRE_DELETE_EXPUNGE, params);
 		}
 
-		JobParameters jobParameters = MultiUrlProcessorJobConfig.buildJobParameters(theBatchSize, theUrlsToDeleteExpunge, requestPartitionIds);
+		JobParameters jobParameters = MultiUrlProcessorJobConfig.buildJobParameters(ProviderConstants.OPERATION_DELETE_EXPUNGE, theBatchSize, theUrlsToDeleteExpunge, requestPartitionIds);
 		return myBatchJobSubmitter.runJob(myDeleteExpungeJob, jobParameters);
 	}
 }

@@ -28,7 +28,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class MultiUrlJobParameterValidatorTest {
 	static final FhirContext ourFhirContext = FhirContext.forR4Cached();
-	private static final String TEST_OP_NAME = "TEST_OPERATION_NAME";
 
 	@Mock
 	MatchUrlService myMatchUrlService;
@@ -39,7 +38,7 @@ class MultiUrlJobParameterValidatorTest {
 
 	@BeforeEach
 	public void initMocks() {
-		mySvc = new MultiUrlJobParameterValidator(TEST_OP_NAME, myMatchUrlService, myDaoRegistry);
+		mySvc = new MultiUrlJobParameterValidator(myMatchUrlService, myDaoRegistry);
 	}
 
 	@Test

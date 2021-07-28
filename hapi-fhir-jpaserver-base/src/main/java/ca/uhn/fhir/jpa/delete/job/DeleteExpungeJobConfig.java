@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.batch.job.MultiUrlProcessorJobConfig;
 import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
 import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -58,7 +57,7 @@ public class DeleteExpungeJobConfig extends MultiUrlProcessorJobConfig {
 	@Lazy
 	public Job deleteExpungeJob(MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
 		return myJobBuilderFactory.get(DELETE_EXPUNGE_JOB_NAME)
-			.validator(multiUrlProcessorParameterValidator(ProviderConstants.OPERATION_DELETE_EXPUNGE, theMatchUrlService, theDaoRegistry))
+			.validator(multiUrlProcessorParameterValidator(theMatchUrlService, theDaoRegistry))
 			.start(deleteExpungeUrlListStep())
 			.build();
 	}

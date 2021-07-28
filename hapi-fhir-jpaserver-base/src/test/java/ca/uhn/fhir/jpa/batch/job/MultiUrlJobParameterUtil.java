@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.batch.job;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import com.github.jsonldjava.shaded.com.google.common.collect.Lists;
 import org.springframework.batch.core.JobParameters;
 
@@ -18,6 +19,6 @@ public final class MultiUrlJobParameterUtil {
 		for (int i = 0; i < theUrls.length; ++i) {
 			requestPartitionIds.add(RequestPartitionId.defaultPartition());
 		}
-		return MultiUrlProcessorJobConfig.buildJobParameters(2401, Lists.newArrayList(theUrls), requestPartitionIds);
+		return MultiUrlProcessorJobConfig.buildJobParameters(ProviderConstants.OPERATION_REINDEX, 2401, Lists.newArrayList(theUrls), requestPartitionIds);
 	}
 }

@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.batch.reader.CronologicalBatchAllResourcePidReader;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IReindexJobSubmitter;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
@@ -73,7 +74,7 @@ public class ReindexJobSubmitterImpl implements IReindexJobSubmitter {
 		 */
 		mySearchParamRegistry.forceRefresh();
 
-		JobParameters jobParameters = MultiUrlProcessorJobConfig.buildJobParameters(theBatchSize, theUrlsToReindex, requestPartitionIds);
+		JobParameters jobParameters = MultiUrlProcessorJobConfig.buildJobParameters(ProviderConstants.OPERATION_REINDEX, theBatchSize, theUrlsToReindex, requestPartitionIds);
 		return myBatchJobSubmitter.runJob(myReindexJob, jobParameters);
 	}
 

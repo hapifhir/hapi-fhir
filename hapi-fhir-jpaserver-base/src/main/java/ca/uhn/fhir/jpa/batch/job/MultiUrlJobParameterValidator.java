@@ -35,12 +35,11 @@ import static ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidRe
  * This class will prevent a job from running any of the provided URLs are not valid on this server.
  */
 public class MultiUrlJobParameterValidator implements JobParametersValidator {
-	private final String myOperationName;
+	public static String JOB_PARAM_OPERATION_NAME = "operation-name";
 	private final MatchUrlService myMatchUrlService;
 	private final DaoRegistry myDaoRegistry;
 
-	public MultiUrlJobParameterValidator(String theOperationName, MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
-		myOperationName = theOperationName;
+	public MultiUrlJobParameterValidator(MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
 		myMatchUrlService = theMatchUrlService;
 		myDaoRegistry = theDaoRegistry;
 	}
@@ -61,7 +60,7 @@ public class MultiUrlJobParameterValidator implements JobParametersValidator {
 					throw new JobParametersInvalidException("The resource type " + resourceName + " is not supported on this server.");
 				}
 			} catch (UnsupportedOperationException e) {
-				throw new JobParametersInvalidException("Failed to parse " + myOperationName + " " + JOB_PARAM_REQUEST_LIST + " item " + url + ": " + e.getMessage());
+				throw new JobParametersInvalidException("Failed to parse " + theJobParameters.getString(JOB_PARAM_OPERATION_NAME) + " " + JOB_PARAM_REQUEST_LIST + " item " + url + ": " + e.getMessage());
 			}
 		}
 	}
