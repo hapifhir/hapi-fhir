@@ -1654,8 +1654,6 @@ public class DaoConfig {
 		myExpungeBatchSize = theExpungeBatchSize;
 	}
 
-// FIXME KHS cdr
-
 	/**
 	 * The reindex batch size (default 800) determines the number of records reindexed in a single transaction.
 	 */

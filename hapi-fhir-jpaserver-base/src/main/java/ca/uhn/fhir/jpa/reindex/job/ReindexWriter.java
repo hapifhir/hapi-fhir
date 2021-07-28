@@ -42,6 +42,7 @@ public class ReindexWriter implements ItemWriter<List<Long>> {
 
 	@Override
 	public void write(List<? extends List<Long>> thePidLists) throws Exception {
+		// FIXME KHS test that this affects runs and isn't subsumed by upstream Spring batch batch size
 		PartitionRunner partitionRunner = new PartitionRunner(myDaoConfig.getReindexBatchSize(), myDaoConfig.getReindexThreadCount());
 
 		for (List<Long> pidList : thePidLists) {
