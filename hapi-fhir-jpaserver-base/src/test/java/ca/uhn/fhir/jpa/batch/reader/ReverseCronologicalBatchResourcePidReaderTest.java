@@ -7,6 +7,9 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch.job.model.PartitionedUrl;
 import ca.uhn.fhir.jpa.batch.job.model.RequestListJson;
+import ca.uhn.fhir.jpa.dao.IResultIterator;
+import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -39,6 +42,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ReverseCronologicalBatchResourcePidReaderTest {
+	private static final int BATCH_SIZE = 3;
 	static FhirContext ourFhirContext = FhirContext.forR4Cached();
 	static String URL_A = "a";
 	static String URL_B = "b";
@@ -54,6 +58,13 @@ class ReverseCronologicalBatchResourcePidReaderTest {
 	DaoRegistry myDaoRegistry;
 	@Mock
 	IFhirResourceDao<Patient> myPatientDao;
+	private final RequestPartitionId myDefaultPartitionId = RequestPartitionId.defaultPartition();
+	@Mock
+	SearchBuilderFactory mySearchBuilderFactory;
+	@Mock
+	private ISearchBuilder mySearchBuilder;
+	@Mock
+	private IResultIterator myResultIter;
 
 	@InjectMocks
 	ReverseCronologicalBatchResourcePidReader myReader = new ReverseCronologicalBatchResourcePidReader();
@@ -65,17 +76,21 @@ class ReverseCronologicalBatchResourcePidReaderTest {
 		ObjectMapper mapper = new ObjectMapper();
 		String requestListJsonString = mapper.writeValueAsString(requestListJson);
 		myReader.setRequestListJson(requestListJsonString);
+		myReader.setBatchSize(BATCH_SIZE);
 
 		SearchParameterMap map = new SearchParameterMap();
 		RuntimeResourceDefinition patientResDef = ourFhirContext.getResourceDefinition("Patient");
-		when(myMatchUrlService.getResourceSearch(URL_A)).thenReturn(new ResourceSearch(patientResDef, map));
-		when(myMatchUrlService.getResourceSearch(URL_B)).thenReturn(new ResourceSearch(patientResDef, map));
-		when(myMatchUrlService.getResourceSearch(URL_C)).thenReturn(new ResourceSearch(patientResDef, map));
+		when(myMatchUrlService.getResourceSearch(URL_A, myDefaultPartitionId)).thenReturn(new ResourceSearch(patientResDef, map, myDefaultPartitionId));
+		when(myMatchUrlService.getResourceSearch(URL_B, myDefaultPartitionId)).thenReturn(new ResourceSearch(patientResDef, map, myDefaultPartitionId));
+		when(myMatchUrlService.getResourceSearch(URL_C, myDefaultPartitionId)).thenReturn(new ResourceSearch(patientResDef, map, myDefaultPartitionId));
 		when(myDaoRegistry.getResourceDao("Patient")).thenReturn(myPatientDao);
 		myPatient = new Patient();
 		when(myPatientDao.readByPid(any())).thenReturn(myPatient);
 		Calendar cal = new GregorianCalendar(2021, 1, 1);
 		myPatient.getMeta().setLastUpdated(cal.getTime());
+
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilder.createQuery(any(), any(), any(), any())).thenReturn(myResultIter);
 	}
 
 	private Set<ResourcePersistentId> buildPidSet(Integer... thePids) {
@@ -87,7 +102,7 @@ class ReverseCronologicalBatchResourcePidReaderTest {
 
 	@Test
 	public void test3x1() throws Exception {
-		when(myPatientDao.searchForIds(any(), any()))
+		when(myResultIter.getNextResultBatch(BATCH_SIZE))
 			.thenReturn(buildPidSet(1, 2, 3))
 			.thenReturn(emptySet)
 			.thenReturn(buildPidSet(4, 5, 6))
@@ -101,10 +116,30 @@ class ReverseCronologicalBatchResourcePidReaderTest {
 		assertNull(myReader.read());
 	}
 
+	@Test
+	public void testReadRepeat() throws Exception {
+		when(myResultIter.getNextResultBatch(BATCH_SIZE))
+			.thenReturn(buildPidSet(1, 2, 3))
+			.thenReturn(buildPidSet(1, 2, 3))
+			.thenReturn(buildPidSet(2, 3, 4))
+			.thenReturn(buildPidSet(4, 5))
+			.thenReturn(emptySet);
+
+		when(myResultIter.hasNext())
+			.thenReturn(true)
+			.thenReturn(true)
+			.thenReturn(true)
+			.thenReturn(true)
+			.thenReturn(false);
+
+		assertListEquals(myReader.read(), 1, 2, 3);
+		assertListEquals(myReader.read(), 4, 5);
+		assertNull(myReader.read());
+	}
 
 	@Test
 	public void test1x3start() throws Exception {
-		when(myPatientDao.searchForIds(any(), any()))
+		when(myResultIter.getNextResultBatch(BATCH_SIZE))
 			.thenReturn(buildPidSet(1, 2, 3))
 			.thenReturn(buildPidSet(4, 5, 6))
 			.thenReturn(buildPidSet(7, 8))
@@ -120,7 +155,7 @@ class ReverseCronologicalBatchResourcePidReaderTest {
 
 	@Test
 	public void test1x3end() throws Exception {
-		when(myPatientDao.searchForIds(any(), any()))
+		when(myResultIter.getNextResultBatch(BATCH_SIZE))
 			.thenReturn(emptySet)
 			.thenReturn(emptySet)
 			.thenReturn(buildPidSet(1, 2, 3))
@@ -140,6 +175,4 @@ class ReverseCronologicalBatchResourcePidReaderTest {
 			assertEquals(theList.get(i), Long.valueOf(theValues[i]));
 		}
 	}
-
-
 }

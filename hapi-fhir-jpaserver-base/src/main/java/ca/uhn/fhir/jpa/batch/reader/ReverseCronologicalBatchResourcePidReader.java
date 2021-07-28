@@ -21,11 +21,16 @@ package ca.uhn.fhir.jpa.batch.reader;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch.job.model.PartitionedUrl;
 import ca.uhn.fhir.jpa.batch.job.model.RequestListJson;
+import ca.uhn.fhir.jpa.dao.IResultIterator;
+import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
+import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
@@ -46,12 +51,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -84,11 +92,14 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private DaoConfig myDaoConfig;
+	private final PidAccumulator myPidAccumulator = new PidAccumulator();
 
 	private List<PartitionedUrl> myPartitionedUrls;
 	private Integer myBatchSize;
 	private final Map<Integer, Date> myThresholdHighByUrlIndex = new HashMap<>();
 	private final Map<Integer, Set<Long>> myAlreadyProcessedPidsWithHighDate = new HashMap<>();
+	@Autowired
+	private SearchBuilderFactory mySearchBuilderFactory;
 	private int myUrlIndex = 0;
 	private Date myStartTime;
 
@@ -111,8 +122,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	@Override
 	public List<Long> read() throws Exception {
 		while (myUrlIndex < myPartitionedUrls.size()) {
-			List<Long> nextBatch;
-			nextBatch = getNextBatch();
+			List<Long> nextBatch = getNextBatch(myPartitionedUrls.get(myUrlIndex).getRequestPartitionId());
 			if (nextBatch.isEmpty()) {
 				++myUrlIndex;
 				continue;
@@ -123,62 +133,46 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 		return null;
 	}
 
-	private List<Long> getNextBatch() {
-		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(myPartitionedUrls.get(myUrlIndex).getUrl());
+	private List<Long> getNextBatch(RequestPartitionId theRequestPartitionId) {
+		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(myPartitionedUrls.get(myUrlIndex).getUrl(), theRequestPartitionId);
 		SearchParameterMap map = buildSearchParameterMap(resourceSearch);
 
 		// Perform the search
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceSearch.getResourceName());
-		List<Long> retval = dao.searchForIds(map, buildSystemRequestDetails()).stream()
-			.map(ResourcePersistentId::getIdAsLong)
-			.collect(Collectors.toList());
+		IResultIterator resultIter = performSearch(resourceSearch, dao);
+		Set<Long> newPids = new LinkedHashSet<>();
+		Set<Long> alreadySeenPids = myAlreadyProcessedPidsWithHighDate.computeIfAbsent(myUrlIndex, i -> new HashSet<>());
 
-		Set<Long> alreadyProcessed = myAlreadyProcessedPidsWithHighDate.get(myUrlIndex);
-		if (alreadyProcessed != null) {
-			ourLog.debug("Removing resources that have already been processed: {}", alreadyProcessed);
-			retval.removeAll(alreadyProcessed);
-		}
+		do {
+			List<Long> pids = resultIter.getNextResultBatch(myBatchSize).stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
+			newPids.addAll(pids);
+			newPids.removeAll(alreadySeenPids);
+		} while (newPids.size() < myBatchSize && resultIter.hasNext());
 
 		if (ourLog.isDebugEnabled()) {
-			ourLog.debug("Search for {}{} returned {} results", resourceSearch.getResourceName(), map.toNormalizedQueryString(myFhirContext), retval.size());
-			ourLog.debug("Results: {}", retval);
+			ourLog.debug("Search for {}{} returned {} results", resourceSearch.getResourceName(), map.toNormalizedQueryString(myFhirContext), newPids.size());
+			ourLog.debug("Results: {}", newPids);
 		}
 
-		setThresholds(dao, retval);
+		myPidAccumulator.setDateFromPid(pid -> {
+			IBaseResource oldestResource = dao.readByPid(new ResourcePersistentId(pid));
+			return oldestResource.getMeta().getLastUpdated();
+		});
+
+		List<Long> retval = new ArrayList<>(newPids);
+		myPidAccumulator.setThresholds(myThresholdHighByUrlIndex.get(myUrlIndex), myAlreadyProcessedPidsWithHighDate.get(myUrlIndex), retval);
 
 		return retval;
 	}
 
-	// FIXME KHS test
-	private void setThresholds(IFhirResourceDao<?> dao, List<Long> retval) {
-		if (retval.isEmpty()) {
-			return;
-		}
-
-		// Adjust the high threshold to be the earliest resource in the batch we found
-		Long pidOfOldestResourceInBatch = retval.get(retval.size() - 1);
-		IBaseResource earliestResource = dao.readByPid(new ResourcePersistentId(pidOfOldestResourceInBatch));
-		Date earliestUpdatedDate = earliestResource.getMeta().getLastUpdated();
-
-		// The earliest date has changed, create a new cache to store pids with that date
-		if (myThresholdHighByUrlIndex.get(myUrlIndex) != earliestUpdatedDate) {
-			myAlreadyProcessedPidsWithHighDate.put(myUrlIndex, new HashSet<>());
-		}
-		myAlreadyProcessedPidsWithHighDate.get(myUrlIndex).add(pidOfOldestResourceInBatch);
-		myThresholdHighByUrlIndex.put(myUrlIndex, earliestUpdatedDate);
-		if (retval.size() <= 1) {
-			return;
-		}
-
-		// There is more than one resource in this batch
-		for (int index = retval.size() - 2; index >= 0; --index) {
-			Long pid = retval.get(index);
-			IBaseResource resource = dao.readByPid(new ResourcePersistentId(pid));
-			if (!earliestUpdatedDate.equals((resource.getMeta().getLastUpdated()))) {
-				break;
-			}
-			myAlreadyProcessedPidsWithHighDate.get(myUrlIndex).add(pidOfOldestResourceInBatch);
-		}
+	// FIXME KHS move out to class to simplify mocks
+	private IResultIterator performSearch(ResourceSearch resourceSearch, IFhirResourceDao<?> dao) {
+		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, resourceSearch.getResourceName(), resourceSearch.getResourceType());
+		sb.setFetchSize(myBatchSize);
+		SystemRequestDetails requestDetails = buildSystemRequestDetails();
+		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(requestDetails, UUID.randomUUID().toString());
+		IResultIterator resultIter = sb.createQuery(resourceSearch.getSearchParameterMap(), searchRuntimeDetails, requestDetails, resourceSearch.getRequestPartitionId());
+		return resultIter;
 	}
 
 	@Nonnull

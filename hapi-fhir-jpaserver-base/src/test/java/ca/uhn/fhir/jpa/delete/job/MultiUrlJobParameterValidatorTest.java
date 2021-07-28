@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.delete.job;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterUtil;
 import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterValidator;
@@ -44,7 +45,7 @@ class MultiUrlJobParameterValidatorTest {
 	public void testValidate() throws JobParametersInvalidException, JsonProcessingException {
 		// setup
 		JobParameters parameters = MultiUrlJobParameterUtil.buildJobParameters("Patient?address=memory", "Patient?name=smith");
-		ResourceSearch resourceSearch = new ResourceSearch(ourFhirContext.getResourceDefinition("Patient"), new SearchParameterMap());
+		ResourceSearch resourceSearch = new ResourceSearch(ourFhirContext.getResourceDefinition("Patient"), new SearchParameterMap(), RequestPartitionId.defaultPartition());
 		when(myMatchUrlService.getResourceSearch(anyString())).thenReturn(resourceSearch);
 		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(true);
 
@@ -57,7 +58,7 @@ class MultiUrlJobParameterValidatorTest {
 	@Test
 	public void testValidateBadType() throws JobParametersInvalidException, JsonProcessingException {
 		JobParameters parameters = MultiUrlJobParameterUtil.buildJobParameters("Patient?address=memory");
-		ResourceSearch resourceSearch = new ResourceSearch(ourFhirContext.getResourceDefinition("Patient"), new SearchParameterMap());
+		ResourceSearch resourceSearch = new ResourceSearch(ourFhirContext.getResourceDefinition("Patient"), new SearchParameterMap(), RequestPartitionId.defaultPartition());
 		when(myMatchUrlService.getResourceSearch(anyString())).thenReturn(resourceSearch);
 		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(false);
 

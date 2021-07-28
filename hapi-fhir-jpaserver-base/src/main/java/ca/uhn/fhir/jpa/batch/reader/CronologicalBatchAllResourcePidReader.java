@@ -74,7 +74,8 @@ public class CronologicalBatchAllResourcePidReader implements ItemReader<List<Lo
 
 	private Integer myBatchSize;
 	private Date myThresholdLow = BEGINNING_OF_TIME;
-	private Set<Long> myAlreadyProcessedPidsWithLowDate;
+	private final PidAccumulator myPidAccumulator = new PidAccumulator(this::dateFromPid);
+	private final Set<Long> myAlreadySeenPids = new HashSet<>();
 	private Date myStartTime;
 
 	@Autowired
@@ -93,6 +94,7 @@ public class CronologicalBatchAllResourcePidReader implements ItemReader<List<Lo
 		return nextBatch.isEmpty() ? null : nextBatch;
 	}
 
+	// FIXME KHS multithread
 	// FIXME KHS test
 	private List<Long> getNextBatch() {
 		PageRequest page = PageRequest.of(0, myBatchSize);
@@ -102,53 +104,24 @@ public class CronologicalBatchAllResourcePidReader implements ItemReader<List<Lo
 		do {
 			slice = myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(page, myThresholdLow, myStartTime);
 			retval = new ArrayList<>(slice.getContent());
-			Set<Long> alreadyProcessed = myAlreadyProcessedPidsWithLowDate;
-			if (alreadyProcessed != null) {
-				ourLog.debug("Removing resources that have already been processed: {}", alreadyProcessed);
-				retval.removeAll(alreadyProcessed);
+			if (myAlreadySeenPids != null) {
+				retval.removeAll(myAlreadySeenPids);
 			}
 			page = page.next();
-		} while (retval.isEmpty() && slice.hasNext());
+		} while (retval.size() < myBatchSize && slice.hasNext());
 
 		if (ourLog.isDebugEnabled()) {
 			ourLog.debug("Results: {}", retval);
 		}
 
-		setThresholds(retval);
+		myThresholdLow = myPidAccumulator.setThresholds(myThresholdLow, myAlreadySeenPids, retval);
 
 		return retval;
 	}
 
-	// FIXME KHS test
-	private void setThresholds(List<Long> retval) {
-		if (retval.isEmpty()) {
-			return;
-		}
-
-		// Adjust the low threshold to be the latest resource in the batch we found
-		Long pidOfLatestResourceInBatch = retval.get(retval.size() - 1);
-		ResourceTable entity = myResourceTableDao.findById(pidOfLatestResourceInBatch).orElseThrow(IllegalStateException::new);
-		Date latestUpdatedDate = entity.getUpdatedDate();
-
-		// The latest date has changed, create a new cache to store pids with that date
-		if (myThresholdLow != latestUpdatedDate) {
-			myAlreadyProcessedPidsWithLowDate = new HashSet<>();
-		}
-		myAlreadyProcessedPidsWithLowDate.add(pidOfLatestResourceInBatch);
-		myThresholdLow = latestUpdatedDate;
-		if (retval.size() <= 1) {
-			return;
-		}
-
-		// There is more than one resource in this batch
-		for (int index = retval.size() - 2; index >= 0; --index) {
-			Long pid = retval.get(index);
-			entity = myResourceTableDao.findById(pid).orElseThrow(IllegalStateException::new);
-			if (!latestUpdatedDate.equals(entity.getUpdatedDate())) {
-				break;
-			}
-			myAlreadyProcessedPidsWithLowDate.add(pid);
-		}
+	private Date dateFromPid(Long thePid) {
+		ResourceTable entity = myResourceTableDao.findById(thePid).orElseThrow(IllegalStateException::new);
+		return entity.getUpdatedDate();
 	}
 
 	@Override

@@ -55,7 +55,7 @@ public class MultiUrlJobParameterValidator implements JobParametersValidator {
 		for (PartitionedUrl partitionedUrl : requestListJson.getPartitionedUrls()) {
 			String url = partitionedUrl.getUrl();
 			try {
-				ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(url);
+				ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(url, partitionedUrl.getRequestPartitionId());
 				String resourceName = resourceSearch.getResourceName();
 				if (!myDaoRegistry.isResourceTypeSupported(resourceName)) {
 					throw new JobParametersInvalidException("The resource type " + resourceName + " is not supported on this server.");

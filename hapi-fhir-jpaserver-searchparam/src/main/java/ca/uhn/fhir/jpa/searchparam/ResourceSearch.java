@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.searchparam;
  */
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
  * A resource type along with a search parameter map.  Everything you need to perform a search!
@@ -28,10 +30,12 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 public class ResourceSearch {
 	private final RuntimeResourceDefinition myRuntimeResourceDefinition;
 	private final SearchParameterMap mySearchParameterMap;
+	private final RequestPartitionId myRequestPartitionId;
 
-	public ResourceSearch(RuntimeResourceDefinition theRuntimeResourceDefinition, SearchParameterMap theSearchParameterMap) {
+	public ResourceSearch(RuntimeResourceDefinition theRuntimeResourceDefinition, SearchParameterMap theSearchParameterMap, RequestPartitionId theRequestPartitionId) {
 		myRuntimeResourceDefinition = theRuntimeResourceDefinition;
 		mySearchParameterMap = theSearchParameterMap;
+		myRequestPartitionId = theRequestPartitionId;
 	}
 
 	public RuntimeResourceDefinition getRuntimeResourceDefinition() {
@@ -48,5 +52,13 @@ public class ResourceSearch {
 
 	public boolean isDeleteExpunge() {
 		return mySearchParameterMap.isDeleteExpunge();
+	}
+
+	public Class<? extends IBaseResource> getResourceType() {
+		return myRuntimeResourceDefinition.getImplementingClass();
+	}
+
+	public RequestPartitionId getRequestPartitionId() {
+		return myRequestPartitionId;
 	}
 }
