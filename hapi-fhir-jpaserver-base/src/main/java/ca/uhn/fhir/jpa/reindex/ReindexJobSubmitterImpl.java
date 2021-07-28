@@ -24,9 +24,9 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
-import ca.uhn.fhir.jpa.batch.job.MultiUrlProcessorJobConfig;
 import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
 import ca.uhn.fhir.jpa.batch.reader.CronologicalBatchAllResourcePidReader;
+import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IReindexJobSubmitter;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
@@ -74,7 +74,7 @@ public class ReindexJobSubmitterImpl implements IReindexJobSubmitter {
 		 */
 		mySearchParamRegistry.forceRefresh();
 
-		JobParameters jobParameters = MultiUrlProcessorJobConfig.buildJobParameters(ProviderConstants.OPERATION_REINDEX, theBatchSize, theUrlsToReindex, requestPartitionIds);
+		JobParameters jobParameters = ReverseCronologicalBatchResourcePidReader.buildJobParameters(ProviderConstants.OPERATION_REINDEX, theBatchSize, theUrlsToReindex, requestPartitionIds);
 		return myBatchJobSubmitter.runJob(myReindexJob, jobParameters);
 	}
 

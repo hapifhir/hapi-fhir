@@ -25,6 +25,8 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterValidator;
+import ca.uhn.fhir.jpa.batch.job.MultiUrlProcessorJobConfig;
 import ca.uhn.fhir.jpa.batch.job.model.PartitionedUrl;
 import ca.uhn.fhir.jpa.batch.job.model.RequestListJson;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
@@ -36,9 +38,12 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemStream;
@@ -46,6 +51,7 @@ import org.springframework.batch.item.ItemStreamException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -207,5 +213,20 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 
 	@Override
 	public void close() throws ItemStreamException {
+	}
+
+
+	@Nonnull
+	public static JobParameters buildJobParameters(String theOperationName, Integer theBatchSize, List<String> theUrlList, List<RequestPartitionId> theRequestPartitionIds) {
+		Map<String, JobParameter> map = new HashMap<>();
+		RequestListJson requestListJson = RequestListJson.fromUrlStringsAndRequestPartitionIds(theUrlList, theRequestPartitionIds);
+		map.put(MultiUrlJobParameterValidator.JOB_PARAM_OPERATION_NAME, new JobParameter(theOperationName));
+		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_REQUEST_LIST, new JobParameter(requestListJson.toJson()));
+		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_START_TIME, new JobParameter(DateUtils.addMinutes(new Date(), MultiUrlProcessorJobConfig.MINUTES_IN_FUTURE_TO_PROCESS_FROM)));
+		if (theBatchSize != null) {
+			map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_BATCH_SIZE, new JobParameter(theBatchSize.longValue()));
+		}
+		JobParameters parameters = new JobParameters(map);
+		return parameters;
 	}
 }

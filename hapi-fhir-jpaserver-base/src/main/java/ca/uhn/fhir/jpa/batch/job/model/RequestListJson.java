@@ -60,8 +60,7 @@ public class RequestListJson implements IModelJson {
 		}
 	}
 
-	@Override
-	public String toString() {
+	public String toJson() {
 		try {
 			return ourObjectMapper.writeValueAsString(this);
 		} catch (JsonProcessingException e) {

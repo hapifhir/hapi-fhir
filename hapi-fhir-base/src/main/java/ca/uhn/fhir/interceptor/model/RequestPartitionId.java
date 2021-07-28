@@ -21,6 +21,7 @@ package ca.uhn.fhir.interceptor.model;
  */
 
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -153,6 +154,14 @@ public class RequestPartitionId implements IModelJson {
 			.append(myPartitionIds)
 			.append(myPartitionNames)
 			.toHashCode();
+	}
+
+	public String toJson() {
+		try {
+			return ourObjectMapper.writeValueAsString(this);
+		} catch (JsonProcessingException e) {
+			throw new InvalidRequestException("Failed to encode " + RequestPartitionId.class, e);
+		}
 	}
 
 	@Nullable

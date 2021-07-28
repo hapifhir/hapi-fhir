@@ -28,8 +28,8 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
-import ca.uhn.fhir.jpa.batch.job.MultiUrlProcessorJobConfig;
 import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
+import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -83,7 +83,7 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRE_DELETE_EXPUNGE, params);
 		}
 
-		JobParameters jobParameters = MultiUrlProcessorJobConfig.buildJobParameters(ProviderConstants.OPERATION_DELETE_EXPUNGE, theBatchSize, theUrlsToDeleteExpunge, requestPartitionIds);
+		JobParameters jobParameters = ReverseCronologicalBatchResourcePidReader.buildJobParameters(ProviderConstants.OPERATION_DELETE_EXPUNGE, theBatchSize, theUrlsToDeleteExpunge, requestPartitionIds);
 		return myBatchJobSubmitter.runJob(myDeleteExpungeJob, jobParameters);
 	}
 }

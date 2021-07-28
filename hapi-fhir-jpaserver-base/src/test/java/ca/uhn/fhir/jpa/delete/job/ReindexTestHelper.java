@@ -4,9 +4,15 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.util.BundleUtil;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Observation;
@@ -15,6 +21,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 public class ReindexTestHelper {
@@ -56,10 +63,16 @@ public class ReindexTestHelper {
 	}
 
 	public IIdType createObservationWithAlleleExtension(Observation.ObservationStatus theStatus) {
+		Observation observation = buildObservationWithAlleleExtension(theStatus);
+		return myObservationDao.create(observation).getId();
+	}
+
+	@Nonnull
+	public Observation buildObservationWithAlleleExtension(Observation.ObservationStatus theStatus) {
 		Observation observation = new Observation();
 		observation.addExtension(ALLELE_EXTENSION_URL, new StringType(TEST_ALLELE_VALUE));
 		observation.setStatus(theStatus);
-		return myObservationDao.create(observation).getId();
+		return observation;
 	}
 
 	public List<String> getAlleleObservationIds() {
@@ -75,5 +88,18 @@ public class ReindexTestHelper {
 		ourLog.info("Searching with url {}", map.toNormalizedQueryString(myFhirContext));
 		IBundleProvider result = myObservationDao.search(map);
 		return result.getAllResourceIds();
+	}
+
+	public IBaseResource buildObservationWithAlleleExtension() {
+		return buildObservationWithAlleleExtension(Observation.ObservationStatus.FINAL);
+	}
+
+	public List<String> getAlleleObservationIds(IGenericClient theClient) {
+		IBaseBundle result = theClient.search()
+			.forResource("Observation")
+			.where(new StringClientParam(ALLELE_SP_CODE).matches().value(TEST_ALLELE_VALUE))
+			.cacheControl(new CacheControlDirective().setNoCache(true))
+			.execute();
+		return BundleUtil.toListOfResourceIds(myFhirContext, result);
 	}
 }

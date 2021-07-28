@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.batch.job.MultiUrlProcessorJobConfig;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,6 +78,7 @@ public class CronologicalBatchAllResourcePidReader implements ItemReader<List<Lo
 	private final PidAccumulator myPidAccumulator = new PidAccumulator(this::dateFromPid);
 	private final Set<Long> myAlreadySeenPids = new HashSet<>();
 	private Date myStartTime;
+	private RequestPartitionId myRequestPartitionId;
 
 	@Autowired
 	public void setBatchSize(@Value("#{jobParameters['" + JOB_PARAM_BATCH_SIZE + "']}") Integer theBatchSize) {
@@ -88,35 +90,29 @@ public class CronologicalBatchAllResourcePidReader implements ItemReader<List<Lo
 		myStartTime = theStartTime;
 	}
 
+	public static JobParameters buildJobParameters(Integer theBatchSize, RequestPartitionId theRequestPartitionId) {
+		Map<String, JobParameter> map = new HashMap<>();
+		map.put(CronologicalBatchAllResourcePidReader.JOB_PARAM_REQUEST_PARTITION, new JobParameter(theRequestPartitionId.toJson()));
+		map.put(CronologicalBatchAllResourcePidReader.JOB_PARAM_START_TIME, new JobParameter(DateUtils.addMinutes(new Date(), MultiUrlProcessorJobConfig.MINUTES_IN_FUTURE_TO_PROCESS_FROM)));
+		if (theBatchSize != null) {
+			map.put(CronologicalBatchAllResourcePidReader.JOB_PARAM_BATCH_SIZE, new JobParameter(theBatchSize.longValue()));
+		}
+		JobParameters parameters = new JobParameters(map);
+		return parameters;
+	}
+
 	@Override
 	public List<Long> read() throws Exception {
 		List<Long> nextBatch = getNextBatch();
 		return nextBatch.isEmpty() ? null : nextBatch;
 	}
 
-	// FIXME KHS multithread
-	// FIXME KHS test
-	private List<Long> getNextBatch() {
-		PageRequest page = PageRequest.of(0, myBatchSize);
-		// FIXME KHS consolidate with other one
-		List<Long> retval = new ArrayList<>();
-		Slice<Long> slice;
-		do {
-			slice = myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(page, myThresholdLow, myStartTime);
-			retval.addAll(slice.getContent());
-
-			if (myAlreadySeenPids != null) {
-				retval.removeAll(myAlreadySeenPids);
-			}
-			page = page.next();
-		} while (retval.size() < myBatchSize && slice.hasNext());
-
-		if (ourLog.isDebugEnabled()) {
-			ourLog.debug("Results: {}", retval);
+	@Autowired
+	public void setRequestPartitionId(@Value("#{jobParameters['" + JOB_PARAM_REQUEST_PARTITION + "']}") String theRequestPartitionIdJson) throws JsonProcessingException {
+		if (theRequestPartitionIdJson == null) {
+			return;
 		}
-
-		myThresholdLow = myPidAccumulator.setThresholds(myThresholdLow, myAlreadySeenPids, retval);
-		return retval;
+		myRequestPartitionId = RequestPartitionId.fromJson(theRequestPartitionIdJson);
 	}
 
 	private Date dateFromPid(Long thePid) {
@@ -143,14 +139,33 @@ public class CronologicalBatchAllResourcePidReader implements ItemReader<List<Lo
 	public void close() throws ItemStreamException {
 	}
 
-	public static JobParameters buildJobParameters(Integer theBatchSize, RequestPartitionId theRequestPartitionId) {
-		Map<String, JobParameter> map = new HashMap<>();
-		map.put(CronologicalBatchAllResourcePidReader.JOB_PARAM_REQUEST_PARTITION, new JobParameter(theRequestPartitionId.toString()));
-		map.put(CronologicalBatchAllResourcePidReader.JOB_PARAM_START_TIME, new JobParameter(DateUtils.addMinutes(new Date(), MultiUrlProcessorJobConfig.MINUTES_IN_FUTURE_TO_PROCESS_FROM)));
-		if (theBatchSize != null) {
-			map.put(CronologicalBatchAllResourcePidReader.JOB_PARAM_BATCH_SIZE, new JobParameter(theBatchSize.longValue()));
+	// FIXME KHS multithread
+	// FIXME KHS test
+	private List<Long> getNextBatch() {
+		PageRequest page = PageRequest.of(0, myBatchSize);
+		// FIXME KHS consolidate with other one
+		List<Long> retval = new ArrayList<>();
+		Slice<Long> slice;
+		do {
+			if (myRequestPartitionId != null) {
+				slice = myResourceTableDao.findIdsOfPartitionedResourcesWithinUpdatedRangeOrderedFromOldest(page, myThresholdLow, myStartTime, myRequestPartitionId.getFirstPartitionIdOrNull());
+			} else {
+				slice = myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(page, myThresholdLow, myStartTime);
+			}
+			retval.addAll(slice.getContent());
+
+			if (myAlreadySeenPids != null) {
+				retval.removeAll(myAlreadySeenPids);
+			}
+			page = page.next();
+		} while (retval.size() < myBatchSize && slice.hasNext());
+
+		if (ourLog.isDebugEnabled()) {
+			ourLog.debug("Results: {}", retval);
 		}
-		JobParameters parameters = new JobParameters(map);
-		return parameters;
+
+		// FIXME KHS rename accumulator
+		myThresholdLow = myPidAccumulator.setThresholds(myThresholdLow, myAlreadySeenPids, retval);
+		return retval;
 	}
 }
