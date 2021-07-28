@@ -8,8 +8,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch.job.model.PartitionedUrl;
 import ca.uhn.fhir.jpa.batch.job.model.RequestListJson;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
-import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -60,14 +58,12 @@ class ReverseCronologicalBatchResourcePidReaderTest {
 	IFhirResourceDao<Patient> myPatientDao;
 	private final RequestPartitionId myDefaultPartitionId = RequestPartitionId.defaultPartition();
 	@Mock
-	SearchBuilderFactory mySearchBuilderFactory;
-	@Mock
-	private ISearchBuilder mySearchBuilder;
-	@Mock
 	private IResultIterator myResultIter;
 
 	@InjectMocks
 	ReverseCronologicalBatchResourcePidReader myReader = new ReverseCronologicalBatchResourcePidReader();
+	@Mock
+	private BatchResourceSearcher myBatchResourceSearcher;
 
 	@BeforeEach
 	public void before() throws JsonProcessingException {
@@ -89,8 +85,7 @@ class ReverseCronologicalBatchResourcePidReaderTest {
 		Calendar cal = new GregorianCalendar(2021, 1, 1);
 		myPatient.getMeta().setLastUpdated(cal.getTime());
 
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
-		when(mySearchBuilder.createQuery(any(), any(), any(), any())).thenReturn(myResultIter);
+		when(myBatchResourceSearcher.performSearch(any(), any())).thenReturn(myResultIter);
 	}
 
 	private Set<ResourcePersistentId> buildPidSet(Integer... thePids) {
