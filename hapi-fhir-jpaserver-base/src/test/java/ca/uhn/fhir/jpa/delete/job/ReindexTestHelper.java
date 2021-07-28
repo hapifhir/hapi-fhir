@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-// FIXME KHS use in cdr
 public class ReindexTestHelper {
 	public static final String ALLELE_EXTENSION_URL = "http://hl7.org/fhir/StructureDefinition/observation-geneticsAlleleName";
 	public static final String ALLELE_SP_CODE = "alleleName";
