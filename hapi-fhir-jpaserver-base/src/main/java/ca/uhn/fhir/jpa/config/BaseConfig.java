@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.config.NonPersistedBatchConfigurer;
 import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
+import ca.uhn.fhir.jpa.batch.reader.BatchResourceSearcher;
 import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
@@ -424,6 +425,11 @@ public abstract class BaseConfig {
 	@Bean
 	public ResourceReindexer resourceReindexer(FhirContext theFhirContext) {
 		return new ResourceReindexer(theFhirContext);
+	}
+
+	@Bean
+	public BatchResourceSearcher myBatchResourceSearcher() {
+		return new BatchResourceSearcher();
 	}
 
 	@Bean
