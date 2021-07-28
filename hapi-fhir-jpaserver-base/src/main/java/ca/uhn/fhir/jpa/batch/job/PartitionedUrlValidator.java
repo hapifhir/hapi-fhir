@@ -22,7 +22,7 @@ public class PartitionedUrlValidator {
 	FhirContext myFhirContext;
 
 	/**
-	 * This method will throw an exception if the user is not allowed to add the requested resource type on the partition determined by the request
+	 * This method will throw an exception if the user is not allowed to access the requested resource type on the partition determined by the request
 	 */
 	public List<RequestPartitionId> requestPartitionIdsFromRequestAndUrls(RequestDetails theRequest, List<String> theUrlsToProcess) {
 		List<RequestPartitionId> retval = new ArrayList<>();

@@ -8,7 +8,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -89,15 +88,12 @@ public class MultitenantDeleteExpungeR4Test extends BaseMultitenantResourceProvi
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		myBatchJobHelper.awaitAllBulkJobCompletions(BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME);
-		assertThat(interceptor.requestPartitionIds, hasSize(3));
-		interceptor.requestPartitionIds.forEach(id -> assertEquals(TENANT_B_ID, id.getFirstPartitionIdOrNull()));
-		interceptor.requestPartitionIds.forEach(id -> assertEquals(TENANT_B, id.getFirstPartitionNameOrNull()));
+		assertThat(interceptor.requestPartitionIds, hasSize(1));
+		RequestPartitionId partitionId = interceptor.requestPartitionIds.get(0);
+		assertEquals(TENANT_B_ID, partitionId.getFirstPartitionIdOrNull());
+		assertEquals(TENANT_B, partitionId.getFirstPartitionNameOrNull());
 		assertThat(interceptor.requestDetails.get(0), isA(ServletRequestDetails.class));
-		assertThat(interceptor.requestDetails.get(1), isA(SystemRequestDetails.class));
-		assertThat(interceptor.requestDetails.get(2), isA(SystemRequestDetails.class));
 		assertEquals("Patient", interceptor.resourceDefs.get(0).getName());
-		assertEquals("Patient", interceptor.resourceDefs.get(1).getName());
-		assertEquals("Patient", interceptor.resourceDefs.get(2).getName());
 		myInterceptorRegistry.unregisterInterceptor(interceptor);
 
 		DecimalType jobIdPrimitive = (DecimalType) response.getParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID);
