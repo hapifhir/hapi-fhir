@@ -18,6 +18,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -156,7 +157,55 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));
 	}
-	// FIXME KHS test reindex_urls
+
+	@Test
+	public void testReindexByUrl() {
+		ReindexTestHelper reindexTestHelper = new ReindexTestHelper(myFhirCtx, myDaoRegistry, mySearchParamRegistry);
+		myTenantClientInterceptor.setTenantId(TENANT_A);
+		IIdType obsFinalA = doCreateResource(reindexTestHelper.buildObservationWithAlleleExtension(Observation.ObservationStatus.FINAL));
+		IIdType obsCancelledA = doCreateResource(reindexTestHelper.buildObservationWithAlleleExtension(Observation.ObservationStatus.CANCELLED));
+
+		myTenantClientInterceptor.setTenantId(TENANT_B);
+		IIdType obsFinalB = doCreateResource(reindexTestHelper.buildObservationWithAlleleExtension(Observation.ObservationStatus.FINAL));
+		IIdType obsCancelledB = doCreateResource(reindexTestHelper.buildObservationWithAlleleExtension(Observation.ObservationStatus.CANCELLED));
+
+		reindexTestHelper.createAlleleSearchParameter();
+
+		// The searchparam value is on the observation, but it hasn't been indexed yet
+		myTenantClientInterceptor.setTenantId(TENANT_A);
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));
+		myTenantClientInterceptor.setTenantId(TENANT_B);
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));
+
+		// setup
+		Parameters input = new Parameters();
+		Integer batchSize = 2401;
+		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_BATCH_SIZE, new DecimalType(batchSize));
+		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_URL, "Observation?status=final");
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+
+		myTenantClientInterceptor.setTenantId(TENANT_A);
+		Parameters response = myClient
+			.operation()
+			.onServer()
+			.named(ProviderConstants.OPERATION_REINDEX)
+			.withParameters(input)
+			.execute();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		DecimalType jobId = (DecimalType) response.getParameter(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
+
+		myBatchJobHelper.awaitJobExecution(jobId.getValueAsNumber().longValue());
+
+		// validate
+		List<String> alleleObservationIds = reindexTestHelper.getAlleleObservationIds(myClient);
+		// Only the one in the first tenant should be indexed
+		myTenantClientInterceptor.setTenantId(TENANT_A);
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
+		assertEquals(obsFinalA.getIdPart(), alleleObservationIds.get(0));
+		myTenantClientInterceptor.setTenantId(TENANT_B);
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));
+	}
 
 	private Bundle getAllPatientsInTenant(String theTenantId) {
 		myTenantClientInterceptor.setTenantId(theTenantId);
