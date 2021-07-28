@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterUtil;
 import ca.uhn.fhir.jpa.batch.job.MultiUrlProcessorJobConfig;
 import ca.uhn.fhir.jpa.batch.reader.CronologicalBatchAllResourcePidReader;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
-import ca.uhn.fhir.jpa.helper.ReindexTestHelper;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.apache.commons.lang3.time.DateUtils;

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.helper;
+package ca.uhn.fhir.jpa.delete.job;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
