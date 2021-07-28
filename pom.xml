@@ -832,6 +832,7 @@
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 
 		<elastic_apm_version>1.13.0</elastic_apm_version>
+		<elastic_client_version>7.13.4</elastic_client_version>
 		<!-- CQL Support -->
 		<cql-engine.version>1.5.1</cql-engine.version>
 		<cql-evaluator.version>1.2.0</cql-evaluator.version>
@@ -1583,8 +1584,17 @@
 				See: https://docs.jboss.org/hibernate/stable/search/reference/en-US/html_single/#getting-started-compatibility
 				-->
 				<groupId>org.elasticsearch.client</groupId>
+				<artifactId>elasticsearch-rest-client-sniffer</artifactId>
+				<version>${elastic_client_version}</version>
+			</dependency>
+			<dependency>
+				<!--
+				Be careful bumping this, you need to match the maximum version supported by Hibernate Search.
+				See: https://docs.jboss.org/hibernate/stable/search/reference/en-US/html_single/#getting-started-compatibility
+				-->
+				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-client</artifactId>
-				<version>7.13.4</version>
+				<version>${elastic_client_version}</version>
 			</dependency>
 			<dependency>
 				<!--
@@ -1593,7 +1603,7 @@
 				-->
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-high-level-client</artifactId>
-				<version>7.13.4</version>
+				<version>${elastic_client_version}</version>
 				<exclusions>
 					<exclusion>
 						<groupId>com.fasterxml.jackson.dataformat</groupId>
