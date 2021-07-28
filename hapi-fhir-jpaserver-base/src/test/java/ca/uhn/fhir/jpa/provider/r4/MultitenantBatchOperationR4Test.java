@@ -33,8 +33,8 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class MultitenantDeleteExpungeR4Test extends BaseMultitenantResourceProviderR4Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(MultitenantDeleteExpungeR4Test.class);
+public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProviderR4Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(MultitenantBatchOperationR4Test.class);
 
 	@Autowired
 	private BatchJobHelper myBatchJobHelper;
@@ -106,6 +106,11 @@ public class MultitenantDeleteExpungeR4Test extends BaseMultitenantResourceProvi
 		assertEquals(2, getAllPatientsInTenant(TENANT_A).getTotal());
 		assertEquals(1, getAllPatientsInTenant(TENANT_B).getTotal());
 		assertEquals(0, getAllPatientsInTenant(DEFAULT_PARTITION_NAME).getTotal());
+
+	}
+
+	// FIXME KHS also test reindex_urls
+	public void testReindexEverything() {
 
 	}
 

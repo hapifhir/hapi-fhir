@@ -99,11 +99,12 @@ public class CronologicalBatchAllResourcePidReader implements ItemReader<List<Lo
 	private List<Long> getNextBatch() {
 		PageRequest page = PageRequest.of(0, myBatchSize);
 		// FIXME KHS consolidate with other one
-		List<Long> retval;
+		List<Long> retval = new ArrayList<>();
 		Slice<Long> slice;
 		do {
 			slice = myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(page, myThresholdLow, myStartTime);
-			retval = new ArrayList<>(slice.getContent());
+			retval.addAll(slice.getContent());
+
 			if (myAlreadySeenPids != null) {
 				retval.removeAll(myAlreadySeenPids);
 			}
@@ -115,7 +116,6 @@ public class CronologicalBatchAllResourcePidReader implements ItemReader<List<Lo
 		}
 
 		myThresholdLow = myPidAccumulator.setThresholds(myThresholdLow, myAlreadySeenPids, retval);
-
 		return retval;
 	}
 

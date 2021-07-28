@@ -19,6 +19,7 @@ import org.springframework.batch.core.JobParametersInvalidException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -46,20 +47,20 @@ class MultiUrlJobParameterValidatorTest {
 		// setup
 		JobParameters parameters = MultiUrlJobParameterUtil.buildJobParameters("Patient?address=memory", "Patient?name=smith");
 		ResourceSearch resourceSearch = new ResourceSearch(ourFhirContext.getResourceDefinition("Patient"), new SearchParameterMap(), RequestPartitionId.defaultPartition());
-		when(myMatchUrlService.getResourceSearch(anyString())).thenReturn(resourceSearch);
+		when(myMatchUrlService.getResourceSearch(anyString(), any())).thenReturn(resourceSearch);
 		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(true);
 
 		// execute
 		mySvc.validate(parameters);
 		// verify
-		verify(myMatchUrlService, times(2)).getResourceSearch(anyString());
+		verify(myMatchUrlService, times(2)).getResourceSearch(anyString(), any());
 	}
 
 	@Test
 	public void testValidateBadType() throws JobParametersInvalidException, JsonProcessingException {
 		JobParameters parameters = MultiUrlJobParameterUtil.buildJobParameters("Patient?address=memory");
 		ResourceSearch resourceSearch = new ResourceSearch(ourFhirContext.getResourceDefinition("Patient"), new SearchParameterMap(), RequestPartitionId.defaultPartition());
-		when(myMatchUrlService.getResourceSearch(anyString())).thenReturn(resourceSearch);
+		when(myMatchUrlService.getResourceSearch(anyString(), any())).thenReturn(resourceSearch);
 		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(false);
 
 		try {

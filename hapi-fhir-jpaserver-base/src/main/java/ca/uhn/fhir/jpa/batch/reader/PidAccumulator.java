@@ -21,10 +21,9 @@ public class PidAccumulator {
 	}
 
 	// FIXME KHS test
-	public Date setThresholds(Date theThreshold, Set<Long> theAlreadySeenPids, List<Long> theNewPids) {
-		Date retval = theThreshold;
+	public Date setThresholds(Date thePrevThreshold, Set<Long> theAlreadySeenPids, List<Long> theNewPids) {
 		if (theNewPids.isEmpty()) {
-			return retval;
+			return thePrevThreshold;
 		}
 
 		// Adjust the low threshold to be the latest resource in the batch we found
@@ -32,13 +31,14 @@ public class PidAccumulator {
 		Date latestUpdatedDate = myDateFromPid.apply(pidOfLatestResourceInBatch);
 
 		// The latest date has changed, create a new cache to store pids with that date
-		if (theThreshold != latestUpdatedDate) {
+		if (thePrevThreshold != latestUpdatedDate) {
 			theAlreadySeenPids.clear();
 		}
 		theAlreadySeenPids.add(pidOfLatestResourceInBatch);
-		retval = latestUpdatedDate;
+
+		Date newThreshold = latestUpdatedDate;
 		if (theNewPids.size() <= 1) {
-			return theThreshold;
+			return newThreshold;
 		}
 
 		// There is more than one resource in this batch
@@ -51,7 +51,7 @@ public class PidAccumulator {
 			theAlreadySeenPids.add(pid);
 		}
 
-		return retval;
+		return newThreshold;
 	}
 
 	public PidAccumulator setDateFromPid(Function<Long, Date> theDateFromPid) {
