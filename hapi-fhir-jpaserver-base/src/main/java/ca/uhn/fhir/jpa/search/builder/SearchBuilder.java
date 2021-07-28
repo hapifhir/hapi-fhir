@@ -58,6 +58,7 @@ import ca.uhn.fhir.jpa.search.builder.sql.SqlObjectFactory;
 import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
@@ -301,32 +302,22 @@ public class SearchBuilder implements ISearchBuilder {
 		/*
 		 * Fulltext or lastn search
 		 */
-		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN()) {
-			if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
-				if (myFulltextSearchSvc == null) {
-					if (myParams.containsKey(Constants.PARAM_TEXT)) {
-						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
-					} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
-						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
-					}
-				}
+		boolean requiresHibernateSearchAccess = myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN();
 
-				if (myParams.getEverythingMode() != null) {
-					pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
-				} else {
-					pids = myFulltextSearchSvc.search(myResourceName, myParams);
-				}
-			} else if (myParams.isLastN()) {
-				if (myIElasticsearchSvc == null) {
-					if (myParams.isLastN()) {
-						throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
-					}
-				}
-				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults);
-				for (String lastnResourceId : lastnResourceIds) {
-					pids.add(myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId));
-				}
+		requiresHibernateSearchAccess |= myParams.entrySet().stream()
+			.filter(entry -> entry.getKey().equals("code"))
+			.flatMap(andList -> andList.getValue().stream())
+			.flatMap(Collection::stream)
+			.filter(param -> param instanceof TokenParam || param instanceof StringParam)
+			.anyMatch(param -> ":text".equals(param.getQueryParameterQualifier()));
+
+		if (requiresHibernateSearchAccess) {
+			if (myParams.isLastN()) {
+				pids = executeLastNAgainstIndex(theMaximumResults);
+			} else {
+				pids = executeFullTextSearchAgainstIndex(theRequest);
 			}
+
 			if (theSearchRuntimeDetails != null) {
 				theSearchRuntimeDetails.setFoundIndexMatchesCount(pids.size());
 				HookParams params = new HookParams()
@@ -353,6 +344,37 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		return queries;
+	}
+
+	private List<ResourcePersistentId> executeLastNAgainstIndex(Integer theMaximumResults) {
+		if (myIElasticsearchSvc == null) {
+			if (myParams.isLastN()) {
+				throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
+			}
+		}
+		List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults);
+
+		return lastnResourceIds.stream()
+			.map(lastnResourceId -> myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId,myResourceName,lastnResourceId))
+			.collect(Collectors.toList());
+	}
+
+	private List<ResourcePersistentId> executeFullTextSearchAgainstIndex(RequestDetails theRequest) {
+		List<ResourcePersistentId> pids;
+		if (myFulltextSearchSvc == null) {
+			if (myParams.containsKey(Constants.PARAM_TEXT)) {
+				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+			} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
+				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+			}
+		}
+
+		if (myParams.getEverythingMode() != null) {
+			pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
+		} else {
+			pids = myFulltextSearchSvc.search(myResourceName, myParams);
+		}
+		return pids;
 	}
 
 	private void doCreateChunkedQueries(SearchParameterMap theParams, List<Long> thePids, Integer theOffset, SortSpec sort, boolean theCount, RequestDetails theRequest, ArrayList<SearchQueryExecutor> theQueries) {

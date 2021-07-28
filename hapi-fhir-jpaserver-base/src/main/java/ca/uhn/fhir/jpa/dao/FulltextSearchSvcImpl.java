@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
@@ -47,11 +48,13 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.api.Constants.PARAMQUALIFIER_TOKEN_TEXT;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
@@ -78,7 +81,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		super();
 	}
 
-	private void addTextSearch(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, List<List<IQueryParameterType>> theTerms, String theFieldName, String theFieldNameEdgeNGram, String theFieldNameTextNGram) {
+	private void addTextSearch(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, List<List<IQueryParameterType>> theTerms, String theFieldName) {
 		if (theTerms == null) {
 			return;
 		}
@@ -118,6 +121,43 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
 		List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
 
+		List<IQueryParameterType> collect = theParams.entrySet().stream()
+			.flatMap(andList -> andList.getValue().stream())
+			.flatMap(Collection::stream)
+			.filter(param -> PARAMQUALIFIER_TOKEN_TEXT.equals(param.getQueryParameterQualifier()))
+			.collect(Collectors.toList());
+
+		/***
+		 * {
+		 *   "myId": 1
+		 *   "myNarrativeText" : 'adsasdjkaldjalkdjalkdjalkdjs",
+		 *   textFields: {
+		 *     "text-code" : "Our observation Glucose Moles volume in Blood"
+		 *     "text-clinicalCode" : "Our observation Glucose Moles volume in Blood"
+		 *     "text-identifier" :
+		 *     "text-component-value-concept": " a a s d d  g v"
+		 *   },
+		 *   resource: {
+		 *   	type: "Observation"
+		 *   	"code": {
+		 *     "coding": [
+		 *       {
+		 *         "system": "http://loinc.org",
+		 *         "code": "15074-8",
+		 *         "display": "Glucose [Moles/volume] in Blood"
+		 *       }
+		 *     ],
+		 *     "text", "Our observation"
+		 *   },
+		 *   }
+		 * }
+		 */
+
+		for (IQueryParameterType iQueryParameterType : collect) {
+			theParams.removeByNameAndQualifier(iQueryParameterType.getQueryParameterQualifier(), TokenParamModifier.TEXT);
+		}
+		List<List<IQueryParameterType>> tokenTextAndTerms = theParams.removeByNameAndQualifier("code", TokenParamModifier.TEXT);
+
 		List<Long> longPids = session.search(ResourceTable.class)
 			//Selects are replacements for projection and convert more cleanly than the old implementation.
 			.select(
@@ -128,11 +168,18 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					/*
 					 * Handle _content parameter (resource body content)
 					 */
-					addTextSearch(f, b, contentAndTerms, "myContentText", "mycontentTextEdgeNGram", "myContentTextNGram");
+					addTextSearch(f, b, contentAndTerms, "myContentText");
 					/*
 					 * Handle _text parameter (resource narrative content)
 					 */
-					addTextSearch(f, b, textAndTerms, "myNarrativeText", "myNarrativeTextEdgeNGram", "myNarrativeTextNGram");
+					addTextSearch(f, b, textAndTerms, "myNarrativeText");
+
+					/**
+					 * Handle :text qualifier on Tokens
+					 */
+//					addTextSearch(f, b, codingAndTerms, "myCodingDisplayText");
+//					addTextSearch(f, b, codeableConceptAndTerms, "myCodeableConceptText");
+//					addTextSearch(f, b, identifierTypeTerms, "myIdentifierTypeText");
 
 					if (theReferencingPid != null) {
 						b.must(f.match().field("myResourceLinksField").matching(theReferencingPid.toString()));

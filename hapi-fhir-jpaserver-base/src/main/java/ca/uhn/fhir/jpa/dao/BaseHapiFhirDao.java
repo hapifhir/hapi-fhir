@@ -8,6 +8,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -87,12 +88,14 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.MetaUtil;
+import ca.uhn.fhir.util.TerserUtil;
 import ca.uhn.fhir.util.XmlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
+import javassist.expr.Instanceof;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -142,6 +145,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
@@ -1697,7 +1701,25 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		} else {
 			theEntity.setNarrativeText(parseNarrativeTextIntoWords(theResource));
 			theEntity.setContentText(parseContentTextIntoWords(theContext, theResource));
+			Map<String,String> searchParamTexts = parseSearchParamTextStuff(theContext, theResource);
+			theEntity.setSearchParamText(searchParamTexts);
 		}
+	}
+
+	private static Map<String, String> parseSearchParamTextStuff(FhirContext theContext, IBaseResource theResource) {
+		// FIXME identify :text searchable params in the resource.  For now, just support Observation.code
+		//TODO START ME HERE TOMORROW
+		Map<String, String> retVal = new HashMap<>();
+		String resourceType = theContext.getResourceType(theResource);
+		if (resourceType.equalsIgnoreCase("observation")) {
+			IFhirPath iFhirPath = theContext.newFhirPath();
+			iFhirPath.evaluateFirst(theResource, "code.text", IPrimitiveType.class)
+			.ifPresent(pType -> {
+				retVal.put("code", pType.getValueAsString());
+			});
+
+		}
+		return retVal;
 	}
 
 	public static String decodeResource(byte[] theResourceBytes, ResourceEncodingEnum theResourceEncoding) {

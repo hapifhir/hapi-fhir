@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -628,7 +629,7 @@ public class SearchParameterMap implements Serializable {
 	 *
 	 * @return an And List or Query Parameters matching the qualifier.
 	 */
-	public List<List<IQueryParameterType>> removeByQualifier(String theName, String theQualifier) {
+	public List<List<IQueryParameterType>> removeByNameAndQualifier(String theName, String theQualifier) {
 
 		List<List<IQueryParameterType>> matchingParameters = new ArrayList<>();
 		List<List<IQueryParameterType>> remainderParameters = new ArrayList<>();
@@ -649,8 +650,31 @@ public class SearchParameterMap implements Serializable {
 
 	}
 
-	public List<List<IQueryParameterType>> removeByQualifier(String theName, @Nonnull TokenParamModifier theModifier) {
-		return removeByQualifier(theName, theModifier.getValue());
+	public List<List<IQueryParameterType>> removeByNameAndQualifier(String theName, @Nonnull TokenParamModifier theModifier) {
+		return removeByNameAndQualifier(theName, theModifier.getValue());
+	}
+
+	public Map<String, List<List<IQueryParameterType>>> removeByQualifier(String theQualifier) {
+
+		Map<String, List<List<IQueryParameterType>>> parameterToTextValuesMap = new HashMap<>();
+		List<IQueryParameterType> collect = mySearchParameterMap.entrySet().stream()
+			.flatMap(andList -> andList.getValue().stream())
+			.flatMap(Collection::stream)
+			.filter(param -> PARAMQUALIFIER_TOKEN_TEXT.equals(param.getQueryParameterQualifier()))
+			.collect(Collectors.toList());
+
+		for (Map.Entry<String, List<List<IQueryParameterType>>> stringListEntry : mySearchParameterMap.entrySet()) {
+			String parameterName = stringListEntry.getKey();
+			for (List<IQueryParameterType> orList: stringListEntry.getValue()) {
+				for (IQueryParameterType parameterType: orList) {
+					if (PARAMQUALIFIER_TOKEN_TEXT.equals(parameterType.getQueryParameterQualifier())) {
+						parameterToTextValuesMap.put(parameterName, removeByNameAndQualifier(parameterName, TokenParamModifier.TEXT));
+					}
+				}
+			}
+		}
+		return parameterToTextValuesMap;
+
 	}
 
 	public int size() {

@@ -49,7 +49,7 @@ class SearchParameterMapTest {
 
 		map.add("code", qualifiedTokenParam);
 		map.add("code", unqualifiedTokenParam);
-		List<List<IQueryParameterType>> andList = map.removeByQualifier("code", TEXT);
+		List<List<IQueryParameterType>> andList = map.removeByNameAndQualifier("code", TEXT);
 		assertThat(andList, hasSize(1));
 		List<IQueryParameterType> orList = andList.get(0);
 		assertThat(orList, hasSize(2));
@@ -69,7 +69,7 @@ class SearchParameterMapTest {
 			.addOr(new TokenParam("weight-text-2").setModifier(TEXT));
 
 		map.add("code", qualifiedTokenParam);
-		List<List<IQueryParameterType>> andList = map.removeByQualifier("code", TEXT);
+		List<List<IQueryParameterType>> andList = map.removeByNameAndQualifier("code", TEXT);
 		assertThat(andList, hasSize(1));
 		List<IQueryParameterType> orList = andList.get(0);
 		assertThat(orList, hasSize(2));
