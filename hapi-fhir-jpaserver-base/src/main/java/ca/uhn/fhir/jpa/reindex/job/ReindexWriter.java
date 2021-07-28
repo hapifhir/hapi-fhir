@@ -23,9 +23,13 @@ package ca.uhn.fhir.jpa.reindex.job;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.expunge.PartitionRunner;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 
@@ -35,10 +39,13 @@ import java.util.List;
  */
 
 public class ReindexWriter implements ItemWriter<List<Long>> {
+	private static final Logger ourLog = LoggerFactory.getLogger(ReindexWriter.class);
 	@Autowired
 	ResourceReindexer myResourceReindexer;
 	@Autowired
 	DaoConfig myDaoConfig;
+	@Autowired
+	protected PlatformTransactionManager myTxManager;
 
 	@Override
 	public void write(List<? extends List<Long>> thePidLists) throws Exception {
@@ -46,7 +53,13 @@ public class ReindexWriter implements ItemWriter<List<Long>> {
 		PartitionRunner partitionRunner = new PartitionRunner(myDaoConfig.getReindexBatchSize(), myDaoConfig.getReindexThreadCount());
 
 		for (List<Long> pidList : thePidLists) {
-			partitionRunner.runInPartitionedThreads(new SliceImpl<>(pidList), pids -> pidList.forEach(pid -> myResourceReindexer.readAndReindexResourceByPid(pid)));
+			partitionRunner.runInPartitionedThreads(new SliceImpl<>(pidList), pids -> reindexPids(pidList));
 		}
+	}
+
+	private void reindexPids(List<Long> pidList) {
+		ourLog.info("Reindexing {} resources.", pidList.size());
+		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+		txTemplate.executeWithoutResult(t -> pidList.forEach(pid -> myResourceReindexer.readAndReindexResourceByPid(pid)));
 	}
 }
