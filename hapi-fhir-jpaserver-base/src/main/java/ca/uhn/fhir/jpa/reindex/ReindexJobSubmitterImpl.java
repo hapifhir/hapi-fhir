@@ -61,6 +61,9 @@ public class ReindexJobSubmitterImpl implements IReindexJobSubmitter {
 	@Override
 	@Transactional(Transactional.TxType.NEVER)
 	public JobExecution submitJob(Integer theBatchSize, List<String> theUrlsToReindex, RequestDetails theRequest) throws JobParametersInvalidException {
+		if (theBatchSize == null) {
+			theBatchSize = myDaoConfig.getReindexBatchSize();
+		}
 		List<RequestPartitionId> requestPartitionIds = myPartitionedUrlValidator.requestPartitionIdsFromRequestAndUrls(theRequest, theUrlsToReindex);
 		if (!myDaoConfig.isReindexEnabled()) {
 			throw new ForbiddenOperationException("Reindexing is disabled on this server.");
@@ -81,6 +84,9 @@ public class ReindexJobSubmitterImpl implements IReindexJobSubmitter {
 	@Override
 	@Transactional(Transactional.TxType.NEVER)
 	public JobExecution submitEverythingJob(Integer theBatchSize, RequestDetails theRequest) throws JobParametersInvalidException {
+		if (theBatchSize == null) {
+			theBatchSize = myDaoConfig.getReindexBatchSize();
+		}
 		RequestPartitionId requestPartitionId = myPartitionedUrlValidator.requestPartitionIdFromRequest(theRequest);
 		if (!myDaoConfig.isReindexEnabled()) {
 			throw new ForbiddenOperationException("Reindexing is disabled on this server.");

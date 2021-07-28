@@ -95,7 +95,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	@Autowired
 	private BatchResourceSearcher myBatchResourceSearcher;
 
-	private final PidAccumulator myPidAccumulator = new PidAccumulator();
+	private final BatchDateThresholdUpdater myBatchDateThresholdUpdater = new BatchDateThresholdUpdater();
 
 	private List<PartitionedUrl> myPartitionedUrls;
 	private Integer myBatchSize;
@@ -158,14 +158,15 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 		setAccumulatorDateFromPidFunction(resourceSearch);
 
 		List<Long> retval = new ArrayList<>(newPids);
-		myPidAccumulator.setThresholds(myThresholdHighByUrlIndex.get(myUrlIndex), myAlreadyProcessedPidsWithHighDate.get(myUrlIndex), retval);
+		Date newThreshold = myBatchDateThresholdUpdater.updateThresholdAndCache(myThresholdHighByUrlIndex.get(myUrlIndex), myAlreadyProcessedPidsWithHighDate.get(myUrlIndex), retval);
+		myThresholdHighByUrlIndex.put(myUrlIndex, newThreshold);
 
 		return retval;
 	}
 
 	private void setAccumulatorDateFromPidFunction(ResourceSearch resourceSearch) {
 		final IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceSearch.getResourceName());
-		myPidAccumulator.setDateFromPid(pid -> {
+		myBatchDateThresholdUpdater.setDateFromPid(pid -> {
 			IBaseResource oldestResource = dao.readByPid(new ResourcePersistentId(pid));
 			return oldestResource.getMeta().getLastUpdated();
 		});
@@ -180,9 +181,6 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 
 	@Override
 	public void open(ExecutionContext executionContext) throws ItemStreamException {
-		if (myBatchSize == null) {
-			myBatchSize = myDaoConfig.getExpungeBatchSize();
-		}
 		if (executionContext.containsKey(CURRENT_URL_INDEX)) {
 			myUrlIndex = new Long(executionContext.getLong(CURRENT_URL_INDEX)).intValue();
 		}

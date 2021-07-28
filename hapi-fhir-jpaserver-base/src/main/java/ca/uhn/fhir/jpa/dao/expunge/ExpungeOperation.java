@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -42,9 +42,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	@Autowired
 	private IResourceExpungeService myExpungeDaoService;
 	@Autowired
-	private PartitionRunner myPartitionRunner;
-	@Autowired
-	protected IInterceptorBroadcaster myInterceptorBroadcaster;
+	private DaoConfig myDaoConfig;
 
 	private final String myResourceName;
 	private final Long myResourceId;
@@ -113,15 +111,19 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	private void expungeOldVersions() {
 		Slice<Long> historicalIds = findHistoricalVersionsOfNonDeletedResources();
 
-		myPartitionRunner.runInPartitionedThreads(historicalIds, partition -> myExpungeDaoService.expungeHistoricalVersions(myRequestDetails, partition, myRemainingCount));
+		getPartitionRunner().runInPartitionedThreads(historicalIds, partition -> myExpungeDaoService.expungeHistoricalVersions(myRequestDetails, partition, myRemainingCount));
+	}
+
+	private PartitionRunner getPartitionRunner() {
+		return new PartitionRunner(myDaoConfig.getExpungeBatchSize(), myDaoConfig.getExpungeThreadCount());
 	}
 
 	private void deleteCurrentVersionsOfDeletedResources(Slice<Long> theResourceIds) {
-		myPartitionRunner.runInPartitionedThreads(theResourceIds, partition -> myExpungeDaoService.expungeCurrentVersionOfResources(myRequestDetails, partition, myRemainingCount));
+		getPartitionRunner().runInPartitionedThreads(theResourceIds, partition -> myExpungeDaoService.expungeCurrentVersionOfResources(myRequestDetails, partition, myRemainingCount));
 	}
 
 	private void deleteHistoricalVersions(Slice<Long> theResourceIds) {
-		myPartitionRunner.runInPartitionedThreads(theResourceIds, partition -> myExpungeDaoService.expungeHistoricalVersionsOfIds(myRequestDetails, partition, myRemainingCount));
+		getPartitionRunner().runInPartitionedThreads(theResourceIds, partition -> myExpungeDaoService.expungeHistoricalVersionsOfIds(myRequestDetails, partition, myRemainingCount));
 	}
 
 	private ExpungeOutcome expungeOutcome() {

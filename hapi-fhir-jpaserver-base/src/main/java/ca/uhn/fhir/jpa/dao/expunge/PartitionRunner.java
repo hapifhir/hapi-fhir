@@ -20,18 +20,13 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Slice;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,16 +41,16 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-@Service
 public class PartitionRunner {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeService.class);
 	private static final int MAX_POOL_SIZE = 1000;
 
-	private final DaoConfig myDaoConfig;
+	private final int myBatchSize;
+	private final int myThreadCount;
 
-	@Autowired
-	public PartitionRunner(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
+	public PartitionRunner(int theBatchSize, int theThreadCount) {
+		myBatchSize = theBatchSize;
+		myThreadCount = theThreadCount;
 	}
 
 	public void runInPartitionedThreads(Slice<Long> theResourceIds, Consumer<List<Long>> partitionConsumer) {
@@ -96,7 +91,7 @@ public class PartitionRunner {
 	private List<Callable<Void>> buildCallableTasks(Slice<Long> theResourceIds, Consumer<List<Long>> partitionConsumer) {
 		List<Callable<Void>> retval = new ArrayList<>();
 
-		List<List<Long>> partitions = Lists.partition(theResourceIds.getContent(), myDaoConfig.getExpungeBatchSize());
+		List<List<Long>> partitions = Lists.partition(theResourceIds.getContent(), myBatchSize);
 
 		for (List<Long> nextPartition : partitions) {
 			if (nextPartition.size() > 0) {
@@ -113,7 +108,7 @@ public class PartitionRunner {
 	}
 
 	private ExecutorService buildExecutor(int numberOfTasks) {
-		int threadCount = Math.min(numberOfTasks, myDaoConfig.getExpungeThreadCount());
+		int threadCount = Math.min(numberOfTasks, myThreadCount);
 		assert (threadCount > 0);
 
 		ourLog.info("Expunging with {} threads", threadCount);
@@ -130,7 +125,7 @@ public class PartitionRunner {
 				executorQueue.put(theRunnable);
 			} catch (InterruptedException e) {
 				throw new RejectedExecutionException("Task " + theRunnable.toString() +
-					" rejected from " + e.toString());
+					" rejected from " + e);
 			}
 			ourLog.info("Slot become available after {}ms", sw.getMillis());
 		};

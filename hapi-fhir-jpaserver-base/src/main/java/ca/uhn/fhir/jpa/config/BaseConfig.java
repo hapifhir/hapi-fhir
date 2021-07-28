@@ -40,7 +40,6 @@ import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.IResourceExpungeService;
-import ca.uhn.fhir.jpa.dao.expunge.PartitionRunner;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
@@ -895,11 +894,6 @@ public abstract class BaseConfig {
 	@Bean
 	public DeleteExpungeService deleteExpungeService() {
 		return new DeleteExpungeService();
-	}
-
-	@Bean
-	public PartitionRunner partitionRunner(DaoConfig theDaoConfig) {
-		return new PartitionRunner(theDaoConfig);
 	}
 
 	@Bean

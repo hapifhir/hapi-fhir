@@ -20,9 +20,12 @@ package ca.uhn.fhir.jpa.reindex.job;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.expunge.PartitionRunner;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexer;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.SliceImpl;
 
 import java.util.List;
 
@@ -34,11 +37,15 @@ import java.util.List;
 public class ReindexWriter implements ItemWriter<List<Long>> {
 	@Autowired
 	ResourceReindexer myResourceReindexer;
+	@Autowired
+	DaoConfig myDaoConfig;
 
 	@Override
 	public void write(List<? extends List<Long>> thePidLists) throws Exception {
+		PartitionRunner partitionRunner = new PartitionRunner(myDaoConfig.getReindexBatchSize(), myDaoConfig.getReindexThreadCount());
+
 		for (List<Long> pidList : thePidLists) {
-			pidList.forEach(pid -> myResourceReindexer.readAndReindexResourceByPid(pid));
+			partitionRunner.runInPartitionedThreads(new SliceImpl<>(pidList), pids -> pidList.forEach(pid -> myResourceReindexer.readAndReindexResourceByPid(pid)));
 		}
 	}
 }

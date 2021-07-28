@@ -61,7 +61,6 @@ import java.util.Set;
 public class CronologicalBatchAllResourcePidReader implements ItemReader<List<Long>>, ItemStream {
 	public static final String JOB_PARAM_BATCH_SIZE = "batch-size";
 	public static final String JOB_PARAM_START_TIME = "start-time";
-	// FIXME KHS use this
 	public static final String JOB_PARAM_REQUEST_PARTITION = "request-partition";
 	public static final String CURRENT_THRESHOLD_LOW = "current.threshold-low";
 
@@ -75,8 +74,8 @@ public class CronologicalBatchAllResourcePidReader implements ItemReader<List<Lo
 
 	private Integer myBatchSize;
 	private Date myThresholdLow = BEGINNING_OF_TIME;
-	private final PidAccumulator myPidAccumulator = new PidAccumulator(this::dateFromPid);
-	private final Set<Long> myAlreadySeenPids = new HashSet<>();
+	private final BatchDateThresholdUpdater myBatchDateThresholdUpdater = new BatchDateThresholdUpdater(this::dateFromPid);
+	private final Set<Long> myAlreadyProcessedPidsWithLowDate = new HashSet<>();
 	private Date myStartTime;
 	private RequestPartitionId myRequestPartitionId;
 
@@ -139,11 +138,8 @@ public class CronologicalBatchAllResourcePidReader implements ItemReader<List<Lo
 	public void close() throws ItemStreamException {
 	}
 
-	// FIXME KHS multithread
-	// FIXME KHS test
 	private List<Long> getNextBatch() {
 		PageRequest page = PageRequest.of(0, myBatchSize);
-		// FIXME KHS consolidate with other one
 		List<Long> retval = new ArrayList<>();
 		Slice<Long> slice;
 		do {
@@ -153,19 +149,14 @@ public class CronologicalBatchAllResourcePidReader implements ItemReader<List<Lo
 				slice = myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(page, myThresholdLow, myStartTime);
 			}
 			retval.addAll(slice.getContent());
-
-			if (myAlreadySeenPids != null) {
-				retval.removeAll(myAlreadySeenPids);
-			}
+			retval.removeAll(myAlreadyProcessedPidsWithLowDate);
 			page = page.next();
 		} while (retval.size() < myBatchSize && slice.hasNext());
 
 		if (ourLog.isDebugEnabled()) {
 			ourLog.debug("Results: {}", retval);
 		}
-
-		// FIXME KHS rename accumulator
-		myThresholdLow = myPidAccumulator.setThresholds(myThresholdLow, myAlreadySeenPids, retval);
+		myThresholdLow = myBatchDateThresholdUpdater.updateThresholdAndCache(myThresholdLow, myAlreadyProcessedPidsWithLowDate, retval);
 		return retval;
 	}
 }

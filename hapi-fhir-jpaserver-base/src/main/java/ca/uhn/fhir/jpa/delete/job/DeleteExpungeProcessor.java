@@ -55,8 +55,6 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 	IdHelperService myIdHelper;
 	@Autowired
 	IResourceLinkDao myResourceLinkDao;
-	@Autowired
-	PartitionRunner myPartitionRunner;
 
 	@Override
 	public List<String> process(List<Long> thePids) throws Exception {
@@ -84,7 +82,8 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 		}
 
 		List<ResourceLink> conflictResourceLinks = Collections.synchronizedList(new ArrayList<>());
-		myPartitionRunner.runInPartitionedThreads(thePids, someTargetPids -> findResourceLinksWithTargetPidIn(thePids.getContent(), someTargetPids, conflictResourceLinks));
+		PartitionRunner partitionRunner = new PartitionRunner(myDaoConfig.getExpungeBatchSize(), myDaoConfig.getExpungeThreadCount());
+		partitionRunner.runInPartitionedThreads(thePids, someTargetPids -> findResourceLinksWithTargetPidIn(thePids.getContent(), someTargetPids, conflictResourceLinks));
 
 		if (conflictResourceLinks.isEmpty()) {
 			return;

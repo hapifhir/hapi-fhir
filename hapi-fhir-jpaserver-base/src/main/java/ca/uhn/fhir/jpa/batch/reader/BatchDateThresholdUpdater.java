@@ -8,20 +8,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
-public class PidAccumulator {
-	private static final Logger ourLog = LoggerFactory.getLogger(PidAccumulator.class);
+public class BatchDateThresholdUpdater {
+	private static final Logger ourLog = LoggerFactory.getLogger(BatchDateThresholdUpdater.class);
 
 	private Function<Long, Date> myDateFromPid;
 
-	public PidAccumulator() {
+	public BatchDateThresholdUpdater() {
 	}
 
-	public PidAccumulator(Function<Long, Date> theDateFromPid) {
+	public BatchDateThresholdUpdater(Function<Long, Date> theDateFromPid) {
 		myDateFromPid = theDateFromPid;
 	}
 
 	// FIXME KHS test
-	public Date setThresholds(Date thePrevThreshold, Set<Long> theAlreadySeenPids, List<Long> theNewPids) {
+	public Date updateThresholdAndCache(Date thePrevThreshold, Set<Long> theAlreadyProcessedPids, List<Long> theNewPids) {
 		if (theNewPids.isEmpty()) {
 			return thePrevThreshold;
 		}
@@ -32,9 +32,9 @@ public class PidAccumulator {
 
 		// The latest date has changed, create a new cache to store pids with that date
 		if (thePrevThreshold != latestUpdatedDate) {
-			theAlreadySeenPids.clear();
+			theAlreadyProcessedPids.clear();
 		}
-		theAlreadySeenPids.add(pidOfLatestResourceInBatch);
+		theAlreadyProcessedPids.add(pidOfLatestResourceInBatch);
 
 		Date newThreshold = latestUpdatedDate;
 		if (theNewPids.size() <= 1) {
@@ -48,13 +48,13 @@ public class PidAccumulator {
 			if (!latestUpdatedDate.equals(newDate)) {
 				break;
 			}
-			theAlreadySeenPids.add(pid);
+			theAlreadyProcessedPids.add(pid);
 		}
 
 		return newThreshold;
 	}
 
-	public PidAccumulator setDateFromPid(Function<Long, Date> theDateFromPid) {
+	public BatchDateThresholdUpdater setDateFromPid(Function<Long, Date> theDateFromPid) {
 		myDateFromPid = theDateFromPid;
 		return this;
 	}

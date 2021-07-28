@@ -70,6 +70,9 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 	@Override
 	@Transactional(Transactional.TxType.NEVER)
 	public JobExecution submitJob(Integer theBatchSize, List<String> theUrlsToDeleteExpunge, RequestDetails theRequest) throws JobParametersInvalidException {
+		if (theBatchSize == null) {
+			theBatchSize = myDaoConfig.getExpungeBatchSize();
+		}
 		List<RequestPartitionId> requestPartitionIds = myPartitionedUrlValidator.requestPartitionIdsFromRequestAndUrls(theRequest, theUrlsToDeleteExpunge);
 		if (!myDaoConfig.canDeleteExpunge()) {
 			throw new ForbiddenOperationException("Delete Expunge not allowed:  " + myDaoConfig.cannotDeleteExpungeReason());

@@ -69,8 +69,6 @@ public class DeleteExpungeService {
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
-	private PartitionRunner myPartitionRunner;
-	@Autowired
 	private ResourceTableFKProvider myResourceTableFKProvider;
 	@Autowired
 	private IResourceLinkDao myResourceLinkDao;
@@ -99,7 +97,8 @@ public class DeleteExpungeService {
 		ourLog.info("Expunging all records linking to {} resources...", thePids.getNumber());
 		AtomicLong expungedEntitiesCount = new AtomicLong();
 		AtomicLong expungedResourcesCount = new AtomicLong();
-		myPartitionRunner.runInPartitionedThreads(thePids, pidChunk -> deleteInTransaction(theResourceName, pidChunk, expungedResourcesCount, expungedEntitiesCount, theRequest));
+		PartitionRunner partitionRunner = new PartitionRunner(myDaoConfig.getExpungeBatchSize(), myDaoConfig.getExpungeThreadCount());
+		partitionRunner.runInPartitionedThreads(thePids, pidChunk -> deleteInTransaction(theResourceName, pidChunk, expungedResourcesCount, expungedEntitiesCount, theRequest));
 		ourLog.info("Expunged a total of {} records", expungedEntitiesCount);
 
 		IBaseOperationOutcome oo;
@@ -131,7 +130,8 @@ public class DeleteExpungeService {
 		}
 
 		List<ResourceLink> conflictResourceLinks = Collections.synchronizedList(new ArrayList<>());
-		myPartitionRunner.runInPartitionedThreads(theAllTargetPids, someTargetPids -> findResourceLinksWithTargetPidIn(theAllTargetPids.getContent(), someTargetPids, conflictResourceLinks));
+		PartitionRunner partitionRunner = new PartitionRunner(myDaoConfig.getExpungeBatchSize(), myDaoConfig.getExpungeThreadCount());
+		partitionRunner.runInPartitionedThreads(theAllTargetPids, someTargetPids -> findResourceLinksWithTargetPidIn(theAllTargetPids.getContent(), someTargetPids, conflictResourceLinks));
 
 		if (conflictResourceLinks.isEmpty()) {
 			return;

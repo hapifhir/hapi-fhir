@@ -56,9 +56,9 @@ public class DaoConfig {
 	 */
 	public static final String DISABLE_STATUS_BASED_REINDEX = "disable_status_based_reindex";
 	/**
-	 * Default value for {@link #setTranslationCachesExpireAfterWriteInMinutes(Long)}: 60 minutes
+	 * Default value for {@link #myTranslationCachesExpireAfterWriteInMinutes}: 60 minutes
 	 *
-	 * @see #setTranslationCachesExpireAfterWriteInMinutes(Long)
+	 * @see #myTranslationCachesExpireAfterWriteInMinutes
 	 */
 	public static final Long DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES = 60L;
 	/**
@@ -98,6 +98,7 @@ public class DaoConfig {
 	private static final Integer DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE = null;
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
 	private static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
+	private static final int DEFAULT_REINDEX_BATCH_SIZE = 800;
 	private static final int DEFAULT_MAXIMUM_DELETE_CONFLICT_COUNT = 60;
 	/**
 	 * Child Configurations
@@ -163,6 +164,7 @@ public class DaoConfig {
 	private boolean myExpungeEnabled;
 	private boolean myDeleteExpungeEnabled;
 	private int myExpungeBatchSize = DEFAULT_EXPUNGE_BATCH_SIZE;
+	private int myReindexBatchSize = DEFAULT_REINDEX_BATCH_SIZE;
 	private int myReindexThreadCount;
 	private int myExpungeThreadCount;
 	private Set<String> myBundleTypesAllowedForStorage;
@@ -1651,6 +1653,23 @@ public class DaoConfig {
 	public void setExpungeBatchSize(int theExpungeBatchSize) {
 		myExpungeBatchSize = theExpungeBatchSize;
 	}
+
+// FIXME KHS cdr
+
+	/**
+	 * The reindex batch size (default 800) determines the number of records reindexed in a single transaction.
+	 */
+	public int getReindexBatchSize() {
+		return myReindexBatchSize;
+	}
+
+	/**
+	 * The reindex batch size (default 800) determines the number of records reindexed in a single transaction.
+	 */
+	public void setReindexBatchSize(int theReindexBatchSize) {
+		myReindexBatchSize = theReindexBatchSize;
+	}
+
 
 	/**
 	 * If set to <code>false</code> (default is <code>true</code>), reindexing of resources will be disabled on this
