@@ -1576,6 +1576,16 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+
+			<dependency>
+				<!--
+				Be careful bumping this, you need to match the maximum version supported by Hibernate Search.
+				See: https://docs.jboss.org/hibernate/stable/search/reference/en-US/html_single/#getting-started-compatibility
+				-->
+				<groupId>org.elasticsearch.client</groupId>
+				<artifactId>elasticsearch-rest-client</artifactId>
+				<version>7.13.4</version>
+			</dependency>
 			<dependency>
 				<!--
 				Be careful bumping this, you need to match the maximum version supported by Hibernate Search.
