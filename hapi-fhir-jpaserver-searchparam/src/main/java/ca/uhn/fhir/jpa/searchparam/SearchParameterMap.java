@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -22,6 +23,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,6 +37,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.api.Constants.PARAMQUALIFIER_TOKEN_TEXT;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -615,6 +618,39 @@ public class SearchParameterMap implements Serializable {
 
 	public List<List<IQueryParameterType>> remove(String theName) {
 		return mySearchParameterMap.remove(theName);
+	}
+
+	/**
+	 * Given a search parameter qualifier (e.g. :text), get and remove all Search Parameters matching this qualifier
+	 *
+	 * @param theName the query parameter key
+	 * @param theQualifier the qualifier you want to remove.
+	 *
+	 * @return an And List or Query Parameters matching the qualifier.
+	 */
+	public List<List<IQueryParameterType>> removeByQualifier(String theName, String theQualifier) {
+
+		List<List<IQueryParameterType>> matchingParameters = new ArrayList<>();
+		List<List<IQueryParameterType>> remainderParameters = new ArrayList<>();
+
+		List<List<IQueryParameterType>> andList = mySearchParameterMap.remove(theName);
+		for (List<IQueryParameterType> orList : andList) {
+			if (!orList.isEmpty() && theQualifier.equals(orList.get(0).getQueryParameterQualifier())) {
+				matchingParameters.add(orList);
+			} else {
+				remainderParameters.add(orList);
+			}
+		}
+
+		if (!remainderParameters.isEmpty()) {
+			mySearchParameterMap.put(theName, remainderParameters);
+		}
+		return matchingParameters;
+
+	}
+
+	public List<List<IQueryParameterType>> removeByQualifier(String theName, @Nonnull TokenParamModifier theModifier) {
+		return removeByQualifier(theName, theModifier.getValue());
 	}
 
 	public int size() {
