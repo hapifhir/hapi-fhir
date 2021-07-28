@@ -45,12 +45,11 @@ public class ReindexProvider extends BaseMultiUrlProcessor {
 		myReindexJobSubmitter = theReindexJobSubmitter;
 	}
 
-	// FIXME KHS test
 	@Operation(name = ProviderConstants.OPERATION_REINDEX, idempotent = false)
 	public IBaseParameters Reindex(
-		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_URL, typeName = "string", min = 0, max = 1) List<IPrimitiveType<String>> theUrlsToReindex,
-		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
-		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_EVERYTHING, typeName = "boolean", min = 0, max = 1) IPrimitiveType<Boolean> theEverything,
+		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_PARAM_URL, typeName = "string", min = 0, max = 1) List<IPrimitiveType<String>> theUrlsToReindex,
+		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_PARAM_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
+		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_PARAM_EVERYTHING, typeName = "boolean", min = 0, max = 1) IPrimitiveType<Boolean> theEverything,
 		RequestDetails theRequestDetails
 	) {
 		Boolean everything = theEverything != null && theEverything.getValue();
