@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.searchparam;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
@@ -161,11 +162,15 @@ public class MatchUrlService {
 		return ReflectionUtil.newInstance(clazz);
 	}
 
-	public ResourceSearch getResourceSearch(String theUrl) {
+	public ResourceSearch getResourceSearch(String theUrl, RequestPartitionId theRequestPartitionId) {
 		RuntimeResourceDefinition resourceDefinition;
 		resourceDefinition = UrlUtil.parseUrlResourceType(myFhirContext, theUrl);
 		SearchParameterMap searchParameterMap = translateMatchUrl(theUrl, resourceDefinition);
-		return new ResourceSearch(resourceDefinition, searchParameterMap);
+		return new ResourceSearch(resourceDefinition, searchParameterMap, theRequestPartitionId);
+	}
+
+	public ResourceSearch getResourceSearch(String theUrl) {
+		return getResourceSearch(theUrl, null);
 	}
 
 	public abstract static class Flag {

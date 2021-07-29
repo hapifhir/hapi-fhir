@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.delete.job;
 
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterUtil;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
@@ -50,7 +51,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
 		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
 
-		JobParameters jobParameters = DeleteExpungeJobParameterUtil.buildJobParameters("Observation?subject.active=false", "Patient?active=false");
+		JobParameters jobParameters = MultiUrlJobParameterUtil.buildJobParameters("Observation?subject.active=false", "Patient?active=false");
 
 		// execute
 		JobExecution jobExecution = myBatchJobSubmitter.runJob(myDeleteExpungeJob, jobParameters);

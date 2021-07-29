@@ -97,7 +97,8 @@ public class DaoConfig {
 	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
 	private static final Integer DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE = null;
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
-	private static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
+	public static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
+	private static final int DEFAULT_REINDEX_BATCH_SIZE = 800;
 	private static final int DEFAULT_MAXIMUM_DELETE_CONFLICT_COUNT = 60;
 	/**
 	 * Child Configurations
@@ -163,6 +164,7 @@ public class DaoConfig {
 	private boolean myExpungeEnabled;
 	private boolean myDeleteExpungeEnabled;
 	private int myExpungeBatchSize = DEFAULT_EXPUNGE_BATCH_SIZE;
+	private int myReindexBatchSize = DEFAULT_REINDEX_BATCH_SIZE;
 	private int myReindexThreadCount;
 	private int myExpungeThreadCount;
 	private Set<String> myBundleTypesAllowedForStorage;
@@ -217,6 +219,12 @@ public class DaoConfig {
 	 * @since 5.2.0
 	 */
 	private boolean myUseLegacySearchBuilder = false;
+
+	/**
+	 * @since 5.5.0
+	 */
+	private boolean myReindexEnabled = true;
+
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -1644,6 +1652,38 @@ public class DaoConfig {
 	 */
 	public void setExpungeBatchSize(int theExpungeBatchSize) {
 		myExpungeBatchSize = theExpungeBatchSize;
+	}
+
+	/**
+	 * The reindex batch size (default 800) determines the number of records reindexed in a single transaction.
+	 */
+	public int getReindexBatchSize() {
+		return myReindexBatchSize;
+	}
+
+	/**
+	 * The reindex batch size (default 800) determines the number of records reindexed in a single transaction.
+	 */
+	public void setReindexBatchSize(int theReindexBatchSize) {
+		myReindexBatchSize = theReindexBatchSize;
+	}
+
+
+	/**
+	 * If set to <code>false</code> (default is <code>true</code>), reindexing of resources will be disabled on this
+	 * server.
+	 */
+	public boolean isReindexEnabled() {
+		return myReindexEnabled;
+	}
+
+	/**
+	 * If set to <code>false</code> (default is <code>true</code>), reindexing of resources will be disabled on this
+	 * server.
+	 */
+
+	public void setReindexEnabled(boolean theReindexEnabled) {
+		myReindexEnabled = theReindexEnabled;
 	}
 
 	/**
