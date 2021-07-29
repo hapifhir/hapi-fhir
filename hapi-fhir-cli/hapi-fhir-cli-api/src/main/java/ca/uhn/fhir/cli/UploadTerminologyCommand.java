@@ -22,7 +22,6 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -39,7 +38,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -60,7 +58,6 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UploadTerminologyCommand.class);
 	private static final long DEFAULT_TRANSFER_SIZE_LIMIT = 10 * FileUtils.ONE_MB;
 	private static long ourTransferSizeLimit = DEFAULT_TRANSFER_SIZE_LIMIT;
-	private static final String CURRENT_VERSION = "current-version";
 
 	@Override
 	public String getCommandDescription() {
@@ -79,8 +76,6 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		addRequiredOption(options, "u", "url", true, "The code system URL associated with this upload (e.g. " + ITermLoaderSvc.SCT_URI + ")");
 		addOptionalOption(options, "d", "data", true, "Local file to use to upload (can be a raw file or a ZIP containing the raw file)");
 		addOptionalOption(options, "m", "mode", true, "The upload mode: SNAPSHOT (default), ADD, REMOVE");
-		addOptionalOption(options, null, CURRENT_VERSION, true, "For LOINC upload. If specified as 'false' the uploaded version will not become current. " +
-			"Allowed values: true (default) or false");
 
 		return options;
 	}
@@ -107,8 +102,6 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 			throw new ParseException("No data file provided");
 		}
 
-		String makeCurrentVersionOption = theCommandLine.getOptionValue(CURRENT_VERSION);
-
 		IGenericClient client = newClient(theCommandLine);
 
 		if (theCommandLine.hasOption(VERBOSE_LOGGING_PARAM)) {
@@ -127,11 +120,10 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 				requestName = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE;
 				break;
 		}
-		invokeOperation(termUrl, datafile, client, requestName, makeCurrentVersionOption);
+		invokeOperation(termUrl, datafile, client, requestName);
 	}
 
-	private void invokeOperation(String theTermUrl, String[] theDatafile,
-			IGenericClient theClient, String theOperationName, String makeCurrentVersionOption) throws ParseException {
+	private void invokeOperation(String theTermUrl, String[] theDatafile, IGenericClient theClient, String theOperationName) throws ParseException {
 		IBaseParameters inputParameters = ParametersUtil.newInstance(myFhirCtx);
 
 		boolean isDeltaOperation =
@@ -139,16 +131,6 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 				theOperationName.equals(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE);
 
 		ParametersUtil.addParameterToParametersUri(myFhirCtx, inputParameters, TerminologyUploaderProvider.PARAM_SYSTEM, theTermUrl);
-
-		if (StringUtils.isNotBlank(makeCurrentVersionOption)) {
-			boolean isMakeCurrentVersion = Boolean.parseBoolean(makeCurrentVersionOption);
-			ParametersUtil.addParameterToParametersString(
-				myFhirCtx, inputParameters, TermLoaderSvcImpl.MAKE_CURRENT_VERSION, String.valueOf(isMakeCurrentVersion));
-		}
-		//todo: is this the case?. Check with client
-//		if (mode != ModeEnum.SNAPSHOT && ! isMakeCurrentVersion) {
-//			throw new ParseException("Delta operations must use (or default to) " + CURRENT_VERSION + "=true parameter");
-//		}
 
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream, Charsets.UTF_8);

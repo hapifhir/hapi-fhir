@@ -52,9 +52,7 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		// Actually do the load
 		mySvc.loadCustom("http://example.com/labCodes", myFiles.getFiles(), mySrd);
 
-		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(
-			mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(),
-			myConceptMapCaptor.capture(), eq(true));
+		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
 		Map<String, TermConcept> concepts = extractConcepts();
 
 		// Verify codesystem
@@ -84,9 +82,7 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		// Actually do the load
 		mySvc.loadCustom("http://example.com/labCodes", myFiles.getFiles(), mySrd);
 
-		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(
-			mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class),
-			myValueSetsCaptor.capture(), myConceptMapCaptor.capture(), eq(true));
+		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
 		Map<String, TermConcept> concepts = extractConcepts();
 
 		// Verify codesystem
@@ -105,9 +101,7 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		// Actually do the load
 		mySvc.loadCustom("http://example.com/labCodes", myFiles.getFiles(), mySrd);
 
-		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(
-			mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class),
-			myValueSetsCaptor.capture(), myConceptMapCaptor.capture(), eq(true));
+		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
 		Map<String, TermConcept> concepts = extractConcepts();
 
 		TermConcept code;

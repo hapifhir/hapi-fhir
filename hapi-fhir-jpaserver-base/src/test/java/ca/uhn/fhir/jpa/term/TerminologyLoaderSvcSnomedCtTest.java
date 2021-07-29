@@ -82,8 +82,7 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 
 		mySvc.loadSnomedCt(myFiles.getFiles(), mySrd);
 
-		verify(myTermCodeSystemStorageSvc).storeNewCodeSystemVersion(any(CodeSystem.class), myCsvCaptor.capture(),
-			any(RequestDetails.class), anyList(), anyListOf(ConceptMap.class), eq(true));
+		verify(myTermCodeSystemStorageSvc).storeNewCodeSystemVersion(any(CodeSystem.class), myCsvCaptor.capture(), any(RequestDetails.class), anyList(), anyListOf(ConceptMap.class));
 
 		TermCodeSystemVersion csv = myCsvCaptor.getValue();
 		TreeSet<String> allCodes = toCodes(csv, true);

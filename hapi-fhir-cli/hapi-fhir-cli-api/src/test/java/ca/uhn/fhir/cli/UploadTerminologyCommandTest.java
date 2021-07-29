@@ -2,17 +2,14 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -25,7 +22,6 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,8 +58,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyList;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -352,248 +346,139 @@ public class UploadTerminologyCommandTest extends BaseTest {
 	}
 
 	@Nested
-	public class RestulServerExtensionTests {
+	public class HeaderPassthroughOptionTests {
 
 		@RegisterExtension
 		public final RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(myCtx);
 
-		@Nested
-		public class HeaderPassthroughOptionTests {
+		private final String headerKey1 = "test-header-key-1";
+		private final String headerValue1 = "test header value-1";
 
-			private final String headerKey1 = "test-header-key-1";
-			private final String headerValue1 = "test header value-1";
+		private final CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
+		private final UploadTerminologyCommand testedCommand =
+			new RequestCapturingUploadTerminologyCommand(myCapturingInterceptor);
 
-			private final CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
-			private final UploadTerminologyCommand testedCommand =
-				new RequestCapturingUploadTerminologyCommand(myCapturingInterceptor);
+		@BeforeEach
+		public void before() {
+			when(myTermLoaderSvc.loadCustom(eq("http://foo"), anyList(), any()))
+				.thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
 
-			@BeforeEach
-			public void before() {
-				when(myTermLoaderSvc.loadCustom(eq("http://foo"), anyList(), any()))
-					.thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
-
-				TerminologyUploaderProvider provider = new TerminologyUploaderProvider(myCtx, myTermLoaderSvc);
-				myRestfulServerExtension.registerProvider(provider);
-			}
-
-
-			@Test
-			public void oneHeader() throws Exception {
-				String[] args = new String[] {
-					"-v", "r4",
-					"-m", "SNAPSHOT",
-					"-t", "http://localhost:" + myRestfulServerExtension.getPort(),
-					"-u", "http://foo",
-					"-d", myConceptsFileName,
-					"-d", myHierarchyFileName,
-					"-hp", "\"" + headerKey1 + ":" + headerValue1 + "\""
-				};
-
-				writeConceptAndHierarchyFiles();
-				final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
-				testedCommand.run(commandLine);
-
-				assertNotNull(myCapturingInterceptor.getLastRequest());
-				Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
-				assertFalse(allHeaders.isEmpty());
-
-				assertTrue(allHeaders.containsKey(headerKey1));
-				assertEquals(1, allHeaders.get(headerKey1).size());
-
-				assertThat(allHeaders.get(headerKey1), hasItems(headerValue1));
-			}
-
-
-			@Test
-			public void twoHeadersSameKey() throws Exception {
-				final String headerValue2 = "test header value-2";
-
-				String[] args = new String[] {
-					"-v", "r4",
-					"-m", "SNAPSHOT",
-					"-t", "http://localhost:" + myRestfulServerExtension.getPort(),
-					"-u", "http://foo",
-					"-d", myConceptsFileName,
-					"-d", myHierarchyFileName,
-					"-hp", "\"" + headerKey1 + ":" + headerValue1 + "\"",
-					"-hp", "\"" + headerKey1 + ":" + headerValue2 + "\""
-				};
-
-				writeConceptAndHierarchyFiles();
-				final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
-				testedCommand.run(commandLine);
-
-				assertNotNull(myCapturingInterceptor.getLastRequest());
-				Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
-				assertFalse(allHeaders.isEmpty());
-				assertEquals(2, allHeaders.get(headerKey1).size());
-
-				assertTrue(allHeaders.containsKey(headerKey1));
-				assertEquals(2, allHeaders.get(headerKey1).size());
-
-				assertEquals(headerValue1, allHeaders.get(headerKey1).get(0));
-				assertEquals(headerValue2, allHeaders.get(headerKey1).get(1));
-			}
-
-			@Test
-			public void twoHeadersDifferentKeys() throws Exception {
-				final String headerKey2 = "test-header-key-2";
-				final String headerValue2 = "test header value-2";
-
-				String[] args = new String[] {
-					"-v", "r4",
-					"-m", "SNAPSHOT",
-					"-t", "http://localhost:" + myRestfulServerExtension.getPort(),
-					"-u", "http://foo",
-					"-d", myConceptsFileName,
-					"-d", myHierarchyFileName,
-					"-hp", "\"" + headerKey1 + ":" + headerValue1 + "\"",
-					"-hp", "\"" + headerKey2 + ":" + headerValue2 + "\""
-				};
-
-				writeConceptAndHierarchyFiles();
-				final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
-				testedCommand.run(commandLine);
-
-				assertNotNull(myCapturingInterceptor.getLastRequest());
-				Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
-				assertFalse(allHeaders.isEmpty());
-
-				assertTrue(allHeaders.containsKey(headerKey1));
-				assertEquals(1, allHeaders.get(headerKey1).size());
-				assertThat(allHeaders.get(headerKey1), hasItems(headerValue1));
-
-				assertTrue(allHeaders.containsKey(headerKey2));
-				assertEquals(1, allHeaders.get(headerKey2).size());
-				assertThat(allHeaders.get(headerKey2), hasItems(headerValue2));
-			}
-
-
-			private class RequestCapturingUploadTerminologyCommand extends UploadTerminologyCommand {
-				private CapturingInterceptor myCapturingInterceptor;
-
-				public RequestCapturingUploadTerminologyCommand(CapturingInterceptor theCapturingInterceptor) {
-					myCapturingInterceptor = theCapturingInterceptor;
-				}
-
-				@Override
-				protected IGenericClient newClient(CommandLine theCommandLine) throws ParseException {
-					IGenericClient client = super.newClient(theCommandLine);
-					client.getInterceptorService().registerInterceptor(myCapturingInterceptor);
-					return client;
-				}
-			}
+			TerminologyUploaderProvider provider = new TerminologyUploaderProvider(myCtx, myTermLoaderSvc);
+			myRestfulServerExtension.registerProvider(provider);
 		}
 
-		@Nested
-		public class CurrentVersionParameterTests {
 
-			private TerminologyUploaderProvider terminologyUploaderProvider;
-			private final UploadTerminologyCommand testedCommand = new UploadTerminologyCommand();
+		@Test
+		public void oneHeader() throws Exception {
+			String[] args = new String[] {
+				"-v", "r4",
+				"-m", "SNAPSHOT",
+				"-t", "http://localhost:" + myRestfulServerExtension.getPort(),
+				"-u", "http://foo",
+				"-d", myConceptsFileName,
+				"-d", myHierarchyFileName,
+				"-hp", "\"" + headerKey1 + ":" + headerValue1 + "\""
+			};
 
-			@Captor private ArgumentCaptor<RequestDetails> myRequestDetailsCaptor;
+			writeConceptAndHierarchyFiles();
+			final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
+			testedCommand.run(commandLine);
 
-			@BeforeEach
-			public void before() throws IOException {
-				writeConceptAndHierarchyFiles();
+			assertNotNull(myCapturingInterceptor.getLastRequest());
+			Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
+			assertFalse(allHeaders.isEmpty());
 
-				terminologyUploaderProvider = spy(new TerminologyUploaderProvider(myCtx, myTermLoaderSvc));
-				myRestfulServerExtension.registerProvider(terminologyUploaderProvider);
+			assertTrue(allHeaders.containsKey(headerKey1));
+			assertEquals(1, allHeaders.get(headerKey1).size());
+
+			assertThat(allHeaders.get(headerKey1), hasItems(headerValue1));
+		}
+
+
+		@Test
+		public void twoHeadersSameKey() throws Exception {
+			final String headerValue2 = "test header value-2";
+
+			String[] args = new String[] {
+				"-v", "r4",
+				"-m", "SNAPSHOT",
+				"-t", "http://localhost:" + myRestfulServerExtension.getPort(),
+				"-u", "http://foo",
+				"-d", myConceptsFileName,
+				"-d", myHierarchyFileName,
+				"-hp", "\"" + headerKey1 + ":" + headerValue1 + "\"",
+				"-hp", "\"" + headerKey1 + ":" + headerValue2 + "\""
+			};
+
+			writeConceptAndHierarchyFiles();
+			final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
+			testedCommand.run(commandLine);
+
+			assertNotNull(myCapturingInterceptor.getLastRequest());
+			Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
+			assertFalse(allHeaders.isEmpty());
+			assertEquals(2, allHeaders.get(headerKey1).size());
+
+			assertTrue(allHeaders.containsKey(headerKey1));
+			assertEquals(2, allHeaders.get(headerKey1).size());
+
+			assertEquals(headerValue1, allHeaders.get(headerKey1).get(0));
+			assertEquals(headerValue2, allHeaders.get(headerKey1).get(1));
+		}
+
+		@Test
+		public void twoHeadersDifferentKeys() throws Exception {
+			final String headerKey2 = "test-header-key-2";
+			final String headerValue2 = "test header value-2";
+
+			String[] args = new String[] {
+				"-v", "r4",
+				"-m", "SNAPSHOT",
+				"-t", "http://localhost:" + myRestfulServerExtension.getPort(),
+				"-u", "http://foo",
+				"-d", myConceptsFileName,
+				"-d", myHierarchyFileName,
+				"-hp", "\"" + headerKey1 + ":" + headerValue1 + "\"",
+				"-hp", "\"" + headerKey2 + ":" + headerValue2 + "\""
+			};
+
+			writeConceptAndHierarchyFiles();
+			final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
+			testedCommand.run(commandLine);
+
+			assertNotNull(myCapturingInterceptor.getLastRequest());
+			Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
+			assertFalse(allHeaders.isEmpty());
+
+			assertTrue(allHeaders.containsKey(headerKey1));
+			assertEquals(1, allHeaders.get(headerKey1).size());
+			assertThat(allHeaders.get(headerKey1), hasItems(headerValue1));
+
+			assertTrue(allHeaders.containsKey(headerKey2));
+			assertEquals(1, allHeaders.get(headerKey2).size());
+			assertThat(allHeaders.get(headerKey2), hasItems(headerValue2));
+		}
+
+
+		private class RequestCapturingUploadTerminologyCommand extends UploadTerminologyCommand {
+			private CapturingInterceptor myCapturingInterceptor;
+
+			public RequestCapturingUploadTerminologyCommand(CapturingInterceptor theCapturingInterceptor) {
+				myCapturingInterceptor = theCapturingInterceptor;
 			}
 
-
-			@Test
-			public void noMakeCurrentVersionParam() throws ParseException {
-				String[] args = new String[]{
-					"-v", "r4",
-					"-m", "SNAPSHOT",
-					"-t", "http://localhost:" + myRestfulServerExtension.getPort(),
-					"-u", "http://loinc.org",
-					"-d", myConceptsFileName,
-					"-d", myHierarchyFileName
-				};
-
-				final CommandLine commandLine = new DefaultParser()
-					.parse(testedCommand.getOptions(), args, true);
-
-				doReturn(ParametersUtil.newInstance(myCtx)).when(terminologyUploaderProvider)
-					.uploadSnapshot(any(), any(), any(), any(), myRequestDetailsCaptor.capture());
-
-				testedCommand.run(commandLine);
-
-				RequestDetails requestDetails = myRequestDetailsCaptor.getValue();
-				Parameters params = (Parameters) requestDetails.getResource();
-				assertFalse(params.hasParameter(TermLoaderSvcImpl.MAKE_CURRENT_VERSION));
-			}
-
-
-			@Test
-			public void explicitMakeCurrentVersionTrueParam() throws ParseException {
-				String[] args = new String[]{
-					"-v", "r4",
-					"-m", "SNAPSHOT",
-					"-t", "http://localhost:" + myRestfulServerExtension.getPort(),
-					"-u", "http://loinc.org",
-					"-d", myConceptsFileName,
-					"-d", myHierarchyFileName,
-					"--current-version", "true"
-				};
-
-				final CommandLine commandLine = new DefaultParser()
-					.parse(testedCommand.getOptions(), args, true);
-
-				doReturn(ParametersUtil.newInstance(myCtx)).when(terminologyUploaderProvider)
-					.uploadSnapshot(any(), any(), any(), any(), myRequestDetailsCaptor.capture());
-
-				testedCommand.run(commandLine);
-
-				RequestDetails requestDetails = myRequestDetailsCaptor.getValue();
-				Parameters params = (Parameters) requestDetails.getResource();
-				assertTrue(params.hasParameter(TermLoaderSvcImpl.MAKE_CURRENT_VERSION));
-				assertEquals("true", params.getParameter(TermLoaderSvcImpl.MAKE_CURRENT_VERSION).toString());
-			}
-
-
-			@Test
-			public void MakeCurrentVersionFalseParamReachesProvider() throws ParseException {
-				String[] args = new String[]{
-					"-v", "r4",
-					"-m", "SNAPSHOT",
-					"-t", "http://localhost:" + myRestfulServerExtension.getPort(),
-					"-u", "http://loinc.org",
-					"-d", myConceptsFileName,
-					"-d", myHierarchyFileName,
-					"--current-version", "false"
-				};
-
-				final CommandLine commandLine = new DefaultParser()
-					.parse(testedCommand.getOptions(), args, true);
-
-				doReturn(ParametersUtil.newInstance(myCtx)).when(terminologyUploaderProvider)
-					.uploadSnapshot(any(), any(), any(), any(), myRequestDetailsCaptor.capture());
-
-				testedCommand.run(commandLine);
-
-				RequestDetails requestDetails = myRequestDetailsCaptor.getValue();
-				Parameters params = (Parameters) requestDetails.getResource();
-				List<String> values = ParametersUtil.getNamedParameterValuesAsString(
-					myCtx, params, TermLoaderSvcImpl.MAKE_CURRENT_VERSION);
-				assertEquals(1, values.size());
-				assertEquals("false", values.get(0));
-
+			@Override
+			protected IGenericClient newClient(CommandLine theCommandLine) throws ParseException {
+				IGenericClient client = super.newClient(theCommandLine);
+				client.getInterceptorService().registerInterceptor(myCapturingInterceptor);
+				return client;
 			}
 		}
 	}
 
 
 
-
-
-
-
-
-
-		private void writeArchiveFile(File... theFiles) throws IOException {
+	private void writeArchiveFile(File... theFiles) throws IOException {
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream, Charsets.UTF_8);
 

@@ -41,11 +41,9 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ClasspathUtil;
-import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -54,12 +52,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,10 +84,12 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_MAKE_CURRENT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONSUMER_NAME_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONSUMER_NAME_FILE_DEFAULT;
@@ -161,7 +159,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	public static final String CUSTOM_CONCEPTS_FILE = "concepts.csv";
 	public static final String CUSTOM_HIERARCHY_FILE = "hierarchy.csv";
 	public static final String CUSTOM_PROPERTIES_FILE = "properties.csv";
-	public static final String MAKE_CURRENT_VERSION = "isMakeCurrentVersion";
 	static final String IMGTHLA_HLA_NOM_TXT = "hla_nom.txt";
 	static final String IMGTHLA_HLA_XML = "hla.xml";
 	static final String CUSTOM_CODESYSTEM_JSON = "codesystem.json";
@@ -226,11 +223,18 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			Properties uploadProperties = getProperties(descriptors, LOINC_UPLOAD_PROPERTIES_FILE.getCode());
 
 			String codeSystemVersionId = uploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
-			boolean isMakeCurrentVersion = getIsMakeCurrentVersion(theRequestDetails);
+			boolean isMakeCurrentVersion = Boolean.parseBoolean(
+				uploadProperties.getProperty(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), "true"));
+
 			if (StringUtils.isBlank(codeSystemVersionId) && ! isMakeCurrentVersion) {
 				throw new InvalidRequestException("'" + LOINC_CODESYSTEM_VERSION.getCode() +
-					"' property is required when 'current-version' parameter is 'false'");
+					"' property is required when 'current-version' property is 'false'");
 			}
+
+			//todo: is this the case?. Check with client
+//		if (! isMakeCurrentVersion && mode != ModeEnum.SNAPSHOT) {
+//			throw new ParseException("Delta operations must use (or default to) " + CURRENT_VERSION + "=true parameter");
+//		}
 
 			List<String> mandatoryFilenameFragments = Arrays.asList(
 				uploadProperties.getProperty(LOINC_ANSWERLIST_FILE.getCode(), LOINC_ANSWERLIST_FILE_DEFAULT.getCode()),
@@ -271,7 +275,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 			if (isMakeCurrentVersion) {
 				if (codeSystemVersionId != null) {
-					processLoincFiles(descriptors, theRequestDetails, uploadProperties, false, isMakeCurrentVersion);
+					processLoincFiles(descriptors, theRequestDetails, uploadProperties, false);
 					uploadProperties.remove(LOINC_CODESYSTEM_VERSION.getCode());
 				}
 				ourLog.info("Uploading CodeSystem and making it current version");
@@ -279,33 +283,11 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			} else {
 				ourLog.info("Uploading CodeSystem without updating current version");
 			}
-			return processLoincFiles(descriptors, theRequestDetails, uploadProperties, true, isMakeCurrentVersion);
+
+			theRequestDetails.getUserData().put(MAKE_LOADING_VERSION_CURRENT, isMakeCurrentVersion);
+			return processLoincFiles(descriptors, theRequestDetails, uploadProperties, true);
 		}
 	}
-
-	private boolean getIsMakeCurrentVersion(RequestDetails theRequestDetails) throws InvalidRequestException{
-		boolean defaultResponse = true;
-
-		IBaseResource requestResource = theRequestDetails.getResource();
-		if (requestResource == null)  return defaultResponse;
-
-		if (! (requestResource instanceof Parameters))  return defaultResponse;
-		Parameters parameters = (Parameters) theRequestDetails.getResource();
-
-		List<String> values = ParametersUtil.getNamedParameterValuesAsString(FhirContext.forR4(), parameters, MAKE_CURRENT_VERSION);
-		if (CollectionUtils.isEmpty(values))  return true;
-
-		if (values.size() > 1) {
-			throw new InvalidRequestException("Parameter '" + MAKE_CURRENT_VERSION + "' was specified more than once.");
-		}
-
-		if (! values.get(0).equalsIgnoreCase("false") && ! values.get(0).equalsIgnoreCase("true")) {
-			throw new InvalidRequestException("Parameter " + MAKE_CURRENT_VERSION + " only accepts values: ['true' or 'false']");
-		}
-
-		return Boolean.parseBoolean(values.get(0));
-	}
-
 
 	@Override
 	public UploadStatistics loadSnomedCt(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
@@ -353,7 +335,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		cs.setVersion(codeSystemVersion.getCodeSystemVersionId());
 
-		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, cs, null, null, true);
+		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, cs, null, null);
 		return new UploadStatistics(count, target);
 	}
 
@@ -378,7 +360,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			CustomTerminologySet terminologySet = CustomTerminologySet.load(descriptors, false);
 			TermCodeSystemVersion csv = terminologySet.toCodeSystemVersion();
 
-			IIdType target = storeCodeSystem(theRequestDetails, csv, codeSystem, null, null, true);
+			IIdType target = storeCodeSystem(theRequestDetails, csv, codeSystem, null, null);
 			return new UploadStatistics(terminologySet.getSize(), target);
 		}
 	}
@@ -573,9 +555,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 //		return new UploadStatistics(conceptCount, target);
 	}
 
-	UploadStatistics processLoincFiles(LoadedFileDescriptors theDescriptors, RequestDetails theRequestDetails,
-			Properties theUploadProperties, Boolean theCloseFiles, boolean isMakeCurrentVersion) {
-
+	UploadStatistics processLoincFiles(LoadedFileDescriptors theDescriptors, RequestDetails theRequestDetails, Properties theUploadProperties, Boolean theCloseFiles) {
 		final TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
 		final Map<String, TermConcept> code2concept = new HashMap<>();
 		final List<ValueSet> valueSets = new ArrayList<>();
@@ -723,7 +703,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		int conceptCount = code2concept.size();
 		ourLog.info("Have {} total concepts, {} root concepts, {} ValueSets", conceptCount, rootConceptCount, valueSetCount);
 
-		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, loincCs, valueSets, conceptMaps, isMakeCurrentVersion);
+		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, loincCs, valueSets, conceptMaps);
 
 		return new UploadStatistics(conceptCount, target);
 	}
@@ -797,14 +777,12 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		cs.setName("SNOMED CT");
 		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, cs, null, null, true);
+		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, cs, null, null);
 
 		return new UploadStatistics(code2concept.size(), target);
 	}
 
-	private IIdType storeCodeSystem(RequestDetails theRequestDetails, final TermCodeSystemVersion theCodeSystemVersion,
-			CodeSystem theCodeSystem, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, boolean isMakeCurrentVersion) {
-
+	private IIdType storeCodeSystem(RequestDetails theRequestDetails, final TermCodeSystemVersion theCodeSystemVersion, CodeSystem theCodeSystem, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
 		Validate.isTrue(theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT);
 
 		List<ValueSet> valueSets = ObjectUtils.defaultIfNull(theValueSets, Collections.emptyList());
@@ -812,8 +790,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		IIdType retVal;
 		myDeferredStorageSvc.setProcessDeferred(false);
-		retVal = myCodeSystemStorageSvc.storeNewCodeSystemVersion(theCodeSystem, theCodeSystemVersion,
-			theRequestDetails, valueSets, conceptMaps, isMakeCurrentVersion);
+		retVal = myCodeSystemStorageSvc.storeNewCodeSystemVersion(theCodeSystem, theCodeSystemVersion, theRequestDetails, valueSets, conceptMaps);
 		myDeferredStorageSvc.setProcessDeferred(true);
 
 		return retVal;

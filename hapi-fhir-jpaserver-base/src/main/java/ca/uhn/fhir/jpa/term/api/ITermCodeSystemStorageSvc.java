@@ -40,50 +40,48 @@ import java.util.List;
  */
 public interface ITermCodeSystemStorageSvc {
 
+	static final String MAKE_LOADING_VERSION_CURRENT = "make.loading.version.current";
+
 	void deleteCodeSystem(TermCodeSystem theCodeSystem);
 
 	void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion);
 
 
+	void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName,
+		String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable,
+		RequestDetails theRequestDetails);
+
 	/**
-	 * Default implementation supports previous signature of method which was added theIsMakeItCurrentVersion parameter
+	 * Default implementation supports previous signature of method which was added RequestDetails parameter
 	 */
 	@Transactional
 	default void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName,
 			String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable) {
 
 		storeNewCodeSystemVersion(theCodeSystemResourcePid, theSystemUri, theSystemName, theSystemVersionId,
-			theCodeSystemVersion, theCodeSystemResourceTable, true);
+			theCodeSystemVersion, theCodeSystemResourceTable, null);
 	}
 
-	void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName,
-		String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable,
-		boolean theIsMakeItCurrentVersion);
-
-
-
-	/**
-	 * Default implementation supports previous signature of method which was added theIsMakeItCurrentVersion parameter
-	 * @return Returns the ID of the created/updated code system
-	 */
-	@Transactional
-	default IIdType storeNewCodeSystemVersion(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource,
-			TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets,
-			List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps) {
-
-		return storeNewCodeSystemVersion(theCodeSystemResource, theCodeSystemVersion,
-			theRequestDetails, theValueSets, theConceptMaps, true);
-	}
 
 	/**
 	 * @return Returns the ID of the created/updated code system
 	 */
 	IIdType storeNewCodeSystemVersion(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource,
 		TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets,
-		List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps, boolean theIsMakeItCurrentVersion);
+		List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps);
 
 
-	void storeNewCodeSystemVersionIfNeeded(CodeSystem theCodeSystem, ResourceTable theResourceEntity);
+
+	void storeNewCodeSystemVersionIfNeeded(CodeSystem theCodeSystem, ResourceTable theResourceEntity, RequestDetails theRequestDetails);
+
+	/**
+	 * Default implementation supports previous signature of method which was added RequestDetails parameter
+	 */
+	default void storeNewCodeSystemVersionIfNeeded(CodeSystem theCodeSystem, ResourceTable theResourceEntity) {
+		storeNewCodeSystemVersionIfNeeded(theCodeSystem, theResourceEntity, null);
+	}
+
+
 
 	UploadStatistics applyDeltaCodeSystemsAdd(String theSystem, CustomTerminologySet theAdditions);
 
