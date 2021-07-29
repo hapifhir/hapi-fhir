@@ -143,10 +143,10 @@ public class CronologicalBatchAllResourcePidReader implements ItemReader<List<Lo
 		List<Long> retval = new ArrayList<>();
 		Slice<Long> slice;
 		do {
-			if (myRequestPartitionId != null) {
-				slice = myResourceTableDao.findIdsOfPartitionedResourcesWithinUpdatedRangeOrderedFromOldest(page, myThresholdLow, myStartTime, myRequestPartitionId.getFirstPartitionIdOrNull());
-			} else {
+			if (myRequestPartitionId == null || myRequestPartitionId.isAllPartitions()) {
 				slice = myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(page, myThresholdLow, myStartTime);
+			} else {
+				slice = myResourceTableDao.findIdsOfPartitionedResourcesWithinUpdatedRangeOrderedFromOldest(page, myThresholdLow, myStartTime, myRequestPartitionId.getFirstPartitionIdOrNull());
 			}
 			retval.addAll(slice.getContent());
 			retval.removeAll(myAlreadyProcessedPidsWithLowDate);
