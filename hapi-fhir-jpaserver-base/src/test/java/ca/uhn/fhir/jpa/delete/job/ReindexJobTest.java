@@ -105,7 +105,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(50, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
-		// Now one of them should be indexed
+		// Now all of them should be indexed
 		assertThat(myReindexTestHelper.getAlleleObservationIds(), hasSize(50));
 	}
 
