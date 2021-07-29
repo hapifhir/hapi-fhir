@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
+import ca.uhn.fhir.jpa.batch.job.model.RequestListJson;
 import ca.uhn.fhir.jpa.batch.reader.CronologicalBatchAllResourcePidReader;
 import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -64,7 +65,7 @@ public class ReindexJobSubmitterImpl implements IReindexJobSubmitter {
 		if (theBatchSize == null) {
 			theBatchSize = myDaoConfig.getReindexBatchSize();
 		}
-		List<RequestPartitionId> requestPartitionIds = myPartitionedUrlValidator.requestPartitionIdsFromRequestAndUrls(theRequest, theUrlsToReindex);
+		RequestListJson requestListJson = myPartitionedUrlValidator.buildRequestListJson(theRequest, theUrlsToReindex);
 		if (!myDaoConfig.isReindexEnabled()) {
 			throw new ForbiddenOperationException("Reindexing is disabled on this server.");
 		}
@@ -77,7 +78,7 @@ public class ReindexJobSubmitterImpl implements IReindexJobSubmitter {
 		 */
 		mySearchParamRegistry.forceRefresh();
 
-		JobParameters jobParameters = ReverseCronologicalBatchResourcePidReader.buildJobParameters(ProviderConstants.OPERATION_REINDEX, theBatchSize, theUrlsToReindex, requestPartitionIds);
+		JobParameters jobParameters = ReverseCronologicalBatchResourcePidReader.buildJobParameters(ProviderConstants.OPERATION_REINDEX, theBatchSize, requestListJson);
 		return myBatchJobSubmitter.runJob(myReindexJob, jobParameters);
 	}
 

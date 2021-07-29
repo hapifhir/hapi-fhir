@@ -24,11 +24,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
+import ca.uhn.fhir.jpa.batch.job.model.RequestListJson;
 import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -73,7 +73,7 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 		if (theBatchSize == null) {
 			theBatchSize = myDaoConfig.getExpungeBatchSize();
 		}
-		List<RequestPartitionId> requestPartitionIds = myPartitionedUrlValidator.requestPartitionIdsFromRequestAndUrls(theRequest, theUrlsToDeleteExpunge);
+		RequestListJson requestListJson = myPartitionedUrlValidator.buildRequestListJson(theRequest, theUrlsToDeleteExpunge);
 		if (!myDaoConfig.canDeleteExpunge()) {
 			throw new ForbiddenOperationException("Delete Expunge not allowed:  " + myDaoConfig.cannotDeleteExpungeReason());
 		}
@@ -86,7 +86,7 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRE_DELETE_EXPUNGE, params);
 		}
 
-		JobParameters jobParameters = ReverseCronologicalBatchResourcePidReader.buildJobParameters(ProviderConstants.OPERATION_DELETE_EXPUNGE, theBatchSize, theUrlsToDeleteExpunge, requestPartitionIds);
+		JobParameters jobParameters = ReverseCronologicalBatchResourcePidReader.buildJobParameters(ProviderConstants.OPERATION_DELETE_EXPUNGE, theBatchSize, requestListJson);
 		return myBatchJobSubmitter.runJob(myDeleteExpungeJob, jobParameters);
 	}
 }

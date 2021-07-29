@@ -216,11 +216,10 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	}
 
 	@Nonnull
-	public static JobParameters buildJobParameters(String theOperationName, Integer theBatchSize, List<String> theUrlList, List<RequestPartitionId> theRequestPartitionIds) {
+	public static JobParameters buildJobParameters(String theOperationName, Integer theBatchSize, RequestListJson theRequestListJson) {
 		Map<String, JobParameter> map = new HashMap<>();
-		RequestListJson requestListJson = RequestListJson.fromUrlStringsAndRequestPartitionIds(theUrlList, theRequestPartitionIds);
 		map.put(MultiUrlJobParameterValidator.JOB_PARAM_OPERATION_NAME, new JobParameter(theOperationName));
-		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_REQUEST_LIST, new JobParameter(requestListJson.toJson()));
+		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_REQUEST_LIST, new JobParameter(theRequestListJson.toJson()));
 		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_START_TIME, new JobParameter(DateUtils.addMinutes(new Date(), MultiUrlProcessorJobConfig.MINUTES_IN_FUTURE_TO_PROCESS_FROM)));
 		if (theBatchSize != null) {
 			map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_BATCH_SIZE, new JobParameter(theBatchSize.longValue()));

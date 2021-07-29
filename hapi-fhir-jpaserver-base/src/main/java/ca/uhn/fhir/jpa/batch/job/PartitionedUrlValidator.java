@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.batch.job;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.batch.job.model.PartitionedUrl;
+import ca.uhn.fhir.jpa.batch.job.model.RequestListJson;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
@@ -44,13 +46,16 @@ public class PartitionedUrlValidator {
 	/**
 	 * This method will throw an exception if the user is not allowed to access the requested resource type on the partition determined by the request
 	 */
-	public List<RequestPartitionId> requestPartitionIdsFromRequestAndUrls(RequestDetails theRequest, List<String> theUrlsToProcess) {
-		List<RequestPartitionId> retval = new ArrayList<>();
+
+	public RequestListJson buildRequestListJson(RequestDetails theRequest, List<String> theUrlsToProcess) {
+		List<PartitionedUrl> partitionedUrls = new ArrayList<>();
 		for (String url : theUrlsToProcess) {
 			ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(url);
 			RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequest, resourceSearch.getResourceName(), resourceSearch.getSearchParameterMap(), null);
-			retval.add(requestPartitionId);
+			partitionedUrls.add(new PartitionedUrl(url, requestPartitionId));
 		}
+		RequestListJson retval = new RequestListJson();
+		retval.setPartitionedUrls(partitionedUrls);
 		return retval;
 	}
 
