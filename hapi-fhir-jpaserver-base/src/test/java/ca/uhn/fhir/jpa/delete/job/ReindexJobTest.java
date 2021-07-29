@@ -65,6 +65,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		// The searchparam value is on the observation, but it hasn't been indexed yet
 		assertThat(myReindexTestHelper.getAlleleObservationIds(), hasSize(0));
 
+		// Only reindex one of them
 		JobParameters jobParameters = MultiUrlJobParameterUtil.buildJobParameters("Observation?status=final");
 
 		// execute
