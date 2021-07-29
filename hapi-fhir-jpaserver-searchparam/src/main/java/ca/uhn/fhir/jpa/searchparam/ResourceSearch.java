@@ -25,7 +25,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
- * A resource type along with a search parameter map.  Everything you need to perform a search!
+ * A resource type along with a search parameter map and partition id.  Everything you need to perform a search!
  */
 public class ResourceSearch {
 	private final RuntimeResourceDefinition myRuntimeResourceDefinition;
