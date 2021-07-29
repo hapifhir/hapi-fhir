@@ -56,7 +56,7 @@ public class ReindexProvider extends BaseMultiUrlProcessor {
 		@Nullable Integer batchSize = getBatchSize(theBatchSize);
 		if (everything) {
 			return processEverything(batchSize, theRequestDetails);
-		} else if (theUrlsToReindex != null) {
+		} else if (theUrlsToReindex != null && !theUrlsToReindex.isEmpty()) {
 			List<String> urls = theUrlsToReindex.stream().map(IPrimitiveType::getValue).collect(Collectors.toList());
 			return super.processUrls(urls, batchSize, theRequestDetails);
 		} else {
