@@ -1,0 +1,4 @@
+---
+type: add
+issue: 2845
+title: "Added new $reindex operation with similar syntax to $delete-expunge that creates a spring-batch job to reindex selected resources."
