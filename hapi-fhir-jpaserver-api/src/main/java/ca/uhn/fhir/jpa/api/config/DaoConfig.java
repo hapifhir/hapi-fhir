@@ -97,7 +97,7 @@ public class DaoConfig {
 	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
 	private static final Integer DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE = null;
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
-	private static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
+	public static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
 	private static final int DEFAULT_REINDEX_BATCH_SIZE = 800;
 	private static final int DEFAULT_MAXIMUM_DELETE_CONFLICT_COUNT = 60;
 	/**
