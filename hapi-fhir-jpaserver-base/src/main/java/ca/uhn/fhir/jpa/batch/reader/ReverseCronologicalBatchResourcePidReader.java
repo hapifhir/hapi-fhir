@@ -91,8 +91,6 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
-	private DaoConfig myDaoConfig;
-	@Autowired
 	private BatchResourceSearcher myBatchResourceSearcher;
 
 	private final BatchDateThresholdUpdater myBatchDateThresholdUpdater = new BatchDateThresholdUpdater();

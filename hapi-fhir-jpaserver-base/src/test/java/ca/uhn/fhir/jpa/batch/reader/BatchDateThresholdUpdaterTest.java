@@ -89,6 +89,27 @@ class BatchDateThresholdUpdaterTest {
 		assertThat(seenPids, contains(PID2, PID3));
 	}
 
+
+	@Test
+	public void threeItemsDifferentLEE() {
+		List<Date> dates = Arrays.asList(LATE_DATE, EARLY_DATE, EARLY_DATE);
+		mySvc.setDateFromPid(pid -> dates.get(pid.intValue() - 1));
+		Set<Long> seenPids = new HashSet<>();
+		Date newThreshold = mySvc.updateThresholdAndCache(LATE_DATE, seenPids, Arrays.asList(PID1, PID2, PID3));
+		assertEquals(EARLY_DATE, newThreshold);
+		assertThat(seenPids, contains(PID2, PID3));
+	}
+
+	@Test
+	public void threeItemsDifferentLLE() {
+		List<Date> dates = Arrays.asList(LATE_DATE, LATE_DATE, EARLY_DATE);
+		mySvc.setDateFromPid(pid -> dates.get(pid.intValue() - 1));
+		Set<Long> seenPids = new HashSet<>();
+		Date newThreshold = mySvc.updateThresholdAndCache(LATE_DATE, seenPids, Arrays.asList(PID1, PID2, PID3));
+		assertEquals(EARLY_DATE, newThreshold);
+		assertThat(seenPids, contains(PID3));
+	}
+
 	@Test
 	public void oneHundredItemsSameDate() {
 		mySvc.setDateFromPid(pid -> LATE_DATE);
