@@ -186,6 +186,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
+		// Reindex Tenant A by query url 
 		myTenantClientInterceptor.setTenantId(TENANT_A);
 		Parameters response = myClient
 			.operation()
