@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.bulk;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
@@ -944,7 +945,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 	public String getBinaryContents(IBulkDataExportSvc.JobInfo theJobInfo, int theIndex) {
 		// Iterate over the files
-		Binary nextBinary = myBinaryDao.read(theJobInfo.getFiles().get(theIndex).getResourceId(), new SystemRequestDetails());
+		Binary nextBinary = myBinaryDao.read(theJobInfo.getFiles().get(theIndex).getResourceId(), new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
 		assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
 		String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
 		ourLog.info("Next contents for type {}:\n{}", nextBinary.getResourceType(), nextContents);
@@ -1238,12 +1239,12 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			createCareTeamWithIndex(i, patId);
 		}
 
-		myPatientGroupId = myGroupDao.update(group, new SystemRequestDetails()).getId();
+		myPatientGroupId = myGroupDao.update(group, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition())).getId();
 
 		//Manually create another golden record
 		Patient goldenPatient2 = new Patient();
 		goldenPatient2.setId("PAT888");
-		DaoMethodOutcome g2Outcome = myPatientDao.update(goldenPatient2, new SystemRequestDetails());
+		DaoMethodOutcome g2Outcome = myPatientDao.update(goldenPatient2, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
 		Long goldenPid2 = myIdHelperService.getPidOrNull(g2Outcome.getResource());
 
 		//Create some nongroup patients MDM linked to a different golden resource. They shouldnt be included in the query.
@@ -1272,14 +1273,14 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		patient.setGender(i % 2 == 0 ? Enumerations.AdministrativeGender.MALE : Enumerations.AdministrativeGender.FEMALE);
 		patient.addName().setFamily("FAM" + i);
 		patient.addIdentifier().setSystem("http://mrns").setValue("PAT" + i);
-		return myPatientDao.update(patient, new SystemRequestDetails());
+		return myPatientDao.update(patient, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
 	}
 
 	private void createCareTeamWithIndex(int i, IIdType patId) {
 		CareTeam careTeam = new CareTeam();
 		careTeam.setId("CT" + i);
 		careTeam.setSubject(new Reference(patId)); // This maps to the "patient" search parameter on CareTeam
-		myCareTeamDao.update(careTeam, new SystemRequestDetails());
+		myCareTeamDao.update(careTeam, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
 	}
 
 	private void createImmunizationWithIndex(int i, IIdType patId) {
@@ -1297,7 +1298,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			cc.addCoding().setSystem("vaccines").setCode("COVID-19");
 			immunization.setVaccineCode(cc);
 		}
-		myImmunizationDao.update(immunization, new SystemRequestDetails());
+		myImmunizationDao.update(immunization, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
 	}
 
 	private void createObservationWithIndex(int i, IIdType patId) {
@@ -1308,7 +1309,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		if (patId != null) {
 			obs.getSubject().setReference(patId.getValue());
 		}
-		myObservationDao.update(obs, new SystemRequestDetails());
+		myObservationDao.update(obs, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
 	}
 
 	public void linkToGoldenResource(Long theGoldenPid, Long theSourcePid) {

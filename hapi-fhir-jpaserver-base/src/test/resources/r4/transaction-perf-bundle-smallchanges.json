@@ -550,7 +550,7 @@
 								}
 							]
 						},
-						"system": "https://healthy.kaiserpermanente.org/front-door",
+						"system": "https://example.org/front-door",
 						"value": "1000116-GA"
 					}
 				],

@@ -72,8 +72,9 @@ public class SystemRequestDetails extends RequestDetails {
 		return myRequestPartitionId;
 	}
 
-	public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
+	public SystemRequestDetails setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
 		myRequestPartitionId = theRequestPartitionId;
+		return this;
 	}
 
 	@Override

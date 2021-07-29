@@ -39,7 +39,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.util.VersionEnum;
-import org.checkerframework.checker.units.qual.C;
 
 import java.util.Arrays;
 import java.util.List;
@@ -117,6 +116,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		cmpToks.addForeignKey("20210720.4", "FK_IDXCMBTOKNU_RES_ID").toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
 		cmpToks.addIndex("20210720.5", "IDX_IDXCMBTOKNU_STR").unique(false).withColumns("IDX_STRING");
 		cmpToks.addIndex("20210720.6", "IDX_IDXCMBTOKNU_RES").unique(false).withColumns("RES_ID");
+
+		Builder.BuilderWithTableName cmbTokNuTable = version.onTable("HFJ_IDX_CMB_TOK_NU");
+
+		cmbTokNuTable.addColumn("20210722.1", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
+		cmbTokNuTable.addColumn("20210722.2", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
+		cmbTokNuTable.modifyColumn("20210722.3", "RES_ID").nullable().withType(ColumnTypeEnum.LONG);
 	}
 
 	private void init540() {

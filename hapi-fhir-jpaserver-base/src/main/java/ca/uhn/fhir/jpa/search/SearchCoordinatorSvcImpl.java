@@ -271,7 +271,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					String resourceType = search.getResourceType();
 					SearchParameterMap params = search.getSearchParameterMap().orElseThrow(() -> new IllegalStateException("No map in PASSCOMPLET search"));
 					IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(resourceType);
-					RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequestDetails, resourceType, params);
+					RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequestDetails, resourceType, params, null);
 					SearchContinuationTask task = new SearchContinuationTask(search, resourceDao, params, resourceType, theRequestDetails, requestPartitionId);
 					myIdToSearchTask.put(search.getUuid(), task);
 					myExecutor.submit(task);

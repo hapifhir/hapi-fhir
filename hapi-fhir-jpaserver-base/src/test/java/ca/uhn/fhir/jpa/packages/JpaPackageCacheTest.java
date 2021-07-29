@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
@@ -40,6 +41,8 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 	private IInterceptorService myInterceptorService;
 	@Autowired
 	private RequestTenantPartitionInterceptor myRequestTenantPartitionInterceptor;
+	@Autowired
+	private ISearchParamExtractor mySearchParamExtractor;
 
 	@AfterEach
 	public void disablePartitioning() {
@@ -75,7 +78,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 	public void testSaveAndDeletePackagePartitionsEnabled() throws IOException {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setDefaultPartitionId(1);
-		myInterceptorService.registerInterceptor(new PatientIdPartitionInterceptor());
+		myInterceptorService.registerInterceptor(new PatientIdPartitionInterceptor(myFhirCtx, mySearchParamExtractor));
 		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
 
 		try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/basisprofil.de.tar.gz")) {
@@ -109,7 +112,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setDefaultPartitionId(0);
 		myPartitionSettings.setUnnamedPartitionMode(true);
-		myInterceptorService.registerInterceptor(new PatientIdPartitionInterceptor());
+		myInterceptorService.registerInterceptor(new PatientIdPartitionInterceptor(myFhirCtx, mySearchParamExtractor));
 		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
 
 		try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz")) {
