@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.delete.job.DeleteExpungeProcessor;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -97,7 +98,7 @@ public class DeleteExpungeService {
 		ourLog.info("Expunging all records linking to {} resources...", thePids.getNumber());
 		AtomicLong expungedEntitiesCount = new AtomicLong();
 		AtomicLong expungedResourcesCount = new AtomicLong();
-		PartitionRunner partitionRunner = new PartitionRunner(myDaoConfig.getExpungeBatchSize(), myDaoConfig.getExpungeThreadCount());
+		PartitionRunner partitionRunner = new PartitionRunner(DeleteExpungeProcessor.PROCESS_NAME, DeleteExpungeProcessor.THREAD_PREFIX, myDaoConfig.getExpungeBatchSize(), myDaoConfig.getExpungeThreadCount());
 		partitionRunner.runInPartitionedThreads(thePids, pidChunk -> deleteInTransaction(theResourceName, pidChunk, expungedResourcesCount, expungedEntitiesCount, theRequest));
 		ourLog.info("Expunged a total of {} records", expungedEntitiesCount);
 
@@ -130,7 +131,7 @@ public class DeleteExpungeService {
 		}
 
 		List<ResourceLink> conflictResourceLinks = Collections.synchronizedList(new ArrayList<>());
-		PartitionRunner partitionRunner = new PartitionRunner(myDaoConfig.getExpungeBatchSize(), myDaoConfig.getExpungeThreadCount());
+		PartitionRunner partitionRunner = new PartitionRunner(DeleteExpungeProcessor.PROCESS_NAME, DeleteExpungeProcessor.THREAD_PREFIX, myDaoConfig.getExpungeBatchSize(), myDaoConfig.getExpungeThreadCount());
 		partitionRunner.runInPartitionedThreads(theAllTargetPids, someTargetPids -> findResourceLinksWithTargetPidIn(theAllTargetPids.getContent(), someTargetPids, conflictResourceLinks));
 
 		if (conflictResourceLinks.isEmpty()) {

@@ -40,6 +40,10 @@ import java.util.List;
 
 public class ReindexWriter implements ItemWriter<List<Long>> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ReindexWriter.class);
+
+	public static final String PROCESS_NAME = "Reindexing";
+	public static final String THREAD_PREFIX = "reindex";
+
 	@Autowired
 	ResourceReindexer myResourceReindexer;
 	@Autowired
@@ -49,16 +53,15 @@ public class ReindexWriter implements ItemWriter<List<Long>> {
 
 	@Override
 	public void write(List<? extends List<Long>> thePidLists) throws Exception {
-		// FIXME KHS test that this affects runs and isn't subsumed by upstream Spring batch batch size
-		PartitionRunner partitionRunner = new PartitionRunner(myDaoConfig.getReindexBatchSize(), myDaoConfig.getReindexThreadCount());
+		PartitionRunner partitionRunner = new PartitionRunner(PROCESS_NAME, THREAD_PREFIX, myDaoConfig.getReindexBatchSize(), myDaoConfig.getReindexThreadCount());
 
+		// Note that since our chunk size is 1, there will always be exactly one list
 		for (List<Long> pidList : thePidLists) {
 			partitionRunner.runInPartitionedThreads(new SliceImpl<>(pidList), pids -> reindexPids(pidList));
 		}
 	}
 
 	private void reindexPids(List<Long> pidList) {
-		ourLog.info("Reindexing {} resources.", pidList.size());
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.executeWithoutResult(t -> pidList.forEach(pid -> myResourceReindexer.readAndReindexResourceByPid(pid)));
 	}

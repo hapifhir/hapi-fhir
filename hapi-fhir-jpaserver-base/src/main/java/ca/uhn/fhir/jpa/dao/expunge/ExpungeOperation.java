@@ -38,6 +38,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Scope("prototype")
 public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeService.class);
+	public static final String PROCESS_NAME = "Expunging";
+	public static final String THREAD_PREFIX = "expunge";
 
 	@Autowired
 	private IResourceExpungeService myExpungeDaoService;
@@ -115,7 +117,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	}
 
 	private PartitionRunner getPartitionRunner() {
-		return new PartitionRunner(myDaoConfig.getExpungeBatchSize(), myDaoConfig.getExpungeThreadCount());
+		return new PartitionRunner(PROCESS_NAME, THREAD_PREFIX, myDaoConfig.getExpungeBatchSize(), myDaoConfig.getExpungeThreadCount());
 	}
 
 	private void deleteCurrentVersionsOfDeletedResources(Slice<Long> theResourceIds) {

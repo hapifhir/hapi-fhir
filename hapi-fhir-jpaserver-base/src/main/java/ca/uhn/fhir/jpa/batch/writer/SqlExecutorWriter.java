@@ -54,6 +54,8 @@ public class SqlExecutorWriter implements ItemWriter<List<String>> {
 
 	@Override
 	public void write(List<? extends List<String>> theSqlLists) throws Exception {
+
+		// Note that since our chunk size is 1, there will always be exactly one list
 		for (List<String> sqlList : theSqlLists) {
 			ourLog.info("Executing {} sql commands", sqlList.size());
 			for (String sql : sqlList) {
