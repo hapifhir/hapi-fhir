@@ -1,5 +1,25 @@
 package ca.uhn.fhir.jpa.batch.reader;
 
+/*-
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,6 +27,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+
+
 
 public class BatchDateThresholdUpdater {
 	private static final Logger ourLog = LoggerFactory.getLogger(BatchDateThresholdUpdater.class);
@@ -20,35 +42,46 @@ public class BatchDateThresholdUpdater {
 		myDateFromPid = theDateFromPid;
 	}
 
-	// FIXME KHS test
-	public Date updateThresholdAndCache(Date thePrevThreshold, Set<Long> theAlreadyProcessedPids, List<Long> theNewPids) {
-		if (theNewPids.isEmpty()) {
+	/**
+	 * This method is used by batch jobs that process resource pids by date in multiple passes.  It's used to ensure
+	 * the same resource isn't processed twice.  What it does is after a pass of processing pids, it calculates
+	 * the threshold date for the next pass and collects all of the resources that have that date into a temporary cache
+	 * so that the caller can exclude those from the next pass.
+	 *
+	 * @param thePrevThreshold                         the date threshold from the previous pass
+	 * @param theAlreadyProcessedPidsWithThresholdDate the set to load pids into that have the new threshold
+	 * @param theProcessedPidsOrderedByDate            the pids ordered by date (can be ascending or descending)
+	 * @return the new date threshold (can be the same as the old threshold if all pids on the list share the same date)
+	 */
+
+	public Date updateThresholdAndCache(Date thePrevThreshold, Set<Long> theAlreadyProcessedPidsWithThresholdDate, List<Long> theProcessedPidsOrderedByDate) {
+		if (theProcessedPidsOrderedByDate.isEmpty()) {
 			return thePrevThreshold;
 		}
 
 		// Adjust the low threshold to be the latest resource in the batch we found
-		Long pidOfLatestResourceInBatch = theNewPids.get(theNewPids.size() - 1);
+		Long pidOfLatestResourceInBatch = theProcessedPidsOrderedByDate.get(theProcessedPidsOrderedByDate.size() - 1);
 		Date latestUpdatedDate = myDateFromPid.apply(pidOfLatestResourceInBatch);
 
 		// The latest date has changed, create a new cache to store pids with that date
 		if (thePrevThreshold != latestUpdatedDate) {
-			theAlreadyProcessedPids.clear();
+			theAlreadyProcessedPidsWithThresholdDate.clear();
 		}
-		theAlreadyProcessedPids.add(pidOfLatestResourceInBatch);
+		theAlreadyProcessedPidsWithThresholdDate.add(pidOfLatestResourceInBatch);
 
 		Date newThreshold = latestUpdatedDate;
-		if (theNewPids.size() <= 1) {
+		if (theProcessedPidsOrderedByDate.size() <= 1) {
 			return newThreshold;
 		}
 
 		// There is more than one resource in this batch
-		for (int index = theNewPids.size() - 2; index >= 0; --index) {
-			Long pid = theNewPids.get(index);
+		for (int index = theProcessedPidsOrderedByDate.size() - 2; index >= 0; --index) {
+			Long pid = theProcessedPidsOrderedByDate.get(index);
 			Date newDate = myDateFromPid.apply(pid);
 			if (!latestUpdatedDate.equals(newDate)) {
 				break;
 			}
-			theAlreadyProcessedPids.add(pid);
+			theAlreadyProcessedPidsWithThresholdDate.add(pid);
 		}
 
 		return newThreshold;
