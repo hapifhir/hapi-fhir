@@ -34,6 +34,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 import java.util.UUID;
 
+/**
+ * This service is used by batch processes to search resources
+ */
 public class BatchResourceSearcher {
 	@Autowired
 	private SearchBuilderFactory mySearchBuilderFactory;

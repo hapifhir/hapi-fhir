@@ -57,11 +57,11 @@ public class PartitionedUrlValidator {
 	public RequestPartitionId requestPartitionIdFromRequest(RequestDetails theRequest) {
 		Set<String> allResourceNames = myFhirContext.getResourceTypes();
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		// Test that the user has access to every resource type on the server:
+		// Verify that the user has access to every resource type on the server:
 		for (String resourceName : allResourceNames) {
 			myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequest, resourceName, map, null);
 		}
-		// Then return the partition for the Patient resource type
+		// Then return the partition for the Patient resource type.  Note Patient was an arbitrary choice here.
 		return myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequest, "Patient", map, null);
 	}
 }

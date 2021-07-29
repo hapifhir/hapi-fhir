@@ -34,8 +34,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.List;
 
 /**
- * Input: list of pids of resources to be deleted and expunged
- * Output: list of sql statements to be executed
+ * Reindex the provided list of pids of resources
  */
 
 public class ReindexWriter implements ItemWriter<List<Long>> {

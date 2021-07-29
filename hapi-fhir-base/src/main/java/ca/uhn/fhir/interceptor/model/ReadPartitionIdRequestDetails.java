@@ -63,6 +63,10 @@ public class ReadPartitionIdRequestDetails {
 		return mySearchParams;
 	}
 
+	public IBaseResource getConditionalTargetOrNull() {
+		return myConditionalTargetOrNull;
+	}
+
 	public static ReadPartitionIdRequestDetails forSearchType(String theResourceType, Object theParams, IBaseResource theConditionalOperationTargetOrNull) {
 		return new ReadPartitionIdRequestDetails(theResourceType, RestOperationTypeEnum.SEARCH_TYPE, null, theParams, theConditionalOperationTargetOrNull);
 	}
@@ -77,9 +81,5 @@ public class ReadPartitionIdRequestDetails {
 			restOperationTypeEnum = RestOperationTypeEnum.HISTORY_SYSTEM;
 		}
 		return new ReadPartitionIdRequestDetails(theResourceType, restOperationTypeEnum, theIdType, null, null);
-	}
-
-	public IBaseResource getConditionalTargetOrNull() {
-		return myConditionalTargetOrNull;
 	}
 }

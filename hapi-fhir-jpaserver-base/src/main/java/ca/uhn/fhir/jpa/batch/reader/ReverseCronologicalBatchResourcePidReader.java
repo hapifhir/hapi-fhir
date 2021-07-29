@@ -124,7 +124,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	@Override
 	public List<Long> read() throws Exception {
 		while (myUrlIndex < myPartitionedUrls.size()) {
-			List<Long> nextBatch = getNextBatch(myPartitionedUrls.get(myUrlIndex).getRequestPartitionId());
+			List<Long> nextBatch = getNextBatch();
 			if (nextBatch.isEmpty()) {
 				++myUrlIndex;
 				continue;
@@ -135,9 +135,10 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 		return null;
 	}
 
-	private List<Long> getNextBatch(RequestPartitionId theRequestPartitionId) {
-		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(myPartitionedUrls.get(myUrlIndex).getUrl(), theRequestPartitionId);
-		enhanceSearchParameterMap(resourceSearch);
+	private List<Long> getNextBatch() {
+		RequestPartitionId requestPartitionId = myPartitionedUrls.get(myUrlIndex).getRequestPartitionId();
+		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(myPartitionedUrls.get(myUrlIndex).getUrl(), requestPartitionId);
+		addDateCountAndSortToSearch(resourceSearch);
 
 		// Perform the search
 		IResultIterator resultIter = myBatchResourceSearcher.performSearch(resourceSearch, myBatchSize);
@@ -155,7 +156,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 			ourLog.debug("Results: {}", newPids);
 		}
 
-		setAccumulatorDateFromPidFunction(resourceSearch);
+		setDateFromPidFunction(resourceSearch);
 
 		List<Long> retval = new ArrayList<>(newPids);
 		Date newThreshold = myBatchDateThresholdUpdater.updateThresholdAndCache(myThresholdHighByUrlIndex.get(myUrlIndex), myAlreadyProcessedPidsWithHighDate.get(myUrlIndex), retval);
@@ -164,15 +165,16 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 		return retval;
 	}
 
-	private void setAccumulatorDateFromPidFunction(ResourceSearch resourceSearch) {
+	private void setDateFromPidFunction(ResourceSearch resourceSearch) {
 		final IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceSearch.getResourceName());
+
 		myBatchDateThresholdUpdater.setDateFromPid(pid -> {
 			IBaseResource oldestResource = dao.readByPid(new ResourcePersistentId(pid));
 			return oldestResource.getMeta().getLastUpdated();
 		});
 	}
 
-	private void enhanceSearchParameterMap(ResourceSearch resourceSearch) {
+	private void addDateCountAndSortToSearch(ResourceSearch resourceSearch) {
 		SearchParameterMap map = resourceSearch.getSearchParameterMap();
 		map.setLastUpdated(new DateRangeParam().setUpperBoundInclusive(myThresholdHighByUrlIndex.get(myUrlIndex)));
 		map.setLoadSynchronousUpTo(myBatchSize);
@@ -212,7 +214,6 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	@Override
 	public void close() throws ItemStreamException {
 	}
-
 
 	@Nonnull
 	public static JobParameters buildJobParameters(String theOperationName, Integer theBatchSize, List<String> theUrlList, List<RequestPartitionId> theRequestPartitionIds) {

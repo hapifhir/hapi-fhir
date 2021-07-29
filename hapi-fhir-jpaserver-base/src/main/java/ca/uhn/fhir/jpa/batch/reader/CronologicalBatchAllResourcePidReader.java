@@ -49,9 +49,10 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This Spring Batch reader takes 4 parameters:
- * {@link #JOB_PARAM_BATCH_SIZE}: The number of resources to return with each search.  If ommitted, {@link DaoConfig#getExpungeBatchSize} will be used.
+ * This Spring Batch reader takes 3 parameters:
+ * {@link #JOB_PARAM_BATCH_SIZE}: The number of resources to return with each search.
  * {@link #JOB_PARAM_START_TIME}: The latest timestamp of resources to search for
+ * {@link #JOB_PARAM_REQUEST_PARTITION}: (optional) The partition of resources to read
  * <p>
  * The reader will return at most {@link #JOB_PARAM_BATCH_SIZE} pids every time it is called, or null
  * once no more matching resources are available.  It returns the resources in reverse chronological order
@@ -106,14 +107,6 @@ public class CronologicalBatchAllResourcePidReader implements ItemReader<List<Lo
 		return nextBatch.isEmpty() ? null : nextBatch;
 	}
 
-	@Autowired
-	public void setRequestPartitionId(@Value("#{jobParameters['" + JOB_PARAM_REQUEST_PARTITION + "']}") String theRequestPartitionIdJson) throws JsonProcessingException {
-		if (theRequestPartitionIdJson == null) {
-			return;
-		}
-		myRequestPartitionId = RequestPartitionId.fromJson(theRequestPartitionIdJson);
-	}
-
 	private Date dateFromPid(Long thePid) {
 		ResourceTable entity = myResourceTableDao.findById(thePid).orElseThrow(IllegalStateException::new);
 		return entity.getUpdatedDate();
@@ -158,5 +151,13 @@ public class CronologicalBatchAllResourcePidReader implements ItemReader<List<Lo
 		}
 		myThresholdLow = myBatchDateThresholdUpdater.updateThresholdAndCache(myThresholdLow, myAlreadyProcessedPidsWithLowDate, retval);
 		return retval;
+	}
+
+	@Autowired
+	public void setRequestPartitionId(@Value("#{jobParameters['" + JOB_PARAM_REQUEST_PARTITION + "']}") String theRequestPartitionIdJson) throws JsonProcessingException {
+		if (theRequestPartitionIdJson == null) {
+			return;
+		}
+		myRequestPartitionId = RequestPartitionId.fromJson(theRequestPartitionIdJson);
 	}
 }

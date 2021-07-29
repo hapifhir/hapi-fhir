@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
-
-
 public class BatchDateThresholdUpdater {
 	private static final Logger ourLog = LoggerFactory.getLogger(BatchDateThresholdUpdater.class);
 
@@ -44,8 +42,8 @@ public class BatchDateThresholdUpdater {
 
 	/**
 	 * This method is used by batch jobs that process resource pids by date in multiple passes.  It's used to ensure
-	 * the same resource isn't processed twice.  What it does is after a pass of processing pids, it calculates
-	 * the threshold date for the next pass and collects all of the resources that have that date into a temporary cache
+	 * the same resource isn't processed twice.  What it does is after a pass of processing pids, it sets
+	 * the threshold date for the next pass from the last resource on the list and collects all of the resources that have that date into a temporary cache
 	 * so that the caller can exclude those from the next pass.
 	 *
 	 * @param thePrevThreshold                         the date threshold from the previous pass
@@ -59,7 +57,7 @@ public class BatchDateThresholdUpdater {
 			return thePrevThreshold;
 		}
 
-		// Adjust the low threshold to be the latest resource in the batch we found
+		// Adjust the low threshold to be the last resource in the batch we found
 		Long pidOfLatestResourceInBatch = theProcessedPidsOrderedByDate.get(theProcessedPidsOrderedByDate.size() - 1);
 		Date latestUpdatedDate = myDateFromPid.apply(pidOfLatestResourceInBatch);
 
@@ -74,7 +72,7 @@ public class BatchDateThresholdUpdater {
 			return newThreshold;
 		}
 
-		// There is more than one resource in this batch
+		// There is more than one resource in this batch, add any others with the same date.  Assume the list is ordered by date.
 		for (int index = theProcessedPidsOrderedByDate.size() - 2; index >= 0; --index) {
 			Long pid = theProcessedPidsOrderedByDate.get(index);
 			Date newDate = myDateFromPid.apply(pid);
@@ -87,6 +85,10 @@ public class BatchDateThresholdUpdater {
 		return newThreshold;
 	}
 
+	/**
+	 * @param theDateFromPid this is a Function to extract a date from a resource id
+	 * @return
+	 */
 	public BatchDateThresholdUpdater setDateFromPid(Function<Long, Date> theDateFromPid) {
 		myDateFromPid = theDateFromPid;
 		return this;
