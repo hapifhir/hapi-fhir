@@ -64,6 +64,13 @@ public class RequestListJson implements IModelJson {
 		return JsonUtil.serializeOrInvalidRequest(this);
 	}
 
+	@Override
+	public String toString() {
+		return "RequestListJson{" +
+			"myPartitionedUrls=" + myPartitionedUrls +
+			'}';
+	}
+
 	public List<PartitionedUrl> getPartitionedUrls() {
 		return myPartitionedUrls;
 	}

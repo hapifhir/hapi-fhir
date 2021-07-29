@@ -56,9 +56,11 @@ public class ReindexProvider extends BaseMultiUrlProcessor {
 		@Nullable Integer batchSize = getBatchSize(theBatchSize);
 		if (everything) {
 			return processEverything(batchSize, theRequestDetails);
-		} else {
+		} else if (theUrlsToReindex != null) {
 			List<String> urls = theUrlsToReindex.stream().map(IPrimitiveType::getValue).collect(Collectors.toList());
 			return super.processUrls(urls, batchSize, theRequestDetails);
+		} else {
+			throw new InvalidRequestException(ProviderConstants.OPERATION_REINDEX + " must specify either everything=true or provide at least one value for " + ProviderConstants.OPERATION_REINDEX_PARAM_URL);
 		}
 	}
 
