@@ -3,16 +3,16 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>ca.uhn.hapi.fhir</groupId>
     <artifactId>hapi-fhir-bom</artifactId>
-    <version>5.5.0-PRE7-SNAPSHOT</version>
+    <version>5.5.0-PRE8-SNAPSHOT</version>
     <packaging>pom</packaging>
 	 <name>HAPI FHIR BOM</name>
 
-    <parent>
-      <groupId>ca.uhn.hapi.fhir</groupId>
-      <artifactId>hapi-deployable-pom</artifactId>
-		 <version>5.5.0-PRE7-SNAPSHOT</version>
-      <relativePath>../hapi-deployable-pom/pom.xml</relativePath>
-   </parent>
+	<parent>
+		<groupId>ca.uhn.hapi.fhir</groupId>
+		<artifactId>hapi-deployable-pom</artifactId>
+		<version>5.5.0-PRE8-SNAPSHOT</version>
+		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
+	</parent>
     
     <dependencyManagement>
         <dependencies>
