@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -39,6 +41,8 @@ import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,8 +53,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -65,20 +71,30 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private EntityManager myEntityManager;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
-	@Autowired
-	private IdHelperService myIdHelperService;
 
 	private Boolean ourDisabled;
-	@Autowired
-	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
-	@Autowired
-	private PartitionSettings myPartitionSettings;
 
 	/**
 	 * Constructor
 	 */
 	public FulltextSearchSvcImpl() {
 		super();
+	}
+
+	public static Map<String, String> parseSearchParamTextStuff(FhirContext theContext, IBaseResource theResource) {
+		// FIXME identify :text searchable params in the resource.  For now, just support Observation.code
+		//TODO START ME HERE TOMORROW
+		Map<String, String> retVal = new HashMap<>();
+		String resourceType = theContext.getResourceType(theResource);
+		if (resourceType.equalsIgnoreCase("observation")) {
+			IFhirPath iFhirPath = theContext.newFhirPath();
+			iFhirPath.evaluateFirst(theResource, "code.text", IPrimitiveType.class)
+			.ifPresent(pType -> {
+				retVal.put("code", pType.getValueAsString());
+			});
+			// todo Add coding[].description too and identifier.type.text
+		}
+		return retVal;
 	}
 
 	private void addTextSearch(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, List<List<IQueryParameterType>> theTerms, String theFieldName) {
