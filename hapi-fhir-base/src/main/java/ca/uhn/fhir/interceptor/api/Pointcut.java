@@ -1986,13 +1986,17 @@ public enum Pointcut implements IPointcut {
 	 * <ul>
 	 * <li>ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage - This parameter should not be modified as processing is complete when this hook is invoked.</li>
 	 * <li>ca.uhn.fhir.rest.server.TransactionLogMessages - This parameter is for informational messages provided by the MDM module during MDM processing.</li>
+	 * <li>ca.uhn.fhir.mdm.api.MdmLinkChangeEvent - Contains information about the change event, including target and golden resource IDs and the operation type.</li>
 	 * </ul>
 	 * </p>
 	 * <p>
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	MDM_AFTER_PERSISTED_RESOURCE_CHECKED(void.class, "ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage", "ca.uhn.fhir.rest.server.TransactionLogMessages"),
+	MDM_AFTER_PERSISTED_RESOURCE_CHECKED(void.class,
+		"ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage",
+		"ca.uhn.fhir.rest.server.TransactionLogMessages",
+		"ca.uhn.fhir.mdm.api.MdmLinkChangeEvent"),
 
 	/**
 	 * <b>Performance Tracing Hook:</b>

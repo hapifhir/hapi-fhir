@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.model;
  * #L%
  */
 
+import ca.uhn.fhir.mdm.api.MdmLinkChangeEvent;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 
 public class MdmTransactionContext {
@@ -44,6 +45,8 @@ public class MdmTransactionContext {
 	private OperationType myRestOperation;
 
 	private String myResourceType;
+
+	private MdmLinkChangeEvent myMdmLinkChangeEvent = new MdmLinkChangeEvent();
 
 	public TransactionLogMessages getTransactionLogMessages() {
 		return myTransactionLogMessages;
@@ -91,5 +94,13 @@ public class MdmTransactionContext {
 
 	public void setResourceType(String myResourceType) {
 		this.myResourceType = myResourceType;
+	}
+
+	public MdmLinkChangeEvent getMdmLinkChangeEvent() {
+		return myMdmLinkChangeEvent;
+	}
+
+	public void setMdmLinkChangeEvent(MdmLinkChangeEvent theMdmLinkChangeEvent) {
+		myMdmLinkChangeEvent = theMdmLinkChangeEvent;
 	}
 }

@@ -30,12 +30,15 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.TooManyCandidatesException;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.MdmLinkChangeEvent;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
@@ -89,11 +92,11 @@ public class MdmMessageHandler implements MessageHandler {
 		try {
 			switch (theMsg.getOperationType()) {
 				case CREATE:
-					handleCreatePatientOrPractitioner(theMsg, mdmContext);
+					handleCreateResource(theMsg, mdmContext);
 					break;
 				case UPDATE:
 				case MANUALLY_TRIGGERED:
-					handleUpdatePatientOrPractitioner(theMsg, mdmContext);
+					handleUpdateResource(theMsg, mdmContext);
 					break;
 				case DELETE:
 				default:
@@ -105,12 +108,15 @@ public class MdmMessageHandler implements MessageHandler {
 		} finally {
 
 			// Interceptor call: MDM_AFTER_PERSISTED_RESOURCE_CHECKED
-			ResourceOperationMessage outgoingMsg = new ResourceOperationMessage(myFhirContext, theMsg.getPayload(myFhirContext), theMsg.getOperationType());
+			IBaseResource targetResource = theMsg.getPayload(myFhirContext);
+			ResourceOperationMessage outgoingMsg = new ResourceOperationMessage(myFhirContext, targetResource, theMsg.getOperationType());
 			outgoingMsg.setTransactionId(theMsg.getTransactionId());
 
 			HookParams params = new HookParams()
 				.add(ResourceOperationMessage.class, outgoingMsg)
-				.add(TransactionLogMessages.class, mdmContext.getTransactionLogMessages());
+				.add(TransactionLogMessages.class, mdmContext.getTransactionLogMessages())
+				.add(MdmLinkChangeEvent.class, mdmContext.getMdmLinkChangeEvent());
+
 			myInterceptorBroadcaster.callHooks(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED, params);
 		}
 	}
@@ -142,7 +148,7 @@ public class MdmMessageHandler implements MessageHandler {
 		}
 	}
 
-	private void handleCreatePatientOrPractitioner(ResourceModifiedMessage theMsg, MdmTransactionContext theMdmTransactionContext) {
+	private void handleCreateResource(ResourceModifiedMessage theMsg, MdmTransactionContext theMdmTransactionContext) {
 		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(getResourceFromPayload(theMsg), theMdmTransactionContext);
 	}
 
@@ -150,7 +156,7 @@ public class MdmMessageHandler implements MessageHandler {
 		return (IAnyResource) theMsg.getNewPayload(myFhirContext);
 	}
 
-	private void handleUpdatePatientOrPractitioner(ResourceModifiedMessage theMsg, MdmTransactionContext theMdmTransactionContext) {
+	private void handleUpdateResource(ResourceModifiedMessage theMsg, MdmTransactionContext theMdmTransactionContext) {
 		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(getResourceFromPayload(theMsg), theMdmTransactionContext);
 	}
 

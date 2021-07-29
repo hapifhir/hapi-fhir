@@ -112,11 +112,14 @@ public class MdmMatchLinkSvc {
 
 			//Set all GoldenResources as POSSIBLE_DUPLICATE of the last GoldenResource.
 			IAnyResource firstGoldenResource = goldenResources.get(0);
+			theMdmTransactionContext.getMdmLinkChangeEvent().setGoldenResourceId(firstGoldenResource);
+
 			goldenResources.subList(1, goldenResources.size())
 				.forEach(possibleDuplicateGoldenResource -> {
 					MdmMatchOutcome outcome = MdmMatchOutcome.POSSIBLE_DUPLICATE;
 					outcome.setEidMatch(theCandidateList.isEidMatch());
 					myMdmLinkSvc.updateLink(firstGoldenResource, possibleDuplicateGoldenResource, outcome, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
+					theMdmTransactionContext.getMdmLinkChangeEvent().addDuplicateGoldenResourceId(possibleDuplicateGoldenResource);
 				});
 		}
 	}
@@ -129,6 +132,8 @@ public class MdmMatchLinkSvc {
 		// 2. Create source resource for the MDM source
 		// 3. UPDATE MDM LINK TABLE
 		myMdmLinkSvc.updateLink(newGoldenResource, theResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
+
+		theMdmTransactionContext.getMdmLinkChangeEvent().setGoldenResourceId(newGoldenResource);
 	}
 
 	private void handleMdmCreate(IAnyResource theTargetResource, MatchedGoldenResourceCandidate theGoldenResourceCandidate, MdmTransactionContext theMdmTransactionContext) {

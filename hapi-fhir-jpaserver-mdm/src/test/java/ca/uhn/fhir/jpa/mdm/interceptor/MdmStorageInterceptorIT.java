@@ -7,13 +7,16 @@ import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.MdmLinkChangeEvent;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -21,16 +24,21 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_GOLDEN_RECORD;
 import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED;
@@ -65,6 +73,24 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	public void testCreatePractitioner() throws InterruptedException {
 		myMdmHelper.createWithLatch(buildPractitionerWithNameAndId("somename", "some_id"));
 		assertLinkCount(1);
+	}
+
+	@Test
+	public void testCreateLinkChangeEvent() throws InterruptedException {
+		Practitioner pr = buildPractitionerWithNameAndId("Young", "AC-DC");
+		myMdmHelper.createWithLatch(pr);
+
+		ResourceOperationMessage resourceOperationMessage = myMdmHelper.getAfterMdmLatch().getLatchInvocationParameterOfType(ResourceOperationMessage.class);
+		assertNotNull(resourceOperationMessage);
+		assertEquals(pr.getId(), resourceOperationMessage.getId());
+
+		MdmLink example = new MdmLink();
+		example.setSourcePid(pr.getIdElement().getIdPartAsLong());
+		MdmLink link = myMdmLinkDao.findAll(Example.of(example)).get(0);
+
+		MdmLinkChangeEvent linkChangeEvent = myMdmHelper.getAfterMdmLatch().getLatchInvocationParameterOfType(MdmLinkChangeEvent.class);
+		assertNotNull(linkChangeEvent);
+		assertEquals(link.getGoldenResourcePid(), new IdDt(linkChangeEvent.getGoldenResourceId()).getIdPartAsLong());
 	}
 
 	@Test
