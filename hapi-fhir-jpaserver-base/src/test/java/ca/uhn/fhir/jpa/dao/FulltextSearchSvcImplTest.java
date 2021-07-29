@@ -23,7 +23,7 @@ class FulltextSearchSvcImplTest {
 		obs.setCode(new CodeableConcept().setText(SP_TEXT_VALUE));
 
 		//When
-		Map<String, String> stringStringMap = FulltextSearchSvcImpl.parseSearchParamTextStuff(FhirContext.forR4Cached(), obs);
+		Map<String, String> stringStringMap = FulltextSearchSvcImpl.parseSearchParamTextStuff(FhirContext.forR4Cached(), obs).getMap();
 
 		//Then
 		assertThat(stringStringMap.keySet(), hasItem(SP_NAME));

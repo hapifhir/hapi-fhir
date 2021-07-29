@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.model.entity;
+package ca.uhn.fhir.jpa.model.search;
 
 /*-
  * #%L
@@ -31,8 +31,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 /**
  * Allows hibernate search to index
  *
@@ -49,7 +47,8 @@ public class SearchParamTextPropertyBinder implements PropertyBinder {
 
 	@Override
 	public void bind(PropertyBindingContext thePropertyBindingContext) {
-		thePropertyBindingContext.dependencies().use("myKey").use("myValue");
+		// FIXME Is it safe to use object identity of the Map to track dirty?
+		thePropertyBindingContext.dependencies().use("mySearchParamTexts");
 		IndexSchemaElement indexSchemaElement = thePropertyBindingContext.indexSchemaElement();
 
 		//In order to support dynamic fields, we have to use field templates. We _must_ define the template at bootstrap time and cannot
@@ -59,14 +58,13 @@ public class SearchParamTextPropertyBinder implements PropertyBinder {
 			.matchingPathGlob(SEARCH_PARAM_TEXT_PREFIX +  "*");
 
 
-		thePropertyBindingContext.bridge(new SearchParamTextPropertyBridge());
+		thePropertyBindingContext.bridge(SearchParamTextWrapper.class, new SearchParamTextPropertyBridge());
 	}
 
-	private class SearchParamTextPropertyBridge implements PropertyBridge {
+	private class SearchParamTextPropertyBridge implements PropertyBridge<SearchParamTextWrapper> {
 
 		@Override
-		public void write(DocumentElement theDocument, Object theObject, PropertyBridgeWriteContext thePropertyBridgeWriteContext) {
-			Map<String, String> searchParamTexts = (Map<String, String>) theObject;
+		public void write(DocumentElement theDocument, SearchParamTextWrapper searchParamTexts, PropertyBridgeWriteContext thePropertyBridgeWriteContext) {
 
 			if (searchParamTexts != null) {
 				searchParamTexts.entrySet()

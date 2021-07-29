@@ -631,18 +631,22 @@ public class SearchParameterMap implements Serializable {
 	 */
 	public List<List<IQueryParameterType>> removeByNameAndQualifier(String theName, String theQualifier) {
 
-		List<List<IQueryParameterType>> matchingParameters = new ArrayList<>();
 		List<List<IQueryParameterType>> remainderParameters = new ArrayList<>();
+		List<List<IQueryParameterType>> matchingParameters = new ArrayList<>();
 
+		// pull all of them out, partition by match against the qualifier
 		List<List<IQueryParameterType>> andList = mySearchParameterMap.remove(theName);
-		for (List<IQueryParameterType> orList : andList) {
-			if (!orList.isEmpty() && theQualifier.equals(orList.get(0).getQueryParameterQualifier())) {
-				matchingParameters.add(orList);
-			} else {
-				remainderParameters.add(orList);
+		if (andList != null) {
+			for (List<IQueryParameterType> orList : andList) {
+				if (!orList.isEmpty() && theQualifier.equals(orList.get(0).getQueryParameterQualifier())) {
+					matchingParameters.add(orList);
+				} else {
+					remainderParameters.add(orList);
+				}
 			}
 		}
 
+		// put the unmatched back in.
 		if (!remainderParameters.isEmpty()) {
 			mySearchParameterMap.put(theName, remainderParameters);
 		}

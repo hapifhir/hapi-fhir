@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.search.SearchParamTextWrapper;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -81,7 +82,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		super();
 	}
 
-	public static Map<String, String> parseSearchParamTextStuff(FhirContext theContext, IBaseResource theResource) {
+	public static SearchParamTextWrapper parseSearchParamTextStuff(FhirContext theContext, IBaseResource theResource) {
 		// FIXME identify :text searchable params in the resource.  For now, just support Observation.code
 		//TODO START ME HERE TOMORROW
 		Map<String, String> retVal = new HashMap<>();
@@ -94,7 +95,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			});
 			// todo Add coding[].description too and identifier.type.text
 		}
-		return retVal;
+		return new SearchParamTextWrapper(retVal);
 	}
 
 	private void addTextSearch(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, List<List<IQueryParameterType>> theTerms, String theFieldName) {
@@ -122,8 +123,16 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private Set<String> extractOrStringParams(List<? extends IQueryParameterType> nextAnd) {
 		Set<String> terms = new HashSet<>();
 		for (IQueryParameterType nextOr : nextAnd) {
-			StringParam nextOrString = (StringParam) nextOr;
-			String nextValueTrimmed = StringUtils.defaultString(nextOrString.getValue()).trim();
+			String nextValueTrimmed;
+			if (nextOr instanceof StringParam) {
+				StringParam nextOrString = (StringParam) nextOr;
+				nextValueTrimmed = StringUtils.defaultString(nextOrString.getValue()).trim();
+			} else if (nextOr instanceof TokenParam) {
+				TokenParam nextOrToken = (TokenParam) nextOr;
+				nextValueTrimmed = nextOrToken.getValue();
+			} else {
+				throw new IllegalArgumentException("Unsupported full-text param type: " + nextOr.getClass());
+			}
 			if (isNotBlank(nextValueTrimmed)) {
 				terms.add(nextValueTrimmed);
 			}
@@ -136,12 +145,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		SearchSession session = Search.session(myEntityManager);
 		List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
 		List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
-
-		List<IQueryParameterType> collect = theParams.entrySet().stream()
-			.flatMap(andList -> andList.getValue().stream())
-			.flatMap(Collection::stream)
-			.filter(param -> PARAMQUALIFIER_TOKEN_TEXT.equals(param.getQueryParameterQualifier()))
-			.collect(Collectors.toList());
 
 		/***
 		 * {
@@ -169,9 +172,15 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		 * }
 		 */
 
-		for (IQueryParameterType iQueryParameterType : collect) {
-			theParams.removeByNameAndQualifier(iQueryParameterType.getQueryParameterQualifier(), TokenParamModifier.TEXT);
-		}
+		// FIXME generic version
+//		List<IQueryParameterType> textParameters = theParams.entrySet().stream()
+//			.flatMap(andList -> andList.getValue().stream())
+//			.flatMap(Collection::stream)
+//			.filter(param -> PARAMQUALIFIER_TOKEN_TEXT.equals(param.getQueryParameterQualifier()))
+//			.collect(Collectors.toList());
+//		for (IQueryParameterType testParameter : textParameters) {
+//			theParams.removeByNameAndQualifier(testParameter.getValueAsQueryToken(), testParameter.getQueryParameterQualifier());
+//		}
 		List<List<IQueryParameterType>> tokenTextAndTerms = theParams.removeByNameAndQualifier("code", TokenParamModifier.TEXT);
 
 		List<Long> longPids = session.search(ResourceTable.class)
@@ -193,6 +202,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					/**
 					 * Handle :text qualifier on Tokens
 					 */
+					addTextSearch(f, b, tokenTextAndTerms, "text-" + "code");
+
 //					addTextSearch(f, b, codingAndTerms, "myCodingDisplayText");
 //					addTextSearch(f, b, codeableConceptAndTerms, "myCodeableConceptText");
 //					addTextSearch(f, b, identifierTypeTerms, "myIdentifierTypeText");

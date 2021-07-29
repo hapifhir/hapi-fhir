@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.search.ResourceTableRoutingBinder;
+import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
+import ca.uhn.fhir.jpa.model.search.SearchParamTextWrapper;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -47,7 +49,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -120,8 +121,9 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private String myNarrativeText;
 
 	@Transient
+	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	@PropertyBinding(binder = @PropertyBinderRef(type = SearchParamTextPropertyBinder.class))
-	private Map<String, String> mySearchParamTexts;
+	private SearchParamTextWrapper mySearchParamTexts;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
@@ -749,7 +751,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		return myCreatedByMatchUrl;
 	}
 
-	public void setSearchParamText(Map<String, String> theSearchParamTexts) {
+	public void setSearchParamText(SearchParamTextWrapper theSearchParamTexts) {
 		mySearchParamTexts = theSearchParamTexts;
 	}
 }
