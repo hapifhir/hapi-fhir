@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.IReindexJobSubmitter;
 import ca.uhn.fhir.rest.server.BaseR4ServerTest;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -26,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class BatchProviderTest extends BaseR4ServerTest {
 	public static final long TEST_JOB_ID = 123L;
@@ -77,7 +79,6 @@ public class BatchProviderTest extends BaseR4ServerTest {
 		assertFalse(myDeleteExpungeJobSubmitter.everything);
 	}
 
-
 	@Test
 	public void testReindex() throws Exception {
 		// setup
@@ -110,6 +111,24 @@ public class BatchProviderTest extends BaseR4ServerTest {
 		assertEquals(batchSize, myReindexJobSubmitter.calledWithBatchSize);
 		assertNotNull(myReindexJobSubmitter.calledWithRequestDetails);
 		assertFalse(myReindexJobSubmitter.everything);
+
+		// bad params
+		input = new Parameters();
+		batchSize = 2401;
+		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_BATCH_SIZE, new DecimalType(batchSize));
+
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		try {
+			response = myClient
+				.operation()
+				.onServer()
+				.named(ProviderConstants.OPERATION_REINDEX)
+				.withParameters(input)
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: $reindex must specify either everything=true or provide at least one value for url", e.getMessage());
+		}
 	}
 
 	@Test
