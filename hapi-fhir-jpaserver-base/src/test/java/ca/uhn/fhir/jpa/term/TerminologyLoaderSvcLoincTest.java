@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
@@ -31,7 +32,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -73,6 +73,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -113,7 +114,6 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	private ArgumentCaptor<List<ConceptMap>> myConceptMapCaptor_268;
 	@Captor
 	private ArgumentCaptor<RequestDetails> myRequestDetailsCaptor;
-
 	private ZipCollectionBuilder myFiles;
 	@Mock
 	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
@@ -742,8 +742,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		// Actually do the load
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
-		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(),
-			myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
 		Map<String, TermConcept> concepts = extractConcepts();
 
 		TermConcept code;
@@ -842,65 +841,94 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 
 	@Nested
-	public class CurrentVersionParameter {
+	public class LoadLoincCurrentVersion {
 		private TermLoaderSvcImpl testedSvc;
 		private final Properties testProps = new Properties();
 
 		@Mock private final LoadedFileDescriptors mockFileDescriptors = mock(LoadedFileDescriptors.class);
 		@SuppressWarnings("unchecked")
 		@Mock private final List<ITermLoaderSvc.FileDescriptor> mockFileDescriptorList = mock(List.class);
+		@Mock private final ITermCodeSystemStorageSvc mockCodeSystemStorageSvc = mock(ITermCodeSystemStorageSvc.class);
+		private final RequestDetails requestDetails = new ServletRequestDetails();
 
 
 		@BeforeEach
-		void beforeEachCurrentVersionParameterTest() {
+		void beforeEach() {
 			testedSvc = spy(mySvc);
-			doReturn(mockFileDescriptors).when(testedSvc).getLoadedFileDescriptors(mockFileDescriptorList);
 			doReturn(testProps).when(testedSvc).getProperties(any(), eq(LOINC_UPLOAD_PROPERTIES_FILE.getCode()));
 		}
 
 
 		@Test
-		public void testLoadNoMakeCurrentVersion() {
+		public void testDontMakeCurrentVersion() throws IOException {
+			addLoincMandatoryFilesToZip(myFiles);
 			testProps.put(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), "false");
 			testProps.put(LOINC_CODESYSTEM_VERSION.getCode(), "27.0");
-			doReturn(mock(UploadStatistics.class)).when(testedSvc).processLoincFiles(
-				mockFileDescriptors, mySrd, testProps, true);
 
+			testedSvc.loadLoinc(myFiles.getFiles(), requestDetails);
 
-			testedSvc.loadLoinc(mockFileDescriptorList, mySrd);
+			verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(
+				any(CodeSystem.class), any(TermCodeSystemVersion.class), myRequestDetailsCaptor.capture(), any(), any());
 
-
-			Mockito.verify(testedSvc, times(1)).processLoincFiles(any(), any(), any(), eq(true));
+			myRequestDetailsCaptor.getAllValues().forEach( rd ->
+				assertFalse(rd.getUserData() == null ||
+					(boolean) requestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE))
+			);
 		}
 
 
 		@Test
-		public void testNoMakeCurrentParameterDefaultsToTrueAndCallsSetVersion() {
-			ArgumentCaptor<Boolean> closeFilesArgCaptor = ArgumentCaptor.forClass(Boolean.class);
-			ArgumentCaptor<Boolean> makeCurrentVersionArgCaptor = ArgumentCaptor.forClass(boolean.class);
-
+		public void testMakeCurrentVersionPropertySet() {
+			testProps.put(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), "true");
 			testProps.put(LOINC_CODESYSTEM_VERSION.getCode(), "27.0");
+			doReturn(mockFileDescriptors).when(testedSvc).getLoadedFileDescriptors(mockFileDescriptorList);
 			doReturn(mock(UploadStatistics.class)).when(testedSvc).processLoincFiles(
-				eq(mockFileDescriptors), any(RequestDetails.class), eq(testProps), any());
+				eq(mockFileDescriptors), eq(requestDetails), eq(testProps), any());
+
+			testedSvc.loadLoinc(mockFileDescriptorList, requestDetails);
+
+			boolean isMakeCurrent = requestDetails.getUserData() == null ||
+				(boolean) requestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
+			assertTrue(isMakeCurrent);
+		}
 
 
-			testedSvc.loadLoinc(mockFileDescriptorList, new ServletRequestDetails());
+		@Test
+		public void testMakeCurrentVersionByDefaultPropertySet() {
+			testProps.put(LOINC_CODESYSTEM_VERSION.getCode(), "27.0");
+			doReturn(mockFileDescriptors).when(testedSvc).getLoadedFileDescriptors(mockFileDescriptorList);
+			doReturn(mock(UploadStatistics.class)).when(testedSvc).processLoincFiles(
+				eq(mockFileDescriptors), eq(requestDetails), eq(testProps), any());
+
+			testedSvc.loadLoinc(mockFileDescriptorList, requestDetails);
+
+			boolean isMakeCurrent = requestDetails.getUserData() == null ||
+				(boolean) requestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
+			assertTrue(isMakeCurrent);
+		}
 
 
-			Mockito.verify(testedSvc, times(2)).processLoincFiles(
-				any(), myRequestDetailsCaptor.capture(), any(), any());
+		@Test
+		public void testDontMakeCurrentVersionPropertySet() {
+			testProps.put(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), "false");
+			testProps.put(LOINC_CODESYSTEM_VERSION.getCode(), "27.0");
+			doReturn(mockFileDescriptors).when(testedSvc).getLoadedFileDescriptors(mockFileDescriptorList);
+			doReturn(mock(UploadStatistics.class)).when(testedSvc).processLoincFiles(
+				eq(mockFileDescriptors), eq(requestDetails), eq(testProps), any());
 
-			// ask no closing files in first call and closing in second
-			assertEquals(true, myRequestDetailsCaptor.getAllValues().get(0)
-				.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE));
-			assertEquals(true, myRequestDetailsCaptor.getAllValues().get(1)
-				.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE));
+			testedSvc.loadLoinc(mockFileDescriptorList, requestDetails);
+
+			boolean isMakeCurrent = requestDetails.getUserData() == null ||
+				(boolean) requestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
+			assertFalse(isMakeCurrent);
 		}
 
 
 		@Test
 		public void testNoVersionAndNoMakeCurrentThrows() {
 			testProps.put(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), "false");
+			doReturn(mockFileDescriptors).when(testedSvc).getLoadedFileDescriptors(mockFileDescriptorList);
+
 			InvalidRequestException thrown = Assertions.assertThrows(InvalidRequestException.class,
 				() -> testedSvc.loadLoinc(mockFileDescriptorList, mySrd) );
 
