@@ -20,7 +20,10 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
+import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -82,4 +85,11 @@ public class JsonUtil {
 		theWriter.append(serialize(theInput));
 	}
 
+	public static String serializeOrInvalidRequest(IModelJson theJson) {
+		try {
+			return ourMapperNonPrettyPrint.writeValueAsString(theJson);
+		} catch (JsonProcessingException e) {
+			throw new InvalidRequestException("Failed to encode " + theJson.getClass(), e);
+		}
+	}
 }

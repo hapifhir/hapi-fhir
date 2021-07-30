@@ -69,7 +69,7 @@ public class FhirResourceDaoPatientR4 extends BaseHapiFhirResourceDao<Patient>im
 		if (theId != null) {
 			paramMap.add("_id", new StringParam(theId.getIdPart()));
 		}
-		
+
 		if (!isPagingProviderDatabaseBacked(theRequest)) {
 			paramMap.setLoadSynchronous(true);
 		}

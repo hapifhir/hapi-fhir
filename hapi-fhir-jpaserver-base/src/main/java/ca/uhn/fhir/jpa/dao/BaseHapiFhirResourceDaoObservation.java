@@ -27,12 +27,13 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.*;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;

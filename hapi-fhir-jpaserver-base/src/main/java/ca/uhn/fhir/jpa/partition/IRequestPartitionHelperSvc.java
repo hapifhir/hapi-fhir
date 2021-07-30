@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.partition;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
-import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;

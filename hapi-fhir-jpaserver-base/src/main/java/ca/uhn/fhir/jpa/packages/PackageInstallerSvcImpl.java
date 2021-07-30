@@ -37,12 +37,12 @@ import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -56,12 +56,12 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
+import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.hl7.fhir.utilities.npm.NpmPackage;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
@@ -227,7 +227,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					create(next, theOutcome);
 				} catch (Exception e) {
 					ourLog.warn("Failed to upload resource of type {} with ID {} - Error: {}", myFhirContext.getResourceType(next), next.getIdElement().getValue(), e.toString());
-					throw new ImplementationGuideInstallationException(String.format("Error installing IG %s#%s: %s", name, version, e.toString()), e);
+					throw new ImplementationGuideInstallationException(String.format("Error installing IG %s#%s: %s", name, version, e), e);
 				}
 
 			}
@@ -412,9 +412,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 		List<IPrimitiveType> statusTypes = myFhirContext.newFhirPath().evaluate(theResource, "status", IPrimitiveType.class);
 		if (statusTypes.size() > 0) {
-			if (!statusTypes.get(0).getValueAsString().equals("active")) {
-				return false;
-			}
+			return statusTypes.get(0).getValueAsString().equals("active");
 		}
 
 		return true;

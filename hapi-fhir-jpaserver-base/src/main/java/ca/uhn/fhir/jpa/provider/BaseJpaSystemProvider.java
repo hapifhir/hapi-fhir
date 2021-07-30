@@ -45,7 +45,17 @@ import java.util.Date;
 
 public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider implements IJpaSystemProvider {
 
+	/**
+	 * @see ProviderConstants#OPERATION_REINDEX
+	 * @deprecated
+	 */
+	@Deprecated
 	public static final String MARK_ALL_RESOURCES_FOR_REINDEXING = "$mark-all-resources-for-reindexing";
+	/**
+	 * @see ProviderConstants#OPERATION_REINDEX
+	 * @deprecated
+	 */
+	@Deprecated
 	public static final String PERFORM_REINDEXING_PASS = "$perform-reindexing-pass";
 
 	private IFhirSystemDao<T, MT> myDao;
