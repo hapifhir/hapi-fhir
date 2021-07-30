@@ -91,6 +91,42 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		MdmLinkChangeEvent linkChangeEvent = myMdmHelper.getAfterMdmLatch().getLatchInvocationParameterOfType(MdmLinkChangeEvent.class);
 		assertNotNull(linkChangeEvent);
 		assertEquals(link.getGoldenResourcePid(), new IdDt(linkChangeEvent.getGoldenResourceId()).getIdPartAsLong());
+		assertEquals(link.getSourcePid(), new IdDt(linkChangeEvent.getTargetResourceId()).getIdPartAsLong());
+	}
+
+	@Test
+	public void testUpdateLinkChangeEvent() throws InterruptedException {
+		Patient patient1 = addExternalEID(buildJanePatient(), "eid-1");
+		patient1 = createPatientAndUpdateLinks(patient1);
+
+		Patient patient2 = addExternalEID(buildJanePatient(), "eid-2");
+		patient2 = createPatientAndUpdateLinks(patient2);
+
+		MdmLinkChangeEvent linkChangeEvent = myMdmHelper.getAfterMdmLatch().getLatchInvocationParameterOfType(MdmLinkChangeEvent.class);
+		assertNotNull(linkChangeEvent);
+//		assertEquals(link.getGoldenResourcePid(), new IdDt(linkChangeEvent.getGoldenResourceId()).getIdPartAsLong());
+//		assertEquals(link.getSourcePid(), new IdDt(linkChangeEvent.getTargetResourceId()).getIdPartAsLong());
+	}
+
+	@Test
+	public void testDuplicateLinkChangeEvent() throws InterruptedException {
+		fail();
+
+		Practitioner pr = buildPractitionerWithNameAndId("Young", "AC-DC");
+		myMdmHelper.createWithLatch(pr);
+
+		ResourceOperationMessage resourceOperationMessage = myMdmHelper.getAfterMdmLatch().getLatchInvocationParameterOfType(ResourceOperationMessage.class);
+		assertNotNull(resourceOperationMessage);
+		assertEquals(pr.getId(), resourceOperationMessage.getId());
+
+		MdmLink example = new MdmLink();
+		example.setSourcePid(pr.getIdElement().getIdPartAsLong());
+		MdmLink link = myMdmLinkDao.findAll(Example.of(example)).get(0);
+
+		MdmLinkChangeEvent linkChangeEvent = myMdmHelper.getAfterMdmLatch().getLatchInvocationParameterOfType(MdmLinkChangeEvent.class);
+		assertNotNull(linkChangeEvent);
+		assertEquals(link.getGoldenResourcePid(), new IdDt(linkChangeEvent.getGoldenResourceId()).getIdPartAsLong());
+		assertEquals(link.getSourcePid(), new IdDt(linkChangeEvent.getTargetResourceId()).getIdPartAsLong());
 	}
 
 	@Test

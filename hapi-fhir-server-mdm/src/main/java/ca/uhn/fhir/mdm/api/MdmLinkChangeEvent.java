@@ -1,15 +1,15 @@
 package ca.uhn.fhir.mdm.api;
 
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class MdmLinkChangeEvent {
 
+	private String myTargetResourceId;
 	private String myGoldenResourceId;
 	private Set<String> myDuplicateGoldenResourceIds = new HashSet<>();
 
@@ -34,6 +34,18 @@ public class MdmLinkChangeEvent {
 			return null;
 		}
 		return idElement.getValueAsString();
+	}
+
+	public String getTargetResourceId() {
+		return myTargetResourceId;
+	}
+
+	public void setTargetResourceId(IBaseResource theTargetResource) {
+		setTargetResourceId(getIdAsString(theTargetResource));
+	}
+
+	public void setTargetResourceId(String theTargetResourceId) {
+		myTargetResourceId = theTargetResourceId;
 	}
 
 	public Set<String> getDuplicateGoldenResourceIds() {
