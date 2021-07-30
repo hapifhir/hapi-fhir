@@ -1,0 +1,9 @@
+---
+type: security
+issue: 2835
+title: "Addressed the following CVE report by bumping the minor version for Jetty in the root POM:
+   <ul>
+      <li>
+         [CVE-2021-34429](https://github.com/advisories/GHSA-vjv5-gp2w-65vm)
+      </li>
+   </ul>"

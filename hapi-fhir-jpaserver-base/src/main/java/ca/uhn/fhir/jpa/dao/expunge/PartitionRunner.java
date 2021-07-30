@@ -20,18 +20,13 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Slice;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,16 +41,20 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-@Service
 public class PartitionRunner {
-	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeService.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(PartitionRunner.class);
 	private static final int MAX_POOL_SIZE = 1000;
 
-	private final DaoConfig myDaoConfig;
+	private final String myProcessName;
+	private final String myThreadPrefix;
+	private final int myBatchSize;
+	private final int myThreadCount;
 
-	@Autowired
-	public PartitionRunner(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
+	public PartitionRunner(String theProcessName, String theThreadPrefix, int theBatchSize, int theThreadCount) {
+		myProcessName = theProcessName;
+		myThreadPrefix = theThreadPrefix;
+		myBatchSize = theBatchSize;
+		myThreadCount = theThreadCount;
 	}
 
 	public void runInPartitionedThreads(Slice<Long> theResourceIds, Consumer<List<Long>> partitionConsumer) {
@@ -70,7 +69,7 @@ public class PartitionRunner {
 				callableTasks.get(0).call();
 				return;
 			} catch (Exception e) {
-				ourLog.error("Error while expunging.", e);
+				ourLog.error("Error while " + myProcessName, e);
 				throw new InternalErrorException(e);
 			}
 		}
@@ -83,10 +82,10 @@ public class PartitionRunner {
 				future.get();
 			}
 		} catch (InterruptedException e) {
-			ourLog.error("Interrupted while expunging.", e);
+			ourLog.error("Interrupted while " + myProcessName, e);
 			Thread.currentThread().interrupt();
 		} catch (ExecutionException e) {
-			ourLog.error("Error while expunging.", e);
+			ourLog.error("Error while " + myProcessName, e);
 			throw new InternalErrorException(e);
 		} finally {
 			executorService.shutdown();
@@ -96,12 +95,13 @@ public class PartitionRunner {
 	private List<Callable<Void>> buildCallableTasks(Slice<Long> theResourceIds, Consumer<List<Long>> partitionConsumer) {
 		List<Callable<Void>> retval = new ArrayList<>();
 
-		List<List<Long>> partitions = Lists.partition(theResourceIds.getContent(), myDaoConfig.getExpungeBatchSize());
+		ourLog.info("Splitting batch job of {} entries into chunks of {}", theResourceIds.getContent().size(), myBatchSize);
+		List<List<Long>> partitions = Lists.partition(theResourceIds.getContent(), myBatchSize);
 
 		for (List<Long> nextPartition : partitions) {
 			if (nextPartition.size() > 0) {
 				Callable<Void> callableTask = () -> {
-					ourLog.info("Expunging any search results pointing to {} resources", nextPartition.size());
+					ourLog.info(myProcessName + " {} resources", nextPartition.size());
 					partitionConsumer.accept(nextPartition);
 					return null;
 				};
@@ -113,24 +113,24 @@ public class PartitionRunner {
 	}
 
 	private ExecutorService buildExecutor(int numberOfTasks) {
-		int threadCount = Math.min(numberOfTasks, myDaoConfig.getExpungeThreadCount());
+		int threadCount = Math.min(numberOfTasks, myThreadCount);
 		assert (threadCount > 0);
 
-		ourLog.info("Expunging with {} threads", threadCount);
+		ourLog.info(myProcessName + " with {} threads", threadCount);
 		LinkedBlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(MAX_POOL_SIZE);
 		BasicThreadFactory threadFactory = new BasicThreadFactory.Builder()
-			.namingPattern("expunge-%d")
+			.namingPattern(myThreadPrefix + "-%d")
 			.daemon(false)
 			.priority(Thread.NORM_PRIORITY)
 			.build();
 		RejectedExecutionHandler rejectedExecutionHandler = (theRunnable, theExecutor) -> {
-			ourLog.info("Note: Expunge executor queue is full ({} elements), waiting for a slot to become available!", executorQueue.size());
+			ourLog.info("Note: " + myThreadPrefix + " executor queue is full ({} elements), waiting for a slot to become available!", executorQueue.size());
 			StopWatch sw = new StopWatch();
 			try {
 				executorQueue.put(theRunnable);
 			} catch (InterruptedException e) {
 				throw new RejectedExecutionException("Task " + theRunnable.toString() +
-					" rejected from " + e.toString());
+					" rejected from " + e);
 			}
 			ourLog.info("Slot become available after {}ms", sw.getMillis());
 		};

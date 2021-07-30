@@ -17,7 +17,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -32,7 +31,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -347,7 +345,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 
 		Multimap<String, Integer> resourcesByType = runInTransaction(() -> {
 			logAllResources();
-			return myResourceTableDao.findAll().stream().collect(MultimapCollector.toMultimap(t->t.getResourceType(), t->t.getPartitionId().getPartitionId()));
+			return myResourceTableDao.findAll().stream().collect(MultimapCollector.toMultimap(t -> t.getResourceType(), t -> t.getPartitionId().getPartitionId()));
 		});
 
 		assertThat(resourcesByType.get("Patient"), contains(4267));
@@ -382,7 +380,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 
 		Multimap<String, Integer> resourcesByType = runInTransaction(() -> {
 			logAllResources();
-			return myResourceTableDao.findAll().stream().collect(MultimapCollector.toMultimap(t->t.getResourceType(), t->t.getPartitionId().getPartitionId()));
+			return myResourceTableDao.findAll().stream().collect(MultimapCollector.toMultimap(t -> t.getResourceType(), t -> t.getPartitionId().getPartitionId()));
 		});
 
 		assertThat(resourcesByType.get("Patient"), contains(4267));
@@ -430,7 +428,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 
 		Multimap<String, Integer> resourcesByType = runInTransaction(() -> {
 			logAllResources();
-			return myResourceTableDao.findAll().stream().collect(MultimapCollector.toMultimap(t->t.getResourceType(), t->t.getPartitionId().getPartitionId()));
+			return myResourceTableDao.findAll().stream().collect(MultimapCollector.toMultimap(t -> t.getResourceType(), t -> t.getPartitionId().getPartitionId()));
 		});
 
 		assertThat(resourcesByType.get("Patient"), contains(4267));

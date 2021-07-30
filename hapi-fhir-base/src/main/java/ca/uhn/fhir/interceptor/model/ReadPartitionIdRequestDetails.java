@@ -42,8 +42,9 @@ public class ReadPartitionIdRequestDetails {
 		myConditionalTargetOrNull = theConditionalTargetOrNull;
 	}
 
-	public IBaseResource getConditionalTargetOrNull() {
-		return myConditionalTargetOrNull;
+	public static ReadPartitionIdRequestDetails forRead(String theResourceType, IIdType theId, boolean theIsVread) {
+		RestOperationTypeEnum op = theIsVread ? RestOperationTypeEnum.VREAD : RestOperationTypeEnum.READ;
+		return new ReadPartitionIdRequestDetails(theResourceType, op, theId.withResourceType(theResourceType), null, null);
 	}
 
 	public String getResourceType() {
@@ -62,9 +63,8 @@ public class ReadPartitionIdRequestDetails {
 		return mySearchParams;
 	}
 
-	public static ReadPartitionIdRequestDetails forRead(String theResourceType, IIdType theId, boolean theIsVread) {
-		RestOperationTypeEnum op = theIsVread ? RestOperationTypeEnum.VREAD : RestOperationTypeEnum.READ;
-		return new ReadPartitionIdRequestDetails(theResourceType, op, theId.withResourceType(theResourceType), null, null);
+	public IBaseResource getConditionalTargetOrNull() {
+		return myConditionalTargetOrNull;
 	}
 
 	public static ReadPartitionIdRequestDetails forSearchType(String theResourceType, Object theParams, IBaseResource theConditionalOperationTargetOrNull) {

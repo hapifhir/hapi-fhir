@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.delete.model;
+package ca.uhn.fhir.jpa.batch.job.model;
 
 /*-
  * #%L
@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.delete.model;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,13 +60,15 @@ public class RequestListJson implements IModelJson {
 		}
 	}
 
+	public String toJson() {
+		return JsonUtil.serializeOrInvalidRequest(this);
+	}
+
 	@Override
 	public String toString() {
-		try {
-			return ourObjectMapper.writeValueAsString(this);
-		} catch (JsonProcessingException e) {
-			throw new InvalidRequestException("Failed to encode " + RequestListJson.class, e);
-		}
+		return "RequestListJson{" +
+			"myPartitionedUrls=" + myPartitionedUrls +
+			'}';
 	}
 
 	public List<PartitionedUrl> getPartitionedUrls() {

@@ -21,12 +21,15 @@ package ca.uhn.fhir.jpa.batch.reader;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.delete.model.PartitionedUrl;
-import ca.uhn.fhir.jpa.delete.model.RequestListJson;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterValidator;
+import ca.uhn.fhir.jpa.batch.job.MultiUrlProcessorJobConfig;
+import ca.uhn.fhir.jpa.batch.job.model.PartitionedUrl;
+import ca.uhn.fhir.jpa.batch.job.model.RequestListJson;
+import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -35,9 +38,12 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemStream;
@@ -46,10 +52,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -65,6 +75,7 @@ import java.util.stream.Collectors;
  * restarting jobs that use this reader so it can pick up where it left off.
  */
 public class ReverseCronologicalBatchResourcePidReader implements ItemReader<List<Long>>, ItemStream {
+	private static final Logger ourLog = LoggerFactory.getLogger(ReverseCronologicalBatchResourcePidReader.class);
 
 	public static final String JOB_PARAM_REQUEST_LIST = "url-list";
 	public static final String JOB_PARAM_BATCH_SIZE = "batch-size";
@@ -72,7 +83,6 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 
 	public static final String CURRENT_URL_INDEX = "current.url-index";
 	public static final String CURRENT_THRESHOLD_HIGH = "current.threshold-high";
-	private static final Logger ourLog = LoggerFactory.getLogger(ReverseCronologicalBatchResourcePidReader.class);
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -81,11 +91,15 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private BatchResourceSearcher myBatchResourceSearcher;
+
+	private final BatchDateThresholdUpdater myBatchDateThresholdUpdater = new BatchDateThresholdUpdater();
 
 	private List<PartitionedUrl> myPartitionedUrls;
 	private Integer myBatchSize;
 	private final Map<Integer, Date> myThresholdHighByUrlIndex = new HashMap<>();
+	private final Map<Integer, Set<Long>> myAlreadyProcessedPidsWithHighDate = new HashMap<>();
+
 	private int myUrlIndex = 0;
 	private Date myStartTime;
 
@@ -108,8 +122,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	@Override
 	public List<Long> read() throws Exception {
 		while (myUrlIndex < myPartitionedUrls.size()) {
-			List<Long> nextBatch;
-			nextBatch = getNextBatch();
+			List<Long> nextBatch = getNextBatch();
 			if (nextBatch.isEmpty()) {
 				++myUrlIndex;
 				continue;
@@ -121,51 +134,53 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	}
 
 	private List<Long> getNextBatch() {
-		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(myPartitionedUrls.get(myUrlIndex).getUrl());
-		SearchParameterMap map = buildSearchParameterMap(resourceSearch);
+		RequestPartitionId requestPartitionId = myPartitionedUrls.get(myUrlIndex).getRequestPartitionId();
+		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(myPartitionedUrls.get(myUrlIndex).getUrl(), requestPartitionId);
+		addDateCountAndSortToSearch(resourceSearch);
 
 		// Perform the search
-		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceSearch.getResourceName());
-		List<Long> retval = dao.searchForIds(map, buildSystemRequestDetails()).stream()
-			.map(ResourcePersistentId::getIdAsLong)
-			.collect(Collectors.toList());
+		IResultIterator resultIter = myBatchResourceSearcher.performSearch(resourceSearch, myBatchSize);
+		Set<Long> newPids = new LinkedHashSet<>();
+		Set<Long> alreadySeenPids = myAlreadyProcessedPidsWithHighDate.computeIfAbsent(myUrlIndex, i -> new HashSet<>());
+
+		do {
+			List<Long> pids = resultIter.getNextResultBatch(myBatchSize).stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
+			newPids.addAll(pids);
+			newPids.removeAll(alreadySeenPids);
+		} while (newPids.size() < myBatchSize && resultIter.hasNext());
 
 		if (ourLog.isDebugEnabled()) {
-			ourLog.debug("Search for {}{} returned {} results", resourceSearch.getResourceName(), map.toNormalizedQueryString(myFhirContext), retval.size());
-			ourLog.debug("Results: {}", retval);
+			ourLog.debug("Search for {}{} returned {} results", resourceSearch.getResourceName(), resourceSearch.getSearchParameterMap().toNormalizedQueryString(myFhirContext), newPids.size());
+			ourLog.debug("Results: {}", newPids);
 		}
 
-		if (!retval.isEmpty()) {
-			// Adjust the high threshold to be the earliest resource in the batch we found
-			Long pidOfOldestResourceInBatch = retval.get(retval.size() - 1);
-			IBaseResource earliestResource = dao.readByPid(new ResourcePersistentId(pidOfOldestResourceInBatch));
-			myThresholdHighByUrlIndex.put(myUrlIndex, earliestResource.getMeta().getLastUpdated());
-		}
+		setDateFromPidFunction(resourceSearch);
+
+		List<Long> retval = new ArrayList<>(newPids);
+		Date newThreshold = myBatchDateThresholdUpdater.updateThresholdAndCache(myThresholdHighByUrlIndex.get(myUrlIndex), myAlreadyProcessedPidsWithHighDate.get(myUrlIndex), retval);
+		myThresholdHighByUrlIndex.put(myUrlIndex, newThreshold);
 
 		return retval;
 	}
 
-	@Nonnull
-	private SearchParameterMap buildSearchParameterMap(ResourceSearch resourceSearch) {
+	private void setDateFromPidFunction(ResourceSearch resourceSearch) {
+		final IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceSearch.getResourceName());
+
+		myBatchDateThresholdUpdater.setDateFromPid(pid -> {
+			IBaseResource oldestResource = dao.readByPid(new ResourcePersistentId(pid));
+			return oldestResource.getMeta().getLastUpdated();
+		});
+	}
+
+	private void addDateCountAndSortToSearch(ResourceSearch resourceSearch) {
 		SearchParameterMap map = resourceSearch.getSearchParameterMap();
 		map.setLastUpdated(new DateRangeParam().setUpperBoundInclusive(myThresholdHighByUrlIndex.get(myUrlIndex)));
 		map.setLoadSynchronousUpTo(myBatchSize);
 		map.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.DESC));
-		return map;
-	}
-
-	@Nonnull
-	private SystemRequestDetails buildSystemRequestDetails() {
-		SystemRequestDetails retval = new SystemRequestDetails();
-		retval.setRequestPartitionId(myPartitionedUrls.get(myUrlIndex).getRequestPartitionId());
-		return retval;
 	}
 
 	@Override
 	public void open(ExecutionContext executionContext) throws ItemStreamException {
-		if (myBatchSize == null) {
-			myBatchSize = myDaoConfig.getExpungeBatchSize();
-		}
 		if (executionContext.containsKey(CURRENT_URL_INDEX)) {
 			myUrlIndex = new Long(executionContext.getLong(CURRENT_URL_INDEX)).intValue();
 		}
@@ -196,5 +211,18 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 
 	@Override
 	public void close() throws ItemStreamException {
+	}
+
+	@Nonnull
+	public static JobParameters buildJobParameters(String theOperationName, Integer theBatchSize, RequestListJson theRequestListJson) {
+		Map<String, JobParameter> map = new HashMap<>();
+		map.put(MultiUrlJobParameterValidator.JOB_PARAM_OPERATION_NAME, new JobParameter(theOperationName));
+		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_REQUEST_LIST, new JobParameter(theRequestListJson.toJson()));
+		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_START_TIME, new JobParameter(DateUtils.addMinutes(new Date(), MultiUrlProcessorJobConfig.MINUTES_IN_FUTURE_TO_PROCESS_FROM)));
+		if (theBatchSize != null) {
+			map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_BATCH_SIZE, new JobParameter(theBatchSize.longValue()));
+		}
+		JobParameters parameters = new JobParameters(map);
+		return parameters;
 	}
 }

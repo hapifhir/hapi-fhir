@@ -47,6 +47,9 @@ import java.util.stream.Collectors;
 public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<String>> {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeProcessor.class);
 
+	public static final String PROCESS_NAME = "Delete Expunging";
+	public static final String THREAD_PREFIX = "delete-expunge";
+
 	@Autowired
 	ResourceTableFKProvider myResourceTableFKProvider;
 	@Autowired
@@ -55,8 +58,6 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 	IdHelperService myIdHelper;
 	@Autowired
 	IResourceLinkDao myResourceLinkDao;
-	@Autowired
-	PartitionRunner myPartitionRunner;
 
 	@Override
 	public List<String> process(List<Long> thePids) throws Exception {
@@ -84,7 +85,8 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 		}
 
 		List<ResourceLink> conflictResourceLinks = Collections.synchronizedList(new ArrayList<>());
-		myPartitionRunner.runInPartitionedThreads(thePids, someTargetPids -> findResourceLinksWithTargetPidIn(thePids.getContent(), someTargetPids, conflictResourceLinks));
+		PartitionRunner partitionRunner = new PartitionRunner(PROCESS_NAME, THREAD_PREFIX, myDaoConfig.getExpungeBatchSize(), myDaoConfig.getExpungeThreadCount());
+		partitionRunner.runInPartitionedThreads(thePids, someTargetPids -> findResourceLinksWithTargetPidIn(thePids.getContent(), someTargetPids, conflictResourceLinks));
 
 		if (conflictResourceLinks.isEmpty()) {
 			return;

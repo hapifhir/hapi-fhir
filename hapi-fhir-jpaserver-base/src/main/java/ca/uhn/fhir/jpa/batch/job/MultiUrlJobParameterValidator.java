@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.delete.job;
+package ca.uhn.fhir.jpa.batch.job;
 
 /*-
  * #%L
@@ -21,11 +21,10 @@ package ca.uhn.fhir.jpa.delete.job;
  */
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.delete.model.PartitionedUrl;
-import ca.uhn.fhir.jpa.delete.model.RequestListJson;
+import ca.uhn.fhir.jpa.batch.job.model.PartitionedUrl;
+import ca.uhn.fhir.jpa.batch.job.model.RequestListJson;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
-import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.JobParametersValidator;
@@ -35,11 +34,12 @@ import static ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidRe
 /**
  * This class will prevent a job from running any of the provided URLs are not valid on this server.
  */
-public class DeleteExpungeJobParameterValidator implements JobParametersValidator {
+public class MultiUrlJobParameterValidator implements JobParametersValidator {
+	public static String JOB_PARAM_OPERATION_NAME = "operation-name";
 	private final MatchUrlService myMatchUrlService;
 	private final DaoRegistry myDaoRegistry;
 
-	public DeleteExpungeJobParameterValidator(MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
+	public MultiUrlJobParameterValidator(MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
 		myMatchUrlService = theMatchUrlService;
 		myDaoRegistry = theDaoRegistry;
 	}
@@ -54,13 +54,13 @@ public class DeleteExpungeJobParameterValidator implements JobParametersValidato
 		for (PartitionedUrl partitionedUrl : requestListJson.getPartitionedUrls()) {
 			String url = partitionedUrl.getUrl();
 			try {
-				ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(url);
+				ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(url, partitionedUrl.getRequestPartitionId());
 				String resourceName = resourceSearch.getResourceName();
 				if (!myDaoRegistry.isResourceTypeSupported(resourceName)) {
 					throw new JobParametersInvalidException("The resource type " + resourceName + " is not supported on this server.");
 				}
 			} catch (UnsupportedOperationException e) {
-				throw new JobParametersInvalidException("Failed to parse " + ProviderConstants.OPERATION_DELETE_EXPUNGE + " " + JOB_PARAM_REQUEST_LIST + " item " + url + ": " + e.getMessage());
+				throw new JobParametersInvalidException("Failed to parse " + theJobParameters.getString(JOB_PARAM_OPERATION_NAME) + " " + JOB_PARAM_REQUEST_LIST + " item " + url + ": " + e.getMessage());
 			}
 		}
 	}
