@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.model.search;
 
 import org.hibernate.search.engine.backend.document.DocumentElement;
 import org.hibernate.search.engine.backend.document.model.dsl.IndexSchemaElement;
+import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.mapper.pojo.bridge.PropertyBridge;
 import org.hibernate.search.mapper.pojo.bridge.binding.PropertyBindingContext;
 import org.hibernate.search.mapper.pojo.bridge.mapping.programmatic.PropertyBinder;
@@ -54,7 +55,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder {
 		//In order to support dynamic fields, we have to use field templates. We _must_ define the template at bootstrap time and cannot
 		//create them adhoc. https://docs.jboss.org/hibernate/search/6.0/reference/en-US/html_single/#mapper-orm-bridge-index-field-dsl-dynamic
 		//I _think_ im doing the right thing here by indicating that everything matching this template uses this analyzer.
-		indexSchemaElement.fieldTemplate("propTemplate", f -> f.asString().analyzer("standard"))
+		indexSchemaElement.fieldTemplate("SearchParamText", f -> f.asString().analyzer("autocompleteWordEdgeAnalyzer").projectable(Projectable.NO))
 			.matchingPathGlob(SEARCH_PARAM_TEXT_PREFIX +  "*");
 
 

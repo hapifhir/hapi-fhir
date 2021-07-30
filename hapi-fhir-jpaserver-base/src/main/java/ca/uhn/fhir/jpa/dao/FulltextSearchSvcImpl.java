@@ -107,6 +107,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			if (terms.size() == 1) {
 				b.must(f.phrase()
 					.field(theFieldName)
+
 					.boost(4.0f)
 					.matching(terms.iterator().next().toLowerCase())
 					.slop(2));
@@ -150,12 +151,14 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		 * {
 		 *   "myId": 1
 		 *   "myNarrativeText" : 'adsasdjkaldjalkdjalkdjalkdjs",
-		 *   textFields: {
+		 *   // should be indexed, not stored
 		 *     "text-code" : "Our observation Glucose Moles volume in Blood"
 		 *     "text-clinicalCode" : "Our observation Glucose Moles volume in Blood"
 		 *     "text-identifier" :
-		 *     "text-component-value-concept": " a a s d d  g v"
-		 *   },
+		 *     "text-component-value-concept": " a a s d d  g v",
+		 *     _index: {
+		 *
+		 *     }
 		 *   resource: {
 		 *   	type: "Observation"
 		 *   	"code": {

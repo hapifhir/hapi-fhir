@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import static ca.uhn.fhir.rest.api.Constants.PARAMQUALIFIER_TOKEN_TEXT;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -162,7 +163,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		obs2.setValue(new Quantity(81));
 		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 
-
 		{
 			// first word
 			SearchParameterMap map = new SearchParameterMap();
@@ -175,6 +175,20 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam("weight").setModifier(TokenParamModifier.TEXT));
 			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
+		}
+
+		{
+			// doesn't find internal fragment
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("ght").setModifier(TokenParamModifier.TEXT));
+			assertEquals(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)).size(), 0);
+		}
+
+		{
+			// prefix
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("Bod").setModifier(TokenParamModifier.TEXT));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
 		}
 
 	}
