@@ -58,8 +58,8 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 	@Autowired
 	private BulkExportDaoSvc myBulkExportDaoSvc;
 
-	private ByteArrayOutputStream myOutputStream;
-	private OutputStreamWriter myWriter;
+	private final ByteArrayOutputStream myOutputStream;
+	private final OutputStreamWriter myWriter;
 	private IParser myParser;
 
 	@Value("#{stepExecutionContext['bulkExportCollectionEntityId']}")

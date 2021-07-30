@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.provider.DeleteExpungeProvider;
+import ca.uhn.fhir.rest.server.provider.ReindexProvider;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -77,6 +78,8 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected IPartitionDao myPartitionDao;
 	@Autowired
 	private DeleteExpungeProvider myDeleteExpungeProvider;
+	@Autowired
+	private ReindexProvider myReindexProvider;
 
 	ResourceCountCache myResourceCountsCache;
 	private TerminologyUploaderProvider myTerminologyUploaderProvider;
@@ -109,7 +112,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProvider.class);
 			myDaoRegistry = myAppCtx.getBean(DaoRegistry.class);
 
-			ourRestServer.registerProviders(mySystemProvider, myTerminologyUploaderProvider, myDeleteExpungeProvider);
+			ourRestServer.registerProviders(mySystemProvider, myTerminologyUploaderProvider, myDeleteExpungeProvider, myReindexProvider);
 			ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
 			ourRestServer.registerProvider(myAppCtx.getBean(DiffProvider.class));
 

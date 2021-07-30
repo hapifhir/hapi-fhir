@@ -675,7 +675,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			Throwable t = next.get();
 			if (t != null) {
 				String stackTrace = ExceptionUtils.getStackTrace(t);
-				fail(t.toString() + "\n" + stackTrace);
+				fail(t + "\n" + stackTrace);
 			}
 		}
 		executor.shutdownNow();
