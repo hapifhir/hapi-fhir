@@ -86,7 +86,6 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcLoincTest.class);
@@ -939,21 +938,6 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 				LOINC_CODESYSTEM_MAKE_CURRENT.getCode() + "' property is 'false'", thrown.getMessage());
 		}
 
-
-
-		@Test
-		public void testNoSnapshotAndNoMakeCurrentThrows() {
-			testProps.put(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), "false");
-			testProps.put(LOINC_CODESYSTEM_VERSION.getCode(), "27.0");
-			when(mySrd.getOperation()).thenReturn(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD);
-			doReturn(mockFileDescriptors).when(testedSvc).getLoadedFileDescriptors(mockFileDescriptorList);
-
-			InvalidRequestException thrown = Assertions.assertThrows(InvalidRequestException.class,
-				() -> testedSvc.loadLoinc(mockFileDescriptorList, mySrd) );
-
-			assertEquals("Delta operations require '" + LOINC_CODESYSTEM_MAKE_CURRENT.getCode() +
-				"' parameter set (or defaulted to) 'true'", thrown.getMessage());
-		}
 	}
 
 
