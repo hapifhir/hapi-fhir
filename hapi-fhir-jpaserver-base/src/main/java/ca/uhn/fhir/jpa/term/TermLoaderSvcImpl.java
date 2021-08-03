@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -228,13 +229,15 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 			if (StringUtils.isBlank(codeSystemVersionId) && ! isMakeCurrentVersion) {
 				throw new InvalidRequestException("'" + LOINC_CODESYSTEM_VERSION.getCode() +
-					"' property is required when 'current-version' property is 'false'");
+					"' property is required when '" + LOINC_CODESYSTEM_MAKE_CURRENT.getCode() + "' property is 'false'");
 			}
 
-			//todo: is this the case?. Check with client
-//		if (! isMakeCurrentVersion && mode != ModeEnum.SNAPSHOT) {
-//			throw new ParseException("Delta operations must use (or default to) " + CURRENT_VERSION + "=true parameter");
-//		}
+			if (! isMakeCurrentVersion
+					&& theRequestDetails.getOperation() != null
+					&& ! theRequestDetails.getOperation().equals(JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM)) {
+				throw new InvalidRequestException("Delta operations require '" + LOINC_CODESYSTEM_MAKE_CURRENT.getCode() +
+					"' parameter set (or defaulted to) 'true'");
+			}
 
 			List<String> mandatoryFilenameFragments = Arrays.asList(
 				uploadProperties.getProperty(LOINC_ANSWERLIST_FILE.getCode(), LOINC_ANSWERLIST_FILE_DEFAULT.getCode()),

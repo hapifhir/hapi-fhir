@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -85,6 +86,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcLoincTest.class);
@@ -856,6 +858,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		void beforeEach() {
 			testedSvc = spy(mySvc);
 			doReturn(testProps).when(testedSvc).getProperties(any(), eq(LOINC_UPLOAD_PROPERTIES_FILE.getCode()));
+			requestDetails.setOperation(JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM);
 		}
 
 
@@ -932,10 +935,25 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			InvalidRequestException thrown = Assertions.assertThrows(InvalidRequestException.class,
 				() -> testedSvc.loadLoinc(mockFileDescriptorList, mySrd) );
 
-			assertEquals("'" + LOINC_CODESYSTEM_VERSION.getCode() +
-				"' property is required when 'current-version' property is 'false'", thrown.getMessage());
+			assertEquals("'" + LOINC_CODESYSTEM_VERSION.getCode() + "' property is required when '" +
+				LOINC_CODESYSTEM_MAKE_CURRENT.getCode() + "' property is 'false'", thrown.getMessage());
 		}
 
+
+
+		@Test
+		public void testNoSnapshotAndNoMakeCurrentThrows() {
+			testProps.put(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), "false");
+			testProps.put(LOINC_CODESYSTEM_VERSION.getCode(), "27.0");
+			when(mySrd.getOperation()).thenReturn(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD);
+			doReturn(mockFileDescriptors).when(testedSvc).getLoadedFileDescriptors(mockFileDescriptorList);
+
+			InvalidRequestException thrown = Assertions.assertThrows(InvalidRequestException.class,
+				() -> testedSvc.loadLoinc(mockFileDescriptorList, mySrd) );
+
+			assertEquals("Delta operations require '" + LOINC_CODESYSTEM_MAKE_CURRENT.getCode() +
+				"' parameter set (or defaulted to) 'true'", thrown.getMessage());
+		}
 	}
 
 
