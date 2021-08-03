@@ -302,16 +302,8 @@ public class SearchBuilder implements ISearchBuilder {
 		/*
 		 * Fulltext or lastn search
 		 */
-		boolean requiresHibernateSearchAccess = myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN();
 
-		requiresHibernateSearchAccess |= myParams.entrySet().stream()
-			.filter(entry -> entry.getKey().equals("code"))
-			.flatMap(andList -> andList.getValue().stream())
-			.flatMap(Collection::stream)
-			.filter(param -> param instanceof TokenParam || param instanceof StringParam)
-			.anyMatch(param -> ":text".equals(param.getQueryParameterQualifier()));
-
-		if (requiresHibernateSearchAccess) {
+		if (requiresHibernateSearchAccess()) {
 			if (myParams.isLastN()) {
 				pids = executeLastNAgainstIndex(theMaximumResults);
 			} else {
@@ -346,12 +338,21 @@ public class SearchBuilder implements ISearchBuilder {
 		return queries;
 	}
 
+	private boolean requiresHibernateSearchAccess() {
+		boolean requiresHibernateSearchAccess = myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN();
+
+		requiresHibernateSearchAccess |= myParams.entrySet().stream()
+			.filter(entry -> entry.getKey().equals("code"))
+			.flatMap(andList -> andList.getValue().stream())
+			.flatMap(Collection::stream)
+			.filter(param -> param instanceof TokenParam || param instanceof StringParam)
+			.anyMatch(param -> ":text".equals(param.getQueryParameterQualifier()));
+		return requiresHibernateSearchAccess;
+	}
+
 	private List<ResourcePersistentId> executeLastNAgainstIndex(Integer theMaximumResults) {
-		if (myIElasticsearchSvc == null) {
-			if (myParams.isLastN()) {
-				throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
-			}
-		}
+		validateLastNIsEnabled();
+
 		List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults);
 
 		return lastnResourceIds.stream()
@@ -359,16 +360,11 @@ public class SearchBuilder implements ISearchBuilder {
 			.collect(Collectors.toList());
 	}
 
-	private List<ResourcePersistentId> executeFullTextSearchAgainstIndex(RequestDetails theRequest) {
-		List<ResourcePersistentId> pids;
-		if (myFulltextSearchSvc == null) {
-			if (myParams.containsKey(Constants.PARAM_TEXT)) {
-				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
-			} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
-				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
-			}
-		}
 
+	private List<ResourcePersistentId> executeFullTextSearchAgainstIndex(RequestDetails theRequest) {
+		validateFullTextSearchIsEnabled();
+
+		List<ResourcePersistentId> pids;
 		if (myParams.getEverythingMode() != null) {
 			pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
 		} else {
@@ -376,6 +372,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 		return pids;
 	}
+
 
 	private void doCreateChunkedQueries(SearchParameterMap theParams, List<Long> thePids, Integer theOffset, SortSpec sort, boolean theCount, RequestDetails theRequest, ArrayList<SearchQueryExecutor> theQueries) {
 		if (thePids.size() < getMaximumPageSize()) {
@@ -1529,4 +1526,21 @@ public class SearchBuilder implements ISearchBuilder {
 		return thePredicates.toArray(new Predicate[0]);
 	}
 
+	private void validateLastNIsEnabled() {
+		if (myIElasticsearchSvc == null) {
+			throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
+		}
+	}
+
+	private void validateFullTextSearchIsEnabled() {
+		if (myFulltextSearchSvc == null) {
+			if (myParams.containsKey(Constants.PARAM_TEXT)) {
+				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+			} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
+				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+			} else {
+				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process qualifier :text");
+			}
+		}
+	}
 }

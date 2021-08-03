@@ -629,7 +629,7 @@ public class SearchParameterMap implements Serializable {
 	 *
 	 * @return an And List or Query Parameters matching the qualifier.
 	 */
-	public List<List<IQueryParameterType>> removeByNameAndQualifier(String theName, String theQualifier) {
+	public List<List<IQueryParameterType>> removeByNameAndQualifier(String theName, @Nonnull String theQualifier) {
 
 		List<List<IQueryParameterType>> remainderParameters = new ArrayList<>();
 		List<List<IQueryParameterType>> matchingParameters = new ArrayList<>();
@@ -658,27 +658,37 @@ public class SearchParameterMap implements Serializable {
 		return removeByNameAndQualifier(theName, theModifier.getValue());
 	}
 
+	/**
+	 * For each search parameter in the map, extract any which have the given qualifier.
+	 * e.g. Take the url: Observation?code:text=abc&code=123&code:text=def&reason:text=somereason
+	 *
+	 * If we call this function with `:text`, it will return a map that looks like:
+	 *
+	 * code -> [[code:text=abc], [code:text=def]]
+	 * reason -> [[reason:text=somereason]]
+	 *
+	 * and the remaining search parameters in the map will be:
+	 *
+	 * code -> [[code=123]]
+	 *
+	 * @param theQualifier
+	 * @return
+	 */
 	public Map<String, List<List<IQueryParameterType>>> removeByQualifier(String theQualifier) {
 
-		Map<String, List<List<IQueryParameterType>>> parameterToTextValuesMap = new HashMap<>();
-		List<IQueryParameterType> collect = mySearchParameterMap.entrySet().stream()
-			.flatMap(andList -> andList.getValue().stream())
-			.flatMap(Collection::stream)
-			.filter(param -> PARAMQUALIFIER_TOKEN_TEXT.equals(param.getQueryParameterQualifier()))
-			.collect(Collectors.toList());
-
-		for (Map.Entry<String, List<List<IQueryParameterType>>> stringListEntry : mySearchParameterMap.entrySet()) {
-			String parameterName = stringListEntry.getKey();
-			for (List<IQueryParameterType> orList: stringListEntry.getValue()) {
-				for (IQueryParameterType parameterType: orList) {
-					if (PARAMQUALIFIER_TOKEN_TEXT.equals(parameterType.getQueryParameterQualifier())) {
-						parameterToTextValuesMap.put(parameterName, removeByNameAndQualifier(parameterName, TokenParamModifier.TEXT));
-					}
-				}
-			}
+		Map<String, List<List<IQueryParameterType>>> retVal = new HashMap<>();
+		Set<String> parameterNames = mySearchParameterMap.keySet();
+		for (String parameterName : parameterNames) {
+			List<List<IQueryParameterType>> paramsWithQualifier = removeByNameAndQualifier(parameterName, theQualifier);
+			retVal.put(parameterName, paramsWithQualifier);
 		}
-		return parameterToTextValuesMap;
 
+		return retVal;
+
+	}
+
+	public Map<String, List<List<IQueryParameterType>>> removeByQualifier(@Nonnull TokenParamModifier theModifier) {
+		return removeByQualifier(theModifier.getValue());
 	}
 
 	public int size() {
