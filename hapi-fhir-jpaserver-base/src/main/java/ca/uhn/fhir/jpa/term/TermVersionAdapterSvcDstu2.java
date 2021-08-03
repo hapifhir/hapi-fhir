@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.term;
  */
 
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -29,7 +30,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 public class TermVersionAdapterSvcDstu2 implements ITermVersionAdapterSvc {
 
 	@Override
-	public IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource) {
+	public IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
 		throw new UnsupportedOperationException();
 	}
 
