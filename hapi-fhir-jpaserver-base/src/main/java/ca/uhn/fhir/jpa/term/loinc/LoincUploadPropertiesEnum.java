@@ -101,6 +101,9 @@ public enum LoincUploadPropertiesEnum {
 	// This is the version identifier for the LOINC code system
 	LOINC_CODESYSTEM_VERSION("loinc.codesystem.version"),
 
+	// Indicates if loading version has to become current
+	LOINC_CODESYSTEM_MAKE_CURRENT("loinc.codesystem.make.current"),
+
 	// This is the version identifier for the answer list file
 	LOINC_ANSWERLIST_VERSION("loinc.answerlist.version"),
 

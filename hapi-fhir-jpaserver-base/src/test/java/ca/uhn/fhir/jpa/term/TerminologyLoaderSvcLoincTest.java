@@ -1,9 +1,53 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
+import ca.uhn.fhir.jpa.entity.TermConceptProperty;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.term.loinc.LoincDocumentOntologyHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincIeeeMedicalDeviceCodeHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincImagingDocumentCodeHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincTop2000LabResultsSiHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincTop2000LabResultsUsHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincUniversalOrderSetHandler;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
+import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_DUPLICATE_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_DUPLICATE_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_MAKE_CURRENT;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONSUMER_NAME_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_DUPLICATE_FILE_DEFAULT;
@@ -30,48 +74,18 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
-import ca.uhn.fhir.jpa.entity.TermConceptProperty;
-import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.loinc.LoincDocumentOntologyHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincIeeeMedicalDeviceCodeHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincImagingDocumentCodeHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincTop2000LabResultsSiHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincTop2000LabResultsUsHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincUniversalOrderSetHandler;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcLoincTest.class);
@@ -99,6 +113,8 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	private ArgumentCaptor<List<ConceptMap>> myConceptMapCaptor_267_second;
 	@Captor
 	private ArgumentCaptor<List<ConceptMap>> myConceptMapCaptor_268;
+	@Captor
+	private ArgumentCaptor<RequestDetails> myRequestDetailsCaptor;
 	private ZipCollectionBuilder myFiles;
 	@Mock
 	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
@@ -169,7 +185,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		verifyLoadLoinc(false, true);
 	}
 
-	
+
 	private void verifyLoadLoinc() {
 		verifyLoadLoinc(true, false);
 	}
@@ -458,7 +474,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(2, vs.getCompose().getInclude().get(0).getConcept().size());
 		assertEquals("17424-3", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
 		assertEquals("13006-2", vs.getCompose().getInclude().get(0).getConcept().get(1).getCode());
-		
+
 		// Consumer Name
 		if (theIncludeConsumerNameAndLinguisticVariants) {
 		    code = concepts.get("61438-8");
@@ -473,7 +489,8 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		    verifyLinguisticVariant(code.getDesignations(), "de-AT", "","","","","","","","","","CoV OC43 RNA ql/SM P","Coronavirus OC43 RNA ql. /Sondermaterial PCR");
 		    verifyLinguisticVariant(code.getDesignations(), "fr-CA", "Virus respiratoire syncytial bovin","Présence-Seuil","Temps ponctuel","XXX","Ordinal","Culture spécifique à un microorganisme","Microbiologie","","","","");
 		    verifyLinguisticVariant(code.getDesignations(), "zh-CN", "HTLV I+II 抗体区带模式","印象","时间点","脑脊液","名义型","免疫印迹法","微生物学试验类","","","Ab;自身抗体 CSF CSF;脊髓液;Cerebral spinal fluid;脑脊髓液 HTLV 1+2 Ab HTLV 1+2 Ab 区带模式 HTLV 1+2 型 Ab HTLV 1+2 型 Ab 区带模式 HTLV 1+2 型抗体 HTLV 1+2 型抗体区带模式 HTLV I+II 型 Ab HTLV I+II 型 Ab 区带模式 HTLV I+II 型抗体 HTLV I+II 型抗体区带模式 HTLV1+2 Ab HTLV1+2 Ab 区带模式 HTLV1+2 抗体 HTLV1+2 抗体区带模式 Human T-lymphotropic virus Type I;HTLV-1;Adult T-cell lymphoma virus type 1;HTLV 1+2 型;HTLV I+II 型;HTLV 1+2;HTLV1+2;人类 T 细胞白血病病毒 1+2 型;人类 T 细胞白血病病毒 I+II 型;人类 T-细胞白血病病毒 1+2 型;人类 T-细胞白血病病毒 I+II 型;人类嗜 T 淋巴细胞病毒 1+2 型;人类嗜 T 淋巴细胞病毒 I+II 型;人类嗜 T-淋巴细胞病毒 1+2 型;人类嗜 Human T-lymphotropic virus;Adult T-cell lymphoma virus;人类 T 细胞白血病病毒;人类 T-细胞白血病病毒;人类嗜 T 淋巴细胞病毒;人类嗜 T-淋巴细胞病毒;嗜人类 T 淋巴细胞病毒 I 型 人类 T 细胞白血病病毒 人类 T 细胞白血病病毒 1+2 型 Ab 人类 T 细胞白血病病毒 1+2 型 Ab 区带模式 人类 T 细胞白血病病毒 1+2 型抗体 人类 T 细胞白血病病毒 1+2 型抗体区带模式 人类 T 细胞白血病病毒 I+II 型 Ab 人类 T 细胞白血病病毒 I+II 型 Ab 区带模式 人类 T 细胞白血病病毒 I+II 型抗体 人类 T 细胞白血病病毒 I+II 型抗体区带模式 人类 T-细胞白血病病毒 人类 T-细胞白血病病毒 1+2 型 Ab 人类 T-细胞白血病病毒 1+2 型 Ab 区带模式 人类 T-细胞白血病病毒 1+2 型抗体 人类 T-细胞白血病病毒 1+2 型抗体区带模式 人类 T-细胞白血病病毒 I+II 型 Ab 人类 T-细胞白血病病毒 I+II 型 Ab 区带模式 人类 T-细胞白血病病毒 I+II 型抗体 人类 T-细胞白血病病毒 I+II 型抗体区带模式 人类 T-细胞白血病病毒（Human T-cell Leukemia Virus，HTLV） 人类嗜 T 淋巴细胞病毒 人类嗜 T 淋巴细胞病毒 1+2 型 Ab 人类嗜 T 淋巴细胞病毒 1+2 型 Ab 区带模式 人类嗜 T 淋巴细胞病毒 1+2 型抗体 人类嗜 T 淋巴细胞病毒 1+2 型抗体区带模式 人类嗜 T 淋巴细胞病毒 I+II 型 Ab 人类嗜 T 淋巴细胞病毒 I+II 型 Ab 区带模式 人类嗜 T 淋巴细胞病毒 I+II 型抗体 人类嗜 T 淋巴细胞病毒 I+II 型抗体区带模式 人类嗜 T-淋巴细胞病毒 人类嗜 T-淋巴细胞病毒 1+2 型 Ab 人类嗜 T-淋巴细胞病毒 1+2 型 Ab 区带模式 人类嗜 T-淋巴细胞病毒 1+2 型抗体 人类嗜 T-淋巴细胞病毒 1+2 型抗体区带模式 人类嗜 T-淋巴细胞病毒 I+II 型 Ab 人类嗜 T-淋巴细胞病毒 I+II 型 Ab 区带模式 人类嗜 T-淋巴细胞病毒 I+II 型抗体 人类嗜 T-淋巴细胞病毒 I+II 型抗体区带模式 人类嗜 T-淋巴细胞病毒（Human T-cell Lymphotrophic Virus，HTLV） 免疫印迹;西部印迹法;Immunoblot;immunoblotting;IB 分类型应答;分类型结果;名义性;名称型;名词型;名词性;标称性;没有自然次序的名义型或分类型应答 区带 区带（带型、条带）模式（模式特征、特征模式、图谱、式样、组份、组分、成员） 印象是一种诊断陈述，始终是对其他某种观察指标的解释或抽象（一系列检验项目结果、一幅图像或者整个某位病人），而且几乎总是由某位专业人员产生。;检查印象;检查印象/解释;检查的印象/解释;检查解释;解释","");
-		}	
+	
+		}
 	}
 
 	@Test
@@ -671,7 +688,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		theFiles.addFileZip("/loinc/", LOINC_LINGUISTIC_VARIANTS_PATH_DEFAULT.getCode() + "frCA8LinguisticVariant.csv");
 	}
 
-	
+
 	public static void addLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
 		addBaseLoincMandatoryFilesToZip(theFiles, true);
 		theFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
@@ -717,7 +734,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			theFiles.addFileZip("/loinc/", LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode());
 			theFiles.addFileZip("/loinc/", LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode());
 		}
-		
+
 	}
 
 	@Test
@@ -821,6 +838,110 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals("LP52260-4", doublyNestedChildCode.getChildren().get(1).getChild().getCode());
 		assertEquals("LP52960-9", doublyNestedChildCode.getChildren().get(2).getChild().getCode());
 	}
+
+
+
+
+	@Nested
+	public class LoadLoincCurrentVersion {
+		private TermLoaderSvcImpl testedSvc;
+		private final Properties testProps = new Properties();
+
+		@Mock private final LoadedFileDescriptors mockFileDescriptors = mock(LoadedFileDescriptors.class);
+		@SuppressWarnings("unchecked")
+		@Mock private final List<ITermLoaderSvc.FileDescriptor> mockFileDescriptorList = mock(List.class);
+		@Mock private final ITermCodeSystemStorageSvc mockCodeSystemStorageSvc = mock(ITermCodeSystemStorageSvc.class);
+		private final RequestDetails requestDetails = new ServletRequestDetails();
+
+
+		@BeforeEach
+		void beforeEach() {
+			testedSvc = spy(mySvc);
+			doReturn(testProps).when(testedSvc).getProperties(any(), eq(LOINC_UPLOAD_PROPERTIES_FILE.getCode()));
+			requestDetails.setOperation(JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM);
+		}
+
+
+		@Test
+		public void testDontMakeCurrentVersion() throws IOException {
+			addLoincMandatoryFilesToZip(myFiles);
+			testProps.put(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), "false");
+			testProps.put(LOINC_CODESYSTEM_VERSION.getCode(), "27.0");
+
+			testedSvc.loadLoinc(myFiles.getFiles(), requestDetails);
+
+			verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(
+				any(CodeSystem.class), any(TermCodeSystemVersion.class), myRequestDetailsCaptor.capture(), any(), any());
+
+			myRequestDetailsCaptor.getAllValues().forEach( rd ->
+				assertFalse(rd.getUserData() == null ||
+					(boolean) requestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE))
+			);
+		}
+
+
+		@Test
+		public void testMakeCurrentVersionPropertySet() {
+			testProps.put(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), "true");
+			testProps.put(LOINC_CODESYSTEM_VERSION.getCode(), "27.0");
+			doReturn(mockFileDescriptors).when(testedSvc).getLoadedFileDescriptors(mockFileDescriptorList);
+			doReturn(mock(UploadStatistics.class)).when(testedSvc).processLoincFiles(
+				eq(mockFileDescriptors), eq(requestDetails), eq(testProps), any());
+
+			testedSvc.loadLoinc(mockFileDescriptorList, requestDetails);
+
+			boolean isMakeCurrent = requestDetails.getUserData() == null ||
+				(boolean) requestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
+			assertTrue(isMakeCurrent);
+		}
+
+
+		@Test
+		public void testMakeCurrentVersionByDefaultPropertySet() {
+			testProps.put(LOINC_CODESYSTEM_VERSION.getCode(), "27.0");
+			doReturn(mockFileDescriptors).when(testedSvc).getLoadedFileDescriptors(mockFileDescriptorList);
+			doReturn(mock(UploadStatistics.class)).when(testedSvc).processLoincFiles(
+				eq(mockFileDescriptors), eq(requestDetails), eq(testProps), any());
+
+			testedSvc.loadLoinc(mockFileDescriptorList, requestDetails);
+
+			boolean isMakeCurrent = requestDetails.getUserData() == null ||
+				(boolean) requestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
+			assertTrue(isMakeCurrent);
+		}
+
+
+		@Test
+		public void testDontMakeCurrentVersionPropertySet() {
+			testProps.put(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), "false");
+			testProps.put(LOINC_CODESYSTEM_VERSION.getCode(), "27.0");
+			doReturn(mockFileDescriptors).when(testedSvc).getLoadedFileDescriptors(mockFileDescriptorList);
+			doReturn(mock(UploadStatistics.class)).when(testedSvc).processLoincFiles(
+				eq(mockFileDescriptors), eq(requestDetails), eq(testProps), any());
+
+			testedSvc.loadLoinc(mockFileDescriptorList, requestDetails);
+
+			boolean isMakeCurrent = requestDetails.getUserData() == null ||
+				(boolean) requestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
+			assertFalse(isMakeCurrent);
+		}
+
+
+		@Test
+		public void testNoVersionAndNoMakeCurrentThrows() {
+			testProps.put(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), "false");
+			doReturn(mockFileDescriptors).when(testedSvc).getLoadedFileDescriptors(mockFileDescriptorList);
+
+			InvalidRequestException thrown = Assertions.assertThrows(InvalidRequestException.class,
+				() -> testedSvc.loadLoinc(mockFileDescriptorList, mySrd) );
+
+			assertEquals("'" + LOINC_CODESYSTEM_VERSION.getCode() + "' property is required when '" +
+				LOINC_CODESYSTEM_MAKE_CURRENT.getCode() + "' property is 'false'", thrown.getMessage());
+		}
+
+	}
+
+
 
 	private static void verifyConsumerName(Collection<TermConceptDesignation> designationList, String theConsumerName) {
 	    
