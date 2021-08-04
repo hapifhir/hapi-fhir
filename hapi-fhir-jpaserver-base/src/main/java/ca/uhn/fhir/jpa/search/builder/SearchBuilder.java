@@ -1016,7 +1016,13 @@ public class SearchBuilder implements ISearchBuilder {
 			for (String nextParamName : comboParamNames) {
 				List<List<IQueryParameterType>> nextValues = theParams.get(nextParamName);
 
-				nextParamName = UrlUtil.escapeUrlParam(nextParamName);
+				// TODO Hack to fix weird IOOB on the next stanza until James comes back and makes sense of this.
+				if (nextValues.isEmpty()) {
+					ourLog.error("query parameter {} is unexpectedly empty. Encountered while considering {} index for {}", nextParamName, comboParam.getName(), theRequest.getCompleteUrl());
+					sb = null;
+					break;
+				}
+
 				if (nextValues.get(0).size() != 1) {
 					sb = null;
 					break;
@@ -1043,13 +1049,14 @@ public class SearchBuilder implements ISearchBuilder {
 					}
 				}
 
-				nextOrValue = UrlUtil.escapeUrlParam(nextOrValue);
-
 				if (first) {
 					first = false;
 				} else {
 					sb.append('&');
 				}
+
+				nextParamName = UrlUtil.escapeUrlParam(nextParamName);
+				nextOrValue = UrlUtil.escapeUrlParam(nextOrValue);
 
 				sb.append(nextParamName).append('=').append(nextOrValue);
 
