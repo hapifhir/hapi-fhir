@@ -86,9 +86,6 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
@@ -342,7 +339,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	@Override
 	@Transactional(propagation = Propagation.MANDATORY)
-	public void storeNewCodeSystemVersionIfNeeded(CodeSystem theCodeSystem, ResourceTable theResourceEntity) {
+	public void storeNewCodeSystemVersionIfNeeded(CodeSystem theCodeSystem, ResourceTable theResourceEntity, RequestDetails theRequestDetails) {
 		if (theCodeSystem != null && isNotBlank(theCodeSystem.getUrl())) {
 			String codeSystemUrl = theCodeSystem.getUrl();
 			if (theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.COMPLETE || theCodeSystem.getContent() == null || theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
@@ -373,7 +370,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 				persCs.getConcepts().addAll(BaseTermReadSvcImpl.toPersistedConcepts(theCodeSystem.getConcept(), persCs));
 				ourLog.debug("Code system has {} concepts", persCs.getConcepts().size());
-				storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, theCodeSystem.getName(), theCodeSystem.getVersion(), persCs, theResourceEntity);
+				storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, theCodeSystem.getName(),
+					theCodeSystem.getVersion(), persCs, theResourceEntity, theRequestDetails);
 			}
 
 		}
@@ -381,13 +379,14 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	@Override
 	@Transactional
-	public IIdType storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequest, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
+	public IIdType storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion,
+			RequestDetails theRequest, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		Validate.notBlank(theCodeSystemResource.getUrl(), "theCodeSystemResource must have a URL");
 
 		// Note that this creates the TermCodeSystem and TermCodeSystemVersion entities if needed
-		IIdType csId = myTerminologyVersionAdapterSvc.createOrUpdateCodeSystem(theCodeSystemResource);
+		IIdType csId = myTerminologyVersionAdapterSvc.createOrUpdateCodeSystem(theCodeSystemResource, theRequest);
 
 		ResourcePersistentId codeSystemResourcePid = myIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), csId.getResourceType(), csId.getIdPart());
 		ResourceTable resource = myResourceTableDao.getOne(codeSystemResourcePid.getIdAsLong());
@@ -396,7 +395,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		populateCodeSystemVersionProperties(theCodeSystemVersion, theCodeSystemResource, resource);
 
-		storeNewCodeSystemVersion(codeSystemResourcePid, theCodeSystemResource.getUrl(), theCodeSystemResource.getName(), theCodeSystemResource.getVersion(), theCodeSystemVersion, resource);
+		storeNewCodeSystemVersion(codeSystemResourcePid, theCodeSystemResource.getUrl(), theCodeSystemResource.getName(),
+			theCodeSystemResource.getVersion(), theCodeSystemVersion, resource, theRequest);
 
 		myDeferredStorageSvc.addConceptMapsToStorageQueue(theConceptMaps);
 		myDeferredStorageSvc.addValueSetsToStorageQueue(theValueSets);
@@ -406,7 +406,9 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	@Override
 	@Transactional
-	public void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theCodeSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable) {
+	public void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri,
+			String theSystemName, String theCodeSystemVersionId, TermCodeSystemVersion theCodeSystemVersion,
+			ResourceTable theCodeSystemResourceTable, RequestDetails theRequestDetails) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		ourLog.debug("Storing code system");
@@ -468,33 +470,41 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			codeSystemToStore = myCodeSystemVersionDao.saveAndFlush(codeSystemToStore);
 		}
 
-		ourLog.debug("Saving code system");
-
-		codeSystem.setCurrentVersion(codeSystemToStore);
-		if (codeSystem.getPid() == null) {
-			codeSystem = myCodeSystemDao.saveAndFlush(codeSystem);
-		}
-
-		ourLog.debug("Setting CodeSystemVersion[{}] on {} concepts...", codeSystem.getPid(), totalCodeCount);
-
-		for (TermConcept next : conceptsToSave) {
-			populateVersion(next, codeSystemToStore);
-		}
-
-		ourLog.debug("Saving {} concepts...", totalCodeCount);
-
-		IdentityHashMap<TermConcept, Object> conceptsStack2 = new IdentityHashMap<>();
-		for (TermConcept next : conceptsToSave) {
-			persistChildren(next, codeSystemToStore, conceptsStack2, totalCodeCount);
-		}
-
-		ourLog.debug("Done saving concepts, flushing to database");
-
-		if (myDeferredStorageSvc.isStorageQueueEmpty() == false) {
-			ourLog.info("Note that some concept saving has been deferred");
+		// defaults to true
+		boolean isMakeVersionCurrent = theRequestDetails == null ||
+			(boolean) theRequestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
+		if (isMakeVersionCurrent) {
+			makeCodeSystemCurrentVersion(codeSystem, codeSystemToStore, conceptsToSave, totalCodeCount);
 		}
 
 	}
+
+
+	private void makeCodeSystemCurrentVersion(TermCodeSystem theCodeSystem, TermCodeSystemVersion theCodeSystemToStore,
+			Collection<TermConcept> theConceptsToSave, int theTotalCodeCount) {
+
+		theCodeSystem.setCurrentVersion(theCodeSystemToStore);
+		if (theCodeSystem.getPid() == null) {
+			theCodeSystem = myCodeSystemDao.saveAndFlush(theCodeSystem);
+		}
+
+		ourLog.debug("Setting CodeSystemVersion[{}] on {} concepts...", theCodeSystem.getPid(), theTotalCodeCount);
+		for (TermConcept next : theConceptsToSave) {
+			populateVersion(next, theCodeSystemToStore);
+		}
+
+		ourLog.debug("Saving {} concepts...", theTotalCodeCount);
+		IdentityHashMap<TermConcept, Object> conceptsStack2 = new IdentityHashMap<>();
+		for (TermConcept next : theConceptsToSave) {
+			persistChildren(next, theCodeSystemToStore, conceptsStack2, theTotalCodeCount);
+		}
+
+		ourLog.debug("Done saving concepts, flushing to database");
+		if (! myDeferredStorageSvc.isStorageQueueEmpty()) {
+			ourLog.info("Note that some concept saving has been deferred");
+		}
+	}
+
 
 	private TermCodeSystemVersion getExistingTermCodeSystemVersion(Long theCodeSystemVersionPid, String theCodeSystemVersion) {
 		TermCodeSystemVersion existing;

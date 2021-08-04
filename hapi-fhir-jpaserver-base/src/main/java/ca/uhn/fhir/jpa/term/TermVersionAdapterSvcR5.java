@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.CodeSystem;
@@ -59,15 +60,15 @@ public class TermVersionAdapterSvcR5 extends BaseTermVersionAdapterSvcImpl imple
 	}
 
 	@Override
-	public IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource) {
+	public IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
 		validateCodeSystemForStorage(theCodeSystemResource);
 
 		CodeSystem codeSystemR4 = org.hl7.fhir.convertors.conv40_50.CodeSystem40_50.convertCodeSystem(theCodeSystemResource);
 		if (isBlank(theCodeSystemResource.getIdElement().getIdPart())) {
 			String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
-			return myCodeSystemResourceDao.update(codeSystemR4, matchUrl).getId();
+			return myCodeSystemResourceDao.update(codeSystemR4, matchUrl, theRequestDetails).getId();
 		} else {
-			return myCodeSystemResourceDao.update(codeSystemR4).getId();
+			return myCodeSystemResourceDao.update(codeSystemR4, theRequestDetails).getId();
 		}
 	}
 
