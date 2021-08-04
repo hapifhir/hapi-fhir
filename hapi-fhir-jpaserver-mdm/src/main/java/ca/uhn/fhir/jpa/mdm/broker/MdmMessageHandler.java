@@ -111,7 +111,6 @@ public class MdmMessageHandler implements MessageHandler {
 			IBaseResource targetResource = theMsg.getPayload(myFhirContext);
 			ResourceOperationMessage outgoingMsg = new ResourceOperationMessage(myFhirContext, targetResource, theMsg.getOperationType());
 			outgoingMsg.setTransactionId(theMsg.getTransactionId());
-			mdmContext.getMdmLinkChangeEvent().setTargetResourceId(targetResource);
 
 			HookParams params = new HookParams()
 				.add(ResourceOperationMessage.class, outgoingMsg)

@@ -103,4 +103,5 @@ public class MdmTransactionContext {
 	public void setMdmLinkChangeEvent(MdmLinkChangeEvent theMdmLinkChangeEvent) {
 		myMdmLinkChangeEvent = theMdmLinkChangeEvent;
 	}
+
 }

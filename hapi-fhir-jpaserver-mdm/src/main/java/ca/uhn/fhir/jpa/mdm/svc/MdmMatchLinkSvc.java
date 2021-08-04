@@ -78,6 +78,8 @@ public class MdmMatchLinkSvc {
 	private MdmTransactionContext doMdmUpdate(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
 		CandidateList candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(theResource);
 
+		theMdmTransactionContext.getMdmLinkChangeEvent().setTargetResourceId(theResource);
+
 		if (candidateList.isEmpty()) {
 			handleMdmWithNoCandidates(theResource, theMdmTransactionContext);
 		} else if (candidateList.exactlyOneMatch()) {
@@ -143,6 +145,8 @@ public class MdmMatchLinkSvc {
 		if (myGoldenResourceHelper.isPotentialDuplicate(goldenResource, theTargetResource)) {
 			log(theMdmTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
 			IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(theTargetResource, theMdmTransactionContext);
+			theMdmTransactionContext.getMdmLinkChangeEvent().setGoldenResourceId(newGoldenResource);
+
 			myMdmLinkSvc.updateLink(newGoldenResource, theTargetResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 			myMdmLinkSvc.updateLink(newGoldenResource, goldenResource, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 		} else {
@@ -150,6 +154,8 @@ public class MdmMatchLinkSvc {
 				myGoldenResourceHelper.handleExternalEidAddition(goldenResource, theTargetResource, theMdmTransactionContext);
 				myEidUpdateService.applySurvivorshipRulesAndSaveGoldenResource(theTargetResource, goldenResource, theMdmTransactionContext);
 			}
+
+			theMdmTransactionContext.getMdmLinkChangeEvent().setGoldenResourceId(goldenResource);
 			myMdmLinkSvc.updateLink(goldenResource, theTargetResource, theGoldenResourceCandidate.getMatchResult(), MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 		}
 	}

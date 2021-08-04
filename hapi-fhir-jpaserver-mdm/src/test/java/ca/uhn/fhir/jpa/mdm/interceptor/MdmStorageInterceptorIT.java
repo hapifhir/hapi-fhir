@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.MdmLinkChangeEvent;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -53,7 +54,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -84,49 +87,38 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		assertNotNull(resourceOperationMessage);
 		assertEquals(pr.getId(), resourceOperationMessage.getId());
 
-		MdmLink example = new MdmLink();
-		example.setSourcePid(pr.getIdElement().getIdPartAsLong());
-		MdmLink link = myMdmLinkDao.findAll(Example.of(example)).get(0);
+		MdmLink link = getLinkByTargetId(pr);
 
 		MdmLinkChangeEvent linkChangeEvent = myMdmHelper.getAfterMdmLatch().getLatchInvocationParameterOfType(MdmLinkChangeEvent.class);
 		assertNotNull(linkChangeEvent);
 		assertEquals(link.getGoldenResourcePid(), new IdDt(linkChangeEvent.getGoldenResourceId()).getIdPartAsLong());
 		assertEquals(link.getSourcePid(), new IdDt(linkChangeEvent.getTargetResourceId()).getIdPartAsLong());
+	}
+
+	private MdmLink getLinkByTargetId(IBaseResource theResource) {
+		MdmLink example = new MdmLink();
+		example.setSourcePid(theResource.getIdElement().getIdPartAsLong());
+		return myMdmLinkDao.findAll(Example.of(example)).get(0);
 	}
 
 	@Test
 	public void testUpdateLinkChangeEvent() throws InterruptedException {
 		Patient patient1 = addExternalEID(buildJanePatient(), "eid-1");
-		patient1 = createPatientAndUpdateLinks(patient1);
+		myMdmHelper.createWithLatch(patient1);
+
+		MdmTransactionContext ctx = createContextForCreate("Patient");
+		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(patient1, ctx);
+		ourLog.info(ctx.getMdmLinkChangeEvent().toString());
+		assertEquals(patient1.getIdElement().getValue(), ctx.getMdmLinkChangeEvent().getTargetResourceId());
+		assertEquals(getLinkByTargetId(patient1).getGoldenResourcePid(),  new IdDt(ctx.getMdmLinkChangeEvent().getGoldenResourceId()).getIdPartAsLong());
 
 		Patient patient2 = addExternalEID(buildJanePatient(), "eid-2");
-		patient2 = createPatientAndUpdateLinks(patient2);
-
-		MdmLinkChangeEvent linkChangeEvent = myMdmHelper.getAfterMdmLatch().getLatchInvocationParameterOfType(MdmLinkChangeEvent.class);
-		assertNotNull(linkChangeEvent);
-//		assertEquals(link.getGoldenResourcePid(), new IdDt(linkChangeEvent.getGoldenResourceId()).getIdPartAsLong());
-//		assertEquals(link.getSourcePid(), new IdDt(linkChangeEvent.getTargetResourceId()).getIdPartAsLong());
-	}
-
-	@Test
-	public void testDuplicateLinkChangeEvent() throws InterruptedException {
-		fail();
-
-		Practitioner pr = buildPractitionerWithNameAndId("Young", "AC-DC");
-		myMdmHelper.createWithLatch(pr);
-
-		ResourceOperationMessage resourceOperationMessage = myMdmHelper.getAfterMdmLatch().getLatchInvocationParameterOfType(ResourceOperationMessage.class);
-		assertNotNull(resourceOperationMessage);
-		assertEquals(pr.getId(), resourceOperationMessage.getId());
-
-		MdmLink example = new MdmLink();
-		example.setSourcePid(pr.getIdElement().getIdPartAsLong());
-		MdmLink link = myMdmLinkDao.findAll(Example.of(example)).get(0);
-
-		MdmLinkChangeEvent linkChangeEvent = myMdmHelper.getAfterMdmLatch().getLatchInvocationParameterOfType(MdmLinkChangeEvent.class);
-		assertNotNull(linkChangeEvent);
-		assertEquals(link.getGoldenResourcePid(), new IdDt(linkChangeEvent.getGoldenResourceId()).getIdPartAsLong());
-		assertEquals(link.getSourcePid(), new IdDt(linkChangeEvent.getTargetResourceId()).getIdPartAsLong());
+		myMdmHelper.createWithLatch(patient2);
+		ctx = createContextForCreate("Patient");
+		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(patient2, ctx);
+		ourLog.info(ctx.getMdmLinkChangeEvent().toString());
+		assertEquals(patient2.getIdElement().getValue(), ctx.getMdmLinkChangeEvent().getTargetResourceId());
+		assertEquals(getLinkByTargetId(patient2).getGoldenResourcePid(),  new IdDt(ctx.getMdmLinkChangeEvent().getGoldenResourceId()).getIdPartAsLong());
 	}
 
 	@Test
