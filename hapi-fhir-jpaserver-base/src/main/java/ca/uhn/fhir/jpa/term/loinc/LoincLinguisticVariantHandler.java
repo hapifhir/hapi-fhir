@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term.loinc;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
+import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 
 import java.util.Map;
 
@@ -54,18 +55,31 @@ public class LoincLinguisticVariantHandler implements IZipContentsHandlerCsv {
 			return;
 		}
 	
-		addDesignation(theRecord, concept, "COMPONENT");
-		addDesignation(theRecord, concept, "PROPERTY");
-		addDesignation(theRecord, concept, "TIME_ASPCT");
-		addDesignation(theRecord, concept, "SYSTEM");
-		addDesignation(theRecord, concept, "SCALE_TYP");
+		// The following should be created as designations for each term:
+        // COMPONENT:PROPERTY:TIME_ASPCT:SYSTEM:SCALE_TYP:METHOD_TYP (as colon-separated concatenation - FormalName)
+        // SHORTNAME
+        // LONG_COMMON_NAME
+        // LinguisticVariantDisplayName
+			
+		//-- add formalName designation
+		StringBuilder formalName = new StringBuilder();
+		formalName.append(trimToEmpty(theRecord.get("COMPONENT") + ":"));
+		formalName.append(trimToEmpty(theRecord.get("PROPERTY") + ":"));
+		formalName.append(trimToEmpty(theRecord.get("TIME_ASPCT") + ":"));
+		formalName.append(trimToEmpty(theRecord.get("SYSTEM") + ":"));
+		formalName.append(trimToEmpty(theRecord.get("SCALE_TYP") + ":"));
+		formalName.append(trimToEmpty(theRecord.get("METHOD_TYP")));
 		
-		addDesignation(theRecord, concept, "METHOD_TYP");
-		addDesignation(theRecord, concept, "CLASS");
+		concept.addDesignation()
+		  .setLanguage(myLanguageCode)
+		  .setUseSystem(ITermLoaderSvc.LOINC_URI)
+		  .setUseCode("FormalName")
+	      .setUseDisplay("FormalName")
+	      .setValue(formalName.toString());
+		
+		//-- other designations
 		addDesignation(theRecord, concept, "SHORTNAME");
-		addDesignation(theRecord, concept, "LONG_COMMON_NAME");
-		addDesignation(theRecord, concept, "RELATEDNAMES2");
-		
+		addDesignation(theRecord, concept, "LONG_COMMON_NAME");		
 		addDesignation(theRecord, concept, "LinguisticVariantDisplayName");
 		
 	}
