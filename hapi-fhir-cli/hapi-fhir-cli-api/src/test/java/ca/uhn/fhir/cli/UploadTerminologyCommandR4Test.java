@@ -1,18 +1,9 @@
 package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.test.utilities.JettyUtil;
-import org.apache.commons.io.FileUtils;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -95,43 +86,8 @@ public class UploadTerminologyCommandR4Test extends BaseUploadTerminologyCommand
 		super.testSnapshotLargeFile(FHIR_VERSION);
 	}
 
-	@Nested
-	public class HeaderPassthroughOptionTests {
-
+	@Test
+	public void testAddICD10UsingCompressedFile() throws IOException {
+		super.testUploadICD10UsingCompressedFile(FHIR_VERSION);
 	}
-
-
-
-	@AfterEach
-	public void after() throws Exception {
-		JettyUtil.closeServer(myServer);
-
-		FileUtils.deleteQuietly(myConceptsFile);
-		FileUtils.deleteQuietly(myHierarchyFile);
-		FileUtils.deleteQuietly(myArchiveFile);
-		FileUtils.deleteQuietly(myCodeSystemFile);
-		FileUtils.deleteQuietly(myTextFile);
-		FileUtils.deleteQuietly(myPropertiesFile);
-
-		UploadTerminologyCommand.setTransferSizeLimitForUnitTest(-1);
-	}
-
-	@BeforeEach
-	public void before() throws Exception {
-		myServer = new Server(0);
-
-		TerminologyUploaderProvider provider = new TerminologyUploaderProvider(myCtx, myTermLoaderSvc);
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(myCtx);
-		servlet.registerProvider(provider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		myServer.setHandler(proxyHandler);
-		JettyUtil.startServer(myServer);
-		myPort = JettyUtil.getPortForStartedServer(myServer);
-
-	}
-
-
 }

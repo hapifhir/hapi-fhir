@@ -10,6 +10,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
+
 @ExtendWith(MockitoExtension.class)
 public class HeaderPassthroughOptionR4Tests extends BaseHeaderPassthroughOptionTests {
 	final String FHIR_VERSION = "r4";
@@ -22,7 +24,7 @@ public class HeaderPassthroughOptionR4Tests extends BaseHeaderPassthroughOptionT
 	protected ITermLoaderSvc myTermLoaderSvc;
 
 	@BeforeEach
-	public void beforeEach() {
+	public void beforeEach() throws IOException {
 		super.beforeEach(myCtx, myTermLoaderSvc, myRestfulServerExtension);
 	}
 

@@ -14,6 +14,8 @@ import org.apache.commons.cli.ParseException;
 import org.hl7.fhir.r4.model.IdType;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -42,11 +44,12 @@ public abstract class BaseHeaderPassthroughOptionTests extends BaseTest {
 		new RequestCapturingUploadTerminologyCommand(myCapturingInterceptor);
 
 	public void beforeEach(FhirContext theFhirCtx, ITermLoaderSvc myTermLoaderSvc,
-								  RestfulServerExtension myRestfulServerExtension) {
+								  RestfulServerExtension myRestfulServerExtension) throws IOException {
 		TerminologyUploaderProvider provider = new TerminologyUploaderProvider(theFhirCtx, myTermLoaderSvc);
 		myRestfulServerExtension.registerProvider(provider);
 		when(myTermLoaderSvc.loadCustom(eq("http://foo"), anyList(), any()))
 			.thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
+		writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
 	}
 
 	protected void oneHeader(String fhirVersion, int thePort) throws Exception {
@@ -60,7 +63,6 @@ public abstract class BaseHeaderPassthroughOptionTests extends BaseTest {
 			"-hp", "\"" + headerKey1 + ":" + headerValue1 + "\""
 		};
 
-		BaseUploadTerminologyCommandTest.writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
 		final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
 		testedCommand.run(commandLine);
 
@@ -88,7 +90,7 @@ public abstract class BaseHeaderPassthroughOptionTests extends BaseTest {
 			"-hp", "\"" + headerKey1 + ":" + headerValue2 + "\""
 		};
 
-		BaseUploadTerminologyCommandTest.writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
+
 		final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
 		testedCommand.run(commandLine);
 
@@ -119,7 +121,6 @@ public abstract class BaseHeaderPassthroughOptionTests extends BaseTest {
 			"-hp", "\"" + headerKey2 + ":" + headerValue2 + "\""
 		};
 
-		BaseUploadTerminologyCommandTest.writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
 		final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
 		testedCommand.run(commandLine);
 
@@ -134,6 +135,21 @@ public abstract class BaseHeaderPassthroughOptionTests extends BaseTest {
 		assertTrue(allHeaders.containsKey(headerKey2));
 		assertEquals(1, allHeaders.get(headerKey2).size());
 		assertThat(allHeaders.get(headerKey2), hasItems(headerValue2));
+	}
+
+	public void writeConceptAndHierarchyFiles(File myConceptsFile, File myHierarchyFile) throws IOException {
+		try (FileWriter w = new FileWriter(myConceptsFile, false)) {
+			w.append("CODE,DISPLAY\n");
+			w.append("ANIMALS,Animals\n");
+			w.append("CATS,Cats\n");
+			w.append("DOGS,Dogs\n");
+		}
+
+		try (FileWriter w = new FileWriter(myHierarchyFile, false)) {
+			w.append("PARENT,CHILD\n");
+			w.append("ANIMALS,CATS\n");
+			w.append("ANIMALS,DOGS\n");
+		}
 	}
 
 	private class RequestCapturingUploadTerminologyCommand extends UploadTerminologyCommand {

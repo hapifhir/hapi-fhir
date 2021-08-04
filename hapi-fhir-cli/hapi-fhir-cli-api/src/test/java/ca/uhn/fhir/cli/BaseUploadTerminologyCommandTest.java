@@ -90,14 +90,16 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 	protected File myCodeSystemFile = new File(myCodeSystemFileName);
 	protected String myTextFileName = "target/hello.txt";
 	protected File myTextFile = new File(myTextFileName);
+	protected String myICD10FileName = new File("src/test/resources").getAbsolutePath() + "/icd10cm_tabular_2021.xml";
+	protected String myICD10URL = "http://hl7.org/fhir/sid/icd-10-cm";
+	protected File myICD10File = new File(myICD10FileName);
 	protected File myArchiveFile;
 	protected String myArchiveFileName;
 	protected String myPropertiesFileName = "target/hello.properties";
 	protected File myPropertiesFile = new File(myTextFileName);
 
 	protected void testDeltaAdd(String fhirVersion) throws IOException {
-
-		BaseUploadTerminologyCommandTest.writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
+		writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
 
 		when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
 
@@ -120,7 +122,6 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 	}
 
 	protected void testDeltaAddUsingCodeSystemResource(String theFhirVersion) throws IOException {
-
 		when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
 
 		App.main(new String[]{
@@ -178,8 +179,7 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 	}
 
 	protected void testDeltaAddUsingCompressedFile(String theFhirVersion) throws IOException {
-
-		BaseUploadTerminologyCommandTest.writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
+		writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
 		writeArchiveFile(myConceptsFile, myHierarchyFile);
 
 		when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
@@ -202,7 +202,7 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 	}
 
 	protected void testDeltaAddInvalidFileName(String theFhirVersion) throws IOException {
-		BaseUploadTerminologyCommandTest.writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
+		writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
 
 		try {
 			App.main(new String[]{
@@ -220,7 +220,7 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 	}
 
 	protected void testDeltaRemove(String theFhirVersion) throws IOException {
-		BaseUploadTerminologyCommandTest.writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
+		writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
 
 		when(myTermLoaderSvc.loadDeltaRemove(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
 
@@ -243,7 +243,7 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 	}
 
 	protected void testSnapshot(String theFhirVersion) throws IOException {
-		BaseUploadTerminologyCommandTest.writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
+		writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
 
 		when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
 
@@ -292,7 +292,7 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 	protected void testSnapshotLargeFile(String theFhirVersion) throws IOException {
 		UploadTerminologyCommand.setTransferSizeLimitForUnitTest(10);
 
-		BaseUploadTerminologyCommandTest.writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
+		writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
 
 		when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
 
@@ -314,7 +314,26 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
 	}
 
-	public static void writeConceptAndHierarchyFiles(File myConceptsFile, File myHierarchyFile) throws IOException {
+	protected void testUploadICD10UsingCompressedFile(String theFhirVersion) throws IOException {
+		when(myTermLoaderSvc.loadIcd10cm(anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
+
+		App.main(new String[]{
+			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+			"-v", theFhirVersion,
+			"-t", "http://localhost:" + myPort,
+			"-u", myICD10URL,
+			"-d", myICD10FileName
+		});
+
+		verify(myTermLoaderSvc, times(1)).loadIcd10cm(myDescriptorListCaptor.capture(), any());
+
+		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
+		assertEquals(1, listOfDescriptors.size());
+		assertThat(listOfDescriptors.get(0).getFilename(), matchesPattern("^file:.*files.*\\.zip$"));
+		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+	}
+
+	public void writeConceptAndHierarchyFiles(File myConceptsFile, File myHierarchyFile) throws IOException {
 		try (FileWriter w = new FileWriter(myConceptsFile, false)) {
 			w.append("CODE,DISPLAY\n");
 			w.append("ANIMALS,Animals\n");

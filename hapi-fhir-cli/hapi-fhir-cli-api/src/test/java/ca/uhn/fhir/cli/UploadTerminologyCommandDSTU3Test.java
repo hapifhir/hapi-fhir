@@ -86,4 +86,8 @@ public class UploadTerminologyCommandDSTU3Test extends BaseUploadTerminologyComm
 		super.testSnapshotLargeFile(FHIR_VERSION);
 	}
 
+	@Test
+	public void testAddICD10UsingCompressedFile() throws IOException {
+		super.testUploadICD10UsingCompressedFile(FHIR_VERSION);
+	}
 }
