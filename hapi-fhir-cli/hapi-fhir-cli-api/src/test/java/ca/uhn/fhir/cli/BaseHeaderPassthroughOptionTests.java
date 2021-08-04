@@ -34,10 +34,10 @@ public abstract class BaseHeaderPassthroughOptionTests extends BaseTest {
 
 	private final String headerKey1 = "test-header-key-1";
 	private final String headerValue1 = "test header value-1";
-	protected String myConceptsFileName = "target/concepts.csv";
-	protected File myConceptsFile = new File(myConceptsFileName);
-	protected String myHierarchyFileName = "target/hierarchy.csv";
-	protected File myHierarchyFile = new File(myHierarchyFileName);
+	private static final String myConceptsFileName = "target/concepts.csv";
+	private static File myConceptsFile = new File(myConceptsFileName);
+	private static final String myHierarchyFileName = "target/hierarchy.csv";
+	private static File myHierarchyFile = new File(myHierarchyFileName);
 
 	private final CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 	private final UploadTerminologyCommand testedCommand =
@@ -136,18 +136,22 @@ public abstract class BaseHeaderPassthroughOptionTests extends BaseTest {
 		assertThat(allHeaders.get(headerKey2), hasItems(headerValue2));
 	}
 
-	public void writeConceptAndHierarchyFiles(File myConceptsFile, File myHierarchyFile) throws IOException {
-		try (FileWriter w = new FileWriter(myConceptsFile, false)) {
-			w.append("CODE,DISPLAY\n");
-			w.append("ANIMALS,Animals\n");
-			w.append("CATS,Cats\n");
-			w.append("DOGS,Dogs\n");
+	public synchronized void writeConceptAndHierarchyFiles() throws IOException {
+		if (!myConceptsFile.exists()) {
+			try (FileWriter w = new FileWriter(myConceptsFile, false)) {
+				w.append("CODE,DISPLAY\n");
+				w.append("ANIMALS,Animals\n");
+				w.append("CATS,Cats\n");
+				w.append("DOGS,Dogs\n");
+			}
 		}
 
-		try (FileWriter w = new FileWriter(myHierarchyFile, false)) {
-			w.append("PARENT,CHILD\n");
-			w.append("ANIMALS,CATS\n");
-			w.append("ANIMALS,DOGS\n");
+		if (!myHierarchyFile.exists()) {
+			try (FileWriter w = new FileWriter(myHierarchyFile, false)) {
+				w.append("PARENT,CHILD\n");
+				w.append("ANIMALS,CATS\n");
+				w.append("ANIMALS,DOGS\n");
+			}
 		}
 	}
 

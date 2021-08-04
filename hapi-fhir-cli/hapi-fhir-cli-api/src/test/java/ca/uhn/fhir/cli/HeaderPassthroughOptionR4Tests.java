@@ -3,8 +3,10 @@ package ca.uhn.fhir.cli;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mock;
@@ -25,7 +27,7 @@ public class HeaderPassthroughOptionR4Tests extends BaseHeaderPassthroughOptionT
 
 	@BeforeEach
 	public void beforeEach() throws IOException {
-		writeConceptAndHierarchyFiles(this.myConceptsFile, myHierarchyFile);
+		writeConceptAndHierarchyFiles();
 		super.beforeEach(myCtx, myTermLoaderSvc, myRestfulServerExtension);
 	}
 

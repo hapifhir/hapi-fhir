@@ -82,10 +82,10 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 	@Captor
 	protected ArgumentCaptor<List<ITermLoaderSvc.FileDescriptor>> myDescriptorListCaptor;
 	protected int myPort;
-	protected String myConceptsFileName = "target/concepts.csv";
-	protected File myConceptsFile = new File(myConceptsFileName);
-	protected String myHierarchyFileName = "target/hierarchy.csv";
-	protected File myHierarchyFile = new File(myHierarchyFileName);
+	protected static final String myConceptsFileName = "target/concepts.csv";
+	protected static File myConceptsFile = new File(myConceptsFileName);
+	protected static final String myHierarchyFileName = "target/hierarchy.csv";
+	protected static File myHierarchyFile = new File(myHierarchyFileName);
 	protected String myCodeSystemFileName = "target/codesystem.json";
 	protected File myCodeSystemFile = new File(myCodeSystemFileName);
 	protected String myTextFileName = "target/hello.txt";
@@ -99,8 +99,6 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 	protected File myPropertiesFile = new File(myTextFileName);
 
 	protected void testDeltaAdd(String fhirVersion) throws IOException {
-		writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
-
 		when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
 
 		App.main(new String[]{
@@ -179,7 +177,6 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 	}
 
 	protected void testDeltaAddUsingCompressedFile(String theFhirVersion) throws IOException {
-		writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
 		writeArchiveFile(myConceptsFile, myHierarchyFile);
 
 		when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
@@ -202,8 +199,6 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 	}
 
 	protected void testDeltaAddInvalidFileName(String theFhirVersion) throws IOException {
-		writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
-
 		try {
 			App.main(new String[]{
 				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
@@ -220,8 +215,6 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 	}
 
 	protected void testDeltaRemove(String theFhirVersion) throws IOException {
-		writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
-
 		when(myTermLoaderSvc.loadDeltaRemove(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
 
 		App.main(new String[]{
@@ -290,8 +283,6 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 	protected void testSnapshotLargeFile(String theFhirVersion) throws IOException {
 		UploadTerminologyCommand.setTransferSizeLimitForUnitTest(10);
 
-		writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
-
 		when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
 
 		App.main(new String[]{
@@ -331,18 +322,22 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
 	}
 
-	public void writeConceptAndHierarchyFiles(File myConceptsFile, File myHierarchyFile) throws IOException {
-		try (FileWriter w = new FileWriter(myConceptsFile, false)) {
-			w.append("CODE,DISPLAY\n");
-			w.append("ANIMALS,Animals\n");
-			w.append("CATS,Cats\n");
-			w.append("DOGS,Dogs\n");
+	public synchronized void writeConceptAndHierarchyFiles() throws IOException {
+		if (!myConceptsFile.exists()) {
+			try (FileWriter w = new FileWriter(myConceptsFile, false)) {
+				w.append("CODE,DISPLAY\n");
+				w.append("ANIMALS,Animals\n");
+				w.append("CATS,Cats\n");
+				w.append("DOGS,Dogs\n");
+			}
 		}
 
-		try (FileWriter w = new FileWriter(myHierarchyFile, false)) {
-			w.append("PARENT,CHILD\n");
-			w.append("ANIMALS,CATS\n");
-			w.append("ANIMALS,DOGS\n");
+		if (!myHierarchyFile.exists()) {
+			try (FileWriter w = new FileWriter(myHierarchyFile, false)) {
+				w.append("PARENT,CHILD\n");
+				w.append("ANIMALS,CATS\n");
+				w.append("ANIMALS,DOGS\n");
+			}
 		}
 	}
 
