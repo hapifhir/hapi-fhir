@@ -8,8 +8,10 @@ import java.util.Map;
 import org.apache.commons.csv.CSVRecord;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.util.StringUtil;
 
 /*-
  * #%L
@@ -73,6 +75,13 @@ public class LoincLinguisticVariantHandler implements IZipContentsHandlerCsv {
 	private void addDesignation(CSVRecord theRecord, TermConcept concept, String fieldName) {
 		
 		String field = trim(theRecord.get(fieldName));
+		if (isBlank(field)) {
+			return;
+		}
+		
+		// this is for loinc only, some fields are exceed the max length for the designation
+		// truncate the field after the last semicolon before max length
+		field = StringUtil.truncToMax(field, ";", TermConceptDesignation.MAX_VAL_LENGTH);
 		if (isBlank(field)) {
 			return;
 		}

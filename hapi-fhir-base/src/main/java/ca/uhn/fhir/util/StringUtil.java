@@ -25,6 +25,10 @@ import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.Arrays;
 
+import static org.apache.commons.lang3.StringUtils.length;
+import static org.apache.commons.lang3.StringUtils.lastOrdinalIndexOf;
+
+
 public class StringUtil {
 
 	/**
@@ -105,4 +109,37 @@ public class StringUtil {
 		return theString.substring(0, theString.offsetByCodePoints(0, theCodePointCount));
 	}
 
+	/**
+	 * Truncate theString until the size is less or equal to theMaxSize based on the last theDelimit
+	 * 
+	 * truncToMax(null, ";", 10) return null
+	 * truncToMax("1234567890", ";", 10) return "1234567890"
+	 * truncToMax("12345678901", ";", 10) return null
+	 * truncToMax("12345;678901", ";", 10) return "12345"
+	 * truncToMax("12345;678901;abc", ";", 10) return "12345"
+	 * truncToMax("12345;6789;abc", ";", 10) return "12345;6789"
+	 * 
+	 * 
+	 * @param theString
+	 * @param theDelimit
+	 * @param theMaxSize
+	 */
+	public static String truncToMax(String theString, String theDelimit, int theMaxSize) {
+		
+		if (theString == null)
+			return null;
+	
+		// No need to truncate
+		if (length(theString) <= theMaxSize)
+			return theString;
+	
+		if (theDelimit == null)
+			return null;
+		
+		int len = lastOrdinalIndexOf(theString, theDelimit, 1);
+		if (len == -1 || theMaxSize <= 0) // can't be truncate to the max length, return null
+			return null;
+		
+		return truncToMax(theString.substring(0, len), theDelimit, theMaxSize);
+	}
 }
