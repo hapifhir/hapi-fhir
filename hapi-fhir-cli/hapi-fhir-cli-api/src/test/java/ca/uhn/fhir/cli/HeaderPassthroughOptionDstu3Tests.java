@@ -25,6 +25,7 @@ public class HeaderPassthroughOptionDstu3Tests extends BaseHeaderPassthroughOpti
 
 	@BeforeEach
 	public void beforeEach() throws IOException {
+		writeConceptAndHierarchyFiles(this.myConceptsFile, myHierarchyFile);
 		super.beforeEach(myCtx, myTermLoaderSvc, myRestfulServerExtension);
 	}
 

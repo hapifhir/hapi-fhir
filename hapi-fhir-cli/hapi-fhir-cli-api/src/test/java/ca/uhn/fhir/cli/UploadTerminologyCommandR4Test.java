@@ -18,6 +18,7 @@ public class UploadTerminologyCommandR4Test extends BaseUploadTerminologyCommand
 
 	@BeforeEach
 	public void beforeEach() throws Exception {
+		writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
 		super.beforeEach(myCtx);
 	}
 

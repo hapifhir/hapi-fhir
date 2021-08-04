@@ -243,8 +243,6 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 	}
 
 	protected void testSnapshot(String theFhirVersion) throws IOException {
-		writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
-
 		when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
 
 		App.main(new String[]{

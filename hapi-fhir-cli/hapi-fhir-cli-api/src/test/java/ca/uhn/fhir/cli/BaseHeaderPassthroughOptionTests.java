@@ -34,10 +34,10 @@ public abstract class BaseHeaderPassthroughOptionTests extends BaseTest {
 
 	private final String headerKey1 = "test-header-key-1";
 	private final String headerValue1 = "test header value-1";
-	private String myConceptsFileName = "target/concepts.csv";
-	private File myConceptsFile = new File(myConceptsFileName);
-	private String myHierarchyFileName = "target/hierarchy.csv";
-	private File myHierarchyFile = new File(myHierarchyFileName);
+	protected String myConceptsFileName = "target/concepts.csv";
+	protected File myConceptsFile = new File(myConceptsFileName);
+	protected String myHierarchyFileName = "target/hierarchy.csv";
+	protected File myHierarchyFile = new File(myHierarchyFileName);
 
 	private final CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 	private final UploadTerminologyCommand testedCommand =
@@ -49,7 +49,6 @@ public abstract class BaseHeaderPassthroughOptionTests extends BaseTest {
 		myRestfulServerExtension.registerProvider(provider);
 		when(myTermLoaderSvc.loadCustom(eq("http://foo"), anyList(), any()))
 			.thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
-		writeConceptAndHierarchyFiles(myConceptsFile, myHierarchyFile);
 	}
 
 	protected void oneHeader(String fhirVersion, int thePort) throws Exception {
