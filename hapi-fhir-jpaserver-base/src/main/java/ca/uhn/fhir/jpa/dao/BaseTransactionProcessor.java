@@ -1010,13 +1010,9 @@ public abstract class BaseTransactionProcessor {
 
 			for (IIdType next : theAllIds) {
 				IIdType replacement = theIdSubstitutions.get(next);
-				if (replacement == null) {
-					continue;
+				if (replacement != null && replacement.equals(next)) {
+					ourLog.debug("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
 				}
-				if (replacement.equals(next)) {
-					continue;
-				}
-				ourLog.debug("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
 			}
 
 			ListMultimap<Pointcut, HookParams> deferredBroadcastEvents = theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
