@@ -1125,6 +1125,7 @@ public abstract class BaseTransactionProcessor {
 					IIdType targetId = resourceReference.getResource().getIdElement();
 					if (targetId.getValue() == null || targetId.getValue().startsWith("#")) {
 						// This means it's a contained resource
+						ourLog.error("THIS THING ISN'T CONTAINED! WHY IS IT CONTAINED!!! ");
 						continue;
 					} else if (theIdSubstitutions.containsValue(targetId)) {
 						newId = targetId;
