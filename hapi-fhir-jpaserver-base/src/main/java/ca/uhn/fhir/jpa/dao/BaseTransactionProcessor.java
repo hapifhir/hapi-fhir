@@ -89,6 +89,7 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -864,6 +865,7 @@ public abstract class BaseTransactionProcessor {
 								matchUrl = parts.getResourceType();
 							}
 							matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
+							//TODO FIXME GGG This update call comes back with a contained resource.
 							outcome = resourceDao.update(res, matchUrl, false, false, theRequest, theTransactionDetails);
 							if (Boolean.TRUE.equals(outcome.getCreated())) {
 								conditionalRequestUrls.put(matchUrl, res.getClass());
@@ -1095,7 +1097,6 @@ public abstract class BaseTransactionProcessor {
 				}
 				deferredIndexesForAutoVersioning.put(nextOutcome, referencesToAutoVersion);
 			}
-
 		}
 
 		// If we have any resources we'll be auto-versioning, index these next
