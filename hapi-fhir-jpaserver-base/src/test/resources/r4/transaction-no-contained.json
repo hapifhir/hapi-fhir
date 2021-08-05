@@ -250,8 +250,8 @@
         ]
       },
       "request": {
-        "method": "POST",
-        "url": "Communication"
+        "method": "PUT",
+        "url": "Communication?identifier=https://example.com|zoop"
       }
     }
   ]
