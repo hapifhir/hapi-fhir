@@ -77,10 +77,6 @@ public class UploadTerminologyCommandTest {
 	@Captor
 	protected ArgumentCaptor<List<ITermLoaderSvc.FileDescriptor>> myDescriptorListCaptor;
 
-//	protected String myICD10FileName = new File("src/test/resources").getAbsolutePath() + "/icd10cm_tabular_2021.xml";
-//	protected String myICD10URL = "http://hl7.org/fhir/sid/icd-10-cm";
-//	protected File myICD10File = new File(myICD10FileName);
-
 	static {
 		System.setProperty("test", "true");
 	}
@@ -118,8 +114,8 @@ public class UploadTerminologyCommandTest {
 		FileUtils.deleteQuietly(myHierarchyFile);
 		FileUtils.deleteQuietly(myCodeSystemFile);
 		FileUtils.deleteQuietly(myTextFile);
-//		FileUtils.deleteQuietly(myArchiveFile);
-//		FileUtils.deleteQuietly(myPropertiesFile);
+		FileUtils.deleteQuietly(myArchiveFile);
+		FileUtils.deleteQuietly(myPropertiesFile);
 		UploadTerminologyCommand.setTransferSizeLimitForUnitTest(-1);
 	}
 
