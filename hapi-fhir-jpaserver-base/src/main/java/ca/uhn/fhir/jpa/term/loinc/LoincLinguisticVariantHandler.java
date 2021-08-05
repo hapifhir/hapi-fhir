@@ -73,8 +73,8 @@ public class LoincLinguisticVariantHandler implements IZipContentsHandlerCsv {
 		concept.addDesignation()
 		  .setLanguage(myLanguageCode)
 		  .setUseSystem(ITermLoaderSvc.LOINC_URI)
-		  .setUseCode("FormalName")
-	      .setUseDisplay("FormalName")
+		  .setUseCode("FullySpecifiedName")
+	      .setUseDisplay("FullySpecifiedName")
 	      .setValue(formalName.toString());
 		
 		//-- other designations

@@ -966,7 +966,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		for (TermConceptDesignation designation : designationList) {
 			if (theLanguage.equals(designation.getLanguage())) {
 				
-				if ("FormalName".equals(designation.getUseDisplay())) 
+				if ("FullySpecifiedName".equals(designation.getUseDisplay())) 
 					formalNameDes = designation;
 				
 				if ("SHORTNAME".equals(designation.getUseDisplay())) 
@@ -978,7 +978,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			}
 		}
 		
-		verifyDesignation(formalNameDes, ITermLoaderSvc.LOINC_URI, "FormalName", theComponent+":"+theProperty+":"+theTimeAspct+":"+theSystem+":"+theScaleTyp+":"+methodType);
+		verifyDesignation(formalNameDes, ITermLoaderSvc.LOINC_URI, "FullySpecifiedName", theComponent+":"+theProperty+":"+theTimeAspct+":"+theSystem+":"+theScaleTyp+":"+methodType);
 		verifyDesignation(shortNameDes, ITermLoaderSvc.LOINC_URI, "SHORTNAME", theShortName);
 		verifyDesignation(longCommonNameDes, ITermLoaderSvc.LOINC_URI, "LONG_COMMON_NAME", theLongCommonName);		
 		verifyDesignation(linguisticVariantDisplayNameDes, ITermLoaderSvc.LOINC_URI, "LinguisticVariantDisplayName", theLinguisticVariantDisplayName);
