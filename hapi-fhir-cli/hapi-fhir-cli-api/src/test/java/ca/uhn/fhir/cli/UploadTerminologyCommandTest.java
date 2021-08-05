@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.FileUtils;
@@ -14,11 +13,16 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.dstu3.model.IdType;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -27,6 +31,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -43,31 +48,61 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
+@ExtendWith(MockitoExtension.class)
+public class UploadTerminologyCommandTest {
+	private static final String FHIR_VERSION_DSTU3 = "DSTU3";
+	private static final String FHIR_VERSION_R4 = "R4";
+	private FhirContext myCtx;
+	private final String myConceptsFileName = "target/concepts.csv";
+	private File myConceptsFile = new File(myConceptsFileName);
+	private final String myHierarchyFileName = "target/hierarchy.csv";
+	private File myHierarchyFile = new File(myHierarchyFileName);
+	private final String myCodeSystemFileName = "target/codesystem.json";
+	private File myCodeSystemFile = new File(myCodeSystemFileName);
+	private final String myTextFileName = "target/hello.txt";
+	private File myTextFile = new File(myTextFileName);
+	private final String myPropertiesFileName = "target/hello.properties";
+	private File myPropertiesFile = new File(myTextFileName);
+	private File myArchiveFile;
+	private String myArchiveFileName;
+	private final String myICD10URL = "http://hl7.org/fhir/sid/icd-10-cm";
+	private final String myICD10FileName = new File("src/test/resources").getAbsolutePath() + "/icd10cm_tabular_2021.xml";
+	private File myICD10File = new File(myICD10FileName);
+	private Server myServer;
+	private int myPort;
+
+	@Mock
+	protected ITermLoaderSvc myTermLoaderSvc;
+
+	@Captor
+	protected ArgumentCaptor<List<ITermLoaderSvc.FileDescriptor>> myDescriptorListCaptor;
+
+//	protected String myICD10FileName = new File("src/test/resources").getAbsolutePath() + "/icd10cm_tabular_2021.xml";
+//	protected String myICD10URL = "http://hl7.org/fhir/sid/icd-10-cm";
+//	protected File myICD10File = new File(myICD10FileName);
 
 	static {
 		System.setProperty("test", "true");
 	}
 
-	@AfterEach
-	public void afterEach() throws Exception {
-		JettyUtil.closeServer(myServer);
-
-		FileUtils.deleteQuietly(myConceptsFile);
-		FileUtils.deleteQuietly(myHierarchyFile);
-		FileUtils.deleteQuietly(myArchiveFile);
-		FileUtils.deleteQuietly(myCodeSystemFile);
-		FileUtils.deleteQuietly(myTextFile);
-		FileUtils.deleteQuietly(myPropertiesFile);
-
-		UploadTerminologyCommand.setTransferSizeLimitForUnitTest(-1);
+	static Stream<String> paramsProvider() {
+		return Stream.of(FHIR_VERSION_DSTU3, FHIR_VERSION_R4);
 	}
 
-	public void beforeEach(FhirContext theFhirCtx) throws Exception {
+	@BeforeEach
+	public void beforeEach(TestInfo testInfo) throws Exception {
+		writeConceptAndHierarchyFiles();
+		if (testInfo.getDisplayName().endsWith(FHIR_VERSION_DSTU3)) {
+			myCtx = FhirContext.forDstu3();
+		} else if (testInfo.getDisplayName().endsWith(FHIR_VERSION_R4)) {
+			myCtx = FhirContext.forR4();
+		} else {
+			fail("Unknown FHIR Version param provided: " + testInfo.getDisplayName());
+		}
 		myServer = new Server(0);
-		TerminologyUploaderProvider provider = new TerminologyUploaderProvider(theFhirCtx, myTermLoaderSvc);
+		TerminologyUploaderProvider provider = new TerminologyUploaderProvider(myCtx, myTermLoaderSvc);
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(theFhirCtx);
+		RestfulServer servlet = new RestfulServer(myCtx);
 		servlet.registerProvider(provider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
@@ -76,34 +111,32 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 		myPort = JettyUtil.getPortForStartedServer(myServer);
 	}
 
-	protected Server myServer;
-	@Mock
-	protected ITermLoaderSvc myTermLoaderSvc;
-	@Captor
-	protected ArgumentCaptor<List<ITermLoaderSvc.FileDescriptor>> myDescriptorListCaptor;
-	protected int myPort;
-	protected static final String myConceptsFileName = "target/concepts.csv";
-	protected static File myConceptsFile = new File(myConceptsFileName);
-	protected static final String myHierarchyFileName = "target/hierarchy.csv";
-	protected static File myHierarchyFile = new File(myHierarchyFileName);
-	protected String myCodeSystemFileName = "target/codesystem.json";
-	protected File myCodeSystemFile = new File(myCodeSystemFileName);
-	protected String myTextFileName = "target/hello.txt";
-	protected File myTextFile = new File(myTextFileName);
-	protected String myICD10FileName = new File("src/test/resources").getAbsolutePath() + "/icd10cm_tabular_2021.xml";
-	protected String myICD10URL = "http://hl7.org/fhir/sid/icd-10-cm";
-	protected File myICD10File = new File(myICD10FileName);
-	protected File myArchiveFile;
-	protected String myArchiveFileName;
-	protected String myPropertiesFileName = "target/hello.properties";
-	protected File myPropertiesFile = new File(myTextFileName);
+	@AfterEach
+	public void afterEach() throws Exception {
+		JettyUtil.closeServer(myServer);
+		FileUtils.deleteQuietly(myConceptsFile);
+		FileUtils.deleteQuietly(myHierarchyFile);
+		FileUtils.deleteQuietly(myCodeSystemFile);
+		FileUtils.deleteQuietly(myTextFile);
+//		FileUtils.deleteQuietly(myArchiveFile);
+//		FileUtils.deleteQuietly(myPropertiesFile);
+		UploadTerminologyCommand.setTransferSizeLimitForUnitTest(-1);
+	}
 
-	protected void testDeltaAdd(String fhirVersion) throws IOException {
-		when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testDeltaAdd(String theFhirVersion) throws IOException {
+		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
+			when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.dstu3.model.IdType("CodeSystem/101")));
+		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
+			when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
+		} else {
+			fail("Unknown FHIR Version param provided: " + theFhirVersion);
+		}
 
 		App.main(new String[]{
 			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
-			"-v", fhirVersion,
+			"-v", theFhirVersion,
 			"-m", "ADD",
 			"-t", "http://localhost:" + myPort,
 			"-u", "http://foo",
@@ -119,7 +152,25 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
 	}
 
-	protected void testDeltaAddUsingCodeSystemResource(String theFhirVersion) throws IOException {
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testDeltaAddUsingCodeSystemResource(String theFhirVersion) throws IOException {
+		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
+			try (FileWriter w = new FileWriter(myCodeSystemFile, false)) {
+				org.hl7.fhir.dstu3.model.CodeSystem cs = new org.hl7.fhir.dstu3.model.CodeSystem();
+				cs.addConcept().setCode("CODE").setDisplay("Display");
+				myCtx.newJsonParser().encodeResourceToWriter(cs, w);
+			}
+		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
+			try (FileWriter w = new FileWriter(myCodeSystemFile, false)) {
+				org.hl7.fhir.r4.model.CodeSystem cs = new org.hl7.fhir.r4.model.CodeSystem();
+				cs.addConcept().setCode("CODE").setDisplay("Display");
+				myCtx.newJsonParser().encodeResourceToWriter(cs, w);
+			}
+		} else {
+			fail("Unknown FHIR Version param provided: " + theFhirVersion);
+		}
+
 		when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
 
 		App.main(new String[]{
@@ -140,7 +191,25 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 		assertThat(uploadFile, uploadFile, containsString("\"CODE\",\"Display\""));
 	}
 
-	protected void testDeltaAddInvalidResource(String theFhirVersion) throws IOException {
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testDeltaAddInvalidResource(String theFhirVersion) throws IOException {
+		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
+			try (FileWriter w = new FileWriter(myCodeSystemFile, false)) {
+				org.hl7.fhir.dstu3.model.Patient patient = new org.hl7.fhir.dstu3.model.Patient();
+				patient.setActive(true);
+				myCtx.newJsonParser().encodeResourceToWriter(patient, w);
+			}
+		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
+			try (FileWriter w = new FileWriter(myCodeSystemFile, false)) {
+				org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
+				patient.setActive(true);
+				myCtx.newJsonParser().encodeResourceToWriter(patient, w);
+			}
+		} else {
+			fail("Unknown FHIR Version param provided: " + theFhirVersion);
+		}
+
 		try {
 			App.main(new String[]{
 				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
@@ -156,7 +225,9 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 		}
 	}
 
-	protected void testDeltaAddInvalidFileType(String theFhirVersion) throws IOException {
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testDeltaAddInvalidFileType(String theFhirVersion) throws IOException {
 		try (FileWriter w = new FileWriter(myTextFileName, false)) {
 			w.append("Help I'm a Bug");
 		}
@@ -176,7 +247,9 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 		}
 	}
 
-	protected void testDeltaAddUsingCompressedFile(String theFhirVersion) throws IOException {
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testDeltaAddUsingCompressedFile(String theFhirVersion) throws IOException {
 		writeArchiveFile(myConceptsFile, myHierarchyFile);
 
 		when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
@@ -198,7 +271,9 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
 	}
 
-	protected void testDeltaAddInvalidFileName(String theFhirVersion) throws IOException {
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testDeltaAddInvalidFileName(String theFhirVersion) throws IOException {
 		try {
 			App.main(new String[]{
 				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
@@ -214,8 +289,16 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 		}
 	}
 
-	protected void testDeltaRemove(String theFhirVersion) throws IOException {
-		when(myTermLoaderSvc.loadDeltaRemove(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testDeltaRemove(String theFhirVersion) throws IOException {
+		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
+			when(myTermLoaderSvc.loadDeltaRemove(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.dstu3.model.IdType("CodeSystem/101")));
+		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
+			when(myTermLoaderSvc.loadDeltaRemove(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
+		} else {
+			fail("Unknown FHIR Version param provided: " + theFhirVersion);
+		}
 
 		App.main(new String[]{
 			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
@@ -235,8 +318,16 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
 	}
 
-	protected void testSnapshot(String theFhirVersion) throws IOException {
-		when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testSnapshot(String theFhirVersion) throws IOException {
+		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
+			when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.dstu3.model.IdType("CodeSystem/101")));
+		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
+			when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
+		} else {
+			fail("Unknown FHIR Version param provided: " + theFhirVersion);
+		}
 
 		App.main(new String[]{
 			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
@@ -256,12 +347,20 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
 	}
 
-	protected void testPropertiesFile(String theFhirVersion) throws IOException {
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testPropertiesFile(String theFhirVersion) throws IOException {
 		try (FileWriter w = new FileWriter(myPropertiesFileName, false)) {
 			w.append("a=b\n");
 		}
 
-		when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
+		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
+			when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.dstu3.model.IdType("CodeSystem/101")));
+		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
+			when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
+		} else {
+			fail("Unknown FHIR Version param provided: " + theFhirVersion);
+		}
 
 		App.main(new String[]{
 			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
@@ -280,10 +379,18 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
 	}
 
-	protected void testSnapshotLargeFile(String theFhirVersion) throws IOException {
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testSnapshotLargeFile(String theFhirVersion) throws IOException {
 		UploadTerminologyCommand.setTransferSizeLimitForUnitTest(10);
 
-		when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
+		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
+			when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.dstu3.model.IdType("CodeSystem/101")));
+		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
+			when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
+		} else {
+			fail("Unknown FHIR Version param provided: " + theFhirVersion);
+		}
 
 		App.main(new String[]{
 			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
@@ -303,8 +410,16 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
 	}
 
-	protected void testUploadICD10UsingCompressedFile(String theFhirVersion) throws IOException {
-		when(myTermLoaderSvc.loadIcd10cm(anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testUploadICD10UsingCompressedFile(String theFhirVersion) throws IOException {
+		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
+			when(myTermLoaderSvc.loadIcd10cm(anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.dstu3.model.IdType("CodeSystem/101")));
+		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
+			when(myTermLoaderSvc.loadIcd10cm(anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
+		} else {
+			fail("Unknown FHIR Version param provided: " + theFhirVersion);
+		}
 
 		App.main(new String[]{
 			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
@@ -322,7 +437,7 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
 	}
 
-	public synchronized void writeConceptAndHierarchyFiles() throws IOException {
+	private synchronized void writeConceptAndHierarchyFiles() throws IOException {
 		if (!myConceptsFile.exists()) {
 			try (FileWriter w = new FileWriter(myConceptsFile, false)) {
 				w.append("CODE,DISPLAY\n");
@@ -331,7 +446,6 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 				w.append("DOGS,Dogs\n");
 			}
 		}
-
 		if (!myHierarchyFile.exists()) {
 			try (FileWriter w = new FileWriter(myHierarchyFile, false)) {
 				w.append("PARENT,CHILD\n");
@@ -348,11 +462,9 @@ public abstract class BaseUploadTerminologyCommandTest extends BaseTest {
 		for (File next : theFiles) {
 			ZipEntry nextEntry = new ZipEntry(UploadTerminologyCommand.stripPath(next.getAbsolutePath()));
 			zipOutputStream.putNextEntry(nextEntry);
-
 			try (FileInputStream fileInputStream = new FileInputStream(next)) {
 				IOUtils.copy(fileInputStream, zipOutputStream);
 			}
-
 		}
 
 		zipOutputStream.flush();

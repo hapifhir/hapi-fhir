@@ -6,12 +6,20 @@ import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
-import ca.uhn.fhir.test.BaseTest;
-import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.ParseException;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.IdType;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -30,32 +38,48 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-public abstract class BaseHeaderPassthroughOptionTests extends BaseTest {
-
+@ExtendWith(MockitoExtension.class)
+public class HeaderPassthroughOptionTest {
+	final String FHIR_VERSION = "r4";
+	private FhirContext myCtx = FhirContext.forR4();
+	private Server myServer;
+	private int myPort;
 	private final String headerKey1 = "test-header-key-1";
 	private final String headerValue1 = "test header value-1";
 	private static final String myConceptsFileName = "target/concepts.csv";
 	private static File myConceptsFile = new File(myConceptsFileName);
 	private static final String myHierarchyFileName = "target/hierarchy.csv";
 	private static File myHierarchyFile = new File(myHierarchyFileName);
-
 	private final CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 	private final UploadTerminologyCommand testedCommand =
 		new RequestCapturingUploadTerminologyCommand(myCapturingInterceptor);
 
-	public void beforeEach(FhirContext theFhirCtx, ITermLoaderSvc myTermLoaderSvc,
-								  RestfulServerExtension myRestfulServerExtension) throws IOException {
-		TerminologyUploaderProvider provider = new TerminologyUploaderProvider(theFhirCtx, myTermLoaderSvc);
-		myRestfulServerExtension.registerProvider(provider);
+	@Mock
+	protected ITermLoaderSvc myTermLoaderSvc;
+
+	@BeforeEach
+	public void beforeEach() throws Exception {
+		myServer = new Server(0);
+		TerminologyUploaderProvider provider = new TerminologyUploaderProvider(myCtx, myTermLoaderSvc);
+		ServletHandler proxyHandler = new ServletHandler();
+		RestfulServer servlet = new RestfulServer(myCtx);
+		servlet.registerProvider(provider);
+		ServletHolder servletHolder = new ServletHolder(servlet);
+		proxyHandler.addServletWithMapping(servletHolder, "/*");
+		myServer.setHandler(proxyHandler);
+		JettyUtil.startServer(myServer);
+		myPort = JettyUtil.getPortForStartedServer(myServer);
+		writeConceptAndHierarchyFiles();
 		when(myTermLoaderSvc.loadCustom(eq("http://foo"), anyList(), any()))
 			.thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
 	}
 
-	protected void oneHeader(String fhirVersion, int thePort) throws Exception {
+	@Test
+	public void oneHeader() throws Exception {
 		String[] args = new String[] {
-			"-v", fhirVersion,
+			"-v", FHIR_VERSION,
 			"-m", "SNAPSHOT",
-			"-t", "http://localhost:" + thePort,
+			"-t", "http://localhost:" + myPort,
 			"-u", "http://foo",
 			"-d", myConceptsFileName,
 			"-d", myHierarchyFileName,
@@ -75,20 +99,20 @@ public abstract class BaseHeaderPassthroughOptionTests extends BaseTest {
 		assertThat(allHeaders.get(headerKey1), hasItems(headerValue1));
 	}
 
-	protected void twoHeadersSameKey(String fhirVersion, int thePort) throws Exception {
+	@Test
+	public void twoHeadersSameKey() throws Exception {
 		final String headerValue2 = "test header value-2";
 
 		String[] args = new String[] {
-			"-v", fhirVersion,
+			"-v", FHIR_VERSION,
 			"-m", "SNAPSHOT",
-			"-t", "http://localhost:" + thePort,
+			"-t", "http://localhost:" + myPort,
 			"-u", "http://foo",
 			"-d", myConceptsFileName,
 			"-d", myHierarchyFileName,
 			"-hp", "\"" + headerKey1 + ":" + headerValue1 + "\"",
 			"-hp", "\"" + headerKey1 + ":" + headerValue2 + "\""
 		};
-
 
 		final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
 		testedCommand.run(commandLine);
@@ -105,14 +129,15 @@ public abstract class BaseHeaderPassthroughOptionTests extends BaseTest {
 		assertEquals(headerValue2, allHeaders.get(headerKey1).get(1));
 	}
 
-	protected void twoHeadersDifferentKeys(String fhirVersion, int thePort) throws Exception {
+	@Test
+	public void twoHeadersDifferentKeys() throws Exception {
 		final String headerKey2 = "test-header-key-2";
 		final String headerValue2 = "test header value-2";
 
 		String[] args = new String[] {
-			"-v", fhirVersion,
+			"-v", FHIR_VERSION,
 			"-m", "SNAPSHOT",
-			"-t", "http://localhost:" + thePort,
+			"-t", "http://localhost:" + myPort,
 			"-u", "http://foo",
 			"-d", myConceptsFileName,
 			"-d", myHierarchyFileName,
@@ -136,7 +161,7 @@ public abstract class BaseHeaderPassthroughOptionTests extends BaseTest {
 		assertThat(allHeaders.get(headerKey2), hasItems(headerValue2));
 	}
 
-	public synchronized void writeConceptAndHierarchyFiles() throws IOException {
+	private synchronized void writeConceptAndHierarchyFiles() throws IOException {
 		if (!myConceptsFile.exists()) {
 			try (FileWriter w = new FileWriter(myConceptsFile, false)) {
 				w.append("CODE,DISPLAY\n");
