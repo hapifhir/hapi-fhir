@@ -262,6 +262,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		entity.setCreatedByMatchUrl(theIfNoneExist);
 		entity.setVersion(1);
 
+		//FIXME GGG is this possibly where we are fetching the thing?
 		if (isNotBlank(theIfNoneExist)) {
 			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theIfNoneExist, myResourceType, theTransactionDetails, theRequest);
 			if (match.size() > 1) {
