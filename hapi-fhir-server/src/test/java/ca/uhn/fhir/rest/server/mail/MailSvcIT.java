@@ -6,6 +6,7 @@ import com.icegreen.greenmail.util.ServerSetupTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.simplejavamail.MailException;
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.email.EmailBuilder;
 
@@ -25,7 +26,7 @@ public class MailSvcIT {
 	private static final String BODY = "Email Body !!!";
 
 	@RegisterExtension
-	static GreenMailExtension greenMail = new GreenMailExtension(ServerSetupTest.SMTP);
+	static GreenMailExtension ourGreenMail = new GreenMailExtension(ServerSetupTest.SMTP);
 
 	private MailSvc fixture;
 
@@ -42,8 +43,8 @@ public class MailSvcIT {
 		// execute
 		fixture.sendMail(mailConfig, email);
 		// validate
-		assertTrue(greenMail.waitForIncomingEmail(1000, 1));
-		final MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
+		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 1));
+		final MimeMessage[] receivedMessages = ourGreenMail.getReceivedMessages();
 		assertEquals(1, receivedMessages.length);
 		assertEquals(SUBJECT, receivedMessages[0].getSubject());
 		assertEquals(BODY, GreenMailUtil.getBody(receivedMessages[0]));
@@ -57,8 +58,8 @@ public class MailSvcIT {
 		// execute
 		fixture.sendMail(mailConfig, emails);
 		// validate
-		assertTrue(greenMail.waitForIncomingEmail(1000, emails.size()));
-		final MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
+		assertTrue(ourGreenMail.waitForIncomingEmail(1000, emails.size()));
+		final MimeMessage[] receivedMessages = ourGreenMail.getReceivedMessages();
 		assertEquals(emails.size(), receivedMessages.length);
 		assertEquals(SUBJECT, receivedMessages[0].getSubject());
 		assertEquals(BODY, GreenMailUtil.getBody(receivedMessages[0]));
@@ -76,8 +77,8 @@ public class MailSvcIT {
 		// execute
 		fixture.sendMail(mailConfig, email);
 		// validate
-		assertTrue(greenMail.waitForIncomingEmail(1000, 0));
-		final MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
+		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 0));
+		final MimeMessage[] receivedMessages = ourGreenMail.getReceivedMessages();
 		assertEquals(0, receivedMessages.length);
 	}
 
@@ -89,9 +90,12 @@ public class MailSvcIT {
 		// execute
 		fixture.sendMail(mailConfig, email,
 			() -> fail("Should not execute on Success"),
-			(e) -> assertEquals("Invalid TO address: " + email, e.getMessage()));
+			(e) -> {
+				assertTrue(e instanceof MailException);
+				assertEquals("Invalid TO address: " + email, e.getMessage());
+			});
 		// validate
-		assertTrue(greenMail.waitForIncomingEmail(1000, 0));
+		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 0));
 	}
 
 	private MailConfig withMailConfig() {

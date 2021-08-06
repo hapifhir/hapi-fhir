@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server.mail;
 
 import org.apache.commons.lang3.Validate;
+import org.simplejavamail.MailException;
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.api.email.Recipient;
 import org.simplejavamail.api.mailer.AsyncResponse;
@@ -49,15 +50,13 @@ public class MailSvc {
 		Validate.notNull(theOnSuccess);
 		Validate.notNull(theErrorHandler);
 		try {
-			theMailer.validate(theEmail);
-		} catch (Exception e) {
+			final AsyncResponse asyncResponse = theMailer.sendMail(theEmail, true);
+			if (asyncResponse != null) {
+				asyncResponse.onSuccess(theOnSuccess);
+				asyncResponse.onException(theErrorHandler);
+			}
+		} catch (MailException e) {
 			theErrorHandler.accept(e);
-			return;
-		}
-		final AsyncResponse asyncResponse = theMailer.sendMail(theEmail, true);
-		if (asyncResponse != null) {
-			asyncResponse.onSuccess(theOnSuccess);
-			asyncResponse.onException(theErrorHandler);
 		}
 	}
 
@@ -76,7 +75,7 @@ public class MailSvc {
 	@Nonnull
 	private String makeMessage(@Nonnull Email theEmail) {
 		return " with subject [" + theEmail.getSubject() + "] and recipients ["
-			+ theEmail.getRecipients().stream().map(Recipient::getAddress).collect(Collectors.joining(", ")) + "]";
+			+ theEmail.getRecipients().stream().map(Recipient::getAddress).collect(Collectors.joining(",")) + "]";
 	}
 
 	private class OnSuccess implements Runnable {
