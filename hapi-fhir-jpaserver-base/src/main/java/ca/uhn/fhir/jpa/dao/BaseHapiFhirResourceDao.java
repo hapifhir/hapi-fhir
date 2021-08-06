@@ -1627,6 +1627,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				entity = myEntityManager.find(ResourceTable.class, pid.getId());
 				resourceId = entity.getIdDt();
 			} else {
+				//FIXME JUAN: This is where the actual resource is replaced with a contained version in the create test. The update test correctly
+				//keeps this as a URN:UUID reference for now.
 				DaoMethodOutcome outcome = create(resource, null, thePerformIndexing, theTransactionDetails, theRequest);
 
 				// Pre-cache the match URL
