@@ -908,12 +908,6 @@
 			</dependency>
 			<dependency>
 				<groupId>com.icegreen</groupId>
-				<artifactId>greenmail-spring</artifactId>
-				<version>1.6.4</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>com.icegreen</groupId>
 				<artifactId>greenmail-junit5</artifactId>
 				<version>1.6.4</version>
 				<scope>test</scope>
@@ -978,11 +972,6 @@
 				<groupId>com.sun.activation</groupId>
 				<artifactId>jakarta.activation</artifactId>
 				<version>2.0.0</version>
-			</dependency>
-			<dependency>
-				<groupId>com.sun.mail</groupId>
-				<artifactId>javax.mail</artifactId>
-				<version>1.6.1</version>
 			</dependency>
             <dependency>
                 <groupId>com.vladsch.flexmark</groupId>
@@ -1130,11 +1119,6 @@
 				<groupId>com.microsoft.sqlserver</groupId>
 				<artifactId>mssql-jdbc</artifactId>
 				<version>9.2.1.jre8</version>
-			</dependency>
-			<dependency>
-				<groupId>javax.mail</groupId>
-				<artifactId>javax.mail-api</artifactId>
-				<version>1.6.0</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet</groupId>
@@ -1800,17 +1784,7 @@
 				<artifactId>spring-websocket</artifactId>
 				<version>${spring_version}</version>
 			</dependency>
-            <dependency>
-                <groupId>org.springframework.batch</groupId>
-                <artifactId>spring-batch-core</artifactId>
-                <version>${spring_batch_version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.batch</groupId>
-                <artifactId>spring-batch-infrastructure</artifactId>
-                <version>${spring_batch_version}</version>
-            </dependency>
-            <dependency>
+			<dependency>
 				<groupId>org.springframework.retry</groupId>
 				<artifactId>spring-retry</artifactId>
 				<version>${spring_retry_version}</version>
