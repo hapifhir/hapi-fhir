@@ -1012,7 +1012,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		//Post the Bundle containing a conditional POST with an identical patient from the above resource.
 		Bundle request = loadResourceFromClasspath(Bundle.class, "/r4/transaction-no-contained-2.json");
+
 		Bundle outcome = mySystemDao.transaction(mySrd, request);
+
 		IdType taskId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
 		Task task = myTaskDao.read(taskId, mySrd);
 
