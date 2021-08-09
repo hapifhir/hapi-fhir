@@ -2139,7 +2139,7 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.6</version>
+					<version>0.8.7</version>
 					<configuration>
 						<excludes>
 							<exclude>ca/uhn/fhir/model/dstu2/**/*.class</exclude>
@@ -2579,6 +2579,12 @@
 							<goal>prepare-agent</goal>
 						</goals>
 					</execution>
+<!--					<execution>-->
+<!--						<id>default-prepare-integration-agent</id>-->
+<!--						<goals>-->
+<!--							<goal>prepare-agent-integration</goal>-->
+<!--						</goals>-->
+<!--					</execution>-->
 				</executions>
 			</plugin>
 		</plugins>
