@@ -20,19 +20,38 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.email;
  * #L%
  */
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.simplejavamail.api.email.Email;
+import org.simplejavamail.email.EmailBuilder;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring5.SpringTemplateEngine;
+import org.thymeleaf.spring5.dialect.SpringStandardDialect;
+import org.thymeleaf.templatemode.TemplateMode;
+import org.thymeleaf.templateresolver.StringTemplateResolver;
 
+import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class EmailDetails {
+	private final SpringTemplateEngine myTemplateEngine;
+	private final Context myContext;
+
 	private String mySubjectTemplate;
 	private String myBodyTemplate;
 	private List<String> myTo;
 	private String myFrom;
 	private IIdType mySubscription;
 
-	public String getBodyTemplate() {
-		return myBodyTemplate;
+	public EmailDetails() {
+		myTemplateEngine = makeTemplateEngine();
+		myContext = new Context();
+	}
+
+	public String getBody() {
+		return myTemplateEngine.process(myBodyTemplate, myContext);
 	}
 
 	public void setBodyTemplate(String theBodyTemplate) {
@@ -40,35 +59,65 @@ public class EmailDetails {
 	}
 
 	public String getFrom() {
-		return myFrom;
+		return StringUtils.trim(myFrom);
 	}
 
 	public void setFrom(String theFrom) {
 		myFrom = theFrom;
 	}
 
-	public String getSubjectTemplate() {
-		return mySubjectTemplate;
+	public String getSubject() {
+		return myTemplateEngine.process(mySubjectTemplate, myContext);
 	}
 
 	public void setSubjectTemplate(String theSubjectTemplate) {
 		mySubjectTemplate = theSubjectTemplate;
 	}
 
-	public IIdType getSubscription() {
-		return mySubscription;
+	public String getSubscriptionId() {
+		return mySubscription.toUnqualifiedVersionless().getValue();
 	}
 
 	public void setSubscription(IIdType theSubscription) {
 		mySubscription = theSubscription;
 	}
 
-	public List<String> getTo() {
-		return myTo;
+	public String getTo() {
+		return myTo.stream().filter(StringUtils::isNotBlank).collect(Collectors.joining(","));
 	}
 
 	public void setTo(List<String> theTo) {
 		myTo = theTo;
+	}
+
+	public Email toEmail() {
+		try {
+			return EmailBuilder.startingBlank()
+				.from(getFrom())
+				.to(getTo())
+				.withSubject(getSubject())
+				.withPlainText(getBody())
+				.withHeader("X-FHIR-Subscription", getSubscriptionId())
+				.buildEmail();
+		} catch (IllegalArgumentException e) {
+			throw new InternalErrorException("Failed to create email message", e);
+		}
+	}
+
+	@Nonnull
+	private SpringTemplateEngine makeTemplateEngine() {
+		StringTemplateResolver stringTemplateResolver = new StringTemplateResolver();
+		stringTemplateResolver.setTemplateMode(TemplateMode.TEXT);
+
+		SpringStandardDialect springStandardDialect = new SpringStandardDialect();
+		springStandardDialect.setEnableSpringELCompiler(true);
+
+		SpringTemplateEngine springTemplateEngine = new SpringTemplateEngine();
+		springTemplateEngine.setDialect(springStandardDialect);
+		springTemplateEngine.setEnableSpringELCompiler(true);
+		springTemplateEngine.setTemplateResolver(stringTemplateResolver);
+
+		return springTemplateEngine;
 	}
 
 }
