@@ -48,16 +48,17 @@ public class EmailSenderImplTest {
 
 		MimeMessage[] messages = ourGreenMail.getReceivedMessages();
 		assertEquals(2, messages.length);
-		ourLog.info("Received: " + GreenMailUtil.getWholeMessage(messages[0]));
-		assertEquals("test subject", messages[0].getSubject());
-		assertEquals(1, messages[0].getFrom().length);
-		assertEquals("foo@example.com", ((InternetAddress) messages[0].getFrom()[0]).getAddress());
-		assertEquals(2, messages[0].getAllRecipients().length);
-		assertEquals("to1@example.com", ((InternetAddress) messages[0].getAllRecipients()[0]).getAddress());
-		assertEquals("to2@example.com", ((InternetAddress) messages[0].getAllRecipients()[1]).getAddress());
-		assertEquals(1, messages[0].getHeader("Content-Type").length);
-		assertEquals("text/plain; charset=UTF-8", messages[0].getHeader("Content-Type")[0]);
-		String foundBody = GreenMailUtil.getBody(messages[0]);
+		final MimeMessage message = messages[0];
+		ourLog.info("Received: " + GreenMailUtil.getWholeMessage(message));
+		assertEquals("test subject", message.getSubject());
+		assertEquals(1, message.getFrom().length);
+		assertEquals("foo@example.com", ((InternetAddress) message.getFrom()[0]).getAddress());
+		assertEquals(2, message.getAllRecipients().length);
+		assertEquals("to1@example.com", ((InternetAddress) message.getAllRecipients()[0]).getAddress());
+		assertEquals("to2@example.com", ((InternetAddress) message.getAllRecipients()[1]).getAddress());
+		assertEquals(1, message.getHeader("Content-Type").length);
+		assertEquals("text/plain; charset=UTF-8", message.getHeader("Content-Type")[0]);
+		String foundBody = GreenMailUtil.getBody(message);
 		assertEquals("foo", foundBody);
 	}
 
