@@ -36,15 +36,7 @@ public class EmailSenderImpl implements IEmailSender {
 	private MailSvc myMailSvc = new MailSvc();
 	private MailConfig myMailConfig;
 
-	public EmailSenderImpl() {
-		this(new MailConfig().setSmtpHostname("localhost").setSmtpPort(25));
-	}
-
 	public EmailSenderImpl(@Nonnull MailConfig theMailConfig) {
-		setMailConfig(theMailConfig);
-	}
-
-	public void setMailConfig(@Nonnull MailConfig theMailConfig) {
 		Validate.notNull(theMailConfig);
 		myMailConfig = theMailConfig;
 	}
