@@ -1,4 +1,4 @@
 ---
 type: add
 issue: 2852
-title: "Replace current send mail code with SimpleJavaMail library."
+title: "Replace existing email implementation code with SimpleJavaMail library."
