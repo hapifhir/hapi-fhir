@@ -76,19 +76,19 @@ public final class MdmResourceUtil {
 		return theBaseResource.getMeta().getTag(theSystem, theCode) != null;
 	}
 
-	private static boolean resourceHasTagWithSystem(IBaseResource theBaseResource, String theSystem) {
+	private static boolean resourceHasTagWithSystem(IBaseResource theBaseResource, @Nonnull String theSystem) {
 		if (theBaseResource == null) {
 			return false;
 		}
-		return theBaseResource.getMeta().getTag().stream().anyMatch(tag -> tag.getSystem().equalsIgnoreCase(theSystem));
+		return theBaseResource.getMeta().getTag().stream().anyMatch(tag -> theSystem.equalsIgnoreCase(tag.getSystem()));
 	}
 
-	private static Optional<? extends IBaseCoding> getTagWithSystem(IBaseResource theResource, String theSystem) {
-		return theResource.getMeta().getTag().stream().filter(tag -> tag.getSystem().equalsIgnoreCase(theSystem)).findFirst();
+	private static Optional<? extends IBaseCoding> getTagWithSystem(IBaseResource theResource, @Nonnull String theSystem) {
+		return theResource.getMeta().getTag().stream().filter(tag -> theSystem.equalsIgnoreCase(tag.getSystem())).findFirst();
 	}
 
-	public static void removeTagWithSystem(IBaseResource theResource, String theSystem) {
-		theResource.getMeta().getTag().removeIf(tag -> tag.getSystem().equalsIgnoreCase(theSystem));
+	public static void removeTagWithSystem(IBaseResource theResource, @Nonnull String theSystem) {
+		theResource.getMeta().getTag().removeIf(tag -> theSystem.equalsIgnoreCase(tag.getSystem()));
 	}
 
 	/**
