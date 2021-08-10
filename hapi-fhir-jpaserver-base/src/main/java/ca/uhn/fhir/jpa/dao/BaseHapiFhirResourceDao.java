@@ -262,7 +262,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		entity.setCreatedByMatchUrl(theIfNoneExist);
 		entity.setVersion(1);
 
-		//FIXME GGG is this possibly where we are fetching the thing?
 		if (isNotBlank(theIfNoneExist)) {
 			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theIfNoneExist, myResourceType, theTransactionDetails, theRequest);
 			if (match.size() > 1) {
@@ -279,7 +278,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				};
 
 				Supplier<IIdType> idSupplier = () -> {
-					return myTxTemplate.execute(tx -> {
+					myTxTemplate.execute(tx -> {
 						IIdType retVal = myIdHelperService.translatePidIdToForcedId(myFhirContext, myResourceName, pid);
 						if (!retVal.hasVersionIdPart()) {
 							IIdType idWithVersion = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getIdAsLong());
