@@ -1029,11 +1029,12 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		mySystemDao.transaction(mySrd, request);
 
 		// Run a second time (no conditional update)
+		request = loadResourceFromClasspath(Bundle.class, "/r4/transaction-no-contained.json");
 		Bundle outcome = mySystemDao.transaction(mySrd, request);
 
 		ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
-		IdType communicationId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
+		IdType communicationId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
 		Communication communication = myCommunicationDao.read(communicationId, mySrd);
 		assertThat(communication.getSubject().getReference(), matchesPattern("Patient/[0-9]+"));
 
