@@ -1,11 +1,12 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
-import ca.uhn.fhir.jpa.subscription.match.deliver.email.JavaMailEmailSender;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.rest.server.mail.MailConfig;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -132,10 +133,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 
 	@Bean
 	public IEmailSender emailSender() {
-		JavaMailEmailSender retVal = new JavaMailEmailSender();
-		retVal.setSmtpServerHostname("localhost");
-		retVal.setSmtpServerPort(3025);
-		return retVal;
+		return new EmailSenderImpl(new MailConfig().setSmtpHostname("localhost").setSmtpPort(3025));
 	}
 
 	@Override
