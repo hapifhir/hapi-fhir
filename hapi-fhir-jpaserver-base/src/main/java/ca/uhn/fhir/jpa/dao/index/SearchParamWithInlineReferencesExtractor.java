@@ -129,6 +129,7 @@ public class SearchParamWithInlineReferencesExtractor {
 			partitionId = RequestPartitionId.allPartitions();
 		}
 
+		//THIS IS THE NEW SPOT
 		mySearchParamExtractorService.extractFromResource(partitionId, theRequest, theParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference);
 
 		Set<Map.Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).entrySet();

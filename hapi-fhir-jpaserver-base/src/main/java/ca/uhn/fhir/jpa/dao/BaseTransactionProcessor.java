@@ -791,6 +791,8 @@ public abstract class BaseTransactionProcessor {
 						String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
 						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
 						outcome = resourceDao.create(res, matchUrl, false, theTransactionDetails, theRequest);
+						// IS THIS THE MAGIC SAUCE?
+					 	res.setId(outcome.getId());
 						if (nextResourceId != null) {
 							handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequest);
 						}
@@ -865,7 +867,6 @@ public abstract class BaseTransactionProcessor {
 								matchUrl = parts.getResourceType();
 							}
 							matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
-							//TODO FIXME GGG This update call comes back with a contained resource.
 							outcome = resourceDao.update(res, matchUrl, false, false, theRequest, theTransactionDetails);
 							if (Boolean.TRUE.equals(outcome.getCreated())) {
 								conditionalRequestUrls.put(matchUrl, res.getClass());
