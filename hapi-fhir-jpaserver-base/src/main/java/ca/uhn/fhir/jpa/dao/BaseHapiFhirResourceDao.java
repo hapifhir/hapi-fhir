@@ -278,7 +278,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				};
 
 				Supplier<IIdType> idSupplier = () -> {
-					myTxTemplate.execute(tx -> {
+					return myTxTemplate.execute(tx -> {
 						IIdType retVal = myIdHelperService.translatePidIdToForcedId(myFhirContext, myResourceName, pid);
 						if (!retVal.hasVersionIdPart()) {
 							IIdType idWithVersion = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getIdAsLong());
@@ -1626,8 +1626,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				entity = myEntityManager.find(ResourceTable.class, pid.getId());
 				resourceId = entity.getIdDt();
 			} else {
-				//FIXME JUAN: This is where the actual resource is replaced with a contained version in the create test. The update test correctly
-				//keeps this as a URN:UUID reference for now.
 				DaoMethodOutcome outcome = create(resource, null, thePerformIndexing, theTransactionDetails, theRequest);
 
 				// Pre-cache the match URL

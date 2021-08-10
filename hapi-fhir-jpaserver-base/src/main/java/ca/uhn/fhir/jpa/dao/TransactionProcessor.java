@@ -41,7 +41,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
-import org.apache.jena.ext.com.google.common.base.Optional;
 import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -68,6 +67,7 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -223,7 +223,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 						if (param instanceof TokenParam) {
 							Predicate hashPredicate = buildHashPredicateFromTokenParam((TokenParam)param, requestPartitionId, cb, from, next);
 
-							//Some partition witchcraft
 							if (hashPredicate != null) {
 								if (myPartitionSettings.isPartitioningEnabled() && !myPartitionSettings.isIncludePartitionInSearchHashes()) {
 									if (requestPartitionId.isDefaultPartition()) {
@@ -251,13 +250,11 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					List<ResourceIndexedSearchParamToken> results = query.getResultList();
 
 					for (ResourceIndexedSearchParamToken nextResult : results) {
-						Optional<MatchUrlToResolve> matchedSearch = Optional
-							.fromNullable(hashToSearchMap.get(nextResult.getHashSystemAndValue()))
-							.or(Optional.fromNullable(hashToSearchMap.get(nextResult.getHashValue())));
-
-						if (matchedSearch.isPresent()) {
-							setSearchToResolvedAndPrefetchFoundResourcePid(theTransactionDetails, idsToPreFetch, nextResult, matchedSearch.get());
+						Optional<MatchUrlToResolve> matchedSearch = Optional.ofNullable(hashToSearchMap.get(nextResult.getHashSystemAndValue()));
+						if (!matchedSearch.isPresent()) {
+							matchedSearch =  Optional.ofNullable(hashToSearchMap.get(nextResult.getHashValue()));
 						}
+						matchedSearch.ifPresent(matchUrlToResolve -> setSearchToResolvedAndPrefetchFoundResourcePid(theTransactionDetails, idsToPreFetch, nextResult, matchUrlToResolve));
 					}
 					//For each SP Map which did not return a result, tag it as not found.
 					searchParameterMapsToResolve.stream()

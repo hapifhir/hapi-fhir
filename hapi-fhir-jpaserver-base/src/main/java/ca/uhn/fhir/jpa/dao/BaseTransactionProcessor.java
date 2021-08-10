@@ -791,7 +791,6 @@ public abstract class BaseTransactionProcessor {
 						String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
 						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
 						outcome = resourceDao.create(res, matchUrl, false, theTransactionDetails, theRequest);
-						// IS THIS THE MAGIC SAUCE?
 					 	res.setId(outcome.getId());
 						if (nextResourceId != null) {
 							handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequest);
@@ -1013,7 +1012,7 @@ public abstract class BaseTransactionProcessor {
 
 			for (IIdType next : theAllIds) {
 				IIdType replacement = theIdSubstitutions.get(next);
-				if (replacement != null && replacement.equals(next)) {
+				if (replacement != null && !replacement.equals(next)) {
 					ourLog.debug("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
 				}
 			}
@@ -1123,7 +1122,6 @@ public abstract class BaseTransactionProcessor {
 					IIdType targetId = resourceReference.getResource().getIdElement();
 					if (targetId.getValue() == null || targetId.getValue().startsWith("#")) {
 						// This means it's a contained resource
-						ourLog.error("THIS THING ISN'T CONTAINED! WHY IS IT CONTAINED!!! ");
 						continue;
 					} else if (theIdSubstitutions.containsValue(targetId)) {
 						newId = targetId;
