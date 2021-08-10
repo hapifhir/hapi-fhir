@@ -1,61 +1,64 @@
 package ca.uhn.fhir.rest.server.mail;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class MailConfig {
-	private String smtpHostname;
-	private Integer smtpPort;
-	private String smtpUsername;
-	private String smtpPassword;
-	private boolean smtpUseStartTLS;
+	private String mySmtpHostname;
+	private Integer mySmtpPort;
+	private String mySmtpUsername;
+	private String mySmtpPassword;
+	private boolean mySmtpUseStartTLS;
 
 	public MailConfig() {
 	}
 
 	public String getSmtpHostname() {
-		return smtpHostname;
+		return mySmtpHostname;
 	}
 
 	public MailConfig setSmtpHostname(String theSmtpHostname) {
-		smtpHostname = theSmtpHostname;
+		mySmtpHostname = theSmtpHostname;
 		return this;
 	}
 
 	public Integer getSmtpPort() {
-		return smtpPort;
+		return mySmtpPort;
 	}
 
 	public MailConfig setSmtpPort(Integer theSmtpPort) {
-		smtpPort = theSmtpPort;
+		mySmtpPort = theSmtpPort;
 		return this;
 	}
 
 	public String getSmtpUsername() {
-		return smtpUsername;
+		return mySmtpUsername;
 	}
 
 	public MailConfig setSmtpUsername(String theSmtpUsername) {
-		smtpUsername = theSmtpUsername;
+		// SimpleJavaMail treats empty smtp username as valid username and requires auth
+		mySmtpUsername = StringUtils.isBlank(theSmtpUsername) ? null : theSmtpUsername;
 		return this;
 	}
 
 	public String getSmtpPassword() {
-		return smtpPassword;
+		return mySmtpPassword;
 	}
 
 	public MailConfig setSmtpPassword(String theSmtpPassword) {
-		smtpPassword = theSmtpPassword;
+		// SimpleJavaMail treats empty smtp password as valid password and requires auth
+		mySmtpPassword = StringUtils.isBlank(theSmtpPassword) ? null : theSmtpPassword;
 		return this;
 	}
 
 	public boolean isSmtpUseStartTLS() {
-		return smtpUseStartTLS;
+		return mySmtpUseStartTLS;
 	}
 
 	public MailConfig setSmtpUseStartTLS(boolean theSmtpUseStartTLS) {
-		smtpUseStartTLS = theSmtpUseStartTLS;
+		mySmtpUseStartTLS = theSmtpUseStartTLS;
 		return this;
 	}
 
