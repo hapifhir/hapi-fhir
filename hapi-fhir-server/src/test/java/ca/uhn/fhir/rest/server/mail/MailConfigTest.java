@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -84,6 +85,24 @@ public class MailConfigTest {
 		assertEquals(fixture.hashCode(), other.hashCode());
 		assertNotEquals(fixture.toString(), other.toString());
 		assertNotEquals(fixture, null);
+	}
+
+	@Test
+	public void testSetSmtpUsername() {
+		// execute & validate
+		assertEquals("xyz", fixture.setSmtpUsername("xyz").getSmtpUsername());
+		assertNull(fixture.setSmtpUsername(null).getSmtpUsername());
+		assertNull(fixture.setSmtpUsername("").getSmtpUsername());
+		assertNull(fixture.setSmtpUsername("  ").getSmtpUsername());
+	}
+
+	@Test
+	public void testSetSmtpPassword() {
+		// execute & validate
+		assertEquals("xyz", fixture.setSmtpPassword("xyz").getSmtpPassword());
+		assertNull(fixture.setSmtpPassword(null).getSmtpPassword());
+		assertNull(fixture.setSmtpPassword("").getSmtpPassword());
+		assertNull(fixture.setSmtpPassword("  ").getSmtpPassword());
 	}
 
 }

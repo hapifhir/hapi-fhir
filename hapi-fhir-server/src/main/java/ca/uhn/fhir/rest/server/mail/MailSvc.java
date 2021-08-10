@@ -62,6 +62,9 @@ public class MailSvc {
 
 	@Nonnull
 	private Mailer makeMailer(@Nonnull MailConfig theMailConfig) {
+		ourLog.info("SMTP Mailer config Hostname:[{}] | Port:[{}] | Username:[{}] | TLS:[{}]",
+			theMailConfig.getSmtpHostname(), theMailConfig.getSmtpPort(),
+			theMailConfig.getSmtpUsername(), theMailConfig.isSmtpUseStartTLS());
 		return MailerBuilder
 			.withSMTPServer(
 				theMailConfig.getSmtpHostname(),
