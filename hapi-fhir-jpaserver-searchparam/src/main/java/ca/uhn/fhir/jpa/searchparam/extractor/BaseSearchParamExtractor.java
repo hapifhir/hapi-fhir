@@ -972,8 +972,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private boolean anySearchParameterUsesResolve(Collection<RuntimeSearchParam> searchParams, RestSearchParameterTypeEnum theSearchParamType) {
 		return searchParams.stream()
 			.filter(param -> param.getParamType() != theSearchParamType)
+			.map(RuntimeSearchParam::getPath)
 			.filter(Objects::nonNull)
-			.anyMatch(param -> param.getPath().contains("resolve"));
+			.anyMatch(path-> path.contains("resolve"));
 	}
 
 	/**
