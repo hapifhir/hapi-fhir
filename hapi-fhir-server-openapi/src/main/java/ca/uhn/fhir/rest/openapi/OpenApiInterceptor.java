@@ -283,7 +283,7 @@ public class OpenApiInterceptor {
 		context.setVariable("SERVER_VERSION", cs.getSoftware().getVersion());
 		context.setVariable("BASE_URL", cs.getImplementation().getUrl());
 		context.setVariable("BANNER_IMAGE_URL", getBannerImage());
-		context.setVariable("OPENAPI_DOCS", cs.getImplementation().getUrl() + "/api-docs");
+		context.setVariable("OPENAPI_DOCS", cs.getImplementation().getUrl() + "api-docs");
 		context.setVariable("FHIR_VERSION", cs.getFhirVersion().toCode());
 		context.setVariable("FHIR_VERSION_CODENAME", FhirVersionEnum.forVersionString(cs.getFhirVersion().toCode()).name());
 
