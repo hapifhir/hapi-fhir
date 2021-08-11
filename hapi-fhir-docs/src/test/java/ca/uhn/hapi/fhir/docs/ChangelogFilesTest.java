@@ -69,6 +69,9 @@ public class ChangelogFilesTest {
 			// this one is optional
 			fieldNames.remove("backport");
 
+			// this one is optional
+			fieldNames.remove("jira");
+
 			assertThat("Invalid element in " + next + ": " + fieldNames, fieldNames, empty());
 
 			if (haveIssue) {
