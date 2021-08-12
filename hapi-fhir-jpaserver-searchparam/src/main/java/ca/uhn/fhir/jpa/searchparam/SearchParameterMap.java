@@ -511,6 +511,14 @@ public class SearchParameterMap implements Serializable {
 			b.append(getSearchTotalMode().getCode());
 		}
 
+		//Contained mode
+		if (getSearchContainedMode() != null) {
+			addUrlParamSeparator(b);
+			b.append(Constants.PARAM_CONTAINED);
+			b.append("=");
+			b.append(getSearchContainedMode().getCode());
+		}
+
 		if (b.length() == 0) {
 			b.append('?');
 		}
