@@ -484,7 +484,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		    verifyLinguisticVariant(code.getDesignations(), "fr-CA", "Cellules de Purkinje cytoplasmique type 2 , IgG","Titre","Temps ponctuel","Sérum","Quantitatif","Immunofluorescence","Sérologie","","","","");
 		    verifyLinguisticVariant(code.getDesignations(), "zh-CN", "血流速度.收缩期.最大值","速度","时间点","大脑中动脉","定量型","超声.多普勒","产科学检查与测量指标.超声","","", "Cereb 动态 可用数量表示的;定量性;数值型;数量型;连续数值型标尺 大脑（Cerebral） 时刻;随机;随意;瞬间 术语\"cerebral\"指的是主要由中枢半球（大脑皮质和基底神经节）组成的那部分脑结构 流 流量;流速;流体 血;全血 血流量;血液流量 速度(距离/时间);速率;速率(距离/时间)","");
 		    code = concepts.get("17787-3");
-		    assertEquals(6, code.getDesignations().size());
+		    assertEquals(5, code.getDesignations().size());
 		    verifyConsumerName(code.getDesignations(), "Consumer Name 17787-3");
 		    verifyLinguisticVariant(code.getDesignations(), "de-AT", "","","","","","","","","","CoV OC43 RNA ql/SM P","Coronavirus OC43 RNA ql. /Sondermaterial PCR");
 		    verifyLinguisticVariant(code.getDesignations(), "fr-CA", "Virus respiratoire syncytial bovin","Présence-Seuil","Temps ponctuel","XXX","Ordinal","Culture spécifique à un microorganisme","Microbiologie","","","","");
@@ -986,7 +986,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	
 	private static void verifyDesignation(TermConceptDesignation theDesignation, String theUseSystem, String theUseCode, String theValue) {
 		if (theDesignation == null)
-			return;
+		   return;
 		assertEquals(theUseSystem, theDesignation.getUseSystem());
 		assertEquals(theUseCode, theDesignation.getUseCode());
 		assertEquals(theValue, theDesignation.getValue());
