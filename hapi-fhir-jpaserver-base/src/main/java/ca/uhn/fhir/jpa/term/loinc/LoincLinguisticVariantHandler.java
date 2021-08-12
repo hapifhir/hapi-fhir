@@ -70,16 +70,16 @@ public class LoincLinguisticVariantHandler implements IZipContentsHandlerCsv {
 		fullySpecifiedName.append(trimToEmpty(theRecord.get("SCALE_TYP") + ":"));
 		fullySpecifiedName.append(trimToEmpty(theRecord.get("METHOD_TYP")));
 		
-		String FullySpecifiedNameStr = fullySpecifiedName.toString();
+		String fullySpecifiedNameStr = fullySpecifiedName.toString();
 		
 		// skip if COMPONENT, PROPERTY, TIME_ASPCT, SYSTEM, SCALE_TYP and METHOD_TYP are all empty
-		if (!FullySpecifiedNameStr.equals(":::::")) {
+		if (!fullySpecifiedNameStr.equals(":::::")) {
 			concept.addDesignation()
 				.setLanguage(myLanguageCode)
 				.setUseSystem(ITermLoaderSvc.LOINC_URI)
 				.setUseCode("FullySpecifiedName")
 				.setUseDisplay("FullySpecifiedName")
-				.setValue(FullySpecifiedNameStr);
+				.setValue(fullySpecifiedNameStr);
 		}
 		
 		//-- other designations
