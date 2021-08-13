@@ -267,10 +267,17 @@ public class OpenApiInterceptor {
 		return false;
 	}
 
+	public String removeTrailingSlash(String theUrl) {
+		while(theUrl.endsWith("/")) {
+			theUrl = theUrl.substring(0, theUrl.length() - 1);
+		}
+		return theUrl;
+	}
+
 	@SuppressWarnings("unchecked")
 	private void serveSwaggerUiHtml(ServletRequestDetails theRequestDetails, HttpServletResponse theResponse) throws IOException {
 		CapabilityStatement cs = getCapabilityStatement(theRequestDetails);
-
+		String baseUrl = removeTrailingSlash(cs.getImplementation().getUrl());
 		theResponse.setStatus(200);
 		theResponse.setContentType(Constants.CT_HTML);
 
@@ -281,9 +288,9 @@ public class OpenApiInterceptor {
 		context.setVariable("DESCRIPTION", cs.getImplementation().getDescription());
 		context.setVariable("SERVER_NAME", cs.getSoftware().getName());
 		context.setVariable("SERVER_VERSION", cs.getSoftware().getVersion());
-		context.setVariable("BASE_URL", cs.getImplementation().getUrl());
+		context.setVariable("BASE_URL", baseUrl);
 		context.setVariable("BANNER_IMAGE_URL", getBannerImage());
-		context.setVariable("OPENAPI_DOCS", cs.getImplementation().getUrl() + "api-docs");
+		context.setVariable("OPENAPI_DOCS", baseUrl + "/api-docs");
 		context.setVariable("FHIR_VERSION", cs.getFhirVersion().toCode());
 		context.setVariable("FHIR_VERSION_CODENAME", FhirVersionEnum.forVersionString(cs.getFhirVersion().toCode()).name());
 

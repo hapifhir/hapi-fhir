@@ -195,6 +195,20 @@ public class OpenApiInterceptorTest {
 		assertThat(buttonTexts.toString(), buttonTexts, Matchers.contains("All", "System Level Operations", "OperationDefinition 1", "Observation", "Patient"));
 	}
 
+	@Test
+	public void testRemoveTrailingSlash() {
+		OpenApiInterceptor interceptor = new OpenApiInterceptor();
+		String url1 = interceptor.removeTrailingSlash("http://localhost:8000");
+		String url2 = interceptor.removeTrailingSlash("http://localhost:8000/");
+		String url3 = interceptor.removeTrailingSlash("http://localhost:8000//");
+		String expect = "http://localhost:8000";
+		assertEquals(expect, url1);
+		assertEquals(expect, url2);
+		assertEquals(expect, url3);
+	}
+
+
+
 	private String fetchSwaggerUi(String url) throws IOException {
 		String resp;
 		HttpGet get = new HttpGet(url);
