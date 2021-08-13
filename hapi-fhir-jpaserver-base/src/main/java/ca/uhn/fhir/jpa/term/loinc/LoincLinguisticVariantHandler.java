@@ -62,20 +62,25 @@ public class LoincLinguisticVariantHandler implements IZipContentsHandlerCsv {
         // LinguisticVariantDisplayName
 			
 		//-- add formalName designation
-		StringBuilder formalName = new StringBuilder();
-		formalName.append(trimToEmpty(theRecord.get("COMPONENT") + ":"));
-		formalName.append(trimToEmpty(theRecord.get("PROPERTY") + ":"));
-		formalName.append(trimToEmpty(theRecord.get("TIME_ASPCT") + ":"));
-		formalName.append(trimToEmpty(theRecord.get("SYSTEM") + ":"));
-		formalName.append(trimToEmpty(theRecord.get("SCALE_TYP") + ":"));
-		formalName.append(trimToEmpty(theRecord.get("METHOD_TYP")));
+		StringBuilder fullySpecifiedName = new StringBuilder();
+		fullySpecifiedName.append(trimToEmpty(theRecord.get("COMPONENT") + ":"));
+		fullySpecifiedName.append(trimToEmpty(theRecord.get("PROPERTY") + ":"));
+		fullySpecifiedName.append(trimToEmpty(theRecord.get("TIME_ASPCT") + ":"));
+		fullySpecifiedName.append(trimToEmpty(theRecord.get("SYSTEM") + ":"));
+		fullySpecifiedName.append(trimToEmpty(theRecord.get("SCALE_TYP") + ":"));
+		fullySpecifiedName.append(trimToEmpty(theRecord.get("METHOD_TYP")));
 		
-		concept.addDesignation()
-		  .setLanguage(myLanguageCode)
-		  .setUseSystem(ITermLoaderSvc.LOINC_URI)
-		  .setUseCode("FullySpecifiedName")
-	      .setUseDisplay("FullySpecifiedName")
-	      .setValue(formalName.toString());
+		String fullySpecifiedNameStr = fullySpecifiedName.toString();
+		
+		// skip if COMPONENT, PROPERTY, TIME_ASPCT, SYSTEM, SCALE_TYP and METHOD_TYP are all empty
+		if (!fullySpecifiedNameStr.equals(":::::")) {
+			concept.addDesignation()
+				.setLanguage(myLanguageCode)
+				.setUseSystem(ITermLoaderSvc.LOINC_URI)
+				.setUseCode("FullySpecifiedName")
+				.setUseDisplay("FullySpecifiedName")
+				.setValue(fullySpecifiedNameStr);
+		}
 		
 		//-- other designations
 		addDesignation(theRecord, concept, "SHORTNAME");
