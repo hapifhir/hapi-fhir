@@ -72,6 +72,7 @@ import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
@@ -92,6 +93,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
@@ -112,12 +114,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 
 public abstract class BaseTransactionProcessor {
 
@@ -146,6 +152,8 @@ public abstract class BaseTransactionProcessor {
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
+	private ThreadPoolTaskExecutor myExecutor ;
+	
 	@VisibleForTesting
 	public void setDaoConfig(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;
@@ -163,8 +171,14 @@ public abstract class BaseTransactionProcessor {
 	@PostConstruct
 	public void start() {
 		ourLog.trace("Starting transaction processor");
+		myExecutor = new ThreadPoolTaskExecutor();
+		myExecutor.setThreadNamePrefix("batch_transaction_get_");
+		myExecutor.setCorePoolSize(myDaoConfig.getBatchTransactionPoolSize());
+		myExecutor.setMaxPoolSize(myDaoConfig.getBatchTransactionMaxPoolSize());
+		myExecutor.setQueueCapacity(myDaoConfig.getBatchTransactionQueueCapacity());
+		myExecutor.initialize();
 	}
-
+	
 	public <BUNDLE extends IBaseBundle> BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest, boolean theNestedMode) {
 		if (theRequestDetails != null && theRequestDetails.getServer() != null && myDao != null) {
 			IServerInterceptor.ActionRequestDetails requestDetails = new IServerInterceptor.ActionRequestDetails(theRequestDetails, theRequest, "Bundle", null);
@@ -450,11 +464,15 @@ public abstract class BaseTransactionProcessor {
 		doTransactionWriteOperations(theRequestDetails, theActionName, transactionDetails, transactionStopWatch, response, originalRequestOrder, entries);
 
 		/*
-		 * Loop through the request and process any entries of type GET
+		 * Loop through the request and process any entries of type GET in parallel
 		 */
-		if (getEntries.size() > 0) {
-			transactionStopWatch.startTask("Process " + getEntries.size() + " GET entries");
+		int getEntriesSize = getEntries.size();
+		if (getEntriesSize > 0) {
+			transactionStopWatch.startTask("Process " + getEntriesSize + " GET entries");
 		}
+		
+		CountDownLatch completionLatch = new CountDownLatch(getEntriesSize);
+		
 		for (IBase nextReqEntry : getEntries) {
 
 			if (theNestedMode) {
@@ -464,55 +482,18 @@ public abstract class BaseTransactionProcessor {
 			if (!(theRequestDetails instanceof ServletRequestDetails)) {
 				throw new MethodNotAllowedException("Can not call transaction GET methods from this context");
 			}
-
-			ServletRequestDetails srd = (ServletRequestDetails) theRequestDetails;
+			
 			Integer originalOrder = originalRequestOrder.get(nextReqEntry);
 			IBase nextRespEntry = (IBase) myVersionAdapter.getEntries(response).get(originalOrder);
-
-			ArrayListMultimap<String, String> paramValues = ArrayListMultimap.create();
-
-			String transactionUrl = extractTransactionUrlOrThrowException(nextReqEntry, "GET");
-
-			ServletSubRequestDetails requestDetails = ServletRequestUtil.getServletSubRequestDetails(srd, transactionUrl, paramValues);
-
-			String url = requestDetails.getRequestPath();
-
-			BaseMethodBinding<?> method = srd.getServer().determineResourceMethod(requestDetails, url);
-			if (method == null) {
-				throw new IllegalArgumentException("Unable to handle GET " + url);
-			}
-
-			if (isNotBlank(myVersionAdapter.getEntryRequestIfMatch(nextReqEntry))) {
-				requestDetails.addHeader(Constants.HEADER_IF_MATCH, myVersionAdapter.getEntryRequestIfMatch(nextReqEntry));
-			}
-			if (isNotBlank(myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry))) {
-				requestDetails.addHeader(Constants.HEADER_IF_NONE_EXIST, myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry));
-			}
-			if (isNotBlank(myVersionAdapter.getEntryRequestIfNoneMatch(nextReqEntry))) {
-				requestDetails.addHeader(Constants.HEADER_IF_NONE_MATCH, myVersionAdapter.getEntryRequestIfNoneMatch(nextReqEntry));
-			}
-
-			Validate.isTrue(method instanceof BaseResourceReturningMethodBinding, "Unable to handle GET {}", url);
-			try {
-
-				BaseResourceReturningMethodBinding methodBinding = (BaseResourceReturningMethodBinding) method;
-				requestDetails.setRestOperationType(methodBinding.getRestOperationType());
-
-				IBaseResource resource = methodBinding.doInvokeServer(srd.getServer(), requestDetails);
-				if (paramValues.containsKey(Constants.PARAM_SUMMARY) || paramValues.containsKey(Constants.PARAM_CONTENT)) {
-					resource = filterNestedBundle(requestDetails, resource);
-				}
-				myVersionAdapter.setResource(nextRespEntry, resource);
-				myVersionAdapter.setResponseStatus(nextRespEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
-			} catch (NotModifiedException e) {
-				myVersionAdapter.setResponseStatus(nextRespEntry, toStatusString(Constants.STATUS_HTTP_304_NOT_MODIFIED));
-			} catch (BaseServerResponseException e) {
-				ourLog.info("Failure processing transaction GET {}: {}", url, e.toString());
-				myVersionAdapter.setResponseStatus(nextRespEntry, toStatusString(e.getStatusCode()));
-				populateEntryWithOperationOutcome(e, nextRespEntry);
-			}
-
+			
+			// Do the read in parallel
+			BundleTask bundleTask = new BundleTask(completionLatch, theRequestDetails, nextReqEntry, nextRespEntry);
+			myExecutor.submit(bundleTask);
 		}
+		
+		// waiting for all GET task completed
+		AsyncUtil.awaitLatchAndIgnoreInterrupt(completionLatch, 120L, TimeUnit.SECONDS);
+
 		transactionStopWatch.endCurrentTask();
 
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
@@ -1544,5 +1525,70 @@ public abstract class BaseTransactionProcessor {
 		return theStatusCode + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
 	}
 
+	public class BundleTask implements Callable<Void> {
+		
+		private CountDownLatch myCompletedLatch;
+		private ServletRequestDetails myRequestDetails;
+		private IBase myNextReqEntry;
+		private IBase myNextRespEntry; 
+		
+		protected BundleTask(CountDownLatch theCompletedLatch, RequestDetails theRequestDetails, IBase theNextReqEntry, IBase theNextRespEntry) {
+			this.myCompletedLatch = theCompletedLatch;
+			this.myRequestDetails = (ServletRequestDetails)theRequestDetails;
+			this.myNextReqEntry = theNextReqEntry;
+			this.myNextRespEntry = theNextRespEntry;			
+		}
+		
+		@Override
+		public Void call() {
+			
+			ArrayListMultimap<String, String> paramValues = ArrayListMultimap.create();
 
+			String transactionUrl = extractTransactionUrlOrThrowException(myNextReqEntry, "GET");
+
+			ServletSubRequestDetails requestDetails = ServletRequestUtil.getServletSubRequestDetails(myRequestDetails, transactionUrl, paramValues);
+
+			String url = requestDetails.getRequestPath();
+
+			BaseMethodBinding<?> method = myRequestDetails.getServer().determineResourceMethod(requestDetails, url);
+			if (method == null) {
+				throw new IllegalArgumentException("Unable to handle GET " + url);
+			}
+
+			if (isNotBlank(myVersionAdapter.getEntryRequestIfMatch(myNextReqEntry))) {
+				requestDetails.addHeader(Constants.HEADER_IF_MATCH, myVersionAdapter.getEntryRequestIfMatch(myNextReqEntry));
+			}
+			if (isNotBlank(myVersionAdapter.getEntryRequestIfNoneExist(myNextReqEntry))) {
+				requestDetails.addHeader(Constants.HEADER_IF_NONE_EXIST, myVersionAdapter.getEntryRequestIfNoneExist(myNextReqEntry));
+			}
+			if (isNotBlank(myVersionAdapter.getEntryRequestIfNoneMatch(myNextReqEntry))) {
+				requestDetails.addHeader(Constants.HEADER_IF_NONE_MATCH, myVersionAdapter.getEntryRequestIfNoneMatch(myNextReqEntry));
+			}
+
+			Validate.isTrue(method instanceof BaseResourceReturningMethodBinding, "Unable to handle GET {}", url);
+			try {
+
+				BaseResourceReturningMethodBinding methodBinding = (BaseResourceReturningMethodBinding) method;
+				requestDetails.setRestOperationType(methodBinding.getRestOperationType());
+
+				IBaseResource resource = methodBinding.doInvokeServer(myRequestDetails.getServer(), requestDetails);
+				if (paramValues.containsKey(Constants.PARAM_SUMMARY) || paramValues.containsKey(Constants.PARAM_CONTENT)) {
+					resource = filterNestedBundle(requestDetails, resource);
+				}
+				myVersionAdapter.setResource(myNextRespEntry, resource);
+				myVersionAdapter.setResponseStatus(myNextRespEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
+			} catch (NotModifiedException e) {
+				myVersionAdapter.setResponseStatus(myNextRespEntry, toStatusString(Constants.STATUS_HTTP_304_NOT_MODIFIED));
+			} catch (BaseServerResponseException e) {
+				ourLog.info("Failure processing transaction GET {}: {}", url, e.toString());
+				myVersionAdapter.setResponseStatus(myNextRespEntry, toStatusString(e.getStatusCode()));
+				populateEntryWithOperationOutcome(e, myNextRespEntry);
+			}
+			
+			// checking for the parallelism
+			ourLog.debug("processing bacth transaction read for {} is completed", myVersionAdapter.getEntryRequestUrl(myNextReqEntry));
+			myCompletedLatch.countDown();
+			return null;
+		}
+	}
 }

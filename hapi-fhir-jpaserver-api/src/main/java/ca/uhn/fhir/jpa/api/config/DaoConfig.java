@@ -259,6 +259,18 @@ public class DaoConfig {
 	private boolean myTriggerSubscriptionsForNonVersioningChanges;
 
 	/**
+	 * @since 5.6.0
+	 */
+	// Thread Pool size used by batch/transaction GET 
+	private static final int DEFAULT_BATCH_TRANSACTION_POOL_SIZE = 20;
+	private static final int DEFAULT_BATCH_TRANSACTION_MAX_POOL_SIZE = 100;
+	private static final int DEFAULT_BATCH_TRANSACTION_QUEUE_CAPACITY = 200;
+	
+	private Integer myBatchTransactionPoolSize = DEFAULT_BATCH_TRANSACTION_POOL_SIZE;
+	private Integer myBatchTransactionMaxPoolSize = DEFAULT_BATCH_TRANSACTION_MAX_POOL_SIZE;
+	private Integer myBatchTransactionQueueCapacity = DEFAULT_BATCH_TRANSACTION_QUEUE_CAPACITY;
+	
+	/**
 	 * Constructor
 	 */
 	public DaoConfig() {
@@ -2570,6 +2582,61 @@ public class DaoConfig {
 		myTriggerSubscriptionsForNonVersioningChanges = theTriggerSubscriptionsForNonVersioningChanges;
 	}
 
+	/**
+	 * Get the batch transaction thread pool size.
+	 * 
+	 * @since 5.6.0
+	 */
+	public Integer getBatchTransactionPoolSize() {
+		return myBatchTransactionPoolSize;
+	}
+
+	/**
+	 * Set the batch transaction thread pool size. The default is @see {@link #DEFAULT_BATCH_TRANSACTION_POOL_SIZE}
+	 * 
+	 * @since 5.6.0
+	 */
+	public void setBatchTransactionPoolSize(Integer theBatchTransactionPoolSize) {
+		this.myBatchTransactionPoolSize = theBatchTransactionPoolSize;
+	}
+	
+	/**
+	 * Get the batch transaction thread max pool size.
+	 * 
+	 * @since 5.6.0
+	 */
+	public Integer getBatchTransactionMaxPoolSize() {
+		return myBatchTransactionMaxPoolSize;
+	}
+	
+	/**
+	 * Set the batch transaction thread pool size. The default is @see {@link #DEFAULT_BATCH_TRANSACTION_MAX_POOL_SIZE}
+	 * 
+	 * @since 5.6.0
+	 */
+	public void setBatchTransactionMaxPoolSize(Integer theBatchTransactionMaxPoolSize) {
+		this.myBatchTransactionMaxPoolSize = theBatchTransactionMaxPoolSize;
+	}
+	
+	/**
+	 * Get the batch transaction thread pool queue capacity.
+	 * 
+	 * @since 5.6.0
+	 */
+	public Integer getBatchTransactionQueueCapacity() {
+		return myBatchTransactionQueueCapacity;
+	}
+	
+	/**
+	 * Set the batch transaction thread pool queue capacity. The default is @see {@link #DEFAULT_BATCH_TRANSACTION_QUEUE_CAPACITY}
+	 * 
+	 * @since 5.6.0
+	 */
+	public void setMyBatchTransactionQueueCapacity(Integer theBatchTransactionQueueCapacity) {
+		this.myBatchTransactionQueueCapacity = theBatchTransactionQueueCapacity;
+	}
+		
+	
 	public boolean canDeleteExpunge() {
 		return isAllowMultipleDelete() && isExpungeEnabled() && isDeleteExpungeEnabled();
 	}
@@ -2690,4 +2757,7 @@ public class DaoConfig {
 		INLINE
 
 	}
+
+
+
 }
