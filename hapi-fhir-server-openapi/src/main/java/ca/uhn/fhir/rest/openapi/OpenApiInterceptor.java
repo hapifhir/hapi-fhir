@@ -509,7 +509,7 @@ public class OpenApiInterceptor {
 				Operation operation = getPathItem(paths, "/" + resourceType, PathItem.HttpMethod.GET);
 				operation.addTagsItem(resourceType);
 				operation.setDescription("This is a search type");
-				operation.setSummary("search-type: Update an existing " + resourceType + " instance, or create using a client-assigned ID");
+				operation.setSummary("search-type: Search for " + resourceType + " instances");
 				addFhirResourceResponse(ctx, openApi, operation, null);
 
 				for (CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent nextSearchParam : nextResource.getSearchParam()) {
