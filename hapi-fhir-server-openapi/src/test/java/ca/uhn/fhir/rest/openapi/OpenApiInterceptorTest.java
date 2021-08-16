@@ -207,7 +207,12 @@ public class OpenApiInterceptorTest {
 		assertEquals(expect, url3);
 	}
 
-
+	@Test
+	public void testRemoveTrailingSlashWithNullUrl() {
+		OpenApiInterceptor interceptor = new OpenApiInterceptor();
+		String url = interceptor.removeTrailingSlash(null);
+		assertEquals(null, url);
+	}
 
 	private String fetchSwaggerUi(String url) throws IOException {
 		String resp;
