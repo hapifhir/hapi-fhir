@@ -473,30 +473,23 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		// defaults to true
 		boolean isMakeVersionCurrent = theRequestDetails == null ||
 			(boolean) theRequestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
+
 		if (isMakeVersionCurrent) {
-			makeCodeSystemCurrentVersion(codeSystem, codeSystemToStore, conceptsToSave, totalCodeCount);
+			codeSystem.setCurrentVersion(codeSystemToStore);
+			if (codeSystem.getPid() == null) {
+				codeSystem = myCodeSystemDao.saveAndFlush(codeSystem);
+			}
 		}
 
-	}
-
-
-	private void makeCodeSystemCurrentVersion(TermCodeSystem theCodeSystem, TermCodeSystemVersion theCodeSystemToStore,
-			Collection<TermConcept> theConceptsToSave, int theTotalCodeCount) {
-
-		theCodeSystem.setCurrentVersion(theCodeSystemToStore);
-		if (theCodeSystem.getPid() == null) {
-			theCodeSystem = myCodeSystemDao.saveAndFlush(theCodeSystem);
+		ourLog.debug("Setting CodeSystemVersion[{}] on {} concepts...", codeSystem.getPid(), totalCodeCount);
+		for (TermConcept next : conceptsToSave) {
+			populateVersion(next, codeSystemToStore);
 		}
 
-		ourLog.debug("Setting CodeSystemVersion[{}] on {} concepts...", theCodeSystem.getPid(), theTotalCodeCount);
-		for (TermConcept next : theConceptsToSave) {
-			populateVersion(next, theCodeSystemToStore);
-		}
-
-		ourLog.debug("Saving {} concepts...", theTotalCodeCount);
+		ourLog.debug("Saving {} concepts...", totalCodeCount);
 		IdentityHashMap<TermConcept, Object> conceptsStack2 = new IdentityHashMap<>();
-		for (TermConcept next : theConceptsToSave) {
-			persistChildren(next, theCodeSystemToStore, conceptsStack2, theTotalCodeCount);
+		for (TermConcept next : conceptsToSave) {
+			persistChildren(next, codeSystemToStore, conceptsStack2, totalCodeCount);
 		}
 
 		ourLog.debug("Done saving concepts, flushing to database");
