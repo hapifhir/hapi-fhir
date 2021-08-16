@@ -268,7 +268,7 @@ public class OpenApiInterceptor {
 	}
 
 	public String removeTrailingSlash(String theUrl) {
-		while(theUrl.endsWith("/")) {
+		while(theUrl != null && theUrl.endsWith("/")) {
 			theUrl = theUrl.substring(0, theUrl.length() - 1);
 		}
 		return theUrl;
@@ -288,7 +288,7 @@ public class OpenApiInterceptor {
 		context.setVariable("DESCRIPTION", cs.getImplementation().getDescription());
 		context.setVariable("SERVER_NAME", cs.getSoftware().getName());
 		context.setVariable("SERVER_VERSION", cs.getSoftware().getVersion());
-		context.setVariable("BASE_URL", baseUrl);
+		context.setVariable("BASE_URL", cs.getImplementation().getUrl());
 		context.setVariable("BANNER_IMAGE_URL", getBannerImage());
 		context.setVariable("OPENAPI_DOCS", baseUrl + "/api-docs");
 		context.setVariable("FHIR_VERSION", cs.getFhirVersion().toCode());
