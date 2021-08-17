@@ -30,9 +30,21 @@ import java.util.Set;
 
 public class MdmLinkChangeEvent implements IModelJson {
 
-	@JsonProperty(value = "targetResourceId")
+	@JsonProperty(value = "matchResult")
+	private MdmMatchResultEnum myMdmMatchResult;
+	@JsonProperty(value = "linkSource")
+	private MdmLinkSourceEnum myMdmLinkSource;
+	@JsonProperty(value = "eidMatch")
+	private Boolean myEidMatch;
+	@JsonProperty(value = "newGoldenResource")
+	private Boolean myNewGoldenResource;
+	@JsonProperty(value = "score")
+	private Double myScore;
+	@JsonProperty(value = "ruleCount")
+	private Long myRuleCount;
+	@JsonProperty(value = "targetResourceId", required = true)
 	private String myTargetResourceId;
-	@JsonProperty(value = "goldenResourceId")
+	@JsonProperty(value = "goldenResourceId", required = true)
 	private String myGoldenResourceId;
 	@JsonProperty(value = "duplicateResourceIds")
 	private Set<String> myDuplicateGoldenResourceIds = new HashSet<>();
@@ -88,10 +100,64 @@ public class MdmLinkChangeEvent implements IModelJson {
 		return this;
 	}
 
+	public MdmMatchResultEnum getMdmMatchResult() {
+		return myMdmMatchResult;
+	}
+
+	public void setMdmMatchResult(MdmMatchResultEnum theMdmMatchResult) {
+		myMdmMatchResult = theMdmMatchResult;
+	}
+
+	public MdmLinkSourceEnum getMdmLinkSource() {
+		return myMdmLinkSource;
+	}
+
+	public void setMdmLinkSource(MdmLinkSourceEnum theMdmLinkSource) {
+		myMdmLinkSource = theMdmLinkSource;
+	}
+
+	public Boolean getEidMatch() {
+		return myEidMatch;
+	}
+
+	public void setEidMatch(Boolean theEidMatch) {
+		myEidMatch = theEidMatch;
+	}
+
+	public Boolean getNewGoldenResource() {
+		return myNewGoldenResource;
+	}
+
+	public void setNewGoldenResource(Boolean theNewGoldenResource) {
+		myNewGoldenResource = theNewGoldenResource;
+	}
+
+	public Double getScore() {
+		return myScore;
+	}
+
+	public void setScore(Double theScore) {
+		myScore = theScore;
+	}
+
+	public Long getRuleCount() {
+		return myRuleCount;
+	}
+
+	public void setRuleCount(Long theRuleCount) {
+		myRuleCount = theRuleCount;
+	}
+
 	@Override
 	public String toString() {
 		return "MdmLinkChangeEvent{" +
-			"myTargetResourceId='" + myTargetResourceId + '\'' +
+			"myMdmMatchResult=" + myMdmMatchResult +
+			", myMdmLinkSource=" + myMdmLinkSource +
+			", myEidMatch=" + myEidMatch +
+			", myNewGoldenResource=" + myNewGoldenResource +
+			", myScore=" + myScore +
+			", myRuleCount=" + myRuleCount +
+			", myTargetResourceId='" + myTargetResourceId + '\'' +
 			", myGoldenResourceId='" + myGoldenResourceId + '\'' +
 			", myDuplicateGoldenResourceIds=" + myDuplicateGoldenResourceIds +
 			'}';

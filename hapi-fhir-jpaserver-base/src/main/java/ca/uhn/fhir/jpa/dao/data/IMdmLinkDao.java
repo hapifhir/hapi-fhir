@@ -67,4 +67,13 @@ public interface IMdmLinkDao extends JpaRepository<MdmLink, Long> {
 		"AND ml.myMatchResult=:matchResult")
 	List<MdmPidTuple> expandPidsBySourcePidAndMatchResult(@Param("sourcePid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
+	@Query("SELECT DISTINCT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid " +
+		"FROM MdmLink ml " +
+		"INNER JOIN MdmLink ml2 " +
+		"ON ml.myGoldenResourcePid = ml2.myGoldenResourcePid " +
+		"WHERE (ml2.mySourcePid = :sourceOrGoldenPid OR ml2.myGoldenResourcePid = :sourceOrGoldenPid) " +
+		"AND ml2.myMatchResult=:matchResult " +
+		"AND ml.myMatchResult=:matchResult")
+	List<MdmPidTuple> expandPidsBySourceOrGoldenResourcePidAndMatchResult(@Param("sourceOrGoldenPid") Long theSourceOrGoldenPid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+
 }
