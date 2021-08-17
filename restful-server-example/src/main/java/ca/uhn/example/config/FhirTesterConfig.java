@@ -41,14 +41,9 @@ public class FhirTesterConfig {
 		retVal
 			.addServer()
 				.withId("home")
-				.withFhirVersion(FhirVersionEnum.DSTU2)
+				.withFhirVersion(FhirVersionEnum.R4)
 				.withBaseUrl("${serverBase}/fhir")
-				.withName("Local Tester")
-			.addServer()
-				.withId("hapi")
-				.withFhirVersion(FhirVersionEnum.DSTU2)
-				.withBaseUrl("http://fhirtest.uhn.ca/baseDstu2")
-				.withName("Public HAPI Test Server");
+				.withName("Local Tester");
 		
 		/*
 		 * Use the method below to supply a client "factory" which can be used 

@@ -1,11 +1,11 @@
 package ca.uhn.example.provider;
 
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.IdType;
+
 import ca.uhn.example.model.MyOrganization;
-import ca.uhn.fhir.model.dstu2.composite.ContactPointDt;
-import ca.uhn.fhir.model.dstu2.valueset.ContactPointUseEnum;
-import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -37,7 +37,7 @@ public class OrganizationResourceProvider implements IResourceProvider {
 	 * @return Returns a resource matching this identifier, or null if none exists.
 	 */
 	@Read()
-	public MyOrganization getResourceById(@IdParam IdDt theId) {
+	public MyOrganization getResourceById(@IdParam IdType theId) {
 		
 		/*
 		 * We only support one organization, so the follwing
@@ -52,17 +52,12 @@ public class OrganizationResourceProvider implements IResourceProvider {
 		retVal.setId("1");
 		retVal.addIdentifier().setSystem("urn:example:orgs").setValue("FooOrganization");
 		retVal.addAddress().addLine("123 Fake Street").setCity("Toronto");
-		retVal.addTelecom().setUse(ContactPointUseEnum.WORK).setValue("1-888-123-4567");
+		retVal.addTelecom().setUse(ContactPoint.ContactPointUse.WORK).setValue("1-888-123-4567");
 		
+		CodeableConcept cc = new CodeableConcept().setText("00102-1");
 		// Populate the first, primitive extension
-		retVal.setBillingCode(new CodeDt("00102-1"));
-		
-		// The second extension is repeatable and takes a block type
-		MyOrganization.EmergencyContact contact = new MyOrganization.EmergencyContact();
-		contact.setActive(new BooleanDt(true));
-		contact.setContact(new ContactPointDt());
-		retVal.getEmergencyContact().add(contact);
-		
+		retVal.setBillingCode(cc);
+				
 		return retVal;
 	}
 
