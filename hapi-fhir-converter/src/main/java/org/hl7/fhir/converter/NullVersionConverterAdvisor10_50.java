@@ -20,8 +20,8 @@ package org.hl7.fhir.converter;
  * #L%
  */
 
-import org.hl7.fhir.convertors.advisors.VersionConvertorAdvisor50;
-import org.hl7.fhir.dstu2.model.Resource;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_10_50;
+import org.hl7.fhir.convertors.conv10_50.VersionConvertor_10_50;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeSystem;
@@ -32,7 +32,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.IdentityHashMap;
 
-public class NullVersionConverterAdvisor50 implements VersionConvertorAdvisor50 {
+public class NullVersionConverterAdvisor10_50 extends BaseAdvisor_10_50 {
 
 	private IdentityHashMap<ValueSet, CodeSystem> myCodeSystems = new IdentityHashMap<>();
 

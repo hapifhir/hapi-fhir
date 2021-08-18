@@ -9,8 +9,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ValidateUtil;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
-import org.hl7.fhir.convertors.conv30_40.CodeSystem30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -24,8 +23,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import static org.hl7.fhir.convertors.conv30_40.ValueSet30_40.convertValueSet;
 
 /*
  * #%L
@@ -67,7 +64,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
 			valueSetToExpandR4 = toCanonicalValueSet(theValueSetToExpand);
 			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(theExpansionOptions, valueSetToExpandR4);
-			return new ValueSetExpansionOutcome(convertValueSet(expandedR4), null);
+			return new ValueSetExpansionOutcome(VersionConvertorFactory_30_40.convertResource(expandedR4), null);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
@@ -81,7 +78,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
 			valueSetToExpandR4 = toCanonicalValueSet(valueSetToExpand);
 			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(theExpansionOptions, valueSetToExpandR4);
-			return convertValueSet(expandedR4);
+			return VersionConvertorFactory_30_40.convertResource(expandedR4);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
@@ -90,31 +87,31 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 	@Override
 	protected org.hl7.fhir.r4.model.ValueSet toCanonicalValueSet(IBaseResource theValueSet) throws FHIRException {
 		org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
-		valueSetToExpandR4 = convertValueSet((ValueSet) theValueSet);
+		valueSetToExpandR4 = (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_30_40.convertResource((ValueSet) theValueSet);
 		return valueSetToExpandR4;
 	}
 
 	@Override
 	protected org.hl7.fhir.r4.model.CodeSystem toCanonicalCodeSystem(IBaseResource theCodeSystem) {
-		return CodeSystem30_40.convertCodeSystem((CodeSystem)theCodeSystem);
+		return (org.hl7.fhir.r4.model.CodeSystem) VersionConvertorFactory_30_40.convertResource((CodeSystem)theCodeSystem);
 	}
 
 	@Override
 	@Nullable
 	protected org.hl7.fhir.r4.model.Coding toCanonicalCoding(IBaseDatatype theCoding) {
-		return VersionConvertor_30_40.convertCoding((org.hl7.fhir.dstu3.model.Coding) theCoding);
+		return (org.hl7.fhir.r4.model.Coding) VersionConvertorFactory_30_40.convertType((Coding) theCoding);
 	}
 
 	@Override
 	@Nullable
 	protected org.hl7.fhir.r4.model.Coding toCanonicalCoding(IBaseCoding theCoding) {
-		return VersionConvertor_30_40.convertCoding((org.hl7.fhir.dstu3.model.Coding) theCoding);
+		return (org.hl7.fhir.r4.model.Coding) VersionConvertorFactory_30_40.convertType((org.hl7.fhir.dstu3.model.Coding) theCoding);
 	}
 
 	@Override
 	@Nullable
 	protected org.hl7.fhir.r4.model.CodeableConcept toCanonicalCodeableConcept(IBaseDatatype theCoding) {
-		return VersionConvertor_30_40.convertCodeableConcept((org.hl7.fhir.dstu3.model.CodeableConcept) theCoding);
+		return (org.hl7.fhir.r4.model.CodeableConcept) VersionConvertorFactory_30_40.convertType((CodeableConcept) theCoding);
 	}
 
 
@@ -160,7 +157,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 	public IValidationSupport.CodeValidationResult validateCodeIsInPreExpandedValueSet(ConceptValidationOptions theOptions, IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet, "ValueSet must not be null");
 		ValueSet valueSet = (ValueSet) theValueSet;
-		org.hl7.fhir.r4.model.ValueSet valueSetR4 = convertValueSet(valueSet);
+		org.hl7.fhir.r4.model.ValueSet valueSetR4 = (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_30_40.convertResource(valueSet);
 
 		Coding coding = (Coding) theCoding;
 		org.hl7.fhir.r4.model.Coding codingR4 = null;
@@ -184,7 +181,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 	public boolean isValueSetPreExpandedForCodeValidation(IBaseResource theValueSet) {
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet, "ValueSet must not be null");
 		ValueSet valueSet = (ValueSet) theValueSet;
-		org.hl7.fhir.r4.model.ValueSet valueSetR4 = convertValueSet(valueSet);
+		org.hl7.fhir.r4.model.ValueSet valueSetR4 = (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_30_40.convertResource(valueSet);
 		return super.isValueSetPreExpandedForCodeValidation(valueSetR4);
 	}
 }

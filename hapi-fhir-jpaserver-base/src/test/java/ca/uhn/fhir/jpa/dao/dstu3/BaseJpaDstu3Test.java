@@ -38,7 +38,6 @@ import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
@@ -53,10 +52,12 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance;
 import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.AuditEvent;
@@ -125,7 +126,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-import static org.hl7.fhir.convertors.conv30_40.ConceptMap30_40.convertConceptMap;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(SpringExtension.class)
@@ -378,7 +378,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@BeforeEach
 	public void beforeFlushFT() {
 		runInTransaction(() -> {
-			SearchSession searchSession  = Search.session(myEntityManager);
+			SearchSession searchSession = Search.session(myEntityManager);
 			searchSession.workspace(ResourceTable.class).purge();
 //			searchSession.workspace(ResourceIndexedSearchParamString.class).purge();
 			searchSession.indexingPlan().execute();
@@ -462,7 +462,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	 */
 	public static ConceptMap createConceptMap() {
 		try {
-			return convertConceptMap(BaseJpaR4Test.createConceptMap());
+			return (ConceptMap) VersionConvertorFactory_30_40.convertResource(BaseJpaR4Test.createConceptMap());
 		} catch (FHIRException fe) {
 			throw new InternalErrorException(fe);
 		}

@@ -27,7 +27,9 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
+import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r5.elementmodel.Element;
@@ -39,6 +41,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.Locale;
 
 public class ValidatorResourceFetcher implements IResourceValidator.IValidatorResourceFetcher {
@@ -60,10 +65,8 @@ public class ValidatorResourceFetcher implements IResourceValidator.IValidatorRe
 		myVersionSpecificCOntextWrapper = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(myValidationSupport);
 	}
 
-
 	@Override
-	public Element fetch(Object appContext, String theUrl) throws FHIRException {
-
+	public Element fetch(IResourceValidator iResourceValidator, Object appContext, String theUrl) throws FHIRFormatError, DefinitionException, FHIRException, IOException {
 		IdType id = new IdType(theUrl);
 		String resourceType = id.getResourceType();
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
@@ -83,7 +86,8 @@ public class ValidatorResourceFetcher implements IResourceValidator.IValidatorRe
 	}
 
 	@Override
-	public IResourceValidator.ReferenceValidationPolicy validationPolicy(Object appContext, String path, String url) {
+	public IResourceValidator.ReferenceValidationPolicy validationPolicy(IResourceValidator iResourceValidator,
+																								Object appContext, String path, String url) {
 		int slashIdx = url.indexOf("/");
 		if (slashIdx > 0 && myFhirContext.getResourceTypes().contains(url.substring(0, slashIdx))) {
 			return myValidationSettings.getLocalReferenceValidationDefaultPolicy();
@@ -93,12 +97,12 @@ public class ValidatorResourceFetcher implements IResourceValidator.IValidatorRe
 	}
 
 	@Override
-	public boolean resolveURL(Object appContext, String path, String url, String type) throws FHIRException {
+	public boolean resolveURL(IResourceValidator iResourceValidator, Object o, String s, String s1, String s2) throws IOException, FHIRException {
 		return true;
 	}
 
 	@Override
-	public byte[] fetchRaw(String url) {
+	public byte[] fetchRaw(IResourceValidator iResourceValidator, String s) throws MalformedURLException, IOException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -109,13 +113,12 @@ public class ValidatorResourceFetcher implements IResourceValidator.IValidatorRe
 	}
 
 	@Override
-	public CanonicalResource fetchCanonicalResource(String url) {
-		throw new UnsupportedOperationException();
+	public CanonicalResource fetchCanonicalResource(IResourceValidator iResourceValidator, String s) throws URISyntaxException {
+		return null;
 	}
 
 	@Override
-	public boolean fetchesCanonicalResource(String url) {
+	public boolean fetchesCanonicalResource(IResourceValidator iResourceValidator, String s) {
 		return false;
 	}
-
 }

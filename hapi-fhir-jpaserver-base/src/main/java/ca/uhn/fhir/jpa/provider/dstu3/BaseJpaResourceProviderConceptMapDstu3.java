@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * #L%
  */
 
+import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
-import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -31,7 +31,7 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -44,8 +44,6 @@ import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.exceptions.FHIRException;
 
 import javax.servlet.http.HttpServletRequest;
-
-import static org.hl7.fhir.convertors.conv30_40.Parameters30_40.convertParameters;
 
 public class BaseJpaResourceProviderConceptMapDstu3 extends JpaResourceProviderDstu3<ConceptMap> {
 	@Operation(name = JpaConstants.OPERATION_TRANSLATE, idempotent = true, returnParameters = {
@@ -82,7 +80,7 @@ public class BaseJpaResourceProviderConceptMapDstu3 extends JpaResourceProviderD
 			&& theSourceValueSet.hasValue();
 		boolean haveSourceCoding = theSourceCoding != null
 			&& theSourceCoding.hasCode();
-		boolean haveSourceCodeableConcept= theSourceCodeableConcept != null
+		boolean haveSourceCodeableConcept = theSourceCodeableConcept != null
 			&& theSourceCodeableConcept.hasCoding()
 			&& theSourceCodeableConcept.getCodingFirstRep().hasCode();
 		boolean haveTargetValueSet = theTargetValueSet != null
@@ -100,46 +98,46 @@ public class BaseJpaResourceProviderConceptMapDstu3 extends JpaResourceProviderD
 
 		TranslationRequest translationRequest = new TranslationRequest();
 		try {
-			
+
 			if (haveUrl) {
-				translationRequest.setUrl(VersionConvertor_30_40.convertUri(theUrl));
+				translationRequest.setUrl((org.hl7.fhir.r4.model.UriType) VersionConvertorFactory_30_40.convertType(theUrl));
 			}
-			
+
 			if (haveConceptMapVersion) {
-				translationRequest.setConceptMapVersion(VersionConvertor_30_40.convertString(theConceptMapVersion));
+				translationRequest.setConceptMapVersion((org.hl7.fhir.r4.model.StringType) VersionConvertorFactory_30_40.convertType(theConceptMapVersion));
 			}
-			
+
 			// Convert from DSTU3 to R4
 			if (haveSourceCode) {
-				translationRequest.getCodeableConcept().addCoding().setCodeElement(VersionConvertor_30_40.convertCode(theSourceCode));
+				translationRequest.getCodeableConcept().addCoding().setCodeElement((org.hl7.fhir.r4.model.CodeType) VersionConvertorFactory_30_40.convertType(theSourceCode));
 
 				if (haveSourceCodeSystem) {
-					translationRequest.getCodeableConcept().getCodingFirstRep().setSystemElement(VersionConvertor_30_40.convertUri(theSourceCodeSystem));
+					translationRequest.getCodeableConcept().getCodingFirstRep().setSystemElement((org.hl7.fhir.r4.model.UriType) VersionConvertorFactory_30_40.convertType(theSourceCodeSystem));
 				}
 
 				if (haveSourceCodeSystemVersion) {
-					translationRequest.getCodeableConcept().getCodingFirstRep().setVersionElement(VersionConvertor_30_40.convertString(theSourceCodeSystemVersion));
+					translationRequest.getCodeableConcept().getCodingFirstRep().setVersionElement((org.hl7.fhir.r4.model.StringType) VersionConvertorFactory_30_40.convertType(theSourceCodeSystemVersion));
 				}
 			} else if (haveSourceCoding) {
-				translationRequest.getCodeableConcept().addCoding(VersionConvertor_30_40.convertCoding(theSourceCoding));
+				translationRequest.getCodeableConcept().addCoding((org.hl7.fhir.r4.model.Coding) VersionConvertorFactory_30_40.convertType(theSourceCoding));
 			} else {
-				translationRequest.setCodeableConcept(VersionConvertor_30_40.convertCodeableConcept(theSourceCodeableConcept));
+				translationRequest.setCodeableConcept((org.hl7.fhir.r4.model.CodeableConcept) VersionConvertorFactory_30_40.convertType(theSourceCodeableConcept));
 			}
 
 			if (haveSourceValueSet) {
-				translationRequest.setSource(VersionConvertor_30_40.convertUri(theSourceValueSet));
+				translationRequest.setSource((org.hl7.fhir.r4.model.UriType) VersionConvertorFactory_30_40.convertType(theSourceValueSet));
 			}
 
 			if (haveTargetValueSet) {
-				translationRequest.setTarget(VersionConvertor_30_40.convertUri(theTargetValueSet));
+				translationRequest.setTarget((org.hl7.fhir.r4.model.UriType) VersionConvertorFactory_30_40.convertType(theTargetValueSet));
 			}
 
 			if (haveTargetCodeSystem) {
-				translationRequest.setTargetSystem(VersionConvertor_30_40.convertUri(theTargetCodeSystem));
+				translationRequest.setTargetSystem((org.hl7.fhir.r4.model.UriType) VersionConvertorFactory_30_40.convertType(theTargetCodeSystem));
 			}
 
 			if (haveReverse) {
-				translationRequest.setReverse(VersionConvertor_30_40.convertBoolean(theReverse));
+				translationRequest.setReverse((org.hl7.fhir.r4.model.BooleanType) VersionConvertorFactory_30_40.convertType(theReverse));
 			}
 
 			if (haveId) {
@@ -155,7 +153,7 @@ public class BaseJpaResourceProviderConceptMapDstu3 extends JpaResourceProviderD
 			TranslateConceptResults result = dao.translate(translationRequest, theRequestDetails);
 
 			// Convert from R4 to DSTU3
-			return convertParameters(TermConceptMappingSvcImpl.toParameters(result));
+			return (Parameters) VersionConvertorFactory_30_40.convertResource(TermConceptMappingSvcImpl.toParameters(result));
 		} catch (FHIRException fe) {
 			throw new InternalErrorException(fe);
 		} finally {

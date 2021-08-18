@@ -428,13 +428,13 @@ public class FhirInstanceValidatorR5Test {
 		String input = IOUtils.toString(FhirInstanceValidator.class.getResourceAsStream("/vitals.json"), Charsets.UTF_8);
 
 		IResourceValidator.IValidatorResourceFetcher resourceFetcher = mock(IResourceValidator.IValidatorResourceFetcher.class);
-		when(resourceFetcher.validationPolicy(any(),anyString(), anyString())).thenReturn(IResourceValidator.ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
+		when(resourceFetcher.validationPolicy(any(), anyString(), anyString(), anyString())).thenReturn(IResourceValidator.ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myVal.validateWithResult(input);
 
-		verify(resourceFetcher, times(13)).resolveURL(any(), anyString(), anyString(), anyString());
-		verify(resourceFetcher, times(4)).validationPolicy(any(), anyString(), anyString());
-		verify(resourceFetcher, times(3)).fetch(any(), anyString());
+		verify(resourceFetcher, times(13)).resolveURL(any(), anyString(), anyString(), anyString(), anyString());
+		verify(resourceFetcher, times(4)).validationPolicy(any(), anyString(), anyString(), anyString());
+		verify(resourceFetcher, times(3)).fetch(any(), anyString(), anyString());
 	}
 
 	@Test

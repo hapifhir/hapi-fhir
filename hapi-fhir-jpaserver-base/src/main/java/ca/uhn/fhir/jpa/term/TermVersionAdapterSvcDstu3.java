@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.UrlUtil;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.dstu3.model.ValueSet;
@@ -36,9 +37,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.hl7.fhir.convertors.conv30_40.CodeSystem30_40.convertCodeSystem;
-import static org.hl7.fhir.convertors.conv30_40.ConceptMap30_40.convertConceptMap;
-import static org.hl7.fhir.convertors.conv30_40.ValueSet30_40.convertValueSet;
 
 public class TermVersionAdapterSvcDstu3 extends BaseTermVersionAdapterSvcImpl implements ITermVersionAdapterSvc {
 
@@ -56,7 +54,7 @@ public class TermVersionAdapterSvcDstu3 extends BaseTermVersionAdapterSvcImpl im
 
 	/**
 	 * Initialize the beans that are used by this service.
-	 *
+	 * <p>
 	 * Note: There is a circular dependency here where the CodeSystem DAO
 	 * needs terminology services, and the term services need the CodeSystem DAO.
 	 * So we look these up in a refresh event instead of just autowiring them
@@ -70,11 +68,11 @@ public class TermVersionAdapterSvcDstu3 extends BaseTermVersionAdapterSvcImpl im
 		myConceptMapResourceDao = (IFhirResourceDao<ConceptMap>) myAppCtx.getBean("myConceptMapDaoDstu3");
 	}
 
-		@Override
+	@Override
 	public IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
 		CodeSystem resourceToStore;
 		try {
-			resourceToStore = convertCodeSystem(theCodeSystemResource);
+			resourceToStore = (CodeSystem) VersionConvertorFactory_30_40.convertResource(theCodeSystemResource);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
@@ -91,7 +89,7 @@ public class TermVersionAdapterSvcDstu3 extends BaseTermVersionAdapterSvcImpl im
 	public void createOrUpdateConceptMap(org.hl7.fhir.r4.model.ConceptMap theConceptMap) {
 		ConceptMap resourceToStore;
 		try {
-			resourceToStore = convertConceptMap(theConceptMap);
+			resourceToStore = (ConceptMap) VersionConvertorFactory_30_40.convertResource(theConceptMap);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
@@ -107,7 +105,7 @@ public class TermVersionAdapterSvcDstu3 extends BaseTermVersionAdapterSvcImpl im
 	public void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet) {
 		ValueSet valueSetDstu3;
 		try {
-			valueSetDstu3 = convertValueSet(theValueSet);
+			valueSetDstu3 = (ValueSet) VersionConvertorFactory_30_40.convertResource(theValueSet);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}

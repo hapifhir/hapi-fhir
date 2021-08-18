@@ -1398,13 +1398,13 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		String encoded = loadResource("/r4/r4-caredove-bundle.json");
 
 		IResourceValidator.IValidatorResourceFetcher resourceFetcher = mock(IResourceValidator.IValidatorResourceFetcher.class);
-		when(resourceFetcher.validationPolicy(any(), anyString(), anyString())).thenReturn(IResourceValidator.ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
+		when(resourceFetcher.validationPolicy(any(), anyString(), anyString(), anyString())).thenReturn(IResourceValidator.ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myVal.validateWithResult(encoded);
 
-		verify(resourceFetcher, times(15)).resolveURL(any(), anyString(), anyString(), anyString());
-		verify(resourceFetcher, times(12)).validationPolicy(any(), anyString(), anyString());
-		verify(resourceFetcher, times(12)).fetch(any(), anyString());
+		verify(resourceFetcher, times(15)).resolveURL(any(), anyString(), anyString(), anyString(), anyString());
+		verify(resourceFetcher, times(12)).validationPolicy(any(), anyString(), anyString(), anyString());
+		verify(resourceFetcher, times(12)).fetch(any(), anyString(), anyString());
 	}
 
 	@Test

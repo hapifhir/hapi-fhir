@@ -30,7 +30,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.hl7.fhir.convertors.conv30_40.ValueSet30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ValueSet;
@@ -42,7 +42,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import java.util.Date;
 
 import static ca.uhn.fhir.jpa.dao.FhirResourceDaoValueSetDstu2.toStringOrNull;
-import static org.hl7.fhir.convertors.conv30_40.ValueSet30_40.convertValueSet;
 
 public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueSet> implements IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> {
 
@@ -54,15 +53,15 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 
 	@Override
 	public org.hl7.fhir.dstu3.model.ValueSet expand(org.hl7.fhir.dstu3.model.ValueSet theSource, ValueSetExpansionOptions theOptions) {
-		org.hl7.fhir.r4.model.ValueSet canonicalInput = ValueSet30_40.convertValueSet(theSource);
+		org.hl7.fhir.r4.model.ValueSet canonicalInput = (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_30_40.convertResource(theSource);
 		org.hl7.fhir.r4.model.ValueSet canonicalOutput = myTerminologySvc.expandValueSet(theOptions, canonicalInput);
-		return ValueSet30_40.convertValueSet(canonicalOutput);
+		return (ValueSet) VersionConvertorFactory_30_40.convertResource(canonicalOutput);
 	}
 
 	@Override
 	public org.hl7.fhir.dstu3.model.ValueSet expandByIdentifier(String theUri, ValueSetExpansionOptions theOptions) {
 		org.hl7.fhir.r4.model.ValueSet canonicalOutput = myTerminologySvc.expandValueSet(theOptions, theUri);
-		return ValueSet30_40.convertValueSet(canonicalOutput);
+		return (ValueSet) VersionConvertorFactory_30_40.convertResource(canonicalOutput);
 	}
 
 	@Override
@@ -86,7 +85,7 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 			if (retVal.getDeleted() == null) {
 				try {
 					ValueSet valueSet = (ValueSet) theResource;
-					org.hl7.fhir.r4.model.ValueSet converted = convertValueSet(valueSet);
+					org.hl7.fhir.r4.model.ValueSet converted = (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_30_40.convertResource(valueSet);
 					myTerminologySvc.storeTermValueSet(retVal, converted);
 				} catch (FHIRException fe) {
 					throw new InternalErrorException(fe);
