@@ -832,5 +832,19 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		assertThat(versionedPatientReference, is(equalTo("Patient/RED/_history/1")));
 	}
 
+	@Test
+	public void testNoNpeMinimal() {
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myModelConfig.setAutoVersionReferenceAtPaths("Observation.subject");
+
+		Observation obs = new Observation();
+		obs.setId("Observation/DEF");
+		obs.setSubject(new Reference("Patient/RED"));
+		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+		builder.addTransactionUpdateEntry(obs);
+
+		mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
+	}
+
 
 }
