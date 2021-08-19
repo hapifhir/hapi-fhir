@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.jpa.provider.r4.ResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -20,8 +22,10 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -781,5 +785,26 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		}
 
 	}
+
+	@Test
+	@DisplayName("GH-2901 Test no NPE is thrown on autoversioned references")
+	public void testNoNpeOnEoBBundle() {
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		List<String> strings = Arrays.asList(
+			"ExplanationOfBenefit.patient",
+			"ExplanationOfBenefit.insurer",
+			"ExplanationOfBenefit.provider",
+			"ExplanationOfBenefit.careTeam.provider",
+			"ExplanationOfBenefit.insurance.coverage",
+			"ExplanationOfBenefit.payee.party"
+		);
+		myModelConfig.setAutoVersionReferenceAtPaths(new HashSet<String>(strings));
+
+		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, new InputStreamReader(FhirResourceDaoR4VersionedReferenceTest.class.getResourceAsStream("/npe-causing-bundle.json")));
+
+		Bundle transaction = mySystemDao.transaction(new SystemRequestDetails(), bundle);
+
+	}
+
 
 }
