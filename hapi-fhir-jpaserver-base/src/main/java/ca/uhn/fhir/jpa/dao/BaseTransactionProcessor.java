@@ -1,58 +1,5 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static ca.uhn.fhir.util.StringUtil.toUtf8String;
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
-
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -121,12 +68,62 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
-import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
+
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
+
+import static ca.uhn.fhir.util.StringUtil.toUtf8String;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseTransactionProcessor {
 
@@ -176,11 +173,13 @@ public abstract class BaseTransactionProcessor {
 		ourLog.trace("Starting transaction processor");
 		myExecutor = new ThreadPoolTaskExecutor();
 		myExecutor.setThreadNamePrefix("bundle_batch_");
-		myExecutor.setCorePoolSize(myDaoConfig.getBatchTransactionPoolSize());
-		myExecutor.setMaxPoolSize(myDaoConfig.getBatchTransactionMaxPoolSize());
-		myExecutor.setQueueCapacity(myDaoConfig.getBatchTransactionQueueCapacity());
+		// For single thread set the value to 1
 		//myExecutor.setCorePoolSize(1);
 		//myExecutor.setMaxPoolSize(1);
+		myExecutor.setCorePoolSize(myDaoConfig.getBundleBatchPoolSize());
+		myExecutor.setMaxPoolSize(myDaoConfig.getBundleBatchMaxPoolSize());
+		myExecutor.setQueueCapacity(myDaoConfig.getBundleBatchQueueCapacity());
+
 		myExecutor.initialize();
 	}
 
@@ -331,7 +330,6 @@ public abstract class BaseTransactionProcessor {
 
 		long start = System.currentTimeMillis();
 
-
 		IBaseBundle response = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.BATCHRESPONSE.toCode());
 		Map<Integer, Object> responseMap = new ConcurrentHashMap<>();
 				
@@ -339,8 +337,8 @@ public abstract class BaseTransactionProcessor {
 		int requestEntriesSize = requestEntries.size();
 
 		// And execute for each entry in parallel as a mini-transaction in its 
-		// own database transaction so that if one fails, it doesn't prevent others
-		// so the result is keep in the map for the original position
+		// own database transaction so that if one fails, it doesn't prevent others.
+		// The result is keep in the map to save the original position
 
 		CountDownLatch completionLatch = new CountDownLatch(requestEntriesSize);
 		IBase nextRequestEntry = null;
@@ -1588,7 +1586,6 @@ public abstract class BaseTransactionProcessor {
 
 				IBaseBundle nextResponseBundle = processTransactionAsSubRequest(myRequestDetails, subRequestBundle, "Batch sub-request", myNestedMode);
 
-				// -- this is a bundle entry
 				IBase  subResponseEntry = (IBase) myVersionAdapter.getEntries(nextResponseBundle).get(0);
 				myResponseMap.put(myResponseOrder, subResponseEntry);
 								
@@ -1608,6 +1605,7 @@ public abstract class BaseTransactionProcessor {
 			}
 
 			if (caughtEx.getException() != null) {
+				// add exception to the response map
 				myResponseMap.put(myResponseOrder, caughtEx);
 			}
 			

@@ -13,9 +13,12 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -25,6 +28,14 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4BundleTest.class);
 
+	@BeforeEach
+	@Override
+	public void before() throws Exception {
+		super.before();
+		myDaoConfig.setBundleBatchPoolSize(myDaoConfig.DEFAULT_BUNDLE_BATCH_POOL_SIZE);
+		myDaoConfig.setBundleBatchMaxPoolSize(myDaoConfig.DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE);
+	}
+	
 	/**
 	 * See #401
 	 */
@@ -91,47 +102,142 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testBundleBatchWithError() {
-		List<String> ids = createPatients(5);
+	public void testBundleBatchWithSingleThread() {
+		List<String> ids = createPatients(50);
 
-		for (String id : ids)
-			System.out.println("id = " + id);
-			
+		myDaoConfig.setBundleBatchPoolSize(1);
+		myDaoConfig.setBundleBatchMaxPoolSize(1);
+		
 		Bundle input = new Bundle();
 		input.setType(BundleType.BATCH);
 
-		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/1");
-		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/10"); // non exist
+		for (String id : ids)
+		    input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(id);
+
+		Bundle output = myClient.transaction().withBundle(input).execute();
+
+		//ourLog.info("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		
-		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/2"); 
-		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/3");
-		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/20"); // non exist
+		assertEquals(50, output.getEntry().size());
+		List<BundleEntryComponent> bundleEntries = output.getEntry();
+
+		int i=0;
+		for (BundleEntryComponent bundleEntry : bundleEntries) {
+			assertEquals(ids.get(i++),  bundleEntry.getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+		}
+
+
+	}
+	@Test
+	public void testBundleBatchWithError() {
+		List<String> ids = createPatients(5);
+
+		Bundle input = new Bundle();
+		input.setType(BundleType.BATCH);
+
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(0));
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/1000"); // not exist
 		
-		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/4");
-		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/30"); // non exist
-		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/5");
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(1)); 
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(2));
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/2000"); // not exist
+		
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(3));
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/3000"); // not exist
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(4));
 		
 
 		Bundle output = myClient.transaction().withBundle(input).execute();
 		
-		ourLog.info("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		//ourLog.info("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		
 		assertEquals(8, output.getEntry().size());
+		
 		List<BundleEntryComponent> bundleEntries = output.getEntry();
+		
+		// patient 1
+		assertEquals(ids.get(0), bundleEntries.get(0).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+		
+		// patient 10 - error outcomes
+	    assertThat(((OperationOutcome)bundleEntries.get(1).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics(), containsString("Patient/1000"));
 
-		BundleEntryComponent bundleEntry = bundleEntries.get(0);
+		// patient 2
+		assertEquals(ids.get(1), bundleEntries.get(2).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+
+		// patient 3
+		assertEquals(ids.get(2), bundleEntries.get(3).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+
+		// patient 20 - error outcomes
+	    assertThat(((OperationOutcome)bundleEntries.get(4).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics(), containsString("Patient/2000"));
+
+		// patient 4
+		assertEquals(ids.get(3), bundleEntries.get(5).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+
+		// patient 30 - error outcomes
+	    assertThat(((OperationOutcome)bundleEntries.get(6).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics(), containsString("Patient/3000"));
+
+		// patient 5
+		assertEquals(ids.get(4), bundleEntries.get(7).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+
+	}
+	
+	@Test
+	public void testBundleBatchWithCreate() {
 		
-		assertEquals(ids.get(0), bundleEntry.getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+		List<String> ids = createPatients(5);
+
+		Bundle input = new Bundle();
+		input.setType(BundleType.BATCH);
+
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(0));
+
+		Patient p = new Patient();
+		p.setId("100");
+		p.setGender(AdministrativeGender.MALE);
+		p.addIdentifier().setSystem("urn:foo").setValue("A");
+		p.addName().setFamily("Smith");
+		input.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST);
+
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(1)); 
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(2));
+
+		Condition c = new Condition();
+		c.getSubject().setReference(ids.get(0));
+		input.addEntry().setResource(c).getRequest().setMethod(HTTPVerb.POST);
 		
-	    bundleEntry = bundleEntries.get(1);
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(3));
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(4));
 		
-		bundleEntry.getResponse();
+		//ourLog.info("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+
+		Bundle output = myClient.transaction().withBundle(input).execute();
 		
-		//ourLog.info("bundleEntry.getResource(): \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundleEntry.getResource()));
+		//ourLog.info("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		
-		//for (BundleEntryComponent bundleEntry : bundleEntries) {
-		//	assertEquals(ids.get(i++),  bundleEntry.getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
-		//}
+		assertEquals(7, output.getEntry().size());
+		
+		List<BundleEntryComponent> bundleEntries = output.getEntry();
+		
+		// patient 1
+		assertEquals(ids.get(0), bundleEntries.get(0).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+		
+		// patient create
+	    assertThat(bundleEntries.get(1).getResponse().getStatus(), containsString("201"));
+
+		// patient 2
+		assertEquals(ids.get(1), bundleEntries.get(2).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+
+		// patient 3
+		assertEquals(ids.get(2), bundleEntries.get(3).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+
+		// condition create
+	    assertThat(bundleEntries.get(4).getResponse().getStatus(), containsString("201"));
+
+		// patient 4
+		assertEquals(ids.get(3), bundleEntries.get(5).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+
+		// patient 5
+		assertEquals(ids.get(4), bundleEntries.get(6).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 
 	}
 	
