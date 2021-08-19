@@ -790,7 +790,6 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	@DisplayName("GH-2901 Test no NPE is thrown on autoversioned references")
 	public void testNoNpeOnEoBBundle() {
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
 		List<String> strings = Arrays.asList(
@@ -833,6 +832,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	@DisplayName("GH-2901 Test no NPE is thrown on autoversioned references")
 	public void testNoNpeMinimal() {
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
 		myModelConfig.setAutoVersionReferenceAtPaths("Observation.subject");
