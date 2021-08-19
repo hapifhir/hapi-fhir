@@ -73,19 +73,6 @@ public class MdmLinkExpandSvc {
 	}
 
 	/**
-	 *  Given a resource ID of a source resource or golden resource, perform MDM expansion and return all the resource
-	 *  IDs of all resources that are MDM-Matched to this resource.
-	 *
-	 * @param theId The Resource ID of the resource to MDM-Expand
-	 * @return A set of strings representing the FHIR ids of the expanded resources.
-	 */
-	public Set<String> expandMdmBySourceOrGoldenResourceId(IIdType theId) {
-		ourLog.debug("About to expand source resource with resource id {}", theId);
-		Long pidOrThrowException = myIdHelperService.getPidOrThrowException(theId);
-		return flatten(myMdmLinkDao.expandPidsBySourceOrGoldenResourcePidAndMatchResult(pidOrThrowException, MdmMatchResultEnum.MATCH));
-	}
-
-	/**
 	 *  Given a PID of a source resource, perform MDM expansion and return all the resource IDs of all resources that are
 	 *  MDM-Matched to this resource.
 	 *
@@ -94,17 +81,14 @@ public class MdmLinkExpandSvc {
 	 */
 	public Set<String> expandMdmBySourceResourcePid(Long theSourceResourcePid) {
 		ourLog.debug("About to expand source resource with PID {}", theSourceResourcePid);
-		return flatten(myMdmLinkDao.expandPidsBySourcePidAndMatchResult(theSourceResourcePid, MdmMatchResultEnum.MATCH));
-	}
-
-	protected Set<String> flatten(List<IMdmLinkDao.MdmPidTuple> thePidTuples) {
+		List<IMdmLinkDao.MdmPidTuple> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsBySourcePidAndMatchResult(theSourceResourcePid, MdmMatchResultEnum.MATCH);
 		Set<Long> flattenedPids = new HashSet<>();
-		thePidTuples.forEach(tuple -> {
+		goldenPidSourcePidTuples.forEach(tuple -> {
 			flattenedPids.add(tuple.getSourcePid());
 			flattenedPids.add(tuple.getGoldenPid());
 		});
 		Set<String> resourceIds = myIdHelperService.translatePidsToFhirResourceIds(flattenedPids);
-		ourLog.debug("Expanded pids are [{}]", String.join(",", resourceIds));
+		ourLog.debug("Pid {} has been expanded to [{}]", theSourceResourcePid, String.join(",", resourceIds));
 		return resourceIds;
 	}
 

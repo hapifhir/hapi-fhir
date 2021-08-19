@@ -88,15 +88,6 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 					assertThat(tuple.getGoldenPid(), is(equalTo(golden.getIdElement().getIdPartAsLong())));
 					assertThat(tuple.getSourcePid(), is(in(expectedExpandedPids)));
 				});
-
-		lists = myMdmLinkDao.expandPidsBySourceOrGoldenResourcePidAndMatchResult(mdmLinks.get(0).getGoldenResourcePid(), MdmMatchResultEnum.MATCH);
-		assertThat(lists, hasSize(10));
-
-		lists.stream()
-			.forEach(tuple -> {
-					assertThat(tuple.getGoldenPid(), is(equalTo(golden.getIdElement().getIdPartAsLong())));
-					assertThat(tuple.getSourcePid(), is(in(expectedExpandedPids)));
-				});
 	}
 
 	private MdmLink createPatientAndLinkTo(Long thePatientPid, MdmMatchResultEnum theMdmMatchResultEnum) {
