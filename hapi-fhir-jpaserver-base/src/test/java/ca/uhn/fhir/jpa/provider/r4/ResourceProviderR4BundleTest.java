@@ -90,6 +90,51 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 	}
 
+	@Test
+	public void testBundleBatchWithError() {
+		List<String> ids = createPatients(5);
+
+		for (String id : ids)
+			System.out.println("id = " + id);
+			
+		Bundle input = new Bundle();
+		input.setType(BundleType.BATCH);
+
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/1");
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/10"); // non exist
+		
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/2"); 
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/3");
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/20"); // non exist
+		
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/4");
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/30"); // non exist
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient/5");
+		
+
+		Bundle output = myClient.transaction().withBundle(input).execute();
+		
+		ourLog.info("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		
+		assertEquals(8, output.getEntry().size());
+		List<BundleEntryComponent> bundleEntries = output.getEntry();
+
+		BundleEntryComponent bundleEntry = bundleEntries.get(0);
+		
+		assertEquals(ids.get(0), bundleEntry.getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+		
+	    bundleEntry = bundleEntries.get(1);
+		
+		bundleEntry.getResponse();
+		
+		//ourLog.info("bundleEntry.getResource(): \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundleEntry.getResource()));
+		
+		//for (BundleEntryComponent bundleEntry : bundleEntries) {
+		//	assertEquals(ids.get(i++),  bundleEntry.getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+		//}
+
+	}
+	
 	private List<String> createPatients(int count) {
 		List<String> ids = new ArrayList<String>();
 		for (int i = 0; i < count; i++) {
