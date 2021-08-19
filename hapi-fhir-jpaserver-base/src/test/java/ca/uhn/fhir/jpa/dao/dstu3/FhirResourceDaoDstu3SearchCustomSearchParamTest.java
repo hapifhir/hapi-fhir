@@ -280,13 +280,13 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		// https://hapi.fhir.org/baseR4/Procedure
 		// ?_id=PRA8780542726
 		// &_revinclude=Procedure%3Apart-of
-		// &_include%3Arecurse=Procedure:part-of%3AfocalAccess
+		// &_include%3Arecurse=Procedure%3AfocalAccess
 		// TODO - Create SearchParam map entries that match the URl above as I cannot figure out
 		// TODO - how to replicate it using the following lines of SearchParameterMap code!
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add("_id", new StringParam(procedureIdParent));
-		map.addRevInclude(new Include("Procedure:part-of")); //.setRecurse(true)
-		map.addInclude(new Include("Procedure:part-of:focalAccess").setRecurse(true));
+		map.addRevInclude(new Include("Procedure:part-of"));
+		map.addInclude(new Include("Procedure:focalAccess"));
 
 		// Perform the Search
 		IBundleProvider results = myProcedureDao.search(map);

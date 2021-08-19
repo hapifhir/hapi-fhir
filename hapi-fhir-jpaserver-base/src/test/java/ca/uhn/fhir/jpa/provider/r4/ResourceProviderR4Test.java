@@ -439,10 +439,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		// https://hapi.fhir.org/baseR4/Procedure
 		// ?_id=PRA8780542726
 		// &_revinclude=Procedure%3Apart-of
-		// &_include%3Arecurse=Procedure:part-of%3AfocalAccess
+		// &_include%3Arecurse=Procedure%3AfocalAccess
 		Bundle response = myClient
 			.search()
-			.byUrl("Procedure?_id=" + procedureIdParent + "&_revinclude=Procedure%3Apart-of&_include%3Arecurse=Procedure:part-of%3AfocalAccess")
+			.byUrl("Procedure?_id=" + procedureIdParent + "&_revinclude=Procedure%3Apart-of&_include%3Arecurse=Procedure%3AfocalAccess")
 			.returnBundle(Bundle.class)
 			.execute();
 
