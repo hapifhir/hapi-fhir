@@ -37,8 +37,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(EmailSubscriptionDstu2Test.class);
-	private static GreenMail ourTestSmtp;
-	private static int ourListenerPort;
+
+	@RegisterExtension
+	static GreenMailExtension ourGreenMail = new GreenMailExtension(ServerSetupTest.SMTP.withPort(0));
+
 	private List<IIdType> mySubscriptionIds = new ArrayList<>();
 
 	@Autowired
@@ -152,10 +154,10 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 	}
 
-
-	@AfterAll
-	public static void afterClass() {
-		ourTestSmtp.stop();
+	private MailConfig withMailConfig() {
+		return new MailConfig()
+			.setSmtpHostname(ServerSetupTest.SMTP.getBindAddress())
+			.setSmtpPort(ourGreenMail.getSmtp().getPort());
 	}
 
 	@BeforeAll

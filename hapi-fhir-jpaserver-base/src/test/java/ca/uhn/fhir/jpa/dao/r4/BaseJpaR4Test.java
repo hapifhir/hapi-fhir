@@ -104,6 +104,7 @@ import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.BodyStructure;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CarePlan;
@@ -366,6 +367,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	@Qualifier("myBinaryDaoR4")
 	protected IFhirResourceDao<Binary> myBinaryDao;
+	@Autowired
+	@Qualifier("myBodyStructureDaoR4")
+	protected IFhirResourceDao<BodyStructure> myBodyStructureDao;
 	@Autowired
 	@Qualifier("myDocumentReferenceDaoR4")
 	protected IFhirResourceDao<DocumentReference> myDocumentReferenceDao;
