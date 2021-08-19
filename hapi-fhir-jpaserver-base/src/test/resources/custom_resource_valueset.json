@@ -1,0 +1,83 @@
+{
+	"resourceType": "ValueSet",
+	"meta": {
+		"versionId": "1",
+		"lastUpdated": "2018-12-21T14:34:04.356-05:00"
+	},
+	"url": "http://fkcfhir.org/fhir/vs/ccdaihddialysisorder",
+	"status": "active",
+	"compose": {
+		"include": [ {
+			"system": "http://fkcfhir.org/fhir/cs/FMCOrderAbbreviation",
+			"concept": [ {
+				"code": "HD_Standard"
+			}, {
+				"code": "HD_Substitute"
+			}, {
+				"code": "HD_BackExcCitr"
+			}, {
+				"code": "HD_BackCit1K"
+			}, {
+				"code": "HD_BackExcDialy"
+			}, {
+				"code": "HD_BackDialCitr"
+			}, {
+				"code": "HD_BackDialCit1K"
+			}, {
+				"code": "HD_BkExcDia1KDia"
+			}, {
+				"code": "HD_Backup1K"
+			}, {
+				"code": "HD_ExcCitr"
+			}, {
+				"code": "HD_ExcCitr1K"
+			}, {
+				"code": "HD_Exception"
+			}, {
+				"code": "HD_ExcDiaCitr"
+			}, {
+				"code": "HD_ExcDiaCitr1K"
+			}, {
+				"code": "HD_Exception1K"
+			}, {
+				"code": "HD_ExTrExcCitr"
+			}, {
+				"code": "HD_ExCitrHP"
+			}, {
+				"code": "HD_ExTrExcCitr1K"
+			}, {
+				"code": "HD_Ex1KCitrHP"
+			}, {
+				"code": "HD_ExTrExcDialy"
+			}, {
+				"code": "HD_ExDiaHP"
+			}, {
+				"code": "HD_ExTrDiaCitr"
+			}, {
+				"code": "HD_ExDiaCitHP"
+			}, {
+				"code": "HD_ExTrDiaCitr1K"
+			}, {
+				"code": "HD_ExDia1KCitHP"
+			}, {
+				"code": "HD_ExExcDia1KDia"
+			}, {
+				"code": "HD_ExDia1KDiaHP"
+			}, {
+				"code": "HD_ Supplemental"
+			}, {
+				"code": "HD_ExtraHomePT"
+			}, {
+				"code": "HD_Extra1K"
+			}, {
+				"code": "HD_Ext1kHomePt"
+			}, {
+				"code": "HD_Self"
+			}, {
+				"code": "HD_Self Train"
+			}, {
+				"code": "HD_Standard1K"
+			} ]
+		} ]
+	}
+}

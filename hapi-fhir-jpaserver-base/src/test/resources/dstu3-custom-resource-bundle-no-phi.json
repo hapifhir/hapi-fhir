@@ -1,0 +1,339 @@
+{
+	"resourceType": "Bundle",
+	"id": "bundle-procedure",
+	"type": "transaction",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "BodySite",
+				"id": "BS1",
+				"meta": {
+					"extension": [
+						{
+							"url": "http://hapifhir.io/fhir/StructureDefinition/resource-meta-source",
+							"valueUri": "#fryyjsKfz7I87n5w"
+						}
+					],
+					"versionId": "2",
+					"lastUpdated": "2021-02-08T13:57:06.167-05:00"
+				},
+				"extension": [
+					{
+						"url": "BodySite#accessType",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "acc_access_typ_fkc",
+									"code": "AVF",
+									"display": "AVFistula"
+								}
+							],
+							"text": "AVFistula"
+						}
+					},
+					{
+						"url": "BodySite#accessSubType",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "acc_access_subtyp_fkc",
+									"code": "STD",
+									"display": "Standard"
+								}
+							],
+							"text": "Standard"
+						}
+					},
+					{
+						"url": "BodySite#status",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "acc_access_sts_fkc",
+									"code": "ACTVINUSE",
+									"display": "Active (In Use)"
+								}
+							],
+							"text": "Active (In Use)"
+						}
+					},
+					{
+						"url": "BodySite#statusDate",
+						"valueDate": "2020-01-01"
+					},
+					{
+						"url": "BodySite#statusHistory",
+						"extension": [
+							{
+								"url": "StatusHistory#status",
+								"valueCodeableConcept": {
+									"coding": [
+										{
+											"system": "acc_access_sts_fkc",
+											"code": "ACTVINUSE",
+											"display": "Active (In Use)"
+										}
+									],
+									"text": "Active (In Use)"
+								}
+							},
+							{
+								"url": "StatusHistory#statusDate",
+								"valueDate": "2020-01-01"
+							},
+							{
+								"url": "StatusHistory#isDeleted",
+								"valueBoolean": false
+							}
+						]
+					},
+					{
+						"url": "BodySite#vwingIndicator",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.com/",
+									"code": "No",
+									"display": "No"
+								}
+							],
+							"text": "No"
+						}
+					},
+					{
+						"url": "BodySite#endovascularCreation",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.com/",
+									"code": "No",
+									"display": "No"
+								}
+							],
+							"text": "No"
+						}
+					},
+					{
+						"url": "BodySite#createdBy",
+						"valueString": "ANURSE"
+					},
+					{
+						"url": "BodySite#createdDate",
+						"valueString": "2020-08-20T05:20:26-04:00"
+					},
+					{
+						"url": "BodySite#createdByUserName",
+						"valueString": "ARN"
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "DAMA_ID"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/v2/0203",
+						"value": "TAC4049"
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "acc_access_anatpos_fkc",
+							"code": "BRCH2BASLC",
+							"display": "Brachial Artery to Basilic Vein"
+						}
+					],
+					"text": "Brachial Artery to Basilic Vein"
+				},
+				"qualifier": [
+					{
+						"coding": [
+							{
+								"system": "acc_access_sitloc_fkc",
+								"code": "LFUPARM",
+								"display": "Left Upper Arm"
+							}
+						],
+						"text": "Left Upper Arm"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "BodySite/BS1"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Procedure",
+				"id": "P1",
+				"meta": {
+					"extension": [
+						{
+							"url": "http://hapifhir.io/fhir/StructureDefinition/resource-meta-source",
+							"valueUri": "#JeUapcIazzkLzqP6"
+						}
+					],
+					"versionId": "1",
+					"lastUpdated": "2021-08-18T06:35:39.744-04:00"
+				},
+				"extension": [
+					{
+						"url": "Procedure#focalAccess",
+						"valueReference": {
+							"reference":  "BodySite/BS1"
+						}
+					}
+				],
+				"identifier": [
+					{
+						"system": "urn:oid:2.16.840.1.113883.3.7418.20.1",
+						"value": "A8780542785"
+					}
+				],
+				"partOf": [
+					{
+						"reference": "Procedure/P1"
+					}
+				],
+				"status": "completed",
+				"category": {
+					"coding": [
+						{
+							"system": "http://mydomain.com/fhir/cs/OrderType",
+							"code": "Hemodialysis",
+							"display": "Hemodialysis"
+						}
+					]
+				},
+				"code": {
+					"coding": [
+						{
+							"system": "http://mydomain.com/fhir/cs/OrderAbbreviation",
+							"code": "CS5_Pt Access",
+							"display": "Dialysis Access"
+						}
+					]
+				},
+				"performedDateTime": "2021-08-18T05:25:00.000-04:00",
+				"performer": [
+					{
+						"role": {
+							"coding": [
+								{
+									"system": "http://mydomain.com/fhir/cs/CSSignature",
+									"code": "CS5PreAccSign",
+									"display": "Pre Access Signature"
+								}
+							]
+						},
+						"actor": {
+							"display": "RN ClinTester|dateTime:08/18/2021 05:25:29"
+						}
+					},
+					{
+						"role": {
+							"coding": [
+								{
+									"system": "http://mydomain.com/fhir/cs/CSSignature",
+									"code": "CS5PostAccSign",
+									"display": "Post Access Signature"
+								}
+							]
+						},
+						"actor": {
+							"display": "RN ClinTester|dateTime:08/18/2021 05:27:46"
+						}
+					}
+				],
+				"bodySite": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.com/fhir/cs/CS5AccessLoc",
+								"code": "Left Upper Arm",
+								"display": "Left Upper Arm"
+							}
+						]
+					}
+				],
+				"complication": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.com/fhir/cs/CS5AccNewFind",
+								"code": "No Unusual Findings",
+								"display": "No Unusual Findings"
+							}
+						]
+					}
+				],
+				"usedCode": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.com/fhir/cs/CS2HPArtUsed",
+								"code": "15g1\"",
+								"display": "15g1\""
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.com/fhir/cs/CS2HPVenUsed",
+								"code": "15g1\"",
+								"display": "15g1\""
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.com/fhir/cs/CS5AccessStatus",
+								"code": "Active (in use)",
+								"display": "Active (in use)"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.com/fhir/cs/CS5AccessType",
+								"code": "AVFistula-Standard",
+								"display": "AVFistula-Standard"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.com/fhir/cs/CS5ButtonUsed",
+								"code": "Y",
+								"display": "Y"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.com/fhir/cs/CS5UsedToday",
+								"code": "Y",
+								"display": "Y"
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Procedure/P1"
+			}
+		}
+	]
+}

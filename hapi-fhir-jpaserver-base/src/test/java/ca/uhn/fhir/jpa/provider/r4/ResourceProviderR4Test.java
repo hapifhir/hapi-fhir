@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.net.InetSocketAddress;
@@ -48,9 +49,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3SearchCustomSearchParamTest;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
-import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -161,7 +161,6 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
-import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -406,6 +405,51 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	@Test
+	public void testSearchResourceRevIncludesPartOfWithCustomSearchParameter() throws IOException {
+		String procedureIdParent = "Procedure/PRA8780542726";
+		String procedureIdChild = "Procedure/PRA8780542785";
+		String bodyStructureIdInChild = "BodyStructure/B51936689";
+		SearchParameter sp = new SearchParameter();
+		sp.addBase("BodySite");
+		sp.addBase("Procedure");
+		sp.setCode("focalAccess");
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.setName("SP_ProcedureBodySite");
+		sp.setDescription("Search Parameter for bodySite in Procedure");
+		sp.setExpression("Procedure.extension('Procedure#focalAccess')");
+		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.getTarget().add(new CodeType("BodySite"));
+		mySearchParameterDao.create(sp);
+
+		mySearchParamRegistry.forceRefresh();
+
+		ValueSet valueSet = myFhirCtx.newJsonParser().parseResource(ValueSet.class, loadClasspath("/custom_resource_valueset.json"));
+		IIdType pidValueSet = myValueSetDao.create(valueSet, mySrd).getId().toUnqualifiedVersionless();
+
+		InputStream bundleRes = ResourceProviderR4Test.class.getResourceAsStream("/r4-custom-resource-bundle-no-phi.json");
+
+		String bundleStr = IOUtils.toString(bundleRes);
+		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, bundleStr);
+		Bundle resp = mySystemDao.transaction(mySrd, bundle);
+		logAllResourceLinks();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+
+		// https://hapi.fhir.org/baseR4/Procedure
+		// ?_id=PRA8780542726
+		// &_revinclude=Procedure%3Apart-of
+		// &_include%3Arecurse=Procedure:part-of%3AfocalAccess
+		Bundle response = myClient
+			.search()
+			.byUrl("Procedure?_id=" + procedureIdParent + "&_revinclude=Procedure%3Apart-of&_include%3Arecurse=Procedure:part-of%3AfocalAccess")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
+		ourLog.info("ids: {}", ids);
+		assertThat(ids, containsInAnyOrder(procedureIdParent, procedureIdChild, bodyStructureIdInChild));
+	}
 
 	@Test
 	public void testManualPagingLinkOffsetDoesntReturnBeyondEnd() {

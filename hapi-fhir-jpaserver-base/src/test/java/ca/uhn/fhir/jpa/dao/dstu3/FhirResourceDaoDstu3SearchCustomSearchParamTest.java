@@ -13,17 +13,43 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.TestUtil;
-import org.hl7.fhir.dstu3.model.*;
+import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.Appointment.AppointmentStatus;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Communication;
+import org.hl7.fhir.dstu3.model.Condition;
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.DateType;
+import org.hl7.fhir.dstu3.model.DecimalType;
+import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.IntegerType;
+import org.hl7.fhir.dstu3.model.Medication;
+import org.hl7.fhir.dstu3.model.MedicationAdministration;
+import org.hl7.fhir.dstu3.model.MedicationRequest;
+import org.hl7.fhir.dstu3.model.MedicationStatement;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.ProcedureRequest;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.SearchParameter;
+import org.hl7.fhir.dstu3.model.Specimen;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -166,6 +192,107 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
 		ourLog.info("IDS: " + ids);
 		assertThat(ids, contains(pid.getValue()));
+	}
+
+	@Test
+	public void testCustomSearchParamSearchResults() throws IOException {
+		String bodySiteId = "BodySite/BS1";
+		String procedureId = "Procedure/P1";
+		SearchParameter sp = new SearchParameter();
+		sp.addBase("BodySite");
+		sp.addBase("Procedure");
+		sp.setCode("focalAccess");
+		sp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
+		sp.setName("SP_ProcedureBodySite");
+		sp.setDescription("Search Parameter for bodySite in Procedure");
+		sp.setExpression("Procedure.extension('Procedure#focalAccess')");
+		sp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		sp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		sp.getTarget().add(new CodeType("BodySite"));
+		mySearchParameterDao.create(sp);
+
+		mySearchParamRegistry.forceRefresh();
+
+		ValueSet valueSet = myFhirCtx.newJsonParser().parseResource(ValueSet.class, loadClasspath("/custom_resource_valueset.json"));
+		myValueSetDao.create(valueSet, mySrd).getId().toUnqualifiedVersionless();
+
+		InputStream bundleRes = FhirResourceDaoDstu3SearchCustomSearchParamTest.class.getResourceAsStream("/dstu3-custom-resource-bundle-no-phi.json");
+
+		String bundleStr = IOUtils.toString(bundleRes);
+		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, bundleStr);
+		Bundle resp = mySystemDao.transaction(mySrd, bundle);
+		logAllResourceLinks();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+
+		// {basefhir}/Procedure
+		// 	?patient=Patient%2FP5000553986&category=Hemodialysis%2CTransitional%20Care%20Dialysis&code%3Ain=http%3A%2F%2Ffkcfhir.org%2Ffhir%2Fvs%2Fccdaihddialysisorder
+		// 	&status=completed
+		// 	&date=ge2021-07-19
+		// 	&_include=Procedure%3Areport
+		// 	&_include=Procedure%3AusedReference
+		// 	&_include%3Arecurse=DiagnosticReport%3Aresult
+		// 	&_include%3Arecurse=Procedure%3AfocalAccess
+		// 	&_revinclude=Procedure%3Apart-of
+		// 	&_sort=-date
+		// 	&_count=1
+		SearchParameterMap map = new SearchParameterMap();
+		String resourceName = "Procedure";
+		map.addInclude(new Include("Procedure:focalAccess"));
+
+		// Perform the Search
+		IBundleProvider results = myProcedureDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		ourLog.info("ids: {}", ids);
+		assertThat(ids, containsInAnyOrder(bodySiteId, procedureId));
+	}
+
+	@Test
+	public void testCustomSearchParamSearchResultsPart2() throws IOException {
+		String procedureIdParent = "Procedure/PRA8780542726";
+		String procedureIdChild = "Procedure/PRA8780542785";
+		String bodySiteIdInChild = "BodySite/B51936689";
+		SearchParameter sp = new SearchParameter();
+		sp.addBase("BodySite");
+		sp.addBase("Procedure");
+		sp.setCode("focalAccess");
+		sp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.REFERENCE);
+		sp.setName("SP_ProcedureBodySite");
+		sp.setDescription("Search Parameter for bodySite in Procedure");
+		sp.setExpression("Procedure.extension('Procedure#focalAccess')");
+		sp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		sp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		sp.getTarget().add(new CodeType("BodySite"));
+		mySearchParameterDao.create(sp);
+
+		mySearchParamRegistry.forceRefresh();
+
+		ValueSet valueSet = myFhirCtx.newJsonParser().parseResource(ValueSet.class, loadClasspath("/custom_resource_valueset.json"));
+		IIdType pidValueSet = myValueSetDao.create(valueSet, mySrd).getId().toUnqualifiedVersionless();
+
+		InputStream bundleRes = FhirResourceDaoDstu3SearchCustomSearchParamTest.class.getResourceAsStream("/dstu3-custom-resource-bundle-no-phi.json");
+
+		String bundleStr = IOUtils.toString(bundleRes);
+		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, bundleStr);
+		Bundle resp = mySystemDao.transaction(mySrd, bundle);
+		logAllResourceLinks();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+
+		// https://hapi.fhir.org/baseR4/Procedure
+		// ?_id=PRA8780542726
+		// &_revinclude=Procedure%3Apart-of
+		// &_include%3Arecurse=Procedure:part-of%3AfocalAccess
+		// TODO - Create SearchParam map entries that match the URl above as I cannot figure out
+		// TODO - how to replicate it using the following lines of SearchParameterMap code!
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add("_id", new StringParam(procedureIdParent));
+		map.addRevInclude(new Include("Procedure:part-of")); //.setRecurse(true)
+		map.addInclude(new Include("Procedure:part-of:focalAccess").setRecurse(true));
+
+		// Perform the Search
+		IBundleProvider results = myProcedureDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		ourLog.info("ids: {}", ids);
+		assertThat(ids, containsInAnyOrder(procedureIdParent, procedureIdChild, bodySiteIdInChild));
 	}
 
 	@Test

@@ -1,0 +1,282 @@
+{
+	"resourceType": "Bundle",
+	"id": "bundle-procedure",
+	"type": "transaction",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "Procedure",
+				"id": "PRA8780542785",
+				"meta": {
+					"versionId": "5",
+					"lastUpdated": "2021-08-18T20:16:04.775+00:00"
+				},
+				"extension": [ {
+					"url": "http://fkcfhir.org/fhir/cs/CS1MachNumber",
+					"valueReference": {
+						"reference": "BodyStructure/B51936689"
+					}
+				} ],
+				"identifier": [ {
+					"system": "urn:oid:2.16.840.1.113883.3.7418.20.1",
+					"value": "A8780542785"
+				} ],
+				"partOf": [ {
+					"reference": "Procedure/PRA8780542726"
+				} ],
+				"status": "completed",
+				"category": {
+					"coding": [ {
+						"system": "http://fkcfhir.org/fhir/cs/FMCOrderType",
+						"code": "Hemodialysis",
+						"display": "Hemodialysis2"
+					} ]
+				},
+				"code": {
+					"coding": [ {
+						"system": "http://fkcfhir.org/fhir/cs/FMCOrderAbbreviation",
+						"code": "CS5_Pt Access",
+						"display": "Dialysis Access"
+					} ]
+				},
+				"performedDateTime": "2021-08-18T05:25:00.000-04:00",
+				"performer": [ {
+					"actor": {
+						"display": "RN ClinTester|dateTime:08/18/2021 05:25:29"
+					}
+				}, {
+					"actor": {
+						"display": "RN ClinTester|dateTime:08/18/2021 05:27:46"
+					}
+				} ],
+				"bodySite": [ {
+					"coding": [ {
+						"system": "http://fkcfhir.org/fhir/cs/CS5AccessLoc",
+						"code": "Left Upper Arm",
+						"display": "Left Upper Arm"
+					} ]
+				} ],
+				"complication": [ {
+					"coding": [ {
+						"system": "http://fkcfhir.org/fhir/cs/CS5AccNewFind",
+						"code": "No Unusual Findings",
+						"display": "No Unusual Findings1"
+					} ]
+				} ],
+				"usedCode": [ {
+					"coding": [ {
+						"system": "http://fkcfhir.org/fhir/cs/CS2HPArtUsed",
+						"code": "15g1\"",
+						"display": "15g1\""
+					} ]
+				}, {
+					"coding": [ {
+						"system": "http://fkcfhir.org/fhir/cs/CS2HPVenUsed",
+						"code": "15g1\"",
+						"display": "15g1\""
+					} ]
+				}, {
+					"coding": [ {
+						"system": "http://fkcfhir.org/fhir/cs/CS5AccessStatus",
+						"code": "Active (in use)",
+						"display": "Active (in use)"
+					} ]
+				}, {
+					"coding": [ {
+						"system": "http://fkcfhir.org/fhir/cs/CS5AccessType",
+						"code": "AVFistula-Standard",
+						"display": "AVFistula-Standard"
+					} ]
+				}, {
+					"coding": [ {
+						"system": "http://fkcfhir.org/fhir/cs/CS5ButtonUsed",
+						"code": "Y",
+						"display": "Y"
+					} ]
+				}, {
+					"coding": [ {
+						"system": "http://fkcfhir.org/fhir/cs/CS5UsedToday",
+						"code": "Y",
+						"display": "Y"
+					} ]
+				} ]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Procedure/PRA8780542785"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Procedure",
+				"id": "PRA8780542726",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2021-08-18T20:02:23.202+00:00"
+				},
+				"identifier": [ {
+					"system": "urn:oid:2.16.840.1.113883.3.7418.20.1",
+					"value": "A8780542726"
+				} ],
+				"status": "completed",
+				"category": {
+					"coding": [ {
+						"system": "http://fkcfhir.org/fhir/cs/FMCOrderType",
+						"code": "Hemodialysis",
+						"display": "Hemodialysis"
+					} ]
+				},
+				"code": {
+					"coding": [ {
+						"system": "http://fkcfhir.org/fhir/cs/FMCOrderAbbreviation",
+						"code": "HD_Standard",
+						"display": "In Ctr HD"
+					} ]
+				},
+				"performedDateTime": "2021-08-18T01:30:00.000-04:00",
+				"usedReference": [ {
+					"reference": "Device/DVf3hemoflow"
+				} ],
+				"usedCode": [ {
+					"coding": [ {
+						"system": "http://fkcfhir.org/fhir/cs/CS2HPDialysate",
+						"code": "2.0 K, 2.0 Ca, 0.75 Mg, 100 Dextrose (G2220)",
+						"display": "2.0 K, 2.0 Ca, 0.75 Mg, 100 Dextrose (G2220)"
+					} ]
+				}, {
+					"coding": [ {
+						"system": "http://fkcfhir.org/fhir/cs/CS1MachShift",
+						"code": "5",
+						"display": "5"
+					} ]
+				}, {
+					"coding": [ {
+						"system": "http://fkcfhir.org/fhir/cs/CS1MachNumber",
+						"code": "54",
+						"display": "54"
+					} ]
+				}, {
+					"coding": [ {
+						"system": "http://fkcfhir.org/fhir/cs/CS1MachType",
+						"code": "FRES 2008 T",
+						"display": "FRES 2008 T"
+					} ]
+				} ]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Procedure/PRA8780542726"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "BodyStructure",
+				"id": "B51936689",
+				"meta": {
+					"extension": [ {
+						"url": "http://hapifhir.io/fhir/StructureDefinition/resource-meta-source",
+						"valueUri": "#fryyjsKfz7I87n5w"
+					} ],
+					"versionId": "1",
+					"lastUpdated": "2021-08-18T20:01:20.647+00:00"
+				},
+				"extension": [ {
+					"url": "BodySite#accessType",
+					"valueCodeableConcept": {
+						"coding": [ {
+							"system": "acc_access_typ_fkc",
+							"code": "AVF",
+							"display": "AVFistula"
+						} ],
+						"text": "AVFistula"
+					}
+				}, {
+					"url": "BodySite#accessSubType",
+					"valueCodeableConcept": {
+						"coding": [ {
+							"system": "acc_access_subtyp_fkc",
+							"code": "STD",
+							"display": "Standard"
+						} ],
+						"text": "Standard"
+					}
+				}, {
+					"url": "BodySite#status",
+					"valueCodeableConcept": {
+						"coding": [ {
+							"system": "acc_access_sts_fkc",
+							"code": "ACTVINUSE",
+							"display": "Active (In Use)"
+						} ],
+						"text": "Active (In Use)"
+					}
+				}, {
+					"url": "BodySite#statusDate",
+					"valueDate": "2020-01-01"
+				}, {
+					"url": "BodySite#statusHistory",
+					"extension": [ {
+						"url": "StatusHistory#status",
+						"valueCodeableConcept": {
+							"coding": [ {
+								"system": "acc_access_sts_fkc",
+								"code": "ACTVINUSE",
+								"display": "Active (In Use)"
+							} ],
+							"text": "Active (In Use)"
+						}
+					}, {
+						"url": "StatusHistory#statusDate",
+						"valueDate": "2020-01-01"
+					}, {
+						"url": "StatusHistory#isDeleted",
+						"valueBoolean": false
+					} ]
+				}, {
+					"url": "BodySite#vwingIndicator",
+					"valueCodeableConcept": {
+						"coding": [ {
+							"system": "http://fmcna.com/",
+							"code": "No",
+							"display": "No"
+						} ],
+						"text": "No"
+					}
+				}, {
+					"url": "BodySite#endovascularCreation",
+					"valueCodeableConcept": {
+						"coding": [ {
+							"system": "http://fmcna.com/",
+							"code": "No",
+							"display": "No"
+						} ],
+						"text": "No"
+					}
+				}, {
+					"url": "BodySite#createdBy",
+					"valueString": "TNURSE"
+				}, {
+					"url": "BodySite#createdDate",
+					"valueString": "2020-08-20T05:20:26-04:00"
+				}, {
+					"url": "BodySite#createdByUserName",
+					"valueString": "SC1 RN"
+				} ],
+				"identifier": [ {
+					"type": {
+						"coding": [ {
+							"system": "http://hl7.org/fhir/v2/0203",
+							"code": "DAMA_ID"
+						} ]
+					},
+					"system": "http://hl7.org/fhir/v2/0203",
+					"value": "TAC4049"
+				} ]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "BodyStructure/B51936689"
+			}
+		}
+	]
+}
