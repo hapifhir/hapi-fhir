@@ -1,6 +1,5 @@
 ---
 type: fix
 issue: 2902
-jira: SMILE-3000
 backport: cust_fmc_5_3
 title: "Fixed a bug wherein includes were not being included on revincludes."

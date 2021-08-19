@@ -40,9 +40,6 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(EmailSubscriptionDstu3Test.class);
 
-	@RegisterExtension
-	static GreenMailExtension ourGreenMail = new GreenMailExtension(ServerSetupTest.SMTP.withPort(0));
-
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
@@ -276,10 +273,9 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		mySubscriptionTestUtil.waitForQueueToDrain();
 	}
 
-	private MailConfig withMailConfig() {
-		return new MailConfig()
-			.setSmtpHostname(ServerSetupTest.SMTP.getBindAddress())
-			.setSmtpPort(ourGreenMail.getSmtp().getPort());
+	@AfterAll
+	public static void afterClass() {
+		ourTestSmtp.stop();
 	}
 
 	@BeforeAll
