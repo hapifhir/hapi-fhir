@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.r4.ResourceProviderR4Test;
@@ -34,7 +35,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -803,7 +806,30 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, new InputStreamReader(FhirResourceDaoR4VersionedReferenceTest.class.getResourceAsStream("/npe-causing-bundle.json")));
 
 		Bundle transaction = mySystemDao.transaction(new SystemRequestDetails(), bundle);
+	}
 
+	@Test
+	public void testAutoVersionPathsWithAutoCreatePlaceholders() {
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+
+		Observation obs = new Observation();
+		obs.setId("Observation/CDE");
+		obs.setSubject(new Reference("Patient/ABC"));
+		DaoMethodOutcome update = myObservationDao.create(obs);
+		Observation resource = (Observation)update.getResource();
+		String versionedPatientReference = resource.getSubject().getReference();
+		assertThat(versionedPatientReference, is(equalTo("Patient/ABC")));
+
+		myModelConfig.setAutoVersionReferenceAtPaths("Observation.subject");
+
+		obs = new Observation();
+		obs.setId("Observation/DEF");
+		obs.setSubject(new Reference("Patient/RED"));
+		update = myObservationDao.create(obs);
+		resource = (Observation)update.getResource();
+		versionedPatientReference = resource.getSubject().getReference();
+
+		assertThat(versionedPatientReference, is(equalTo("Patient/RED/_history/1")));
 	}
 
 

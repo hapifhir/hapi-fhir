@@ -28,14 +28,14 @@
 			},
 			"use": "claim",
 			"patient": {
-				"reference": "Patient/123"
+				"reference": "Patient/ABC"
 			},
 			"billablePeriod": {
 				"start": "2015-12-14T00:00:00-05:00"
 			},
 			"created": "2021-08-16T13:54:10-04:00",
 			"insurer": {
-				"reference": "Organization/1"
+				"reference": "Organization/A"
 			},
 			"provider": {
 				"reference": "Organization/b9d22776-1ee9-3843-bc48-b4bf67861483"
@@ -44,7 +44,7 @@
 			"careTeam": [ {
 				"sequence": 1,
 				"provider": {
-					"reference": "Practitioner/1"
+					"reference": "Practitioner/H"
 				},
 				"role": {
 					"coding": [ {
@@ -55,7 +55,7 @@
 			}, {
 				"sequence": 2,
 				"provider": {
-					"reference": "Practitioner/2"
+					"reference": "Practitioner/I"
 				},
 				"role": {
 					"coding": [ {
@@ -66,7 +66,7 @@
 			}, {
 				"sequence": 3,
 				"provider": {
-					"reference": "Practitioner/3"
+					"reference": "Practitioner/J"
 				},
 				"role": {
 					"coding": [ {
@@ -129,7 +129,7 @@
 			"insurance": [ {
 				"focal": true,
 				"coverage": {
-					"reference": "Coverage/10"
+					"reference": "Coverage/G"
 				}
 			} ],
 			"total": [ {
@@ -185,14 +185,14 @@
 			},
 			"use": "claim",
 			"patient": {
-				"reference": "Patient/123"
+				"reference": "Patient/ABC"
 			},
 			"billablePeriod": {
 				"start": "2015-12-18T00:00:00-05:00"
 			},
 			"created": "2021-08-16T13:54:10-04:00",
 			"insurer": {
-				"reference": "Organization/1"
+				"reference": "Organization/A"
 			},
 			"provider": {
 				"reference": "Organization/d10823cf-ee15-3a0e-a12e-1509cd18cda4"
@@ -201,7 +201,7 @@
 			"careTeam": [ {
 				"sequence": 1,
 				"provider": {
-					"reference": "Practitioner/4"
+					"reference": "Practitioner/D"
 				},
 				"role": {
 					"coding": [ {
@@ -212,7 +212,7 @@
 			}, {
 				"sequence": 2,
 				"provider": {
-					"reference": "Practitioner/5"
+					"reference": "Practitioner/E"
 				},
 				"role": {
 					"coding": [ {
@@ -223,7 +223,7 @@
 			}, {
 				"sequence": 3,
 				"provider": {
-					"reference": "Practitioner/6"
+					"reference": "Practitioner/F"
 				},
 				"role": {
 					"coding": [ {
@@ -370,7 +370,7 @@
 			"insurance": [ {
 				"focal": true,
 				"coverage": {
-					"reference": "Coverage/10"
+					"reference": "Coverage/G"
 				}
 			} ],
 			"total": [ {
