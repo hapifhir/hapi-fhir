@@ -15,6 +15,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.time.DateUtils;
 import org.fhir.ucum.UcumService;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_10_50;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_10_50;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
@@ -691,7 +692,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 				converter = new IVersionTypeConverter() {
 					@Override
 					public Resource toCanonical(IBaseResource theNonCanonical) {
-						Resource retVal = VersionConvertorFactory_10_50.convertResource((org.hl7.fhir.dstu2.model.Resource) theNonCanonical);
+						Resource retVal = VersionConvertorFactory_10_50.convertResource((org.hl7.fhir.dstu2.model.Resource) theNonCanonical, new BaseAdvisor_10_50(false));
 						if (theNonCanonical instanceof org.hl7.fhir.dstu2.model.ValueSet) {
 							org.hl7.fhir.dstu2.model.ValueSet valueSet = (org.hl7.fhir.dstu2.model.ValueSet) theNonCanonical;
 							if (valueSet.hasCodeSystem() && valueSet.getCodeSystem().hasSystem()) {
