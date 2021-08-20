@@ -78,7 +78,8 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		CodingDt coding = null;
 		CodeableConceptDt codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertFalse(result.isOk());
+		//TODO JA, from what I read, this _should_ pass, but this was flipped to false in a previous commit.
+		assertTrue(result.isOk());
 	}
 
 	@Test
