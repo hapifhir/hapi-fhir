@@ -330,6 +330,9 @@ public abstract class BaseTransactionProcessor {
 
 		long start = System.currentTimeMillis();
 
+		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
 		IBaseBundle response = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.BATCHRESPONSE.toCode());
 		Map<Integer, Object> responseMap = new ConcurrentHashMap<>();
 				
@@ -1575,9 +1578,6 @@ public abstract class BaseTransactionProcessor {
 		@Override
 		public Void call() {
 			
-			TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-
 			BaseServerResponseExceptionHolder caughtEx = new BaseServerResponseExceptionHolder();
 
 			try {

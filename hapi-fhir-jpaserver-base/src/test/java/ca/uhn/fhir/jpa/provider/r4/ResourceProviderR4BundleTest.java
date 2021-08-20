@@ -37,13 +37,6 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		myDaoConfig.setBundleBatchMaxPoolSize(100);
 	}
 	
-	@AfterEach
-	@Override
-	public void after() throws Exception {
-		super.after();
-		myDaoConfig.setBundleBatchPoolSize(1);
-		myDaoConfig.setBundleBatchMaxPoolSize(1);
-	}
 	/**
 	 * See #401
 	 */
