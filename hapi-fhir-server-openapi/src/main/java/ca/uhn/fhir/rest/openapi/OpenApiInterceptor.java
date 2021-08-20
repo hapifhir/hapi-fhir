@@ -386,6 +386,8 @@ public class OpenApiInterceptor {
 		Paths paths = new Paths();
 		openApi.setPaths(paths);
 
+		String partitionName = "DEFAULT/";
+
 		if (page == null || page.equals(PAGE_SYSTEM) || page.equals(PAGE_ALL)) {
 			Tag serverTag = new Tag();
 			serverTag.setName(PAGE_SYSTEM);
@@ -398,7 +400,6 @@ public class OpenApiInterceptor {
 			addFhirResourceResponse(ctx, openApi, capabilitiesOperation, "CapabilityStatement");
 
 			Set<CapabilityStatement.SystemRestfulInteraction> systemInteractions = cs.getRestFirstRep().getInteraction().stream().map(t -> t.getCode()).collect(Collectors.toSet());
-
 			// Transaction Operation
 			if (systemInteractions.contains(CapabilityStatement.SystemRestfulInteraction.TRANSACTION) || systemInteractions.contains(CapabilityStatement.SystemRestfulInteraction.BATCH)) {
 				Operation transaction = getPathItem(paths, "/", PathItem.HttpMethod.POST);
@@ -513,7 +514,7 @@ public class OpenApiInterceptor {
 
 			// Search
 			if (typeRestfulInteractions.contains(CapabilityStatement.TypeRestfulInteraction.SEARCHTYPE)) {
-				Operation operation = getPathItem(paths, "/" + resourceType, PathItem.HttpMethod.GET);
+				Operation operation = getPathItem(paths, "/"  + partitionName + resourceType, PathItem.HttpMethod.GET);
 				operation.addTagsItem(resourceType);
 				operation.setDescription("This is a search type");
 				operation.setSummary("search-type: Search for " + resourceType + " instances");
