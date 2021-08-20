@@ -20,18 +20,17 @@ package org.hl7.fhir.converter;
  * #L%
  */
 
-import org.hl7.fhir.convertors.advisors.VersionConvertorAdvisor30;
-import org.hl7.fhir.dstu2.model.Resource;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.CodeSystem;
-import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_10_40;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r5.model.FhirPublication;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class NullVersionConverterAdvisor30 implements VersionConvertorAdvisor30 {
+public class NullVersionConverterAdvisor10_40 extends BaseAdvisor_10_40 {
 
 
 	@Nullable
