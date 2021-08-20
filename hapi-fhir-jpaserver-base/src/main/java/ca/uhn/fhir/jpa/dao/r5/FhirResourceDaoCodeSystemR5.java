@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -150,7 +151,7 @@ public class FhirResourceDaoCodeSystemR5 extends BaseHapiFhirResourceDao<CodeSys
 			CodeSystem cs = (CodeSystem) theResource;
 			addPidToResource(theEntity, theResource);
 
-			myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded((org.hl7.fhir.r4.model.CodeSystem) VersionConvertorFactory_40_50.convertResource(cs), (ResourceTable) theEntity);
+			myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded((org.hl7.fhir.r4.model.CodeSystem) VersionConvertorFactory_40_50.convertResource(cs, new BaseAdvisor_40_50(false)), (ResourceTable) theEntity);
 		}
 
 		return retVal;
