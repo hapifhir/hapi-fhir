@@ -78,7 +78,6 @@ import org.thymeleaf.IEngineConfiguration;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.cache.AlwaysValidCacheEntryValidity;
 import org.thymeleaf.cache.ICacheEntryValidity;
-import org.thymeleaf.cache.NonCacheableCacheEntryValidity;
 import org.thymeleaf.context.IExpressionContext;
 import org.thymeleaf.context.WebContext;
 import org.thymeleaf.linkbuilder.AbstractLinkBuilder;
@@ -127,11 +126,20 @@ public class OpenApiInterceptor {
 	private final Map<String, String> myResourcePathToClasspath = new HashMap<>();
 	private final Map<String, String> myExtensionToContentType = new HashMap<>();
 	private String myBannerImage;
+	private final boolean myShowPartitionPrefix;
+
+	// FIXME KZ delete this?  Or figure out a better way to pass the configuration in.
+	public OpenApiInterceptor() {
+		this(false,null);
+	}
 
 	/**
 	 * Constructor
 	 */
-	public OpenApiInterceptor() {
+	public OpenApiInterceptor(boolean theRequestPartitionFlag, String theDefaultPartitionName) {
+		// FIXME MB how to configure?  Do we know the default partition name?
+		myShowPartitionPrefix = theRequestPartitionFlag;
+
 		mySwaggerUiVersion = initSwaggerUiWebJar();
 
 		myTemplateEngine = new TemplateEngine();
@@ -746,6 +754,17 @@ public class OpenApiInterceptor {
 
 	private Operation getPathItem(Paths thePaths, String thePath, PathItem.HttpMethod theMethod) {
 		PathItem pathItem;
+		String partitionPrefix;
+
+		Operation newOperation = new Operation();
+
+		if (myShowPartitionPrefix) {
+			partitionPrefix = "/{partitionId}";
+			addPartitionNameParameter(newOperation);
+		} else {
+			partitionPrefix = "";
+		}
+		thePath = partitionPrefix + thePath;
 		if (thePaths.containsKey(thePath)) {
 			pathItem = thePaths.get(thePath);
 		} else {
@@ -756,19 +775,19 @@ public class OpenApiInterceptor {
 		switch (theMethod) {
 			case POST:
 				assert pathItem.getPost() == null : "Have duplicate POST at path: " + thePath;
-				return pathItem.post(new Operation()).getPost();
+				return pathItem.post(newOperation).getPost();
 			case GET:
 				assert pathItem.getGet() == null : "Have duplicate GET at path: " + thePath;
-				return pathItem.get(new Operation()).getGet();
+				return pathItem.get(newOperation).getGet();
 			case PUT:
 				assert pathItem.getPut() == null;
-				return pathItem.put(new Operation()).getPut();
+				return pathItem.put(newOperation).getPut();
 			case PATCH:
 				assert pathItem.getPatch() == null;
-				return pathItem.patch(new Operation()).getPatch();
+				return pathItem.patch(newOperation).getPatch();
 			case DELETE:
 				assert pathItem.getDelete() == null;
-				return pathItem.delete(new Operation()).getDelete();
+				return pathItem.delete(newOperation).getDelete();
 			case HEAD:
 			case OPTIONS:
 			case TRACE:
@@ -840,6 +859,18 @@ public class OpenApiInterceptor {
 		parameter.setIn("path");
 		parameter.setDescription("The resource ID");
 		parameter.setExample("123");
+		parameter.setSchema(new Schema().type("string").minimum(new BigDecimal(1)));
+		parameter.setStyle(Parameter.StyleEnum.SIMPLE);
+		theOperation.addParametersItem(parameter);
+	}
+
+	private void addPartitionNameParameter(Operation theOperation) {
+		Parameter parameter = new Parameter();
+		parameter.setName("partition_name");
+		// FIXME MB only if request mode
+		parameter.setIn("path");
+		parameter.setDescription("The name of the partition to target");
+		parameter.setExample("DEFAULT");
 		parameter.setSchema(new Schema().type("string").minimum(new BigDecimal(1)));
 		parameter.setStyle(Parameter.StyleEnum.SIMPLE);
 		theOperation.addParametersItem(parameter);
