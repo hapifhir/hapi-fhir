@@ -2,4 +2,4 @@
 type: add
 issue: 2836
 jira: SMILE-2197
-title: "Processing a FHIR bundle batch now in parallel by default and it's configurable by DaoConfig."
+title: "FHIR bundle batch is now processed in parallel by default and is configurable by DaoConfig."
