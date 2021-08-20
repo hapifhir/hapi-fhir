@@ -735,6 +735,32 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 
 	@Test
+	public void testSearchOnIdAndReference() {
+
+		Patient p = new Patient();
+		p.setId("B");
+		myPatientDao.update(p);
+
+		Observation obs = new Observation();
+		obs.setId("A");
+		obs.setSubject(new Reference("Patient/B"));
+		myObservationDao.update(obs);
+
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add("_id", new TokenParam("A"));
+		map.add("subject", new ReferenceParam("Patient/B"));
+		myCaptureQueriesListener.clear();
+		IBundleProvider outcome = myObservationDao.search(map, new SystemRequestDetails());
+		assertEquals(1, outcome.getResources(0, 999).size());
+		String selectQuery = myCaptureQueriesListener.logSelectQueriesForCurrentThread(1);
+		assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "partition_id is null"));
+
+	}
+
+
+
+	@Test
 	public void testSearchOnReverseInclude() {
 		Patient patient = new Patient();
 		patient.getMeta().addTag("http://system", "value1", "display");
