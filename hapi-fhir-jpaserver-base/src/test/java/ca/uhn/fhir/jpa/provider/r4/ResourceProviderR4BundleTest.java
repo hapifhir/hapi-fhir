@@ -22,6 +22,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 
@@ -37,6 +38,13 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		myDaoConfig.setBundleBatchMaxPoolSize(100);
 	}
 	
+	@AfterEach
+	@Override
+	public void after() throws Exception {
+		super.after();
+		myDaoConfig.setBundleBatchPoolSize(DaoConfig.DEFAULT_BUNDLE_BATCH_POOL_SIZE);
+		myDaoConfig.setBundleBatchMaxPoolSize(DaoConfig.DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE);
+	}
 	/**
 	 * See #401
 	 */

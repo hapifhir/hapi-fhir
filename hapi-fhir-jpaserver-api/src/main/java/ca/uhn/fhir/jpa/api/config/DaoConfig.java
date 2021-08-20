@@ -262,8 +262,8 @@ public class DaoConfig {
 	 * @since 5.6.0
 	 */
 	// Thread Pool size used by batch in bundle
-	public static final int DEFAULT_BUNDLE_BATCH_POOL_SIZE = 20; //20
-	public static final int DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE = 100; //100
+	public static final int DEFAULT_BUNDLE_BATCH_POOL_SIZE = 20; // 1 for single thread
+	public static final int DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE = 100; // 1 for single thread
 	public static final int DEFAULT_BUNDLE_BATCH_QUEUE_CAPACITY = 200;
 
 	private Integer myBundleBatchPoolSize = DEFAULT_BUNDLE_BATCH_POOL_SIZE;
