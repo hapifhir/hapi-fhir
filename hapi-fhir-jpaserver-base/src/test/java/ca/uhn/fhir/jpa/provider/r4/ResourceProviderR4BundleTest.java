@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -32,10 +33,17 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 	@Override
 	public void before() throws Exception {
 		super.before();
-		myDaoConfig.setBundleBatchPoolSize(myDaoConfig.DEFAULT_BUNDLE_BATCH_POOL_SIZE);
-		myDaoConfig.setBundleBatchMaxPoolSize(myDaoConfig.DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE);
+		myDaoConfig.setBundleBatchPoolSize(20);
+		myDaoConfig.setBundleBatchMaxPoolSize(100);
 	}
 	
+	@AfterEach
+	@Override
+	public void after() throws Exception {
+		super.after();
+		myDaoConfig.setBundleBatchPoolSize(1);
+		myDaoConfig.setBundleBatchMaxPoolSize(1);
+	}
 	/**
 	 * See #401
 	 */
