@@ -753,8 +753,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myObservationDao.search(map, new SystemRequestDetails());
 		assertEquals(1, outcome.getResources(0, 999).size());
-		String selectQuery = myCaptureQueriesListener.logSelectQueriesForCurrentThread(1);
-		assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "partition_id is null"));
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
+		assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "select t0.res_id from hfj_resource t0"), selectQuery);
+		assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_type = 'observation'"), selectQuery);
+		assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_deleted_at is null"), selectQuery);
 
 	}
 
