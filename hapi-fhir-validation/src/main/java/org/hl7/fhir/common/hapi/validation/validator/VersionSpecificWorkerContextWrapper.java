@@ -707,7 +707,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 					@Override
 					public IBaseResource fromCanonical(Resource theCanonical) {
-						return VersionConvertorFactory_10_50.convertResource(theCanonical);
+						return VersionConvertorFactory_10_50.convertResource(theCanonical, new BaseAdvisor_10_50(false));
 					}
 				};
 				break;

@@ -57,6 +57,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance;
 import org.hl7.fhir.dstu3.model.Appointment;
@@ -462,7 +463,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	 */
 	public static ConceptMap createConceptMap() {
 		try {
-			return (ConceptMap) VersionConvertorFactory_30_40.convertResource(BaseJpaR4Test.createConceptMap());
+			return (ConceptMap) VersionConvertorFactory_30_40.convertResource(BaseJpaR4Test.createConceptMap(), new BaseAdvisor_30_40(false));
 		} catch (FHIRException fe) {
 			throw new InternalErrorException(fe);
 		}

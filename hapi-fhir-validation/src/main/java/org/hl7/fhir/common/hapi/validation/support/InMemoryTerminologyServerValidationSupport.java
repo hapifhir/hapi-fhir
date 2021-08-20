@@ -9,6 +9,7 @@ import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_10_50;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_50;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_10_50;
@@ -67,15 +68,15 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		IBaseResource expansion;
 		switch (myCtx.getVersion().getVersion()) {
 			case DSTU2_HL7ORG: {
-				expansion = VersionConvertorFactory_10_50.convertResource(expansionR5);
+				expansion = VersionConvertorFactory_10_50.convertResource(expansionR5, new BaseAdvisor_10_50(false));
 				break;
 			}
 			case DSTU3: {
-				expansion = VersionConvertorFactory_30_50.convertResource(expansionR5);
+				expansion = VersionConvertorFactory_30_50.convertResource(expansionR5, new BaseAdvisor_30_50(false));
 				break;
 			}
 			case R4: {
-				expansion = VersionConvertorFactory_40_50.convertResource(expansionR5);
+				expansion = VersionConvertorFactory_40_50.convertResource(expansionR5, new BaseAdvisor_40_50(false));
 				break;
 			}
 			case R5: {
@@ -358,10 +359,10 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		};
 		Function<String, org.hl7.fhir.r5.model.ValueSet> valueSetLoader = t -> {
 			org.hl7.fhir.dstu2.model.ValueSet valueSet = (org.hl7.fhir.dstu2.model.ValueSet) theValidationSupportContext.getRootValidationSupport().fetchValueSet(t);
-			return (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_10_50.convertResource(valueSet);
+			return (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_10_50.convertResource(valueSet, new BaseAdvisor_10_50(false));
 		};
 
-		org.hl7.fhir.r5.model.ValueSet input = (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_10_50.convertResource(theInput);
+		org.hl7.fhir.r5.model.ValueSet input = (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_10_50.convertResource(theInput, new BaseAdvisor_10_50(false));
 		org.hl7.fhir.r5.model.ValueSet output = expandValueSetR5(theValidationSupportContext, input, codeSystemLoader, valueSetLoader, theWantSystemUrlAndVersion, theWantCode);
 		return (output);
 	}
@@ -384,11 +385,11 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		Function<String, org.hl7.fhir.r5.model.ValueSet> valueSetLoader = t -> {
 			ca.uhn.fhir.model.dstu2.resource.ValueSet valueSet = (ca.uhn.fhir.model.dstu2.resource.ValueSet) theValidationSupportContext.getRootValidationSupport().fetchValueSet(t);
 			org.hl7.fhir.dstu2.model.ValueSet valueSetRi = parserRi.parseResource(org.hl7.fhir.dstu2.model.ValueSet.class, parserHapi.encodeResourceToString(valueSet));
-			return (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_10_50.convertResource(valueSetRi);
+			return (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_10_50.convertResource(valueSetRi, new BaseAdvisor_10_50(false));
 		};
 
 		org.hl7.fhir.dstu2.model.ValueSet valueSetRi = parserRi.parseResource(org.hl7.fhir.dstu2.model.ValueSet.class, parserHapi.encodeResourceToString(theInput));
-		org.hl7.fhir.r5.model.ValueSet input = (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_10_50.convertResource(valueSetRi);
+		org.hl7.fhir.r5.model.ValueSet input = (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_10_50.convertResource(valueSetRi, new BaseAdvisor_10_50(false));
 		org.hl7.fhir.r5.model.ValueSet output = expandValueSetR5(theValidationSupportContext, input, codeSystemLoader, valueSetLoader, theWantSystemUrlAndVersion, theWantCode);
 		return (output);
 	}
@@ -448,7 +449,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			return (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_30_50.convertResource(valueSet, new BaseAdvisor_30_50(false));
 		};
 
-		org.hl7.fhir.r5.model.ValueSet input = (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_30_50.convertResource(theInput);
+		org.hl7.fhir.r5.model.ValueSet input = (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_30_50.convertResource(theInput, new BaseAdvisor_30_50(false));
 		org.hl7.fhir.r5.model.ValueSet output = expandValueSetR5(theValidationSupportContext, input, codeSystemLoader, valueSetLoader, theWantSystemUrlAndVersion, theWantCode);
 		return (output);
 	}
@@ -464,7 +465,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			return (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_40_50.convertResource(valueSet, new BaseAdvisor_40_50(false));
 		};
 
-		org.hl7.fhir.r5.model.ValueSet input = (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_40_50.convertResource(theInput);
+		org.hl7.fhir.r5.model.ValueSet input = (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_40_50.convertResource(theInput, new BaseAdvisor_40_50(false));
 		org.hl7.fhir.r5.model.ValueSet output = expandValueSetR5(theValidationSupportContext, input, codeSystemLoader, valueSetLoader, theWantSystemUrlAndVersion, theWantCode);
 		return (output);
 	}

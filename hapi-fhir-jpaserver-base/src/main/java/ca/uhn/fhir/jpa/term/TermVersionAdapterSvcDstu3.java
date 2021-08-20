@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.UrlUtil;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.ConceptMap;
@@ -72,7 +73,7 @@ public class TermVersionAdapterSvcDstu3 extends BaseTermVersionAdapterSvcImpl im
 	public IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
 		CodeSystem resourceToStore;
 		try {
-			resourceToStore = (CodeSystem) VersionConvertorFactory_30_40.convertResource(theCodeSystemResource);
+			resourceToStore = (CodeSystem) VersionConvertorFactory_30_40.convertResource(theCodeSystemResource, new BaseAdvisor_30_40(false));
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
@@ -89,7 +90,7 @@ public class TermVersionAdapterSvcDstu3 extends BaseTermVersionAdapterSvcImpl im
 	public void createOrUpdateConceptMap(org.hl7.fhir.r4.model.ConceptMap theConceptMap) {
 		ConceptMap resourceToStore;
 		try {
-			resourceToStore = (ConceptMap) VersionConvertorFactory_30_40.convertResource(theConceptMap);
+			resourceToStore = (ConceptMap) VersionConvertorFactory_30_40.convertResource(theConceptMap, new BaseAdvisor_30_40(false));
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
@@ -105,7 +106,7 @@ public class TermVersionAdapterSvcDstu3 extends BaseTermVersionAdapterSvcImpl im
 	public void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet) {
 		ValueSet valueSetDstu3;
 		try {
-			valueSetDstu3 = (ValueSet) VersionConvertorFactory_30_40.convertResource(theValueSet);
+			valueSetDstu3 = (ValueSet) VersionConvertorFactory_30_40.convertResource(theValueSet, new BaseAdvisor_30_40(false));
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}

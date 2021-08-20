@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -53,15 +54,15 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 
 	@Override
 	public org.hl7.fhir.dstu3.model.ValueSet expand(org.hl7.fhir.dstu3.model.ValueSet theSource, ValueSetExpansionOptions theOptions) {
-		org.hl7.fhir.r4.model.ValueSet canonicalInput = (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_30_40.convertResource(theSource);
+		org.hl7.fhir.r4.model.ValueSet canonicalInput = (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_30_40.convertResource(theSource, new BaseAdvisor_30_40(false));
 		org.hl7.fhir.r4.model.ValueSet canonicalOutput = myTerminologySvc.expandValueSet(theOptions, canonicalInput);
-		return (ValueSet) VersionConvertorFactory_30_40.convertResource(canonicalOutput);
+		return (ValueSet) VersionConvertorFactory_30_40.convertResource(canonicalOutput, new BaseAdvisor_30_40(false));
 	}
 
 	@Override
 	public org.hl7.fhir.dstu3.model.ValueSet expandByIdentifier(String theUri, ValueSetExpansionOptions theOptions) {
 		org.hl7.fhir.r4.model.ValueSet canonicalOutput = myTerminologySvc.expandValueSet(theOptions, theUri);
-		return (ValueSet) VersionConvertorFactory_30_40.convertResource(canonicalOutput);
+		return (ValueSet) VersionConvertorFactory_30_40.convertResource(canonicalOutput, new BaseAdvisor_30_40(false));
 	}
 
 	@Override
@@ -85,7 +86,7 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 			if (retVal.getDeleted() == null) {
 				try {
 					ValueSet valueSet = (ValueSet) theResource;
-					org.hl7.fhir.r4.model.ValueSet converted = (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_30_40.convertResource(valueSet);
+					org.hl7.fhir.r4.model.ValueSet converted = (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_30_40.convertResource(valueSet, new BaseAdvisor_30_40(false));
 					myTerminologySvc.storeTermValueSet(retVal, converted);
 				} catch (FHIRException fe) {
 					throw new InternalErrorException(fe);

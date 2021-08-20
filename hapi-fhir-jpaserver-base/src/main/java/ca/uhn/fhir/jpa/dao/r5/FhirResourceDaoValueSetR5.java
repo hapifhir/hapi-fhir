@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -52,14 +53,14 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 	@Override
 	public ValueSet expandByIdentifier(String theUri, ValueSetExpansionOptions theOptions) {
 		org.hl7.fhir.r4.model.ValueSet canonicalOutput = myTerminologySvc.expandValueSet(theOptions, theUri);
-		return (ValueSet) VersionConvertorFactory_40_50.convertResource(canonicalOutput);
+		return (ValueSet) VersionConvertorFactory_40_50.convertResource(canonicalOutput, new BaseAdvisor_40_50(false));
 	}
 
 	@Override
 	public ValueSet expand(ValueSet theSource, ValueSetExpansionOptions theOptions) {
-		org.hl7.fhir.r4.model.ValueSet canonicalInput = (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_40_50.convertResource(theSource);
+		org.hl7.fhir.r4.model.ValueSet canonicalInput = (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_40_50.convertResource(theSource, new BaseAdvisor_40_50(false));
 		org.hl7.fhir.r4.model.ValueSet canonicalOutput = myTerminologySvc.expandValueSet(theOptions, canonicalInput);
-		return (ValueSet) VersionConvertorFactory_40_50.convertResource(canonicalOutput);
+		return (ValueSet) VersionConvertorFactory_40_50.convertResource(canonicalOutput, new BaseAdvisor_40_50(false));
 	}
 
 	@Override
@@ -82,7 +83,7 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 		if (getConfig().isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
 			if (retVal.getDeleted() == null) {
 				ValueSet valueSet = (ValueSet) theResource;
-				myTerminologySvc.storeTermValueSet(retVal, (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_40_50.convertResource(valueSet));
+				myTerminologySvc.storeTermValueSet(retVal, (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_40_50.convertResource(valueSet, new BaseAdvisor_40_50(false)));
 			} else {
 				myTerminologySvc.deleteValueSetAndChildren(retVal);
 			}

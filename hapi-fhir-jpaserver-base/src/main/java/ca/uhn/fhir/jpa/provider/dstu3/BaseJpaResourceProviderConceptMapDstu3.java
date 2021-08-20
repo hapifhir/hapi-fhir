@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeType;
@@ -100,44 +101,44 @@ public class BaseJpaResourceProviderConceptMapDstu3 extends JpaResourceProviderD
 		try {
 
 			if (haveUrl) {
-				translationRequest.setUrl((org.hl7.fhir.r4.model.UriType) VersionConvertorFactory_30_40.convertType(theUrl));
+				translationRequest.setUrl((org.hl7.fhir.r4.model.UriType) VersionConvertorFactory_30_40.convertType(theUrl, new BaseAdvisor_30_40(false)));
 			}
 
 			if (haveConceptMapVersion) {
-				translationRequest.setConceptMapVersion((org.hl7.fhir.r4.model.StringType) VersionConvertorFactory_30_40.convertType(theConceptMapVersion));
+				translationRequest.setConceptMapVersion((org.hl7.fhir.r4.model.StringType) VersionConvertorFactory_30_40.convertType(theConceptMapVersion, new BaseAdvisor_30_40(false)));
 			}
 
 			// Convert from DSTU3 to R4
 			if (haveSourceCode) {
-				translationRequest.getCodeableConcept().addCoding().setCodeElement((org.hl7.fhir.r4.model.CodeType) VersionConvertorFactory_30_40.convertType(theSourceCode));
+				translationRequest.getCodeableConcept().addCoding().setCodeElement((org.hl7.fhir.r4.model.CodeType) VersionConvertorFactory_30_40.convertType(theSourceCode, new BaseAdvisor_30_40(false)));
 
 				if (haveSourceCodeSystem) {
-					translationRequest.getCodeableConcept().getCodingFirstRep().setSystemElement((org.hl7.fhir.r4.model.UriType) VersionConvertorFactory_30_40.convertType(theSourceCodeSystem));
+					translationRequest.getCodeableConcept().getCodingFirstRep().setSystemElement((org.hl7.fhir.r4.model.UriType) VersionConvertorFactory_30_40.convertType(theSourceCodeSystem, new BaseAdvisor_30_40(false)));
 				}
 
 				if (haveSourceCodeSystemVersion) {
-					translationRequest.getCodeableConcept().getCodingFirstRep().setVersionElement((org.hl7.fhir.r4.model.StringType) VersionConvertorFactory_30_40.convertType(theSourceCodeSystemVersion));
+					translationRequest.getCodeableConcept().getCodingFirstRep().setVersionElement((org.hl7.fhir.r4.model.StringType) VersionConvertorFactory_30_40.convertType(theSourceCodeSystemVersion, new BaseAdvisor_30_40(false)));
 				}
 			} else if (haveSourceCoding) {
-				translationRequest.getCodeableConcept().addCoding((org.hl7.fhir.r4.model.Coding) VersionConvertorFactory_30_40.convertType(theSourceCoding));
+				translationRequest.getCodeableConcept().addCoding((org.hl7.fhir.r4.model.Coding) VersionConvertorFactory_30_40.convertType(theSourceCoding, new BaseAdvisor_30_40(false)));
 			} else {
-				translationRequest.setCodeableConcept((org.hl7.fhir.r4.model.CodeableConcept) VersionConvertorFactory_30_40.convertType(theSourceCodeableConcept));
+				translationRequest.setCodeableConcept((org.hl7.fhir.r4.model.CodeableConcept) VersionConvertorFactory_30_40.convertType(theSourceCodeableConcept, new BaseAdvisor_30_40(false)));
 			}
 
 			if (haveSourceValueSet) {
-				translationRequest.setSource((org.hl7.fhir.r4.model.UriType) VersionConvertorFactory_30_40.convertType(theSourceValueSet));
+				translationRequest.setSource((org.hl7.fhir.r4.model.UriType) VersionConvertorFactory_30_40.convertType(theSourceValueSet, new BaseAdvisor_30_40(false)));
 			}
 
 			if (haveTargetValueSet) {
-				translationRequest.setTarget((org.hl7.fhir.r4.model.UriType) VersionConvertorFactory_30_40.convertType(theTargetValueSet));
+				translationRequest.setTarget((org.hl7.fhir.r4.model.UriType) VersionConvertorFactory_30_40.convertType(theTargetValueSet, new BaseAdvisor_30_40(false)));
 			}
 
 			if (haveTargetCodeSystem) {
-				translationRequest.setTargetSystem((org.hl7.fhir.r4.model.UriType) VersionConvertorFactory_30_40.convertType(theTargetCodeSystem));
+				translationRequest.setTargetSystem((org.hl7.fhir.r4.model.UriType) VersionConvertorFactory_30_40.convertType(theTargetCodeSystem, new BaseAdvisor_30_40(false)));
 			}
 
 			if (haveReverse) {
-				translationRequest.setReverse((org.hl7.fhir.r4.model.BooleanType) VersionConvertorFactory_30_40.convertType(theReverse));
+				translationRequest.setReverse((org.hl7.fhir.r4.model.BooleanType) VersionConvertorFactory_30_40.convertType(theReverse, new BaseAdvisor_30_40(false)));
 			}
 
 			if (haveId) {
@@ -153,7 +154,7 @@ public class BaseJpaResourceProviderConceptMapDstu3 extends JpaResourceProviderD
 			TranslateConceptResults result = dao.translate(translationRequest, theRequestDetails);
 
 			// Convert from R4 to DSTU3
-			return (Parameters) VersionConvertorFactory_30_40.convertResource(TermConceptMappingSvcImpl.toParameters(result));
+			return (Parameters) VersionConvertorFactory_30_40.convertResource(TermConceptMappingSvcImpl.toParameters(result), new BaseAdvisor_30_40(false));
 		} catch (FHIRException fe) {
 			throw new InternalErrorException(fe);
 		} finally {

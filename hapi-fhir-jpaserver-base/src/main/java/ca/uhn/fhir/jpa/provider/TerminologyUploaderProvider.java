@@ -40,6 +40,8 @@ import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -307,10 +309,10 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		CodeSystem nextCodeSystem;
 		switch (getContext().getVersion().getVersion()) {
 			case DSTU3:
-				nextCodeSystem = (CodeSystem) VersionConvertorFactory_30_40.convertResource((org.hl7.fhir.dstu3.model.CodeSystem) theCodeSystem);
+				nextCodeSystem = (CodeSystem) VersionConvertorFactory_30_40.convertResource((org.hl7.fhir.dstu3.model.CodeSystem) theCodeSystem, new BaseAdvisor_30_40(false));
 				break;
 			case R5:
-				nextCodeSystem = (CodeSystem) VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r5.model.CodeSystem) theCodeSystem);
+				nextCodeSystem = (CodeSystem) VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r5.model.CodeSystem) theCodeSystem, new BaseAdvisor_40_50(false));
 				break;
 			default:
 				nextCodeSystem = (CodeSystem) theCodeSystem;

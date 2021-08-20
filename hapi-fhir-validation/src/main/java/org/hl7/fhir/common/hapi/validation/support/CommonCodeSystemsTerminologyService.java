@@ -16,6 +16,7 @@ import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.dstu2.model.ValueSet;
@@ -388,7 +389,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				normalized = retVal;
 				break;
 			case R5:
-				normalized = VersionConvertorFactory_40_50.convertResource(retVal);
+				normalized = VersionConvertorFactory_40_50.convertResource(retVal, new BaseAdvisor_40_50(false));
 				break;
 		}
 
