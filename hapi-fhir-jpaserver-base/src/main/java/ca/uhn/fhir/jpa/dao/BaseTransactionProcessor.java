@@ -178,7 +178,6 @@ public abstract class BaseTransactionProcessor {
 		//myExecutor.setMaxPoolSize(1);
 		myExecutor.setCorePoolSize(myDaoConfig.getBundleBatchPoolSize());
 		myExecutor.setMaxPoolSize(myDaoConfig.getBundleBatchMaxPoolSize());
-		myExecutor.setQueueCapacity(myDaoConfig.getBundleBatchQueueCapacity());
 
 		myExecutor.initialize();
 	}
@@ -352,7 +351,7 @@ public abstract class BaseTransactionProcessor {
 		}
 
 		// waiting for all tasks to be completed
-		AsyncUtil.awaitLatchAndIgnoreInterrupt(completionLatch, 120L, TimeUnit.SECONDS);
+		AsyncUtil.awaitLatchAndIgnoreInterrupt(completionLatch, 300L, TimeUnit.SECONDS);
 		
 		// Now, create the bundle response in original order
 		Object nextResponseEntry;

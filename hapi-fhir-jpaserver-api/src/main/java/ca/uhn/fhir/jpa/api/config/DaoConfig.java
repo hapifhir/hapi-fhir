@@ -264,11 +264,9 @@ public class DaoConfig {
 	// Thread Pool size used by batch in bundle
 	public static final int DEFAULT_BUNDLE_BATCH_POOL_SIZE = 20; // 1 for single thread
 	public static final int DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE = 100; // 1 for single thread
-	public static final int DEFAULT_BUNDLE_BATCH_QUEUE_CAPACITY = 200;
 
 	private Integer myBundleBatchPoolSize = DEFAULT_BUNDLE_BATCH_POOL_SIZE;
 	private Integer myBundleBatchMaxPoolSize = DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE;
-	private Integer myBundleBatchQueueCapacity = DEFAULT_BUNDLE_BATCH_QUEUE_CAPACITY;
 
 	/**
 	 * Constructor
@@ -2618,24 +2616,6 @@ public class DaoConfig {
 	 */
 	public void setBundleBatchMaxPoolSize(Integer theBundleBatchMaxPoolSize) {
 		this.myBundleBatchMaxPoolSize = theBundleBatchMaxPoolSize;
-	}
-	
-	/**
-	 * Get the batch transaction thread pool queue capacity.
-	 * 
-	 * @since 5.6.0
-	 */
-	public Integer getBundleBatchQueueCapacity() {
-		return myBundleBatchQueueCapacity;
-	}
-	
-	/**
-	 * Set the batch transaction thread pool queue capacity. The default is @see {@link #DEFAULT_BUNDLE_BATCH_QUEUE_CAPACITY}
-	 * 
-	 * @since 5.6.0
-	 */
-	public void setMyBundleBatchQueueCapacity(Integer theBundleBatchQueueCapacity) {
-		this.myBundleBatchQueueCapacity = theBundleBatchQueueCapacity;
 	}
 	
 	public boolean canDeleteExpunge() {
