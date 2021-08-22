@@ -103,7 +103,7 @@ public class ResponseTerminologyDisplayPopulationInterceptor extends BaseRespons
 				ValidationSupportContext validationSupportContext = new ValidationSupportContext(myValidationSupport);
 				if (myValidationSupport.isCodeSystemSupported(validationSupportContext, system)) {
 
-					IValidationSupport.LookupCodeResult lookupCodeResult = myValidationSupport.lookupCode(validationSupportContext, system, code);
+					IValidationSupport.LookupCodeResult lookupCodeResult = myValidationSupport.lookupCode(validationSupportContext, system, code, null);
 					if (lookupCodeResult != null && lookupCodeResult.isFound()) {
 						String newDisplay = lookupCodeResult.getCodeDisplay();
 						IPrimitiveType<?> newString = myStringDefinition.newInstance(newDisplay);

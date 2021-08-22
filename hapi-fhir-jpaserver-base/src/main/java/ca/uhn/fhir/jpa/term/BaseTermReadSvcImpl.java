@@ -817,7 +817,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 								nextSystem = system;
 							}
 
-							LookupCodeResult lookup = myValidationSupport.lookupCode(new ValidationSupportContext(provideValidationSupport()), nextSystem, next.getCode());
+							LookupCodeResult lookup = myValidationSupport.lookupCode(new ValidationSupportContext(provideValidationSupport()), nextSystem, next.getCode(), null);
 							if (lookup != null && lookup.isFound()) {
 								addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, nextSystem, next.getCode(), lookup.getCodeDisplay());
 								foundCount++;
@@ -1989,7 +1989,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	protected abstract ValueSet toCanonicalValueSet(IBaseResource theValueSet);
 
-	protected IValidationSupport.LookupCodeResult lookupCode(String theSystem, String theCode) {
+	protected IValidationSupport.LookupCodeResult lookupCode(String theSystem, String theCode, String theDisplayLanguage) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		return txTemplate.execute(t -> {
 			Optional<TermConcept> codeOpt = findCode(theSystem, theCode);
@@ -2006,12 +2006,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 				for (TermConceptDesignation next : code.getDesignations()) {
 					IValidationSupport.ConceptDesignation designation = new IValidationSupport.ConceptDesignation();
-					designation.setLanguage(next.getLanguage());
-					designation.setUseSystem(next.getUseSystem());
-					designation.setUseCode(next.getUseCode());
-					designation.setUseDisplay(next.getUseDisplay());
-					designation.setValue(next.getValue());
-					result.getDesignations().add(designation);
+					// filter out the designation based on displayLanguage if any
+					if (isDisplayLanguageMatch(theDisplayLanguage, next.getLanguage())) {
+						designation.setLanguage(next.getLanguage());
+						designation.setUseSystem(next.getUseSystem());
+						designation.setUseCode(next.getUseCode());
+						designation.setUseDisplay(next.getUseDisplay());
+						designation.setValue(next.getValue());
+						result.getDesignations().add(designation);
+					}
 				}
 
 				for (TermConceptProperty next : code.getProperties()) {
@@ -2034,6 +2037,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		});
 	}
 
+	
 	@Nullable
 	private ConceptSubsumptionOutcome testForSubsumption(SearchSession theSearchSession, TermConcept theLeft, TermConcept theRight, ConceptSubsumptionOutcome theOutput) {
 		List<TermConcept> fetch = theSearchSession.search(TermConcept.class)
@@ -2481,4 +2485,11 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return termConcept;
 	}
 
+    static boolean isDisplayLanguageMatch(String theReqLang, String theStoredLang) {
+		// NOTE: return the designation when one of then is not specified.
+		if (theReqLang == null || theStoredLang == null)
+			return true;
+		
+		return theReqLang.equalsIgnoreCase(theStoredLang);
+    }
 }

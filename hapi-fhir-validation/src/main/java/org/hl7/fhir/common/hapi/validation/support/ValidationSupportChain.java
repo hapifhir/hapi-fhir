@@ -296,10 +296,10 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
 		for (IValidationSupport next : myChain) {
 			if (next.isCodeSystemSupported(theValidationSupportContext, theSystem)) {
-				return next.lookupCode(theValidationSupportContext, theSystem, theCode);
+				return next.lookupCode(theValidationSupportContext, theSystem, theCode, theDisplayLanguage);
 			}
 		}
 		return null;

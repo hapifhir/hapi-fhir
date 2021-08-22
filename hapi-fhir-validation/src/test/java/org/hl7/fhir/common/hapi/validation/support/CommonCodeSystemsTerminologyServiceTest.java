@@ -30,28 +30,28 @@ public class CommonCodeSystemsTerminologyServiceTest {
 
 	@Test
 	public void testUcum_LookupCode_Good() {
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "Cel");
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "Cel", null);
 		assert outcome != null;
 		assertEquals(true, outcome.isFound());
 	}
 
 	@Test
 	public void testUcum_LookupCode_Good2() {
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "kg/m2");
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "kg/m2", null);
 		assert outcome != null;
 		assertEquals(true, outcome.isFound());
 	}
 
 	@Test
 	public void testUcum_LookupCode_Bad() {
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "AAAAA");
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "AAAAA", null);
 		assert outcome != null;
 		assertEquals(false, outcome.isFound());
 	}
 
 	@Test
 	public void testUcum_LookupCode_UnknownSystem() {
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://foo", "AAAAA");
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://foo", "AAAAA", null);
 		assertNull(outcome);
 	}
 

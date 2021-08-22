@@ -881,7 +881,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		StringType code = new StringType("ParentA");
 		StringType system = new StringType("http://snomed.info/sct");
-		IValidationSupport.LookupCodeResult outcome = myCodeSystemDao.lookupCode(code, system, null, mySrd);
+		IValidationSupport.LookupCodeResult outcome = myCodeSystemDao.lookupCode(code, system, null, null, mySrd);
 		assertEquals(true, outcome.isFound());
 	}
 

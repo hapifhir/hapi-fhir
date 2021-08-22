@@ -194,7 +194,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 	@Nullable
 	public CodeValidationResult validateLookupCode(ValidationSupportContext theValidationSupportContext, String theCode, String theSystem) {
-		LookupCodeResult lookupResult = lookupCode(theValidationSupportContext, theSystem, theCode);
+		LookupCodeResult lookupResult = lookupCode(theValidationSupportContext, theSystem, theCode, null);
 		CodeValidationResult validationResult = null;
 		if (lookupResult != null) {
 			if (lookupResult.isFound()) {
@@ -209,7 +209,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 
 	@Override
-	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
 
 		Map<String, String> map;
 		switch (theSystem) {
