@@ -142,7 +142,7 @@ public class JpaTerminologyProvider implements TerminologyProvider {
 	@Override
 	public Code lookup(Code code, CodeSystemInfo codeSystem) throws ResourceNotFoundException {
 		LookupCodeResult cs = myTerminologySvc.lookupCode(new ValidationSupportContext(myValidationSupport),
-			codeSystem.getId(), code.getCode(), null);
+			codeSystem.getId(), code.getCode());
 
 		code.setDisplay(cs.getCodeDisplay());
 		code.setSystem(codeSystem.getId());

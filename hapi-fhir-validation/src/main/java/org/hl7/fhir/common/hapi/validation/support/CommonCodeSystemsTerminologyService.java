@@ -194,7 +194,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 	@Nullable
 	public CodeValidationResult validateLookupCode(ValidationSupportContext theValidationSupportContext, String theCode, String theSystem) {
-		LookupCodeResult lookupResult = lookupCode(theValidationSupportContext, theSystem, theCode, null);
+		LookupCodeResult lookupResult = lookupCode(theValidationSupportContext, theSystem, theCode);
 		CodeValidationResult validationResult = null;
 		if (lookupResult != null) {
 			if (lookupResult.isFound()) {

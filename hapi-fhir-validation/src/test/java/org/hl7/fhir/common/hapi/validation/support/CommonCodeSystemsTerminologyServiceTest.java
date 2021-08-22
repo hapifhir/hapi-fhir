@@ -30,21 +30,21 @@ public class CommonCodeSystemsTerminologyServiceTest {
 
 	@Test
 	public void testUcum_LookupCode_Good() {
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "Cel", null);
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "Cel");
 		assert outcome != null;
 		assertEquals(true, outcome.isFound());
 	}
 
 	@Test
 	public void testUcum_LookupCode_Good2() {
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "kg/m2", null);
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "kg/m2");
 		assert outcome != null;
 		assertEquals(true, outcome.isFound());
 	}
 
 	@Test
 	public void testUcum_LookupCode_Bad() {
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "AAAAA", null);
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "AAAAA");
 		assert outcome != null;
 		assertEquals(false, outcome.isFound());
 	}
