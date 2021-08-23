@@ -886,7 +886,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 		IRestfulServerDefaults server = theRequestDetails.getServer();
 		IPagingProvider pagingProvider = server.getPagingProvider();
-		return pagingProvider instanceof DatabaseBackedPagingProvider;
+		return pagingProvider != null;
 	}
 
 	protected void markResourcesMatchingExpressionAsNeedingReindexing(Boolean theCurrentlyReindexing, String theExpression) {
