@@ -88,8 +88,8 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		// Look for failures
 		for (Future<?> next : futures) {
 			try {
-				next.get();
-				ourLog.info("Future produced success");
+			next.get();
+			ourLog.info("Future produced success");
 			} catch (Exception e) {
 				ourLog.info("Future produced exception: {}", e.toString());
 				throw new AssertionError("Failed with message: " + e.toString(), e);

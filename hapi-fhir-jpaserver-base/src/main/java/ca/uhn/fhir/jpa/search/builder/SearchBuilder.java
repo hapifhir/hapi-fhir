@@ -91,7 +91,6 @@ import com.healthmarketscience.sqlbuilder.Condition;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,6 +118,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -216,8 +216,13 @@ public class SearchBuilder implements ISearchBuilder {
 			attemptCompositeUniqueSpProcessing(theQueryStack, theParams, theRequest);
 		}
 
+		// Handle _id last, since it can typically be tacked onto a different parameter
+		List<String> paramNames = myParams.keySet().stream().filter(t -> !t.equals(IAnyResource.SP_RES_ID)).collect(Collectors.toList());
+		if (myParams.containsKey(IAnyResource.SP_RES_ID)) {
+			paramNames.add(IAnyResource.SP_RES_ID);
+		}
+
 		// Handle each parameter
-		List<String> paramNames = new ArrayList<>(myParams.keySet());
 		for (String nextParamName : paramNames) {
 			if (myParams.isLastN() && LastNParameterHelper.isLastNParameter(nextParamName, myContext)) {
 				// Skip parameters for Subject, Patient, Code and Category for LastN as these will be filtered by Elasticsearch
@@ -828,7 +833,7 @@ public class SearchBuilder implements ISearchBuilder {
 								resourceLink = (Long) ((Object[]) nextRow)[0];
 								version = (Long) ((Object[]) nextRow)[1];
 							} else {
-								resourceLink = (Long)nextRow;
+								resourceLink = (Long) nextRow;
 							}
 
 							pidsToInclude.add(new ResourcePersistentId(resourceLink, version));
@@ -897,8 +902,8 @@ public class SearchBuilder implements ISearchBuilder {
 								if (resourceLink != null) {
 									ResourcePersistentId persistentId;
 									if (findVersionFieldName != null) {
-										persistentId = new ResourcePersistentId(((Object[])resourceLink)[0]);
-										persistentId.setVersion((Long) ((Object[])resourceLink)[1]);
+										persistentId = new ResourcePersistentId(((Object[]) resourceLink)[0]);
+										persistentId.setVersion((Long) ((Object[]) resourceLink)[1]);
 									} else {
 										persistentId = new ResourcePersistentId(resourceLink);
 									}

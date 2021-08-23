@@ -153,6 +153,17 @@ public class IdHelperService {
 	}
 
 	/**
+	 * Returns true if the given resource ID should be stored in a forced ID. Under default config
+	 * (meaning client ID strategy is {@link ca.uhn.fhir.jpa.api.config.DaoConfig.ClientIdStrategyEnum#ALPHANUMERIC})
+	 * this will return true if the ID has any non-digit characters.
+	 * <p>
+	 * In {@link ca.uhn.fhir.jpa.api.config.DaoConfig.ClientIdStrategyEnum#ANY} mode it will always return true.
+	 */
+	public boolean idRequiresForcedId(String theId) {
+		return myDaoConfig.getResourceClientIdStrategy() == DaoConfig.ClientIdStrategyEnum.ANY || !isValidPid(theId);
+	}
+
+	/**
 	 * Given a collection of resource IDs (resource type + id), resolves the internal persistent IDs.
 	 * <p>
 	 * This implementation will always try to use a cache for performance, meaning that it can resolve resources that
