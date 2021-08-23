@@ -77,7 +77,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 
 				IdType valueAsId = new IdType(value);
 				if (isNotBlank(value)) {
-					if (!myIdHelperService.idRequiresForcedId(value) && allIdsAreForcedIds) {
+					if (!myIdHelperService.idRequiresForcedId(valueAsId.getIdPart()) && allIdsAreForcedIds) {
 						allIdsAreForcedIds = false;
 					}
 					haveValue = true;

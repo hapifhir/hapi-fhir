@@ -842,17 +842,15 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "forcedid0_.forced_id in ('a')"), selectQuery);
 
 			selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "select t0.res_id from hfj_resource t0"), selectQuery);
-			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_type = 'observation'"), selectQuery);
-			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_deleted_at is null"), selectQuery);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "select t1.res_id from hfj_resource t1"), selectQuery);
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t1.res_type = 'observation'"), selectQuery);
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t1.res_deleted_at is null"), selectQuery);
 		}
 
 		// Search by ID where at least one ID is a numeric ID
 		{
 			SearchParameterMap map = SearchParameterMap.newSynchronous();
 			map.add("_id", new TokenOrListParam(null, "A", obs2id));
-			map.add("subject", new ReferenceParam("Patient/B"));
-			map.add("status", new TokenParam("final"));
 			myCaptureQueriesListener.clear();
 			IBundleProvider outcome = myObservationDao.search(map, new SystemRequestDetails());
 			assertEquals(2, outcome.size());
@@ -894,8 +892,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		{
 			SearchParameterMap map = SearchParameterMap.newSynchronous();
 			map.add("_id", new TokenOrListParam(null, "A", obs2id));
-			map.add("subject", new ReferenceParam("Patient/B"));
-			map.add("status", new TokenParam("final"));
 			myCaptureQueriesListener.clear();
 			IBundleProvider outcome = myObservationDao.search(map, new SystemRequestDetails());
 			assertEquals(0, outcome.size());
