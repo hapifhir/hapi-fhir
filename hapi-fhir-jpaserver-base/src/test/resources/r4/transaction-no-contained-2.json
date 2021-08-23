@@ -1,0 +1,49 @@
+{
+	"resourceType": "Bundle",
+	"type": "transaction",
+	"entry": [
+		{
+			"fullUrl": "urn:uuid:1f3b9e25-fd45-4342-a82b-7ca5755923bb",
+			"resource": {
+				"resourceType": "Task",
+				"language": "en-US",
+				"identifier": [
+					{
+						"system": "https://example.org/fhir/taskidentifier",
+						"value": "101019"
+					}
+				],
+				"basedOn": [
+					{
+						"reference": "urn:uuid:47c6d106-3441-41c0-8a2c-054ad9897ced"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Task?identifier\u003dhttps%3A%2F%2Fexample.org%2Ffhir%2Ftaskidentifier|101019"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:47c6d106-3441-41c0-8a2c-054ad9897ced",
+			"resource": {
+				"resourceType": "Patient",
+				"identifier": [
+					{
+						"system": "https://example.org/fhir/memberidentifier",
+						"value": "12345670"
+					},
+					{
+						"system": "https://example.org/fhir/memberuniqueidentifier",
+						"value": "12345670TT"
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "/Patient",
+				"ifNoneExist": "Patient?identifier\u003dhttps%3A%2F%2Fexample.org%2Ffhir%2Fmemberuniqueidentifier|12345670TT"
+			}
+		}
+	]
+}

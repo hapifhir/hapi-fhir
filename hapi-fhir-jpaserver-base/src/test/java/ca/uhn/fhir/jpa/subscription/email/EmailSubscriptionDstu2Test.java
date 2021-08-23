@@ -41,7 +41,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(EmailSubscriptionDstu2Test.class);
 
 	@RegisterExtension
-	static GreenMailExtension ourGreenMail = new GreenMailExtension(ServerSetupTest.SMTP);
+	static GreenMailExtension ourGreenMail = new GreenMailExtension(ServerSetupTest.SMTP.withPort(0));
 
 	private List<IIdType> mySubscriptionIds = new ArrayList<>();
 
@@ -148,7 +148,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 	private MailConfig withMailConfig() {
 		return new MailConfig()
 			.setSmtpHostname(ServerSetupTest.SMTP.getBindAddress())
-			.setSmtpPort(ServerSetupTest.SMTP.getPort());
+			.setSmtpPort(ourGreenMail.getSmtp().getPort());
 	}
 
 }
