@@ -207,6 +207,18 @@
 							<artifactId>commons-compress</artifactId>
 							<version>${commons_compress_version}</version>
 						</dependency>
+						<!-- This is here because core libs needs it, and we need it for javadoc generation -->
+						<dependency>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>1.18.16</version>
+						</dependency>
+						<!-- This is here because core libs needs it, and we need it for javadoc generation -->
+						<dependency>
+							<groupId>org.jetbrains</groupId>
+							<artifactId>annotations</artifactId>
+							<version>22.0.0</version>
+						</dependency>
 					</additionalDependencies>
 				</configuration>
 			</plugin>
