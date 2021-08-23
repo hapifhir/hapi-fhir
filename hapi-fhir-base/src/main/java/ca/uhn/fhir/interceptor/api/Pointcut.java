@@ -1996,7 +1996,7 @@ public enum Pointcut implements IPointcut {
 	MDM_AFTER_PERSISTED_RESOURCE_CHECKED(void.class,
 		"ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage",
 		"ca.uhn.fhir.rest.server.TransactionLogMessages",
-		"ca.uhn.fhir.mdm.api.MdmLinkChangeEvent"),
+		"ca.uhn.fhir.mdm.api.MdmLinkEvent"),
 
 	/**
 	 * <b>Performance Tracing Hook:</b>
