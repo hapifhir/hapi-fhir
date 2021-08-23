@@ -207,6 +207,16 @@
 							<artifactId>commons-compress</artifactId>
 							<version>${commons_compress_version}</version>
 						</dependency>
+						<dependency>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>1.18.16</version>
+						</dependency>
+						<dependency>
+							<groupId>org.jetbrains</groupId>
+							<artifactId>annotations</artifactId>
+							<version>22.0.0</version>
+						</dependency>
 					</additionalDependencies>
 				</configuration>
 			</plugin>
