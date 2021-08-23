@@ -136,8 +136,8 @@ public class IdHelperService {
 	public ResourcePersistentId resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId) {
 		Validate.notNull(theId, "theId must not be null");
 
-		Long retVal;
-		if (myDaoConfig.getResourceClientIdStrategy() == DaoConfig.ClientIdStrategyEnum.ANY || !isValidPid(theId)) {
+		ResourcePersistentId retVal;
+		if (idRequiresForcedId	(theId)) {
 			if (myDaoConfig.isDeleteEnabled()) {
 				retVal = resolveResourceIdentity(theRequestPartitionId, theResourceType, theId).getResourceId();
 			} else {
@@ -151,6 +151,28 @@ public class IdHelperService {
 
 		return new ResourcePersistentId(retVal);
 	}
+
+	/**
+	 * Returns true if the given resource ID should be stored in a forced ID. Under default config
+	 * (meaning client ID strategy is {@link ca.uhn.fhir.jpa.api.config.DaoConfig.ClientIdStrategyEnum#ALPHANUMERIC})
+	 * this will return true if the ID has any non-digit characters.
+	 *
+	 * In {@link ca.uhn.fhir.jpa.api.config.DaoConfig.ClientIdStrategyEnum#ANY} mode it will always return true.
+	 */
+	public boolean idRequiresForcedId(String theId) {
+		return myDaoConfig.getResourceClientIdStrategy() == DaoConfig.ClientIdStrategyEnum.ANY || !isValidPid(theId);
+	}
+
+	@Nonnull
+	private String toForcedIdToPidKey(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId) {
+		return RequestPartitionId.stringifyForKey(theRequestPartitionId) + "/" + theResourceType + "/" + theId;
+	}
+
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	private EntityManager myEntityManager;
+
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	/**
 	 * Given a collection of resource IDs (resource type + id), resolves the internal persistent IDs.

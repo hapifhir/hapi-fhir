@@ -69,6 +69,250 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testTransactionCreates_NoGuard() {
+		myDaoConfig.setMatchUrlCache(true);
+
+		AtomicInteger passCounter = new AtomicInteger(0);
+		AtomicInteger fuzzCounter = new AtomicInteger(0);
+		Runnable creator = newTransactionTaskWithUpdatesAndConditionalUpdates(passCounter, fuzzCounter);
+
+		for (int i = 0; i < 10; i++) {
+			passCounter.set(i);
+			ourLog.info("*********************************************************************************");
+			ourLog.info("Starting pass {}", i);
+			ourLog.info("*********************************************************************************");
+
+			List<Future<?>> futures = new ArrayList<>();
+			for (int j = 0; j < 10; j++) {
+				futures.add(myExecutor.submit(creator));
+			}
+
+			for (Future<?> next : futures) {
+				try {
+					next.get();
+				} catch (Exception e) {
+					// ignore
+				}
+			}
+
+			creator.run();
+		}
+
+		runInTransaction(() -> {
+			Map<String, Integer> counts = getResourceCountMap();
+
+			assertEquals(10, counts.get("Patient"), counts.toString());
+		});
+
+	}
+
+
+	/**
+	 * Make a transaction with conditional updates that will fail due to
+	 * constraint errors and be retried automatically. Make sure that the
+	 * retry succeeds and that the data ultimately gets written.
+	 */
+	@Test
+	public void testTransactionCreates_WithRetry() throws ExecutionException, InterruptedException {
+		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
+
+		AtomicInteger setCounter = new AtomicInteger(0);
+		AtomicInteger fuzzCounter = new AtomicInteger(0);
+		Runnable creator = newTransactionTaskWithUpdatesAndConditionalUpdates(setCounter, fuzzCounter);
+
+		for (int set = 0; set < 3; set++) {
+
+			ourLog.info("*********************************************************************************");
+			ourLog.info("Starting pass {}", set);
+			ourLog.info("*********************************************************************************");
+			fuzzCounter.set(set);
+
+			List<Future<?>> futures = new ArrayList<>();
+			for (int j = 0; j < 10; j++) {
+				futures.add(myExecutor.submit(creator));
+			}
+
+			for (Future<?> next : futures) {
+				next.get();
+			}
+
+
+		}
+
+		logAllResourceLinks();
+		runInTransaction(() -> {
+			Map<String, Integer> counts = getResourceCountMap();
+
+			assertEquals(1, counts.get("Patient"), counts.toString());
+			assertEquals(1, counts.get("Observation"), counts.toString());
+			assertEquals(6, myResourceLinkDao.count());
+			assertEquals(6, myResourceTableDao.count());
+			assertEquals(14, myResourceHistoryTableDao.count());
+		});
+
+	}
+
+	@Test
+	public void testTransactionCreates_WithConcurrencySemaphore() throws ExecutionException, InterruptedException {
+		myInterceptorRegistry.registerInterceptor(myConcurrencySemaphoreInterceptor);
+
+		AtomicInteger setCounter = new AtomicInteger(0);
+		AtomicInteger fuzzCounter = new AtomicInteger(0);
+		Runnable creator = newTransactionTaskWithUpdatesAndConditionalUpdates(setCounter, fuzzCounter);
+
+		for (int set = 0; set < 3; set++) {
+
+			ourLog.info("*********************************************************************************");
+			ourLog.info("Starting pass {}", set);
+			ourLog.info("*********************************************************************************");
+			fuzzCounter.set(set);
+
+			List<Future<?>> futures = new ArrayList<>();
+			for (int j = 0; j < 10; j++) {
+				futures.add(myExecutor.submit(creator));
+			}
+
+			for (Future<?> next : futures) {
+				next.get();
+			}
+
+		}
+
+		logAllResourceLinks();
+		runInTransaction(() -> {
+			Map<String, Integer> counts = getResourceCountMap();
+
+			assertEquals(1, counts.get("Patient"), counts.toString());
+			assertEquals(1, counts.get("Observation"), counts.toString());
+			assertEquals(6, myResourceLinkDao.count());
+			assertEquals(6, myResourceTableDao.count());
+			assertEquals(14, myResourceHistoryTableDao.count());
+		});
+
+		assertEquals(6, myConcurrencySemaphoreInterceptor.countSemaphores());
+	}
+
+	@Test
+	public void testTransactionCreates_WithConcurrencySemaphore_DontLockOnCachedMatchUrlsForConditionalCreate() throws ExecutionException, InterruptedException {
+		myDaoConfig.setMatchUrlCacheEnabled(true);
+		myInterceptorRegistry.registerInterceptor(myConcurrencySemaphoreInterceptor);
+		myConcurrencySemaphoreInterceptor.setLogWaits(true);
+
+		Runnable creator = ()->{
+			BundleBuilder bb = new BundleBuilder(myFhirCtx);
+
+			Patient patient1 = new Patient();
+			patient1.addIdentifier().setSystem("http://foo").setValue("1");
+			bb.addTransactionCreateEntry(patient1).conditional("Patient?identifier=http://foo|1");
+
+			Patient patient2 = new Patient();
+			patient2.addIdentifier().setSystem("http://foo").setValue("2");
+			bb.addTransactionCreateEntry(patient2).conditional("Patient?identifier=http://foo|2");
+
+			Bundle input = (Bundle) bb.getBundle();
+			SystemRequestDetails requestDetails = new SystemRequestDetails();
+			mySystemDao.transaction(requestDetails, input);
+		};
+
+		for (int set = 0; set < 3; set++) {
+			myConcurrencySemaphoreInterceptor.clearSemaphores();
+
+			List<Future<?>> futures = new ArrayList<>();
+			for (int j = 0; j < 10; j++) {
+				futures.add(myExecutor.submit(creator));
+			}
+
+			for (Future<?> next : futures) {
+				next.get();
+			}
+
+			if (set == 0) {
+				assertEquals(2, myConcurrencySemaphoreInterceptor.countSemaphores());
+			} else {
+				assertEquals(0, myConcurrencySemaphoreInterceptor.countSemaphores());
+			}
+		}
+
+		runInTransaction(() -> {
+			Map<String, Integer> counts = getResourceCountMap();
+			assertEquals(2, counts.get("Patient"), counts.toString());
+		});
+
+	}
+
+	@Nonnull
+	private Map<String, Integer> getResourceCountMap() {
+		Map<String, Integer> counts = new TreeMap<>();
+		myResourceTableDao
+			.findAll()
+			.stream()
+			.forEach(t -> {
+				counts.putIfAbsent(t.getResourceType(), 0);
+				int value = counts.get(t.getResourceType());
+				value++;
+				counts.put(t.getResourceType(), value);
+			});
+		ourLog.info("Counts: {}", counts);
+		return counts;
+	}
+
+
+	@Nonnull
+	private Runnable newTransactionTaskWithUpdatesAndConditionalUpdates(AtomicInteger theSetCounter, AtomicInteger theFuzzCounter) {
+		Runnable creator = () -> {
+			BundleBuilder bb = new BundleBuilder(myFhirCtx);
+			String patientId = "Patient/PT" + theSetCounter.get();
+			IdType practitionerId = IdType.newRandomUuid();
+			IdType practitionerId2 = IdType.newRandomUuid();
+
+			ExplanationOfBenefit eob = new ExplanationOfBenefit();
+			eob.addIdentifier().setSystem("foo").setValue("" + theSetCounter.get());
+			eob.getPatient().setReference(patientId);
+			eob.addCareTeam().getProvider().setReference(practitionerId.getValue());
+			eob.addCareTeam().getProvider().setReference(practitionerId2.getValue());
+			eob.getFormCode().setText("EOB " + theFuzzCounter.get());
+			bb.addTransactionUpdateEntry(eob).conditional("ExplanationOfBenefit?identifier=foo|" + theSetCounter.get());
+
+			Patient pt = new Patient();
+			pt.setId(patientId);
+			pt.setActive(true);
+			pt.addName().setFamily("FAMILY " + theFuzzCounter.get());
+			bb.addTransactionUpdateEntry(pt);
+
+			Coverage coverage = new Coverage();
+			coverage.addIdentifier().setSystem("foo").setValue("" + theSetCounter.get());
+			coverage.getBeneficiary().setReference(patientId);
+			coverage.setDependent("DEP " + theFuzzCounter.get());
+			bb.addTransactionUpdateEntry(coverage).conditional("Coverage?identifier=foo|" + theSetCounter.get());
+
+			Practitioner practitioner = new Practitioner();
+			practitioner.setId(practitionerId);
+			practitioner.addIdentifier().setSystem("foo").setValue("" + theSetCounter.get());
+			practitioner.addName().setFamily("SET " + theFuzzCounter.get());
+			bb.addTransactionCreateEntry(practitioner).conditional("Practitioner?identifier=foo|" + theSetCounter.get());
+
+			Practitioner practitioner2 = new Practitioner();
+			practitioner2.setId(practitionerId2);
+			practitioner2.addIdentifier().setSystem("foo2").setValue("" + theSetCounter.get());
+			practitioner2.addName().setFamily("SET " + theFuzzCounter.get());
+			bb.addTransactionCreateEntry(practitioner2).conditional("Practitioner?identifier=foo2|" + theSetCounter.get());
+
+			Observation obs = new Observation();
+			obs.setId("Observation/OBS" + theSetCounter);
+			obs.getSubject().setReference(pt.getId());
+			obs.getCode().setText("SET " + theFuzzCounter.get());
+			bb.addTransactionUpdateEntry(obs);
+
+			Bundle input = (Bundle) bb.getBundle();
+			SystemRequestDetails requestDetails = new SystemRequestDetails();
+			UserRequestRetryVersionConflictsInterceptor.addRetryHeader(requestDetails, 20);
+			mySystemDao.transaction(requestDetails, input);
+		};
+		return creator;
+	}
+
+
+	@Test
 	public void testCreateWithClientAssignedId() {
 		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
 		String value = UserRequestRetryVersionConflictsInterceptor.RETRY + "; " + UserRequestRetryVersionConflictsInterceptor.MAX_RETRIES + "=10";
