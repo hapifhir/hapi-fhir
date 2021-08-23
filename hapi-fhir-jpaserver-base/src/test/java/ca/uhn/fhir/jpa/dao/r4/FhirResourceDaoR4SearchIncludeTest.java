@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
@@ -31,9 +30,6 @@ import java.util.stream.IntStream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hl7.fhir.r4.model.ResourceType.BodyStructure;
-import static org.hl7.fhir.r4.model.ResourceType.Patient;
-import static org.hl7.fhir.r4.model.ResourceType.Procedure;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -155,7 +151,6 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		p.addExtension("http://fkcfhir.org/fhir/cs/CS1MachNumber", new Reference("BodyStructure/B51936689"));
 		myProcedureDao.update(p, mySrd);
 
-		logAllResources();
 		logAllResourceLinks();
 
 		// Non synchronous

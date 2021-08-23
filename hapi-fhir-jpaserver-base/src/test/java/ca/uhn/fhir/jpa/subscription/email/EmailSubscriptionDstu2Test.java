@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.subscription.email;
 
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
-import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
@@ -16,10 +15,11 @@ import com.icegreen.greenmail.util.GreenMailUtil;
 import com.icegreen.greenmail.util.ServerSetup;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.*;
-
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,15 +32,14 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import static ca.uhn.fhir.jpa.subscription.resthook.RestHookTestDstu3Test.logAllInterceptors;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(EmailSubscriptionDstu2Test.class);
-
-	@RegisterExtension
-	static GreenMailExtension ourGreenMail = new GreenMailExtension(ServerSetupTest.SMTP.withPort(0));
-
+	private static GreenMail ourTestSmtp;
+	private static int ourListenerPort;
 	private List<IIdType> mySubscriptionIds = new ArrayList<>();
 
 	@Autowired
@@ -154,10 +153,10 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 	}
 
-	private MailConfig withMailConfig() {
-		return new MailConfig()
-			.setSmtpHostname(ServerSetupTest.SMTP.getBindAddress())
-			.setSmtpPort(ourGreenMail.getSmtp().getPort());
+
+	@AfterAll
+	public static void afterClass() {
+		ourTestSmtp.stop();
 	}
 
 	@BeforeAll
