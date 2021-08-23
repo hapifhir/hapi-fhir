@@ -65,7 +65,6 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 		Set<ResourcePersistentId> allOrPids = null;
 		SearchFilterParser.CompareOperation defaultOperation = SearchFilterParser.CompareOperation.eq;
 
-		boolean allIdsAreForcedIds = true;
 		for (List<? extends IQueryParameterType> nextValue : theValues) {
 			Set<ResourcePersistentId> orPids = new HashSet<>();
 			boolean haveValue = false;
@@ -77,9 +76,6 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 
 				IdType valueAsId = new IdType(value);
 				if (isNotBlank(value)) {
-					if (!myIdHelperService.idRequiresForcedId(valueAsId.getIdPart()) && allIdsAreForcedIds) {
-						allIdsAreForcedIds = false;
-					}
 					haveValue = true;
 					try {
 						ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(theRequestPartitionId, theResourceName, valueAsId.getIdPart());
@@ -118,7 +114,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 
 			List<Long> resourceIds = ResourcePersistentId.toLongList(allOrPids);
 			if (theSourceJoinColumn == null) {
-				BaseJoiningPredicateBuilder queryRootTable = super.getOrCreateQueryRootTable(!allIdsAreForcedIds);
+				BaseJoiningPredicateBuilder queryRootTable = super.getOrCreateQueryRootTable();
 				Condition predicate;
 				switch (operation) {
 					default:

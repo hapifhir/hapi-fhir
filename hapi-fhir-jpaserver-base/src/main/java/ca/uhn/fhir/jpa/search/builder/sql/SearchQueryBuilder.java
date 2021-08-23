@@ -455,31 +455,18 @@ public class SearchQueryBuilder {
 	 * If at least one predicate builder already exists, return the last one added to the chain. If none has been selected, create a builder on HFJ_RESOURCE, add it and return it.
 	 */
 	public BaseJoiningPredicateBuilder getOrCreateFirstPredicateBuilder() {
-		return getOrCreateFirstPredicateBuilder(true);
-	}
-
-	/**
-	 * If at least one predicate builder already exists, return the last one added to the chain. If none has been selected, create a builder on HFJ_RESOURCE, add it and return it.
-	 */
-	public BaseJoiningPredicateBuilder getOrCreateFirstPredicateBuilder(boolean theIncludeResourceTypeAndNonDeletedFlag) {
 		if (myFirstPredicateBuilder == null) {
-			getOrCreateResourceTablePredicateBuilder(theIncludeResourceTypeAndNonDeletedFlag);
+			getOrCreateResourceTablePredicateBuilder();
 		}
 		return myFirstPredicateBuilder;
 	}
 
 	public ResourceTablePredicateBuilder getOrCreateResourceTablePredicateBuilder() {
-		return getOrCreateResourceTablePredicateBuilder(true);
-	}
-
-	public ResourceTablePredicateBuilder getOrCreateResourceTablePredicateBuilder(boolean theIncludeResourceTypeAndNonDeletedFlag) {
 		if (myResourceTableRoot == null) {
 			ResourceTablePredicateBuilder resourceTable = mySqlBuilderFactory.resourceTable(this);
 			addTable(resourceTable, null);
-			if (theIncludeResourceTypeAndNonDeletedFlag) {
-				Condition typeAndDeletionPredicate = resourceTable.createResourceTypeAndNonDeletedPredicates();
-				addPredicate(typeAndDeletionPredicate);
-			}
+			Condition typeAndDeletionPredicate = resourceTable.createResourceTypeAndNonDeletedPredicates();
+			addPredicate(typeAndDeletionPredicate);
 			myResourceTableRoot = resourceTable;
 		}
 		return myResourceTableRoot;

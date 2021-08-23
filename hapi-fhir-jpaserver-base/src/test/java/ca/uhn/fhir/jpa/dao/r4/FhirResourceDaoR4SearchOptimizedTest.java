@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -19,7 +18,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.StringUtils;
@@ -27,8 +25,6 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
@@ -797,112 +793,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals(2, StringUtils.countMatches(selectQuery, "JOIN"));
 		assertEquals(1, StringUtils.countMatches(selectQuery, "SELECT"));
 	}
-
-	/**
-	 * Make sure that if we're performing a query where the resource type is implicitly known,
-	 * we don't include a selector for the resource type
-	 *
-	 * This test is for queries with _id where the ID is a forced ID
-	 */
-	@Test
-	public void testSearchOnIdAndReference_SearchById() {
-
-		Patient p = new Patient();
-		p.setId("B");
-		myPatientDao.update(p);
-
-		Observation obs = new Observation();
-		obs.setId("A");
-		obs.setSubject(new Reference("Patient/B"));
-		obs.setStatus(Observation.ObservationStatus.FINAL);
-		myObservationDao.update(obs);
-
-		Observation obs2 = new Observation();
-		obs2.setSubject(new Reference("Patient/B"));
-		obs2.setStatus(Observation.ObservationStatus.FINAL);
-		String obs2id = myObservationDao.create(obs2).getId().getIdPart();
-		assertThat(obs2id, matchesPattern("^[0-9]+$"));
-
-		// Search by ID where all IDs are forced IDs
-		{
-			SearchParameterMap map = SearchParameterMap.newSynchronous();
-			map.add("_id", new TokenParam("A"));
-			map.add("subject", new ReferenceParam("Patient/B"));
-			map.add("status", new TokenParam("final"));
-			myCaptureQueriesListener.clear();
-			IBundleProvider outcome = myObservationDao.search(map, new SystemRequestDetails());
-			assertEquals(1, outcome.getResources(0, 999).size());
-			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-
-			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "forcedid0_.resource_type='observation'"), selectQuery);
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "forcedid0_.forced_id in ('a')"), selectQuery);
-
-			selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "select t1.res_id from hfj_resource t1"), selectQuery);
-			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t1.res_type = 'observation'"), selectQuery);
-			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t1.res_deleted_at is null"), selectQuery);
-		}
-
-		// Search by ID where at least one ID is a numeric ID
-		{
-			SearchParameterMap map = SearchParameterMap.newSynchronous();
-			map.add("_id", new TokenOrListParam(null, "A", obs2id));
-			myCaptureQueriesListener.clear();
-			IBundleProvider outcome = myObservationDao.search(map, new SystemRequestDetails());
-			assertEquals(2, outcome.size());
-			assertEquals(2, outcome.getResources(0, 999).size());
-			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "select t0.res_id from hfj_resource t0"), selectQuery);
-			// Because we included a non-forced ID, we need to verify the type
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_type = 'observation'"), selectQuery);
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_deleted_at is null"), selectQuery);
-		}
-
-		// Delete the resource - The searches should generate similar SQL now, but
-		// not actually return the result
-		myObservationDao.delete(new IdType("Observation/A"));
-		myObservationDao.delete(new IdType("Observation/" + obs2id));
-
-		// Search by ID where all IDs are forced IDs
-		{
-			SearchParameterMap map = SearchParameterMap.newSynchronous();
-			map.add("_id", new TokenParam("A"));
-			myCaptureQueriesListener.clear();
-			IBundleProvider outcome = myObservationDao.search(map, new SystemRequestDetails());
-			assertEquals(0, outcome.size());
-			assertEquals(0, outcome.getResources(0, 999).size());
-			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-
-			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "forcedid0_.resource_type='observation'"), selectQuery);
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "forcedid0_.forced_id in ('a')"), selectQuery);
-
-			selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "select t0.res_id from hfj_resource t0"), selectQuery);
-			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_type = 'observation'"), selectQuery);
-			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_deleted_at is null"), selectQuery);
-		}
-
-		// Search by ID where at least one ID is a numeric ID
-		{
-			SearchParameterMap map = SearchParameterMap.newSynchronous();
-			map.add("_id", new TokenOrListParam(null, "A", obs2id));
-			myCaptureQueriesListener.clear();
-			IBundleProvider outcome = myObservationDao.search(map, new SystemRequestDetails());
-			assertEquals(0, outcome.size());
-			assertEquals(0, outcome.getResources(0, 999).size());
-			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "select t0.res_id from hfj_resource t0"), selectQuery);
-			// Because we included a non-forced ID, we need to verify the type
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_type = 'observation'"), selectQuery);
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_deleted_at is null"), selectQuery);
-		}
-
-	}
-
 
 	@AfterEach
 	public void afterResetDao() {

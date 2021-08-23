@@ -1478,28 +1478,21 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			id2 = myOrganizationDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
 		}
 
-		// FIXME: restore
-
-		int size;
 		SearchParameterMap params = new SearchParameterMap();
-//		params.setLoadSynchronous(true);
-//		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(id1));
-//
-//		params = new SearchParameterMap();
-//		params.add("_id", new StringParam(id1));
-//		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(id1));
-//
-//		params = new SearchParameterMap();
-//		params.add("_id", new StringParam("9999999999999999"));
-//		assertEquals(0, toList(myPatientDao.search(params)).size());
-
-		myCaptureQueriesListener.clear();
-		params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(id1));
+
+		params = new SearchParameterMap();
+		params.add("_id", new StringParam(id1));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(id1));
+
+		params = new SearchParameterMap();
+		params.add("_id", new StringParam("9999999999999999"));
+		assertEquals(0, toList(myPatientDao.search(params)).size());
+
+		params = new SearchParameterMap();
 		params.add("_id", new StringParam(id2));
-		size = toList(myPatientDao.search(params)).size();
-		myCaptureQueriesListener.logAllQueries();
-		assertEquals(0, size);
+		assertEquals(0, toList(myPatientDao.search(params)).size());
 
 	}
 
@@ -1604,8 +1597,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertEquals(1, countMatches(sqlQuery, "res_id = '123'"), sqlQuery);
 			assertEquals(1, countMatches(sqlQuery, "join"), sqlQuery);
 			assertEquals(1, countMatches(sqlQuery, "hash_sys_and_value"), sqlQuery);
-			assertEquals(0, countMatches(sqlQuery, "res_type = 'diagnosticreport"), sqlQuery); // could be 0
-			assertEquals(0, countMatches(sqlQuery, "res_deleted_at"), sqlQuery); // could be 0
+			assertEquals(1, countMatches(sqlQuery, "res_type = 'diagnosticreport"), sqlQuery); // could be 0
+			assertEquals(1, countMatches(sqlQuery, "res_deleted_at"), sqlQuery); // could be 0
 		}
 	}
 
