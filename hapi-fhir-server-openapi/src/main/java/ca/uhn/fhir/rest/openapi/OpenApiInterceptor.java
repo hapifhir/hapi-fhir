@@ -385,7 +385,6 @@ public class OpenApiInterceptor {
 		Paths paths = new Paths();
 		openApi.setPaths(paths);
 
-		String partitionName = "DEFAULT/";
 
 		if (page == null || page.equals(PAGE_SYSTEM) || page.equals(PAGE_ALL)) {
 			Tag serverTag = new Tag();
@@ -513,7 +512,7 @@ public class OpenApiInterceptor {
 
 			// Search
 			if (typeRestfulInteractions.contains(CapabilityStatement.TypeRestfulInteraction.SEARCHTYPE)) {
-				Operation operation = getPathItem(paths, "/"  + partitionName + resourceType, PathItem.HttpMethod.GET);
+				Operation operation = getPathItem(paths, "/" + resourceType, PathItem.HttpMethod.GET);
 				operation.addTagsItem(resourceType);
 				operation.setDescription("This is a search type");
 				operation.setSummary("search-type: Search for " + resourceType + " instances");
