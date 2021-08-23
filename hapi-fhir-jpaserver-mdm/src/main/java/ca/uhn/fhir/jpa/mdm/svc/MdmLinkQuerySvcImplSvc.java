@@ -36,20 +36,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 
-public class MdmLinkQuerySvcImpl implements IMdmLinkQuerySvc {
+public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(MdmLinkQuerySvcImpl.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(MdmLinkQuerySvcImplSvc.class);
+
+	@Autowired
+	MdmLinkDaoSvc myMdmLinkDaoSvc;
 
 	@Autowired
 	IdHelperService myIdHelperService;
+
 	@Autowired
-	MdmLinkDaoSvc myMdmLinkDaoSvc;
+	IMdmModelConverterSvc myMdmModelConverterSvc;
 
 	@Override
 	public Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest) {
 		Example<MdmLink> exampleLink = exampleLinkFromParameters(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource);
 		Page<MdmLink> mdmLinkByExample = myMdmLinkDaoSvc.findMdmLinkByExample(exampleLink, thePageRequest);
-		Page<MdmLinkJson> map = mdmLinkByExample.map(this::toJson);
+		Page<MdmLinkJson> map = mdmLinkByExample.map(myMdmModelConverterSvc::toJson);
 		return map;
 	}
 
@@ -57,26 +61,8 @@ public class MdmLinkQuerySvcImpl implements IMdmLinkQuerySvc {
 	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest) {
 		Example<MdmLink> exampleLink = exampleLinkFromParameters(null, null, MdmMatchResultEnum.POSSIBLE_DUPLICATE, null);
 		Page<MdmLink> mdmLinkPage = myMdmLinkDaoSvc.findMdmLinkByExample(exampleLink, thePageRequest);
-		Page<MdmLinkJson> map = mdmLinkPage.map(this::toJson);
+		Page<MdmLinkJson> map = mdmLinkPage.map(myMdmModelConverterSvc::toJson);
 		return map;
-	}
-
-	private MdmLinkJson toJson(MdmLink theLink) {
-		MdmLinkJson retval = new MdmLinkJson();
-		String sourceId = myIdHelperService.resourceIdFromPidOrThrowException(theLink.getSourcePid()).toVersionless().getValue();
-		retval.setSourceId(sourceId);
-		String goldenResourceId = myIdHelperService.resourceIdFromPidOrThrowException(theLink.getGoldenResourcePid()).toVersionless().getValue();
-		retval.setGoldenResourceId(goldenResourceId);
-		retval.setCreated(theLink.getCreated());
-		retval.setEidMatch(theLink.getEidMatch());
-		retval.setLinkSource(theLink.getLinkSource());
-		retval.setMatchResult(theLink.getMatchResult());
-		retval.setLinkCreatedNewResource(theLink.getHadToCreateNewGoldenResource());
-		retval.setScore(theLink.getScore());
-		retval.setUpdated(theLink.getUpdated());
-		retval.setVector(theLink.getVector());
-		retval.setVersion(theLink.getVersion());
-		return retval;
 	}
 
 	private Example<MdmLink> exampleLinkFromParameters(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource) {

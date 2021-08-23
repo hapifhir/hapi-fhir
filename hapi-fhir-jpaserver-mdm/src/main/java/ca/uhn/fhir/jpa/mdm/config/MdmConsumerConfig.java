@@ -31,15 +31,17 @@ import ca.uhn.fhir.jpa.mdm.dao.MdmLinkFactory;
 import ca.uhn.fhir.jpa.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.jpa.mdm.interceptor.MdmStorageInterceptor;
 import ca.uhn.fhir.jpa.mdm.svc.GoldenResourceMergerSvcImpl;
+import ca.uhn.fhir.jpa.mdm.svc.IMdmModelConverterSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmClearSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmControllerSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmEidUpdateService;
 import ca.uhn.fhir.jpa.mdm.svc.MdmGoldenResourceDeletingSvc;
-import ca.uhn.fhir.jpa.mdm.svc.MdmLinkQuerySvcImpl;
+import ca.uhn.fhir.jpa.mdm.svc.MdmLinkQuerySvcImplSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmLinkSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmLinkUpdaterSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatchFinderSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
+import ca.uhn.fhir.jpa.mdm.svc.MdmModelConverterSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmResourceFilteringSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmSearchParamSvc;
@@ -179,7 +181,12 @@ public class MdmConsumerConfig {
 
 	@Bean
 	IMdmLinkQuerySvc mdmLinkQuerySvc() {
-		return new MdmLinkQuerySvcImpl();
+		return new MdmLinkQuerySvcImplSvc();
+	}
+
+	@Bean
+	IMdmModelConverterSvc mdmModelConverterSvc() {
+		return new MdmModelConverterSvcImpl();
 	}
 
 	@Bean

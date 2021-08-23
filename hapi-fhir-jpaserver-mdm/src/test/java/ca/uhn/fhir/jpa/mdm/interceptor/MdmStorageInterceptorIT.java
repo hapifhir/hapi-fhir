@@ -7,7 +7,7 @@ import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.mdm.api.MdmLinkChangeEvent;
+import ca.uhn.fhir.mdm.api.MdmLinkEvent;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
@@ -32,14 +32,11 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_GOLDEN_RECORD;
 import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED;
@@ -89,7 +86,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 		MdmLink link = getLinkByTargetId(pr);
 
-		MdmLinkChangeEvent linkChangeEvent = myMdmHelper.getAfterMdmLatch().getLatchInvocationParameterOfType(MdmLinkChangeEvent.class);
+		MdmLinkEvent linkChangeEvent = myMdmHelper.getAfterMdmLatch().getLatchInvocationParameterOfType(MdmLinkEvent.class);
 		assertNotNull(linkChangeEvent);
 		assertEquals(link.getGoldenResourcePid(), new IdDt(linkChangeEvent.getGoldenResourceId()).getIdPartAsLong());
 		assertEquals(link.getSourcePid(), new IdDt(linkChangeEvent.getTargetResourceId()).getIdPartAsLong());

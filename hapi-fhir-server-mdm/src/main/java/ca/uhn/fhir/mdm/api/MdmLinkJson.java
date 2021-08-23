@@ -48,11 +48,15 @@ public class MdmLinkJson implements IModelJson {
 	@JsonProperty("version")
 	private String myVersion;
 
-	/** This link was created as a result of an eid match **/
+	/**
+	 * This link was created as a result of an eid match
+	 **/
 	@JsonProperty("eidMatch")
 	private Boolean myEidMatch;
 
-	/** This link created a new golden resource **/
+	/**
+	 * This link created a new golden resource
+	 **/
 	@JsonProperty("linkCreatedNewGoldenResource")
 	private Boolean myLinkCreatedNewResource;
 
@@ -61,6 +65,9 @@ public class MdmLinkJson implements IModelJson {
 
 	@JsonProperty("score")
 	private Double myScore;
+
+	@JsonProperty("ruleCount")
+	private Long myRuleCount;
 
 	public String getGoldenResourceId() {
 		return myGoldenResourceId;
@@ -159,5 +166,13 @@ public class MdmLinkJson implements IModelJson {
 	public MdmLinkJson setScore(Double theScore) {
 		myScore = theScore;
 		return this;
+	}
+
+	public Long getRuleCount() {
+		return myRuleCount;
+	}
+
+	public void setRuleCount(Long theRuleCount) {
+		myRuleCount = theRuleCount;
 	}
 }

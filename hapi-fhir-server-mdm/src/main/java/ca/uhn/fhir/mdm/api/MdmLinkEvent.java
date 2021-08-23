@@ -28,7 +28,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import java.util.HashSet;
 import java.util.Set;
 
-public class MdmLinkChangeEvent implements IModelJson {
+public class MdmLinkEvent implements IModelJson {
 
 	@JsonProperty(value = "matchResult")
 	private MdmMatchResultEnum myMdmMatchResult;
@@ -92,7 +92,7 @@ public class MdmLinkChangeEvent implements IModelJson {
 		myDuplicateGoldenResourceIds = theDuplicateGoldenResourceIds;
 	}
 
-	public MdmLinkChangeEvent addDuplicateGoldenResourceId(IBaseResource theDuplicateGoldenResourceId) {
+	public MdmLinkEvent addDuplicateGoldenResourceId(IBaseResource theDuplicateGoldenResourceId) {
 		String id = getIdAsString(theDuplicateGoldenResourceId);
 		if (id != null) {
 			getDuplicateGoldenResourceIds().add(id);
@@ -121,6 +121,10 @@ public class MdmLinkChangeEvent implements IModelJson {
 	}
 
 	public void setEidMatch(Boolean theEidMatch) {
+		if (theEidMatch == null) {
+			myEidMatch = Boolean.FALSE;
+			return;
+		}
 		myEidMatch = theEidMatch;
 	}
 
@@ -129,6 +133,10 @@ public class MdmLinkChangeEvent implements IModelJson {
 	}
 
 	public void setNewGoldenResource(Boolean theNewGoldenResource) {
+		if (theNewGoldenResource == null) {
+			myNewGoldenResource = Boolean.FALSE;
+			return;
+		}
 		myNewGoldenResource = theNewGoldenResource;
 	}
 
@@ -146,6 +154,15 @@ public class MdmLinkChangeEvent implements IModelJson {
 
 	public void setRuleCount(Long theRuleCount) {
 		myRuleCount = theRuleCount;
+	}
+
+	public void setFromLink(MdmLinkJson theMdmLinkJson) {
+		setMdmMatchResult(theMdmLinkJson.getMatchResult());
+		setMdmLinkSource(theMdmLinkJson.getLinkSource());
+		setEidMatch(theMdmLinkJson.getEidMatch());
+		setNewGoldenResource(theMdmLinkJson.getLinkCreatedNewResource());
+		setScore(theMdmLinkJson.getScore());
+		setRuleCount(theMdmLinkJson.getRuleCount());
 	}
 
 	@Override

@@ -26,15 +26,14 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import ca.uhn.fhir.jpa.mdm.svc.MdmLinkSvcImpl;
+import ca.uhn.fhir.jpa.mdm.svc.IMdmModelConverterSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmResourceFilteringSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.TooManyCandidatesException;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.api.MdmLinkChangeEvent;
+import ca.uhn.fhir.mdm.api.MdmLinkEvent;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
@@ -42,7 +41,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
@@ -69,6 +67,8 @@ public class MdmMessageHandler implements MessageHandler {
 	private MdmResourceFilteringSvc myMdmResourceFilteringSvc;
 	@Autowired
 	private IMdmSettings myMdmSettings;
+	@Autowired
+	private IMdmModelConverterSvc myModelConverter;
 
 	@Override
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
@@ -119,25 +119,17 @@ public class MdmMessageHandler implements MessageHandler {
 			ResourceOperationMessage outgoingMsg = new ResourceOperationMessage(myFhirContext, targetResource, theMsg.getOperationType());
 			outgoingMsg.setTransactionId(theMsg.getTransactionId());
 
-			MdmLinkChangeEvent linkChangeEvent = mdmContext.getMdmLinkChangeEvent();
+			MdmLinkEvent linkChangeEvent = mdmContext.getMdmLinkChangeEvent();
 			Optional<MdmLink> mdmLinkBySource = myMdmLinkDaoSvc.findMdmLinkBySource(targetResource);
 			if (!mdmLinkBySource.isPresent()) {
 				ourLog.warn("Unable to find link by source for {}", targetResource.getIdElement());
 			}
 
-			mdmLinkBySource.ifPresent(link -> {
-				linkChangeEvent.setMdmMatchResult(link.getMatchResult());
-				linkChangeEvent.setMdmLinkSource(link.getLinkSource());
-				linkChangeEvent.setEidMatch(link.isEidMatchPresent());
-				linkChangeEvent.setNewGoldenResource(link.getHadToCreateNewGoldenResource());
-				linkChangeEvent.setScore(link.getScore());
-				linkChangeEvent.setRuleCount(link.getRuleCount());
-			});
-
+			mdmLinkBySource.ifPresent(link -> linkChangeEvent.setFromLink(myModelConverter.toJson(link)));
 			HookParams params = new HookParams()
 				.add(ResourceOperationMessage.class, outgoingMsg)
 				.add(TransactionLogMessages.class, mdmContext.getTransactionLogMessages())
-				.add(MdmLinkChangeEvent.class, mdmContext.getMdmLinkChangeEvent());
+				.add(MdmLinkEvent.class, mdmContext.getMdmLinkChangeEvent());
 
 			myInterceptorBroadcaster.callHooks(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED, params);
 		}
