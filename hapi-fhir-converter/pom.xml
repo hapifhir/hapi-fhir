@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>5.5.0</version>
+		<version>5.6.0-PRE1-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -206,18 +206,6 @@
 							<groupId>org.apache.commons</groupId>
 							<artifactId>commons-compress</artifactId>
 							<version>${commons_compress_version}</version>
-						</dependency>
-						<!-- This is here because core libs needs it, and we need it for javadoc generation -->
-						<dependency>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-							<version>1.18.16</version>
-						</dependency>
-						<!-- This is here because core libs needs it, and we need it for javadoc generation -->
-						<dependency>
-							<groupId>org.jetbrains</groupId>
-							<artifactId>annotations</artifactId>
-							<version>22.0.0</version>
 						</dependency>
 					</additionalDependencies>
 				</configuration>
