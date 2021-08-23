@@ -1522,6 +1522,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-client</artifactId>
+				<version>${resteasy_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
 				<artifactId>resteasy-core</artifactId>
 				<version>${resteasy_version}</version>
 			</dependency>
