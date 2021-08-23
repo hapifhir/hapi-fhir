@@ -511,6 +511,15 @@ public class SearchParameterMap implements Serializable {
 			b.append(getSearchTotalMode().getCode());
 		}
 
+		//Contained mode
+		//For some reason, instead of null here, we default to false. That said, ommitting it is identical to setting it to false.
+		if (getSearchContainedMode() != SearchContainedModeEnum.FALSE) {
+			addUrlParamSeparator(b);
+			b.append(Constants.PARAM_CONTAINED);
+			b.append("=");
+			b.append(getSearchContainedMode().getCode());
+		}
+
 		if (b.length() == 0) {
 			b.append('?');
 		}

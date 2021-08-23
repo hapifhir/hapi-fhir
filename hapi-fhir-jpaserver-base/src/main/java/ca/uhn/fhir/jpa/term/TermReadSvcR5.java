@@ -10,8 +10,8 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR5;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
 import ca.uhn.fhir.util.ValidateUtil;
-import org.hl7.fhir.convertors.VersionConvertor_40_50;
-import org.hl7.fhir.convertors.conv40_50.CodeSystem40_50;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -19,8 +19,6 @@ import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.ValueSet;
-import org.hl7.fhir.utilities.TerminologyServiceOptions;
-import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -59,15 +57,16 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 	@Transactional(dontRollbackOn = {ExpansionTooCostlyException.class})
 	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
 		ValueSet valueSetToExpand = (ValueSet) theValueSetToExpand;
-		org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(theExpansionOptions, org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSetToExpand));
-		return new ValueSetExpansionOutcome(org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(expandedR4));
+		org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(theExpansionOptions,
+			(org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_40_50.convertResource(valueSetToExpand, new BaseAdvisor_40_50(false)));
+		return new ValueSetExpansionOutcome(VersionConvertorFactory_40_50.convertResource(expandedR4, new BaseAdvisor_40_50(false)));
 	}
 
 	@Override
 	public IBaseResource expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theInput) {
 		org.hl7.fhir.r4.model.ValueSet valueSetToExpand = toCanonicalValueSet(theInput);
 		org.hl7.fhir.r4.model.ValueSet valueSetR4 = super.expandValueSet(theExpansionOptions, valueSetToExpand);
-		return org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSetR4);
+		return VersionConvertorFactory_40_50.convertResource(valueSetR4, new BaseAdvisor_40_50(false));
 	}
 
 	@Override
@@ -79,7 +78,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 	@Override
 	protected org.hl7.fhir.r4.model.ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable) {
 		ValueSet valueSetR5 = myDaoRegistry.getResourceDao("ValueSet").toResource(ValueSet.class, theResourceTable, null, false);
-		return org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSetR5);
+		return (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_40_50.convertResource(valueSetR5, new BaseAdvisor_40_50(false));
 	}
 
 	@Override
@@ -110,30 +109,30 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 	@Override
 	@Nullable
 	protected org.hl7.fhir.r4.model.Coding toCanonicalCoding(IBaseDatatype theCoding) {
-		return VersionConvertor_40_50.convertCoding((Coding) theCoding);
+		return (org.hl7.fhir.r4.model.Coding) VersionConvertorFactory_40_50.convertType((Coding) theCoding, new BaseAdvisor_40_50(false));
 	}
 
 	@Override
 	@Nullable
 	protected org.hl7.fhir.r4.model.Coding toCanonicalCoding(IBaseCoding theCoding) {
-		return VersionConvertor_40_50.convertCoding((Coding) theCoding);
+		return (org.hl7.fhir.r4.model.Coding) VersionConvertorFactory_40_50.convertType((Coding) theCoding, new BaseAdvisor_40_50(false));
 	}
 
 	@Override
 	@Nullable
 	protected org.hl7.fhir.r4.model.CodeableConcept toCanonicalCodeableConcept(IBaseDatatype theCoding) {
-		return VersionConvertor_40_50.convertCodeableConcept((CodeableConcept) theCoding);
+		return (org.hl7.fhir.r4.model.CodeableConcept) VersionConvertorFactory_40_50.convertType((CodeableConcept) theCoding, new BaseAdvisor_40_50(false));
 	}
 
 
 	@Override
 	protected org.hl7.fhir.r4.model.ValueSet toCanonicalValueSet(IBaseResource theValueSet) throws org.hl7.fhir.exceptions.FHIRException {
-		return org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet((ValueSet) theValueSet);
+		return (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_40_50.convertResource((ValueSet) theValueSet, new BaseAdvisor_40_50(false));
 	}
 
 	@Override
 	protected org.hl7.fhir.r4.model.CodeSystem toCanonicalCodeSystem(IBaseResource theCodeSystem) {
-		return CodeSystem40_50.convertCodeSystem((CodeSystem) theCodeSystem);
+		return (org.hl7.fhir.r4.model.CodeSystem) VersionConvertorFactory_40_50.convertResource((CodeSystem) theCodeSystem, new BaseAdvisor_40_50(false));
 	}
 
 	@Override

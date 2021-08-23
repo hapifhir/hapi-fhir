@@ -57,8 +57,8 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
-import org.hl7.fhir.convertors.VersionConvertor_40_50;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -78,7 +78,6 @@ import org.thymeleaf.IEngineConfiguration;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.cache.AlwaysValidCacheEntryValidity;
 import org.thymeleaf.cache.ICacheEntryValidity;
-import org.thymeleaf.cache.NonCacheableCacheEntryValidity;
 import org.thymeleaf.context.IExpressionContext;
 import org.thymeleaf.context.WebContext;
 import org.thymeleaf.linkbuilder.AbstractLinkBuilder;
@@ -909,9 +908,9 @@ public class OpenApiInterceptor {
 	private static <T extends Resource> T toCanonicalVersion(IBaseResource theNonCanonical) {
 		IBaseResource canonical;
 		if (theNonCanonical instanceof org.hl7.fhir.dstu3.model.Resource) {
-			canonical = VersionConvertor_30_40.convertResource((org.hl7.fhir.dstu3.model.Resource) theNonCanonical, true);
+			canonical = VersionConvertorFactory_30_40.convertResource((org.hl7.fhir.dstu3.model.Resource) theNonCanonical);
 		} else if (theNonCanonical instanceof org.hl7.fhir.r5.model.Resource) {
-			canonical = VersionConvertor_40_50.convertResource((org.hl7.fhir.r5.model.Resource) theNonCanonical);
+			canonical = VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r5.model.Resource) theNonCanonical);
 		} else {
 			canonical = theNonCanonical;
 		}

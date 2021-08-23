@@ -90,6 +90,7 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -803,6 +804,7 @@ public abstract class BaseTransactionProcessor {
 						String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
 						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
 						outcome = resourceDao.create(res, matchUrl, false, theTransactionDetails, theRequest);
+					 	res.setId(outcome.getId());
 						if (nextResourceId != null) {
 							handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequest);
 						}
@@ -1023,13 +1025,9 @@ public abstract class BaseTransactionProcessor {
 
 			for (IIdType next : theAllIds) {
 				IIdType replacement = theIdSubstitutions.get(next);
-				if (replacement == null) {
-					continue;
+				if (replacement != null && !replacement.equals(next)) {
+					ourLog.debug("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
 				}
-				if (replacement.equals(next)) {
-					continue;
-				}
-				ourLog.debug("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
 			}
 
 			ListMultimap<Pointcut, HookParams> deferredBroadcastEvents = theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
@@ -1112,7 +1110,6 @@ public abstract class BaseTransactionProcessor {
 				}
 				deferredIndexesForAutoVersioning.put(nextOutcome, referencesToAutoVersion);
 			}
-
 		}
 
 		// If we have any resources we'll be auto-versioning, index these next
