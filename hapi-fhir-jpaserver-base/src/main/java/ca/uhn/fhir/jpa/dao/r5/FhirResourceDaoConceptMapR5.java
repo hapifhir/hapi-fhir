@@ -29,6 +29,8 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.ConceptMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +58,8 @@ public class FhirResourceDaoConceptMapR5 extends BaseHapiFhirResourceDao<Concept
 
 			if (retVal.getDeleted() == null) {
 				ConceptMap conceptMap = (ConceptMap) theResource;
-				myTermConceptMappingSvc.storeTermConceptMapAndChildren(retVal, org.hl7.fhir.convertors.conv40_50.ConceptMap40_50.convertConceptMap(conceptMap));
+				myTermConceptMappingSvc.storeTermConceptMapAndChildren(retVal,
+					(org.hl7.fhir.r4.model.ConceptMap) VersionConvertorFactory_40_50.convertResource(conceptMap, new BaseAdvisor_40_50(false)));
 			} else {
 				myTermConceptMappingSvc.deleteConceptMapAndChildren(retVal);
 			}

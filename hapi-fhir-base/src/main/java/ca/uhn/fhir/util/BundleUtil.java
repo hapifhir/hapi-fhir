@@ -450,6 +450,15 @@ public class BundleUtil {
 	}
 
 	/**
+	 * Extract all of ids of all the resources from a given bundle
+	 */
+	public static List<String> toListOfResourceIds(FhirContext theContext, IBaseBundle theBundle) {
+		return toListOfResourcesOfType(theContext, theBundle, IBaseResource.class).stream()
+			.map(resource -> resource.getIdElement().getIdPart())
+			.collect(Collectors.toList());
+	}
+
+	/**
 	 * Extract all of the resources of a given type from a given bundle
 	 */
 	@SuppressWarnings("unchecked")

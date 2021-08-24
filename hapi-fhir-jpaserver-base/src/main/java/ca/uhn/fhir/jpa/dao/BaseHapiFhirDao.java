@@ -94,6 +94,7 @@ import com.google.common.collect.Sets;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -129,7 +130,6 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import javax.validation.constraints.Null;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 import java.util.ArrayList;
@@ -1163,10 +1163,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					validateResourceForStorage((T) theResource, entity);
 				}
 			}
-			String resourceType = myContext.getResourceType(theResource);
-			if (isNotBlank(entity.getResourceType()) && !entity.getResourceType().equals(resourceType)) {
-				throw new UnprocessableEntityException(
-					"Existing resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + entity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
+			if (!StringUtils.isBlank(entity.getResourceType())) {
+				validateIncomingResourceTypeMatchesExisting(theResource, entity);
 			}
 		}
 
@@ -1207,6 +1205,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			if (thePerformIndexing || ((ResourceTable) theEntity).getVersion() == 1) {
 
 				newParams = new ResourceIndexedSearchParams();
+
 				mySearchParamWithInlineReferencesExtractor.populateFromResource(newParams, theTransactionDetails, entity, theResource, existingParams, theRequest, thePerformIndexing);
 
 				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);
@@ -1398,7 +1397,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 
 				// Synchronize composite params
-				mySearchParamWithInlineReferencesExtractor.storeCompositeStringUniques(newParams, entity, existingParams);
+				mySearchParamWithInlineReferencesExtractor.storeUniqueComboParameters(newParams, entity, existingParams);
 			}
 		}
 
@@ -1408,6 +1407,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 
 		return entity;
+	}
+
+	private void validateIncomingResourceTypeMatchesExisting(IBaseResource theResource, ResourceTable entity) {
+		String resourceType = myContext.getResourceType(theResource);
+		if (!resourceType.equals(entity.getResourceType())) {
+			throw new UnprocessableEntityException(
+				"Existing resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + entity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
+		}
 	}
 
 	@Override

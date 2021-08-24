@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.interceptor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -31,6 +30,7 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -45,7 +45,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -62,6 +61,9 @@ public class PatientIdPartitionInterceptor {
 	@Autowired
 	private FhirContext myFhirContext;
 
+	@Autowired
+	private ISearchParamExtractor mySearchParamExtractor;
+
 	/**
 	 * Constructor
 	 */
@@ -72,9 +74,10 @@ public class PatientIdPartitionInterceptor {
 	/**
 	 * Constructor
 	 */
-	public PatientIdPartitionInterceptor(FhirContext theFhirContext) {
+	public PatientIdPartitionInterceptor(FhirContext theFhirContext, ISearchParamExtractor theSearchParamExtractor) {
 		this();
 		myFhirContext = theFhirContext;
+		mySearchParamExtractor = theSearchParamExtractor;
 	}
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
@@ -92,14 +95,15 @@ public class PatientIdPartitionInterceptor {
 				throw new MethodNotAllowedException("Patient resource IDs must be client-assigned in patient compartment mode");
 			}
 		} else {
-			IFhirPath fhirPath = myFhirContext.newFhirPath();
 			compartmentIdentity = compartmentSps
 				.stream()
 				.flatMap(param -> Arrays.stream(BaseSearchParamExtractor.splitPathsR4(param.getPath())))
 				.filter(StringUtils::isNotBlank)
-				.map(path -> fhirPath.evaluateFirst(theResource, path, IBaseReference.class))
-				.filter(Optional::isPresent)
-				.map(Optional::get)
+				.map(path -> mySearchParamExtractor.getPathValueExtractor(theResource, path).get())
+				.filter(t -> !t.isEmpty())
+				.map(t -> t.get(0))
+				.filter(t -> t instanceof IBaseReference)
+				.map(t -> (IBaseReference) t)
 				.map(t -> t.getReferenceElement().getValue())
 				.map(t -> new IdType(t).getIdPart())
 				.filter(StringUtils::isNotBlank)
@@ -113,17 +117,6 @@ public class PatientIdPartitionInterceptor {
 
 		return provideCompartmentMemberInstanceResponse(theRequestDetails, compartmentIdentity);
 	}
-
-	@Nonnull
-	private List<RuntimeSearchParam> getCompartmentSearchParams(RuntimeResourceDefinition resourceDef) {
-		return resourceDef
-			.getSearchParams()
-			.stream()
-			.filter(param -> param.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
-			.filter(param -> param.getProvidesMembershipInCompartments() != null && param.getProvidesMembershipInCompartments().contains("Patient"))
-			.collect(Collectors.toList());
-	}
-
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
 	public RequestPartitionId identifyForRead(ReadPartitionIdRequestDetails theReadDetails, RequestDetails theRequestDetails) {
@@ -165,7 +158,23 @@ public class PatientIdPartitionInterceptor {
 				// nothing
 		}
 
-		return provideUnsupportedQueryResponse(theReadDetails);
+		// If we couldn't identify a patient ID by the URL, let's try using the
+		// conditional target if we have one
+		if (theReadDetails.getConditionalTargetOrNull() != null) {
+			return identifyForCreate(theReadDetails.getConditionalTargetOrNull(), theRequestDetails);
+		}
+
+		return provideNonPatientSpecificQueryResponse(theReadDetails);
+	}
+
+	@Nonnull
+	private List<RuntimeSearchParam> getCompartmentSearchParams(RuntimeResourceDefinition resourceDef) {
+		return resourceDef
+			.getSearchParams()
+			.stream()
+			.filter(param -> param.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
+			.filter(param -> param.getProvidesMembershipInCompartments() != null && param.getProvidesMembershipInCompartments().contains("Patient"))
+			.collect(Collectors.toList());
 	}
 
 	private String getSingleResourceIdValueOrNull(SearchParameterMap theParams, String theParamName, String theResourceType) {
@@ -202,8 +211,8 @@ public class PatientIdPartitionInterceptor {
 	/**
 	 * Return a partition or throw an error for FHIR operations that can not be used with this interceptor
 	 */
-	protected RequestPartitionId provideUnsupportedQueryResponse(ReadPartitionIdRequestDetails theRequestDetails) {
-		throw new MethodNotAllowedException("This server is not able to handle this request of type " + theRequestDetails.getRestOperationType());
+	protected RequestPartitionId provideNonPatientSpecificQueryResponse(ReadPartitionIdRequestDetails theRequestDetails) {
+		return RequestPartitionId.allPartitions();
 	}
 
 

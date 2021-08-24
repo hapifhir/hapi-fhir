@@ -48,7 +48,7 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 	}
 
 	@Override
-	protected IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath) {
+	public IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath) {
 		return () -> {
 			String path = theSinglePath;
 

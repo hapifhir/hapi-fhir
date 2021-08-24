@@ -68,6 +68,13 @@ public class MatchResourceUrlService {
 	 * Note that this will only return a maximum of 2 results!!
 	 */
 	public <R extends IBaseResource> Set<ResourcePersistentId> processMatchUrl(String theMatchUrl, Class<R> theResourceType, TransactionDetails theTransactionDetails, RequestDetails theRequest) {
+		return processMatchUrl(theMatchUrl, theResourceType, theTransactionDetails, theRequest, null);
+	}
+
+	/**
+	 * Note that this will only return a maximum of 2 results!!
+	 */
+	public <R extends IBaseResource> Set<ResourcePersistentId> processMatchUrl(String theMatchUrl, Class<R> theResourceType, TransactionDetails theTransactionDetails, RequestDetails theRequest, IBaseResource theConditionalOperationTargetOrNull) {
 		String resourceType = myContext.getResourceType(theResourceType);
 		String matchUrl = massageForStorage(resourceType, theMatchUrl);
 
@@ -92,7 +99,7 @@ public class MatchResourceUrlService {
 		}
 		paramMap.setLoadSynchronousUpTo(2);
 
-		Set<ResourcePersistentId> retVal = search(paramMap, theResourceType, theRequest);
+		Set<ResourcePersistentId> retVal = search(paramMap, theResourceType, theRequest, theConditionalOperationTargetOrNull);
 
 		if (myDaoConfig.isMatchUrlCacheEnabled() && retVal.size() == 1) {
 			ResourcePersistentId pid = retVal.iterator().next();
@@ -124,14 +131,14 @@ public class MatchResourceUrlService {
 		return existing;
 	}
 
-	public <R extends IBaseResource> Set<ResourcePersistentId> search(SearchParameterMap theParamMap, Class<R> theResourceType, RequestDetails theRequest) {
+	public <R extends IBaseResource> Set<ResourcePersistentId> search(SearchParameterMap theParamMap, Class<R> theResourceType, RequestDetails theRequest, @Nullable IBaseResource theConditionalOperationTargetOrNull) {
 		StopWatch sw = new StopWatch();
 		IFhirResourceDao<R> dao = myDaoRegistry.getResourceDao(theResourceType);
 		if (dao == null) {
 			throw new InternalErrorException("No DAO for resource type: " + theResourceType.getName());
 		}
 
-		Set<ResourcePersistentId> retVal = dao.searchForIds(theParamMap, theRequest);
+		Set<ResourcePersistentId> retVal = dao.searchForIds(theParamMap, theRequest, theConditionalOperationTargetOrNull);
 
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
 		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {

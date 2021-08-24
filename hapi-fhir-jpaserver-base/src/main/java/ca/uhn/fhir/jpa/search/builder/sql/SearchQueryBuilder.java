@@ -27,7 +27,8 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.CompositeUniqueSearchParameterPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
@@ -145,12 +146,20 @@ public class SearchQueryBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a Composite Unique search parameter
 	 */
-	public CompositeUniqueSearchParameterPredicateBuilder addCompositeUniquePredicateBuilder() {
-		CompositeUniqueSearchParameterPredicateBuilder retVal = mySqlBuilderFactory.newCompositeUniqueSearchParameterPredicateBuilder(this);
+	public ComboUniqueSearchParameterPredicateBuilder addComboUniquePredicateBuilder() {
+		ComboUniqueSearchParameterPredicateBuilder retVal = mySqlBuilderFactory.newComboUniqueSearchParameterPredicateBuilder(this);
 		addTable(retVal, null);
 		return retVal;
 	}
 
+	/**
+	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a Composite Unique search parameter
+	 */
+	public ComboNonUniqueSearchParameterPredicateBuilder addComboNonUniquePredicateBuilder() {
+		ComboNonUniqueSearchParameterPredicateBuilder retVal = mySqlBuilderFactory.newComboNonUniqueSearchParameterPredicateBuilder(this);
+		addTable(retVal, null);
+		return retVal;
+	}
 
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a COORDS search parameter
@@ -460,18 +469,31 @@ public class SearchQueryBuilder {
 	 * If at least one predicate builder already exists, return the last one added to the chain. If none has been selected, create a builder on HFJ_RESOURCE, add it and return it.
 	 */
 	public BaseJoiningPredicateBuilder getOrCreateFirstPredicateBuilder() {
+		return getOrCreateFirstPredicateBuilder(true);
+	}
+
+	/**
+	 * If at least one predicate builder already exists, return the last one added to the chain. If none has been selected, create a builder on HFJ_RESOURCE, add it and return it.
+	 */
+	public BaseJoiningPredicateBuilder getOrCreateFirstPredicateBuilder(boolean theIncludeResourceTypeAndNonDeletedFlag) {
 		if (myFirstPredicateBuilder == null) {
-			getOrCreateResourceTablePredicateBuilder();
+			getOrCreateResourceTablePredicateBuilder(theIncludeResourceTypeAndNonDeletedFlag);
 		}
 		return myFirstPredicateBuilder;
 	}
 
 	public ResourceTablePredicateBuilder getOrCreateResourceTablePredicateBuilder() {
+		return getOrCreateResourceTablePredicateBuilder(true);
+	}
+
+	public ResourceTablePredicateBuilder getOrCreateResourceTablePredicateBuilder(boolean theIncludeResourceTypeAndNonDeletedFlag) {
 		if (myResourceTableRoot == null) {
 			ResourceTablePredicateBuilder resourceTable = mySqlBuilderFactory.resourceTable(this);
 			addTable(resourceTable, null);
-			Condition typeAndDeletionPredicate = resourceTable.createResourceTypeAndNonDeletedPredicates();
-			addPredicate(typeAndDeletionPredicate);
+			if (theIncludeResourceTypeAndNonDeletedFlag) {
+				Condition typeAndDeletionPredicate = resourceTable.createResourceTypeAndNonDeletedPredicates();
+				addPredicate(typeAndDeletionPredicate);
+			}
 			myResourceTableRoot = resourceTable;
 		}
 		return myResourceTableRoot;

@@ -24,7 +24,6 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-import static org.hl7.fhir.convertors.conv30_40.Parameters30_40.convertParameters;
 
 /*
  * #%L
