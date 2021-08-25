@@ -303,7 +303,6 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
 		myModelConfig.setAutoVersionReferenceAtPaths("Observation.subject");
 
-
 		BundleBuilder builder = new BundleBuilder(myFhirCtx);
 
 		Patient patient = new Patient();
@@ -334,7 +333,6 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		observation = myObservationDao.read(observationId);
 		assertEquals(patientId.getValue(), observation.getSubject().getReference());
 		assertEquals(encounterId.toVersionless().getValue(), observation.getEncounter().getReference());
-
 	}
 
 	@Test
@@ -397,7 +395,6 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		assertEquals(patientId.getValue(), observation.getSubject().getReference());
 		assertEquals("2", observation.getSubject().getReferenceElement().getVersionIdPart());
 		assertEquals(encounterId.toVersionless().getValue(), observation.getEncounter().getReference());
-
 	}
 
 
@@ -417,7 +414,6 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			// Update patient to make a second version
 			patient.setActive(false);
 			myPatientDao.update(patient);
-
 		}
 
 		BundleBuilder builder = new BundleBuilder(myFhirCtx);
@@ -466,7 +462,6 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			// Update patient to make a second version
 			patient.setActive(false);
 			myPatientDao.update(patient);
-
 		}
 
 		BundleBuilder builder = new BundleBuilder(myFhirCtx);
@@ -499,9 +494,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		// Read back and verify that reference is now versioned
 		observation = myObservationDao.read(observationId);
 		assertEquals(patientId.getValue(), observation.getSubject().getReference());
-
 	}
-
 
 	@Test
 	public void testSearchAndIncludeVersionedReference_Asynchronous() {

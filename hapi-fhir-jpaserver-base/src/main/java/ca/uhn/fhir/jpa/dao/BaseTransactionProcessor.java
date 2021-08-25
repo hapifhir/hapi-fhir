@@ -384,7 +384,8 @@ public abstract class BaseTransactionProcessor {
 		myHapiTransactionService = theHapiTransactionService;
 	}
 
-	private IBaseBundle processTransaction(final RequestDetails theRequestDetails, final IBaseBundle theRequest, final String theActionName, boolean theNestedMode) {
+	private IBaseBundle processTransaction(final RequestDetails theRequestDetails, final IBaseBundle theRequest,
+														final String theActionName, boolean theNestedMode) {
 		validateDependencies();
 
 		String transactionType = myVersionAdapter.getBundleType(theRequest);
@@ -440,10 +441,11 @@ public abstract class BaseTransactionProcessor {
 		List<IBase> getEntries = new ArrayList<>();
 		final IdentityHashMap<IBase, Integer> originalRequestOrder = new IdentityHashMap<>();
 		for (int i = 0; i < requestEntries.size(); i++) {
-			originalRequestOrder.put(requestEntries.get(i), i);
+			IBase requestEntry = requestEntries.get(i);
+			originalRequestOrder.put(requestEntry, i);
 			myVersionAdapter.addEntry(response);
-			if (myVersionAdapter.getEntryRequestVerb(myContext, requestEntries.get(i)).equals("GET")) {
-				getEntries.add(requestEntries.get(i));
+			if (myVersionAdapter.getEntryRequestVerb(myContext, requestEntry).equals("GET")) {
+				getEntries.add(requestEntry);
 			}
 		}
 
@@ -462,73 +464,17 @@ public abstract class BaseTransactionProcessor {
 		}
 		entries.sort(new TransactionSorter(placeholderIds));
 
-		doTransactionWriteOperations(theRequestDetails, theActionName, transactionDetails, transactionStopWatch, response, originalRequestOrder, entries);
+		// perform all writes
+		doTransactionWriteOperations(theRequestDetails, theActionName,
+			transactionDetails, transactionStopWatch,
+			response, originalRequestOrder, entries);
 
-		/*
-		 * Loop through the request and process any entries of type GET
-		 */
-		if (getEntries.size() > 0) {
-			transactionStopWatch.startTask("Process " + getEntries.size() + " GET entries");
-		}
-		for (IBase nextReqEntry : getEntries) {
-
-			if (theNestedMode) {
-				throw new InvalidRequestException("Can not invoke read operation on nested transaction");
-			}
-
-			if (!(theRequestDetails instanceof ServletRequestDetails)) {
-				throw new MethodNotAllowedException("Can not call transaction GET methods from this context");
-			}
-
-			ServletRequestDetails srd = (ServletRequestDetails) theRequestDetails;
-			Integer originalOrder = originalRequestOrder.get(nextReqEntry);
-			IBase nextRespEntry = (IBase) myVersionAdapter.getEntries(response).get(originalOrder);
-
-			ArrayListMultimap<String, String> paramValues = ArrayListMultimap.create();
-
-			String transactionUrl = extractTransactionUrlOrThrowException(nextReqEntry, "GET");
-
-			ServletSubRequestDetails requestDetails = ServletRequestUtil.getServletSubRequestDetails(srd, transactionUrl, paramValues);
-
-			String url = requestDetails.getRequestPath();
-
-			BaseMethodBinding<?> method = srd.getServer().determineResourceMethod(requestDetails, url);
-			if (method == null) {
-				throw new IllegalArgumentException("Unable to handle GET " + url);
-			}
-
-			if (isNotBlank(myVersionAdapter.getEntryRequestIfMatch(nextReqEntry))) {
-				requestDetails.addHeader(Constants.HEADER_IF_MATCH, myVersionAdapter.getEntryRequestIfMatch(nextReqEntry));
-			}
-			if (isNotBlank(myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry))) {
-				requestDetails.addHeader(Constants.HEADER_IF_NONE_EXIST, myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry));
-			}
-			if (isNotBlank(myVersionAdapter.getEntryRequestIfNoneMatch(nextReqEntry))) {
-				requestDetails.addHeader(Constants.HEADER_IF_NONE_MATCH, myVersionAdapter.getEntryRequestIfNoneMatch(nextReqEntry));
-			}
-
-			Validate.isTrue(method instanceof BaseResourceReturningMethodBinding, "Unable to handle GET {}", url);
-			try {
-
-				BaseResourceReturningMethodBinding methodBinding = (BaseResourceReturningMethodBinding) method;
-				requestDetails.setRestOperationType(methodBinding.getRestOperationType());
-
-				IBaseResource resource = methodBinding.doInvokeServer(srd.getServer(), requestDetails);
-				if (paramValues.containsKey(Constants.PARAM_SUMMARY) || paramValues.containsKey(Constants.PARAM_CONTENT)) {
-					resource = filterNestedBundle(requestDetails, resource);
-				}
-				myVersionAdapter.setResource(nextRespEntry, resource);
-				myVersionAdapter.setResponseStatus(nextRespEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
-			} catch (NotModifiedException e) {
-				myVersionAdapter.setResponseStatus(nextRespEntry, toStatusString(Constants.STATUS_HTTP_304_NOT_MODIFIED));
-			} catch (BaseServerResponseException e) {
-				ourLog.info("Failure processing transaction GET {}: {}", url, e.toString());
-				myVersionAdapter.setResponseStatus(nextRespEntry, toStatusString(e.getStatusCode()));
-				populateEntryWithOperationOutcome(e, nextRespEntry);
-			}
-
-		}
-		transactionStopWatch.endCurrentTask();
+		// perform all gets
+		// (we do these last so that the gets happen on the final state of the DB;
+		// see above note)
+		doTransactionReadOperations(theRequestDetails, response,
+			getEntries, originalRequestOrder,
+			transactionStopWatch, theNestedMode);
 
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
 		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequestDetails)) {
@@ -545,6 +491,74 @@ public abstract class BaseTransactionProcessor {
 		return response;
 	}
 
+	private void doTransactionReadOperations(final RequestDetails theRequestDetails, IBaseBundle theResponse,
+														  List<IBase> theGetEntries, IdentityHashMap<IBase, Integer> theOriginalRequestOrder,
+														  StopWatch theTransactionStopWatch, boolean theNestedMode) {
+		if (theGetEntries.size() > 0) {
+			theTransactionStopWatch.startTask("Process " + theGetEntries.size() + " GET entries");
+
+			/*
+			 * Loop through the request and process any entries of type GET
+			 */
+			for (IBase nextReqEntry : theGetEntries) {
+				if (theNestedMode) {
+					throw new InvalidRequestException("Can not invoke read operation on nested transaction");
+				}
+
+				if (!(theRequestDetails instanceof ServletRequestDetails)) {
+					throw new MethodNotAllowedException("Can not call transaction GET methods from this context");
+				}
+
+				ServletRequestDetails srd = (ServletRequestDetails) theRequestDetails;
+				Integer originalOrder = theOriginalRequestOrder.get(nextReqEntry);
+				IBase nextRespEntry = (IBase) myVersionAdapter.getEntries(theResponse).get(originalOrder);
+
+				ArrayListMultimap<String, String> paramValues = ArrayListMultimap.create();
+
+				String transactionUrl = extractTransactionUrlOrThrowException(nextReqEntry, "GET");
+
+				ServletSubRequestDetails requestDetails = ServletRequestUtil.getServletSubRequestDetails(srd, transactionUrl, paramValues);
+
+				String url = requestDetails.getRequestPath();
+
+				BaseMethodBinding<?> method = srd.getServer().determineResourceMethod(requestDetails, url);
+				if (method == null) {
+					throw new IllegalArgumentException("Unable to handle GET " + url);
+				}
+
+				if (isNotBlank(myVersionAdapter.getEntryRequestIfMatch(nextReqEntry))) {
+					requestDetails.addHeader(Constants.HEADER_IF_MATCH, myVersionAdapter.getEntryRequestIfMatch(nextReqEntry));
+				}
+				if (isNotBlank(myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry))) {
+					requestDetails.addHeader(Constants.HEADER_IF_NONE_EXIST, myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry));
+				}
+				if (isNotBlank(myVersionAdapter.getEntryRequestIfNoneMatch(nextReqEntry))) {
+					requestDetails.addHeader(Constants.HEADER_IF_NONE_MATCH, myVersionAdapter.getEntryRequestIfNoneMatch(nextReqEntry));
+				}
+
+				Validate.isTrue(method instanceof BaseResourceReturningMethodBinding, "Unable to handle GET {}", url);
+				try {
+					BaseResourceReturningMethodBinding methodBinding = (BaseResourceReturningMethodBinding) method;
+					requestDetails.setRestOperationType(methodBinding.getRestOperationType());
+
+					IBaseResource resource = methodBinding.doInvokeServer(srd.getServer(), requestDetails);
+					if (paramValues.containsKey(Constants.PARAM_SUMMARY) || paramValues.containsKey(Constants.PARAM_CONTENT)) {
+						resource = filterNestedBundle(requestDetails, resource);
+					}
+					myVersionAdapter.setResource(nextRespEntry, resource);
+					myVersionAdapter.setResponseStatus(nextRespEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
+				} catch (NotModifiedException e) {
+					myVersionAdapter.setResponseStatus(nextRespEntry, toStatusString(Constants.STATUS_HTTP_304_NOT_MODIFIED));
+				} catch (BaseServerResponseException e) {
+					ourLog.info("Failure processing transaction GET {}: {}", url, e.toString());
+					myVersionAdapter.setResponseStatus(nextRespEntry, toStatusString(e.getStatusCode()));
+					populateEntryWithOperationOutcome(e, nextRespEntry);
+				}
+			}
+			theTransactionStopWatch.endCurrentTask();
+		}
+	}
+
 	/**
 	 * All of the write operations in the transaction (PUT, POST, etc.. basically anything
 	 * except GET) are performed in their own database transaction before we do the reads.
@@ -554,7 +568,10 @@ public abstract class BaseTransactionProcessor {
 	 * heavy load with lots of concurrent transactions using all available
 	 * database connections.
 	 */
-	private void doTransactionWriteOperations(RequestDetails theRequestDetails, String theActionName, TransactionDetails theTransactionDetails, StopWatch theTransactionStopWatch, IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder, List<IBase> theEntries) {
+	private void doTransactionWriteOperations(RequestDetails theRequestDetails, String theActionName,
+															TransactionDetails theTransactionDetails, StopWatch theTransactionStopWatch,
+															IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder,
+															List<IBase> theEntries) {
 		TransactionWriteOperationsDetails writeOperationsDetails = null;
 		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE, myInterceptorBroadcaster, theRequestDetails) ||
 			CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_POST, myInterceptorBroadcaster, theRequestDetails)) {
@@ -583,14 +600,18 @@ public abstract class BaseTransactionProcessor {
 				.add(TransactionDetails.class, theTransactionDetails)
 				.add(TransactionWriteOperationsDetails.class, writeOperationsDetails);
 			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE, params);
-
 		}
 
 		TransactionCallback<Map<IBase, IIdType>> txCallback = status -> {
 			final Set<IIdType> allIds = new LinkedHashSet<>();
 			final Map<IIdType, IIdType> idSubstitutions = new HashMap<>();
 			final Map<IIdType, DaoMethodOutcome> idToPersistedOutcome = new HashMap<>();
-			Map<IBase, IIdType> retVal = doTransactionWriteOperations(theRequestDetails, theActionName, theTransactionDetails, allIds, idSubstitutions, idToPersistedOutcome, theResponse, theOriginalRequestOrder, theEntries, theTransactionStopWatch);
+
+			Map<IBase, IIdType> retVal = doTransactionWriteOperations(theRequestDetails, theActionName,
+				theTransactionDetails, allIds,
+				idSubstitutions, idToPersistedOutcome,
+				theResponse, theOriginalRequestOrder,
+				theEntries, theTransactionStopWatch);
 
 			theTransactionStopWatch.startTask("Commit writes to database");
 			return retVal;
@@ -721,7 +742,7 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * Retrieves teh next resource id (IIdType) from the base resource and next request entry.
+	 * Retrieves the next resource id (IIdType) from the base resource and next request entry.
 	 * @param theBaseResource - base resource
 	 * @param theNextReqEntry - next request entry
 	 * @param theAllIds - set of all IIdType values
@@ -1161,19 +1182,11 @@ public abstract class BaseTransactionProcessor {
 					nextOutcome, nextResource,
 					referencesToAutoVersion); // this is empty
 			} else {
+				// we have autoversioned things to defer until later
 				if (deferredIndexesForAutoVersioning == null) {
 					deferredIndexesForAutoVersioning = new IdentityHashMap<>();
 				}
 				deferredIndexesForAutoVersioning.put(nextOutcome, referencesToAutoVersion);
-
-				// TODO - add the references to the
-				// idsToPersistedOutcomes
-//				for (IBaseReference autoVersion: referencesToAutoVersion) {
-//					IBaseResource resource = myVersionAdapter.getResource(autoVersion);
-//					IFhirResourceDao dao = getDaoOrThrowException(resource.getClass());
-//
-//				}
-//				theIdToPersistedOutcome.put()
 			}
 		}
 
@@ -1183,6 +1196,15 @@ public abstract class BaseTransactionProcessor {
 				DaoMethodOutcome nextOutcome = nextEntry.getKey();
 				Set<IBaseReference> referencesToAutoVersion = nextEntry.getValue();
 				IBaseResource nextResource = nextOutcome.getResource();
+
+				//TODO - should we add the autoversioned resources to our idtoPersistedoutcomes here?
+//				for (IBaseReference autoVersionRef : referencesToAutoVersion) {
+//					IBaseResource baseResource = myVersionAdapter.getResource(autoVersionRef);
+//					IFhirResourceDao dao = getDaoOrThrowException(baseResource.getClass());
+//
+//					theIdToPersistedOutcome.put(baseResource.getIdElement(), );
+//				}
+
 				resolveReferencesThenSaveAndIndexResource(theRequest, theTransactionDetails,
 					theIdSubstitutions, theIdToPersistedOutcome,
 					entriesToProcess, nonUpdatedEntities,
