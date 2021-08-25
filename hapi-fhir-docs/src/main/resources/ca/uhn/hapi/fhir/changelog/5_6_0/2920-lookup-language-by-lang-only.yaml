@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2920
+jira: SMILE-2971
+title: "Previously, validation against bcp47 (urn:ietf:bcp:47) as a language would fail validation if the region was absent. This has been fixed, and the validate
+operation will now correctly validate simple languages, e.g. `nl` instead of requiring `nl-DE` or `nl-NL`"
