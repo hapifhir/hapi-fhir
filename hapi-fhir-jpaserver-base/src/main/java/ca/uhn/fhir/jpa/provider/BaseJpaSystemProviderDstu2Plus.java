@@ -26,13 +26,13 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -43,6 +43,11 @@ public abstract class BaseJpaSystemProviderDstu2Plus<T, MT> extends BaseJpaSyste
 	@Operation(name = MARK_ALL_RESOURCES_FOR_REINDEXING, idempotent = false, returnParameters = {
 		@OperationParam(name = "status")
 	})
+	/**
+	 * @deprecated
+	 * @see ca.uhn.fhir.rest.server.provider.ReindexProvider#Reindex(List, IPrimitiveType, RequestDetails)
+	 */
+	@Deprecated
 	public IBaseResource markAllResourcesForReindexing(
 		@OperationParam(name="type", min = 0, max = 1, typeName = "code") IPrimitiveType<String> theType
 	) {
@@ -65,6 +70,11 @@ public abstract class BaseJpaSystemProviderDstu2Plus<T, MT> extends BaseJpaSyste
 	@Operation(name = PERFORM_REINDEXING_PASS, idempotent = false, returnParameters = {
 		@OperationParam(name = "status")
 	})
+	/**
+	 * @deprecated
+	 * @see ca.uhn.fhir.rest.server.provider.ReindexProvider#Reindex(List, IPrimitiveType, RequestDetails)
+	 */
+	@Deprecated
 	public IBaseResource performReindexingPass() {
 		Integer count = getResourceReindexingSvc().runReindexingPass();
 

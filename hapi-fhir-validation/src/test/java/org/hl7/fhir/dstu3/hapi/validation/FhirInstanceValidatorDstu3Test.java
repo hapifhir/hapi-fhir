@@ -1312,13 +1312,13 @@ public class FhirInstanceValidatorDstu3Test {
 		String input = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/dstu3-rick-test.json"), Charsets.UTF_8);
 
 		IResourceValidator.IValidatorResourceFetcher resourceFetcher = mock(IResourceValidator.IValidatorResourceFetcher.class);
-		when(resourceFetcher.validationPolicy(any(), anyString(), anyString())).thenReturn(IResourceValidator.ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
+		when(resourceFetcher.validationPolicy(any(), any(), any(), any())).thenReturn(IResourceValidator.ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myVal.validateWithResult(input);
 
-		verify(resourceFetcher, times(3)).resolveURL(any(), anyString(), anyString(), anyString());
-		verify(resourceFetcher, times(4)).validationPolicy(any(), anyString(), anyString());
-		verify(resourceFetcher, times(4)).fetch(any(), anyString());
+		verify(resourceFetcher, times(3)).resolveURL(any(), any(), anyString(), anyString(), anyString());
+		verify(resourceFetcher, times(4)).validationPolicy(any(), any(), anyString(), anyString());
+		verify(resourceFetcher, times(4)).fetch(any(), any(), anyString());
 	}
 
 	@Test

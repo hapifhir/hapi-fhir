@@ -271,7 +271,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					String resourceType = search.getResourceType();
 					SearchParameterMap params = search.getSearchParameterMap().orElseThrow(() -> new IllegalStateException("No map in PASSCOMPLET search"));
 					IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(resourceType);
-					RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequestDetails, resourceType, params);
+					RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequestDetails, resourceType, params, null);
 					SearchContinuationTask task = new SearchContinuationTask(search, resourceDao, params, resourceType, theRequestDetails, requestPartitionId);
 					myIdToSearchTask.put(search.getUuid(), task);
 					myExecutor.submit(task);
@@ -536,19 +536,22 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			 * individually for pages as we return them to clients
 			 */
 
+			// _includes
 			Integer maxIncludes = myDaoConfig.getMaximumIncludesToLoadPerPage();
 			final Set<ResourcePersistentId> includedPids = theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes);
-
 			if (maxIncludes != null) {
 				maxIncludes -= includedPids.size();
 			}
-
-			if (theParams.getEverythingMode() == null && (maxIncludes == null || maxIncludes > 0)) {
-				includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes));
-			}
-
+			pids.addAll(includedPids);
 			List<ResourcePersistentId> includedPidsList = new ArrayList<>(includedPids);
-			pids.addAll(includedPidsList);
+
+			// _revincludes
+			if (theParams.getEverythingMode() == null && (maxIncludes == null || maxIncludes > 0)) {
+				Set<ResourcePersistentId> revIncludedPids = theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes);
+				includedPids.addAll(revIncludedPids);
+				pids.addAll(revIncludedPids);
+				includedPidsList.addAll(revIncludedPids);
+			}
 
 			List<IBaseResource> resources = new ArrayList<>();
 			theSb.loadResourcesByPid(pids, includedPidsList, resources, false, theRequestDetails);

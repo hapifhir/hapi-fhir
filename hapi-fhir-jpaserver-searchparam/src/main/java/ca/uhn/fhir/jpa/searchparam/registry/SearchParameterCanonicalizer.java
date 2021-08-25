@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * #L%
  */
 
+import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
@@ -152,14 +153,16 @@ public class SearchParameterCanonicalizer {
 
 		IIdType id = theNextSp.getIdElement();
 		String uri = "";
-		boolean unique = false;
+		ComboSearchParamType unique = null;
 
 		List<ExtensionDt> uniqueExts = theNextSp.getUndeclaredExtensionsByUrl(HapiExtensions.EXT_SP_UNIQUE);
 		if (uniqueExts.size() > 0) {
 			IPrimitiveType<?> uniqueExtsValuePrimitive = uniqueExts.get(0).getValueAsPrimitive();
 			if (uniqueExtsValuePrimitive != null) {
 				if ("true".equalsIgnoreCase(uniqueExtsValuePrimitive.getValueAsString())) {
-					unique = true;
+					unique = ComboSearchParamType.UNIQUE;
+				} else if ("false".equalsIgnoreCase(uniqueExtsValuePrimitive.getValueAsString())) {
+					unique = ComboSearchParamType.NON_UNIQUE;
 				}
 			}
 		}
@@ -232,14 +235,16 @@ public class SearchParameterCanonicalizer {
 
 		IIdType id = theNextSp.getIdElement();
 		String uri = "";
-		boolean unique = false;
+		ComboSearchParamType unique = null;
 
 		List<Extension> uniqueExts = theNextSp.getExtensionsByUrl(HapiExtensions.EXT_SP_UNIQUE);
 		if (uniqueExts.size() > 0) {
 			IPrimitiveType<?> uniqueExtsValuePrimitive = uniqueExts.get(0).getValueAsPrimitive();
 			if (uniqueExtsValuePrimitive != null) {
 				if ("true".equalsIgnoreCase(uniqueExtsValuePrimitive.getValueAsString())) {
-					unique = true;
+					unique = ComboSearchParamType.UNIQUE;
+				} else if ("false".equalsIgnoreCase(uniqueExtsValuePrimitive.getValueAsString())) {
+					unique = ComboSearchParamType.NON_UNIQUE;
 				}
 			}
 		}
@@ -317,7 +322,7 @@ public class SearchParameterCanonicalizer {
 
 		IIdType id = theNextSp.getIdElement();
 		String uri = terser.getSinglePrimitiveValueOrNull(theNextSp, "url");
-		boolean unique = false;
+		ComboSearchParamType unique = null;
 
 		String value = ((IBaseHasExtensions) theNextSp).getExtension()
 			.stream()
@@ -328,7 +333,9 @@ public class SearchParameterCanonicalizer {
 			.findFirst()
 			.orElse("");
 		if ("true".equalsIgnoreCase(value)) {
-			unique = true;
+			unique = ComboSearchParamType.UNIQUE;
+		} else if ("false".equalsIgnoreCase(value)) {
+			unique = ComboSearchParamType.NON_UNIQUE;
 		}
 
 		List<RuntimeSearchParam.Component> components = new ArrayList<>();

@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.subscription.email;
 
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
-import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
@@ -11,15 +11,16 @@ import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import com.icegreen.greenmail.util.GreenMail;
+import ca.uhn.fhir.rest.server.mail.MailConfig;
+import com.icegreen.greenmail.junit5.GreenMailExtension;
 import com.icegreen.greenmail.util.GreenMailUtil;
-import com.icegreen.greenmail.util.ServerSetup;
+import com.icegreen.greenmail.util.ServerSetupTest;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.*;
-
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,16 +30,19 @@ import javax.mail.internet.MimeMessage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import static ca.uhn.fhir.jpa.subscription.resthook.RestHookTestDstu3Test.logAllInterceptors;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(EmailSubscriptionDstu2Test.class);
-	private static GreenMail ourTestSmtp;
-	private static int ourListenerPort;
+
+	@RegisterExtension
+	static GreenMailExtension ourGreenMail = new GreenMailExtension(ServerSetupTest.SMTP.withPort(0));
+
 	private List<IIdType> mySubscriptionIds = new ArrayList<>();
 
 	@Autowired
@@ -64,8 +68,6 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 		ourLog.info("Before re-registering interceptors");
 		logAllInterceptors(myInterceptorRegistry);
-
-		mySubscriptionTestUtil.initEmailSender(ourListenerPort);
 
 		mySubscriptionTestUtil.registerEmailInterceptor();
 
@@ -121,51 +123,32 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		Subscription subscription1 = createSubscription(criteria1, payload, "to1@example.com,to2@example.com");
 		mySubscriptionTestUtil.waitForQueueToDrain();
 		await().until(()->mySubscriptionRegistry.get(subscription1.getIdElement().getIdPart()), Matchers.not(Matchers.nullValue()));
-		mySubscriptionTestUtil.setEmailSender(subscription1.getIdElement());
-		assertEquals(0, Arrays.asList(ourTestSmtp.getReceivedMessages()).size());
+		mySubscriptionTestUtil.setEmailSender(subscription1.getIdElement(), new EmailSenderImpl(withMailConfig()));
+		assertEquals(0, Arrays.asList(ourGreenMail.getReceivedMessages()).size());
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 
-		waitForSize(2, 60000, new Callable<Number>() {
-			@Override
-			public Number call() {
-				int length = ourTestSmtp.getReceivedMessages().length;
-				ourLog.trace("Have received {}", length);
-				return length;
-			}
-		});
+		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 1));
 
-		MimeMessage[] messages = ourTestSmtp.getReceivedMessages();
+		MimeMessage[] messages = ourGreenMail.getReceivedMessages();
 		assertEquals(2, messages.length);
-		int msgIdx = 0;
-		ourLog.info("Received: " + GreenMailUtil.getWholeMessage(messages[msgIdx]));
-		assertEquals("HAPI FHIR Subscriptions", messages[msgIdx].getSubject());
-		assertEquals(1, messages[msgIdx].getFrom().length);
-		assertEquals("noreply@unknown.com", ((InternetAddress) messages[msgIdx].getFrom()[0]).getAddress());
-		assertEquals(2, messages[msgIdx].getAllRecipients().length);
-		assertEquals("to1@example.com", ((InternetAddress) messages[msgIdx].getAllRecipients()[0]).getAddress());
-		assertEquals("to2@example.com", ((InternetAddress) messages[msgIdx].getAllRecipients()[1]).getAddress());
-		assertEquals(1, messages[msgIdx].getHeader("Content-Type").length);
-		assertEquals("text/plain; charset=us-ascii", messages[msgIdx].getHeader("Content-Type")[0]);
-		String foundBody = GreenMailUtil.getBody(messages[msgIdx]);
+		ourLog.info("Received: " + GreenMailUtil.getWholeMessage(messages[0]));
+		assertEquals("HAPI FHIR Subscriptions", messages[0].getSubject());
+		assertEquals(1, messages[0].getFrom().length);
+		assertEquals("noreply@unknown.com", ((InternetAddress) messages[0].getFrom()[0]).getAddress());
+		assertEquals(2, messages[0].getAllRecipients().length);
+		assertEquals("to1@example.com", ((InternetAddress) messages[0].getAllRecipients()[0]).getAddress());
+		assertEquals("to2@example.com", ((InternetAddress) messages[0].getAllRecipients()[1]).getAddress());
+		assertEquals(1, messages[0].getHeader("Content-Type").length);
+		assertEquals("text/plain; charset=UTF-8", messages[0].getHeader("Content-Type")[0]);
+		String foundBody = GreenMailUtil.getBody(messages[0]);
 		assertEquals("", foundBody);
-
 	}
 
-
-	@AfterAll
-	public static void afterClass() {
-		ourTestSmtp.stop();
+	private MailConfig withMailConfig() {
+		return new MailConfig()
+			.setSmtpHostname(ServerSetupTest.SMTP.getBindAddress())
+			.setSmtpPort(ourGreenMail.getSmtp().getPort());
 	}
-
-	@BeforeAll
-	public static void beforeClass() {
-		ServerSetup smtp = new ServerSetup(0, null, ServerSetup.PROTOCOL_SMTP);
-		smtp.setServerStartupTimeout(2000);
-		ourTestSmtp = new GreenMail(smtp);
-		ourTestSmtp.start();
-        ourListenerPort = ourTestSmtp.getSmtp().getPort();
-	}
-
 
 }

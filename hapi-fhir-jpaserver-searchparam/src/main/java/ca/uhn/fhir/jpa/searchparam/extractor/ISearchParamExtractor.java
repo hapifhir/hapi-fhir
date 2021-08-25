@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.utils.FHIRPathEngine;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -80,6 +81,8 @@ public interface ISearchParamExtractor {
 	ResourceIndexedSearchParamToken createSearchParamForCoding(String theResourceType, RuntimeSearchParam theSearchParam, IBase theValue);
 
 	String getDisplayTextForCoding(IBase theValue);
+
+	BaseSearchParamExtractor.IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath);
 
 	List<IBase> getCodingsFromCodeableConcept(IBase theValue);
 

@@ -20,19 +20,12 @@ package ca.uhn.fhir.jpa.delete.job;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.batch.job.MultiUrlProcessorJobConfig;
 import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
-import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
 import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
-import ca.uhn.fhir.jpa.delete.model.RequestListJson;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
@@ -43,11 +36,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import javax.annotation.Nonnull;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME;
 
@@ -56,9 +45,8 @@ import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME;
  * Delete Expunge job.
  */
 @Configuration
-public class DeleteExpungeJobConfig {
+public class DeleteExpungeJobConfig extends MultiUrlProcessorJobConfig {
 	public static final String DELETE_EXPUNGE_URL_LIST_STEP_NAME = "delete-expunge-url-list-step";
-	private static final int MINUTES_IN_FUTURE_TO_DELETE_FROM = 1;
 
 	@Autowired
 	private StepBuilderFactory myStepBuilderFactory;
@@ -67,24 +55,11 @@ public class DeleteExpungeJobConfig {
 
 	@Bean(name = DELETE_EXPUNGE_JOB_NAME)
 	@Lazy
-	public Job deleteExpungeJob(FhirContext theFhirContext, MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) throws Exception {
+	public Job deleteExpungeJob(MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
 		return myJobBuilderFactory.get(DELETE_EXPUNGE_JOB_NAME)
-			.validator(deleteExpungeJobParameterValidator(theFhirContext, theMatchUrlService, theDaoRegistry))
+			.validator(multiUrlProcessorParameterValidator(theMatchUrlService, theDaoRegistry))
 			.start(deleteExpungeUrlListStep())
 			.build();
-	}
-
-	@Nonnull
-	public static JobParameters buildJobParameters(Integer theBatchSize, List<String> theUrlList, List<RequestPartitionId> theRequestPartitionIds) {
-		Map<String, JobParameter> map = new HashMap<>();
-		RequestListJson requestListJson = RequestListJson.fromUrlStringsAndRequestPartitionIds(theUrlList, theRequestPartitionIds);
-		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_REQUEST_LIST, new JobParameter(requestListJson.toString()));
-		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_START_TIME, new JobParameter(DateUtils.addMinutes(new Date(), MINUTES_IN_FUTURE_TO_DELETE_FROM)));
-		if (theBatchSize != null) {
-			map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_BATCH_SIZE, new JobParameter(theBatchSize.longValue()));
-		}
-		JobParameters parameters = new JobParameters(map);
-		return parameters;
 	}
 
 	@Bean
@@ -95,45 +70,22 @@ public class DeleteExpungeJobConfig {
 			.processor(deleteExpungeProcessor())
 			.writer(sqlExecutorWriter())
 			.listener(pidCountRecorderListener())
-			.listener(promotionListener())
+			.listener(deleteExpungePromotionListener())
 			.build();
 	}
 
 	@Bean
-	@StepScope
-	public PidReaderCounterListener pidCountRecorderListener() {
-		return new PidReaderCounterListener();
-	}
+	public ExecutionContextPromotionListener deleteExpungePromotionListener() {
+		ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
 
-	@Bean
-	@StepScope
-	public ReverseCronologicalBatchResourcePidReader reverseCronologicalBatchResourcePidReader() {
-		return new ReverseCronologicalBatchResourcePidReader();
+		listener.setKeys(new String[]{SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED, PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED});
+
+		return listener;
 	}
 
 	@Bean
 	@StepScope
 	public DeleteExpungeProcessor deleteExpungeProcessor() {
 		return new DeleteExpungeProcessor();
-	}
-
-	@Bean
-	@StepScope
-	public SqlExecutorWriter sqlExecutorWriter() {
-		return new SqlExecutorWriter();
-	}
-
-	@Bean
-	public JobParametersValidator deleteExpungeJobParameterValidator(FhirContext theFhirContext, MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
-		return new DeleteExpungeJobParameterValidator(theMatchUrlService, theDaoRegistry);
-	}
-
-	@Bean
-	public ExecutionContextPromotionListener promotionListener() {
-		ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
-
-		listener.setKeys(new String[]{SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED, PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED});
-
-		return listener;
 	}
 }

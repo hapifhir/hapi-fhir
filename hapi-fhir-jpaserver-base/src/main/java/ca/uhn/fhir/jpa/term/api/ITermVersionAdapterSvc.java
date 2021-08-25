@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term.api;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -32,7 +33,11 @@ import org.hl7.fhir.r4.model.ValueSet;
  */
 public interface ITermVersionAdapterSvc {
 
-	IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource);
+	default IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource) {
+		return createOrUpdateCodeSystem(theCodeSystemResource, null);
+	}
+
+	IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource, RequestDetails theRequestDetails);
 
 	void createOrUpdateConceptMap(ConceptMap theNextConceptMap);
 

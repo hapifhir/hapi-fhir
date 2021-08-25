@@ -110,7 +110,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	 * @see Metadata#cacheMillis()
 	 * @since 4.1.0
 	 */
-	private void setCacheMillis(long theCacheMillis) {
+	public void setCacheMillis(long theCacheMillis) {
 		myCacheMillis = theCacheMillis;
 	}
 

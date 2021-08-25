@@ -40,26 +40,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaSearchParamCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaSearchParamCache.class);
 
-	private volatile Map<String, List<RuntimeSearchParam>> myActiveUniqueSearchParams = Collections.emptyMap();
-	private volatile Map<String, Map<Set<String>, List<RuntimeSearchParam>>> myActiveParamNamesToUniqueSearchParams = Collections.emptyMap();
+	private volatile Map<String, List<RuntimeSearchParam>> myActiveComboSearchParams = Collections.emptyMap();
+	private volatile Map<String, Map<Set<String>, List<RuntimeSearchParam>>> myActiveParamNamesToComboSearchParams = Collections.emptyMap();
 
-	public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
-		List<RuntimeSearchParam> retval = myActiveUniqueSearchParams.get(theResourceName);
+	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
+		List<RuntimeSearchParam> retval = myActiveComboSearchParams.get(theResourceName);
 		if (retval == null) {
 			retval = Collections.emptyList();
 		}
 		return retval;
 	}
 
-	public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
-		Map<Set<String>, List<RuntimeSearchParam>> paramNamesToParams = myActiveParamNamesToUniqueSearchParams.get(theResourceName);
+	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {
+		Map<Set<String>, List<RuntimeSearchParam>> paramNamesToParams = myActiveParamNamesToComboSearchParams.get(theResourceName);
 		if (paramNamesToParams == null) {
 			return Collections.emptyList();
 		}
@@ -72,8 +71,8 @@ public class JpaSearchParamCache {
 	}
 
 	void populateActiveSearchParams(IInterceptorService theInterceptorBroadcaster, IPhoneticEncoder theDefaultPhoneticEncoder, RuntimeSearchParamCache theActiveSearchParams) {
-		Map<String, List<RuntimeSearchParam>> activeUniqueSearchParams = new HashMap<>();
-		Map<String, Map<Set<String>, List<RuntimeSearchParam>>> activeParamNamesToUniqueSearchParams = new HashMap<>();
+		Map<String, List<RuntimeSearchParam>> resourceNameToComboSearchParams = new HashMap<>();
+		Map<String, Map<Set<String>, List<RuntimeSearchParam>>> activeParamNamesToComboSearchParams = new HashMap<>();
 
 		Map<String, RuntimeSearchParam> idToRuntimeSearchParam = new HashMap<>();
 		List<RuntimeSearchParam> jpaSearchParams = new ArrayList<>();
@@ -83,7 +82,7 @@ public class JpaSearchParamCache {
 		 */
 		for (String theResourceName : theActiveSearchParams.getResourceNameKeys()) {
 			Map<String, RuntimeSearchParam> searchParamMap = theActiveSearchParams.getSearchParamMap(theResourceName);
-			List<RuntimeSearchParam> uniqueSearchParams = activeUniqueSearchParams.computeIfAbsent(theResourceName, k -> new ArrayList<>());
+			List<RuntimeSearchParam> comboSearchParams = resourceNameToComboSearchParams.computeIfAbsent(theResourceName, k -> new ArrayList<>());
 			Collection<RuntimeSearchParam> nextSearchParamsForResourceName = searchParamMap.values();
 
 			ourLog.trace("Resource {} has {} params", theResourceName, searchParamMap.size());
@@ -99,10 +98,9 @@ public class JpaSearchParamCache {
 					idToRuntimeSearchParam.put(nextCandidate.getUri(), nextCandidate);
 				}
 
-				RuntimeSearchParam nextCandidateCasted = nextCandidate;
-				jpaSearchParams.add(nextCandidateCasted);
-				if (nextCandidateCasted.isUnique()) {
-					uniqueSearchParams.add(nextCandidateCasted);
+				jpaSearchParams.add(nextCandidate);
+				if (nextCandidate.getComboSearchParamType() != null) {
+					comboSearchParams.add(nextCandidate);
 				}
 
 				setPhoneticEncoder(theDefaultPhoneticEncoder, nextCandidate);
@@ -137,19 +135,19 @@ public class JpaSearchParamCache {
 				}
 			}
 
-			if (next.isUnique()) {
+			if (next.getComboSearchParamType() != null) {
 				for (String nextBase : next.getBase()) {
-					activeParamNamesToUniqueSearchParams.computeIfAbsent(nextBase, v -> new HashMap<>());
-					activeParamNamesToUniqueSearchParams.get(nextBase).computeIfAbsent(paramNames, t -> new ArrayList<>());
-					activeParamNamesToUniqueSearchParams.get(nextBase).get(paramNames).add(next);
+					activeParamNamesToComboSearchParams.computeIfAbsent(nextBase, v -> new HashMap<>());
+					activeParamNamesToComboSearchParams.get(nextBase).computeIfAbsent(paramNames, t -> new ArrayList<>());
+					activeParamNamesToComboSearchParams.get(nextBase).get(paramNames).add(next);
 				}
 			}
 		}
 
-		ourLog.info("Have {} unique search params", activeParamNamesToUniqueSearchParams.size());
+		ourLog.info("Have {} unique search params", activeParamNamesToComboSearchParams.size());
 
-		myActiveUniqueSearchParams = activeUniqueSearchParams;
-		myActiveParamNamesToUniqueSearchParams = activeParamNamesToUniqueSearchParams;
+		myActiveComboSearchParams = resourceNameToComboSearchParams;
+		myActiveParamNamesToComboSearchParams = activeParamNamesToComboSearchParams;
 	}
 
 	void setPhoneticEncoder(IPhoneticEncoder theDefaultPhoneticEncoder, RuntimeSearchParam searchParam) {

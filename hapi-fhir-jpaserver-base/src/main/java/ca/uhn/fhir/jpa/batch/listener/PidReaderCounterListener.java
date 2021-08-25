@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.batch.listener;
  */
 
 import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.annotation.AfterProcess;
+import org.springframework.batch.core.annotation.AfterRead;
 import org.springframework.batch.core.annotation.BeforeStep;
 
 import java.util.List;
@@ -40,8 +40,8 @@ public class PidReaderCounterListener {
 		myStepExecution = stepExecution;
 	}
 
-	@AfterProcess
-	public void afterProcess(List<Long> thePids, List<String> theSqlList) {
+	@AfterRead
+	public void afterRead(List<Long> thePids) {
 		myTotalPidsProcessed += thePids.size();
 		myStepExecution.getExecutionContext().putLong(RESOURCE_TOTAL_PROCESSED, myTotalPidsProcessed);
 	}

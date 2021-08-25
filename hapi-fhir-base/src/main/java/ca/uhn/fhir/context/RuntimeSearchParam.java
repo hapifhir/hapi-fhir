@@ -10,6 +10,7 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -55,7 +56,7 @@ public class RuntimeSearchParam {
 	private final RuntimeSearchParamStatusEnum myStatus;
 	private final String myUri;
 	private final Map<String, List<IBaseExtension<?, ?>>> myExtensions = new HashMap<>();
-	private final boolean myUnique;
+	private final ComboSearchParamType myComboSearchParamType;
 	private final List<Component> myComponents;
 	private IPhoneticEncoder myPhoneticEncoder;
 
@@ -64,20 +65,20 @@ public class RuntimeSearchParam {
 	 */
 	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType,
 									  Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, Collection<String> theBase) {
-		this(theId, theUri, theName, theDescription, thePath, theParamType, theProvidesMembershipInCompartments, theTargets, theStatus, false, Collections.emptyList(), theBase);
+		this(theId, theUri, theName, theDescription, thePath, theParamType, theProvidesMembershipInCompartments, theTargets, theStatus, null, Collections.emptyList(), theBase);
 	}
 
 	/**
 	 * Copy constructor
 	 */
 	public RuntimeSearchParam(RuntimeSearchParam theSp) {
-		this(theSp.getId(), theSp.getUri(), theSp.getName(), theSp.getDescription(), theSp.getPath(), theSp.getParamType(), theSp.getProvidesMembershipInCompartments(), theSp.getTargets(), theSp.getStatus(), theSp.isUnique(), theSp.getComponents(), theSp.getBase());
+		this(theSp.getId(), theSp.getUri(), theSp.getName(), theSp.getDescription(), theSp.getPath(), theSp.getParamType(), theSp.getProvidesMembershipInCompartments(), theSp.getTargets(), theSp.getStatus(), theSp.getComboSearchParamType(), theSp.getComponents(), theSp.getBase());
 	}
 
 	/**
 	 * Constructor
 	 */
-	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, boolean theUnique, List<Component> theComponents, Collection<String> theBase) {
+	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, ComboSearchParamType theComboSearchParamType, List<Component> theComponents, Collection<String> theBase) {
 		super();
 
 		myId = theId;
@@ -110,7 +111,7 @@ public class RuntimeSearchParam {
 		} else {
 			myBase = Collections.unmodifiableSet(new HashSet<>(theBase));
 		}
-		myUnique = theUnique;
+		myComboSearchParamType = theComboSearchParamType;
 		if (theComponents != null) {
 			myComponents = Collections.unmodifiableList(theComponents);
 		} else {
@@ -122,8 +123,12 @@ public class RuntimeSearchParam {
 		return myComponents;
 	}
 
-	public boolean isUnique() {
-		return myUnique;
+	/**
+	 * Returns <code>null</code> if this is not a combo search param type
+	 */
+	@Nullable
+	public ComboSearchParamType getComboSearchParamType() {
+		return myComboSearchParamType;
 	}
 
 	/**
