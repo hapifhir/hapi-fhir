@@ -345,7 +345,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
 		return validateCode(theValidationSupportContext, new ConceptValidationOptions(), theSystem, theCode, null, null).asLookupCodeResult(theSystem, theCode);
 	}
 
@@ -550,7 +550,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 					if (theWantCode != null) {
 						if (theValidationSupportContext.getRootValidationSupport().isCodeSystemSupported(theValidationSupportContext, includeOrExcludeConceptSystemUrl)) {
-							LookupCodeResult lookup = theValidationSupportContext.getRootValidationSupport().lookupCode(theValidationSupportContext, includeOrExcludeConceptSystemUrl, theWantCode);
+							LookupCodeResult lookup = theValidationSupportContext.getRootValidationSupport().lookupCode(theValidationSupportContext, includeOrExcludeConceptSystemUrl, theWantCode, null);
 							if (lookup != null && lookup.isFound()) {
 								CodeSystem.ConceptDefinitionComponent conceptDefinition = new CodeSystem.ConceptDefinitionComponent()
 									.addConcept()
