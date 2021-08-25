@@ -240,8 +240,10 @@ public abstract class BaseTransactionProcessor {
 		myVersionAdapter.populateEntryWithOperationOutcome(caughtEx, nextEntry);
 	}
 
-	private void handleTransactionCreateOrUpdateOutcome(Map<IIdType, IIdType> idSubstitutions, Map<IIdType, DaoMethodOutcome> idToPersistedOutcome, IIdType nextResourceId, DaoMethodOutcome outcome,
-																		 IBase newEntry, String theResourceType, IBaseResource theRes, RequestDetails theRequestDetails) {
+	private void handleTransactionCreateOrUpdateOutcome(Map<IIdType, IIdType> idSubstitutions, Map<IIdType, DaoMethodOutcome> idToPersistedOutcome,
+																		 IIdType nextResourceId, DaoMethodOutcome outcome,
+																		 IBase newEntry, String theResourceType,
+																		 IBaseResource theRes, RequestDetails theRequestDetails) {
 		IIdType newId = outcome.getId().toUnqualified();
 		IIdType resourceId = isPlaceholder(nextResourceId) ? nextResourceId : nextResourceId.toUnqualifiedVersionless();
 		if (newId.equals(resourceId) == false) {
@@ -652,8 +654,129 @@ public abstract class BaseTransactionProcessor {
 		myModelConfig = theModelConfig;
 	}
 
-	protected Map<IBase, IIdType> doTransactionWriteOperations(final RequestDetails theRequest, String theActionName, TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
-																				  Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder, List<IBase> theEntries, StopWatch theTransactionStopWatch) {
+	/**
+	 * Searches for duplicate conditional creates and consolidates them.
+	 *
+	 * @param theEntries
+	 */
+	private void consolidateDuplicateConditionalCreates(List<IBase> theEntries) {
+		final HashMap<String, String> keyToUuid = new HashMap<>();
+		for (int index = 0, originalIndex = 0; index < theEntries.size(); index++, originalIndex++) {
+			IBase nextReqEntry = theEntries.get(index);
+			IBaseResource resource = myVersionAdapter.getResource(nextReqEntry);
+			if (resource != null) {
+				String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
+				String entryUrl = myVersionAdapter.getFullUrl(nextReqEntry);
+				String requestUrl = myVersionAdapter.getEntryRequestUrl(nextReqEntry);
+				String ifNoneExist = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
+				String key = verb + "|" + requestUrl + "|" + ifNoneExist;
+
+				// Conditional UPDATE
+				boolean consolidateEntry = false;
+				if ("PUT".equals(verb)) {
+					if (isNotBlank(entryUrl) && isNotBlank(requestUrl)) {
+						int questionMarkIndex = requestUrl.indexOf('?');
+						if (questionMarkIndex >= 0 && requestUrl.length() > (questionMarkIndex + 1)) {
+							consolidateEntry = true;
+						}
+					}
+				}
+
+				// Conditional CREATE
+				if ("POST".equals(verb)) {
+					if (isNotBlank(entryUrl) && isNotBlank(requestUrl) && isNotBlank(ifNoneExist)) {
+						if (!entryUrl.equals(requestUrl)) {
+							consolidateEntry = true;
+						}
+					}
+				}
+
+				if (consolidateEntry) {
+					if (!keyToUuid.containsKey(key)) {
+						keyToUuid.put(key, entryUrl);
+					} else {
+						ourLog.info("Discarding transaction bundle entry {} as it contained a duplicate conditional {}", originalIndex, verb);
+						theEntries.remove(index);
+						index--;
+						String existingUuid = keyToUuid.get(key);
+						for (IBase nextEntry : theEntries) {
+							IBaseResource nextResource = myVersionAdapter.getResource(nextEntry);
+							for (IBaseReference nextReference : myContext.newTerser().getAllPopulatedChildElementsOfType(nextResource, IBaseReference.class)) {
+								// We're interested in any references directly to the placeholder ID, but also
+								// references that have a resource target that has the placeholder ID.
+								String nextReferenceId = nextReference.getReferenceElement().getValue();
+								if (isBlank(nextReferenceId) && nextReference.getResource() != null) {
+									nextReferenceId = nextReference.getResource().getIdElement().getValue();
+								}
+								if (entryUrl.equals(nextReferenceId)) {
+									nextReference.setReference(existingUuid);
+									nextReference.setResource(null);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Retrieves teh next resource id (IIdType) from the base resource and next request entry.
+	 * @param theBaseResource - base resource
+	 * @param theNextReqEntry - next request entry
+	 * @param theAllIds - set of all IIdType values
+	 * @return
+	 */
+	private IIdType getNextResourceIdFromBaseResource(IBaseResource theBaseResource,
+													  IBase theNextReqEntry,
+													  Set<IIdType> theAllIds) {
+		IIdType nextResourceId = null;
+		if (theBaseResource != null) {
+			nextResourceId = theBaseResource.getIdElement();
+
+			String fullUrl = myVersionAdapter.getFullUrl(theNextReqEntry);
+			if (isNotBlank(fullUrl)) {
+				IIdType fullUrlIdType = newIdType(fullUrl);
+				if (isPlaceholder(fullUrlIdType)) {
+					nextResourceId = fullUrlIdType;
+				} else if (!nextResourceId.hasIdPart()) {
+					nextResourceId = fullUrlIdType;
+				}
+			}
+
+			if (nextResourceId.hasIdPart() && nextResourceId.getIdPart().matches("[a-zA-Z]+:.*") && !isPlaceholder(nextResourceId)) {
+				throw new InvalidRequestException("Invalid placeholder ID found: " + nextResourceId.getIdPart() + " - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'");
+			}
+
+			if (nextResourceId.hasIdPart() && !nextResourceId.hasResourceType() && !isPlaceholder(nextResourceId)) {
+				nextResourceId = newIdType(toResourceName(theBaseResource.getClass()), nextResourceId.getIdPart());
+				theBaseResource.setId(nextResourceId);
+			}
+
+			/*
+			 * Ensure that the bundle doesn't have any duplicates, since this causes all kinds of weirdness
+			 */
+			if (isPlaceholder(nextResourceId)) {
+				if (!theAllIds.add(nextResourceId)) {
+					throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextResourceId));
+				}
+			} else if (nextResourceId.hasResourceType() && nextResourceId.hasIdPart()) {
+				IIdType nextId = nextResourceId.toUnqualifiedVersionless();
+				if (!theAllIds.add(nextId)) {
+					throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextId));
+				}
+			}
+
+		}
+
+		return nextResourceId;
+	}
+
+	protected Map<IBase, IIdType> doTransactionWriteOperations(final RequestDetails theRequest, String theActionName,
+																				  TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
+																				  Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
+																				  IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder,
+																				  List<IBase> theEntries, StopWatch theTransactionStopWatch) {
 
 		theTransactionDetails.beginAcceptingDeferredInterceptorBroadcasts(
 			Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED,
@@ -661,7 +784,6 @@ public abstract class BaseTransactionProcessor {
 			Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED
 		);
 		try {
-
 			Set<String> deletedResources = new HashSet<>();
 			DeleteConflictList deleteConflicts = new DeleteConflictList();
 			Map<IBase, IIdType> entriesToProcess = new IdentityHashMap<>();
@@ -673,117 +795,20 @@ public abstract class BaseTransactionProcessor {
 			/*
 			 * Look for duplicate conditional creates and consolidate them
 			 */
-			final HashMap<String, String> keyToUuid = new HashMap<>();
-			for (int index = 0, originalIndex = 0; index < theEntries.size(); index++, originalIndex++) {
-				IBase nextReqEntry = theEntries.get(index);
-				IBaseResource resource = myVersionAdapter.getResource(nextReqEntry);
-				if (resource != null) {
-					String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
-					String entryUrl = myVersionAdapter.getFullUrl(nextReqEntry);
-					String requestUrl = myVersionAdapter.getEntryRequestUrl(nextReqEntry);
-					String ifNoneExist = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
-					String key = verb + "|" + requestUrl + "|" + ifNoneExist;
-
-					// Conditional UPDATE
-					boolean consolidateEntry = false;
-					if ("PUT".equals(verb)) {
-						if (isNotBlank(entryUrl) && isNotBlank(requestUrl)) {
-							int questionMarkIndex = requestUrl.indexOf('?');
-							if (questionMarkIndex >= 0 && requestUrl.length() > (questionMarkIndex + 1)) {
-								consolidateEntry = true;
-							}
-						}
-					}
-
-					// Conditional CREATE
-					if ("POST".equals(verb)) {
-						if (isNotBlank(entryUrl) && isNotBlank(requestUrl) && isNotBlank(ifNoneExist)) {
-							if (!entryUrl.equals(requestUrl)) {
-								consolidateEntry = true;
-							}
-						}
-					}
-
-					if (consolidateEntry) {
-						if (!keyToUuid.containsKey(key)) {
-							keyToUuid.put(key, entryUrl);
-						} else {
-							ourLog.info("Discarding transaction bundle entry {} as it contained a duplicate conditional {}", originalIndex, verb);
-							theEntries.remove(index);
-							index--;
-							String existingUuid = keyToUuid.get(key);
-							for (IBase nextEntry : theEntries) {
-								IBaseResource nextResource = myVersionAdapter.getResource(nextEntry);
-								for (IBaseReference nextReference : myContext.newTerser().getAllPopulatedChildElementsOfType(nextResource, IBaseReference.class)) {
-									// We're interested in any references directly to the placeholder ID, but also
-									// references that have a resource target that has the placeholder ID.
-									String nextReferenceId = nextReference.getReferenceElement().getValue();
-									if (isBlank(nextReferenceId) && nextReference.getResource() != null) {
-										nextReferenceId = nextReference.getResource().getIdElement().getValue();
-									}
-									if (entryUrl.equals(nextReferenceId)) {
-										nextReference.setReference(existingUuid);
-										nextReference.setResource(null);
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-
+			 consolidateDuplicateConditionalCreates(theEntries);
 
 			/*
 			 * Loop through the request and process any entries of type
 			 * PUT, POST or DELETE
 			 */
 			for (int i = 0; i < theEntries.size(); i++) {
-
 				if (i % 250 == 0) {
 					ourLog.debug("Processed {} non-GET entries out of {} in transaction", i, theEntries.size());
 				}
 
 				IBase nextReqEntry = theEntries.get(i);
 				IBaseResource res = myVersionAdapter.getResource(nextReqEntry);
-				IIdType nextResourceId = null;
-				if (res != null) {
-
-					nextResourceId = res.getIdElement();
-
-					String fullUrl = myVersionAdapter.getFullUrl(nextReqEntry);
-					if (isNotBlank(fullUrl)) {
-						IIdType fullUrlIdType = newIdType(fullUrl);
-						if (isPlaceholder(fullUrlIdType)) {
-							nextResourceId = fullUrlIdType;
-						} else if (!nextResourceId.hasIdPart()) {
-							nextResourceId = fullUrlIdType;
-						}
-					}
-
-					if (nextResourceId.hasIdPart() && nextResourceId.getIdPart().matches("[a-zA-Z]+:.*") && !isPlaceholder(nextResourceId)) {
-						throw new InvalidRequestException("Invalid placeholder ID found: " + nextResourceId.getIdPart() + " - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'");
-					}
-
-					if (nextResourceId.hasIdPart() && !nextResourceId.hasResourceType() && !isPlaceholder(nextResourceId)) {
-						nextResourceId = newIdType(toResourceName(res.getClass()), nextResourceId.getIdPart());
-						res.setId(nextResourceId);
-					}
-
-					/*
-					 * Ensure that the bundle doesn't have any duplicates, since this causes all kinds of weirdness
-					 */
-					if (isPlaceholder(nextResourceId)) {
-						if (!theAllIds.add(nextResourceId)) {
-							throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextResourceId));
-						}
-					} else if (nextResourceId.hasResourceType() && nextResourceId.hasIdPart()) {
-						IIdType nextId = nextResourceId.toUnqualifiedVersionless();
-						if (!theAllIds.add(nextId)) {
-							throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextId));
-						}
-					}
-
-				}
+				IIdType nextResourceId = getNextResourceIdFromBaseResource(res, nextReqEntry, theAllIds);
 
 				String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
 				String resourceType = res != null ? myContext.getResourceType(res) : null;
@@ -891,7 +916,8 @@ public abstract class BaseTransactionProcessor {
 							}
 						}
 
-						handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequest);
+						handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId,
+							outcome, nextRespEntry, resourceType, res, theRequest);
 						entriesToProcess.put(nextRespEntry, outcome.getId());
 						break;
 					}
@@ -958,52 +984,24 @@ public abstract class BaseTransactionProcessor {
 			 * was also deleted as a part of this transaction, which is why we check this now at the
 			 * end.
 			 */
-			for (Iterator<DeleteConflict> iter = deleteConflicts.iterator(); iter.hasNext(); ) {
-				DeleteConflict nextDeleteConflict = iter.next();
+			checkForDeleteConflicts(deleteConflicts, deletedResources, updatedResources);
 
-				/*
-				 * If we have a conflict, it means we can't delete Resource/A because
-				 * Resource/B has a reference to it. We'll ignore that conflict though
-				 * if it turns out we're also deleting Resource/B in this transaction.
-				 */
-				if (deletedResources.contains(nextDeleteConflict.getSourceId().toUnqualifiedVersionless().getValue())) {
-					iter.remove();
-					continue;
-				}
-
-				/*
-				 * And then, this is kind of a last ditch check. It's also ok to delete
-				 * Resource/A if Resource/B isn't being deleted, but it is being UPDATED
-				 * in this transaction, and the updated version of it has no references
-				 * to Resource/A any more.
-				 */
-				String sourceId = nextDeleteConflict.getSourceId().toUnqualifiedVersionless().getValue();
-				String targetId = nextDeleteConflict.getTargetId().toUnqualifiedVersionless().getValue();
-				Optional<IBaseResource> updatedSource = updatedResources
-					.stream()
-					.filter(t -> sourceId.equals(t.getIdElement().toUnqualifiedVersionless().getValue()))
-					.findFirst();
-				if (updatedSource.isPresent()) {
-					List<ResourceReferenceInfo> referencesInSource = myContext.newTerser().getAllResourceReferences(updatedSource.get());
-					boolean sourceStillReferencesTarget = referencesInSource
-						.stream()
-						.anyMatch(t -> targetId.equals(t.getResourceReference().getReferenceElement().toUnqualifiedVersionless().getValue()));
-					if (!sourceStillReferencesTarget) {
-						iter.remove();
-					}
-				}
-			}
-			DeleteConflictService.validateDeleteConflictsEmptyOrThrowException(myContext, deleteConflicts);
-
-			theIdToPersistedOutcome.entrySet().forEach(t -> theTransactionDetails.addResolvedResourceId(t.getKey(), t.getValue().getPersistentId()));
+			theIdToPersistedOutcome.entrySet().forEach(idAndOutcome -> {
+				theTransactionDetails.addResolvedResourceId(idAndOutcome.getKey(), idAndOutcome.getValue().getPersistentId());
+			});
 
 			/*
 			 * Perform ID substitutions and then index each resource we have saved
 			 */
 
-			resolveReferencesThenSaveAndIndexResources(theRequest, theTransactionDetails, theIdSubstitutions, theIdToPersistedOutcome, theTransactionStopWatch, entriesToProcess, nonUpdatedEntities, updatedEntities);
+			resolveReferencesThenSaveAndIndexResources(theRequest, theTransactionDetails,
+				theIdSubstitutions, theIdToPersistedOutcome,
+				theTransactionStopWatch, entriesToProcess,
+				nonUpdatedEntities, updatedEntities);
 
 			theTransactionStopWatch.endCurrentTask();
+
+			// flush writes to db
 			theTransactionStopWatch.startTask("Flush writes to database");
 
 			flushSession(theIdToPersistedOutcome);
@@ -1062,6 +1060,53 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
+	 * Checks for any delete conflicts.
+	 * @param theDeleteConflicts - set of delete conflicts
+	 * @param theDeletedResources - set of deleted resources
+	 * @param theUpdatedResources - list of updated resources
+	 */
+	private void checkForDeleteConflicts(DeleteConflictList theDeleteConflicts,
+										 Set<String> theDeletedResources,
+										 List<IBaseResource> theUpdatedResources) {
+		for (Iterator<DeleteConflict> iter = theDeleteConflicts.iterator(); iter.hasNext(); ) {
+			DeleteConflict nextDeleteConflict = iter.next();
+
+			/*
+			 * If we have a conflict, it means we can't delete Resource/A because
+			 * Resource/B has a reference to it. We'll ignore that conflict though
+			 * if it turns out we're also deleting Resource/B in this transaction.
+			 */
+			if (theDeletedResources.contains(nextDeleteConflict.getSourceId().toUnqualifiedVersionless().getValue())) {
+				iter.remove();
+				continue;
+			}
+
+			/*
+			 * And then, this is kind of a last ditch check. It's also ok to delete
+			 * Resource/A if Resource/B isn't being deleted, but it is being UPDATED
+			 * in this transaction, and the updated version of it has no references
+			 * to Resource/A any more.
+			 */
+			String sourceId = nextDeleteConflict.getSourceId().toUnqualifiedVersionless().getValue();
+			String targetId = nextDeleteConflict.getTargetId().toUnqualifiedVersionless().getValue();
+			Optional<IBaseResource> updatedSource = theUpdatedResources
+				.stream()
+				.filter(t -> sourceId.equals(t.getIdElement().toUnqualifiedVersionless().getValue()))
+				.findFirst();
+			if (updatedSource.isPresent()) {
+				List<ResourceReferenceInfo> referencesInSource = myContext.newTerser().getAllResourceReferences(updatedSource.get());
+				boolean sourceStillReferencesTarget = referencesInSource
+					.stream()
+					.anyMatch(t -> targetId.equals(t.getResourceReference().getReferenceElement().toUnqualifiedVersionless().getValue()));
+				if (!sourceStillReferencesTarget) {
+					iter.remove();
+				}
+			}
+		}
+		DeleteConflictService.validateDeleteConflictsEmptyOrThrowException(myContext, theDeleteConflicts);
+	}
+
+	/**
 	 * This method replaces any placeholder references in the
 	 * source transaction Bundle with their actual targets, then stores the resource contents and indexes
 	 * in the database. This is trickier than you'd think because of a couple of possibilities during the
@@ -1083,7 +1128,10 @@ public abstract class BaseTransactionProcessor {
 	 * pass because it's too complex to try and insert the auto-versioned references and still
 	 * account for NOPs, so we block NOPs in that pass.
 	 */
-	private void resolveReferencesThenSaveAndIndexResources(RequestDetails theRequest, TransactionDetails theTransactionDetails, Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, StopWatch theTransactionStopWatch, Map<IBase, IIdType> entriesToProcess, Set<IIdType> nonUpdatedEntities, Set<IBasePersistedResource> updatedEntities) {
+	private void resolveReferencesThenSaveAndIndexResources(RequestDetails theRequest, TransactionDetails theTransactionDetails,
+																			  Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
+																			  StopWatch theTransactionStopWatch, Map<IBase, IIdType> entriesToProcess,
+																			  Set<IIdType> nonUpdatedEntities, Set<IBasePersistedResource> updatedEntities) {
 		FhirTerser terser = myContext.newTerser();
 		theTransactionStopWatch.startTask("Index " + theIdToPersistedOutcome.size() + " resources");
 		IdentityHashMap<DaoMethodOutcome, Set<IBaseReference>> deferredIndexesForAutoVersioning = null;
@@ -1105,14 +1153,28 @@ public abstract class BaseTransactionProcessor {
 
 			Set<IBaseReference> referencesToAutoVersion = BaseStorageDao.extractReferencesToAutoVersion(myContext, myModelConfig, nextResource);
 			if (referencesToAutoVersion.isEmpty()) {
-				resolveReferencesThenSaveAndIndexResource(theRequest, theTransactionDetails, theIdSubstitutions, theIdToPersistedOutcome, entriesToProcess, nonUpdatedEntities, updatedEntities, terser, nextOutcome, nextResource, referencesToAutoVersion);
+				// no references to autoversion - we can do the resolve and save now
+				resolveReferencesThenSaveAndIndexResource(theRequest, theTransactionDetails,
+					theIdSubstitutions, theIdToPersistedOutcome,
+					entriesToProcess, nonUpdatedEntities,
+					updatedEntities, terser,
+					nextOutcome, nextResource,
+					referencesToAutoVersion); // this is empty
 			} else {
 				if (deferredIndexesForAutoVersioning == null) {
 					deferredIndexesForAutoVersioning = new IdentityHashMap<>();
 				}
 				deferredIndexesForAutoVersioning.put(nextOutcome, referencesToAutoVersion);
-			}
 
+				// TODO - add the references to the
+				// idsToPersistedOutcomes
+//				for (IBaseReference autoVersion: referencesToAutoVersion) {
+//					IBaseResource resource = myVersionAdapter.getResource(autoVersion);
+//					IFhirResourceDao dao = getDaoOrThrowException(resource.getClass());
+//
+//				}
+//				theIdToPersistedOutcome.put()
+			}
 		}
 
 		// If we have any resources we'll be auto-versioning, index these next
@@ -1121,12 +1183,22 @@ public abstract class BaseTransactionProcessor {
 				DaoMethodOutcome nextOutcome = nextEntry.getKey();
 				Set<IBaseReference> referencesToAutoVersion = nextEntry.getValue();
 				IBaseResource nextResource = nextOutcome.getResource();
-				resolveReferencesThenSaveAndIndexResource(theRequest, theTransactionDetails, theIdSubstitutions, theIdToPersistedOutcome, entriesToProcess, nonUpdatedEntities, updatedEntities, terser, nextOutcome, nextResource, referencesToAutoVersion);
+				resolveReferencesThenSaveAndIndexResource(theRequest, theTransactionDetails,
+					theIdSubstitutions, theIdToPersistedOutcome,
+					entriesToProcess, nonUpdatedEntities,
+					updatedEntities, terser,
+					nextOutcome, nextResource,
+					referencesToAutoVersion);
 			}
 		}
 	}
 
-	private void resolveReferencesThenSaveAndIndexResource(RequestDetails theRequest, TransactionDetails theTransactionDetails, Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, Map<IBase, IIdType> entriesToProcess, Set<IIdType> nonUpdatedEntities, Set<IBasePersistedResource> updatedEntities, FhirTerser terser, DaoMethodOutcome nextOutcome, IBaseResource nextResource, Set<IBaseReference> theReferencesToAutoVersion) {
+	private void resolveReferencesThenSaveAndIndexResource(RequestDetails theRequest, TransactionDetails theTransactionDetails,
+																			 Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
+																			 Map<IBase, IIdType> entriesToProcess, Set<IIdType> nonUpdatedEntities,
+																			 Set<IBasePersistedResource> updatedEntities, FhirTerser terser,
+																			 DaoMethodOutcome nextOutcome, IBaseResource nextResource,
+																			 Set<IBaseReference> theReferencesToAutoVersion) {
 		// References
 		List<ResourceReferenceInfo> allRefs = terser.getAllResourceReferences(nextResource);
 		for (ResourceReferenceInfo nextRef : allRefs) {

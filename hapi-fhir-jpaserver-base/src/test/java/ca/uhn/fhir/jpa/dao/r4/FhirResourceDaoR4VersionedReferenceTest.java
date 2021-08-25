@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -802,7 +803,9 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		);
 		myModelConfig.setAutoVersionReferenceAtPaths(new HashSet<String>(strings));
 
-		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, new InputStreamReader(FhirResourceDaoR4VersionedReferenceTest.class.getResourceAsStream("/npe-causing-bundle.json")));
+		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class,
+			new InputStreamReader(
+				FhirResourceDaoR4VersionedReferenceTest.class.getResourceAsStream("/npe-causing-bundle.json")));
 
 		Bundle transaction = mySystemDao.transaction(new SystemRequestDetails(), bundle);
 	}
@@ -834,8 +837,16 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 	@Test
 	@DisplayName("GH-2901 Test no NPE is thrown on autoversioned references")
 	public void testNoNpeMinimal() {
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(false);
 		myModelConfig.setAutoVersionReferenceAtPaths("Observation.subject");
+
+//		ParserOptions options = new ParserOptions();
+//		options.setDontStripVersionsFromReferencesAtPaths("Observation.subject");
+//		myFhirCtx.setParserOptions(options);
+
+		Patient patient = new Patient();
+		patient.setId("Patient/RED");
+		myPatientDao.update(patient);
 
 		Observation obs = new Observation();
 		obs.setId("Observation/DEF");
