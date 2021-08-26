@@ -205,7 +205,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
-		map = new SearchParameterMap();
+		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add("_tag", new TokenParam(methodName, methodName));
 		assertEquals(1, myOrganizationDao.search(map).size().intValue());

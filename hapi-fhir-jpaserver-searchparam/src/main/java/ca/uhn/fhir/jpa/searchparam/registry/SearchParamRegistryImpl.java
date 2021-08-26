@@ -319,7 +319,4 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		mySearchParameterCanonicalizer = theSearchParameterCanonicalizerForUnitTest;
 	}
 
-	public SearchParameterCanonicalizer getSearchParameterCanonicalizerForUnitTest() {
-		return mySearchParameterCanonicalizerForUnitTest;
-	}
 }
