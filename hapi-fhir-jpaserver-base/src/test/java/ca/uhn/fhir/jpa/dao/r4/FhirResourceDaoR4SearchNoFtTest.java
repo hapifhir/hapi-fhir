@@ -104,7 +104,6 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -5303,7 +5302,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		createObservationWithEffective("YES21", "2011-01-02T00:00:00+09:00");
 		createObservationWithEffective("YES22", "2011-01-02T00:00:00+10:00");
 		createObservationWithEffective("YES23", "2011-01-02T00:00:00+11:00");
-
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
