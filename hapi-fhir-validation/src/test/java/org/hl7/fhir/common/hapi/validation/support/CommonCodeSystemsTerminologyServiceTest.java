@@ -113,6 +113,13 @@ public class CommonCodeSystemsTerminologyServiceTest {
 	}
 
 	@Test
+	public void testLanguages_CommonLanguagesVs_LanguageAndRegion() {
+		IValidationSupport.LookupCodeResult nl = mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "nl-NL");
+		assertTrue(nl.isFound());
+		assertEquals("Dutch Netherlands", nl.getCodeDisplay());
+	}
+
+	@Test
 	public void testLanguages_CommonLanguagesVs_BadCode() {
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(newSupport(), newOptions(), "urn:ietf:bcp:47", "FOO", null, "http://hl7.org/fhir/ValueSet/languages");
 		assert outcome != null;
