@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -41,6 +42,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +53,7 @@ import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -71,6 +74,10 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
+	@Autowired
+	private ITermReadSvc myITermReadSvc;
+
 	private Class<? extends IBaseResource> myCodeSystemType;
 	private Class<? extends IBaseResource> myStructureDefinitionType;
 	private Class<? extends IBaseResource> myValueSetType;
@@ -97,8 +104,22 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 	@Override
 	public IBaseResource fetchValueSet(String theSystem) {
+		// if no version is present, we need to append the current version,
+		// if one exists, in case it is not the last loaded
+		theSystem = appendCurrentVersion(theSystem);
 		return fetchResource(myValueSetType, theSystem);
 	}
+
+
+	private String appendCurrentVersion(String theSystem) {
+		// if version is included there is nothing to add here
+		if (theSystem.contains("|"))  return theSystem;
+
+		Optional<String> currentVersionOpt = myITermReadSvc.getValueSetCurrentVersion(new UriType(theSystem));
+
+		return currentVersionOpt.map(ver -> theSystem + "|" + ver).orElse(theSystem);
+	}
+
 
 	@Override
 	public IBaseResource fetchStructureDefinition(String theUrl) {
@@ -174,6 +195,9 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 						params.add(ValueSet.SP_VERSION, new TokenParam(theUri.substring(versionSeparator + 1)));
 						params.add(ValueSet.SP_URL, new UriParam(theUri.substring(0, versionSeparator)));
 					} else {
+						// last loaded ValueSet not necessarily is the current version anymore, so code should be executing
+						// this path only when there is no current version pointed for the ValueSet
+						ourLog.warn("Fetching ValueSet current version as last loaded");
 						params.add(ValueSet.SP_URL, new UriParam(theUri));
 					}
 					params.setSort(new SortSpec("_lastUpdated").setOrder(SortOrderEnum.DESC));

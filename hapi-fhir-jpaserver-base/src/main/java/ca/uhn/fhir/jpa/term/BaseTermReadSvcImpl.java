@@ -68,6 +68,7 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
 import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -117,6 +118,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.quartz.JobExecutionContext;
@@ -230,6 +232,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private ApplicationContext myApplicationContext;
 	@Autowired
 	private ITermConceptMappingSvc myTermConceptMappingSvc;
+
+	@Autowired
+	private ITermValueSetDao myTermValueSetDao;
 
 	private volatile IValidationSupport myJpaValidationSupport;
 	private volatile IValidationSupport myValidationSupport;
@@ -445,12 +450,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			if (theValueSetToExpand.hasVersion()) {
 				optionalTermValueSet = myValueSetDao.findTermValueSetByUrlAndVersion(theValueSetToExpand.getUrl(), theValueSetToExpand.getVersion());
 			} else {
-				List<TermValueSet> termValueSets = myValueSetDao.findTermValueSetByUrl(PageRequest.of(0, 1), theValueSetToExpand.getUrl());
-				if (termValueSets.size() > 0) {
-					optionalTermValueSet = Optional.of(termValueSets.get(0));
-				} else {
-					optionalTermValueSet = Optional.empty();
-				}
+				optionalTermValueSet = myValueSetDao.findTermValueSetByUrlAndCurrentVersion(theValueSetToExpand.getUrl());
 			}
 		} else {
 			optionalTermValueSet = Optional.empty();
@@ -1884,7 +1884,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	@Override
 	@Transactional
-	public void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet) {
+	public void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet , RequestDetails theRequestDetails) {
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
 		if (isPlaceholder(theValueSet)) {
@@ -1903,6 +1903,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		termValueSet.setUrl(theValueSet.getUrl());
 		termValueSet.setVersion(theValueSet.getVersion());
 		termValueSet.setName(theValueSet.hasName() ? theValueSet.getName() : null);
+
+		// value sets must be marked as current only when version is present and flag indicates that
+		if (theValueSet.getVersion() != null) {
+			if (ITermCodeSystemStorageSvc.isMakeVersionCurrent(theRequestDetails)) {
+				makeVersionCurrent(theValueSet);
+			}
+		}
 
 		// Delete version being replaced
 		deleteValueSetForResource(theResourceTable);
@@ -1939,6 +1946,31 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			throw new UnprocessableEntityException(msg);
 		}
 	}
+
+
+	private void makeVersionCurrent(ValueSet theValueSet) {
+		resetCurrentValueSetVersion(theValueSet);
+
+		TermValueSet termValueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(
+			theValueSet.getUrl(), theValueSet.getVersion())
+			.orElseThrow(() ->
+				new InternalErrorException("Couldn't retrieve TermValueSet with url: " +
+					theValueSet.getUrl() + " and version: " + theValueSet.getVersion() ) );
+
+		termValueSet.setCurrentVersion(true);
+		myTermValueSetDao.save(termValueSet);
+	}
+
+
+	private void resetCurrentValueSetVersion(ValueSet theValueSet) {
+		Optional<TermValueSet> termValueSetOpt = myTermValueSetDao.findTermValueSetByUrlAndCurrentVersion(theValueSet.getUrl());
+		if (! termValueSetOpt.isPresent())  return;
+
+		TermValueSet termValueSet = termValueSetOpt.get();
+		termValueSet.setCurrentVersion(false);
+		myTermValueSetDao.save(termValueSet);
+	}
+
 
 	@Override
 	@Transactional
@@ -2479,6 +2511,20 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			termConcept.getProperties().add(property);
 		}
 		return termConcept;
+	}
+
+
+	@Override
+	@Transactional
+	public Optional<String> getValueSetCurrentVersion(UriType theUrl) {
+		Optional<TermValueSet> termValueSetOpt =
+			myTermValueSetDao.findTermValueSetByUrlAndCurrentVersion(theUrl.getValueAsString());
+
+		if (! termValueSetOpt.isPresent() || StringUtils.isBlank(termValueSetOpt.get().getVersion())) {
+			return Optional.empty();
+		}
+
+		return termValueSetOpt.map(TermValueSet::getVersion);
 	}
 
 }

@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
@@ -52,7 +53,7 @@ public interface ITermDeferredStorageSvc {
 
 	void addConceptMapsToStorageQueue(List<ConceptMap> theConceptMaps);
 
-	void addValueSetsToStorageQueue(List<ValueSet> theValueSets);
+	void addValueSetsToStorageQueue(List<ValueSet> theValueSets, RequestDetails theRequestDetails);
 
 	void deleteCodeSystem(TermCodeSystem theCodeSystem);
 

@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
@@ -49,6 +50,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.util.Pair;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,6 +67,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
@@ -72,7 +75,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	final private List<TermCodeSystem> myDeferredCodeSystemsDeletions = Collections.synchronizedList(new ArrayList<>());
 	final private Queue<TermCodeSystemVersion> myDeferredCodeSystemVersionsDeletions = new ConcurrentLinkedQueue<>();
 	final private List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
-	final private List<ValueSet> myDeferredValueSets = Collections.synchronizedList(new ArrayList<>());
+	final private List<Pair<ValueSet, RequestDetails>> myDeferredValueSets = Collections.synchronizedList(new ArrayList<>());
 	final private List<ConceptMap> myDeferredConceptMaps = Collections.synchronizedList(new ArrayList<>());
 	final private List<TermConceptParentChildLink> myConceptLinksToSaveLater = Collections.synchronizedList(new ArrayList<>());
 	@Autowired
@@ -116,9 +119,9 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	@Override
-	public void addValueSetsToStorageQueue(List<ValueSet> theValueSets) {
+	public void addValueSetsToStorageQueue(List<ValueSet> theValueSets, RequestDetails theRequestDetails) {
 		Validate.notNull(theValueSets);
-		myDeferredValueSets.addAll(theValueSets);
+		myDeferredValueSets.addAll(theValueSets.stream().map(vs -> Pair.of(vs, theRequestDetails)).collect(Collectors.toList()));
 	}
 
 	@Override
@@ -214,12 +217,15 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		}
 	}
 
+
 	private void processDeferredValueSets() {
 		int count = Math.min(myDeferredValueSets.size(), 200);
-		for (ValueSet nextValueSet : new ArrayList<>(myDeferredValueSets.subList(0, count))) {
-			ourLog.info("Creating ValueSet: {}", nextValueSet.getId());
-			myTerminologyVersionAdapterSvc.createOrUpdateValueSet(nextValueSet);
-			myDeferredValueSets.remove(nextValueSet);
+		for (Pair<ValueSet, RequestDetails> nextPair : new ArrayList<>(myDeferredValueSets.subList(0, count))) {
+			ValueSet valueSet = nextPair.getFirst();
+			RequestDetails requestDetails = nextPair.getSecond();
+			ourLog.info("Creating ValueSet: {}", valueSet.getId());
+			myTerminologyVersionAdapterSvc.createOrUpdateValueSet(valueSet, requestDetails);
+			myDeferredValueSets.remove(nextPair);
 		}
 		ourLog.info("Saved {} deferred ValueSet resources, have {} remaining", count, myDeferredValueSets.size());
 	}

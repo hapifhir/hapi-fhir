@@ -44,14 +44,28 @@ public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long> {
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myExpansionStatus = :expansion_status")
 	Slice<TermValueSet> findByExpansionStatus(Pageable pageable, @Param("expansion_status") TermValueSetPreExpansionStatusEnum theExpansionStatus);
 
-	@Query(value="SELECT vs FROM TermValueSet vs INNER JOIN ResourceTable r ON r.myId = vs.myResourcePid WHERE vs.myUrl = :url ORDER BY r.myUpdated DESC")
-	List<TermValueSet> findTermValueSetByUrl(Pageable thePage, @Param("url") String theUrl);
-
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myUrl = :url AND vs.myVersion IS NULL")
 	Optional<TermValueSet> findTermValueSetByUrlAndNullVersion(@Param("url") String theUrl);
 
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myUrl = :url AND vs.myVersion = :version")
 	Optional<TermValueSet> findTermValueSetByUrlAndVersion(@Param("url") String theUrl, @Param("version") String theVersion);
 
+	/**
+	 * Obtain the only ValueSet for the url which myIsCurrentVersion is true if one exists
+	 * or the last loaded ValueSet for the url which version is null otherwise
+	 */
+	@Query("select vs FROM TermValueSet vs JOIN FETCH vs.myResource r WHERE vs.myUrl = :url AND (vs.myIsCurrentVersion is true or " +
+		"(vs.myIsCurrentVersion is false AND vs.myVersion is null AND not exists(" +
+		"FROM TermValueSet WHERE myUrl = :url AND myIsCurrentVersion is true )) ) order by r.myUpdated DESC")
+	List<TermValueSet> listTermValueSetsByUrlAndCurrentVersion(@Param("url") String theUrl, Pageable pageable);
 
+	/**
+	 * This method uses the previous one to get a possible list of ValueSets and return the first if any
+	 * because the query will obtain no more than one if one with the myCurrentVersion flag exists but
+	 * could obtain more if one with that flag doesn't exist. For that reason the query is Pageable and ordered
+	 */
+	default Optional<TermValueSet> findTermValueSetByUrlAndCurrentVersion(@Param("url") String theUrl) {
+		List<TermValueSet> termValueSets = listTermValueSetsByUrlAndCurrentVersion(theUrl, Pageable.ofSize(1));
+		return termValueSets.isEmpty()? Optional.empty() : Optional.of(termValueSets.get(0));
+	}
 }
