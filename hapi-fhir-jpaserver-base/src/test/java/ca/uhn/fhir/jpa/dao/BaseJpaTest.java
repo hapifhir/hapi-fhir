@@ -702,26 +702,6 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	}
 
-	public static void waitForSize(int theTarget, Callable<Number> theCallable) throws Exception {
-		waitForSize(theTarget, 10000, theCallable);
-	}
-
-	@SuppressWarnings("BusyWait")
-	public static void waitForSize(int theTarget, int theTimeout, Callable<Number> theCallable) throws Exception {
-		StopWatch sw = new StopWatch();
-		while (theCallable.call().intValue() != theTarget && sw.getMillis() < theTimeout) {
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException theE) {
-				throw new Error(theE);
-			}
-		}
-		if (sw.getMillis() >= theTimeout) {
-			fail("Size " + theCallable.call() + " is != target " + theTarget);
-		}
-		Thread.sleep(500);
-	}
-
 	public static void waitForSize(int theTarget, Callable<Number> theCallable, Callable<String> theFailureMessage) throws Exception {
 		waitForSize(theTarget, 10000, theCallable, theFailureMessage);
 	}

@@ -3,11 +3,13 @@ package ca.uhn.fhir.jpa.subscription.email;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.server.mail.MailConfig;
 import ca.uhn.fhir.util.HapiExtensions;
+import com.icegreen.greenmail.junit5.GreenMailExtension;
 import com.icegreen.greenmail.store.FolderException;
-import com.icegreen.greenmail.util.GreenMail;
-import com.icegreen.greenmail.util.ServerSetup;
+import com.icegreen.greenmail.util.ServerSetupTest;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -15,11 +17,10 @@ import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.mail.internet.InternetAddress;
@@ -27,11 +28,11 @@ import javax.mail.internet.MimeMessage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import static ca.uhn.fhir.jpa.subscription.resthook.RestHookTestDstu3Test.logAllInterceptors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test the rest-hook subscriptions
@@ -40,11 +41,12 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(EmailSubscriptionDstu3Test.class);
 
+	@RegisterExtension
+	static GreenMailExtension ourGreenMail = new GreenMailExtension(ServerSetupTest.SMTP.withPort(0));
+
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
-	private static int ourListenerPort;
-	private static GreenMail ourTestSmtp;
 	private List<IIdType> mySubscriptionIds = new ArrayList<>();
 
 	@AfterEach
@@ -68,7 +70,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@BeforeEach
 	public void beforeRegisterEmailListener() throws FolderException {
-		ourTestSmtp.purgeEmailFromAllMailboxes();
+		ourGreenMail.purgeEmailFromAllMailboxes();
 
 		ourLog.info("Before re-registering interceptors");
 		logAllInterceptors(myInterceptorRegistry);
@@ -77,8 +79,6 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 		ourLog.info("After re-registering interceptors");
 		logAllInterceptors(myInterceptorRegistry);
-
-		mySubscriptionTestUtil.initEmailSender(ourListenerPort);
 
 		myDaoConfig.setEmailFromAddress("123@hapifhir.io");
 	}
@@ -133,24 +133,19 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		Subscription subscription = createSubscription(criteria1, payload);
 		waitForQueueToDrain();
-		mySubscriptionTestUtil.setEmailSender(subscription.getIdElement());
+		mySubscriptionTestUtil.setEmailSender(subscription.getIdElement(), new EmailSenderImpl(withMailConfig()));
 
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
 
-		waitForSize(1, 60000, new Callable<Number>() {
-			@Override
-			public Number call() {
-				return ourTestSmtp.getReceivedMessages().length;
-			}
-		});
+		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 1));
 
-		List<MimeMessage> received = Arrays.asList(ourTestSmtp.getReceivedMessages());
+		List<MimeMessage> received = Arrays.asList(ourGreenMail.getReceivedMessages());
 		assertEquals(1, received.get(0).getFrom().length);
 		assertEquals("123@hapifhir.io", ((InternetAddress) received.get(0).getFrom()[0]).getAddress());
 		assertEquals(1, received.get(0).getAllRecipients().length);
 		assertEquals("foo@example.com", ((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress());
-		assertEquals("text/plain; charset=us-ascii", received.get(0).getContentType());
+		assertEquals("text/plain; charset=UTF-8", received.get(0).getContentType());
 		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
 
 		// Expect the body of the email subscription to be an Observation formatted as XML
@@ -185,25 +180,20 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
-		mySubscriptionTestUtil.setEmailSender(subscriptionTemp.getIdElement());
+		mySubscriptionTestUtil.setEmailSender(subscriptionTemp.getIdElement(), new EmailSenderImpl(withMailConfig()));
 
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
 
-		waitForSize(1, 60000, new Callable<Number>() {
-			@Override
-			public Number call() throws Exception {
-				return ourTestSmtp.getReceivedMessages().length;
-			}
-		});
+		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 1));
 
-		List<MimeMessage> received = Arrays.asList(ourTestSmtp.getReceivedMessages());
+		List<MimeMessage> received = Arrays.asList(ourGreenMail.getReceivedMessages());
 		assertEquals(1, received.size());
 		assertEquals(1, received.get(0).getFrom().length);
 		assertEquals("myfrom@from.com", ((InternetAddress) received.get(0).getFrom()[0]).getAddress());
 		assertEquals(1, received.get(0).getAllRecipients().length);
 		assertEquals("foo@example.com", ((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress());
-		assertEquals("text/plain; charset=us-ascii", received.get(0).getContentType());
+		assertEquals("text/plain; charset=UTF-8", received.get(0).getContentType());
 		assertEquals("This is a subject", received.get(0).getSubject().toString().trim());
 		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
 
@@ -239,25 +229,20 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		ourLog.info("Subscription ID is: {}", id.getValue());
 
 		waitForQueueToDrain();
-		mySubscriptionTestUtil.setEmailSender(subscriptionTemp.getIdElement());
+		mySubscriptionTestUtil.setEmailSender(subscriptionTemp.getIdElement(), new EmailSenderImpl(withMailConfig()));
 
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
 
-		waitForSize(1, 60000, new Callable<Number>() {
-			@Override
-			public Number call() throws Exception {
-				return ourTestSmtp.getReceivedMessages().length;
-			}
-		});
+		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 1));
 
-		List<MimeMessage> received = Arrays.asList(ourTestSmtp.getReceivedMessages());
+		List<MimeMessage> received = Arrays.asList(ourGreenMail.getReceivedMessages());
 		assertEquals(1, received.size());
 		assertEquals(1, received.get(0).getFrom().length);
 		assertEquals("myfrom@from.com", ((InternetAddress) received.get(0).getFrom()[0]).getAddress());
 		assertEquals(1, received.get(0).getAllRecipients().length);
 		assertEquals("foo@example.com", ((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress());
-		assertEquals("text/plain; charset=us-ascii", received.get(0).getContentType());
+		assertEquals("text/plain; charset=UTF-8", received.get(0).getContentType());
 		assertEquals("This is a subject", received.get(0).getSubject().toString().trim());
 		assertEquals("", received.get(0).getContent().toString().trim());
 		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
@@ -273,20 +258,11 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		mySubscriptionTestUtil.waitForQueueToDrain();
 	}
 
-	@AfterAll
-	public static void afterClass() {
-		ourTestSmtp.stop();
+	private MailConfig withMailConfig() {
+		return new MailConfig()
+			.setSmtpHostname(ServerSetupTest.SMTP.getBindAddress())
+			.setSmtpPort(ourGreenMail.getSmtp().getPort());
 	}
 
-	@BeforeAll
-	public static void beforeClass() {
-		ServerSetup smtp = new ServerSetup(0, null, ServerSetup.PROTOCOL_SMTP);
-		smtp.setServerStartupTimeout(2000);
-		smtp.setReadTimeout(2000);
-		smtp.setConnectionTimeout(2000);
-		ourTestSmtp = new GreenMail(smtp);
-		ourTestSmtp.start();
-        ourListenerPort = ourTestSmtp.getSmtp().getPort();
-	}
 
 }
