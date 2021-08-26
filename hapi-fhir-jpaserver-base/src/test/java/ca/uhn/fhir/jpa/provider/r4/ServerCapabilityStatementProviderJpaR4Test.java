@@ -142,7 +142,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 		assertEquals(1, fooSearchParams.size());
 		assertEquals("_lastUpdated", fooSearchParams.get(0).getName());
 		assertEquals("http://hl7.org/fhir/SearchParameter/Resource-lastUpdated", fooSearchParams.get(0).getDefinition());
-		assertEquals("Only return resources which were last updated as specified by the given range", fooSearchParams.get(0).getDocumentation());
+		assertEquals("When the resource version last changed", fooSearchParams.get(0).getDocumentation());
 		assertEquals(Enumerations.SearchParamType.DATE, fooSearchParams.get(0).getType());
 
 	}
