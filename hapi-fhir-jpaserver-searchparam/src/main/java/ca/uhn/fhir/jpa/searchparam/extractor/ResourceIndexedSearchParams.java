@@ -331,6 +331,10 @@ public final class ResourceIndexedSearchParams {
                                                                                      Collection<RT> paramCollection) {
 		for (Map.Entry<String, RuntimeSearchParam> nextEntry : activeSearchParams) {
 			String nextParamName = nextEntry.getKey();
+			if (nextParamName == null || nextParamName.startsWith("_")) {
+				continue;
+			}
+
 			if (nextEntry.getValue().getParamType() == type) {
 				boolean haveParam = false;
 				for (BaseResourceIndexedSearchParam nextParam : paramCollection) {
