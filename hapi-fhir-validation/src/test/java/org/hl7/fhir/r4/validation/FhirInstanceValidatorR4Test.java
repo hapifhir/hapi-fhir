@@ -254,7 +254,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				return retVal;
 			}
 		});
-		when(mockSupport.lookupCode(any(), any(), any())).thenAnswer(t -> {
+		when(mockSupport.lookupCode(any(), any(), any(), any())).thenAnswer(t -> {
 			String system = t.getArgument(1, String.class);
 			String code = t.getArgument(2, String.class);
 			if (myValidConcepts.contains(system + "___" + code)) {
@@ -995,8 +995,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		List<SingleValidationMessage> messages = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(3, messages.size(), output.toString());
 		assertThat(messages.get(0).getMessage(), containsString("Element must have some content"));
-		assertThat(messages.get(1).getMessage(), containsString("Primitive types must have a value or must have child extensions"));
-		assertThat(messages.get(2).getMessage(), containsString("ele-1: 'All FHIR elements must have a @value or children' Rule 'All FHIR elements must have a @value or children' Failed"));
+		assertThat(messages.get(2).getMessage(), containsString("Primitive types must have a value or must have child extensions"));
 	}
 
 	@Test
@@ -1398,13 +1397,13 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		String encoded = loadResource("/r4/r4-caredove-bundle.json");
 
 		IResourceValidator.IValidatorResourceFetcher resourceFetcher = mock(IResourceValidator.IValidatorResourceFetcher.class);
-		when(resourceFetcher.validationPolicy(any(), anyString(), anyString())).thenReturn(IResourceValidator.ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
+		when(resourceFetcher.validationPolicy(any(), any(), any(), any())).thenReturn(IResourceValidator.ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myVal.validateWithResult(encoded);
 
-		verify(resourceFetcher, times(15)).resolveURL(any(), anyString(), anyString(), anyString());
-		verify(resourceFetcher, times(12)).validationPolicy(any(), anyString(), anyString());
-		verify(resourceFetcher, times(12)).fetch(any(), anyString());
+		verify(resourceFetcher, times(15)).resolveURL(any(), any(), anyString(), anyString(), anyString());
+		verify(resourceFetcher, times(12)).validationPolicy(any(), any(), anyString(), anyString());
+		verify(resourceFetcher, times(12)).fetch(any(), any(), anyString());
 	}
 
 	@Test

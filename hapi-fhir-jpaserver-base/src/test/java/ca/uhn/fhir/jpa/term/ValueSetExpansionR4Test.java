@@ -408,7 +408,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		// Confirm we pre-expanded successfully
 		runInTransaction(() -> {
 			Pageable page = Pageable.unpaged();
-			List<TermValueSet> valueSets = myTermValueSetDao.findTermValueSetByUrl(page, "http://foo/vs");
+			List<TermValueSet> valueSets = myTermValueSetDaoTestUtil.findTermValueSetByUrl(page, "http://foo/vs");
 			assertEquals(1, valueSets.size());
 			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, valueSets.get(0).getExpansionStatus());
 		});

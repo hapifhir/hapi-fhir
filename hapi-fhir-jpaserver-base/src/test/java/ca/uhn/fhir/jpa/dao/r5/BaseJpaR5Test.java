@@ -44,6 +44,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
+import ca.uhn.fhir.jpa.dao.data.ITermValueSetDaoTestUtil;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
@@ -141,7 +142,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.AopTestUtils;
@@ -158,7 +158,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
@@ -392,6 +392,8 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
 	@Autowired
+	protected ITermValueSetDaoTestUtil myTermValueSetDaoTestUtil;
+	@Autowired
 	protected ITermValueSetConceptDao myTermValueSetConceptDao;
 	@Autowired
 	protected ITermValueSetConceptDesignationDao myTermValueSetConceptDesignationDao;
@@ -569,9 +571,9 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 
 	public List<String> getExpandedConceptsByValueSetUrl(String theValuesetUrl) {
 		return runInTransaction(() -> {
-			List<TermValueSet> valueSets = myTermValueSetDao.findTermValueSetByUrl(Pageable.unpaged(), theValuesetUrl);
-			assertEquals(1, valueSets.size());
-			TermValueSet valueSet = valueSets.get(0);
+			Optional<TermValueSet> valueSetOpt = myTermValueSetDao.findTermValueSetByUrlAndCurrentVersion(theValuesetUrl);
+			assertTrue(valueSetOpt.isPresent());
+			TermValueSet valueSet = valueSetOpt.get();
 			List<TermValueSetConcept> concepts = valueSet.getConcepts();
 			return concepts.stream().map(concept -> concept.getCode()).collect(Collectors.toList());
 		});

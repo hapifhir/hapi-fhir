@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
@@ -63,6 +64,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -1001,6 +1003,23 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	}
 
+
+	@Test
+	public void testTransactionNoContainedRedux() throws IOException {
+		//Pre-create the patient, which will cause the ifNoneExist to prevent a new creation during bundle transaction
+		Patient patient = loadResourceFromClasspath(Patient.class, "/r4/preexisting-patient.json");
+		myPatientDao.create(patient);
+
+		//Post the Bundle containing a conditional POST with an identical patient from the above resource.
+		Bundle request = loadResourceFromClasspath(Bundle.class, "/r4/transaction-no-contained-2.json");
+
+		Bundle outcome = mySystemDao.transaction(mySrd, request);
+
+		IdType taskId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
+		Task task = myTaskDao.read(taskId, mySrd);
+
+		assertThat(task.getBasedOn().get(0).getReference(), matchesPattern("Patient/[0-9]+"));
+	}
 
 	@Test
 	public void testTransactionNoContained() throws IOException {

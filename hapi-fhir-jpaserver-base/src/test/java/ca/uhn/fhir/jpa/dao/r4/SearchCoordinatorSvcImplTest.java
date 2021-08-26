@@ -10,10 +10,8 @@ import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
-import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -40,7 +38,7 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 	private ISearchCoordinatorSvc mySearchCoordinator;
 
 	@Autowired
-	private ISearchCacheSvc myDataaseCacheSvc;
+	private ISearchCacheSvc myDatabaseCacheSvc;
 
 	@AfterEach
 	public void after() {
@@ -92,7 +90,7 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 			assertEquals(30, mySearchResultDao.count());
 		});
 
-		myDataaseCacheSvc.pollForStaleSearchesAndDeleteThem();
+		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem();
 		runInTransaction(()->{
 			// We should delete up to 10, but 3 don't get deleted since they have too many results to delete in one pass
 			assertEquals(13, mySearchDao.count());
@@ -101,7 +99,7 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 			assertEquals(15, mySearchResultDao.count());
 		});
 
-		myDataaseCacheSvc.pollForStaleSearchesAndDeleteThem();
+		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem();
 		runInTransaction(()->{
 			// Once again we attempt to delete 10, but the first 3 don't get deleted and still remain
 			// (total is 6 because 3 weren't deleted, and they blocked another 3 that might have been)
@@ -110,7 +108,7 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 			assertEquals(0, mySearchResultDao.count());
 		});
 
-		myDataaseCacheSvc.pollForStaleSearchesAndDeleteThem();
+		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem();
 		runInTransaction(()->{
 			assertEquals(0, mySearchDao.count());
 			assertEquals(0, mySearchDao.countDeleted());

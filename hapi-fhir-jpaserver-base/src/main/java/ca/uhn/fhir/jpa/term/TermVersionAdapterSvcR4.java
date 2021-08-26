@@ -81,12 +81,12 @@ public class TermVersionAdapterSvcR4 extends BaseTermVersionAdapterSvcImpl imple
 	}
 
 	@Override
-	public void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet) {
+	public void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet, RequestDetails theRequestDetails) {
 		if (isBlank(theValueSet.getIdElement().getIdPart())) {
 			String matchUrl = "ValueSet?url=" + UrlUtil.escapeUrlParam(theValueSet.getUrl());
-			myValueSetResourceDao.update(theValueSet, matchUrl);
+			myValueSetResourceDao.update(theValueSet, matchUrl, theRequestDetails);
 		} else {
-			myValueSetResourceDao.update(theValueSet);
+			myValueSetResourceDao.update(theValueSet, theRequestDetails);
 		}
 	}
 

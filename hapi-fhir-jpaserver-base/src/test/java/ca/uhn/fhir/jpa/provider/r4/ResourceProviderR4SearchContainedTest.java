@@ -284,7 +284,6 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 		assertEquals(0L, oids.size());
 	}
 
-
 	@Test
 	public void testContainedSearchByNumber() throws Exception {
 
@@ -975,6 +974,11 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 		assertEquals(1L, oids.size());
 		assertThat(oids, contains(oid1.getValue()));
+	}
+
+	//See https://github.com/hapifhir/hapi-fhir/issues/2887
+	@Test
+	public void testContainedResourceParameterIsUsedInCache() {
 
 	}
 
