@@ -1205,6 +1205,7 @@ public abstract class BaseTransactionProcessor {
 //					theIdToPersistedOutcome.put(baseResource.getIdElement(), );
 //				}
 
+
 				resolveReferencesThenSaveAndIndexResource(theRequest, theTransactionDetails,
 					theIdSubstitutions, theIdToPersistedOutcome,
 					entriesToProcess, nonUpdatedEntities,
