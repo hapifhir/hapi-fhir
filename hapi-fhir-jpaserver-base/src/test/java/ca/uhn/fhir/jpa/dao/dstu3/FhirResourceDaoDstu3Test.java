@@ -214,11 +214,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		map.add("_language", new StringParam("EN_ca"));
-		assertEquals(0, myOrganizationDao.search(map).size().intValue());
-
-		map = new SearchParameterMap();
-		map.setLoadSynchronous(true);
 		map.add("_tag", new TokenParam(methodName, methodName));
 		assertEquals(0, myOrganizationDao.search(map).size().intValue());
 	}

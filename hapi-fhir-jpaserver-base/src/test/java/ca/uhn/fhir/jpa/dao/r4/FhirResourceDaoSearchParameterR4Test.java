@@ -50,9 +50,6 @@ public class FhirResourceDaoSearchParameterR4Test {
 				if (nextp.getName().equals("_id")) {
 					continue;
 				}
-				if (nextp.getName().equals("_language")) {
-					continue;
-				}
 				if (isBlank(nextp.getPath())) {
 					continue;
 				}

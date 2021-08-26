@@ -2435,14 +2435,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
-		params.add("_language", new StringParam("TEST"));
-		myCaptureQueriesListener.clear();
-		result = toList(myPatientDao.search(params));
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-		assertEquals(1, result.size());
-
-		params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
 		params.add(Patient.SP_IDENTIFIER, new TokenParam("TEST", "TEST"));
 		assertEquals(1, toList(myPatientDao.search(params)).size());
 
@@ -2456,11 +2448,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
 		params.add("_id", new StringParam("TEST"));
-		assertEquals(0, toList(myPatientDao.search(params)).size());
-
-		params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add("_language", new StringParam("TEST"));
 		assertEquals(0, toList(myPatientDao.search(params)).size());
 
 		params = new SearchParameterMap();

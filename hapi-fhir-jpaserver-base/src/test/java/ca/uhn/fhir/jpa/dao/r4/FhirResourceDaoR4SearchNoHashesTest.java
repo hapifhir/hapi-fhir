@@ -1409,11 +1409,6 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 		params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
-		params.add("_language", new StringParam("TEST"));
-		assertEquals(0, toList(myPatientDao.search(params)).size());
-
-		params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
 		params.add(Patient.SP_IDENTIFIER, new TokenParam("TEST", "TEST"));
 		assertEquals(0, toList(myPatientDao.search(params)).size());
 
