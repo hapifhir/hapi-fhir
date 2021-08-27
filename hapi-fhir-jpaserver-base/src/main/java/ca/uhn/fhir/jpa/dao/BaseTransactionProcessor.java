@@ -174,9 +174,6 @@ public abstract class BaseTransactionProcessor {
 		ourLog.trace("Starting transaction processor");
 		myExecutor = new ThreadPoolTaskExecutor();
 		myExecutor.setThreadNamePrefix("bundle_batch_");
-		// For single thread set the value to 1
-		//myExecutor.setCorePoolSize(1);
-		//myExecutor.setMaxPoolSize(1);
 		myExecutor.setCorePoolSize(myDaoConfig.getBundleBatchPoolSize());
 		myExecutor.setMaxPoolSize(myDaoConfig.getBundleBatchMaxPoolSize());
 		myExecutor.setQueueCapacity(DaoConfig.DEFAULT_BUNDLE_BATCH_QUEUE_CAPACITY);
