@@ -399,7 +399,9 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			theCodeSystemResource.getVersion(), theCodeSystemVersion, resource, theRequest);
 
 		myDeferredStorageSvc.addConceptMapsToStorageQueue(theConceptMaps);
-		myDeferredStorageSvc.addValueSetsToStorageQueue(theValueSets, theRequest);
+
+		boolean isMakeVersionCurrent = ITermCodeSystemStorageSvc.isMakeVersionCurrent(theRequest);
+		myDeferredStorageSvc.addValueSetsToStorageQueue(theValueSets, isMakeVersionCurrent);
 
 		return csId;
 	}
@@ -470,10 +472,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			codeSystemToStore = myCodeSystemVersionDao.saveAndFlush(codeSystemToStore);
 		}
 
-		// defaults to true
-		boolean isMakeVersionCurrent = theRequestDetails == null ||
-			(boolean) theRequestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
-
+		boolean isMakeVersionCurrent = ITermCodeSystemStorageSvc.isMakeVersionCurrent(theRequestDetails);
 		if (isMakeVersionCurrent) {
 			codeSystem.setCurrentVersion(codeSystemToStore);
 			if (codeSystem.getPid() == null) {

@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.IValueSetConceptAccumulator;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -90,10 +89,10 @@ public interface ITermReadSvc extends IValidationSupport {
 	void deleteValueSetAndChildren(ResourceTable theResourceTable);
 
 
-	void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet, RequestDetails theRequestDetails);
+	void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet, boolean theMakeItCurrent);
 
 	default void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet) {
-		storeTermValueSet(theResourceTable, theValueSet, null);
+		storeTermValueSet(theResourceTable, theValueSet, true);
 	}
 
 

@@ -37,7 +37,6 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
@@ -75,7 +74,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	final private List<TermCodeSystem> myDeferredCodeSystemsDeletions = Collections.synchronizedList(new ArrayList<>());
 	final private Queue<TermCodeSystemVersion> myDeferredCodeSystemVersionsDeletions = new ConcurrentLinkedQueue<>();
 	final private List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
-	final private List<Pair<ValueSet, RequestDetails>> myDeferredValueSets = Collections.synchronizedList(new ArrayList<>());
+	final private List<Pair<ValueSet, Boolean>> myDeferredValueSets = Collections.synchronizedList(new ArrayList<>());
 	final private List<ConceptMap> myDeferredConceptMaps = Collections.synchronizedList(new ArrayList<>());
 	final private List<TermConceptParentChildLink> myConceptLinksToSaveLater = Collections.synchronizedList(new ArrayList<>());
 	@Autowired
@@ -119,9 +118,9 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	@Override
-	public void addValueSetsToStorageQueue(List<ValueSet> theValueSets, RequestDetails theRequestDetails) {
+	public void addValueSetsToStorageQueue(List<ValueSet> theValueSets, boolean theMakeThemCurrent) {
 		Validate.notNull(theValueSets);
-		myDeferredValueSets.addAll(theValueSets.stream().map(vs -> Pair.of(vs, theRequestDetails)).collect(Collectors.toList()));
+		myDeferredValueSets.addAll(theValueSets.stream().map(vs -> Pair.of(vs, theMakeThemCurrent)).collect(Collectors.toList()));
 	}
 
 	@Override
@@ -220,11 +219,11 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	private void processDeferredValueSets() {
 		int count = Math.min(myDeferredValueSets.size(), 200);
-		for (Pair<ValueSet, RequestDetails> nextPair : new ArrayList<>(myDeferredValueSets.subList(0, count))) {
+		for (Pair<ValueSet, Boolean> nextPair : new ArrayList<>(myDeferredValueSets.subList(0, count))) {
 			ValueSet valueSet = nextPair.getFirst();
-			RequestDetails requestDetails = nextPair.getSecond();
-			ourLog.info("Creating ValueSet: {}", valueSet.getId());
-			myTerminologyVersionAdapterSvc.createOrUpdateValueSet(valueSet, requestDetails);
+			boolean makeItCurrent = nextPair.getSecond();
+			ourLog.info("Creating ValueSet: {} , {}making it current version", valueSet.getId(), (makeItCurrent ? "" : "not "));
+			myTerminologyVersionAdapterSvc.createOrUpdateValueSet(valueSet, makeItCurrent);
 			myDeferredValueSets.remove(nextPair);
 		}
 		ourLog.info("Saved {} deferred ValueSet resources, have {} remaining", count, myDeferredValueSets.size());

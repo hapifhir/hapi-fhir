@@ -68,7 +68,6 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
 import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -1884,7 +1883,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	@Override
 	@Transactional
-	public void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet , RequestDetails theRequestDetails) {
+	public void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet , boolean theMakeItCurrent) {
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
 		if (isPlaceholder(theValueSet)) {
@@ -1903,12 +1902,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		termValueSet.setUrl(theValueSet.getUrl());
 		termValueSet.setVersion(theValueSet.getVersion());
 		termValueSet.setName(theValueSet.hasName() ? theValueSet.getName() : null);
+		termValueSet.setCurrentVersion(false);
 
 		// value sets must be marked as current only when version is present and flag indicates that
-		if (theValueSet.getVersion() != null) {
-			if (ITermCodeSystemStorageSvc.isMakeVersionCurrent(theRequestDetails)) {
-				makeVersionCurrent(theValueSet);
-			}
+		if (theValueSet.getVersion() != null && theMakeItCurrent) {
+			resetCurrentValueSetVersion(theValueSet);
+			termValueSet.setCurrentVersion(true);
 		}
 
 		// Delete version being replaced
@@ -1945,20 +1944,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			}
 			throw new UnprocessableEntityException(msg);
 		}
-	}
-
-
-	private void makeVersionCurrent(ValueSet theValueSet) {
-		resetCurrentValueSetVersion(theValueSet);
-
-		TermValueSet termValueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(
-			theValueSet.getUrl(), theValueSet.getVersion())
-			.orElseThrow(() ->
-				new InternalErrorException("Couldn't retrieve TermValueSet with url: " +
-					theValueSet.getUrl() + " and version: " + theValueSet.getVersion() ) );
-
-		termValueSet.setCurrentVersion(true);
-		myTermValueSetDao.save(termValueSet);
 	}
 
 

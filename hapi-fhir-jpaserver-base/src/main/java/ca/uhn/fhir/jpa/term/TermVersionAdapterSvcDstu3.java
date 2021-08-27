@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
@@ -37,6 +38,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
+import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class TermVersionAdapterSvcDstu3 extends BaseTermVersionAdapterSvcImpl implements ITermVersionAdapterSvc {
@@ -103,7 +105,7 @@ public class TermVersionAdapterSvcDstu3 extends BaseTermVersionAdapterSvcImpl im
 	}
 
 	@Override
-	public void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet, RequestDetails theRequestDetails) {
+	public void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet, boolean theMakeItCurrent) {
 		ValueSet valueSetDstu3;
 		try {
 			valueSetDstu3 = (ValueSet) VersionConvertorFactory_30_40.convertResource(theValueSet, new BaseAdvisor_30_40(false));
@@ -111,11 +113,14 @@ public class TermVersionAdapterSvcDstu3 extends BaseTermVersionAdapterSvcImpl im
 			throw new InternalErrorException(e);
 		}
 
+		TransactionDetails txDetails = new TransactionDetails();
+		txDetails.putUserData(MAKE_LOADING_VERSION_CURRENT, theMakeItCurrent);
+
 		if (isBlank(valueSetDstu3.getIdElement().getIdPart())) {
 			String matchUrl = "ValueSet?url=" + UrlUtil.escapeUrlParam(theValueSet.getUrl());
-			myValueSetResourceDao.update(valueSetDstu3, matchUrl, theRequestDetails);
+			myValueSetResourceDao.update(valueSetDstu3, matchUrl, true, false, null, txDetails);
 		} else {
-			myValueSetResourceDao.update(valueSetDstu3, theRequestDetails);
+			myValueSetResourceDao.update(valueSetDstu3, null, true, false, null, txDetails);
 		}
 	}
 
