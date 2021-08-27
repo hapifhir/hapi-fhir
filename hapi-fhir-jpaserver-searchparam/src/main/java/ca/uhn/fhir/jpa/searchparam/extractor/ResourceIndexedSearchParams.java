@@ -225,7 +225,7 @@ public final class ResourceIndexedSearchParams {
 				resourceParams = myDateParams;
 				break;
 			case REFERENCE:
-				return matchResourceLinks(theModelConfig, theResourceName, theParamName, value, theParamDef.getPathsSplit());
+				return matchResourceLinks(theModelConfig, theResourceName, theParamName, value, theParamDef.getPathsSplitForResourceType(theResourceName));
 			case COMPOSITE:
 			case HAS:
 			case SPECIAL:

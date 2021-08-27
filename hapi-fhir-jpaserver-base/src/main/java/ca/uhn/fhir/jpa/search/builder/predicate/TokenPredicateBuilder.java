@@ -222,7 +222,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		if (retVal == null) {
 			if (theSearchParam != null) {
 				Set<String> valueSetUris = Sets.newHashSet();
-				for (String nextPath : theSearchParam.getPathsSplit()) {
+				for (String nextPath : theSearchParam.getPathsSplitForResourceType(getResourceType())) {
 					Class<? extends IBaseResource> type = getFhirContext().getResourceDefinition(getResourceType()).getImplementingClass();
 					BaseRuntimeChildDefinition def = getFhirContext().newTerser().getDefinition(type, nextPath);
 					if (def instanceof BaseRuntimeDeclaredChildDefinition) {
