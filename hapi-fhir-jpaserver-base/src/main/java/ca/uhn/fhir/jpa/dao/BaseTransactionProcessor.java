@@ -154,7 +154,7 @@ public abstract class BaseTransactionProcessor {
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
 	private ThreadPoolTaskExecutor myExecutor ;
-	
+
 	@VisibleForTesting
 	public void setDaoConfig(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;
@@ -349,7 +349,12 @@ public abstract class BaseTransactionProcessor {
 		for (int i=0; i<requestEntriesSize; i++ ) {
 			nextRequestEntry = requestEntries.get(i);
 			BundleTask bundleTask = new BundleTask(completionLatch, theRequestDetails, responseMap, i, nextRequestEntry, theNestedMode);
-			myExecutor.submit(bundleTask);
+			//Don't spin up a new thread for nothing if batch size is <=1
+			if (myDaoConfig.getBundleBatchPoolSize() <= 1) {
+				bundleTask.call();
+			} else {
+				myExecutor.submit(bundleTask);
+			}
 		}
 
 		// waiting for all tasks to be completed
@@ -1557,7 +1562,7 @@ public abstract class BaseTransactionProcessor {
 	public class BundleTask implements Callable<Void> {
 
 		private CountDownLatch myCompletedLatch;
-		private ServletRequestDetails myRequestDetails;
+		private RequestDetails myRequestDetails;
 		private IBase myNextReqEntry;
 		private Map<Integer, Object> myResponseMap;
 		private int myResponseOrder;
@@ -1565,7 +1570,7 @@ public abstract class BaseTransactionProcessor {
 		
 		protected BundleTask(CountDownLatch theCompletedLatch, RequestDetails theRequestDetails, Map<Integer, Object> theResponseMap, int theResponseOrder, IBase theNextReqEntry, boolean theNestedMode) {
 			this.myCompletedLatch = theCompletedLatch;
-			this.myRequestDetails = (ServletRequestDetails)theRequestDetails;
+			this.myRequestDetails = theRequestDetails;
 			this.myNextReqEntry = theNextReqEntry;
 			this.myResponseMap = theResponseMap;		
 			this.myResponseOrder = theResponseOrder;					
