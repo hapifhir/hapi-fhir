@@ -96,7 +96,7 @@ public class MdmTransactionContext {
 		this.myResourceType = myResourceType;
 	}
 
-	public MdmLinkEvent getMdmLinkChangeEvent() {
+	public MdmLinkEvent getMdmLinkEvent() {
 		return myMdmLinkEvent;
 	}
 

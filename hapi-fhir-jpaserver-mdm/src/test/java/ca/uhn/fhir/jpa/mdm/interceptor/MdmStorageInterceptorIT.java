@@ -6,8 +6,12 @@ import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
+import ca.uhn.fhir.jpa.mdm.svc.MdmLinkSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkEvent;
+import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
@@ -68,6 +72,8 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	public MdmHelperR4 myMdmHelper;
 	@Autowired
 	private IdHelperService myIdHelperService;
+	@Autowired
+	private IMdmLinkSvc myMdmLinkSvc;
 
 	@Test
 	public void testCreatePractitioner() throws InterruptedException {
@@ -105,17 +111,17 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 		MdmTransactionContext ctx = createContextForCreate("Patient");
 		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(patient1, ctx);
-		ourLog.info(ctx.getMdmLinkChangeEvent().toString());
-		assertEquals(patient1.getIdElement().getValue(), ctx.getMdmLinkChangeEvent().getTargetResourceId());
-		assertEquals(getLinkByTargetId(patient1).getGoldenResourcePid(),  new IdDt(ctx.getMdmLinkChangeEvent().getGoldenResourceId()).getIdPartAsLong());
+		ourLog.info(ctx.getMdmLinkEvent().toString());
+		assertEquals(patient1.getIdElement().getValue(), ctx.getMdmLinkEvent().getTargetResourceId());
+		assertEquals(getLinkByTargetId(patient1).getGoldenResourcePid(),  new IdDt(ctx.getMdmLinkEvent().getGoldenResourceId()).getIdPartAsLong());
 
 		Patient patient2 = addExternalEID(buildJanePatient(), "eid-2");
 		myMdmHelper.createWithLatch(patient2);
 		ctx = createContextForCreate("Patient");
 		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(patient2, ctx);
-		ourLog.info(ctx.getMdmLinkChangeEvent().toString());
-		assertEquals(patient2.getIdElement().getValue(), ctx.getMdmLinkChangeEvent().getTargetResourceId());
-		assertEquals(getLinkByTargetId(patient2).getGoldenResourcePid(),  new IdDt(ctx.getMdmLinkChangeEvent().getGoldenResourceId()).getIdPartAsLong());
+		ourLog.info(ctx.getMdmLinkEvent().toString());
+		assertEquals(patient2.getIdElement().getValue(), ctx.getMdmLinkEvent().getTargetResourceId());
+		assertEquals(getLinkByTargetId(patient2).getGoldenResourcePid(),  new IdDt(ctx.getMdmLinkEvent().getGoldenResourceId()).getIdPartAsLong());
 	}
 
 	@Test

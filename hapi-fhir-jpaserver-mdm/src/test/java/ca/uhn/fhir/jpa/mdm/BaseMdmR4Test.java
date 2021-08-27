@@ -326,14 +326,14 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		assertEquals(theExpectedCount, myMdmLinkDao.count());
 	}
 
-	protected IAnyResource getGoldenResourceFromTargetResource(IAnyResource theBaseResource) {
+	protected <T extends IAnyResource> T getGoldenResourceFromTargetResource(T theBaseResource) {
 		String resourceType = theBaseResource.getIdElement().getResourceType();
 		IFhirResourceDao relevantDao = myDaoRegistry.getResourceDao(resourceType);
 
 		Optional<MdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(theBaseResource));
 		if (matchedLinkForTargetPid.isPresent()) {
 			Long goldenResourcePid = matchedLinkForTargetPid.get().getGoldenResourcePid();
-			return (IAnyResource) relevantDao.readByPid(new ResourcePersistentId(goldenResourcePid));
+			return (T) relevantDao.readByPid(new ResourcePersistentId(goldenResourcePid));
 		} else {
 			return null;
 		}

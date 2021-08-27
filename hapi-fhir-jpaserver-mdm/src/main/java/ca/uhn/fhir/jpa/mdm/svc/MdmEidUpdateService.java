@@ -86,7 +86,7 @@ public class MdmEidUpdateService {
 			myMdmResourceDaoSvc.upsertGoldenResource(updateContext.getMatchedGoldenResource(), theMdmTransactionContext.getResourceType());
 		}
 
-		theMdmTransactionContext.getMdmLinkChangeEvent().setGoldenResourceId(updateContext.getExistingGoldenResource());
+		theMdmTransactionContext.getMdmLinkEvent().setGoldenResourceId(updateContext.getExistingGoldenResource());
 	}
 
 	private void handleNoEidsInCommon(IAnyResource theResource, MatchedGoldenResourceCandidate theMatchedGoldenResourceCandidate, MdmTransactionContext theMdmTransactionContext, MdmUpdateContext theUpdateContext) {
