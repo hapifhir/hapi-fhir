@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription.channel.api;
 
 public abstract class BaseChannelSettings implements IChannelSettings {
 	private boolean myQualifyChannelName = true;
+	private boolean myPrefixChannelName = true;
 
 	/**
 	 * Default true.  Used by IChannelNamer to decide how to qualify the channel name.
@@ -29,6 +30,18 @@ public abstract class BaseChannelSettings implements IChannelSettings {
 	@Override
 	public boolean isQualifyChannelName() {
 		return myQualifyChannelName;
+	}
+
+	@Override
+	public boolean isPrefixChannelName() {
+		return myPrefixChannelName;
+	}
+
+	/**
+	 * Default true.  Used by IChannelNamer to decide whether to add a prefix to the channel.
+	 */
+	public void setPrefixChannelName(boolean thePrefixChannelName) {
+		myPrefixChannelName = thePrefixChannelName;
 	}
 
 	/**

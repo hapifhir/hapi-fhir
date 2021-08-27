@@ -88,6 +88,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 
 		ChannelProducerSettings channelSettings = new ChannelProducerSettings();
 		channelSettings.setQualifyChannelName(false);
+		channelSettings.setPrefixChannelName(false);
 
 		IChannelProducer channelProducer = myChannelFactory.getOrCreateProducer(queueName, ResourceModifiedJsonMessage.class, channelSettings);
 
