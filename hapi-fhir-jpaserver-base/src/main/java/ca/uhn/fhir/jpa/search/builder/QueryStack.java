@@ -991,8 +991,8 @@ public class QueryStack {
 		List<IQueryParameterType> tokens = new ArrayList<>(); 
 		
 		boolean paramInverted = false;
-		
 		TokenParamModifier modifier = null;
+		
 		for (IQueryParameterType nextOr : theList) {
 			if (nextOr instanceof TokenParam) {
 				if (!((TokenParam) nextOr).isEmpty()) {
@@ -1015,7 +1015,7 @@ public class QueryStack {
 					} 
 					
 					modifier = id.getModifier();
-					// for all :not modifier, create a token list, and remove the :not modifier
+					// for :not modifier, create a token and remove the :not modifier
 					if (modifier != null && modifier == TokenParamModifier.NOT) {
 						IQueryParameterType notToken = new TokenParam(((TokenParam) nextOr).getSystem(), ((TokenParam) nextOr).getValue());						
 						tokens.add(notToken);
@@ -1024,9 +1024,7 @@ public class QueryStack {
 						tokens.add(nextOr);
 					}
 				}
-
 			} else {
-
 				tokens.add(nextOr);
 			}
 		}
