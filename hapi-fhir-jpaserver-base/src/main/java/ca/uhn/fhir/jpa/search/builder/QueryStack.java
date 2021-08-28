@@ -1017,8 +1017,7 @@ public class QueryStack {
 					modifier = id.getModifier();
 					// for :not modifier, create a token and remove the :not modifier
 					if (modifier != null && modifier == TokenParamModifier.NOT) {
-						IQueryParameterType notToken = new TokenParam(((TokenParam) nextOr).getSystem(), ((TokenParam) nextOr).getValue());						
-						tokens.add(notToken);
+						tokens.add(new TokenParam(((TokenParam) nextOr).getSystem(), ((TokenParam) nextOr).getValue()));
 						paramInverted = true;
 					} else {
 						tokens.add(nextOr);
