@@ -21,8 +21,8 @@ package ca.uhn.fhir.mdm.provider;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
-import ca.uhn.fhir.mdm.api.IMdmExpungeSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
@@ -31,13 +31,13 @@ import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.provider.MultiUrlProcessor;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -58,10 +58,12 @@ import org.springframework.data.domain.Page;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -69,10 +71,9 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	private static final Logger ourLog = getLogger(MdmProviderDstu3Plus.class);
 
-
+	private final MultiUrlProcessor myMultiUrlProcessor;
 	private final IMdmControllerSvc myMdmControllerSvc;
 	private final IMdmMatchFinderSvc myMdmMatchFinderSvc;
-	private final IMdmExpungeSvc myMdmExpungeSvc;
 	private final IMdmSubmitSvc myMdmSubmitSvc;
 
 	public static final int DEFAULT_PAGE_SIZE = 20;
@@ -84,11 +85,11 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	 * Note that this is not a spring bean. Any necessary injections should
 	 * happen in the constructor
 	 */
-	public MdmProviderDstu3Plus(FhirContext theFhirContext, IMdmControllerSvc theMdmControllerSvc, IMdmMatchFinderSvc theMdmMatchFinderSvc, IMdmExpungeSvc theMdmExpungeSvc, IMdmSubmitSvc theMdmSubmitSvc) {
+	public MdmProviderDstu3Plus(FhirContext theFhirContext, IMdmControllerSvc theMdmControllerSvc, IMdmMatchFinderSvc theMdmMatchFinderSvc, IMdmClearJobSubmitter theMdmClearJobSubmitter, IMdmSubmitSvc theMdmSubmitSvc) {
 		super(theFhirContext);
+		myMultiUrlProcessor = new MultiUrlProcessor(theFhirContext, theMdmClearJobSubmitter);
 		myMdmControllerSvc = theMdmControllerSvc;
 		myMdmMatchFinderSvc = theMdmMatchFinderSvc;
-		myMdmExpungeSvc = theMdmExpungeSvc;
 		myMdmSubmitSvc = theMdmSubmitSvc;
 	}
 
@@ -180,21 +181,19 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		);
 	}
 
-	@Operation(name = ProviderConstants.MDM_CLEAR, returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, typeName = "decimal")
+	@Operation(name = ProviderConstants.OPERATION_MDM_CLEAR, returnParameters = {
+		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RESPONSE_JOB_ID, typeName = "decimal")
 	})
-	public IBaseParameters clearMdmLinks(@OperationParam(name = ProviderConstants.MDM_CLEAR_SOURCE_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theSourceType,
+	public IBaseParameters clearMdmLinks(@OperationParam(name = ProviderConstants.OPERATION_MDM_CLEAR_RESOURCE_NAME, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theResourceNames,
+													 @OperationParam(name = ProviderConstants.OPERATION_MDM_CLEAR_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
 													 ServletRequestDetails theRequestDetails) {
-		long resetCount;
-		if (theSourceType == null || StringUtils.isBlank(theSourceType.getValue())) {
-			resetCount = myMdmExpungeSvc.expungeAllMdmLinks(theRequestDetails);
-		} else {
-			resetCount = myMdmExpungeSvc.expungeAllMdmLinksOfSourceType(theSourceType.getValueAsString(), theRequestDetails);
+
+		List<String> urls = new ArrayList<>();
+		if (theResourceNames != null) {
+			urls.addAll(theResourceNames.stream().map(s -> s.getValue() + "?").collect(Collectors.toList()));
 		}
 
-		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
-		ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_MDM_CLEAR_OUT_PARAM_DELETED_COUNT, resetCount);
-		return retval;
+		return myMultiUrlProcessor.processUrls(urls, myMultiUrlProcessor.getBatchSize(theBatchSize), theRequestDetails);
 	}
 
 	@Operation(name = ProviderConstants.MDM_QUERY_LINKS, idempotent = true)
@@ -233,7 +232,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 
 		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
 
-		Page<MdmLinkJson> possibleDuplicates = myMdmControllerSvc.getDuplicateGoldenResources(createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.DUPLICATE_GOLDEN_RESOURCES, (String) null), mdmPageRequest);
+		Page<MdmLinkJson> possibleDuplicates = myMdmControllerSvc.getDuplicateGoldenResources(createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.DUPLICATE_GOLDEN_RESOURCES, null), mdmPageRequest);
 
 		return parametersFromMdmLinks(possibleDuplicates, false, theRequestDetails, mdmPageRequest);
 	}
@@ -255,7 +254,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, typeName = "integer")
+		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RESPONSE_JOB_ID, typeName = "integer")
 	})
 	public IBaseParameters mdmBatchOnAllSourceResources(
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_RESOURCE_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theResourceType,
@@ -278,7 +277,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 
 
 	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, typeName = "Patient", returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, typeName = "integer")
+		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RESPONSE_JOB_ID, typeName = "integer")
 	})
 	public IBaseParameters mdmBatchPatientInstance(
 		@IdParam IIdType theIdParam,
@@ -288,7 +287,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, typeName = "Patient", returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, typeName = "integer")
+		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RESPONSE_JOB_ID, typeName = "integer")
 	})
 	public IBaseParameters mdmBatchPatientType(
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA, typeName = "string") IPrimitiveType<String> theCriteria,
@@ -299,7 +298,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, typeName = "Practitioner", returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, typeName = "integer")
+		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RESPONSE_JOB_ID, typeName = "integer")
 	})
 	public IBaseParameters mdmBatchPractitionerInstance(
 		@IdParam IIdType theIdParam,
@@ -309,7 +308,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, typeName = "Practitioner", returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, typeName = "integer")
+		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RESPONSE_JOB_ID, typeName = "integer")
 	})
 	public IBaseParameters mdmBatchPractitionerType(
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA, typeName = "string") IPrimitiveType<String> theCriteria,
@@ -324,7 +323,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	 */
 	public IBaseParameters buildMdmOutParametersWithCount(long theCount) {
 		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
-		ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, theCount);
+		ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_MDM_BATCH_RESPONSE_JOB_ID, theCount);
 		return retval;
 	}
 

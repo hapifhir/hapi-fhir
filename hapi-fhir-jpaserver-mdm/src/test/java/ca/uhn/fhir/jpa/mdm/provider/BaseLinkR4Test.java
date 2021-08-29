@@ -1,10 +1,11 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
-import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
-import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,6 +53,8 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 		saveLink(myLink);
 		assertEquals(MdmLinkSourceEnum.AUTO, myLink.getLinkSource());
 		myDaoConfig.setExpungeEnabled(true);
+		myDaoConfig.setAllowMultipleDelete(true);
+		myDaoConfig.setDeleteExpungeEnabled(true);
 	}
 
 	@AfterEach
@@ -67,5 +71,12 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 	@Nonnull
 	protected List<MdmLink> getPatientLinks() {
 		return myMdmLinkDaoSvc.findMdmLinksBySourceResource(myPatient);
+	}
+
+	@Nonnull
+	protected List<IPrimitiveType<String>> getResourceNames(String theResourceName) {
+		List<IPrimitiveType<String>> resourceNames = new ArrayList<>();
+		resourceNames.add(new StringType(theResourceName));
+		return resourceNames;
 	}
 }

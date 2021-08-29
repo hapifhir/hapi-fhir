@@ -20,11 +20,11 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
+import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmExpungeSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
-import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
-import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -62,7 +62,7 @@ public class MdmClearSvcImpl implements IMdmExpungeSvc {
 
 	private void throwExceptionIfInvalidSourceResourceType(String theResourceType) {
 		if (!myMdmSettings.isSupportedMdmType(theResourceType)) {
-			throw new InvalidRequestException(ProviderConstants.MDM_CLEAR + " does not support resource type: " + theResourceType);
+			throw new InvalidRequestException(ProviderConstants.OPERATION_MDM_CLEAR + " does not support resource type: " + theResourceType);
 		}
 	}
 

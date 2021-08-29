@@ -22,6 +22,8 @@ package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
+// FIXME KHS
+@Deprecated
 public interface IMdmExpungeSvc {
 
 	/**

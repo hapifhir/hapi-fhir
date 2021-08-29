@@ -59,6 +59,7 @@ import java.util.stream.Collectors;
 /**
  * DeleteExpunge is now performed using the {@link ca.uhn.fhir.jpa.delete.DeleteExpungeJobSubmitterImpl} Spring Batch job.
  */
+// FIXME KHS remove
 @Deprecated
 public class DeleteExpungeService {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeService.class);

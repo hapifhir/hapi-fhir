@@ -48,7 +48,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testClearAllLinks() {
 		assertLinkCount(2);
-		myMdmProvider.clearMdmLinks(null, myRequestDetails);
+		myMdmProvider.clearMdmLinks(null, null, myRequestDetails);
 		assertNoLinksExist();
 	}
 
@@ -70,12 +70,13 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(2);
 		Patient read = myPatientDao.read(new IdDt(mySourcePatientId.getValueAsString()).toVersionless());
 		assertThat(read, is(notNullValue()));
-		myMdmProvider.clearMdmLinks(new StringType("Patient"), myRequestDetails);
+		myMdmProvider.clearMdmLinks(getResourceNames("Patient"), null, myRequestDetails);
 		assertNoPatientLinksExist();
 		try {
 			myPatientDao.read(new IdDt(mySourcePatientId.getValueAsString()).toVersionless());
 			fail();
-		} catch (ResourceNotFoundException e) {}
+		} catch (ResourceNotFoundException e) {
+		}
 
 	}
 	@Test
@@ -87,7 +88,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		Patient patientAndUpdateLinks = createPatientAndUpdateLinks(buildJanePatient());
 		IAnyResource goldenResource = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
 		assertThat(goldenResource, is(notNullValue()));
-		myMdmProvider.clearMdmLinks(null, myRequestDetails);
+		myMdmProvider.clearMdmLinks(null, null, myRequestDetails);
 		assertNoPatientLinksExist();
 		goldenResource = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
 		assertThat(goldenResource, is(nullValue()));
@@ -104,7 +105,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		linkGoldenResources(goldenResourceFromTarget, goldenResourceFromTarget2);
 
 		//SUT
-		myMdmProvider.clearMdmLinks(null, myRequestDetails);
+		myMdmProvider.clearMdmLinks(null, null, myRequestDetails);
 
 		assertNoPatientLinksExist();
 		IBundleProvider search = myPatientDao.search(buildGoldenResourceParameterMap());
@@ -135,7 +136,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		linkGoldenResources(goldenResourceFromTarget2, goldenResourceFromTarget);
 
 		//SUT
-		IBaseParameters parameters = myMdmProvider.clearMdmLinks(null, myRequestDetails);
+		IBaseParameters parameters = myMdmProvider.clearMdmLinks(null, null, myRequestDetails);
 
 		printLinks();
 
@@ -157,18 +158,19 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(2);
 		Practitioner read = myPractitionerDao.read(new IdDt(myPractitionerGoldenResourceId.getValueAsString()).toVersionless());
 		assertThat(read, is(notNullValue()));
-		myMdmProvider.clearMdmLinks(new StringType("Practitioner"), myRequestDetails);
+		myMdmProvider.clearMdmLinks(getResourceNames("Practitioner"), null, myRequestDetails);
 		assertNoPractitionerLinksExist();
 		try {
 			myPractitionerDao.read(new IdDt(myPractitionerGoldenResourceId.getValueAsString()).toVersionless());
 			fail();
-		} catch (ResourceNotFoundException e) {}
+		} catch (ResourceNotFoundException e) {
+		}
 	}
 
 	@Test
 	public void testClearInvalidTargetType() {
 		try {
-			myMdmProvider.clearMdmLinks(new StringType("Observation"), myRequestDetails);
+			myMdmProvider.clearMdmLinks(getResourceNames("Observation"), null, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), is(equalTo("$mdm-clear does not support resource type: Observation")));
