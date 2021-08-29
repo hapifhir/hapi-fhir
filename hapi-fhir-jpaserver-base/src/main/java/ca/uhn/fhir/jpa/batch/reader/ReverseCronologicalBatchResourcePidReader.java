@@ -60,6 +60,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -136,18 +137,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	private List<Long> getNextBatch() {
 		RequestPartitionId requestPartitionId = myPartitionedUrls.get(myUrlIndex).getRequestPartitionId();
 		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(myPartitionedUrls.get(myUrlIndex).getUrl(), requestPartitionId);
-		addDateCountAndSortToSearch(resourceSearch);
-
-		// Perform the search
-		IResultIterator resultIter = myBatchResourceSearcher.performSearch(resourceSearch, myBatchSize);
-		Set<Long> newPids = new LinkedHashSet<>();
-		Set<Long> alreadySeenPids = myAlreadyProcessedPidsWithHighDate.computeIfAbsent(myUrlIndex, i -> new HashSet<>());
-
-		do {
-			List<Long> pids = resultIter.getNextResultBatch(myBatchSize).stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
-			newPids.addAll(pids);
-			newPids.removeAll(alreadySeenPids);
-		} while (newPids.size() < myBatchSize && resultIter.hasNext());
+		Set<Long> newPids = getNextPidBatch(resourceSearch);
 
 		if (ourLog.isDebugEnabled()) {
 			ourLog.debug("Search for {}{} returned {} results", resourceSearch.getResourceName(), resourceSearch.getSearchParameterMap().toNormalizedQueryString(myFhirContext), newPids.size());
@@ -157,24 +147,49 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 		setDateFromPidFunction(resourceSearch);
 
 		List<Long> retval = new ArrayList<>(newPids);
-		Date newThreshold = myBatchDateThresholdUpdater.updateThresholdAndCache(myThresholdHighByUrlIndex.get(myUrlIndex), myAlreadyProcessedPidsWithHighDate.get(myUrlIndex), retval);
+		Date newThreshold = myBatchDateThresholdUpdater.updateThresholdAndCache(getCurrentHighThreshold(), myAlreadyProcessedPidsWithHighDate.get(myUrlIndex), retval);
 		myThresholdHighByUrlIndex.put(myUrlIndex, newThreshold);
 
 		return retval;
 	}
 
-	private void setDateFromPidFunction(ResourceSearch resourceSearch) {
+	protected Date getCurrentHighThreshold() {
+		return myThresholdHighByUrlIndex.get(myUrlIndex);
+	}
+
+	protected Set<Long> getNextPidBatch(ResourceSearch resourceSearch) {
+		Set<Long> retval = new LinkedHashSet<>();
+		addDateCountAndSortToSearch(resourceSearch);
+
+		// Perform the search
+		IResultIterator resultIter = myBatchResourceSearcher.performSearch(resourceSearch, myBatchSize);
+		Set<Long> alreadySeenPids = myAlreadyProcessedPidsWithHighDate.computeIfAbsent(myUrlIndex, i -> new HashSet<>());
+
+		do {
+			List<Long> pids = resultIter.getNextResultBatch(myBatchSize).stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
+			retval.addAll(pids);
+			retval.removeAll(alreadySeenPids);
+		} while (retval.size() < myBatchSize && resultIter.hasNext());
+
+		return retval;
+	}
+
+	protected void setDateFromPidFunction(ResourceSearch resourceSearch) {
 		final IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceSearch.getResourceName());
 
-		myBatchDateThresholdUpdater.setDateFromPid(pid -> {
+		setDateExtractorFunction(pid -> {
 			IBaseResource oldestResource = dao.readByPid(new ResourcePersistentId(pid));
 			return oldestResource.getMeta().getLastUpdated();
 		});
 	}
 
+	protected void setDateExtractorFunction(Function<Long, Date> theDateExtractorFunction) {
+		myBatchDateThresholdUpdater.setDateFromPid(theDateExtractorFunction);
+	}
+
 	private void addDateCountAndSortToSearch(ResourceSearch resourceSearch) {
 		SearchParameterMap map = resourceSearch.getSearchParameterMap();
-		map.setLastUpdated(new DateRangeParam().setUpperBoundInclusive(myThresholdHighByUrlIndex.get(myUrlIndex)));
+		map.setLastUpdated(new DateRangeParam().setUpperBoundInclusive(getCurrentHighThreshold()));
 		map.setLoadSynchronousUpTo(myBatchSize);
 		map.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.DESC));
 	}
@@ -224,5 +239,9 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 		}
 		JobParameters parameters = new JobParameters(map);
 		return parameters;
+	}
+
+	protected Integer getBatchSize() {
+		return myBatchSize;
 	}
 }
