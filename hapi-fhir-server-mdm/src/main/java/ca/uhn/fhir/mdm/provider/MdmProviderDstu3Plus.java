@@ -196,6 +196,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 
 		if (theResourceNames != null) {
 			resourceNames.addAll(theResourceNames.stream().map(IPrimitiveType::getValue).collect(Collectors.toList()));
+			validateResourceNames(resourceNames);
 		} else {
 			resourceNames.addAll(myMdmSettings.getMdmRules().getMdmTypes());
 		}
@@ -204,14 +205,22 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		return myMultiUrlProcessor.processUrls(urls, myMultiUrlProcessor.getBatchSize(theBatchSize), theRequestDetails);
 	}
 
+	private void validateResourceNames(List<String> theResourceNames) {
+		for (String resourceName : theResourceNames) {
+			if (!myMdmSettings.isSupportedMdmType(resourceName)) {
+				throw new InvalidRequestException(ProviderConstants.OPERATION_MDM_CLEAR + " does not support resource type: " + resourceName);
+			}
+		}
+	}
+
 	@Operation(name = ProviderConstants.MDM_QUERY_LINKS, idempotent = true)
 	public IBaseParameters queryLinks(@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theGoldenResourceId,
 												 @OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theResourceId,
 												 @OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_MATCH_RESULT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theMatchResult,
 												 @OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_LINK_SOURCE, min = 0, max = 1, typeName = "string")
-														 IPrimitiveType<String> theLinkSource,
+													 IPrimitiveType<String> theLinkSource,
 
-												 @Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
+												 @Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
 												 @OperationParam(name = PARAM_OFFSET, min = 0, max = 1, typeName = "integer")
 														 IPrimitiveType<Integer> theOffset,
 												 @Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
