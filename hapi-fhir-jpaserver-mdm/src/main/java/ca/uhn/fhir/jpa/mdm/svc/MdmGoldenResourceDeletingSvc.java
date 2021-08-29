@@ -25,8 +25,8 @@ import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.expunge.DeleteExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
 import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.SliceImpl;
@@ -51,7 +51,7 @@ public class MdmGoldenResourceDeletingSvc {
 	@Autowired
 	DeleteExpungeService myDeleteExpungeService;
 
-	public DeleteMethodOutcome expungeGoldenResourcePids(List<Long> theGoldenResourcePids, String theResourceType, ServletRequestDetails theRequestDetails) {
+	public DeleteMethodOutcome expungeGoldenResourcePids(List<Long> theGoldenResourcePids, String theResourceType, RequestDetails theRequestDetails) {
 		return myDeleteExpungeService.expungeByResourcePids(ProviderConstants.OPERATION_MDM_CLEAR, theResourceType, new SliceImpl<>(theGoldenResourcePids), theRequestDetails);
 	}
 }

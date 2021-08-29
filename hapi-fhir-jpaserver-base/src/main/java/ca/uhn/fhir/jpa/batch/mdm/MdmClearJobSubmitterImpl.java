@@ -28,7 +28,7 @@ import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
 import ca.uhn.fhir.jpa.batch.job.model.RequestListJson;
-import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
+import ca.uhn.fhir.jpa.batch.mdm.job.ReverseCronologicalBatchMdmLinkPidReader;
 import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
@@ -78,7 +78,7 @@ public class MdmClearJobSubmitterImpl implements IMdmClearJobSubmitter {
 			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRE_DELETE_EXPUNGE, params);
 		}
 
-		JobParameters jobParameters = ReverseCronologicalBatchResourcePidReader.buildJobParameters(ProviderConstants.OPERATION_MDM_CLEAR, theBatchSize, requestListJson);
+		JobParameters jobParameters = ReverseCronologicalBatchMdmLinkPidReader.buildJobParameters(ProviderConstants.OPERATION_MDM_CLEAR, theBatchSize, requestListJson);
 		return myBatchJobSubmitter.runJob(myMdmClearJob, jobParameters);
 	}
 }

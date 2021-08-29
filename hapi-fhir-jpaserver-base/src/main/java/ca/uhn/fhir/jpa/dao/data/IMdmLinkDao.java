@@ -71,6 +71,6 @@ public interface IMdmLinkDao extends JpaRepository<MdmLink, Long> {
 	@Query("SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid FROM MdmLink ml WHERE ml.myGoldenResourcePid = :goldenPid and ml.myMatchResult = :matchResult")
 	List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(@Param("goldenPid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
-	@Query("SELECT ml.myId FROM MdmLink ml WHERE ml.myMdmSourceType = :resourceName AND ml.myCreated > :highThreshold ORDER BY ml.myCreated DESC")
+	@Query("SELECT ml.myId FROM MdmLink ml WHERE ml.myMdmSourceType = :resourceName AND ml.myCreated <= :highThreshold ORDER BY ml.myCreated DESC")
 	List<Long> findPidByResourceNameAndThreshold(@Param("resourceName") String theResourceName, @Param("highThreshold") Date theHighThreshold, Pageable thePageable);
 }

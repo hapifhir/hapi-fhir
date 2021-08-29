@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
 import ca.uhn.fhir.mdm.api.MdmConstants;
@@ -75,6 +76,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	private final IMdmControllerSvc myMdmControllerSvc;
 	private final IMdmMatchFinderSvc myMdmMatchFinderSvc;
 	private final IMdmSubmitSvc myMdmSubmitSvc;
+	private final IMdmSettings myMdmSettings;
 
 	public static final int DEFAULT_PAGE_SIZE = 20;
 	public static final int MAX_PAGE_SIZE = 100;
@@ -85,12 +87,13 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	 * Note that this is not a spring bean. Any necessary injections should
 	 * happen in the constructor
 	 */
-	public MdmProviderDstu3Plus(FhirContext theFhirContext, IMdmControllerSvc theMdmControllerSvc, IMdmMatchFinderSvc theMdmMatchFinderSvc, IMdmClearJobSubmitter theMdmClearJobSubmitter, IMdmSubmitSvc theMdmSubmitSvc) {
+	public MdmProviderDstu3Plus(FhirContext theFhirContext, IMdmControllerSvc theMdmControllerSvc, IMdmMatchFinderSvc theMdmMatchFinderSvc, IMdmClearJobSubmitter theMdmClearJobSubmitter, IMdmSubmitSvc theMdmSubmitSvc, IMdmSettings theIMdmSettings) {
 		super(theFhirContext);
 		myMultiUrlProcessor = new MultiUrlProcessor(theFhirContext, theMdmClearJobSubmitter);
 		myMdmControllerSvc = theMdmControllerSvc;
 		myMdmMatchFinderSvc = theMdmMatchFinderSvc;
 		myMdmSubmitSvc = theMdmSubmitSvc;
+		myMdmSettings = theIMdmSettings;
 	}
 
 	@Operation(name = ProviderConstants.EMPI_MATCH, typeName = "Patient")
@@ -188,11 +191,16 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 													 @OperationParam(name = ProviderConstants.OPERATION_MDM_CLEAR_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
 													 ServletRequestDetails theRequestDetails) {
 
-		List<String> urls = new ArrayList<>();
+		List<String> resourceNames = new ArrayList<>();
+
+
 		if (theResourceNames != null) {
-			urls.addAll(theResourceNames.stream().map(s -> s.getValue() + "?").collect(Collectors.toList()));
+			resourceNames.addAll(theResourceNames.stream().map(IPrimitiveType::getValue).collect(Collectors.toList()));
+		} else {
+			resourceNames.addAll(myMdmSettings.getMdmRules().getMdmTypes());
 		}
 
+		List<String> urls = resourceNames.stream().map(s -> s + "?").collect(Collectors.toList());
 		return myMultiUrlProcessor.processUrls(urls, myMultiUrlProcessor.getBatchSize(theBatchSize), theRequestDetails);
 	}
 

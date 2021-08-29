@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,8 @@ public class MdmProviderLoader {
 	private IMdmClearJobSubmitter myMdmClearJobSubmitter;
 	@Autowired
 	private IMdmSubmitSvc myMdmSubmitSvc;
+	@Autowired
+	private IMdmSettings myMdmSettings;
 
 	private BaseMdmProvider myMdmProvider;
 
@@ -54,7 +57,7 @@ public class MdmProviderLoader {
 			case DSTU3:
 			case R4:
 				myResourceProviderFactory.addSupplier(() -> {
-					myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmClearJobSubmitter, myMdmSubmitSvc);
+					myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmClearJobSubmitter, myMdmSubmitSvc, myMdmSettings);
 					return myMdmProvider;
 				});
 				break;

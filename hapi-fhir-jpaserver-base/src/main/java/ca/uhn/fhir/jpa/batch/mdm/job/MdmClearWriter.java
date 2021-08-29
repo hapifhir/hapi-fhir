@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.batch.mdm.job;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.expunge.PartitionRunner;
-import ca.uhn.fhir.jpa.search.reindex.ResourceReindexer;
+import ca.uhn.fhir.mdm.api.IMdmClearSvc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemWriter;
@@ -45,22 +45,25 @@ public class MdmClearWriter implements ItemWriter<List<Long>> {
 	protected PlatformTransactionManager myTxManager;
 	// FIXME KHS rewrite
 	@Autowired
-	ResourceReindexer myResourceReindexer;
+	IMdmClearSvc myMdmClearSvc;
 	@Autowired
 	DaoConfig myDaoConfig;
 
 	@Override
 	public void write(List<? extends List<Long>> thePidLists) throws Exception {
+
+		ourLog.info(">>> DELETING {}", thePidLists.get(0));
+
 		PartitionRunner partitionRunner = new PartitionRunner(PROCESS_NAME, THREAD_PREFIX, myDaoConfig.getReindexBatchSize(), myDaoConfig.getReindexThreadCount());
 
 		// Note that since our chunk size is 1, there will always be exactly one list
 		for (List<Long> pidList : thePidLists) {
-			partitionRunner.runInPartitionedThreads(new SliceImpl<>(pidList), pids -> reindexPids(pidList));
+			partitionRunner.runInPartitionedThreads(new SliceImpl<>(pidList), pids -> removeLinks(pidList));
 		}
 	}
 
-	private void reindexPids(List<Long> pidList) {
+	private void removeLinks(List<Long> pidList) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-		txTemplate.executeWithoutResult(t -> pidList.forEach(pid -> myResourceReindexer.readAndReindexResourceByPid(pid)));
+		txTemplate.executeWithoutResult(t -> myMdmClearSvc.removeLinkAndGoldenResources(pidList));
 	}
 }

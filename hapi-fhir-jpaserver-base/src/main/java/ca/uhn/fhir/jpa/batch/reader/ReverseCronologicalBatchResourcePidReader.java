@@ -137,6 +137,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 	private List<Long> getNextBatch() {
 		RequestPartitionId requestPartitionId = myPartitionedUrls.get(myUrlIndex).getRequestPartitionId();
 		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(myPartitionedUrls.get(myUrlIndex).getUrl(), requestPartitionId);
+		myAlreadyProcessedPidsWithHighDate.putIfAbsent(myUrlIndex, new HashSet<>());
 		Set<Long> newPids = getNextPidBatch(resourceSearch);
 
 		if (ourLog.isDebugEnabled()) {
@@ -163,7 +164,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 
 		// Perform the search
 		IResultIterator resultIter = myBatchResourceSearcher.performSearch(resourceSearch, myBatchSize);
-		Set<Long> alreadySeenPids = myAlreadyProcessedPidsWithHighDate.computeIfAbsent(myUrlIndex, i -> new HashSet<>());
+		Set<Long> alreadySeenPids = myAlreadyProcessedPidsWithHighDate.get(myUrlIndex);
 
 		do {
 			List<Long> pids = resultIter.getNextResultBatch(myBatchSize).stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());

@@ -145,7 +145,7 @@ public class ProviderConstants {
 	/**
 	 * The Spring Batch job id of the delete expunge job created by a $delete-expunge operation
 	 */
-	public static final String OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID = "jobId";
+	public static final String OPERATION_BATCH_RESPONSE_JOB_ID = "jobId";
 
 	/**
 	 * Operation name for the $delete-expunge operation
