@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.batch.mdm.job;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch.job.MultiUrlProcessorJobConfig;
 import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
+import ca.uhn.fhir.jpa.delete.job.DeleteExpungeProcessor;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -30,11 +31,15 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
+import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.support.CompositeItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.MDM_CLEAR_JOB_NAME;
@@ -51,6 +56,12 @@ public class MdmClearJobConfig extends MultiUrlProcessorJobConfig {
 	private StepBuilderFactory myStepBuilderFactory;
 	@Autowired
 	private JobBuilderFactory myJobBuilderFactory;
+	@Autowired
+	private DeleteExpungeProcessor myDeleteExpungeProcessor;
+	@Autowired
+	@Qualifier("deleteExpungePromotionListener")
+	private ExecutionContextPromotionListener myDeleteExpungePromotionListener;
+
 
 	@Bean(name = MDM_CLEAR_JOB_NAME)
 	@Lazy
@@ -64,12 +75,24 @@ public class MdmClearJobConfig extends MultiUrlProcessorJobConfig {
 	@Bean
 	public Step mdmClearUrlListStep() {
 		return myStepBuilderFactory.get(MDM_CLEAR_RESOURCE_LIST_STEP_NAME)
-			.<List<Long>, List<Long>>chunk(1)
+			.<List<Long>, List<String>>chunk(1)
 			.reader(reverseCronologicalBatchMdmLinkPidReader())
-			.writer(mdmClearWriter())
+			.processor(compositeProcessor())
+			.writer(sqlExecutorWriter())
 			.listener(pidCountRecorderListener())
-			.listener(mdmClearPromotionListener())
+			.listener(myDeleteExpungePromotionListener)
 			.build();
+	}
+
+	@Bean
+	@StepScope
+	public ItemProcessor<List<Long>, List<String>> compositeProcessor() {
+		CompositeItemProcessor<List<Long>, List<String>> compositeProcessor = new CompositeItemProcessor<>();
+		List itemProcessors = new ArrayList<>();
+		itemProcessors.add(mdmLinkDeleter());
+		itemProcessors.add(myDeleteExpungeProcessor);
+		compositeProcessor.setDelegates(itemProcessors);
+		return compositeProcessor;
 	}
 
 	@Bean
@@ -80,8 +103,8 @@ public class MdmClearJobConfig extends MultiUrlProcessorJobConfig {
 
 	@Bean
 	@StepScope
-	public MdmClearWriter mdmClearWriter() {
-		return new MdmClearWriter();
+	public MdmLinkDeleter mdmLinkDeleter() {
+		return new MdmLinkDeleter();
 	}
 
 	@Bean

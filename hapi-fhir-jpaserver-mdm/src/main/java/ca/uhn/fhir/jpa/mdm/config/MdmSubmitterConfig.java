@@ -24,13 +24,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDeleteSvc;
 import ca.uhn.fhir.jpa.mdm.interceptor.MdmSubmitterInterceptorLoader;
 import ca.uhn.fhir.jpa.mdm.svc.MdmChannelSubmitterSvcImpl;
-import ca.uhn.fhir.jpa.mdm.svc.MdmClearSvcImpl;
-import ca.uhn.fhir.jpa.mdm.svc.MdmGoldenResourceDeletingSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmSubmitSvcImpl;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
-import ca.uhn.fhir.mdm.api.IMdmClearSvc;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -62,11 +59,6 @@ public class MdmSubmitterConfig {
 	}
 
 	@Bean
-	MdmGoldenResourceDeletingSvc mdmGoldenResourceDeletingSvc() {
-		return new MdmGoldenResourceDeletingSvc();
-	}
-
-	@Bean
 	@Lazy
 	IMdmChannelSubmitterSvc mdmChannelSubmitterSvc(FhirContext theFhirContext, IChannelFactory theChannelFactory) {
 		return new MdmChannelSubmitterSvcImpl(theFhirContext, theChannelFactory);
@@ -75,10 +67,5 @@ public class MdmSubmitterConfig {
 	@Bean
 	IMdmSubmitSvc mdmSubmitService() {
 		return new MdmSubmitSvcImpl();
-	}
-
-	@Bean
-	IMdmClearSvc mdmClearSvc() {
-		return new MdmClearSvcImpl();
 	}
 }

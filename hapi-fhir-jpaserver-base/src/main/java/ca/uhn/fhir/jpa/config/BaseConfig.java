@@ -35,7 +35,6 @@ import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
-import ca.uhn.fhir.jpa.dao.expunge.DeleteExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
@@ -889,11 +888,6 @@ public abstract class BaseConfig {
 	@Bean
 	public DaoSearchParamSynchronizer daoSearchParamSynchronizer() {
 		return new DaoSearchParamSynchronizer();
-	}
-
-	@Bean
-	public DeleteExpungeService deleteExpungeService() {
-		return new DeleteExpungeService();
 	}
 
 	@Bean

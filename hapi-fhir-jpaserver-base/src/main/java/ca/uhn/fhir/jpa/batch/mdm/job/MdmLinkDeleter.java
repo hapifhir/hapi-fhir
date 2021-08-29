@@ -22,48 +22,48 @@ package ca.uhn.fhir.jpa.batch.mdm.job;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.expunge.PartitionRunner;
-import ca.uhn.fhir.mdm.api.IMdmClearSvc;
+import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * Reindex the provided list of pids of resources
+ * Take MdmLink pids in and output golden resource pids out
  */
 
-public class MdmClearWriter implements ItemWriter<List<Long>> {
+public class MdmLinkDeleter implements ItemProcessor<List<Long>, List<Long>> {
 	public static final String PROCESS_NAME = "Reindexing";
 	public static final String THREAD_PREFIX = "reindex";
-	private static final Logger ourLog = LoggerFactory.getLogger(MdmClearWriter.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(MdmLinkDeleter.class);
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
-	// FIXME KHS rewrite
 	@Autowired
-	IMdmClearSvc myMdmClearSvc;
+	IMdmLinkSvc myMdmLinkSvc;
 	@Autowired
 	DaoConfig myDaoConfig;
 
 	@Override
-	public void write(List<? extends List<Long>> thePidLists) throws Exception {
-
-		ourLog.info(">>> DELETING {}", thePidLists.get(0));
+	public List<Long> process(List<Long> thePidList) throws Exception {
+		ConcurrentLinkedQueue<Long> goldenPidAggregator = new ConcurrentLinkedQueue<>();
 
 		PartitionRunner partitionRunner = new PartitionRunner(PROCESS_NAME, THREAD_PREFIX, myDaoConfig.getReindexBatchSize(), myDaoConfig.getReindexThreadCount());
 
 		// Note that since our chunk size is 1, there will always be exactly one list
-		for (List<Long> pidList : thePidLists) {
-			partitionRunner.runInPartitionedThreads(new SliceImpl<>(pidList), pids -> removeLinks(pidList));
-		}
+		partitionRunner.runInPartitionedThreads(new SliceImpl<>(thePidList), pids -> removeLinks(thePidList, goldenPidAggregator));
+
+		return new ArrayList<>(goldenPidAggregator);
 	}
 
-	private void removeLinks(List<Long> pidList) {
+	private void removeLinks(List<Long> pidList, ConcurrentLinkedQueue<Long> theGoldenPidAggregator) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-		txTemplate.executeWithoutResult(t -> myMdmClearSvc.removeLinkAndGoldenResources(pidList));
+		txTemplate.executeWithoutResult(t -> theGoldenPidAggregator.addAll(myMdmLinkSvc.deleteAllMdmLinksAndReturnGoldenResourcePids(pidList)));
 	}
 }

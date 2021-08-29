@@ -183,7 +183,6 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		}
 	}
 
-	// FIXME KHS fix this test
 	@Test
 	public void testClearInvalidTargetType() {
 		try {

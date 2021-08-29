@@ -37,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -88,6 +89,11 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 			log(theMdmTransactionContext, "Deleting MdmLink [" + theGoldenResource.getIdElement().toVersionless() + " -> " + theSourceResource.getIdElement().toVersionless() + "] with result: " + mdmLink.getMatchResult());
 			myMdmLinkDaoSvc.deleteLink(mdmLink);
 		}
+	}
+
+	@Override
+	public List<Long> deleteAllMdmLinksAndReturnGoldenResourcePids(List<Long> theLinks) {
+		return myMdmLinkDaoSvc.deleteMdmLinksAndReturnGoldenResourcePids(theLinks);
 	}
 
 	/**
