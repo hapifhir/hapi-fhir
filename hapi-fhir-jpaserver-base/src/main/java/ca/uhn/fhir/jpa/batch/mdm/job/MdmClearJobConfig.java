@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.batch.mdm;
+package ca.uhn.fhir.jpa.batch.mdm.job;
 
 /*-
  * #%L
@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.batch.mdm;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch.job.MultiUrlProcessorJobConfig;
 import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
-import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -42,7 +41,7 @@ import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.MDM_CLEAR_JOB_NAME;
 
 /**
  * Spring batch Job configuration file. Contains all necessary plumbing to run a
- * Delete Expunge job.
+ * Reindex job.
  */
 @Configuration
 public class MdmClearJobConfig extends MultiUrlProcessorJobConfig {
@@ -58,34 +57,39 @@ public class MdmClearJobConfig extends MultiUrlProcessorJobConfig {
 	public Job mdmClearJob(MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
 		return myJobBuilderFactory.get(MDM_CLEAR_JOB_NAME)
 			.validator(multiUrlProcessorParameterValidator(theMatchUrlService, theDaoRegistry))
-			.start(mdmClearResourceListStep())
+			.start(mdmClearUrlListStep())
 			.build();
 	}
 
 	@Bean
-	public Step mdmClearResourceListStep() {
+	public Step mdmClearUrlListStep() {
 		return myStepBuilderFactory.get(MDM_CLEAR_RESOURCE_LIST_STEP_NAME)
-			.<List<Long>, List<String>>chunk(1)
-			.reader(reverseCronologicalBatchResourcePidReader())
-			.processor(mdmClearProcessor())
-			.writer(sqlExecutorWriter())
+			.<List<Long>, List<Long>>chunk(1)
+			.reader(reverseCronologicalBatchMdmLinkPidReader())
+			.writer(mdmClearWriter())
 			.listener(pidCountRecorderListener())
 			.listener(mdmClearPromotionListener())
 			.build();
 	}
 
 	@Bean
-	public ExecutionContextPromotionListener mdmClearPromotionListener() {
-		ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
-
-		listener.setKeys(new String[]{SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED, PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED});
-
-		return listener;
+	@StepScope
+	public ReverseCronologicalBatchMdmLinkPidReader reverseCronologicalBatchMdmLinkPidReader() {
+		return new ReverseCronologicalBatchMdmLinkPidReader();
 	}
 
 	@Bean
 	@StepScope
-	public MdmClearProcessor mdmClearProcessor() {
-		return new MdmClearProcessor();
+	public MdmClearWriter mdmClearWriter() {
+		return new MdmClearWriter();
+	}
+
+	@Bean
+	public ExecutionContextPromotionListener mdmClearPromotionListener() {
+		ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
+
+		listener.setKeys(new String[]{PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED});
+
+		return listener;
 	}
 }
