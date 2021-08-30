@@ -21,7 +21,6 @@ package ca.uhn.fhir.mdm.provider;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
@@ -38,7 +37,6 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.provider.MultiUrlProcessor;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -72,7 +70,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	private static final Logger ourLog = getLogger(MdmProviderDstu3Plus.class);
 
-	private final MultiUrlProcessor myMultiUrlProcessor;
 	private final IMdmControllerSvc myMdmControllerSvc;
 	private final IMdmMatchFinderSvc myMdmMatchFinderSvc;
 	private final IMdmSubmitSvc myMdmSubmitSvc;
@@ -87,9 +84,8 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	 * Note that this is not a spring bean. Any necessary injections should
 	 * happen in the constructor
 	 */
-	public MdmProviderDstu3Plus(FhirContext theFhirContext, IMdmControllerSvc theMdmControllerSvc, IMdmMatchFinderSvc theMdmMatchFinderSvc, IMdmClearJobSubmitter theMdmClearJobSubmitter, IMdmSubmitSvc theMdmSubmitSvc, IMdmSettings theIMdmSettings) {
+	public MdmProviderDstu3Plus(FhirContext theFhirContext, IMdmControllerSvc theMdmControllerSvc, IMdmMatchFinderSvc theMdmMatchFinderSvc, IMdmSubmitSvc theMdmSubmitSvc, IMdmSettings theIMdmSettings) {
 		super(theFhirContext);
-		myMultiUrlProcessor = new MultiUrlProcessor(theFhirContext, theMdmClearJobSubmitter);
 		myMdmControllerSvc = theMdmControllerSvc;
 		myMdmMatchFinderSvc = theMdmMatchFinderSvc;
 		myMdmSubmitSvc = theMdmSubmitSvc;
@@ -202,7 +198,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		}
 
 		List<String> urls = resourceNames.stream().map(s -> s + "?").collect(Collectors.toList());
-		return myMultiUrlProcessor.processUrls(urls, myMultiUrlProcessor.getBatchSize(theBatchSize), theRequestDetails);
+		return myMdmControllerSvc.submitMdmClearJob(urls, theBatchSize, theRequestDetails);
 	}
 
 	private void validateResourceNames(List<String> theResourceNames) {
