@@ -1206,7 +1206,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			if (thePerformIndexing || ((ResourceTable) theEntity).getVersion() == 1) {
 
 				newParams = new ResourceIndexedSearchParams();
-				//FIX ME GGG: This is where the placeholder references end up getting created, deeeeeep down the stakc.
+				//FIXME GGG: This is where the placeholder references end up getting created, deeeeeep down the stakc.
 				mySearchParamWithInlineReferencesExtractor.populateFromResource(newParams, theTransactionDetails, entity, theResource, existingParams, theRequest, thePerformIndexing);
 
 				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);

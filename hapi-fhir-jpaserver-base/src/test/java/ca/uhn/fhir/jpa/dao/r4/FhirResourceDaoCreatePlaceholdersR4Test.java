@@ -1,17 +1,20 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Sets;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
@@ -21,6 +24,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -565,6 +570,61 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testAutocreatePlaceholderTest() {
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+
+		Observation obs = new Observation();
+		obs.setId("Observation/DEF");
+		Reference patientRef = new Reference("Patient/RED");
+		obs.setSubject(patientRef);
+		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+		builder.addTransactionUpdateEntry(obs);
+
+		mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
+
+		Patient returned = myPatientDao.read(patientRef.getReferenceElement());
+		Assertions.assertTrue(returned != null);
+	}
 
 
+	@Test
+	public void testAutocreatePlaceholderWithTargetExistingAlreadyTest() {
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+
+		myModelConfig.setAutoVersionReferenceAtPaths("Observation.subject");
+
+		String patientId = "Patient/RED";
+
+		// create
+		Patient patient = new Patient();
+//		patient.setId(patientId);
+		patient.setIdElement(new IdType(patientId));
+//		patient.setActive(true);
+		myPatientDao.update(patient);
+
+		// update
+		patient.setActive(true);
+		myPatientDao.update(patient);
+
+		// observation (with version 2)
+		Observation obs = new Observation();
+		obs.setId("Observation/DEF");
+		Reference patientRef = new Reference(patientId);
+		obs.setSubject(patientRef);
+		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+		builder.addTransactionUpdateEntry(obs);
+
+		Bundle transaction = mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
+
+		Patient returned = myPatientDao.read(patientRef.getReferenceElement());
+		Assertions.assertTrue(returned != null);
+		Assertions.assertTrue(returned.getActive());
+
+		Observation retObservation = myObservationDao.read(obs.getIdElement());
+		Assertions.assertTrue(retObservation != null);
+	}
+
+	// always work with the put
+	// conditional create (replace put with conditional create?)
 }
