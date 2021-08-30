@@ -185,7 +185,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_MDM_CLEAR, returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RESPONSE_JOB_ID, typeName = "decimal")
+		@OperationParam(name = ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, typeName = "decimal")
 	})
 	public IBaseParameters clearMdmLinks(@OperationParam(name = ProviderConstants.OPERATION_MDM_CLEAR_RESOURCE_NAME, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theResourceNames,
 													 @OperationParam(name = ProviderConstants.OPERATION_MDM_CLEAR_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,

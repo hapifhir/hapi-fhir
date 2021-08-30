@@ -85,11 +85,10 @@ public class ProviderConstants {
 	public static final String MDM_NOT_DUPLICATE = "$mdm-not-duplicate";
 
 	public static final String OPERATION_MDM_CLEAR = "$mdm-clear";
-	public static final String OPERATION_MDM_CLEAR_RESOURCE_NAME = "resourceName";
+	public static final String OPERATION_MDM_CLEAR_RESOURCE_NAME = "resourceType";
 	public static final String OPERATION_MDM_CLEAR_BATCH_SIZE = "batchSize";
 	public static final String OPERATION_MDM_SUBMIT = "$mdm-submit";
 	public static final String MDM_BATCH_RUN_CRITERIA = "criteria";
-	public static final String OPERATION_MDM_BATCH_RESPONSE_JOB_ID = "submitted";
 	public static final String MDM_BATCH_RUN_RESOURCE_TYPE = "resourceType";
 	/**
 	 * CQL Operations
