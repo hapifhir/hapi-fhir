@@ -46,7 +46,7 @@ import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.MDM_CLEAR_JOB_NAME;
 
 /**
  * Spring batch Job configuration file. Contains all necessary plumbing to run a
- * Reindex job.
+ * $mdm-clear job.
  */
 @Configuration
 public class MdmClearJobConfig extends MultiUrlProcessorJobConfig {

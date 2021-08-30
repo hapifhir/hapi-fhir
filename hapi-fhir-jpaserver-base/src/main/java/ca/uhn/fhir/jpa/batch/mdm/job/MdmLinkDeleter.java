@@ -53,12 +53,8 @@ public class MdmLinkDeleter implements ItemProcessor<List<Long>, List<Long>> {
 	@Override
 	public List<Long> process(List<Long> thePidList) throws Exception {
 		ConcurrentLinkedQueue<Long> goldenPidAggregator = new ConcurrentLinkedQueue<>();
-
 		PartitionRunner partitionRunner = new PartitionRunner(PROCESS_NAME, THREAD_PREFIX, myDaoConfig.getReindexBatchSize(), myDaoConfig.getReindexThreadCount());
-
-		// Note that since our chunk size is 1, there will always be exactly one list
 		partitionRunner.runInPartitionedThreads(new SliceImpl<>(thePidList), pids -> removeLinks(thePidList, goldenPidAggregator));
-
 		return new ArrayList<>(goldenPidAggregator);
 	}
 

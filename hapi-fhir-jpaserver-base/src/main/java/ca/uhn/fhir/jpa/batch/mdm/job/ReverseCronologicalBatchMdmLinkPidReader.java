@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.batch.mdm.job;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
@@ -32,16 +31,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * This Spring Batch reader takes 4 parameters:
- * {@link #JOB_PARAM_REQUEST_LIST}: A list of URLs to search for along with the partitions those searches should be performed on
- * {@link #JOB_PARAM_BATCH_SIZE}: The number of resources to return with each search.  If ommitted, {@link DaoConfig#getExpungeBatchSize} will be used.
- * {@link #JOB_PARAM_START_TIME}: The latest timestamp of resources to search for
- * <p>
- * The reader will return at most {@link #JOB_PARAM_BATCH_SIZE} pids every time it is called, or null
- * once no more matching resources are available.  It returns the resources in reverse chronological order
- * and stores where it's at in the Spring Batch execution context with the key {@link #CURRENT_THRESHOLD_HIGH}
- * appended with "." and the index number of the url list item it has gotten up to.  This is to permit
- * restarting jobs that use this reader so it can pick up where it left off.
+ * This is the same as the parent class, except it operates on MdmLink entities instead of resource entities
  */
 public class ReverseCronologicalBatchMdmLinkPidReader extends ReverseCronologicalBatchResourcePidReader {
 	@Autowired
