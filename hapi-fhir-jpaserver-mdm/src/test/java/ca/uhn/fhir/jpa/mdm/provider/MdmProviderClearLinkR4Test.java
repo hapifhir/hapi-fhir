@@ -9,16 +9,12 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -33,10 +29,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
-
-	@Autowired
-	BatchJobHelper myBatchJobHelper;
-
 	protected Practitioner myPractitioner;
 	protected StringType myPractitionerId;
 	protected IAnyResource myPractitionerGoldenResource;
@@ -56,16 +48,6 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(2);
 		clearMdmLinks();
 		assertNoLinksExist();
-	}
-
-	private void clearMdmLinks() {
-		Parameters result = (Parameters) myMdmProvider.clearMdmLinks(null, null, myRequestDetails);
-		myBatchJobHelper.awaitJobExecution(BatchHelperR4.jobIdFromParameters(result));
-	}
-
-	private void clearMdmLinks(String theResourceName) {
-		Parameters result = (Parameters) myMdmProvider.clearMdmLinks(getResourceNames(theResourceName), null, myRequestDetails);
-		myBatchJobHelper.awaitJobExecution(BatchHelperR4.jobIdFromParameters(result));
 	}
 
 	private void assertNoLinksExist() {
