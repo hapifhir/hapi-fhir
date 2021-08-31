@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2933
+jira: SMILE-3056
+title: "Fixed a regression which causes transactions with multiple identical ifNoneExist clauses to create duplicate data."
+
