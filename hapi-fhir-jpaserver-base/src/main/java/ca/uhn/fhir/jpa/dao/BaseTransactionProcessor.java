@@ -650,6 +650,7 @@ public abstract class BaseTransactionProcessor {
 		catch (Exception ex) {
 			//FIXME - remove
 			ourLog.info("FindME");
+
 			ourLog.info(ex.getLocalizedMessage());
 			ex.printStackTrace();
 			entriesToProcess = new HashMap<>();
@@ -1306,28 +1307,61 @@ public abstract class BaseTransactionProcessor {
 			} else if (nextId.getValue().startsWith("urn:")) {
 				throw new InvalidRequestException("Unable to satisfy placeholder ID " + nextId.getValue() + " found in element named '" + nextRef.getName() + "' within resource of type: " + nextResource.getIdElement().getResourceType());
 			} else {
-				if (theReferencesToAutoVersion.contains(resourceReference)) {
+				// resource type -> set of Ids
+				// we'll populate this with only those resource/ids of
+				// resource references that:
+				// a) do not exist in the idToPersistedOutcome
+				//		(so not in top level of bundle)
+				// b) do not exist in DB
+				//		(so newly created resources)
+				//
+				// we only do this if autocreateplaceholders is on
+				HashMap<String, Set<IIdType>> resourceTypeToListOfIds = new HashMap<>();
+				if (myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
+					for (IBaseReference ref : theReferencesToAutoVersion) {
+						IIdType id = ref.getReferenceElement();
+						// if we don't have this in our idToPersistedOutcome
+						// and we have createplaceholderreferences on
+						// we will have to check if these objects exist in the DB
+						if (!theIdToPersistedOutcome.containsKey(id)) {
+							if (!resourceTypeToListOfIds.containsKey(id.getResourceType())) {
+								resourceTypeToListOfIds.put(id.getResourceType(), new HashSet<>());
+							}
 
-					//TODO - if we get here and there's still no
-					// value in theIdToPersistedOutcome map
-					// we should throw an invalid request exception
-
-					DaoMethodOutcome outcome = theIdToPersistedOutcome.get(nextId);
-
-					if (outcome == null) {
-						IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceReference.getReferenceElement().getResourceType());
-						IBaseResource baseResource;
-						try {
-							// DB hit
-							baseResource = dao.read(resourceReference.getReferenceElement());
-						} catch (ResourceNotFoundException ex) {
-							// does not exist - add the history/1
-							String val = resourceReference.getReferenceElement().getValue();
-							resourceReference.getReferenceElement().setValue(val + "/_history/1");
+							resourceTypeToListOfIds.get(id.getResourceType()).add(id);
 						}
 					}
 
-					if (outcome != null && !outcome.isNop() && !Boolean.TRUE.equals(outcome.getCreated())) {
+					for (String resourceType : resourceTypeToListOfIds.keySet()) {
+						IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceType);
+						Set<IIdType> idSet = resourceTypeToListOfIds.get(resourceType);
+
+						// DB hit :(
+						Set<IIdType> existing = dao.hasResources(idSet);
+
+						// we remove all the ids that are found, leaving
+						// only the ids of those not in the DB at all
+						idSet.removeAll(existing);
+					}
+				}
+
+				if (theReferencesToAutoVersion.contains(resourceReference)) {
+					DaoMethodOutcome outcome = theIdToPersistedOutcome.get(nextId);
+
+					if (outcome == null && myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
+						// null outcome means it's a resource reference that was not at top of bundle
+						IIdType id = resourceReference.getReferenceElement();
+						String resourceType = id.getResourceType();
+						// if it exists in resourceTypeToListOfIds
+						// it's not in the DB (new resource)
+						Set<IIdType> ids = resourceTypeToListOfIds.get(resourceType);
+						if (!ids.contains(id)) {
+							// doesn't exist in the DB
+							// which means the history necessarily is 1 (first one)
+							resourceReference.getReferenceElement().setValue(id.getValue() + "/_history/1");
+						}
+					}
+					else if (outcome != null && !outcome.isNop() && !Boolean.TRUE.equals(outcome.getCreated())) {
 						addRollbackReferenceRestore(theTransactionDetails, resourceReference);
 						resourceReference.setReference(nextId.getValue());
 						resourceReference.setResource(null);

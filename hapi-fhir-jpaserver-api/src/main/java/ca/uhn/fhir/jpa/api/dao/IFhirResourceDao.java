@@ -162,6 +162,15 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	T read(IIdType theId);
 
 	/**
+	 * Helper method to determine if some resources exist in the DB (without throwing).
+	 * Returns a set that contains the IIdType for every resource found.
+	 * If it's not found, it won't be included in the set.
+	 * @param theIds - list of IIdType ids (for the same resource)
+	 * @return
+	 */
+	Set<IIdType> hasResources(Collection<IIdType> theIds);
+
+	/**
 	 * Read a resource by its internal PID
 	 */
 	T readByPid(ResourcePersistentId thePid);

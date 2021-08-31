@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -1154,6 +1155,22 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		TransactionDetails transactionDetails = new TransactionDetails();
 
 		return myTransactionService.execute(theRequest, transactionDetails, tx -> doRead(theId, theRequest, theDeletedOk));
+	}
+
+	@Override
+	public Set<IIdType> hasResources(Collection<IIdType> theIds) {
+		List<String> idPortions = theIds.stream().map(t -> t.getIdPart()).collect(Collectors.toList());
+		Collection<Object[]> matches = myForcedIdDao.findResourcesByForcedId(getResourceName(),
+			idPortions);
+
+		HashSet<IIdType> collected = new HashSet<>();
+		for (Object[] match : matches) {
+			String resourceType = (String) match[0];
+			String forcedId = (String) match[1];
+			collected.add(new IdDt(resourceType, forcedId));
+		}
+
+		return collected;
 	}
 
 	public T doRead(IIdType theId, RequestDetails theRequest, boolean theDeletedOk) {

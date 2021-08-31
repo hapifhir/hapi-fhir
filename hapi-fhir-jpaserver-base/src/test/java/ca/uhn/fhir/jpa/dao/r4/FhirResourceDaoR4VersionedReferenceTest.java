@@ -301,8 +301,8 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 	@Test
 	public void testInsertVersionedReferenceAtPathUsingTransaction() {
-//		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
-//		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
 		myModelConfig.setAutoVersionReferenceAtPaths("Observation.subject");
 
 		Patient p = new Patient();
@@ -893,24 +893,21 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		BundleBuilder builder = new BundleBuilder(myFhirCtx);
 		builder.addTransactionUpdateEntry(obs);
 
+		Bundle submitted = (Bundle)builder.getBundle();
+
 		//1 make sure this test throws the InvalidRequestException (make separate test for this)
 		//2 add a test for patient created before bundle and then process observation with reference to patient (null check for outcome)
 		//3
 
-//		Assertions.assertThrows()
-		try {
-			Bundle returnedTr = mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
+		Bundle returnedTr = mySystemDao.transaction(new SystemRequestDetails(), submitted);
 
-			System.out.println("returned " + returnedTr.getEntry().size());
-			Observation obRet = myObservationDao.read(obs.getIdElement());
-			System.out.println("HELLO " + obRet.getId());
-			Patient returned = myPatientDao.read(patientRef.getReferenceElement());
-			Assertions.assertTrue(returned != null);
-		}
-		catch (Exception ex) {
-			System.out.println("TEST " + ex.getLocalizedMessage());
-			Assertions.assertTrue(ex == null);
-		}
+		Assertions.assertTrue(returnedTr != null);
+
+		// some verification
+		Observation obRet = myObservationDao.read(obs.getIdElement());
+		Assertions.assertTrue(obRet != null);
+		Patient returned = myPatientDao.read(patientRef.getReferenceElement());
+		Assertions.assertTrue(returned != null);
 	}
 
 
