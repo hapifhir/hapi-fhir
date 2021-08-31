@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
@@ -126,6 +127,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
@@ -150,12 +152,14 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TYPE;
 import static org.apache.commons.lang3.StringUtils.countMatches;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
@@ -1354,6 +1358,34 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		List<IIdType> actual = toUnqualifiedVersionlessIds(myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Patient.SP_ADDRESS, new StringParam("123 Fake Street"))));
 		assertThat(actual, contains(id));
+	}
+
+	@Test
+	@DisplayName("Duplicate Conditional Creates all resolve to the same match")
+	public void testDuplicateConditionalCreatesOnToken() throws IOException {
+		String inputString = IOUtils.toString(getClass().getResourceAsStream("/duplicate-conditional-create.json"), StandardCharsets.UTF_8);
+		Bundle firstBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, inputString);
+
+		//Before you ask, yes, this has to be separately parsed. The reason for this is that the parameters passed to mySystemDao.transaction are _not_ immutable, so we cannot
+		//simply reuse the original bundle object.
+		Bundle duplicateBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, inputString);
+
+		Bundle bundleResponse = mySystemDao.transaction(new SystemRequestDetails(), firstBundle);
+		bundleResponse.getEntry()
+			.forEach( entry -> assertThat(entry.getResponse().getStatus(), is(equalTo("201 Created"))));
+
+		IBundleProvider search = myOrganizationDao.search(new SearchParameterMap().setLoadSynchronous(true));
+		assertEquals(1, search.getAllResources().size());
+
+		//Running the bundle again should just result in 0 new resources created, as the org should already exist, and there is no update to the SR.
+		bundleResponse= mySystemDao.transaction(new SystemRequestDetails(), duplicateBundle);
+		bundleResponse.getEntry()
+			.forEach( entry -> {
+				assertThat(entry.getResponse().getStatus(), is(equalTo("200 OK")));
+			});
+
+		search = myOrganizationDao.search(new SearchParameterMap().setLoadSynchronous(true), new SystemRequestDetails());
+		assertEquals(1, search.getAllResources().size());
 	}
 
 	@Test
