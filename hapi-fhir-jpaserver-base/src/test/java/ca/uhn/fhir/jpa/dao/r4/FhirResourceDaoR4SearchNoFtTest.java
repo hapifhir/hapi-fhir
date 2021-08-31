@@ -125,9 +125,12 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Timing;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -176,6 +179,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Autowired
 	MatchUrlService myMatchUrlService;
+
+	@BeforeAll
+	public static void beforeAllTest(){
+		System.setProperty("user.timezone", "EST");
+	}
 
 	@AfterEach
 	public void afterResetSearchSize() {
@@ -5399,6 +5407,19 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			"Observation/YES23",
 			"Observation/YES24"
 		));
+	}
+
+	@ParameterizedTest
+	@CsvFileSource(files = "src/test/resources/r4/date-search-test-case.csv", numLinesToSkip = 1)
+	public void testDateSearchWithIncompleteDate(String theQuery, String theEffectiveDate, Boolean theExpectedMatch) {
+
+		createObservationWithEffective("OBS1", theEffectiveDate);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Observation.SP_DATE, new DateParam(theQuery));
+		IBundleProvider results = myObservationDao.search(map);
+		List<String> values = toUnqualifiedVersionlessIdValues(results);
+		assertEquals(values.isEmpty(), !theExpectedMatch);
 	}
 
 	private void createObservationWithEffective(String theId, String theEffective) {
