@@ -127,6 +127,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
@@ -1360,74 +1361,25 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testDuplicateConditionalCreatesOnToken() {
-		String bundle = "{\n" +
-			"  \"resourceType\": \"Bundle\",\n" +
-			"  \"type\": \"transaction\",\n" +
-			"  \"entry\": [ {\n" +
-			"    \"fullUrl\": \"urn:uuid:33b76421-1c91-471f-ae1c-e7486e804f18\",\n" +
-			"    \"resource\": {\n" +
-			"      \"resourceType\": \"Organization\",\n" +
-			"      \"identifier\": [ {\n" +
-			"        \"system\": \"https://fhir.infoway-inforoute.ca/NamingSystem/ca-on-health-care-facility-id\",\n" +
-			"        \"value\": \"3972\"\n" +
-			"      } ]\n" +
-			"    },\n" +
-			"    \"request\": {\n" +
-			"      \"method\": \"POST\",\n" +
-			"      \"url\": \"/Organization\",\n" +
-			"      \"ifNoneExist\": \"Organization?identifier=https%3A%2F%2Ffhir.infoway-inforoute.ca%2FNamingSystem%2Fca-on-health-care-facility-id|3972\"\n" +
-			"    }\n" +
-			"  }, {\n" +
-			"    \"fullUrl\": \"urn:uuid:65d2bf18-543e-4d05-b66b-07cee541172f\",\n" +
-			"    \"resource\": {\n" +
-			"      \"resourceType\": \"Organization\",\n" +
-			"      \"identifier\": [ {\n" +
-			"        \"system\": \"https://fhir.infoway-inforoute.ca/NamingSystem/ca-on-health-care-facility-id\",\n" +
-			"        \"value\": \"3972\"\n" +
-			"      } ]\n" +
-			"    },\n" +
-			"    \"request\": {\n" +
-			"      \"method\": \"POST\",\n" +
-			"      \"url\": \"/Organization\",\n" +
-			"      \"ifNoneExist\": \"Organization?identifier=https%3A%2F%2Ffhir.infoway-inforoute.ca%2FNamingSystem%2Fca-on-health-care-facility-id|3972\"\n" +
-			"    }\n" +
-			"  }, {\n" +
-			"    \"fullUrl\": \"urn:uuid:2a4635e2-e678-4ed7-9a92-901d67787434\",\n" +
-			"    \"resource\": {\n" +
-			"      \"resourceType\": \"ServiceRequest\",\n" +
-			"      \"identifier\": [ {\n" +
-			"        \"system\": \"https://corhealth-ontario.ca/NamingSystem/service-request-id\",\n" +
-			"        \"value\": \"1\"\n" +
-			"      } ],\n" +
-			"      \"performer\": [ {\n" +
-			"        \"reference\": \"urn:uuid:65d2bf18-543e-4d05-b66b-07cee541172f\",\n" +
-			"        \"type\": \"Organization\"\n" +
-			"      } ]\n" +
-			"    },\n" +
-			"    \"request\": {\n" +
-			"      \"method\": \"PUT\",\n" +
-			"      \"url\": \"/ServiceRequest?identifier=https%3A%2F%2Fcorhealth-ontario.ca%2FNamingSystem%2Fservice-request-id|1\"\n" +
-			"    }\n" +
-			"  } ]\n" +
-			"}";
+	@DisplayName("Duplicate Conditional Creates all resolve to the same match")
+	public void testDuplicateConditionalCreatesOnToken() throws IOException {
+		String inputString = IOUtils.toString(getClass().getResourceAsStream("/duplicate-conditional-create.json"), StandardCharsets.UTF_8);
+		Bundle firstBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, inputString);
 
-		Bundle bundle1 = (Bundle) myFhirCtx.newJsonParser().parseResource(bundle);
-		Bundle duplicateBundle = (Bundle) myFhirCtx.newJsonParser().parseResource(bundle);
-		ourLog.error("TRANS 1");
-		Bundle bundleResponse = mySystemDao.transaction(new SystemRequestDetails(), bundle1);
-		bundleResponse.getEntry().stream()
-			.forEach( entry -> {
-				assertThat(entry.getResponse().getStatus(), is(equalTo("201 Created")));
-			});
+		//Before you ask, yes, this has to be separately parsed. The reason for this is that the parameters passed to mySystemDao.transaction are _not_ immutable, so we cannot
+		//simply reuse the original bundle object.
+		Bundle duplicateBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, inputString);
+
+		Bundle bundleResponse = mySystemDao.transaction(new SystemRequestDetails(), firstBundle);
+		bundleResponse.getEntry()
+			.forEach( entry -> assertThat(entry.getResponse().getStatus(), is(equalTo("201 Created"))));
 
 		IBundleProvider search = myOrganizationDao.search(new SearchParameterMap().setLoadSynchronous(true));
 		assertEquals(1, search.getAllResources().size());
 
 		//Running the bundle again should just result in 0 new resources created, as the org should already exist, and there is no update to the SR.
-		ourLog.error("TRANS 2");
 		bundleResponse= mySystemDao.transaction(new SystemRequestDetails(), duplicateBundle);
-		bundleResponse.getEntry().stream()
+		bundleResponse.getEntry()
 			.forEach( entry -> {
 				assertThat(entry.getResponse().getStatus(), is(equalTo("200 OK")));
 			});
