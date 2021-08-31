@@ -51,6 +51,8 @@ public class ReindexJobConfig extends MultiUrlProcessorJobConfig {
 	private StepBuilderFactory myStepBuilderFactory;
 	@Autowired
 	private JobBuilderFactory myJobBuilderFactory;
+	@Autowired
+	private ReindexWriter myReindexWriter;
 
 	@Bean(name = REINDEX_JOB_NAME)
 	@Lazy
@@ -66,16 +68,10 @@ public class ReindexJobConfig extends MultiUrlProcessorJobConfig {
 		return myStepBuilderFactory.get(REINDEX_URL_LIST_STEP_NAME)
 			.<List<Long>, List<Long>>chunk(1)
 			.reader(reverseCronologicalBatchResourcePidReader())
-			.writer(reindexWriter())
+			.writer(myReindexWriter)
 			.listener(pidCountRecorderListener())
 			.listener(reindexPromotionListener())
 			.build();
-	}
-
-	@Bean
-	@StepScope
-	public ReindexWriter reindexWriter() {
-		return new ReindexWriter();
 	}
 
 	@Bean
