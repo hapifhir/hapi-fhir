@@ -21,8 +21,10 @@ package ca.uhn.fhir.jpa.batch.mdm.job;
  */
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.expunge.PartitionRunner;
-import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
+import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
@@ -33,7 +35,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 /**
  * Take MdmLink pids in and output golden resource pids out
@@ -46,7 +50,7 @@ public class MdmLinkDeleter implements ItemProcessor<List<Long>, List<Long>> {
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
 	@Autowired
-	IMdmLinkSvc myMdmLinkSvc;
+	IMdmLinkDao myMdmLinkDao;
 	@Autowired
 	DaoConfig myDaoConfig;
 
@@ -60,6 +64,22 @@ public class MdmLinkDeleter implements ItemProcessor<List<Long>, List<Long>> {
 
 	private void removeLinks(List<Long> pidList, ConcurrentLinkedQueue<Long> theGoldenPidAggregator) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-		txTemplate.executeWithoutResult(t -> theGoldenPidAggregator.addAll(myMdmLinkSvc.deleteAllMdmLinksAndReturnGoldenResourcePids(pidList)));
+
+		txTemplate.executeWithoutResult(t -> theGoldenPidAggregator.addAll(deleteMdmLinksAndReturnGoldenResourcePids(pidList)));
+	}
+
+	public List<Long> deleteMdmLinksAndReturnGoldenResourcePids(List<Long> thePids) {
+		List<MdmLink> links = myMdmLinkDao.findAllById(thePids);
+		Set<Long> goldenResources = links.stream().map(MdmLink::getGoldenResourcePid).collect(Collectors.toSet());
+		//TODO GGG this is probably invalid... we are essentially looking for GOLDEN -> GOLDEN links, which are either POSSIBLE_DUPLICATE
+		//and REDIRECT
+		goldenResources.addAll(links.stream()
+			.filter(link -> link.getMatchResult().equals(MdmMatchResultEnum.REDIRECT)
+				|| link.getMatchResult().equals(MdmMatchResultEnum.POSSIBLE_DUPLICATE))
+			.map(MdmLink::getSourcePid).collect(Collectors.toSet()));
+		ourLog.info("Deleting {} MDM link records...", links.size());
+		myMdmLinkDao.deleteAll(links);
+		ourLog.info("{} MDM link records deleted", links.size());
+		return new ArrayList<>(goldenResources);
 	}
 }

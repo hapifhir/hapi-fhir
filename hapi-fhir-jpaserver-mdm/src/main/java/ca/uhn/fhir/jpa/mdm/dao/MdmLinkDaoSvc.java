@@ -40,13 +40,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class MdmLinkDaoSvc {
 
@@ -225,21 +222,6 @@ public class MdmLinkDaoSvc {
 		MdmLink exampleLink = myMdmLinkFactory.newMdmLink().setGoldenResourcePid(pid);
 		Example<MdmLink> example = Example.of(exampleLink);
 		return myMdmLinkDao.findAll(example);
-	}
-
-	public List<Long> deleteMdmLinksAndReturnGoldenResourcePids(List<Long> thePids) {
-		List<MdmLink> links = myMdmLinkDao.findAllById(thePids);
-		Set<Long> goldenResources = links.stream().map(MdmLink::getGoldenResourcePid).collect(Collectors.toSet());
-		//TODO GGG this is probably invalid... we are essentially looking for GOLDEN -> GOLDEN links, which are either POSSIBLE_DUPLICATE
-		//and REDIRECT
-		goldenResources.addAll(links.stream()
-			.filter(link -> link.getMatchResult().equals(MdmMatchResultEnum.REDIRECT)
-				|| link.getMatchResult().equals(MdmMatchResultEnum.POSSIBLE_DUPLICATE))
-			.map(MdmLink::getSourcePid).collect(Collectors.toSet()));
-		ourLog.info("Deleting {} MDM link records...", links.size());
-		myMdmLinkDao.deleteAll(links);
-		ourLog.info("{} MDM link records deleted", links.size());
-		return new ArrayList<>(goldenResources);
 	}
 
 	/**
