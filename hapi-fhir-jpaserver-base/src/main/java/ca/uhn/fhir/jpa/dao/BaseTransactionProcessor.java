@@ -174,19 +174,24 @@ public abstract class BaseTransactionProcessor {
 	@PostConstruct
 	public void start() {
 		ourLog.trace("Starting transaction processor");
-		if (myDaoConfig.getBundleBatchPoolSize() > 1) {
-			ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-			executor.setThreadNamePrefix("bundle_batch_");
-			executor.setCorePoolSize(myDaoConfig.getBundleBatchPoolSize());
-			executor.setMaxPoolSize(myDaoConfig.getBundleBatchMaxPoolSize());
-			executor.setQueueCapacity(DaoConfig.DEFAULT_BUNDLE_BATCH_QUEUE_CAPACITY);
-			executor.initialize();
-			myExecutor = executor;
+	}
+	public TaskExecutor getTaskExecutor() {
+		if (myExecutor == null) {
+			if (myDaoConfig.getBundleBatchPoolSize() > 1) {
+				ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+				executor.setThreadNamePrefix("bundle_batch_");
+				executor.setCorePoolSize(myDaoConfig.getBundleBatchPoolSize());
+				executor.setMaxPoolSize(myDaoConfig.getBundleBatchMaxPoolSize());
+				executor.setQueueCapacity(DaoConfig.DEFAULT_BUNDLE_BATCH_QUEUE_CAPACITY);
+				executor.initialize();
+				myExecutor = executor;
 
-		} else {
-			SyncTaskExecutor executor = new SyncTaskExecutor();
-			myExecutor = executor;
+			} else {
+				SyncTaskExecutor executor = new SyncTaskExecutor();
+				myExecutor = executor;
+			}
 		}
+		return myExecutor;
 	}
 
 	public <BUNDLE extends IBaseBundle> BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest, boolean theNestedMode) {
@@ -354,7 +359,7 @@ public abstract class BaseTransactionProcessor {
 		for (int i=0; i<requestEntriesSize; i++ ) {
 			nextRequestEntry = requestEntries.get(i);
 			BundleTask bundleTask = new BundleTask(completionLatch, theRequestDetails, responseMap, i, nextRequestEntry, theNestedMode);
-			myExecutor.execute(bundleTask);
+			getTaskExecutor().execute(bundleTask);
 		}
 
 		// waiting for all tasks to be completed
