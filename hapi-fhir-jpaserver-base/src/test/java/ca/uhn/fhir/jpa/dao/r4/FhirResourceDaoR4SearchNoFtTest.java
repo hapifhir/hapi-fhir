@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
@@ -150,12 +151,14 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TYPE;
 import static org.apache.commons.lang3.StringUtils.countMatches;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
@@ -1354,6 +1357,83 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		List<IIdType> actual = toUnqualifiedVersionlessIds(myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Patient.SP_ADDRESS, new StringParam("123 Fake Street"))));
 		assertThat(actual, contains(id));
+	}
+
+	@Test
+	public void testDuplicateConditionalCreatesOnToken() {
+		String bundle = "{\n" +
+			"  \"resourceType\": \"Bundle\",\n" +
+			"  \"type\": \"transaction\",\n" +
+			"  \"entry\": [ {\n" +
+			"    \"fullUrl\": \"urn:uuid:33b76421-1c91-471f-ae1c-e7486e804f18\",\n" +
+			"    \"resource\": {\n" +
+			"      \"resourceType\": \"Organization\",\n" +
+			"      \"identifier\": [ {\n" +
+			"        \"system\": \"https://fhir.infoway-inforoute.ca/NamingSystem/ca-on-health-care-facility-id\",\n" +
+			"        \"value\": \"3972\"\n" +
+			"      } ]\n" +
+			"    },\n" +
+			"    \"request\": {\n" +
+			"      \"method\": \"POST\",\n" +
+			"      \"url\": \"/Organization\",\n" +
+			"      \"ifNoneExist\": \"Organization?identifier=https%3A%2F%2Ffhir.infoway-inforoute.ca%2FNamingSystem%2Fca-on-health-care-facility-id|3972\"\n" +
+			"    }\n" +
+			"  }, {\n" +
+			"    \"fullUrl\": \"urn:uuid:65d2bf18-543e-4d05-b66b-07cee541172f\",\n" +
+			"    \"resource\": {\n" +
+			"      \"resourceType\": \"Organization\",\n" +
+			"      \"identifier\": [ {\n" +
+			"        \"system\": \"https://fhir.infoway-inforoute.ca/NamingSystem/ca-on-health-care-facility-id\",\n" +
+			"        \"value\": \"3972\"\n" +
+			"      } ]\n" +
+			"    },\n" +
+			"    \"request\": {\n" +
+			"      \"method\": \"POST\",\n" +
+			"      \"url\": \"/Organization\",\n" +
+			"      \"ifNoneExist\": \"Organization?identifier=https%3A%2F%2Ffhir.infoway-inforoute.ca%2FNamingSystem%2Fca-on-health-care-facility-id|3972\"\n" +
+			"    }\n" +
+			"  }, {\n" +
+			"    \"fullUrl\": \"urn:uuid:2a4635e2-e678-4ed7-9a92-901d67787434\",\n" +
+			"    \"resource\": {\n" +
+			"      \"resourceType\": \"ServiceRequest\",\n" +
+			"      \"identifier\": [ {\n" +
+			"        \"system\": \"https://corhealth-ontario.ca/NamingSystem/service-request-id\",\n" +
+			"        \"value\": \"1\"\n" +
+			"      } ],\n" +
+			"      \"performer\": [ {\n" +
+			"        \"reference\": \"urn:uuid:65d2bf18-543e-4d05-b66b-07cee541172f\",\n" +
+			"        \"type\": \"Organization\"\n" +
+			"      } ]\n" +
+			"    },\n" +
+			"    \"request\": {\n" +
+			"      \"method\": \"PUT\",\n" +
+			"      \"url\": \"/ServiceRequest?identifier=https%3A%2F%2Fcorhealth-ontario.ca%2FNamingSystem%2Fservice-request-id|1\"\n" +
+			"    }\n" +
+			"  } ]\n" +
+			"}";
+
+		Bundle bundle1 = (Bundle) myFhirCtx.newJsonParser().parseResource(bundle);
+		Bundle duplicateBundle = (Bundle) myFhirCtx.newJsonParser().parseResource(bundle);
+		ourLog.error("TRANS 1");
+		Bundle bundleResponse = mySystemDao.transaction(new SystemRequestDetails(), bundle1);
+		bundleResponse.getEntry().stream()
+			.forEach( entry -> {
+				assertThat(entry.getResponse().getStatus(), is(equalTo("201 Created")));
+			});
+
+		IBundleProvider search = myOrganizationDao.search(new SearchParameterMap().setLoadSynchronous(true));
+		assertEquals(1, search.getAllResources().size());
+
+		//Running the bundle again should just result in 0 new resources created, as the org should already exist, and there is no update to the SR.
+		ourLog.error("TRANS 2");
+		bundleResponse= mySystemDao.transaction(new SystemRequestDetails(), duplicateBundle);
+		bundleResponse.getEntry().stream()
+			.forEach( entry -> {
+				assertThat(entry.getResponse().getStatus(), is(equalTo("200 OK")));
+			});
+
+		search = myOrganizationDao.search(new SearchParameterMap().setLoadSynchronous(true), new SystemRequestDetails());
+		assertEquals(1, search.getAllResources().size());
 	}
 
 	@Test
