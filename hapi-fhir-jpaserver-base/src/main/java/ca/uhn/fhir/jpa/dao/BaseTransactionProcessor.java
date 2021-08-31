@@ -175,7 +175,8 @@ public abstract class BaseTransactionProcessor {
 	public void start() {
 		ourLog.trace("Starting transaction processor");
 	}
-	public TaskExecutor getTaskExecutor() {
+
+	private TaskExecutor getTaskExecutor() {
 		if (myExecutor == null) {
 			if (myDaoConfig.getBundleBatchPoolSize() > 1) {
 				ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
