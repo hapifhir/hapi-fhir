@@ -571,7 +571,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 
 	public List<String> getExpandedConceptsByValueSetUrl(String theValuesetUrl) {
 		return runInTransaction(() -> {
-			Optional<TermValueSet> valueSetOpt = myTermValueSetDao.findTermValueSetByUrlAndCurrentVersion(theValuesetUrl);
+			Optional<TermValueSet> valueSetOpt = myTermValueSetDao.findTermValueSetByUrl(theValuesetUrl);
 			assertTrue(valueSetOpt.isPresent());
 			TermValueSet valueSet = valueSetOpt.get();
 			List<TermValueSetConcept> concepts = valueSet.getConcepts();

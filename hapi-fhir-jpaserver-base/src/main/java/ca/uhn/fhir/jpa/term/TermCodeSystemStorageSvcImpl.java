@@ -399,9 +399,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			theCodeSystemResource.getVersion(), theCodeSystemVersion, resource, theRequest);
 
 		myDeferredStorageSvc.addConceptMapsToStorageQueue(theConceptMaps);
-
-		boolean isMakeVersionCurrent = ITermCodeSystemStorageSvc.isMakeVersionCurrent(theRequest);
-		myDeferredStorageSvc.addValueSetsToStorageQueue(theValueSets, isMakeVersionCurrent);
+		myDeferredStorageSvc.addValueSetsToStorageQueue(theValueSets);
 
 		return csId;
 	}

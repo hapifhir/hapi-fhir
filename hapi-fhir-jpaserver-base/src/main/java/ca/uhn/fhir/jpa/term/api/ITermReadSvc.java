@@ -14,7 +14,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import javax.annotation.Nonnull;
@@ -88,13 +87,7 @@ public interface ITermReadSvc extends IValidationSupport {
 
 	void deleteValueSetAndChildren(ResourceTable theResourceTable);
 
-
-	void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet, boolean theMakeItCurrent);
-
-	default void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet) {
-		storeTermValueSet(theResourceTable, theValueSet, true);
-	}
-
+	void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet);
 
 	IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB);
 
@@ -122,5 +115,4 @@ public interface ITermReadSvc extends IValidationSupport {
 	 */
 	CodeValidationResult codeSystemValidateCode(IIdType theCodeSystemId, String theValueSetUrl, String theVersion, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept);
 
-	Optional<String> getValueSetCurrentVersion(UriType theUrl);
 }

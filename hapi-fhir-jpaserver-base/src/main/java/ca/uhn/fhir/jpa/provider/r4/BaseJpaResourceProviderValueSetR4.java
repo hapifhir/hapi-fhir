@@ -26,7 +26,6 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProviderValueSetDstu2;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -43,19 +42,13 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
-
-import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class BaseJpaResourceProviderValueSetR4 extends JpaResourceProviderR4<ValueSet> {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaResourceProviderValueSetR4.class);
-
-	@Autowired
-	private ITermReadSvc myITermReadSvc;
 
 	@Operation(name = JpaConstants.OPERATION_EXPAND, idempotent = true)
 	public ValueSet expand(
@@ -83,16 +76,6 @@ public class BaseJpaResourceProviderValueSetR4 extends JpaResourceProviderR4<Val
 			throw new InvalidRequestException("$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.");
 		}
 
-		// todo JM remove this code. This function is at lower level now
-		// because current version is not necessarily the last uploaded anymore, we add a version parameter for the current version
-		if (haveIdentifier && ! haveValueSetVersion) {
-			Optional<String> currentVersionOpt = myITermReadSvc.getValueSetCurrentVersion(theUrl);
-			if (currentVersionOpt.isPresent()) {
-				theValueSetVersion = new StringType(currentVersionOpt.get());
-				haveValueSetVersion = true;
-			}
-		}
-
 		ValueSetExpansionOptions options = createValueSetExpansionOptions(myDaoConfig, theOffset, theCount, theIncludeHierarchy, theFilter);
 
 		startRequest(theServletRequest);
@@ -114,7 +97,6 @@ public class BaseJpaResourceProviderValueSetR4 extends JpaResourceProviderR4<Val
 			endRequest(theServletRequest);
 		}
 	}
-
 
 	@Operation(name = JpaConstants.OPERATION_VALIDATE_CODE, idempotent = true, returnParameters = {
 		@OperationParam(name = "result", type = BooleanType.class, min = 1),

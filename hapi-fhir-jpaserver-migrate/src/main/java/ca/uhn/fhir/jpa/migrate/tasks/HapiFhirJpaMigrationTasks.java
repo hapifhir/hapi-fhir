@@ -122,14 +122,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		cmbTokNuTable.addColumn("20210722.1", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
 		cmbTokNuTable.addColumn("20210722.2", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
 		cmbTokNuTable.modifyColumn("20210722.3", "RES_ID").nullable().withType(ColumnTypeEnum.LONG);
-
-		version.onTable("TRM_VALUESET")
-			.addColumn("20210820.1", "CURRENT_VERSION").nullable().type(ColumnTypeEnum.BOOLEAN);
-
-		//todo JM Add new column initialization and validate boolean in Oracle
-
 	}
-
 
 	private void init540() {
 

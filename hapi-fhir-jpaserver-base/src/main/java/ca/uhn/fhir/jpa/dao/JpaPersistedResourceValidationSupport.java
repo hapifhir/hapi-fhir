@@ -25,15 +25,18 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -69,14 +72,14 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaPersistedResourceValidationSupport.class);
 
+	public static final String LOINC_GENERIC_VALUESET_URL = "http://loinc.org/vs";
+	public static final String LOINC_GENERIC_VALUESET_URL_PLUS_SLASH = LOINC_GENERIC_VALUESET_URL + "/";
+
 	private final FhirContext myFhirContext;
 	private final IBaseResource myNoMatch;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-
-	@Autowired
-	private ITermReadSvc myITermReadSvc;
 
 	private Class<? extends IBaseResource> myCodeSystemType;
 	private Class<? extends IBaseResource> myStructureDefinitionType;
@@ -104,20 +107,34 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 	@Override
 	public IBaseResource fetchValueSet(String theSystem) {
-		// if no version is present, we need to append the current version,
-		// if one exists, in case it is not the last loaded
-		theSystem = appendCurrentVersion(theSystem);
-		return fetchResource(myValueSetType, theSystem);
+		boolean isNotLoincCodeSystem = ! StringUtils.containsIgnoreCase(theSystem, "loinc");
+		boolean hasVersion = theSystem.contains("|");
+		boolean isForGenericValueSet = theSystem.equals(LOINC_GENERIC_VALUESET_URL);
+		if (isNotLoincCodeSystem || hasVersion || isForGenericValueSet) {
+			return fetchResource(myValueSetType, theSystem);
+		}
+
+		// if no version is present, we need to fetch the resource for the current version if one exists,
+		// in case it is not the last loaded
+		Optional<IBaseResource> currentVSOpt = getValueSetCurrentVersion(new UriType(theSystem));
+		return currentVSOpt.orElseThrow(() -> new ResourceNotFoundException(
+			"Couldn't find current version ValueSet for url: " + theSystem));
 	}
 
+	/**
+	 * Obtains the current version of a ValueSet using the fact that the current
+	 * version is always pointed by the ForcedId for the no-versioned VS
+	 */
+	public Optional<IBaseResource> getValueSetCurrentVersion(UriType theUrl) {
+		if (! theUrl.getValueAsString().startsWith(LOINC_GENERIC_VALUESET_URL))   return Optional.empty();
 
-	private String appendCurrentVersion(String theSystem) {
-		// if version is included there is nothing to add here
-		if (theSystem.contains("|"))  return theSystem;
+		if (!theUrl.getValue().startsWith(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH)) {
+				throw new InternalErrorException("Don't know how to extract ForcedId from url: " + theUrl.getValueAsString());
+		}
 
-		Optional<String> currentVersionOpt = myITermReadSvc.getValueSetCurrentVersion(new UriType(theSystem));
-
-		return currentVersionOpt.map(ver -> theSystem + "|" + ver).orElse(theSystem);
+		String forcedId = theUrl.getValue().substring(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH.length());
+		IBaseResource valueSet = myDaoRegistry.getResourceDao(myValueSetType).read(new IdDt("ValueSet", forcedId));
+		return Optional.ofNullable(valueSet);
 	}
 
 
@@ -195,9 +212,6 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 						params.add(ValueSet.SP_VERSION, new TokenParam(theUri.substring(versionSeparator + 1)));
 						params.add(ValueSet.SP_URL, new UriParam(theUri.substring(0, versionSeparator)));
 					} else {
-						// last loaded ValueSet not necessarily is the current version anymore, so code should be executing
-						// this path only when there is no current version pointed for the ValueSet
-						ourLog.warn("Fetching ValueSet current version as last loaded");
 						params.add(ValueSet.SP_URL, new UriParam(theUri));
 					}
 					params.setSort(new SortSpec("_lastUpdated").setOrder(SortOrderEnum.DESC));

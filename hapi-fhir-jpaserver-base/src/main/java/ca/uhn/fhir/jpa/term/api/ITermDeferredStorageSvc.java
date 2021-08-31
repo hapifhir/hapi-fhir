@@ -52,7 +52,7 @@ public interface ITermDeferredStorageSvc {
 
 	void addConceptMapsToStorageQueue(List<ConceptMap> theConceptMaps);
 
-	void addValueSetsToStorageQueue(List<ValueSet> theValueSets, boolean theMakeThemCurrent);
+	void addValueSetsToStorageQueue(List<ValueSet> theValueSets);
 
 	void deleteCodeSystem(TermCodeSystem theCodeSystem);
 

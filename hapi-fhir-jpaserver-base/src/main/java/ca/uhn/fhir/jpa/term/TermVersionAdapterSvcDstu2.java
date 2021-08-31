@@ -40,7 +40,7 @@ public class TermVersionAdapterSvcDstu2 implements ITermVersionAdapterSvc {
 	}
 
 	@Override
-	public void createOrUpdateValueSet(ValueSet theValueSet, boolean theMakeItCurrent) {
+	public void createOrUpdateValueSet(ValueSet theValueSet) {
 		throw new UnsupportedOperationException();
 	}
 

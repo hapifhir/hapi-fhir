@@ -26,10 +26,24 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.OptimisticLock;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,10 +99,6 @@ public class TermValueSet implements Serializable {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "EXPANSION_STATUS", nullable = false, length = MAX_EXPANSION_STATUS_LENGTH)
 	private TermValueSetPreExpansionStatusEnum myExpansionStatus;
-
-	@OptimisticLock(excluded = true)
-	@Column(name = "CURRENT_VERSION")
-	private Boolean myIsCurrentVersion = false;
 
 	@Transient
 	private transient Integer myHashCode;
@@ -201,14 +211,6 @@ public class TermValueSet implements Serializable {
 			"Version exceeds maximum length (" + MAX_VER_LENGTH + "): " + length(theVersion));
 		myVersion = theVersion;
 		return this;
-	}
-
-	public Boolean getCurrentVersion() {
-		return myIsCurrentVersion;
-	}
-
-	public void setCurrentVersion(Boolean theCurrentVersion) {
-		myIsCurrentVersion = theCurrentVersion;
 	}
 
 	@Override

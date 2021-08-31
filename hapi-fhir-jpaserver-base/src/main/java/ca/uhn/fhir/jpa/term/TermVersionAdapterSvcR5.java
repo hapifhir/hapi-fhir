@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
@@ -36,7 +35,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
-import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class TermVersionAdapterSvcR5 extends BaseTermVersionAdapterSvcImpl implements ITermVersionAdapterSvc {
@@ -90,18 +88,15 @@ public class TermVersionAdapterSvcR5 extends BaseTermVersionAdapterSvcImpl imple
 	}
 
 	@Override
-	public void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet, boolean theMakeItCurrent) {
+	public void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet) {
 
 		ValueSet valueSetR4 = (ValueSet) VersionConvertorFactory_40_50.convertResource(theValueSet, new BaseAdvisor_40_50(false));
 
-		TransactionDetails txDetails = new TransactionDetails();
-		txDetails.putUserData(MAKE_LOADING_VERSION_CURRENT, theMakeItCurrent);
-
 		if (isBlank(theValueSet.getIdElement().getIdPart())) {
 			String matchUrl = "ValueSet?url=" + UrlUtil.escapeUrlParam(theValueSet.getUrl());
-			myValueSetResourceDao.update(valueSetR4, matchUrl, true, false, null, txDetails);
+			myValueSetResourceDao.update(valueSetR4, matchUrl);
 		} else {
-			myValueSetResourceDao.update(valueSetR4, null, true, false, null, txDetails);
+			myValueSetResourceDao.update(valueSetR4);
 		}
 	}
 
