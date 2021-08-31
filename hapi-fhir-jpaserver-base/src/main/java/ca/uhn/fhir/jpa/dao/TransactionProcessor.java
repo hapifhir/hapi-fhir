@@ -261,7 +261,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 						// No matches
 						.filter(match -> !match.myResolved)
 						.forEach(match -> {
-							ourLog.warn("Was unable to match url {} from database", match.myRequestUrl);
+							ourLog.debug("Was unable to match url {} from database", match.myRequestUrl);
 							theTransactionDetails.addResolvedMatchUrl(match.myRequestUrl, TransactionDetails.NOT_FOUND);
 						});
 				}
@@ -337,7 +337,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	}
 
 	private void setSearchToResolvedAndPrefetchFoundResourcePid(TransactionDetails theTransactionDetails, List<Long> idsToPreFetch, ResourceIndexedSearchParamToken nextResult, MatchUrlToResolve nextSearchParameterMap) {
-		ourLog.warn("Matched url {} from database", nextSearchParameterMap.myRequestUrl);
+		ourLog.debug("Matched url {} from database", nextSearchParameterMap.myRequestUrl);
 		idsToPreFetch.add(nextResult.getResourcePid());
 		myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, nextSearchParameterMap.myResourceDefinition.getName(), nextSearchParameterMap.myRequestUrl, new ResourcePersistentId(nextResult.getResourcePid()));
 		theTransactionDetails.addResolvedMatchUrl(nextSearchParameterMap.myRequestUrl, new ResourcePersistentId(nextResult.getResourcePid()));
