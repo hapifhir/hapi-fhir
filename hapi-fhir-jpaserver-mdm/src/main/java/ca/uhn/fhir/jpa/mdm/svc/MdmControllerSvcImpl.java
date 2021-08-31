@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
-import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
+import ca.uhn.fhir.mdm.api.IMdmBatchJobSubmitterFactory;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
@@ -65,7 +65,10 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	@Autowired
 	IMdmLinkUpdaterSvc myIMdmLinkUpdaterSvc;
 	@Autowired
-	IMdmClearJobSubmitter myMdmClearJobSubmitter;
+	IMdmBatchJobSubmitterFactory myMdmBatchJobSubmitterFactory;
+
+	public MdmControllerSvcImpl() {
+	}
 
 	@Override
 	public IAnyResource mergeGoldenResources(String theFromGoldenResourceId, String theToGoldenResourceId, IAnyResource theManuallyMergedGoldenResource, MdmTransactionContext theMdmTransactionContext) {
@@ -105,7 +108,7 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 
 	@Override
 	public IBaseParameters submitMdmClearJob(List<String> theUrls, IPrimitiveType<BigDecimal> theBatchSize, ServletRequestDetails theRequestDetails) {
-		MultiUrlProcessor multiUrlProcessor = new MultiUrlProcessor(myFhirContext, myMdmClearJobSubmitter);
+		MultiUrlProcessor multiUrlProcessor = new MultiUrlProcessor(myFhirContext, myMdmBatchJobSubmitterFactory.getClearJobSubmitter());
 		return multiUrlProcessor.processUrls(theUrls, multiUrlProcessor.getBatchSize(theBatchSize), theRequestDetails);
 	}
 

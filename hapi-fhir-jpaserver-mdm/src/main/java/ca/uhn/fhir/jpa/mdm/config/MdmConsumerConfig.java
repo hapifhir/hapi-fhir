@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.mdm.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.batch.mdm.MdmClearJobSubmitterImpl;
+import ca.uhn.fhir.jpa.batch.mdm.MdmBatchJobSubmitterFactoryImpl;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDeleteSvc;
 import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.jpa.mdm.broker.MdmMessageHandler;
@@ -51,7 +51,7 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchCriteriaBuilderSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
-import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
+import ca.uhn.fhir.mdm.api.IMdmBatchJobSubmitterFactory;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
@@ -182,8 +182,8 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	IMdmClearJobSubmitter myMdmClearJobSubmitter() {
-		return new MdmClearJobSubmitterImpl();
+	IMdmBatchJobSubmitterFactory mdmBatchJobSubmitterFactory() {
+		return new MdmBatchJobSubmitterFactoryImpl();
 	}
 
 	@Bean
