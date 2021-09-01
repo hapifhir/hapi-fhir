@@ -21,14 +21,14 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.search.SearchParamTextWrapper;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -42,6 +42,7 @@ import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,15 +54,14 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static ca.uhn.fhir.rest.api.Constants.PARAMQUALIFIER_TOKEN_TEXT;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
@@ -72,6 +72,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private EntityManager myEntityManager;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
+	@Autowired
+	private ISearchParamExtractor mySearchParamExtractor;
+
 
 	private Boolean ourDisabled;
 
@@ -82,20 +85,48 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		super();
 	}
 
-	public static SearchParamTextWrapper parseSearchParamTextStuff(FhirContext theContext, IBaseResource theResource) {
-		// FIXME identify :text searchable params in the resource.  For now, just support Observation.code
-		//TODO START ME HERE TOMORROW
+	public ExtendedLuceneIndexData extractLuceneIndexData(FhirContext theContext, IBaseResource theResource) {
 		Map<String, String> retVal = new HashMap<>();
-		String resourceType = theContext.getResourceType(theResource);
-		if (resourceType.equalsIgnoreCase("observation")) {
-			IFhirPath iFhirPath = theContext.newFhirPath();
-			iFhirPath.evaluateFirst(theResource, "code.text", IPrimitiveType.class)
-			.ifPresent(pType -> {
-				retVal.put("code", pType.getValueAsString());
-			});
-			// todo Add coding[].description too and identifier.type.text
-		}
-		return new SearchParamTextWrapper(retVal);
+		// wipmb find all CodeableConcept  targeted by an sp.
+		RuntimeResourceDefinition resourceDefinition = theContext.getResourceDefinition(theResource);
+		IFhirPath iFhirPath = theContext.newFhirPath();
+
+		List<RuntimeSearchParam> searchParams = resourceDefinition.getSearchParams();
+		searchParams.stream().forEach(sp -> {
+			String allText = null;
+			switch (sp.getParamType()) {
+				// fixme extract and test.
+				case TOKEN:
+					allText = mySearchParamExtractor.extractValues(sp.getPath(), theResource).stream()
+						.flatMap(v -> {
+							String type = v.fhirType();
+							switch (type) {
+								case "CodeableConcept":
+									return extractCodeableConceptTexts(v, iFhirPath);
+								// FIXME what other types contribute to :text?  https://hl7.org/fhir/search.html#token
+								// CodeableConcept.text, Coding.display, or Identifier.type.text.
+							}
+							return null;
+						})
+						.collect(Collectors.joining(" "));
+					break;
+				default:
+					// we only support token for now.
+					break;
+			}
+			if (StringUtils.isNotBlank(allText)) {
+				retVal.put(sp.getName(), allText);
+			}
+		});
+		return new ExtendedLuceneIndexData(retVal);
+	}
+
+	private Stream<String> extractCodeableConceptTexts(IBase theResource, IFhirPath iFhirPath) {
+		return Stream.concat(
+			iFhirPath.evaluate(theResource, "text", IPrimitiveType.class).stream()
+				.map(p -> p.getValueAsString()),
+			iFhirPath.evaluate(theResource, "coding.display", IPrimitiveType.class).stream()
+				.map(p -> p.getValueAsString()));
 	}
 
 	private void addTextSearch(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, List<List<IQueryParameterType>> theTerms, String theFieldName) {
@@ -146,6 +177,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		SearchSession session = Search.session(myEntityManager);
 		List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
 		List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
+		// wipmb make this query builder dynamic on SPs too.
 
 		/***
 		 * {

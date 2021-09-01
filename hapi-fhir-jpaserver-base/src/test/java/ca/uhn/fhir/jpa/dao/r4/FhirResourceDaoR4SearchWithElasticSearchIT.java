@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -157,11 +158,22 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		obs1.getNoteFirstRep().setText("obs1");
 		IIdType id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
 
+
 		Observation obs2 = new Observation();
 		obs2.getCode().setText("Body Weight");
+		obs2.getCode().addCoding().setCode("29463-7").setSystem("http://loinc.org").setDisplay("Body weight as measured by me");
 		obs2.setStatus(Observation.ObservationStatus.FINAL);
 		obs2.setValue(new Quantity(81));
 		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+
+		// don't look in the narrative when only searching code.
+		Observation obs3 = new Observation();
+		Narrative narrative = new Narrative();
+		narrative.setDivAsString("<div>Body Weight</div>");
+		obs3.setText(narrative);
+		obs3.setStatus(Observation.ObservationStatus.FINAL);
+		obs3.setValue(new Quantity(81));
+		IIdType id3 = myObservationDao.create(obs3, mySrd).getId().toUnqualifiedVersionless();
 
 		{
 			// first word
@@ -188,6 +200,13 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			// prefix
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam("Bod").setModifier(TokenParamModifier.TEXT));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
+		}
+
+		{
+			// codeable.display
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("measured").setModifier(TokenParamModifier.TEXT));
 			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
 		}
 

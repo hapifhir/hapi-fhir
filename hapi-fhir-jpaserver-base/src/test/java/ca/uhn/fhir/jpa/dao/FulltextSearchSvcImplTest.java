@@ -13,6 +13,7 @@ import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 class FulltextSearchSvcImplTest {
+	FulltextSearchSvcImpl mySvc = new FulltextSearchSvcImpl();
 
 	@Test
 	void parseSearchParamTextStuff() {
@@ -23,7 +24,7 @@ class FulltextSearchSvcImplTest {
 		obs.setCode(new CodeableConcept().setText(SP_TEXT_VALUE));
 
 		//When
-		Map<String, String> stringStringMap = FulltextSearchSvcImpl.parseSearchParamTextStuff(FhirContext.forR4Cached(), obs).getMap();
+		Map<String, String> stringStringMap = mySvc.extractLuceneIndexData(FhirContext.forR4Cached(), obs).getMap();
 
 		//Then
 		assertThat(stringStringMap.keySet(), hasItem(SP_NAME));

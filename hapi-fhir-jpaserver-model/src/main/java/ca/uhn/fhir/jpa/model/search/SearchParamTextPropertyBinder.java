@@ -30,8 +30,6 @@ import org.hibernate.search.mapper.pojo.bridge.runtime.PropertyBridgeWriteContex
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-
 /**
  * Allows hibernate search to index
  *
@@ -40,8 +38,7 @@ import java.util.Map;
  * Identifier.type.text
  *
  */
-public class SearchParamTextPropertyBinder implements PropertyBinder {
-
+public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBridge<ExtendedLuceneIndexData> {
 
 	public static final String SEARCH_PARAM_TEXT_PREFIX = "text-";
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamTextPropertyBinder.class);
@@ -50,30 +47,26 @@ public class SearchParamTextPropertyBinder implements PropertyBinder {
 	public void bind(PropertyBindingContext thePropertyBindingContext) {
 		// FIXME Is it safe to use object identity of the Map to track dirty?
 		thePropertyBindingContext.dependencies().use("mySearchParamTexts");
-		IndexSchemaElement indexSchemaElement = thePropertyBindingContext.indexSchemaElement();
 
+		defineIndexingTemplate(thePropertyBindingContext);
+
+		thePropertyBindingContext.bridge(ExtendedLuceneIndexData.class, this);
+	}
+
+	private void defineIndexingTemplate(PropertyBindingContext thePropertyBindingContext) {
+		IndexSchemaElement indexSchemaElement = thePropertyBindingContext.indexSchemaElement();
 		//In order to support dynamic fields, we have to use field templates. We _must_ define the template at bootstrap time and cannot
 		//create them adhoc. https://docs.jboss.org/hibernate/search/6.0/reference/en-US/html_single/#mapper-orm-bridge-index-field-dsl-dynamic
 		//I _think_ im doing the right thing here by indicating that everything matching this template uses this analyzer.
 		indexSchemaElement.fieldTemplate("SearchParamText", f -> f.asString().analyzer("autocompleteWordEdgeAnalyzer").projectable(Projectable.NO))
-			.matchingPathGlob(SEARCH_PARAM_TEXT_PREFIX +  "*");
-
-
-		thePropertyBindingContext.bridge(SearchParamTextWrapper.class, new SearchParamTextPropertyBridge());
+			.matchingPathGlob(SEARCH_PARAM_TEXT_PREFIX + "*");
 	}
 
-	private class SearchParamTextPropertyBridge implements PropertyBridge<SearchParamTextWrapper> {
-
-		@Override
-		public void write(DocumentElement theDocument, SearchParamTextWrapper searchParamTexts, PropertyBridgeWriteContext thePropertyBridgeWriteContext) {
-
-			if (searchParamTexts != null) {
-				searchParamTexts.entrySet()
-					.forEach(entry -> {
-						theDocument.addValue(SEARCH_PARAM_TEXT_PREFIX + entry.getKey(), entry.getValue());
-						ourLog.trace("Adding Search Param Text: {}{} -- {}", SEARCH_PARAM_TEXT_PREFIX, entry.getKey(), entry.getValue());
-					});
-				}
-			}
+	@Override
+	public void write(DocumentElement theDocument, ExtendedLuceneIndexData theIndexData, PropertyBridgeWriteContext thePropertyBridgeWriteContext) {
+		if (theIndexData != null) {
+			theIndexData.writeIndexElements(theDocument);
 		}
+	}
+
 }

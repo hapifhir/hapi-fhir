@@ -24,7 +24,7 @@ import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.search.ResourceTableRoutingBinder;
 import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
-import ca.uhn.fhir.jpa.model.search.SearchParamTextWrapper;
+import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -123,7 +123,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Transient
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	@PropertyBinding(binder = @PropertyBinderRef(type = SearchParamTextPropertyBinder.class))
-	private SearchParamTextWrapper mySearchParamTexts;
+	private ExtendedLuceneIndexData mySearchParamTexts;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
@@ -751,7 +751,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		return myCreatedByMatchUrl;
 	}
 
-	public void setSearchParamText(SearchParamTextWrapper theSearchParamTexts) {
+	public void setSearchParamText(ExtendedLuceneIndexData theSearchParamTexts) {
 		mySearchParamTexts = theSearchParamTexts;
 	}
 }
