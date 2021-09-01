@@ -2005,9 +2005,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				result.setCodeDisplay(code.getDisplay());
 
 				for (TermConceptDesignation next : code.getDesignations()) {
-					IValidationSupport.ConceptDesignation designation = new IValidationSupport.ConceptDesignation();
 					// filter out the designation based on displayLanguage if any
 					if (isDisplayLanguageMatch(theDisplayLanguage, next.getLanguage())) {
+						IValidationSupport.ConceptDesignation designation = new IValidationSupport.ConceptDesignation();
 						designation.setLanguage(next.getLanguage());
 						designation.setUseSystem(next.getUseSystem());
 						designation.setUseCode(next.getUseCode());
