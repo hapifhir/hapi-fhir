@@ -44,8 +44,8 @@ import java.util.stream.Collectors;
  */
 
 public class MdmLinkDeleter implements ItemProcessor<List<Long>, List<Long>> {
-	public static final String PROCESS_NAME = "Reindexing";
-	public static final String THREAD_PREFIX = "reindex";
+	public static final String PROCESS_NAME = "MdmClear";
+	public static final String THREAD_PREFIX = "mdmClear";
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmLinkDeleter.class);
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
