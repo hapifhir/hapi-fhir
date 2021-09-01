@@ -592,7 +592,7 @@ This operation takes two optional Parameters.
             <td>String</td>
             <td>0..*</td>
             <td>
-                The Source resource types you would like to clear. If omitted, will operate over all resource types.  If ommitted, all resource types will be cleared.
+                The Source resource types you would like to clear. If omitted, all resource types will be cleared.
             </td>
         </tr>
         <tr>
