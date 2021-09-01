@@ -29,10 +29,15 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
 
 import java.util.List;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 public class BinaryUtil {
+	private static final Logger ourLog = getLogger(BinaryUtil.class);
+
 
 	private BinaryUtil() {
 		// non instantiable
@@ -44,18 +49,23 @@ public class BinaryUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public static IPrimitiveType<byte[]> getOrCreateData(FhirContext theContext, IBaseBinary theBinary) {
+
+		ourLog.warn("About to fetch binary data from {}", theBinary.getIdElement());
 		String elementName = "content";
 		if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
 			elementName = "data";
 		}
 
+		ourLog.warn("Will be using element [{}].", elementName);
 		BaseRuntimeChildDefinition entryChild = AttachmentUtil.getChild(theContext, theBinary, elementName);
 		List<IBase> entries = entryChild.getAccessor().getValues(theBinary);
+		ourLog.warn("There are {} entries for {}", entries.size(), elementName);
 		return entries
 			.stream()
 			.map(t -> (IPrimitiveType<byte[]>) t)
 			.findFirst()
 			.orElseGet(() -> {
+				ourLog.warn("We were unable to pull any binary data, creating a new null binary.");
 				IPrimitiveType<byte[]> binary = AttachmentUtil.newPrimitive(theContext, "base64Binary", null);
 				entryChild.getMutator().setValue(theBinary, binary);
 				return binary;
