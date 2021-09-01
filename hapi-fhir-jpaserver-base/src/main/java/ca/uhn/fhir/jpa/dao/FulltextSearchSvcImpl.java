@@ -42,9 +42,7 @@ import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,13 +52,10 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -86,47 +81,17 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	}
 
 	public ExtendedLuceneIndexData extractLuceneIndexData(FhirContext theContext, IBaseResource theResource) {
-		Map<String, String> retVal = new HashMap<>();
-		// wipmb find all CodeableConcept  targeted by an sp.
+		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData();
+
 		RuntimeResourceDefinition resourceDefinition = theContext.getResourceDefinition(theResource);
 		IFhirPath iFhirPath = theContext.newFhirPath();
 
-		List<RuntimeSearchParam> searchParams = resourceDefinition.getSearchParams();
-		searchParams.stream().forEach(sp -> {
-			String allText = null;
-			switch (sp.getParamType()) {
-				// fixme extract and test.
-				case TOKEN:
-					allText = mySearchParamExtractor.extractValues(sp.getPath(), theResource).stream()
-						.flatMap(v -> {
-							String type = v.fhirType();
-							switch (type) {
-								case "CodeableConcept":
-									return extractCodeableConceptTexts(v, iFhirPath);
-								// FIXME what other types contribute to :text?  https://hl7.org/fhir/search.html#token
-								// CodeableConcept.text, Coding.display, or Identifier.type.text.
-							}
-							return null;
-						})
-						.collect(Collectors.joining(" "));
-					break;
-				default:
-					// we only support token for now.
-					break;
-			}
-			if (StringUtils.isNotBlank(allText)) {
-				retVal.put(sp.getName(), allText);
-			}
-		});
-		return new ExtendedLuceneIndexData(retVal);
-	}
-
-	private Stream<String> extractCodeableConceptTexts(IBase theResource, IFhirPath iFhirPath) {
-		return Stream.concat(
-			iFhirPath.evaluate(theResource, "text", IPrimitiveType.class).stream()
-				.map(p -> p.getValueAsString()),
-			iFhirPath.evaluate(theResource, "coding.display", IPrimitiveType.class).stream()
-				.map(p -> p.getValueAsString()));
+		resourceDefinition.getSearchParams().stream()
+			.map(sp->new LuceneRuntimeSearchParam(sp, iFhirPath, mySearchParamExtractor))
+			.forEach(lsp -> {
+				lsp.extractLuceneIndexData(theResource, retVal);
+			});
+		return retVal;
 	}
 
 	private void addTextSearch(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, List<List<IQueryParameterType>> theTerms, String theFieldName) {
