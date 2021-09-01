@@ -1,13 +1,16 @@
-package ca.uhn.fhir.jpa.dao.r4;
+package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.ClinicalImpression;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
@@ -16,9 +19,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -26,15 +30,18 @@ import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
+public class ResourceProviderR4SearchTest extends BaseResourceProviderR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ChainedContainedR4SearchTest.class);
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4SearchTest.class);
 	@Autowired
-	MatchUrlService myMatchUrlService;
+	@Qualifier("myClinicalImpressionDaoR4")
+	protected IFhirResourceDao<ClinicalImpression> myClinicalImpressionDao;
+	private CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 
+	@Override
 	@AfterEach
 	public void after() throws Exception {
+		super.after();
 
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
@@ -44,85 +51,27 @@ public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 
+		myClient.unregisterInterceptor(myCapturingInterceptor);
 		myModelConfig.setIndexOnContainedResources(false);
 		myModelConfig.setIndexOnContainedResources(new ModelConfig().isIndexOnContainedResources());
 	}
 
 	@BeforeEach
+	@Override
 	public void before() throws Exception {
+		super.before();
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 
 		myDaoConfig.setAllowMultipleDelete(true);
+		myClient.registerInterceptor(myCapturingInterceptor);
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		myModelConfig.setIndexOnContainedResources(true);
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@Test
-	public void testShouldResolveATwoLinkChainWithStandAloneResources() throws Exception {
+	public void testAllResourcesStandAlone() throws Exception {
 
-		// setup
-		IIdType oid1;
-
-		{
-			Patient p = new Patient();
-			p.setId(IdType.newRandomUuid());
-			p.addName().setFamily("Smith").addGiven("John");
-			myPatientDao.create(p, mySrd);
-
-			Observation obs = new Observation();
-			obs.getCode().setText("Observation 1");
-			obs.getSubject().setReference(p.getId());
-
-			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-
-			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
-		}
-
-		String url = "/Observation?subject.name=Smith";
-
-		// execute
-		myCaptureQueriesListener.clear();
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
-		ourLog.info(">>> " + myCaptureQueriesListener.getSelectQueriesForCurrentThread());
-
-		// validate
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
-	}
-
-	@Test
-	public void testShouldResolveATwoLinkChainWithAContainedResource() throws Exception {
-		IIdType oid1;
-
-		{
-			Patient p = new Patient();
-			p.setId("pat");
-			p.addName().setFamily("Smith").addGiven("John");
-
-			Observation obs = new Observation();
-			obs.getContained().add(p);
-			obs.getCode().setText("Observation 1");
-			obs.getSubject().setReference("#pat");
-
-			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-
-			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
-		}
-
-		String url = "/Observation?subject.name=Smith";
-		myCaptureQueriesListener.clear();
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
-		ourLog.info(">>> " + myCaptureQueriesListener.getSelectQueriesForCurrentThread());
-
-		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
-	}
-
-	@Test
-	public void testShouldResolveAThreeLinkChainWhereAllResourcesStandAlone() throws Exception {
-
-		// setup
 		IIdType oid1;
 
 		{
@@ -146,20 +95,15 @@ public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
 			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
-		String url = "/Observation?subject.organization.name=HealthCo";
+		String uri = ourServerBase + "/Observation?subject.organization.name=HealthCo";
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
-		// execute
-		myCaptureQueriesListener.clear();
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
-		ourLog.info(">>> " + myCaptureQueriesListener.getSelectQueriesForCurrentThread());
-
-		// validate
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids, contains(oid1.getValue()));
 	}
 
 	@Test
-	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheEndOfTheChain() throws Exception {
+	public void testContainedResourceAtTheEndOfTheChain() throws Exception {
 		// This is the case that is most relevant to SMILE-2899
 		IIdType oid1;
 
@@ -184,17 +128,15 @@ public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
 			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
-		String url = "/Observation?subject.organization.name=HealthCo";
-		myCaptureQueriesListener.clear();
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
-		ourLog.info(">>> " + myCaptureQueriesListener.getSelectQueriesForCurrentThread());
+		String uri = ourServerBase + "/Observation?subject.organization.name=HealthCo";
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids, contains(oid1.getValue()));
 	}
 
 	@Test
-	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheBeginningOfTheChain() throws Exception {
+	public void testContainedResourceAtTheBeginningOfTheChain() throws Exception {
 		// This case seems like it would be less frequent in production, but we don't want to
 		// paint ourselves into a corner where we require the contained link to be the last
 		// one in the chain
@@ -222,23 +164,24 @@ public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
 			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
-		String url = "/Observation?subject.organization.name=HealthCo";
-		myCaptureQueriesListener.clear();
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
-		ourLog.info(">>> " + myCaptureQueriesListener.getSelectQueriesForCurrentThread());
+		String uri = ourServerBase + "/Observation?subject.organization.name=HealthCo";
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertEquals(1L, oids.size());
-		assertThat(oids, contains(oid1.getIdPart()));
+		assertThat(oids, contains(oid1.getValue()));
 	}
 
-	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String theUrl) throws IOException {
-		List<String> ids = new ArrayList<>();
+	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
+		List<String> ids;
+		HttpGet get = new HttpGet(uri);
 
-		ResourceSearch search = myMatchUrlService.getResourceSearch(theUrl);
-		SearchParameterMap map = search.getSearchParameterMap();
-		map.setLoadSynchronous(true);
-		IBundleProvider result = myObservationDao.search(map);
-		return result.getAllResourceIds();
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(resp);
+			Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, resp);
+			ids = toUnqualifiedVersionlessIdValues(bundle);
+		}
+		return ids;
 	}
 
 }
