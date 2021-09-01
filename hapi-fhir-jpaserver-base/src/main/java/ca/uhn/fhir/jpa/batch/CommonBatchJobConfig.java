@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.batch;
 
 import ca.uhn.fhir.jpa.batch.processor.GoldenResourceAnnotatingProcessor;
 import ca.uhn.fhir.jpa.batch.processor.PidToIBaseResourceProcessor;
+import ca.uhn.fhir.jpa.reindex.job.ReindexWriter;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,6 +40,12 @@ public class CommonBatchJobConfig {
 	@StepScope
 	public GoldenResourceAnnotatingProcessor goldenResourceAnnotatingProcessor() {
 		return new GoldenResourceAnnotatingProcessor();
+	}
+
+	@Bean
+	@StepScope
+	public ReindexWriter reindexWriter() {
+		return new ReindexWriter();
 	}
 
 }

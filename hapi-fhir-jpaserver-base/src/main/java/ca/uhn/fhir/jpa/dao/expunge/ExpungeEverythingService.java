@@ -65,6 +65,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -100,6 +101,9 @@ public class ExpungeEverythingService {
 
 	private TransactionTemplate myTxTemplate;
 
+	@Autowired
+	private MemoryCacheService myMemoryCacheService;
+
 	@PostConstruct
 	public void initTxTemplate() {
 		myTxTemplate = new TransactionTemplate(myPlatformTransactionManager);
@@ -122,37 +126,37 @@ public class ExpungeEverythingService {
 			counter.addAndGet(doExpungeEverythingQuery("UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null"));
 			return null;
 		});
-		counter.addAndGet(expungeEverythingByType(NpmPackageVersionResourceEntity.class));
-		counter.addAndGet(expungeEverythingByType(NpmPackageVersionEntity.class));
-		counter.addAndGet(expungeEverythingByType(NpmPackageEntity.class));
-		counter.addAndGet(expungeEverythingByType(SearchParamPresent.class));
-		counter.addAndGet(expungeEverythingByType(BulkImportJobFileEntity.class));
-		counter.addAndGet(expungeEverythingByType(BulkImportJobEntity.class));
-		counter.addAndGet(expungeEverythingByType(ForcedId.class));
-		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamDate.class));
-		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamNumber.class));
-		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamQuantity.class));
-		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamQuantityNormalized.class));
-		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamString.class));
-		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamToken.class));
-		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamUri.class));
-		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamCoords.class));
-		counter.addAndGet(expungeEverythingByType(ResourceIndexedComboStringUnique.class));
-		counter.addAndGet(expungeEverythingByType(ResourceIndexedComboTokenNonUnique.class));
-		counter.addAndGet(expungeEverythingByType(ResourceLink.class));
-		counter.addAndGet(expungeEverythingByType(SearchResult.class));
-		counter.addAndGet(expungeEverythingByType(SearchInclude.class));
-		counter.addAndGet(expungeEverythingByType(TermValueSetConceptDesignation.class));
-		counter.addAndGet(expungeEverythingByType(TermValueSetConcept.class));
-		counter.addAndGet(expungeEverythingByType(TermValueSet.class));
-		counter.addAndGet(expungeEverythingByType(TermConceptParentChildLink.class));
-		counter.addAndGet(expungeEverythingByType(TermConceptMapGroupElementTarget.class));
-		counter.addAndGet(expungeEverythingByType(TermConceptMapGroupElement.class));
-		counter.addAndGet(expungeEverythingByType(TermConceptMapGroup.class));
-		counter.addAndGet(expungeEverythingByType(TermConceptMap.class));
-		counter.addAndGet(expungeEverythingByType(TermConceptProperty.class));
-		counter.addAndGet(expungeEverythingByType(TermConceptDesignation.class));
-		counter.addAndGet(expungeEverythingByType(TermConcept.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(NpmPackageVersionResourceEntity.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(NpmPackageVersionEntity.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(NpmPackageEntity.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(SearchParamPresent.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(BulkImportJobFileEntity.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(BulkImportJobEntity.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(ForcedId.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(ResourceIndexedSearchParamDate.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(ResourceIndexedSearchParamNumber.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(ResourceIndexedSearchParamQuantity.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(ResourceIndexedSearchParamQuantityNormalized.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(ResourceIndexedSearchParamString.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(ResourceIndexedSearchParamToken.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(ResourceIndexedSearchParamUri.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(ResourceIndexedSearchParamCoords.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(ResourceIndexedComboStringUnique.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(ResourceIndexedComboTokenNonUnique.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(ResourceLink.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(SearchResult.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(SearchInclude.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(TermValueSetConceptDesignation.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(TermValueSetConcept.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(TermValueSet.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(TermConceptParentChildLink.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(TermConceptMapGroupElementTarget.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(TermConceptMapGroupElement.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(TermConceptMapGroup.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(TermConceptMap.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(TermConceptProperty.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(TermConceptDesignation.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(TermConcept.class));
 		myTxTemplate.execute(t -> {
 			for (TermCodeSystem next : myEntityManager.createQuery("SELECT c FROM " + TermCodeSystem.class.getName() + " c", TermCodeSystem.class).getResultList()) {
 				next.setCurrentVersion(null);
@@ -160,52 +164,66 @@ public class ExpungeEverythingService {
 			}
 			return null;
 		});
-		counter.addAndGet(expungeEverythingByType(TermCodeSystemVersion.class));
-		counter.addAndGet(expungeEverythingByType(TermCodeSystem.class));
-		counter.addAndGet(expungeEverythingByType(SubscriptionTable.class));
-		counter.addAndGet(expungeEverythingByType(ResourceHistoryTag.class));
-		counter.addAndGet(expungeEverythingByType(ResourceTag.class));
-		counter.addAndGet(expungeEverythingByType(TagDefinition.class));
-		counter.addAndGet(expungeEverythingByType(ResourceHistoryProvenanceEntity.class));
-		counter.addAndGet(expungeEverythingByType(ResourceHistoryTable.class));
-		counter.addAndGet(expungeEverythingByType(ResourceTable.class));
-		counter.addAndGet(expungeEverythingByType(PartitionEntity.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(TermCodeSystemVersion.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(TermCodeSystem.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(SubscriptionTable.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(ResourceHistoryTag.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(ResourceTag.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(TagDefinition.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(ResourceHistoryProvenanceEntity.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(ResourceHistoryTable.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(ResourceTable.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(PartitionEntity.class));
 		myTxTemplate.execute(t -> {
 			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + Search.class.getSimpleName() + " d"));
 			return null;
 		});
 
+                purgeAllCaches();
+
 		ourLog.info("COMPLETED GLOBAL $expunge - Deleted {} rows", counter.get());
 	}
 
+        private void purgeAllCaches() {
+                myTxTemplate.execute(t -> {
+                        myMemoryCacheService.invalidateAllCaches();
+                        return null;
+                });
+        }
+
+        private int expungeEverythingByTypeWithoutPurging(Class<?> theEntityType) {
+                int outcome = 0;
+                while (true) {
+                        StopWatch sw = new StopWatch();
+
+                        @SuppressWarnings("ConstantConditions")
+                        int count = myTxTemplate.execute(t -> {
+                                CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
+                                CriteriaQuery<?> cq = cb.createQuery(theEntityType);
+                                cq.from(theEntityType);
+                                TypedQuery<?> query = myEntityManager.createQuery(cq);
+                                query.setMaxResults(1000);
+                                List<?> results = query.getResultList();
+                                for (Object result : results) {
+                                        myEntityManager.remove(result);
+                                }
+                                return results.size();
+                        });
+
+                        outcome += count;
+                        if (count == 0) {
+                                break;
+                        }
+
+                        ourLog.info("Have deleted {} entities of type {} in {}", outcome, theEntityType.getSimpleName(), sw.toString());
+                }
+                return outcome;
+        }
+
 	public int expungeEverythingByType(Class<?> theEntityType) {
-
-		int outcome = 0;
-		while (true) {
-			StopWatch sw = new StopWatch();
-
-			@SuppressWarnings("ConstantConditions")
-			int count = myTxTemplate.execute(t -> {
-				CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
-				CriteriaQuery<?> cq = cb.createQuery(theEntityType);
-				cq.from(theEntityType);
-				TypedQuery<?> query = myEntityManager.createQuery(cq);
-				query.setMaxResults(1000);
-				List<?> results = query.getResultList();
-				for (Object result : results) {
-					myEntityManager.remove(result);
-				}
-				return results.size();
-			});
-
-			outcome += count;
-			if (count == 0) {
-				break;
-			}
-
-			ourLog.info("Have deleted {} entities of type {} in {}", outcome, theEntityType.getSimpleName(), sw.toString());
-		}
-		return outcome;
+                int result = expungeEverythingByTypeWithoutPurging(theEntityType);
+                purgeAllCaches();
+                return result;
 	}
 
 	private int doExpungeEverythingQuery(String theQuery) {

@@ -39,8 +39,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.r4.model.CodeSystem;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -154,7 +154,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 								throw new ParseException("Could not detect FHIR encoding for file: " + nextDataFile);
 							}
 
-							CodeSystem resource = encoding.newParser(myFhirCtx).parseResource(CodeSystem.class, contents);
+							IBaseResource resource = encoding.newParser(myFhirCtx).parseResource(contents);
 							ParametersUtil.addParameterToParameters(myFhirCtx, inputParameters, TerminologyUploaderProvider.PARAM_CODESYSTEM, resource);
 
 						} else {
