@@ -77,7 +77,7 @@ public class MdmClearJobConfig extends MultiUrlProcessorJobConfig {
 		return myStepBuilderFactory.get(MDM_CLEAR_RESOURCE_LIST_STEP_NAME)
 			.<List<Long>, List<String>>chunk(1)
 			.reader(reverseCronologicalBatchMdmLinkPidReader())
-			.processor(compositeProcessor())
+			.processor(deleteThenExpungeCompositeProcessor())
 			.writer(sqlExecutorWriter())
 			.listener(pidCountRecorderListener())
 			.listener(myDeleteExpungePromotionListener)
@@ -86,7 +86,7 @@ public class MdmClearJobConfig extends MultiUrlProcessorJobConfig {
 
 	@Bean
 	@StepScope
-	public ItemProcessor<List<Long>, List<String>> compositeProcessor() {
+	public ItemProcessor<List<Long>, List<String>> deleteThenExpungeCompositeProcessor() {
 		CompositeItemProcessor<List<Long>, List<String>> compositeProcessor = new CompositeItemProcessor<>();
 		List itemProcessors = new ArrayList<>();
 		itemProcessors.add(mdmLinkDeleter());
