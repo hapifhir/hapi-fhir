@@ -76,7 +76,6 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
                 Meta theMeta = new Meta();
                 theMeta.addProfile("http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient");
                 thePatient.setMeta(theMeta);
-                myPatientDao.update(thePatient, mySrd);
 
                 IIdType id = myPatientDao.update(thePatient, mySrd).getId();
                 assertNotNull(myPatientDao.read(id));
