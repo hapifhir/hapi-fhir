@@ -916,7 +916,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSearchOnStatusAndTag_AvoidHFJResourceJoins() {
+	public void testSearchOnUnderscoreTagParam_AvoidHFJResourceJoins() {
 		// This Issue: https://github.com/hapifhir/hapi-fhir/issues/2942
 		// See this PR for a similar type of Fix: https://github.com/hapifhir/hapi-fhir/pull/2909
 		SearchParameter searchParameter = new SearchParameter();
@@ -970,7 +970,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		logAllResourceTags();
 		logAllResourceVersions();
 
-		// Search example:
+		// Search example 1:
 		// http://FHIR_SERVER/fhir_request/Procedure
 		// ?status%3Anot=entered-in-error&subject=B
 		// &category=CANN&focalAccess=BodySite%2F3530342921&_tag=TagValue
@@ -993,6 +993,35 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 			// Check for a particular WHERE CLAUSE in the generated SQL to make sure we are verifying the correct query
 			assertEquals(2, StringUtils.countMatches(selectQuery.toLowerCase(), " join hfj_res_link "), selectQuery);
+
+			// Ensure that we do NOT see a couple of particular WHERE clauses
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_type = 'procedure'"), selectQuery);
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null"), selectQuery);
+		}
+
+		// Search example 2:
+		// http://FHIR_SERVER/fhir_request/Procedure
+		// ?status%3Anot=entered-in-error&category=CANN&focalAccess=3692871435
+		// &_tag=1STCANN1NDL%2C1STCANN2NDL&outcome=SUCCESS&_count=1&_requestTrace=True
+		// NOTE: This gets sorted once so the order is different once it gets executed!
+		{
+			// IMPORTANT: Keep the query param order exactly as shown below!
+			// NOTE: The "outcome" SearchParameter is not being used below, but it doesn't affect the test.
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			// _tag, category, status, subject, focalAccess
+			map.add("_tag", new TokenParam("TagValue"));
+			map.add("category", new TokenParam("CANN"));
+			map.add("status", new TokenParam("entered-in-error").setModifier(TokenParamModifier.NOT));
+			map.add("focalAccess", new ReferenceParam("BodyStructure/" + bsId.getIdPart()));
+			myCaptureQueriesListener.clear();
+			IBundleProvider outcome = myProcedureDao.search(map, new SystemRequestDetails());
+			ourLog.info("Search returned {} resources.", outcome.getResources(0, 999).size());
+			//assertEquals(1, outcome.getResources(0, 999).size());
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+			// Check for a particular WHERE CLAUSE in the generated SQL to make sure we are verifying the correct query
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), " join hfj_res_link "), selectQuery);
 
 			// Ensure that we do NOT see a couple of particular WHERE clauses
 			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_type = 'procedure'"), selectQuery);
