@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.BodyStructure;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -39,6 +40,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.AfterEach;
@@ -918,6 +920,20 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	public void testSearchOnStatusAndTag_AvoidHFJResourceJoins() {
 		// This Issue: https://github.com/hapifhir/hapi-fhir/issues/2942
 		// See this PR for a similar type of Query change: https://github.com/hapifhir/hapi-fhir/pull/2909
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.addBase("BodySite").addBase("Procedure");
+		searchParameter.setCode("focalAccess");
+		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
+		searchParameter.setExpression("Procedure.extension('Procedure#focalAccess')");
+		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		IIdType spId = mySearchParameterDao.create(searchParameter).getId().toUnqualifiedVersionless();
+		mySearchParamRegistry.forceRefresh();
+
+		BodyStructure bs = new BodyStructure();
+		bs.setDescription("BodyStructure in R4 replaced BodySite from DSTU4");
+		IIdType bsId = myBodyStructureDao.create(bs, mySrd).getId().toUnqualifiedVersionless();
+
 		Patient patient = new Patient();
 		patient.setActive(true);
 		patient.addName().setFamily("FamilyName");
@@ -941,10 +957,22 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		procedure.setSubject(new Reference(patientId));
 		procedure.setStatus(Procedure.ProcedureStatus.COMPLETED);
 		procedure.setCategory(categoryCodeableConcept1);
+//		Extension extProcedure = procedure
+//			.addExtension()
+//			.setUrl("http://hapifhir.io/fhir/StructureDefinition/resource-meta-source")
+//			.setValue(new UriType("#IGnelx1k3MYKfJxN"));
+//		"extension":[
+//		{
+//			"url":"Procedure#focalAccess",
+//			"valueReference":{
+//			"reference":"BodySite/65472744"
+//		}
+//		}
+//   ],
 		Extension extProcedure = procedure
 			.addExtension()
-			.setUrl("http://hapifhir.io/fhir/StructureDefinition/resource-meta-source")
-			.setValue(new UriType("#IGnelx1k3MYKfJxN"));
+			.setUrl("Procedure#focalAccess")
+			.setValue(new UriType("BodyStructure/" + bsId.getIdPartAsLong()));
 		procedure.getMeta()
 			.addTag("acc_procext_fkc", "1STCANN2NDL", "First Successful Cannulation with 2 Needles");
 		IIdType procedureId = myProcedureDao.create(procedure).getId().toUnqualifiedVersionless();
@@ -964,7 +992,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			map.add("status", new TokenParam("entered-in-error").setModifier(TokenParamModifier.NOT));
 			// TODO Is this TokenParam value correct given the Resource setup steps above - I don't see the connection ???
 			map.add("category", new TokenParam("CANN"));
-			map.addInclude(new Include("Procedure:focalAccess").asRecursive());
+			map.add("focalAccess", new ReferenceParam("BodyStructure%2F" + bsId.toUnqualifiedVersionless()));
 			map.add("_tag", new TokenParam("TagValue"));
 			myCaptureQueriesListener.clear();
 			IBundleProvider outcome = myProcedureDao.search(map, new SystemRequestDetails());
@@ -974,7 +1002,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 			// Check for a particular WHERE CLAUSE in the generated SQL to make sure we are verifying the correct query
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), ".target_resource_id = '1'"), selectQuery);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), ".target_resource_id = '" + patientId.getIdPart() +"'"), selectQuery);
 
 			// Ensure that we do NOT see a couple of particular WHERE clauses
 			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null"), selectQuery);
