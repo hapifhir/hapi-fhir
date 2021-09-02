@@ -934,6 +934,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		IIdType bsId = myBodyStructureDao.create(bs, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient patient = new Patient();
+		patient.setId("P1");
 		patient.setActive(true);
 		patient.addName().setFamily("FamilyName");
 		Extension extParent = patient
@@ -949,7 +950,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			.addExtension()
 			.setUrl("text")
 			.setValue(new StringType("Not Hispanic or Latino"));
-		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		myPatientDao.update(patient);
 
 //		"category":{
 //			"coding":[
@@ -965,7 +966,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			.setCode("CANN")
 			.setDisplay("Cannulation"));
 		Procedure procedure = new Procedure();
-		procedure.setSubject(new Reference(patientId));
+		procedure.setSubject(new Reference("Patient/P1"));
 		procedure.setStatus(Procedure.ProcedureStatus.COMPLETED);
 		procedure.setCategory(categoryCodeableConcept1);
 //		Extension extProcedure = procedure
@@ -1000,7 +1001,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			// Add query params to try and replicate the sample query above!
 			SearchParameterMap map = SearchParameterMap.newSynchronous();
 			map.add("status", new TokenParam("entered-in-error").setModifier(TokenParamModifier.NOT));
-			map.add("subject", new ReferenceParam(patientId));
+			map.add("subject", new ReferenceParam("Patient/P1"));
 			// TODO Is this TokenParam value correct given the Resource setup steps above - I don't see the connection ???
 			map.add("category", new TokenParam("CANN"));
 			map.add("focalAccess", new ReferenceParam("BodyStructure/" + bsId.getIdPart()));
@@ -1013,7 +1014,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 			// Check for a particular WHERE CLAUSE in the generated SQL to make sure we are verifying the correct query
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), ".target_resource_id = '" + patientId.getIdPart() +"'"), selectQuery);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), ".target_resource_id = 'P1'"), selectQuery);
 
 			// Ensure that we do NOT see a couple of particular WHERE clauses
 			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null"), selectQuery);
