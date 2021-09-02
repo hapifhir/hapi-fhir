@@ -968,14 +968,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			.addTag("acc_procext_fkc", "1STCANN2NDL", "First Successful Cannulation with 2 Needles");
 		IIdType procedureId = myProcedureDao.create(procedure).getId().toUnqualifiedVersionless();
 
-		Device device = new Device();
-		device.setManufacturer("Acme");
-		IIdType deviceId = myDeviceDao.create(device).getId().toUnqualifiedVersionless();
-
-		Provenance provenance = new Provenance();
-		provenance.setActivity(new CodeableConcept().addCoding(new Coding().setSystem("http://hl7.org/fhir/v3/DocumentCompletion").setCode("PA")));
-		provenance.addAgent().setWho(new Reference(deviceId));
-
 		logAllResources();
 		logAllResourceTags();
 		logAllResourceVersions();
@@ -1031,29 +1023,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			// Check for a particular WHERE CLAUSE in the generated SQL to make sure we are verifying the correct query
 			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), " join hfj_res_link "), selectQuery);
 
-			// Ensure that we do NOT see a couple of particular WHERE clauses
-			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_type = 'procedure'"), selectQuery);
-			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null"), selectQuery);
-		}
-
-		// Search example 3:
-		// http://FHIR_SERVER/fhir_request/Provenance
-		// ?agent=Acme&activity=PA&_lastUpdated=ge2021-01-01&_requestTrace=True
-		// NOTE: This gets sorted once so the order is different once it gets executed!
-		{
-			// IMPORTANT: Keep the query param order exactly as shown below!
-			// NOTE: The "outcome" SearchParameter is not being used below, but it doesn't affect the test.
-			SearchParameterMap map = SearchParameterMap.newSynchronous();
-			//map.add("_lastUpdated", new TokenParam("ge2021-01-01"));
-			map.add("agent", new ReferenceParam("Device/" + deviceId.getIdPart()));
-			//map.add("activity", new ReferenceParam("PA"));
-			myCaptureQueriesListener.clear();
-			IBundleProvider outcome = myProvenanceDao.search(map, new SystemRequestDetails());
-			ourLog.info("Search returned {} resources.", outcome.getResources(0, 999).size());
-			//assertEquals(1, outcome.getResources(0, 999).size());
-			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-
-			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 			// Ensure that we do NOT see a couple of particular WHERE clauses
 			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_type = 'procedure'"), selectQuery);
 			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null"), selectQuery);
