@@ -114,15 +114,10 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		o.setStatus(ObservationStatus.FINAL);
 		o.getSubject().setReference("Patient/FOO");
 
-		Assertions.assertThrows(InvalidRequestException.class, () -> {
+		Exception ex = Assertions.assertThrows(InvalidRequestException.class, () -> {
 			myObservationDao.update(o, mySrd);
 		});
-//		try {
-//
-//			fail();
-//		} catch (InvalidRequestException e) {
-//			assertThat(e.getMessage(), startsWith("Resource Patient/FOO not found, specified in path: Observation.subject"));
-//		}
+		assertThat(ex.getMessage(), startsWith("Resource Patient/FOO not found, specified in path: Observation.subject"));
 	}
 
 	@Test
