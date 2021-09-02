@@ -163,6 +163,7 @@ public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
 		// This is the case that is most relevant to SMILE-2899
 		IIdType oid1;
 
+		myCaptureQueriesListener.clear();
 		{
 			Organization org = new Organization();
 			org.setId("org");
@@ -183,11 +184,12 @@ public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
 
 			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
+		ourLog.info("Data setup SQL: " + myCaptureQueriesListener.getInsertQueriesForCurrentThread());
 
 		String url = "/Observation?subject.organization.name=HealthCo";
 		myCaptureQueriesListener.clear();
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
-		ourLog.info(">>> " + myCaptureQueriesListener.getSelectQueriesForCurrentThread());
+		ourLog.info("Data retrieval SQL: " + myCaptureQueriesListener.getSelectQueriesForCurrentThread());
 
 		assertEquals(1L, oids.size());
 		assertThat(oids, contains(oid1.getIdPart()));

@@ -80,6 +80,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
@@ -339,15 +340,26 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		List<String> candidateTargetTypes = new ArrayList<>();
 		List<Condition> orPredicates = new ArrayList<>();
 		QueryStack childQueryFactory = myQueryStack.newChildQueryFactoryWithFullBuilderReuse();
-		for (String nextType : resourceTypes) {
-			String chain = theReferenceParam.getChain();
 
-			String remainingChain = null;
-			int chainDotIndex = chain.indexOf('.');
-			if (chainDotIndex != -1) {
-				remainingChain = chain.substring(chainDotIndex + 1);
-				chain = chain.substring(0, chainDotIndex);
-			}
+		String chain = theReferenceParam.getChain();
+
+		String remainingChain = null;
+		int chainDotIndex = chain.indexOf('.');
+		if (chainDotIndex != -1) {
+			remainingChain = chain.substring(chainDotIndex + 1);
+			chain = chain.substring(0, chainDotIndex);
+		}
+
+		int qualifierIndex = chain.indexOf(':');
+		String qualifier = null;
+		if (qualifierIndex != -1) {
+			qualifier = chain.substring(qualifierIndex);
+			chain = chain.substring(0, qualifierIndex);
+		}
+
+		boolean isMeta = ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(chain);
+
+		for (String nextType : resourceTypes) {
 
 			RuntimeResourceDefinition typeDef = getFhirContext().getResourceDefinition(nextType);
 			String subResourceName = typeDef.getName();
@@ -358,14 +370,6 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 				continue;
 			}
 
-			int qualifierIndex = chain.indexOf(':');
-			String qualifier = null;
-			if (qualifierIndex != -1) {
-				qualifier = chain.substring(qualifierIndex);
-				chain = chain.substring(0, qualifierIndex);
-			}
-
-			boolean isMeta = ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(chain);
 			RuntimeSearchParam param = null;
 			if (!isMeta) {
 				param = mySearchParamRegistry.getActiveSearchParam(nextType, chain);
@@ -400,6 +404,9 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 
 			orPredicates.add(toAndPredicate(andPredicates));
 
+			if (getModelConfig().isIndexOnContainedResources() && theReferenceParam.getChain().contains(".")) {
+				orPredicates.add(childQueryFactory.createPredicateReferenceForContainedResourceNew(myColumnTargetResourceId, subResourceName, chain, param, orValues, null, theRequest, theRequestPartitionId));
+			}
 		}
 
 		if (candidateTargetTypes.isEmpty()) {
