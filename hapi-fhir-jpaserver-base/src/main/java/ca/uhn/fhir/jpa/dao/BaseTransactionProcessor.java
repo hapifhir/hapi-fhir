@@ -94,6 +94,8 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.SyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -154,11 +156,11 @@ public abstract class BaseTransactionProcessor {
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
+	private TaskExecutor myExecutor ;
+
 	@Autowired
 	private IAutoVersioningService myAutoVersioningService;
 
-	private ThreadPoolTaskExecutor myExecutor ;
-	
 	@VisibleForTesting
 	public void setDaoConfig(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;
@@ -176,16 +178,25 @@ public abstract class BaseTransactionProcessor {
 	@PostConstruct
 	public void start() {
 		ourLog.trace("Starting transaction processor");
-		myExecutor = new ThreadPoolTaskExecutor();
-		myExecutor.setThreadNamePrefix("bundle_batch_");
-		// For single thread set the value to 1
-		//myExecutor.setCorePoolSize(1);
-		//myExecutor.setMaxPoolSize(1);
-		myExecutor.setCorePoolSize(myDaoConfig.getBundleBatchPoolSize());
-		myExecutor.setMaxPoolSize(myDaoConfig.getBundleBatchMaxPoolSize());
-		myExecutor.setQueueCapacity(DaoConfig.DEFAULT_BUNDLE_BATCH_QUEUE_CAPACITY);
+	}
 
-		myExecutor.initialize();
+	private TaskExecutor getTaskExecutor() {
+		if (myExecutor == null) {
+			if (myDaoConfig.getBundleBatchPoolSize() > 1) {
+				ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+				executor.setThreadNamePrefix("bundle_batch_");
+				executor.setCorePoolSize(myDaoConfig.getBundleBatchPoolSize());
+				executor.setMaxPoolSize(myDaoConfig.getBundleBatchMaxPoolSize());
+				executor.setQueueCapacity(DaoConfig.DEFAULT_BUNDLE_BATCH_QUEUE_CAPACITY);
+				executor.initialize();
+				myExecutor = executor;
+
+			} else {
+				SyncTaskExecutor executor = new SyncTaskExecutor();
+				myExecutor = executor;
+			}
+		}
+		return myExecutor;
 	}
 
 	public <BUNDLE extends IBaseBundle> BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest, boolean theNestedMode) {
@@ -355,7 +366,7 @@ public abstract class BaseTransactionProcessor {
 		for (int i=0; i<requestEntriesSize; i++ ) {
 			nextRequestEntry = requestEntries.get(i);
 			BundleTask bundleTask = new BundleTask(completionLatch, theRequestDetails, responseMap, i, nextRequestEntry, theNestedMode);
-			myExecutor.submit(bundleTask);
+			getTaskExecutor().execute(bundleTask);
 		}
 
 		// waiting for all tasks to be completed
@@ -854,6 +865,7 @@ public abstract class BaseTransactionProcessor {
 						String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
 						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
 						outcome = resourceDao.create(res, matchUrl, false, theTransactionDetails, theRequest);
+					 	res.setId(outcome.getId());
 						if (nextResourceId != null) {
 							handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequest);
 						}
@@ -1047,13 +1059,9 @@ public abstract class BaseTransactionProcessor {
 
 			for (IIdType next : theAllIds) {
 				IIdType replacement = theIdSubstitutions.get(next);
-				if (replacement == null) {
-					continue;
+				if (replacement != null && !replacement.equals(next)) {
+					ourLog.debug("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
 				}
-				if (replacement.equals(next)) {
-					continue;
-				}
-				ourLog.debug("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
 			}
 
 			ListMultimap<Pointcut, HookParams> deferredBroadcastEvents = theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
@@ -1673,10 +1681,10 @@ public abstract class BaseTransactionProcessor {
 		return theStatusCode + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
 	}
 
-	public class BundleTask implements Callable<Void> {
+	public class BundleTask implements Runnable {
 
 		private CountDownLatch myCompletedLatch;
-		private ServletRequestDetails myRequestDetails;
+		private RequestDetails myRequestDetails;
 		private IBase myNextReqEntry;
 		private Map<Integer, Object> myResponseMap;
 		private int myResponseOrder;
@@ -1684,7 +1692,7 @@ public abstract class BaseTransactionProcessor {
 		
 		protected BundleTask(CountDownLatch theCompletedLatch, RequestDetails theRequestDetails, Map<Integer, Object> theResponseMap, int theResponseOrder, IBase theNextReqEntry, boolean theNestedMode) {
 			this.myCompletedLatch = theCompletedLatch;
-			this.myRequestDetails = (ServletRequestDetails)theRequestDetails;
+			this.myRequestDetails = theRequestDetails;
 			this.myNextReqEntry = theNextReqEntry;
 			this.myResponseMap = theResponseMap;		
 			this.myResponseOrder = theResponseOrder;					
@@ -1692,10 +1700,8 @@ public abstract class BaseTransactionProcessor {
 		}
 		
 		@Override
-		public Void call() {
-			
+		public void run() {
 			BaseServerResponseExceptionHolder caughtEx = new BaseServerResponseExceptionHolder();
-
 			try {
 				IBaseBundle subRequestBundle = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode());
 				myVersionAdapter.addEntry(subRequestBundle, (IBase) myNextReqEntry);
@@ -1728,7 +1734,6 @@ public abstract class BaseTransactionProcessor {
 			// checking for the parallelism
 			ourLog.debug("processing bacth for {} is completed", myVersionAdapter.getEntryRequestUrl((IBase)myNextReqEntry));
 			myCompletedLatch.countDown();
-			return null;
 		}
 	}
 }

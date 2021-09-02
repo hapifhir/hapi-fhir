@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2923
+title: "$lookup operation cache was based on system and code, it becomes a defect 
+   after adding displayLanguage support. Problem is now fixed."

@@ -398,8 +398,8 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public void cachePackage(PackageVersion packageDetails, List<PackageVersion> dependencies) {
-		throw new UnsupportedOperationException();
+	public void cachePackage(PackageDetails packageDetails, List<PackageVersion> list) {
+
 	}
 
 	@Override
@@ -443,6 +443,16 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public boolean hasPackage(PackageVersion packageVersion) {
+		return false;
+	}
+
+	@Override
+	public PackageDetails getPackage(PackageVersion packageVersion) {
+		return null;
+	}
+
+	@Override
 	public int getClientRetryCount() {
 		throw new UnsupportedOperationException();
 	}
@@ -454,6 +464,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public TimeTracker clock() {
+		return null;
+	}
+
+	@Override
+	public PackageVersion getPackageForUrl(String s) {
 		return null;
 	}
 

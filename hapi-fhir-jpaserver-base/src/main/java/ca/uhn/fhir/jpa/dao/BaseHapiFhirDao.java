@@ -94,6 +94,7 @@ import com.google.common.collect.Sets;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -1162,10 +1163,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					validateResourceForStorage((T) theResource, entity);
 				}
 			}
-			String resourceType = myContext.getResourceType(theResource);
-			if (isNotBlank(entity.getResourceType()) && !entity.getResourceType().equals(resourceType)) {
-				throw new UnprocessableEntityException(
-					"Existing resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + entity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
+			if (!StringUtils.isBlank(entity.getResourceType())) {
+				validateIncomingResourceTypeMatchesExisting(theResource, entity);
 			}
 		}
 
@@ -1206,7 +1205,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			if (thePerformIndexing || ((ResourceTable) theEntity).getVersion() == 1) {
 
 				newParams = new ResourceIndexedSearchParams();
-				//FIXME GGG: This is where the placeholder references end up getting created, deeeeeep down the stakc.
 				mySearchParamWithInlineReferencesExtractor.populateFromResource(newParams, theTransactionDetails, entity, theResource, existingParams, theRequest, thePerformIndexing);
 
 				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);
@@ -1414,6 +1412,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 
 		return entity;
+	}
+
+	private void validateIncomingResourceTypeMatchesExisting(IBaseResource theResource, ResourceTable entity) {
+		String resourceType = myContext.getResourceType(theResource);
+		if (!resourceType.equals(entity.getResourceType())) {
+			throw new UnprocessableEntityException(
+				"Existing resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + entity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
+		}
 	}
 
 	@Override

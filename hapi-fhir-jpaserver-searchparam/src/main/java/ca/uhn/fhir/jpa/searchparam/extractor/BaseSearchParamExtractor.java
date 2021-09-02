@@ -78,6 +78,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -964,6 +965,18 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return retVal;
 	}
 
+
+	/**
+	 * Helper function to determine if a set of SPs for a resource uses a resolve as part of its fhir path.
+	 */
+	private boolean anySearchParameterUsesResolve(Collection<RuntimeSearchParam> searchParams, RestSearchParameterTypeEnum theSearchParamType) {
+		return searchParams.stream()
+			.filter(param -> param.getParamType() != theSearchParamType)
+			.map(RuntimeSearchParam::getPath)
+			.filter(Objects::nonNull)
+			.anyMatch(path-> path.contains("resolve"));
+	}
+
 	/**
 	 * HAPI FHIR Reference objects (e.g. {@link org.hl7.fhir.r4.model.Reference}) can hold references either by text
 	 * (e.g. "#3") or by resource (e.g. "new Reference(patientInstance)"). The FHIRPath evaluator only understands the
@@ -974,17 +987,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	 * if we think there's actually a chance
 	 */
 	private void cleanUpContainedResourceReferences(IBaseResource theResource, RestSearchParameterTypeEnum theSearchParamType, Collection<RuntimeSearchParam> searchParams) {
-		boolean havePathWithResolveExpression = myModelConfig.isIndexOnContainedResources();
-		for (RuntimeSearchParam nextSpDef : searchParams) {
-			if (nextSpDef.getParamType() != theSearchParamType) {
-				continue;
-			}
-			if (defaultString(nextSpDef.getPath()).contains("resolve")) {
-				havePathWithResolveExpression = true;
-				break;
-			}
-		}
+		boolean havePathWithResolveExpression =
+			myModelConfig.isIndexOnContainedResources()
+			|| anySearchParameterUsesResolve(searchParams, theSearchParamType);
+
 		if (havePathWithResolveExpression) {
+			//TODO GGG/JA: At this point, if the Task.basedOn.reference.resource does _not_ have an ID, we will attempt to contain it internally. Wild
 			myContext.newTerser().containResources(theResource, FhirTerser.OptionsEnum.MODIFY_RESOURCE, FhirTerser.OptionsEnum.STORE_AND_REUSE_RESULTS);
 		}
 	}

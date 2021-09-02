@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.provider.r5;
  * #L%
  */
 
+import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
-import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -30,7 +30,8 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hl7.fhir.convertors.VersionConvertor_40_50;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.CodeableConcept;
@@ -52,7 +53,7 @@ public class BaseJpaResourceProviderConceptMapR5 extends JpaResourceProviderR5<C
 		HttpServletRequest theServletRequest,
 		@IdParam(optional = true) IdType theId,
 		@OperationParam(name = "url", min = 0, max = 1) UriType theUrl,
-		@OperationParam(name = "conceptMapVersion", min = 0, max = 1) StringType theConceptMapVersion,		
+		@OperationParam(name = "conceptMapVersion", min = 0, max = 1) StringType theConceptMapVersion,
 		@OperationParam(name = "code", min = 0, max = 1) CodeType theSourceCode,
 		@OperationParam(name = "system", min = 0, max = 1) UriType theSourceCodeSystem,
 		@OperationParam(name = "version", min = 0, max = 1) StringType theSourceCodeSystemVersion,
@@ -78,7 +79,7 @@ public class BaseJpaResourceProviderConceptMapR5 extends JpaResourceProviderR5<C
 			&& theSourceValueSet.hasValue();
 		boolean haveSourceCoding = theSourceCoding != null
 			&& theSourceCoding.hasCode();
-		boolean haveSourceCodeableConcept= theSourceCodeableConcept != null
+		boolean haveSourceCodeableConcept = theSourceCodeableConcept != null
 			&& theSourceCodeableConcept.hasCoding()
 			&& theSourceCodeableConcept.getCodingFirstRep().hasCode();
 		boolean haveTargetValueSet = theTargetValueSet != null
@@ -97,43 +98,44 @@ public class BaseJpaResourceProviderConceptMapR5 extends JpaResourceProviderR5<C
 		TranslationRequest translationRequest = new TranslationRequest();
 
 		if (haveUrl) {
-			translationRequest.setUrl(VersionConvertor_40_50.convertUri(theUrl));
+			translationRequest.setUrl((org.hl7.fhir.r4.model.UriType) VersionConvertorFactory_40_50.convertType(theUrl, new BaseAdvisor_40_50(false)));
 		}
-		
+
 		if (haveConceptMapVersion) {
-			translationRequest.setConceptMapVersion(VersionConvertor_40_50.convertString(theConceptMapVersion));
+			translationRequest.setConceptMapVersion((org.hl7.fhir.r4.model.StringType) VersionConvertorFactory_40_50.convertType(theConceptMapVersion, new BaseAdvisor_40_50(false)));
 		}
-		
+
 		if (haveSourceCode) {
-			translationRequest.getCodeableConcept().addCoding().setCodeElement(VersionConvertor_40_50.convertCode(theSourceCode));
+			translationRequest.getCodeableConcept().addCoding().setCodeElement((org.hl7.fhir.r4.model.CodeType) VersionConvertorFactory_40_50.convertType(theSourceCode, new BaseAdvisor_40_50(false)));
 
 			if (haveSourceCodeSystem) {
-				translationRequest.getCodeableConcept().getCodingFirstRep().setSystemElement(VersionConvertor_40_50.convertUri(theSourceCodeSystem));
+				translationRequest.getCodeableConcept().getCodingFirstRep().setSystemElement((org.hl7.fhir.r4.model.UriType) VersionConvertorFactory_40_50.convertType(theSourceCodeSystem, new BaseAdvisor_40_50(false)));
 			}
 
 			if (haveSourceCodeSystemVersion) {
-				translationRequest.getCodeableConcept().getCodingFirstRep().setVersionElement(VersionConvertor_40_50.convertString(theSourceCodeSystemVersion));
+				translationRequest.getCodeableConcept().getCodingFirstRep()
+					.setVersionElement((org.hl7.fhir.r4.model.StringType) VersionConvertorFactory_40_50.convertType(theSourceCodeSystemVersion, new BaseAdvisor_40_50(false)));
 			}
 		} else if (haveSourceCoding) {
-			translationRequest.getCodeableConcept().addCoding(VersionConvertor_40_50.convertCoding(theSourceCoding));
+			translationRequest.getCodeableConcept().addCoding((org.hl7.fhir.r4.model.Coding) VersionConvertorFactory_40_50.convertType(theSourceCoding, new BaseAdvisor_40_50(false)));
 		} else {
-			translationRequest.setCodeableConcept(VersionConvertor_40_50.convertCodeableConcept(theSourceCodeableConcept));
+			translationRequest.setCodeableConcept((org.hl7.fhir.r4.model.CodeableConcept) VersionConvertorFactory_40_50.convertType(theSourceCodeableConcept, new BaseAdvisor_40_50(false)));
 		}
 
 		if (haveSourceValueSet) {
-			translationRequest.setSource(VersionConvertor_40_50.convertUri(theSourceValueSet));
+			translationRequest.setSource((org.hl7.fhir.r4.model.UriType) VersionConvertorFactory_40_50.convertType(theSourceValueSet, new BaseAdvisor_40_50(false)));
 		}
 
 		if (haveTargetValueSet) {
-			translationRequest.setTarget(VersionConvertor_40_50.convertUri(theTargetValueSet));
+			translationRequest.setTarget((org.hl7.fhir.r4.model.UriType) VersionConvertorFactory_40_50.convertType(theTargetValueSet, new BaseAdvisor_40_50(false)));
 		}
 
 		if (haveTargetCodeSystem) {
-			translationRequest.setTargetSystem(VersionConvertor_40_50.convertUri(theTargetCodeSystem));
+			translationRequest.setTargetSystem((org.hl7.fhir.r4.model.UriType) VersionConvertorFactory_40_50.convertType(theTargetCodeSystem, new BaseAdvisor_40_50(false)));
 		}
 
 		if (haveReverse) {
-			translationRequest.setReverse(VersionConvertor_40_50.convertBoolean(theReverse));
+			translationRequest.setReverse((org.hl7.fhir.r4.model.BooleanType) VersionConvertorFactory_40_50.convertType(theReverse, new BaseAdvisor_40_50(false)));
 		}
 
 		if (haveId) {
@@ -145,7 +147,7 @@ public class BaseJpaResourceProviderConceptMapR5 extends JpaResourceProviderR5<C
 			IFhirResourceDaoConceptMap<ConceptMap> dao = (IFhirResourceDaoConceptMap<ConceptMap>) getDao();
 			TranslateConceptResults result = dao.translate(translationRequest, theRequestDetails);
 			org.hl7.fhir.r4.model.Parameters parameters = TermConceptMappingSvcImpl.toParameters(result);
-			return org.hl7.fhir.convertors.conv40_50.Parameters40_50.convertParameters(parameters);
+			return (Parameters) VersionConvertorFactory_40_50.convertResource(parameters, new BaseAdvisor_40_50(false));
 		} finally {
 			endRequest(theServletRequest);
 		}

@@ -46,6 +46,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,10 +62,12 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -218,18 +221,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 						IQueryParameterType param = andList.get(0).get(0);
 
 						if (param instanceof TokenParam) {
-							TokenParam tokenParam = (TokenParam) param;
-							Predicate hashPredicate = null;
-							if (isNotBlank(tokenParam.getValue()) && isNotBlank(tokenParam.getSystem())) {
-								next.myHashSystemAndValue = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(myPartitionSettings, requestPartitionId, next.myResourceDefinition.getName(), next.myMatchUrlSearchMap.keySet().iterator().next(), tokenParam.getSystem(), tokenParam.getValue());
-								hashPredicate = cb.equal(from.get("myHashSystemAndValue").as(Long.class), next.myHashSystemAndValue);
-							} else if (isNotBlank(tokenParam.getValue())) {
-								next.myHashValue = ResourceIndexedSearchParamToken.calculateHashValue(myPartitionSettings, requestPartitionId, next.myResourceDefinition.getName(), next.myMatchUrlSearchMap.keySet().iterator().next(), tokenParam.getValue());
-								hashPredicate = cb.equal(from.get("myHashValue").as(Long.class), next.myHashValue);
-							}
+							Predicate hashPredicate = buildHashPredicateFromTokenParam((TokenParam)param, requestPartitionId, cb, from, next);
 
 							if (hashPredicate != null) {
-
 								if (myPartitionSettings.isPartitioningEnabled() && !myPartitionSettings.isIncludePartitionInSearchHashes()) {
 									if (requestPartitionId.isDefaultPartition()) {
 										Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue").as(Integer.class));
@@ -250,35 +244,30 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				if (orPredicates.size() > 1) {
 					cq.where(cb.or(orPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
 
+					Map<Long, List<MatchUrlToResolve>> hashToSearchMap = buildHashToSearchMap(searchParameterMapsToResolve);
+
 					TypedQuery<ResourceIndexedSearchParamToken> query = myEntityManager.createQuery(cq);
 					List<ResourceIndexedSearchParamToken> results = query.getResultList();
+
 					for (ResourceIndexedSearchParamToken nextResult : results) {
-
-						for (MatchUrlToResolve nextSearchParameterMap : searchParameterMapsToResolve) {
-							if (nextSearchParameterMap.myHashSystemAndValue != null && nextSearchParameterMap.myHashSystemAndValue.equals(nextResult.getHashSystemAndValue())) {
-								idsToPreFetch.add(nextResult.getResourcePid());
-								myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, nextSearchParameterMap.myResourceDefinition.getName(), nextSearchParameterMap.myRequestUrl, new ResourcePersistentId(nextResult.getResourcePid()));
-								theTransactionDetails.addResolvedMatchUrl(nextSearchParameterMap.myRequestUrl, new ResourcePersistentId(nextResult.getResourcePid()));
-								nextSearchParameterMap.myResolved = true;
-							}
-							if (nextSearchParameterMap.myHashValue != null && nextSearchParameterMap.myHashValue.equals(nextResult.getHashValue())) {
-								idsToPreFetch.add(nextResult.getResourcePid());
-								myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, nextSearchParameterMap.myResourceDefinition.getName(), nextSearchParameterMap.myRequestUrl, new ResourcePersistentId(nextResult.getResourcePid()));
-								theTransactionDetails.addResolvedMatchUrl(nextSearchParameterMap.myRequestUrl, new ResourcePersistentId(nextResult.getResourcePid()));
-								nextSearchParameterMap.myResolved = true;
-							}
-
+						Optional<List<MatchUrlToResolve>> matchedSearch = Optional.ofNullable(hashToSearchMap.get(nextResult.getHashSystemAndValue()));
+						if (!matchedSearch.isPresent()) {
+							matchedSearch =  Optional.ofNullable(hashToSearchMap.get(nextResult.getHashValue()));
 						}
-
+						matchedSearch.ifPresent(matchUrlsToResolve -> {
+							matchUrlsToResolve.forEach(matchUrl -> {
+								setSearchToResolvedAndPrefetchFoundResourcePid(theTransactionDetails, idsToPreFetch, nextResult, matchUrl);
+							});
+						});
 					}
-
-					for (MatchUrlToResolve nextSearchParameterMap : searchParameterMapsToResolve) {
+					//For each SP Map which did not return a result, tag it as not found.
+					searchParameterMapsToResolve.stream()
 						// No matches
-						if (!nextSearchParameterMap.myResolved) {
-							theTransactionDetails.addResolvedMatchUrl(nextSearchParameterMap.myRequestUrl, TransactionDetails.NOT_FOUND);
-						}
-					}
-
+						.filter(match -> !match.myResolved)
+						.forEach(match -> {
+							ourLog.debug("Was unable to match url {} from database", match.myRequestUrl);
+							theTransactionDetails.addResolvedMatchUrl(match.myRequestUrl, TransactionDetails.NOT_FOUND);
+						});
 				}
 			}
 
@@ -318,6 +307,49 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		}
 
 		return super.doTransactionWriteOperations(theRequest, theActionName, theTransactionDetails, theAllIds, theIdSubstitutions, theIdToPersistedOutcome, theResponse, theOriginalRequestOrder, theEntries, theTransactionStopWatch);
+	}
+
+	/**
+	 * Given a token parameter, build the query predicate based on its hash. Uses system and value if both are available, otherwise just value.
+	 * If neither are available, it returns null.
+	 */
+	@Nullable
+	private Predicate buildHashPredicateFromTokenParam(TokenParam theTokenParam, RequestPartitionId theRequestPartitionId, CriteriaBuilder cb, Root<ResourceIndexedSearchParamToken> from, MatchUrlToResolve theMatchUrl) {
+		Predicate hashPredicate = null;
+		if (isNotBlank(theTokenParam.getValue()) && isNotBlank(theTokenParam.getSystem())) {
+			theMatchUrl.myHashSystemAndValue = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(myPartitionSettings, theRequestPartitionId, theMatchUrl.myResourceDefinition.getName(), theMatchUrl.myMatchUrlSearchMap.keySet().iterator().next(), theTokenParam.getSystem(), theTokenParam.getValue());
+			hashPredicate = cb.equal(from.get("myHashSystemAndValue").as(Long.class), theMatchUrl.myHashSystemAndValue);
+		} else if (isNotBlank(theTokenParam.getValue())) {
+			theMatchUrl.myHashValue = ResourceIndexedSearchParamToken.calculateHashValue(myPartitionSettings, theRequestPartitionId, theMatchUrl.myResourceDefinition.getName(), theMatchUrl.myMatchUrlSearchMap.keySet().iterator().next(), theTokenParam.getValue());
+			hashPredicate = cb.equal(from.get("myHashValue").as(Long.class), theMatchUrl.myHashValue);
+		}
+		return hashPredicate;
+	}
+
+	private Map<Long, List<MatchUrlToResolve>> buildHashToSearchMap(List<MatchUrlToResolve> searchParameterMapsToResolve) {
+		Map<Long, List<MatchUrlToResolve>> hashToSearch = new HashMap<>();
+		//Build a lookup map so we don't have to iterate over the searches repeatedly.
+		for (MatchUrlToResolve nextSearchParameterMap : searchParameterMapsToResolve) {
+			if (nextSearchParameterMap.myHashSystemAndValue != null) {
+				List<MatchUrlToResolve> matchUrlsToResolve = hashToSearch.getOrDefault(nextSearchParameterMap.myHashSystemAndValue, new ArrayList<>());
+				matchUrlsToResolve.add(nextSearchParameterMap);
+				hashToSearch.put(nextSearchParameterMap.myHashSystemAndValue,  matchUrlsToResolve);
+			}
+			if (nextSearchParameterMap.myHashValue!= null) {
+				List<MatchUrlToResolve> matchUrlsToResolve = hashToSearch.getOrDefault(nextSearchParameterMap.myHashValue, new ArrayList<>());
+				matchUrlsToResolve.add(nextSearchParameterMap);
+				hashToSearch.put(nextSearchParameterMap.myHashValue,  matchUrlsToResolve);
+			}
+		}
+		return hashToSearch;
+	}
+
+	private void setSearchToResolvedAndPrefetchFoundResourcePid(TransactionDetails theTransactionDetails, List<Long> idsToPreFetch, ResourceIndexedSearchParamToken nextResult, MatchUrlToResolve nextSearchParameterMap) {
+		ourLog.debug("Matched url {} from database", nextSearchParameterMap.myRequestUrl);
+		idsToPreFetch.add(nextResult.getResourcePid());
+		myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, nextSearchParameterMap.myResourceDefinition.getName(), nextSearchParameterMap.myRequestUrl, new ResourcePersistentId(nextResult.getResourcePid()));
+		theTransactionDetails.addResolvedMatchUrl(nextSearchParameterMap.myRequestUrl, new ResourcePersistentId(nextResult.getResourcePid()));
+		nextSearchParameterMap.setResolved(true);
 	}
 
 	private List<ResourceTable> preFetchIndexes(List<Long> ids, String typeDesc, String fieldName) {
@@ -378,6 +410,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			myRequestUrl = theRequestUrl;
 			myMatchUrlSearchMap = theMatchUrlSearchMap;
 			myResourceDefinition = theResourceDefinition;
+		}
+		public void setResolved(boolean theResolved) {
+			myResolved = theResolved;
 		}
 	}
 }

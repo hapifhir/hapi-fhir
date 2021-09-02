@@ -428,13 +428,13 @@ public class FhirInstanceValidatorR5Test {
 		String input = IOUtils.toString(FhirInstanceValidator.class.getResourceAsStream("/vitals.json"), Charsets.UTF_8);
 
 		IResourceValidator.IValidatorResourceFetcher resourceFetcher = mock(IResourceValidator.IValidatorResourceFetcher.class);
-		when(resourceFetcher.validationPolicy(any(),anyString(), anyString())).thenReturn(IResourceValidator.ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
+		when(resourceFetcher.validationPolicy(any(), any(), any(), any())).thenReturn(IResourceValidator.ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myVal.validateWithResult(input);
 
-		verify(resourceFetcher, times(13)).resolveURL(any(), anyString(), anyString(), anyString());
-		verify(resourceFetcher, times(4)).validationPolicy(any(), anyString(), anyString());
-		verify(resourceFetcher, times(3)).fetch(any(), anyString());
+		verify(resourceFetcher, times(13)).resolveURL(any(), any(), anyString(), anyString(), anyString());
+		verify(resourceFetcher, times(4)).validationPolicy(any(), any(), anyString(), anyString());
+		verify(resourceFetcher, times(3)).fetch(any(), any(), anyString());
 	}
 
 	@Test
@@ -614,8 +614,8 @@ public class FhirInstanceValidatorR5Test {
 		List<SingleValidationMessage> messages = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals( 3, messages.size(), output.toString());
 		assertThat(messages.get(0).getMessage(), containsString("Element must have some content"));
-		assertThat(messages.get(1).getMessage(), containsString("Primitive types must have a value or must have child extensions"));
-		assertThat(messages.get(2).getMessage(), containsString("ele-1: 'All FHIR elements must have a @value or children' Rule 'All FHIR elements must have a @value or children' Failed"));
+		assertThat(messages.get(1).getMessage(), containsString("ele-1: 'All FHIR elements must have a @value or children' Rule 'All FHIR elements must have a @value or children' Failed"));
+		assertThat(messages.get(2).getMessage(), containsString("Primitive types must have a value or must have child extensions"));
 	}
 
 	@Test

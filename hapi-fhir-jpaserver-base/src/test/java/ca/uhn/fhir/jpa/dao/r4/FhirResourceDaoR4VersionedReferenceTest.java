@@ -779,7 +779,6 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			assertEquals(observationId.getValue(), resources.get(0).getIdElement().getValue());
 			assertEquals(patientId.withVersion("2").getValue(), resources.get(1).getIdElement().getValue());
 		}
-
 	}
 
 	@Test
