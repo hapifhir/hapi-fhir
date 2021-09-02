@@ -31,6 +31,7 @@ import org.hl7.fhir.r4.model.BodyStructure;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
@@ -38,6 +39,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
@@ -916,7 +918,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSearchOnUnderscoreTagParam_AvoidHFJResourceJoins() {
+	public void testSearchOnUnderscoreParams_AvoidHFJResourceJoins() {
 		// This Issue: https://github.com/hapifhir/hapi-fhir/issues/2942
 		// See this PR for a similar type of Fix: https://github.com/hapifhir/hapi-fhir/pull/2909
 		SearchParameter searchParameter = new SearchParameter();
@@ -966,6 +968,14 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			.addTag("acc_procext_fkc", "1STCANN2NDL", "First Successful Cannulation with 2 Needles");
 		IIdType procedureId = myProcedureDao.create(procedure).getId().toUnqualifiedVersionless();
 
+		Device device = new Device();
+		device.setManufacturer("Acme");
+		IIdType deviceId = myDeviceDao.create(device).getId().toUnqualifiedVersionless();
+
+		Provenance provenance = new Provenance();
+		provenance.setActivity(new CodeableConcept().addCoding(new Coding().setSystem("http://hl7.org/fhir/v3/DocumentCompletion").setCode("PA")));
+		provenance.addAgent().setWho(new Reference(deviceId));
+
 		logAllResources();
 		logAllResourceTags();
 		logAllResourceVersions();
@@ -987,7 +997,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			myCaptureQueriesListener.clear();
 			IBundleProvider outcome = myProcedureDao.search(map, new SystemRequestDetails());
 			ourLog.info("Search returned {} resources.", outcome.getResources(0, 999).size());
-			//assertEquals(1, outcome.getResources(0, 999).size());
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
@@ -1008,7 +1017,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			// IMPORTANT: Keep the query param order exactly as shown below!
 			// NOTE: The "outcome" SearchParameter is not being used below, but it doesn't affect the test.
 			SearchParameterMap map = SearchParameterMap.newSynchronous();
-			// _tag, category, status, subject, focalAccess
+			// _tag, category, status, focalAccess
 			map.add("_tag", new TokenParam("TagValue"));
 			map.add("category", new TokenParam("CANN"));
 			map.add("status", new TokenParam("entered-in-error").setModifier(TokenParamModifier.NOT));
@@ -1016,13 +1025,35 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			myCaptureQueriesListener.clear();
 			IBundleProvider outcome = myProcedureDao.search(map, new SystemRequestDetails());
 			ourLog.info("Search returned {} resources.", outcome.getResources(0, 999).size());
-			//assertEquals(1, outcome.getResources(0, 999).size());
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 			// Check for a particular WHERE CLAUSE in the generated SQL to make sure we are verifying the correct query
 			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), " join hfj_res_link "), selectQuery);
 
+			// Ensure that we do NOT see a couple of particular WHERE clauses
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_type = 'procedure'"), selectQuery);
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null"), selectQuery);
+		}
+
+		// Search example 3:
+		// http://FHIR_SERVER/fhir_request/Provenance
+		// ?agent=Acme&activity=PA&_lastUpdated=ge2021-01-01&_requestTrace=True
+		// NOTE: This gets sorted once so the order is different once it gets executed!
+		{
+			// IMPORTANT: Keep the query param order exactly as shown below!
+			// NOTE: The "outcome" SearchParameter is not being used below, but it doesn't affect the test.
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			//map.add("_lastUpdated", new TokenParam("ge2021-01-01"));
+			map.add("agent", new ReferenceParam("Device/" + deviceId.getIdPart()));
+			//map.add("activity", new ReferenceParam("PA"));
+			myCaptureQueriesListener.clear();
+			IBundleProvider outcome = myProvenanceDao.search(map, new SystemRequestDetails());
+			ourLog.info("Search returned {} resources.", outcome.getResources(0, 999).size());
+			//assertEquals(1, outcome.getResources(0, 999).size());
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 			// Ensure that we do NOT see a couple of particular WHERE clauses
 			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_type = 'procedure'"), selectQuery);
 			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null"), selectQuery);
