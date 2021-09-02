@@ -20,11 +20,10 @@ package ca.uhn.fhir.jpa.batch.mdm.job;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.batch.job.MultiUrlProcessorJobConfig;
+import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterValidator;
 import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
+import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
 import ca.uhn.fhir.jpa.delete.job.DeleteExpungeProcessor;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -49,7 +48,7 @@ import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.MDM_CLEAR_JOB_NAME;
  * $mdm-clear job.
  */
 @Configuration
-public class MdmClearJobConfig extends MultiUrlProcessorJobConfig {
+public class MdmClearJobConfig {
 	public static final String MDM_CLEAR_RESOURCE_LIST_STEP_NAME = "mdm-clear-resource-list-step";
 
 	@Autowired
@@ -58,16 +57,25 @@ public class MdmClearJobConfig extends MultiUrlProcessorJobConfig {
 	private JobBuilderFactory myJobBuilderFactory;
 	@Autowired
 	private DeleteExpungeProcessor myDeleteExpungeProcessor;
+
 	@Autowired
 	@Qualifier("deleteExpungePromotionListener")
 	private ExecutionContextPromotionListener myDeleteExpungePromotionListener;
 
+	@Autowired
+	private MultiUrlJobParameterValidator myMultiUrlProcessorParameterValidator;
+
+	@Autowired
+	private PidReaderCounterListener myPidCountRecorderListener;
+
+	@Autowired
+	private SqlExecutorWriter mySqlExecutorWriter;
 
 	@Bean(name = MDM_CLEAR_JOB_NAME)
 	@Lazy
-	public Job mdmClearJob(MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
+	public Job mdmClearJob() {
 		return myJobBuilderFactory.get(MDM_CLEAR_JOB_NAME)
-			.validator(multiUrlProcessorParameterValidator(theMatchUrlService, theDaoRegistry))
+			.validator(myMultiUrlProcessorParameterValidator)
 			.start(mdmClearUrlListStep())
 			.build();
 	}
@@ -78,8 +86,8 @@ public class MdmClearJobConfig extends MultiUrlProcessorJobConfig {
 			.<List<Long>, List<String>>chunk(1)
 			.reader(reverseCronologicalBatchMdmLinkPidReader())
 			.processor(deleteThenExpungeCompositeProcessor())
-			.writer(sqlExecutorWriter())
-			.listener(pidCountRecorderListener())
+			.writer(mySqlExecutorWriter)
+			.listener(myPidCountRecorderListener)
 			.listener(myDeleteExpungePromotionListener)
 			.build();
 	}
@@ -102,7 +110,6 @@ public class MdmClearJobConfig extends MultiUrlProcessorJobConfig {
 	}
 
 	@Bean
-	@StepScope
 	public MdmLinkDeleter mdmLinkDeleter() {
 		return new MdmLinkDeleter();
 	}
