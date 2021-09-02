@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
@@ -27,14 +28,18 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -913,18 +918,35 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		// See this PR for a similar type of Query change: https://github.com/hapifhir/hapi-fhir/pull/2909
 		//
 		Patient patient = new Patient();
-		patient.setId("B");
-		patient.getMeta().addTag(null, "TagKey", "TagValue");
-		myPatientDao.update(patient);
+		patient.setActive(true);
+		patient.addName().setFamily("FamilyName");
+		Extension extParent = patient
+			.addExtension()
+			.setUrl("http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity");
+		extParent
+			.addExtension()
+			.setUrl("ombCategory")
+			.setValue(new CodeableConcept().addCoding(new Coding().setSystem("urn:oid:2.16.840.1.113883.5.50")
+			.setCode("2186-5")
+			.setDisplay("Not Hispanic or Latino")));
+		extParent
+			.addExtension()
+			.setUrl("text")
+			.setValue(new StringType("Not Hispanic or Latino"));
+		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		CodeableConcept categoryCodeableConcept1 = new CodeableConcept().setText("Test Codeable Concept Field");
-
 		Procedure procedure = new Procedure();
-		procedure.setId("A");
-		procedure.setSubject(new Reference("Patient/B"));
+		procedure.setSubject(new Reference(patientId));
 		procedure.setStatus(Procedure.ProcedureStatus.COMPLETED);
 		procedure.setCategory(categoryCodeableConcept1);
-		myProcedureDao.update(procedure);
+		Extension extProcedure = procedure
+			.addExtension()
+			.setUrl("http://hapifhir.io/fhir/StructureDefinition/resource-meta-source")
+			.setValue(new UriType("#IGnelx1k3MYKfJxN"));
+		procedure.getMeta()
+			.addTag("acc_procext_fkc", "1STCANN2NDL", "First Successful Cannulation with 2 Needles");
+		IIdType procedureId = myProcedureDao.create(procedure).getId().toUnqualifiedVersionless();
 
 		logAllResources();
 		logAllResourceTags();
@@ -936,21 +958,31 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		// &category=CANN&focalAccess=BodySite%2F3530342921&_tag=TagValue
 		{
 			SearchParameterMap map = SearchParameterMap.newSynchronous();
-			map.add("subject", new ReferenceParam("Patient/B"));
+			map.add("subject", new ReferenceParam(patientId));
 			// TODO KBD Add additional params to try and replicate the sample query above!
 			//map.add("status", new TokenParam("final"));
 			//map.add("category", new TokenParam("final"));
+			map.add("_tag", new TokenParam("TagValue"));
 			myCaptureQueriesListener.clear();
 			IBundleProvider outcome = myProcedureDao.search(map, new SystemRequestDetails());
-			assertEquals(1, outcome.getResources(0, 999).size());
+			//assertEquals(1, outcome.getResources(0, 999).size());
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			// Dump Out the Generated SQL
+			List<SqlQuery> sqlQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+			for (int i = 0; i < sqlQueries.size(); i++) {
+				ourLog.info("\n==================================================================\n");
+				ourLog.info("iteration: {}\n", i);
+				ourLog.info("Generated SQL:\n{}", sqlQueries.get(i).getSql(true, false));
+				ourLog.info("==================================================================\n\n");
+			}
 
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 			// TODO KBD Figure out what to look for in the selectQuery SQL!
 			//assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "forcedid0_.resource_type='observation'"), selectQuery);
 			//assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "forcedid0_.forced_id in ('a')"), selectQuery);
 
-			selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
+			//selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
 			// TODO KBD Figure out what to look for in the selectQuery SQL!
 			//assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "select t1.res_id from hfj_resource t1"), selectQuery);
 			//assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t1.res_type = 'observation'"), selectQuery);
