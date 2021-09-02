@@ -113,8 +113,9 @@ public interface IForcedIdDao extends JpaRepository<ForcedId, Long> {
 
 	@Query("" +
 	"SELECT " +
-	"   f.myResourceType, f.myForcedId " +
+	"   f.myResourceType, f.myForcedId, f.myResourcePid, t.myVersion " +
 	"FROM ForcedId f " +
+	"JOIN ResourceTable t ON t.myId = f.myResourcePid " +
 	"WHERE f.myResourceType = :resource_type AND f.myForcedId IN ( :forced_id )")
 	Collection<Object[]> findResourcesByForcedId(@Param("resource_type") String theResourceType, @Param("forced_id") Collection<String> theForcedIds);
 

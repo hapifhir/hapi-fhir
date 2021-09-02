@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
+import ca.uhn.fhir.jpa.dao.IAutoVersioningService;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
@@ -498,6 +499,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected ValidationSettings myValidationSettings;
 	@Autowired
 	protected IMdmLinkDao myMdmLinkDao;
+	@Autowired
+	protected IAutoVersioningService myAutoVersioningService;
 
 	@AfterEach()
 	public void afterCleanupDao() {

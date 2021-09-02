@@ -168,7 +168,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @param theIds - list of IIdType ids (for the same resource)
 	 * @return
 	 */
-	Set<IIdType> hasResources(Collection<IIdType> theIds);
+	Map<IIdType, ResourcePersistentId> getIdsOfExistingResources(Collection<IIdType> theIds);
 
 	/**
 	 * Read a resource by its internal PID

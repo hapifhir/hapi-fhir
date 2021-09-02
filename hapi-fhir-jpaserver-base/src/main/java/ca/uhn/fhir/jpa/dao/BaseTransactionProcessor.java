@@ -52,6 +52,7 @@ import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -61,7 +62,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
@@ -69,11 +69,11 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
+import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
@@ -116,10 +116,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -152,6 +153,9 @@ public abstract class BaseTransactionProcessor {
 	private ModelConfig myModelConfig;
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
+
+	@Autowired
+	private IAutoVersioningService myAutoVersioningService;
 
 	private ThreadPoolTaskExecutor myExecutor ;
 	
@@ -418,28 +422,6 @@ public abstract class BaseTransactionProcessor {
 		final TransactionDetails transactionDetails = new TransactionDetails();
 		final StopWatch transactionStopWatch = new StopWatch();
 
-		//TODO
-		// Create Autoreference Placeholders is enabled
-		// we should create any sub reference that doesn't already exist
-//		if (myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
-//			List<IBase> referencesToCreate = new ArrayList<>();
-//			for (IBase entry : requestEntries) {
-//				IBaseResource resource = myVersionAdapter.getResource(entry);
-//				Set<IBaseReference> referencesToAutoVersion = BaseStorageDao.extractReferencesToAutoVersion(myContext,
-//					myModelConfig,
-//					resource);
-//				for (IBaseReference subReference : referencesToAutoVersion) {
-//						// doesn't exist - add it to the entries to be created
-//						org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent req = new org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent();
-//						req.setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT);
-//						req.setUrl(subReference.getReferenceElement().getValue());
-////						req.setIfNoneExist(); //TODO - look at conditional creates to see how this works
-//						referencesToCreate.add(req); // adding the request should add it to theIdToPersistence map later
-//				}
-//			}
-//			requestEntries.addAll(referencesToCreate);
-//		}
-
 		// Do all entries have a verb?
 		for (int i = 0; i < numberOfEntries; i++) {
 			IBase nextReqEntry = requestEntries.get(i);
@@ -509,9 +491,6 @@ public abstract class BaseTransactionProcessor {
 				.add(StorageProcessingMessage.class, message);
 			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_INFO, params);
 		}
-
-		//FIXME - remove before committing
-		ourLog.info(myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
 		return response;
 	}
@@ -639,21 +618,12 @@ public abstract class BaseTransactionProcessor {
 				theEntries, theTransactionStopWatch);
 
 			theTransactionStopWatch.startTask("Commit writes to database");
-			ourLog.info("Retval has " + retVal.values().size());
 			return retVal;
 		};
 		Map<IBase, IIdType> entriesToProcess;
 
 		try {
 			entriesToProcess = myHapiTransactionService.execute(theRequestDetails, theTransactionDetails, txCallback);
-		}
-		catch (Exception ex) {
-			//FIXME - remove
-			ourLog.info("FindME");
-
-			ourLog.info(ex.getLocalizedMessage());
-			ex.printStackTrace();
-			entriesToProcess = new HashMap<>();
 		}
 		finally {
 			if (writeOperationsDetails != null) {
@@ -1232,24 +1202,6 @@ public abstract class BaseTransactionProcessor {
 				Set<IBaseReference> referencesToAutoVersion = nextEntry.getValue();
 				IBaseResource nextResource = nextOutcome.getResource();
 
-				//TODO - should we add the autoversioned resources to our idtoPersistedoutcomes here?
-				// idToPersistedOutcomes has no entry for them at this point (if they were not in the
-				// top level bundle)
-				// should we just add no-op values to the map (since they are all going to be gets)?
-//				for (IBaseReference autoVersionRef : referencesToAutoVersion) {
-//					IFhirResourceDao dao = myDaoRegistry.getResourceDao(autoVersionRef.getReferenceElement().getResourceType());
-//					IBaseResource baseResource;
-//					try {
-//						baseResource = dao.read(autoVersionRef.getReferenceElement());
-//					} catch (ResourceNotFoundException ex) {
-						// not found
-//						baseResource =
-//						DaoMethodOutcome outcome = new DaoMethodOutcome();
-//						outcome.setResource(baseResource);
-//						outcome.setNop(true); // we are just reading it
-//						theIdToPersistedOutcome.put(autoVersionRef.getReferenceElement(), outcome);
-//					}
-//				}
 
 				resolveReferencesThenSaveAndIndexResource(theRequest, theTransactionDetails,
 					theIdSubstitutions, theIdToPersistedOutcome,
@@ -1307,61 +1259,33 @@ public abstract class BaseTransactionProcessor {
 			} else if (nextId.getValue().startsWith("urn:")) {
 				throw new InvalidRequestException("Unable to satisfy placeholder ID " + nextId.getValue() + " found in element named '" + nextRef.getName() + "' within resource of type: " + nextResource.getIdElement().getResourceType());
 			} else {
-				// resource type -> set of Ids
-				// we'll populate this with only those resource/ids of
-				// resource references that:
-				// a) do not exist in the idToPersistedOutcome
-				//		(so not in top level of bundle)
-				// b) do not exist in DB
-				//		(so newly created resources)
-				//
-				// we only do this if autocreateplaceholders is on
-				HashMap<String, Set<IIdType>> resourceTypeToListOfIds = new HashMap<>();
-				if (myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
-					for (IBaseReference ref : theReferencesToAutoVersion) {
-						IIdType id = ref.getReferenceElement();
-						// if we don't have this in our idToPersistedOutcome
-						// and we have createplaceholderreferences on
-						// we will have to check if these objects exist in the DB
-						if (!theIdToPersistedOutcome.containsKey(id)) {
-							if (!resourceTypeToListOfIds.containsKey(id.getResourceType())) {
-								resourceTypeToListOfIds.put(id.getResourceType(), new HashSet<>());
-							}
+				// get a map of
+				// existing ids -> PID (for resources that exist in the DB)
+				Map<IIdType, ResourcePersistentId> idToPID = myAutoVersioningService.getAutoversionsForIds(theReferencesToAutoVersion.stream()
+					.map(ref -> ref.getReferenceElement()).collect(Collectors.toList()));
 
-							resourceTypeToListOfIds.get(id.getResourceType()).add(id);
-						}
+				for (IBaseReference baseRef : theReferencesToAutoVersion) {
+					IIdType id = baseRef.getReferenceElement();
+					if (!idToPID.containsKey(id)
+							&& myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
+						// not in the db, but autocreateplaceholders is true
+						// so the version we'll set is "1" (since it will be
+						// created later)
+						String newRef = id.withVersion("1").getValue();
+						id.setValue(newRef);
 					}
-
-					for (String resourceType : resourceTypeToListOfIds.keySet()) {
-						IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceType);
-						Set<IIdType> idSet = resourceTypeToListOfIds.get(resourceType);
-
-						// DB hit :(
-						Set<IIdType> existing = dao.hasResources(idSet);
-
-						// we remove all the ids that are found, leaving
-						// only the ids of those not in the DB at all
-						idSet.removeAll(existing);
+					else {
+						// we will add the looked up info to the transaction
+						// for later
+						theTransactionDetails.addResolvedResourceId(id,
+							idToPID.get(id));
 					}
 				}
 
 				if (theReferencesToAutoVersion.contains(resourceReference)) {
 					DaoMethodOutcome outcome = theIdToPersistedOutcome.get(nextId);
 
-					if (outcome == null && myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
-						// null outcome means it's a resource reference that was not at top of bundle
-						IIdType id = resourceReference.getReferenceElement();
-						String resourceType = id.getResourceType();
-						// if it exists in resourceTypeToListOfIds
-						// it's not in the DB (new resource)
-						Set<IIdType> ids = resourceTypeToListOfIds.get(resourceType);
-						if (!ids.contains(id)) {
-							// doesn't exist in the DB
-							// which means the history necessarily is 1 (first one)
-							resourceReference.getReferenceElement().setValue(id.getValue() + "/_history/1");
-						}
-					}
-					else if (outcome != null && !outcome.isNop() && !Boolean.TRUE.equals(outcome.getCreated())) {
+					if (outcome != null && !outcome.isNop() && !Boolean.TRUE.equals(outcome.getCreated())) {
 						addRollbackReferenceRestore(theTransactionDetails, resourceReference);
 						resourceReference.setReference(nextId.getValue());
 						resourceReference.setResource(null);

@@ -138,9 +138,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -1158,16 +1160,34 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public Set<IIdType> hasResources(Collection<IIdType> theIds) {
-		List<String> idPortions = theIds.stream().map(t -> t.getIdPart()).collect(Collectors.toList());
+	public Map<IIdType, ResourcePersistentId> getIdsOfExistingResources(Collection<IIdType> theIds) {
+		// these are the found Ids that were in the db
+		HashMap<IIdType, ResourcePersistentId> collected = new HashMap<>();
+
+		if (theIds == null || theIds.isEmpty()) {
+			return collected;
+		}
+
+		List<String> idPortions = theIds
+			.stream()
+			.map(IIdType::getIdPart)
+			.collect(Collectors.toList());
+
 		Collection<Object[]> matches = myForcedIdDao.findResourcesByForcedId(getResourceName(),
 			idPortions);
 
-		HashSet<IIdType> collected = new HashSet<>();
 		for (Object[] match : matches) {
 			String resourceType = (String) match[0];
 			String forcedId = (String) match[1];
-			collected.add(new IdDt(resourceType, forcedId));
+			Long pid = (Long) match[2];
+			Long versionId = (Long) match[3];
+			IIdType id = new IdDt(resourceType, forcedId);
+			// we won't put the version on the IIdType
+			// so callers can use this as a lookup to match to
+			ResourcePersistentId persistentId = new ResourcePersistentId(pid);
+			persistentId.setVersion(versionId);
+
+			collected.put(id, persistentId);
 		}
 
 		return collected;
