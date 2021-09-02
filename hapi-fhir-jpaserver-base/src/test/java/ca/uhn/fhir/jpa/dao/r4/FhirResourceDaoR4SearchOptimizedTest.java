@@ -918,7 +918,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	@Test
 	public void testSearchOnStatusAndTag_AvoidHFJResourceJoins() {
 		// This Issue: https://github.com/hapifhir/hapi-fhir/issues/2942
-		// See this PR for a similar type of Query change: https://github.com/hapifhir/hapi-fhir/pull/2909
+		// See this PR for a similar type of Fix: https://github.com/hapifhir/hapi-fhir/pull/2909
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.addBase("BodySite").addBase("Procedure");
 		searchParameter.setCode("focalAccess");
@@ -951,17 +951,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			.setUrl("text")
 			.setValue(new StringType("Not Hispanic or Latino"));
 		myPatientDao.update(patient);
-
-//		"category":{
-//			"coding":[
-//			{
-//				"system":"acc_proccat_fkc",
-//				"code":"CANN",
-//				"display":"Cannulation"
-//			}
-//      ],
-//			"text":"Cannulation"
-//		},
 		CodeableConcept categoryCodeableConcept1 = new CodeableConcept().addCoding(new Coding().setSystem("acc_proccat_fkc")
 			.setCode("CANN")
 			.setDisplay("Cannulation"));
@@ -969,18 +958,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		procedure.setSubject(new Reference("Patient/P1"));
 		procedure.setStatus(Procedure.ProcedureStatus.COMPLETED);
 		procedure.setCategory(categoryCodeableConcept1);
-//		Extension extProcedure = procedure
-//			.addExtension()
-//			.setUrl("http://hapifhir.io/fhir/StructureDefinition/resource-meta-source")
-//			.setValue(new UriType("#IGnelx1k3MYKfJxN"));
-//		"extension":[
-//		{
-//			"url":"Procedure#focalAccess",
-//			"valueReference":{
-//			"reference":"BodySite/65472744"
-//		}
-//		}
-//   ],
 		Extension extProcedure = procedure
 			.addExtension()
 			.setUrl("Procedure#focalAccess")
@@ -997,8 +974,9 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		// http://FHIR_SERVER/fhir_request/Procedure
 		// ?status%3Anot=entered-in-error&subject=B
 		// &category=CANN&focalAccess=BodySite%2F3530342921&_tag=TagValue
+		// NOTE: This gets sorted once so the order is different once it gets executed!
 		{
-			// Add query params to try and replicate the sample query above!
+			// IMPORTANT: Keep the query param order exactly as shown below!
 			SearchParameterMap map = SearchParameterMap.newSynchronous();
 			// _tag, category, status, subject, focalAccess
 			map.add("_tag", new TokenParam("TagValue"));
@@ -1014,18 +992,12 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 			// Check for a particular WHERE CLAUSE in the generated SQL to make sure we are verifying the correct query
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), ".target_resource_id = 'P1'"), selectQuery);
+			assertEquals(2, StringUtils.countMatches(selectQuery.toLowerCase(), " join hfj_res_link "), selectQuery);
 
 			// Ensure that we do NOT see a couple of particular WHERE clauses
-			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null"), selectQuery);
 			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_type = 'procedure'"), selectQuery);
-
-			logAllResources();
-			logAllResourceTags();
-			logAllResourceVersions();
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null"), selectQuery);
 		}
-
-
 	}
 
 	@AfterEach
