@@ -101,6 +101,7 @@ public class MdmMatchLinkSvc {
 			handleMdmWithSingleCandidate(theResource, firstMatch, theMdmTransactionContext);
 		} else {
 			log(theMdmTransactionContext, "MDM received multiple match candidates, that were linked to different Golden Resources. Setting POSSIBLE_DUPLICATES and POSSIBLE_MATCHES.");
+
 			//Set them all as POSSIBLE_MATCH
 			List<IAnyResource> goldenResources = new ArrayList<>();
 			for (MatchedGoldenResourceCandidate matchedGoldenResourceCandidate : theCandidateList.getCandidates()) {

@@ -6,12 +6,7 @@ import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
-import ca.uhn.fhir.jpa.mdm.svc.MdmLinkSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
-import ca.uhn.fhir.mdm.api.MdmLinkEvent;
-import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
-import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
@@ -21,7 +16,6 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
-import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -29,7 +23,6 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -55,9 +48,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -72,30 +63,11 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	public MdmHelperR4 myMdmHelper;
 	@Autowired
 	private IdHelperService myIdHelperService;
-	@Autowired
-	private IMdmLinkSvc myMdmLinkSvc;
 
 	@Test
 	public void testCreatePractitioner() throws InterruptedException {
 		myMdmHelper.createWithLatch(buildPractitionerWithNameAndId("somename", "some_id"));
 		assertLinkCount(1);
-	}
-
-	@Test
-	public void testCreateLinkChangeEvent() throws InterruptedException {
-		Practitioner pr = buildPractitionerWithNameAndId("Young", "AC-DC");
-		myMdmHelper.createWithLatch(pr);
-
-		ResourceOperationMessage resourceOperationMessage = myMdmHelper.getAfterMdmLatch().getLatchInvocationParameterOfType(ResourceOperationMessage.class);
-		assertNotNull(resourceOperationMessage);
-		assertEquals(pr.getId(), resourceOperationMessage.getId());
-
-		MdmLink link = getLinkByTargetId(pr);
-
-		MdmLinkEvent linkChangeEvent = myMdmHelper.getAfterMdmLatch().getLatchInvocationParameterOfType(MdmLinkEvent.class);
-		assertNotNull(linkChangeEvent);
-		assertEquals(link.getGoldenResourcePid(), new IdDt(linkChangeEvent.getGoldenResourceId()).getIdPartAsLong());
-		assertEquals(link.getSourcePid(), new IdDt(linkChangeEvent.getTargetResourceId()).getIdPartAsLong());
 	}
 
 	private MdmLink getLinkByTargetId(IBaseResource theResource) {
@@ -113,7 +85,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(patient1, ctx);
 		ourLog.info(ctx.getMdmLinkEvent().toString());
 		assertEquals(patient1.getIdElement().getValue(), ctx.getMdmLinkEvent().getTargetResourceId());
-		assertEquals(getLinkByTargetId(patient1).getGoldenResourcePid(),  new IdDt(ctx.getMdmLinkEvent().getGoldenResourceId()).getIdPartAsLong());
+		assertEquals(getLinkByTargetId(patient1).getGoldenResourcePid(), new IdDt(ctx.getMdmLinkEvent().getGoldenResourceId()).getIdPartAsLong());
 
 		Patient patient2 = addExternalEID(buildJanePatient(), "eid-2");
 		myMdmHelper.createWithLatch(patient2);
@@ -121,7 +93,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(patient2, ctx);
 		ourLog.info(ctx.getMdmLinkEvent().toString());
 		assertEquals(patient2.getIdElement().getValue(), ctx.getMdmLinkEvent().getTargetResourceId());
-		assertEquals(getLinkByTargetId(patient2).getGoldenResourcePid(),  new IdDt(ctx.getMdmLinkEvent().getGoldenResourceId()).getIdPartAsLong());
+		assertEquals(getLinkByTargetId(patient2).getGoldenResourcePid(), new IdDt(ctx.getMdmLinkEvent().getGoldenResourceId()).getIdPartAsLong());
 	}
 
 	@Test
