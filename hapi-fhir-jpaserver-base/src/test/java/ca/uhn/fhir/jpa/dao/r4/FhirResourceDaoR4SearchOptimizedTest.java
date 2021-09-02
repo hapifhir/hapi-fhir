@@ -12,7 +12,6 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
@@ -28,7 +27,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
@@ -911,7 +909,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSearchOnStatusAndTag_SearchById() {
+	public void testSearchOnStatusAndTag_AvoidHFJResourceJoins() {
 		// See this PR for a similar type of Query change: https://github.com/hapifhir/hapi-fhir/pull/2909
 		//
 		Patient patient = new Patient();
