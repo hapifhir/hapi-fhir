@@ -988,9 +988,12 @@ public class QueryStack {
 													  String theSpnamePrefix, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theList,
 													  SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 
-		List<IQueryParameterType> tokens = new ArrayList<>();
+		List<IQueryParameterType> tokens = new ArrayList<>(); 
+		
+		boolean paramInverted = false;
+		TokenParamModifier modifier = null;
+		
 		for (IQueryParameterType nextOr : theList) {
-
 			if (nextOr instanceof TokenParam) {
 				if (!((TokenParam) nextOr).isEmpty()) {
 					TokenParam id = (TokenParam) nextOr;
@@ -1009,17 +1012,20 @@ public class QueryStack {
 						}
 
 						return createPredicateString(theSourceJoinColumn, theResourceName, theSpnamePrefix, theSearchParam, theList, null, theRequestPartitionId);
+					} 
+					
+					modifier = id.getModifier();
+					// for :not modifier, create a token and remove the :not modifier
+					if (modifier != null && modifier == TokenParamModifier.NOT) {
+						tokens.add(new TokenParam(((TokenParam) nextOr).getSystem(), ((TokenParam) nextOr).getValue()));
+						paramInverted = true;
+					} else {
+						tokens.add(nextOr);
 					}
-
-					tokens.add(nextOr);
-
 				}
-
 			} else {
-
 				tokens.add(nextOr);
 			}
-
 		}
 
 		if (tokens.isEmpty()) {
@@ -1027,14 +1033,31 @@ public class QueryStack {
 		}
 
 		String paramName = getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
+		Condition predicate;
+		BaseJoiningPredicateBuilder join;
+		
+		if (paramInverted) {
+			SearchQueryBuilder sqlBuilder = mySqlBuilder.newChildSqlBuilder();
+			TokenPredicateBuilder tokenSelector = sqlBuilder.addTokenPredicateBuilder(null);
+			sqlBuilder.addPredicate(tokenSelector.createPredicateToken(tokens, theResourceName, theSpnamePrefix, theSearchParam, theRequestPartitionId));
+			SelectQuery sql = sqlBuilder.getSelect();
+			Expression subSelect = new Subquery(sql);
+			
+			join = mySqlBuilder.getOrCreateFirstPredicateBuilder();
+			predicate = new InCondition(join.getResourceIdColumn(), subSelect).setNegate(true);
+			
+		} else {
+		
+			TokenPredicateBuilder tokenJoin = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.TOKEN, theSourceJoinColumn, paramName, () -> mySqlBuilder.addTokenPredicateBuilder(theSourceJoinColumn)).getResult();
 
-		TokenPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.TOKEN, theSourceJoinColumn, paramName, () -> mySqlBuilder.addTokenPredicateBuilder(theSourceJoinColumn)).getResult();
+			if (theList.get(0).getMissing() != null) {
+				return tokenJoin.createPredicateParamMissingForNonReference(theResourceName, paramName, theList.get(0).getMissing(), theRequestPartitionId);
+			}
 
-		if (theList.get(0).getMissing() != null) {
-			return join.createPredicateParamMissingForNonReference(theResourceName, paramName, theList.get(0).getMissing(), theRequestPartitionId);
-		}
-
-		Condition predicate = join.createPredicateToken(tokens, theResourceName, theSpnamePrefix, theSearchParam, theOperation, theRequestPartitionId);
+			predicate = tokenJoin.createPredicateToken(tokens, theResourceName, theSpnamePrefix, theSearchParam, theOperation, theRequestPartitionId);
+			join = tokenJoin; 
+		} 
+		
 		return join.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 	}
 
