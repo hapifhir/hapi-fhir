@@ -1000,12 +1000,12 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		{
 			// Add query params to try and replicate the sample query above!
 			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			// _tag, category, status, subject, focalAccess
+			map.add("_tag", new TokenParam("TagValue"));
+			map.add("category", new TokenParam("CANN"));
 			map.add("status", new TokenParam("entered-in-error").setModifier(TokenParamModifier.NOT));
 			map.add("subject", new ReferenceParam("Patient/P1"));
-			// TODO Is this TokenParam value correct given the Resource setup steps above - I don't see the connection ???
-			map.add("category", new TokenParam("CANN"));
 			map.add("focalAccess", new ReferenceParam("BodyStructure/" + bsId.getIdPart()));
-			map.add("_tag", new TokenParam("TagValue"));
 			myCaptureQueriesListener.clear();
 			IBundleProvider outcome = myProcedureDao.search(map, new SystemRequestDetails());
 			ourLog.info("Search returned {} resources.", outcome.getResources(0, 999).size());
