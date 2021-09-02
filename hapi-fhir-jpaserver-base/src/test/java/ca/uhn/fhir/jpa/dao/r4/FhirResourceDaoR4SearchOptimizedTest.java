@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
@@ -26,12 +27,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -906,6 +910,60 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testSearchOnStatusAndTag_SearchById() {
+		// See this PR for a similar type of Query change: https://github.com/hapifhir/hapi-fhir/pull/2909
+		//
+		Patient patient = new Patient();
+		patient.setId("B");
+		patient.getMeta().addTag(null, "TagKey", "TagValue");
+		myPatientDao.update(patient);
+
+		CodeableConcept categoryCodeableConcept1 = new CodeableConcept().setText("Test Codeable Concept Field");
+
+		Procedure procedure = new Procedure();
+		procedure.setId("A");
+		procedure.setSubject(new Reference("Patient/B"));
+		procedure.setStatus(Procedure.ProcedureStatus.COMPLETED);
+		procedure.setCategory(categoryCodeableConcept1);
+		myProcedureDao.update(procedure);
+
+		logAllResources();
+		logAllResourceTags();
+		logAllResourceVersions();
+
+		// Search example:
+		// http://FHIR_SERVER/fhir_request/Procedure
+		// ?status%3Anot=entered-in-error&subject=B
+		// &category=CANN&focalAccess=BodySite%2F3530342921&_tag=TagValue
+		{
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.add("subject", new ReferenceParam("Patient/B"));
+			// TODO KBD Add additional params to try and replicate the sample query above!
+			//map.add("status", new TokenParam("final"));
+			//map.add("category", new TokenParam("final"));
+			myCaptureQueriesListener.clear();
+			IBundleProvider outcome = myProcedureDao.search(map, new SystemRequestDetails());
+			assertEquals(1, outcome.getResources(0, 999).size());
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+			// TODO KBD Figure out what to look for in the selectQuery SQL!
+			//assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "forcedid0_.resource_type='observation'"), selectQuery);
+			//assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "forcedid0_.forced_id in ('a')"), selectQuery);
+
+			selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
+			// TODO KBD Figure out what to look for in the selectQuery SQL!
+			//assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "select t1.res_id from hfj_resource t1"), selectQuery);
+			//assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t1.res_type = 'observation'"), selectQuery);
+			//assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t1.res_deleted_at is null"), selectQuery);
+			logAllResources();
+			logAllResourceTags();
+			logAllResourceVersions();
+		}
+
+
+	}
 
 	@AfterEach
 	public void afterResetDao() {
