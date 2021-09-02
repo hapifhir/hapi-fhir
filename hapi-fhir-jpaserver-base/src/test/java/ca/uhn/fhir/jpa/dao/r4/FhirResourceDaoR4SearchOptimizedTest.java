@@ -12,7 +12,6 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
@@ -952,7 +951,19 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			.setValue(new StringType("Not Hispanic or Latino"));
 		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
-		CodeableConcept categoryCodeableConcept1 = new CodeableConcept().setText("Test Codeable Concept Field");
+//		"category":{
+//			"coding":[
+//			{
+//				"system":"acc_proccat_fkc",
+//				"code":"CANN",
+//				"display":"Cannulation"
+//			}
+//      ],
+//			"text":"Cannulation"
+//		},
+		CodeableConcept categoryCodeableConcept1 = new CodeableConcept().addCoding(new Coding().setSystem("acc_proccat_fkc")
+			.setCode("CANN")
+			.setDisplay("Cannulation"));
 		Procedure procedure = new Procedure();
 		procedure.setSubject(new Reference(patientId));
 		procedure.setStatus(Procedure.ProcedureStatus.COMPLETED);
@@ -988,11 +999,11 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		{
 			// Add query params to try and replicate the sample query above!
 			SearchParameterMap map = SearchParameterMap.newSynchronous();
-			map.add("subject", new ReferenceParam(patientId));
 			map.add("status", new TokenParam("entered-in-error").setModifier(TokenParamModifier.NOT));
+			map.add("subject", new ReferenceParam(patientId));
 			// TODO Is this TokenParam value correct given the Resource setup steps above - I don't see the connection ???
 			map.add("category", new TokenParam("CANN"));
-			map.add("focalAccess", new ReferenceParam("BodyStructure%2F" + bsId.toUnqualifiedVersionless()));
+			map.add("focalAccess", new ReferenceParam("BodyStructure/" + bsId.getIdPart()));
 			map.add("_tag", new TokenParam("TagValue"));
 			myCaptureQueriesListener.clear();
 			IBundleProvider outcome = myProcedureDao.search(map, new SystemRequestDetails());
