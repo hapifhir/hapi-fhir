@@ -233,7 +233,6 @@ public abstract class BaseStorageDao {
 						// resource not found
 						// and no autocreateplaceholders set...
 						// we throw
-						System.out.println("FINDME");
 						throw new ResourceNotFoundException(referenceElement);
 					}
 					String newTargetReference = referenceElement.withVersion(version.toString()).getValue();
