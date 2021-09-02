@@ -12,7 +12,7 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.util.SqlQuery;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
@@ -22,6 +22,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -915,8 +916,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchOnStatusAndTag_AvoidHFJResourceJoins() {
+		// This Issue: https://github.com/hapifhir/hapi-fhir/issues/2942
 		// See this PR for a similar type of Query change: https://github.com/hapifhir/hapi-fhir/pull/2909
-		//
 		Patient patient = new Patient();
 		patient.setActive(true);
 		patient.addName().setFamily("FamilyName");
@@ -957,36 +958,28 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		// ?status%3Anot=entered-in-error&subject=B
 		// &category=CANN&focalAccess=BodySite%2F3530342921&_tag=TagValue
 		{
+			// Add query params to try and replicate the sample query above!
 			SearchParameterMap map = SearchParameterMap.newSynchronous();
 			map.add("subject", new ReferenceParam(patientId));
-			// TODO KBD Add additional params to try and replicate the sample query above!
-			//map.add("status", new TokenParam("final"));
-			//map.add("category", new TokenParam("final"));
+			map.add("status", new TokenParam("entered-in-error").setModifier(TokenParamModifier.NOT));
+			// TODO Is this TokenParam value correct given the Resource setup steps above - I don't see the connection ???
+			map.add("category", new TokenParam("CANN"));
+			map.addInclude(new Include("Procedure:focalAccess").asRecursive());
 			map.add("_tag", new TokenParam("TagValue"));
 			myCaptureQueriesListener.clear();
 			IBundleProvider outcome = myProcedureDao.search(map, new SystemRequestDetails());
+			ourLog.info("Search returned {} resources.", outcome.getResources(0, 999).size());
 			//assertEquals(1, outcome.getResources(0, 999).size());
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
-			// Dump Out the Generated SQL
-			List<SqlQuery> sqlQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
-			for (int i = 0; i < sqlQueries.size(); i++) {
-				ourLog.info("\n==================================================================\n");
-				ourLog.info("iteration: {}\n", i);
-				ourLog.info("Generated SQL:\n{}", sqlQueries.get(i).getSql(true, false));
-				ourLog.info("==================================================================\n\n");
-			}
-
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-			// TODO KBD Figure out what to look for in the selectQuery SQL!
-			//assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "forcedid0_.resource_type='observation'"), selectQuery);
-			//assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "forcedid0_.forced_id in ('a')"), selectQuery);
+			// Check for a particular WHERE CLAUSE in the generated SQL to make sure we are verifying the correct query
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), ".target_resource_id = '1'"), selectQuery);
 
-			//selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
-			// TODO KBD Figure out what to look for in the selectQuery SQL!
-			//assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "select t1.res_id from hfj_resource t1"), selectQuery);
-			//assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t1.res_type = 'observation'"), selectQuery);
-			//assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t1.res_deleted_at is null"), selectQuery);
+			// Ensure that we do NOT see a couple of particular WHERE clauses
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null"), selectQuery);
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_type = 'procedure'"), selectQuery);
+
 			logAllResources();
 			logAllResourceTags();
 			logAllResourceVersions();
