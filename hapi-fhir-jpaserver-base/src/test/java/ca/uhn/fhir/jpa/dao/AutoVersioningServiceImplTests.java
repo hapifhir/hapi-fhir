@@ -13,7 +13,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,8 +38,10 @@ public class AutoVersioningServiceImplTests {
 		IFhirResourceDao daoMock = Mockito.mock(IFhirResourceDao.class);
 		Mockito.when(daoMock.getIdsOfExistingResources(Mockito.anyList()))
 			.thenReturn(map);
+		Mockito.when(daoRegistry.getResourceDao(Mockito.anyString()))
+			.thenReturn(daoMock);
 
-		Map<IIdType, ResourcePersistentId> retMap = myAutoversioningService.getAutoversionsForIds(Collections.singletonList(type));
+		Map<IIdType, ResourcePersistentId> retMap = myAutoversioningService.getExistingAutoversionsForIds(Collections.singletonList(type));
 
 		Assertions.assertTrue(retMap.containsKey(type));
 		Assertions.assertEquals(pid.getVersion(), map.get(type).getVersion());
@@ -52,11 +54,38 @@ public class AutoVersioningServiceImplTests {
 		IFhirResourceDao daoMock = Mockito.mock(IFhirResourceDao.class);
 		Mockito.when(daoMock.getIdsOfExistingResources(Mockito.anyList()))
 			.thenReturn(new HashMap<>());
+		Mockito.when(daoRegistry.getResourceDao(Mockito.anyString()))
+			.thenReturn(daoMock);
 
-		Map<IIdType, ResourcePersistentId> retMap = myAutoversioningService.getAutoversionsForIds(Collections.singletonList(type));
+		Map<IIdType, ResourcePersistentId> retMap = myAutoversioningService.getExistingAutoversionsForIds(Collections.singletonList(type));
 
 		Assertions.assertTrue(retMap.isEmpty());
 	}
 
+	@Test
+	public void getAutoversionsForIds_whenSomeResourcesDoNotExist_returnsOnlyExistingElements() {
+		IIdType type = new IdDt("Patient/RED");
+		ResourcePersistentId pid = new ResourcePersistentId(1);
+		pid.setVersion(2L);
+		HashMap<IIdType, ResourcePersistentId> map = new HashMap<>();
+		map.put(type, pid);
+		IIdType type2 = new IdDt("Patient/BLUE");
 
+		// when
+		IFhirResourceDao daoMock = Mockito.mock(IFhirResourceDao.class);
+		Mockito.when(daoMock.getIdsOfExistingResources(Mockito.anyList()))
+			.thenReturn(map);
+		Mockito.when(daoRegistry.getResourceDao(Mockito.anyString()))
+			.thenReturn(daoMock);
+
+		// test
+		Map<IIdType, ResourcePersistentId> retMap = myAutoversioningService.getExistingAutoversionsForIds(
+			Arrays.asList(type, type2)
+		);
+
+		// verify
+		Assertions.assertEquals(map.size(), retMap.size());
+		Assertions.assertTrue(retMap.containsKey(type));
+		Assertions.assertFalse(retMap.containsKey(type2));
+	}
 }

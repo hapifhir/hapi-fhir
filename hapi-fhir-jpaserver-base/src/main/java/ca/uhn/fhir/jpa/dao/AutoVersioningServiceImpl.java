@@ -18,7 +18,7 @@ public class AutoVersioningServiceImpl implements IAutoVersioningService {
 	private DaoRegistry myDaoRegistry;
 
 	@Override
-	public Map<IIdType, ResourcePersistentId> getAutoversionsForIds(Collection<IIdType> theIds) {
+	public Map<IIdType, ResourcePersistentId> getExistingAutoversionsForIds(Collection<IIdType> theIds) {
 		HashMap<IIdType, ResourcePersistentId> idToPID = new HashMap<>();
 		HashMap<String, List<IIdType>> resourceTypeToIds = new HashMap<>();
 

@@ -19,5 +19,5 @@ public interface IAutoVersioningService {
 	 * @param theIds
 	 * @return
 	 */
-	Map<IIdType, ResourcePersistentId> getAutoversionsForIds(Collection<IIdType> theIds);
+	Map<IIdType, ResourcePersistentId> getExistingAutoversionsForIds(Collection<IIdType> theIds);
 }

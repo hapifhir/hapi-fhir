@@ -209,7 +209,7 @@ public abstract class BaseStorageDao {
 				IIdType referenceElement = nextReference.getReferenceElement();
 				if (!referenceElement.hasBaseUrl()) {
 
-					Map<IIdType, ResourcePersistentId> idToPID = myAutoVersioningService.getAutoversionsForIds(
+					Map<IIdType, ResourcePersistentId> idToPID = myAutoVersioningService.getExistingAutoversionsForIds(
 						Collections.singletonList(referenceElement)
 					);
 

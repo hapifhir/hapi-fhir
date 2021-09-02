@@ -25,7 +25,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -598,9 +597,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		// create
 		Patient patient = new Patient();
-//		patient.setId(patientId);
 		patient.setIdElement(new IdType(patientId));
-//		patient.setActive(true);
 		myPatientDao.update(patient);
 
 		// update
@@ -624,7 +621,4 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		Observation retObservation = myObservationDao.read(obs.getIdElement());
 		Assertions.assertTrue(retObservation != null);
 	}
-
-	// always work with the put
-	// conditional create (replace put with conditional create?)
 }

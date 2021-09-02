@@ -117,7 +117,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -1269,7 +1268,7 @@ public abstract class BaseTransactionProcessor {
 			} else {
 				// get a map of
 				// existing ids -> PID (for resources that exist in the DB)
-				Map<IIdType, ResourcePersistentId> idToPID = myAutoVersioningService.getAutoversionsForIds(theReferencesToAutoVersion.stream()
+				Map<IIdType, ResourcePersistentId> idToPID = myAutoVersioningService.getExistingAutoversionsForIds(theReferencesToAutoVersion.stream()
 					.map(ref -> ref.getReferenceElement()).collect(Collectors.toList()));
 
 				for (IBaseReference baseRef : theReferencesToAutoVersion) {

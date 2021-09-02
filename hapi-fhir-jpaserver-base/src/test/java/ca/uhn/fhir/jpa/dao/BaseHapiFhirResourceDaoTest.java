@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @ExtendWith(MockitoExtension.class)
 class BaseHapiFhirResourceDaoTest {
 
+	// our simple concrete test class for BaseHapiFhirResourceDao
 	private class SimpleTestDao extends BaseHapiFhirResourceDao<Patient> {
 		public SimpleTestDao() {
 			super();
@@ -58,6 +59,14 @@ class BaseHapiFhirResourceDaoTest {
 
 	//TODO - all other dependency mocks
 
+	/**
+	 * Creates a match entry to be returned by myIForcedIdDao.
+	 * This ordering matters (see IForcedIdDao)
+	 * @param theId
+	 * @param thePID
+	 * @param theResourceVersion
+	 * @return
+	 */
 	private Object[] createMatchEntryForGetIdsOfExistingResources(IIdType theId, long thePID, long theResourceVersion) {
 		Object[] arr = new Object[] {
 			theId.getResourceType(),
