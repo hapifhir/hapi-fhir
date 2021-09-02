@@ -13,11 +13,14 @@ import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -198,6 +201,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		assertEquals(obsList.get(4).toString(), ids.get(2));
 		assertEquals(obsList.get(5).toString(), ids.get(3));
 	}
+
 
 	
 	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
