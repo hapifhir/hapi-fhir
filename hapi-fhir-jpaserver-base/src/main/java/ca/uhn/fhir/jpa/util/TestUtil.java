@@ -96,7 +96,7 @@ public class TestUtil {
 				.collect(Collectors.toSet());
 		}
 
-		ImmutableSet<ClassInfo> classes = ClassPath.from(TestUtil.class.getClassLoader()).getTopLevelClasses(packageName);
+		ImmutableSet<ClassInfo> classes = ClassPath.from(TestUtil.class.getClassLoader()).getTopLevelClassesRecursive(packageName);
 		Set<String> names = new HashSet<String>();
 
 		if (classes.size() <= 1) {
