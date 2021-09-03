@@ -22,8 +22,7 @@ public class VersionEnumTest {
 		version = version.replaceAll("-PRE[0-9]+", "");
 		version = version.replace("-SNAPSHOT", "");
 
-		//TODO GGG Do not merge this into master
-//		assertThat(versions, hasItem(version));
+		assertThat(versions, hasItem(version));
 	}
 
 
