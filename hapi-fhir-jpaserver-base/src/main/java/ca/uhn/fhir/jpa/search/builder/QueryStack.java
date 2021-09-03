@@ -985,41 +985,51 @@ public class QueryStack {
 	}
 
 	public Condition createPredicateToken(@Nullable DbColumn theSourceJoinColumn, String theResourceName,
-													  String theSpnamePrefix, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theList,
-													  SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
+			String theSpnamePrefix, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theList,
+			SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 
 		List<IQueryParameterType> tokens = new ArrayList<>();
-		for (IQueryParameterType nextOr : theList) {
 
+		boolean paramInverted = false;
+		TokenParamModifier modifier = null;
+
+		for (IQueryParameterType nextOr : theList) {
 			if (nextOr instanceof TokenParam) {
 				if (!((TokenParam) nextOr).isEmpty()) {
 					TokenParam id = (TokenParam) nextOr;
 					if (id.isText()) {
 
 						// Check whether the :text modifier is actually enabled here
-						boolean tokenTextIndexingEnabled = BaseSearchParamExtractor.tokenTextIndexingEnabledForSearchParam(myModelConfig, theSearchParam);
+						boolean tokenTextIndexingEnabled = BaseSearchParamExtractor
+								.tokenTextIndexingEnabledForSearchParam(myModelConfig, theSearchParam);
 						if (!tokenTextIndexingEnabled) {
 							String msg;
 							if (myModelConfig.isSuppressStringIndexingInTokens()) {
-								msg = myFhirContext.getLocalizer().getMessage(PredicateBuilderToken.class, "textModifierDisabledForServer");
+								msg = myFhirContext.getLocalizer().getMessage(PredicateBuilderToken.class,
+										"textModifierDisabledForServer");
 							} else {
-								msg = myFhirContext.getLocalizer().getMessage(PredicateBuilderToken.class, "textModifierDisabledForSearchParam");
+								msg = myFhirContext.getLocalizer().getMessage(PredicateBuilderToken.class,
+										"textModifierDisabledForSearchParam");
 							}
 							throw new MethodNotAllowedException(msg);
 						}
 
-						return createPredicateString(theSourceJoinColumn, theResourceName, theSpnamePrefix, theSearchParam, theList, null, theRequestPartitionId);
+						return createPredicateString(theSourceJoinColumn, theResourceName, theSpnamePrefix,
+								theSearchParam, theList, null, theRequestPartitionId);
 					}
 
-					tokens.add(nextOr);
-
+					modifier = id.getModifier();
+					// for :not modifier, create a token and remove the :not modifier
+					if (modifier != null && modifier == TokenParamModifier.NOT) {
+						tokens.add(new TokenParam(((TokenParam) nextOr).getSystem(), ((TokenParam) nextOr).getValue()));
+						paramInverted = true;
+					} else {
+						tokens.add(nextOr);
+					}
 				}
-
 			} else {
-
 				tokens.add(nextOr);
 			}
-
 		}
 
 		if (tokens.isEmpty()) {
@@ -1027,14 +1037,41 @@ public class QueryStack {
 		}
 
 		String paramName = getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
+		Condition predicate;
+		BaseJoiningPredicateBuilder join;
 
-		TokenPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.TOKEN, theSourceJoinColumn, paramName, () -> mySqlBuilder.addTokenPredicateBuilder(theSourceJoinColumn)).getResult();
+		if (paramInverted) {
+			SearchQueryBuilder sqlBuilder = mySqlBuilder.newChildSqlBuilder();
+			TokenPredicateBuilder tokenSelector = sqlBuilder.addTokenPredicateBuilder(null);
+			sqlBuilder.addPredicate(tokenSelector.createPredicateToken(tokens, theResourceName, theSpnamePrefix,
+					theSearchParam, theRequestPartitionId));
+			SelectQuery sql = sqlBuilder.getSelect();
+			Expression subSelect = new Subquery(sql);
 
-		if (theList.get(0).getMissing() != null) {
-			return join.createPredicateParamMissingForNonReference(theResourceName, paramName, theList.get(0).getMissing(), theRequestPartitionId);
+			join = mySqlBuilder.getOrCreateFirstPredicateBuilder();
+
+			if (theSourceJoinColumn == null) {
+				predicate = new InCondition(join.getResourceIdColumn(), subSelect).setNegate(true);
+			} else {
+				//-- for the resource link, need join with target_resource_id
+				predicate = new InCondition(theSourceJoinColumn, subSelect).setNegate(true);
+			}
+
+		} else {
+
+			TokenPredicateBuilder tokenJoin = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.TOKEN,
+					theSourceJoinColumn, paramName, () -> mySqlBuilder.addTokenPredicateBuilder(theSourceJoinColumn))
+							.getResult();
+
+			if (theList.get(0).getMissing() != null) {
+				return tokenJoin.createPredicateParamMissingForNonReference(theResourceName, paramName,
+						theList.get(0).getMissing(), theRequestPartitionId);
+			}
+
+			predicate = tokenJoin.createPredicateToken(tokens, theResourceName, theSpnamePrefix, theSearchParam, theOperation, theRequestPartitionId);
+			join = tokenJoin;
 		}
 
-		Condition predicate = join.createPredicateToken(tokens, theResourceName, theSpnamePrefix, theSearchParam, theOperation, theRequestPartitionId);
 		return join.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 	}
 
