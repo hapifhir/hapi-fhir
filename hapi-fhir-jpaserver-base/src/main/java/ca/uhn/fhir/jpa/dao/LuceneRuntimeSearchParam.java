@@ -9,6 +9,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,7 +33,8 @@ public class LuceneRuntimeSearchParam {
 			// fixme MB find all CodeableConcept  targeted by an sp.
 			// fixme MB pull Strings as well to support :text
 			case TOKEN:
-				allText = mySearchParamExtractor.extractValues(mySearchParam.getPath(), theResource).stream()
+				List<IBase> bases = mySearchParamExtractor.extractValues(mySearchParam.getPath(), theResource);
+					allText = bases.stream()
 					.flatMap(v -> {
 						String type = v.fhirType();
 						switch (type) {
