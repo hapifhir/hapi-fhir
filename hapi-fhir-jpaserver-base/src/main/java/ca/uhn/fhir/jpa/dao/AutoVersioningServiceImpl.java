@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -18,7 +19,7 @@ public class AutoVersioningServiceImpl implements IAutoVersioningService {
 	private DaoRegistry myDaoRegistry;
 
 	@Override
-	public Map<IIdType, ResourcePersistentId> getExistingAutoversionsForIds(Collection<IIdType> theIds) {
+	public Map<IIdType, ResourcePersistentId> getExistingAutoversionsForIds(RequestPartitionId theRequestPartitionId, Collection<IIdType> theIds) {
 		HashMap<IIdType, ResourcePersistentId> idToPID = new HashMap<>();
 		HashMap<String, List<IIdType>> resourceTypeToIds = new HashMap<>();
 
@@ -33,7 +34,8 @@ public class AutoVersioningServiceImpl implements IAutoVersioningService {
 		for (String resourceType : resourceTypeToIds.keySet()) {
 			IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceType);
 
-			Map<IIdType, ResourcePersistentId> idAndPID = dao.getIdsOfExistingResources(resourceTypeToIds.get(resourceType));
+			Map<IIdType, ResourcePersistentId> idAndPID = dao.getIdsOfExistingResources(theRequestPartitionId,
+				resourceTypeToIds.get(resourceType));
 			idToPID.putAll(idAndPID);
 		}
 

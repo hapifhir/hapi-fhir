@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -1268,7 +1269,9 @@ public abstract class BaseTransactionProcessor {
 			} else {
 				// get a map of
 				// existing ids -> PID (for resources that exist in the DB)
-				Map<IIdType, ResourcePersistentId> idToPID = myAutoVersioningService.getExistingAutoversionsForIds(theReferencesToAutoVersion.stream()
+				// should this be allPartitions?
+				Map<IIdType, ResourcePersistentId> idToPID = myAutoVersioningService.getExistingAutoversionsForIds(RequestPartitionId.allPartitions(),
+					theReferencesToAutoVersion.stream()
 					.map(ref -> ref.getReferenceElement()).collect(Collectors.toList()));
 
 				for (IBaseReference baseRef : theReferencesToAutoVersion) {

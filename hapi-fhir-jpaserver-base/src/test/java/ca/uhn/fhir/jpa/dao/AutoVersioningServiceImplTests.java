@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -36,12 +37,14 @@ public class AutoVersioningServiceImplTests {
 		map.put(type, pid);
 
 		IFhirResourceDao daoMock = Mockito.mock(IFhirResourceDao.class);
-		Mockito.when(daoMock.getIdsOfExistingResources(Mockito.anyList()))
+		Mockito.when(daoMock.getIdsOfExistingResources(Mockito.any(RequestPartitionId.class),
+				Mockito.anyList()))
 			.thenReturn(map);
 		Mockito.when(daoRegistry.getResourceDao(Mockito.anyString()))
 			.thenReturn(daoMock);
 
-		Map<IIdType, ResourcePersistentId> retMap = myAutoversioningService.getExistingAutoversionsForIds(Collections.singletonList(type));
+		Map<IIdType, ResourcePersistentId> retMap = myAutoversioningService.getExistingAutoversionsForIds(RequestPartitionId.allPartitions(),
+			Collections.singletonList(type));
 
 		Assertions.assertTrue(retMap.containsKey(type));
 		Assertions.assertEquals(pid.getVersion(), map.get(type).getVersion());
@@ -52,12 +55,14 @@ public class AutoVersioningServiceImplTests {
 		IIdType type = new IdDt("Patient/RED");
 
 		IFhirResourceDao daoMock = Mockito.mock(IFhirResourceDao.class);
-		Mockito.when(daoMock.getIdsOfExistingResources(Mockito.anyList()))
+		Mockito.when(daoMock.getIdsOfExistingResources(Mockito.any(RequestPartitionId.class),
+				Mockito.anyList()))
 			.thenReturn(new HashMap<>());
 		Mockito.when(daoRegistry.getResourceDao(Mockito.anyString()))
 			.thenReturn(daoMock);
 
-		Map<IIdType, ResourcePersistentId> retMap = myAutoversioningService.getExistingAutoversionsForIds(Collections.singletonList(type));
+		Map<IIdType, ResourcePersistentId> retMap = myAutoversioningService.getExistingAutoversionsForIds(RequestPartitionId.allPartitions(),
+			Collections.singletonList(type));
 
 		Assertions.assertTrue(retMap.isEmpty());
 	}
@@ -73,13 +78,14 @@ public class AutoVersioningServiceImplTests {
 
 		// when
 		IFhirResourceDao daoMock = Mockito.mock(IFhirResourceDao.class);
-		Mockito.when(daoMock.getIdsOfExistingResources(Mockito.anyList()))
+		Mockito.when(daoMock.getIdsOfExistingResources(Mockito.any(RequestPartitionId.class), Mockito.anyList()))
 			.thenReturn(map);
 		Mockito.when(daoRegistry.getResourceDao(Mockito.anyString()))
 			.thenReturn(daoMock);
 
 		// test
 		Map<IIdType, ResourcePersistentId> retMap = myAutoversioningService.getExistingAutoversionsForIds(
+			RequestPartitionId.allPartitions(),
 			Arrays.asList(type, type2)
 		);
 

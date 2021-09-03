@@ -37,7 +37,6 @@ import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
-import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -52,7 +51,6 @@ import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.patch.FhirPatch;
 import ca.uhn.fhir.jpa.patch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.patch.XmlPatchUtils;
-import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -141,6 +139,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -1160,7 +1159,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public Map<IIdType, ResourcePersistentId> getIdsOfExistingResources(Collection<IIdType> theIds) {
+	public Map<IIdType, ResourcePersistentId> getIdsOfExistingResources(RequestPartitionId thePartitionId,
+																							  Collection<IIdType> theIds) {
 		// these are the found Ids that were in the db
 		HashMap<IIdType, ResourcePersistentId> collected = new HashMap<>();
 
@@ -1168,26 +1168,40 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			return collected;
 		}
 
-		List<String> idPortions = theIds
-			.stream()
-			.map(IIdType::getIdPart)
-			.collect(Collectors.toList());
+		List<ResourcePersistentId> resourcePersistentIds = myIdHelperService.resolveResourcePersistentIdsWithCache(thePartitionId,
+			theIds.stream().collect(Collectors.toList()));
 
-		Collection<Object[]> matches = myForcedIdDao.findResourcesByForcedId(getResourceName(),
-			idPortions);
+		// we'll use this map to fetch pids that require versions
+		HashMap<Long, ResourcePersistentId> pidsToVersionToResourcePid = new HashMap<>();
 
-		for (Object[] match : matches) {
-			String resourceType = (String) match[0];
-			String forcedId = (String) match[1];
-			Long pid = (Long) match[2];
-			Long versionId = (Long) match[3];
-			IIdType id = new IdDt(resourceType, forcedId);
-			// we won't put the version on the IIdType
-			// so callers can use this as a lookup to match to
-			ResourcePersistentId persistentId = new ResourcePersistentId(pid);
-			persistentId.setVersion(versionId);
+		// fill in our map
+		for (ResourcePersistentId pid : resourcePersistentIds) {
+			if (pid.getVersion() == null) {
+				pidsToVersionToResourcePid.put(pid.getIdAsLong(), pid);
+			}
+			Optional<IIdType> idOp = theIds.stream()
+				.filter(i -> i.getIdPart().equals(pid.getAssociatedResourceId().getIdPart()))
+				.findFirst();
+			// this should always be present
+			// since it was passed in.
+			// but land of optionals...
+			idOp.ifPresent(id -> {
+				collected.put(id, pid);
+			});
+		}
 
-			collected.put(id, persistentId);
+		// set any versions we don't already have
+		if (!pidsToVersionToResourcePid.isEmpty()) {
+			Collection<Object[]> resourceEntries = myResourceTableDao
+				.getResourceVersionsForPid(new ArrayList<>(pidsToVersionToResourcePid.keySet()));
+
+			for (Object[] record : resourceEntries) {
+				// order matters!
+				Long retPid = (Long)record[0];
+				String resType = (String)record[1];
+				Long version = (Long)record[2];
+				pidsToVersionToResourcePid.get(retPid).setVersion(version);
+			}
 		}
 
 		return collected;

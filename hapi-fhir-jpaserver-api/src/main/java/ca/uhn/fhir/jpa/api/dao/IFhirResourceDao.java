@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.api.dao;
  */
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
@@ -168,7 +169,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @param theIds - list of IIdType ids (for the same resource)
 	 * @return
 	 */
-	Map<IIdType, ResourcePersistentId> getIdsOfExistingResources(Collection<IIdType> theIds);
+	Map<IIdType, ResourcePersistentId> getIdsOfExistingResources(RequestPartitionId partitionId, Collection<IIdType> theIds);
 
 	/**
 	 * Read a resource by its internal PID

@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -209,7 +210,7 @@ public abstract class BaseStorageDao {
 				IIdType referenceElement = nextReference.getReferenceElement();
 				if (!referenceElement.hasBaseUrl()) {
 
-					Map<IIdType, ResourcePersistentId> idToPID = myAutoVersioningService.getExistingAutoversionsForIds(
+					Map<IIdType, ResourcePersistentId> idToPID = myAutoVersioningService.getExistingAutoversionsForIds(RequestPartitionId.allPartitions(),
 						Collections.singletonList(referenceElement)
 					);
 
@@ -220,7 +221,7 @@ public abstract class BaseStorageDao {
 					Long version;
 					if (idToPID.containsKey(referenceElement)) {
 						// the resource exists... latest id
-						// will bbe the value in the ResourcePersistentId
+						// will be the value in the ResourcePersistentId
 						version = idToPID.get(referenceElement).getVersion();
 					}
 					else if (myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {

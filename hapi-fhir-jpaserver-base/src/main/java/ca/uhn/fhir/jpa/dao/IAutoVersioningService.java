@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -17,7 +18,8 @@ public interface IAutoVersioningService {
 	 * If the returned map does not return an IIdType -> ResourcePersistentId
 	 * then it means that it is a non-existing resource in the DB
 	 * @param theIds
+	 * @param thePartitionId - the partition id
 	 * @return
 	 */
-	Map<IIdType, ResourcePersistentId> getExistingAutoversionsForIds(Collection<IIdType> theIds);
+	Map<IIdType, ResourcePersistentId> getExistingAutoversionsForIds(RequestPartitionId thePartitionId, Collection<IIdType> theIds);
 }

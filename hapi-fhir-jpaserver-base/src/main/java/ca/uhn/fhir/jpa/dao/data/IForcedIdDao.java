@@ -112,23 +112,6 @@ public interface IForcedIdDao extends JpaRepository<ForcedId, Long> {
 	Collection<Object[]> findAndResolveByForcedIdWithNoType(@Param("resource_type") String theResourceType, @Param("forced_id") Collection<String> theForcedIds);
 
 	/**
-	 * This method returns a collection where eah row is an element in the collection.
-	 * Each element in the collection is an object array where order matters.
-	 * The returned order of each object array element is:
-	 * ResourceType (Patient, etc - String), ForcedId (String), ResourcePID (Long), Version (Long)
-	 * @param theResourceType
-	 * @param theForcedIds
-	 * @return
-	 */
-	@Query("" +
-	"SELECT " +
-	"   f.myResourceType, f.myForcedId, f.myResourcePid, t.myVersion " +
-	"FROM ForcedId f " +
-	"JOIN ResourceTable t ON t.myId = f.myResourcePid " +
-	"WHERE f.myResourceType = :resource_type AND f.myForcedId IN ( :forced_id )")
-	Collection<Object[]> findResourcesByForcedId(@Param("resource_type") String theResourceType, @Param("forced_id") Collection<String> theForcedIds);
-
-	/**
 	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
 	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
 	 */

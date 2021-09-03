@@ -2,8 +2,11 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -13,12 +16,14 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Request;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoTestRule;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
@@ -54,27 +59,40 @@ class BaseHapiFhirResourceDaoTest {
 	@InjectMocks
 	private BaseHapiFhirResourceDao myBaseHapiFhirResourceDao = new SimpleTestDao();
 
+//	@Mock
+//	private IForcedIdDao myIForcedIdDao;
+
 	@Mock
-	private IForcedIdDao myIForcedIdDao;
+	private IdHelperService myIdHelperService;
+
+	@Mock
+	private IResourceTableDao myResourceTableDao;
 
 	//TODO - all other dependency mocks
 
+
+	private ResourcePersistentId getResourcePersistentIdFromResource(IIdType theId, long thePid) {
+		ResourcePersistentId id = new ResourcePersistentId(thePid);
+		String idPortion = theId.getIdPart();
+		IIdType newId = new IdDt(theId.getResourceType(), idPortion);
+		id.setAssociatedResourceId(newId);
+		return id;
+	}
+
 	/**
-	 * Creates a match entry to be returned by myIForcedIdDao.
-	 * This ordering matters (see IForcedIdDao)
-	 * @param theId
-	 * @param thePID
-	 * @param theResourceVersion
+	 * Gets a ResourceTable record for getResourceVersionsForPid
+	 * Order matters!
+	 * @param resourceType
+	 * @param pid
+	 * @param version
 	 * @return
 	 */
-	private Object[] createMatchEntryForGetIdsOfExistingResources(IIdType theId, long thePID, long theResourceVersion) {
-		Object[] arr = new Object[] {
-			theId.getResourceType(),
-			theId.getIdPart(),
-			thePID,
-			theResourceVersion
+	private Object[] getResourceTableRecordForResourceTypeAndPid(String resourceType, long pid, long version) {
+		return new Object[] {
+			pid, // long
+			resourceType, // string
+			version // long
 		};
-		return arr;
 	}
 
 	@Test
@@ -83,31 +101,38 @@ class BaseHapiFhirResourceDaoTest {
 		IIdType patientIdAndType = new IdDt("Patient/RED");
 		long patientPID = 1L;
 		long patientResourceVersion = 2L;
+		ResourcePersistentId pat1ResourcePID = getResourcePersistentIdFromResource(patientIdAndType, patientPID);
 		IIdType patient2IdAndType = new IdDt("Patient/BLUE");
 		long patient2PID = 3L;
 		long patient2ResourceVersion = 4L;
+		ResourcePersistentId pat2ResourcePID = getResourcePersistentIdFromResource(patient2IdAndType, patient2PID);
 		List<IIdType> inputList = new ArrayList<>();
 		inputList.add(patientIdAndType);
 		inputList.add(patient2IdAndType);
 
 		Collection<Object[]> matches = Arrays.asList(
-			createMatchEntryForGetIdsOfExistingResources(patientIdAndType, patientPID, patientResourceVersion),
-			createMatchEntryForGetIdsOfExistingResources(patient2IdAndType, patient2PID, patient2ResourceVersion)
+			getResourceTableRecordForResourceTypeAndPid(patientIdAndType.getResourceType(), patientPID, patientResourceVersion),
+			getResourceTableRecordForResourceTypeAndPid(patient2IdAndType.getResourceType(), patient2PID, patient2ResourceVersion)
 		);
 
 		// when
-		Mockito.when(myIForcedIdDao.findResourcesByForcedId(Mockito.anyString(),
-			Mockito.anyList())).thenReturn(matches);
+		Mockito.when(myIdHelperService.resolveResourcePersistentIdsWithCache(Mockito.any(RequestPartitionId.class),
+			Mockito.anyList()))
+			.thenReturn(Arrays.asList(pat1ResourcePID, pat2ResourcePID));
+		Mockito.when(myResourceTableDao.getResourceVersionsForPid(Mockito.anyList()))
+			.thenReturn(matches);
 
-		Map<IIdType, ResourcePersistentId> idToPIDOfExistingResources = myBaseHapiFhirResourceDao.getIdsOfExistingResources(inputList);
+		Map<IIdType, ResourcePersistentId> idToPIDOfExistingResources = myBaseHapiFhirResourceDao.getIdsOfExistingResources(RequestPartitionId.allPartitions(),
+			inputList);
 
 		Assertions.assertEquals(inputList.size(), idToPIDOfExistingResources.size());
 		Assertions.assertTrue(idToPIDOfExistingResources.containsKey(patientIdAndType));
 		Assertions.assertTrue(idToPIDOfExistingResources.containsKey(patient2IdAndType));
-		Assertions.assertEquals(idToPIDOfExistingResources.get(patientIdAndType).getIdAsLong(), patientPID);
-		Assertions.assertEquals(idToPIDOfExistingResources.get(patient2IdAndType).getIdAsLong(), patient2PID);
-		Assertions.assertEquals(idToPIDOfExistingResources.get(patientIdAndType).getVersion(), patientResourceVersion);
-		Assertions.assertEquals(idToPIDOfExistingResources.get(patient2IdAndType).getVersion(), patient2ResourceVersion);
+
+		Assertions.assertEquals(patientPID, idToPIDOfExistingResources.get(patientIdAndType).getIdAsLong());
+		Assertions.assertEquals(patient2PID, idToPIDOfExistingResources.get(patient2IdAndType).getIdAsLong(), patient2PID);
+		Assertions.assertEquals(patientResourceVersion, idToPIDOfExistingResources.get(patientIdAndType).getVersion());
+		Assertions.assertEquals(patient2ResourceVersion, idToPIDOfExistingResources.get(patient2IdAndType).getVersion());
 	}
 
 	@Test
@@ -116,10 +141,12 @@ class BaseHapiFhirResourceDaoTest {
 		IIdType patient = new IdDt("Patient/RED");
 
 		// when
-		Mockito.when(myIForcedIdDao.findResourcesByForcedId(Mockito.anyString(), Mockito.anyList()))
+		Mockito.when(myIdHelperService.resolveResourcePersistentIdsWithCache(Mockito.any(RequestPartitionId.class),
+			Mockito.anyList()))
 			.thenReturn(new ArrayList<>());
 
-		Map<IIdType, ResourcePersistentId> map = myBaseHapiFhirResourceDao.getIdsOfExistingResources(Collections.singletonList(patient));
+		Map<IIdType, ResourcePersistentId> map = myBaseHapiFhirResourceDao.getIdsOfExistingResources(RequestPartitionId.allPartitions(),
+			Collections.singletonList(patient));
 
 		Assertions.assertTrue(map.isEmpty());
 	}
@@ -135,15 +162,17 @@ class BaseHapiFhirResourceDaoTest {
 		inputList.add(patientIdAndType);
 		inputList.add(patient2IdAndType);
 
-		Collection<Object[]> matches = Collections.singletonList(
-			createMatchEntryForGetIdsOfExistingResources(patientIdAndType, patientPID, patientResourceVersion)
-		);
-
 		// when
-		Mockito.when(myIForcedIdDao.findResourcesByForcedId(Mockito.anyString(), Mockito.anyList()))
-			.thenReturn(matches);
+		Mockito.when(myIdHelperService
+				.resolveResourcePersistentIdsWithCache(Mockito.any(RequestPartitionId.class),
+			Mockito.anyList()))
+			.thenReturn(Collections.singletonList(getResourcePersistentIdFromResource(patientIdAndType, patientPID)));
+		Mockito.when(myResourceTableDao.getResourceVersionsForPid(Mockito.anyList()))
+			.thenReturn(Collections
+				.singletonList(getResourceTableRecordForResourceTypeAndPid(patientIdAndType.getResourceType(), patientPID, patientResourceVersion)));
 
-		Map<IIdType, ResourcePersistentId> map = myBaseHapiFhirResourceDao.getIdsOfExistingResources(inputList);
+		Map<IIdType, ResourcePersistentId> map = myBaseHapiFhirResourceDao.getIdsOfExistingResources(RequestPartitionId.allPartitions(),
+			inputList);
 
 		// verify
 		Assertions.assertFalse(map.isEmpty());
