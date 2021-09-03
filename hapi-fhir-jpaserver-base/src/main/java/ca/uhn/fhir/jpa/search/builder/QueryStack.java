@@ -1139,14 +1139,17 @@ public class QueryStack {
 							//   For now, leave the incorrect implementation alone, just in case someone is relying on it,
 							//   until the complete fix is available.
 							andPredicates.add(createPredicateReferenceForContainedResource(null, theResourceName, theParamName, nextParamDef, nextAnd, null, theRequest, theRequestPartitionId));
-						} else if (nextAnd.stream().filter(t -> t instanceof ReferenceParam).map(t -> (ReferenceParam) t).anyMatch(t -> t.getChain().contains("."))) {
-								// FIXME for now, restrict contained reference traversal to the last reference in the chain
-								andPredicates.add(createPredicateReference(theSourceJoinColumn, theResourceName, theParamName, nextAnd, null, theRequest, theRequestPartitionId));
-						} else {
+						} else if (isEligibleForContainedResourceSearch(nextAnd)) {
+							// TODO for now, restrict contained reference traversal to the last reference in the chain
+							//   We don't seem to be indexing the outbound references of a contained resource, so we can't
+							//   include them in search chains.
+							//   It would be nice to eventually relax this constraint, but no client seems to be asking for it.
 							andPredicates.add(toOrPredicate(
 								createPredicateReference(theSourceJoinColumn, theResourceName, theParamName, nextAnd, null, theRequest, theRequestPartitionId),
 								createPredicateReferenceForContainedResource(theSourceJoinColumn, theResourceName, theParamName, nextParamDef, nextAnd, null, theRequest, theRequestPartitionId)
 							));
+						} else {
+							andPredicates.add(createPredicateReference(theSourceJoinColumn, theResourceName, theParamName, nextAnd, null, theRequest, theRequestPartitionId));
 						}
 					}
 					break;
@@ -1223,6 +1226,14 @@ public class QueryStack {
 		}
 
 		return toAndPredicate(andPredicates);
+	}
+
+	private boolean isEligibleForContainedResourceSearch(List<? extends IQueryParameterType> nextAnd) {
+		return myModelConfig.isIndexOnContainedResources() &&
+			nextAnd.stream()
+				.filter(t -> t instanceof ReferenceParam)
+				.map(t -> (ReferenceParam) t)
+				.noneMatch(t -> t.getChain().contains("."));
 	}
 
 	public void addPredicateCompositeUnique(String theIndexString, RequestPartitionId theRequestPartitionId) {
