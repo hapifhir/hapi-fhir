@@ -62,6 +62,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.SpecialParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -338,6 +339,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		boolean foundChainMatch = false;
 		List<String> candidateTargetTypes = new ArrayList<>();
 		List<Condition> orPredicates = new ArrayList<>();
+		boolean paramInverted = false;
 		QueryStack childQueryFactory = myQueryStack.newChildQueryFactoryWithFullBuilderReuse();
 		for (String nextType : resourceTypes) {
 			String chain = theReferenceParam.getChain();
@@ -383,6 +385,13 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 				if (chainValue == null) {
 					continue;
 				}
+
+				// For the token param, if it's a :not modifier, need switch OR to AND
+				if (!paramInverted && chainValue instanceof TokenParam) {
+					if (((TokenParam) chainValue).getModifier() == TokenParamModifier.NOT) {
+						paramInverted = true;
+					}
+				}
 				foundChainMatch = true;
 				orValues.add(chainValue);
 			}
@@ -410,10 +419,17 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			warnAboutPerformanceOnUnqualifiedResources(theParamName, theRequest, candidateTargetTypes);
 		}
 
-		Condition multiTypeOrPredicate = toOrPredicate(orPredicates);
+		// If :not modifier for a token, switch OR with AND in the multi-type case
+		Condition multiTypePredicate;
+		if (paramInverted) {
+			multiTypePredicate = toAndPredicate(orPredicates);
+		} else {
+			multiTypePredicate = toOrPredicate(orPredicates);
+		}
+		
 		List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName);
 		Condition pathPredicate = createPredicateSourcePaths(pathsToMatch);
-		return toAndPredicate(pathPredicate, multiTypeOrPredicate);
+		return toAndPredicate(pathPredicate, multiTypePredicate);
 	}
 
 	@Nonnull
