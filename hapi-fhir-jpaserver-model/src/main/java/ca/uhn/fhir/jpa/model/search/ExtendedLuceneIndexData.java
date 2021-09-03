@@ -16,14 +16,14 @@ public class ExtendedLuceneIndexData {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExtendedLuceneIndexData.class);
 
 	// wipmb add the Resource - do we already have it as json somewhere?
-	// fixme figure out the document layout.  Flat sp + modfier for now.
+	// TODO figure out the document layout.  Flat sp + modfier for now.
 	final private Map<String, String> mySearchParamTexts;
 
 	public ExtendedLuceneIndexData() {
 		this.mySearchParamTexts = new HashMap<>();
 	}
 
-	// fixme mb delete?
+	// TODO mb delete?
 	public ExtendedLuceneIndexData(Map<String, String> theSearchParamTexts) {
 		this.mySearchParamTexts = theSearchParamTexts;
 	}

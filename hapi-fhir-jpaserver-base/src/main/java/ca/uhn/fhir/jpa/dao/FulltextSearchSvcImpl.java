@@ -171,7 +171,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		 * }
 		 */
 
-		// FIXME generic version
+		// TODO generic version
 //		List<IQueryParameterType> textParameters = theParams.entrySet().stream()
 //			.flatMap(andList -> andList.getValue().stream())
 //			.flatMap(Collection::stream)

@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// fixme mb find a better module and package for this. ISearchParamExtractor is in jpa, and I wonder ...
+// TODO mb find a better module and package for this. ISearchParamExtractor is in jpa, and I wonder ...
 public class LuceneRuntimeSearchParam {
 	final RuntimeSearchParam mySearchParam;
 	final IFhirPath myFhirPath;
@@ -29,9 +29,9 @@ public class LuceneRuntimeSearchParam {
 		// just :text for now.
 		String allText = null;
 		switch (mySearchParam.getParamType()) {
-			// fixme extract and test.
-			// fixme MB find all CodeableConcept  targeted by an sp.
-			// fixme MB pull Strings as well to support :text
+			// TODO extract and test.
+			// TODO MB find all CodeableConcept  targeted by an sp.
+			// TODO MB pull Strings as well to support :text
 			case TOKEN:
 				List<IBase> bases = mySearchParamExtractor.extractValues(mySearchParam.getPath(), theResource);
 					allText = bases.stream()
@@ -42,7 +42,7 @@ public class LuceneRuntimeSearchParam {
 								return extractCodeableConceptTexts(v);
 							case "Identifier":
 								return extractIdentifierTypeTexts(v);
-							// FIXME what other types contribute to :text?  https://hl7.org/fhir/search.html#token
+							// TODO what other types contribute to :text?  https://hl7.org/fhir/search.html#token
 							// CodeableConcept.text, Coding.display, or Identifier.type.text.
 						}
 						return Stream.empty();
@@ -54,7 +54,7 @@ public class LuceneRuntimeSearchParam {
 				break;
 		}
 		if (StringUtils.isNotBlank(allText)) {
-			// fixme introduce wrapper type to support more than just :text
+			// TODO introduce wrapper type to support more than just :text
 			retVal.addIndexData(mySearchParam.getName(), allText);
 		}
 	}

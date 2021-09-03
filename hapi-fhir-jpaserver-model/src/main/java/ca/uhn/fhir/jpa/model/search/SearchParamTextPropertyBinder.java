@@ -45,7 +45,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 
 	@Override
 	public void bind(PropertyBindingContext thePropertyBindingContext) {
-		// FIXME Is it safe to use object identity of the Map to track dirty?
+		// TODO Is it safe to use object identity of the Map to track dirty?
 		thePropertyBindingContext.dependencies().use("mySearchParamTexts");
 
 		defineIndexingTemplate(thePropertyBindingContext);
