@@ -1044,7 +1044,13 @@ public class QueryStack {
 			Expression subSelect = new Subquery(sql);
 			
 			join = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-			predicate = new InCondition(join.getResourceIdColumn(), subSelect).setNegate(true);
+			
+			if (theSourceJoinColumn == null) {
+				predicate = new InCondition(join.getResourceIdColumn(), subSelect).setNegate(true);
+			} else {
+				//-- for the resource link, need join with target_resource_id
+			    predicate = new InCondition(theSourceJoinColumn, subSelect).setNegate(true);
+			}
 			
 		} else {
 		
