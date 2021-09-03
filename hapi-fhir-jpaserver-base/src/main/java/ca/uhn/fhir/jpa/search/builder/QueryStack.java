@@ -1139,8 +1139,14 @@ public class QueryStack {
 							//   For now, leave the incorrect implementation alone, just in case someone is relying on it,
 							//   until the complete fix is available.
 							andPredicates.add(createPredicateReferenceForContainedResource(null, theResourceName, theParamName, nextParamDef, nextAnd, null, theRequest, theRequestPartitionId));
+						} else if (nextAnd.stream().filter(t -> t instanceof ReferenceParam).map(t -> (ReferenceParam) t).anyMatch(t -> t.getChain().contains("."))) {
+								// FIXME for now, restrict contained reference traversal to the last reference in the chain
+								andPredicates.add(createPredicateReference(theSourceJoinColumn, theResourceName, theParamName, nextAnd, null, theRequest, theRequestPartitionId));
 						} else {
-							andPredicates.add(createPredicateReference(theSourceJoinColumn, theResourceName, theParamName, nextAnd, null, theRequest, theRequestPartitionId));
+							andPredicates.add(toOrPredicate(
+								createPredicateReference(theSourceJoinColumn, theResourceName, theParamName, nextAnd, null, theRequest, theRequestPartitionId),
+								createPredicateReferenceForContainedResource(theSourceJoinColumn, theResourceName, theParamName, nextParamDef, nextAnd, null, theRequest, theRequestPartitionId)
+							));
 						}
 					}
 					break;
