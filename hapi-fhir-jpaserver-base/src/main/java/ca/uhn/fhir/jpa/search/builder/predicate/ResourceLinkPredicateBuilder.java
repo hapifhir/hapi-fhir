@@ -402,10 +402,6 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			andPredicates.add(childQueryFactory.searchForIdsWithAndOr(myColumnTargetResourceId, subResourceName, chain, chainParamValues, theRequest, theRequestPartitionId, SearchContainedModeEnum.FALSE));
 
 			orPredicates.add(toAndPredicate(andPredicates));
-
-			if (getModelConfig().isIndexOnContainedResources() && theReferenceParam.getChain().contains(".")) {
-				orPredicates.add(childQueryFactory.createPredicateReferenceForContainedResource(myColumnTargetResourceId, subResourceName, chain, param, orValues, null, theRequest, theRequestPartitionId));
-			}
 		}
 
 		if (candidateTargetTypes.isEmpty()) {
