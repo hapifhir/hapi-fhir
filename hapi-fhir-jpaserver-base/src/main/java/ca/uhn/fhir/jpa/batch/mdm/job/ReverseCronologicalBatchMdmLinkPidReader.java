@@ -41,6 +41,7 @@ public class ReverseCronologicalBatchMdmLinkPidReader extends ReverseCronologica
 	protected Set<Long> getNextPidBatch(ResourceSearch resourceSearch) {
 		String resourceName = resourceSearch.getResourceName();
 		Pageable pageable = PageRequest.of(0, getBatchSize());
+		//Expand out the list to handle the REDIRECT/POSSIBLE DUPLICATE ones.
 		return new HashSet<>(myMdmLinkDao.findPidByResourceNameAndThreshold(resourceName, getCurrentHighThreshold(), pageable));
 	}
 

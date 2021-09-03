@@ -25,8 +25,8 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.batch.CommonBatchJobConfig;
 import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterValidator;
-import ca.uhn.fhir.jpa.batch.job.MultiUrlProcessorJobConfig;
 import ca.uhn.fhir.jpa.batch.job.model.PartitionedUrl;
 import ca.uhn.fhir.jpa.batch.job.model.RequestListJson;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
@@ -234,7 +234,7 @@ public class ReverseCronologicalBatchResourcePidReader implements ItemReader<Lis
 		Map<String, JobParameter> map = new HashMap<>();
 		map.put(MultiUrlJobParameterValidator.JOB_PARAM_OPERATION_NAME, new JobParameter(theOperationName));
 		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_REQUEST_LIST, new JobParameter(theRequestListJson.toJson()));
-		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_START_TIME, new JobParameter(DateUtils.addMinutes(new Date(), MultiUrlProcessorJobConfig.MINUTES_IN_FUTURE_TO_PROCESS_FROM)));
+		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_START_TIME, new JobParameter(DateUtils.addMinutes(new Date(), CommonBatchJobConfig.MINUTES_IN_FUTURE_TO_PROCESS_FROM)));
 		if (theBatchSize != null) {
 			map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_BATCH_SIZE, new JobParameter(theBatchSize.longValue()));
 		}
