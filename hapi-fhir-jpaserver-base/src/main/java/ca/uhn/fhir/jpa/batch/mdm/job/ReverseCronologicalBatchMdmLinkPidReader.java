@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.batch.mdm.job;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
+import ca.uhn.fhir.jpa.batch.reader.BaseReverseCronologicalBatchPidReader;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ import java.util.Set;
 /**
  * This is the same as the parent class, except it operates on MdmLink entities instead of resource entities
  */
-public class ReverseCronologicalBatchMdmLinkPidReader extends ReverseCronologicalBatchResourcePidReader {
+public class ReverseCronologicalBatchMdmLinkPidReader extends BaseReverseCronologicalBatchPidReader {
 	@Autowired
 	IMdmLinkDao myMdmLinkDao;
 
