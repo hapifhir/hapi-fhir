@@ -991,10 +991,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			.addTag("acc_procext_fkc", "1STCANN2NDL", "First Successful Cannulation with 2 Needles");
 		IIdType procedureId = myProcedureDao.create(procedure).getId().toUnqualifiedVersionless();
 
-		logAllResources();
-		logAllResourceTags();
-		logAllResourceVersions();
-
 		// Search example 1:
 		// http://FHIR_SERVER/fhir_request/Procedure
 		// ?status%3Anot=entered-in-error&subject=B
@@ -1014,7 +1010,9 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			ourLog.info("Search returned {} resources.", outcome.getResources(0, 999).size());
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
-			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+			assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
+			ourLog.info("selectQuery: {}", selectQuery);
 			// Check for a particular WHERE CLAUSE in the generated SQL to make sure we are verifying the correct query
 			assertEquals(2, StringUtils.countMatches(selectQuery.toLowerCase(), " join hfj_res_link "), selectQuery);
 
@@ -1043,6 +1041,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+			ourLog.info("selectQuery: {}", selectQuery);
 			// Check for a particular WHERE CLAUSE in the generated SQL to make sure we are verifying the correct query
 			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), " join hfj_res_link "), selectQuery);
 
