@@ -54,7 +54,6 @@ public class BaseMultiUrlProcessor {
 		}
 	}
 
-	@Nullable
 	protected Integer getBatchSize(IPrimitiveType<BigDecimal> theBatchSize) {
 		Integer batchSize = null;
 		if (theBatchSize != null && !theBatchSize.isEmpty()) {
