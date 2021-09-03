@@ -56,12 +56,21 @@ public class ResourceProviderSearchModifierDstu3Test extends BaseResourceProvide
 		}
 
 		{
-			//Fails during a chain
+			//Works in a chain
 			String noResultSearchString = "Observation?context.type:not=system|value";
 			ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(noResultSearchString);
 			SearchParameterMap searchParameterMap = resourceSearch.getSearchParameterMap();
 			IBundleProvider search = myObservationDao.search(searchParameterMap);
 			assertThat(search.size(), is(equalTo(0)));
+		}
+		{
+			//Works in a chain with only value
+			String noResultSearchString = "Observation?context.type:not=value";
+			ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(noResultSearchString);
+			SearchParameterMap searchParameterMap = resourceSearch.getSearchParameterMap();
+			IBundleProvider search = myObservationDao.search(searchParameterMap);
+			assertThat(search.size(), is(equalTo(0)));
+
 		}
 
 	}
