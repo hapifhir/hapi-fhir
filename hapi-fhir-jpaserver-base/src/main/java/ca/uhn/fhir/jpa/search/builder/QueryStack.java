@@ -794,112 +794,6 @@ public class QueryStack {
 
 		switch (targetParamDefinition.getParamType()) {
 			case DATE:
-				containedCondition = createPredicateDate(null, theResourceName, spnamePrefix, targetParamDefinition,
-					orValues, theOperation, theRequestPartitionId);
-				break;
-			case NUMBER:
-				containedCondition = createPredicateNumber(null, theResourceName, spnamePrefix, targetParamDefinition,
-					orValues, theOperation, theRequestPartitionId);
-				break;
-			case QUANTITY:
-				containedCondition = createPredicateQuantity(null, theResourceName, spnamePrefix, targetParamDefinition,
-					orValues, theOperation, theRequestPartitionId);
-				break;
-			case STRING:
-				containedCondition = createPredicateString(null, theResourceName, spnamePrefix, targetParamDefinition,
-					orValues, theOperation, theRequestPartitionId);
-				break;
-			case TOKEN:
-				containedCondition = createPredicateToken(null, theResourceName, spnamePrefix, targetParamDefinition,
-					orValues, theOperation, theRequestPartitionId);
-				break;
-			case COMPOSITE:
-				containedCondition = createPredicateComposite(null, theResourceName, spnamePrefix, targetParamDefinition,
-					orValues, theRequestPartitionId);
-				break;
-			case URI:
-				containedCondition = createPredicateUri(null, theResourceName, spnamePrefix, targetParamDefinition,
-					orValues, theOperation, theRequest, theRequestPartitionId);
-				break;
-			case HAS:
-			case REFERENCE:
-			case SPECIAL:
-			default:
-				throw new InvalidRequestException(
-					"The search type:" + targetParamDefinition.getParamType() + " is not supported.");
-		}
-
-		return containedCondition;
-	}
-
-	public Condition createPredicateReferenceForContainedResourceNew(@Nullable DbColumn theSourceJoinColumn,
-																						String theResourceName, String theParamName, RuntimeSearchParam theSearchParam,
-																						List<? extends IQueryParameterType> theList, SearchFilterParser.CompareOperation theOperation,
-																						RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
-
-		String spnamePrefix = theParamName;
-
-		String targetChain = null;
-		String targetParamName = null;
-		String targetQualifier = null;
-		String targetValue = null;
-
-		RuntimeSearchParam targetParamDefinition = null;
-
-		List<IQueryParameterType> orValues = Lists.newArrayList();
-		IQueryParameterType qp = null;
-
-		for (int orIdx = 0; orIdx < theList.size(); orIdx++) {
-
-			IQueryParameterType nextOr = theList.get(orIdx);
-
-			if (nextOr instanceof ReferenceParam) {
-
-				ReferenceParam referenceParam = (ReferenceParam) nextOr;
-
-				// 1. Find out the parameter, qualifier and the value
-				targetChain = referenceParam.getChain();
-				targetParamName = targetChain;
-				targetValue = nextOr.getValueAsQueryToken(myFhirContext);
-
-				int qualifierIndex = targetChain.indexOf(':');
-				if (qualifierIndex != -1) {
-					targetParamName = targetChain.substring(0, qualifierIndex);
-					targetQualifier = targetChain.substring(qualifierIndex);
-				}
-
-				// 2. find out the data type
-				if (targetParamDefinition == null) {
-					Iterator<String> it = theSearchParam.getTargets().iterator();
-					while (it.hasNext()) {
-						targetParamDefinition = mySearchParamRegistry.getActiveSearchParam(it.next(), targetParamName);
-						// TODO Is it safe to stop as soon as we find one? Is it possible that, if we kept going, we would uncover different types?
-						if (targetParamDefinition != null)
-							break;
-					}
-				}
-
-				if (targetParamDefinition == null) {
-					throw new InvalidRequestException("Unknown search parameter name: " + targetParamName + ".");
-				}
-
-				qp = toParameterType(targetParamDefinition);
-				qp.setValueAsQueryToken(myFhirContext, targetParamName, targetQualifier, targetValue);
-				orValues.add(qp);
-			}
-		}
-
-		orValues = orValues.stream().distinct().collect(Collectors.toList());
-
-		if (targetParamDefinition == null) {
-			throw new InvalidRequestException("Unknown search parameter names: [" + theSearchParam.getName() + "].");
-		}
-
-		// 3. create the query
-		Condition containedCondition = null;
-
-		switch (targetParamDefinition.getParamType()) {
-			case DATE:
 				containedCondition = createPredicateDate(theSourceJoinColumn, theResourceName, spnamePrefix, targetParamDefinition,
 					orValues, theOperation, theRequestPartitionId);
 				break;
@@ -1244,7 +1138,7 @@ public class QueryStack {
 							//   See SMILE-2898 for details.
 							//   For now, leave the incorrect implementation alone, just in case someone is relying on it,
 							//   until the complete fix is available.
-							andPredicates.add(createPredicateReferenceForContainedResource(theSourceJoinColumn, theResourceName, theParamName, nextParamDef, nextAnd, null, theRequest, theRequestPartitionId));
+							andPredicates.add(createPredicateReferenceForContainedResource(null, theResourceName, theParamName, nextParamDef, nextAnd, null, theRequest, theRequestPartitionId));
 						} else {
 							andPredicates.add(createPredicateReference(theSourceJoinColumn, theResourceName, theParamName, nextAnd, null, theRequest, theRequestPartitionId));
 						}
