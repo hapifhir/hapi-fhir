@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -92,6 +93,7 @@ public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	@Disabled
 	public void testShouldResolveATwoLinkChainWithAContainedResource() throws Exception {
 		IIdType oid1;
 
@@ -196,6 +198,7 @@ public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	@Disabled
 	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheBeginningOfTheChain() throws Exception {
 		// This case seems like it would be less frequent in production, but we don't want to
 		// paint ourselves into a corner where we require the contained link to be the last
