@@ -20,24 +20,29 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,13 +68,10 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private ISearchParamExtractor mySearchParamExtractor;
+
 
 	private Boolean ourDisabled;
-	@Autowired
-	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
-	@Autowired
-	private PartitionSettings myPartitionSettings;
 
 	/**
 	 * Constructor
@@ -78,7 +80,21 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		super();
 	}
 
-	private void addTextSearch(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, List<List<IQueryParameterType>> theTerms, String theFieldName, String theFieldNameEdgeNGram, String theFieldNameTextNGram) {
+	public ExtendedLuceneIndexData extractLuceneIndexData(FhirContext theContext, IBaseResource theResource) {
+		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData();
+
+		RuntimeResourceDefinition resourceDefinition = theContext.getResourceDefinition(theResource);
+		IFhirPath iFhirPath = theContext.newFhirPath();
+
+		resourceDefinition.getSearchParams().stream()
+			.map(sp->new LuceneRuntimeSearchParam(sp, iFhirPath, mySearchParamExtractor))
+			.forEach(lsp -> {
+				lsp.extractLuceneIndexData(theResource, retVal);
+			});
+		return retVal;
+	}
+
+	private void addTextSearch(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, List<List<IQueryParameterType>> theTerms, String theFieldName) {
 		if (theTerms == null) {
 			return;
 		}
@@ -103,8 +119,16 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private Set<String> extractOrStringParams(List<? extends IQueryParameterType> nextAnd) {
 		Set<String> terms = new HashSet<>();
 		for (IQueryParameterType nextOr : nextAnd) {
-			StringParam nextOrString = (StringParam) nextOr;
-			String nextValueTrimmed = StringUtils.defaultString(nextOrString.getValue()).trim();
+			String nextValueTrimmed;
+			if (nextOr instanceof StringParam) {
+				StringParam nextOrString = (StringParam) nextOr;
+				nextValueTrimmed = StringUtils.defaultString(nextOrString.getValue()).trim();
+			} else if (nextOr instanceof TokenParam) {
+				TokenParam nextOrToken = (TokenParam) nextOr;
+				nextValueTrimmed = nextOrToken.getValue();
+			} else {
+				throw new IllegalArgumentException("Unsupported full-text param type: " + nextOr.getClass());
+			}
 			if (isNotBlank(nextValueTrimmed)) {
 				terms.add(nextValueTrimmed);
 			}
@@ -117,6 +141,47 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		SearchSession session = Search.session(myEntityManager);
 		List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
 		List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
+		// wipmb make this query builder dynamic on SPs too.
+
+		/***
+		 * {
+		 *   "myId": 1
+		 *   "myNarrativeText" : 'adsasdjkaldjalkdjalkdjalkdjs",
+		 *   // should be indexed, not stored
+		 *     "text-code" : "Our observation Glucose Moles volume in Blood"
+		 *     "text-clinicalCode" : "Our observation Glucose Moles volume in Blood"
+		 *     "text-identifier" :
+		 *     "text-component-value-concept": " a a s d d  g v",
+		 *     _index: {
+		 *
+		 *     }
+		 *   resource: {
+		 *   	type: "Observation"
+		 *   	"code": {
+		 *     "coding": [
+		 *       {
+		 *         "system": "http://loinc.org",
+		 *         "code": "15074-8",
+		 *         "display": "Glucose [Moles/volume] in Blood"
+		 *       }
+		 *     ],
+		 *     "text", "Our observation"
+		 *   },
+		 *   }
+		 * }
+		 */
+
+		// FIXME generic version
+//		List<IQueryParameterType> textParameters = theParams.entrySet().stream()
+//			.flatMap(andList -> andList.getValue().stream())
+//			.flatMap(Collection::stream)
+//			.filter(param -> PARAMQUALIFIER_TOKEN_TEXT.equals(param.getQueryParameterQualifier()))
+//			.collect(Collectors.toList());
+//		for (IQueryParameterType testParameter : textParameters) {
+//			theParams.removeByNameAndQualifier(testParameter.getValueAsQueryToken(), testParameter.getQueryParameterQualifier());
+//		}
+		List<List<IQueryParameterType>> tokenTextAndTerms = theParams.removeByNameAndQualifier("code", TokenParamModifier.TEXT);
+		List<List<IQueryParameterType>> identifierText = theParams.removeByNameAndQualifier("identifier", TokenParamModifier.TEXT);
 
 		List<Long> longPids = session.search(ResourceTable.class)
 			//Selects are replacements for projection and convert more cleanly than the old implementation.
@@ -128,11 +193,21 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					/*
 					 * Handle _content parameter (resource body content)
 					 */
-					addTextSearch(f, b, contentAndTerms, "myContentText", "mycontentTextEdgeNGram", "myContentTextNGram");
+					addTextSearch(f, b, contentAndTerms, "myContentText");
 					/*
 					 * Handle _text parameter (resource narrative content)
 					 */
-					addTextSearch(f, b, textAndTerms, "myNarrativeText", "myNarrativeTextEdgeNGram", "myNarrativeTextNGram");
+					addTextSearch(f, b, textAndTerms, "myNarrativeText");
+
+					/**
+					 * Handle :text qualifier on Tokens
+					 */
+					addTextSearch(f, b, tokenTextAndTerms, "text-" + "code");
+					addTextSearch(f, b, identifierText, "text-" + "identifier");
+
+//					addTextSearch(f, b, codingAndTerms, "myCodingDisplayText");
+//					addTextSearch(f, b, codeableConceptAndTerms, "myCodeableConceptText");
+//					addTextSearch(f, b, identifierTypeTerms, "myIdentifierTypeText");
 
 					if (theReferencingPid != null) {
 						b.must(f.match().field("myResourceLinksField").matching(theReferencingPid.toString()));

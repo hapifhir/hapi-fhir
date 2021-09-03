@@ -44,6 +44,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -1698,13 +1699,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 	}
 
-	public static void populateFullTextFields(final FhirContext theContext, final IBaseResource theResource, ResourceTable theEntity) {
+	public void populateFullTextFields(final FhirContext theContext, final IBaseResource theResource, ResourceTable theEntity) {
 		if (theEntity.getDeleted() != null) {
 			theEntity.setNarrativeText(null);
 			theEntity.setContentText(null);
 		} else {
 			theEntity.setNarrativeText(parseNarrativeTextIntoWords(theResource));
 			theEntity.setContentText(parseContentTextIntoWords(theContext, theResource));
+			ExtendedLuceneIndexData searchParamTexts = myFulltextSearchSvc.extractLuceneIndexData(theContext, theResource);
+			theEntity.setSearchParamText(searchParamTexts);
 		}
 	}
 

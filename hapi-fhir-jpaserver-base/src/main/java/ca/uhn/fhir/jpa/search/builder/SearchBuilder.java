@@ -81,6 +81,7 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
@@ -310,32 +311,14 @@ public class SearchBuilder implements ISearchBuilder {
 		/*
 		 * Fulltext or lastn search
 		 */
-		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN()) {
-			if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
-				if (myFulltextSearchSvc == null) {
-					if (myParams.containsKey(Constants.PARAM_TEXT)) {
-						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
-					} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
-						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
-					}
-				}
 
-				if (myParams.getEverythingMode() != null) {
-					pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
-				} else {
-					pids = myFulltextSearchSvc.search(myResourceName, myParams);
-				}
-			} else if (myParams.isLastN()) {
-				if (myIElasticsearchSvc == null) {
-					if (myParams.isLastN()) {
-						throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
-					}
-				}
-				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults);
-				for (String lastnResourceId : lastnResourceIds) {
-					pids.add(myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId));
-				}
+		if (requiresHibernateSearchAccess()) {
+			if (myParams.isLastN()) {
+				pids = executeLastNAgainstIndex(theMaximumResults);
+			} else {
+				pids = executeFullTextSearchAgainstIndex(theRequest);
 			}
+
 			if (theSearchRuntimeDetails != null) {
 				theSearchRuntimeDetails.setFoundIndexMatchesCount(pids.size());
 				HookParams params = new HookParams()
@@ -363,6 +346,43 @@ public class SearchBuilder implements ISearchBuilder {
 
 		return queries;
 	}
+
+	private boolean requiresHibernateSearchAccess() {
+		boolean requiresHibernateSearchAccess = myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN();
+
+		requiresHibernateSearchAccess |= myParams.entrySet().stream()
+			// wipmb needs to be dynamic from SPs
+			.filter(entry -> entry.getKey().equals("code") || entry.getKey().equalsIgnoreCase("identifier"))
+			.flatMap(andList -> andList.getValue().stream())
+			.flatMap(Collection::stream)
+			.filter(param -> param instanceof TokenParam || param instanceof StringParam)
+			.anyMatch(param -> ":text".equals(param.getQueryParameterQualifier()));
+		return requiresHibernateSearchAccess;
+	}
+
+	private List<ResourcePersistentId> executeLastNAgainstIndex(Integer theMaximumResults) {
+		validateLastNIsEnabled();
+
+		List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults);
+
+		return lastnResourceIds.stream()
+			.map(lastnResourceId -> myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId,myResourceName,lastnResourceId))
+			.collect(Collectors.toList());
+	}
+
+
+	private List<ResourcePersistentId> executeFullTextSearchAgainstIndex(RequestDetails theRequest) {
+		validateFullTextSearchIsEnabled();
+
+		List<ResourcePersistentId> pids;
+		if (myParams.getEverythingMode() != null) {
+			pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
+		} else {
+			pids = myFulltextSearchSvc.search(myResourceName, myParams);
+		}
+		return pids;
+	}
+
 
 	private void doCreateChunkedQueries(SearchParameterMap theParams, List<Long> thePids, Integer theOffset, SortSpec sort, boolean theCount, RequestDetails theRequest, ArrayList<SearchQueryExecutor> theQueries) {
 		if (thePids.size() < getMaximumPageSize()) {
@@ -1523,4 +1543,21 @@ public class SearchBuilder implements ISearchBuilder {
 		return thePredicates.toArray(new Predicate[0]);
 	}
 
+	private void validateLastNIsEnabled() {
+		if (myIElasticsearchSvc == null) {
+			throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
+		}
+	}
+
+	private void validateFullTextSearchIsEnabled() {
+		if (myFulltextSearchSvc == null) {
+			if (myParams.containsKey(Constants.PARAM_TEXT)) {
+				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+			} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
+				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+			} else {
+				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process qualifier :text");
+			}
+		}
+	}
 }

@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static ca.uhn.fhir.rest.api.Constants.PARAMQUALIFIER_TOKEN_TEXT;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,6 +14,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -19,7 +23,9 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -142,7 +148,84 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("blood"));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
+	}
 
+	@Test
+	public void testResourceCodeTextSearch() {
+		Observation obs1 = new Observation();
+		obs1.getCode().setText("Weight");
+		obs1.setStatus(Observation.ObservationStatus.FINAL);
+		obs1.setValue(new Quantity(123));
+		obs1.getNoteFirstRep().setText("obs1");
+		IIdType id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+
+
+		Observation obs2 = new Observation();
+		obs2.getCode().setText("Body Weight");
+		obs2.getCode().addCoding().setCode("29463-7").setSystem("http://loinc.org").setDisplay("Body weight as measured by me");
+		obs2.setStatus(Observation.ObservationStatus.FINAL);
+		obs2.setValue(new Quantity(81));
+		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+
+		// don't look in the narrative when only searching code.
+		Observation obs3 = new Observation();
+		Narrative narrative = new Narrative();
+		narrative.setDivAsString("<div>Body Weight</div>");
+		obs3.setText(narrative);
+		obs3.setStatus(Observation.ObservationStatus.FINAL);
+		obs3.setValue(new Quantity(81));
+		IIdType id3 = myObservationDao.create(obs3, mySrd).getId().toUnqualifiedVersionless();
+
+		//:text should work for identifier types
+		Observation obs4 = new Observation();
+		Identifier identifier = obs3.addIdentifier();
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.setText("Random Identifier Typetest");
+		identifier.setType(codeableConcept);
+		obs4.addIdentifier(identifier);
+		IIdType id4 = myObservationDao.create(obs4, mySrd).getId().toUnqualifiedVersionless();
+
+		{
+			// first word
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("Body").setModifier(TokenParamModifier.TEXT));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
+		}
+
+		{
+			// any word
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("weight").setModifier(TokenParamModifier.TEXT));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
+		}
+
+		{
+			// doesn't find internal fragment
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("ght").setModifier(TokenParamModifier.TEXT));
+			assertEquals(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)).size(), 0);
+		}
+
+		{
+			// prefix
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("Bod").setModifier(TokenParamModifier.TEXT));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
+		}
+
+		{
+			// codeable.display
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("measured").setModifier(TokenParamModifier.TEXT));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
+		}
+
+		{
+			// Identifier Type
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("identifier", new TokenParam("Random").setModifier(TokenParamModifier.TEXT));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id4)));
+		}
 	}
 
 	@Test

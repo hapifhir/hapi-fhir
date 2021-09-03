@@ -22,9 +22,12 @@ package ca.uhn.fhir.jpa.dao;
 
 import java.util.List;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IFulltextSearchSvc {
 
@@ -35,4 +38,5 @@ public interface IFulltextSearchSvc {
 
 	boolean isDisabled();
 
+	ExtendedLuceneIndexData extractLuceneIndexData(FhirContext theContext, IBaseResource theResource);
 }
