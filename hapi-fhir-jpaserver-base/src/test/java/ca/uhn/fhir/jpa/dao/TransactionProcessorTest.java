@@ -70,6 +70,8 @@ public class TransactionProcessorTest {
 	private MatchUrlService myMatchUrlService;
 	@MockBean
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	@MockBean
+	private IAutoVersioningService myAutoVersioningService;
 
 	@MockBean(answer = Answers.RETURNS_DEEP_STUBS)
 	private SessionImpl mySession;
