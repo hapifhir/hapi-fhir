@@ -387,7 +387,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 				}
 
 				// For the token param, if it's a :not modifier, need switch OR to AND
-				if (!paramInverted) {
+				if (!paramInverted && chainValue instanceof TokenParam) {
 					if (((TokenParam) chainValue).getModifier() == TokenParamModifier.NOT) {
 						paramInverted = true;
 					}
