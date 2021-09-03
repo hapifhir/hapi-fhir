@@ -103,7 +103,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			if (terms.size() == 1) {
 				b.must(f.phrase()
 					.field(theFieldName)
-
 					.boost(4.0f)
 					.matching(terms.iterator().next().toLowerCase())
 					.slop(2));
@@ -182,6 +181,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 //			theParams.removeByNameAndQualifier(testParameter.getValueAsQueryToken(), testParameter.getQueryParameterQualifier());
 //		}
 		List<List<IQueryParameterType>> tokenTextAndTerms = theParams.removeByNameAndQualifier("code", TokenParamModifier.TEXT);
+		List<List<IQueryParameterType>> identifierText = theParams.removeByNameAndQualifier("identifier", TokenParamModifier.TEXT);
 
 		List<Long> longPids = session.search(ResourceTable.class)
 			//Selects are replacements for projection and convert more cleanly than the old implementation.
@@ -203,6 +203,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					 * Handle :text qualifier on Tokens
 					 */
 					addTextSearch(f, b, tokenTextAndTerms, "text-" + "code");
+					addTextSearch(f, b, identifierText, "text-" + "identifier");
 
 //					addTextSearch(f, b, codingAndTerms, "myCodingDisplayText");
 //					addTextSearch(f, b, codeableConceptAndTerms, "myCodeableConceptText");

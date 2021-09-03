@@ -40,6 +40,8 @@ public class LuceneRuntimeSearchParam {
 						switch (type) {
 							case "CodeableConcept":
 								return extractCodeableConceptTexts(v);
+							case "Identifier":
+								return extractIdentifierTypeTexts(v);
 							// FIXME what other types contribute to :text?  https://hl7.org/fhir/search.html#token
 							// CodeableConcept.text, Coding.display, or Identifier.type.text.
 						}
@@ -57,11 +59,15 @@ public class LuceneRuntimeSearchParam {
 		}
 	}
 
+	private Stream<String> extractIdentifierTypeTexts(IBase theElement) {
+		return myFhirPath.evaluate(theElement, "type.text", IPrimitiveType.class).stream().map(IPrimitiveType::getValueAsString);
+	}
+
 	Stream<String> extractCodeableConceptTexts(IBase theElement) {
 		return Stream.concat(
 			myFhirPath.evaluate(theElement, "text", IPrimitiveType.class).stream()
-				.map(p -> p.getValueAsString()),
+				.map(IPrimitiveType::getValueAsString),
 			myFhirPath.evaluate(theElement, "coding.display", IPrimitiveType.class).stream()
-				.map(p -> p.getValueAsString()));
+				.map(IPrimitiveType::getValueAsString));
 	}
 }

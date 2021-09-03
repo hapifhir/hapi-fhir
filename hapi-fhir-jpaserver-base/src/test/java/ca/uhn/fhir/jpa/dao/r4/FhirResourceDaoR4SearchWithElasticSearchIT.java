@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
@@ -175,6 +176,15 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		obs3.setValue(new Quantity(81));
 		IIdType id3 = myObservationDao.create(obs3, mySrd).getId().toUnqualifiedVersionless();
 
+		//:text should work for identifier types
+		Observation obs4 = new Observation();
+		Identifier identifier = obs3.addIdentifier();
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.setText("Random Identifier Typetest");
+		identifier.setType(codeableConcept);
+		obs4.addIdentifier(identifier);
+		IIdType id4 = myObservationDao.create(obs4, mySrd).getId().toUnqualifiedVersionless();
+
 		{
 			// first word
 			SearchParameterMap map = new SearchParameterMap();
@@ -210,6 +220,12 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
 		}
 
+		{
+			// Identifier Type
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("identifier", new TokenParam("Random").setModifier(TokenParamModifier.TEXT));
+			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id4)));
+		}
 	}
 
 	@Test

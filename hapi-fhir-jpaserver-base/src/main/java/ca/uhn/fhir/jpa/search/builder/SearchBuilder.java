@@ -343,7 +343,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		requiresHibernateSearchAccess |= myParams.entrySet().stream()
 			// wipmb needs to be dynamic from SPs
-			.filter(entry -> entry.getKey().equals("code"))
+			.filter(entry -> entry.getKey().equals("code") || entry.getKey().equalsIgnoreCase("identifier"))
 			.flatMap(andList -> andList.getValue().stream())
 			.flatMap(Collection::stream)
 			.filter(param -> param instanceof TokenParam || param instanceof StringParam)
