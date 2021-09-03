@@ -236,6 +236,82 @@ public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
 		assertThat(oids, contains(oid1.getIdPart()));
 	}
 
+	@Test
+	public void testShouldResolveAThreeLinkChainWithQualifiersWhereAllResourcesStandAlone() throws Exception {
+
+		// setup
+		IIdType oid1;
+
+		{
+			Organization org = new Organization();
+			org.setId(IdType.newRandomUuid());
+			org.setName("HealthCo");
+			myOrganizationDao.create(org, mySrd);
+
+			Patient p = new Patient();
+			p.setId(IdType.newRandomUuid());
+			p.addName().setFamily("Smith").addGiven("John");
+			p.getManagingOrganization().setReference(org.getId());
+			myPatientDao.create(p, mySrd);
+
+			Observation obs = new Observation();
+			obs.getCode().setText("Observation 1");
+			obs.getSubject().setReference(p.getId());
+
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+
+		String url = "/Observation?subject:Patient.organization:Organization.name=HealthCo";
+
+		// execute
+		myCaptureQueriesListener.clear();
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		ourLog.info(">>> " + myCaptureQueriesListener.getSelectQueriesForCurrentThread());
+
+		// validate
+		assertEquals(1L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
+	@Test
+	public void testShouldResolveAThreeLinkChainWithQualifiersWithAContainedResourceAtTheEndOfTheChain() throws Exception {
+		// This is the case that is most relevant to SMILE-2899
+		IIdType oid1;
+
+		myCaptureQueriesListener.clear();
+		{
+			Organization org = new Organization();
+			org.setId("org");
+			org.setName("HealthCo");
+
+			Patient p = new Patient();
+			p.setId(IdType.newRandomUuid());
+			p.getContained().add(org);
+			p.addName().setFamily("Smith").addGiven("John");
+			p.getManagingOrganization().setReference("#org");
+			myPatientDao.create(p, mySrd);
+
+			Observation obs = new Observation();
+			obs.getCode().setText("Observation 1");
+			obs.getSubject().setReference(p.getId());
+
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+		ourLog.info("Data setup SQL: " + myCaptureQueriesListener.getInsertQueriesForCurrentThread());
+
+		String url = "/Observation?subject:Patient.organization:Organization.name=HealthCo";
+		myCaptureQueriesListener.clear();
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		ourLog.info("Data retrieval SQL: " + myCaptureQueriesListener.getSelectQueriesForCurrentThread());
+
+		assertEquals(1L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
 	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String theUrl) throws IOException {
 		List<String> ids = new ArrayList<>();
 
