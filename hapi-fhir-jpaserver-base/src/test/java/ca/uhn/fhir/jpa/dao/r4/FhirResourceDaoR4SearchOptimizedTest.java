@@ -21,18 +21,29 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.BodyStructure;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -906,6 +917,117 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testSearchOnUnderscoreParams_AvoidHFJResourceJoins() {
+		// This Issue: https://github.com/hapifhir/hapi-fhir/issues/2942
+		// See this PR for a similar type of Fix: https://github.com/hapifhir/hapi-fhir/pull/2909
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.addBase("BodySite").addBase("Procedure");
+		searchParameter.setCode("focalAccess");
+		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
+		searchParameter.setExpression("Procedure.extension('Procedure#focalAccess')");
+		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		IIdType spId = mySearchParameterDao.create(searchParameter).getId().toUnqualifiedVersionless();
+		mySearchParamRegistry.forceRefresh();
+
+		BodyStructure bs = new BodyStructure();
+		bs.setDescription("BodyStructure in R4 replaced BodySite from DSTU4");
+		IIdType bsId = myBodyStructureDao.create(bs, mySrd).getId().toUnqualifiedVersionless();
+
+		Patient patient = new Patient();
+		patient.setId("P1");
+		patient.setActive(true);
+		patient.addName().setFamily("FamilyName");
+		Extension extParent = patient
+			.addExtension()
+			.setUrl("http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity");
+		extParent
+			.addExtension()
+			.setUrl("ombCategory")
+			.setValue(new CodeableConcept().addCoding(new Coding().setSystem("urn:oid:2.16.840.1.113883.5.50")
+			.setCode("2186-5")
+			.setDisplay("Not Hispanic or Latino")));
+		extParent
+			.addExtension()
+			.setUrl("text")
+			.setValue(new StringType("Not Hispanic or Latino"));
+		myPatientDao.update(patient);
+		CodeableConcept categoryCodeableConcept1 = new CodeableConcept().addCoding(new Coding().setSystem("acc_proccat_fkc")
+			.setCode("CANN")
+			.setDisplay("Cannulation"));
+		Procedure procedure = new Procedure();
+		procedure.setSubject(new Reference("Patient/P1"));
+		procedure.setStatus(Procedure.ProcedureStatus.COMPLETED);
+		procedure.setCategory(categoryCodeableConcept1);
+		Extension extProcedure = procedure
+			.addExtension()
+			.setUrl("Procedure#focalAccess")
+			.setValue(new UriType("BodyStructure/" + bsId.getIdPartAsLong()));
+		procedure.getMeta()
+			.addTag("acc_procext_fkc", "1STCANN2NDL", "First Successful Cannulation with 2 Needles");
+		IIdType procedureId = myProcedureDao.create(procedure).getId().toUnqualifiedVersionless();
+
+		logAllResources();
+		logAllResourceTags();
+		logAllResourceVersions();
+
+		// Search example 1:
+		// http://FHIR_SERVER/fhir_request/Procedure
+		// ?status%3Anot=entered-in-error&subject=B
+		// &category=CANN&focalAccess=BodySite%2F3530342921&_tag=TagValue
+		// NOTE: This gets sorted once so the order is different once it gets executed!
+		{
+			// IMPORTANT: Keep the query param order exactly as shown below!
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			// _tag, category, status, subject, focalAccess
+			map.add("_tag", new TokenParam("TagValue"));
+			map.add("category", new TokenParam("CANN"));
+			map.add("status", new TokenParam("entered-in-error").setModifier(TokenParamModifier.NOT));
+			map.add("subject", new ReferenceParam("Patient/P1"));
+			map.add("focalAccess", new ReferenceParam("BodyStructure/" + bsId.getIdPart()));
+			myCaptureQueriesListener.clear();
+			IBundleProvider outcome = myProcedureDao.search(map, new SystemRequestDetails());
+			ourLog.info("Search returned {} resources.", outcome.getResources(0, 999).size());
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+			// Check for a particular WHERE CLAUSE in the generated SQL to make sure we are verifying the correct query
+			assertEquals(2, StringUtils.countMatches(selectQuery.toLowerCase(), " join hfj_res_link "), selectQuery);
+
+			// Ensure that we do NOT see a couple of particular WHERE clauses
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_type = 'procedure'"), selectQuery);
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null"), selectQuery);
+		}
+
+		// Search example 2:
+		// http://FHIR_SERVER/fhir_request/Procedure
+		// ?status%3Anot=entered-in-error&category=CANN&focalAccess=3692871435
+		// &_tag=1STCANN1NDL%2C1STCANN2NDL&outcome=SUCCESS&_count=1&_requestTrace=True
+		// NOTE: This gets sorted once so the order is different once it gets executed!
+		{
+			// IMPORTANT: Keep the query param order exactly as shown below!
+			// NOTE: The "outcome" SearchParameter is not being used below, but it doesn't affect the test.
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			// _tag, category, status, focalAccess
+			map.add("_tag", new TokenParam("TagValue"));
+			map.add("category", new TokenParam("CANN"));
+			map.add("status", new TokenParam("entered-in-error").setModifier(TokenParamModifier.NOT));
+			map.add("focalAccess", new ReferenceParam("BodyStructure/" + bsId.getIdPart()));
+			myCaptureQueriesListener.clear();
+			IBundleProvider outcome = myProcedureDao.search(map, new SystemRequestDetails());
+			ourLog.info("Search returned {} resources.", outcome.getResources(0, 999).size());
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+			// Check for a particular WHERE CLAUSE in the generated SQL to make sure we are verifying the correct query
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), " join hfj_res_link "), selectQuery);
+
+			// Ensure that we do NOT see a couple of particular WHERE clauses
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_type = 'procedure'"), selectQuery);
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null"), selectQuery);
+		}
+	}
 
 	@AfterEach
 	public void afterResetDao() {
