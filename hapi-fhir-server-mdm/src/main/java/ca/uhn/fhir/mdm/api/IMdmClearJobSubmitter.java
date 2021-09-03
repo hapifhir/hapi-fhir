@@ -20,24 +20,10 @@ package ca.uhn.fhir.mdm.api;
  * #L%
  */
 
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IMultiUrlJobSubmitter;
 
-public interface IMdmExpungeSvc {
-
-	/**
-	 * Given a resource type, delete the underlying MDM links, and their related golden resource objects.
-	 *
-	 * @param theSourceResourceType The type of resources
-	 * @param theRequestDetails
-	 * @return the count of deleted MDM links
-	 */
-	long expungeAllMdmLinksOfSourceType(String theSourceResourceType, ServletRequestDetails theRequestDetails);
-
-	/**
-	 * Delete all MDM links, and their related golden resource objects.
-	 *
-	 * @return the count of deleted MDM links
-	 * @param theRequestDetails
-	 */
-	long expungeAllMdmLinks(ServletRequestDetails theRequestDetails);
+/**
+ * Tag interface for Spring autowiring
+ */
+public interface IMdmClearJobSubmitter extends IMultiUrlJobSubmitter {
 }
