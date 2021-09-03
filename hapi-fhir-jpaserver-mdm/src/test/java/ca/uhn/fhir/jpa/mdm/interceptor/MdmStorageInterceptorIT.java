@@ -77,26 +77,6 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void testUpdateLinkChangeEvent() throws InterruptedException {
-		Patient patient1 = addExternalEID(buildJanePatient(), "eid-1");
-		myMdmHelper.createWithLatch(patient1);
-
-		MdmTransactionContext ctx = createContextForCreate("Patient");
-		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(patient1, ctx);
-		ourLog.info(ctx.getMdmLinkEvent().toString());
-		assertEquals(patient1.getIdElement().getValue(), ctx.getMdmLinkEvent().getTargetResourceId());
-		assertEquals(getLinkByTargetId(patient1).getGoldenResourcePid(), new IdDt(ctx.getMdmLinkEvent().getGoldenResourceId()).getIdPartAsLong());
-
-		Patient patient2 = addExternalEID(buildJanePatient(), "eid-2");
-		myMdmHelper.createWithLatch(patient2);
-		ctx = createContextForCreate("Patient");
-		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(patient2, ctx);
-		ourLog.info(ctx.getMdmLinkEvent().toString());
-		assertEquals(patient2.getIdElement().getValue(), ctx.getMdmLinkEvent().getTargetResourceId());
-		assertEquals(getLinkByTargetId(patient2).getGoldenResourcePid(), new IdDt(ctx.getMdmLinkEvent().getGoldenResourceId()).getIdPartAsLong());
-	}
-
-	@Test
 	public void testSearchExpandingInterceptorWorks() {
 		SearchParameterMap subject = new SearchParameterMap("subject", new ReferenceParam("Patient/123").setMdmExpand(true)).setLoadSynchronous(true);
 		myObservationDao.search(subject);

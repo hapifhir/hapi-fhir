@@ -78,8 +78,6 @@ public class MdmMatchLinkSvc {
 	private MdmTransactionContext doMdmUpdate(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
 		CandidateList candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(theResource);
 
-		theMdmTransactionContext.getMdmLinkEvent().setTargetResourceId(theResource);
-
 		if (candidateList.isEmpty()) {
 			handleMdmWithNoCandidates(theResource, theMdmTransactionContext);
 		} else if (candidateList.exactlyOneMatch()) {
@@ -115,14 +113,12 @@ public class MdmMatchLinkSvc {
 
 			//Set all GoldenResources as POSSIBLE_DUPLICATE of the last GoldenResource.
 			IAnyResource firstGoldenResource = goldenResources.get(0);
-			theMdmTransactionContext.getMdmLinkEvent().setGoldenResourceId(firstGoldenResource);
 
 			goldenResources.subList(1, goldenResources.size())
 				.forEach(possibleDuplicateGoldenResource -> {
 					MdmMatchOutcome outcome = MdmMatchOutcome.POSSIBLE_DUPLICATE;
 					outcome.setEidMatch(theCandidateList.isEidMatch());
 					myMdmLinkSvc.updateLink(firstGoldenResource, possibleDuplicateGoldenResource, outcome, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
-					theMdmTransactionContext.getMdmLinkEvent().addDuplicateGoldenResourceId(possibleDuplicateGoldenResource);
 				});
 		}
 	}
@@ -135,8 +131,6 @@ public class MdmMatchLinkSvc {
 		// 2. Create source resource for the MDM source
 		// 3. UPDATE MDM LINK TABLE
 		myMdmLinkSvc.updateLink(newGoldenResource, theResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
-
-		theMdmTransactionContext.getMdmLinkEvent().setGoldenResourceId(newGoldenResource);
 	}
 
 	private void handleMdmCreate(IAnyResource theTargetResource, MatchedGoldenResourceCandidate theGoldenResourceCandidate, MdmTransactionContext theMdmTransactionContext) {
@@ -146,7 +140,6 @@ public class MdmMatchLinkSvc {
 		if (myGoldenResourceHelper.isPotentialDuplicate(goldenResource, theTargetResource)) {
 			log(theMdmTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
 			IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(theTargetResource, theMdmTransactionContext);
-			theMdmTransactionContext.getMdmLinkEvent().setGoldenResourceId(newGoldenResource);
 
 			myMdmLinkSvc.updateLink(newGoldenResource, theTargetResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 			myMdmLinkSvc.updateLink(newGoldenResource, goldenResource, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
@@ -156,7 +149,6 @@ public class MdmMatchLinkSvc {
 				myEidUpdateService.applySurvivorshipRulesAndSaveGoldenResource(theTargetResource, goldenResource, theMdmTransactionContext);
 			}
 
-			theMdmTransactionContext.getMdmLinkEvent().setGoldenResourceId(goldenResource);
 			myMdmLinkSvc.updateLink(goldenResource, theTargetResource, theGoldenResourceCandidate.getMatchResult(), MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 		}
 	}

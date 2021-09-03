@@ -25,158 +25,32 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class MdmLinkEvent implements IModelJson {
 
-	@JsonProperty(value = "matchResult")
-	private MdmMatchResultEnum myMdmMatchResult;
-	@JsonProperty(value = "linkSource")
-	private MdmLinkSourceEnum myMdmLinkSource;
-	@JsonProperty(value = "eidMatch")
-	private Boolean myEidMatch;
-	@JsonProperty(value = "newGoldenResource")
-	private Boolean myNewGoldenResource;
-	@JsonProperty(value = "score")
-	private Double myScore;
-	@JsonProperty(value = "ruleCount")
-	private Long myRuleCount;
-	@JsonProperty(value = "targetResourceId", required = true)
-	private String myTargetResourceId;
-	@JsonProperty(value = "goldenResourceId", required = true)
-	private String myGoldenResourceId;
-	@JsonProperty(value = "duplicateResourceIds")
-	private Set<String> myDuplicateGoldenResourceIds = new HashSet<>();
+	private List<MdmLinkJson> myMdmLinks = new ArrayList<>();
 
-	public String getGoldenResourceId() {
-		return myGoldenResourceId;
+	public List<MdmLinkJson> getMdmLinks() {
+		return myMdmLinks;
 	}
 
-	public void setGoldenResourceId(IBaseResource theGoldenResourceId) {
-		setGoldenResourceId(getIdAsString(theGoldenResourceId));
+	public void setMdmLinks(List<MdmLinkJson> theMdmLinks) {
+		myMdmLinks = theMdmLinks;
 	}
 
-	public void setGoldenResourceId(String theGoldenResourceId) {
-		myGoldenResourceId = theGoldenResourceId;
-	}
-
-	private String getIdAsString(IBaseResource theResource) {
-		if (theResource == null) {
-			return null;
-		}
-		IIdType idElement = theResource.getIdElement();
-		if (idElement == null) {
-			return null;
-		}
-		return idElement.getValueAsString();
-	}
-
-	public String getTargetResourceId() {
-		return myTargetResourceId;
-	}
-
-	public void setTargetResourceId(IBaseResource theTargetResource) {
-		setTargetResourceId(getIdAsString(theTargetResource));
-	}
-
-	public void setTargetResourceId(String theTargetResourceId) {
-		myTargetResourceId = theTargetResourceId;
-	}
-
-	public Set<String> getDuplicateGoldenResourceIds() {
-		return myDuplicateGoldenResourceIds;
-	}
-
-	public void setDuplicateGoldenResourceIds(Set<String> theDuplicateGoldenResourceIds) {
-		myDuplicateGoldenResourceIds = theDuplicateGoldenResourceIds;
-	}
-
-	public MdmLinkEvent addDuplicateGoldenResourceId(IBaseResource theDuplicateGoldenResourceId) {
-		String id = getIdAsString(theDuplicateGoldenResourceId);
-		if (id != null) {
-			getDuplicateGoldenResourceIds().add(id);
-		}
+	public MdmLinkEvent addMdmLink(MdmLinkJson theMdmLink) {
+		getMdmLinks().add(theMdmLink);
 		return this;
-	}
-
-	public MdmMatchResultEnum getMdmMatchResult() {
-		return myMdmMatchResult;
-	}
-
-	public void setMdmMatchResult(MdmMatchResultEnum theMdmMatchResult) {
-		myMdmMatchResult = theMdmMatchResult;
-	}
-
-	public MdmLinkSourceEnum getMdmLinkSource() {
-		return myMdmLinkSource;
-	}
-
-	public void setMdmLinkSource(MdmLinkSourceEnum theMdmLinkSource) {
-		myMdmLinkSource = theMdmLinkSource;
-	}
-
-	public Boolean getEidMatch() {
-		return myEidMatch;
-	}
-
-	public void setEidMatch(Boolean theEidMatch) {
-		if (theEidMatch == null) {
-			myEidMatch = Boolean.FALSE;
-			return;
-		}
-		myEidMatch = theEidMatch;
-	}
-
-	public Boolean getNewGoldenResource() {
-		return myNewGoldenResource;
-	}
-
-	public void setNewGoldenResource(Boolean theNewGoldenResource) {
-		if (theNewGoldenResource == null) {
-			myNewGoldenResource = Boolean.FALSE;
-			return;
-		}
-		myNewGoldenResource = theNewGoldenResource;
-	}
-
-	public Double getScore() {
-		return myScore;
-	}
-
-	public void setScore(Double theScore) {
-		myScore = theScore;
-	}
-
-	public Long getRuleCount() {
-		return myRuleCount;
-	}
-
-	public void setRuleCount(Long theRuleCount) {
-		myRuleCount = theRuleCount;
-	}
-
-	public void setFromLink(MdmLinkJson theMdmLinkJson) {
-		setMdmMatchResult(theMdmLinkJson.getMatchResult());
-		setMdmLinkSource(theMdmLinkJson.getLinkSource());
-		setEidMatch(theMdmLinkJson.getEidMatch());
-		setNewGoldenResource(theMdmLinkJson.getLinkCreatedNewResource());
-		setScore(theMdmLinkJson.getScore());
-		setRuleCount(theMdmLinkJson.getRuleCount());
 	}
 
 	@Override
 	public String toString() {
-		return "MdmLinkChangeEvent{" +
-			"myMdmMatchResult=" + myMdmMatchResult +
-			", myMdmLinkSource=" + myMdmLinkSource +
-			", myEidMatch=" + myEidMatch +
-			", myNewGoldenResource=" + myNewGoldenResource +
-			", myScore=" + myScore +
-			", myRuleCount=" + myRuleCount +
-			", myTargetResourceId='" + myTargetResourceId + '\'' +
-			", myGoldenResourceId='" + myGoldenResourceId + '\'' +
-			", myDuplicateGoldenResourceIds=" + myDuplicateGoldenResourceIds +
+		return "MdmLinkEvent{" +
+			"myMdmLinks=" + myMdmLinks +
 			'}';
 	}
 }

@@ -119,17 +119,17 @@ public class MdmMessageHandler implements MessageHandler {
 			ResourceOperationMessage outgoingMsg = new ResourceOperationMessage(myFhirContext, targetResource, theMsg.getOperationType());
 			outgoingMsg.setTransactionId(theMsg.getTransactionId());
 
-			MdmLinkEvent linkChangeEvent = mdmContext.getMdmLinkEvent();
-			Optional<MdmLink> mdmLinkBySource = myMdmLinkDaoSvc.findMdmLinkBySource(targetResource);
-			if (!mdmLinkBySource.isPresent()) {
-				ourLog.warn("Unable to find link by source for {}", targetResource.getIdElement());
-			}
+			MdmLinkEvent linkChangeEvent = new MdmLinkEvent();
+			mdmContext.getMdmLinks()
+				.stream()
+				.forEach(l -> {
+					linkChangeEvent.addMdmLink(myModelConverter.toJson((MdmLink) l));
+				});
 
-			mdmLinkBySource.ifPresent(link -> linkChangeEvent.setFromLink(myModelConverter.toJson(link)));
 			HookParams params = new HookParams()
 				.add(ResourceOperationMessage.class, outgoingMsg)
 				.add(TransactionLogMessages.class, mdmContext.getTransactionLogMessages())
-				.add(MdmLinkEvent.class, mdmContext.getMdmLinkEvent());
+				.add(MdmLinkEvent.class, linkChangeEvent);
 
 			myInterceptorBroadcaster.callHooks(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED, params);
 		}

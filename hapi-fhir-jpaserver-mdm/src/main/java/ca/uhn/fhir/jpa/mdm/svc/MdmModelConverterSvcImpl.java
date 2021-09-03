@@ -31,22 +31,22 @@ public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 	IdHelperService myIdHelperService;
 
 	public MdmLinkJson toJson(MdmLink theLink) {
-		MdmLinkJson retval = new MdmLinkJson();
+		MdmLinkJson retVal = new MdmLinkJson();
 		String sourceId = myIdHelperService.resourceIdFromPidOrThrowException(theLink.getSourcePid()).toVersionless().getValue();
-		retval.setSourceId(sourceId);
+		retVal.setSourceId(sourceId);
 		String goldenResourceId = myIdHelperService.resourceIdFromPidOrThrowException(theLink.getGoldenResourcePid()).toVersionless().getValue();
-		retval.setGoldenResourceId(goldenResourceId);
-		retval.setCreated(theLink.getCreated());
-		retval.setEidMatch(theLink.getEidMatch());
-		retval.setLinkSource(theLink.getLinkSource());
-		retval.setMatchResult(theLink.getMatchResult());
-		retval.setLinkCreatedNewResource(theLink.getHadToCreateNewGoldenResource());
-		retval.setScore(theLink.getScore());
-		retval.setUpdated(theLink.getUpdated());
-		retval.setVector(theLink.getVector());
-		retval.setVersion(theLink.getVersion());
-		retval.setRuleCount(theLink.getRuleCount());
-		return retval;
+		retVal.setGoldenResourceId(goldenResourceId);
+		retVal.setCreated(theLink.getCreated());
+		retVal.setEidMatch(theLink.getEidMatch());
+		retVal.setLinkSource(theLink.getLinkSource());
+		retVal.setMatchResult(theLink.getMatchResult());
+		retVal.setLinkCreatedNewResource(theLink.getHadToCreateNewGoldenResource());
+		retVal.setScore(theLink.getScore());
+		retVal.setUpdated(theLink.getUpdated());
+		retVal.setVector(theLink.getVector());
+		retVal.setVersion(theLink.getVersion());
+		retVal.setRuleCount(theLink.getRuleCount());
+		return retVal;
 	}
 
 }
