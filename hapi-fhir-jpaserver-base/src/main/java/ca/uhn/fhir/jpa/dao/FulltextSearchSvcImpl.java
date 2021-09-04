@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.fhirpath.IFhirPath;
@@ -52,6 +53,7 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -69,6 +71,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private PlatformTransactionManager myTxManager;
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
+	@Autowired
+	private FhirContext myFhirContext;
 
 
 	private Boolean ourDisabled;
@@ -180,8 +184,17 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 //		for (IQueryParameterType testParameter : textParameters) {
 //			theParams.removeByNameAndQualifier(testParameter.getValueAsQueryToken(), testParameter.getQueryParameterQualifier());
 //		}
-		List<List<IQueryParameterType>> tokenTextAndTerms = theParams.removeByNameAndQualifier("code", TokenParamModifier.TEXT);
-		List<List<IQueryParameterType>> identifierText = theParams.removeByNameAndQualifier("identifier", TokenParamModifier.TEXT);
+		//DSTU doesn't support fhirpath, so fall back to old style lookup.
+
+		List<List<IQueryParameterType>> tokenTextAndTerms;
+		List<List<IQueryParameterType>> identifierText;
+		if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+			tokenTextAndTerms = theParams.removeByNameAndQualifier("code", TokenParamModifier.TEXT);
+			identifierText = theParams.removeByNameAndQualifier("identifier", TokenParamModifier.TEXT);
+		} else {
+			tokenTextAndTerms = new ArrayList<>();
+			identifierText = new ArrayList<>();
+		}
 
 		List<Long> longPids = session.search(ResourceTable.class)
 			//Selects are replacements for projection and convert more cleanly than the old implementation.
