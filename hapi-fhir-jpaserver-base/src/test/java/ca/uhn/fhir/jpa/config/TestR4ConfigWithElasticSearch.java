@@ -1,11 +1,16 @@
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.search.elastic.ElasticsearchHibernatePropertiesBuilder;
+import ca.uhn.fhir.jpa.search.elastic.IndexNamePrefixLayoutStrategy;
 import ca.uhn.fhir.jpa.search.lastn.config.TestElasticsearchContainerHelper;
+import org.h2.index.Index;
 import org.hibernate.search.backend.elasticsearch.index.IndexStatus;
+import org.hibernate.search.backend.elasticsearch.index.layout.IndexLayoutStrategy;
 import org.hibernate.search.mapper.orm.schema.management.SchemaManagementStrategyName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;

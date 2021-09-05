@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.config;
 import java.util.Properties;
 
 import org.hibernate.dialect.H2Dialect;
+import org.hibernate.search.backend.elasticsearch.index.layout.IndexLayoutStrategy;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.engine.cfg.BackendSettings;
 import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;

@@ -121,6 +121,7 @@ import ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.DatabaseSearchResultCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
+import ca.uhn.fhir.jpa.search.elastic.IndexNamePrefixLayoutStrategy;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexer;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
@@ -909,6 +910,11 @@ public abstract class BaseConfig {
 	@Bean
 	public PredicateBuilderFactory predicateBuilderFactory(ApplicationContext theApplicationContext) {
 		return new PredicateBuilderFactory(theApplicationContext);
+	}
+
+	@Bean
+	public IndexNamePrefixLayoutStrategy indexNamePrefixLayoutStrategy() {
+		return new IndexNamePrefixLayoutStrategy();
 	}
 
 	@Bean
