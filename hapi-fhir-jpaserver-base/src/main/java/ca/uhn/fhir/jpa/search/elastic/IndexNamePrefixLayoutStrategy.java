@@ -20,8 +20,8 @@ import java.util.regex.Pattern;
 @Service
 public class IndexNamePrefixLayoutStrategy implements IndexLayoutStrategy {
 
-//	@Autowired
-//	private DaoConfig myDaoConfig;
+	@Autowired
+	private DaoConfig myDaoConfig;
 
 	static final Log log = (Log) LoggerFactory.make(Log.class, MethodHandles.lookup());
 	public static final String NAME = "prefix";
@@ -40,9 +40,9 @@ public class IndexNamePrefixLayoutStrategy implements IndexLayoutStrategy {
 	}
 
 	private String addPrefixIfNecessary(String theCandidateName) {
-		String myDaoConfig = "zoop";
-		if (!StringUtils.isBlank(myDaoConfig)) {
-			return myDaoConfig + "-" + theCandidateName;
+
+		if (!StringUtils.isBlank(myDaoConfig.getElasticSearchIndexPrefix())) {
+			return myDaoConfig.getElasticSearchIndexPrefix() + "-" + theCandidateName;
 		} else {
 			return theCandidateName;
 		}
@@ -63,9 +63,8 @@ public class IndexNamePrefixLayoutStrategy implements IndexLayoutStrategy {
 	}
 
 	private String removePrefixIfNecessary(String theCandidateUniqueKey) {
-		String myDaoConfig = "zoop";
-		if (!StringUtils.isBlank(myDaoConfig)) {
-			return theCandidateUniqueKey.replace(myDaoConfig+ "-", "");
+		if (!StringUtils.isBlank(myDaoConfig.getElasticSearchIndexPrefix())) {
+			return theCandidateUniqueKey.replace(myDaoConfig.getElasticSearchIndexPrefix() + "-", "");
 		} else {
 			return theCandidateUniqueKey;
 		}

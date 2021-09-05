@@ -913,7 +913,7 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public IndexNamePrefixLayoutStrategy indexNamePrefixLayoutStrategy() {
+	public IndexNamePrefixLayoutStrategy indexLayoutStrategy() {
 		return new IndexNamePrefixLayoutStrategy();
 	}
 
