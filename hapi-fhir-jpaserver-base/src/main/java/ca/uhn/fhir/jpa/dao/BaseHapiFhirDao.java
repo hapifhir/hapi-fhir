@@ -699,9 +699,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		});
 
-		boolean retval = !allTagsOld.equals(allTagsNew);
 		theEntity.setHasTags(!allTagsNew.isEmpty());
-		return retval;
+		return !allTagsOld.equals(allTagsNew);
 	}
 
 	@SuppressWarnings("unchecked")
