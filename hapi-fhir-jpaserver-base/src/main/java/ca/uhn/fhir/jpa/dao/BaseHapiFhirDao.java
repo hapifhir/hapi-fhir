@@ -1373,11 +1373,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return entity;
 	}
 
-	private void createHistoryEntry(RequestDetails theRequest, IBaseResource theResource, ResourceTable entity, EncodedResource changed) {
+	private void createHistoryEntry(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, EncodedResource theChanged) {
 		boolean versionedTags = getConfig().getTagStorageMode() == DaoConfig.TagStorageModeEnum.VERSIONED;
-		final ResourceHistoryTable historyEntry = entity.toHistory(versionedTags);
-		historyEntry.setEncoding(changed.getEncoding());
-		historyEntry.setResource(changed.getResource());
+		final ResourceHistoryTable historyEntry = theEntity.toHistory(versionedTags);
+		historyEntry.setEncoding(theChanged.getEncoding());
+		historyEntry.setResource(theChanged.getResource());
 
 		ourLog.debug("Saving history entry {}", historyEntry.getIdDt());
 		myResourceHistoryTableDao.save(historyEntry);
@@ -1406,8 +1406,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (haveSource || haveRequestId) {
 			ResourceHistoryProvenanceEntity provenance = new ResourceHistoryProvenanceEntity();
 			provenance.setResourceHistoryTable(historyEntry);
-			provenance.setResourceTable(entity);
-			provenance.setPartitionId(entity.getPartitionId());
+			provenance.setResourceTable(theEntity);
+			provenance.setPartitionId(theEntity.getPartitionId());
 			if (haveRequestId) {
 				provenance.setRequestId(left(requestId, Constants.REQUEST_ID_LENGTH));
 			}
