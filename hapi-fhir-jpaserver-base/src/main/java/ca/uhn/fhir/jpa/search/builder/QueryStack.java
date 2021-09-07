@@ -729,10 +729,10 @@ public class QueryStack {
 		return predicateBuilder.createPredicate(theRequest, theResourceName, theParamName, theList, theOperation, theRequestPartitionId);
 	}
 
-	private Condition createPredicateReferenceForContainedResource(@Nullable DbColumn theSourceJoinColumn,
-																						String theResourceName, String theParamName, RuntimeSearchParam theSearchParam,
-																						List<? extends IQueryParameterType> theList, SearchFilterParser.CompareOperation theOperation,
-																						RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateReferenceForContainedResource(@Nullable DbColumn theSourceJoinColumn,
+																					  String theResourceName, String theParamName, RuntimeSearchParam theSearchParam,
+																					  List<? extends IQueryParameterType> theList, SearchFilterParser.CompareOperation theOperation,
+																					  RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 
 		String spnamePrefix = theParamName;
 
@@ -794,31 +794,31 @@ public class QueryStack {
 
 		switch (targetParamDefinition.getParamType()) {
 			case DATE:
-				containedCondition = createPredicateDate(null, theResourceName, spnamePrefix, targetParamDefinition,
+				containedCondition = createPredicateDate(theSourceJoinColumn, theResourceName, spnamePrefix, targetParamDefinition,
 					orValues, theOperation, theRequestPartitionId);
 				break;
 			case NUMBER:
-				containedCondition = createPredicateNumber(null, theResourceName, spnamePrefix, targetParamDefinition,
+				containedCondition = createPredicateNumber(theSourceJoinColumn, theResourceName, spnamePrefix, targetParamDefinition,
 					orValues, theOperation, theRequestPartitionId);
 				break;
 			case QUANTITY:
-				containedCondition = createPredicateQuantity(null, theResourceName, spnamePrefix, targetParamDefinition,
+				containedCondition = createPredicateQuantity(theSourceJoinColumn, theResourceName, spnamePrefix, targetParamDefinition,
 					orValues, theOperation, theRequestPartitionId);
 				break;
 			case STRING:
-				containedCondition = createPredicateString(null, theResourceName, spnamePrefix, targetParamDefinition,
+				containedCondition = createPredicateString(theSourceJoinColumn, theResourceName, spnamePrefix, targetParamDefinition,
 					orValues, theOperation, theRequestPartitionId);
 				break;
 			case TOKEN:
-				containedCondition = createPredicateToken(null, theResourceName, spnamePrefix, targetParamDefinition,
+				containedCondition = createPredicateToken(theSourceJoinColumn, theResourceName, spnamePrefix, targetParamDefinition,
 					orValues, theOperation, theRequestPartitionId);
 				break;
 			case COMPOSITE:
-				containedCondition = createPredicateComposite(null, theResourceName, spnamePrefix, targetParamDefinition,
+				containedCondition = createPredicateComposite(theSourceJoinColumn, theResourceName, spnamePrefix, targetParamDefinition,
 					orValues, theRequestPartitionId);
 				break;
 			case URI:
-				containedCondition = createPredicateUri(null, theResourceName, spnamePrefix, targetParamDefinition,
+				containedCondition = createPredicateUri(theSourceJoinColumn, theResourceName, spnamePrefix, targetParamDefinition,
 					orValues, theOperation, theRequest, theRequestPartitionId);
 				break;
 			case HAS:
@@ -1162,10 +1162,24 @@ public class QueryStack {
 					break;
 				case REFERENCE:
 					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-						if (theSearchContainedMode.equals(SearchContainedModeEnum.TRUE))
-							andPredicates.add(createPredicateReferenceForContainedResource(theSourceJoinColumn, theResourceName, theParamName, nextParamDef, nextAnd, null, theRequest, theRequestPartitionId));
-						else
+						if (theSearchContainedMode.equals(SearchContainedModeEnum.TRUE)) {
+							// TODO: The _contained parameter is not intended to control search chain interpretation like this.
+							//   See SMILE-2898 for details.
+							//   For now, leave the incorrect implementation alone, just in case someone is relying on it,
+							//   until the complete fix is available.
+							andPredicates.add(createPredicateReferenceForContainedResource(null, theResourceName, theParamName, nextParamDef, nextAnd, null, theRequest, theRequestPartitionId));
+						} else if (isEligibleForContainedResourceSearch(nextAnd)) {
+							// TODO for now, restrict contained reference traversal to the last reference in the chain
+							//   We don't seem to be indexing the outbound references of a contained resource, so we can't
+							//   include them in search chains.
+							//   It would be nice to eventually relax this constraint, but no client seems to be asking for it.
+							andPredicates.add(toOrPredicate(
+								createPredicateReference(theSourceJoinColumn, theResourceName, theParamName, nextAnd, null, theRequest, theRequestPartitionId),
+								createPredicateReferenceForContainedResource(theSourceJoinColumn, theResourceName, theParamName, nextParamDef, nextAnd, null, theRequest, theRequestPartitionId)
+							));
+						} else {
 							andPredicates.add(createPredicateReference(theSourceJoinColumn, theResourceName, theParamName, nextAnd, null, theRequest, theRequestPartitionId));
+						}
 					}
 					break;
 				case STRING:
@@ -1241,6 +1255,14 @@ public class QueryStack {
 		}
 
 		return toAndPredicate(andPredicates);
+	}
+
+	private boolean isEligibleForContainedResourceSearch(List<? extends IQueryParameterType> nextAnd) {
+		return myModelConfig.isIndexOnContainedResources() &&
+			nextAnd.stream()
+				.filter(t -> t instanceof ReferenceParam)
+				.map(t -> (ReferenceParam) t)
+				.noneMatch(t -> t.getChain().contains("."));
 	}
 
 	public void addPredicateCompositeUnique(String theIndexString, RequestPartitionId theRequestPartitionId) {
