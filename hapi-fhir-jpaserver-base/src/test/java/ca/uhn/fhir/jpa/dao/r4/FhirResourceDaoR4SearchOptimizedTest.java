@@ -923,7 +923,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	 * we include a selector for the resource type
 	 */
 	@Test
-	public void testSearchByLastUpdated_IncludesResourceTypeSelector() {
+	public void testSearchByLastUpdatedOnly() {
 		Patient p = new Patient();
 		p.setId("B");
 		myPatientDao.update(p);
