@@ -16,6 +16,7 @@ import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.dialect.H2Dialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -143,8 +144,8 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 	@Override
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-		LocalContainerEntityManagerFactoryBean retVal = new HapiFhirLocalContainerEntityManagerFactoryBean();
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory) {
+		LocalContainerEntityManagerFactoryBean retVal = new HapiFhirLocalContainerEntityManagerFactoryBean(theConfigurableListableBeanFactory);
 		configureEntityManagerFactory(retVal, fhirContext());
 		retVal.setJpaDialect(new HapiFhirHibernateJpaDialect(fhirContext().getLocalizer()));
 		retVal.setPackagesToScan("ca.uhn.fhir.jpa.model.entity", "ca.uhn.fhir.jpa.entity");

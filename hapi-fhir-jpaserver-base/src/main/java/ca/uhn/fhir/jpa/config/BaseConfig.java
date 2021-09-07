@@ -153,6 +153,7 @@ import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -286,8 +287,8 @@ public abstract class BaseConfig {
 	 * bean, but it provides a partially completed entity manager
 	 * factory with HAPI FHIR customizations
 	 */
-	protected LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-		LocalContainerEntityManagerFactoryBean retVal = new HapiFhirLocalContainerEntityManagerFactoryBean();
+	protected LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory myConfigurableListableBeanFactory) {
+		LocalContainerEntityManagerFactoryBean retVal = new HapiFhirLocalContainerEntityManagerFactoryBean(myConfigurableListableBeanFactory);
 		configureEntityManagerFactory(retVal, fhirContext());
 		return retVal;
 	}

@@ -23,6 +23,9 @@ package ca.uhn.fhir.jpa.config;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.query.criteria.LiteralHandlingMode;
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.orm.hibernate5.SpringBeanContainer;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 import java.util.Map;
@@ -32,6 +35,14 @@ import java.util.Map;
  * that sets some sensible default property values
  */
 public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContainerEntityManagerFactoryBean {
+
+	//Weeeeee : https://stackoverflow.com/questions/57902388/how-to-inject-spring-beans-into-the-hibernate-envers-revisionlistener
+	ConfigurableListableBeanFactory myConfigurableListableBeanFactory;
+
+	public HapiFhirLocalContainerEntityManagerFactoryBean(ConfigurableListableBeanFactory theConfigurableListableBeanFactory) {
+		myConfigurableListableBeanFactory = theConfigurableListableBeanFactory;
+	}
+
 	@Override
 	public Map<String, Object> getJpaPropertyMap() {
 		Map<String, Object> retVal = super.getJpaPropertyMap();
@@ -62,6 +73,11 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 
 		if (!retVal.containsKey(AvailableSettings.BATCH_VERSIONED_DATA)) {
 			retVal.put(AvailableSettings.BATCH_VERSIONED_DATA, "true");
+		}
+		//Why is this here, you ask? LocalContainerEntityManagerFactoryBean actually clobbers the setting hibernate needs
+		//in order to be able to resolve beans, so we add it back in manually here:
+		if (!retVal.containsKey(AvailableSettings.BEAN_CONTAINER)) {
+			retVal.put(AvailableSettings.BEAN_CONTAINER, new SpringBeanContainer(myConfigurableListableBeanFactory));
 		}
 
 		return retVal;

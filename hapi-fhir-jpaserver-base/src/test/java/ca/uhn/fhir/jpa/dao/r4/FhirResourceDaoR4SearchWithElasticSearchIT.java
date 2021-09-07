@@ -112,7 +112,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	@BeforeEach
 	public void beforePurgeDatabase() {
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
-		myDaoConfig.setElasticSearchIndexPrefix("ZOOP");
 	}
 
 	@Override
