@@ -66,14 +66,6 @@ public class IdHelperServiceTest {
 	@InjectMocks
 	private IdHelperService myIdHelperService;
 
-	private ResourcePersistentId getResourcePersistentIdFromResource(IIdType theId, long thePid) {
-		ResourcePersistentId id = new ResourcePersistentId(thePid);
-		String idPortion = theId.getIdPart();
-		IIdType newId = new IdDt(theId.getResourceType(), idPortion);
-		id.setAssociatedResourceId(newId);
-		return id;
-	}
-
 	/**
 	 * Gets a ResourceTable record for getResourceVersionsForPid
 	 * Order matters!

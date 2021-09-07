@@ -590,7 +590,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		// create
 		Patient patient = new Patient();
 		patient.setIdElement(new IdType(patientId));
-		myPatientDao.update(patient);
+		myPatientDao.update(patient); // use update to use forcedid
 
 		// update
 		patient.setActive(true);
@@ -615,7 +615,9 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertNotNull(retObservation);
 	}
 
-
+	/**
+	 * This test is the same as above, except it uses the serverid (instead of forcedid)
+	 */
 	@Test
 	public void testAutocreatePlaceholderWithExistingTargetWithServerAssignedIdTest() {
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
@@ -624,9 +626,9 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		// create
 		Patient patient = new Patient();
 		patient.setIdElement(new IdType("Patient"));
-		DaoMethodOutcome ret = myPatientDao.create(patient);
+		DaoMethodOutcome ret = myPatientDao.create(patient); // use create to use server id
 
-		// update
+		// update - to update our version
 		patient.setActive(true);
 		myPatientDao.update(patient);
 
