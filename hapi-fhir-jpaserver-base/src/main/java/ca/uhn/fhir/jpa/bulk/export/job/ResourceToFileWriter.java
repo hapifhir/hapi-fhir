@@ -117,9 +117,11 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 		int count = 0;
 		for (List<IBaseResource> resourceList : theList) {
 			for (IBaseResource nextFileResource : resourceList) {
-				myParser.encodeResourceToWriter(nextFileResource, myWriter);
-				myWriter.append("\n");
-				count++;
+				if (nextFileResource != null) {
+					myParser.encodeResourceToWriter(nextFileResource, myWriter);
+					myWriter.append("\n");
+					count++;
+				}
 			}
 		}
 
