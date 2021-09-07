@@ -114,9 +114,9 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		map.add("subject", new ReferenceParam("name", "Smith"));
 		map.setSearchContainedMode(SearchContainedModeEnum.TRUE);
 		map.setLoadSynchronous(true);
-		myCaptureQueriesListener.clear();
+
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id)));
-		ourLog.info(">>> " + myCaptureQueriesListener.getSelectQueriesForCurrentThread());
+
 	}
 	
 	

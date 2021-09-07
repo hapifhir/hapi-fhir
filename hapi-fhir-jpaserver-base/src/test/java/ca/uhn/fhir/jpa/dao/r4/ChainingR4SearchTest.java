@@ -28,9 +28,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ChainedContainedR4SearchTest.class);
+public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 	@Autowired
 	MatchUrlService myMatchUrlService;
@@ -77,16 +75,12 @@ public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
 			obs.getSubject().setReference(p.getId());
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-
-			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		String url = "/Observation?subject.name=Smith";
 
 		// execute
-		myCaptureQueriesListener.clear();
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
-		ourLog.info(">>> " + myCaptureQueriesListener.getSelectQueriesForCurrentThread());
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -95,6 +89,7 @@ public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
 
 	@Test
 	public void testShouldResolveATwoLinkChainWithAContainedResource() throws Exception {
+		// setup
 		IIdType oid1;
 
 		{
@@ -109,16 +104,14 @@ public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
 			obs.getSubject().setReference("#pat");
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-
-			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		String url = "/Observation?subject.name=Smith";
-//		String url = "/Observation?subject.name=Smith&value-string=Test";
-		myCaptureQueriesListener.clear();
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
-		ourLog.info(">>> " + myCaptureQueriesListener.getSelectQueriesForCurrentThread());
 
+		// execute
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+
+		// validate
 		assertEquals(1L, oids.size());
 		assertThat(oids, contains(oid1.getIdPart()));
 	}
@@ -146,16 +139,12 @@ public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
 			obs.getSubject().setReference(p.getId());
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-
-			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		String url = "/Observation?subject.organization.name=HealthCo";
 
 		// execute
-		myCaptureQueriesListener.clear();
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
-		ourLog.info(">>> " + myCaptureQueriesListener.getSelectQueriesForCurrentThread());
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -165,9 +154,10 @@ public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
 	@Test
 	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheEndOfTheChain() throws Exception {
 		// This is the case that is most relevant to SMILE-2899
+
+		// setup
 		IIdType oid1;
 
-		myCaptureQueriesListener.clear();
 		{
 			Organization org = new Organization();
 			org.setId("org");
@@ -185,16 +175,14 @@ public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
 			obs.getSubject().setReference(p.getId());
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-
-			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		ourLog.info("Data setup SQL: " + myCaptureQueriesListener.getInsertQueriesForCurrentThread());
 
 		String url = "/Observation?subject.organization.name=HealthCo";
-		myCaptureQueriesListener.clear();
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
-		ourLog.info("Data retrieval SQL: " + myCaptureQueriesListener.getSelectQueriesForCurrentThread());
 
+		// execute
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+
+		// validate
 		assertEquals(1L, oids.size());
 		assertThat(oids, contains(oid1.getIdPart()));
 	}
@@ -204,6 +192,7 @@ public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
 	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheBeginningOfTheChain() throws Exception {
 		// We do not currently support this case - we may not be indexing the references of contained resources
 
+		// setup
 		IIdType oid1;
 
 		{
@@ -223,15 +212,14 @@ public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
 			obs.getSubject().setReference("#pat");
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-
-			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		String url = "/Observation?subject.organization.name=HealthCo";
-		myCaptureQueriesListener.clear();
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
-		ourLog.info(">>> " + myCaptureQueriesListener.getSelectQueriesForCurrentThread());
 
+		// execute
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+
+		// validate
 		assertEquals(1L, oids.size());
 		assertThat(oids, contains(oid1.getIdPart()));
 	}
@@ -259,16 +247,12 @@ public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
 			obs.getSubject().setReference(p.getId());
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-
-			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		String url = "/Observation?subject:Patient.organization:Organization.name=HealthCo";
 
 		// execute
-		myCaptureQueriesListener.clear();
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
-		ourLog.info(">>> " + myCaptureQueriesListener.getSelectQueriesForCurrentThread());
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -278,9 +262,10 @@ public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
 	@Test
 	public void testShouldResolveAThreeLinkChainWithQualifiersWithAContainedResourceAtTheEndOfTheChain() throws Exception {
 		// This is the case that is most relevant to SMILE-2899
+
+		// setup
 		IIdType oid1;
 
-		myCaptureQueriesListener.clear();
 		{
 			Organization org = new Organization();
 			org.setId("org");
@@ -298,16 +283,14 @@ public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
 			obs.getSubject().setReference(p.getId());
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-
-			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		ourLog.info("Data setup SQL: " + myCaptureQueriesListener.getInsertQueriesForCurrentThread());
 
 		String url = "/Observation?subject:Patient.organization:Organization.name=HealthCo";
-		myCaptureQueriesListener.clear();
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
-		ourLog.info("Data retrieval SQL: " + myCaptureQueriesListener.getSelectQueriesForCurrentThread());
 
+		// execute
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+
+		// validate
 		assertEquals(1L, oids.size());
 		assertThat(oids, contains(oid1.getIdPart()));
 	}
@@ -340,16 +323,12 @@ public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
 			obs.getSubject().setReference(p.getId());
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-
-			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		String url = "/Observation?subject.organization.partof.name=HealthCo";
 
 		// execute
-		myCaptureQueriesListener.clear();
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
-		ourLog.info(">>> " + myCaptureQueriesListener.getSelectQueriesForCurrentThread());
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -384,16 +363,12 @@ public class ChainedContainedR4SearchTest extends BaseJpaR4Test {
 			obs.getSubject().setReference(p.getId());
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-
-			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		String url = "/Observation?subject.organization.partof.name=HealthCo";
 
 		// execute
-		myCaptureQueriesListener.clear();
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
-		ourLog.info(">>> " + myCaptureQueriesListener.getSelectQueriesForCurrentThread());
 
 		// validate
 		assertEquals(1L, oids.size());
