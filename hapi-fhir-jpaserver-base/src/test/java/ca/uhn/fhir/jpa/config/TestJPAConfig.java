@@ -34,11 +34,6 @@ public class TestJPAConfig {
 	}
 
 	@Bean
-	public IndexNamePrefixLayoutStrategy indexNamePrefixLayoutStrategy() {
-		return new IndexNamePrefixLayoutStrategy();
-	}
-
-	@Bean
 	public PartitionSettings partitionSettings() {
 		return new PartitionSettings();
 	}

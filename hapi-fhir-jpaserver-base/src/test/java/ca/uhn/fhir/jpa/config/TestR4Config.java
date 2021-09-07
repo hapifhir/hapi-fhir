@@ -151,10 +151,6 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	}
 
 	@Bean
-	public IndexLayoutStrategy indexPrefixLayout() {
-		return new IndexNamePrefixLayoutStrategy();
-	}
-	@Bean
 	public Properties jpaProperties() {
 		Properties extraProperties = new Properties();
 		extraProperties.put("hibernate.format_sql", "false");
