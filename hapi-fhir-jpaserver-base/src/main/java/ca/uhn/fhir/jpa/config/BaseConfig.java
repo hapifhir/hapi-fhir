@@ -16,6 +16,8 @@ import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.config.NonPersistedBatchConfigurer;
 import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
+import ca.uhn.fhir.jpa.batch.mdm.MdmBatchJobSubmitterFactoryImpl;
+import ca.uhn.fhir.jpa.batch.mdm.MdmClearJobSubmitterImpl;
 import ca.uhn.fhir.jpa.batch.reader.BatchResourceSearcher;
 import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
@@ -35,7 +37,6 @@ import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
-import ca.uhn.fhir.jpa.dao.expunge.DeleteExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
@@ -137,6 +138,8 @@ import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.validation.JpaResourceLoader;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
+import ca.uhn.fhir.mdm.api.IMdmBatchJobSubmitterFactory;
+import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.IReindexJobSubmitter;
@@ -517,8 +520,18 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public MdmLinkExpandSvc myMdmLinkExpandSvc() {
+	public MdmLinkExpandSvc mdmLinkExpandSvc() {
 		return new MdmLinkExpandSvc();
+	}
+
+	@Bean
+	IMdmBatchJobSubmitterFactory mdmBatchJobSubmitterFactory() {
+		return new MdmBatchJobSubmitterFactoryImpl();
+	}
+
+	@Bean
+	IMdmClearJobSubmitter mdmClearJobSubmitter() {
+		return new MdmClearJobSubmitterImpl();
 	}
 
 	@Bean
@@ -891,11 +904,6 @@ public abstract class BaseConfig {
 	@Bean
 	public DaoSearchParamSynchronizer daoSearchParamSynchronizer() {
 		return new DaoSearchParamSynchronizer();
-	}
-
-	@Bean
-	public DeleteExpungeService deleteExpungeService() {
-		return new DeleteExpungeService();
 	}
 
 	@Bean

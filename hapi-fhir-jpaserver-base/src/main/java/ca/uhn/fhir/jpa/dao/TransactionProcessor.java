@@ -244,24 +244,28 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				if (orPredicates.size() > 1) {
 					cq.where(cb.or(orPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
 
-					Map<Long, MatchUrlToResolve> hashToSearchMap = buildHashToSearchMap(searchParameterMapsToResolve);
+					Map<Long, List<MatchUrlToResolve>> hashToSearchMap = buildHashToSearchMap(searchParameterMapsToResolve);
 
 					TypedQuery<ResourceIndexedSearchParamToken> query = myEntityManager.createQuery(cq);
 					List<ResourceIndexedSearchParamToken> results = query.getResultList();
 
 					for (ResourceIndexedSearchParamToken nextResult : results) {
-						Optional<MatchUrlToResolve> matchedSearch = Optional.ofNullable(hashToSearchMap.get(nextResult.getHashSystemAndValue()));
+						Optional<List<MatchUrlToResolve>> matchedSearch = Optional.ofNullable(hashToSearchMap.get(nextResult.getHashSystemAndValue()));
 						if (!matchedSearch.isPresent()) {
 							matchedSearch =  Optional.ofNullable(hashToSearchMap.get(nextResult.getHashValue()));
 						}
-						matchedSearch.ifPresent(matchUrlToResolve -> setSearchToResolvedAndPrefetchFoundResourcePid(theTransactionDetails, idsToPreFetch, nextResult, matchUrlToResolve));
+						matchedSearch.ifPresent(matchUrlsToResolve -> {
+							matchUrlsToResolve.forEach(matchUrl -> {
+								setSearchToResolvedAndPrefetchFoundResourcePid(theTransactionDetails, idsToPreFetch, nextResult, matchUrl);
+							});
+						});
 					}
 					//For each SP Map which did not return a result, tag it as not found.
 					searchParameterMapsToResolve.stream()
 						// No matches
 						.filter(match -> !match.myResolved)
 						.forEach(match -> {
-							ourLog.warn("Was unable to match url {} from database", match.myRequestUrl);
+							ourLog.debug("Was unable to match url {} from database", match.myRequestUrl);
 							theTransactionDetails.addResolvedMatchUrl(match.myRequestUrl, TransactionDetails.NOT_FOUND);
 						});
 				}
@@ -322,22 +326,26 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		return hashPredicate;
 	}
 
-	private Map<Long, MatchUrlToResolve> buildHashToSearchMap(List<MatchUrlToResolve> searchParameterMapsToResolve) {
-		Map<Long, MatchUrlToResolve> hashToSearch = new HashMap<>();
+	private Map<Long, List<MatchUrlToResolve>> buildHashToSearchMap(List<MatchUrlToResolve> searchParameterMapsToResolve) {
+		Map<Long, List<MatchUrlToResolve>> hashToSearch = new HashMap<>();
 		//Build a lookup map so we don't have to iterate over the searches repeatedly.
 		for (MatchUrlToResolve nextSearchParameterMap : searchParameterMapsToResolve) {
 			if (nextSearchParameterMap.myHashSystemAndValue != null) {
-				hashToSearch.put(nextSearchParameterMap.myHashSystemAndValue,  nextSearchParameterMap);
+				List<MatchUrlToResolve> matchUrlsToResolve = hashToSearch.getOrDefault(nextSearchParameterMap.myHashSystemAndValue, new ArrayList<>());
+				matchUrlsToResolve.add(nextSearchParameterMap);
+				hashToSearch.put(nextSearchParameterMap.myHashSystemAndValue,  matchUrlsToResolve);
 			}
 			if (nextSearchParameterMap.myHashValue!= null) {
-				hashToSearch.put(nextSearchParameterMap.myHashValue,  nextSearchParameterMap);
+				List<MatchUrlToResolve> matchUrlsToResolve = hashToSearch.getOrDefault(nextSearchParameterMap.myHashValue, new ArrayList<>());
+				matchUrlsToResolve.add(nextSearchParameterMap);
+				hashToSearch.put(nextSearchParameterMap.myHashValue,  matchUrlsToResolve);
 			}
 		}
 		return hashToSearch;
 	}
 
 	private void setSearchToResolvedAndPrefetchFoundResourcePid(TransactionDetails theTransactionDetails, List<Long> idsToPreFetch, ResourceIndexedSearchParamToken nextResult, MatchUrlToResolve nextSearchParameterMap) {
-		ourLog.warn("Matched url {} from database", nextSearchParameterMap.myRequestUrl);
+		ourLog.debug("Matched url {} from database", nextSearchParameterMap.myRequestUrl);
 		idsToPreFetch.add(nextResult.getResourcePid());
 		myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, nextSearchParameterMap.myResourceDefinition.getName(), nextSearchParameterMap.myRequestUrl, new ResourcePersistentId(nextResult.getResourcePid()));
 		theTransactionDetails.addResolvedMatchUrl(nextSearchParameterMap.myRequestUrl, new ResourcePersistentId(nextResult.getResourcePid()));

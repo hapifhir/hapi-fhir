@@ -43,6 +43,9 @@ public class PartitionedUrlValidator {
 	@Autowired
 	FhirContext myFhirContext;
 
+	public PartitionedUrlValidator() {
+	}
+
 	/**
 	 * This method will throw an exception if the user is not allowed to access the requested resource type on the partition determined by the request
 	 */

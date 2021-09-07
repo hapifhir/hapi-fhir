@@ -45,33 +45,15 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		String resp = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		
+		//-- The designations should have de-AT and default language
 		List<ParametersParameterComponent> parameterList = respParam.getParameter();
+		
+		verifyParameterList(parameterList);
 		List<ParametersParameterComponent> designationList = getDesignations(parameterList);
-		
-		assertEquals("display", respParam.getParameter().get(0).getName());
-		assertEquals(("Systolic blood pressure 12 hour minimum"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		
-		assertEquals("abstract", respParam.getParameter().get(1).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(1).getValue()).getValue());
-
-		//-- designationList
-		assertEquals(2, designationList.size());
-		
-		// 1. de-AT:Systolic blood pressure 12 hour minimum
-		ParametersParameterComponent designation = designationList.get(0);
-		assertEquals("language", designation.getPart().get(0).getName());
-		assertEquals("de-AT", designation.getPart().get(0).getValue().toString());
-		assertEquals("value", designation.getPart().get(2).getName());
-		assertEquals("de-AT:Systolic blood pressure 12 hour minimum", designation.getPart().get(2).getValue().toString());
-
-		// 2. Systolic blood pressure 12 hour minimum (no language)
-		designation = designationList.get(1);
-		assertEquals("language", designation.getPart().get(0).getName());
-		assertNull(designation.getPart().get(0).getValue());
-		assertEquals("value", designation.getPart().get(2).getName());
-		assertEquals("Systolic blood pressure 12 hour minimum", designation.getPart().get(2).getValue().toString());
-
+		// should be de-AT and default
+		assertEquals(2, designationList.size()); 
+		verifyDesignationDeAT(designationList.get(0));
+		verifyDesignationNoLanguage(designationList.get(1));
 	}
 
 	
@@ -89,25 +71,14 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		String resp = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		
+		//-- The designations should have default language only
 		List<ParametersParameterComponent> parameterList = respParam.getParameter();
+		
+		verifyParameterList(parameterList);
 		List<ParametersParameterComponent> designationList = getDesignations(parameterList);
-		
-		assertEquals("display", respParam.getParameter().get(0).getName());
-		assertEquals(("Systolic blood pressure 12 hour minimum"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		
-		assertEquals("abstract", respParam.getParameter().get(1).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(1).getValue()).getValue());
-
-		//-- designationList
-		assertEquals(1, designationList.size());
-		
-		// 1. Systolic blood pressure 12 hour minimum (no language)
-		ParametersParameterComponent designation = designationList.get(0);
-		assertEquals("language", designation.getPart().get(0).getName());
-		assertNull(designation.getPart().get(0).getValue());
-		assertEquals("value", designation.getPart().get(2).getName());
-		assertEquals("Systolic blood pressure 12 hour minimum", designation.getPart().get(2).getValue().toString());
+		// should be default only
+		assertEquals(1, designationList.size()); 
+		verifyDesignationNoLanguage(designationList.get(0));
 
 	}
 	
@@ -124,41 +95,145 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		String resp = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		
+		//-- The designations should have all languages and the default language
 		List<ParametersParameterComponent> parameterList = respParam.getParameter();
+		
+		verifyParameterList(parameterList);
 		List<ParametersParameterComponent> designationList = getDesignations(parameterList);
-		
-		assertEquals("display", respParam.getParameter().get(0).getName());
-		assertEquals(("Systolic blood pressure 12 hour minimum"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		
-		assertEquals("abstract", respParam.getParameter().get(1).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(1).getValue()).getValue());
+		// designation should be fr-FR, De-AT and default
+		assertEquals(3, designationList.size()); 
+		verifyDesignationfrFR(designationList.get(0));
+		verifyDesignationDeAT(designationList.get(1));
+		verifyDesignationNoLanguage(designationList.get(2));
 
-		//-- designationList
-		assertEquals(3, designationList.size());
+	}
+	
+	@Test
+	public void testLookupWithDisplayLanguageCaching() {
 		
-		// 1. fr-FR:Systolic blood pressure 12 hour minimum
-		ParametersParameterComponent designation = designationList.get(0);
+		//-- first call with de-AT
+		Parameters respParam = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "code", new CodeType("8494-7"))
+			.andParameter("system", new UriType(CS_ACME_URL))
+			.andParameter("displayLanguage",new CodeType("de-AT"))
+			.execute();
+
+		String resp = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		//-- The designations should have de-AT and default language
+		List<ParametersParameterComponent> parameterList = respParam.getParameter();
+		
+		verifyParameterList(parameterList);
+		List<ParametersParameterComponent> designationList = getDesignations(parameterList);
+		// should be de-AT and default
+		assertEquals(2, designationList.size()); 
+		verifyDesignationDeAT(designationList.get(0));
+		verifyDesignationNoLanguage(designationList.get(1));
+
+		//-- second call with zh-CN (not-exist)
+		respParam = myClient
+				.operation()
+				.onType(CodeSystem.class)
+				.named("lookup")
+				.withParameter(Parameters.class, "code", new CodeType("8494-7"))
+				.andParameter("system", new UriType(CS_ACME_URL))
+				.andParameter("displayLanguage",new CodeType("zh-CN"))
+				.execute();
+
+		resp = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		//-- The designations should have default language only
+		parameterList = respParam.getParameter();
+		
+		verifyParameterList(parameterList);
+		designationList = getDesignations(parameterList);
+		// should be default only
+		assertEquals(1, designationList.size()); 
+		verifyDesignationNoLanguage(designationList.get(0));
+		
+		//-- third call with no language
+		respParam = myClient
+				.operation()
+				.onType(CodeSystem.class)
+				.named("lookup")
+				.withParameter(Parameters.class, "code", new CodeType("8494-7"))
+				.andParameter("system", new UriType(CS_ACME_URL))
+				.execute();
+
+		resp = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		//-- The designations should have all languages and the default language
+		parameterList = respParam.getParameter();
+		
+		verifyParameterList(parameterList);
+		designationList = getDesignations(parameterList);
+		// designation should be fr-FR, De-AT and default
+		assertEquals(3, designationList.size()); 
+		verifyDesignationfrFR(designationList.get(0));
+		verifyDesignationDeAT(designationList.get(1));
+		verifyDesignationNoLanguage(designationList.get(2));
+		
+		//-- forth call with fr-FR
+		respParam = myClient
+				.operation()
+				.onType(CodeSystem.class)
+				.named("lookup")
+				.withParameter(Parameters.class, "code", new CodeType("8494-7"))
+				.andParameter("system", new UriType(CS_ACME_URL))
+				.andParameter("displayLanguage",new CodeType("fr-FR"))
+				.execute();
+
+		resp = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		//-- The designations should have fr-FR languages and the default language
+		parameterList = respParam.getParameter();
+		
+		verifyParameterList(parameterList);
+		designationList = getDesignations(parameterList);
+		// designation should be fr-FR, default
+		assertEquals(2, designationList.size()); 
+		verifyDesignationfrFR(designationList.get(0));
+		verifyDesignationNoLanguage(designationList.get(1));
+	}
+	
+	
+	private void verifyParameterList(List<ParametersParameterComponent> parameterList) {
+		assertEquals("display", parameterList.get(0).getName());
+		assertEquals(("Systolic blood pressure 12 hour minimum"),
+				((StringType) parameterList.get(0).getValue()).getValue());
+
+		assertEquals("abstract", parameterList.get(1).getName());
+		assertEquals(false, ((BooleanType) parameterList.get(1).getValue()).getValue());
+	}
+	
+	private void verifyDesignationfrFR(ParametersParameterComponent designation) {
 		assertEquals("language", designation.getPart().get(0).getName());
 		assertEquals("fr-FR", designation.getPart().get(0).getValue().toString());
 		assertEquals("value", designation.getPart().get(2).getName());
 		assertEquals("fr-FR:Systolic blood pressure 12 hour minimum", designation.getPart().get(2).getValue().toString());
-
-		// 2. de-AT:Systolic blood pressure 12 hour minimum
-		designation = designationList.get(1);
+	}
+	
+	private void verifyDesignationDeAT(ParametersParameterComponent designation) {
 		assertEquals("language", designation.getPart().get(0).getName());
 		assertEquals("de-AT", designation.getPart().get(0).getValue().toString());
 		assertEquals("value", designation.getPart().get(2).getName());
 		assertEquals("de-AT:Systolic blood pressure 12 hour minimum", designation.getPart().get(2).getValue().toString());
-
-		// 3. Systolic blood pressure 12 hour minimum (no language)
-		designation = designationList.get(2);
+	}
+	
+	private void verifyDesignationNoLanguage(ParametersParameterComponent designation) {
 		assertEquals("language", designation.getPart().get(0).getName());
 		assertNull(designation.getPart().get(0).getValue());
 		assertEquals("value", designation.getPart().get(2).getName());
 		assertEquals("Systolic blood pressure 12 hour minimum", designation.getPart().get(2).getValue().toString());
-
 	}
+	
 	private List<ParametersParameterComponent> getDesignations(List<ParametersParameterComponent> parameterList) {
 		
 		List<ParametersParameterComponent> designationList = new ArrayList<>();
@@ -168,6 +243,5 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 				designationList.add(parameter);
 		}
 		return designationList;
-		
 	}
 }
