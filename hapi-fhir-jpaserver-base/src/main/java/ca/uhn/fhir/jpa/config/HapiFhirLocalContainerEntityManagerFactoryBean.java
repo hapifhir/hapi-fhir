@@ -36,7 +36,7 @@ import java.util.Map;
  */
 public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContainerEntityManagerFactoryBean {
 
-	//Weeeeee : https://stackoverflow.com/questions/57902388/how-to-inject-spring-beans-into-the-hibernate-envers-revisionlistener
+	//https://stackoverflow.com/questions/57902388/how-to-inject-spring-beans-into-the-hibernate-envers-revisionlistener
 	ConfigurableListableBeanFactory myConfigurableListableBeanFactory;
 
 	public HapiFhirLocalContainerEntityManagerFactoryBean(ConfigurableListableBeanFactory theConfigurableListableBeanFactory) {
@@ -75,7 +75,7 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 			retVal.put(AvailableSettings.BATCH_VERSIONED_DATA, "true");
 		}
 		//Why is this here, you ask? LocalContainerEntityManagerFactoryBean actually clobbers the setting hibernate needs
-		//in order to be able to resolve beans, so we add it back in manually here:
+		//in order to be able to resolve beans, so we add it back in manually here
 		if (!retVal.containsKey(AvailableSettings.BEAN_CONTAINER)) {
 			retVal.put(AvailableSettings.BEAN_CONTAINER, new SpringBeanContainer(myConfigurableListableBeanFactory));
 		}
