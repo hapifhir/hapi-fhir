@@ -175,4 +175,22 @@ public class MdmLinkJson implements IModelJson {
 	public void setRuleCount(Long theRuleCount) {
 		myRuleCount = theRuleCount;
 	}
+
+	@Override
+	public String toString() {
+		return "MdmLinkJson{" +
+			"myGoldenResourceId='" + myGoldenResourceId + '\'' +
+			", mySourceId='" + mySourceId + '\'' +
+			", myMatchResult=" + myMatchResult +
+			", myLinkSource=" + myLinkSource +
+			", myCreated=" + myCreated +
+			", myUpdated=" + myUpdated +
+			", myVersion='" + myVersion + '\'' +
+			", myEidMatch=" + myEidMatch +
+			", myLinkCreatedNewResource=" + myLinkCreatedNewResource +
+			", myVector=" + myVector +
+			", myScore=" + myScore +
+			", myRuleCount=" + myRuleCount +
+			'}';
+	}
 }

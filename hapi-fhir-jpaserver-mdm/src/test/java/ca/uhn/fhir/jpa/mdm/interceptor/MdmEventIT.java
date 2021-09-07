@@ -80,7 +80,19 @@ public class MdmEventIT extends BaseMdmR4Test {
 		MdmLinkEvent linkChangeEvent = myMdmHelper.getAfterMdmLatch().getLatchInvocationParameterOfType(MdmLinkEvent.class);
 		assertNotNull(linkChangeEvent);
 
-		// MdmTransactionContext ctx = myMdmMatchLinkSvc.updateMdmLinksForMdmSource(patient2, createContextForUpdate(patient2.getIdElement().getResourceType()));
+		ourLog.info("Got event: {}", linkChangeEvent);
+
+		long expectTwoPossibleMatchesForPatientTwo = linkChangeEvent.getMdmLinks()
+			.stream()
+			.filter(l -> l.getSourceId().equals(patient2.getIdElement().toVersionless().getValueAsString()) && l.getMatchResult() == MdmMatchResultEnum.POSSIBLE_MATCH)
+			.count();
+		assertEquals(2, expectTwoPossibleMatchesForPatientTwo);
+
+		long expectOnePossibleDuplicate = linkChangeEvent.getMdmLinks()
+			.stream()
+			.filter(l -> l.getMatchResult() == MdmMatchResultEnum.POSSIBLE_DUPLICATE)
+			.count();
+		assertEquals(1, expectOnePossibleDuplicate);
 
 		List<MdmLinkJson> mdmLinkEvent = linkChangeEvent.getMdmLinks();
 		assertEquals(3, mdmLinkEvent.size());
@@ -122,10 +134,9 @@ public class MdmEventIT extends BaseMdmR4Test {
 		assertEquals(1, linkChangeEvent.getMdmLinks().size());
 
 		MdmLinkJson link = linkChangeEvent.getMdmLinks().get(0);
-		assertEquals(patient1.getResourceType() + "/" + patient1.getIdElement().getIdPart(), link.getSourceId());
+		assertEquals(patient1.getIdElement().toVersionless().getValueAsString(), link.getSourceId());
 		assertEquals(getLinkByTargetId(patient1).getGoldenResourcePid(), new IdDt(link.getGoldenResourceId()).getIdPartAsLong());
 		assertEquals(MdmMatchResultEnum.MATCH, link.getMatchResult());
 	}
-
 
 }
