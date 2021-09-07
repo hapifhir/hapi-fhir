@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search.elastic;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.search.backend.elasticsearch.index.layout.IndexLayoutStrategy;
@@ -40,7 +41,7 @@ public class IndexNamePrefixLayoutStrategy implements IndexLayoutStrategy {
 	}
 
 	private String addPrefixIfNecessary(String theCandidateName) {
-
+		validateDaoConfigIsPresent();
 		if (!StringUtils.isBlank(myDaoConfig.getElasticSearchIndexPrefix())) {
 			return myDaoConfig.getElasticSearchIndexPrefix() + "-" + theCandidateName;
 		} else {
@@ -63,10 +64,16 @@ public class IndexNamePrefixLayoutStrategy implements IndexLayoutStrategy {
 	}
 
 	private String removePrefixIfNecessary(String theCandidateUniqueKey) {
+		validateDaoConfigIsPresent();
 		if (!StringUtils.isBlank(myDaoConfig.getElasticSearchIndexPrefix())) {
 			return theCandidateUniqueKey.replace(myDaoConfig.getElasticSearchIndexPrefix() + "-", "");
 		} else {
 			return theCandidateUniqueKey;
+		}
+	}
+	private void validateDaoConfigIsPresent() {
+		if (myDaoConfig == null) {
+			throw new ConfigurationException("While attempting to boot HAPI FHIR, the Hibernate Search bootstrapper failed to find the DaoConfig. This probably means Hibernate Search has been recently upgraded, or somebody modified HapiFhirLocalContainerEntityManagerFactoryBean.");
 		}
 	}
 }
