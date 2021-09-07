@@ -84,21 +84,19 @@ public class ProviderConstants {
 	public static final String MDM_DUPLICATE_GOLDEN_RESOURCES = "$mdm-duplicate-golden-resources";
 	public static final String MDM_NOT_DUPLICATE = "$mdm-not-duplicate";
 
-	public static final String MDM_CLEAR = "$mdm-clear";
-	public static final String MDM_CLEAR_SOURCE_TYPE = "sourceType";
+	public static final String OPERATION_MDM_CLEAR = "$mdm-clear";
+	public static final String OPERATION_MDM_CLEAR_RESOURCE_NAME = "resourceType";
+	public static final String OPERATION_MDM_CLEAR_BATCH_SIZE = "batchSize";
 	public static final String OPERATION_MDM_SUBMIT = "$mdm-submit";
-	public static final String MDM_BATCH_RUN_CRITERIA = "criteria" ;
-	public static final String OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT = "submitted" ;
-	public static final String OPERATION_MDM_CLEAR_OUT_PARAM_DELETED_COUNT = "deleted";
+	public static final String MDM_BATCH_RUN_CRITERIA = "criteria";
 	public static final String MDM_BATCH_RUN_RESOURCE_TYPE = "resourceType";
-
 	/**
 	 * CQL Operations
 	 */
 	public static final String CQL_EVALUATE_MEASURE = "$evaluate-measure";
 
 	/**
-	 *  Operation name for the $meta operation
+	 * Operation name for the $meta operation
 	 */
 	public static final String OPERATION_META = "$meta";
 
@@ -146,7 +144,7 @@ public class ProviderConstants {
 	/**
 	 * The Spring Batch job id of the delete expunge job created by a $delete-expunge operation
 	 */
-	public static final String OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID = "jobId";
+	public static final String OPERATION_BATCH_RESPONSE_JOB_ID = "jobId";
 
 	/**
 	 * Operation name for the $delete-expunge operation

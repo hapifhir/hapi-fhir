@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.batch;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.batch.mdm.job.MdmClearJobConfig;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imprt.job.BulkImportJobConfig;
 import ca.uhn.fhir.jpa.delete.job.DeleteExpungeJobConfig;
@@ -40,7 +41,8 @@ import java.util.Set;
 	BulkImportJobConfig.class,
 	DeleteExpungeJobConfig.class,
 	ReindexJobConfig.class,
-	ReindexEverythingJobConfig.class
+	ReindexEverythingJobConfig.class,
+	MdmClearJobConfig.class
 })
 public class BatchJobsConfig {
 
@@ -93,5 +95,10 @@ public class BatchJobsConfig {
 	 * Reindex Everything
 	 */
 	public static final String REINDEX_EVERYTHING_JOB_NAME = "reindexEverythingJob";
+
+	/**
+	 * MDM Clear
+	 */
+	public static final String MDM_CLEAR_JOB_NAME = "mdmClearJob";
 
 }

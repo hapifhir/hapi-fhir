@@ -35,6 +35,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.InstantType;
 
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -106,7 +107,8 @@ public class TestUtil {
 		for (ClassInfo classInfo : classes) {
 			Class<?> clazz = Class.forName(classInfo.getName());
 			Entity entity = clazz.getAnnotation(Entity.class);
-			if (entity == null) {
+			Embeddable embeddable = clazz.getAnnotation(Embeddable.class);
+			if (entity == null && embeddable == null) {
 				continue;
 			}
 

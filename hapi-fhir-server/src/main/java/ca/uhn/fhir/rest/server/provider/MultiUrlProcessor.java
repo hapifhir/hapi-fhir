@@ -34,20 +34,20 @@ import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.List;
 
-public class BaseMultiUrlProcessor {
-	protected final FhirContext myFhirContext;
+public class MultiUrlProcessor {
+	private final FhirContext myFhirContext;
 	private final IMultiUrlJobSubmitter myMultiUrlProcessorJobSubmitter;
 
-	public BaseMultiUrlProcessor(FhirContext theFhirContext, IMultiUrlJobSubmitter theMultiUrlProcessorJobSubmitter) {
+	public MultiUrlProcessor(FhirContext theFhirContext, IMultiUrlJobSubmitter theMultiUrlProcessorJobSubmitter) {
 		myMultiUrlProcessorJobSubmitter = theMultiUrlProcessorJobSubmitter;
 		myFhirContext = theFhirContext;
 	}
 
-	protected IBaseParameters processUrls(List<String> theUrlsToProcess, Integer theBatchSize, RequestDetails theRequestDetails) {
+	public IBaseParameters processUrls(List<String> theUrlsToProcess, Integer theBatchSize, RequestDetails theRequestDetails) {
 		try {
 			JobExecution jobExecution = myMultiUrlProcessorJobSubmitter.submitJob(theBatchSize, theUrlsToProcess, theRequestDetails);
 			IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
-			ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID, jobExecution.getJobId());
+			ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, jobExecution.getJobId());
 			return retval;
 		} catch (JobParametersInvalidException e) {
 			throw new InvalidRequestException("Invalid job parameters: " + e.getMessage(), e);
@@ -55,7 +55,7 @@ public class BaseMultiUrlProcessor {
 	}
 
 	@Nullable
-	protected Integer getBatchSize(IPrimitiveType<BigDecimal> theBatchSize) {
+	public Integer getBatchSize(IPrimitiveType<BigDecimal> theBatchSize) {
 		Integer batchSize = null;
 		if (theBatchSize != null && !theBatchSize.isEmpty()) {
 			batchSize = theBatchSize.getValue().intValue();
