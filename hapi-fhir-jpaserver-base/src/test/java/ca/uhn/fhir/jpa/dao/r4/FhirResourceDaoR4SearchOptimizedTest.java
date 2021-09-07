@@ -918,6 +918,38 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	}
 
+	/**
+	 * Make sure that if we're performing a query where the ONLY param is _lastUpdated,
+	 * we include a selector for the resource type
+	 */
+	@Test
+	public void testSearchByLastUpdated_IncludesResourceTypeSelector() {
+		Patient p = new Patient();
+		p.setId("B");
+		myPatientDao.update(p);
+
+		Observation obs = new Observation();
+		obs.setId("A");
+		obs.setSubject(new Reference("Patient/B"));
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		myObservationDao.update(obs);
+
+		// Search using only a _lastUpdated param
+		{
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.setLastUpdated(new DateRangeParam("ge2021-01-01", null));
+			myCaptureQueriesListener.clear();
+			IBundleProvider outcome = myObservationDao.search(map, new SystemRequestDetails());
+			assertEquals(1, outcome.getResources(0, 999).size());
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "select t0.res_id from hfj_resource t0"), selectQuery);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_type = 'observation'"), selectQuery);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_deleted_at is null"), selectQuery);
+		}
+	}
+
 	@Test
 	public void testSearchOnUnderscoreParams_AvoidHFJResourceJoins() {
 		// This Issue: https://github.com/hapifhir/hapi-fhir/issues/2942
