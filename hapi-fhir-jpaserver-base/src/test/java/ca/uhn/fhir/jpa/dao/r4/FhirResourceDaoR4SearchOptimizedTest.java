@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -917,18 +918,60 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	}
 
+	/**
+	 * Make sure that if we're performing a query where the ONLY param is _lastUpdated,
+	 * we include a selector for the resource type
+	 */
+	@Test
+	public void testSearchByLastUpdatedOnly() {
+		Patient p = new Patient();
+		p.setId("B");
+		myPatientDao.update(p);
+
+		Observation obs = new Observation();
+		obs.setId("A");
+		obs.setSubject(new Reference("Patient/B"));
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		myObservationDao.update(obs);
+
+		// Search using only a _lastUpdated param
+		{
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.setLastUpdated(new DateRangeParam("ge2021-01-01", null));
+			myCaptureQueriesListener.clear();
+			IBundleProvider outcome = myObservationDao.search(map, new SystemRequestDetails());
+			assertEquals(1, outcome.getResources(0, 999).size());
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "select t0.res_id from hfj_resource t0"), selectQuery);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_type = 'observation'"), selectQuery);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_deleted_at is null"), selectQuery);
+		}
+	}
+
 	@Test
 	public void testSearchOnUnderscoreParams_AvoidHFJResourceJoins() {
 		// This Issue: https://github.com/hapifhir/hapi-fhir/issues/2942
 		// See this PR for a similar type of Fix: https://github.com/hapifhir/hapi-fhir/pull/2909
-		SearchParameter searchParameter = new SearchParameter();
-		searchParameter.addBase("BodySite").addBase("Procedure");
-		searchParameter.setCode("focalAccess");
-		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
-		searchParameter.setExpression("Procedure.extension('Procedure#focalAccess')");
-		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
-		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		IIdType spId = mySearchParameterDao.create(searchParameter).getId().toUnqualifiedVersionless();
+		// SearchParam - focalAccess
+		SearchParameter searchParameter1 = new SearchParameter();
+		searchParameter1.addBase("BodySite").addBase("Procedure");
+		searchParameter1.setCode("focalAccess");
+		searchParameter1.setType(Enumerations.SearchParamType.REFERENCE);
+		searchParameter1.setExpression("Procedure.extension('Procedure#focalAccess')");
+		searchParameter1.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+		searchParameter1.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		IIdType sp1Id = mySearchParameterDao.create(searchParameter1).getId().toUnqualifiedVersionless();
+		// SearchParam - focalAccess
+		SearchParameter searchParameter2 = new SearchParameter();
+		searchParameter2.addBase("Provenance");
+		searchParameter2.setCode("activity");
+		searchParameter2.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter2.setExpression("Provenance.extension('Provenance#activity')");
+		searchParameter2.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+		searchParameter2.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		IIdType sp2Id = mySearchParameterDao.create(searchParameter2).getId().toUnqualifiedVersionless();
 		mySearchParamRegistry.forceRefresh();
 
 		BodyStructure bs = new BodyStructure();
@@ -967,6 +1010,15 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		procedure.getMeta()
 			.addTag("acc_procext_fkc", "1STCANN2NDL", "First Successful Cannulation with 2 Needles");
 		IIdType procedureId = myProcedureDao.create(procedure).getId().toUnqualifiedVersionless();
+
+		Device device = new Device();
+		device.setManufacturer("Acme");
+		IIdType deviceId = myDeviceDao.create(device).getId().toUnqualifiedVersionless();
+
+		Provenance provenance = new Provenance();
+		provenance.setActivity(new CodeableConcept().addCoding(new Coding().setSystem("http://hl7.org/fhir/v3/DocumentCompletion").setCode("PA")));
+		provenance.addAgent().setWho(new Reference(deviceId));
+		IIdType provenanceId = myProvenanceDao.create(provenance).getId().toUnqualifiedVersionless();
 
 		logAllResources();
 		logAllResourceTags();
@@ -1025,6 +1077,30 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 			// Ensure that we do NOT see a couple of particular WHERE clauses
 			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_type = 'procedure'"), selectQuery);
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null"), selectQuery);
+		}
+
+		// Search example 3:
+		// http://FHIR_SERVER/fhir_request/Provenance
+		// ?agent=Acme&activity=PA&_lastUpdated=ge2021-01-01&_requestTrace=True
+		// NOTE: This gets sorted once so the order is different once it gets executed!
+		{
+			// IMPORTANT: Keep the query param order exactly as shown below!
+			// NOTE: The "outcome" SearchParameter is not being used below, but it doesn't affect the test.
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.add("agent", new ReferenceParam("Device/" + deviceId.getIdPart()));
+			map.add("activity", new TokenParam("PA"));
+			DateRangeParam dateRangeParam = new DateRangeParam("ge2021-01-01", null);
+			map.setLastUpdated(dateRangeParam);
+			myCaptureQueriesListener.clear();
+			IBundleProvider outcome = myProvenanceDao.search(map, new SystemRequestDetails());
+			ourLog.info("Search returned {} resources.", outcome.getResources(0, 999).size());
+			//assertEquals(1, outcome.getResources(0, 999).size());
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+			// Ensure that we do NOT see a couple of particular WHERE clauses
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_type = 'provenance'"), selectQuery);
 			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null"), selectQuery);
 		}
 	}
