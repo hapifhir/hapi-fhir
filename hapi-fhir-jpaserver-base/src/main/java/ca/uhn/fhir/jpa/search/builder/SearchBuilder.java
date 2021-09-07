@@ -221,10 +221,14 @@ public class SearchBuilder implements ISearchBuilder {
 
 		SearchContainedModeEnum searchContainedMode = theParams.getSearchContainedMode();
 
-		// Handle _id last, since it can typically be tacked onto a different parameter
-		List<String> paramNames = myParams.keySet().stream().filter(t -> !t.equals(IAnyResource.SP_RES_ID)).collect(Collectors.toList());
+		// Handle _id and _tag last, since they can typically be tacked onto a different parameter
+		List<String> paramNames = myParams.keySet().stream().filter(t -> !t.equals(IAnyResource.SP_RES_ID))
+			.filter(t -> !t.equals(Constants.PARAM_TAG)).collect(Collectors.toList());
 		if (myParams.containsKey(IAnyResource.SP_RES_ID)) {
 			paramNames.add(IAnyResource.SP_RES_ID);
+		}
+		if (myParams.containsKey(Constants.PARAM_TAG)) {
+			paramNames.add(Constants.PARAM_TAG);
 		}
 
 		// Handle each parameter
