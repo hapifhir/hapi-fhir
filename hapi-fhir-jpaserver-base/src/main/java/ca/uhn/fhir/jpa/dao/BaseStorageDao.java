@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -93,7 +94,7 @@ public abstract class BaseStorageDao {
 	@Autowired
 	protected ModelConfig myModelConfig;
 	@Autowired
-	protected IAutoVersioningService myAutoVersioningService;
+	protected IdHelperService myIdHelperService;
 	@Autowired
 	protected DaoConfig myDaoConfig;
 
@@ -210,7 +211,7 @@ public abstract class BaseStorageDao {
 				IIdType referenceElement = nextReference.getReferenceElement();
 				if (!referenceElement.hasBaseUrl()) {
 
-					Map<IIdType, ResourcePersistentId> idToPID = myAutoVersioningService.getExistingAutoversionsForIds(RequestPartitionId.allPartitions(),
+					Map<IIdType, ResourcePersistentId> idToPID = myIdHelperService.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
 						Collections.singletonList(referenceElement)
 					);
 

@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
@@ -159,7 +160,7 @@ public abstract class BaseTransactionProcessor {
 	private TaskExecutor myExecutor ;
 
 	@Autowired
-	private IAutoVersioningService myAutoVersioningService;
+	private IdHelperService myIdHelperService;
 
 	@VisibleForTesting
 	public void setDaoConfig(DaoConfig theDaoConfig) {
@@ -696,7 +697,7 @@ public abstract class BaseTransactionProcessor {
 	 *
 	 * @param theEntries
 	 */
-	private void consolidateDuplicateConditionalCreates(List<IBase> theEntries) {
+	private void consolidateDuplicateConditionals(List<IBase> theEntries) {
 		final HashMap<String, String> keyToUuid = new HashMap<>();
 		for (int index = 0, originalIndex = 0; index < theEntries.size(); index++, originalIndex++) {
 			IBase nextReqEntry = theEntries.get(index);
@@ -832,7 +833,7 @@ public abstract class BaseTransactionProcessor {
 			/*
 			 * Look for duplicate conditional creates and consolidate them
 			 */
-			 consolidateDuplicateConditionalCreates(theEntries);
+			 consolidateDuplicateConditionals(theEntries);
 
 			/*
 			 * Loop through the request and process any entries of type
@@ -1270,7 +1271,7 @@ public abstract class BaseTransactionProcessor {
 				// get a map of
 				// existing ids -> PID (for resources that exist in the DB)
 				// should this be allPartitions?
-				Map<IIdType, ResourcePersistentId> idToPID = myAutoVersioningService.getExistingAutoversionsForIds(RequestPartitionId.allPartitions(),
+				Map<IIdType, ResourcePersistentId> idToPID = myIdHelperService.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
 					theReferencesToAutoVersion.stream()
 					.map(ref -> ref.getReferenceElement()).collect(Collectors.toList()));
 

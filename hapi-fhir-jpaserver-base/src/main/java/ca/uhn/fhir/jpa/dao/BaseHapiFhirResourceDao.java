@@ -1158,55 +1158,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myTransactionService.execute(theRequest, transactionDetails, tx -> doRead(theId, theRequest, theDeletedOk));
 	}
 
-	@Override
-	public Map<IIdType, ResourcePersistentId> getIdsOfExistingResources(RequestPartitionId thePartitionId,
-																							  Collection<IIdType> theIds) {
-		// these are the found Ids that were in the db
-		HashMap<IIdType, ResourcePersistentId> collected = new HashMap<>();
-
-		if (theIds == null || theIds.isEmpty()) {
-			return collected;
-		}
-
-		List<ResourcePersistentId> resourcePersistentIds = myIdHelperService.resolveResourcePersistentIdsWithCache(thePartitionId,
-			theIds.stream().collect(Collectors.toList()));
-
-		// we'll use this map to fetch pids that require versions
-		HashMap<Long, ResourcePersistentId> pidsToVersionToResourcePid = new HashMap<>();
-
-		// fill in our map
-		for (ResourcePersistentId pid : resourcePersistentIds) {
-			if (pid.getVersion() == null) {
-				pidsToVersionToResourcePid.put(pid.getIdAsLong(), pid);
-			}
-			Optional<IIdType> idOp = theIds.stream()
-				.filter(i -> i.getIdPart().equals(pid.getAssociatedResourceId().getIdPart()))
-				.findFirst();
-			// this should always be present
-			// since it was passed in.
-			// but land of optionals...
-			idOp.ifPresent(id -> {
-				collected.put(id, pid);
-			});
-		}
-
-		// set any versions we don't already have
-		if (!pidsToVersionToResourcePid.isEmpty()) {
-			Collection<Object[]> resourceEntries = myResourceTableDao
-				.getResourceVersionsForPid(new ArrayList<>(pidsToVersionToResourcePid.keySet()));
-
-			for (Object[] record : resourceEntries) {
-				// order matters!
-				Long retPid = (Long)record[0];
-				String resType = (String)record[1];
-				Long version = (Long)record[2];
-				pidsToVersionToResourcePid.get(retPid).setVersion(version);
-			}
-		}
-
-		return collected;
-	}
-
 	public T doRead(IIdType theId, RequestDetails theRequest, boolean theDeletedOk) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 

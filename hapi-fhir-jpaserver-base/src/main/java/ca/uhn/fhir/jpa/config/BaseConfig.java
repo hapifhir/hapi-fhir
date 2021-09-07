@@ -27,11 +27,9 @@ import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.svc.BulkDataImportSvcImpl;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
-import ca.uhn.fhir.jpa.dao.AutoVersioningServiceImpl;
 import ca.uhn.fhir.jpa.dao.DaoSearchParamProvider;
 import ca.uhn.fhir.jpa.dao.HistoryBuilder;
 import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
-import ca.uhn.fhir.jpa.dao.IAutoVersioningService;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
@@ -230,11 +228,6 @@ public abstract class BaseConfig {
 	 */
 	@PostConstruct
 	public void initSettings() {
-	}
-
-	@Bean
-	public IAutoVersioningService autoVersioningService() {
-		return new AutoVersioningServiceImpl();
 	}
 
 	public void setSearchCoordCorePoolSize(Integer searchCoordCorePoolSize) {
