@@ -49,6 +49,10 @@ public class ReindexEverythingJobConfig {
 	private StepBuilderFactory myStepBuilderFactory;
 	@Autowired
 	private JobBuilderFactory myJobBuilderFactory;
+	@Autowired
+	private ReindexWriter myReindexWriter;
+	@Autowired
+	private PidReaderCounterListener myPidCountRecorderListener;
 
 	@Bean(name = REINDEX_EVERYTHING_JOB_NAME)
 	@Lazy
@@ -63,8 +67,8 @@ public class ReindexEverythingJobConfig {
 		return myStepBuilderFactory.get(REINDEX_EVERYTHING_STEP_NAME)
 			.<List<Long>, List<Long>>chunk(1)
 			.reader(cronologicalBatchAllResourcePidReader())
-			.writer(reindexWriter())
-			.listener(reindexEverythingPidCountRecorderListener())
+			.writer(myReindexWriter)
+			.listener(myPidCountRecorderListener)
 			.listener(reindexEverythingPromotionListener())
 			.build();
 	}
@@ -73,18 +77,6 @@ public class ReindexEverythingJobConfig {
 	@StepScope
 	public CronologicalBatchAllResourcePidReader cronologicalBatchAllResourcePidReader() {
 		return new CronologicalBatchAllResourcePidReader();
-	}
-
-	@Bean
-	@StepScope
-	public ReindexWriter reindexWriter() {
-		return new ReindexWriter();
-	}
-
-	@Bean
-	@StepScope
-	public PidReaderCounterListener reindexEverythingPidCountRecorderListener() {
-		return new PidReaderCounterListener();
 	}
 
 	@Bean

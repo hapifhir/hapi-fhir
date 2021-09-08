@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.IReindexJobSubmitter;
 import ca.uhn.fhir.rest.server.BaseR4ServerTest;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -69,8 +70,7 @@ public class BatchProviderTest extends BaseR4ServerTest {
 			.execute();
 
 		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		DecimalType jobId = (DecimalType) response.getParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID);
-		assertEquals(TEST_JOB_ID, jobId.getValue().longValue());
+		assertEquals(TEST_JOB_ID, BatchHelperR4.jobIdFromParameters(response));
 		assertThat(myDeleteExpungeJobSubmitter.calledWithUrls, hasSize(2));
 		assertEquals(url1, myDeleteExpungeJobSubmitter.calledWithUrls.get(0));
 		assertEquals(url2, myDeleteExpungeJobSubmitter.calledWithUrls.get(1));

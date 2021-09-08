@@ -385,6 +385,7 @@ public class OpenApiInterceptor {
 		Paths paths = new Paths();
 		openApi.setPaths(paths);
 
+
 		if (page == null || page.equals(PAGE_SYSTEM) || page.equals(PAGE_ALL)) {
 			Tag serverTag = new Tag();
 			serverTag.setName(PAGE_SYSTEM);
@@ -397,7 +398,6 @@ public class OpenApiInterceptor {
 			addFhirResourceResponse(ctx, openApi, capabilitiesOperation, "CapabilityStatement");
 
 			Set<CapabilityStatement.SystemRestfulInteraction> systemInteractions = cs.getRestFirstRep().getInteraction().stream().map(t -> t.getCode()).collect(Collectors.toSet());
-
 			// Transaction Operation
 			if (systemInteractions.contains(CapabilityStatement.SystemRestfulInteraction.TRANSACTION) || systemInteractions.contains(CapabilityStatement.SystemRestfulInteraction.BATCH)) {
 				Operation transaction = getPathItem(paths, "/", PathItem.HttpMethod.POST);
@@ -742,8 +742,9 @@ public class OpenApiInterceptor {
 		}
 	}
 
-	private Operation getPathItem(Paths thePaths, String thePath, PathItem.HttpMethod theMethod) {
+	protected Operation getPathItem(Paths thePaths, String thePath, PathItem.HttpMethod theMethod) {
 		PathItem pathItem;
+
 		if (thePaths.containsKey(thePath)) {
 			pathItem = thePaths.get(thePath);
 		} else {

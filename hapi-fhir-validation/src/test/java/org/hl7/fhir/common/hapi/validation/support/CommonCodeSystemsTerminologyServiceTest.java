@@ -51,7 +51,7 @@ public class CommonCodeSystemsTerminologyServiceTest {
 
 	@Test
 	public void testUcum_LookupCode_UnknownSystem() {
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://foo", "AAAAA");
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://foo", "AAAAA", null);
 		assertNull(outcome);
 	}
 
@@ -103,6 +103,20 @@ public class CommonCodeSystemsTerminologyServiceTest {
 		assert outcome != null;
 		assertTrue(outcome.isOk());
 		assertEquals("English (United States)", outcome.getDisplay());
+	}
+
+	@Test
+	public void testLanguages_CommonLanguagesVs_OnlyLanguage_NoRegion() {
+		IValidationSupport.LookupCodeResult nl = mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "nl");
+		assertTrue(nl.isFound());
+		assertEquals("Dutch", nl.getCodeDisplay());
+	}
+
+	@Test
+	public void testLanguages_CommonLanguagesVs_LanguageAndRegion() {
+		IValidationSupport.LookupCodeResult nl = mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "nl-NL");
+		assertTrue(nl.isFound());
+		assertEquals("Dutch Netherlands", nl.getCodeDisplay());
 	}
 
 	@Test
