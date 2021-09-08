@@ -63,6 +63,7 @@ import org.hl7.fhir.dstu3.model.AllergyIntolerance;
 import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.AuditEvent;
 import org.hl7.fhir.dstu3.model.Binary;
+import org.hl7.fhir.dstu3.model.BodySite;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.CodeSystem;
@@ -95,6 +96,7 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.PractitionerRole;
+import org.hl7.fhir.dstu3.model.Procedure;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
@@ -316,6 +318,12 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myTaskDaoDstu3")
 	protected IFhirResourceDao<Task> myTaskDao;
+	@Autowired
+	@Qualifier("myBodySiteDaoDstu3")
+	protected IFhirResourceDao<BodySite> myBodySiteDao;
+	@Autowired
+	@Qualifier("myProcedureDaoDstu3")
+	protected IFhirResourceDao<Procedure> myProcedureDao;
 	@Autowired
 	protected ITermConceptDao myTermConceptDao;
 	@Autowired

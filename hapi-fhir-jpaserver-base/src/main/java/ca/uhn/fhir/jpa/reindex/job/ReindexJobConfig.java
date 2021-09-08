@@ -21,15 +21,17 @@ package ca.uhn.fhir.jpa.reindex.job;
  */
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.batch.job.MultiUrlProcessorJobConfig;
+import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterValidator;
 import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
+import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
+import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
+import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,19 +46,30 @@ import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.REINDEX_JOB_NAME;
  * Reindex job.
  */
 @Configuration
-public class ReindexJobConfig extends MultiUrlProcessorJobConfig {
+public class ReindexJobConfig {
 	public static final String REINDEX_URL_LIST_STEP_NAME = "reindex-url-list-step";
 
 	@Autowired
 	private StepBuilderFactory myStepBuilderFactory;
 	@Autowired
 	private JobBuilderFactory myJobBuilderFactory;
+	@Autowired
+	private ReindexWriter myReindexWriter;
+
+	@Autowired
+	private MultiUrlJobParameterValidator myMultiUrlProcessorParameterValidator;
+
+	@Autowired
+	private PidReaderCounterListener myPidCountRecorderListener;
+
+	@Autowired
+	private ReverseCronologicalBatchResourcePidReader myReverseCronologicalBatchResourcePidReader;
 
 	@Bean(name = REINDEX_JOB_NAME)
 	@Lazy
-	public Job reindexJob(MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
+	public Job reindexJob() {
 		return myJobBuilderFactory.get(REINDEX_JOB_NAME)
-			.validator(multiUrlProcessorParameterValidator(theMatchUrlService, theDaoRegistry))
+			.validator(myMultiUrlProcessorParameterValidator)
 			.start(reindexUrlListStep())
 			.build();
 	}
@@ -65,17 +78,11 @@ public class ReindexJobConfig extends MultiUrlProcessorJobConfig {
 	public Step reindexUrlListStep() {
 		return myStepBuilderFactory.get(REINDEX_URL_LIST_STEP_NAME)
 			.<List<Long>, List<Long>>chunk(1)
-			.reader(reverseCronologicalBatchResourcePidReader())
-			.writer(reindexWriter())
-			.listener(pidCountRecorderListener())
+			.reader(myReverseCronologicalBatchResourcePidReader)
+			.writer(myReindexWriter)
+			.listener(myPidCountRecorderListener)
 			.listener(reindexPromotionListener())
 			.build();
-	}
-
-	@Bean
-	@StepScope
-	public ReindexWriter reindexWriter() {
-		return new ReindexWriter();
 	}
 
 	@Bean

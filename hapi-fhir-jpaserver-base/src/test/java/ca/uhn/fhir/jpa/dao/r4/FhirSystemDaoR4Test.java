@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -117,12 +117,18 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		myDaoConfig.setAllowInlineMatchUrlReferences(false);
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+		myDaoConfig.setBundleBatchPoolSize(new DaoConfig().getBundleBatchPoolSize());
+		myDaoConfig.setBundleBatchMaxPoolSize(new DaoConfig().getBundleBatchMaxPoolSize());
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
+		myModelConfig.setAutoVersionReferenceAtPaths(new ModelConfig().getAutoVersionReferenceAtPaths());
 	}
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myInterceptorRegistry.registerInterceptor(myInterceptor);
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myDaoConfig.setBundleBatchPoolSize(1);
+		myDaoConfig.setBundleBatchMaxPoolSize(1);
 	}
 
 	private Bundle createInputTransactionWithPlaceholderIdInMatchUrl(HTTPVerb theVerb) {

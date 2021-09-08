@@ -1,0 +1,402 @@
+{
+	"resourceType": "Bundle",
+	"type": "transaction",
+	"entry": [ {
+		"resource": {
+			"resourceType": "ExplanationOfBenefit",
+			"id": "26d4cebd-95c6-39ea-855c-dc819bc68d08",
+			"meta": {
+				"lastUpdated": "2016-01-01T00:56:00.000-05:00",
+				"profile": [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional" ]
+			},
+			"identifier": [ {
+				"type": {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+						"code": "uc"
+					} ]
+				},
+				"system": "fhir/CodeSystem/sid/eob-inpatient-claim-id",
+				"value": "20550047"
+			} ],
+			"status": "active",
+			"type": {
+				"coding": [ {
+					"system": "http://terminology.hl7.org/CodeSystem/claim-type",
+					"code": "institutional"
+				} ]
+			},
+			"use": "claim",
+			"patient": {
+				"reference": "Patient/ABC"
+			},
+			"billablePeriod": {
+				"start": "2015-12-14T00:00:00-05:00"
+			},
+			"created": "2021-08-16T13:54:10-04:00",
+			"insurer": {
+				"reference": "Organization/A"
+			},
+			"provider": {
+				"reference": "Organization/b9d22776-1ee9-3843-bc48-b4bf67861483"
+			},
+			"outcome": "complete",
+			"careTeam": [ {
+				"sequence": 1,
+				"provider": {
+					"reference": "Practitioner/H"
+				},
+				"role": {
+					"coding": [ {
+						"system": "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+						"code": "primary"
+					} ]
+				}
+			}, {
+				"sequence": 2,
+				"provider": {
+					"reference": "Practitioner/I"
+				},
+				"role": {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+						"code": "attending"
+					} ]
+				}
+			}, {
+				"sequence": 3,
+				"provider": {
+					"reference": "Practitioner/J"
+				},
+				"role": {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+						"code": "performing"
+					} ]
+				}
+			} ],
+			"supportingInfo": [ {
+				"sequence": 1,
+				"category": {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+						"code": "admissionperiod"
+					} ]
+				},
+				"timingPeriod": {
+					"start": "2015-12-14T00:00:00-05:00",
+					"end": "2016-01-11T14:11:00-05:00"
+				}
+			}, {
+				"sequence": 2,
+				"category": {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+						"code": "clmrecvddate"
+					} ]
+				},
+				"timingDate": "2018-12-23"
+			}, {
+				"sequence": 3,
+				"category": {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+						"code": "admtype"
+					} ]
+				},
+				"code": {
+					"coding": [ {
+						"system": "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit",
+						"code": "4"
+					} ]
+				}
+			} ],
+			"diagnosis": [ {
+				"sequence": 1,
+				"diagnosisCodeableConcept": {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/sid/icd-10-cm",
+						"code": "Z38.00"
+					} ]
+				},
+				"type": [ {
+					"coding": [ {
+						"system": "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
+						"code": "principal"
+					} ]
+				} ]
+			} ],
+			"insurance": [ {
+				"focal": true,
+				"coverage": {
+					"reference": "Coverage/G"
+				}
+			} ],
+			"total": [ {
+				"category": {
+					"coding": [ {
+						"system": "http://terminology.hl7.org/CodeSystem/adjudication",
+						"code": "benefit"
+					} ]
+				},
+				"amount": {
+					"value": 1039.28
+				}
+			}, {
+				"category": {
+					"coding": [ {
+						"system": "http://terminology.hl7.org/CodeSystem/adjudication",
+						"code": "submitted"
+					} ]
+				},
+				"amount": {
+					"value": 2011
+				}
+			} ]
+		},
+		"request": {
+			"method": "PUT",
+			"url": "ExplanationOfBenefit/26d4cebd-95c6-39ea-855c-dc819bc68d08"
+		}
+	}, {
+		"resource": {
+			"resourceType": "ExplanationOfBenefit",
+			"id": "a25f1c3a-09b9-3f17-8f1b-0fbbf6391fce",
+			"meta": {
+				"lastUpdated": "2016-01-01T00:58:00.000-05:00",
+				"profile": [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional" ]
+			},
+			"identifier": [ {
+				"type": {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+						"code": "uc"
+					} ]
+				},
+				"system": "fhir/CodeSystem/sid/eob-inpatient-claim-id",
+				"value": "20586901"
+			} ],
+			"status": "active",
+			"type": {
+				"coding": [ {
+					"system": "http://terminology.hl7.org/CodeSystem/claim-type",
+					"code": "institutional"
+				} ]
+			},
+			"use": "claim",
+			"patient": {
+				"reference": "Patient/ABC"
+			},
+			"billablePeriod": {
+				"start": "2015-12-18T00:00:00-05:00"
+			},
+			"created": "2021-08-16T13:54:10-04:00",
+			"insurer": {
+				"reference": "Organization/A"
+			},
+			"provider": {
+				"reference": "Organization/d10823cf-ee15-3a0e-a12e-1509cd18cda4"
+			},
+			"outcome": "complete",
+			"careTeam": [ {
+				"sequence": 1,
+				"provider": {
+					"reference": "Practitioner/D"
+				},
+				"role": {
+					"coding": [ {
+						"system": "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+						"code": "primary"
+					} ]
+				}
+			}, {
+				"sequence": 2,
+				"provider": {
+					"reference": "Practitioner/E"
+				},
+				"role": {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+						"code": "attending"
+					} ]
+				}
+			}, {
+				"sequence": 3,
+				"provider": {
+					"reference": "Practitioner/F"
+				},
+				"role": {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+						"code": "performing"
+					} ]
+				}
+			} ],
+			"supportingInfo": [ {
+				"sequence": 1,
+				"category": {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+						"code": "admissionperiod"
+					} ]
+				},
+				"timingPeriod": {
+					"start": "2015-12-18T00:00:00-05:00",
+					"end": "2016-01-11T14:12:00-05:00"
+				}
+			}, {
+				"sequence": 2,
+				"category": {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+						"code": "clmrecvddate"
+					} ]
+				},
+				"timingDate": "2018-12-29"
+			}, {
+				"sequence": 3,
+				"category": {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+						"code": "admtype"
+					} ]
+				},
+				"code": {
+					"coding": [ {
+						"system": "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit",
+						"code": "4"
+					} ]
+				}
+			} ],
+			"diagnosis": [ {
+				"sequence": 1,
+				"diagnosisCodeableConcept": {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/sid/icd-10-cm",
+						"code": "Z38.00"
+					} ]
+				},
+				"type": [ {
+					"coding": [ {
+						"system": "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
+						"code": "principal"
+					} ]
+				} ]
+			}, {
+				"sequence": 2,
+				"diagnosisCodeableConcept": {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/sid/icd-10-cm",
+						"code": "P96.89"
+					} ]
+				},
+				"type": [ {
+					"coding": [ {
+						"system": "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
+						"code": "principal"
+					} ]
+				} ]
+			}, {
+				"sequence": 3,
+				"diagnosisCodeableConcept": {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/sid/icd-10-cm",
+						"code": "R25.8"
+					} ]
+				},
+				"type": [ {
+					"coding": [ {
+						"system": "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
+						"code": "principal"
+					} ]
+				} ]
+			}, {
+				"sequence": 4,
+				"diagnosisCodeableConcept": {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/sid/icd-10-cm",
+						"code": "P08.21"
+					} ]
+				},
+				"type": [ {
+					"coding": [ {
+						"system": "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
+						"code": "principal"
+					} ]
+				} ]
+			}, {
+				"sequence": 5,
+				"diagnosisCodeableConcept": {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/sid/icd-10-cm",
+						"code": "P92.5"
+					} ]
+				},
+				"type": [ {
+					"coding": [ {
+						"system": "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
+						"code": "principal"
+					} ]
+				} ]
+			}, {
+				"sequence": 6,
+				"diagnosisCodeableConcept": {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/sid/icd-10-cm",
+						"code": "P92.6"
+					} ]
+				},
+				"type": [ {
+					"coding": [ {
+						"system": "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
+						"code": "principal"
+					} ]
+				} ]
+			}, {
+				"sequence": 7,
+				"diagnosisCodeableConcept": {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/sid/icd-10-cm",
+						"code": "Z23"
+					} ]
+				},
+				"type": [ {
+					"coding": [ {
+						"system": "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
+						"code": "principal"
+					} ]
+				} ]
+			} ],
+			"insurance": [ {
+				"focal": true,
+				"coverage": {
+					"reference": "Coverage/G"
+				}
+			} ],
+			"total": [ {
+				"category": {
+					"coding": [ {
+						"system": "http://terminology.hl7.org/CodeSystem/adjudication",
+						"code": "benefit"
+					} ]
+				},
+				"amount": {
+					"value": 1421.31
+				}
+			}, {
+				"category": {
+					"coding": [ {
+						"system": "http://terminology.hl7.org/CodeSystem/adjudication",
+						"code": "submitted"
+					} ]
+				},
+				"amount": {
+					"value": 2336
+				}
+			} ]
+		},
+		"request": {
+			"method": "PUT",
+			"url": "ExplanationOfBenefit/a25f1c3a-09b9-3f17-8f1b-0fbbf6391fce"
+		}
+	} ] }
