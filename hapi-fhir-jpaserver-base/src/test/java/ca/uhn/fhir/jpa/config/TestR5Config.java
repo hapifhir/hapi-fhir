@@ -16,6 +16,7 @@ import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
 import org.hibernate.search.engine.cfg.BackendSettings;
 import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -138,8 +139,8 @@ public class TestR5Config extends BaseJavaConfigR5 {
 
 	@Override
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory) {
+		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory(theConfigurableListableBeanFactory);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaR5");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());

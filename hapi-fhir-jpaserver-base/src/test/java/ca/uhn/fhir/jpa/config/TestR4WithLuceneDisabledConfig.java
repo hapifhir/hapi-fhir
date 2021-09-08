@@ -3,9 +3,11 @@ package ca.uhn.fhir.jpa.config;
 import java.util.Properties;
 
 import org.hibernate.dialect.H2Dialect;
+import org.hibernate.search.backend.elasticsearch.index.layout.IndexLayoutStrategy;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.engine.cfg.BackendSettings;
 import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -27,8 +29,8 @@ public class TestR4WithLuceneDisabledConfig extends TestR4Config {
 
 	@Override
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory) {
+		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory(theConfigurableListableBeanFactory);
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());
 		return retVal;

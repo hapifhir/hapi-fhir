@@ -261,6 +261,11 @@ public class DaoConfig {
 	/**
 	 * @since 5.6.0
 	 */
+	private String myElasicSearchIndexPrefix;
+
+	/**
+	 * @since 5.6.0
+	 */
 	// Thread Pool size used by batch in bundle
 	public static final int DEFAULT_BUNDLE_BATCH_POOL_SIZE = 20; // 1 for single thread
 	public static final int DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE = 100; // 1 for single thread
@@ -268,6 +273,7 @@ public class DaoConfig {
 
 	private Integer myBundleBatchPoolSize = DEFAULT_BUNDLE_BATCH_POOL_SIZE;
 	private Integer myBundleBatchMaxPoolSize = DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE;
+
 
 	/**
 	 * Constructor
@@ -2643,7 +2649,29 @@ public class DaoConfig {
 		return retval;
 	}
 
-	public enum StoreMetaSourceInformationEnum {
+	/**
+	 *
+	 * Sets a prefix for any indexes created when interacting with elasticsearch. This will apply to fulltext search indexes
+	 * and terminology expansion indexes.
+	 *
+	 * @since 5.6.0
+	 */
+	public String getElasticSearchIndexPrefix() {
+		return myElasicSearchIndexPrefix;
+	}
+
+	/**
+	 *
+	 * Sets a prefix for any indexes created when interacting with elasticsearch. This will apply to fulltext search indexes
+	 * and terminology expansion indexes.
+	 *
+	 * @since 5.6.0
+	 */
+	public void setElasticSearchIndexPrefix(String thePrefix) {
+		myElasicSearchIndexPrefix = thePrefix;
+	}
+
+    public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),
 		SOURCE_URI(true, false),
 		REQUEST_ID(false, true),
