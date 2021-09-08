@@ -103,6 +103,16 @@ public interface IResourceTableDao extends JpaRepository<ResourceTable, Long>, I
 	@Query("SELECT t.myVersion FROM ResourceTable t WHERE t.myId = :pid")
 	Long findCurrentVersionByPid(@Param("pid") Long thePid);
 
+	/**
+	 * This query will return rows with the following values:
+	 * Id (resource pid - long), ResourceType (Patient, etc), version (long)
+	 * Order matters!
+	 * @param pid - list of pids to get versions for
+	 * @return
+	 */
+	@Query("SELECT t.myId, t.myResourceType, t.myVersion FROM ResourceTable t WHERE t.myId IN ( :pid )")
+	Collection<Object[]> getResourceVersionsForPid(@Param("pid") List<Long> pid);
+
 	@Query("SELECT t FROM ResourceTable t LEFT JOIN FETCH t.myForcedId WHERE t.myPartitionId.myPartitionId IS NULL AND t.myId = :pid")
 	Optional<ResourceTable> readByPartitionIdNull(@Param("pid") Long theResourceId);
 

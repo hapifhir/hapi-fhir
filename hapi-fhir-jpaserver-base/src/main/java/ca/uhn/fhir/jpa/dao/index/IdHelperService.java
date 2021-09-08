@@ -541,6 +541,95 @@ public class IdHelperService {
 	}
 
 	/**
+	 * Helper method to determine if some resources exist in the DB (without throwing).
+	 * Returns a set that contains the IIdType for every resource found.
+	 * If it's not found, it won't be included in the set.
+	 * @param theIds - list of IIdType ids (for the same resource)
+	 * @return
+	 */
+	private Map<IIdType, ResourcePersistentId> getIdsOfExistingResources(RequestPartitionId thePartitionId,
+																							  Collection<IIdType> theIds) {
+		// these are the found Ids that were in the db
+		HashMap<IIdType, ResourcePersistentId> collected = new HashMap<>();
+
+		if (theIds == null || theIds.isEmpty()) {
+			return collected;
+		}
+
+		List<ResourcePersistentId> resourcePersistentIds = resolveResourcePersistentIdsWithCache(thePartitionId,
+			theIds.stream().collect(Collectors.toList()));
+
+		// we'll use this map to fetch pids that require versions
+		HashMap<Long, ResourcePersistentId> pidsToVersionToResourcePid = new HashMap<>();
+
+		// fill in our map
+		for (ResourcePersistentId pid : resourcePersistentIds) {
+			if (pid.getVersion() == null) {
+				pidsToVersionToResourcePid.put(pid.getIdAsLong(), pid);
+			}
+			Optional<IIdType> idOp = theIds.stream()
+				.filter(i -> i.getIdPart().equals(pid.getAssociatedResourceId().getIdPart()))
+				.findFirst();
+			// this should always be present
+			// since it was passed in.
+			// but land of optionals...
+			idOp.ifPresent(id -> {
+				collected.put(id, pid);
+			});
+		}
+
+		// set any versions we don't already have
+		if (!pidsToVersionToResourcePid.isEmpty()) {
+			Collection<Object[]> resourceEntries = myResourceTableDao
+				.getResourceVersionsForPid(new ArrayList<>(pidsToVersionToResourcePid.keySet()));
+
+			for (Object[] record : resourceEntries) {
+				// order matters!
+				Long retPid = (Long)record[0];
+				String resType = (String)record[1];
+				Long version = (Long)record[2];
+				pidsToVersionToResourcePid.get(retPid).setVersion(version);
+			}
+		}
+
+		return collected;
+	}
+
+	/**
+	 * Retrieves the latest versions for any resourceid that are found.
+	 * If they are not found, they will not be contained in the returned map.
+	 * The key should be the same value that was passed in to allow
+	 * consumer to look up the value using the id they already have.
+	 *
+	 * This method should not throw, so it can safely be consumed in
+	 * transactions.
+	 *
+	 * @param theRequestPartitionId - request partition id
+	 * @param theIds - list of IIdTypes for resources of interest.
+	 * @return
+	 */
+	public Map<IIdType, ResourcePersistentId> getLatestVersionIdsForResourceIds(RequestPartitionId theRequestPartitionId, Collection<IIdType> theIds) {
+		HashMap<IIdType, ResourcePersistentId> idToPID = new HashMap<>();
+		HashMap<String, List<IIdType>> resourceTypeToIds = new HashMap<>();
+
+		for (IIdType id : theIds) {
+			String resourceType = id.getResourceType();
+			if (!resourceTypeToIds.containsKey(resourceType)) {
+				resourceTypeToIds.put(resourceType, new ArrayList<>());
+			}
+			resourceTypeToIds.get(resourceType).add(id);
+		}
+
+		for (String resourceType : resourceTypeToIds.keySet()) {
+			Map<IIdType, ResourcePersistentId> idAndPID = getIdsOfExistingResources(theRequestPartitionId,
+				resourceTypeToIds.get(resourceType));
+			idToPID.putAll(idAndPID);
+		}
+
+		return idToPID;
+	}
+
+	/**
 	 * @deprecated This method doesn't take a partition ID as input, so it is unsafe. It
 	 * should be reworked to include the partition ID before any new use is incorporated
 	 */
