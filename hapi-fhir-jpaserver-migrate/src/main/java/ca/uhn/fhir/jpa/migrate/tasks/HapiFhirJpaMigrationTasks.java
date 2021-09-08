@@ -99,10 +99,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_BLK_EXPORT_JOB")
 			.modifyColumn("20210624.1","REQUEST").nonNullable().withType(ColumnTypeEnum.STRING, 1024);
 
-// FIXME: move this
-        version.onTable("HFJ_RESOURCE")
-			.dropIndex("20210709.1", "IDX_RES_LANG");
-
 		version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
 			.modifyColumn("20210713.1","IDX_STRING").nonNullable().withType(ColumnTypeEnum.STRING, 500);
 
@@ -126,6 +122,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		cmbTokNuTable.addColumn("20210722.1", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
 		cmbTokNuTable.addColumn("20210722.2", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
 		cmbTokNuTable.modifyColumn("20210722.3", "RES_ID").nullable().withType(ColumnTypeEnum.LONG);
+
+		// Dropping index on the language column, as it's no longer in use.
+		// TODO: After 2 releases from 5.5.0, drop the column too
+		version.onTable("HFJ_RESOURCE")
+			.dropIndex("20210908.1", "IDX_RES_LANG");
+
 	}
 
 	private void init540() {
