@@ -21,6 +21,8 @@ import java.lang.annotation.Target;
 @Target(value= ElementType.FIELD)
 public @interface ClobMigrated {
 
+	String MIGRATION_NOT_NECESSARY = "MIGRATION_NOT_NECESSARY";
+
 	/**
 	 * The software version in which the migration happened
 	 */
