@@ -20,10 +20,6 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
-import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
-import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -31,6 +27,10 @@ import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
+import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -68,6 +68,9 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 	public static final int DEFAULT_BUFFER_SIZE = 100;
 
 	private int myBufferSize = DEFAULT_BUFFER_SIZE;
+
+	public MdmSubmitSvcImpl() {
+	}
 
 	@Override
 	@Transactional

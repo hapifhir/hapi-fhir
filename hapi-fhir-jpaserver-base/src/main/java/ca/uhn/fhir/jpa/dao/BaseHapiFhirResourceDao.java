@@ -1409,7 +1409,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		translateSearchParams(theParams);
+		translateListSearchParams(theParams);
 
 		notifySearchInterceptors(theParams, theRequest);
 
@@ -1434,7 +1434,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
-	private void translateSearchParams(SearchParameterMap theParams) {
+	private void translateListSearchParams(SearchParameterMap theParams) {
 		Iterator<String> keyIterator = theParams.keySet().iterator();
 
 		// Translate _list=42 to _has=List:item:_id=42
