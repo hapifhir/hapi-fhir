@@ -94,7 +94,6 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 				throw new InvalidRequestException("Resource " + resName + "/" + idPart + " not found, specified in path: " + theSourcePath);
 
 			}
-
 			resolvedResource = createdTableOpt.get();
 		}
 
