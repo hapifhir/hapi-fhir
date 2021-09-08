@@ -143,6 +143,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("TRM_CONCEPT")
 			.migrateClobToBlob("20210908.4", "PID", "PARENT_PIDS", "PARENT_PIDSB");
 
+		// HFJ_SEARCH.SEARCH_QUERY_STRING
+		// Note that we won't migrate values here since these are short lived anyhow
 		version.onTable("HFJ_SEARCH")
 			.migrateClobToBlob("20210908.5", "PID", "SEARCH_QUERY_STRING", "SEARCH_QUERY_STRINGB");
 	}
