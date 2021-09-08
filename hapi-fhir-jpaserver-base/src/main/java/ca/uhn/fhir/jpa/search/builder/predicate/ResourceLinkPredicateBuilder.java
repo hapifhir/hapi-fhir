@@ -38,20 +38,18 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderReference;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
-import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.CompositeParam;
@@ -66,6 +64,8 @@ import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
@@ -341,15 +341,26 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		List<Condition> orPredicates = new ArrayList<>();
 		boolean paramInverted = false;
 		QueryStack childQueryFactory = myQueryStack.newChildQueryFactoryWithFullBuilderReuse();
-		for (String nextType : resourceTypes) {
-			String chain = theReferenceParam.getChain();
 
-			String remainingChain = null;
-			int chainDotIndex = chain.indexOf('.');
-			if (chainDotIndex != -1) {
-				remainingChain = chain.substring(chainDotIndex + 1);
-				chain = chain.substring(0, chainDotIndex);
-			}
+		String chain = theReferenceParam.getChain();
+
+		String remainingChain = null;
+		int chainDotIndex = chain.indexOf('.');
+		if (chainDotIndex != -1) {
+			remainingChain = chain.substring(chainDotIndex + 1);
+			chain = chain.substring(0, chainDotIndex);
+		}
+
+		int qualifierIndex = chain.indexOf(':');
+		String qualifier = null;
+		if (qualifierIndex != -1) {
+			qualifier = chain.substring(qualifierIndex);
+			chain = chain.substring(0, qualifierIndex);
+		}
+
+		boolean isMeta = ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(chain);
+
+		for (String nextType : resourceTypes) {
 
 			RuntimeResourceDefinition typeDef = getFhirContext().getResourceDefinition(nextType);
 			String subResourceName = typeDef.getName();
@@ -360,14 +371,6 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 				continue;
 			}
 
-			int qualifierIndex = chain.indexOf(':');
-			String qualifier = null;
-			if (qualifierIndex != -1) {
-				qualifier = chain.substring(qualifierIndex);
-				chain = chain.substring(0, qualifierIndex);
-			}
-
-			boolean isMeta = ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(chain);
 			RuntimeSearchParam param = null;
 			if (!isMeta) {
 				param = mySearchParamRegistry.getActiveSearchParam(nextType, chain);
@@ -408,7 +411,6 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			andPredicates.add(childQueryFactory.searchForIdsWithAndOr(myColumnTargetResourceId, subResourceName, chain, chainParamValues, theRequest, theRequestPartitionId, SearchContainedModeEnum.FALSE));
 
 			orPredicates.add(toAndPredicate(andPredicates));
-
 		}
 
 		if (candidateTargetTypes.isEmpty()) {
