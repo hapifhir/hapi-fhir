@@ -132,11 +132,11 @@ public class SearchParamExtractorDstu3Test {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), new PartitionSettings(), ourCtx, searchParamRegistry);
 		extractor.start();
 
-		searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "", RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, false, null, null));
+		searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "", RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null));
 		Patient resource = new Patient();
 		extractor.extractSearchParamStrings(resource);
 
-		searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", null, RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, false, null, null));
+		searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", null, RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null));
 		extractor.extractSearchParamStrings(resource);
 	}
 
@@ -148,7 +148,7 @@ public class SearchParamExtractorDstu3Test {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), new PartitionSettings(), ourCtx, searchParamRegistry);
 		extractor.start();
 
-		searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "communication.language.coding.system | communication.language.coding.code", RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, false, null, null));
+		searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "communication.language.coding.system | communication.language.coding.code", RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null));
 		Patient resource = new Patient();
 		resource.getCommunicationFirstRep().getLanguage().getCodingFirstRep().setCode("blah");
 		Set<ResourceIndexedSearchParamString> strings = extractor.extractSearchParamStrings(resource);
@@ -166,37 +166,37 @@ public class SearchParamExtractorDstu3Test {
 		extractor.start();
 
 		{
-			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, false, null, null));
+			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> outcome = extractor.extractSearchParamStrings(resource);
 			assertThat(outcome.getWarnings(), Matchers.contains("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient"));
 		}
 		{
-			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.TOKEN, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, false, null, null));
+			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.TOKEN, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> outcome = extractor.extractSearchParamTokens(resource);
 			assertThat(outcome.getWarnings(), Matchers.contains("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient"));
 		}
 		{
-			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.QUANTITY, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, false, null, null));
+			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.QUANTITY, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamQuantity> outcome = extractor.extractSearchParamQuantity(resource);
 			assertThat(outcome.getWarnings(), Matchers.contains("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient"));
 		}
 		{
-			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.DATE, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, false, null, null));
+			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.DATE, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> outcome = extractor.extractSearchParamDates(resource);
 			assertThat(outcome.getWarnings(), Matchers.contains("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient"));
 		}
 		{
-			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.NUMBER, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, false, null, null));
+			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.NUMBER, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamNumber> outcome = extractor.extractSearchParamNumber(resource);
 			assertThat(outcome.getWarnings(), Matchers.contains("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient"));
 		}
 		{
-			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.URI, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, false, null, null));
+			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.URI, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamUri> outcome = extractor.extractSearchParamUri(resource);
 			assertThat(outcome.getWarnings(), Matchers.contains("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient"));
@@ -269,7 +269,7 @@ public class SearchParamExtractorDstu3Test {
 		}
 
 		@Override
-		public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
+		public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -280,7 +280,7 @@ public class SearchParamExtractorDstu3Test {
 		}
 
 		@Override
-		public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
+		public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
 			throw new UnsupportedOperationException();
 		}
 

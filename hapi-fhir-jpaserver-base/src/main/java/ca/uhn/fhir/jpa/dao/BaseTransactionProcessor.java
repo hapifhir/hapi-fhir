@@ -72,6 +72,7 @@ import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
@@ -89,9 +90,13 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.SyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
@@ -112,6 +117,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
@@ -146,6 +155,8 @@ public abstract class BaseTransactionProcessor {
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
+	private TaskExecutor myExecutor ;
+
 	@VisibleForTesting
 	public void setDaoConfig(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;
@@ -163,6 +174,25 @@ public abstract class BaseTransactionProcessor {
 	@PostConstruct
 	public void start() {
 		ourLog.trace("Starting transaction processor");
+	}
+
+	private TaskExecutor getTaskExecutor() {
+		if (myExecutor == null) {
+			if (myDaoConfig.getBundleBatchPoolSize() > 1) {
+				ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+				executor.setThreadNamePrefix("bundle_batch_");
+				executor.setCorePoolSize(myDaoConfig.getBundleBatchPoolSize());
+				executor.setMaxPoolSize(myDaoConfig.getBundleBatchMaxPoolSize());
+				executor.setQueueCapacity(DaoConfig.DEFAULT_BUNDLE_BATCH_QUEUE_CAPACITY);
+				executor.initialize();
+				myExecutor = executor;
+
+			} else {
+				SyncTaskExecutor executor = new SyncTaskExecutor();
+				myExecutor = executor;
+			}
+		}
+		return myExecutor;
 	}
 
 	public <BUNDLE extends IBaseBundle> BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest, boolean theNestedMode) {
@@ -309,59 +339,54 @@ public abstract class BaseTransactionProcessor {
 
 	private IBaseBundle batch(final RequestDetails theRequestDetails, IBaseBundle theRequest, boolean theNestedMode) {
 		ourLog.info("Beginning batch with {} resources", myVersionAdapter.getEntries(theRequest).size());
+
 		long start = System.currentTimeMillis();
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
-		IBaseBundle resp = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.BATCHRESPONSE.toCode());
+		IBaseBundle response = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.BATCHRESPONSE.toCode());
+		Map<Integer, Object> responseMap = new ConcurrentHashMap<>();
+				
+		List<IBase> requestEntries = myVersionAdapter.getEntries(theRequest);
+		int requestEntriesSize = requestEntries.size();
 
-		/*
-		 * For batch, we handle each entry as a mini-transaction in its own database transaction so that if one fails, it doesn't prevent others
-		 */
+		// And execute for each entry in parallel as a mini-transaction in its 
+		// own database transaction so that if one fails, it doesn't prevent others.
+		// The result is keep in the map to save the original position
 
-		for (final Object nextRequestEntry : myVersionAdapter.getEntries(theRequest)) {
-
-			BaseServerResponseExceptionHolder caughtEx = new BaseServerResponseExceptionHolder();
-
-			try {
-				IBaseBundle subRequestBundle = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode());
-				myVersionAdapter.addEntry(subRequestBundle, (IBase) nextRequestEntry);
-
-				IBaseBundle nextResponseBundle = processTransactionAsSubRequest(theRequestDetails, subRequestBundle, "Batch sub-request", theNestedMode);
-
-				IBase subResponseEntry = (IBase) myVersionAdapter.getEntries(nextResponseBundle).get(0);
-				myVersionAdapter.addEntry(resp, subResponseEntry);
-
-				/*
-				 * If the individual entry didn't have a resource in its response, bring the sub-transaction's OperationOutcome across so the client can see it
-				 */
-				if (myVersionAdapter.getResource(subResponseEntry) == null) {
-					IBase nextResponseBundleFirstEntry = (IBase) myVersionAdapter.getEntries(nextResponseBundle).get(0);
-					myVersionAdapter.setResource(subResponseEntry, myVersionAdapter.getResource(nextResponseBundleFirstEntry));
-				}
-
-			} catch (BaseServerResponseException e) {
-				caughtEx.setException(e);
-			} catch (Throwable t) {
-				ourLog.error("Failure during BATCH sub transaction processing", t);
-				caughtEx.setException(new InternalErrorException(t));
-			}
-
-			if (caughtEx.getException() != null) {
-				IBase nextEntry = myVersionAdapter.addEntry(resp);
-
-				populateEntryWithOperationOutcome(caughtEx.getException(), nextEntry);
-
-				myVersionAdapter.setResponseStatus(nextEntry, toStatusString(caughtEx.getException().getStatusCode()));
-			}
-
+		CountDownLatch completionLatch = new CountDownLatch(requestEntriesSize);
+		IBase nextRequestEntry = null;
+		for (int i=0; i<requestEntriesSize; i++ ) {
+			nextRequestEntry = requestEntries.get(i);
+			BundleTask bundleTask = new BundleTask(completionLatch, theRequestDetails, responseMap, i, nextRequestEntry, theNestedMode);
+			getTaskExecutor().execute(bundleTask);
 		}
 
+		// waiting for all tasks to be completed
+		AsyncUtil.awaitLatchAndIgnoreInterrupt(completionLatch, 300L, TimeUnit.SECONDS);
+		
+		// Now, create the bundle response in original order
+		Object nextResponseEntry;
+		for (int i=0; i<requestEntriesSize; i++ )  {
+			
+			nextResponseEntry = responseMap.get(i);
+			if (nextResponseEntry instanceof BaseServerResponseExceptionHolder) {
+				BaseServerResponseExceptionHolder caughtEx = (BaseServerResponseExceptionHolder)nextResponseEntry;
+				if (caughtEx.getException() != null) {
+					IBase nextEntry = myVersionAdapter.addEntry(response);
+					populateEntryWithOperationOutcome(caughtEx.getException(), nextEntry);
+					myVersionAdapter.setResponseStatus(nextEntry, toStatusString(caughtEx.getException().getStatusCode()));
+				} 
+			} else {
+				myVersionAdapter.addEntry(response, (IBase)nextResponseEntry);
+			}
+		}
+		
 		long delay = System.currentTimeMillis() - start;
 		ourLog.info("Batch completed in {}ms", delay);
 
-		return resp;
+		return response;
 	}
 
 	@VisibleForTesting
@@ -792,6 +817,7 @@ public abstract class BaseTransactionProcessor {
 						String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
 						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
 						outcome = resourceDao.create(res, matchUrl, false, theTransactionDetails, theRequest);
+					 	res.setId(outcome.getId());
 						if (nextResourceId != null) {
 							handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequest);
 						}
@@ -1012,13 +1038,9 @@ public abstract class BaseTransactionProcessor {
 
 			for (IIdType next : theAllIds) {
 				IIdType replacement = theIdSubstitutions.get(next);
-				if (replacement == null) {
-					continue;
+				if (replacement != null && !replacement.equals(next)) {
+					ourLog.debug("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
 				}
-				if (replacement.equals(next)) {
-					continue;
-				}
-				ourLog.debug("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
 			}
 
 			ListMultimap<Pointcut, HookParams> deferredBroadcastEvents = theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
@@ -1101,7 +1123,6 @@ public abstract class BaseTransactionProcessor {
 				}
 				deferredIndexesForAutoVersioning.put(nextOutcome, referencesToAutoVersion);
 			}
-
 		}
 
 		// If we have any resources we'll be auto-versioning, index these next
@@ -1546,5 +1567,59 @@ public abstract class BaseTransactionProcessor {
 		return theStatusCode + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
 	}
 
+	public class BundleTask implements Runnable {
 
+		private CountDownLatch myCompletedLatch;
+		private RequestDetails myRequestDetails;
+		private IBase myNextReqEntry;
+		private Map<Integer, Object> myResponseMap;
+		private int myResponseOrder;
+		private boolean myNestedMode;
+		
+		protected BundleTask(CountDownLatch theCompletedLatch, RequestDetails theRequestDetails, Map<Integer, Object> theResponseMap, int theResponseOrder, IBase theNextReqEntry, boolean theNestedMode) {
+			this.myCompletedLatch = theCompletedLatch;
+			this.myRequestDetails = theRequestDetails;
+			this.myNextReqEntry = theNextReqEntry;
+			this.myResponseMap = theResponseMap;		
+			this.myResponseOrder = theResponseOrder;					
+			this.myNestedMode = theNestedMode;
+		}
+		
+		@Override
+		public void run() {
+			BaseServerResponseExceptionHolder caughtEx = new BaseServerResponseExceptionHolder();
+			try {
+				IBaseBundle subRequestBundle = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode());
+				myVersionAdapter.addEntry(subRequestBundle, (IBase) myNextReqEntry);
+
+				IBaseBundle nextResponseBundle = processTransactionAsSubRequest(myRequestDetails, subRequestBundle, "Batch sub-request", myNestedMode);
+
+				IBase  subResponseEntry = (IBase) myVersionAdapter.getEntries(nextResponseBundle).get(0);
+				myResponseMap.put(myResponseOrder, subResponseEntry);
+								
+				/*
+				 * If the individual entry didn't have a resource in its response, bring the sub-transaction's OperationOutcome across so the client can see it
+				 */
+				if (myVersionAdapter.getResource(subResponseEntry) == null) {
+					IBase nextResponseBundleFirstEntry = (IBase) myVersionAdapter.getEntries(nextResponseBundle).get(0);
+					myResponseMap.put(myResponseOrder, nextResponseBundleFirstEntry);
+				}
+
+			} catch (BaseServerResponseException e) {
+				caughtEx.setException(e);
+			} catch (Throwable t) {
+				ourLog.error("Failure during BATCH sub transaction processing", t);
+				caughtEx.setException(new InternalErrorException(t));
+			}
+
+			if (caughtEx.getException() != null) {
+				// add exception to the response map
+				myResponseMap.put(myResponseOrder, caughtEx);
+			}
+			
+			// checking for the parallelism
+			ourLog.debug("processing bacth for {} is completed", myVersionAdapter.getEntryRequestUrl((IBase)myNextReqEntry));
+			myCompletedLatch.countDown();
+		}
+	}
 }

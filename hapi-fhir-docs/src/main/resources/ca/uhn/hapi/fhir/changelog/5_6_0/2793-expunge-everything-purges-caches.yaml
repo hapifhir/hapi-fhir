@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2793
+title: "Previously, when using the Expunge Everything operation, caches could retain old invalid values. This has been corrected. Thanks to [Ben Li-Sauerwine](https://github.com/theGOTOguy) for the fix!"

@@ -1,0 +1,4 @@
+---
+type: change
+issue: 2805
+title: "When the contents of a package are corrupt, the error messages now identify the corrupt element"

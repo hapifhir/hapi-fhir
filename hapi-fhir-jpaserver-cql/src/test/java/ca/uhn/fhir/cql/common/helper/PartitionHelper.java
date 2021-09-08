@@ -5,7 +5,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -49,7 +49,7 @@ public class PartitionHelper implements BeforeEachCallback, AfterEachCallback {
 		private boolean myCalled = false;
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
-		RequestPartitionId partitionIdentifyRead(ServletRequestDetails theRequestDetails) {
+		RequestPartitionId partitionIdentifyRead(RequestDetails theRequestDetails) {
 			myCalled = true;
 			if (theRequestDetails == null) {
 				ourLog.info("useful breakpoint :-)");
@@ -67,7 +67,7 @@ public class PartitionHelper implements BeforeEachCallback, AfterEachCallback {
 		}
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
-		RequestPartitionId partitionIdentifyCreate(ServletRequestDetails theRequestDetails) {
+		RequestPartitionId partitionIdentifyCreate(RequestDetails theRequestDetails) {
 			return RequestPartitionId.defaultPartition();
 		}
 	}

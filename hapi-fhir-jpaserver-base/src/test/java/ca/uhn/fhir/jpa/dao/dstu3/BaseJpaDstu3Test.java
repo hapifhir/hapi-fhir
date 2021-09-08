@@ -17,7 +17,7 @@ import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestDstu3Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
@@ -38,7 +38,6 @@ import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
@@ -53,14 +52,18 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance;
 import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.AuditEvent;
 import org.hl7.fhir.dstu3.model.Binary;
+import org.hl7.fhir.dstu3.model.BodySite;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.CodeSystem;
@@ -93,6 +96,7 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.PractitionerRole;
+import org.hl7.fhir.dstu3.model.Procedure;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
@@ -125,7 +129,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-import static org.hl7.fhir.convertors.conv30_40.ConceptMap30_40.convertConceptMap;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(SpringExtension.class)
@@ -150,7 +153,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("myCoverageDaoDstu3")
 	protected IFhirResourceDao<Coverage> myCoverageDao;
 	@Autowired
-	protected IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
+	protected IResourceIndexedComboStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
 	@Autowired
 	@Qualifier("myAllergyIntoleranceDaoDstu3")
 	protected IFhirResourceDao<AllergyIntolerance> myAllergyIntoleranceDao;
@@ -316,6 +319,12 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("myTaskDaoDstu3")
 	protected IFhirResourceDao<Task> myTaskDao;
 	@Autowired
+	@Qualifier("myBodySiteDaoDstu3")
+	protected IFhirResourceDao<BodySite> myBodySiteDao;
+	@Autowired
+	@Qualifier("myProcedureDaoDstu3")
+	protected IFhirResourceDao<Procedure> myProcedureDao;
+	@Autowired
 	protected ITermConceptDao myTermConceptDao;
 	@Autowired
 	protected ITermCodeSystemDao myTermCodeSystemDao;
@@ -378,7 +387,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@BeforeEach
 	public void beforeFlushFT() {
 		runInTransaction(() -> {
-			SearchSession searchSession  = Search.session(myEntityManager);
+			SearchSession searchSession = Search.session(myEntityManager);
 			searchSession.workspace(ResourceTable.class).purge();
 //			searchSession.workspace(ResourceIndexedSearchParamString.class).purge();
 			searchSession.indexingPlan().execute();
@@ -462,7 +471,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	 */
 	public static ConceptMap createConceptMap() {
 		try {
-			return convertConceptMap(BaseJpaR4Test.createConceptMap());
+			return (ConceptMap) VersionConvertorFactory_30_40.convertResource(BaseJpaR4Test.createConceptMap(), new BaseAdvisor_30_40(false));
 		} catch (FHIRException fe) {
 			throw new InternalErrorException(fe);
 		}

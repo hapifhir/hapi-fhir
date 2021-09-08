@@ -1,10 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Address.AddressUse;
@@ -26,14 +26,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ContainedTest.class);
@@ -80,7 +78,6 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		map = new SearchParameterMap();
 		map.add("subject", new ReferenceParam("name", "Smith"));
 		map.setSearchContainedMode(SearchContainedModeEnum.TRUE);
-		
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id)));
 	}
 	
@@ -110,14 +107,16 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 				.getSingleResult();
 			assertEquals(1L, i.longValue());
 		});
-		
+
 		SearchParameterMap map;
 
 		map = new SearchParameterMap();
 		map.add("subject", new ReferenceParam("name", "Smith"));
 		map.setSearchContainedMode(SearchContainedModeEnum.TRUE);
-		
+		map.setLoadSynchronous(true);
+
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id)));
+
 	}
 	
 	

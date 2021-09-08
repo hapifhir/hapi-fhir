@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class CqlMeasureEvaluationDstu3Test extends BaseCqlDstu3Test {
-	Logger ourLog = LoggerFactory.getLogger(CqlMeasureEvaluationDstu3Test.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(CqlMeasureEvaluationDstu3Test.class);
 
 	@Autowired
 	MeasureOperationsProvider myMeasureOperationsProvider;
@@ -60,7 +60,7 @@ public class CqlMeasureEvaluationDstu3Test extends BaseCqlDstu3Test {
 		String periodStart = this.getPeriodStart(expected);
 		String periodEnd = this.getPeriodEnd(expected);
 
-		this.ourLog.info("Measure: %s, Patient: %s, Start: %s, End: %s", measureId, patientId, periodStart, periodEnd);
+		ourLog.info("Measure: {}, Patient: {}, Start: {}, End: {}", measureId, patientId, periodStart, periodEnd);
 
 		MeasureReport actual = this.myMeasureOperationsProvider.evaluateMeasure(new IdType("Measure", measureId),
 			periodStart, periodEnd, null,

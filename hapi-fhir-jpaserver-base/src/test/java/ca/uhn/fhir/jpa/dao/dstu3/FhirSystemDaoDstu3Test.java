@@ -116,12 +116,16 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 		myDaoConfig.setMaximumDeleteConflictQueryCount(new DaoConfig().getMaximumDeleteConflictQueryCount());
+		myDaoConfig.setBundleBatchPoolSize(new DaoConfig().getBundleBatchPoolSize());
+		myDaoConfig.setBundleBatchMaxPoolSize(new DaoConfig().getBundleBatchMaxPoolSize());
 
 	}
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myDaoConfig.setBundleBatchPoolSize(1);
+		myDaoConfig.setBundleBatchMaxPoolSize(1);
 	}
 
 	private Bundle createInputTransactionWithPlaceholderIdInMatchUrl(HTTPVerb theVerb) {

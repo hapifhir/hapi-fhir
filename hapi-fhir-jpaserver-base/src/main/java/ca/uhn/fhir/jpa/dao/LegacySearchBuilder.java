@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -42,7 +43,7 @@ import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
@@ -868,8 +869,10 @@ public class LegacySearchBuilder implements ISearchBuilder {
 		// Since we're going to remove elements below
 		theParams.values().forEach(nextAndList -> ensureSubListsAreWritable(nextAndList));
 
-		List<RuntimeSearchParam> activeUniqueSearchParams = mySearchParamRegistry.getActiveUniqueSearchParams(myResourceName, theParams.keySet());
+		List<RuntimeSearchParam> activeUniqueSearchParams = mySearchParamRegistry.getActiveComboSearchParams(myResourceName, theParams.keySet());
 		if (activeUniqueSearchParams.size() > 0) {
+
+			Validate.isTrue(activeUniqueSearchParams.get(0).getComboSearchParamType()== ComboSearchParamType.UNIQUE, "Non unique combo parameters are not supported with the legacy search builder");
 
 			StringBuilder sb = new StringBuilder();
 			sb.append(myResourceName);
@@ -943,7 +946,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 	}
 
 	private void addPredicateCompositeStringUnique(@Nonnull SearchParameterMap theParams, String theIndexedString, RequestPartitionId theRequestPartitionId) {
-		From<?, ResourceIndexedCompositeStringUnique> join = myQueryStack.createJoin(SearchBuilderJoinEnum.COMPOSITE_UNIQUE, null);
+		From<?, ResourceIndexedComboStringUnique> join = myQueryStack.createJoin(SearchBuilderJoinEnum.COMPOSITE_UNIQUE, null);
 
 		if (!theRequestPartitionId.isAllPartitions()) {
 			Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();

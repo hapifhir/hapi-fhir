@@ -57,8 +57,8 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
-import org.hl7.fhir.convertors.VersionConvertor_40_50;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -78,7 +78,6 @@ import org.thymeleaf.IEngineConfiguration;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.cache.AlwaysValidCacheEntryValidity;
 import org.thymeleaf.cache.ICacheEntryValidity;
-import org.thymeleaf.cache.NonCacheableCacheEntryValidity;
 import org.thymeleaf.context.IExpressionContext;
 import org.thymeleaf.context.WebContext;
 import org.thymeleaf.linkbuilder.AbstractLinkBuilder;
@@ -267,10 +266,17 @@ public class OpenApiInterceptor {
 		return false;
 	}
 
+	public String removeTrailingSlash(String theUrl) {
+		while(theUrl != null && theUrl.endsWith("/")) {
+			theUrl = theUrl.substring(0, theUrl.length() - 1);
+		}
+		return theUrl;
+	}
+
 	@SuppressWarnings("unchecked")
 	private void serveSwaggerUiHtml(ServletRequestDetails theRequestDetails, HttpServletResponse theResponse) throws IOException {
 		CapabilityStatement cs = getCapabilityStatement(theRequestDetails);
-
+		String baseUrl = removeTrailingSlash(cs.getImplementation().getUrl());
 		theResponse.setStatus(200);
 		theResponse.setContentType(Constants.CT_HTML);
 
@@ -283,7 +289,7 @@ public class OpenApiInterceptor {
 		context.setVariable("SERVER_VERSION", cs.getSoftware().getVersion());
 		context.setVariable("BASE_URL", cs.getImplementation().getUrl());
 		context.setVariable("BANNER_IMAGE_URL", getBannerImage());
-		context.setVariable("OPENAPI_DOCS", cs.getImplementation().getUrl() + "/api-docs");
+		context.setVariable("OPENAPI_DOCS", baseUrl + "/api-docs");
 		context.setVariable("FHIR_VERSION", cs.getFhirVersion().toCode());
 		context.setVariable("FHIR_VERSION_CODENAME", FhirVersionEnum.forVersionString(cs.getFhirVersion().toCode()).name());
 
@@ -379,6 +385,7 @@ public class OpenApiInterceptor {
 		Paths paths = new Paths();
 		openApi.setPaths(paths);
 
+
 		if (page == null || page.equals(PAGE_SYSTEM) || page.equals(PAGE_ALL)) {
 			Tag serverTag = new Tag();
 			serverTag.setName(PAGE_SYSTEM);
@@ -391,7 +398,6 @@ public class OpenApiInterceptor {
 			addFhirResourceResponse(ctx, openApi, capabilitiesOperation, "CapabilityStatement");
 
 			Set<CapabilityStatement.SystemRestfulInteraction> systemInteractions = cs.getRestFirstRep().getInteraction().stream().map(t -> t.getCode()).collect(Collectors.toSet());
-
 			// Transaction Operation
 			if (systemInteractions.contains(CapabilityStatement.SystemRestfulInteraction.TRANSACTION) || systemInteractions.contains(CapabilityStatement.SystemRestfulInteraction.BATCH)) {
 				Operation transaction = getPathItem(paths, "/", PathItem.HttpMethod.POST);
@@ -509,7 +515,7 @@ public class OpenApiInterceptor {
 				Operation operation = getPathItem(paths, "/" + resourceType, PathItem.HttpMethod.GET);
 				operation.addTagsItem(resourceType);
 				operation.setDescription("This is a search type");
-				operation.setSummary("search-type: Update an existing " + resourceType + " instance, or create using a client-assigned ID");
+				operation.setSummary("search-type: Search for " + resourceType + " instances");
 				addFhirResourceResponse(ctx, openApi, operation, null);
 
 				for (CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent nextSearchParam : nextResource.getSearchParam()) {
@@ -736,8 +742,9 @@ public class OpenApiInterceptor {
 		}
 	}
 
-	private Operation getPathItem(Paths thePaths, String thePath, PathItem.HttpMethod theMethod) {
+	protected Operation getPathItem(Paths thePaths, String thePath, PathItem.HttpMethod theMethod) {
 		PathItem pathItem;
+
 		if (thePaths.containsKey(thePath)) {
 			pathItem = thePaths.get(thePath);
 		} else {
@@ -902,9 +909,9 @@ public class OpenApiInterceptor {
 	private static <T extends Resource> T toCanonicalVersion(IBaseResource theNonCanonical) {
 		IBaseResource canonical;
 		if (theNonCanonical instanceof org.hl7.fhir.dstu3.model.Resource) {
-			canonical = VersionConvertor_30_40.convertResource((org.hl7.fhir.dstu3.model.Resource) theNonCanonical, true);
+			canonical = VersionConvertorFactory_30_40.convertResource((org.hl7.fhir.dstu3.model.Resource) theNonCanonical);
 		} else if (theNonCanonical instanceof org.hl7.fhir.r5.model.Resource) {
-			canonical = VersionConvertor_40_50.convertResource((org.hl7.fhir.r5.model.Resource) theNonCanonical);
+			canonical = VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r5.model.Resource) theNonCanonical);
 		} else {
 			canonical = theNonCanonical;
 		}

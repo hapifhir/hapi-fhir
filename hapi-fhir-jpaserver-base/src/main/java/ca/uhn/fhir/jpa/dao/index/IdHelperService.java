@@ -36,6 +36,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 import org.apache.commons.lang3.StringUtils;
@@ -155,7 +156,7 @@ public class IdHelperService {
 		assert TransactionSynchronizationManager.isSynchronizationActive();
 
 		ResourcePersistentId retVal;
-		if (myDaoConfig.getResourceClientIdStrategy() == DaoConfig.ClientIdStrategyEnum.ANY || !isValidPid(theId)) {
+		if (idRequiresForcedId	(theId)) {
 			if (myDaoConfig.isDeleteEnabled()) {
 				retVal = new ResourcePersistentId(resolveResourceIdentity(theRequestPartitionId, theResourceType, theId).getResourceId());
 			} else {
@@ -175,6 +176,17 @@ public class IdHelperService {
 		}
 
 		return retVal;
+	}
+
+	/**
+	 * Returns true if the given resource ID should be stored in a forced ID. Under default config
+	 * (meaning client ID strategy is {@link ca.uhn.fhir.jpa.api.config.DaoConfig.ClientIdStrategyEnum#ALPHANUMERIC})
+	 * this will return true if the ID has any non-digit characters.
+	 *
+	 * In {@link ca.uhn.fhir.jpa.api.config.DaoConfig.ClientIdStrategyEnum#ANY} mode it will always return true.
+	 */
+	public boolean idRequiresForcedId(String theId) {
+		return myDaoConfig.getResourceClientIdStrategy() == DaoConfig.ClientIdStrategyEnum.ANY || !isValidPid(theId);
 	}
 
 	@Nonnull
@@ -395,9 +407,9 @@ public class IdHelperService {
 		return retVal;
 	}
 
-	private RequestPartitionId replaceDefault(RequestPartitionId theRequestPartitionId) {
+	RequestPartitionId replaceDefault(RequestPartitionId theRequestPartitionId) {
 		if (myPartitionSettings.getDefaultPartitionId() != null) {
-			if (theRequestPartitionId.hasDefaultPartitionId()) {
+			if (!theRequestPartitionId.isAllPartitions() && theRequestPartitionId.hasDefaultPartitionId()) {
 				List<Integer> partitionIds = theRequestPartitionId
 					.getPartitionIds()
 					.stream()
@@ -585,6 +597,11 @@ public class IdHelperService {
 		} else {
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theResourcePersistentId.getIdAsLong(), Optional.empty());
 		}
+	}
+
+	@VisibleForTesting
+	void setPartitionSettingsForUnitTest(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	public static boolean isValidPid(IIdType theId) {

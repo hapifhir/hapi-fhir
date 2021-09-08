@@ -12,7 +12,7 @@ import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
@@ -435,7 +435,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertEquals(myPartitionDate, presents.get(0).getPartitionId().getPartitionDate());
 
 			// HFJ_IDX_CMP_STRING_UNIQ
-			List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAllForResourceIdForUnitTest(patientId);
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAllForResourceIdForUnitTest(patientId);
 			assertEquals(1, uniques.size());
 			assertEquals(myPartitionId, uniques.get(0).getPartitionId().getPartitionId().intValue());
 			assertEquals(myPartitionDate, uniques.get(0).getPartitionId().getPartitionDate());
@@ -519,7 +519,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertEquals(myPartitionDate, presents.get(0).getPartitionId().getPartitionDate());
 
 			// HFJ_IDX_CMP_STRING_UNIQ
-			List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAllForResourceIdForUnitTest(patientId);
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAllForResourceIdForUnitTest(patientId);
 			assertEquals(1, uniques.size());
 			assertEquals(null, uniques.get(0).getPartitionId().getPartitionId());
 			assertEquals(myPartitionDate, uniques.get(0).getPartitionId().getPartitionDate());
@@ -2274,7 +2274,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		ourLog.info("Search SQL:\n{}", searchSql);
 		assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
 		assertEquals(1, StringUtils.countMatches(searchSql, "TAG_SYSTEM = 'http://system'"), searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, "t1.HASH_SYS_AND_VALUE ="), searchSql);
+		assertEquals(1, StringUtils.countMatches(searchSql, ".HASH_SYS_AND_VALUE ="), searchSql);
 
 
 	}

@@ -225,15 +225,15 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	}
 
 	public static String createLeftAndRightMatchLikeExpression(String likeExpression) {
-		return "%" + likeExpression.replace("%", "[%]") + "%";
+		return "%" + likeExpression.replace("%", "\\%") + "%";
 	}
 
 	public static String createLeftMatchLikeExpression(String likeExpression) {
-		return likeExpression.replace("%", "[%]") + "%";
+		return likeExpression.replace("%", "\\%") + "%";
 	}
 
 	public static String createRightMatchLikeExpression(String likeExpression) {
-		return "%" + likeExpression.replace("%", "[%]");
+		return "%" + likeExpression.replace("%", "\\%");
 	}
 
 

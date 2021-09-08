@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.util.InterceptorUtil;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -74,6 +75,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class PersistedJpaBundleProvider implements IBundleProvider {
 
@@ -409,19 +411,25 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	// Note: Leave as protected, HSPC depends on this
 	@SuppressWarnings("WeakerAccess")
 	protected List<IBaseResource> toResourceList(ISearchBuilder theSearchBuilder, List<ResourcePersistentId> thePids) {
-		Set<ResourcePersistentId> includedPids = new HashSet<>();
 
+		List<ResourcePersistentId> includedPidList = new ArrayList<>();
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
 			Integer maxIncludes = myDaoConfig.getMaximumIncludesToLoadPerPage();
-			includedPids.addAll(theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated(), myUuid, myRequest, maxIncludes));
+
+			// Load _revincludes
+			Set<ResourcePersistentId> includedPids = theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated(), myUuid, myRequest, maxIncludes);
 			if (maxIncludes != null) {
 				maxIncludes -= includedPids.size();
 			}
-			includedPids.addAll(theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated(), myUuid, myRequest, maxIncludes));
-		}
+			thePids.addAll(includedPids);
+			includedPidList.addAll(includedPids);
 
-		List<ResourcePersistentId> includedPidList = new ArrayList<>(includedPids);
-		thePids.addAll(includedPidList);
+			// Load _includes
+			Set<ResourcePersistentId> revIncludedPids = theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated(), myUuid, myRequest, maxIncludes);
+			thePids.addAll(revIncludedPids);
+			includedPidList.addAll(revIncludedPids);
+
+		}
 
 		// Execute the query and make sure we return distinct results
 		List<IBaseResource> resources = new ArrayList<>();

@@ -70,11 +70,11 @@ public interface ISearchParamRegistry {
 	default void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {
 	}
 
-	default List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
+	default List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
 		return Collections.emptyList();
 	}
 
-	default List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
+	default List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {
 		return Collections.emptyList();
 	}
 

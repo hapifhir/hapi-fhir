@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.index;
  * #L%
  */
 
+import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -27,17 +28,19 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
-import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -46,15 +49,18 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import javax.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
@@ -64,8 +70,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -92,7 +100,7 @@ public class SearchParamWithInlineReferencesExtractor {
 	@Autowired
 	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
 	@Autowired
-	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
+	private IResourceIndexedComboStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
@@ -140,7 +148,7 @@ public class SearchParamWithInlineReferencesExtractor {
 		}
 
 		/*
-		 * Handle composites
+		 * Handle combo parameters
 		 */
 		extractCompositeStringUniques(theEntity, theParams);
 	}
@@ -148,86 +156,152 @@ public class SearchParamWithInlineReferencesExtractor {
 	private void extractCompositeStringUniques(ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
 
 		final String resourceType = theEntity.getResourceType();
-		List<RuntimeSearchParam> uniqueSearchParams = mySearchParamRegistry.getActiveUniqueSearchParams(resourceType);
+		List<RuntimeSearchParam> comboSearchParams = mySearchParamRegistry.getActiveComboSearchParams(resourceType);
 
-		for (RuntimeSearchParam next : uniqueSearchParams) {
+		for (RuntimeSearchParam next : comboSearchParams) {
+			switch (Objects.requireNonNull(next.getComboSearchParamType())) {
+				case UNIQUE:
+					extractComboUniqueParam(theEntity, theParams, resourceType, next);
+					break;
+				case NON_UNIQUE:
+					extractComboNonUniqueParam(theEntity, theParams, resourceType, next);
+			}
+		}
+	}
 
-			List<List<String>> partsChoices = new ArrayList<>();
+	private void extractComboNonUniqueParam(ResourceTable theEntity, ResourceIndexedSearchParams theParams, String theResourceType, RuntimeSearchParam theParam) {
+		Set<String> queryStringsToPopulate = extractParameterCombinationsForComboParam(theParams, theResourceType, theParam);
 
-			List<RuntimeSearchParam> compositeComponents = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, next);
-			for (RuntimeSearchParam nextCompositeOf : compositeComponents) {
-				Collection<? extends BaseResourceIndexedSearchParam> paramsListForCompositePart = null;
-				Collection<ResourceLink> linksForCompositePart = null;
-				Collection<String> linksForCompositePartWantPaths = null;
-				switch (nextCompositeOf.getParamType()) {
-					case NUMBER:
-						paramsListForCompositePart = theParams.myNumberParams;
-						break;
-					case DATE:
-						paramsListForCompositePart = theParams.myDateParams;
-						break;
-					case STRING:
-						paramsListForCompositePart = theParams.myStringParams;
-						break;
-					case TOKEN:
-						paramsListForCompositePart = theParams.myTokenParams;
-						break;
-					case REFERENCE:
-						linksForCompositePart = theParams.myLinks;
-						linksForCompositePartWantPaths = new HashSet<>(nextCompositeOf.getPathsSplit());
-						break;
-					case QUANTITY:
-						paramsListForCompositePart = theParams.myQuantityParams;
-						break;
-					case URI:
-						paramsListForCompositePart = theParams.myUriParams;
-						break;
-					case SPECIAL:
-					case COMPOSITE:
-					case HAS:
-						break;
-				}
+		for (String nextQueryString : queryStringsToPopulate) {
+			ourLog.trace("Adding composite unique SP: {}", nextQueryString);
+			theParams.myComboTokenNonUnique.add(new ResourceIndexedComboTokenNonUnique(myPartitionSettings, theEntity, nextQueryString));
+		}
+	}
 
-				ArrayList<String> nextChoicesList = new ArrayList<>();
-				partsChoices.add(nextChoicesList);
+	private void extractComboUniqueParam(ResourceTable theEntity, ResourceIndexedSearchParams theParams, String theResourceType, RuntimeSearchParam theParam) {
+		Set<String> queryStringsToPopulate = extractParameterCombinationsForComboParam(theParams, theResourceType, theParam);
 
-				String key = UrlUtil.escapeUrlParam(nextCompositeOf.getName());
-				if (paramsListForCompositePart != null) {
-					for (BaseResourceIndexedSearchParam nextParam : paramsListForCompositePart) {
-						if (nextParam.getParamName().equals(nextCompositeOf.getName())) {
-							IQueryParameterType nextParamAsClientParam = nextParam.toQueryParameterType();
-							String value = nextParamAsClientParam.getValueAsQueryToken(myContext);
-							if (isNotBlank(value)) {
-								value = UrlUtil.escapeUrlParam(value);
-								nextChoicesList.add(key + "=" + value);
-							}
-						}
+		for (String nextQueryString : queryStringsToPopulate) {
+				ourLog.trace("Adding composite unique SP: {}", nextQueryString);
+				theParams.myComboStringUniques.add(new ResourceIndexedComboStringUnique(theEntity, nextQueryString, theParam.getId()));
+		}
+	}
+
+	@Nonnull
+	private Set<String> extractParameterCombinationsForComboParam(ResourceIndexedSearchParams theParams, String theResourceType, RuntimeSearchParam theParam) {
+		List<List<String>> partsChoices = new ArrayList<>();
+
+		List<RuntimeSearchParam> compositeComponents = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, theParam);
+		for (RuntimeSearchParam nextCompositeOf : compositeComponents) {
+			Collection<? extends BaseResourceIndexedSearchParam> paramsListForCompositePart = findParameterIndexes(theParams, nextCompositeOf);
+
+			Collection<ResourceLink> linksForCompositePart = null;
+			switch (nextCompositeOf.getParamType()) {
+				case REFERENCE:
+					linksForCompositePart = theParams.myLinks;
+					break;
+				case NUMBER:
+				case DATE:
+				case STRING:
+				case TOKEN:
+				case QUANTITY:
+				case URI:
+				case SPECIAL:
+				case COMPOSITE:
+				case HAS:
+					break;
+			}
+
+			Collection<String> linksForCompositePartWantPaths = null;
+			switch (nextCompositeOf.getParamType()) {
+				case REFERENCE:
+					linksForCompositePartWantPaths = new HashSet<>(nextCompositeOf.getPathsSplit());
+					break;
+				case NUMBER:
+				case DATE:
+				case STRING:
+				case TOKEN:
+				case QUANTITY:
+				case URI:
+				case SPECIAL:
+				case COMPOSITE:
+				case HAS:
+					break;
+			}
+
+			ArrayList<String> nextChoicesList = new ArrayList<>();
+			partsChoices.add(nextChoicesList);
+
+			String key = UrlUtil.escapeUrlParam(nextCompositeOf.getName());
+			if (paramsListForCompositePart != null) {
+				for (BaseResourceIndexedSearchParam nextParam : paramsListForCompositePart) {
+					IQueryParameterType nextParamAsClientParam = nextParam.toQueryParameterType();
+					String value = nextParamAsClientParam.getValueAsQueryToken(myContext);
+
+					RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceType, key);
+					if (theParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE && param != null && param.getParamType() == RestSearchParameterTypeEnum.STRING) {
+						value = StringUtil.normalizeStringForSearchIndexing(value);
 					}
-				}
-				if (linksForCompositePart != null) {
-					for (ResourceLink nextLink : linksForCompositePart) {
-						if (linksForCompositePartWantPaths.contains(nextLink.getSourcePath())) {
-							assert isNotBlank(nextLink.getTargetResourceType());
-							assert isNotBlank(nextLink.getTargetResourceId());
-							String value = nextLink.getTargetResourceType() + "/" + nextLink.getTargetResourceId();
-							if (isNotBlank(value)) {
-								value = UrlUtil.escapeUrlParam(value);
-								nextChoicesList.add(key + "=" + value);
-							}
-						}
+
+					if (isNotBlank(value)) {
+						value = UrlUtil.escapeUrlParam(value);
+						nextChoicesList.add(key + "=" + value);
 					}
 				}
 			}
-
-			Set<String> queryStringsToPopulate = ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains(resourceType, partsChoices);
-
-			for (String nextQueryString : queryStringsToPopulate) {
-				if (isNotBlank(nextQueryString)) {
-					ourLog.trace("Adding composite unique SP: {}", nextQueryString);
-					theParams.myCompositeStringUniques.add(new ResourceIndexedCompositeStringUnique(theEntity, nextQueryString, next.getId()));
+			if (linksForCompositePart != null) {
+				for (ResourceLink nextLink : linksForCompositePart) {
+					if (linksForCompositePartWantPaths.contains(nextLink.getSourcePath())) {
+						assert isNotBlank(nextLink.getTargetResourceType());
+						assert isNotBlank(nextLink.getTargetResourceId());
+						String value = nextLink.getTargetResourceType() + "/" + nextLink.getTargetResourceId();
+						if (isNotBlank(value)) {
+							value = UrlUtil.escapeUrlParam(value);
+							nextChoicesList.add(key + "=" + value);
+						}
+					}
 				}
 			}
 		}
+
+		return ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains(theResourceType, partsChoices);
+	}
+
+	@Nullable
+	private Collection<? extends BaseResourceIndexedSearchParam> findParameterIndexes(ResourceIndexedSearchParams theParams, RuntimeSearchParam nextCompositeOf) {
+		Collection<? extends BaseResourceIndexedSearchParam> paramsListForCompositePart = null;
+		switch (nextCompositeOf.getParamType()) {
+			case NUMBER:
+				paramsListForCompositePart = theParams.myNumberParams;
+				break;
+			case DATE:
+				paramsListForCompositePart = theParams.myDateParams;
+				break;
+			case STRING:
+				paramsListForCompositePart = theParams.myStringParams;
+				break;
+			case TOKEN:
+				paramsListForCompositePart = theParams.myTokenParams;
+				break;
+			case QUANTITY:
+				paramsListForCompositePart = theParams.myQuantityParams;
+				break;
+			case URI:
+				paramsListForCompositePart = theParams.myUriParams;
+				break;
+			case REFERENCE:
+			case SPECIAL:
+			case COMPOSITE:
+			case HAS:
+				break;
+		}
+		if (paramsListForCompositePart != null) {
+			paramsListForCompositePart = paramsListForCompositePart
+				.stream()
+				.filter(t->t.getParamName().equals(nextCompositeOf.getName()))
+				.collect(Collectors.toList());
+		}
+		return paramsListForCompositePart;
 	}
 
 
@@ -309,19 +383,21 @@ public class SearchParamWithInlineReferencesExtractor {
 		myDaoSearchParamSynchronizer = theDaoSearchParamSynchronizer;
 	}
 
-	public void storeCompositeStringUniques(ResourceIndexedSearchParams theParams, ResourceTable theEntity, ResourceIndexedSearchParams existingParams) {
+	public void storeUniqueComboParameters(ResourceIndexedSearchParams theParams, ResourceTable theEntity, ResourceIndexedSearchParams theExistingParams) {
 
-		// Store composite string uniques
+		/*
+		 * String Uniques
+		 */
 		if (myDaoConfig.isUniqueIndexesEnabled()) {
-			for (ResourceIndexedCompositeStringUnique next : myDaoSearchParamSynchronizer.subtract(existingParams.myCompositeStringUniques, theParams.myCompositeStringUniques)) {
+			for (ResourceIndexedComboStringUnique next : myDaoSearchParamSynchronizer.subtract(theExistingParams.myComboStringUniques, theParams.myComboStringUniques)) {
 				ourLog.debug("Removing unique index: {}", next);
 				myEntityManager.remove(next);
-				theEntity.getParamsCompositeStringUnique().remove(next);
+				theEntity.getParamsComboStringUnique().remove(next);
 			}
-			boolean haveNewParams = false;
-			for (ResourceIndexedCompositeStringUnique next : myDaoSearchParamSynchronizer.subtract(theParams.myCompositeStringUniques, existingParams.myCompositeStringUniques)) {
+			boolean haveNewStringUniqueParams = false;
+			for (ResourceIndexedComboStringUnique next : myDaoSearchParamSynchronizer.subtract(theParams.myComboStringUniques, theExistingParams.myComboStringUniques)) {
 				if (myDaoConfig.isUniqueIndexesCheckedBeforeSave()) {
-					ResourceIndexedCompositeStringUnique existing = myResourceIndexedCompositeStringUniqueDao.findByQueryString(next.getIndexString());
+					ResourceIndexedComboStringUnique existing = myResourceIndexedCompositeStringUniqueDao.findByQueryString(next.getIndexString());
 					if (existing != null) {
 
 						String searchParameterId = "(unknown)";
@@ -335,12 +411,12 @@ public class SearchParamWithInlineReferencesExtractor {
 				}
 				ourLog.debug("Persisting unique index: {}", next);
 				myEntityManager.persist(next);
-				haveNewParams = true;
+				haveNewStringUniqueParams = true;
 			}
-			if (theParams.myCompositeStringUniques.size() > 0 || haveNewParams) {
-				theEntity.setParamsCompositeStringUniquePresent(true);
+			if (theParams.myComboStringUniques.size() > 0 || haveNewStringUniqueParams) {
+				theEntity.setParamsComboStringUniquePresent(true);
 			} else {
-				theEntity.setParamsCompositeStringUniquePresent(false);
+				theEntity.setParamsComboStringUniquePresent(false);
 			}
 		}
 	}

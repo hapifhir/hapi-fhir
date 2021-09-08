@@ -172,6 +172,10 @@ public class MemoryCacheService {
 		return (Cache<K, T>) myCaches.get(theCache);
 	}
 
+	public long getEstimatedSize(CacheEnum theCache) {
+		return getCache(theCache).estimatedSize();
+	}
+
 	public enum CacheEnum {
 
 		TAG_DEFINITION(TagDefinitionCacheKey.class),

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.mdm.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.batch.mdm.MdmBatchJobSubmitterFactoryImpl;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDeleteSvc;
 import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.jpa.mdm.broker.MdmMessageHandler;
@@ -31,10 +32,8 @@ import ca.uhn.fhir.jpa.mdm.dao.MdmLinkFactory;
 import ca.uhn.fhir.jpa.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.jpa.mdm.interceptor.MdmStorageInterceptor;
 import ca.uhn.fhir.jpa.mdm.svc.GoldenResourceMergerSvcImpl;
-import ca.uhn.fhir.jpa.mdm.svc.MdmClearSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmControllerSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmEidUpdateService;
-import ca.uhn.fhir.jpa.mdm.svc.MdmGoldenResourceDeletingSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmLinkQuerySvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmLinkSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmLinkUpdaterSvcImpl;
@@ -52,8 +51,8 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchCriteriaBuilderSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
+import ca.uhn.fhir.mdm.api.IMdmBatchJobSubmitterFactory;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
-import ca.uhn.fhir.mdm.api.IMdmExpungeSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
@@ -183,8 +182,8 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	IMdmExpungeSvc mdmResetSvc(MdmLinkDaoSvc theMdmLinkDaoSvc, MdmGoldenResourceDeletingSvc theDeletingSvc, IMdmSettings theIMdmSettings) {
-		return new MdmClearSvcImpl(theMdmLinkDaoSvc, theDeletingSvc, theIMdmSettings);
+	IMdmBatchJobSubmitterFactory mdmBatchJobSubmitterFactory() {
+		return new MdmBatchJobSubmitterFactoryImpl();
 	}
 
 	@Bean
@@ -251,4 +250,5 @@ public class MdmConsumerConfig {
 	IMdmControllerSvc mdmControllerSvc() {
 		return new MdmControllerSvcImpl();
 	}
+
 }

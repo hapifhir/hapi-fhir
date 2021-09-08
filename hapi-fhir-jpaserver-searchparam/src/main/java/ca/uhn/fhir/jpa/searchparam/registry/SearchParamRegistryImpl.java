@@ -109,13 +109,13 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	}
 
 	@Override
-	public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
-		return myJpaSearchParamCache.getActiveUniqueSearchParams(theResourceName);
+	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
+		return myJpaSearchParamCache.getActiveComboSearchParams(theResourceName);
 	}
 
 	@Override
-	public List<RuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
-		return myJpaSearchParamCache.getActiveUniqueSearchParams(theResourceName, theParamNames);
+	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {
+		return myJpaSearchParamCache.getActiveComboSearchParams(theResourceName, theParamNames);
 	}
 
 	@Nullable

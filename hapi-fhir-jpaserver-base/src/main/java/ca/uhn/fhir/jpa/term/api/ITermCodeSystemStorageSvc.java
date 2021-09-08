@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.term.api;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -28,10 +27,12 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 /**
@@ -39,18 +40,48 @@ import java.util.List;
  */
 public interface ITermCodeSystemStorageSvc {
 
+	static final String MAKE_LOADING_VERSION_CURRENT = "make.loading.version.current";
+
 	void deleteCodeSystem(TermCodeSystem theCodeSystem);
 
 	void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion);
 
-	void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable);
+
+	void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName,
+		String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable,
+		RequestDetails theRequestDetails);
+
+	/**
+	 * Default implementation supports previous signature of method which was added RequestDetails parameter
+	 */
+	@Transactional
+	default void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName,
+			String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable) {
+
+		storeNewCodeSystemVersion(theCodeSystemResourcePid, theSystemUri, theSystemName, theSystemVersionId,
+			theCodeSystemVersion, theCodeSystemResourceTable, null);
+	}
+
 
 	/**
 	 * @return Returns the ID of the created/updated code system
 	 */
-	IIdType storeNewCodeSystemVersion(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets, List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps);
+	IIdType storeNewCodeSystemVersion(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource,
+		TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets,
+		List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps);
 
-	void storeNewCodeSystemVersionIfNeeded(CodeSystem theCodeSystem, ResourceTable theResourceEntity);
+
+
+	void storeNewCodeSystemVersionIfNeeded(CodeSystem theCodeSystem, ResourceTable theResourceEntity, RequestDetails theRequestDetails);
+
+	/**
+	 * Default implementation supports previous signature of method which was added RequestDetails parameter
+	 */
+	default void storeNewCodeSystemVersionIfNeeded(CodeSystem theCodeSystem, ResourceTable theResourceEntity) {
+		storeNewCodeSystemVersionIfNeeded(theCodeSystem, theResourceEntity, null);
+	}
+
+
 
 	UploadStatistics applyDeltaCodeSystemsAdd(String theSystem, CustomTerminologySet theAdditions);
 
