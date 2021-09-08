@@ -21,10 +21,12 @@ package ca.uhn.fhir.jpa.util;
  */
 
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.model.entity.ClobMigrated;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 import org.apache.commons.io.IOUtils;
@@ -56,6 +58,7 @@ import java.io.InputStream;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -73,6 +76,9 @@ public class TestUtil {
 	public static final int MAX_COL_LENGTH = 2000;
 	private static final int MAX_LENGTH = 30;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestUtil.class);
+	private static final Set<Class<?>> ourAllowedLobTypes = Sets.newHashSet(
+		Blob.class, byte[].class
+	);
 	private static Set<String> ourReservedWords;
 
 	/**
@@ -257,10 +263,10 @@ public class TestUtil {
 			assertNotADuplicateName(columnName, null);
 			ForeignKey fk = joinColumn.foreignKey();
 			if (theIsSuperClass) {
-				Validate.isTrue(isBlank(fk.name()), "Foreign key on " + theAnnotatedElement.toString() + " has a name() and should not as it is a superclass");
+				Validate.isTrue(isBlank(fk.name()), "Foreign key on " + theAnnotatedElement + " has a name() and should not as it is a superclass");
 			} else {
 				Validate.notNull(fk);
-				Validate.isTrue(isNotBlank(fk.name()), "Foreign key on " + theAnnotatedElement.toString() + " has no name()");
+				Validate.isTrue(isNotBlank(fk.name()), "Foreign key on " + theAnnotatedElement + " has no name()");
 				Validate.isTrue(fk.name().startsWith("FK_"));
 				assertNotADuplicateName(fk.name(), theNames);
 			}
@@ -272,7 +278,7 @@ public class TestUtil {
 			validateColumnName(columnName, theAnnotatedElement);
 
 			assertNotADuplicateName(columnName, null);
-			Validate.isTrue(column.unique() == false, "Should not use unique attribute on column (use named @UniqueConstraint instead) on " + theAnnotatedElement.toString());
+			Validate.isTrue(column.unique() == false, "Should not use unique attribute on column (use named @UniqueConstraint instead) on " + theAnnotatedElement);
 
 			boolean hasLob = theAnnotatedElement.getAnnotation(Lob.class) != null;
 			Field field = (Field) theAnnotatedElement;
@@ -321,6 +327,20 @@ public class TestUtil {
 			assertEquals(gen.generator(), sg.name());
 			assertEquals(gen.generator(), sg.sequenceName());
 		}
+
+		Lob lob = theAnnotatedElement.getAnnotation(Lob.class);
+		if (lob != null) {
+			Validate.isTrue(theAnnotatedElement instanceof Field);
+			Field field = (Field) theAnnotatedElement;
+			Class<?> fieldType = field.getType();
+			if (!ourAllowedLobTypes.contains(fieldType)) {
+				ClobMigrated migrated = theAnnotatedElement.getAnnotation(ClobMigrated.class);
+				if (migrated == null) {
+					throw new IllegalArgumentException("Field is declared as a @Lob but is not one of allowable types " + ourAllowedLobTypes + ": " + field);
+				}
+			}
+		}
+
 
 	}
 

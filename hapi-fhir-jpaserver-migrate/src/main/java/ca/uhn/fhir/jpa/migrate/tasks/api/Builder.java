@@ -277,6 +277,9 @@ public class Builder {
 			addTask(task);
 		}
 
+		public void migrateClobToBlob(String theVersion, String thePidColumnName, String theOldClobColumnName, String theSOURCE_direct_parent_pidsc) {
+		}
+
 		public class BuilderAddIndexWithName {
 			private final String myVersion;
 			private final String myIndexName;

@@ -122,6 +122,29 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		cmbTokNuTable.addColumn("20210722.1", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
 		cmbTokNuTable.addColumn("20210722.2", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
 		cmbTokNuTable.modifyColumn("20210722.3", "RES_ID").nullable().withType(ColumnTypeEnum.LONG);
+
+		/*
+		 * Replace CLOB columns with BLOB columns
+		 */
+
+		// TRM_VALUESET_CONCEPT.SOURCE_DIRECT_PARENT_PIDS
+		version.onTable("TRM_VALUESET_CONCEPT")
+			.addColumn("20210908.1", "SOURCE_DIRECT_PARENT_PIDSB")
+			.nullable()
+			.type(ColumnTypeEnum.BLOB);
+		version.onTable("TRM_VALUESET_CONCEPT")
+			.migrateClobToBlob("20210908.2", "PID", "SOURCE_DIRECT_PARENT_PIDS", "SOURCE_DIRECT_PARENT_PIDSB");
+
+		// TRM_CONCEPT.PARENT_PIDS
+		version.onTable("TRM_CONCEPT")
+			.addColumn("20210908.3", "PARENT_PIDSB")
+			.nullable()
+			.type(ColumnTypeEnum.BLOB);
+		version.onTable("TRM_CONCEPT")
+			.migrateClobToBlob("20210908.4", "PID", "PARENT_PIDS", "PARENT_PIDSB");
+
+		version.onTable("HFJ_SEARCH")
+			.migrateClobToBlob("20210908.5", "PID", "SEARCH_QUERY_STRING", "SEARCH_QUERY_STRINGB");
 	}
 
 	private void init540() {

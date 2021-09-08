@@ -35,6 +35,9 @@ public class DropColumnTask extends BaseTableColumnTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DropColumnTask.class);
 
+	/**
+	 * Constructor
+	 */
 	public DropColumnTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
 	}
