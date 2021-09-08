@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -37,6 +38,7 @@ import java.util.Set;
  */
 public class ResourceVersionMap {
 	private final Set<IIdType> mySourceIds = new HashSet<>();
+	// Key versionless id, value version
 	private final Map<IIdType, String> myMap = new HashMap<>();
 	private ResourceVersionMap() {}
 
@@ -56,6 +58,12 @@ public class ResourceVersionMap {
 		return new ResourceVersionMap();
 	}
 
+	public static ResourceVersionMap fromResourcePersistentIds(List<ResourcePersistentId> theResourcePersistentIds) {
+		ResourceVersionMap retval = new ResourceVersionMap();
+		theResourcePersistentIds.forEach(resource -> retval.add(resource.getAssociatedResourceId()));
+		return retval;
+	}
+
 	private void add(IIdType theId) {
 		IdDt id = new IdDt(theId);
 		mySourceIds.add(id);
@@ -63,7 +71,7 @@ public class ResourceVersionMap {
 	}
 
 	public String getVersion(IIdType theResourceId) {
-		return myMap.get(new IdDt(theResourceId.toUnqualifiedVersionless()));
+		return get(theResourceId);
 	}
 
 	public int size() {
@@ -84,5 +92,19 @@ public class ResourceVersionMap {
 
 	public boolean containsKey(IIdType theId) {
 		return myMap.containsKey(new IdDt(theId.toUnqualifiedVersionless()));
+	}
+
+	public ResourcePersistentId getResourcePersistentId(IIdType theId) {
+		String idPart = theId.getIdPart();
+		Long version = getVersionAsLong(theId);
+		return new ResourcePersistentId(idPart, version);
+	}
+
+	public Long getVersionAsLong(IIdType theId) {
+		return Long.valueOf(getVersion(theId));
+	}
+
+	public boolean isEmpty() {
+		return myMap.isEmpty();
 	}
 }

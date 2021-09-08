@@ -24,11 +24,13 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,17 +54,19 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 	DaoRegistry myDaoRegistry;
 	@Autowired
 	IResourceTableDao myResourceTableDao;
+	@Autowired
+	IdHelperService myIdHelperService;
 
 	@Override
 	@Nonnull
-	public ResourceVersionMap getVersionMap(String theResourceName, SearchParameterMap theSearchParamMap) {
+	public ResourceVersionMap getVersionMap(RequestPartitionId theRequestPartitionId, String theResourceName, SearchParameterMap theSearchParamMap) {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceName);
 
 		if (ourLog.isDebugEnabled()) {
 			ourLog.debug("About to retrieve version map for resource type: {}", theResourceName);
 		}
 
-		List<Long> matchingIds = dao.searchForIds(theSearchParamMap, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.allPartitions())).stream()
+		List<Long> matchingIds = dao.searchForIds(theSearchParamMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId)).stream()
 			.map(ResourcePersistentId::getIdAsLong)
 			.collect(Collectors.toList());
 
@@ -73,5 +77,14 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 		});
 
 		return ResourceVersionMap.fromResourceTableEntities(allById);
+	}
+
+	@Override
+	public ResourceVersionMap getLatestVersionIdsForResourceIds(RequestPartitionId thePartitionId, List<IIdType> theIds) {
+
+		List<ResourcePersistentId> resourcePersistentIds = myIdHelperService.resolveResourcePersistentIdsWithCache(thePartitionId,
+			new ArrayList<>(theIds));
+
+		return ResourceVersionMap.fromResourcePersistentIds(resourcePersistentIds);
 	}
 }

@@ -45,6 +45,7 @@ import com.google.common.collect.Lists;
 import org.hamcrest.Matchers;
 import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.junit.jupiter.api.AfterEach;
@@ -323,9 +324,14 @@ public class GiantTransactionPerfTest {
 
 		@Nonnull
 		@Override
-		public ResourceVersionMap getVersionMap(String theResourceName, SearchParameterMap theSearchParamMap) {
+		public ResourceVersionMap getVersionMap(RequestPartitionId theRequestPartitionId, String theResourceName, SearchParameterMap theSearchParamMap) {
 			myGetVersionMap++;
 			return ResourceVersionMap.fromResources(Lists.newArrayList());
+		}
+
+		@Override
+		public ResourceVersionMap getLatestVersionIdsForResourceIds(RequestPartitionId thePartition, List<IIdType> theIds) {
+			return null;
 		}
 	}
 

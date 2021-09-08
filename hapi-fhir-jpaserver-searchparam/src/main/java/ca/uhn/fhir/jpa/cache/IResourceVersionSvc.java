@@ -20,9 +20,12 @@ package ca.uhn.fhir.jpa.cache;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * This interface is used by the {@link IResourceChangeListenerCacheRefresher} to read resources matching the provided
@@ -30,5 +33,12 @@ import javax.annotation.Nonnull;
  */
 public interface IResourceVersionSvc {
 	@Nonnull
-	ResourceVersionMap getVersionMap(String theResourceName, SearchParameterMap theSearchParamMap);
+	ResourceVersionMap getVersionMap(RequestPartitionId theRequestPartitionId, String theResourceName, SearchParameterMap theSearchParamMap);
+
+	@Nonnull
+	default ResourceVersionMap getVersionMap(String theResourceName, SearchParameterMap theSearchParamMap) {
+		return getVersionMap(RequestPartitionId.allPartitions(), theResourceName, theSearchParamMap);
+	}
+
+	ResourceVersionMap getLatestVersionIdsForResourceIds(RequestPartitionId thePartition, List<IIdType> theIds);
 }
