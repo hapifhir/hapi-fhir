@@ -124,6 +124,7 @@ public class TermConcept implements Serializable {
 	 * hibernate search can see it as a string
 	 */
 	// FIXME: make transient for RDBMS but not for Search
+	// FIXME: also test this on Postgres and Oracle
 	@FullTextField(name = "myParentPids", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "conceptParentPidsAnalyzer")
 	private String myParentPidsString;
 
