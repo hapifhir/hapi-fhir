@@ -30,7 +30,8 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
+import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -94,7 +95,7 @@ public abstract class BaseStorageDao {
 	@Autowired
 	protected ModelConfig myModelConfig;
 	@Autowired
-	protected IdHelperService myIdHelperService;
+	protected IResourceVersionSvc myResourceVersionSvc;
 	@Autowired
 	protected DaoConfig myDaoConfig;
 
@@ -211,7 +212,7 @@ public abstract class BaseStorageDao {
 				IIdType referenceElement = nextReference.getReferenceElement();
 				if (!referenceElement.hasBaseUrl()) {
 
-					Map<IIdType, ResourcePersistentId> idToPID = myIdHelperService.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
+					ResourcePersistentIdMap resourceVersionMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
 						Collections.singletonList(referenceElement)
 					);
 
@@ -220,12 +221,11 @@ public abstract class BaseStorageDao {
 					// 2) no resource exists, but we will create one (eventually). The version is 1
 					// 3) no resource exists, and none will be made -> throw
 					Long version;
-					if (idToPID.containsKey(referenceElement)) {
+					if (resourceVersionMap.containsKey(referenceElement)) {
 						// the resource exists... latest id
 						// will be the value in the ResourcePersistentId
-						version = idToPID.get(referenceElement).getVersion();
-					}
-					else if (myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
+						version = resourceVersionMap.getResourcePersistentId(referenceElement).getVersion();
+					} else if (myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
 						// if idToPID doesn't contain object
 						// but autcreateplaceholders is on
 						// then the version will be 1 (the first version)
