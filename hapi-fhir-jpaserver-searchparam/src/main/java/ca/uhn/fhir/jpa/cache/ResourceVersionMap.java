@@ -95,9 +95,9 @@ public class ResourceVersionMap {
 	}
 
 	public ResourcePersistentId getResourcePersistentId(IIdType theId) {
-		String idPart = theId.getIdPart();
-		Long version = getVersionAsLong(theId);
-		return new ResourcePersistentId(idPart, version);
+		ResourcePersistentId retval = ResourcePersistentId.fromIIdType(theId);
+		retval.setVersion(getVersionAsLong(theId));
+		return retval;
 	}
 
 	public Long getVersionAsLong(IIdType theId) {
