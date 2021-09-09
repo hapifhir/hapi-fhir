@@ -32,7 +32,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -55,7 +54,6 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -179,9 +177,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		 */
 
 
-		List<List<IQueryParameterType>> tokenTextAndTerms;
-		List<List<IQueryParameterType>> identifierText;
-
 		List<Long> longPids = session.search(ResourceTable.class)
 			//Selects are replacements for projection and convert more cleanly than the old implementation.
 			.select(
@@ -233,7 +228,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	private List<ResourcePersistentId> convertLongsToResourcePersistentIds(List<Long> theLongPids) {
 		return theLongPids.stream()
-			.map(pid -> new ResourcePersistentId(pid))
+			.map(ResourcePersistentId::new)
 			.collect(Collectors.toList());
 	}
 
