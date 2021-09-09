@@ -32,11 +32,13 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
@@ -73,6 +75,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private ISearchParamExtractor mySearchParamExtractor;
 	@Autowired
 	private FhirContext myFhirContext;
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
 
 
 	private Boolean ourDisabled;
@@ -92,9 +96,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 		resourceDefinition.getSearchParams().stream()
 			.map(sp->new LuceneRuntimeSearchParam(sp, iFhirPath, mySearchParamExtractor))
-			.forEach(lsp -> {
-				lsp.extractLuceneIndexData(theResource, retVal);
-			});
+			.forEach(lsp -> lsp.extractLuceneIndexData(theResource, retVal));
 		return retVal;
 	}
 
@@ -145,16 +147,17 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		SearchSession session = Search.session(myEntityManager);
 		List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
 		List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
-		// wipmb make this query builder dynamic on SPs too.
 
-		/***
+		/*
+		 * We save an elastic document something like this.
+		 *
 		 * {
 		 *   "myId": 1
 		 *   "myNarrativeText" : 'adsasdjkaldjalkdjalkdjalkdjs",
 		 *   // should be indexed, not stored
 		 *     "text-code" : "Our observation Glucose Moles volume in Blood"
 		 *     "text-clinicalCode" : "Our observation Glucose Moles volume in Blood"
-		 *     "text-identifier" :
+		 *     "text-identifier" : ""
 		 *     "text-component-value-concept": " a a s d d  g v",
 		 *     _index: {
 		 *
@@ -175,26 +178,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		 * }
 		 */
 
-		// TODO generic version
-//		List<IQueryParameterType> textParameters = theParams.entrySet().stream()
-//			.flatMap(andList -> andList.getValue().stream())
-//			.flatMap(Collection::stream)
-//			.filter(param -> PARAMQUALIFIER_TOKEN_TEXT.equals(param.getQueryParameterQualifier()))
-//			.collect(Collectors.toList());
-//		for (IQueryParameterType testParameter : textParameters) {
-//			theParams.removeByNameAndQualifier(testParameter.getValueAsQueryToken(), testParameter.getQueryParameterQualifier());
-//		}
-		//DSTU doesn't support fhirpath, so fall back to old style lookup.
 
 		List<List<IQueryParameterType>> tokenTextAndTerms;
 		List<List<IQueryParameterType>> identifierText;
-		if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-			tokenTextAndTerms = theParams.removeByNameAndQualifier("code", TokenParamModifier.TEXT);
-			identifierText = theParams.removeByNameAndQualifier("identifier", TokenParamModifier.TEXT);
-		} else {
-			tokenTextAndTerms = new ArrayList<>();
-			identifierText = new ArrayList<>();
-		}
 
 		List<Long> longPids = session.search(ResourceTable.class)
 			//Selects are replacements for projection and convert more cleanly than the old implementation.
@@ -212,15 +198,23 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					 */
 					addTextSearch(f, b, textAndTerms, "myNarrativeText");
 
-					/**
-					 * Handle :text qualifier on Tokens
-					 */
-					addTextSearch(f, b, tokenTextAndTerms, "text-" + "code");
-					addTextSearch(f, b, identifierText, "text-" + "identifier");
+					//DSTU2 doesn't support fhirpath, so fall back to old style lookup.
+					if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
 
-//					addTextSearch(f, b, codingAndTerms, "myCodingDisplayText");
-//					addTextSearch(f, b, codeableConceptAndTerms, "myCodeableConceptText");
-//					addTextSearch(f, b, identifierTypeTerms, "myIdentifierTypeText");
+						for(String nextParam: theParams.keySet()) {
+							RuntimeSearchParam activeParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, nextParam);
+							switch (activeParam.getParamType()) {
+								case TOKEN:
+									List<List<IQueryParameterType>> andOrTerms = theParams.removeByNameAndQualifier(nextParam, TokenParamModifier.TEXT);
+									if (andOrTerms != null && !andOrTerms.isEmpty()) {
+										addTextSearch(f, b, andOrTerms, "text-" + nextParam);
+									}
+									break;
+								default:
+									// we only support token :text for now.
+							}
+						}
+					}
 
 					if (theReferencingPid != null) {
 						b.must(f.match().field("myResourceLinksField").matching(theReferencingPid.toString()));
