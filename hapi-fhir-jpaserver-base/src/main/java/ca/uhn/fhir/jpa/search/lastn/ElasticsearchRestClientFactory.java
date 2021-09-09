@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.lastn;
  * #L%
  */
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -30,6 +31,8 @@ import org.apache.http.message.BasicHeader;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
+
+import javax.annotation.Nullable;
 
 public class ElasticsearchRestClientFactory {
 
@@ -52,20 +55,21 @@ public class ElasticsearchRestClientFactory {
 		}
 	}
 
-    static public RestHighLevelClient createElasticsearchHighLevelRestClient(String theHostname, int thePort, String theUsername, String thePassword) {
-        final CredentialsProvider credentialsProvider =
-                new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(AuthScope.ANY,
-                new UsernamePasswordCredentials(theUsername, thePassword));
-        RestClientBuilder clientBuilder = RestClient.builder(
-                new HttpHost(stripHostOfScheme(theHostname), thePort, determineScheme(theHostname)))
-                .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder
-                        .setDefaultCredentialsProvider(credentialsProvider));
+	static public RestHighLevelClient createElasticsearchHighLevelRestClient(
+		String theHostname, int thePort, @Nullable String theUsername, @Nullable String thePassword) {
 
-        Header[] defaultHeaders = new Header[]{new BasicHeader("Content-Type", "application/json")};
-        clientBuilder.setDefaultHeaders(defaultHeaders);
+		RestClientBuilder clientBuilder = RestClient.builder(
+			new HttpHost(stripHostOfScheme(theHostname), thePort, determineScheme(theHostname)));
+		if (StringUtils.isNotBlank(theUsername) && StringUtils.isNotBlank(thePassword)) {
+			final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+			credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(theUsername, thePassword));
+			clientBuilder.setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder
+				.setDefaultCredentialsProvider(credentialsProvider));
+		}
+		Header[] defaultHeaders = new Header[]{new BasicHeader("Content-Type", "application/json")};
+		clientBuilder.setDefaultHeaders(defaultHeaders);
 
-        return new RestHighLevelClient(clientBuilder);
+		return new RestHighLevelClient(clientBuilder);
 
-    }
+	}
 }
