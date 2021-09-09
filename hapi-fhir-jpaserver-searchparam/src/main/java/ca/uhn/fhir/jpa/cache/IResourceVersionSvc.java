@@ -40,5 +40,5 @@ public interface IResourceVersionSvc {
 		return getVersionMap(RequestPartitionId.allPartitions(), theResourceName, theSearchParamMap);
 	}
 
-	ResourceVersionMap getLatestVersionIdsForResourceIds(RequestPartitionId thePartition, List<IIdType> theIds);
+	ResourcePersistentIdMap getLatestVersionIdsForResourceIds(RequestPartitionId thePartition, List<IIdType> theIds);
 }

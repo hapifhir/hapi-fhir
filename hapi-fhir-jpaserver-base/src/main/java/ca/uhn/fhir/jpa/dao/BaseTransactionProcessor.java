@@ -36,7 +36,7 @@ import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
-import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
+import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
@@ -1271,7 +1271,7 @@ public abstract class BaseTransactionProcessor {
 				// get a map of
 				// existing ids -> PID (for resources that exist in the DB)
 				// should this be allPartitions?
-				ResourceVersionMap resourceVersionMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
+				ResourcePersistentIdMap resourceVersionMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
 					theReferencesToAutoVersion.stream()
 						.map(IBaseReference::getReferenceElement).collect(Collectors.toList()));
 

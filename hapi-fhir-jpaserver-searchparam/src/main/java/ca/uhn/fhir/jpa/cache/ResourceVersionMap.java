@@ -22,9 +22,10 @@ package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,9 +38,10 @@ import java.util.Set;
  * This immutable map holds a copy of current resource versions read from the repository.
  */
 public class ResourceVersionMap {
+	private static final Logger ourLog = LoggerFactory.getLogger(ResourceVersionMap.class);
 	private final Set<IIdType> mySourceIds = new HashSet<>();
 	// Key versionless id, value version
-	private final Map<IIdType, String> myMap = new HashMap<>();
+	private final Map<IIdType, Long> myMap = new HashMap<>();
 	private ResourceVersionMap() {}
 
 	public static ResourceVersionMap fromResourceTableEntities(List<ResourceTable> theEntities) {
@@ -58,19 +60,17 @@ public class ResourceVersionMap {
 		return new ResourceVersionMap();
 	}
 
-	public static ResourceVersionMap fromResourcePersistentIds(List<ResourcePersistentId> theResourcePersistentIds) {
-		ResourceVersionMap retval = new ResourceVersionMap();
-		theResourcePersistentIds.forEach(resourcePersistentId -> retval.add(resourcePersistentId.getAssociatedResourceId()));
-		return retval;
-	}
-
 	private void add(IIdType theId) {
+		if (theId.getVersionIdPart() == null) {
+			ourLog.warn("Not storing {} in ResourceVersionMap because it does not have a version.", theId);
+			return;
+		}
 		IdDt id = new IdDt(theId);
 		mySourceIds.add(id);
-		myMap.put(id.toUnqualifiedVersionless(), id.getVersionIdPart());
+		myMap.put(id.toUnqualifiedVersionless(), id.getVersionIdPartAsLong());
 	}
 
-	public String getVersion(IIdType theResourceId) {
+	public Long getVersion(IIdType theResourceId) {
 		return get(theResourceId);
 	}
 
@@ -86,22 +86,12 @@ public class ResourceVersionMap {
 		return Collections.unmodifiableSet(mySourceIds);
 	}
 
-	public String get(IIdType theId) {
+	public Long get(IIdType theId) {
 		return myMap.get(new IdDt(theId.toUnqualifiedVersionless()));
 	}
 
 	public boolean containsKey(IIdType theId) {
 		return myMap.containsKey(new IdDt(theId.toUnqualifiedVersionless()));
-	}
-
-	public ResourcePersistentId getResourcePersistentId(IIdType theId) {
-		ResourcePersistentId retval = ResourcePersistentId.fromIIdType(theId);
-		retval.setVersion(getVersionAsLong(theId));
-		return retval;
-	}
-
-	public Long getVersionAsLong(IIdType theId) {
-		return Long.valueOf(getVersion(theId));
 	}
 
 	public boolean isEmpty() {

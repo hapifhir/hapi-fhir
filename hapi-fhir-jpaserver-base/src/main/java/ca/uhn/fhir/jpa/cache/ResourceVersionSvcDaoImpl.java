@@ -80,11 +80,11 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 	}
 
 	@Override
-	public ResourceVersionMap getLatestVersionIdsForResourceIds(RequestPartitionId thePartitionId, List<IIdType> theIds) {
+	public ResourcePersistentIdMap getLatestVersionIdsForResourceIds(RequestPartitionId thePartitionId, List<IIdType> theIds) {
 
 		List<ResourcePersistentId> resourcePersistentIds = myIdHelperService.resolveResourcePersistentIdsWithCache(thePartitionId,
 			new ArrayList<>(theIds));
 
-		return ResourceVersionMap.fromResourcePersistentIds(resourcePersistentIds);
+		return ResourcePersistentIdMap.fromResourcePersistentIds(resourcePersistentIds);
 	}
 }

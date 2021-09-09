@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheFactory;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
+import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
@@ -330,7 +331,7 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public ResourceVersionMap getLatestVersionIdsForResourceIds(RequestPartitionId thePartition, List<IIdType> theIds) {
+		public ResourcePersistentIdMap getLatestVersionIdsForResourceIds(RequestPartitionId thePartition, List<IIdType> theIds) {
 			return null;
 		}
 	}

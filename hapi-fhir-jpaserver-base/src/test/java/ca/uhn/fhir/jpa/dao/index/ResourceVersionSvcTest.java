@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
+import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -134,7 +134,7 @@ public class ResourceVersionSvcTest {
 		mockReturnsFor_getIdsOfExistingResources(pack);
 
 		// test
-		ResourceVersionMap retMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
+		ResourcePersistentIdMap retMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
 			Collections.singletonList(type));
 
 		Assertions.assertTrue(retMap.containsKey(type));
@@ -149,7 +149,7 @@ public class ResourceVersionSvcTest {
 		mock_resolveResourcePersistentIdsWithCache_toReturnNothing();
 
 		// test
-		ResourceVersionMap retMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
+		ResourcePersistentIdMap retMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
 			Collections.singletonList(type));
 
 		Assertions.assertTrue(retMap.isEmpty());
@@ -171,7 +171,7 @@ public class ResourceVersionSvcTest {
 		mockReturnsFor_getIdsOfExistingResources(pack);
 
 		// test
-		ResourceVersionMap retMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(
+		ResourcePersistentIdMap retMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(
 			RequestPartitionId.allPartitions(),
 			Arrays.asList(type, type2)
 		);
