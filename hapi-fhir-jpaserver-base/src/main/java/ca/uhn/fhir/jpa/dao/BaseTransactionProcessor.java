@@ -1607,7 +1607,6 @@ public abstract class BaseTransactionProcessor {
 			for (int attempt = 1;; attempt++) {
 				try {
 					processBatchEntry();
-					ourLog.warn("O shit we succeeded");
 					return true;
 				} catch (BaseServerResponseException e) {
 					//If we catch a known and structured exception from HAPI, just fail.
@@ -1620,7 +1619,6 @@ public abstract class BaseTransactionProcessor {
 						ourLog.error("Failure during BATCH sub transaction processing", t);
 						return false;
 					}
-					ourLog.warn("O shit we gonna retry {}", attempt);
 				}
 			}
 		}
