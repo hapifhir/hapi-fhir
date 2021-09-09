@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.DaoFailureUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -95,8 +96,7 @@ public class HapiTransactionService {
 		 		 * thrown by one of the client threads, so we auto-retry in order to avoid
 		 		 * annoying spurious failures for the client.
 		 		 */
-				if (e.getMessage().contains("HFJ_TAG_DEF") || e.getMessage().contains("hfj_tag_def") ||
-					 e.getMessage().contains("HFJ_RES_TAG") || e.getMessage().contains("hfj_res_tag")) {
+				if (DaoFailureUtil.isTagStorageFailure(e)) {
 					maxRetries = 3;
 				}
 

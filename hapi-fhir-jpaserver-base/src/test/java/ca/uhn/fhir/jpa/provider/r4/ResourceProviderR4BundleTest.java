@@ -255,7 +255,6 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		Bundle input = new Bundle();
 		input.setType(BundleType.BATCH);
 
-
 		Patient p = new Patient();
 		p.setId("100");
 		p.setGender(AdministrativeGender.MALE);
@@ -273,13 +272,12 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		input.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST);
 
 		Patient p3 = new Patient();
-		p3.setId("300");
+		p3.setId("pat-300");
 		p3.setGender(AdministrativeGender.MALE);
 		p3.addIdentifier().setSystem("urn:foo").setValue("A");
 		p3.addName().setFamily("Smith");
 		p3.getMeta().addTag().setSystem("mysystem").setCode("mycode");
-		input.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT);
-
+		input.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/pat-300");
 
 		Bundle output = myClient.transaction().withBundle(input).execute();
 		output.getEntry().stream()
@@ -288,7 +286,6 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 			.forEach(statusCode -> {
 				assertEquals(statusCode, "201 Created");
 			});
-
 	}
 
 	
