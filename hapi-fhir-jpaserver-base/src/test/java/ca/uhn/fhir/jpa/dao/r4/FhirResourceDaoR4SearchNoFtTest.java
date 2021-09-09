@@ -5418,6 +5418,17 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		));
 	}
 
+	/**
+	 * Test for our date search operator.
+	 *
+	 * Be careful - date searching is defined by set relations over intervals, not a simple number comparison.
+	 * See http://hl7.org/fhir/search.html#prefix for details.
+	 *
+	 * TODO - pull this out into a general conformance suite so we can run it against Mongo, and Elastic.
+	 * @param theResourceDate
+	 * @param theQuery
+	 * @param theExpectedMatch
+	 */
 	@ParameterizedTest
 	// use @CsvSource to debug individual cases.
 	//@CsvSource("2021-01-01,eq2020,false")
