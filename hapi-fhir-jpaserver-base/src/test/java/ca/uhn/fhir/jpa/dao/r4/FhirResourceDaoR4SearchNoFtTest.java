@@ -53,7 +53,9 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.util.CollectionUtil;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.ResourceUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -130,7 +132,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvFileSource;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -141,9 +146,12 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -151,6 +159,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TYPE;
 import static org.apache.commons.lang3.StringUtils.countMatches;
@@ -5410,16 +5419,57 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@ParameterizedTest
+	// use @CsvSource to debug individual cases.
+	//@CsvSource("ne2020,2021,true")
+	@MethodSource("dateSearchValues")
 	@CsvFileSource(files = "src/test/resources/r4/date-search-test-case.csv", numLinesToSkip = 1)
-	public void testDateSearchWithIncompleteDate(String theQuery, String theEffectiveDate, Boolean theExpectedMatch) {
+	public void testDateSearchWithIncompleteDate(String theQuery, String theResourceDate, Boolean theExpectedMatch) {
 
-		createObservationWithEffective("OBS1", theEffectiveDate);
+		createObservationWithEffective("OBS1", theResourceDate);
 
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add(Observation.SP_DATE, new DateParam(theQuery));
 		IBundleProvider results = myObservationDao.search(map);
 		List<String> values = toUnqualifiedVersionlessIdValues(results);
-		assertEquals(values.isEmpty(), !theExpectedMatch);
+		boolean matched = !values.isEmpty();
+		assertEquals(theExpectedMatch, matched, "Expected " + theQuery + " to " + (theExpectedMatch?"":"not ") +"match " + theResourceDate);
+	}
+
+	/**
+	 * helper for compressed format of date test cases.
+	 *
+	 * The csv has rows with: Matching prefixes, Query Date, Resource Date
+	 * E.g. "eq ge le,2020, 2020"
+	 * This helper expands that one line into test for all of eq, ge, gt, le, lt, and ne,
+	 * expecting the listed prefixes to match, and the unlisted ones to not match.
+	 *
+	 * @return the individual test case arguments for testDateSearchWithIncompleteDate()
+	 */
+	public static List<Arguments> dateSearchValues() throws IOException {
+		Set<String> supportedPrefixes = CollectionUtil.newSet("eq","ge","gt","le","lt","ne");
+
+		List<String> testCaseLines = IOUtils.readLines(FhirResourceDaoR4SearchNoFtTest.class.getResourceAsStream("/r4/date-prefix-test-cases.csv"), StandardCharsets.UTF_8);
+		testCaseLines.remove(0); // first line is csv header.
+
+		// expand these into individual tests for each prefix.
+		List<Arguments> testCases = new ArrayList<>();
+		for (String line: testCaseLines) {
+			// line looks like: "eq ge le,2020, 2020"
+			// Matching prefixes, Query Date, Resource Date
+			String[] fields = line.split(",");
+			String truePrefixes = fields[0].trim();
+			String queryValue = fields[1].trim();
+			String resourceValue = fields[2].trim();
+
+			Set<String> expectedTruePrefixes = Arrays.stream(truePrefixes.split(" +")).map(s -> s.trim()).collect(Collectors.toSet());
+
+			for (String prefix: supportedPrefixes) {
+				boolean expectMatch = expectedTruePrefixes.contains(prefix);
+				testCases.add(Arguments.of(prefix + queryValue, resourceValue, expectMatch));
+			}
+		}
+
+		return testCases;
 	}
 
 	private void createObservationWithEffective(String theId, String theEffective) {
