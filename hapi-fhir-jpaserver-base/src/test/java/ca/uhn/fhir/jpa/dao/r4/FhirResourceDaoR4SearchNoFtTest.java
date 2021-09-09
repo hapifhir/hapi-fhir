@@ -5422,7 +5422,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	// use @CsvSource to debug individual cases.
 	//@CsvSource("eq2020,2021-01-01,false")
 	@MethodSource("dateSearchValues")
-	//@CsvFileSource(files = "src/test/resources/r4/date-search-test-case.csv", numLinesToSkip = 1)
+	@CsvFileSource(files = "src/test/resources/r4/date-search-test-case.csv", numLinesToSkip = 1)
 	public void testDateSearchWithIncompleteDate(String theQuery, String theResourceDate, Boolean theExpectedMatch) {
 
 		createObservationWithEffective("OBS1", theResourceDate);
