@@ -125,4 +125,10 @@ public class ResourcePersistentId {
 		}
 		return retVal;
 	}
+
+	public static ResourcePersistentId fromIIdType(IIdType theId) {
+		ResourcePersistentId retval = new ResourcePersistentId(theId);
+		retval.setAssociatedResourceId(theId);
+		return retval;
+	}
 }

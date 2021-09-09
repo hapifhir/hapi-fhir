@@ -60,7 +60,7 @@ public class ResourceVersionMap {
 
 	public static ResourceVersionMap fromResourcePersistentIds(List<ResourcePersistentId> theResourcePersistentIds) {
 		ResourceVersionMap retval = new ResourceVersionMap();
-		theResourcePersistentIds.forEach(resource -> retval.add(resource.getAssociatedResourceId()));
+		theResourcePersistentIds.forEach(resourcePersistentId -> retval.add(resourcePersistentId.getAssociatedResourceId()));
 		return retval;
 	}
 
