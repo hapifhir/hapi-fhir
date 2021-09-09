@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
@@ -70,6 +71,8 @@ public class TransactionProcessorTest {
 	private MatchUrlService myMatchUrlService;
 	@MockBean
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	@MockBean
+	private IResourceVersionSvc myResourceVersionSvc;
 
 	@MockBean(answer = Answers.RETURNS_DEEP_STUBS)
 	private SessionImpl mySession;
