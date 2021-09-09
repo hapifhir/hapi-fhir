@@ -1,11 +1,12 @@
 package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
+import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
-import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -17,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -28,13 +28,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class IdHelperServiceTest {
+public class ResourceVersionSvcTest {
 
 	// helper class to package up data for helper methods
 	private class ResourceIdPackage {
@@ -52,19 +53,15 @@ public class IdHelperServiceTest {
 	}
 
 	@Mock
-	private IResourceTableDao myResourceTableDao;
-
+	DaoRegistry myDaoRegistry;
 	@Mock
-	private DaoConfig myDaoConfig;
-
+	IResourceTableDao myResourceTableDao;
 	@Mock
-	private MemoryCacheService myMemoryCacheService;
+	IdHelperService myIdHelperService;
 
-	@Mock
-	private EntityManager myEntityManager;
-
+	// TODO KHS move the methods that use this out to a separate test class
 	@InjectMocks
-	private IdHelperService myIdHelperService;
+	private ResourceVersionSvcDaoImpl myResourceVersionSvc;
 
 	/**
 	 * Gets a ResourceTable record for getResourceVersionsForPid
@@ -92,20 +89,7 @@ public class IdHelperServiceTest {
 		Root<ForcedId> from = Mockito.mock(Root.class);
 		Path path = Mockito.mock(Path.class);
 
-		Mockito.when(cb.createQuery(Mockito.any(Class.class)))
-			.thenReturn(criteriaQuery);
-		Mockito.when(criteriaQuery.from(Mockito.any(Class.class)))
-			.thenReturn(from);
-		Mockito.when(from.get(Mockito.anyString()))
-			.thenReturn(path);
-
 		TypedQuery<ForcedId> queryMock = Mockito.mock(TypedQuery.class);
-		Mockito.when(queryMock.getResultList()).thenReturn(new ArrayList<>()); // not found
-
-		Mockito.when(myEntityManager.getCriteriaBuilder())
-			.thenReturn(cb);
-		Mockito.when(myEntityManager.createQuery(Mockito.any(CriteriaQuery.class)))
-			.thenReturn(queryMock);
 	}
 
 	/**
@@ -130,15 +114,11 @@ public class IdHelperServiceTest {
 
 		ResourcePersistentId first = resourcePersistentIds.remove(0);
 		if (resourcePersistentIds.isEmpty()) {
-			Mockito.when(myMemoryCacheService.getIfPresent(Mockito.any(MemoryCacheService.CacheEnum.class), Mockito.anyString()))
-				.thenReturn(first).thenReturn(null);
+			when(myIdHelperService.resolveResourcePersistentIdsWithCache(any(), any())).thenReturn(Collections.singletonList(first));
 		}
 		else {
-			Mockito.when(myMemoryCacheService.getIfPresent(Mockito.any(MemoryCacheService.CacheEnum.class), Mockito.anyString()))
-				.thenReturn(first, resourcePersistentIds.toArray());
+			when(myIdHelperService.resolveResourcePersistentIdsWithCache(any(), any())).thenReturn(resourcePersistentIds);
 		}
-		Mockito.when(myResourceTableDao.getResourceVersionsForPid(Mockito.anyList()))
-			.thenReturn(matches);
 	}
 
 	@Test
@@ -154,7 +134,7 @@ public class IdHelperServiceTest {
 		mockReturnsFor_getIdsOfExistingResources(pack);
 
 		// test
-		Map<IIdType, ResourcePersistentId> retMap = myIdHelperService.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
+		ResourcePersistentIdMap retMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
 			Collections.singletonList(type));
 
 		Assertions.assertTrue(retMap.containsKey(type));
@@ -169,7 +149,7 @@ public class IdHelperServiceTest {
 		mock_resolveResourcePersistentIdsWithCache_toReturnNothing();
 
 		// test
-		Map<IIdType, ResourcePersistentId> retMap = myIdHelperService.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
+		ResourcePersistentIdMap retMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
 			Collections.singletonList(type));
 
 		Assertions.assertTrue(retMap.isEmpty());
@@ -191,7 +171,7 @@ public class IdHelperServiceTest {
 		mockReturnsFor_getIdsOfExistingResources(pack);
 
 		// test
-		Map<IIdType, ResourcePersistentId> retMap = myIdHelperService.getLatestVersionIdsForResourceIds(
+		ResourcePersistentIdMap retMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(
 			RequestPartitionId.allPartitions(),
 			Arrays.asList(type, type2)
 		);
