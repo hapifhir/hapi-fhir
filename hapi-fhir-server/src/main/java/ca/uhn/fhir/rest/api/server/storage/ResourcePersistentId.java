@@ -21,7 +21,6 @@ package ca.uhn.fhir.rest.api.server.storage;
  */
 
 import ca.uhn.fhir.util.ObjectUtil;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
@@ -126,13 +125,5 @@ public class ResourcePersistentId {
 			retVal.add(new ResourcePersistentId(next));
 		}
 		return retVal;
-	}
-
-	public static ResourcePersistentId fromResource(IAnyResource theResource) {
-		IIdType id = theResource.getIdElement();
-		ResourcePersistentId retval = new ResourcePersistentId(theResource.getUserData(RESOURCE_PID));
-		retval.setAssociatedResourceId(id);
-		retval.setVersion(id.getVersionIdPartAsLong());
-		return retval;
 	}
 }
