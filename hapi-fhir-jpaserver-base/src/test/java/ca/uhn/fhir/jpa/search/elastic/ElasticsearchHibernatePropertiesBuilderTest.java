@@ -42,7 +42,7 @@ class ElasticsearchHibernatePropertiesBuilderTest {
 
 		//SUT
 		try {
-			myPropertiesBuilder.setRestUrl(protocolHost);
+			myPropertiesBuilder.setHosts(protocolHost);
 			fail();
 		} catch (ConfigurationException e ) {
 			assertThat(e.getMessage(), is(equalTo(failureMessage)));
@@ -50,7 +50,7 @@ class ElasticsearchHibernatePropertiesBuilderTest {
 
 		Properties properties = new Properties();
 		myPropertiesBuilder
-			.setRestUrl(host)
+			.setHosts(host)
 			.apply(properties);
 
 		assertThat(properties.getProperty(BackendSettings.backendKey(ElasticsearchBackendSettings.HOSTS)), is(equalTo(host)));

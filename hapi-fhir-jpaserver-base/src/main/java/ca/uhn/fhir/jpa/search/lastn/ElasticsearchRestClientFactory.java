@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.lastn;
  * #L%
  */
 
+import ca.uhn.fhir.context.ConfigurationException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
@@ -28,38 +29,41 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.message.BasicHeader;
+import org.elasticsearch.client.Node;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ElasticsearchRestClientFactory {
 
 
-	private static String determineScheme(String theHostname) {
-		int schemeIdx = theHostname.indexOf("://");
-		if (schemeIdx > 0) {
-			return theHostname.substring(0, schemeIdx);
-		} else {
-			return "http";
-		}
-	}
-
-	private static String stripHostOfScheme(String theHostname) {
-		int schemeIdx = theHostname.indexOf("://");
-		if (schemeIdx > 0) {
-			return theHostname.substring(schemeIdx + 3);
-		} else {
-			return theHostname;
-		}
-	}
-
 	static public RestHighLevelClient createElasticsearchHighLevelRestClient(
-		String theHostname, int thePort, @Nullable String theUsername, @Nullable String thePassword) {
+		String protocol, String hosts, @Nullable String theUsername, @Nullable String thePassword) {
 
-		RestClientBuilder clientBuilder = RestClient.builder(
-			new HttpHost(stripHostOfScheme(theHostname), thePort, determineScheme(theHostname)));
+		if (hosts.contains("://")) {
+			throw new ConfigurationException("Elasticsearch URLs cannot include a protocol, that is a separate property. Remove http:// or https:// from this URL.");
+		}
+		String[] hostArray = hosts.split(",");
+		List<Node> clientNodes = Arrays.stream(hostArray)
+			.map(String::trim)
+			.filter(s -> s.contains(":"))
+			.map(h -> {
+				int colonIndex = h.indexOf(":");
+				String host = h.substring(0, colonIndex);
+				int port = Integer.parseInt(h.substring(colonIndex + 1));
+				return new Node(new HttpHost(host, port, protocol));
+			})
+			.collect(Collectors.toList());
+		if (hostArray.length != clientNodes.size()) {
+			throw new ConfigurationException("Elasticsearch URLs have to contain ':' as a host:port separator. Example: localhost:9200,localhost:9201,localhost:9202");
+		}
+
+		RestClientBuilder clientBuilder = RestClient.builder(clientNodes.toArray(new Node[0]));
 		if (StringUtils.isNotBlank(theUsername) && StringUtils.isNotBlank(thePassword)) {
 			final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 			credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(theUsername, thePassword));

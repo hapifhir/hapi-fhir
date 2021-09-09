@@ -128,7 +128,7 @@ public class ElasticsearchWithPrefixConfig {
 			.settings(Settings.builder().put("index.max_ngram_diff", 50));
 
 		try {
-			RestHighLevelClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient("http://" + host, httpPort, "", "");
+			RestHighLevelClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient("http", host + ":" + httpPort, "", "");
 			AcknowledgedResponse acknowledgedResponse = elasticsearchHighLevelRestClient.indices().putTemplate(ngramTemplate, RequestOptions.DEFAULT);
 			assert acknowledgedResponse.isAcknowledged();
 		} catch (IOException theE) {
