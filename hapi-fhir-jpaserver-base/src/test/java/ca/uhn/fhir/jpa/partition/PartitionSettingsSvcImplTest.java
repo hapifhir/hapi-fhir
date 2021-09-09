@@ -3,13 +3,20 @@ package ca.uhn.fhir.jpa.partition;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
+
+	@AfterEach
+	public void after() {
+		myPartitionSettings.setUnnamedPartitionMode(false);
+	}
 
 	@Test
 	public void testCreateAndFetchPartition() {
@@ -25,6 +32,21 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 
 		partition = myPartitionConfigSvc.getPartitionByName("NAME123");
 		assertEquals("NAME123", partition.getName());
+	}
+
+	@Test
+	public void testCreatePartition_BlockedInUnnamedPartitionMode() {
+		myPartitionSettings.setUnnamedPartitionMode(true);
+
+		PartitionEntity partition = new PartitionEntity();
+		partition.setId(123);
+		partition.setName("NAME123");
+		partition.setDescription("A description");
+		try {
+			myPartitionConfigSvc.createPartition(partition);
+		} catch (MethodNotAllowedException e) {
+			assertEquals("Can not invoke this operation in unnamed partition mode", e.getMessage());
+		}
 	}
 
 	@Test

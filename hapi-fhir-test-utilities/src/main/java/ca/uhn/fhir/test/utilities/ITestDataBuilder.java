@@ -20,14 +20,11 @@ package ca.uhn.fhir.test.utilities;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.matchesPattern;
-
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -36,6 +33,10 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.matchesPattern;
 
 /**
  * This is an experiment to see if we can make test data creation for storage unit tests a bit more readable.
@@ -175,7 +176,19 @@ public interface ITestDataBuilder {
 		};
 	}
 
-	default  Consumer<IBaseResource> withObservationHasMember(@Nullable IIdType theHasMember) {
+	default Consumer<IBaseResource> withObservationCode(@Nullable String theSystem, @Nullable String theCode) {
+		return t -> {
+			ICompositeType codeableConcept = (ICompositeType) getFhirContext().getElementDefinition("CodeableConcept").newInstance();
+			IBase coding = getFhirContext().newTerser().addElement(codeableConcept, "coding");
+			getFhirContext().newTerser().addElement(coding, "system", theSystem);
+			getFhirContext().newTerser().addElement(coding, "code", theCode);
+
+			RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(t.getClass());
+			resourceDef.getChildByName("code").getMutator().addValue(t, codeableConcept);
+		};
+	}
+
+	default Consumer<IBaseResource> withObservationHasMember(@Nullable IIdType theHasMember) {
 		return t -> {
 			if (theHasMember != null) {
 				IBaseReference reference = (IBaseReference) getFhirContext().getElementDefinition("Reference").newInstance();
@@ -187,7 +200,7 @@ public interface ITestDataBuilder {
 		};
 	}
 
-	default  Consumer<IBaseResource> withOrganization(@Nullable IIdType theHasMember) {
+	default Consumer<IBaseResource> withOrganization(@Nullable IIdType theHasMember) {
 		return t -> {
 			if (theHasMember != null) {
 				IBaseReference reference = (IBaseReference) getFhirContext().getElementDefinition("Reference").newInstance();

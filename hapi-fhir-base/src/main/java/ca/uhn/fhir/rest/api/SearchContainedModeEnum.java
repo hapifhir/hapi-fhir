@@ -51,7 +51,7 @@ public enum SearchContainedModeEnum {
 		myCode = theCode;
 	}
 
-	private String getCode() {
+	public String getCode() {
 		return myCode;
 	}
 

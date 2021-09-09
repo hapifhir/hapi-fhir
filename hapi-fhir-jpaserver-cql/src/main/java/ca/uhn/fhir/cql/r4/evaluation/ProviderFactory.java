@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cql.common.provider.EvaluationProviderFactory;
 import ca.uhn.fhir.cql.common.retrieve.JpaFhirRetrieveProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterResolver;
@@ -51,19 +52,19 @@ public class ProviderFactory implements EvaluationProviderFactory {
 		myModelResolver = theFhirModelResolver;
 	}
 
-	public DataProvider createDataProvider(String model, String version) {
-		return this.createDataProvider(model, version, null, null, null);
+	public DataProvider createDataProvider(String model, String version, RequestDetails theRequestDetails) {
+		return this.createDataProvider(model, version, null, null, null, theRequestDetails);
 	}
 
-	public DataProvider createDataProvider(String model, String version, String url, String user, String pass) {
+	public DataProvider createDataProvider(String model, String version, String url, String user, String pass, RequestDetails theRequestDetails) {
 		TerminologyProvider terminologyProvider = this.createTerminologyProvider(model, version, url, user, pass);
-		return this.createDataProvider(model, version, terminologyProvider);
+		return this.createDataProvider(model, version, terminologyProvider, theRequestDetails);
 	}
 
-	public DataProvider createDataProvider(String model, String version, TerminologyProvider terminologyProvider) {
+	public DataProvider createDataProvider(String model, String version, TerminologyProvider terminologyProvider, RequestDetails theRequestDetails) {
 		if (model.equals("FHIR") && version.startsWith("4")) {
 			JpaFhirRetrieveProvider retrieveProvider = new JpaFhirRetrieveProvider(myDaoRegistry,
-				new SearchParameterResolver(myFhirContext));
+				new SearchParameterResolver(myFhirContext), theRequestDetails);
 			retrieveProvider.setTerminologyProvider(terminologyProvider);
 			retrieveProvider.setExpandValueSets(true);
 

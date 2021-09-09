@@ -40,6 +40,7 @@ public class ResourceTableFKProvider {
 		// SELECT FKTABLE_NAME, FKCOLUMN_NAME FROM CROSS_REFERENCES WHERE PKTABLE_NAME = 'HFJ_RESOURCE'
 		retval.add(new ResourceForeignKey("HFJ_FORCED_ID", "RESOURCE_PID"));
 		retval.add(new ResourceForeignKey("HFJ_IDX_CMP_STRING_UNIQ", "RES_ID"));
+		retval.add(new ResourceForeignKey("HFJ_IDX_CMB_TOK_NU", "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_RES_LINK", "SRC_RESOURCE_ID"));
 		retval.add(new ResourceForeignKey("HFJ_RES_LINK", "TARGET_RESOURCE_ID"));
 		retval.add(new ResourceForeignKey("HFJ_RES_PARAM_PRESENT", "RES_ID"));

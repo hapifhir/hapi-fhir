@@ -20,10 +20,6 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
-import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
-import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -31,6 +27,10 @@ import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
+import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -65,7 +65,12 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 	@Autowired
 	private IMdmSettings myMdmSettings;
 
-	private static final int BUFFER_SIZE = 100;
+	public static final int DEFAULT_BUFFER_SIZE = 100;
+
+	private int myBufferSize = DEFAULT_BUFFER_SIZE;
+
+	public MdmSubmitSvcImpl() {
+	}
 
 	@Override
 	@Transactional
@@ -88,7 +93,8 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 
 		validateSourceType(theSourceResourceType);
 		SearchParameterMap spMap = myMdmSearchParamSvc.getSearchParameterMapFromCriteria(theSourceResourceType, theCriteria);
-		spMap.setLoadSynchronousUpTo(BUFFER_SIZE);
+		spMap.setLoadSynchronous(true);
+		spMap.setCount(myBufferSize);
 		ISearchBuilder searchBuilder = myMdmSearchParamSvc.generateSearchBuilderForType(theSourceResourceType);
 		return submitAllMatchingResourcesToMdmChannel(spMap, searchBuilder);
 	}
@@ -99,7 +105,7 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 		try (IResultIterator query = theSearchBuilder.createQuery(theSpMap, searchRuntimeDetails, null, RequestPartitionId.defaultPartition())) {
 			Collection<ResourcePersistentId> pidBatch;
 			do {
-				pidBatch = query.getNextResultBatch(BUFFER_SIZE);
+				pidBatch = query.getNextResultBatch(myBufferSize);
 				total += loadPidsAndSubmitToMdmChannel(theSearchBuilder, pidBatch);
 			} while (query.hasNext());
 		} catch (IOException theE) {
@@ -158,5 +164,10 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 		if(!myMdmSettings.getMdmRules().getMdmTypes().contains(theResourceType)) {
 			throw new InvalidRequestException(ProviderConstants.OPERATION_MDM_SUBMIT + " does not support resource type: " + theResourceType);
 		}
+	}
+
+	@Override
+	public void setBufferSize(int myBufferSize) {
+		this.myBufferSize = myBufferSize;
 	}
 }

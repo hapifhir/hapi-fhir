@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2761
+title: "When searching for ExplanationOfBenefit?patient=123,456, the compartment authorization interceptor was treating
+'123,456' as a single id rather than as a list of ids.  This has been corrected."

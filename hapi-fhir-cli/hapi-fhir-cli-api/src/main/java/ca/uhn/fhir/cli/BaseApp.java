@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.fusesource.jansi.Ansi.ansi;
@@ -216,43 +217,14 @@ public abstract class BaseApp {
 		}
 
 		if (theArgs[0].equals("help")) {
-			if (theArgs.length < 2) {
-				logUsage();
-				return;
-			}
-			BaseCommand command = null;
-			for (BaseCommand nextCommand : ourCommands) {
-				if (nextCommand.getCommandName().equals(theArgs[1])) {
-					command = nextCommand;
-					break;
-				}
-			}
-			if (command == null) {
-				String message = "Unknown command: " + theArgs[1];
-				System.err.println(message);
-				exitDueToProblem(message);
-				return;
-			}
-			logCommandUsage(command);
+			processHelp(theArgs);
 			return;
 		}
 
-		BaseCommand command = null;
-		for (BaseCommand nextCommand : ourCommands) {
-			if (nextCommand.getCommandName().equals(theArgs[0])) {
-				command = nextCommand;
-				break;
-			}
-		}
+		Optional<BaseCommand> commandOpt = parseCommand(theArgs);
+		if (! commandOpt.isPresent())  return;
 
-		if (command == null) {
-			String message = "Unrecognized command: " + ansi().bold().fg(Ansi.Color.RED) + theArgs[0] + ansi().boldOff().fg(Ansi.Color.WHITE);
-			printMessageToStdout(message);
-			printMessageToStdout("");
-			logUsage();
-			exitDueToProblem(message);
-			return;
-		}
+		BaseCommand command = commandOpt.get();
 
 		myShutdownHook = new MyShutdownHook(command);
 		Runtime.getRuntime().addShutdownHook(myShutdownHook);
@@ -304,10 +276,43 @@ public abstract class BaseApp {
 		} catch (Throwable t) {
 			ourLog.error("Error during execution: ", t);
 			runCleanupHookAndUnregister();
-			exitDueToException(new CommandFailureException("Error: " + t.toString(), t));
+			exitDueToException(new CommandFailureException("Error: " + t, t));
 		}
 
 	}
+
+	private Optional<BaseCommand> parseCommand(String[] theArgs) {
+		Optional<BaseCommand> commandOpt = getNextCommand(theArgs);
+
+		if (! commandOpt.isPresent()) {
+			String message = "Unrecognized command: " + ansi().bold().fg(Ansi.Color.RED) + theArgs[0] + ansi().boldOff().fg(Ansi.Color.WHITE);
+			printMessageToStdout(message);
+			printMessageToStdout("");
+			logUsage();
+			exitDueToProblem(message);
+		}
+		return commandOpt;
+	}
+
+	private Optional<BaseCommand> getNextCommand(String[] theArgs) {
+		return ourCommands.stream().filter(cmd -> cmd.getCommandName().equals(theArgs[0])).findFirst();
+	}
+
+	private void processHelp(String[] theArgs) {
+		if (theArgs.length < 2) {
+			logUsage();
+			return;
+		}
+		Optional<BaseCommand> commandOpt = getNextCommand(theArgs);
+		if (! commandOpt.isPresent()) {
+			String message = "Unknown command: " + theArgs[1];
+			System.err.println(message);
+			exitDueToProblem(message);
+			return;
+		}
+		logCommandUsage(commandOpt.get());
+	}
+
 
 	private void exitDueToProblem(String theDescription) {
 		if ("true".equals(System.getProperty("test"))) {
@@ -380,6 +385,7 @@ public abstract class BaseApp {
 			configurator.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
 			((LoggerContext) LoggerFactory.getILoggerFactory()).reset();
 			configurator.doConfigure(App.class.getResourceAsStream("/logback-cli-on.xml"));
+			ourLog.info("Logging configuration set from file logback-cli-on.xml");
 		} catch (JoranException e) {
 			e.printStackTrace();
 		}
@@ -391,6 +397,7 @@ public abstract class BaseApp {
 			configurator.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
 			((LoggerContext) LoggerFactory.getILoggerFactory()).reset();
 			configurator.doConfigure(App.class.getResourceAsStream("/logback-cli-on-debug.xml"));
+			ourLog.info("Logging configuration set from file logback-cli-on-debug.xml");
 		} catch (JoranException e) {
 			e.printStackTrace();
 		}

@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.term.icd10cm.Icd10CmLoader;
 import ca.uhn.fhir.jpa.term.loinc.LoincAnswerListHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincAnswerListLinkHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincConsumerNameHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincDocumentOntologyHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincGroupFileHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincGroupTermsFileHandler;
@@ -19,6 +20,8 @@ import ca.uhn.fhir.jpa.term.loinc.LoincHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincHierarchyHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincIeeeMedicalDeviceCodeHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincImagingDocumentCodeHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincLinguisticVariantHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincLinguisticVariantsHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincParentGroupFileHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincPartHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincPartLinkHandler;
@@ -81,11 +84,15 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_MAKE_CURRENT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONSUMER_NAME_FILE;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONSUMER_NAME_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_DOCUMENT_ONTOLOGY_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_FILE;
@@ -100,6 +107,10 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IEEE_ME
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_FILE;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_PATH;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_PATH_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PARENT_GROUP_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PARENT_GROUP_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_FILE;
@@ -188,7 +199,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 	@Override
 	public UploadStatistics loadImgthla(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
+		try (LoadedFileDescriptors descriptors = getLoadedFileDescriptors(theFiles)) {
 			List<String> mandatoryFilenameFragments = Arrays.asList(
 				IMGTHLA_HLA_NOM_TXT,
 				IMGTHLA_HLA_XML
@@ -201,10 +212,24 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		}
 	}
 
+	@VisibleForTesting
+	LoadedFileDescriptors getLoadedFileDescriptors(List<FileDescriptor> theFiles) {
+		return new LoadedFileDescriptors(theFiles);
+	}
+
 	@Override
 	public UploadStatistics loadLoinc(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
+		try (LoadedFileDescriptors descriptors = getLoadedFileDescriptors(theFiles)) {
 			Properties uploadProperties = getProperties(descriptors, LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+
+			String codeSystemVersionId = uploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+			boolean isMakeCurrentVersion = Boolean.parseBoolean(
+				uploadProperties.getProperty(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), "true"));
+
+			if (StringUtils.isBlank(codeSystemVersionId) && ! isMakeCurrentVersion) {
+				throw new InvalidRequestException("'" + LOINC_CODESYSTEM_VERSION.getCode() +
+					"' property is required when '" + LOINC_CODESYSTEM_MAKE_CURRENT.getCode() + "' property is 'false'");
+			}
 
 			List<String> mandatoryFilenameFragments = Arrays.asList(
 				uploadProperties.getProperty(LOINC_ANSWERLIST_FILE.getCode(), LOINC_ANSWERLIST_FILE_DEFAULT.getCode()),
@@ -232,27 +257,36 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				uploadProperties.getProperty(LOINC_GROUP_TERMS_FILE.getCode(), LOINC_GROUP_TERMS_FILE_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_PARENT_GROUP_FILE.getCode(), LOINC_PARENT_GROUP_FILE_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE.getCode(), LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode()),
-				uploadProperties.getProperty(LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE.getCode(), LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode())
+				uploadProperties.getProperty(LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE.getCode(), LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode()),
+
+				//-- optional consumer name
+				uploadProperties.getProperty(LOINC_CONSUMER_NAME_FILE.getCode(), LOINC_CONSUMER_NAME_FILE_DEFAULT.getCode()),
+				uploadProperties.getProperty(LOINC_LINGUISTIC_VARIANTS_FILE.getCode(), LOINC_LINGUISTIC_VARIANTS_FILE_DEFAULT.getCode())
+
 			);
 			descriptors.verifyOptionalFilesExist(optionalFilenameFragments);
 
 			ourLog.info("Beginning LOINC processing");
 
+			if (isMakeCurrentVersion) {
+				if (codeSystemVersionId != null) {
+					processLoincFiles(descriptors, theRequestDetails, uploadProperties, false);
+					uploadProperties.remove(LOINC_CODESYSTEM_VERSION.getCode());
+				}
+				ourLog.info("Uploading CodeSystem and making it current version");
 
-			String codeSystemVersionId = uploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
-			if (codeSystemVersionId != null) {
-				// Load the code system with version and then remove the version property.
-				processLoincFiles(descriptors, theRequestDetails, uploadProperties, false);
-				uploadProperties.remove(LOINC_CODESYSTEM_VERSION.getCode());
+			} else {
+				ourLog.info("Uploading CodeSystem without updating current version");
 			}
-			// Load the same code system with null version. This will become the default version.
+
+			theRequestDetails.getUserData().put(MAKE_LOADING_VERSION_CURRENT, isMakeCurrentVersion);
 			return processLoincFiles(descriptors, theRequestDetails, uploadProperties, true);
 		}
 	}
 
 	@Override
 	public UploadStatistics loadSnomedCt(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
+		try (LoadedFileDescriptors descriptors = getLoadedFileDescriptors(theFiles)) {
 
 			List<String> expectedFilenameFragments = Arrays.asList(
 				SCT_FILE_DESCRIPTION,
@@ -279,7 +313,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
 		int count = 0;
 
-		try (LoadedFileDescriptors compressedDescriptors = new LoadedFileDescriptors(theFiles)) {
+		try (LoadedFileDescriptors compressedDescriptors = getLoadedFileDescriptors(theFiles)) {
 			for (FileDescriptor nextDescriptor : compressedDescriptors.getUncompressedFileDescriptors()) {
 				if (nextDescriptor.getFilename().toLowerCase(Locale.US).endsWith(".xml")) {
 					try (InputStream inputStream = nextDescriptor.getInputStream();
@@ -302,7 +336,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 	@Override
 	public UploadStatistics loadCustom(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
+		try (LoadedFileDescriptors descriptors = getLoadedFileDescriptors(theFiles)) {
 			Optional<String> codeSystemContent = loadFile(descriptors, CUSTOM_CODESYSTEM_JSON, CUSTOM_CODESYSTEM_XML);
 			CodeSystem codeSystem;
 			if (codeSystemContent.isPresent()) {
@@ -330,7 +364,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	@Override
 	public UploadStatistics loadDeltaAdd(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
 		ourLog.info("Processing terminology delta ADD for system[{}] with files: {}", theSystem, theFiles.stream().map(t -> t.getFilename()).collect(Collectors.toList()));
-		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
+		try (LoadedFileDescriptors descriptors = getLoadedFileDescriptors(theFiles)) {
 			CustomTerminologySet terminologySet = CustomTerminologySet.load(descriptors, false);
 			return myCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(theSystem, terminologySet);
 		}
@@ -339,7 +373,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	@Override
 	public UploadStatistics loadDeltaRemove(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
 		ourLog.info("Processing terminology delta REMOVE for system[{}] with files: {}", theSystem, theFiles.stream().map(t -> t.getFilename()).collect(Collectors.toList()));
-		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
+		try (LoadedFileDescriptors descriptors = getLoadedFileDescriptors(theFiles)) {
 			CustomTerminologySet terminologySet = CustomTerminologySet.load(descriptors, true);
 			return myCodeSystemStorageSvc.applyDeltaCodeSystemsRemove(theSystem, terminologySet);
 		}
@@ -378,8 +412,9 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 	}
 
+	@VisibleForTesting
 	@NotNull
-	private Properties getProperties(LoadedFileDescriptors theDescriptors, String thePropertiesFile) {
+	Properties getProperties(LoadedFileDescriptors theDescriptors, String thePropertiesFile) {
 		Properties retVal = new Properties();
 
 		try (InputStream propertyStream = TermLoaderSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/loinc/loincupload.properties")) {
@@ -521,6 +556,8 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		final List<ValueSet> valueSets = new ArrayList<>();
 		final List<ConceptMap> conceptMaps = new ArrayList<>();
 
+		final List<LoincLinguisticVariantsHandler.LinguisticVariant> linguisticVariants = new ArrayList<>();
+
 		LoincXmlFileZipContentsHandler loincXmlHandler = new LoincXmlFileZipContentsHandler();
 		iterateOverZipFile(theDescriptors, "loinc.xml", false, false, loincXmlHandler);
 		String loincCsString = loincXmlHandler.getContents();
@@ -627,6 +664,21 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		iterateOverZipFileCsvOptional(theDescriptors, theUploadProperties.getProperty(LOINC_PART_LINK_FILE.getCode(), LOINC_PART_LINK_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 		iterateOverZipFileCsvOptional(theDescriptors, theUploadProperties.getProperty(LOINC_PART_LINK_FILE_PRIMARY.getCode(), LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 		iterateOverZipFileCsvOptional(theDescriptors, theUploadProperties.getProperty(LOINC_PART_LINK_FILE_SUPPLEMENTARY.getCode(), LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
+
+		// Consumer Name
+		handler = new LoincConsumerNameHandler(code2concept);
+		iterateOverZipFileCsvOptional(theDescriptors, theUploadProperties.getProperty(LOINC_CONSUMER_NAME_FILE.getCode(), LOINC_CONSUMER_NAME_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
+
+		// Linguistic Variants
+		handler = new LoincLinguisticVariantsHandler(linguisticVariants);
+		iterateOverZipFileCsvOptional(theDescriptors, theUploadProperties.getProperty(LOINC_LINGUISTIC_VARIANTS_FILE.getCode(), LOINC_LINGUISTIC_VARIANTS_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
+
+		String langFileName = null;
+		for (LoincLinguisticVariantsHandler.LinguisticVariant linguisticVariant : linguisticVariants) {
+			handler = new LoincLinguisticVariantHandler(code2concept, linguisticVariant.getLanguageCode());
+			langFileName = linguisticVariant.getLinguisticVariantFileName();
+			iterateOverZipFileCsvOptional(theDescriptors, theUploadProperties.getProperty(LOINC_LINGUISTIC_VARIANTS_PATH.getCode() + langFileName, LOINC_LINGUISTIC_VARIANTS_PATH_DEFAULT.getCode() + langFileName), handler, ',', QuoteMode.NON_NUMERIC, false);
+		}
 
 		if (theCloseFiles) {
 			IOUtils.closeQuietly(theDescriptors);

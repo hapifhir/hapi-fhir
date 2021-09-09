@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -233,6 +234,33 @@ class AddressValidatingInterceptorTest {
 		verify(myValidator, times(1)).isValid(any(), any());
 		assertValidationErrorValue(person.getAddress().get(0), "false");
 		assertValidationErrorValue(person.getAddress().get(1), "true");
+	}
+
+	@Test
+	void validateOnValidInvalid() {
+		Address address = new Address();
+		address.addLine("Line");
+		address.setCity("City");
+
+		Person person = new Person();
+		person.addAddress(address);
+
+		AddressValidationResult validationResult = new AddressValidationResult();
+		validationResult.setValid(true);
+		when(myValidator.isValid(eq(address), any())).thenReturn(validationResult);
+		myInterceptor.resourcePreUpdate(myRequestDetails, null, person);
+
+		assertValidationErrorValue(person.getAddress().get(0), "false");
+
+		when(myValidator.isValid(eq(address), any())).thenThrow(new RuntimeException());
+
+		myInterceptor.resourcePreUpdate(myRequestDetails, null, person);
+
+		Extension ext = assertValidationErrorExtension(address);
+		assertNotNull(ext);
+		assertNull(ext.getValue());
+		assertTrue(ext.hasExtension());
+
 	}
 
 	public static class TestAddressValidator implements IAddressValidator {

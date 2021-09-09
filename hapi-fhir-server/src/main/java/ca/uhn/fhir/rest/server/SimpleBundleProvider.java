@@ -37,6 +37,8 @@ public class SimpleBundleProvider implements IBundleProvider {
 	private Integer myPreferredPageSize;
 	private Integer mySize;
 	private IPrimitiveType<Date> myPublished = InstantDt.withCurrentTime();
+	private Integer myCurrentPageOffset;
+	private Integer myCurrentPageSize;
 
 	/**
 	 * Constructor
@@ -72,6 +74,36 @@ public class SimpleBundleProvider implements IBundleProvider {
 		myList = Collections.emptyList();
 		myUuid = null;
 		setSize(theSize);
+	}
+
+	/**
+	 * @since 5.5.0
+	 */
+	@Override
+	public Integer getCurrentPageOffset() {
+		return myCurrentPageOffset;
+	}
+
+	/**
+	 * @since 5.5.0
+	 */
+	public void setCurrentPageOffset(Integer theCurrentPageOffset) {
+		myCurrentPageOffset = theCurrentPageOffset;
+	}
+
+	/**
+	 * @since 5.5.0
+	 */
+	@Override
+	public Integer getCurrentPageSize() {
+		return myCurrentPageSize;
+	}
+
+	/**
+	 * @since 5.5.0
+	 */
+	public void setCurrentPageSize(Integer theCurrentPageSize) {
+		myCurrentPageSize = theCurrentPageSize;
 	}
 
 	/**

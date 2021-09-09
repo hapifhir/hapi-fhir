@@ -6,10 +6,11 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>5.5.0-PRE4-SNAPSHOT</version>
+	<version>5.6.0-PRE4-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
+
 
 	<organization>
 		<name>Smile CDR, Inc.</name>
@@ -747,7 +748,7 @@
 
 	<properties>
 
-		<fhir_core_version>5.4.0</fhir_core_version>
+		<fhir_core_version>5.4.10</fhir_core_version>
 		<ucum_version>1.0.3</ucum_version>
 
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -767,7 +768,7 @@
 		<aries_spifly_version>1.2</aries_spifly_version>
 		<caffeine_version>2.9.1</caffeine_version>
 		<commons_codec_version>1.15</commons_codec_version>
-		<commons_compress_version>1.20</commons_compress_version>
+		<commons_compress_version>1.21</commons_compress_version>
 		<commons_text_version>1.9</commons_text_version>
 		<commons_io_version>2.8.0</commons_io_version>
 		<commons_lang3_version>3.12.0</commons_lang3_version>
@@ -786,8 +787,7 @@
 		<jaxb_runtime_version>3.0.0</jaxb_runtime_version>
 		<jena_version>3.17.0</jena_version>
 		<jersey_version>3.0.0</jersey_version>
-		<!-- 9.4.17 seems to have issues -->
-		<jetty_version>9.4.42.v20210604</jetty_version>
+		<jetty_version>9.4.43.v20210629</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.7.1</junit_version>
 		<flexmark_version>0.50.40</flexmark_version>
@@ -822,6 +822,7 @@
 		<spring_retry_version>1.2.2.RELEASE</spring_retry_version>
 
 		<stax2_api_version>3.1.4</stax2_api_version>
+		<testcontainers_version>1.15.3</testcontainers_version>
 		<thymeleaf-version>3.0.12.RELEASE</thymeleaf-version>
 		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 
@@ -893,16 +894,25 @@
 				<artifactId>caffeine</artifactId>
 				<version>${caffeine_version}</version>
 			</dependency>
+			<!-- mail start -->
+			<dependency>
+				<groupId>org.simplejavamail</groupId>
+				<artifactId>simple-java-mail</artifactId>
+				<version>6.6.1</version>
+			</dependency>
 			<dependency>
 				<groupId>com.icegreen</groupId>
 				<artifactId>greenmail</artifactId>
-				<version>1.6.3</version>
+				<version>1.6.4</version>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>com.icegreen</groupId>
-				<artifactId>greenmail-spring</artifactId>
-				<version>1.5.10</version>
+				<artifactId>greenmail-junit5</artifactId>
+				<version>1.6.4</version>
+				<scope>test</scope>
 			</dependency>
+			<!-- mail end -->
 			<dependency>
 				<groupId>com.github.dnault</groupId>
 				<artifactId>xml-patch</artifactId>
@@ -963,11 +973,6 @@
 				<artifactId>jakarta.activation</artifactId>
 				<version>2.0.0</version>
 			</dependency>
-			<dependency>
-				<groupId>com.sun.mail</groupId>
-				<artifactId>javax.mail</artifactId>
-				<version>1.6.1</version>
-			</dependency>
             <dependency>
                 <groupId>com.vladsch.flexmark</groupId>
                 <artifactId>flexmark</artifactId>
@@ -1027,6 +1032,11 @@
 				<groupId>org.hl7.fhir.testcases</groupId>
 				<artifactId>fhir-test-cases</artifactId>
 				<version>1.1.14</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jdom</groupId>
+				<artifactId>jdom2</artifactId>
+				<version>2.0.6</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jetbrains</groupId>
@@ -1109,11 +1119,6 @@
 				<groupId>com.microsoft.sqlserver</groupId>
 				<artifactId>mssql-jdbc</artifactId>
 				<version>9.2.1.jre8</version>
-			</dependency>
-			<dependency>
-				<groupId>javax.mail</groupId>
-				<artifactId>javax.mail-api</artifactId>
-				<version>1.6.0</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet</groupId>
@@ -1588,7 +1593,20 @@
 						<groupId>org.yaml</groupId>
 						<artifactId>*</artifactId>
 					</exclusion>
+					<exclusion>
+						<!-- Elastic have repackaged net.java.dev.jna, but we need a newer version to support Mac ARM. Managed below. -->
+						<groupId>org.elasticsearch</groupId>
+						<artifactId>jna</artifactId>
+					</exclusion>
 				</exclusions>
+			</dependency>
+			<!--  Upgrade testcontainers and elasticsearch dependency for Mac M1 ARM64 support.
+			  We can delete this once testcontainers and elasticsearch upgrade. -->
+			<dependency>
+				<groupId>net.java.dev.jna</groupId>
+				<artifactId>jna</artifactId>
+				<version>5.8.0</version>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
@@ -1766,17 +1784,7 @@
 				<artifactId>spring-websocket</artifactId>
 				<version>${spring_version}</version>
 			</dependency>
-            <dependency>
-                <groupId>org.springframework.batch</groupId>
-                <artifactId>spring-batch-core</artifactId>
-                <version>${spring_batch_version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.batch</groupId>
-                <artifactId>spring-batch-infrastructure</artifactId>
-                <version>${spring_batch_version}</version>
-            </dependency>
-            <dependency>
+			<dependency>
 				<groupId>org.springframework.retry</groupId>
 				<artifactId>spring-retry</artifactId>
 				<version>${spring_retry_version}</version>
@@ -1871,19 +1879,19 @@
 			<dependency>
 				<groupId>org.testcontainers</groupId>
 				<artifactId>testcontainers</artifactId>
-				<version>1.15.3</version>
+				<version>${testcontainers_version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.testcontainers</groupId>
 				<artifactId>elasticsearch</artifactId>
-				<version>1.15.3</version>
+				<version>${testcontainers_version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.testcontainers</groupId>
 				<artifactId>junit-jupiter</artifactId>
-				<version>1.15.3</version>
+				<version>${testcontainers_version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -2746,33 +2754,20 @@
 				<module>hapi-fhir-jpaserver-searchparam</module>
 				<module>hapi-fhir-jpaserver-subscription</module>
 				<module>hapi-fhir-jaxrsserver-base</module>
-				<module>hapi-fhir-jaxrsserver-example</module>
 				<module>hapi-fhir-jpaserver-batch</module>
 				<module>hapi-fhir-jpaserver-base</module>
 				<module>hapi-fhir-jpaserver-migrate</module>
 				<module>hapi-fhir-jpaserver-mdm</module>
-				<module>restful-server-example</module>
 				<module>hapi-fhir-testpage-overlay</module>
 				<module>hapi-fhir-jpaserver-uhnfhirtest</module>
 				<module>hapi-fhir-client-okhttp</module>
 				<module>hapi-fhir-android</module>
 				<module>hapi-fhir-cli</module>
 				<module>hapi-fhir-dist</module>
-				<!--<module>osgi</module>-->
-				<!--<module>osgi/hapi-fhir-karaf-features</module>
-				<module>osgi/hapi-fhir-karaf-integration-tests</module>-->
-				<!--
-				<module>example-projects/hapi-fhir-base-example-embedded-ws</module>
-				<module>example-projects/hapi-fhir-standalone-overlay-example</module>
-				<module>example-projects/hapi-fhir-jpaserver-cds-example</module>
-				<module>example-projects/hapi-fhir-jpaserver-dynamic</module>
-				<module>example-projects/hapi-fhir-jpaserver-example-postgres</module>
-				-->
 				<module>tests/hapi-fhir-base-test-jaxrsserver-kotlin</module>
 				<module>tests/hapi-fhir-base-test-mindeps-client</module>
 				<module>tests/hapi-fhir-base-test-mindeps-server</module>
 				<module>hapi-fhir-spring-boot</module>
-				<!--<module>hapi-fhir-osgi-core</module>-->
 			</modules>
 		</profile>
 		<profile>

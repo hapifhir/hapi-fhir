@@ -24,13 +24,15 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy;
-import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import com.google.common.annotations.VisibleForTesting;
-import org.jetbrains.annotations.Nullable;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +41,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 
 public class HapiTransactionService {
@@ -65,11 +68,11 @@ public class HapiTransactionService {
 		myTxTemplate = new TransactionTemplate(myTransactionManager);
 	}
 
-	public <T> T execute(RequestDetails theRequestDetails, TransactionCallback<T> theCallback) {
-		return execute(theRequestDetails, theCallback, null);
+	public <T> T execute(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, TransactionCallback<T> theCallback) {
+		return execute(theRequestDetails, theTransactionDetails, theCallback, null);
 	}
 
-	public <T> T execute(RequestDetails theRequestDetails, TransactionCallback<T> theCallback, Runnable theOnRollback) {
+	public <T> T execute(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, TransactionCallback<T> theCallback, Runnable theOnRollback) {
 
 		for (int i = 0; ; i++) {
 			try {
@@ -108,8 +111,22 @@ public class HapiTransactionService {
 				}
 
 				if (i < maxRetries) {
-					sleepAtLeast(250, false);
+					theTransactionDetails.getRollbackUndoActions().forEach(t->t.run());
+					theTransactionDetails.clearRollbackUndoActions();
+					theTransactionDetails.clearResolvedItems();
+					theTransactionDetails.clearUserData(BaseHapiFhirDao.XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
+					theTransactionDetails.clearUserData(BaseHapiFhirDao.XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
+					double sleepAmount = (250.0d * i) * Math.random();
+					long sleepAmountLong = (long) sleepAmount;
+					sleepAtLeast(sleepAmountLong, false);
+
+					ourLog.info("About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.", sleepAmountLong);
 					continue;
+				}
+
+				IBaseOperationOutcome oo = null;
+				if (e instanceof ResourceVersionConflictException) {
+					oo = ((ResourceVersionConflictException) e).getOperationOutcome();
 				}
 
 				if (maxRetries > 0) {
@@ -118,7 +135,7 @@ public class HapiTransactionService {
 					throw new ResourceVersionConflictException(msg);
 				}
 
-				throw e;
+				throw new ResourceVersionConflictException(e.getMessage(), e, oo);
 			}
 		}
 

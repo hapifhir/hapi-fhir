@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #L%
  */
 
+import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
-import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -30,14 +30,14 @@ import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
-
-import static org.hl7.fhir.convertors.conv30_40.ConceptMap30_40.convertConceptMap;
 
 public class FhirResourceDaoConceptMapDstu3 extends BaseHapiFhirResourceDao<ConceptMap> implements IFhirResourceDaoConceptMap<ConceptMap> {
 	@Autowired
@@ -53,7 +53,6 @@ public class FhirResourceDaoConceptMapDstu3 extends BaseHapiFhirResourceDao<Conc
 	}
 
 
-
 	@Override
 	public ResourceTable updateEntity(RequestDetails theRequestDetails, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
 												 boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
@@ -63,7 +62,7 @@ public class FhirResourceDaoConceptMapDstu3 extends BaseHapiFhirResourceDao<Conc
 			if (retVal.getDeleted() == null) {
 				try {
 					ConceptMap conceptMap = (ConceptMap) theResource;
-					org.hl7.fhir.r4.model.ConceptMap converted = convertConceptMap(conceptMap);
+					org.hl7.fhir.r4.model.ConceptMap converted = (org.hl7.fhir.r4.model.ConceptMap) VersionConvertorFactory_30_40.convertResource(conceptMap, new BaseAdvisor_30_40(false));
 					myTermConceptMappingSvc.storeTermConceptMapAndChildren(retVal, converted);
 				} catch (FHIRException fe) {
 					throw new InternalErrorException(fe);

@@ -26,6 +26,7 @@ import ca.uhn.fhir.cql.dstu3.builder.MeasureReportBuilder;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.cqframework.cql.elm.execution.ExpressionDef;
 import org.cqframework.cql.elm.execution.FunctionDef;
@@ -74,17 +75,17 @@ public class MeasureEvaluation {
 		this.measurementPeriod = measurementPeriod;
 	}
 
-	public MeasureReport evaluatePatientMeasure(Measure measure, Context context, String patientId) {
+	public MeasureReport evaluatePatientMeasure(Measure measure, Context context, String patientId, RequestDetails theRequestDetails) {
 		logger.info("Generating individual report");
 
 		if (patientId == null) {
-            return evaluatePopulationMeasure(measure, context);
-        }
+			return evaluatePopulationMeasure(measure, context, theRequestDetails);
+		}
 
-        Patient patient = registry.getResourceDao(Patient.class).read(new IdType(patientId));
-        // Iterable<Object> patientRetrieve = provider.retrieve("Patient", "id",
-        // patientId, "Patient", null, null, null, null, null, null, null, null);
-        // Patient patient = null;
+		Patient patient = registry.getResourceDao(Patient.class).read(new IdType(patientId), theRequestDetails);
+		// Iterable<Object> patientRetrieve = provider.retrieve("Patient", "id",
+		// patientId, "Patient", null, null, null, null, null, null, null, null);
+		// Patient patient = null;
         // if (patientRetrieve.iterator().hasNext()) {
         // patient = (Patient) patientRetrieve.iterator().next();
         // }
@@ -92,45 +93,47 @@ public class MeasureEvaluation {
 
 
         boolean isSingle = true;
-        return evaluate(measure, context,
+
+
+		return evaluate(measure, context,
                 patient == null ? Collections.emptyList() : Collections.singletonList(patient),
                 MeasureReport.MeasureReportType.INDIVIDUAL, isSingle);
     }
 
-    public MeasureReport evaluatePatientListMeasure(Measure measure, Context context, String practitionerRef) {
-        logger.info("Generating patient-list report");
+	public MeasureReport evaluatePatientListMeasure(Measure measure, Context context, String practitionerRef, RequestDetails theRequestDetails) {
+		logger.info("Generating patient-list report");
 
-        List<Patient> patients = practitionerRef == null ? getAllPatients() : getPractitionerPatients(practitionerRef);
-        boolean isSingle = false;
-        return evaluate(measure, context, patients, MeasureReport.MeasureReportType.PATIENTLIST, isSingle);
-    }
+		List<Patient> patients = practitionerRef == null ? getAllPatients(theRequestDetails) : getPractitionerPatients(practitionerRef, theRequestDetails);
+		boolean isSingle = false;
+		return evaluate(measure, context, patients, MeasureReport.MeasureReportType.PATIENTLIST, isSingle);
+	}
 
-    private List<Patient> getPractitionerPatients(String practitionerRef) {
-		 SearchParameterMap map = SearchParameterMap.newSynchronous();
-		 map.add("general-practitioner", new ReferenceParam(
-			 practitionerRef.startsWith("Practitioner/") ? practitionerRef : "Practitioner/" + practitionerRef));
+	private List<Patient> getPractitionerPatients(String practitionerRef, RequestDetails theRequestDetails) {
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add("general-practitioner", new ReferenceParam(
+			practitionerRef.startsWith("Practitioner/") ? practitionerRef : "Practitioner/" + practitionerRef));
 
-		 List<Patient> patients = new ArrayList<>();
-		 IBundleProvider patientProvider = registry.getResourceDao("Patient").search(map);
-		 List<IBaseResource> patientList = patientProvider.getAllResources();
-		 patientList.forEach(x -> patients.add((Patient) x));
-		 return patients;
-	 }
+		List<Patient> patients = new ArrayList<>();
+		IBundleProvider patientProvider = registry.getResourceDao("Patient").search(map, theRequestDetails);
+		List<IBaseResource> patientList = patientProvider.getAllResources();
+		patientList.forEach(x -> patients.add((Patient) x));
+		return patients;
+	}
 
-    private List<Patient> getAllPatients() {
-		 List<Patient> patients = new ArrayList<>();
-		 IBundleProvider patientProvider = registry.getResourceDao("Patient").search(SearchParameterMap.newSynchronous());
-		 List<IBaseResource> patientList = patientProvider.getAllResources();
-		 patientList.forEach(x -> patients.add((Patient) x));
-		 return patients;
-	 }
+	private List<Patient> getAllPatients(RequestDetails theRequestDetails) {
+		List<Patient> patients = new ArrayList<>();
+		IBundleProvider patientProvider = registry.getResourceDao("Patient").search(SearchParameterMap.newSynchronous(), theRequestDetails);
+		List<IBaseResource> patientList = patientProvider.getAllResources();
+		patientList.forEach(x -> patients.add((Patient) x));
+		return patients;
+	}
 
-    public MeasureReport evaluatePopulationMeasure(Measure measure, Context context) {
-        logger.info("Generating summary report");
+	public MeasureReport evaluatePopulationMeasure(Measure measure, Context context, RequestDetails theRequestDetails) {
+		logger.info("Generating summary report");
 
-        boolean isSingle = false;
-        return evaluate(measure, context, getAllPatients(), MeasureReport.MeasureReportType.SUMMARY, isSingle);
-    }
+		boolean isSingle = false;
+		return evaluate(measure, context, getAllPatients(theRequestDetails), MeasureReport.MeasureReportType.SUMMARY, isSingle);
+	}
 
     @SuppressWarnings("unchecked")
     private void clearExpressionCache(Context context) {

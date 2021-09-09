@@ -40,6 +40,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.TerserUtil;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -54,6 +56,8 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 
 public class DaoResourceLinkResolver implements IResourceLinkResolver {
@@ -90,7 +94,6 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 				throw new InvalidRequestException("Resource " + resName + "/" + idPart + " not found, specified in path: " + theSourcePath);
 
 			}
-
 			resolvedResource = createdTableOpt.get();
 		}
 
@@ -160,7 +163,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 
 		if (referenceIdentifier == null && referenceMatchUrlIdentifier != null) {
 			addMatchUrlIdentifierToTargetResource(theTargetResourceDef, theTargetResource, referenceMatchUrlIdentifier);
-		} else if (referenceIdentifier!= null && referenceMatchUrlIdentifier == null) {
+		} else if (referenceIdentifier != null && referenceMatchUrlIdentifier == null) {
 			addSubjectIdentifierToTargetResource(theSourceReference, theTargetResourceDef, theTargetResource);
 		} else if (referenceIdentifier != null && referenceMatchUrlIdentifier != null) {
 			if (referenceIdentifier.equals(referenceMatchUrlIdentifier)) {
@@ -222,16 +225,33 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		}
 	}
 
-	private CanonicalIdentifier extractIdentifierFromUrl(String theValue) {
-		if (!theValue.contains("identifier=")) {
+	/**
+	 * Extracts the first available identifier from the URL part
+	 *
+	 * @param theValue Part of the URL to extract identifiers from
+	 * @return Returns the first available identifier in the canonical form or null if URL contains no identifier param
+	 * @throws IllegalArgumentException IllegalArgumentException is thrown in case identifier parameter can not be split using <code>system|value</code> pattern.
+	 */
+	protected CanonicalIdentifier extractIdentifierFromUrl(String theValue) {
+		int identifierIndex = theValue.indexOf("identifier=");
+		if (identifierIndex == -1) {
 			return null;
 		}
-		CanonicalIdentifier identifier = new CanonicalIdentifier();
-		String identifierString = theValue.substring(theValue.indexOf("=") + 1);
+
+		List<NameValuePair> params = URLEncodedUtils.parse(theValue.substring(identifierIndex), StandardCharsets.UTF_8, '&', ';');
+		Optional<NameValuePair> idOptional = params.stream().filter(p -> p.getName().equals("identifier")).findFirst();
+		if (!idOptional.isPresent()) {
+			return null;
+		}
+
+		NameValuePair id = idOptional.get();
+		String identifierString = id.getValue();
 		String[] split = identifierString.split("\\|");
 		if (split.length != 2) {
 			throw new IllegalArgumentException("Can't create a placeholder reference with identifier " + theValue + ". It is not a valid identifier");
 		}
+
+		CanonicalIdentifier identifier = new CanonicalIdentifier();
 		identifier.setSystem(split[0]);
 		identifier.setValue(split[1]);
 		return identifier;

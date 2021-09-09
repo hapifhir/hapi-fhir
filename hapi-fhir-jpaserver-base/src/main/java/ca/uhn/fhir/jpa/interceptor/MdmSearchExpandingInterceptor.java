@@ -76,8 +76,16 @@ public class MdmSearchExpandingInterceptor {
 			if (iQueryParameterType instanceof ReferenceParam) {
 				ReferenceParam refParam = (ReferenceParam) iQueryParameterType;
 				if (refParam.isMdmExpand()) {
-					ourLog.debug("Found a reference parameter to expand: {}", refParam.toString());
+					ourLog.debug("Found a reference parameter to expand: {}", refParam);
+					//First, attempt to expand as a source resource.
 					Set<String> expandedResourceIds = myMdmLinkExpandSvc.expandMdmBySourceResourceId(new IdDt(refParam.getValue()));
+
+					// If we failed, attempt to expand as a golden resource
+					if (expandedResourceIds.isEmpty()) {
+							expandedResourceIds =  myMdmLinkExpandSvc.expandMdmByGoldenResourceId(new IdDt(refParam.getValue()));
+					}
+
+					//Rebuild the search param list.
 					if (!expandedResourceIds.isEmpty()) {
 						ourLog.debug("Parameter has been expanded to: {}", String.join(", ", expandedResourceIds));
 						toRemove.add(refParam);

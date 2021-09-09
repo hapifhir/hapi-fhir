@@ -116,12 +116,16 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 		myDaoConfig.setMaximumDeleteConflictQueryCount(new DaoConfig().getMaximumDeleteConflictQueryCount());
+		myDaoConfig.setBundleBatchPoolSize(new DaoConfig().getBundleBatchPoolSize());
+		myDaoConfig.setBundleBatchMaxPoolSize(new DaoConfig().getBundleBatchMaxPoolSize());
 
 	}
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myDaoConfig.setBundleBatchPoolSize(1);
+		myDaoConfig.setBundleBatchMaxPoolSize(1);
 	}
 
 	private Bundle createInputTransactionWithPlaceholderIdInMatchUrl(HTTPVerb theVerb) {
@@ -1340,7 +1344,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 			// ok
 		}
 
-		IBundleProvider history = myPatientDao.history(id, null, null, mySrd);
+		IBundleProvider history = myPatientDao.history(id, null, null, null, mySrd);
 		assertEquals(2, history.size().intValue());
 
 		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(0, 1).get(0)));
@@ -1437,7 +1441,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);
 		mySystemDao.transaction(mySrd, bundle);
 
-		IBundleProvider history = mySystemDao.history(null, null, null);
+		IBundleProvider history = mySystemDao.history(null, null, null, null);
 		Bundle list = toBundle(history);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(list));
 

@@ -47,7 +47,7 @@ public class SchemaMigrator {
 	private final String myMigrationTableName;
 	private final List<BaseTask> myMigrationTasks;
 	private boolean myDontUseFlyway;
-	private boolean myOutOfOrderPermitted;
+	private boolean myStrictOrder;
 	private DriverTypeEnum myDriverType;
 	private List<Callback> myCallbacks = Collections.emptyList();
 
@@ -60,11 +60,7 @@ public class SchemaMigrator {
 		myMigrationTableName = theMigrationTableName;
 		myMigrationTasks = theMigrationTasks;
 
-		if (jpaProperties.containsKey(AvailableSettings.HBM2DDL_AUTO) && "update".equals(jpaProperties.getProperty(AvailableSettings.HBM2DDL_AUTO))) {
-			mySkipValidation = true;
-		} else {
-			mySkipValidation = false;
-		}
+		mySkipValidation = jpaProperties.containsKey(AvailableSettings.HBM2DDL_AUTO) && "update".equals(jpaProperties.getProperty(AvailableSettings.HBM2DDL_AUTO));
 	}
 
 	public void setCallbacks(List<Callback> theCallbacks) {
@@ -76,8 +72,8 @@ public class SchemaMigrator {
 		myDontUseFlyway = theDontUseFlyway;
 	}
 
-	public void setOutOfOrderPermitted(boolean theOutOfOrderPermitted) {
-		myOutOfOrderPermitted = theOutOfOrderPermitted;
+	public void setStrictOrder(boolean theStrictOrder) {
+		myStrictOrder = theStrictOrder;
 	}
 
 	public void validate() {
@@ -98,7 +94,7 @@ public class SchemaMigrator {
 				ourLog.info("Database schema confirmed at expected version " + getCurrentVersion(migrationInfo.get()));
 			}
 		} catch (SQLException e) {
-			throw new ConfigurationException("Unable to connect to " + myDataSource.toString(), e);
+			throw new ConfigurationException("Unable to connect to " + myDataSource, e);
 		}
 	}
 
@@ -125,7 +121,7 @@ public class SchemaMigrator {
 			migrator.setDataSource(myDataSource);
 		} else {
 			migrator = new FlywayMigrator(myMigrationTableName, myDataSource, myDriverType);
-			migrator.setOutOfOrderPermitted(myOutOfOrderPermitted);
+			migrator.setStrictOrder(myStrictOrder);
 		}
 		migrator.addTasks(myMigrationTasks);
 		migrator.setCallbacks(myCallbacks);

@@ -31,10 +31,11 @@ import java.io.IOException;
 
 @Component
 public class MdmSettings implements IMdmSettings {
+	public static final int DEFAULT_CANDIDATE_SEARCH_LIMIT = 10000;
 	private final IMdmRuleValidator myMdmRuleValidator;
 
 	private boolean myEnabled;
-	private int myConcurrentConsumers = MDM_DEFAULT_CONCURRENT_CONSUMERS;
+	private final int myConcurrentConsumers = MDM_DEFAULT_CONCURRENT_CONSUMERS;
 	private String myScriptText;
 	private String mySurvivorshipRules;
 	private MdmRulesJson myMdmRules;
@@ -42,11 +43,17 @@ public class MdmSettings implements IMdmSettings {
 
 	/**
 	 * If disabled, the underlying MDM system will operate under the following assumptions:
-	 *
+	 * <p>
 	 * 1. Source resource may have more than 1 EID of the same system simultaneously.
 	 * 2. During linking, incoming patient EIDs will be merged with existing Golden Resource EIDs.
 	 */
 	private boolean myPreventMultipleEids;
+
+	/**
+	 * When searching for matching candidates, this is the maximum number of candidates that will be retrieved.  If the
+	 * number matched is equal to or higher than this, then an exception will be thrown and candidate matching will be aborted
+	 */
+	private int myCandidateSearchLimit = DEFAULT_CANDIDATE_SEARCH_LIMIT;
 
 	@Autowired
 	public MdmSettings(IMdmRuleValidator theMdmRuleValidator) {
@@ -120,5 +127,14 @@ public class MdmSettings implements IMdmSettings {
 
 	public void setSurvivorshipRules(String theSurvivorshipRules) {
 		mySurvivorshipRules = theSurvivorshipRules;
+	}
+
+	@Override
+	public int getCandidateSearchLimit() {
+		return myCandidateSearchLimit;
+	}
+
+	public void setCandidateSearchLimit(int theCandidateSearchLimit) {
+		myCandidateSearchLimit = theCandidateSearchLimit;
 	}
 }

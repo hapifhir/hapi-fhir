@@ -13,17 +13,20 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -50,16 +53,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-
+@ExtendWith(MockitoExtension.class)
 public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 
-	private static FhirContext ourCtx = FhirContext.forCached(FhirVersionEnum.R4);
+	private static final FhirContext ourCtx = FhirContext.forCached(FhirVersionEnum.R4);
 
 	@Mock
 	private PlatformTransactionManager myTxManager;
 
-	private ResourceReindexingSvcImpl mySvc;
-	private DaoConfig myDaoConfig;
+	private final DaoConfig myDaoConfig = new DaoConfig();
 
 	@Mock
 	private DaoRegistry myDaoRegistry;
@@ -88,6 +90,10 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 	private TransactionStatus myTxStatus;
 	@Mock
 	private ISchedulerService mySchedulerService;
+	@InjectMocks
+	private final ResourceReindexer myResourceReindexer = new ResourceReindexer(ourCtx);
+	@InjectMocks
+	private final ResourceReindexingSvcImpl mySvc = new ResourceReindexingSvcImpl();
 
 	@Override
 	protected FhirContext getContext() {
@@ -101,22 +107,12 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 
 	@BeforeEach
 	public void before() {
-		myDaoConfig = new DaoConfig();
 		myDaoConfig.setReindexThreadCount(2);
 
-		mySvc = new ResourceReindexingSvcImpl();
 		mySvc.setContextForUnitTest(ourCtx);
 		mySvc.setDaoConfigForUnitTest(myDaoConfig);
-		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
-		mySvc.setForcedIdDaoForUnitTest(myForcedIdDao);
-		mySvc.setReindexJobDaoForUnitTest(myReindexJobDao);
-		mySvc.setResourceTableDaoForUnitTest(myResourceTableDao);
-		mySvc.setTxManagerForUnitTest(myTxManager);
-		mySvc.setSearchParamRegistryForUnitTest(mySearchParamRegistry);
-		mySvc.setSchedulerServiceForUnitTest(mySchedulerService);
+		mySvc.setResourceReindexerForUnitTest(myResourceReindexer);
 		mySvc.start();
-
-		when(myTxManager.getTransaction(any())).thenReturn(myTxStatus);
 	}
 
 	@Test
@@ -157,7 +153,6 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 	public void testMarkAsDeletedIfNothingIndexed() {
 		mockNothingToExpunge();
 		mockSingleReindexingJob(null);
-		mockFetchFourResources();
 		// Mock resource fetch
 		List<Long> values = Collections.emptyList();
 		when(myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(any(), any(), any())).thenReturn(new SliceImpl<>(values));
@@ -197,6 +192,8 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		mockSingleReindexingJob(null);
 		mockFourResourcesNeedReindexing();
 		mockFetchFourResources();
+		when(myDaoRegistry.getResourceDao(eq("Patient"))).thenReturn(myResourceDao);
+		when(myDaoRegistry.getResourceDao(eq(Patient.class))).thenReturn(myResourceDao);
 
 		int count = mySvc.forceReindexingPass();
 		assertEquals(4, count);
@@ -248,8 +245,6 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		mockWhenResourceTableFindById(updatedTimes, resourceTypes);
 		when(myDaoRegistry.getResourceDao(eq("Patient"))).thenReturn(myResourceDao);
 		when(myDaoRegistry.getResourceDao(eq(Patient.class))).thenReturn(myResourceDao);
-		when(myDaoRegistry.getResourceDao(eq("Observation"))).thenReturn(myResourceDao);
-		when(myDaoRegistry.getResourceDao(eq(Observation.class))).thenReturn(myResourceDao);
 		when(myResourceDao.readByPid(any(), anyBoolean())).thenAnswer(t->{
 			int idx = t.getArgument(0, ResourcePersistentId.class).getIdAsLong().intValue();
 			return resources.get(idx);
@@ -277,6 +272,8 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 
 	@Test
 	public void testReindexDeletedResource() {
+		// setup
+		when(myTxManager.getTransaction(any())).thenReturn(myTxStatus);
 		mockNothingToExpunge();
 		mockSingleReindexingJob("Patient");
 		// Mock resource fetch
@@ -294,15 +291,13 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		);
 		mockWhenResourceTableFindById(updatedTimes, resourceTypes);
 		when(myDaoRegistry.getResourceDao(eq("Patient"))).thenReturn(myResourceDao);
-		when(myDaoRegistry.getResourceDao(eq(Patient.class))).thenReturn(myResourceDao);
-		when(myDaoRegistry.getResourceDao(eq("Observation"))).thenReturn(myResourceDao);
-		when(myDaoRegistry.getResourceDao(eq(Observation.class))).thenReturn(myResourceDao);
 		when(myResourceDao.readByPid(any(), anyBoolean())).thenReturn(null);
 
-
+		// execute
 		int count = mySvc.forceReindexingPass();
-		assertEquals(0, count);
 
+		// verify
+		assertEquals(0, count);
 		verify(myResourceTableDao, times(1)).updateIndexStatus(eq(0L), eq(BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED));
 	}
 
@@ -356,8 +351,6 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 			new Observation().setId("Observation/3/_history/1")
 		);
 		mockWhenResourceTableFindById(updatedTimes, resourceTypes);
-		when(myDaoRegistry.getResourceDao(eq("Patient"))).thenReturn(myResourceDao);
-		when(myDaoRegistry.getResourceDao(eq(Patient.class))).thenReturn(myResourceDao);
 		when(myDaoRegistry.getResourceDao(eq("Observation"))).thenReturn(myResourceDao);
 		when(myDaoRegistry.getResourceDao(eq(Observation.class))).thenReturn(myResourceDao);
 		when(myResourceDao.readByPid(any(), anyBoolean())).thenAnswer(t->{

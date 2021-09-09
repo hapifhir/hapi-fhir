@@ -10,7 +10,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.StringType;
@@ -30,7 +29,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
-
 	protected Practitioner myPractitioner;
 	protected StringType myPractitionerId;
 	protected IAnyResource myPractitionerGoldenResource;
@@ -48,7 +46,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testClearAllLinks() {
 		assertLinkCount(2);
-		myMdmProvider.clearMdmLinks(null, myRequestDetails);
+		clearMdmLinks();
 		assertNoLinksExist();
 	}
 
@@ -70,12 +68,13 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(2);
 		Patient read = myPatientDao.read(new IdDt(mySourcePatientId.getValueAsString()).toVersionless());
 		assertThat(read, is(notNullValue()));
-		myMdmProvider.clearMdmLinks(new StringType("Patient"), myRequestDetails);
+		clearMdmLinks("Patient");
 		assertNoPatientLinksExist();
 		try {
 			myPatientDao.read(new IdDt(mySourcePatientId.getValueAsString()).toVersionless());
 			fail();
-		} catch (ResourceNotFoundException e) {}
+		} catch (ResourceNotFoundException e) {
+		}
 
 	}
 	@Test
@@ -87,7 +86,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		Patient patientAndUpdateLinks = createPatientAndUpdateLinks(buildJanePatient());
 		IAnyResource goldenResource = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
 		assertThat(goldenResource, is(notNullValue()));
-		myMdmProvider.clearMdmLinks(null, myRequestDetails);
+		clearMdmLinks();
 		assertNoPatientLinksExist();
 		goldenResource = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
 		assertThat(goldenResource, is(nullValue()));
@@ -104,7 +103,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		linkGoldenResources(goldenResourceFromTarget, goldenResourceFromTarget2);
 
 		//SUT
-		myMdmProvider.clearMdmLinks(null, myRequestDetails);
+		clearMdmLinks();
 
 		assertNoPatientLinksExist();
 		IBundleProvider search = myPatientDao.search(buildGoldenResourceParameterMap());
@@ -135,7 +134,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		linkGoldenResources(goldenResourceFromTarget2, goldenResourceFromTarget);
 
 		//SUT
-		IBaseParameters parameters = myMdmProvider.clearMdmLinks(null, myRequestDetails);
+		clearMdmLinks();
 
 		printLinks();
 
@@ -157,18 +156,19 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(2);
 		Practitioner read = myPractitionerDao.read(new IdDt(myPractitionerGoldenResourceId.getValueAsString()).toVersionless());
 		assertThat(read, is(notNullValue()));
-		myMdmProvider.clearMdmLinks(new StringType("Practitioner"), myRequestDetails);
+		clearMdmLinks("Practitioner");
 		assertNoPractitionerLinksExist();
 		try {
 			myPractitionerDao.read(new IdDt(myPractitionerGoldenResourceId.getValueAsString()).toVersionless());
 			fail();
-		} catch (ResourceNotFoundException e) {}
+		} catch (ResourceNotFoundException e) {
+		}
 	}
 
 	@Test
 	public void testClearInvalidTargetType() {
 		try {
-			myMdmProvider.clearMdmLinks(new StringType("Observation"), myRequestDetails);
+			myMdmProvider.clearMdmLinks(getResourceNames("Observation"), null, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), is(equalTo("$mdm-clear does not support resource type: Observation")));

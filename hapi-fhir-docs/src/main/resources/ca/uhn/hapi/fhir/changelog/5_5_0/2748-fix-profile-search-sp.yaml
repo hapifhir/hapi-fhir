@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2748
+backport: 5.4.2
+title: "The SQL generated for the `_profile` search parameter did not use all of the columns on the tag index table,
+   resulting on poor performance on MySQL. This has been corrected."

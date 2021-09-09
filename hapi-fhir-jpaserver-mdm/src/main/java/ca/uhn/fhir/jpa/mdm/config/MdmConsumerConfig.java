@@ -21,15 +21,42 @@ package ca.uhn.fhir.jpa.mdm.config;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.batch.mdm.MdmBatchJobSubmitterFactoryImpl;
+import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDeleteSvc;
 import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptor;
+import ca.uhn.fhir.jpa.mdm.broker.MdmMessageHandler;
+import ca.uhn.fhir.jpa.mdm.broker.MdmQueueConsumerLoader;
+import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.jpa.mdm.dao.MdmLinkFactory;
+import ca.uhn.fhir.jpa.mdm.interceptor.IMdmStorageInterceptor;
+import ca.uhn.fhir.jpa.mdm.interceptor.MdmStorageInterceptor;
+import ca.uhn.fhir.jpa.mdm.svc.GoldenResourceMergerSvcImpl;
+import ca.uhn.fhir.jpa.mdm.svc.MdmControllerSvcImpl;
+import ca.uhn.fhir.jpa.mdm.svc.MdmEidUpdateService;
+import ca.uhn.fhir.jpa.mdm.svc.MdmLinkQuerySvcImpl;
+import ca.uhn.fhir.jpa.mdm.svc.MdmLinkSvcImpl;
+import ca.uhn.fhir.jpa.mdm.svc.MdmLinkUpdaterSvcImpl;
+import ca.uhn.fhir.jpa.mdm.svc.MdmMatchFinderSvcImpl;
+import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
+import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvc;
+import ca.uhn.fhir.jpa.mdm.svc.MdmResourceFilteringSvc;
+import ca.uhn.fhir.jpa.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmSurvivorshipSvcImpl;
+import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateSearcher;
+import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByEidSvc;
+import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByExampleSvc;
+import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByLinkSvc;
+import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchCriteriaBuilderSvc;
+import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
+import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
+import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
+import ca.uhn.fhir.mdm.api.IMdmBatchJobSubmitterFactory;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
-import ca.uhn.fhir.mdm.api.IMdmExpungeSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
-import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.log.Logs;
@@ -38,33 +65,8 @@ import ca.uhn.fhir.mdm.provider.MdmProviderLoader;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
-import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
-import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDeleteSvc;
-import ca.uhn.fhir.jpa.mdm.broker.MdmMessageHandler;
-import ca.uhn.fhir.jpa.mdm.broker.MdmQueueConsumerLoader;
-import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import ca.uhn.fhir.jpa.mdm.dao.MdmLinkFactory;
-import ca.uhn.fhir.jpa.mdm.interceptor.MdmStorageInterceptor;
-import ca.uhn.fhir.jpa.mdm.interceptor.IMdmStorageInterceptor;
-import ca.uhn.fhir.jpa.mdm.svc.MdmClearSvcImpl;
-import ca.uhn.fhir.jpa.mdm.svc.MdmControllerSvcImpl;
-import ca.uhn.fhir.jpa.mdm.svc.MdmEidUpdateService;
-import ca.uhn.fhir.jpa.mdm.svc.MdmLinkQuerySvcImpl;
-import ca.uhn.fhir.jpa.mdm.svc.MdmLinkSvcImpl;
-import ca.uhn.fhir.jpa.mdm.svc.MdmLinkUpdaterSvcImpl;
-import ca.uhn.fhir.jpa.mdm.svc.MdmMatchFinderSvcImpl;
-import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
-import ca.uhn.fhir.jpa.mdm.svc.MdmGoldenResourceDeletingSvc;
-import ca.uhn.fhir.jpa.mdm.svc.GoldenResourceMergerSvcImpl;
-import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvc;
-import ca.uhn.fhir.jpa.mdm.svc.MdmResourceFilteringSvc;
-import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchCriteriaBuilderSvc;
-import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
-import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
-import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByEidSvc;
-import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByLinkSvc;
-import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByExampleSvc;
+import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.validation.IResourceLoader;
 import org.slf4j.Logger;
@@ -180,13 +182,18 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	IMdmExpungeSvc mdmResetSvc(MdmLinkDaoSvc theMdmLinkDaoSvc, MdmGoldenResourceDeletingSvc theDeletingSvc, IMdmSettings theIMdmSettings) {
-		return new MdmClearSvcImpl(theMdmLinkDaoSvc, theDeletingSvc, theIMdmSettings);
+	IMdmBatchJobSubmitterFactory mdmBatchJobSubmitterFactory() {
+		return new MdmBatchJobSubmitterFactoryImpl();
 	}
 
 	@Bean
 	MdmCandidateSearchSvc mdmCandidateSearchSvc() {
 		return new MdmCandidateSearchSvc();
+	}
+
+	@Bean
+	CandidateSearcher candidateSearcher(DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings, MdmSearchParamSvc theMdmSearchParamSvc) {
+		return new CandidateSearcher(theDaoRegistry, theMdmSettings, theMdmSearchParamSvc);
 	}
 
 	@Bean
@@ -243,4 +250,5 @@ public class MdmConsumerConfig {
 	IMdmControllerSvc mdmControllerSvc() {
 		return new MdmControllerSvcImpl();
 	}
+
 }

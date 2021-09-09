@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /*
  * #%L
@@ -87,6 +88,25 @@ public interface IBundleProvider {
 	default String getPreviousPageId() {
 		return null;
 	}
+
+	/**
+	 * If the results in this bundle were produced using an offset query (as opposed to a query using
+	 * continuation pointers, page IDs, etc.) the page offset can be returned here. The server
+	 * should then attempt to form paging links that use <code>_offset</code> instead of
+	 * opaque page IDs.
+	 */
+	default Integer getCurrentPageOffset() {
+		return null;
+	}
+
+	/**
+	 * If {@link #getCurrentPageOffset()} returns a non-null value, this method must also return
+	 * the actual page size used
+	 */
+	default Integer getCurrentPageSize() {
+		return null;
+	}
+
 
 	/**
 	 * Returns the instant as of which this result was created. The
@@ -187,11 +207,18 @@ public interface IBundleProvider {
 	}
 
 	/**
-	 * Returns the value of {@link #size()} and throws a {@link NullPointerException} of it is null
+	 * @return the value of {@link #size()} and throws a {@link NullPointerException} of it is null
 	 */
 	default int sizeOrThrowNpe() {
 		Integer retVal = size();
 		Validate.notNull(retVal, "size() returned null");
 		return retVal;
+	}
+
+	/**
+	 * @return the list of ids of all resources in the bundle
+	 */
+	default List<String> getAllResourceIds() {
+		return getAllResources().stream().map(resource -> resource.getIdElement().getIdPart()).collect(Collectors.toList());
 	}
 }

@@ -69,20 +69,26 @@ public final class MdmResourceUtil {
 		return resourceHasTag(theBaseResource, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED);
 	}
 
-	private static boolean resourceHasTag(IBaseResource theTheBaseResource, String theSystem, String theCode) {
-		return theTheBaseResource.getMeta().getTag(theSystem, theCode) != null;
+	private static boolean resourceHasTag(IBaseResource theBaseResource, String theSystem, String theCode) {
+		if (theBaseResource == null) {
+			return false;
+		}
+		return theBaseResource.getMeta().getTag(theSystem, theCode) != null;
 	}
 
-	private static boolean resourceHasTagWithSystem(IBaseResource theTheBaseResource, String theSystem) {
-		return theTheBaseResource.getMeta().getTag().stream().anyMatch(tag -> tag.getSystem().equalsIgnoreCase(theSystem));
+	private static boolean resourceHasTagWithSystem(IBaseResource theBaseResource, @Nonnull String theSystem) {
+		if (theBaseResource == null) {
+			return false;
+		}
+		return theBaseResource.getMeta().getTag().stream().anyMatch(tag -> theSystem.equalsIgnoreCase(tag.getSystem()));
 	}
 
-	private static Optional<? extends IBaseCoding> getTagWithSystem(IBaseResource theResource, String theSystem) {
-		return theResource.getMeta().getTag().stream().filter(tag -> tag.getSystem().equalsIgnoreCase(theSystem)).findFirst();
+	private static Optional<? extends IBaseCoding> getTagWithSystem(IBaseResource theResource, @Nonnull String theSystem) {
+		return theResource.getMeta().getTag().stream().filter(tag -> theSystem.equalsIgnoreCase(tag.getSystem())).findFirst();
 	}
 
-	public static void removeTagWithSystem(IBaseResource theResource, String theSystem) {
-		theResource.getMeta().getTag().removeIf(tag -> tag.getSystem().equalsIgnoreCase(theSystem));
+	public static void removeTagWithSystem(IBaseResource theResource, @Nonnull String theSystem) {
+		theResource.getMeta().getTag().removeIf(tag -> theSystem.equalsIgnoreCase(tag.getSystem()));
 	}
 
 	/**

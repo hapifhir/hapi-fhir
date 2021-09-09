@@ -23,8 +23,8 @@ package ca.uhn.fhir.mdm.provider;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
-import ca.uhn.fhir.mdm.api.IMdmExpungeSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,9 +43,9 @@ public class MdmProviderLoader {
 	@Autowired
 	private IMdmControllerSvc myMdmControllerSvc;
 	@Autowired
-	private IMdmExpungeSvc myMdmExpungeSvc;
-	@Autowired
 	private IMdmSubmitSvc myMdmSubmitSvc;
+	@Autowired
+	private IMdmSettings myMdmSettings;
 
 	private BaseMdmProvider myMdmProvider;
 
@@ -54,7 +54,7 @@ public class MdmProviderLoader {
 			case DSTU3:
 			case R4:
 				myResourceProviderFactory.addSupplier(() -> {
-					myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmExpungeSvc, myMdmSubmitSvc);
+					myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmSubmitSvc, myMdmSettings);
 					return myMdmProvider;
 				});
 				break;

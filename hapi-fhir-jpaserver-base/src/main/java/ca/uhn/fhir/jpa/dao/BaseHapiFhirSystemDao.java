@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
@@ -8,6 +7,7 @@ import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
@@ -93,7 +93,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	}
 
 	@Override
-	public IBundleProvider history(Date theSince, Date theUntil, RequestDetails theRequestDetails) {
+	public IBundleProvider history(Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails) {
 		if (theRequestDetails != null) {
 			// Notify interceptors
 			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails);
@@ -101,7 +101,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 		}
 
 		StopWatch w = new StopWatch();
-		IBundleProvider retVal = super.history(theRequestDetails, null, null, theSince, theUntil);
+		IBundleProvider retVal = super.history(theRequestDetails, null, null, theSince, theUntil, theOffset);
 		ourLog.info("Processed global history in {}ms", w.getMillisAndRestart());
 		return retVal;
 	}

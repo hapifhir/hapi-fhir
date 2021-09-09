@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2797
+title: "When initiating a FHIR bulk export, if more than one `_typeFilter` parameter was supplied
+  only the first one was respected. This has been corrected."

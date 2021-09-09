@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -35,6 +36,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 import org.apache.commons.lang3.StringUtils;
@@ -71,6 +73,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder.replaceDefaultPartitionIdIfNonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -149,7 +152,7 @@ public class IdHelperService {
 		Validate.notNull(theId, "theId must not be null");
 
 		ResourcePersistentId retVal;
-		if (myDaoConfig.getResourceClientIdStrategy() == DaoConfig.ClientIdStrategyEnum.ANY || !isValidPid(theId)) {
+		if (idRequiresForcedId	(theId)) {
 			if (myDaoConfig.isDeleteEnabled()) {
 				retVal = new ResourcePersistentId(resolveResourceIdentity(theRequestPartitionId, theResourceType, theId).getResourceId());
 			} else {
@@ -171,6 +174,17 @@ public class IdHelperService {
 		return retVal;
 	}
 
+	/**
+	 * Returns true if the given resource ID should be stored in a forced ID. Under default config
+	 * (meaning client ID strategy is {@link ca.uhn.fhir.jpa.api.config.DaoConfig.ClientIdStrategyEnum#ALPHANUMERIC})
+	 * this will return true if the ID has any non-digit characters.
+	 *
+	 * In {@link ca.uhn.fhir.jpa.api.config.DaoConfig.ClientIdStrategyEnum#ANY} mode it will always return true.
+	 */
+	public boolean idRequiresForcedId(String theId) {
+		return myDaoConfig.getResourceClientIdStrategy() == DaoConfig.ClientIdStrategyEnum.ANY || !isValidPid(theId);
+	}
+
 	@Nonnull
 	private String toForcedIdToPidKey(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId) {
 		return RequestPartitionId.stringifyForKey(theRequestPartitionId) + "/" + theResourceType + "/" + theId;
@@ -178,6 +192,9 @@ public class IdHelperService {
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
+
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	/**
 	 * Given a collection of resource IDs (resource type + id), resolves the internal persistent IDs.
@@ -232,12 +249,20 @@ public class IdHelperService {
 				Predicate idCriteria = cb.equal(from.get("myForcedId").as(String.class), next.getIdPart());
 				andPredicates.add(idCriteria);
 
-				if (theRequestPartitionId.isDefaultPartition()) {
+				if (theRequestPartitionId.isDefaultPartition() && myPartitionSettings.getDefaultPartitionId() == null) {
 					Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue").as(Integer.class));
 					andPredicates.add(partitionIdCriteria);
 				} else if (!theRequestPartitionId.isAllPartitions()) {
-					Predicate partitionIdCriteria = from.get("myPartitionIdValue").as(Integer.class).in(theRequestPartitionId.getPartitionIds());
-					andPredicates.add(partitionIdCriteria);
+					List<Integer> partitionIds = theRequestPartitionId.getPartitionIds();
+					partitionIds = replaceDefaultPartitionIdIfNonNull(myPartitionSettings, partitionIds);
+
+					if (partitionIds.size() > 1) {
+						Predicate partitionIdCriteria = from.get("myPartitionIdValue").as(Integer.class).in(partitionIds);
+						andPredicates.add(partitionIdCriteria);
+					} else {
+						Predicate partitionIdCriteria = cb.equal(from.get("myPartitionIdValue").as(Integer.class), partitionIds.get(0));
+						andPredicates.add(partitionIdCriteria);
+					}
 				}
 
 				predicates.add(cb.and(andPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
@@ -310,6 +335,7 @@ public class IdHelperService {
 		}
 
 		List<IResourceLookup> retVal = new ArrayList<>();
+		RequestPartitionId requestPartitionId = replaceDefault(theRequestPartitionId);
 
 		if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
 			List<Long> pids = theId
@@ -318,7 +344,7 @@ public class IdHelperService {
 				.map(t -> t.getIdPartAsLong())
 				.collect(Collectors.toList());
 			if (!pids.isEmpty()) {
-				resolvePids(theRequestPartitionId, pids, retVal);
+				resolvePids(requestPartitionId, pids, retVal);
 			}
 		}
 
@@ -343,15 +369,15 @@ public class IdHelperService {
 				Collection<Object[]> views;
 				assert isNotBlank(nextResourceType);
 
-				if (theRequestPartitionId.isAllPartitions()) {
+				if (requestPartitionId.isAllPartitions()) {
 					views = myForcedIdDao.findAndResolveByForcedIdWithNoType(nextResourceType, nextIds);
 				} else {
-					if (theRequestPartitionId.isDefaultPartition()) {
+					if (requestPartitionId.isDefaultPartition()) {
 						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(nextResourceType, nextIds);
-					} else if (theRequestPartitionId.hasDefaultPartitionId()) {
-						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(nextResourceType, nextIds, theRequestPartitionId.getPartitionIdsWithoutDefault());
+					} else if (requestPartitionId.hasDefaultPartitionId()) {
+						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(nextResourceType, nextIds, requestPartitionId.getPartitionIdsWithoutDefault());
 					} else {
-						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(nextResourceType, nextIds, theRequestPartitionId.getPartitionIds());
+						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(nextResourceType, nextIds, requestPartitionId.getPartitionIds());
 					}
 				}
 
@@ -373,6 +399,20 @@ public class IdHelperService {
 		}
 
 		return retVal;
+	}
+
+	RequestPartitionId replaceDefault(RequestPartitionId theRequestPartitionId) {
+		if (myPartitionSettings.getDefaultPartitionId() != null) {
+			if (!theRequestPartitionId.isAllPartitions() && theRequestPartitionId.hasDefaultPartitionId()) {
+				List<Integer> partitionIds = theRequestPartitionId
+					.getPartitionIds()
+					.stream()
+					.map(t -> t == null ? myPartitionSettings.getDefaultPartitionId() : t)
+					.collect(Collectors.toList());
+				return RequestPartitionId.fromPartitionIds(partitionIds);
+			}
+		}
+		return theRequestPartitionId;
 	}
 
 	private void resolvePids(@Nonnull RequestPartitionId theRequestPartitionId, List<Long> thePidsToResolve, List<IResourceLookup> theTarget) {
@@ -470,6 +510,11 @@ public class IdHelperService {
 		return retVal;
 	}
 
+	/**
+	 * @deprecated This method doesn't take a partition ID as input, so it is unsafe. It
+	 * should be reworked to include the partition ID before any new use is incorporated
+	 */
+	@Deprecated
 	@Nullable
 	public Long getPidOrNull(IBaseResource theResource) {
 		IAnyResource anyResource = (IAnyResource) theResource;
@@ -485,6 +530,100 @@ public class IdHelperService {
 		return retVal;
 	}
 
+	/**
+	 * Helper method to determine if some resources exist in the DB (without throwing).
+	 * Returns a set that contains the IIdType for every resource found.
+	 * If it's not found, it won't be included in the set.
+	 * @param theIds - list of IIdType ids (for the same resource)
+	 * @return
+	 */
+	private Map<IIdType, ResourcePersistentId> getIdsOfExistingResources(RequestPartitionId thePartitionId,
+																							  Collection<IIdType> theIds) {
+		// these are the found Ids that were in the db
+		HashMap<IIdType, ResourcePersistentId> collected = new HashMap<>();
+
+		if (theIds == null || theIds.isEmpty()) {
+			return collected;
+		}
+
+		List<ResourcePersistentId> resourcePersistentIds = resolveResourcePersistentIdsWithCache(thePartitionId,
+			theIds.stream().collect(Collectors.toList()));
+
+		// we'll use this map to fetch pids that require versions
+		HashMap<Long, ResourcePersistentId> pidsToVersionToResourcePid = new HashMap<>();
+
+		// fill in our map
+		for (ResourcePersistentId pid : resourcePersistentIds) {
+			if (pid.getVersion() == null) {
+				pidsToVersionToResourcePid.put(pid.getIdAsLong(), pid);
+			}
+			Optional<IIdType> idOp = theIds.stream()
+				.filter(i -> i.getIdPart().equals(pid.getAssociatedResourceId().getIdPart()))
+				.findFirst();
+			// this should always be present
+			// since it was passed in.
+			// but land of optionals...
+			idOp.ifPresent(id -> {
+				collected.put(id, pid);
+			});
+		}
+
+		// set any versions we don't already have
+		if (!pidsToVersionToResourcePid.isEmpty()) {
+			Collection<Object[]> resourceEntries = myResourceTableDao
+				.getResourceVersionsForPid(new ArrayList<>(pidsToVersionToResourcePid.keySet()));
+
+			for (Object[] record : resourceEntries) {
+				// order matters!
+				Long retPid = (Long)record[0];
+				String resType = (String)record[1];
+				Long version = (Long)record[2];
+				pidsToVersionToResourcePid.get(retPid).setVersion(version);
+			}
+		}
+
+		return collected;
+	}
+
+	/**
+	 * Retrieves the latest versions for any resourceid that are found.
+	 * If they are not found, they will not be contained in the returned map.
+	 * The key should be the same value that was passed in to allow
+	 * consumer to look up the value using the id they already have.
+	 *
+	 * This method should not throw, so it can safely be consumed in
+	 * transactions.
+	 *
+	 * @param theRequestPartitionId - request partition id
+	 * @param theIds - list of IIdTypes for resources of interest.
+	 * @return
+	 */
+	public Map<IIdType, ResourcePersistentId> getLatestVersionIdsForResourceIds(RequestPartitionId theRequestPartitionId, Collection<IIdType> theIds) {
+		HashMap<IIdType, ResourcePersistentId> idToPID = new HashMap<>();
+		HashMap<String, List<IIdType>> resourceTypeToIds = new HashMap<>();
+
+		for (IIdType id : theIds) {
+			String resourceType = id.getResourceType();
+			if (!resourceTypeToIds.containsKey(resourceType)) {
+				resourceTypeToIds.put(resourceType, new ArrayList<>());
+			}
+			resourceTypeToIds.get(resourceType).add(id);
+		}
+
+		for (String resourceType : resourceTypeToIds.keySet()) {
+			Map<IIdType, ResourcePersistentId> idAndPID = getIdsOfExistingResources(theRequestPartitionId,
+				resourceTypeToIds.get(resourceType));
+			idToPID.putAll(idAndPID);
+		}
+
+		return idToPID;
+	}
+
+	/**
+	 * @deprecated This method doesn't take a partition ID as input, so it is unsafe. It
+	 * should be reworked to include the partition ID before any new use is incorporated
+	 */
+	@Deprecated
 	@Nonnull
 	public Long getPidOrThrowException(IIdType theId) {
 		List<IIdType> ids = Collections.singletonList(theId);
@@ -492,6 +631,11 @@ public class IdHelperService {
 		return resourcePersistentIds.get(0).getIdAsLong();
 	}
 
+	/**
+	 * @deprecated This method doesn't take a partition ID as input, so it is unsafe. It
+	 * should be reworked to include the partition ID before any new use is incorporated
+	 */
+	@Deprecated
 	@Nonnull
 	public List<Long> getPidsOrThrowException(List<IIdType> theIds) {
 		List<ResourcePersistentId> resourcePersistentIds = this.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), theIds);
@@ -532,6 +676,11 @@ public class IdHelperService {
 		} else {
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theResourcePersistentId.getIdAsLong(), Optional.empty());
 		}
+	}
+
+	@VisibleForTesting
+	void setPartitionSettingsForUnitTest(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	public static boolean isValidPid(IIdType theId) {

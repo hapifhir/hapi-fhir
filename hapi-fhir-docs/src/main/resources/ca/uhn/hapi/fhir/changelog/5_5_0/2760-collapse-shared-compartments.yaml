@@ -1,0 +1,7 @@
+---
+type: change
+issue: 2760
+backport: 5.4.2
+title: "If two authorization compartments apply to the same targets and share the same compartment name,
+then instead of creating a new compartment, the rule builder now adds the new owner to the list of owners in the
+existing compartment."

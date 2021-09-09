@@ -1,5 +1,6 @@
 ---
 type: change
+backport: 5.4.2
 issue: 2697
 title: "DELETE _expunge=true has been converted to use Spring Batch.  It now simply returns the jobId of the Spring Batch
 job while the job continues to run in the background.  A new operation called $expunge-delete has been added to provide

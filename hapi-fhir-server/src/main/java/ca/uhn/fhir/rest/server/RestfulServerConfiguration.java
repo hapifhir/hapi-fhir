@@ -496,7 +496,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 			Set<String> targets = Collections.emptySet();
 			RuntimeSearchParam.RuntimeSearchParamStatusEnum status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE;
 			Collection<String> base = Collections.singletonList(theSearchMethodBinding.getResourceName());
-			RuntimeSearchParam param = new RuntimeSearchParam(id, uri, nextParamName, description, path, type, providesMembershipInCompartments, targets, status, false, null, base);
+			RuntimeSearchParam param = new RuntimeSearchParam(id, uri, nextParamName, description, path, type, providesMembershipInCompartments, targets, status, null, null, base);
 			theMapToPopulate.put(nextParamName, param);
 
 		}

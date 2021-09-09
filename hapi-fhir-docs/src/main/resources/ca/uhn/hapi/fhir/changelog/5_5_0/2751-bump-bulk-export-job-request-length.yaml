@@ -1,0 +1,4 @@
+---
+type: change
+issue: 2751
+title: "The bulk export request length limit has been increased to 1024 characters."

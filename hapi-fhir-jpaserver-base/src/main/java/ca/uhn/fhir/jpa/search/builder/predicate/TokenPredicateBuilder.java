@@ -56,6 +56,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.toAndPredicate;
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.toEqualToOrInPredicate;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.toOrPredicate;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -300,11 +301,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 		if (!haveMultipleColumns && conditions.length > 1) {
 			List<Long> values = Arrays.asList(hashes);
-			InCondition predicate = new InCondition(columns[0], generatePlaceholders(values));
-			if (!theWantEquals) {
-				predicate.setNegate(true);
-			}
-			return predicate;
+			return toEqualToOrInPredicate(columns[0], generatePlaceholders(values), !theWantEquals);
 		}
 
 		for (int i = 0; i < conditions.length; i++) {

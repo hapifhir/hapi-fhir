@@ -1,0 +1,6 @@
+---
+type: change
+issue: 2773
+backport: 5.4.2
+title: "Flyway migration used to enforce order by default.  This has been changed so now the default behaviour is
+out of order migrations are permitted.  Strict order can be enforced via the new strict-order flag if required."

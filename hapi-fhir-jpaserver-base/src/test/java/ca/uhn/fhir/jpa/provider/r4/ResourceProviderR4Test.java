@@ -295,7 +295,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 	}
 
-
 	@Test
 	public void testSearchWithContainsLowerCase() {
 		myDaoConfig.setAllowContainsSearches(true);
@@ -331,6 +330,37 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
 		assertThat(ids, containsInAnyOrder(pt1id));
 
+	}
+
+	@Test
+	public void testSearchWithPercentSign() {
+		myDaoConfig.setAllowContainsSearches(true);
+
+		Patient pt1 = new Patient();
+		pt1.addName().setFamily("Smith%");
+		String pt1id = myPatientDao.create(pt1).getId().toUnqualifiedVersionless().getValue();
+
+		Bundle output = myClient
+			.search()
+			.forResource("Patient")
+			.where(Patient.NAME.contains().value("Smith%"))
+			.returnBundle(Bundle.class)
+			.execute();
+		List<String> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
+		assertThat(ids, containsInAnyOrder(pt1id));
+
+		Patient pt2 = new Patient();
+		pt2.addName().setFamily("Sm%ith");
+		String pt2id = myPatientDao.create(pt2).getId().toUnqualifiedVersionless().getValue();
+
+		output = myClient
+			.search()
+			.forResource("Patient")
+			.where(Patient.NAME.contains().value("Sm%ith"))
+			.returnBundle(Bundle.class)
+			.execute();
+		ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
+		assertThat(ids, containsInAnyOrder(pt2id));
 	}
 
 	@Test
@@ -2732,6 +2762,106 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 			throw e;
 		}
+	}
+
+	@Test
+	public void testHistoryPaging() {
+
+		Patient patient = new Patient();
+		patient.setId("Patient/A");
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+		patient.setActive(false);
+		myClient.update().resource(patient).execute();
+
+		sleepAtLeast(100);
+		Date midDate = new Date();
+		sleepAtLeast(100);
+
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+		patient.setActive(false);
+		myClient.update().resource(patient).execute();
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+		patient.setActive(false);
+		myClient.update().resource(patient).execute();
+
+		Bundle history = myClient
+			.history()
+			.onInstance("Patient/A")
+			.returnBundle(Bundle.class)
+			.prettyPrint()
+			.count(2)
+			.execute();
+
+		assertThat(toUnqualifiedIdValues(history).toString(), toUnqualifiedIdValues(history), contains(
+			"Patient/A/_history/6",
+			"Patient/A/_history/5"
+		));
+
+		history = myClient
+			.loadPage()
+			.next(history)
+			.execute();
+
+		assertThat(toUnqualifiedIdValues(history).toString(), toUnqualifiedIdValues(history), contains(
+			"Patient/A/_history/4",
+			"Patient/A/_history/3"
+		));
+
+		history = myClient
+			.loadPage()
+			.next(history)
+			.execute();
+
+		assertThat(toUnqualifiedIdValues(history).toString(), toUnqualifiedIdValues(history), contains(
+			"Patient/A/_history/2",
+			"Patient/A/_history/1"
+		));
+
+		history = myClient
+			.loadPage()
+			.next(history)
+			.execute();
+
+		assertEquals(0, history.getEntry().size());
+
+		/*
+		 * Try with a date offset
+		 */
+
+		history = myClient
+			.history()
+			.onInstance("Patient/A")
+			.returnBundle(Bundle.class)
+			.since(midDate)
+			.prettyPrint()
+			.count(2)
+			.execute();
+
+		assertThat(toUnqualifiedIdValues(history).toString(), toUnqualifiedIdValues(history), contains(
+			"Patient/A/_history/6",
+			"Patient/A/_history/5"
+		));
+
+		history = myClient
+			.loadPage()
+			.next(history)
+			.execute();
+
+		assertThat(toUnqualifiedIdValues(history).toString(), toUnqualifiedIdValues(history), contains(
+			"Patient/A/_history/4",
+			"Patient/A/_history/3"
+		));
+
+		history = myClient
+			.loadPage()
+			.next(history)
+			.execute();
+
+		assertEquals(0, history.getEntry().size());
+
 	}
 
 	// private void delete(String theResourceType, String theParamName, String theParamValue) {

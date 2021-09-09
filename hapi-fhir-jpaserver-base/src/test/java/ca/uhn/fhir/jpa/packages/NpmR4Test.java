@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
@@ -44,7 +45,9 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +79,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@TestMethodOrder(MethodOrderer.MethodName.class)
 public class NpmR4Test extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(NpmR4Test.class);
@@ -124,6 +128,8 @@ public class NpmR4Test extends BaseJpaR4Test {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
 		myPartitionSettings.setPartitioningEnabled(false);
+		myPartitionSettings.setUnnamedPartitionMode(false);
+		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
 		myInterceptorService.unregisterInterceptor(myRequestTenantPartitionInterceptor);
 	}
 
@@ -417,9 +423,9 @@ public class NpmR4Test extends BaseJpaR4Test {
 		myDaoConfig.setAllowExternalReferences(true);
 
 		byte[] bytes = loadClasspathBytes("/packages/test-draft-sample.tgz");
-		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.11.1", bytes);
+		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.onlydrafts/0.11.1", bytes);
 
-		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.onlydrafts").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
 		assertEquals(0, outcome.getResourcesInstalled().size(), outcome.getResourcesInstalled().toString());
 
@@ -428,6 +434,31 @@ public class NpmR4Test extends BaseJpaR4Test {
 	@Test
 	public void testInstallR4Package_Twice() throws Exception {
 		myDaoConfig.setAllowExternalReferences(true);
+
+		byte[] bytes = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
+		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.12.0", bytes);
+
+		PackageInstallOutcomeJson outcome;
+
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		outcome = myPackageInstallerSvc.install(spec);
+		assertEquals(1, outcome.getResourcesInstalled().get("CodeSystem"));
+
+		myPackageInstallerSvc.install(spec);
+		outcome = myPackageInstallerSvc.install(spec);
+		assertEquals(null, outcome.getResourcesInstalled().get("CodeSystem"));
+
+		// Ensure that we loaded the contents
+		IBundleProvider searchResult = myCodeSystemDao.search(SearchParameterMap.newSynchronous("url", new UriParam("http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system")));
+		assertEquals(1, searchResult.sizeOrThrowNpe());
+
+	}
+
+	@Test
+	public void testInstallR4Package_Twice_partitioningEnabled() throws Exception {
+		myDaoConfig.setAllowExternalReferences(true);
+		myPartitionSettings.setPartitioningEnabled(true);
+		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
 
 		byte[] bytes = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
 		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.12.0", bytes);
@@ -766,6 +797,43 @@ public class NpmR4Test extends BaseJpaR4Test {
 	@Test
 	public void testInstallPkgContainingLogicalStructureDefinition() throws Exception {
 		myDaoConfig.setAllowExternalReferences(true);
+
+		byte[] bytes = loadClasspathBytes("/packages/test-logical-structuredefinition.tgz");
+		myFakeNpmServlet.myResponses.put("/test-logical-structuredefinition/1.0.0", bytes);
+
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-logical-structuredefinition").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
+		assertEquals(2, outcome.getResourcesInstalled().get("StructureDefinition"));
+
+		// Be sure no further communication with the server
+		JettyUtil.closeServer(myServer);
+
+		// Search for the installed resource
+		runInTransaction(() -> {
+			// Confirm that Laborbefund (a logical StructureDefinition) was created without a snapshot.
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.add(StructureDefinition.SP_URL, new UriParam("https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/LogicalModel/Laborbefund"));
+			IBundleProvider result = myStructureDefinitionDao.search(map);
+			assertEquals(1, result.sizeOrThrowNpe());
+			List<IBaseResource> resources = result.getResources(0,1);
+			assertFalse(((StructureDefinition)resources.get(0)).hasSnapshot());
+
+			// Confirm that DiagnosticLab (a resource StructureDefinition with differential but no snapshot) was created with a generated snapshot.
+			map = SearchParameterMap.newSynchronous();
+			map.add(StructureDefinition.SP_URL, new UriParam("https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab"));
+			result = myStructureDefinitionDao.search(map);
+			assertEquals(1, result.sizeOrThrowNpe());
+			resources = result.getResources(0,1);
+			assertTrue(((StructureDefinition)resources.get(0)).hasSnapshot());
+
+		});
+	}
+
+	@Test
+	public void testInstallPkgContainingNonPartitionedResourcesPartitionsEnabled() throws Exception {
+		myDaoConfig.setAllowExternalReferences(true);
+		myPartitionSettings.setPartitioningEnabled(true);
+		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
 
 		byte[] bytes = loadClasspathBytes("/packages/test-logical-structuredefinition.tgz");
 		myFakeNpmServlet.myResponses.put("/test-logical-structuredefinition/1.0.0", bytes);

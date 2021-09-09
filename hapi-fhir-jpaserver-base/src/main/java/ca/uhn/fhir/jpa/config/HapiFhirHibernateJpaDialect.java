@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hibernate.HibernateException;
 import org.hibernate.PessimisticLockException;
@@ -81,7 +81,7 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 				if (constraintName.contains(ResourceHistoryTable.IDX_RESVER_ID_VER)) {
 					throw new ResourceVersionConflictException(messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceVersionConstraintFailure"));
 				}
-				if (constraintName.contains(ResourceIndexedCompositeStringUnique.IDX_IDXCMPSTRUNIQ_STRING)) {
+				if (constraintName.contains(ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_STRING)) {
 					throw new ResourceVersionConflictException(messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceIndexedCompositeStringUniqueConstraintFailure"));
 				}
 				if (constraintName.contains(ForcedId.IDX_FORCEDID_TYPE_FID)) {
@@ -117,7 +117,8 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 			}
 		}
 
-		return super.convertHibernateAccessException(theException);
+		DataAccessException retVal = super.convertHibernateAccessException(theException);
+		return retVal;
 	}
 
 }

@@ -28,6 +28,8 @@ public class PartitionSettings {
 	private boolean myPartitioningEnabled = false;
 	private CrossPartitionReferenceMode myAllowReferencesAcrossPartitions = CrossPartitionReferenceMode.NOT_ALLOWED;
 	private boolean myIncludePartitionInSearchHashes = false;
+	private boolean myUnnamedPartitionMode;
+	private Integer myDefaultPartitionId;
 
 	/**
 	 * If set to <code>true</code> (default is <code>false</code>) the <code>PARTITION_ID</code> value will be factored into the
@@ -90,6 +92,48 @@ public class PartitionSettings {
 	 */
 	public void setAllowReferencesAcrossPartitions(CrossPartitionReferenceMode theAllowReferencesAcrossPartitions) {
 		myAllowReferencesAcrossPartitions = theAllowReferencesAcrossPartitions;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>), partitions will be unnamed and all IDs from {@link Integer#MIN_VALUE} through
+	 * {@link Integer#MAX_VALUE} will be allowed without needing to be created ahead of time.
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isUnnamedPartitionMode() {
+		return myUnnamedPartitionMode;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>), partitions will be unnamed and all IDs from {@link Integer#MIN_VALUE} through
+	 * {@link Integer#MAX_VALUE} will be allowed without needing to be created ahead of time.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setUnnamedPartitionMode(boolean theUnnamedPartitionMode) {
+		myUnnamedPartitionMode = theUnnamedPartitionMode;
+	}
+
+	/**
+	 * If set, the given ID will be used for the default partition. The default is
+	 * <code>null</code> which will result in the use of a null value for default
+	 * partition items.
+	 *
+	 * @since 5.5.0
+	 */
+	public Integer getDefaultPartitionId() {
+		return myDefaultPartitionId;
+	}
+
+	/**
+	 * If set, the given ID will be used for the default partition. The default is
+	 * <code>null</code> which will result in the use of a null value for default
+	 * partition items.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setDefaultPartitionId(Integer theDefaultPartitionId) {
+		myDefaultPartitionId = theDefaultPartitionId;
 	}
 
 

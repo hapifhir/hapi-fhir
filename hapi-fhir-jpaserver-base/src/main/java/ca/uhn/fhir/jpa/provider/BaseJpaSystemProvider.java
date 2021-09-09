@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.rest.annotation.At;
 import ca.uhn.fhir.rest.annotation.History;
+import ca.uhn.fhir.rest.annotation.Offset;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Since;
@@ -44,7 +45,17 @@ import java.util.Date;
 
 public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider implements IJpaSystemProvider {
 
+	/**
+	 * @see ProviderConstants#OPERATION_REINDEX
+	 * @deprecated
+	 */
+	@Deprecated
 	public static final String MARK_ALL_RESOURCES_FOR_REINDEXING = "$mark-all-resources-for-reindexing";
+	/**
+	 * @see ProviderConstants#OPERATION_REINDEX
+	 * @deprecated
+	 */
+	@Deprecated
 	public static final String PERFORM_REINDEXING_PASS = "$perform-reindexing-pass";
 
 	private IFhirSystemDao<T, MT> myDao;
@@ -90,11 +101,16 @@ public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider implements IJp
 	}
 
 	@History
-	public IBundleProvider historyServer(HttpServletRequest theRequest, @Since Date theDate, @At DateRangeParam theAt, RequestDetails theRequestDetails) {
+	public IBundleProvider historyServer(
+		HttpServletRequest theRequest,
+		@Offset Integer theOffset,
+		@Since Date theDate,
+		@At DateRangeParam theAt,
+		RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
 			DateRangeParam range = super.processSinceOrAt(theDate, theAt);
-			return myDao.history(range.getLowerBoundAsInstant(), range.getUpperBoundAsInstant(), theRequestDetails);
+			return myDao.history(range.getLowerBoundAsInstant(), range.getUpperBoundAsInstant(), theOffset, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}

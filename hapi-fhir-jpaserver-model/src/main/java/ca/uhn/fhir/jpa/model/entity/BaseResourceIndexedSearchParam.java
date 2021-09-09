@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -35,7 +34,6 @@ import com.google.common.hash.Hashing;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 
-import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -45,6 +43,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import java.util.Date;
+import java.util.List;
 
 @MappedSuperclass
 public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
@@ -153,11 +152,6 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 
 	public abstract IQueryParameterType toQueryParameterType();
 
-	@Override
-	public void setPartitionId(@Nullable RequestPartitionId theRequestPartitionId) {
-		super.setPartitionId(theRequestPartitionId);
-	}
-
 	public boolean matches(IQueryParameterType theParam) {
 		throw new UnsupportedOperationException("No parameter matcher for " + theParam);
 	}
@@ -171,13 +165,13 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		return this;
 	}
 
+	public ModelConfig getModelConfig() {
+		return myModelConfig;
+	}
+
 	public BaseResourceIndexedSearchParam setModelConfig(ModelConfig theModelConfig) {
 		myModelConfig = theModelConfig;
 		return this;
-	}
-
-	public ModelConfig getModelConfig() {
-		return myModelConfig;
 	}
 
 	public static long calculateHashIdentity(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, String theResourceType, String theParamName) {
@@ -187,6 +181,17 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 
 	public static long calculateHashIdentity(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName) {
 		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName);
+	}
+
+	public static long calculateHashIdentity(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, List<String> theAdditionalValues) {
+		String[] values = new String[theAdditionalValues.size() + 2];
+		values[0] = theResourceType;
+		values[1] = theParamName;
+		for (int i = 0; i < theAdditionalValues.size(); i++) {
+			values[i + 2] = theAdditionalValues.get(i);
+		}
+
+		return hash(thePartitionSettings, theRequestPartitionId, values);
 	}
 
 	/**

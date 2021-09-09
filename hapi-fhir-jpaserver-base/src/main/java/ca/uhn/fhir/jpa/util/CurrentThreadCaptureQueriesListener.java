@@ -27,16 +27,29 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class CurrentThreadCaptureQueriesListener extends BaseCaptureQueriesListener {
 
 	private static final ThreadLocal<Queue<SqlQuery>> ourQueues = new ThreadLocal<>();
+	private static final ThreadLocal<AtomicInteger> ourCommits = new ThreadLocal<>();
+	private static final ThreadLocal<AtomicInteger> ourRollbacks = new ThreadLocal<>();
 	private static final Logger ourLog = LoggerFactory.getLogger(CurrentThreadCaptureQueriesListener.class);
 
 	@Override
 	protected Queue<SqlQuery> provideQueryList() {
 		return ourQueues.get();
+	}
+
+	@Override
+	protected AtomicInteger provideCommitCounter() {
+		return ourCommits.get();
+	}
+
+	@Override
+	protected AtomicInteger provideRollbackCounter() {
+		return ourRollbacks.get();
 	}
 
 	/**
@@ -45,11 +58,14 @@ public class CurrentThreadCaptureQueriesListener extends BaseCaptureQueriesListe
 	public static SqlQueryList getCurrentQueueAndStopCapturing() {
 		Queue<SqlQuery> retVal = ourQueues.get();
 		ourQueues.remove();
+		ourCommits.remove();
+		ourRollbacks.remove();
 		if (retVal == null) {
 			return new SqlQueryList();
 		}
 		return new SqlQueryList(retVal);
 	}
+
 
 	/**
 	 * Starts capturing queries for the current thread.
@@ -62,6 +78,8 @@ public class CurrentThreadCaptureQueriesListener extends BaseCaptureQueriesListe
 	 */
 	public static void startCapturing() {
 		ourQueues.set(new ArrayDeque<>());
+		ourCommits.set(new AtomicInteger(0));
+		ourRollbacks.set(new AtomicInteger(0));
 	}
 
 	/**

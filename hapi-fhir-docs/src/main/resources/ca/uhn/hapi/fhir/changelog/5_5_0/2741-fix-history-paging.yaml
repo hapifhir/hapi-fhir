@@ -1,0 +1,6 @@
+---
+type: fix
+backport: 5.4.2
+issue: 2741
+title: "A regression caused the JPA Server History operation to not return paging links in responses. This
+   has been corrected."

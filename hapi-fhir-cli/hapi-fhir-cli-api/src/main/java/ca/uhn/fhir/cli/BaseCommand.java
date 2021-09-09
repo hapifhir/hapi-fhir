@@ -26,13 +26,20 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import com.google.common.base.Charsets;
-import org.apache.commons.cli.*;
+import com.google.common.collect.Sets;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionGroup;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -42,13 +49,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Base64Utils;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.Console;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 import static org.fusesource.jansi.Ansi.ansi;
 
 public abstract class BaseCommand implements Comparable<BaseCommand> {
@@ -109,7 +130,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			try {
 				retVal = reader.readLine();
 			} catch (IOException e) {
-				throw new ParseException("Failed to read input from user: " + e.toString());
+				throw new ParseException("Failed to read input from user: " + e);
 			}
 		} else {
 			retVal = new String(console.readPassword());
@@ -120,9 +141,13 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		return retVal;
 	}
 
+	protected Collection<Object> getFilterOutVersions() {
+		return Sets.newHashSet(FhirVersionEnum.DSTU2_1, FhirVersionEnum.DSTU2_HL7ORG);
+	}
+
 	protected void addFhirVersionOption(Options theOptions) {
 		String versions = Arrays.stream(FhirVersionEnum.values())
-			.filter(t -> t != FhirVersionEnum.DSTU2_1 && t != FhirVersionEnum.DSTU2_HL7ORG)
+			.filter(t -> ! getFilterOutVersions().contains(t))
 			.map(t -> t.name().toLowerCase())
 			.sorted()
 			.collect(Collectors.joining(", "));
@@ -275,11 +300,32 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			byte[] basicAuth = optionValue.getBytes();
 			String base64EncodedBasicAuth = Base64Utils.encodeToString(basicAuth);
 			basicAuthHeaderValue = Constants.HEADER_AUTHORIZATION_VALPREFIX_BASIC + base64EncodedBasicAuth;
-		} else {
-			basicAuthHeaderValue = null;
 		}
 		return basicAuthHeaderValue;
 	}
+
+
+	protected Pair<String, String> parseNameValueParameter(
+			String separator, String theParamName, String theParam) throws ParseException {
+
+		String errorMsg = "Parameter " + theParamName + " must be in the format: \"name:value\"";
+
+		if (! theParam.contains(separator)) {
+			throw new ParseException(errorMsg);
+		}
+
+		String[] nameValue = theParam.split(separator);
+		if (nameValue.length != 2) {
+			throw new ParseException(errorMsg);
+		}
+
+		if (StringUtils.isBlank(nameValue[0]) || StringUtils.isBlank(nameValue[1])) {
+			throw new ParseException(errorMsg);
+		}
+
+		return Pair.of(nameValue[0], nameValue[1]);
+	}
+
 
 	public <T extends Enum> T getAndParseOptionEnum(CommandLine theCommandLine, String theOption, Class<T> theEnumClass, boolean theRequired, T theDefault) throws ParseException {
 		String val = theCommandLine.getOptionValue(theOption);

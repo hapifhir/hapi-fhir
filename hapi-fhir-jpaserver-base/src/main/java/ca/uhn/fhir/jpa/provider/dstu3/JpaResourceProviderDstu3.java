@@ -24,8 +24,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
-import static org.hl7.fhir.convertors.conv30_40.Parameters30_40.convertParameters;
-
 public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaResourceProvider<T> {
 
 	public JpaResourceProviderDstu3() {

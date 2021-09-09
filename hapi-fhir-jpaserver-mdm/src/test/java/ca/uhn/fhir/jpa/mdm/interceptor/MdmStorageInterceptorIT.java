@@ -119,6 +119,9 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		}
 	}
 
+	// TODO This test often fails in IntelliJ with the error message:
+	// "The operation has failed with a version constraint failure. This generally means that two clients/threads were
+	// trying to update the same resource at the same time, and this request was chosen as the failing request."
 	@Test
 	public void testCreatingGoldenResourceWithInsufficentMDMAttributesIsNotMDMProcessed() throws InterruptedException {
 		myMdmHelper.doCreateResource(new Patient(), true);
@@ -200,7 +203,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		// Updating a Golden Resource Patient who was created via MDM should fail.
 		MdmLink mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(patient)).get();
 		Long sourcePatientPid = mdmLink.getGoldenResourcePid();
-		Patient goldenResourcePatient = (Patient) myPatientDao.readByPid(new ResourcePersistentId(sourcePatientPid));
+		Patient goldenResourcePatient = myPatientDao.readByPid(new ResourcePersistentId(sourcePatientPid));
 		goldenResourcePatient.setGender(Enumerations.AdministrativeGender.MALE);
 		try {
 			myMdmHelper.doUpdateResource(goldenResourcePatient, true);

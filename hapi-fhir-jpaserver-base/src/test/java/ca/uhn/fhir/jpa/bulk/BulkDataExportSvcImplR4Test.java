@@ -3,11 +3,11 @@ package ca.uhn.fhir.jpa.bulk;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobParametersBuilder;
 import ca.uhn.fhir.jpa.bulk.export.job.GroupBulkExportJobParametersBuilder;
@@ -26,6 +26,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -40,6 +41,7 @@ import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.CareTeam;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.EpisodeOfCare;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Immunization;
@@ -329,7 +331,8 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			BatchJobsConfig.BULK_EXPORT_JOB_NAME,
 			BatchJobsConfig.PATIENT_BULK_EXPORT_JOB_NAME,
 			BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME,
-			BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME
+			BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME,
+			BatchJobsConfig.MDM_CLEAR_JOB_NAME
 		);
 	}
 
@@ -511,6 +514,63 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 			if ("Patient".equals(next.getResourceType())) {
 				assertThat(nextContents, containsString("\"id\":\"PAT3\""));
+				assertEquals(1, nextContents.split("\n").length);
+			} else {
+				fail(next.getResourceType());
+			}
+		}
+	}
+
+	@Test
+	public void testGenerateBulkExport_WithMultipleTypeFilters() {
+		// Create some resources to load
+		Patient p = new Patient();
+		p.setId("P999999990");
+		p.setActive(true);
+		myPatientDao.update(p);
+
+		EpisodeOfCare eoc = new EpisodeOfCare();
+		eoc.setId("E0");
+		eoc.getPatient().setReference("Patient/P999999990");
+		myEpisodeOfCareDao.update(eoc);
+
+		// Create a bulk job
+		HashSet<String> types = Sets.newHashSet("Patient", "EpisodeOfCare");
+		Set<String> typeFilters = Sets.newHashSet("Patient?_id=P999999990", "EpisodeOfCare?patient=P999999990");
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+		options.setResourceTypes(types);
+		options.setFilters(typeFilters);
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(options);
+		assertNotNull(jobDetails.getJobId());
+
+		// Check the status
+		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+		assertEquals(BulkExportJobStatusEnum.SUBMITTED, status.getStatus());
+		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=EpisodeOfCare,Patient&_typeFilter=Patient%3F_id%3DP999999990&_typeFilter=EpisodeOfCare%3Fpatient%3DP999999990", status.getRequest());
+
+		// Run a scheduled pass to build the export
+		myBulkDataExportSvc.buildExportFiles();
+
+		awaitAllBulkJobCompletions();
+
+		// Fetch the job again
+		status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+		assertEquals(BulkExportJobStatusEnum.COMPLETE, status.getStatus());
+		assertEquals(2, status.getFiles().size());
+
+		// Iterate over the files
+		for (IBulkDataExportSvc.FileEntry next : status.getFiles()) {
+			Binary nextBinary = myBinaryDao.read(next.getResourceId());
+			assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
+			String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
+			ourLog.info("Next contents for type {}:\n{}", next.getResourceType(), nextContents);
+
+			if ("Patient".equals(next.getResourceType())) {
+				assertThat(nextContents, containsString("\"id\":\"P999999990\""));
+				assertEquals(1, nextContents.split("\n").length);
+			} else if ("EpisodeOfCare".equals(next.getResourceType())) {
+				assertThat(nextContents, containsString("\"id\":\"E0\""));
 				assertEquals(1, nextContents.split("\n").length);
 			} else {
 				fail(next.getResourceType());
@@ -886,7 +946,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 	public String getBinaryContents(IBulkDataExportSvc.JobInfo theJobInfo, int theIndex) {
 		// Iterate over the files
-		Binary nextBinary = myBinaryDao.read(theJobInfo.getFiles().get(theIndex).getResourceId(), new SystemRequestDetails());
+		Binary nextBinary = myBinaryDao.read(theJobInfo.getFiles().get(theIndex).getResourceId(), new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
 		assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
 		String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
 		ourLog.info("Next contents for type {}:\n{}", nextBinary.getResourceType(), nextContents);
@@ -1180,12 +1240,12 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			createCareTeamWithIndex(i, patId);
 		}
 
-		myPatientGroupId = myGroupDao.update(group, new SystemRequestDetails()).getId();
+		myPatientGroupId = myGroupDao.update(group, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition())).getId();
 
 		//Manually create another golden record
 		Patient goldenPatient2 = new Patient();
 		goldenPatient2.setId("PAT888");
-		DaoMethodOutcome g2Outcome = myPatientDao.update(goldenPatient2, new SystemRequestDetails());
+		DaoMethodOutcome g2Outcome = myPatientDao.update(goldenPatient2, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
 		Long goldenPid2 = myIdHelperService.getPidOrNull(g2Outcome.getResource());
 
 		//Create some nongroup patients MDM linked to a different golden resource. They shouldnt be included in the query.
@@ -1214,14 +1274,14 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		patient.setGender(i % 2 == 0 ? Enumerations.AdministrativeGender.MALE : Enumerations.AdministrativeGender.FEMALE);
 		patient.addName().setFamily("FAM" + i);
 		patient.addIdentifier().setSystem("http://mrns").setValue("PAT" + i);
-		return myPatientDao.update(patient, new SystemRequestDetails());
+		return myPatientDao.update(patient, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
 	}
 
 	private void createCareTeamWithIndex(int i, IIdType patId) {
 		CareTeam careTeam = new CareTeam();
 		careTeam.setId("CT" + i);
 		careTeam.setSubject(new Reference(patId)); // This maps to the "patient" search parameter on CareTeam
-		myCareTeamDao.update(careTeam, new SystemRequestDetails());
+		myCareTeamDao.update(careTeam, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
 	}
 
 	private void createImmunizationWithIndex(int i, IIdType patId) {
@@ -1239,7 +1299,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			cc.addCoding().setSystem("vaccines").setCode("COVID-19");
 			immunization.setVaccineCode(cc);
 		}
-		myImmunizationDao.update(immunization, new SystemRequestDetails());
+		myImmunizationDao.update(immunization, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
 	}
 
 	private void createObservationWithIndex(int i, IIdType patId) {
@@ -1250,7 +1310,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		if (patId != null) {
 			obs.getSubject().setReference(patId.getValue());
 		}
-		myObservationDao.update(obs, new SystemRequestDetails());
+		myObservationDao.update(obs, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
 	}
 
 	public void linkToGoldenResource(Long theGoldenPid, Long theSourcePid) {

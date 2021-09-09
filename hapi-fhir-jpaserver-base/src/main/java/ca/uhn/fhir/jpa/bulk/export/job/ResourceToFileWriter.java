@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -57,8 +58,8 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 	@Autowired
 	private BulkExportDaoSvc myBulkExportDaoSvc;
 
-	private ByteArrayOutputStream myOutputStream;
-	private OutputStreamWriter myWriter;
+	private final ByteArrayOutputStream myOutputStream;
+	private final OutputStreamWriter myWriter;
 	private IParser myParser;
 
 	@Value("#{stepExecutionContext['bulkExportCollectionEntityId']}")
@@ -101,7 +102,7 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 		IBaseBinary binary = BinaryUtil.newBinary(myFhirContext);
 		binary.setContentType(Constants.CT_FHIR_NDJSON);
 		binary.setContent(myOutputStream.toByteArray());
-		DaoMethodOutcome outcome = myBinaryDao.create(binary, new SystemRequestDetails());
+		DaoMethodOutcome outcome = myBinaryDao.create(binary, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
 		return outcome.getResource().getIdElement();
 	}
 
