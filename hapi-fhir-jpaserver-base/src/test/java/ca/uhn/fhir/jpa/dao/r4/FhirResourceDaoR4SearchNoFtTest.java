@@ -5420,10 +5420,10 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@ParameterizedTest
 	// use @CsvSource to debug individual cases.
-	//@CsvSource("eq2020,2021-01-01,false")
+	//@CsvSource("2021-01-01,eq2020,false")
 	@MethodSource("dateSearchValues")
 	@CsvFileSource(files = "src/test/resources/r4/date-search-test-case.csv", numLinesToSkip = 1)
-	public void testDateSearchWithIncompleteDate(String theQuery, String theResourceDate, Boolean theExpectedMatch) {
+	public void testDateSearchWithIncompleteDate(String theResourceDate, String theQuery, Boolean theExpectedMatch) {
 
 		createObservationWithEffective("OBS1", theResourceDate);
 
@@ -5465,7 +5465,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 			for (String prefix: supportedPrefixes) {
 				boolean expectMatch = expectedTruePrefixes.contains(prefix);
-				testCases.add(Arguments.of(prefix + queryValue, resourceValue, expectMatch));
+				testCases.add(Arguments.of(resourceValue, prefix + queryValue, expectMatch));
 			}
 		}
 
