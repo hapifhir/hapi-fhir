@@ -5419,22 +5419,22 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	/**
-	 * Test for our date search operator.
+	 * Test for our date search operators.
 	 *
 	 * Be careful - date searching is defined by set relations over intervals, not a simple number comparison.
 	 * See http://hl7.org/fhir/search.html#prefix for details.
 	 *
 	 * TODO - pull this out into a general conformance suite so we can run it against Mongo, and Elastic.
-	 * @param theResourceDate
-	 * @param theQuery
-	 * @param theExpectedMatch
+	 * @param theResourceDate the date to use as Observation effective date
+	 * @param theQuery the query parameter value including prefix (e.g. eq2020-01-01)
+	 * @param theExpectedMatch true if theQuery should match theResourceDate.
 	 */
 	@ParameterizedTest
 	// use @CsvSource to debug individual cases.
 	//@CsvSource("2021-01-01,eq2020,false")
-	@MethodSource("dateSearchValues")
-	@CsvFileSource(files = "src/test/resources/r4/date-search-test-case.csv", numLinesToSkip = 1)
-	public void testDateSearchWithIncompleteDate(String theResourceDate, String theQuery, Boolean theExpectedMatch) {
+	@MethodSource("dateSearchCases")
+	@CsvFileSource(resources = "/r4/date-search-test-case.csv", numLinesToSkip = 1)
+	public void testDateSearchMatching(String theResourceDate, String theQuery, Boolean theExpectedMatch) {
 
 		createObservationWithEffective("OBS1", theResourceDate);
 
@@ -5454,9 +5454,9 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	 * This helper expands that one line into test for all of eq, ge, gt, le, lt, and ne,
 	 * expecting the listed prefixes to match, and the unlisted ones to not match.
 	 *
-	 * @return the individual test case arguments for testDateSearchWithIncompleteDate()
+	 * @return the individual test case arguments for testDateSearchMatching()
 	 */
-	public static List<Arguments> dateSearchValues() throws IOException {
+	public static List<Arguments> dateSearchCases() throws IOException {
 		Set<String> supportedPrefixes = CollectionUtil.newSet("eq","ge","gt","le","lt","ne");
 
 		List<String> testCaseLines = IOUtils.readLines(FhirResourceDaoR4SearchNoFtTest.class.getResourceAsStream("/r4/date-prefix-test-cases.csv"), StandardCharsets.UTF_8);
@@ -5472,7 +5472,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			String queryValue = fields[1].trim();
 			String resourceValue = fields[2].trim();
 
-			Set<String> expectedTruePrefixes = Arrays.stream(truePrefixes.split(" +")).map(s -> s.trim()).collect(Collectors.toSet());
+			Set<String> expectedTruePrefixes = Arrays.stream(truePrefixes.split(" +")).map(String::trim).collect(Collectors.toSet());
 
 			for (String prefix: supportedPrefixes) {
 				boolean expectMatch = expectedTruePrefixes.contains(prefix);
