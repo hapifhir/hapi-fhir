@@ -80,6 +80,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -115,6 +116,7 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -366,8 +368,8 @@ public abstract class BaseTransactionProcessor {
 		IBase nextRequestEntry = null;
 		for (int i=0; i<requestEntriesSize; i++ ) {
 			nextRequestEntry = requestEntries.get(i);
-			BundleTask bundleTask = new BundleTask(completionLatch, theRequestDetails, responseMap, i, nextRequestEntry, theNestedMode);
-			getTaskExecutor().execute(bundleTask);
+			RetriableBundleTask retriableBundleTask = new RetriableBundleTask(completionLatch, theRequestDetails, responseMap, i, nextRequestEntry, theNestedMode);
+			getTaskExecutor().execute(retriableBundleTask);
 		}
 
 		// waiting for all tasks to be completed
@@ -1684,7 +1686,7 @@ public abstract class BaseTransactionProcessor {
 		return theStatusCode + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
 	}
 
-	public class BundleTask implements Runnable {
+	public class RetriableBundleTask implements Runnable {
 
 		private CountDownLatch myCompletedLatch;
 		private RequestDetails myRequestDetails;
@@ -1692,51 +1694,73 @@ public abstract class BaseTransactionProcessor {
 		private Map<Integer, Object> myResponseMap;
 		private int myResponseOrder;
 		private boolean myNestedMode;
-		
-		protected BundleTask(CountDownLatch theCompletedLatch, RequestDetails theRequestDetails, Map<Integer, Object> theResponseMap, int theResponseOrder, IBase theNextReqEntry, boolean theNestedMode) {
+		private Throwable myLastSeenException;
+
+		protected RetriableBundleTask(CountDownLatch theCompletedLatch, RequestDetails theRequestDetails, Map<Integer, Object> theResponseMap, int theResponseOrder, IBase theNextReqEntry, boolean theNestedMode) {
 			this.myCompletedLatch = theCompletedLatch;
 			this.myRequestDetails = theRequestDetails;
 			this.myNextReqEntry = theNextReqEntry;
 			this.myResponseMap = theResponseMap;		
 			this.myResponseOrder = theResponseOrder;					
 			this.myNestedMode = theNestedMode;
+			this.myLastSeenException = null;
 		}
-		
+
+		private void processBatchEntry() {
+			IBaseBundle subRequestBundle = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode());
+			myVersionAdapter.addEntry(subRequestBundle, (IBase) myNextReqEntry);
+
+			IBaseBundle nextResponseBundle = processTransactionAsSubRequest(myRequestDetails, subRequestBundle, "Batch sub-request", myNestedMode);
+
+			IBase  subResponseEntry = (IBase) myVersionAdapter.getEntries(nextResponseBundle).get(0);
+			myResponseMap.put(myResponseOrder, subResponseEntry);
+
+			/*
+			 * If the individual entry didn't have a resource in its response, bring the sub-transaction's OperationOutcome across so the client can see it
+			 */
+			if (myVersionAdapter.getResource(subResponseEntry) == null) {
+				IBase nextResponseBundleFirstEntry = (IBase) myVersionAdapter.getEntries(nextResponseBundle).get(0);
+				myResponseMap.put(myResponseOrder, nextResponseBundleFirstEntry);
+			}
+		}
+		private boolean processBatchEntryWithRetry() {
+			int maxAttempts =3;
+			for (int attempt = 1;; attempt++) {
+				try {
+					processBatchEntry();
+					return true;
+				} catch (BaseServerResponseException e) {
+					//If we catch a known and structured exception from HAPI, just fail.
+					myLastSeenException = e;
+					return false;
+				} catch (Throwable t) {
+					myLastSeenException = t;
+					//If we have caught a non-tag-storage failure we are unfamiliar with, or we have exceeded max attempts, exit.
+					if (!DaoFailureUtil.isTagStorageFailure(t) || attempt >= maxAttempts) {
+						ourLog.error("Failure during BATCH sub transaction processing", t);
+						return false;
+					}
+				}
+			}
+		}
+
 		@Override
 		public void run() {
-			BaseServerResponseExceptionHolder caughtEx = new BaseServerResponseExceptionHolder();
-			try {
-				IBaseBundle subRequestBundle = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode());
-				myVersionAdapter.addEntry(subRequestBundle, (IBase) myNextReqEntry);
-
-				IBaseBundle nextResponseBundle = processTransactionAsSubRequest(myRequestDetails, subRequestBundle, "Batch sub-request", myNestedMode);
-
-				IBase  subResponseEntry = (IBase) myVersionAdapter.getEntries(nextResponseBundle).get(0);
-				myResponseMap.put(myResponseOrder, subResponseEntry);
-								
-				/*
-				 * If the individual entry didn't have a resource in its response, bring the sub-transaction's OperationOutcome across so the client can see it
-				 */
-				if (myVersionAdapter.getResource(subResponseEntry) == null) {
-					IBase nextResponseBundleFirstEntry = (IBase) myVersionAdapter.getEntries(nextResponseBundle).get(0);
-					myResponseMap.put(myResponseOrder, nextResponseBundleFirstEntry);
-				}
-
-			} catch (BaseServerResponseException e) {
-				caughtEx.setException(e);
-			} catch (Throwable t) {
-				ourLog.error("Failure during BATCH sub transaction processing", t);
-				caughtEx.setException(new InternalErrorException(t));
+			boolean success = processBatchEntryWithRetry();
+			if (!success) {
+				populateResponseMapWithLastSeenException();
 			}
 
-			if (caughtEx.getException() != null) {
-				// add exception to the response map
-				myResponseMap.put(myResponseOrder, caughtEx);
-			}
-			
 			// checking for the parallelism
-			ourLog.debug("processing bacth for {} is completed", myVersionAdapter.getEntryRequestUrl((IBase)myNextReqEntry));
+			ourLog.debug("Processing batch entry for {} is completed", myVersionAdapter.getEntryRequestUrl((IBase)myNextReqEntry));
 			myCompletedLatch.countDown();
 		}
+
+		private void populateResponseMapWithLastSeenException() {
+			BaseServerResponseExceptionHolder caughtEx = new BaseServerResponseExceptionHolder();
+			caughtEx.setException(new InternalErrorException(myLastSeenException));
+			myResponseMap.put(myResponseOrder, caughtEx);
+		}
+
 	}
 }
