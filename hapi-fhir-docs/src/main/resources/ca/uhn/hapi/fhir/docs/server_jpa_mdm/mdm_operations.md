@@ -567,11 +567,15 @@ Note that the request goes to the root of the FHIR server, and not the `Organiza
 
 ## Clearing MDM Links
 
-The `$mdm-clear` operation is used to batch-delete MDM links and related Golden Resources from the database. This operation is meant to be used during the rules-tuning phase of the MDM implementation so that you can quickly test your ruleset. It permits the user to reset the state of their MDM system without manual deletion of all related links and Golden Resources.
+The `$mdm-clear` operation is used to batch-delete MDM links and related Golden Resources from the database. This
+operation is intended to be used during the rules-tuning phase of the MDM implementation so that you can quickly test
+your ruleset. It permits the user to reset the state of their MDM system without manual deletion of all related links
+and Golden Resources.
 
-After the operation is complete, all targeted MDM links are removed from the system, and their related Golden Resources are deleted and expunged from the server.
+After the operation is complete, all targeted MDM links are removed from the system, and their related Golden Resources
+are deleted and expunged from the server.
 
-This operation takes a single optional Parameter.
+This operation takes two optional Parameters.
 
 <table class="table table-striped table-condensed">
     <thead>
@@ -584,11 +588,21 @@ This operation takes a single optional Parameter.
     </thead>
     <tbody>
         <tr>
-            <td>sourceType</td>
+            <td>resourceType</td>
             <td>String</td>
+            <td>0..*</td>
+            <td>
+                The Source resource types you would like to clear. If omitted, all resource types will be cleared.
+            </td>
+        </tr>
+        <tr>
+            <td>batchSize</td>
+            <td>Integer</td>
             <td>0..1</td>
             <td>
-                The Source Resource type you would like to clear. If omitted, will operate over all links.
+                The number of links that should be deleted at a time.  If ommitted, then the batch size will be determined by the value
+of [Expunge Batch Size](/apidocs/hapi-fhir-jpaserver-api/ca/uhn/fhir/jpa/api/config/DaoConfig.html#getExpungeBatchSize())
+property.
             </td>
         </tr>
     </tbody>
@@ -598,33 +612,27 @@ This operation takes a single optional Parameter.
 
 Use an HTTP POST to the following URL to invoke this operation:
 
-```url
-http://example.com/$mdm-clear
-```
+```http
+POST /$mdm-clear
+Content-Type: application/fhir+json
 
-The following request body could be used:
-
-```json
 {
   "resourceType": "Parameters",
   "parameter": [ {
-    "name": "sourceType",
+    "name": "resourceType",
     "valueString": "Patient"
+  }, {
+    "name": "resourceType",
+    "valueString": "Practitioner"
+  }, {
+    "name": "batchSize",
+    "valueDecimal": 1000
   } ]
 }
 ```
 
-This operation returns the number of MDM links that were cleared. The following is a sample response:
-
-```json
-{
-  "resourceType": "Parameters",
-  "parameter": [ {
-    "name": "reset",
-    "valueDecimal": 5
-  } ]
-}
-```
+This operation returns the job execution id of the Spring Batch job that will be run to remove all the links and their
+golden resources.
 
 ## Batch-creating MDM Links
 

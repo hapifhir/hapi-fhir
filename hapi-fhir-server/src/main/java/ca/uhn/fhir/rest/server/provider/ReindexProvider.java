@@ -37,11 +37,14 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ReindexProvider extends BaseMultiUrlProcessor {
+public class ReindexProvider {
+	private final FhirContext myFhirContext;
 	private final IReindexJobSubmitter myReindexJobSubmitter;
+	private final MultiUrlProcessor myMultiUrlProcessor;
 
 	public ReindexProvider(FhirContext theFhirContext, IReindexJobSubmitter theReindexJobSubmitter) {
-		super(theFhirContext, theReindexJobSubmitter);
+		myFhirContext = theFhirContext;
+		myMultiUrlProcessor = new MultiUrlProcessor(theFhirContext, theReindexJobSubmitter);
 		myReindexJobSubmitter = theReindexJobSubmitter;
 	}
 
@@ -53,12 +56,12 @@ public class ReindexProvider extends BaseMultiUrlProcessor {
 		RequestDetails theRequestDetails
 	) {
 		Boolean everything = theEverything != null && theEverything.getValue();
-		@Nullable Integer batchSize = getBatchSize(theBatchSize);
+		@Nullable Integer batchSize = myMultiUrlProcessor.getBatchSize(theBatchSize);
 		if (everything) {
 			return processEverything(batchSize, theRequestDetails);
 		} else if (theUrlsToReindex != null && !theUrlsToReindex.isEmpty()) {
 			List<String> urls = theUrlsToReindex.stream().map(IPrimitiveType::getValue).collect(Collectors.toList());
-			return super.processUrls(urls, batchSize, theRequestDetails);
+			return myMultiUrlProcessor.processUrls(urls, batchSize, theRequestDetails);
 		} else {
 			throw new InvalidRequestException(ProviderConstants.OPERATION_REINDEX + " must specify either everything=true or provide at least one value for " + ProviderConstants.OPERATION_REINDEX_PARAM_URL);
 		}
@@ -68,7 +71,7 @@ public class ReindexProvider extends BaseMultiUrlProcessor {
 		try {
 			JobExecution jobExecution = myReindexJobSubmitter.submitEverythingJob(theBatchSize, theRequestDetails);
 			IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
-			ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID, jobExecution.getJobId());
+			ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, jobExecution.getJobId());
 			return retval;
 		} catch (JobParametersInvalidException e) {
 			throw new InvalidRequestException("Invalid job parameters: " + e.getMessage(), e);
