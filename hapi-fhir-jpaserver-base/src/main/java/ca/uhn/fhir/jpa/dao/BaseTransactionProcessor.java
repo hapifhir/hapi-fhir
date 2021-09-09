@@ -1691,7 +1691,7 @@ public abstract class BaseTransactionProcessor {
 		private final Map<Integer, Object> myResponseMap;
 		private final int myResponseOrder;
 		private final boolean myNestedMode;
-		private Throwable myLastSeenException;
+		private BaseServerResponseException myLastSeenException;
 
 		protected RetriableBundleTask(CountDownLatch theCompletedLatch, RequestDetails theRequestDetails, Map<Integer, Object> theResponseMap, int theResponseOrder, IBase theNextReqEntry, boolean theNestedMode) {
 			this.myCompletedLatch = theCompletedLatch;
@@ -1731,7 +1731,7 @@ public abstract class BaseTransactionProcessor {
 					myLastSeenException = e;
 					return false;
 				} catch (Throwable t) {
-					myLastSeenException = t;
+					myLastSeenException = new InternalErrorException(t);
 					//If we have caught a non-tag-storage failure we are unfamiliar with, or we have exceeded max attempts, exit.
 					if (!DaoFailureUtil.isTagStorageFailure(t) || attempt >= maxAttempts) {
 						ourLog.error("Failure during BATCH sub transaction processing", t);
@@ -1755,7 +1755,7 @@ public abstract class BaseTransactionProcessor {
 
 		private void populateResponseMapWithLastSeenException() {
 			BaseServerResponseExceptionHolder caughtEx = new BaseServerResponseExceptionHolder();
-			caughtEx.setException(new InternalErrorException(myLastSeenException));
+			caughtEx.setException(myLastSeenException);
 			myResponseMap.put(myResponseOrder, caughtEx);
 		}
 
