@@ -21,7 +21,7 @@ public class TestR4ConfigWithElasticsearchClient extends TestR4ConfigWithElastic
 	public ElasticsearchSvcImpl myElasticsearchSvc() {
 		int elasticsearchPort = elasticContainer().getMappedPort(9200);
 		String host = elasticContainer().getHost();
-		return new ElasticsearchSvcImpl(host, elasticsearchPort, "", "");
+		return new ElasticsearchSvcImpl(host + ":" + elasticsearchPort, null, null);
 	}
 
 	@PreDestroy
