@@ -99,6 +99,9 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		theProperties.put(HibernateOrmMapperSettings.AUTOMATIC_INDEXING_SYNCHRONIZATION_STRATEGY, myDebugSyncStrategy);
 		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.LOG_JSON_PRETTY_PRINTING), Boolean.toString(myDebugPrettyPrintJsonLog));
 
+		//This tells elasticsearch to use our custom index naming strategy.
+		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.LAYOUT_STRATEGY), IndexNamePrefixLayoutStrategy.class.getName());
+
 		injectStartupTemplate(myProtocol, myRestUrl, myUsername, myPassword);
 
 	}
@@ -149,7 +152,7 @@ public class ElasticsearchHibernatePropertiesBuilder {
 	 */
 	void injectStartupTemplate(String theProtocol, String theHostAndPort, String theUsername, String thePassword) {
 		PutIndexTemplateRequest ngramTemplate = new PutIndexTemplateRequest("ngram-template")
-			.patterns(Arrays.asList("resourcetable-*", "termconcept-*"))
+			.patterns(Arrays.asList("*resourcetable-*", "*termconcept-*"))
 			.settings(Settings.builder().put("index.max_ngram_diff", 50));
 
 		int colonIndex = theHostAndPort.indexOf(":");

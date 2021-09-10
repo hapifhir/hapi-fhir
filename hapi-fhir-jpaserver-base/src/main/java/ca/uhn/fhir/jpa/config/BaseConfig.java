@@ -122,6 +122,7 @@ import ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.DatabaseSearchResultCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
+import ca.uhn.fhir.jpa.search.elastic.IndexNamePrefixLayoutStrategy;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexer;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
@@ -155,6 +156,7 @@ import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -288,8 +290,8 @@ public abstract class BaseConfig {
 	 * bean, but it provides a partially completed entity manager
 	 * factory with HAPI FHIR customizations
 	 */
-	protected LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-		LocalContainerEntityManagerFactoryBean retVal = new HapiFhirLocalContainerEntityManagerFactoryBean();
+	protected LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory myConfigurableListableBeanFactory) {
+		LocalContainerEntityManagerFactoryBean retVal = new HapiFhirLocalContainerEntityManagerFactoryBean(myConfigurableListableBeanFactory);
 		configureEntityManagerFactory(retVal, fhirContext());
 		return retVal;
 	}
@@ -917,6 +919,11 @@ public abstract class BaseConfig {
 	@Bean
 	public PredicateBuilderFactory predicateBuilderFactory(ApplicationContext theApplicationContext) {
 		return new PredicateBuilderFactory(theApplicationContext);
+	}
+
+	@Bean
+	public IndexNamePrefixLayoutStrategy indexLayoutStrategy() {
+		return new IndexNamePrefixLayoutStrategy();
 	}
 
 	@Bean
