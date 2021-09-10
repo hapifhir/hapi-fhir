@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
