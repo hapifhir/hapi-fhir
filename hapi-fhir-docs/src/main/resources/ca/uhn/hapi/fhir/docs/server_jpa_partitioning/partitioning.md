@@ -78,32 +78,52 @@ The criteria for determining the partition will depend on your use case. For exa
 
 ## Identify Partition for Read (Optional)
 
-A hook against the [`Pointcut.STORAGE_PARTITION_IDENTIFY_READ`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PARTITION_IDENTIFY_READ) pointcut must be registered, and this hook method will be invoked every time a resource is created in order to determine the partition to assign the resource to.
+A hook against
+the [`Pointcut.STORAGE_PARTITION_IDENTIFY_READ`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PARTITION_IDENTIFY_READ)
+pointcut must be registered, and this hook method will be invoked every time a resource is created in order to determine
+the partition to assign the resource to.
 
-As of HAPI FHIR 5.3.0, the *Identify Partition for Read* hook method may return multiple partition names or IDs. If more than one partition is identified, the server will search in all identified partitions.  
+As of HAPI FHIR 5.3.0, the *Identify Partition for Read* hook method may return multiple partition names or IDs. If more
+than one partition is identified, the server will search in all identified partitions.
 
 ## Non-Partitionable Resources
 
-Some resource types can not be placed in any partition other than the DEFAULT partition. When a resource of one of these types is being created, the *STORAGE_PARTITION_IDENTIFY_CREATE* pointcut is invoked, but the hook method must return [defaultPartition()](https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/model/RequestPartitionId.html#defaultPartition()). A partition date may optionally be included.
+Some resource types can not be placed in any partition other than the DEFAULT partition. When a resource of one of these
+types is being created, the *STORAGE_PARTITION_IDENTIFY_CREATE* pointcut is invoked, but the hook method must
+return [defaultPartition()](https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/model/RequestPartitionId.html#defaultPartition())
+. A partition date may optionally be included.
 
 The following resource types may not be placed in any partition except the default partition:
 
-* CapabilityStatement
-* CodeSystem
-* CompartmentDefinition
-* ConceptMap
-* NamingSystem
-* OperationDefinition
-* Questionnaire
-* SearchParameter
-* StructureDefinition
-* StructureMap
+### Infrastructure
+
 * Subscription
+* SearchParameter
+
+### Validation and Conformance
+
+* StructureDefinition
+* Questionnaire
+* CapabilityStatement
+* CompartmentDefinition
+* OperationDefinition
+
+### Terminology
+
+* ConceptMap
+* CodeSystem
 * ValueSet
+* NamingSystem
+* StructureMap
+
+### Measure Evaluation
+
+* Library
 
 ## Examples
 
-See [Partition Interceptor Examples](./partition_interceptor_examples.html) for various samples of how partitioning interceptors can be set up.
+See [Partition Interceptor Examples](./partition_interceptor_examples.html) for various samples of how partitioning
+interceptors can be set up.
 
 # Complete Example: Using Request Tenants
 

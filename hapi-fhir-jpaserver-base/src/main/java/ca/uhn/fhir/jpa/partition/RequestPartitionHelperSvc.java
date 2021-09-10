@@ -92,6 +92,8 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 		myNonPartitionableResourceNames.add("NamingSystem");
 		myNonPartitionableResourceNames.add("StructureMap");
 
+		// Measure Evaluation
+		myNonPartitionableResourceNames.add("Library");
 	}
 
 	/**
