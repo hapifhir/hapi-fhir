@@ -17,6 +17,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,7 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -233,24 +235,27 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testProcedurePatient(){
-		Bundle resp2 = myClient
+	public void testParamWithNoValueIsConsideredForCacheResults(){
+		// Given: We populate the cache by searching
+		myClient
 			.search()
 			.byUrl("Procedure")
 			.returnBundle(Bundle.class)
 			.execute();
 
+		// When: We search Procedure?patient=
 		BaseServerResponseException exception = assertThrows(BaseServerResponseException.class, () -> {myClient
 			.search()
 			.byUrl("Procedure?patient=")
 			.returnBundle(Bundle.class)
 			.execute();});
 
-		assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, exception.getStatusCode());
+		// Then: We do not get a cache hit
+		assertNotEquals(Constants.STATUS_HTTP_200_OK, exception.getStatusCode());
 	}
 
 	@Test
-	public void testPatient(){
+	public void testReturn400ForParameterWithNoValue(){
 		BaseServerResponseException exception = assertThrows(BaseServerResponseException.class, () -> {myClient
 			.search()
 			.byUrl("Procedure?patient=")

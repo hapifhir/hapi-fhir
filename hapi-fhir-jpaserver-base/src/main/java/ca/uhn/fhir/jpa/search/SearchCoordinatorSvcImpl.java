@@ -1014,9 +1014,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						logged = true;
 						ourLog.warn("Failed during search due to invalid request: {}", t.toString());
 					}
-				}else if (t instanceof java.lang.IllegalArgumentException && t.getMessage().contentEquals("The validated expression is false")) {
-					logged = true;
-					ourLog.warn("Failed during search due to invalid request: {}", t.toString());
 				}
 
 				if (!logged) {
@@ -1031,8 +1028,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				int failureCode = InternalErrorException.STATUS_CODE;
 				if (t instanceof BaseServerResponseException) {
 					failureCode = ((BaseServerResponseException) t).getStatusCode();
-				}else if(t instanceof java.lang.IllegalArgumentException && t.getMessage().contentEquals("The validated expression is false")) {
-					failureCode = Constants.STATUS_HTTP_400_BAD_REQUEST;
 				}
 
 				if (System.getProperty(UNIT_TEST_CAPTURE_STACK) != null) {
@@ -1212,6 +1207,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			} catch (IOException e) {
 				ourLog.error("IO failure during database access", e);
 				throw new InternalErrorException(e);
+			} catch (IllegalArgumentException e) {
+				ourLog.error("Illegal Argument during database access", e);
+				throw new InvalidRequestException("Parameter value missing in request", e);
 			}
 		}
 	}
