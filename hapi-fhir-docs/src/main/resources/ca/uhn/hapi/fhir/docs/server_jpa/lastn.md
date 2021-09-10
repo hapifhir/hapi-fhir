@@ -31,7 +31,7 @@ In addition, the Elasticsearch client service, `ElasticsearchSvcImpl` will need 
 ```java
   @Bean()
   public ElasticsearchSvcImpl elasticsearchSvc() {
-     String elasticsearchHost = "localhost:9301";
+     String elasticsearchHost = "localhost:9200";
      String elasticsearchUsername = "elastic";
      String elasticsearchPassword = "changeme";
 

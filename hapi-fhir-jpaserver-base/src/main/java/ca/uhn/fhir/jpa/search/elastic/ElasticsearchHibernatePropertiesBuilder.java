@@ -144,13 +144,13 @@ public class ElasticsearchHibernatePropertiesBuilder {
 	 * TODO GGG HS: In HS6.1, we should have a native way of performing index settings manipulation at bootstrap time, so this should
 	 * eventually be removed in favour of whatever solution they come up with.
 	 */
-	void injectStartupTemplate(String protocol, String hosts, @Nullable String username, @Nullable String password) {
+	void injectStartupTemplate(String theProtocol, String theHosts, @Nullable String theUsername, @Nullable String thePassword) {
 		PutIndexTemplateRequest ngramTemplate = new PutIndexTemplateRequest("ngram-template")
 			.patterns(Arrays.asList("*resourcetable-*", "*termconcept-*"))
 			.settings(Settings.builder().put("index.max_ngram_diff", 50));
 
 		try {
-			RestHighLevelClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(protocol, hosts, username, password);
+			RestHighLevelClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(theProtocol, theHosts, theUsername, thePassword);
 			ourLog.info("Adding starter template for large ngram diffs");
 			AcknowledgedResponse acknowledgedResponse = elasticsearchHighLevelRestClient.indices().putTemplate(ngramTemplate, RequestOptions.DEFAULT);
 			assert acknowledgedResponse.isAcknowledged();
