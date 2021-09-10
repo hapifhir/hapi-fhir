@@ -123,6 +123,7 @@ import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -168,6 +169,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport.LOINC_GENERIC_VALUESET_URL;
+import static ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport.LOINC_GENERIC_VALUESET_URL_PLUS_SLASH;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -445,7 +448,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			if (theValueSetToExpand.hasVersion()) {
 				optionalTermValueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(theValueSetToExpand.getUrl(), theValueSetToExpand.getVersion());
 			} else {
-				optionalTermValueSet = myTermValueSetDao.findTermValueSetByUrl(theValueSetToExpand.getUrl());
+				optionalTermValueSet = findCurrentTermValueSet(theValueSetToExpand.getUrl());
 			}
 		} else {
 			optionalTermValueSet = Optional.empty();
@@ -2332,6 +2335,31 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		return codeSystemValidateCode(codeSystemUrl, theVersion, code, display);
 	}
+
+
+	@Override
+	public Optional<TermValueSet> findCurrentTermValueSet(String theUrl) {
+		boolean isNotLoincCodeSystem = ! StringUtils.containsIgnoreCase(theUrl, "loinc");
+		boolean hasVersion = theUrl.contains("|");
+		boolean isForGenericValueSet = theUrl.equals(LOINC_GENERIC_VALUESET_URL);
+		if (isNotLoincCodeSystem || hasVersion || isForGenericValueSet) {
+			List<TermValueSet> termValueSetList = myTermValueSetDao.findTermValueSetByUrl(Pageable.ofSize(1), theUrl);
+			if (termValueSetList.isEmpty()) return Optional.empty();
+			return Optional.of(termValueSetList.get(0));
+		}
+
+		if (! theUrl.startsWith(LOINC_GENERIC_VALUESET_URL))   return Optional.empty();
+
+		if (! theUrl.startsWith(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH)) {
+			throw new InternalErrorException("Don't know how to extract ForcedId from url: " + theUrl);
+		}
+
+		String forcedId = theUrl.substring(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH.length());
+		if (StringUtils.isBlank(forcedId))  return Optional.empty();
+
+		return myTermValueSetDao.findTermValueSetByForcedId(forcedId);
+	}
+
 
 	@SuppressWarnings("unchecked")
 	private CodeValidationResult codeSystemValidateCode(String theCodeSystemUrl, String theCodeSystemVersion, String theCode, String theDisplay) {

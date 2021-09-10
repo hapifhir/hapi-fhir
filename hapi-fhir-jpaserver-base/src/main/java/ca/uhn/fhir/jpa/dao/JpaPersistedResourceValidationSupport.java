@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -80,7 +81,6 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-
 	private Class<? extends IBaseResource> myCodeSystemType;
 	private Class<? extends IBaseResource> myStructureDefinitionType;
 	private Class<? extends IBaseResource> myValueSetType;
@@ -128,12 +128,13 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	public Optional<IBaseResource> getValueSetCurrentVersion(UriType theUrl) {
 		if (! theUrl.getValueAsString().startsWith(LOINC_GENERIC_VALUESET_URL))   return Optional.empty();
 
-		if (!theUrl.getValue().startsWith(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH)) {
+		if (! theUrl.getValue().startsWith(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH)) {
 				throw new InternalErrorException("Don't know how to extract ForcedId from url: " + theUrl.getValueAsString());
 		}
 
 		String forcedId = theUrl.getValue().substring(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH.length());
-		IBaseResource valueSet = myDaoRegistry.getResourceDao(myValueSetType).read(new IdDt("ValueSet", forcedId));
+		IFhirResourceDao<? extends IBaseResource> valueSetResourceDao = myDaoRegistry.getResourceDao(myValueSetType);
+		IBaseResource valueSet = valueSetResourceDao.read(new IdDt("ValueSet", forcedId));
 		return Optional.ofNullable(valueSet);
 	}
 

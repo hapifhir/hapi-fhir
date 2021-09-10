@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,8 +30,6 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
-
-import static ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport.LOINC_GENERIC_VALUESET_URL;
 
 public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long> {
 
@@ -51,28 +48,17 @@ public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long> {
 	List<TermValueSet> findTermValueSetByUrl(Pageable thePage, @Param("url") String theUrl);
 
 	/**
-	 * The current TermValueSet is not necessarily the last uploaded anymore, but we know which is the last VS resource
-	 * because it is pointed by a specific ForcedId, so we locate current ValueSet as the one pointing to the current resource
+	 * The current TermValueSet is not necessarily the last uploaded anymore, but the current VS resource
+	 * is pointed by a specific ForcedId, so we locate current ValueSet as the one pointing to current VS resource
 	 */
 	@Query(value="SELECT vs FROM ForcedId f, TermValueSet vs where f.myForcedId = :forcedId and vs.myResource = f.myResource")
 	Optional<TermValueSet> findTermValueSetByForcedId(@Param("forcedId") String theForcedId);
-
-	default Optional<TermValueSet> findTermValueSetByUrl(@Param("url") String theUrl) {
-		if (theUrl.startsWith(LOINC_GENERIC_VALUESET_URL)) {
-			String forcedId = theUrl.substring(LOINC_GENERIC_VALUESET_URL.length());
-			if (StringUtils.isBlank(forcedId))  return Optional.empty();
-			return findTermValueSetByForcedId(forcedId);
-		}
-
-		List<TermValueSet> tvsList = findTermValueSetByUrl(Pageable.ofSize(1), theUrl);
-
-		return Optional.ofNullable(tvsList.size() == 1 ? tvsList.get(0) : null);
-	}
 
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myUrl = :url AND vs.myVersion IS NULL")
 	Optional<TermValueSet> findTermValueSetByUrlAndNullVersion(@Param("url") String theUrl);
 
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myUrl = :url AND vs.myVersion = :version")
 	Optional<TermValueSet> findTermValueSetByUrlAndVersion(@Param("url") String theUrl, @Param("version") String theVersion);
+
 
 }

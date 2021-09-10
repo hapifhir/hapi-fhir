@@ -7,24 +7,23 @@ This CodeSystem resource describes 'LOINC' independent of any particular version
 
 Note that the following set of codes are defined by the LOINC code systems:
  - the main LOINC codes
- - the LOINC Answer codes (LA-) and the LOINC Answer list codes (LL-)
- - the LOINC Part codes (LP-) in the Multiaxial Hierarchy
- - the LOINC Part codes (LP-) for the properties
+ - the LOINC Answer codes (LA) and the LOINC Answer list codes (LL)
+ - the LOINC Part codes (LP) in the Multiaxial Hierarchy
+ - the LOINC Part codes (LP) for the properties
     Note: there are license restrictions on the use of LOINC Part codes
- - the LOINC Group codes (LG-)
+ - the LOINC Group codes (LG)
     Note: presently the LOINC Group codes are used to identify these roll-up groups as ValueSets, but are not yet loaded as codes in the CodeSystem
 
 Servers may generate variants of this for the LOINC version(s) and features they support.
 
-File Version: 0.6
 -->
 
 <CodeSystem xmlns="http://hl7.org/fhir">
 	<id value="loinc"/>
 
 	<!--
-	This url is unchanged for all versions of LOINC. There can only be one correct Code System resource for each value of the version attribute (at least, only one per server).
-	-->
+    This url is unchanged for all versions of LOINC. There can only be one correct Code System resource for each value of the version attribute (at least, only one per server).
+    -->
 	<url value="http://loinc.org"/>
 
 	<!-- the HL7 v3 OID assigned to LOINC -->
@@ -33,38 +32,32 @@ File Version: 0.6
 		<value value="urn:oid:2.16.840.1.113883.6.1"/>
 	</identifier>
 
-	<!--
-	If a version is specified:
-	<version value="2.68"/>
-	-->
+<!--    <version value="2.68"/>-->
 
 	<!--
-	If a specific version is specified, the name should carry this information (e.g. LOINC_268).
-	-->
+    If a specific version is specified, the name should carry this information (e.g. LOINC_270).
+    -->
 	<name value="LOINC"/>
-	<title value="LOINC Code System"/>
+	<title value="LOINC Code System (Testing Copy)"/>
 	<status value="active"/>
 	<experimental value="false"/>
 
 	<publisher value="Regenstrief Institute, Inc."/>
 	<contact>
 		<telecom>
+			<system value="url" />
 			<value value="http://loinc.org"/>
 		</telecom>
 	</contact>
 
 	<!--
-	<date value=2020-06/>
+	<date value=2021-06/>
 	-->
 	<description value="LOINC is a freely available international standard for tests, measurements, and observations"/>
-	<copyright value="This material contains content from LOINC (http://loinc.org). LOINC is copyright ©1995-2020, Regenstrief Institute, Inc. and the Logical Observation Identifiers Names and Codes (LOINC) Committee and is available at no cost under the license at http://loinc.org/license. LOINC® is a registered United States trademark of Regenstrief Institute, Inc."/>
+	<copyright value="This material contains content from LOINC (http://loinc.org). LOINC is copyright ©1995-2021, Regenstrief Institute, Inc. and the Logical Observation Identifiers Names and Codes (LOINC) Committee and is available at no cost under the license at http://loinc.org/license. LOINC® is a registered United States trademark of Regenstrief Institute, Inc."/>
 	<caseSensitive  value="false"/>
 
-	<valueSet value=" http://loinc.org/vs"/>
-	<!--
-	 For a version specific reference:
-	 <valueSet value="http://loinc.org/2.68/vs"/>
-  -->
+	<valueSet value="http://loinc.org/vs"/>
 
 	<!--
 	  It's at the discretion of servers whether to present fragments of LOINC hierarchically or not, when using the code system resource. But, if they are hierarchical, the Hierarchy SHALL be based on the is-a relationship that is derived from the LOINC Multiaxial Hierarchy.
@@ -93,13 +86,15 @@ File Version: 0.6
 
 	  For illustration purposes, consider this slice of the LOINC Multiaxial Hierarchy when reading the descriptions below:
 
-	  Microbiology [LP7819-8]
-		 Microorganism [LP14559-6]
-			Virus [LP14855-8]
-			  Zika virus [LP200137-0]
-				 Zika virus RNA | XXX [LP203271-4]
-					Zika virus RNA | XXX | Microbiology [LP379670-5]
-					  Zika virus RNA [Presence] in Unspecified specimen by Probe and target amplification method [79190-5]
+	  Laboratory [LP29693-6]
+        Microbiology and Antimicrobial susceptibility [LP343406-7]
+            Microbiology [LP7819-8]
+                Microorganism [LP14559-6]
+                    Virus [LP14855-8]
+                        Zika virus [LP200137-0]
+                            Zika virus RNA | XXX [LP203271-4]
+                                Zika virus RNA | XXX | Microbiology [LP379670-5]
+                                    Zika virus RNA [Presence] in Unspecified specimen by Probe and target amplification method [79190-5]
 
 	  Language Note: The filters defined here are specified using the default LOINC language - English (US). Requests are meant to be specified and interpreted on the English version. The return can be in a specified language (if supported by the server). But note that not all filters/properties have language translations available.
 	  -->
@@ -141,13 +136,13 @@ File Version: 0.6
 		<code value="parent"/>
 		<uri value="http://hl7.org/fhir/concept-properties#parent"/>
 		<description value="A parent code in the Multiaxial Hierarchy"/>
-		<type value=""/>
+		<type value="code"/>
 	</property>
 	<property>
 		<code value="child"/>
 		<uri value="http://hl7.org/fhir/concept-properties#child"/>
 		<description value="A child code in the Multiaxial Hierarchy"/>
-		<type value=""/>
+		<type value="code"/>
 	</property>
 
 	<!--
@@ -155,8 +150,8 @@ File Version: 0.6
 	  These apply to the main LOINC codes, but not the Multiaxial Hierarchy, Answer lists, or the Part codes.
 	  Notes:
 		 In the LOINC code system resource, the display element = LONG_COMMON_NAME
-		 Many properties are specified as type "coding", which allows use of LOINC Part codes (LP-) and the display text. LOINC Parts and their associations to LOINC terms are published in the LOINC Part File.
-		 The properties defined here follow the guidance of the LOINC Users' Manual, which states that they should be expressed with the LOINC attributes contained in the LOINC Table. Properties that are not defined in the LOINC Table use FHIR-styled names.
+		 Many properties are specified as type "Coding", which allows use of LOINC Part codes (LP-) and the display text. LOINC Parts and their associations to LOINC terms are published in the LOINC Part File.
+		 The properties defined here follow the guidance of the LOINC Users' Guide, which states that they should be expressed with the LOINC attributes contained in the LOINC Table. Properties that are not defined in the LOINC Table use FHIR-styled names.
 	-->
 
 	<property>
@@ -204,7 +199,7 @@ File Version: 0.6
 	<property>
 		<code value="CLASS"/>
 		<uri value="http://loinc.org/property/CLASS"/>
-		<description value="An arbitrary classification of the terms for grouping related observations together"/>
+		<description value="An arbitrary classification of terms for grouping related observations together"/>
 		<type value="Coding"/>
 	</property>
 	<property>
@@ -228,7 +223,7 @@ File Version: 0.6
 	<property>
 		<code value="HL7_ATTACHMENT_STRUCTURE"/>
 		<uri value="http://loinc.org/property/HL7_ATTACHMENT_STRUCTURE"/>
-		<description value="This property is populated in collaboration with the HL7 Attachments Work Group as described in the HL7 Attachment Specification: Supplement to Consolidated CDA Templated Guide."/>
+		<description value="This property is populated in collaboration with the HL7 Payer-Provider Exchange (PIE) Work Group (previously called Attachments Work Group) as described in the HL7 Attachment Specification: Supplement to Consolidated CDA Templated Guide."/>
 		<type value="string"/>
 	</property>
 	<property>
@@ -369,7 +364,7 @@ File Version: 0.6
 	<!--
 	LOINC/RSNA Radiology Playbook properties. These apply only to terms in the LOINC/RSNA Radiology Playbook File.
 		  Notes:
-			Properties are specified as type "coding", which are represented by LOINC Part codes (LP-) and their display names.
+			Properties are specified as type "Coding", which are represented by LOINC Part codes (LP-) and their display names.
 			The attribute names here use FHIR styled names rather than their original LOINC style names because the original names contain periods.
 	-->
 
@@ -486,7 +481,7 @@ File Version: 0.6
 	Document Ontology properties.
 	These apply only to terms in the LOINC Document Ontology File
 		  Notes
-			Properties are specified as type "coding", which are represented by LOINC Part codes (LP-) and their display names.
+			Properties are specified as type "Coding", which are represented by LOINC Part codes (LP-) and their display names.
 			The attribute names here use FHIR styled names rather than their original LOINC style names because those contain periods.
 	 -->
 
