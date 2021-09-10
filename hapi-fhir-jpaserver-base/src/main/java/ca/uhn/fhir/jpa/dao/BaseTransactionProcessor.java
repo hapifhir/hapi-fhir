@@ -35,7 +35,8 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
+import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
@@ -54,7 +55,6 @@ import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -160,7 +160,7 @@ public abstract class BaseTransactionProcessor {
 	private TaskExecutor myExecutor ;
 
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IResourceVersionSvc myResourceVersionSvc;
 
 	@VisibleForTesting
 	public void setDaoConfig(DaoConfig theDaoConfig) {
@@ -366,8 +366,8 @@ public abstract class BaseTransactionProcessor {
 		IBase nextRequestEntry = null;
 		for (int i=0; i<requestEntriesSize; i++ ) {
 			nextRequestEntry = requestEntries.get(i);
-			BundleTask bundleTask = new BundleTask(completionLatch, theRequestDetails, responseMap, i, nextRequestEntry, theNestedMode);
-			getTaskExecutor().execute(bundleTask);
+			RetriableBundleTask retriableBundleTask = new RetriableBundleTask(completionLatch, theRequestDetails, responseMap, i, nextRequestEntry, theNestedMode);
+			getTaskExecutor().execute(retriableBundleTask);
 		}
 
 		// waiting for all tasks to be completed
@@ -1271,25 +1271,24 @@ public abstract class BaseTransactionProcessor {
 				// get a map of
 				// existing ids -> PID (for resources that exist in the DB)
 				// should this be allPartitions?
-				Map<IIdType, ResourcePersistentId> idToPID = myIdHelperService.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
+				ResourcePersistentIdMap resourceVersionMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
 					theReferencesToAutoVersion.stream()
-					.map(ref -> ref.getReferenceElement()).collect(Collectors.toList()));
+						.map(IBaseReference::getReferenceElement).collect(Collectors.toList()));
 
 				for (IBaseReference baseRef : theReferencesToAutoVersion) {
 					IIdType id = baseRef.getReferenceElement();
-					if (!idToPID.containsKey(id)
-							&& myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
+					if (!resourceVersionMap.containsKey(id)
+						&& myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
 						// not in the db, but autocreateplaceholders is true
 						// so the version we'll set is "1" (since it will be
 						// created later)
 						String newRef = id.withVersion("1").getValue();
 						id.setValue(newRef);
-					}
-					else {
+					} else {
 						// we will add the looked up info to the transaction
 						// for later
 						theTransactionDetails.addResolvedResourceId(id,
-							idToPID.get(id));
+							resourceVersionMap.getResourcePersistentId(id));
 					}
 				}
 
@@ -1684,59 +1683,81 @@ public abstract class BaseTransactionProcessor {
 		return theStatusCode + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
 	}
 
-	public class BundleTask implements Runnable {
+	public class RetriableBundleTask implements Runnable {
 
-		private CountDownLatch myCompletedLatch;
-		private RequestDetails myRequestDetails;
-		private IBase myNextReqEntry;
-		private Map<Integer, Object> myResponseMap;
-		private int myResponseOrder;
-		private boolean myNestedMode;
-		
-		protected BundleTask(CountDownLatch theCompletedLatch, RequestDetails theRequestDetails, Map<Integer, Object> theResponseMap, int theResponseOrder, IBase theNextReqEntry, boolean theNestedMode) {
+		private final CountDownLatch myCompletedLatch;
+		private final RequestDetails myRequestDetails;
+		private final IBase myNextReqEntry;
+		private final Map<Integer, Object> myResponseMap;
+		private final int myResponseOrder;
+		private final boolean myNestedMode;
+		private BaseServerResponseException myLastSeenException;
+
+		protected RetriableBundleTask(CountDownLatch theCompletedLatch, RequestDetails theRequestDetails, Map<Integer, Object> theResponseMap, int theResponseOrder, IBase theNextReqEntry, boolean theNestedMode) {
 			this.myCompletedLatch = theCompletedLatch;
 			this.myRequestDetails = theRequestDetails;
 			this.myNextReqEntry = theNextReqEntry;
-			this.myResponseMap = theResponseMap;		
-			this.myResponseOrder = theResponseOrder;					
+			this.myResponseMap = theResponseMap;
+			this.myResponseOrder = theResponseOrder;
 			this.myNestedMode = theNestedMode;
+			this.myLastSeenException = null;
 		}
-		
+
+		private void processBatchEntry() {
+			IBaseBundle subRequestBundle = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode());
+			myVersionAdapter.addEntry(subRequestBundle, myNextReqEntry);
+
+			IBaseBundle nextResponseBundle = processTransactionAsSubRequest(myRequestDetails, subRequestBundle, "Batch sub-request", myNestedMode);
+
+			IBase  subResponseEntry = (IBase) myVersionAdapter.getEntries(nextResponseBundle).get(0);
+			myResponseMap.put(myResponseOrder, subResponseEntry);
+
+			/*
+			 * If the individual entry didn't have a resource in its response, bring the sub-transaction's OperationOutcome across so the client can see it
+			 */
+			if (myVersionAdapter.getResource(subResponseEntry) == null) {
+				IBase nextResponseBundleFirstEntry = (IBase) myVersionAdapter.getEntries(nextResponseBundle).get(0);
+				myResponseMap.put(myResponseOrder, nextResponseBundleFirstEntry);
+			}
+		}
+		private boolean processBatchEntryWithRetry() {
+			int maxAttempts =3;
+			for (int attempt = 1;; attempt++) {
+				try {
+					processBatchEntry();
+					return true;
+				} catch (BaseServerResponseException e) {
+					//If we catch a known and structured exception from HAPI, just fail.
+					myLastSeenException = e;
+					return false;
+				} catch (Throwable t) {
+					myLastSeenException = new InternalErrorException(t);
+					//If we have caught a non-tag-storage failure we are unfamiliar with, or we have exceeded max attempts, exit.
+					if (!DaoFailureUtil.isTagStorageFailure(t) || attempt >= maxAttempts) {
+						ourLog.error("Failure during BATCH sub transaction processing", t);
+						return false;
+					}
+				}
+			}
+		}
+
 		@Override
 		public void run() {
-			BaseServerResponseExceptionHolder caughtEx = new BaseServerResponseExceptionHolder();
-			try {
-				IBaseBundle subRequestBundle = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode());
-				myVersionAdapter.addEntry(subRequestBundle, (IBase) myNextReqEntry);
-
-				IBaseBundle nextResponseBundle = processTransactionAsSubRequest(myRequestDetails, subRequestBundle, "Batch sub-request", myNestedMode);
-
-				IBase  subResponseEntry = (IBase) myVersionAdapter.getEntries(nextResponseBundle).get(0);
-				myResponseMap.put(myResponseOrder, subResponseEntry);
-								
-				/*
-				 * If the individual entry didn't have a resource in its response, bring the sub-transaction's OperationOutcome across so the client can see it
-				 */
-				if (myVersionAdapter.getResource(subResponseEntry) == null) {
-					IBase nextResponseBundleFirstEntry = (IBase) myVersionAdapter.getEntries(nextResponseBundle).get(0);
-					myResponseMap.put(myResponseOrder, nextResponseBundleFirstEntry);
-				}
-
-			} catch (BaseServerResponseException e) {
-				caughtEx.setException(e);
-			} catch (Throwable t) {
-				ourLog.error("Failure during BATCH sub transaction processing", t);
-				caughtEx.setException(new InternalErrorException(t));
+			boolean success = processBatchEntryWithRetry();
+			if (!success) {
+				populateResponseMapWithLastSeenException();
 			}
 
-			if (caughtEx.getException() != null) {
-				// add exception to the response map
-				myResponseMap.put(myResponseOrder, caughtEx);
-			}
-			
 			// checking for the parallelism
-			ourLog.debug("processing bacth for {} is completed", myVersionAdapter.getEntryRequestUrl((IBase)myNextReqEntry));
+			ourLog.debug("processing batch for {} is completed", myVersionAdapter.getEntryRequestUrl(myNextReqEntry));
 			myCompletedLatch.countDown();
 		}
+
+		private void populateResponseMapWithLastSeenException() {
+			BaseServerResponseExceptionHolder caughtEx = new BaseServerResponseExceptionHolder();
+			caughtEx.setException(myLastSeenException);
+			myResponseMap.put(myResponseOrder, caughtEx);
+		}
+
 	}
 }

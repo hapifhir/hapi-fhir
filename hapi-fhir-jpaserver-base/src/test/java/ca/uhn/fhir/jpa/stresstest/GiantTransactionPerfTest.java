@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheFactory;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
+import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
@@ -45,6 +46,7 @@ import com.google.common.collect.Lists;
 import org.hamcrest.Matchers;
 import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.junit.jupiter.api.AfterEach;
@@ -323,9 +325,14 @@ public class GiantTransactionPerfTest {
 
 		@Nonnull
 		@Override
-		public ResourceVersionMap getVersionMap(String theResourceName, SearchParameterMap theSearchParamMap) {
+		public ResourceVersionMap getVersionMap(RequestPartitionId theRequestPartitionId, String theResourceName, SearchParameterMap theSearchParamMap) {
 			myGetVersionMap++;
 			return ResourceVersionMap.fromResources(Lists.newArrayList());
+		}
+
+		@Override
+		public ResourcePersistentIdMap getLatestVersionIdsForResourceIds(RequestPartitionId thePartition, List<IIdType> theIds) {
+			return null;
 		}
 	}
 
