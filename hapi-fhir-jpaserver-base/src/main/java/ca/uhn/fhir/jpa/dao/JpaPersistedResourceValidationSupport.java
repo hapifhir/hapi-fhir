@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -81,6 +82,10 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
+	@Autowired
+	private ITermReadSvc myTermReadSvc;
+
 	private Class<? extends IBaseResource> myCodeSystemType;
 	private Class<? extends IBaseResource> myStructureDefinitionType;
 	private Class<? extends IBaseResource> myValueSetType;
@@ -107,25 +112,20 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 	@Override
 	public IBaseResource fetchValueSet(String theSystem) {
-		boolean isNotLoincCodeSystem = ! StringUtils.containsIgnoreCase(theSystem, "loinc");
-		boolean hasVersion = theSystem.contains("|");
-		boolean isForGenericValueSet = theSystem.equals(LOINC_GENERIC_VALUESET_URL);
-		if (isNotLoincCodeSystem || hasVersion || isForGenericValueSet) {
-			return fetchResource(myValueSetType, theSystem);
+		if (myTermReadSvc.isLoincNotGenericUnversionedValueSet(theSystem)) {
+			Optional<IBaseResource> currentVSOpt = getValueSetCurrentVersion(new UriType(theSystem));
+			return currentVSOpt.orElseThrow(() -> new ResourceNotFoundException(
+				"Couldn't find current version ValueSet for url: " + theSystem));
 		}
 
-		// if no version is present, we need to fetch the resource for the current version if one exists,
-		// in case it is not the last loaded
-		Optional<IBaseResource> currentVSOpt = getValueSetCurrentVersion(new UriType(theSystem));
-		return currentVSOpt.orElseThrow(() -> new ResourceNotFoundException(
-			"Couldn't find current version ValueSet for url: " + theSystem));
+		return fetchResource(myValueSetType, theSystem);
 	}
 
 	/**
 	 * Obtains the current version of a ValueSet using the fact that the current
 	 * version is always pointed by the ForcedId for the no-versioned VS
 	 */
-	public Optional<IBaseResource> getValueSetCurrentVersion(UriType theUrl) {
+	private Optional<IBaseResource> getValueSetCurrentVersion(UriType theUrl) {
 		if (! theUrl.getValueAsString().startsWith(LOINC_GENERIC_VALUESET_URL))   return Optional.empty();
 
 		if (! theUrl.getValue().startsWith(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH)) {
@@ -133,6 +133,10 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		}
 
 		String forcedId = theUrl.getValue().substring(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH.length());
+		if (StringUtils.isBlank(forcedId))  return Optional.empty();
+
+		if (myTermReadSvc.mustReturnEmptyValueSet(theUrl.getValueAsString()))  return Optional.empty();
+
 		IFhirResourceDao<? extends IBaseResource> valueSetResourceDao = myDaoRegistry.getResourceDao(myValueSetType);
 		IBaseResource valueSet = valueSetResourceDao.read(new IdDt("ValueSet", forcedId));
 		return Optional.ofNullable(valueSet);

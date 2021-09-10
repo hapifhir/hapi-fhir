@@ -2337,27 +2337,48 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 
+	/**
+	 * When the search is for no-version loinc system it uses the forcedId to obtain the current
+	 * version, as it is not necessarily the last  one anymore.
+	 * For other cases it keeps on considering the last uploaded as the current
+	 */
 	@Override
 	public Optional<TermValueSet> findCurrentTermValueSet(String theUrl) {
-		boolean isNotLoincCodeSystem = ! StringUtils.containsIgnoreCase(theUrl, "loinc");
-		boolean hasVersion = theUrl.contains("|");
-		boolean isForGenericValueSet = theUrl.equals(LOINC_GENERIC_VALUESET_URL);
-		if (isNotLoincCodeSystem || hasVersion || isForGenericValueSet) {
-			List<TermValueSet> termValueSetList = myTermValueSetDao.findTermValueSetByUrl(Pageable.ofSize(1), theUrl);
-			if (termValueSetList.isEmpty()) return Optional.empty();
-			return Optional.of(termValueSetList.get(0));
+		if (isLoincNotGenericUnversionedValueSet(theUrl)) {
+			if (mustReturnEmptyValueSet(theUrl))   return Optional.empty();
+
+			String forcedId = theUrl.substring(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH.length());
+			if (StringUtils.isBlank(forcedId))  return Optional.empty();
+
+			return myTermValueSetDao.findTermValueSetByForcedId(forcedId);
 		}
 
-		if (! theUrl.startsWith(LOINC_GENERIC_VALUESET_URL))   return Optional.empty();
+		List<TermValueSet> termValueSetList = myTermValueSetDao.findTermValueSetByUrl(Pageable.ofSize(1), theUrl);
+		if (termValueSetList.isEmpty()) return Optional.empty();
+		return Optional.of(termValueSetList.get(0));
+	}
+
+
+	@Override
+	public boolean mustReturnEmptyValueSet(String theUrl) {
+		if (! theUrl.startsWith(LOINC_GENERIC_VALUESET_URL))   return true;
 
 		if (! theUrl.startsWith(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH)) {
 			throw new InternalErrorException("Don't know how to extract ForcedId from url: " + theUrl);
 		}
 
 		String forcedId = theUrl.substring(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH.length());
-		if (StringUtils.isBlank(forcedId))  return Optional.empty();
+		return StringUtils.isBlank(forcedId);
+	}
 
-		return myTermValueSetDao.findTermValueSetByForcedId(forcedId);
+
+	@Override
+	public boolean isLoincNotGenericUnversionedValueSet(String theUrl) {
+		boolean isLoincCodeSystem = StringUtils.containsIgnoreCase(theUrl, "loinc");
+		boolean isNoVersion = ! theUrl.contains("|");
+		boolean isNotLoincGenericValueSet = ! theUrl.equals(LOINC_GENERIC_VALUESET_URL);
+
+		return isLoincCodeSystem && isNoVersion && isNotLoincGenericValueSet;
 	}
 
 

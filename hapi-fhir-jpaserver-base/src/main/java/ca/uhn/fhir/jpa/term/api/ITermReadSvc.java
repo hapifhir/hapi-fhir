@@ -120,4 +120,8 @@ public interface ITermReadSvc extends IValidationSupport {
 	 * Version independent
 	 */
 	Optional<TermValueSet> findCurrentTermValueSet(String theUrl);
+
+	boolean mustReturnEmptyValueSet(String theUrl);
+
+	boolean isLoincNotGenericUnversionedValueSet(String theUrl);
 }
