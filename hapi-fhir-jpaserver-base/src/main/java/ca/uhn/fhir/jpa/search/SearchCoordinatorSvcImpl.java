@@ -1207,9 +1207,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			} catch (IOException e) {
 				ourLog.error("IO failure during database access", e);
 				throw new InternalErrorException(e);
-			} catch (IllegalArgumentException e) {
-				ourLog.error("Illegal Argument during database access", e);
-				throw new InvalidRequestException("Parameter value missing in request", e);
 			}
 		}
 	}

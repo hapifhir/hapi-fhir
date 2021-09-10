@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.annotations.VisibleForTesting;
@@ -204,7 +205,12 @@ public class IdHelperService {
 	 */
 	@Nonnull
 	public List<ResourcePersistentId> resolveResourcePersistentIdsWithCache(RequestPartitionId theRequestPartitionId, List<IIdType> theIds) {
-		theIds.forEach(id -> Validate.isTrue(id.hasIdPart()));
+		try {
+			theIds.forEach(id -> Validate.isTrue(id.hasIdPart()));
+		} catch (IllegalArgumentException e) {
+			ourLog.error("Illegal Argument during database access", e);
+			throw new InvalidRequestException("Parameter value missing in request", e);
+		}
 
 		if (theIds.isEmpty()) {
 			return Collections.emptyList();
