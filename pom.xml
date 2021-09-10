@@ -737,6 +737,12 @@
 			<id>rbhman</id>
 			<name>Bruno Hedman</name>
 		</developer>
+
+		<developer>
+			<id>bratwurtz</id>
+			<name>Dušan Marković</name>
+			<organization>Better</organization>
+		</developer>
 	</developers>
 
 	<licenses>
