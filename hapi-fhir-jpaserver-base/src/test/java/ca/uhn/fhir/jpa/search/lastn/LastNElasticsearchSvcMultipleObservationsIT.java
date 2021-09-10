@@ -68,7 +68,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 	public void before() throws IOException {
 		PartitionSettings partitionSettings = new PartitionSettings();
 		partitionSettings.setPartitioningEnabled(false);
-		elasticsearchSvc = new ElasticsearchSvcImpl(partitionSettings, elasticsearchContainer.getHost(), elasticsearchContainer.getMappedPort(9200), "", "");
+		elasticsearchSvc = new ElasticsearchSvcImpl(partitionSettings, elasticsearchContainer.getHost() + ":" + elasticsearchContainer.getMappedPort(9200), null, null);
 
 		if (!indexLoaded) {
 			createMultiplePatientsAndObservations();
