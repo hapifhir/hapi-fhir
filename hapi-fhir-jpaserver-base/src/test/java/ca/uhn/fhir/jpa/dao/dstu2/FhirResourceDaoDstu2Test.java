@@ -224,7 +224,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
-	public void testCantSearchForDeletedResourceByLanguageOrTag() {
+	public void testCantSearchForDeletedResourceByTag() {
 		String methodName = "testCantSearchForDeletedResourceByLanguageOrTag";
 		Organization org = new Organization();
 		org.setLanguage(new CodeDt("EN_ca"));
@@ -236,19 +236,13 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
-		SearchParameterMap map = new SearchParameterMap();
-		map.add("_language", new StringParam("EN_ca"));
-		assertEquals(1, myOrganizationDao.search(map).size().intValue());
+		SearchParameterMap map;
 
 		map = new SearchParameterMap();
 		map.add("_tag", new TokenParam(methodName, methodName));
 		assertEquals(1, myOrganizationDao.search(map).size().intValue());
 
 		myOrganizationDao.delete(orgId, mySrd);
-
-		map = new SearchParameterMap();
-		map.add("_language", new StringParam("EN_ca"));
-		assertEquals(0, myOrganizationDao.search(map).size().intValue());
 
 		map = new SearchParameterMap();
 		map.add("_tag", new TokenParam(methodName, methodName));
@@ -1603,7 +1597,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			found = toList(myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Patient.SP_BIRTHDATE + "AAAA", new DateParam(ParamPrefixEnum.GREATERTHAN, "2000-01-01"))));
 			assertEquals(0, found.size());
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown search parameter \"birthdateAAAA\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _language, _lastUpdated, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, careprovider, deathdate, deceased, email, family, gender, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertEquals("Unknown search parameter \"birthdateAAAA\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, careprovider, deathdate, deceased, email, family, gender, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
 
 	}

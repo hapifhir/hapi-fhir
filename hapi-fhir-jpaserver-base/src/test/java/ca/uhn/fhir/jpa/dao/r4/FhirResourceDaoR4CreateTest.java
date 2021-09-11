@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -28,6 +29,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SampledData;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
@@ -62,6 +64,30 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 	}
+
+
+	@Test
+	public void testCreateLinkCreatesAppropriatePaths() {
+		Patient p = new Patient();
+		p.setId("Patient/A");
+		p.setActive(true);
+		myPatientDao.update(p, mySrd);
+
+		Observation obs = new Observation();
+		obs.setSubject(new Reference("Patient/A"));
+		myObservationDao.create(obs, mySrd);
+
+		runInTransaction(() ->{
+			List<ResourceLink> allLinks = myResourceLinkDao.findAll();
+			List<String> paths = allLinks
+				.stream()
+				.map(t -> t.getSourcePath())
+				.sorted()
+				.collect(Collectors.toList());
+			assertThat(paths.toString(), paths, contains("Observation.subject", "Observation.subject.where(resolve() is Patient)"));
+		});
+	}
+
 
 	@Test
 	public void testConditionalCreateWithPlusInUrl() {

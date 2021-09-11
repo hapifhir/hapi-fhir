@@ -434,9 +434,6 @@ public class QueryStack {
 				param.setValueAsQueryToken(null, null, null, theFilter.getValue());
 				return theQueryStack3.createPredicateResourceId(null, Collections.singletonList(Collections.singletonList(param)), theResourceName, theFilter.getOperation(), theRequestPartitionId);
 			}
-			case IAnyResource.SP_RES_LANGUAGE: {
-				return theQueryStack3.createPredicateLanguage(Collections.singletonList(Collections.singletonList(new StringParam(theFilter.getValue()))), theFilter.getOperation());
-			}
 			case Constants.PARAM_SOURCE: {
 				TokenParam param = new TokenParam();
 				param.setValueAsQueryToken(null, null, null, theFilter.getValue());
@@ -577,44 +574,6 @@ public class QueryStack {
 		}
 
 		return toAndPredicate(andPredicates);
-	}
-
-	public Condition createPredicateLanguage(List<List<IQueryParameterType>> theList, Object theOperation) {
-
-		ResourceTablePredicateBuilder rootTable = mySqlBuilder.getOrCreateResourceTablePredicateBuilder();
-
-		List<Condition> predicates = new ArrayList<>();
-		for (List<? extends IQueryParameterType> nextList : theList) {
-
-			Set<String> values = new HashSet<>();
-			for (IQueryParameterType next : nextList) {
-				if (next instanceof StringParam) {
-					String nextValue = ((StringParam) next).getValue();
-					if (isBlank(nextValue)) {
-						continue;
-					}
-					values.add(nextValue);
-				} else {
-					throw new InternalErrorException("Language parameter must be of type " + StringParam.class.getCanonicalName() + " - Got " + next.getClass().getCanonicalName());
-				}
-			}
-
-			if (values.isEmpty()) {
-				continue;
-			}
-
-			if ((theOperation == null) ||
-				(theOperation == SearchFilterParser.CompareOperation.eq)) {
-				predicates.add(rootTable.createLanguagePredicate(values, false));
-			} else if (theOperation == SearchFilterParser.CompareOperation.ne) {
-				predicates.add(rootTable.createLanguagePredicate(values, true));
-			} else {
-				throw new InvalidRequestException("Unsupported operator specified in language query, only \"eq\" and \"ne\" are supported");
-			}
-
-		}
-
-		return toAndPredicate(predicates);
 	}
 
 	public Condition createPredicateNumber(@Nullable DbColumn theSourceJoinColumn, String theResourceName,
@@ -1098,9 +1057,6 @@ public class QueryStack {
 		switch (theParamName) {
 			case IAnyResource.SP_RES_ID:
 				return createPredicateResourceId(theSourceJoinColumn, theAndOrParams, theResourceName, null, theRequestPartitionId);
-
-			case IAnyResource.SP_RES_LANGUAGE:
-				return createPredicateLanguage(theAndOrParams, null);
 
 			case Constants.PARAM_HAS:
 				return createPredicateHas(theSourceJoinColumn, theResourceName, theAndOrParams, theRequest, theRequestPartitionId);
