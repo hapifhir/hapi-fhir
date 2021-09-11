@@ -129,11 +129,6 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		myOriginalValue = theOriginalValue;
 		calculateHashes();
 		
-		System.out.println("myValueLow  = " + myValueLow);
-		System.out.println("myValueHigh = " + myValueHigh);
-	
-		System.out.println("myValueLowDateOrdinal  = " + myValueLowDateOrdinal);
-		System.out.println("myValueHighDateOrdinal = " + myValueHighDateOrdinal);
 	}
 
 	private void computeValueHighDateOrdinal(String theHigh) {
