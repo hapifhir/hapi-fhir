@@ -1207,6 +1207,34 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
+	public void testConditionalUrlWhichDoesNotMatcHResource() {
+		Bundle transactionBundle = new Bundle().setType(BundleType.TRANSACTION);
+
+		// Patient
+		HumanName patientName = new HumanName().setFamily("TEST_LAST_NAME").addGiven("TEST_FIRST_NAME");
+		Identifier patientIdentifier = new Identifier().setSystem("http://example.com/mrns").setValue("U1234567890");
+		Patient patient = new Patient()
+			.setName(List.of(patientName))
+			.setIdentifier(List.of(patientIdentifier));
+		patient.setId(IdType.newRandomUuid());
+
+		transactionBundle
+			.addEntry()
+			.setFullUrl(patient.getId())
+			.setResource(patient)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.PUT)
+			.setUrl("/Patient?identifier=" + patientIdentifier.getSystem() + "|" + "zoop");
+
+		ourLog.info("Patient TEMP UUID: {}", patient.getId());
+		String s = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(transactionBundle);
+		System.out.println(s);
+		Bundle outcome= mySystemDao.transaction(null, transactionBundle);
+		String patientLocation = outcome.getEntry().get(0).getResponse().getLocation();
+		assertThat(patientLocation, matchesPattern("Patient/[a-z0-9-]+/_history/1"));
+	}
+
+	@Test
 	public void testTransactionCreateInlineMatchUrlWithOneMatch() {
 		String methodName = "testTransactionCreateInlineMatchUrlWithOneMatch";
 		Bundle request = new Bundle();
