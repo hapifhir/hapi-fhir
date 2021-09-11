@@ -279,4 +279,15 @@ public final class DateUtils {
 		
 		return new ImmutablePair<String, String>(lbStr, upStr);
 	}
+	
+	public static Date getEndOfDay(Date theDate) {
+
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(theDate);
+		cal.set(Calendar.HOUR_OF_DAY, cal.getMaximum(Calendar.HOUR_OF_DAY));
+		cal.set(Calendar.MINUTE, cal.getMaximum(Calendar.MINUTE));
+		cal.set(Calendar.SECOND, cal.getMaximum(Calendar.SECOND));
+		cal.set(Calendar.MILLISECOND, cal.getMaximum(Calendar.MILLISECOND));
+		return cal.getTime();
+	}
 }

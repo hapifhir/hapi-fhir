@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -146,9 +147,9 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		if (theHighString.length() == 4 || theHighString.length() == 7 || theHighString.length() == 10) {
 			
 			String theCompleteDateStr =  DateUtils.getCompletedDate(theHighString).getRight();
-			theCompleteDateStr = theCompleteDateStr + " 23:59:59"; // set to last second
 			try {
-				this.myValueHigh  = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(theCompleteDateStr);  
+				Date complateDate = new SimpleDateFormat("yyyy-MM-dd").parse(theCompleteDateStr);  
+			    this.myValueHigh = DateUtils.getEndOfDay(complateDate);
 			} catch (ParseException e) {
 				// do nothing; 
 			}
