@@ -41,6 +41,7 @@ import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
@@ -94,8 +95,8 @@ public class TestJpaR4Config extends BaseJavaConfigR4 {
 
 	@Override
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory) {
+		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory(theConfigurableListableBeanFactory);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaR4");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());

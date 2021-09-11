@@ -309,7 +309,7 @@ public class IdHelperService {
 		if (forcedId.isPresent()) {
 			retVal.setValue(theResourceType + '/' + forcedId.get());
 		} else {
-			retVal.setValue(theResourceType + '/' + theId.toString());
+			retVal.setValue(theResourceType + '/' + theId);
 		}
 
 		return retVal;

@@ -31,12 +31,11 @@ In addition, the Elasticsearch client service, `ElasticsearchSvcImpl` will need 
 ```java
   @Bean()
   public ElasticsearchSvcImpl elasticsearchSvc() {
-     String elasticsearchHost = "localhost";
-     String elasticsearchUserId = "elastic";
+     String elasticsearchHost = "localhost:9200";
+     String elasticsearchUsername = "elastic";
      String elasticsearchPassword = "changeme";
-     int elasticsearchPort = 9301;
 
-     return new ElasticsearchSvcImpl(elasticsearchHost, elasticsearchPort, elasticsearchUserId, elasticsearchPassword);
+     return new ElasticsearchSvcImpl(elasticsearchHost, elasticsearchUsername, elasticsearchPassword);
   }
 ```
 

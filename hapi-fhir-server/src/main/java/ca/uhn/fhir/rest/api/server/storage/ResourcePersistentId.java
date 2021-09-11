@@ -33,6 +33,7 @@ import java.util.Optional;
  * a Long, a String, or something else.
  */
 public class ResourcePersistentId {
+	private static final String RESOURCE_PID = "RESOURCE_PID";
 	private Object myId;
 	private Long myVersion;
 	private IIdType myAssociatedResourceId;
