@@ -6,7 +6,9 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,7 +16,9 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class InMemoryTerminologyServerValidationSupportTest {
 
@@ -25,11 +29,11 @@ class InMemoryTerminologyServerValidationSupportTest {
 	private PrePopulatedValidationSupport myPrePopulated;
 
 	@BeforeEach
-	public void before( ){
+	public void before() {
 		mySvc = new InMemoryTerminologyServerValidationSupport(myCtx);
 		myDefaultSupport = new DefaultProfileValidationSupport(myCtx);
 		myPrePopulated = new PrePopulatedValidationSupport(myCtx);
-		myChain = new ValidationSupportChain(mySvc,myPrePopulated, myDefaultSupport);
+		myChain = new ValidationSupportChain(mySvc, myPrePopulated, myDefaultSupport);
 
 		// Force load
 		myDefaultSupport.fetchCodeSystem("http://foo");
@@ -86,6 +90,88 @@ class InMemoryTerminologyServerValidationSupportTest {
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(valCtx, options, "http://cs", "code1", null, "http://vs");
 		assertTrue(outcome.isOk());
 
+	}
+
+	@Test
+	public void testValidateCodeWithVersionedCodeSystemUrl_Matching() {
+		CodeSystem cs = new CodeSystem();
+		cs.setId("snomed-ct-ca-imm");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.FRAGMENT);
+		cs.setUrl("http://snomed.info/sct");
+		cs.setVersion("http://snomed.info/sct/20611000087101/version/20210331");
+		cs.addConcept().setCode("28571000087109").setDisplay("MODERNA COVID-19 mRNA-1273");
+		myPrePopulated.addCodeSystem(cs);
+
+		ValueSet vs = new ValueSet();
+		vs.setId("vaccinecode");
+		vs.setUrl("http://ehealthontario.ca/fhir/ValueSet/vaccinecode");
+		vs.setVersion("0.1.17");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent vsInclude = vs.getCompose().addInclude();
+		vsInclude.setSystem("http://snomed.info/sct");
+		vsInclude.setVersion("http://snomed.info/sct/20611000087101/version/20210331");
+		vsInclude.addConcept().setCode("28571000087109").setDisplay("MODERNA COVID-19 mRNA-1273");
+		myPrePopulated.addValueSet(vs);
+
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		ConceptValidationOptions options = new ConceptValidationOptions();
+
+		String codeSystemUrl;
+		String valueSetUrl;
+		String code;
+		IValidationSupport.CodeValidationResult outcome;
+
+		// Good code
+		codeSystemUrl = "http://snomed.info/sct";
+		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
+		code = "28571000087109";
+		outcome = mySvc.validateCode(valCtx, options, codeSystemUrl, code, null, valueSetUrl);
+		assertTrue(outcome.isOk());
+
+		// Bad code
+		codeSystemUrl = "http://snomed.info/sct";
+		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
+		code = "123";
+		outcome = mySvc.validateCode(valCtx, options, codeSystemUrl, code, null, valueSetUrl);
+		assertFalse(outcome.isOk());
+	}
+
+	@Test
+	public void testValidateCodeWithVersionedCodeSystemUrl_NotMatching() {
+		CodeSystem cs = new CodeSystem();
+		cs.setId("snomed-ct-ca-imm");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.FRAGMENT);
+		cs.setUrl("http://snomed.info/sct");
+		cs.setVersion("http://snomed.info/sct/20611000087101/version/20210331");
+		cs.addConcept().setCode("28571000087109").setDisplay("MODERNA COVID-19 mRNA-1273");
+		myPrePopulated.addCodeSystem(cs);
+
+		ValueSet vs = new ValueSet();
+		vs.setId("vaccinecode");
+		vs.setUrl("http://ehealthontario.ca/fhir/ValueSet/vaccinecode");
+		vs.setVersion("0.1.17");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent vsInclude = vs.getCompose().addInclude();
+		vsInclude.setSystem("http://snomed.info/sct");
+		vsInclude.setVersion("0.17"); // different version
+		vsInclude.addConcept().setCode("28571000087109").setDisplay("MODERNA COVID-19 mRNA-1273");
+		myPrePopulated.addValueSet(vs);
+
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		ConceptValidationOptions options = new ConceptValidationOptions();
+
+		String codeSystemUrl;
+		String valueSetUrl;
+		String code;
+		IValidationSupport.CodeValidationResult outcome;
+
+		codeSystemUrl = "http://snomed.info/sct";
+		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
+		code = "28571000087109";
+		outcome = mySvc.validateCode(valCtx, options, codeSystemUrl, code, null, valueSetUrl);
+		assertNull(outcome);
 	}
 
 	private static class PrePopulatedValidationSupportDstu2 extends PrePopulatedValidationSupport {

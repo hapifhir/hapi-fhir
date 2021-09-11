@@ -124,8 +124,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Override
-	public CodeValidationResult
-	validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystemUrlAndVersion, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystemUrlAndVersion, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		org.hl7.fhir.r5.model.ValueSet expansion = expandValueSetToCanonical(theValidationSupportContext, theValueSet, theCodeSystemUrlAndVersion, theCode);
 		if (expansion == null) {
 			return null;
@@ -566,7 +565,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 							 * If we're doing an expansion specifically looking for a single code, that means we're validating that code.
 							 * In the case where we have a ValueSet that explicitly enumerates a collection of codes
 							 * (via ValueSet.compose.include.code) in a code system that is unknown we'll assume the code is valid
-							 * even iof we can't find the CodeSystem. This is a compromise obviously, since it would be ideal for
+							 * even if we can't find the CodeSystem. This is a compromise obviously, since it would be ideal for
 							 * CodeSystems to always be known, but realistically there are always going to be CodeSystems that
 							 * can't be supplied because of copyright issues, or because they are grammar based. Allowing a VS to
 							 * enumerate a set of good codes for them is a nice compromise there.
