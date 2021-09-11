@@ -51,7 +51,9 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.EpisodeOfCare;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Meta;
@@ -1161,6 +1163,48 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		validate(outcome);
 	}
 
+	@Test
+	public void testConditionalUpdate_forObservationWithNonExistentPatientSubject_shouldCreateLinkedResources() {
+		Bundle transactionBundle = new Bundle().setType(BundleType.TRANSACTION);
+
+		// Patient
+		HumanName patientName = new HumanName().setFamily("TEST_LAST_NAME").addGiven("TEST_FIRST_NAME");
+		Identifier patientIdentifier = new Identifier().setSystem("http://example.com/mrns").setValue("U1234567890");
+		Patient patient = new Patient()
+			.setName(List.of(patientName))
+			.setIdentifier(List.of(patientIdentifier));
+		patient.setId(IdType.newRandomUuid());
+
+		transactionBundle
+			.addEntry()
+			.setFullUrl(patient.getId())
+			.setResource(patient)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.PUT)
+			.setUrl("/Patient?identifier=" + patientIdentifier.getSystem() + "|" + patientIdentifier.getValue());
+
+		// Observation
+		Observation observation = new Observation();
+		observation.setId(IdType.newRandomUuid());
+		observation.getSubject().setReference(patient.getIdElement().toUnqualifiedVersionless().toString());
+
+		transactionBundle
+			.addEntry()
+			.setFullUrl(observation.getId())
+			.setResource(observation)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.PUT)
+			.setUrl("/Observation?subject=" + patient.getIdElement().toUnqualifiedVersionless().toString());
+
+		ourLog.info("Patient TEMP UUID: {}", patient.getId());
+		String s = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(transactionBundle);
+		System.out.println(s);
+		Bundle outcome= mySystemDao.transaction(null, transactionBundle);
+		String patientLocation = outcome.getEntry().get(0).getResponse().getLocation();
+		assertThat(patientLocation, matchesPattern("Patient/[a-z0-9-]+/_history/1"));
+		String observationLocation = outcome.getEntry().get(1).getResponse().getLocation();
+		assertThat(observationLocation, matchesPattern("Observation/[a-z0-9-]+/_history/1"));
+	}
 
 	@Test
 	public void testTransactionCreateInlineMatchUrlWithOneMatch() {
