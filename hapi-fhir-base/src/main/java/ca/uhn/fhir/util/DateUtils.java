@@ -21,6 +21,7 @@ package ca.uhn.fhir.util;
  */
 
 import java.lang.ref.SoftReference;
+import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -29,6 +30,10 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A utility class for parsing and formatting HTTP dates as used in cookies and
@@ -221,5 +226,57 @@ public final class DateUtils {
 		}
 		return argument;
 	}
+		
+	/**
+	 * Convert an incomplete date e.g. 2020 or 2020-01 to a complete date with lower
+	 * bound to the first day of the year/month, and upper bound to the last day of
+	 * the year/month
+	 * 
+	 *  e.g. 2020 to 2020-01-01 (left), 2020-12-31 (right)
+	 *  2020-02 to 2020-02-01 (left), 2020-02-29 (right)
+	 *
+	 * @param theIncompleteDateStr 2020 or 2020-01
+	 * @return a pair of complete date, left is lower bound, and right is upper bound
+	 */
+	public static Pair<String, String> getCompletedDate(String theIncompleteDateStr) {
+		
+		if (StringUtils.isBlank(theIncompleteDateStr)) 
+			return new ImmutablePair<String, String>(null, null);
+			
+		String lbStr, upStr;
+		// YYYY only, return the last day of the year
+		if (theIncompleteDateStr.length() == 4)  {
+			lbStr = theIncompleteDateStr + "-01-01"; // first day of the year
+			upStr = theIncompleteDateStr + "-12-31"; // last day of the year
+			return new ImmutablePair<String, String>(lbStr, upStr);
+		}
+		
+		// Not YYYY-MM, no change
+		if (theIncompleteDateStr.length() != 7)
+			return new ImmutablePair<String, String>(theIncompleteDateStr, theIncompleteDateStr);
+		
+		// YYYY-MM Only
+		Date lb=null;
+		try {
+			// first day of the month
+			lb = new SimpleDateFormat("yyyy-MM-dd").parse(theIncompleteDateStr+"-01");   
+		} catch (ParseException e) {
+			return new ImmutablePair<String, String>(theIncompleteDateStr, theIncompleteDateStr);
+		}
+		
+		// last day of the month
+	    Calendar calendar = Calendar.getInstance();  
+	    calendar.setTime(lb);  
 
+	    calendar.add(Calendar.MONTH, 1);  
+	    calendar.set(Calendar.DAY_OF_MONTH, 1);  
+	    calendar.add(Calendar.DATE, -1);  
+
+	    Date ub = calendar.getTime();  
+
+	    lbStr = new SimpleDateFormat("yyyy-MM-dd").format(lb);  
+	    upStr = new SimpleDateFormat("yyyy-MM-dd").format(ub);  
+		
+		return new ImmutablePair<String, String>(lbStr, upStr);
+	}
 }

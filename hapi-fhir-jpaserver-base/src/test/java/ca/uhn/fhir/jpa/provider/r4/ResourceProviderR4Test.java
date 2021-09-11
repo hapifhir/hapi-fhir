@@ -6431,6 +6431,49 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(2, ids.size());
 	}
 
+	@Test
+	public void testSearchWithLowerBoundDate() throws Exception {
+		
+		// Issue 2424 test case
+		IIdType pid0;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			patient.setBirthDateElement(new DateType("2073"));
+			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+			
+			ourLog.info("Patient: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+			
+			System.out.println("pid0 " + pid0);
+		}
+		
+		String uri = ourServerBase + "/Patient?_total=accurate&birthdate=gt2072";
+
+		List<String> ids;
+		HttpGet get = new HttpGet(uri);
+
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(resp);
+			Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, resp);
+			ids = toUnqualifiedVersionlessIdValues(bundle);
+			ourLog.info("Patient: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		}
+		
+		uri = ourServerBase + "/Patient?_total=accurate&birthdate=gt2072-01-01";
+
+		get = new HttpGet(uri);
+
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(resp);
+			Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, resp);
+			ids = toUnqualifiedVersionlessIdValues(bundle);
+			ourLog.info("Patient: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		}
+	
+	}
 	private String toStr(Date theDate) {
 		return new InstantDt(theDate).getValueAsString();
 	}
