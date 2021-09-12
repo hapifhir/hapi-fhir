@@ -1,24 +1,33 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticsearchClient;
 import ca.uhn.fhir.jpa.dao.ObservationLastNIndexPersistSvc;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.aspectj.lang.annotation.Before;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
@@ -31,14 +40,18 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -411,7 +424,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 	@Order(1)
 	@Test
 	public void testSampleBundleInTransaction() throws IOException {
-		FhirContext myFhirCtx = FhirContext.forCached(FhirVersionEnum.R4);
+		FhirContext myFhirCtx = FhirContext.forR4Cached();
 
 		PathMatchingResourcePatternResolver provider = new PathMatchingResourcePatternResolver();
 		final Resource[] bundleResources;

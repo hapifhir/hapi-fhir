@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -20,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CapabilityStatementCustomizationR4Test {
 
-	private final FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R4);
+	private final FhirContext myCtx = FhirContext.forR4Cached();
 	@Order(0)
 	@RegisterExtension
 	protected RestfulServerExtension myServerExtension = new RestfulServerExtension(myCtx);
