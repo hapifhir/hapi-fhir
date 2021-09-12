@@ -1022,11 +1022,6 @@
           "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
         },
         {
-          "name": "_language",
-          "type": "token",
-          "documentation": "The language of the resource"
-        },
-        {
           "name": "active",
           "type": "token",
           "documentation": "Whether the patient record is active",

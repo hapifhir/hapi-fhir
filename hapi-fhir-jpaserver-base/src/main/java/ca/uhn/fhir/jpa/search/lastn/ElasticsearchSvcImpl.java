@@ -68,11 +68,11 @@ import org.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.ParsedTopHits;
-import org.elasticsearch.search.aggregations.support.ValueType;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -125,13 +125,13 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	private PartitionSettings myPartitionSettings;
 
 	//This constructor used to inject a dummy partitionsettings in test.
-	public ElasticsearchSvcImpl(PartitionSettings thePartitionSetings, String theHostname, int thePort, String theUsername, String thePassword) {
-		this(theHostname, thePort, theUsername, thePassword);
+	public ElasticsearchSvcImpl(PartitionSettings thePartitionSetings, String theHostname, @Nullable String theUsername, @Nullable String thePassword) {
+		this(theHostname, theUsername, thePassword);
 		this.myPartitionSettings = thePartitionSetings;
 	}
 
-	public ElasticsearchSvcImpl(String theHostname, int thePort, String theUsername, String thePassword) {
-		myRestHighLevelClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(theHostname, thePort, theUsername, thePassword);
+	public ElasticsearchSvcImpl(String theHostname, @Nullable String theUsername, @Nullable String thePassword) {
+		myRestHighLevelClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient("http", theHostname, theUsername, thePassword);
 
 		try {
 			createObservationIndexIfMissing();

@@ -29,13 +29,6 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
 public interface IAnyResource extends IBaseResource {
 
 	/**
-	 * Search parameter constant for <b>_language</b>
-	 */
-	@SearchParamDefinition(name="_language", path="", description="The language of the resource", type="string"  )
-	String SP_RES_LANGUAGE = "_language";
-
-
-	/**
 	 * Search parameter constant for <b>_id</b>
 	 */
 	@SearchParamDefinition(name="_id", path="", description="The ID of the resource", type="token"  )

@@ -97,7 +97,7 @@ public class LastNElasticsearchSvcSingleObservationIT {
 	public void before() {
 		PartitionSettings partitionSettings = new PartitionSettings();
 		partitionSettings.setPartitioningEnabled(false);
-		elasticsearchSvc = new ElasticsearchSvcImpl(partitionSettings, elasticsearchContainer.getHost(), elasticsearchContainer.getMappedPort(9200), "", "");
+		elasticsearchSvc = new ElasticsearchSvcImpl(partitionSettings, elasticsearchContainer.getHost() + ":" + elasticsearchContainer.getMappedPort(9200), "", "");
 	}
 
 	@AfterEach

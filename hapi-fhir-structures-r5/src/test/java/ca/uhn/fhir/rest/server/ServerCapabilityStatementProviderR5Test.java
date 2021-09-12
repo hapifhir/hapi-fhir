@@ -479,7 +479,8 @@ public class ServerCapabilityStatementProviderR5Test {
 				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
 					SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 					SearchParameter param = (SearchParameter) binding.getParameters().get(25);
-					assertEquals("The organization at which this person is a patient", param.getDescription());
+					assertEquals("careprovider", param.getName());
+					assertEquals("Patient's nominated care provider, could be a care manager, not the organization that manages the record", param.getDescription());
 					found = true;
 			}
 		}

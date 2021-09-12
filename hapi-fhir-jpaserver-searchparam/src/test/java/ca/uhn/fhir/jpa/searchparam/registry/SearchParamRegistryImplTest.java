@@ -63,7 +63,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 public class SearchParamRegistryImplTest {
 	private static final FhirContext ourFhirContext = FhirContext.forR4();
-	private static final ReadOnlySearchParamCache ourBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(ourFhirContext);
+	private static final ReadOnlySearchParamCache ourBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(ourFhirContext, new SearchParameterCanonicalizer(ourFhirContext));
 
 	public static final int TEST_SEARCH_PARAMS = 3;
 	private static final List<ResourceTable> ourEntities;
@@ -77,7 +77,7 @@ public class SearchParamRegistryImplTest {
 			ourEntities.add(createEntity(ourLastId, 1));
 		}
 		ourResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(ourEntities);
-		ourBuiltinPatientSearchParamCount = ReadOnlySearchParamCache.fromFhirContext(ourFhirContext).getSearchParamMap("Patient").size();
+		ourBuiltinPatientSearchParamCount = ReadOnlySearchParamCache.fromFhirContext(ourFhirContext, new SearchParameterCanonicalizer(ourFhirContext)).getSearchParamMap("Patient").size();
 	}
 
 	@Autowired
@@ -178,7 +178,7 @@ public class SearchParamRegistryImplTest {
 
 	@Test
 	void handleInit() {
-		assertEquals(25, mySearchParamRegistry.getActiveSearchParams("Patient").size());
+		assertEquals(31, mySearchParamRegistry.getActiveSearchParams("Patient").size());
 
 		IdDt idBad = new IdDt("SearchParameter/bad");
 		when(mySearchParamProvider.read(idBad)).thenThrow(new ResourceNotFoundException("id bad"));
@@ -191,7 +191,7 @@ public class SearchParamRegistryImplTest {
 		idList.add(idBad);
 		idList.add(idGood);
 		mySearchParamRegistry.handleInit(idList);
-		assertEquals(26, mySearchParamRegistry.getActiveSearchParams("Patient").size());
+		assertEquals(32, mySearchParamRegistry.getActiveSearchParams("Patient").size());
 	}
 
 	@Test
