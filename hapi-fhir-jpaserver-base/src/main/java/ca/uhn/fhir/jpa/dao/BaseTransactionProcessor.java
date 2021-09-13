@@ -188,7 +188,7 @@ public abstract class BaseTransactionProcessor {
 				executor.setThreadNamePrefix("bundle_batch_");
 				executor.setCorePoolSize(myDaoConfig.getBundleBatchPoolSize());
 				executor.setMaxPoolSize(myDaoConfig.getBundleBatchMaxPoolSize());
-				executor.setQueueCapacity(DaoConfig.DEFAULT_BUNDLE_BATCH_QUEUE_CAPACITY);
+
 				executor.initialize();
 				myExecutor = executor;
 
