@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -20,6 +23,7 @@ import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
@@ -49,6 +53,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -90,15 +95,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
 		assertEquals(24, expandedValueSet.getExpansion().getContains().size());
 
-		runInTransaction(() -> {
-			assertEquals(24, myTermValueSetConceptDao.count());
-		});
+		runInTransaction(() -> assertEquals(24, myTermValueSetConceptDao.count()));
 
 		myValueSetDao.delete(valueSet.getIdElement());
 
-		runInTransaction(() -> {
-			assertEquals(0, myTermValueSetConceptDao.count());
-		});
+		runInTransaction(() -> assertEquals(0, myTermValueSetConceptDao.count()));
 
 		expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
 		assertEquals(24, expandedValueSet.getExpansion().getContains().size());
@@ -1473,6 +1474,191 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum", 0);
 		});
 	}
+
+
+
+
+	@Test
+	public void testExpandValueSet_VsUsesVersionedSystem_CsOnlyDifferentVersionPresent() {
+		CodeSystem cs = new CodeSystem();
+		cs.setId("snomed-ct-ca-imm");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.FRAGMENT);
+		cs.setUrl("http://snomed.info/sct");
+		cs.setVersion("http://snomed.info/sct/20611000087101/version/20210331");
+		cs.addConcept().setCode("28571000087109").setDisplay("MODERNA COVID-19 mRNA-1273");
+		myCodeSystemDao.update(cs, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setId("vaccinecode");
+		vs.setUrl("http://ehealthontario.ca/fhir/ValueSet/vaccinecode");
+		vs.setVersion("0.1.17");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent vsInclude = vs.getCompose().addInclude();
+		vsInclude.setSystem("http://snomed.info/sct");
+		vsInclude.setVersion("0.17"); // different version
+		vsInclude.addConcept().setCode("28571000087109").setDisplay("MODERNA COVID-19 mRNA-1273");
+		myValueSetDao.update(vs, mySrd);
+
+		String codeSystemUrl;
+		String valueSetUrl;
+		String code;
+
+		try {
+			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
+			fail();
+		} catch (NullPointerException e) {
+			assertEquals("Unable to expand ValueSet because CodeSystem has CodeSystem.content=not-present but contents were not found: http://snomed.info/sct|0.17", e.getMessage());
+		}
+
+		codeSystemUrl = "http://snomed.info/sct";
+		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
+		code = "28571000087109";
+		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
+		assertFalse(outcome.isOk());
+		assertEquals("Unable to expand ValueSet because CodeSystem has CodeSystem.content=not-present but contents were not found: http://snomed.info/sct|0.17", outcome.getMessage());
+		assertEquals("error", outcome.getSeverityCode());
+	}
+
+	@Test
+	public void testExpandValueSet_VsUsesVersionedSystem_CsIsFragmentWithoutCode() {
+		CodeSystem cs = new CodeSystem();
+		cs.setId("snomed-ct-ca-imm");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.FRAGMENT);
+		cs.setUrl("http://snomed.info/sct");
+		cs.setVersion("http://snomed.info/sct/20611000087101/version/20210331");
+		cs.addConcept().setCode("28571000087109").setDisplay("MODERNA COVID-19 mRNA-1273");
+		myCodeSystemDao.update(cs, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setId("vaccinecode");
+		vs.setUrl("http://ehealthontario.ca/fhir/ValueSet/vaccinecode");
+		vs.setVersion("0.1.17");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent vsInclude = vs.getCompose().addInclude();
+		vsInclude.setSystem("http://snomed.info/sct");
+		vsInclude.setVersion("http://snomed.info/sct/20611000087101/version/20210331");
+		vsInclude.addConcept().setCode("28571000087109").setDisplay("MODERNA COVID-19 mRNA-1273");
+		myValueSetDao.update(vs, mySrd);
+
+		String codeSystemUrl;
+		String valueSetUrl;
+		String code;
+
+		ValueSet valueSet = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
+		assertNotNull(valueSet);
+		assertEquals(1, valueSet.getExpansion().getContains().size());
+		assertEquals("28571000087109", valueSet.getExpansion().getContains().get(0).getCode());
+		assertEquals("MODERNA COVID-19 mRNA-1273", valueSet.getExpansion().getContains().get(0).getDisplay());
+
+		codeSystemUrl = "http://snomed.info/sct";
+		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
+		code = "28571000087109";
+		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
+		assertTrue(outcome.isOk());
+	}
+
+	@Test
+	public void testExpandValueSet_VsUsesVersionedSystem_CsIsFragmentWithCode() {
+		CodeSystem cs = new CodeSystem();
+		cs.setId("snomed-ct-ca-imm");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.FRAGMENT);
+		cs.setUrl("http://snomed.info/sct");
+		cs.setVersion("http://snomed.info/sct/20611000087101/version/20210331");
+		cs.addConcept().setCode("28571000087109").setDisplay("MODERNA COVID-19 mRNA-1273");
+		myCodeSystemDao.update(cs, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setId("vaccinecode");
+		vs.setUrl("http://ehealthontario.ca/fhir/ValueSet/vaccinecode");
+		vs.setVersion("http://snomed.info/sct/20611000087101/version/20210331");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent vsInclude = vs.getCompose().addInclude();
+		vsInclude.setSystem("http://snomed.info/sct");
+		vsInclude.setVersion("http://snomed.info/sct/20611000087101/version/20210331");
+		vsInclude.addConcept().setCode("28571000087109").setDisplay("MODERNA COVID-19 mRNA-1273");
+		myValueSetDao.update(vs, mySrd);
+
+		String codeSystemUrl;
+		String valueSetUrl;
+		String code;
+		IValidationSupport.CodeValidationResult outcome;
+
+		// Good code
+		codeSystemUrl = "http://snomed.info/sct";
+		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
+		code = "28571000087109";
+		outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
+		assertTrue(outcome.isOk());
+		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
+
+		// Bad code
+		codeSystemUrl = "http://snomed.info/sct";
+		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
+		code = "123";
+		outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
+		assertFalse(outcome.isOk());
+
+		ValueSet valueSet = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
+		assertNotNull(valueSet);
+		assertEquals(1, valueSet.getExpansion().getContains().size());
+		assertEquals("28571000087109", valueSet.getExpansion().getContains().get(0).getCode());
+		assertEquals("MODERNA COVID-19 mRNA-1273", valueSet.getExpansion().getContains().get(0).getDisplay());
+	}
+
+
+	@Test
+	public void testExpandValueSet_VsUsesVersionedSystem_CsIsCompleteWithCode() {
+		CodeSystem cs = new CodeSystem();
+		cs.setId("snomed-ct-ca-imm");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl("http://snomed.info/sct");
+		cs.setVersion("http://snomed.info/sct/20611000087101/version/20210331");
+		cs.addConcept().setCode("28571000087109").setDisplay("MODERNA COVID-19 mRNA-1273");
+		myCodeSystemDao.update(cs, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setId("vaccinecode");
+		vs.setUrl("http://ehealthontario.ca/fhir/ValueSet/vaccinecode");
+		vs.setVersion("http://snomed.info/sct/20611000087101/version/20210331");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent vsInclude = vs.getCompose().addInclude();
+		vsInclude.setSystem("http://snomed.info/sct");
+		vsInclude.setVersion("http://snomed.info/sct/20611000087101/version/20210331");
+		vsInclude.addConcept().setCode("28571000087109").setDisplay("MODERNA COVID-19 mRNA-1273");
+		myValueSetDao.update(vs, mySrd);
+
+		String codeSystemUrl;
+		String valueSetUrl;
+		String code;
+		IValidationSupport.CodeValidationResult outcome;
+
+		// Good code
+		codeSystemUrl = "http://snomed.info/sct";
+		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
+		code = "28571000087109";
+		outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
+		assertTrue(outcome.isOk());
+		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
+
+		// Bad code
+		codeSystemUrl = "http://snomed.info/sct";
+		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
+		code = "123";
+		outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
+		assertFalse(outcome.isOk());
+
+		ValueSet valueSet = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
+		assertNotNull(valueSet);
+		assertEquals(1, valueSet.getExpansion().getContains().size());
+		assertEquals("28571000087109", valueSet.getExpansion().getContains().get(0).getCode());
+		assertEquals("MODERNA COVID-19 mRNA-1273", valueSet.getExpansion().getContains().get(0).getDisplay());
+	}
+
+
 
 	@Nonnull
 	public static List<String> toCodes(ValueSet theExpandedValueSet) {

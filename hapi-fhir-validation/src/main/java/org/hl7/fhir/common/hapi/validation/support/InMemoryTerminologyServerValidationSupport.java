@@ -60,7 +60,12 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	@Override
 	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
 
-		org.hl7.fhir.r5.model.ValueSet expansionR5 = expandValueSetToCanonical(theValidationSupportContext, theValueSetToExpand, null, null);
+		org.hl7.fhir.r5.model.ValueSet expansionR5;
+		try {
+			expansionR5 = expandValueSetToCanonical(theValidationSupportContext, theValueSetToExpand, null, null);
+		} catch (ExpansionCouldNotBeCompletedInternallyException e) {
+			return new ValueSetExpansionOutcome(e.getMessage());
+		}
 		if (expansionR5 == null) {
 			return null;
 		}
@@ -89,10 +94,10 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				throw new IllegalArgumentException("Can not handle version: " + myCtx.getVersion().getVersion());
 		}
 
-		return new ValueSetExpansionOutcome(expansion, null);
+		return new ValueSetExpansionOutcome(expansion);
 	}
 
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetToCanonical(ValidationSupportContext theValidationSupportContext, IBaseResource theValueSetToExpand, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode) {
+	private org.hl7.fhir.r5.model.ValueSet expandValueSetToCanonical(ValidationSupportContext theValidationSupportContext, IBaseResource theValueSetToExpand, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode) throws ExpansionCouldNotBeCompletedInternallyException {
 		org.hl7.fhir.r5.model.ValueSet expansionR5;
 		switch (theValueSetToExpand.getStructureFhirVersionEnum()) {
 			case DSTU2: {
@@ -125,10 +130,27 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 	@Override
 	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystemUrlAndVersion, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
-		org.hl7.fhir.r5.model.ValueSet expansion = expandValueSetToCanonical(theValidationSupportContext, theValueSet, theCodeSystemUrlAndVersion, theCode);
+		org.hl7.fhir.r5.model.ValueSet expansion;
+		try {
+			expansion = expandValueSetToCanonical(theValidationSupportContext, theValueSet, theCodeSystemUrlAndVersion, theCode);
+		} catch (ExpansionCouldNotBeCompletedInternallyException e) {
+			String vsUrl = myCtx.newTerser().getSinglePrimitiveValueOrNull(theValueSet, "url");
+			CodeValidationResult codeValidationResult = new CodeValidationResult();
+			codeValidationResult.setSeverityCode("error");
+
+			String msg = "Failed to expand ValueSet '" + vsUrl + "'. Could not validate code " + theCodeSystemUrlAndVersion + "#" + theCode;
+			if (e.getMessage() != null) {
+				msg += ". Error was: " + e.getMessage();
+			}
+
+			codeValidationResult.setMessage(msg);
+			return codeValidationResult;
+		}
+
 		if (expansion == null) {
 			return null;
 		}
+
 		return validateCodeInExpandedValueSet(theValidationSupportContext, theOptions, theCodeSystemUrlAndVersion, theCode, theDisplay, expansion);
 	}
 
@@ -202,10 +224,14 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			return null;
 		}
 
+		if (valueSetExpansionOutcome.getError() != null) {
+			return new CodeValidationResult()
+				.setSeverity(IssueSeverity.ERROR)
+				.setMessage(valueSetExpansionOutcome.getError());
+		}
+
 		IBaseResource expansion = valueSetExpansionOutcome.getValueSet();
-
 		return validateCodeInExpandedValueSet(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, expansion);
-
 	}
 
 	private CodeValidationResult validateCodeInExpandedValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystemUrlAndVersionToValidate, String theCodeToValidate, String theDisplayToValidate, IBaseResource theExpansion) {
@@ -349,7 +375,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetDstu2Hl7Org(ValidationSupportContext theValidationSupportContext, ValueSet theInput, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode) {
+	private org.hl7.fhir.r5.model.ValueSet expandValueSetDstu2Hl7Org(ValidationSupportContext theValidationSupportContext, ValueSet theInput, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode) throws ExpansionCouldNotBeCompletedInternallyException {
 		Function<String, CodeSystem> codeSystemLoader = t -> {
 			org.hl7.fhir.dstu2.model.ValueSet codeSystem = (org.hl7.fhir.dstu2.model.ValueSet) theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(t);
 			CodeSystem retVal = new CodeSystem();
@@ -367,7 +393,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetDstu2(ValidationSupportContext theValidationSupportContext, ca.uhn.fhir.model.dstu2.resource.ValueSet theInput, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode) {
+	private org.hl7.fhir.r5.model.ValueSet expandValueSetDstu2(ValidationSupportContext theValidationSupportContext, ca.uhn.fhir.model.dstu2.resource.ValueSet theInput, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode) throws ExpansionCouldNotBeCompletedInternallyException {
 		IParser parserRi = FhirContext.forCached(FhirVersionEnum.DSTU2_HL7ORG).newJsonParser();
 		IParser parserHapi = FhirContext.forCached(FhirVersionEnum.DSTU2).newJsonParser();
 
@@ -438,7 +464,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetDstu3(ValidationSupportContext theValidationSupportContext, org.hl7.fhir.dstu3.model.ValueSet theInput, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode) {
+	private org.hl7.fhir.r5.model.ValueSet expandValueSetDstu3(ValidationSupportContext theValidationSupportContext, org.hl7.fhir.dstu3.model.ValueSet theInput, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode) throws ExpansionCouldNotBeCompletedInternallyException {
 		Function<String, org.hl7.fhir.r5.model.CodeSystem> codeSystemLoader = t -> {
 			org.hl7.fhir.dstu3.model.CodeSystem codeSystem = (org.hl7.fhir.dstu3.model.CodeSystem) theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(t);
 			return (CodeSystem) VersionConvertorFactory_30_50.convertResource(codeSystem, new BaseAdvisor_30_50(false));
@@ -454,7 +480,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetR4(ValidationSupportContext theValidationSupportContext, org.hl7.fhir.r4.model.ValueSet theInput, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode) {
+	private org.hl7.fhir.r5.model.ValueSet expandValueSetR4(ValidationSupportContext theValidationSupportContext, org.hl7.fhir.r4.model.ValueSet theInput, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode) throws ExpansionCouldNotBeCompletedInternallyException {
 		Function<String, org.hl7.fhir.r5.model.CodeSystem> codeSystemLoader = t -> {
 			org.hl7.fhir.r4.model.CodeSystem codeSystem = (org.hl7.fhir.r4.model.CodeSystem) theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(t);
 			return (CodeSystem) VersionConvertorFactory_40_50.convertResource(codeSystem, new BaseAdvisor_40_50(false));
@@ -465,12 +491,11 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		};
 
 		org.hl7.fhir.r5.model.ValueSet input = (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_40_50.convertResource(theInput, new BaseAdvisor_40_50(false));
-		org.hl7.fhir.r5.model.ValueSet output = expandValueSetR5(theValidationSupportContext, input, codeSystemLoader, valueSetLoader, theWantSystemUrlAndVersion, theWantCode);
-		return (output);
+		return expandValueSetR5(theValidationSupportContext, input, codeSystemLoader, valueSetLoader, theWantSystemUrlAndVersion, theWantCode);
 	}
 
 	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetR5(ValidationSupportContext theValidationSupportContext, org.hl7.fhir.r5.model.ValueSet theInput) {
+	private org.hl7.fhir.r5.model.ValueSet expandValueSetR5(ValidationSupportContext theValidationSupportContext, org.hl7.fhir.r5.model.ValueSet theInput) throws ExpansionCouldNotBeCompletedInternallyException {
 		Function<String, org.hl7.fhir.r5.model.CodeSystem> codeSystemLoader = t -> (org.hl7.fhir.r5.model.CodeSystem) theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(t);
 		Function<String, org.hl7.fhir.r5.model.ValueSet> valueSetLoader = t -> (org.hl7.fhir.r5.model.ValueSet) theValidationSupportContext.getRootValidationSupport().fetchValueSet(t);
 
@@ -478,15 +503,11 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Nullable
-	private org.hl7.fhir.r5.model.ValueSet expandValueSetR5(ValidationSupportContext theValidationSupportContext, org.hl7.fhir.r5.model.ValueSet theInput, Function<String, CodeSystem> theCodeSystemLoader, Function<String, org.hl7.fhir.r5.model.ValueSet> theValueSetLoader, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode) {
+	private org.hl7.fhir.r5.model.ValueSet expandValueSetR5(ValidationSupportContext theValidationSupportContext, org.hl7.fhir.r5.model.ValueSet theInput, Function<String, CodeSystem> theCodeSystemLoader, Function<String, org.hl7.fhir.r5.model.ValueSet> theValueSetLoader, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode) throws ExpansionCouldNotBeCompletedInternallyException {
 		Set<FhirVersionIndependentConcept> concepts = new HashSet<>();
 
-		try {
-			expandValueSetR5IncludeOrExclude(theValidationSupportContext, concepts, theCodeSystemLoader, theValueSetLoader, theInput.getCompose().getInclude(), true, theWantSystemUrlAndVersion, theWantCode);
-			expandValueSetR5IncludeOrExclude(theValidationSupportContext, concepts, theCodeSystemLoader, theValueSetLoader, theInput.getCompose().getExclude(), false, theWantSystemUrlAndVersion, theWantCode);
-		} catch (ExpansionCouldNotBeCompletedInternallyException e) {
-			return null;
-		}
+		expandValueSetR5IncludeOrExclude(theValidationSupportContext, concepts, theCodeSystemLoader, theValueSetLoader, theInput.getCompose().getInclude(), true, theWantSystemUrlAndVersion, theWantCode);
+		expandValueSetR5IncludeOrExclude(theValidationSupportContext, concepts, theCodeSystemLoader, theValueSetLoader, theInput.getCompose().getExclude(), false, theWantSystemUrlAndVersion, theWantCode);
 
 		org.hl7.fhir.r5.model.ValueSet retVal = new org.hl7.fhir.r5.model.ValueSet();
 		for (FhirVersionIndependentConcept next : concepts) {
@@ -529,11 +550,13 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				}
 
 				CodeSystem includeOrExcludeSystemResource;
+				String loadedCodeSystemUrl;
 				if (includeOrExcludeConceptSystemVersion != null) {
-					includeOrExcludeSystemResource = theCodeSystemLoader.apply(includeOrExcludeConceptSystemUrl + "|" + includeOrExcludeConceptSystemVersion);
+					loadedCodeSystemUrl = includeOrExcludeConceptSystemUrl + "|" + includeOrExcludeConceptSystemVersion;
 				} else {
-					includeOrExcludeSystemResource = theCodeSystemLoader.apply(includeOrExcludeConceptSystemUrl);
+					loadedCodeSystemUrl = includeOrExcludeConceptSystemUrl;
 				}
+				includeOrExcludeSystemResource = theCodeSystemLoader.apply(loadedCodeSystemUrl);
 
 				Set<String> wantCodes;
 				if (nextInclude.getConcept().isEmpty()) {
@@ -545,6 +568,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				}
 
 				boolean ableToHandleCode = false;
+				String failureMessage = null;
 				if (includeOrExcludeSystemResource == null || includeOrExcludeSystemResource.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 
 					if (theWantCode != null) {
@@ -573,6 +597,16 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 							for (org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent next : theComposeList) {
 								if (Objects.equals(next.getSystem(), theWantSystemUrlAndVersion)) {
 									Optional<org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent> matchingEnumeratedConcept = next.getConcept().stream().filter(t -> Objects.equals(t.getCode(), theWantCode)).findFirst();
+
+									// If the ValueSet.compose.include has no individual concepts in it, and
+									// we can't find the actual referenced CodeSystem, we have no choice
+									// but to fail
+									if (!next.getConcept().isEmpty()) {
+										ableToHandleCode = true;
+									} else {
+										failureMessage = getFailureMessageForMissingOrUnusableCodeSystem(includeOrExcludeSystemResource, loadedCodeSystemUrl);
+									}
+
 									if (matchingEnumeratedConcept.isPresent()) {
 										CodeSystem.ConceptDefinitionComponent conceptDefinition = new CodeSystem.ConceptDefinitionComponent()
 											.addConcept()
@@ -580,13 +614,14 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 											.setDisplay(matchingEnumeratedConcept.get().getDisplay());
 										List<CodeSystem.ConceptDefinitionComponent> codesList = Collections.singletonList(conceptDefinition);
 										addCodes(includeOrExcludeConceptSystemUrl, includeOrExcludeConceptSystemVersion, codesList, nextCodeList, wantCodes);
-										ableToHandleCode = true;
 										break;
 									}
 								}
 							}
 
 						}
+					} else {
+						failureMessage = getFailureMessageForMissingOrUnusableCodeSystem(includeOrExcludeSystemResource, loadedCodeSystemUrl);
 					}
 
 				} else {
@@ -594,7 +629,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				}
 
 				if (!ableToHandleCode) {
-					throw new ExpansionCouldNotBeCompletedInternallyException();
+					throw new ExpansionCouldNotBeCompletedInternallyException(failureMessage);
 				}
 
 				if (includeOrExcludeSystemResource != null && includeOrExcludeSystemResource.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
@@ -608,7 +643,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				if (vs != null) {
 					org.hl7.fhir.r5.model.ValueSet subExpansion = expandValueSetR5(theValidationSupportContext, vs, theCodeSystemLoader, theValueSetLoader, theWantSystemUrlAndVersion, theWantCode);
 					if (subExpansion == null) {
-						throw new ExpansionCouldNotBeCompletedInternallyException();
+						throw new ExpansionCouldNotBeCompletedInternallyException("Failed to expand ValueSet: " + nextValueSetInclude.getValueAsString());
 					}
 					for (org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent next : subExpansion.getExpansion().getContains()) {
 						nextCodeList.add(new FhirVersionIndependentConcept(next.getSystem(), next.getCode(), next.getDisplay(), next.getVersion()));
@@ -626,6 +661,17 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 	}
 
+	private String getFailureMessageForMissingOrUnusableCodeSystem(CodeSystem includeOrExcludeSystemResource, String loadedCodeSystemUrl) {
+		String failureMessage;
+		if (includeOrExcludeSystemResource == null) {
+			failureMessage = "Unable to expand ValueSet because CodeSystem could not be found: " + loadedCodeSystemUrl;
+		} else {
+			assert includeOrExcludeSystemResource.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT;
+			failureMessage = "Unable to expand ValueSet because CodeSystem has CodeSystem.content=not-present but contents were not found: " + loadedCodeSystemUrl;
+		}
+		return failureMessage;
+	}
+
 	private void addCodes(String theCodeSystemUrl, String theCodeSystemVersion, List<CodeSystem.ConceptDefinitionComponent> theSource, List<FhirVersionIndependentConcept> theTarget, Set<String> theCodeFilter) {
 		for (CodeSystem.ConceptDefinitionComponent next : theSource) {
 			if (isNotBlank(next.getCode())) {
@@ -639,6 +685,9 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 	private static class ExpansionCouldNotBeCompletedInternallyException extends Exception {
 
+		public ExpansionCouldNotBeCompletedInternallyException(String theMessage) {
+			super(theMessage);
+		}
 	}
 
 	private static void flattenAndConvertCodesDstu2(List<org.hl7.fhir.dstu2.model.ValueSet.ValueSetExpansionContainsComponent> theInput, List<FhirVersionIndependentConcept> theFhirVersionIndependentConcepts) {
