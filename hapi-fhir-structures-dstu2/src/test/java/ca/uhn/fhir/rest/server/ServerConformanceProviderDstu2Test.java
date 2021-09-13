@@ -501,7 +501,7 @@ public class ServerConformanceProviderDstu2Test {
 			if (resourceBinding.getResourceName().equals("Patient")) {
 				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
-				SearchParameter param = (SearchParameter) binding.getParameters().get(25);
+				SearchParameter param = (SearchParameter) binding.getParameters().get(24);
 				assertEquals("The organization at which this person is a patient", param.getDescription());
 				found = true;
 			}

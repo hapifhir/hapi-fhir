@@ -41,7 +41,7 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 			.setIndexSchemaManagementStrategy(SchemaManagementStrategyName.CREATE)
 			.setIndexManagementWaitTimeoutMillis(10000)
 			.setRequiredIndexStatus(IndexStatus.YELLOW)
-			.setRestUrl(host+ ":" + httpPort)
+			.setHosts(host + ":" + httpPort)
 			.setProtocol("http")
 			.setUsername("")
 			.setPassword("")

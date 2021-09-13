@@ -249,6 +249,45 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		assertEquals(ids.get(4), bundleEntries.get(6).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 
 	}
+
+	@Test
+	public void testTagCacheWorksWithBatchMode() {
+		Bundle input = new Bundle();
+		input.setType(BundleType.BATCH);
+
+		Patient p = new Patient();
+		p.setId("100");
+		p.setGender(AdministrativeGender.MALE);
+		p.addIdentifier().setSystem("urn:foo").setValue("A");
+		p.addName().setFamily("Smith");
+		p.getMeta().addTag().setSystem("mysystem").setCode("mycode");
+		input.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST);
+
+		Patient p2 = new Patient();
+		p2.setId("200");
+		p2.setGender(AdministrativeGender.MALE);
+		p2.addIdentifier().setSystem("urn:foo").setValue("A");
+		p2.addName().setFamily("Smith");
+		p2.getMeta().addTag().setSystem("mysystem").setCode("mycode");
+		input.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST);
+
+		Patient p3 = new Patient();
+		p3.setId("pat-300");
+		p3.setGender(AdministrativeGender.MALE);
+		p3.addIdentifier().setSystem("urn:foo").setValue("A");
+		p3.addName().setFamily("Smith");
+		p3.getMeta().addTag().setSystem("mysystem").setCode("mycode");
+		input.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/pat-300");
+
+		Bundle output = myClient.transaction().withBundle(input).execute();
+		output.getEntry().stream()
+			.map(BundleEntryComponent::getResponse)
+			.map(Bundle.BundleEntryResponseComponent::getStatus)
+			.forEach(statusCode -> {
+				assertEquals(statusCode, "201 Created");
+			});
+	}
+
 	
 	private List<String> createPatients(int count) {
 		List<String> ids = new ArrayList<String>();

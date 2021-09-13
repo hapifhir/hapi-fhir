@@ -1,7 +1,6 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
@@ -168,7 +167,7 @@ public class CommonCodeSystemsTerminologyServiceTest {
 
 	@Test
 	public void testFetchCodeSystemBuiltIn_Iso3166_DSTU3() {
-		CommonCodeSystemsTerminologyService svc = new CommonCodeSystemsTerminologyService(FhirContext.forCached(FhirVersionEnum.DSTU3));
+		CommonCodeSystemsTerminologyService svc = new CommonCodeSystemsTerminologyService(FhirContext.forDstu3Cached());
 		org.hl7.fhir.dstu3.model.CodeSystem cs = (org.hl7.fhir.dstu3.model.CodeSystem) svc.fetchCodeSystem(CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL);
 		assert cs != null;
 		assertEquals(498, cs.getConcept().size());
@@ -176,7 +175,7 @@ public class CommonCodeSystemsTerminologyServiceTest {
 
 	@Test
 	public void testFetchCodeSystemBuiltIn_Iso3166_R5() {
-		CommonCodeSystemsTerminologyService svc = new CommonCodeSystemsTerminologyService(FhirContext.forCached(FhirVersionEnum.R5));
+		CommonCodeSystemsTerminologyService svc = new CommonCodeSystemsTerminologyService(FhirContext.forR5Cached());
 		org.hl7.fhir.r5.model.CodeSystem cs = (org.hl7.fhir.r5.model.CodeSystem) svc.fetchCodeSystem(CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL);
 		assert cs != null;
 		assertEquals(498, cs.getConcept().size());
@@ -184,7 +183,7 @@ public class CommonCodeSystemsTerminologyServiceTest {
 
 	@Test
 	public void testFetchCodeSystemBuiltIn_Iso3166_DSTU2() {
-		CommonCodeSystemsTerminologyService svc = new CommonCodeSystemsTerminologyService(FhirContext.forCached(FhirVersionEnum.DSTU2));
+		CommonCodeSystemsTerminologyService svc = new CommonCodeSystemsTerminologyService(FhirContext.forDstu2Cached());
 		IBaseResource cs = svc.fetchCodeSystem(CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL);
 		assertEquals(null, cs);
 	}

@@ -33,7 +33,7 @@ public class ElasticsearchPrefixTest {
 	public void test() throws IOException {
 		//Given
 		RestHighLevelClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(
-			"http://" + elasticsearchContainer.getHost(), elasticsearchContainer.getMappedPort(9200), "", "");
+			"http", elasticsearchContainer.getHost() + ":" + elasticsearchContainer.getMappedPort(9200), "", "");
 
 		//When
 		RestClient lowLevelClient = elasticsearchHighLevelRestClient.getLowLevelClient();
