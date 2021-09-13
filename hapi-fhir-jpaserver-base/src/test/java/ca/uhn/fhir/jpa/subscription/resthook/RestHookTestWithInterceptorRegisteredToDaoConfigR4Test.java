@@ -2,7 +2,6 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
@@ -20,28 +19,36 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
-import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Subscription;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Test the rest-hook subscriptions
  */
 public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends BaseResourceProviderR4Test {
 
-	private static List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
+	private static final List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	private static int ourListenerPort;
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestWithInterceptorRegisteredToDaoConfigR4Test.class);
-	private static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
+	private static final List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
 
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
@@ -270,7 +277,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 
 	@BeforeAll
 	public static void startListenerServer() throws Exception {
-		ourListenerRestServer = new RestfulServer(FhirContext.forCached(FhirVersionEnum.R4));
+		ourListenerRestServer = new RestfulServer(FhirContext.forR4Cached());
 
 		ObservationListener obsListener = new ObservationListener();
 		ourListenerRestServer.setResourceProviders(obsListener);

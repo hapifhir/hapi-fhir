@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
@@ -32,7 +31,7 @@ public class FhirResourceDaoSearchParameterR4Test {
 
 	@BeforeEach
 	public void before() {
-		myCtx = FhirContext.forCached(FhirVersionEnum.R4);
+		myCtx = FhirContext.forR4Cached();
 
 		myDao = new FhirResourceDaoSearchParameterR4();
 		myDao.setContext(myCtx);
@@ -48,9 +47,6 @@ public class FhirResourceDaoSearchParameterR4Test {
 			RuntimeResourceDefinition nextResDef = myCtx.getResourceDefinition(nextResource);
 			for (RuntimeSearchParam nextp : nextResDef.getSearchParams()) {
 				if (nextp.getName().equals("_id")) {
-					continue;
-				}
-				if (nextp.getName().equals("_language")) {
 					continue;
 				}
 				if (isBlank(nextp.getPath())) {

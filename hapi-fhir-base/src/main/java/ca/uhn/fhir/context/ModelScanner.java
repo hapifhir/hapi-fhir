@@ -73,7 +73,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 class ModelScanner {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ModelScanner.class);
-
 	private Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myClassToElementDefinitions = new HashMap<>();
 	private FhirContext myContext;
 	private Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = new HashMap<>();
@@ -90,6 +89,7 @@ class ModelScanner {
 					 @Nonnull Collection<Class<? extends IBase>> theResourceTypes) throws ConfigurationException {
 		myContext = theContext;
 		myVersion = theVersion;
+
 		Set<Class<? extends IBase>> toScan = new HashSet<>(theResourceTypes);
 		init(theExistingDefinitions, toScan);
 	}
@@ -405,8 +405,8 @@ class ModelScanner {
 				List<RuntimeSearchParam.Component> components = null;
 				if (paramType == RestSearchParameterTypeEnum.COMPOSITE) {
 					components = new ArrayList<>();
-					for (String next : searchParam.compositeOf()) {
-						String ref = "http://hl7.org/fhir/SearchParameter/" + theResourceDef.getName().toLowerCase() + "-" + next;
+					for (String name : searchParam.compositeOf()) {
+						String ref = toCanonicalSearchParameterUri(theResourceDef, name);
 						components.add(new RuntimeSearchParam.Component(null, ref));
 					}
 				}
@@ -414,7 +414,8 @@ class ModelScanner {
 				Collection<String> base = Collections.singletonList(theResourceDef.getName());
 				String url = null;
 				if (theResourceDef.isStandardType()) {
-					url = "http://hl7.org/fhir/SearchParameter/" + theResourceDef.getName().toLowerCase() + "-" + searchParam.name();
+					String name = searchParam.name();
+					url = toCanonicalSearchParameterUri(theResourceDef, name);
 				}
 				RuntimeSearchParam param = new RuntimeSearchParam(null, url, searchParam.name(), searchParam.description(), searchParam.path(), paramType, providesMembershipInCompartments, toTargetList(searchParam.target()), RuntimeSearchParamStatusEnum.ACTIVE, null, components, base);
 				theResourceDef.addSearchParam(param);
@@ -422,6 +423,10 @@ class ModelScanner {
 			}
 		}
 
+	}
+
+	private String toCanonicalSearchParameterUri(RuntimeResourceDefinition theResourceDef, String theName) {
+		return "http://hl7.org/fhir/SearchParameter/" + theResourceDef.getName() + "-" + theName;
 	}
 
 	private Set<String> toTargetList(Class<? extends IBaseResource>[] theTarget) {

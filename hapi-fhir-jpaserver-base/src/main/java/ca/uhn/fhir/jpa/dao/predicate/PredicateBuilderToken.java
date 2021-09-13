@@ -261,6 +261,9 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 			if (theSearchParam != null) {
 				Set<String> valueSetUris = Sets.newHashSet();
 				for (String nextPath : theSearchParam.getPathsSplit()) {
+					if (!nextPath.startsWith(myResourceType + ".")) {
+						continue;
+					}
 					BaseRuntimeChildDefinition def = myContext.newTerser().getDefinition(myResourceType, nextPath);
 					if (def instanceof BaseRuntimeDeclaredChildDefinition) {
 						String valueSet = ((BaseRuntimeDeclaredChildDefinition) def).getBindingValueSet();

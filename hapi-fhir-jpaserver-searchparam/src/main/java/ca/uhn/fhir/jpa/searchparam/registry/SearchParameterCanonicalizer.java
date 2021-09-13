@@ -87,7 +87,11 @@ public class SearchParameterCanonicalizer {
 			default:
 				throw new InternalErrorException("SearchParameter canonicalization not supported for FHIR version" + myFhirContext.getVersion().getVersion());
 		}
-		extractExtensions(theSearchParameter, retVal);
+
+		if (retVal != null) {
+			extractExtensions(theSearchParameter, retVal);
+		}
+
 		return retVal;
 	}
 
@@ -309,7 +313,9 @@ public class SearchParameterCanonicalizer {
 		Set<String> targets = terser.getValues(theNextSp, "target", IPrimitiveType.class).stream().map(t -> t.getValueAsString()).collect(Collectors.toSet());
 
 		if (isBlank(name) || isBlank(path) || paramType == null) {
-			if (paramType != RestSearchParameterTypeEnum.COMPOSITE) {
+			if ("_text".equals(name) || "_content".equals(name)) {
+				// ok
+			} else if (paramType != RestSearchParameterTypeEnum.COMPOSITE) {
 				return null;
 			}
 		}
