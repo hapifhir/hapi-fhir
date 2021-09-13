@@ -72,17 +72,8 @@ public abstract class BaseResource extends BaseElement implements IResource {
 	@SearchParamDefinition(name="_id", path="", description="The ID of the resource", type="string"  )
 	public static final String SP_RES_ID = "_id";
 
-	/**
-	 * Search parameter constant for <b>_language</b>
-	 */
-	@SearchParamDefinition(name="_language", path="", description="The language of the resource", type="string"  )
-	public static final String SP_RES_LANGUAGE = "_language";
-	
-
-	
 	@Child(name = "contained", order = 2, min = 0, max = 1)
 	private ContainedDt myContained;
-
 
 	private IdDt myId;
 

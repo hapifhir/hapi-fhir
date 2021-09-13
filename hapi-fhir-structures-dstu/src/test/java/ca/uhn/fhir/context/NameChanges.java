@@ -42,7 +42,7 @@ public class NameChanges {
 				}
 				
 				if (name.startsWith("_")) {
-					continue; // _id and _language
+					continue; // _id
 				}
 
 				String path = nextParam.getPath();
