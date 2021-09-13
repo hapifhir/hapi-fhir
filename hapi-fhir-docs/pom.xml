@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>5.3.3</version>
+		<version>5.3.4</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -78,13 +78,13 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
-			<version>5.3.3</version>
+			<version>5.3.4</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-subscription</artifactId>
-			<version>5.3.3</version>
+			<version>5.3.4</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -101,7 +101,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-testpage-overlay</artifactId>
-			<version>5.3.3</version>
+			<version>5.3.4</version>
 			<classifier>classes</classifier>
 		</dependency>
 		<dependency>
