@@ -156,6 +156,7 @@ public class InMemoryResourceMatcher {
 		String resourceName = theResourceDefinition.getName();
 		RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(resourceName, theParamName);
 		InMemoryMatchResult checkUnsupportedResult = checkUnsupportedPrefixes(theParamName, paramDef, theAndOrParams);
+
 		if (!checkUnsupportedResult.supported()) {
 			return checkUnsupportedResult;
 		}

@@ -44,7 +44,9 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
+import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -64,6 +66,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
@@ -157,6 +160,8 @@ public abstract class BaseTransactionProcessor {
 	private ModelConfig myModelConfig;
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
+	@Autowired
+	private SearchParamMatcher mySearchParamMatcher;
 
 	private TaskExecutor myExecutor ;
 
@@ -852,6 +857,7 @@ public abstract class BaseTransactionProcessor {
 			Map<IBase, IIdType> entriesToProcess = new IdentityHashMap<>();
 			Set<IIdType> nonUpdatedEntities = new HashSet<>();
 			Set<IBasePersistedResource> updatedEntities = new HashSet<>();
+			Map<String, IIdType> conditionalUrlToIdMap = new HashMap<>();
 			List<IBaseResource> updatedResources = new ArrayList<>();
 			Map<String, Class<? extends IBaseResource>> conditionalRequestUrls = new HashMap<>();
 
@@ -891,6 +897,7 @@ public abstract class BaseTransactionProcessor {
 						String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
 						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
 						outcome = resourceDao.create(res, matchUrl, false, theTransactionDetails, theRequest);
+						conditionalUrlToIdMap.put(matchUrl, outcome.getId());
 					 	res.setId(outcome.getId());
 						if (nextResourceId != null) {
 							handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequest);
@@ -925,6 +932,7 @@ public abstract class BaseTransactionProcessor {
 							String matchUrl = parts.getResourceType() + '?' + parts.getParams();
 							matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
 							DeleteMethodOutcome deleteOutcome = dao.deleteByUrl(matchUrl, deleteConflicts, theRequest);
+							conditionalUrlToIdMap.put(matchUrl, deleteOutcome.getId());
 							List<ResourceTable> allDeleted = deleteOutcome.getDeletedEntities();
 							for (ResourceTable deleted : allDeleted) {
 								deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless().getValueAsString());
@@ -967,6 +975,7 @@ public abstract class BaseTransactionProcessor {
 							}
 							matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
 							outcome = resourceDao.update(res, matchUrl, false, false, theRequest, theTransactionDetails);
+							conditionalUrlToIdMap.put(matchUrl, outcome.getId());
 							if (Boolean.TRUE.equals(outcome.getCreated())) {
 								conditionalRequestUrls.put(matchUrl, res.getClass());
 							}
@@ -1025,6 +1034,7 @@ public abstract class BaseTransactionProcessor {
 						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
 						IIdType patchId = myContext.getVersion().newIdType().setValue(parts.getResourceId());
 						DaoMethodOutcome outcome = dao.patch(patchId, matchUrl, patchType, patchBody, patchBodyParameters, theRequest);
+						conditionalUrlToIdMap.put(matchUrl, outcome.getId());
 						updatedEntities.add(outcome.getEntity());
 						if (outcome.getResource() != null) {
 							updatedResources.add(outcome.getResource());
@@ -1081,6 +1091,11 @@ public abstract class BaseTransactionProcessor {
 			if (!myDaoConfig.isMassIngestionMode()) {
 				validateNoDuplicates(theRequest, theActionName, conditionalRequestUrls, theIdToPersistedOutcome.values());
 			}
+
+			if (!myDaoConfig.isMassIngestionMode()) {
+				validateAllInsertsMatchTheirConditionalUrls(theIdToPersistedOutcome, conditionalUrlToIdMap, theRequest);
+			}
+
 			theTransactionStopWatch.endCurrentTask();
 
 			for (IIdType next : theAllIds) {
@@ -1117,6 +1132,32 @@ public abstract class BaseTransactionProcessor {
 				theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
 			}
 		}
+	}
+
+	/**
+	 * After transaction processing and resolution of indexes and references, we want to validate that the resources that were stored _actually_
+	 * match the conditional URLs that they were brought in on.
+	 * @param theIdToPersistedOutcome
+	 * @param conditionalUrlToIdMap
+	 */
+	private void validateAllInsertsMatchTheirConditionalUrls(Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, Map<String, IIdType> conditionalUrlToIdMap, RequestDetails theRequest) {
+		conditionalUrlToIdMap.entrySet().stream()
+			.forEach(entry -> {
+				String matchUrl = entry.getKey();
+				IIdType value = entry.getValue();
+				DaoMethodOutcome daoMethodOutcome = theIdToPersistedOutcome.get(value);
+				if (daoMethodOutcome != null && daoMethodOutcome.getResource() != null) {
+					InMemoryMatchResult match = mySearchParamMatcher.match(matchUrl, daoMethodOutcome.getResource(), theRequest);
+					if (ourLog.isDebugEnabled()) {
+						ourLog.debug("Checking conditional URL [{}] against resource with ID [{}]: Supported?:[{}], Matched?:[{}]", matchUrl, value, match.supported(), match.matched());
+					}
+					if (match.supported()) {
+						if (!match.matched()) {
+							throw new PreconditionFailedException("Invalid conditional URL \"" + matchUrl + "\". The given resource is not matched by this URL.");
+						};
+					}
+				}
+			});
 	}
 
 	/**
@@ -1409,7 +1450,7 @@ public abstract class BaseTransactionProcessor {
 		thePersistedOutcomes
 			.stream()
 			.filter(t -> !t.isNop())
-			.filter(t -> t.getEntity() instanceof ResourceTable)
+			.filter(t -> t.getEntity() instanceof ResourceTable)//N.B. GGG: This validation never occurs for mongo, as nothing is a ResourceTable.
 			.filter(t -> t.getEntity().getDeleted() == null)
 			.filter(t -> t.getResource() != null)
 			.forEach(t -> resourceToIndexedParams.put(t.getResource(), new ResourceIndexedSearchParams((ResourceTable) t.getEntity())));
