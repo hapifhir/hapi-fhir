@@ -277,7 +277,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 
 	@Test
-	public void testValidateCodeWithVersionedCanonicalUrl() {
+	public void testExpandValueSet_VsUsesVersionedSystem_CsIsFragmentWithoutCode() {
 		CodeSystem cs = new CodeSystem();
 		cs.setId("snomed-ct-ca-imm");
 		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -297,9 +297,9 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		vsInclude.addConcept().setCode("28571000087109").setDisplay("MODERNA COVID-19 mRNA-1273");
 		myValueSetDao.update(vs);
 
+
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(null, new IdType("ValueSet/vaccinecode"), new CodeType("28571000087109"), new CodeType("http://snomed.info/sct"), null, null, null, mySrd);
 		assertTrue(outcome.isOk());
-
 		outcome = myTermSvc.validateCodeInValueSet(
 			new ValidationSupportContext(myValidationSupport),
 			new ConceptValidationOptions(),
@@ -309,6 +309,9 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 			vs
 			);
 		assertTrue(outcome.isOk());
+
+		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/vaccinecode"), new ValueSetExpansionOptions(), mySrd);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
 	}
 
