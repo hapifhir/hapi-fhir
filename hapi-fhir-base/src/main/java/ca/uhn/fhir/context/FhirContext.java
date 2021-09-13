@@ -227,7 +227,7 @@ public class FhirContext {
 
 
 	/**
-	 * @since 5.5.0
+	 * @since 5.6.0
 	 */
 	public static FhirContext forDstu2Cached() {
 		return forCached(FhirVersionEnum.DSTU2);
