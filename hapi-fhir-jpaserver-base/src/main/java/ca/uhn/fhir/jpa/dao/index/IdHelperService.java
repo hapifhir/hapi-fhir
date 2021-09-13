@@ -205,11 +205,11 @@ public class IdHelperService {
 	 */
 	@Nonnull
 	public List<ResourcePersistentId> resolveResourcePersistentIdsWithCache(RequestPartitionId theRequestPartitionId, List<IIdType> theIds) {
-		try {
-			theIds.forEach(id -> Validate.isTrue(id.hasIdPart()));
-		} catch (IllegalArgumentException e) {
-			ourLog.error("Illegal Argument during database access", e);
-			throw new InvalidRequestException("Parameter value missing in request", e);
+		for (IIdType id : theIds) {
+			if (!id.hasIdPart()) {
+				ourLog.error("Illegal Argument during database access");
+				throw new InvalidRequestException("Parameter value missing in request");
+			}
 		}
 
 		if (theIds.isEmpty()) {

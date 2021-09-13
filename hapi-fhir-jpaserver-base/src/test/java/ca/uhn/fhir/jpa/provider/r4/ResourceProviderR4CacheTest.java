@@ -8,16 +8,12 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.ctc.wstx.shaded.msv_core.verifier.jarv.Const;
-import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -256,12 +252,14 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testReturn400ForParameterWithNoValue(){
+		// When: We search Procedure?patient=
 		BaseServerResponseException exception = assertThrows(BaseServerResponseException.class, () -> {myClient
 			.search()
 			.byUrl("Procedure?patient=")
 			.returnBundle(Bundle.class)
 			.execute();});
 
+		// Then: We get a HTTP 400 Bad Request
 		assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, exception.getStatusCode());
 	}
 
