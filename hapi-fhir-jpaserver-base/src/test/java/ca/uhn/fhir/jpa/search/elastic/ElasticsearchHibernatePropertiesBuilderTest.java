@@ -23,17 +23,11 @@ class ElasticsearchHibernatePropertiesBuilderTest {
 
 	ElasticsearchHibernatePropertiesBuilder myPropertiesBuilder = spy(ElasticsearchHibernatePropertiesBuilder.class);
 
-	@BeforeEach
-	public void prepMocks() {
-		//ensures we don't try to reach out to a real ES server on apply.
-		doNothing().when(myPropertiesBuilder).injectStartupTemplate(any(), any(), any(), any());
-	}
-
 	@Test
-	public void testRestUrlCannotContainProtocol() {
+	public void testHostsCannotContainProtocol() {
 		String host = "localhost:9200";
 		String protocolHost = "https://" + host;
-		String failureMessage = "Elasticsearch URL cannot include a protocol, that is a separate property. Remove http:// or https:// from this URL.";
+		String failureMessage = "Elasticsearch URLs cannot include a protocol, that is a separate property. Remove http:// or https:// from this URL.";
 
 		myPropertiesBuilder
 			.setProtocol("https")
@@ -42,19 +36,42 @@ class ElasticsearchHibernatePropertiesBuilderTest {
 
 		//SUT
 		try {
-			myPropertiesBuilder.setRestUrl(protocolHost);
+			myPropertiesBuilder.setHosts(protocolHost)
+				.apply(new Properties());
 			fail();
 		} catch (ConfigurationException e ) {
 			assertThat(e.getMessage(), is(equalTo(failureMessage)));
 		}
 
+		doNothing().when(myPropertiesBuilder).injectStartupTemplate(any(), any(), any(), any());
 		Properties properties = new Properties();
 		myPropertiesBuilder
-			.setRestUrl(host)
+			.setHosts(host)
 			.apply(properties);
 
 		assertThat(properties.getProperty(BackendSettings.backendKey(ElasticsearchBackendSettings.HOSTS)), is(equalTo(host)));
 
+	}
+
+	@Test
+	public void testHostsValueValidation() {
+		String host = "localhost_9200,localhost:9201,localhost:9202";
+		String failureMessage = "Elasticsearch URLs have to contain ':' as a host:port separator. Example: localhost:9200,localhost:9201,localhost:9202";
+
+		myPropertiesBuilder
+			.setProtocol("https")
+			.setHosts(host)
+			.setUsername("whatever")
+			.setPassword("whatever");
+
+		//SUT
+		try {
+			myPropertiesBuilder
+				.apply(new Properties());
+			fail();
+		} catch (ConfigurationException e ) {
+			assertThat(e.getMessage(), is(equalTo(failureMessage)));
+		}
 	}
 
 }
