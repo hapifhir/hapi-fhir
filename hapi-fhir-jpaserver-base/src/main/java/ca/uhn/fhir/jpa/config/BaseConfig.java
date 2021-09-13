@@ -316,6 +316,8 @@ public abstract class BaseConfig {
 	public ThreadPoolTaskExecutor searchCoordinatorThreadFactory() {
 		final ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
 		threadPoolTaskExecutor.setThreadNamePrefix("search_coord_");
+		threadPoolTaskExecutor.setCorePoolSize(20);
+		threadPoolTaskExecutor.setMaxPoolSize(100);
 		threadPoolTaskExecutor.initialize();
 		return threadPoolTaskExecutor;
 	}
