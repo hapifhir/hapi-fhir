@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.stresstest;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
@@ -110,7 +109,7 @@ import static org.mockito.Mockito.when;
 public class GiantTransactionPerfTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(GiantTransactionPerfTest.class);
-	private final FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R4);
+	private final FhirContext myCtx = FhirContext.forR4Cached();
 	private FhirSystemDaoR4 mySystemDao;
 	private IInterceptorBroadcaster myInterceptorSvc;
 	private TransactionProcessor myTransactionProcessor;

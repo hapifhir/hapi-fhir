@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -119,7 +118,7 @@ public class ServerCapabilityStatementProviderR4Test {
 	public static final String PATIENT_SUB_SUB_2 = "PatientSubSub2";
 	public static final String PATIENT_TRIPLE_SUB = "PatientTripleSub";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerCapabilityStatementProviderR4Test.class);
-	private final FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R4);
+	private final FhirContext myCtx = FhirContext.forR4Cached();
 	private FhirValidator myValidator;
 
 	private static Set<String> toStrings(Collection<? extends IPrimitiveType> theType) {

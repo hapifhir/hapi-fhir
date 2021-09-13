@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.search.lastn;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import ca.uhn.fhir.jpa.search.lastn.config.TestElasticsearchContainerHelper;
@@ -27,23 +26,17 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -85,7 +78,7 @@ public class LastNElasticsearchSvcSingleObservationIT {
 	final String CODEFIRSTCODINGSYSTEM = "http://mycodes.org/fhir/observation-code";
 	final String CODEFIRSTCODINGCODE = "test-code";
 	final String CODEFIRSTCODINGDISPLAY = "test-code display";
-	final FhirContext myFhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+	final FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	ElasticsearchSvcImpl elasticsearchSvc;
 

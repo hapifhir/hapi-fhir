@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r5.BaseResourceProviderR5Test;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
@@ -225,7 +224,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 
 	@BeforeAll
 	public static void startListenerServer() throws Exception {
-		RestfulServer ourListenerRestServer = new RestfulServer(FhirContext.forCached(FhirVersionEnum.R5));
+		RestfulServer ourListenerRestServer = new RestfulServer(FhirContext.forR5Cached());
 
 		ObservationListener obsListener = new ObservationListener();
 		ourListenerRestServer.setResourceProviders(obsListener);
