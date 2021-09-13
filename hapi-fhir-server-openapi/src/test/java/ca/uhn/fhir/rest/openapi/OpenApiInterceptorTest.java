@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.openapi;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -70,7 +69,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class OpenApiInterceptorTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(OpenApiInterceptorTest.class);
-	private FhirContext myFhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+	private final FhirContext myFhirContext = FhirContext.forR4Cached();
 	@RegisterExtension
 	@Order(0)
 	protected RestfulServerExtension myServer = new RestfulServerExtension(myFhirContext)

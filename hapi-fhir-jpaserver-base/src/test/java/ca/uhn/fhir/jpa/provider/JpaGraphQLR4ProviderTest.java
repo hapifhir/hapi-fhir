@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
@@ -31,7 +30,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.utilities.graphql.Argument;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
-import org.hl7.fhir.utilities.graphql.Value;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +38,6 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -55,7 +52,7 @@ public class JpaGraphQLR4ProviderTest {
 	public static final String DATA_PREFIX = "{\"data\": ";
 	public static final String DATA_SUFFIX = "}";
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forCached(FhirVersionEnum.R4);
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static int ourPort;
 	private static Server ourServer;
 
@@ -252,7 +249,7 @@ public class JpaGraphQLR4ProviderTest {
 				Patient patient = new Patient();
 				patient.addName(new HumanName().setFamily("FAMILY"));
 				patient.getIdElement().setValue("Patient/" + i);
-				retVal.add((Patient) patient);
+				retVal.add(patient);
 			}
 			return retVal;
 		}

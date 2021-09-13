@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
@@ -49,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchParamExtractorDstu3Test {
 
-	private static FhirContext ourCtx = FhirContext.forCached(FhirVersionEnum.DSTU3);
+	private static FhirContext ourCtx = FhirContext.forDstu3Cached();
 
 	@Test
 	public void testParamWithOrInPath() {

@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
@@ -61,7 +60,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class SearchParamExtractorR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamExtractorR4Test.class);
-	private static FhirContext ourCtx = FhirContext.forCached(FhirVersionEnum.R4);
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private MySearchParamRegistry mySearchParamRegistry;
 	private PartitionSettings myPartitionSettings;
 
@@ -398,7 +397,7 @@ public class SearchParamExtractorR4Test {
 	private static class MySearchParamRegistry implements ISearchParamRegistry, ISearchParamRegistryController {
 
 
-		private List<RuntimeSearchParam> myExtraSearchParams = new ArrayList<>();
+		private final List<RuntimeSearchParam> myExtraSearchParams = new ArrayList<>();
 
 		@Override
 		public void forceRefresh() {
