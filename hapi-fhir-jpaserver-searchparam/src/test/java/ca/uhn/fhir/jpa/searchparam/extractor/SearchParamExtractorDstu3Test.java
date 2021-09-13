@@ -48,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchParamExtractorDstu3Test {
 
-	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
+	private static FhirContext ourCtx = FhirContext.forDstu3Cached();
 
 	@Test
 	public void testParamWithOrInPath() {
