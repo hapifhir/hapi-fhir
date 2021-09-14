@@ -83,6 +83,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -896,8 +897,8 @@ public abstract class BaseTransactionProcessor {
 						String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
 						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
 						outcome = resourceDao.create(res, matchUrl, false, theTransactionDetails, theRequest);
-						conditionalUrlToIdMap.put(matchUrl, outcome.getId());
-					 	res.setId(outcome.getId());
+						setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
+						res.setId(outcome.getId());
 						if (nextResourceId != null) {
 							handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequest);
 						}
@@ -931,7 +932,7 @@ public abstract class BaseTransactionProcessor {
 							String matchUrl = parts.getResourceType() + '?' + parts.getParams();
 							matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
 							DeleteMethodOutcome deleteOutcome = dao.deleteByUrl(matchUrl, deleteConflicts, theRequest);
-							conditionalUrlToIdMap.put(matchUrl, deleteOutcome.getId());
+							setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, deleteOutcome.getId());
 							List<ResourceTable> allDeleted = deleteOutcome.getDeletedEntities();
 							for (ResourceTable deleted : allDeleted) {
 								deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless().getValueAsString());
@@ -974,7 +975,7 @@ public abstract class BaseTransactionProcessor {
 							}
 							matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
 							outcome = resourceDao.update(res, matchUrl, false, false, theRequest, theTransactionDetails);
-							conditionalUrlToIdMap.put(matchUrl, outcome.getId());
+							setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
 							if (Boolean.TRUE.equals(outcome.getCreated())) {
 								conditionalRequestUrls.put(matchUrl, res.getClass());
 							}
@@ -1033,7 +1034,7 @@ public abstract class BaseTransactionProcessor {
 						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
 						IIdType patchId = myContext.getVersion().newIdType().setValue(parts.getResourceId());
 						DaoMethodOutcome outcome = dao.patch(patchId, matchUrl, patchType, patchBody, patchBodyParameters, theRequest);
-						conditionalUrlToIdMap.put(matchUrl, outcome.getId());
+						setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
 						updatedEntities.add(outcome.getEntity());
 						if (outcome.getResource() != null) {
 							updatedResources.add(outcome.getResource());
@@ -1133,6 +1134,12 @@ public abstract class BaseTransactionProcessor {
 		}
 	}
 
+	private void setConditionalUrlToBeValidatedLater(Map<String, IIdType> theConditionalUrlToIdMap, String theMatchUrl, IIdType theId) {
+		if (!StringUtils.isBlank(theMatchUrl)) {
+			theConditionalUrlToIdMap.put(theMatchUrl, theId);
+		}
+	}
+
 	/**
 	 * After transaction processing and resolution of indexes and references, we want to validate that the resources that were stored _actually_
 	 * match the conditional URLs that they were brought in on.
@@ -1141,6 +1148,7 @@ public abstract class BaseTransactionProcessor {
 	 */
 	private void validateAllInsertsMatchTheirConditionalUrls(Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, Map<String, IIdType> conditionalUrlToIdMap, RequestDetails theRequest) {
 		conditionalUrlToIdMap.entrySet().stream()
+			.filter(entry -> entry.getKey() != null)
 			.forEach(entry -> {
 				String matchUrl = entry.getKey();
 				IIdType value = entry.getValue();
