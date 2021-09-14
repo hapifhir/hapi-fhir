@@ -363,9 +363,8 @@ public abstract class BaseTransactionProcessor {
 		List<RetriableBundleTask> getCalls = new ArrayList<>();
 		List<RetriableBundleTask> nonGetCalls = new ArrayList<>();
 
-		long getEntriesSize = requestEntries.stream().filter(entry -> myVersionAdapter.getEntryRequestVerb(myContext, entry).equalsIgnoreCase("GET")).count();
-		CountDownLatch completionLatch = new CountDownLatch((int) getEntriesSize);
-		for (int i=0; i<requestEntriesSize ; i++ ) {
+		CountDownLatch completionLatch = new CountDownLatch(requestEntriesSize);
+		for (int i=0; i< requestEntriesSize ; i++ ) {
 			IBase nextRequestEntry = requestEntries.get(i);
 			RetriableBundleTask retriableBundleTask = new RetriableBundleTask(completionLatch, theRequestDetails, responseMap, i, nextRequestEntry, theNestedMode);
 			if  (myVersionAdapter.getEntryRequestVerb(myContext, nextRequestEntry).equalsIgnoreCase("GET")) {
