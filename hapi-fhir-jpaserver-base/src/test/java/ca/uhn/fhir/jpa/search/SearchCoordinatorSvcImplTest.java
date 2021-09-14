@@ -126,7 +126,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		myCurrentSearch = null;
 
-		mySvc = new SearchCoordinatorSvcImpl(new BaseDstu3Config().searchCoordinatorThreadFactory());
+		mySvc = new SearchCoordinatorSvcImpl();
 		mySvc.setEntityManagerForUnitTest(myEntityManager);
 		mySvc.setTransactionManagerForUnitTest(myTxManager);
 		mySvc.setContextForUnitTest(ourCtx);

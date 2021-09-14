@@ -123,7 +123,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	public static final Integer INTEGER_0 = 0;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCoordinatorSvcImpl.class);
 	private final ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<>();
-	private final ExecutorService myExecutor;
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
@@ -162,8 +161,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	 * Constructor
 	 */
 	@Autowired
-	public SearchCoordinatorSvcImpl(ThreadPoolTaskExecutor searchCoordinatorThreadFactory) {
-		myExecutor = searchCoordinatorThreadFactory.getThreadPoolExecutor();
+	public SearchCoordinatorSvcImpl() {
+		super();
 	}
 
 	@VisibleForTesting
@@ -274,7 +273,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequestDetails, resourceType, params, null);
 					SearchContinuationTask task = new SearchContinuationTask(search, resourceDao, params, resourceType, theRequestDetails, requestPartitionId);
 					myIdToSearchTask.put(search.getUuid(), task);
-					myExecutor.submit(task);
+					task.call();
 				}
 			}
 
@@ -406,7 +405,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		SearchTask task = new SearchTask(theSearch, theCallingDao, theParams, theResourceType, theRequestDetails, theRequestPartitionId);
 		myIdToSearchTask.put(theSearch.getUuid(), task);
-		myExecutor.submit(task);
+		task.call();
 
 		PersistedJpaSearchFirstPageBundleProvider retVal = myPersistedJpaBundleProviderFactory.newInstanceFirstPage(theRequestDetails, theSearch, task, theSb);
 
