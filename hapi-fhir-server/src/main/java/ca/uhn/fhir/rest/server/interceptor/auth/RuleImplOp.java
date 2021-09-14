@@ -18,6 +18,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -28,6 +29,8 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,6 +72,8 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	private Collection<IIdType> myAppliesToInstances;
 	private boolean myAppliesToDeleteCascade;
 	private boolean myAppliesToDeleteExpunge;
+	private boolean myDeviceIncludedInPatientCompartment;
+	private Map<String, Set<String>> myAdditionalCompartmentSearchParamMap;
 
 	/**
 	 * Constructor
@@ -337,7 +342,12 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 		for (IIdType next : myClassifierCompartmentOwners) {
 			if (target.resource != null) {
-				if (t.isSourceInCompartmentForTarget(myClassifierCompartmentName, target.resource, next)) {
+
+				Set<String> additionalSearchParamNames = null;
+				if (myAdditionalCompartmentSearchParamMap != null) {
+					additionalSearchParamNames = myAdditionalCompartmentSearchParamMap.get(target.resourceType);
+				}
+				if (t.isSourceInCompartmentForTarget(myClassifierCompartmentName, target.resource, next, additionalSearchParamNames)) {
 					foundMatch = true;
 					break;
 				}
@@ -372,6 +382,12 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				String compartmentOwnerResourceType = next.getResourceType();
 				if (!StringUtils.equals(target.resourceType, compartmentOwnerResourceType)) {
 					List<RuntimeSearchParam> params = sourceDef.getSearchParamsForCompartmentName(compartmentOwnerResourceType);
+					if (target.resourceType.equalsIgnoreCase("Device") && myDeviceIncludedInPatientCompartment) {
+						if (params == null || params.isEmpty()) {
+							params = new ArrayList<>();
+						}
+						params.add(sourceDef.getSearchParam("patient"));
+					}
 					if (!params.isEmpty()) {
 
 						/*
@@ -656,6 +672,10 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		myAppliesToDeleteExpunge = theAppliesToDeleteExpunge;
 	}
 
+	void setDeviceIncludedInPatientCompartment(boolean theDeviceIncludedInPatientCompartment) {
+		myDeviceIncludedInPatientCompartment = theDeviceIncludedInPatientCompartment;
+	}
+
 	public void addClassifierCompartmentOwner(IIdType theOwner) {
 		List<IIdType> newList = new ArrayList<>(myClassifierCompartmentOwners);
 		newList.add(theOwner);
@@ -680,5 +700,18 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				// no more cases
 				return false;
 		}
+	}
+
+	public void setAdditionalSearchParamsForCompartmentTypes(List<String> theTypeAndParams) {
+		if (myAdditionalCompartmentSearchParamMap == null) {
+			myAdditionalCompartmentSearchParamMap = new HashMap<>();
+		}
+
+		for (String typeAndParam: theTypeAndParams) {
+			String[] split = typeAndParam.split(",");
+			Validate.isTrue(split.length == 2);
+			myAdditionalCompartmentSearchParamMap.computeIfAbsent(split[0], (v) -> new HashSet<>()).add(split[1]);
+		}
+		this.myAdditionalCompartmentSearchParamMap = myAdditionalCompartmentSearchParamMap;
 	}
 }

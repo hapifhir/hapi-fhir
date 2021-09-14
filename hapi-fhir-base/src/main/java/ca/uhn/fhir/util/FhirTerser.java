@@ -704,6 +704,21 @@ public class FhirTerser {
 	 * @throws IllegalArgumentException If theTarget does not contain both a resource type and ID
 	 */
 	public boolean isSourceInCompartmentForTarget(String theCompartmentName, IBaseResource theSource, IIdType theTarget) {
+		return isSourceInCompartmentForTarget(theCompartmentName, theSource, theTarget, null);
+	}
+
+	/**
+	 * Returns <code>true</code> if <code>theSource</code> is in the compartment named <code>theCompartmentName</code>
+	 * belonging to resource <code>theTarget</code>
+	 *
+	 * @param theCompartmentName The name of the compartment
+	 * @param theSource          The potential member of the compartment
+	 * @param theTarget          The owner of the compartment. Note that both the resource type and ID must be filled in on this IIdType or the method will throw an {@link IllegalArgumentException}
+	 * @param theAdditionalCompartmentParamNames If provided, search param names provided here will be considered as included in the given compartment for this comparison.
+	 * @return <code>true</code> if <code>theSource</code> is in the compartment or one of the additional parameters matched.
+	 * @throws IllegalArgumentException If theTarget does not contain both a resource type and ID
+	 */
+	public boolean isSourceInCompartmentForTarget(String theCompartmentName, IBaseResource theSource, IIdType theTarget, Set<String> theAdditionalCompartmentParamNames) {
 		Validate.notBlank(theCompartmentName, "theCompartmentName must not be null or blank");
 		Validate.notNull(theSource, "theSource must not be null");
 		Validate.notNull(theTarget, "theTarget must not be null");
@@ -720,6 +735,18 @@ public class FhirTerser {
 		}
 
 		List<RuntimeSearchParam> params = sourceDef.getSearchParamsForCompartmentName(theCompartmentName);
+
+		//If passed an additional set of searchparameter names, add them for comparison purposes.
+		if (theAdditionalCompartmentParamNames != null) {
+			List<RuntimeSearchParam> additionalParams = theAdditionalCompartmentParamNames.stream().map(paramName -> sourceDef.getSearchParam(paramName)).collect(Collectors.toList());
+			if (params == null || params.isEmpty()) {
+				params = additionalParams;
+			} else {
+				params.addAll(additionalParams);
+			}
+		}
+
+
 		for (RuntimeSearchParam nextParam : params) {
 			for (String nextPath : nextParam.getPathsSplit()) {
 

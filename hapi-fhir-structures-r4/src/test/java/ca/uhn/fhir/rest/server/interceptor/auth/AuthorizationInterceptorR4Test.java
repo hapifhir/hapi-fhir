@@ -376,7 +376,39 @@ public class AuthorizationInterceptorR4Test {
 		assertTrue(ourHitMethod);
 
 	}
+	@Test
+	public void testDeviceIsPartOfPatientCompartment() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				List<String> bonusPatientCompartmentSearchParams = Collections.singletonList("device:patient");
+				return new RuleBuilder()
+					.allow().read().allResources()
+					.inCompartmentWithAdditionalSearchParams("Patient", new IdType("Patient/123"), bonusPatientCompartmentSearchParams)
+					.andThen().denyAll()
+					.build();
+			}
+		});
 
+		HttpGet httpGet;
+		HttpResponse status;
+
+		Patient patient;
+
+
+		patient = new Patient();
+		patient.setId("Patient/123");
+		Device d = new Device();
+		d.getPatient().setResource(patient);
+
+		ourHitMethod = false;
+		ourReturn = Collections.singletonList(d);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Device/124456");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+	}
 	@Test
 	public void testAllowByCompartmentUsingUnqualifiedIds() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -436,6 +468,24 @@ public class AuthorizationInterceptorR4Test {
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+
+		patient = new Patient();
+		patient.setId("Patient/123");
+		carePlan = new CarePlan();
+		carePlan.setStatus(CarePlan.CarePlanStatus.ACTIVE);
+		carePlan.getSubject().setResource(patient);
+
+		Device d = new Device();
+		d.getPatient().setResource(patient);
+
+		ourHitMethod = false;
+		ourReturn = Collections.singletonList(d);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Device/123456");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 	}
 
@@ -3619,6 +3669,30 @@ public class AuthorizationInterceptorR4Test {
 		}
 	}
 
+	public static class DummyDeviceResourceProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Device.class;
+		}
+
+		@Read(version = true)
+		public Device read(@IdParam IdType theId) {
+			ourHitMethod = true;
+			if (ourReturn.isEmpty()) {
+				throw new ResourceNotFoundException(theId);
+			}
+			return (Device) ourReturn.get(0);
+		}
+		@Search()
+		public List<Resource> search(
+			@OptionalParam(name = "patient") ReferenceParam thePatient
+		) {
+			ourHitMethod = true;
+			return ourReturn;
+		}
+	}
+
 	@SuppressWarnings("unused")
 	public static class DummyObservationResourceProvider implements IResourceProvider {
 
@@ -3953,12 +4027,13 @@ public class AuthorizationInterceptorR4Test {
 		DummyEncounterResourceProvider encProv = new DummyEncounterResourceProvider();
 		DummyCarePlanResourceProvider cpProv = new DummyCarePlanResourceProvider();
 		DummyDiagnosticReportResourceProvider drProv = new DummyDiagnosticReportResourceProvider();
+		DummyDeviceResourceProvider devProv = new DummyDeviceResourceProvider();
 		PlainProvider plainProvider = new PlainProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
 		ourServlet.setFhirContext(ourCtx);
-		ourServlet.registerProviders(patProvider, obsProv, encProv, cpProv, orgProv, drProv);
+		ourServlet.registerProviders(patProvider, obsProv, encProv, cpProv, orgProv, drProv, devProv);
 		ourServlet.registerProvider(new DummyServiceRequestResourceProvider());
 		ourServlet.registerProvider(new DummyConsentResourceProvider());
 		ourServlet.setPlainProviders(plainProvider);

@@ -451,6 +451,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				private Collection<? extends IIdType> myInCompartmentOwners;
 				private Collection<IIdType> myAppliesToInstances;
 				private RuleImplOp myRule;
+				private List<String> myAdditionalSearchParamsForCompartmentTypes;
 
 				/**
 				 * Constructor
@@ -483,6 +484,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					myRule.setClassifierCompartmentOwners(myInCompartmentOwners);
 					myRule.setAppliesToDeleteCascade(myOnCascade);
 					myRule.setAppliesToDeleteExpunge(myOnExpunge);
+					myRule.setAdditionalSearchParamsForCompartmentTypes(myAdditionalSearchParamsForCompartmentTypes);
 					myRules.add(myRule);
 
 					return new RuleBuilderFinished(myRule);
@@ -518,6 +520,26 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					myInCompartmentOwners = Collections.singletonList(theOwner);
 					return finished();
 				}
+
+				@Override
+				public IAuthRuleBuilderRuleOpClassifierFinished inCompartmentWithAdditionalSearchParams(String theCompartmentName, IIdType theOwner, List<String> additionalTypeSearchParamNames) {
+					Validate.notBlank(theCompartmentName, "theCompartmentName must not be null");
+					Validate.notNull(theOwner, "theOwner must not be null");
+					validateOwner(theOwner);
+					myClassifierType = ClassifierTypeEnum.IN_COMPARTMENT;
+					myInCompartmentName = theCompartmentName;
+					Optional<RuleImplOp> oRule = findMatchingRule();
+
+					if (oRule.isPresent()) {
+						RuleImplOp rule = oRule.get();
+						rule.setAdditionalSearchParamsForCompartmentTypes(additionalTypeSearchParamNames);
+						rule.addClassifierCompartmentOwner(theOwner);
+						return new RuleBuilderFinished(rule);
+					}
+					myInCompartmentOwners = Collections.singletonList(theOwner);
+					return finished();
+				}
+
 
 				private Optional<RuleImplOp> findMatchingRule() {
 					return myRules.stream()

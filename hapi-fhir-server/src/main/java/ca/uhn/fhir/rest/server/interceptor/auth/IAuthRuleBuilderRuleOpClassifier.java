@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  */
 
 import java.util.Collection;
+import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -57,6 +58,8 @@ public interface IAuthRuleBuilderRuleOpClassifier {
 	 * @param theOwners The owner of the compartment. Note that both the resource type and ID must be populated in this ID.
 	 */
 	IAuthRuleBuilderRuleOpClassifierFinished inCompartment(String theCompartmentName, Collection<? extends IIdType> theOwners);
+
+	IAuthRuleBuilderRuleOpClassifierFinished inCompartmentWithAdditionalSearchParams(String theCompartmentName, IIdType theOwner, List<String> additionalTypeSearchParamNames);
 
 	/**
 	 * Rule applies to any resource instances
