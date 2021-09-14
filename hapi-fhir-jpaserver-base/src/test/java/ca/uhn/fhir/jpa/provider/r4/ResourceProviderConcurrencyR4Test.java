@@ -62,12 +62,20 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 		assertThat(myExceptions, empty());
 	}
 
+	/**
+	 * This test is intended to verify that we are in fact executing searches in parallel
+	 * when two different searches come in.
+	 *
+	 * We execute two identical searches (which should result in only one actual
+	 * execution that will be reused by both) and one other search. We use an
+	 * interceptor to artifically delay the execution of the first search in order
+	 * to verify that the last search completes before the first one can finish.
+	 */
 	@Test
 	public void testSearchesExecuteConcurrently() {
 		createPatient(withFamily("FAMILY1"));
 		createPatient(withFamily("FAMILY2"));
 		createPatient(withFamily("FAMILY3"));
-
 
 		SearchBlockingInterceptor searchBlockingInterceptorFamily1 = new SearchBlockingInterceptor("FAMILY1");
 		myInterceptorRegistry.registerInterceptor(searchBlockingInterceptorFamily1);
@@ -141,7 +149,7 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 		}
 
 		ourLog.info("About to wait for FAMILY3 to complete");
-		await().atMost(10, TimeUnit.MINUTES).until(() -> myReceivedNames, contains("FAMILY3"));
+		await().until(() -> myReceivedNames, contains("FAMILY3"));
 		ourLog.info("Got FAMILY3");
 
 		searchBlockingInterceptorFamily1.getSemaphore().release();
@@ -149,6 +157,8 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 		ourLog.info("About to wait for FAMILY1 to complete");
 		await().until(() -> myReceivedNames, contains("FAMILY3", "FAMILY1", "FAMILY1"));
 		ourLog.info("Got FAMILY1");
+
+		assertEquals(1, searchBlockingInterceptorFamily1.getHits());
 	}
 
 
