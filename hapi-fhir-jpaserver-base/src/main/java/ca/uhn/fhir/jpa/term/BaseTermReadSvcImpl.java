@@ -2382,6 +2382,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 
+	@Override
+	public boolean isLoincNotGenericUnversionedCodeSystem(String theUrl) {
+		boolean isLoincCodeSystem = StringUtils.containsIgnoreCase(theUrl, "loinc");
+		boolean isNoVersion = ! theUrl.contains("|");
+
+		return isLoincCodeSystem && isNoVersion;
+	}
+
+
 	@SuppressWarnings("unchecked")
 	private CodeValidationResult codeSystemValidateCode(String theCodeSystemUrl, String theCodeSystemVersion, String theCode, String theDisplay) {
 

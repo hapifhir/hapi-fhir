@@ -34,7 +34,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -74,7 +73,8 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaPersistedResourceValidationSupport.class);
 
-	public static final String LOINC_GENERIC_VALUESET_URL = "http://loinc.org/vs";
+	public static final String LOINC_GENERIC_CODE_SYSTEM_URL = "http://loinc.org";
+	public static final String LOINC_GENERIC_VALUESET_URL = LOINC_GENERIC_CODE_SYSTEM_URL + "/vs";
 	public static final String LOINC_GENERIC_VALUESET_URL_PLUS_SLASH = LOINC_GENERIC_VALUESET_URL + "/";
 
 	private final FhirContext myFhirContext;
@@ -107,8 +107,28 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
+		if (myTermReadSvc.isLoincNotGenericUnversionedCodeSystem(theSystem)) {
+			Optional<IBaseResource> currentCSOpt = getCodeSystemCurrentVersion(new UriType(theSystem));
+			return currentCSOpt.orElseThrow(() -> new ResourceNotFoundException(
+				"Couldn't find current version CodeSystem for url: " + theSystem));
+		}
+
 		return fetchResource(myCodeSystemType, theSystem);
 	}
+
+	/**
+	 * Obtains the current version of a CodeSystem using the fact that the current
+	 * version is always pointed by the ForcedId for the no-versioned CS
+	 */
+	private Optional<IBaseResource> getCodeSystemCurrentVersion(UriType theUrl) {
+		if (! theUrl.getValueAsString().contains("loinc"))  return Optional.empty();
+
+		IFhirResourceDao<? extends IBaseResource> valueSetResourceDao = myDaoRegistry.getResourceDao(myCodeSystemType);
+		String forcedId = "loinc";
+		IBaseResource codeSystem = valueSetResourceDao.read(new IdDt("CodeSystem", forcedId));
+		return Optional.ofNullable(codeSystem);
+	}
+
 
 	@Override
 	public IBaseResource fetchValueSet(String theSystem) {
@@ -126,16 +146,10 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	 * version is always pointed by the ForcedId for the no-versioned VS
 	 */
 	private Optional<IBaseResource> getValueSetCurrentVersion(UriType theUrl) {
-		if (! theUrl.getValueAsString().startsWith(LOINC_GENERIC_VALUESET_URL))   return Optional.empty();
-
-		if (! theUrl.getValue().startsWith(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH)) {
-				throw new InternalErrorException("Don't know how to extract ForcedId from url: " + theUrl.getValueAsString());
-		}
+		if (myTermReadSvc.mustReturnEmptyValueSet(theUrl.getValueAsString()))   return Optional.empty();
 
 		String forcedId = theUrl.getValue().substring(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH.length());
 		if (StringUtils.isBlank(forcedId))  return Optional.empty();
-
-		if (myTermReadSvc.mustReturnEmptyValueSet(theUrl.getValueAsString()))  return Optional.empty();
 
 		IFhirResourceDao<? extends IBaseResource> valueSetResourceDao = myDaoRegistry.getResourceDao(myValueSetType);
 		IBaseResource valueSet = valueSetResourceDao.read(new IdDt("ValueSet", forcedId));
