@@ -358,19 +358,28 @@ public abstract class BaseTransactionProcessor {
 		List<IBase> requestEntries = myVersionAdapter.getEntries(theRequest);
 		int requestEntriesSize = requestEntries.size();
 
-		// And execute for each entry in parallel as a mini-transaction in its 
-		// own database transaction so that if one fails, it doesn't prevent others.
-		// The result is keep in the map to save the original position
+		// Now, run all non-gets sequentially, and all gets are submitted to the executor to run (potentially) in parallel
+		// The result is kept in the map to save the original position
+		List<RetriableBundleTask> getCalls = new ArrayList<>();
+		List<RetriableBundleTask> nonGetCalls = new ArrayList<>();
 
-		CountDownLatch completionLatch = new CountDownLatch(requestEntriesSize);
-		IBase nextRequestEntry = null;
-		for (int i=0; i<requestEntriesSize; i++ ) {
-			nextRequestEntry = requestEntries.get(i);
+		long getEntriesSize = requestEntries.stream().filter(entry -> myVersionAdapter.getEntryRequestVerb(myContext, entry).equalsIgnoreCase("GET")).count();
+		CountDownLatch completionLatch = new CountDownLatch((int) getEntriesSize);
+		for (int i=0; i<requestEntriesSize ; i++ ) {
+			IBase nextRequestEntry = requestEntries.get(i);
 			RetriableBundleTask retriableBundleTask = new RetriableBundleTask(completionLatch, theRequestDetails, responseMap, i, nextRequestEntry, theNestedMode);
-			getTaskExecutor().execute(retriableBundleTask);
+			if  (myVersionAdapter.getEntryRequestVerb(myContext, nextRequestEntry).equalsIgnoreCase("GET")) {
+				getCalls.add(retriableBundleTask);
+			} else {
+				nonGetCalls.add(retriableBundleTask);
+			}
 		}
+		//Execute all non-gets on calling thread.
+		nonGetCalls.forEach(RetriableBundleTask::run);
+		//Execute all gets (potentially in a pool)
+		getCalls.forEach(getCall -> getTaskExecutor().execute(getCall));
 
-		// waiting for all tasks to be completed
+		// waiting for all async tasks to be completed
 		AsyncUtil.awaitLatchAndIgnoreInterrupt(completionLatch, 300L, TimeUnit.SECONDS);
 		
 		// Now, create the bundle response in original order
