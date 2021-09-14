@@ -1824,9 +1824,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setIfNoneExist("Patient?identifier=urn%3Asystem%7C" + methodName);
 
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST);
+//		p = new Patient();
+//		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+//		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST);
 
 		try {
 			mySystemDao.transaction(mySrd, request);

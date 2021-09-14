@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
+import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
@@ -280,7 +281,9 @@ public abstract class BaseTransactionProcessor {
 				idSubstitutions.put(id, newId);
 			}
 		}
-		idToPersistedOutcome.put(newId, outcome);
+
+		populateIdToPersistedOutcomeMap(idToPersistedOutcome, newId, outcome);
+
 		if (outcome.getCreated()) {
 			myVersionAdapter.setResponseStatus(newEntry, toStatusString(Constants.STATUS_HTTP_201_CREATED));
 		} else {
@@ -302,6 +305,21 @@ public abstract class BaseTransactionProcessor {
 			}
 		}
 
+	}
+
+	/** Method which populates entry in idToPersistedOutcome.
+	 * Will store whatever outcome is sent, unless the key already exists, then we only replace an instance if we find that the instance
+	 * we are replacing with is non-lazy. This allows us to evaluate later more easily, as we _know_ we need access to these.
+	 */
+	private void populateIdToPersistedOutcomeMap(Map<IIdType, DaoMethodOutcome> idToPersistedOutcome, IIdType newId, DaoMethodOutcome outcome) {
+		//Prefer real method outcomes over lazy ones.
+		if (idToPersistedOutcome.containsKey(newId)) {
+			if (!(outcome instanceof LazyDaoMethodOutcome)) {
+				idToPersistedOutcome.put(newId, outcome);
+			}
+		} else {
+			idToPersistedOutcome.put(newId, outcome);
+		}
 	}
 
 	private Date getLastModified(IBaseResource theRes) {
@@ -1092,10 +1110,14 @@ public abstract class BaseTransactionProcessor {
 				validateNoDuplicates(theRequest, theActionName, conditionalRequestUrls, theIdToPersistedOutcome.values());
 			}
 
+			theTransactionStopWatch.endCurrentTask();
+			if (conditionalUrlToIdMap.size() > 0) {
+				theTransactionStopWatch.startTask("Check that all conditionally created/updated entities actually match their conditionals.");
+			}
+
 			if (!myDaoConfig.isMassIngestionMode()) {
 				validateAllInsertsMatchTheirConditionalUrls(theIdToPersistedOutcome, conditionalUrlToIdMap, theRequest);
 			}
-
 			theTransactionStopWatch.endCurrentTask();
 
 			for (IIdType next : theAllIds) {
