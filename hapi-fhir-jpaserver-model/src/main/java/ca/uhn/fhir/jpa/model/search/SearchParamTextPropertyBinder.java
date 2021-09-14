@@ -21,8 +21,13 @@ package ca.uhn.fhir.jpa.model.search;
  */
 
 import org.hibernate.search.engine.backend.document.DocumentElement;
+import org.hibernate.search.engine.backend.document.IndexObjectFieldReference;
 import org.hibernate.search.engine.backend.document.model.dsl.IndexSchemaElement;
+import org.hibernate.search.engine.backend.document.model.dsl.IndexSchemaObjectField;
+import org.hibernate.search.engine.backend.types.ObjectStructure;
 import org.hibernate.search.engine.backend.types.Projectable;
+import org.hibernate.search.engine.backend.types.dsl.IndexFieldTypeFactory;
+import org.hibernate.search.engine.backend.types.dsl.StringIndexFieldTypeOptionsStep;
 import org.hibernate.search.mapper.pojo.bridge.PropertyBridge;
 import org.hibernate.search.mapper.pojo.bridge.binding.PropertyBindingContext;
 import org.hibernate.search.mapper.pojo.bridge.mapping.programmatic.PropertyBinder;
@@ -55,11 +60,35 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 
 	private void defineIndexingTemplate(PropertyBindingContext thePropertyBindingContext) {
 		IndexSchemaElement indexSchemaElement = thePropertyBindingContext.indexSchemaElement();
+
 		//In order to support dynamic fields, we have to use field templates. We _must_ define the template at bootstrap time and cannot
 		//create them adhoc. https://docs.jboss.org/hibernate/search/6.0/reference/en-US/html_single/#mapper-orm-bridge-index-field-dsl-dynamic
 		//I _think_ im doing the right thing here by indicating that everything matching this template uses this analyzer.
-		indexSchemaElement.fieldTemplate("SearchParamText", f -> f.asString().analyzer("autocompleteWordEdgeAnalyzer").projectable(Projectable.NO))
+		IndexFieldTypeFactory indexFieldTypeFactory = thePropertyBindingContext.typeFactory();
+		StringIndexFieldTypeOptionsStep<?> textType =
+			indexFieldTypeFactory.asString()
+				.analyzer("autocompleteWordEdgeAnalyzer")
+				.projectable(Projectable.NO);
+		IndexSchemaObjectField spfield = indexSchemaElement.objectField("sp", ObjectStructure.FLATTENED);
+		IndexObjectFieldReference sp = spfield.toReference();
+
+
+		// wip mb what normalizer should we use here?  This should also match the generic "string" index path.
+
+		// Note: the lucene/elastic independent api is hurting a bit here.
+		// For lucene, we need a separate field for each analyzer.  So we'll add string (for :exact), and text (for :text).
+		// They aren't marked stored, so there's no space cost beyond the index for each.
+		// But for elastic, I'd rather have a single field defined, with multi-field sub-fields.  The index cost is the same,
+		// but elastic will actually store all fields in the source document.
+		spfield.objectFieldTemplate("stringIndex", ObjectStructure.FLATTENED).matchingPathGlob("*.string");
+		spfield.fieldTemplate("text", textType).matchingPathGlob("*.string.text");
+		indexSchemaElement
+			.fieldTemplate("SearchParamText", textType)
 			.matchingPathGlob(SEARCH_PARAM_TEXT_PREFIX + "*");
+
+		// last, since the globs are matched in declaration order, and * matches even nested nodes.
+		spfield.objectFieldTemplate("spObject", ObjectStructure.FLATTENED).matchingPathGlob("*");
+
 	}
 
 	@Override

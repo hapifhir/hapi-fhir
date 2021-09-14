@@ -195,14 +195,14 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 					//DSTU2 doesn't support fhirpath, so fall back to old style lookup.
 					if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-
+						// wip mb the query guts
 						for(String nextParam: theParams.keySet()) {
 							RuntimeSearchParam activeParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, nextParam);
 							switch (activeParam.getParamType()) {
 								case TOKEN:
 									List<List<IQueryParameterType>> andOrTerms = theParams.removeByNameAndQualifier(nextParam, TokenParamModifier.TEXT);
 									if (andOrTerms != null && !andOrTerms.isEmpty()) {
-										addTextSearch(f, b, andOrTerms, "text-" + nextParam);
+										addTextSearch(f, b, andOrTerms, "sp." + nextParam + ".string.text");
 									}
 									break;
 								default:

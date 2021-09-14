@@ -1,22 +1,35 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static ca.uhn.fhir.rest.api.Constants.PARAMQUALIFIER_TOKEN_TEXT;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticSearch;
+import ca.uhn.fhir.jpa.dao.BaseJpaTest;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationResult;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -39,32 +52,16 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticSearch;
-import ca.uhn.fhir.jpa.dao.BaseJpaTest;
-import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
-import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.ValidationResult;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
@@ -152,38 +149,49 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 	@Test
 	public void testResourceCodeTextSearch() {
-		Observation obs1 = new Observation();
-		obs1.getCode().setText("Weight");
-		obs1.setStatus(Observation.ObservationStatus.FINAL);
-		obs1.setValue(new Quantity(123));
-		obs1.getNoteFirstRep().setText("obs1");
-		IIdType id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+		IIdType id1,id2,id3,id4;
+
+		{
+			Observation obs1 = new Observation();
+			obs1.getCode().setText("Weight");
+			obs1.setStatus(Observation.ObservationStatus.FINAL);
+			obs1.setValue(new Quantity(123));
+			obs1.getNoteFirstRep().setText("obs1");
+			id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		{
+			Observation obs2 = new Observation();
+			obs2.getCode().setText("Body Weight");
+			obs2.getCode().addCoding().setCode("29463-7").setSystem("http://loinc.org").setDisplay("Body weight as measured by me");
+			obs2.setStatus(Observation.ObservationStatus.FINAL);
+			obs2.setValue(new Quantity(81));
+			id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+			ourLog.info("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
+		}
 
 
-		Observation obs2 = new Observation();
-		obs2.getCode().setText("Body Weight");
-		obs2.getCode().addCoding().setCode("29463-7").setSystem("http://loinc.org").setDisplay("Body weight as measured by me");
-		obs2.setStatus(Observation.ObservationStatus.FINAL);
-		obs2.setValue(new Quantity(81));
-		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
-
-		// don't look in the narrative when only searching code.
-		Observation obs3 = new Observation();
-		Narrative narrative = new Narrative();
-		narrative.setDivAsString("<div>Body Weight</div>");
-		obs3.setText(narrative);
-		obs3.setStatus(Observation.ObservationStatus.FINAL);
-		obs3.setValue(new Quantity(81));
-		IIdType id3 = myObservationDao.create(obs3, mySrd).getId().toUnqualifiedVersionless();
+		{
+			// don't look in the narrative when only searching code.
+			Observation obs3 = new Observation();
+			Narrative narrative = new Narrative();
+			narrative.setDivAsString("<div>Body Weight</div>");
+			obs3.setText(narrative);
+			obs3.setStatus(Observation.ObservationStatus.FINAL);
+			obs3.setValue(new Quantity(81));
+			id3 = myObservationDao.create(obs3, mySrd).getId().toUnqualifiedVersionless();
+			// id3 isn't found in this test.
+		}
 
 		//:text should work for identifier types
-		Observation obs4 = new Observation();
-		Identifier identifier = obs3.addIdentifier();
-		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.setText("Random Identifier Typetest");
-		identifier.setType(codeableConcept);
-		obs4.addIdentifier(identifier);
-		IIdType id4 = myObservationDao.create(obs4, mySrd).getId().toUnqualifiedVersionless();
+		{
+			Observation obs4 = new Observation();
+			Identifier identifier = obs4.addIdentifier();
+			CodeableConcept codeableConcept = new CodeableConcept();
+			codeableConcept.setText("Random Identifier Typetest");
+			identifier.setType(codeableConcept);
+			id4 = myObservationDao.create(obs4, mySrd).getId().toUnqualifiedVersionless();
+		}
 
 		{
 			// first word
