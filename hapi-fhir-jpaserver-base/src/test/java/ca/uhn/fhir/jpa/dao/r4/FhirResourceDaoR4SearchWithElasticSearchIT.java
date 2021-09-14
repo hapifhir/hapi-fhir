@@ -180,7 +180,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			obs3.setStatus(Observation.ObservationStatus.FINAL);
 			obs3.setValue(new Quantity(81));
 			id3 = myObservationDao.create(obs3, mySrd).getId().toUnqualifiedVersionless();
-			// id3 isn't found in this test.
+			ourLog.trace("id3 is never found {}", id3);
 		}
 
 		//:text should work for identifier types
@@ -197,42 +197,42 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			// first word
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam("Body").setModifier(TokenParamModifier.TEXT));
-			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
+			assertThat("Search by first word", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
 		}
 
 		{
 			// any word
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam("weight").setModifier(TokenParamModifier.TEXT));
-			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
+			assertThat("Search by any word", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
 		}
 
 		{
 			// doesn't find internal fragment
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam("ght").setModifier(TokenParamModifier.TEXT));
-			assertEquals(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)).size(), 0);
+			assertThat("Search doesn't match middle of words", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), Matchers.empty());
 		}
 
 		{
 			// prefix
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam("Bod").setModifier(TokenParamModifier.TEXT));
-			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
+			assertThat("Search matches start of word", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
 		}
 
 		{
 			// codeable.display
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam("measured").setModifier(TokenParamModifier.TEXT));
-			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
+			assertThat(":text matches code.display", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
 		}
 
 		{
 			// Identifier Type
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("identifier", new TokenParam("Random").setModifier(TokenParamModifier.TEXT));
-			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id4)));
+			assertThat(":text matches identifier text", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id4)));
 		}
 	}
 

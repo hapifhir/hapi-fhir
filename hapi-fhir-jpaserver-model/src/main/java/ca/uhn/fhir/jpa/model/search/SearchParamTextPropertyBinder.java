@@ -67,13 +67,12 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		IndexFieldTypeFactory indexFieldTypeFactory = thePropertyBindingContext.typeFactory();
 		StringIndexFieldTypeOptionsStep<?> textType =
 			indexFieldTypeFactory.asString()
+				// wip mb where do we do unicode normalization?  Java-side, or in the analyzer?
 				.analyzer("autocompleteWordEdgeAnalyzer")
 				.projectable(Projectable.NO);
 		IndexSchemaObjectField spfield = indexSchemaElement.objectField("sp", ObjectStructure.FLATTENED);
 		IndexObjectFieldReference sp = spfield.toReference();
 
-
-		// wip mb what normalizer should we use here?  This should also match the generic "string" index path.
 
 		// Note: the lucene/elastic independent api is hurting a bit here.
 		// For lucene, we need a separate field for each analyzer.  So we'll add string (for :exact), and text (for :text).
@@ -94,6 +93,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 	@Override
 	public void write(DocumentElement theDocument, ExtendedLuceneIndexData theIndexData, PropertyBridgeWriteContext thePropertyBridgeWriteContext) {
 		if (theIndexData != null) {
+			ourLog.trace("Writing index data for {}", theIndexData);
 			theIndexData.writeIndexElements(theDocument);
 		}
 	}
