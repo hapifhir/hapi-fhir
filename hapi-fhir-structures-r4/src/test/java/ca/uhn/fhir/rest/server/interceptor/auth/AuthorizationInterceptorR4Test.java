@@ -480,17 +480,6 @@ public class AuthorizationInterceptorR4Test {
 		carePlan = new CarePlan();
 		carePlan.setStatus(CarePlan.CarePlanStatus.ACTIVE);
 		carePlan.getSubject().setResource(patient);
-
-		Device d = new Device();
-		d.getPatient().setResource(patient);
-
-		ourHitMethod = false;
-		ourReturn = Collections.singletonList(d);
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Device/123456");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
 	}
 
 	/**

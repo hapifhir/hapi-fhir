@@ -385,8 +385,8 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 					List<RuntimeSearchParam> params = sourceDef.getSearchParamsForCompartmentName(compartmentOwnerResourceType);
 
-					Set<String> additionalParamNames = myAdditionalCompartmentSearchParamMap.get(sourceDef.getName().toLowerCase());
-					List<RuntimeSearchParam> additionalParams = additionalParamNames.stream().map(paramName -> sourceDef.getSearchParam(paramName)).collect(Collectors.toList());
+					Set<String> additionalParamNames = myAdditionalCompartmentSearchParamMap.getOrDefault(sourceDef.getName().toLowerCase(), new HashSet<>());
+					List<RuntimeSearchParam> additionalParams = additionalParamNames.stream().map(sourceDef::getSearchParam).collect(Collectors.toList());
 					if (params == null || params.isEmpty()) {
 						params = additionalParams;
 					} else {
