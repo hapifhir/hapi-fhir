@@ -16,10 +16,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// TODO mb find a better module and package for this. ISearchParamExtractor is in jpa, and I wonder ...
-// FIXME MB this for sure should find a way to re-use BaseSearchParamExtractor, SearchParamExtractorDstu2, and friends
+// WIP mb find a better module and package for this. ISearchParamExtractor is in jpa, and I wonder ...
+// WIP MB this for sure should find a way to re-use BaseSearchParamExtractor, SearchParamExtractorDstu2, and friends
 // There is way too much in there to re-produce independently.
-// TODO Need to introduce a factory for the actual index objects to liberate BaseSearchParamExtractor from JPA
+// WIP Need to introduce a factory for the actual index objects to liberate BaseSearchParamExtractor from JPA
 public class LuceneRuntimeSearchParam {
 	private static final Logger ourLog = LoggerFactory.getLogger(LuceneRuntimeSearchParam.class);
 
