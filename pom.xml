@@ -2001,8 +2001,6 @@
 					<configuration>
 						<source>1.8</source>
 						<target>1.8</target>
-						<testSource>16</testSource>
-						<testTarget>16</testTarget>
 						<forceJavacCompilerUse>true</forceJavacCompilerUse>
 						<encoding>UTF-8</encoding>
 						<fork>true</fork>
