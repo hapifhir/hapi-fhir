@@ -96,7 +96,6 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -647,7 +646,7 @@ public abstract class BaseTransactionProcessor {
 		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, thePointcut, params);
 	}
 
-	@NotNull
+
 	private TransactionWriteOperationsDetails buildWriteOperationsDetails(List<IBase> theEntries) {
 		TransactionWriteOperationsDetails writeOperationsDetails;
 		List<String> updateRequestUrls = new ArrayList<>();
