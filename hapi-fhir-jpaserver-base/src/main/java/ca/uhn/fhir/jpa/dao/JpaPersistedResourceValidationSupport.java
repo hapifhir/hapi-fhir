@@ -76,7 +76,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	private Class<? extends IBaseResource> myValueSetType;
 	private Class<? extends IBaseResource> myQuestionnaireType;
 	private Class<? extends IBaseResource> myImplementationGuideType;
-	private Cache<String, IBaseResource> myLoadCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
+	private Cache<String, IBaseResource> myLoadCache = Caffeine.newBuilder().maximumSize(1000).expireAfterWrite(1, TimeUnit.MINUTES).build();
 
 	/**
 	 * Constructor

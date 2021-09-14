@@ -1,8 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -18,13 +16,13 @@ import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.junit.jupiter.api.AfterEach;
@@ -216,7 +214,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			// Expansion should contain all codes
 			myCaptureQueriesListener.clear();
 			ValueSet expandedValueSet = myTermSvc.expandValueSet(new ValueSetExpansionOptions(), input);
-			List<String> codes = expandedValueSet.getExpansion().getContains().stream().map(t -> t.getCode()).collect(Collectors.toList());
+			List<String> codes = extractExpansionCodes(expandedValueSet);
 			assertThat(codes.toString(), codes, containsInAnyOrder("code100", "code1000", "code1001", "code1002", "code1003", "code1004"));
 
 			// Make sure we used the pre-expanded version
@@ -231,7 +229,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			myCaptureQueriesListener.clear();
 			ValueSetExpansionOptions options = ValueSetExpansionOptions.forOffsetAndCount(0, 1000).setFilter("display value 100");
 			ValueSet expandedValueSet = myValueSetDao.expand(vsId, options, mySrd);
-			List<String> codes = expandedValueSet.getExpansion().getContains().stream().map(t -> t.getCode()).collect(Collectors.toList());
+			List<String> codes = extractExpansionCodes(expandedValueSet);
 			assertThat(codes.toString(), codes, containsInAnyOrder("code100", "code1000", "code1001", "code1002", "code1003", "code1004"));
 
 			// Make sure we used the pre-expanded version
@@ -558,8 +556,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertConceptContainsDesignation(otherConcept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk minimaal 1 uur");
 
 		//Ensure they are streamed back in the same order.
-		List<String> firstExpansionCodes = reexpandedValueSet.getExpansion().getContains().stream().map(cn -> cn.getCode()).collect(Collectors.toList());
-		List<String> secondExpansionCodes = expandedValueSet.getExpansion().getContains().stream().map(cn -> cn.getCode()).collect(Collectors.toList());
+		List<String> firstExpansionCodes = extractExpansionCodes(reexpandedValueSet);
+		List<String> secondExpansionCodes = extractExpansionCodes(expandedValueSet);
 		assertThat(firstExpansionCodes, is(equalTo(secondExpansionCodes)));
 
 		//Ensure that internally the designations are expanded back in the same order.
@@ -855,16 +853,65 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testExpandValueSetWithUnknownCodeSystem() {
+		// Direct expansion
 		ValueSet vs = new ValueSet();
-		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
-		include.setSystem("http://unknown-system");
-		ValueSet outcome = myTermSvc.expandValueSet(new ValueSetExpansionOptions().setFailOnMissingCodeSystem(false), vs);
-		assertEquals(0, outcome.getExpansion().getContains().size());
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
-		ourLog.info(encoded);
+		vs.getCompose().addInclude().setSystem("http://unknown-system");
+		try {
+			myTermSvc.expandValueSet(new ValueSetExpansionOptions().setFailOnMissingCodeSystem(false), vs);
+			fail();
+		} catch (InternalErrorException e) {
+			assertEquals("Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", e.getMessage());
+		}
 
-		Extension extensionByUrl = outcome.getMeta().getExtensionByUrl(HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE);
-		assertEquals("Unknown CodeSystem URI \"http://unknown-system\" referenced from ValueSet", extensionByUrl.getValueAsPrimitive().getValueAsString());
+		// Store it
+		vs = new ValueSet();
+		vs.setId("ValueSet/vs-with-invalid-cs");
+		vs.setUrl("http://vs-with-invalid-cs");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem("http://unknown-system");
+		myValueSetDao.update(vs);
+
+		// In memory expansion
+		try {
+			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
+			fail();
+		} catch (InternalErrorException e) {
+			assertEquals("Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", e.getMessage());
+		}
+
+		// Try validating a code against this VS - This code isn't in a system that's included by the VS, so we know
+		// conclusively that the code isn't valid for the VS even though we don't have the CS that actually is included
+		String codeSystemUrl = "http://invalid-cs";
+		String valueSetUrl = "http://vs-with-invalid-cs";
+		String code = "28571000087109";
+		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
+		assertFalse(outcome.isOk());
+		assertEquals("Unknown code 'http://invalid-cs#28571000087109' in ValueSet 'http://vs-with-invalid-cs'", outcome.getMessage());
+		assertEquals("error", outcome.getSeverityCode());
+
+		// Try validating a code that is in the missing CS that is imported by the VS
+		codeSystemUrl = "http://unknown-system";
+		outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
+		assertFalse(outcome.isOk());
+		assertEquals("Failed to expand ValueSet 'http://vs-with-invalid-cs'. Could not validate code http://unknown-system#28571000087109. Error was: Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", outcome.getMessage());
+		assertEquals("error", outcome.getSeverityCode());
+
+		// Perform Pre-Expansion
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		// Make sure it's done
+		runInTransaction(() -> assertNull(myTermCodeSystemDao.findByCodeSystemUri("http://snomed.info/sct")));
+		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, myTermValueSetDao.findByUrl("http://vs-with-invalid-cs").orElseThrow(()->new IllegalStateException()).getExpansionStatus()));
+
+		// Try expansion again
+		try {
+			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
+			fail();
+		} catch (InternalErrorException e) {
+			assertEquals("Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", e.getMessage());
+		}
+
 	}
 
 	@Test
@@ -1475,16 +1522,13 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		});
 	}
 
-
-
-
 	@Test
-	public void testExpandValueSet_VsUsesVersionedSystem_CsOnlyDifferentVersionPresent() {
+	public void testExpandValueSet_VsUsesVersionedSystem_CsIsFragmentWithWrongVersion() {
 		CodeSystem cs = new CodeSystem();
 		cs.setId("snomed-ct-ca-imm");
 		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		cs.setContent(CodeSystem.CodeSystemContentMode.FRAGMENT);
-		cs.setUrl("http://snomed.info/sct");
+		cs.setUrl("http://foo-cs");
 		cs.setVersion("http://snomed.info/sct/20611000087101/version/20210331");
 		cs.addConcept().setCode("28571000087109").setDisplay("MODERNA COVID-19 mRNA-1273");
 		myCodeSystemDao.update(cs, mySrd);
@@ -1495,7 +1539,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		vs.setVersion("0.1.17");
 		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		ValueSet.ConceptSetComponent vsInclude = vs.getCompose().addInclude();
-		vsInclude.setSystem("http://snomed.info/sct");
+		vsInclude.setSystem("http://foo-cs");
 		vsInclude.setVersion("0.17"); // different version
 		vsInclude.addConcept().setCode("28571000087109").setDisplay("MODERNA COVID-19 mRNA-1273");
 		myValueSetDao.update(vs, mySrd);
@@ -1504,20 +1548,39 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		String valueSetUrl;
 		String code;
 
-		try {
-			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-			fail();
-		} catch (NullPointerException e) {
-			assertEquals("Unable to expand ValueSet because CodeSystem has CodeSystem.content=not-present but contents were not found: http://snomed.info/sct|0.17", e.getMessage());
-		}
+		// Make sure nothing is stored in the TRM DB yet
+		runInTransaction(() -> assertNull(myTermCodeSystemDao.findByCodeSystemUri("http://snomed.info/sct")));
+		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, myTermValueSetDao.findByUrl("http://ehealthontario.ca/fhir/ValueSet/vaccinecode").get().getExpansionStatus()));
+
+		// In memory expansion
+		ValueSet expansion = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		assertThat(extractExpansionMessage(expansion), containsString("has not yet been pre-expanded"));
+		assertThat(extractExpansionMessage(expansion), containsString("Current status: NOT_EXPANDED"));
+		assertThat(extractExpansionCodes(expansion), contains("28571000087109"));
 
 		codeSystemUrl = "http://snomed.info/sct";
 		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
 		code = "28571000087109";
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
 		assertFalse(outcome.isOk());
-		assertEquals("Unable to expand ValueSet because CodeSystem has CodeSystem.content=not-present but contents were not found: http://snomed.info/sct|0.17", outcome.getMessage());
+		assertEquals("Unknown code 'http://snomed.info/sct#28571000087109' in ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'", outcome.getMessage());
 		assertEquals("error", outcome.getSeverityCode());
+
+		// Perform Pre-Expansion
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		// Make sure it's done
+		runInTransaction(() -> assertNull(myTermCodeSystemDao.findByCodeSystemUri("http://snomed.info/sct")));
+		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, myTermValueSetDao.findByUrl("http://ehealthontario.ca/fhir/ValueSet/vaccinecode").get().getExpansionStatus()));
+
+		// Try expansion again
+		expansion = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		assertThat(extractExpansionMessage(expansion), containsString("has not yet been pre-expanded"));
+		assertThat(extractExpansionMessage(expansion), containsString("Current status: NOT_EXPANDED"));
+		assertThat(extractExpansionCodes(expansion), contains("28571000087109"));
 	}
 
 	@Test
@@ -1608,7 +1671,6 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertEquals("MODERNA COVID-19 mRNA-1273", valueSet.getExpansion().getContains().get(0).getDisplay());
 	}
 
-
 	@Test
 	public void testExpandValueSet_VsUsesVersionedSystem_CsIsCompleteWithCode() {
 		CodeSystem cs = new CodeSystem();
@@ -1658,11 +1720,20 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertEquals("MODERNA COVID-19 mRNA-1273", valueSet.getExpansion().getContains().get(0).getDisplay());
 	}
 
+	private static List<String> extractExpansionCodes(ValueSet theExpansion) {
+		return theExpansion.getExpansion().getContains().stream().map(t -> t.getCode()).collect(Collectors.toList());
+	}
 
+	private static String extractExpansionMessage(ValueSet outcome) {
+		List<Extension> extensions = outcome.getMeta().getExtensionsByUrl(EXT_VALUESET_EXPANSION_MESSAGE);
+		assertEquals(1, extensions.size());
+		String expansionMessage = extensions.get(0).getValueAsPrimitive().getValueAsString();
+		return expansionMessage;
+	}
 
 	@Nonnull
 	public static List<String> toCodes(ValueSet theExpandedValueSet) {
-		return theExpandedValueSet.getExpansion().getContains().stream().map(t -> t.getCode()).collect(Collectors.toList());
+		return extractExpansionCodes(theExpandedValueSet);
 	}
 
 

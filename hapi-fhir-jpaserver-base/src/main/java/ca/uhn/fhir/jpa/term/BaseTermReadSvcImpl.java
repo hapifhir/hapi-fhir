@@ -71,7 +71,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.CoverageIgnore;
@@ -91,6 +90,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.RegexpQuery;
+import org.hibernate.exception.spi.ConversionContext;
 import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
 import org.hibernate.search.backend.lucene.LuceneExtension;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
@@ -101,6 +101,10 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
+import org.hl7.fhir.convertors.context.ConversionContext40_50;
+import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
+import org.hl7.fhir.convertors.conv40_50.resources40_50.ValueSet40_50;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -165,6 +169,7 @@ import java.util.StringTokenizer;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -788,78 +793,93 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					}
 				}
 
-				// No CodeSystem matching the URL found in the database.
-				CodeSystem codeSystemFromContext = fetchCanonicalCodeSystemFromCompleteContext(system);
-				if (codeSystemFromContext == null) {
+				Consumer<FhirVersionIndependentConcept> consumer = c -> {
+					addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, system, c.getCode(), c.getDisplay());
+				};
 
-					// This is a last ditch effort.. We don't have a CodeSystem resource for the desired CS, and we don't have
-					// anything at all in the database that matches it. So let's try asking the validation support context
-					// just in case there is a registered service that knows how to handle this. This can happen, for example,
-					// if someone creates a valueset that includes UCUM codes, since we don't have a CodeSystem resource for those
-					// but CommonCodeSystemsTerminologyService can validate individual codes.
-					List<FhirVersionIndependentConcept> includedConcepts = null;
-					if (theExpansionFilter.hasCode()) {
-						includedConcepts = new ArrayList<>();
-						includedConcepts.add(theExpansionFilter.toFhirVersionIndependentConcept());
-					} else if (!theIncludeOrExclude.getConcept().isEmpty()) {
-						includedConcepts = theIncludeOrExclude
-							.getConcept()
-							.stream()
-							.map(t -> new FhirVersionIndependentConcept(theIncludeOrExclude.getSystem(), t.getCode()))
-							.collect(Collectors.toList());
-					}
-
-					if (includedConcepts != null) {
-						int foundCount = 0;
-						for (FhirVersionIndependentConcept next : includedConcepts) {
-							String nextSystem = next.getSystem();
-							if (nextSystem == null) {
-								nextSystem = system;
-							}
-
-							LookupCodeResult lookup = myValidationSupport.lookupCode(new ValidationSupportContext(provideValidationSupport()), nextSystem, next.getCode());
-							if (lookup != null && lookup.isFound()) {
-								addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, nextSystem, next.getCode(), lookup.getCodeDisplay());
-								foundCount++;
-							}
-						}
-
-						if (foundCount == includedConcepts.size()) {
-							return false;
-							// ELSE, we'll continue below and throw an exception
-						}
-					}
-
-					String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionRefersToUnknownCs", system);
-					if (provideExpansionOptions(theExpansionOptions).isFailOnMissingCodeSystem()) {
-						throw new PreconditionFailedException(msg);
-					} else {
-						ourLog.warn(msg);
-						theValueSetCodeAccumulator.addMessage(msg);
-						return false;
-					}
-
+				try {
+					ConversionContext40_50.INSTANCE.init(new VersionConvertor_40_50(new BaseAdvisor_40_50()), "ValueSet");
+					org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent includeOrExclude = ValueSet40_50.convertConceptSetComponent(theIncludeOrExclude);
+					new InMemoryTerminologyServerValidationSupport(myContext).expandValueSetIncludeOrExclude(new ValidationSupportContext(provideValidationSupport()), consumer, includeOrExclude);
+				} catch (InMemoryTerminologyServerValidationSupport.ExpansionCouldNotBeCompletedInternallyException e) {
+					throw new InternalErrorException(e);
+				} finally {
+					ConversionContext40_50.INSTANCE.close("ValueSet");
 				}
 
-				if (!theIncludeOrExclude.getConcept().isEmpty()) {
-					for (ValueSet.ConceptReferenceComponent next : theIncludeOrExclude.getConcept()) {
-						String nextCode = next.getCode();
-						if (!theExpansionFilter.hasCode() || theExpansionFilter.getCode().equals(nextCode)) {
-							if (isNoneBlank(system, nextCode) && !theAddedCodes.contains(system + "|" + nextCode)) {
-
-								CodeSystem.ConceptDefinitionComponent code = findCode(codeSystemFromContext.getConcept(), nextCode);
-								if (code != null) {
-									String display = code.getDisplay();
-									addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, system, nextCode, display);
-								}
-
-							}
-						}
-					}
-				} else {
-					List<CodeSystem.ConceptDefinitionComponent> concept = codeSystemFromContext.getConcept();
-					addConceptsToList(theValueSetCodeAccumulator, theAddedCodes, system, concept, theAdd, theExpansionFilter);
-				}
+				// FIXME: remove
+//				// No CodeSystem matching the URL found in the database.
+//				CodeSystem codeSystemFromContext = fetchCanonicalCodeSystemFromCompleteContext(system);
+//				if (codeSystemFromContext == null) {
+//
+//					// This is a last ditch effort.. We don't have a CodeSystem resource for the desired CS, and we don't have
+//					// anything at all in the database that matches it. So let's try asking the validation support context
+//					// just in case there is a registered service that knows how to handle this. This can happen, for example,
+//					// if someone creates a valueset that includes UCUM codes, since we don't have a CodeSystem resource for those
+//					// but CommonCodeSystemsTerminologyService can validate individual codes.
+//					List<FhirVersionIndependentConcept> includedConcepts = null;
+//					if (theExpansionFilter.hasCode()) {
+//						includedConcepts = new ArrayList<>();
+//						includedConcepts.add(theExpansionFilter.toFhirVersionIndependentConcept());
+//					} else if (!theIncludeOrExclude.getConcept().isEmpty()) {
+//						includedConcepts = theIncludeOrExclude
+//							.getConcept()
+//							.stream()
+//							.map(t -> new FhirVersionIndependentConcept(theIncludeOrExclude.getSystem(), t.getCode()))
+//							.collect(Collectors.toList());
+//					}
+//
+//					if (includedConcepts != null) {
+//						int foundCount = 0;
+//						for (FhirVersionIndependentConcept next : includedConcepts) {
+//							String nextSystem = next.getSystem();
+//							if (nextSystem == null) {
+//								nextSystem = system;
+//							}
+//
+//							LookupCodeResult lookup = myValidationSupport.lookupCode(new ValidationSupportContext(provideValidationSupport()), nextSystem, next.getCode());
+//							if (lookup != null && lookup.isFound()) {
+//								addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, nextSystem, next.getCode(), lookup.getCodeDisplay());
+//								foundCount++;
+//							}
+//						}
+//
+//						if (foundCount == includedConcepts.size()) {
+//							return false;
+//							// ELSE, we'll continue below and throw an exception
+//						}
+//					}
+//
+//					String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionRefersToUnknownCs", system);
+//					if (provideExpansionOptions(theExpansionOptions).isFailOnMissingCodeSystem()) {
+//						throw new PreconditionFailedException(msg);
+//					} else {
+//						ourLog.warn(msg);
+//						theValueSetCodeAccumulator.addMessage(msg);
+//						return false;
+//					}
+//
+//				}
+//
+//				if (!theIncludeOrExclude.getConcept().isEmpty()) {
+//					for (ValueSet.ConceptReferenceComponent next : theIncludeOrExclude.getConcept()) {
+//						String nextCode = next.getCode();
+//						if (!theExpansionFilter.hasCode() || theExpansionFilter.getCode().equals(nextCode)) {
+//							if (isNoneBlank(system, nextCode) && !theAddedCodes.contains(system + "|" + nextCode)) {
+//
+//								CodeSystem.ConceptDefinitionComponent code = findCode(codeSystemFromContext.getConcept(), nextCode);
+//								if (code != null) {
+//									String display = code.getDisplay();
+//									addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, system, nextCode, display);
+//								}
+//
+//							}
+//						}
+//					}
+//				} else {
+//					List<CodeSystem.ConceptDefinitionComponent> concept = codeSystemFromContext.getConcept();
+//					addConceptsToList(theValueSetCodeAccumulator, theAddedCodes, system, concept, theAdd, theExpansionFilter);
+//				}
 
 				return false;
 			}
@@ -1037,10 +1057,11 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	private ValueSet.ConceptReferenceComponent getMatchedConceptIncludedInValueSet(ValueSet.ConceptSetComponent theIncludeOrExclude, TermConcept concept) {
-		ValueSet.ConceptReferenceComponent theIncludeConcept = theIncludeOrExclude.getConcept().stream().filter(includedConcept ->
-			includedConcept.getCode().equalsIgnoreCase(concept.getCode())
-		).findFirst().orElse(null);
-		return theIncludeConcept;
+		return theIncludeOrExclude
+			.getConcept()
+			.stream().filter(includedConcept -> includedConcept.getCode().equalsIgnoreCase(concept.getCode()))
+			.findFirst()
+			.orElse(null);
 	}
 
 	/**
@@ -2037,7 +2058,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		});
 	}
 
-	
+
 	@Nullable
 	private ConceptSubsumptionOutcome testForSubsumption(SearchSession theSearchSession, TermConcept theLeft, TermConcept theRight, ConceptSubsumptionOutcome theOutput) {
 		List<TermConcept> fetch = theSearchSession.search(TermConcept.class)
@@ -2485,11 +2506,11 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return termConcept;
 	}
 
-    static boolean isDisplayLanguageMatch(String theReqLang, String theStoredLang) {
+	static boolean isDisplayLanguageMatch(String theReqLang, String theStoredLang) {
 		// NOTE: return the designation when one of then is not specified.
 		if (theReqLang == null || theStoredLang == null)
 			return true;
-		
+
 		return theReqLang.equalsIgnoreCase(theStoredLang);
-    }
+	}
 }

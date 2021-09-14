@@ -72,7 +72,6 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 
 	@PostConstruct
 	public void postConstruct() {
-		addValidationSupport(myDefaultProfileValidationSupport);
 		addValidationSupport(myJpaValidationSupport);
 		//TODO MAKE SURE THAT THIS IS BEING CAL
 		addValidationSupport(myTerminologyService);
@@ -81,6 +80,7 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 		addValidationSupport(myNpmJpaValidationSupport);
 		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
 		addValidationSupport(myConceptMappingSvc);
+		addValidationSupport(myDefaultProfileValidationSupport);
 		addValidationSupport(myUnknownCodeSystemWarningValidationSupport);
 	}
 

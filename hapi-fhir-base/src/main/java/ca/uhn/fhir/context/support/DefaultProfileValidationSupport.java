@@ -45,6 +45,16 @@ import java.util.Properties;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+/**
+ * This class returns the vocabulary that is shipped with the base FHIR
+ * specification.
+ *
+ * Note that this class is version aware. For example, a request for
+ * <code>http://foo-codesystem|123</code> will only return a value if
+ * the built in resource if the version matches. Unversioned URLs
+ * should generally be used, and will return whatever version is
+ * present.
+ */
 public class DefaultProfileValidationSupport implements IValidationSupport {
 
 	private static final String URL_PREFIX_STRUCTURE_DEFINITION = "http://hl7.org/fhir/StructureDefinition/";
@@ -179,15 +189,27 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
 			// System can take the form "http://url|version"
 			String system = theSystem;
-			if (system.contains("|")) {
-				system = system.substring(0, system.indexOf('|'));
+			String version = null;
+			int pipeIdx = system.indexOf('|');
+			if (pipeIdx > 0) {
+				version = system.substring(pipeIdx + 1);
+				system = system.substring(0, pipeIdx);
 			}
 
+			IBaseResource candidate;
 			if (codeSystem) {
-				return codeSystems.get(system);
+				candidate = codeSystems.get(system);
 			} else {
-				return valueSets.get(system);
+				candidate = valueSets.get(system);
 			}
+
+			if (candidate != null && isNotBlank(version)) {
+				if (!version.equals(myCtx.newTerser().getSinglePrimitiveValueOrNull(candidate, "version"))) {
+					candidate = null;
+				}
+			}
+
+			return candidate;
 		}
 	}
 
