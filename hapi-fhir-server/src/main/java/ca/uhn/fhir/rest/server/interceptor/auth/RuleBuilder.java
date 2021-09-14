@@ -451,7 +451,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				private Collection<? extends IIdType> myInCompartmentOwners;
 				private Collection<IIdType> myAppliesToInstances;
 				private RuleImplOp myRule;
-				private List<String> myAdditionalSearchParamsForCompartmentTypes;
+				private List<String> myAdditionalSearchParamsForCompartmentTypes = new ArrayList<>();
 
 				/**
 				 * Constructor
