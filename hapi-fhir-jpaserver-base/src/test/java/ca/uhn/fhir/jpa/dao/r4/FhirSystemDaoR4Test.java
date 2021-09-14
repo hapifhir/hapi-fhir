@@ -85,6 +85,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -1173,8 +1174,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		HumanName patientName = new HumanName().setFamily("TEST_LAST_NAME").addGiven("TEST_FIRST_NAME");
 		Identifier patientIdentifier = new Identifier().setSystem("http://example.com/mrns").setValue("U1234567890");
 		Patient patient = new Patient()
-			.setName(List.of(patientName))
-			.setIdentifier(List.of(patientIdentifier));
+			.setName(Arrays.asList(patientName))
+			.setIdentifier(Arrays.asList(patientIdentifier));
 		patient.setId(IdType.newRandomUuid());
 
 		transactionBundle
@@ -1218,8 +1219,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		HumanName patientName = new HumanName().setFamily("TEST_LAST_NAME").addGiven("TEST_FIRST_NAME");
 		Identifier patientIdentifier = new Identifier().setSystem("http://example.com/mrns").setValue(storedIdentifierValue);
 		Patient patient = new Patient()
-			.setName(List.of(patientName))
-			.setIdentifier(List.of(patientIdentifier));
+			.setName(Arrays.asList(patientName))
+			.setIdentifier(Arrays.asList(patientIdentifier));
 		patient.setId(IdType.newRandomUuid());
 
 		transactionBundle
