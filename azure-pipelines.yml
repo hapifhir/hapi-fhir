@@ -15,7 +15,7 @@ pool:
 jobs:
   - job: Build
     timeoutInMinutes: 360
-    container: maven:3-openjdk-15
+    container: maven:3-openjdk-16
     steps:
       - task: DockerInstaller@0
         displayName: Docker Installer
@@ -32,7 +32,7 @@ jobs:
           script: mkdir -p $(MAVEN_CACHE_FOLDER); pwd; ls -al $(MAVEN_CACHE_FOLDER)
       - task: Maven@3
         env:
-          JAVA_HOME_11_X64: /usr/java/openjdk-15
+          JAVA_HOME_11_X64: /usr/java/openjdk-16
         inputs:
           goals: 'clean install'
           # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
