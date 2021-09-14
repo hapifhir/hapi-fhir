@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -345,7 +346,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 				Set<String> additionalSearchParamNames = null;
 				if (myAdditionalCompartmentSearchParamMap != null) {
-					additionalSearchParamNames = myAdditionalCompartmentSearchParamMap.get(target.resourceType);
+					additionalSearchParamNames = myAdditionalCompartmentSearchParamMap.get(ctx.getResourceType(target.resource).toLowerCase());
 				}
 				if (t.isSourceInCompartmentForTarget(myClassifierCompartmentName, target.resource, next, additionalSearchParamNames)) {
 					foundMatch = true;
@@ -381,13 +382,17 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				RuntimeResourceDefinition sourceDef = theRequestDetails.getFhirContext().getResourceDefinition(target.resourceType);
 				String compartmentOwnerResourceType = next.getResourceType();
 				if (!StringUtils.equals(target.resourceType, compartmentOwnerResourceType)) {
+
 					List<RuntimeSearchParam> params = sourceDef.getSearchParamsForCompartmentName(compartmentOwnerResourceType);
-					if (target.resourceType.equalsIgnoreCase("Device") && myDeviceIncludedInPatientCompartment) {
-						if (params == null || params.isEmpty()) {
-							params = new ArrayList<>();
-						}
-						params.add(sourceDef.getSearchParam("patient"));
+
+					Set<String> additionalParamNames = myAdditionalCompartmentSearchParamMap.get(sourceDef.getName().toLowerCase());
+					List<RuntimeSearchParam> additionalParams = additionalParamNames.stream().map(paramName -> sourceDef.getSearchParam(paramName)).collect(Collectors.toList());
+					if (params == null || params.isEmpty()) {
+						params = additionalParams;
+					} else {
+						params.addAll(additionalParams);
 					}
+
 					if (!params.isEmpty()) {
 
 						/*
@@ -708,10 +713,9 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		}
 
 		for (String typeAndParam: theTypeAndParams) {
-			String[] split = typeAndParam.split(",");
+			String[] split = typeAndParam.split(":");
 			Validate.isTrue(split.length == 2);
-			myAdditionalCompartmentSearchParamMap.computeIfAbsent(split[0], (v) -> new HashSet<>()).add(split[1]);
+			myAdditionalCompartmentSearchParamMap.computeIfAbsent(split[0].toLowerCase(), (v) -> new HashSet<>()).add(split[1].toLowerCase());
 		}
-		this.myAdditionalCompartmentSearchParamMap = myAdditionalCompartmentSearchParamMap;
 	}
 }

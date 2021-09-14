@@ -376,15 +376,19 @@ public class AuthorizationInterceptorR4Test {
 		assertTrue(ourHitMethod);
 
 	}
+
 	@Test
-	public void testDeviceIsPartOfPatientCompartment() throws Exception {
+	public void testCustomCompartmentSpsOnMultipleInstances() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				List<String> bonusPatientCompartmentSearchParams = Collections.singletonList("device:patient");
+				List<IdType> relatedIds = new ArrayList<>();
+				relatedIds.add(new IdType("Patient/123"));
+				relatedIds.add(new IdType("Patient/456"));
 				return new RuleBuilder()
 					.allow().read().allResources()
-					.inCompartmentWithAdditionalSearchParams("Patient", new IdType("Patient/123"), bonusPatientCompartmentSearchParams)
+					.inCompartmentWithAdditionalSearchParams("Patient", relatedIds, bonusPatientCompartmentSearchParams)
 					.andThen().denyAll()
 					.build();
 			}

@@ -39,6 +39,7 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -100,7 +101,7 @@ public class AuthorizationInterceptors {
                .denyAll()
                .build();
          }
-         
+
          // If the user is an admin, allow everything
          if (userIsAdmin) {
             return new RuleBuilder()
@@ -204,6 +205,18 @@ public class AuthorizationInterceptors {
 			}
 		};
 		//END SNIPPET: bulkExport
+
+		//START SNIPPET: advancedCompartment
+		new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				List<String> additionalCompartmentSpNames = Collections.singletonList("device:patient");
+				return new RuleBuilder()
+					.allow().read().allResources().inCompartmentWithAdditionalSearchParams("Patient", new IdType("Patient/123"), additionalCompartmentSpNames)
+					.build();
+			}
+		};
+		//END SNIPPET: advancedCompartment
 
 
 	}
