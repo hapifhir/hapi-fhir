@@ -5,9 +5,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
+import com.google.common.base.Charsets;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -111,6 +117,24 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testHighConcurrencyWorks() throws IOException, InterruptedException {
+		myDaoConfig.setBundleBatchPoolSize(20);
+		myDaoConfig.setBundleBatchMaxPoolSize(100);
+		List<Bundle> bundles = new ArrayList<>();
+		for (int i =0 ; i < 20; i ++) {
+			bundles.add(myFhirCtx.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/r4/identical-tags-batch.json"), Charsets.UTF_8)));
+		}
+
+		ExecutorService tpe = Executors.newFixedThreadPool(4);
+		for (Bundle bundle :bundles) {
+			tpe.execute(() -> myClient.transaction().withBundle(bundle).execute());
+		}
+		tpe.shutdown();;
+		tpe.awaitTermination(100, TimeUnit.SECONDS);
+	}
+
+
+	@Test
 	public void testBundleBatchWithSingleThread() {
 		List<String> ids = createPatients(50);
 
@@ -198,8 +222,10 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		Bundle input = new Bundle();
 		input.setType(BundleType.BATCH);
 
+		//1
 		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(0));
 
+		//2
 		Patient p = new Patient();
 		p.setId("100");
 		p.setGender(AdministrativeGender.MALE);
@@ -207,14 +233,19 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		p.addName().setFamily("Smith");
 		input.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST);
 
-		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(1)); 
+		//3
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(1));
+		//4
 		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(2));
 
+		//5
 		Condition c = new Condition();
 		c.getSubject().setReference(ids.get(0));
 		input.addEntry().setResource(c).getRequest().setMethod(HTTPVerb.POST);
-		
+
+		//6
 		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(3));
+		//7
 		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(4));
 		
 		//ourLog.info("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
@@ -249,6 +280,45 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		assertEquals(ids.get(4), bundleEntries.get(6).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 
 	}
+
+	@Test
+	public void testTagCacheWorksWithBatchMode() {
+		Bundle input = new Bundle();
+		input.setType(BundleType.BATCH);
+
+		Patient p = new Patient();
+		p.setId("100");
+		p.setGender(AdministrativeGender.MALE);
+		p.addIdentifier().setSystem("urn:foo").setValue("A");
+		p.addName().setFamily("Smith");
+		p.getMeta().addTag().setSystem("mysystem").setCode("mycode");
+		input.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST);
+
+		Patient p2 = new Patient();
+		p2.setId("200");
+		p2.setGender(AdministrativeGender.MALE);
+		p2.addIdentifier().setSystem("urn:foo").setValue("A");
+		p2.addName().setFamily("Smith");
+		p2.getMeta().addTag().setSystem("mysystem").setCode("mycode");
+		input.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST);
+
+		Patient p3 = new Patient();
+		p3.setId("pat-300");
+		p3.setGender(AdministrativeGender.MALE);
+		p3.addIdentifier().setSystem("urn:foo").setValue("A");
+		p3.addName().setFamily("Smith");
+		p3.getMeta().addTag().setSystem("mysystem").setCode("mycode");
+		input.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/pat-300");
+
+		Bundle output = myClient.transaction().withBundle(input).execute();
+		output.getEntry().stream()
+			.map(BundleEntryComponent::getResponse)
+			.map(Bundle.BundleEntryResponseComponent::getStatus)
+			.forEach(statusCode -> {
+				assertEquals(statusCode, "201 Created");
+			});
+	}
+
 	
 	private List<String> createPatients(int count) {
 		List<String> ids = new ArrayList<String>();

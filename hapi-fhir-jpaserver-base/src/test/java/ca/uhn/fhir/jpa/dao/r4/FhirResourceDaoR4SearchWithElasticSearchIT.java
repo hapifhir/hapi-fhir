@@ -432,6 +432,4 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 	}
 
-
-
 }

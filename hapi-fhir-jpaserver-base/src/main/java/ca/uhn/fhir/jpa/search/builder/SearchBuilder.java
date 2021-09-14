@@ -396,7 +396,7 @@ public class SearchBuilder implements ISearchBuilder {
 		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, sqlBuilderResourceName, mySqlBuilderFactory, myDialectProvider, theCount);
 		QueryStack queryStack3 = new QueryStack(theParams, myDaoConfig, myDaoConfig.getModelConfig(), myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
 
-		if (theParams.keySet().size() > 1 || theParams.getSort() != null || theParams.keySet().contains(Constants.PARAM_HAS)) {
+		if (theParams.keySet().size() > 1 || theParams.getSort() != null || theParams.keySet().contains(Constants.PARAM_HAS) || isPotentiallyContainedReferenceParameterExistsAtRoot(theParams)) {
 			List<RuntimeSearchParam> activeComboParams = mySearchParamRegistry.getActiveComboSearchParams(myResourceName, theParams.keySet());
 			if (activeComboParams.isEmpty()) {
 				sqlBuilder.setNeedResourceTableRoot(true);
@@ -504,6 +504,13 @@ public class SearchBuilder implements ISearchBuilder {
 
 		SearchQueryExecutor executor = mySqlBuilderFactory.newSearchQueryExecutor(generatedSql, myMaxResultsToFetch);
 		return Optional.of(executor);
+	}
+
+	private boolean isPotentiallyContainedReferenceParameterExistsAtRoot(SearchParameterMap theParams) {
+		return myModelConfig.isIndexOnContainedResources() && theParams.values().stream()
+			.flatMap(Collection::stream)
+			.flatMap(Collection::stream)
+			.anyMatch(t -> t instanceof ReferenceParam);
 	}
 
 	private List<Long> normalizeIdListForLastNInClause(List<Long> lastnResourceIds) {
