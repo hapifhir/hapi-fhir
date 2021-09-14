@@ -1175,6 +1175,7 @@ public abstract class BaseTransactionProcessor {
 				String matchUrl = entry.getKey();
 				IIdType value = entry.getValue();
 				DaoMethodOutcome daoMethodOutcome = theIdToPersistedOutcome.get(value);
+				//TODO GGG: daoMethodOutcome.getResource() actually executes a DB select query. Any way to avoid this??
 				if (daoMethodOutcome != null && daoMethodOutcome.getResource() != null) {
 					InMemoryMatchResult match = mySearchParamMatcher.match(matchUrl, daoMethodOutcome.getResource(), theRequest);
 					if (ourLog.isDebugEnabled()) {
