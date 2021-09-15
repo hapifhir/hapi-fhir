@@ -53,7 +53,7 @@ public interface IAuthRuleBuilderRuleOp extends IAuthRuleBuilderAppliesTo<IAuthR
 	 * <li><b><code>Patient/123</code></b> - Any Patient resource with the ID "123" will be matched</li>
 	 * <li><b><code>123</code></b> - Any resource of any type with the ID "123" will be matched</li>
 	 * </ul>
-	 *
+	 >*
 	 * @param theId The ID of the resource to apply  (e.g. <code>Patient/123</code>)
 	 * @throws IllegalArgumentException If theId does not contain an ID with at least an ID part
 	 * @throws NullPointerException     If theId is null
