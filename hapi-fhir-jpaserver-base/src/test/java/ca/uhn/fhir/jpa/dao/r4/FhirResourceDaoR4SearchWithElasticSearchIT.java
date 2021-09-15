@@ -217,7 +217,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		{
 			// prefix
 			SearchParameterMap map = new SearchParameterMap();
-			map.add("code", new TokenParam("Bod").setModifier(TokenParamModifier.TEXT));
+			map.add("code", new TokenParam("Bod*").setModifier(TokenParamModifier.TEXT));
 			assertThat("Search matches start of word", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
 		}
 
