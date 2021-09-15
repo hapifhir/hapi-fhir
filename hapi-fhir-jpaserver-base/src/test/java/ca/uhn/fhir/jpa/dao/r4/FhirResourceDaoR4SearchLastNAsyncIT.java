@@ -13,6 +13,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -30,6 +32,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4SearchLastNAsyncIT.class);
 	@Autowired
 	protected DaoConfig myDaoConfig;
 	private List<Integer> originalPreFetchThresholds;
@@ -108,8 +111,11 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 			.map(t -> t.getSql(true, false))
 			.collect(Collectors.toList());
 
+		ourLog.info("Queries:\n * " + String.join("\n * ", queries));
+
+		// 3 queries to actually perform the search
 		// 1 query to lookup up Search from cache, and 2 chunked queries to retrieve resources by PID.
-		assertEquals(3, queries.size());
+		assertEquals(6, queries.size());
 
 		// The first chunked query should have a full complement of PIDs
 		StringBuilder firstQueryPattern = new StringBuilder(".*RES_ID in \\('[0-9]+'");
@@ -117,7 +123,7 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 			firstQueryPattern.append(" , '[0-9]+'");
 		}
 		firstQueryPattern.append("\\).*");
-		assertThat(queries.get(1), matchesPattern(firstQueryPattern.toString()));
+		assertThat(queries.get(4), matchesPattern(firstQueryPattern.toString()));
 
 		// the second chunked query should be padded with "-1".
 		StringBuilder secondQueryPattern = new StringBuilder(".*RES_ID in \\('[0-9]+'");
@@ -128,7 +134,7 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 			secondQueryPattern.append(" , '-1'");
 		}
 		secondQueryPattern.append("\\).*");
-		assertThat(queries.get(2), matchesPattern(secondQueryPattern.toString()));
+		assertThat(queries.get(5), matchesPattern(secondQueryPattern.toString()));
 
 	}
 
