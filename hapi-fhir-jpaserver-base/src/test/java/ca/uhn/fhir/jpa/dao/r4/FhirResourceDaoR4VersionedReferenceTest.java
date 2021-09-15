@@ -467,7 +467,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 		Patient patient = new Patient();
 		patient.setId(IdType.newRandomUuid());
-		patient.setActive(true);
+		patient.setActive(false);
 		builder
 			.addTransactionUpdateEntry(patient)
 			.conditional("Patient?active=false");
