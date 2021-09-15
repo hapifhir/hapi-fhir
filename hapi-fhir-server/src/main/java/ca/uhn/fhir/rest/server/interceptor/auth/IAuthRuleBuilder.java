@@ -67,6 +67,7 @@ public interface IAuthRuleBuilder {
 	 *           and could be shown to the client, but has no semantic meaning within
 	 *           HAPI FHIR.
 	 */
+	IAuthRuleBuilderRuleOpClassifierFinished allowAll(String theRuleName);
 
 	/**
 	 * Build the rule list
