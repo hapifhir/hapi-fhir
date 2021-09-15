@@ -3675,7 +3675,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 //		assertEquals(searchQuery, 2, StringUtils.countMatches(searchQuery.toUpperCase(), "AND RESOURCETA0_.RES_UPDATED"));
 	}
 
-
 	@Test
 	public void testSearchTokenParam() {
 		Patient patient = new Patient();
