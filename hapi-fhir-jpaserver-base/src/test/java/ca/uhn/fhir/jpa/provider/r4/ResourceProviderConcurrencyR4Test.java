@@ -20,9 +20,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -152,7 +152,7 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 		await().until(() -> myReceivedNames, contains("FAMILY3"));
 		ourLog.info("Got FAMILY3");
 
-		searchBlockingInterceptorFamily1.getSemaphore().release();
+		searchBlockingInterceptorFamily1.getLatch().countDown();
 
 		ourLog.info("About to wait for FAMILY1 to complete");
 		await().until(() -> myReceivedNames, contains("FAMILY3", "FAMILY1", "FAMILY1"));
@@ -165,7 +165,7 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 	@Interceptor
 	public static class SearchBlockingInterceptor {
 
-		private final Semaphore mySemaphore = new Semaphore(0);
+		private final CountDownLatch myLatch = new CountDownLatch(1);
 		private final String myFamily;
 		private AtomicInteger myHits = new AtomicInteger(0);
 
@@ -180,7 +180,7 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 			if (family.equals(myFamily)) {
 				try {
 					myHits.incrementAndGet();
-					if (!mySemaphore.tryAcquire(1, TimeUnit.MINUTES)) {
+					if (!myLatch.await(1, TimeUnit.MINUTES)) {
 						throw new InternalErrorException("Timed out waiting for " + Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED);
 					}
 				} catch (InterruptedException e) {
@@ -193,8 +193,8 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 			return myHits.get();
 		}
 
-		public Semaphore getSemaphore() {
-			return mySemaphore;
+		public CountDownLatch getLatch() {
+			return myLatch;
 		}
 	}
 
