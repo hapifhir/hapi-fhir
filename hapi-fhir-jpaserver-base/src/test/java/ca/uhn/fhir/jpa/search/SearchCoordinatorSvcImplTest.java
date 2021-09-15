@@ -174,12 +174,8 @@ public class SearchCoordinatorSvcImplTest {
 		IResultIterator iter = new FailAfterNIterator(new SlowIterator(pids.iterator(), 2), 300);
 		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
-		assertNotNull(result.getUuid());
-		assertEquals(null, result.size());
-
 		try {
-			result.getResources(0, 100000);
+			mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), containsString("FAILED"));
 			assertThat(e.getMessage(), containsString("at ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImplTest"));
@@ -393,7 +389,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
 		assertNotNull(result.getUuid());
-		assertEquals(null, result.size());
+		assertEquals(790, result.size());
 
 		ArgumentCaptor<Search> searchCaptor = ArgumentCaptor.forClass(Search.class);
 		verify(mySearchCacheSvc, atLeast(1)).save(searchCaptor.capture());
@@ -404,22 +400,10 @@ public class SearchCoordinatorSvcImplTest {
 		PersistedJpaBundleProvider provider;
 
 		resources = result.getResources(0, 10);
-		assertNull(result.size());
+		assertEquals(790, result.size());
 		assertEquals(10, resources.size());
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("19", resources.get(9).getIdElement().getValueAsString());
-
-		when(mySearchCacheSvc.fetchByUuid(eq(result.getUuid()))).thenReturn(Optional.of(search));
-
-		/*
-		 * Now call from a new bundle provider. This simulates a separate HTTP
-		 * client request coming in.
-		 */
-		provider = newPersistedJpaBundleProvider(result.getUuid());
-		resources = provider.getResources(10, 20);
-		assertEquals(10, resources.size());
-		assertEquals("20", resources.get(0).getIdElement().getValueAsString());
-		assertEquals("29", resources.get(9).getIdElement().getValueAsString());
 
 		myExpectedNumberOfSearchBuildersCreated = 4;
 	}
