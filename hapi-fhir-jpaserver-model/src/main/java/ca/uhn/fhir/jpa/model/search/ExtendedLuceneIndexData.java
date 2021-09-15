@@ -16,6 +16,7 @@ public class ExtendedLuceneIndexData {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExtendedLuceneIndexData.class);
 
 	// wip mb add the Resource - do we already have it as json somewhere?
+	// wip mb this needs to be something bigger.
 	final private Map<String, String> mySearchParamTexts;
 
 	public ExtendedLuceneIndexData() {
