@@ -16,6 +16,7 @@ import org.hibernate.search.engine.cfg.BackendSettings;
 import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -134,8 +135,8 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 
 	@Override
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory) {
+		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory(theConfigurableListableBeanFactory);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu2");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());

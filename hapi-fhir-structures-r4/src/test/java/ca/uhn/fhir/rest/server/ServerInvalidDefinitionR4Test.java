@@ -1,8 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -14,34 +12,23 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import ca.uhn.fhir.test.utilities.server.MockServletUtil;
-import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.OperationDefinition;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ServerInvalidDefinitionR4Test extends BaseR4ServerTest {
@@ -208,7 +195,7 @@ public class ServerInvalidDefinitionR4Test extends BaseR4ServerTest {
 
 		}
 
-		RestfulServer rs = new RestfulServer(FhirContext.forCached(FhirVersionEnum.R4));
+		RestfulServer rs = new RestfulServer(FhirContext.forR4Cached());
 		rs.setProviders(new PlainProviderWithExtendedOperationOnNoType());
 		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
 
