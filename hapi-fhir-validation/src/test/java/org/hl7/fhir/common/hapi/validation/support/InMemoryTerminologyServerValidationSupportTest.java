@@ -68,7 +68,7 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code99", null, vs);
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://cs#code99'", outcome.getMessage());
+		assertEquals("Unknown code 'http://cs#code99' in ValueSet 'http://vs'", outcome.getMessage());
 		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
 
 	}
@@ -132,7 +132,7 @@ public class InMemoryTerminologyServerValidationSupportTest {
 
 
 	@Test
-	public void testExpandValueSet_VsUsesVersionedSystem_CsOnlyDifferentVersionPresent() {
+	public void testExpandValueSet_VsIsEnumeratedWithVersionedSystem_CsOnlyDifferentVersionPresent() {
 		CodeSystem cs = new CodeSystem();
 		cs.setId("snomed-ct-ca-imm");
 		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -161,16 +161,14 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		String code;
 
 		IValidationSupport.ValueSetExpansionOutcome expansion = mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
-		assertNull(expansion.getValueSet());
-		assertEquals("Unable to expand ValueSet because CodeSystem could not be found: http://snomed.info/sct|0.17", expansion.getError());
+		assertNotNull(expansion.getValueSet());
+		assertEquals(1, ((ValueSet)expansion.getValueSet()).getExpansion().getContains().size());
 
 		codeSystemUrl = "http://snomed.info/sct";
 		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
 		code = "28571000087109";
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(valCtx, options, codeSystemUrl, code, null, valueSetUrl);
-		assertFalse(outcome.isOk());
-		assertEquals("Unable to expand ValueSet because CodeSystem could not be found: http://snomed.info/sct|0.17", outcome.getMessage());
-		assertEquals("error", outcome.getSeverityCode());
+		assertTrue(outcome.isOk());
 	}
 
 

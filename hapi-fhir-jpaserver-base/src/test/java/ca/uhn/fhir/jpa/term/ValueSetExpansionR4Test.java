@@ -1523,7 +1523,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 	}
 
 	@Test
-	public void testExpandValueSet_VsUsesVersionedSystem_CsIsFragmentWithWrongVersion() {
+	public void testExpandValueSet_VsIsEnumeratedWithVersionedSystem_CsIsFragmentWithWrongVersion() {
 		CodeSystem cs = new CodeSystem();
 		cs.setId("snomed-ct-ca-imm");
 		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -1578,10 +1578,70 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		// Try expansion again
 		expansion = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
-		assertThat(extractExpansionMessage(expansion), containsString("has not yet been pre-expanded"));
-		assertThat(extractExpansionMessage(expansion), containsString("Current status: NOT_EXPANDED"));
+		assertThat(extractExpansionMessage(expansion), containsString("ValueSet was expanded using a pre-calculated expansion"));
 		assertThat(extractExpansionCodes(expansion), contains("28571000087109"));
 	}
+
+	@Test
+	public void testExpandValueSet_VsIsNonEnumeratedWithVersionedSystem_CsIsFragmentWithWrongVersion() {
+		CodeSystem cs = new CodeSystem();
+		cs.setId("snomed-ct-ca-imm");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.FRAGMENT);
+		cs.setUrl("http://foo-cs");
+		cs.setVersion("http://snomed.info/sct/20611000087101/version/20210331");
+		cs.addConcept().setCode("28571000087109").setDisplay("MODERNA COVID-19 mRNA-1273");
+		myCodeSystemDao.update(cs, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setId("vaccinecode");
+		vs.setUrl("http://ehealthontario.ca/fhir/ValueSet/vaccinecode");
+		vs.setVersion("0.1.17");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent vsInclude = vs.getCompose().addInclude();
+		vsInclude.setSystem("http://foo-cs");
+		vsInclude.setVersion("0.17"); // different version
+		myValueSetDao.update(vs, mySrd);
+
+		String codeSystemUrl;
+		String valueSetUrl;
+		String code;
+
+		// Make sure nothing is stored in the TRM DB yet
+		runInTransaction(() -> assertNull(myTermCodeSystemDao.findByCodeSystemUri("http://snomed.info/sct")));
+		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, myTermValueSetDao.findByUrl("http://ehealthontario.ca/fhir/ValueSet/vaccinecode").get().getExpansionStatus()));
+
+		// In memory expansion
+		try {
+			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
+		} catch (InternalErrorException e) {
+			assertEquals("Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17", e.getMessage());
+		}
+
+		codeSystemUrl = "http://snomed.info/sct";
+		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
+		code = "28571000087109";
+		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
+		assertFalse(outcome.isOk());
+		assertEquals("Unknown code 'http://snomed.info/sct#28571000087109' in ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'", outcome.getMessage());
+		assertEquals("error", outcome.getSeverityCode());
+
+		// Perform Pre-Expansion
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		// Make sure it's done
+		runInTransaction(() -> assertNull(myTermCodeSystemDao.findByCodeSystemUri("http://snomed.info/sct")));
+		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, myTermValueSetDao.findByUrl("http://ehealthontario.ca/fhir/ValueSet/vaccinecode").get().getExpansionStatus()));
+
+		// Try expansion again
+		try {
+			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
+		} catch (InternalErrorException e) {
+			assertEquals("Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17", e.getMessage());
+		}
+	}
+
 
 	@Test
 	public void testExpandValueSet_VsUsesVersionedSystem_CsIsFragmentWithoutCode() {
