@@ -68,7 +68,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		StringIndexFieldTypeOptionsStep<?> textType =
 			indexFieldTypeFactory.asString()
 				// wip mb where do we do unicode normalization?  Java-side, or in the analyzer?
-				.analyzer("autocompleteWordEdgeAnalyzer")
+				.analyzer("standardAnalyzer")
 				.projectable(Projectable.NO);
 		IndexSchemaObjectField spfield = indexSchemaElement.objectField("sp", ObjectStructure.FLATTENED);
 		IndexObjectFieldReference sp = spfield.toReference();

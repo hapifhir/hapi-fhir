@@ -38,7 +38,9 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.search.engine.search.common.BooleanOperator;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.mapper.orm.Search;
@@ -105,11 +107,15 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		for (List<? extends IQueryParameterType> nextAnd : theTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
 			if (terms.size() == 1) {
-				b.must(f.phrase()
+				String query = terms.stream()
+					.map(s->"(" + s + ")")
+					.collect(Collectors.joining(" OR "));
+				b.must(f.simpleQueryString()
 					.field(theFieldName)
 					.boost(4.0f)
-					.matching(terms.iterator().next().toLowerCase())
-					.slop(2));
+					.matching(query)
+					.analyzer("standardAnalyzer")
+					.defaultOperator(BooleanOperator.AND)); // term value may contain multiple tokens.  Require all of them to be present.
 			} else if (terms.size() > 1) {
 				String joinedTerms = StringUtils.join(terms, ' ');
 				b.must(f.match().field(theFieldName).matching(joinedTerms));
@@ -196,7 +202,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					//DSTU2 doesn't support fhirpath, so fall back to old style lookup.
 					if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
 						// wip mb the query guts
-						for(String nextParam: theParams.keySet()) {
+						// copy the keys to avoid concurrent modification error
+						Iterable<String> keys = Lists.newArrayList(theParams.keySet());
+						for(String nextParam: keys) {
 							RuntimeSearchParam activeParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, nextParam);
 							switch (activeParam.getParamType()) {
 								case TOKEN:

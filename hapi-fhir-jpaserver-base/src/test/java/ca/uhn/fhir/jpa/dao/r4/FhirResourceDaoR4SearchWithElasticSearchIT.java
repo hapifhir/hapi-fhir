@@ -153,7 +153,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 		{
 			Observation obs1 = new Observation();
-			obs1.getCode().setText("Weight");
+			obs1.getCode().setText("Weight unique");
 			obs1.setStatus(Observation.ObservationStatus.FINAL);
 			obs1.setValue(new Quantity(123));
 			obs1.getNoteFirstRep().setText("obs1");
@@ -167,7 +167,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			obs2.setStatus(Observation.ObservationStatus.FINAL);
 			obs2.setValue(new Quantity(81));
 			id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
-			ourLog.info("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
+			//ourLog.info("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
 		}
 
 
@@ -217,8 +217,15 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		{
 			// prefix
 			SearchParameterMap map = new SearchParameterMap();
-			map.add("code", new TokenParam("Bod").setModifier(TokenParamModifier.TEXT));
+			map.add("code", new TokenParam("Bod*").setModifier(TokenParamModifier.TEXT));
 			assertThat("Search matches start of word", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
+		}
+
+		{
+			// prefix
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("Bod").setModifier(TokenParamModifier.TEXT));
+			assertThat("Bare prefix does not match", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
 		}
 
 		{
@@ -233,6 +240,28 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("identifier", new TokenParam("Random").setModifier(TokenParamModifier.TEXT));
 			assertThat(":text matches identifier text", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id4)));
+		}
+
+		{
+			// multiple values means or
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("unique").setModifier(TokenParamModifier.TEXT));
+			map.get("code").get(0).add(new TokenParam("measured").setModifier(TokenParamModifier.TEXT));
+			assertThat("Multiple query values means or in :text", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1,id2)));
+		}
+
+		{
+			// space means AND
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("Body Weight").setModifier(TokenParamModifier.TEXT));
+			assertThat("Multiple terms in value means and for :text", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
+		}
+
+		{
+			// don't apply the n-gram analyzer to the query, just the text.
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("Bodum").setModifier(TokenParamModifier.TEXT));
+			assertThat("search with shared prefix does not match", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), Matchers.empty());
 		}
 	}
 
