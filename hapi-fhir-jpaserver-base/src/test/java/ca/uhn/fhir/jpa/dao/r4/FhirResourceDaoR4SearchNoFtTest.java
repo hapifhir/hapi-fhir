@@ -8,10 +8,13 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -34,7 +37,10 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.annotation.IdParam;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -52,6 +58,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CareTeam;
 import org.hl7.fhir.r4.model.ChargeItem;
+import org.hl7.fhir.r4.model.ClinicalImpression;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -4451,6 +4458,90 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertEquals(1, countMatches(searchQuery.toLowerCase(), "sp_value_low"), searchQuery);
 		}
 
+	}
+
+	@Test
+	public void testPeriodSearchMissingABoundFails() {
+		String spString = "{\n" +
+			"\"resourceType\": \"SearchParameter\",\n" +
+			"\"id\": \"SP4119935\",\n" +
+			"\"meta\": {\n" +
+			"\"extension\": [ {\n" +
+			"\"url\": \"http://hapifhir.io/fhir/StructureDefinition/resource-meta-source\",\n" +
+			"\"valueUri\": \"#K024ySQrgGZLO8QQ\"\n" +
+			"} ],\n" +
+			"\"versionId\": \"1\",\n" +
+			"\"lastUpdated\": \"2021-08-16T17:48:54.033-04:00\"\n" +
+			"},\n" +
+			"\"url\": \"http://fkcfhir/sp/ClinicalImpression/effectivePeriod\",\n" +
+			"\"name\": \"ClinicalImpression effectivePeriod\",\n" +
+			"\"status\": \"active\",\n" +
+			"\"code\": \"effectivePeriod\",\n" +
+			"\"base\": [ \"ClinicalImpression\" ],\n" +
+			"\"type\": \"date\",\n" +
+			"\"description\": \"Search by the ClinicalImpression effectivePeriod\",\n" +
+			"\"expression\": \"ClinicalImpression.effective.as(Period)\",\n" +
+			"\"xpathUsage\": \"normal\"\n" +
+			"}";
+
+		String clinicalImpString = "{\n" +
+			"  \"resourceType\": \"ClinicalImpression\",\n" +
+			"  \"id\": \"CIA31965439\",\n" +
+			"  \"meta\": {\n" +
+			"    \"extension\": [ {\n" +
+			"      \"url\": \"http://hapifhir.io/fhir/StructureDefinition/resource-meta-source\",\n" +
+			"      \"valueUri\": \"#Ns1SmVyPFuWNFZZs\"\n" +
+			"    } ],\n" +
+			"    \"versionId\": \"1\",\n" +
+			"    \"lastUpdated\": \"2021-08-19T16:10:05.653-04:00\"\n" +
+			"  },\n" +
+			"  \"extension\": [ {\n" +
+			"    \"url\": \"ClinicalImpression#eCCNoteStatus\",\n" +
+			"    \"valueCodeableConcept\": {\n" +
+			"      \"coding\": [ {\n" +
+			"        \"system\": \"http://fkcfhir.org/fhir/cs/FMCeCCNotesStatus\",\n" +
+			"        \"code\": \"3\",\n" +
+			"        \"display\": \"Complete\"\n" +
+			"      } ]\n" +
+			"    }\n" +
+			"  } ],\n" +
+			"  \"identifier\": [ {\n" +
+			"    \"system\": \"urn:oid:2.16.840.1.113883.3.7418.24.1\",\n" +
+			"    \"value\": \"A31965439\"\n" +
+			"  }, {\n" +
+			"    \"system\": \"urn:oid:2.16.840.1.113883.3.7418.24.2\",\n" +
+			"    \"value\": \"A31181014\"\n" +
+			"  } ],\n" +
+			"  \"status\": \"completed\",\n" +
+			"  \"code\": {\n" +
+			"    \"coding\": [ {\n" +
+			"      \"system\": \"http://fkcfhir.org/fhir/cs/FMCNotesType\",\n" +
+			"      \"code\": \"ClinicalNote\",\n" +
+			"      \"display\": \"Clinical Note\"\n" +
+			"    } ],\n" +
+			"    \"text\": \"Clinical Note\"\n" +
+			"  },\n" +
+			"  \"description\": \"Referral made to NW Renal Access Center for drop in AFT values along with difficulty cannulating. \",\n" +
+			"  \"effectivePeriod\": {\n" +
+			"    \"start\": \"2021-05-07T18:14:00.000-04:00\"\n" +
+			"  },\n" +
+			"  \"date\": \"2021-05-07T15:13:00.000-04:00\",\n" +
+			"  \"summary\": \"Referral made to NW Renal Access Center for drop in AFT values along with difficulty cannulating. \"\n" +
+			"}\n" +
+			"\n";
+		IParser iParser = myFhirCtx.newJsonParser();
+		mySearchParameterDao.update(iParser.parseResource(SearchParameter.class, spString));
+		mySearchParamRegistry.forceRefresh();
+		DaoMethodOutcome update = myClinicalImpressionDao.update(iParser.parseResource(ClinicalImpression.class, clinicalImpString));
+
+		SearchParameterMap spMap = new SearchParameterMap();
+		spMap.setLoadSynchronous(true);
+		spMap.add("effectivePeriod", new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2020-01-01"));
+		spMap.add("_id", new StringParam("CIA31965439"));
+		IBundleProvider search = myClinicalImpressionDao.search(spMap);
+		ClinicalImpression resource = (ClinicalImpression) search.getResources(0, 1).get(0);
+		assertThat(resource.getEffectivePeriod().getStartElement(), is(notNullValue()));
+		assertThat(resource.getEffectivePeriod().getEndElement(), is(notNullValue()));
 	}
 
 
