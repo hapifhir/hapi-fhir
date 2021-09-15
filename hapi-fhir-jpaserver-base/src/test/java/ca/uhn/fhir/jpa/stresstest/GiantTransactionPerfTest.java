@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.stresstest;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
@@ -36,6 +35,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -109,7 +109,7 @@ import static org.mockito.Mockito.when;
 public class GiantTransactionPerfTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(GiantTransactionPerfTest.class);
-	private final FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R4);
+	private final FhirContext myCtx = FhirContext.forR4Cached();
 	private FhirSystemDaoR4 mySystemDao;
 	private IInterceptorBroadcaster myInterceptorSvc;
 	private TransactionProcessor myTransactionProcessor;
@@ -218,6 +218,7 @@ public class GiantTransactionPerfTest {
 
 		mySearchParamRegistry = new SearchParamRegistryImpl();
 		mySearchParamRegistry.setResourceChangeListenerRegistry(myResourceChangeListenerRegistry);
+		mySearchParamRegistry.setSearchParameterCanonicalizerForUnitTest(new SearchParameterCanonicalizer(myCtx));
 		mySearchParamRegistry.setFhirContext(myCtx);
 		mySearchParamRegistry.setModelConfig(myDaoConfig.getModelConfig());
 		mySearchParamRegistry.registerListener();

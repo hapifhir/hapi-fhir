@@ -1,16 +1,27 @@
 package ca.uhn.fhir.narrative;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.collections.Transformer;
 import org.apache.commons.collections.map.LazyMap;
 import org.hamcrest.core.StringContains;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.DiagnosticReport.DiagnosticReportStatus;
+import org.hl7.fhir.dstu3.model.Medication;
+import org.hl7.fhir.dstu3.model.MedicationRequest;
 import org.hl7.fhir.dstu3.model.MedicationRequest.MedicationRequestStatus;
+import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Quantity;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.SimpleQuantity;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultThymeleafNarrativeGeneratorDstu3Test.class);
-	private final FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.DSTU3);
+	private final FhirContext myCtx = FhirContext.forDstu3Cached();
 	private DefaultThymeleafNarrativeGenerator myGen;
 
 	@BeforeEach

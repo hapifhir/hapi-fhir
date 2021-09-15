@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2958
+jira: SMILE-643
+title: "Fixed issue where the processing of queries like Procedure?patient= before a cache search would cause the parameter key to be removed.
+Additionally, ensured that requests like Procedure?patient= cause HTTP 400 Bad Request instead of HTTP 500 Internal Error."

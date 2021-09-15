@@ -282,7 +282,7 @@ public abstract class BaseApp {
 	}
 
 	private Optional<BaseCommand> parseCommand(String[] theArgs) {
-		Optional<BaseCommand> commandOpt = getNextCommand(theArgs);
+		Optional<BaseCommand> commandOpt = getNextCommand(theArgs, 0);
 
 		if (! commandOpt.isPresent()) {
 			String message = "Unrecognized command: " + ansi().bold().fg(Ansi.Color.RED) + theArgs[0] + ansi().boldOff().fg(Ansi.Color.WHITE);
@@ -294,8 +294,8 @@ public abstract class BaseApp {
 		return commandOpt;
 	}
 
-	private Optional<BaseCommand> getNextCommand(String[] theArgs) {
-		return ourCommands.stream().filter(cmd -> cmd.getCommandName().equals(theArgs[0])).findFirst();
+	private Optional<BaseCommand> getNextCommand(String[] theArgs, int thePosition) {
+		return ourCommands.stream().filter(cmd -> cmd.getCommandName().equals(theArgs[thePosition])).findFirst();
 	}
 
 	private void processHelp(String[] theArgs) {
@@ -303,7 +303,7 @@ public abstract class BaseApp {
 			logUsage();
 			return;
 		}
-		Optional<BaseCommand> commandOpt = getNextCommand(theArgs);
+		Optional<BaseCommand> commandOpt = getNextCommand(theArgs, 1);
 		if (! commandOpt.isPresent()) {
 			String message = "Unknown command: " + theArgs[1];
 			System.err.println(message);

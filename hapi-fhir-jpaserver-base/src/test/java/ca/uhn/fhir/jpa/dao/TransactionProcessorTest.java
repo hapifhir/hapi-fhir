@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -123,7 +122,7 @@ public class TransactionProcessorTest {
 
 		@Bean
 		public FhirContext fhirContext() {
-			return FhirContext.forCached(FhirVersionEnum.R4);
+			return FhirContext.forR4Cached();
 		}
 
 		@Bean

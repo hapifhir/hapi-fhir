@@ -400,11 +400,8 @@ public class SearchParameterMap implements Serializable {
 			for (List<? extends IQueryParameterType> nextValuesAndIn : nextValuesAndsIn) {
 
 				List<IQueryParameterType> nextValuesOrsOut = new ArrayList<>();
-				for (IQueryParameterType nextValueOrIn : nextValuesAndIn) {
-					if (nextValueOrIn.getMissing() != null || isNotBlank(nextValueOrIn.getValueAsQueryToken(theCtx))) {
-						nextValuesOrsOut.add(nextValueOrIn);
-					}
-				}
+
+				nextValuesOrsOut.addAll(nextValuesAndIn);
 
 				nextValuesOrsOut.sort(new QueryParameterTypeComparator(theCtx));
 

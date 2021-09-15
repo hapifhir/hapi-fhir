@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
@@ -87,7 +86,7 @@ import static org.mockito.Mockito.when;
 public class SearchCoordinatorSvcImplTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchCoordinatorSvcImplTest.class);
-	private static FhirContext ourCtx = FhirContext.forCached(FhirVersionEnum.DSTU3);
+	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 	@Mock
 	private IFhirResourceDao<?> myCallingDao;
 	@Mock
@@ -667,7 +666,7 @@ public class SearchCoordinatorSvcImplTest {
 	public static class FailAfterNIterator extends BaseIterator<ResourcePersistentId> implements IResultIterator {
 
 		private int myCount;
-		private IResultIterator myWrap;
+		private final IResultIterator myWrap;
 
 		FailAfterNIterator(IResultIterator theWrap, int theCount) {
 			myWrap = theWrap;
@@ -768,10 +767,10 @@ public class SearchCoordinatorSvcImplTest {
 
 		private static final Logger ourLog = LoggerFactory.getLogger(SlowIterator.class);
 		private final IResultIterator myResultIteratorWrap;
-		private int myDelay;
-		private Iterator<ResourcePersistentId> myWrap;
-		private List<ResourcePersistentId> myReturnedValues = new ArrayList<>();
-		private AtomicInteger myCountReturned = new AtomicInteger(0);
+		private final int myDelay;
+		private final Iterator<ResourcePersistentId> myWrap;
+		private final List<ResourcePersistentId> myReturnedValues = new ArrayList<>();
+		private final AtomicInteger myCountReturned = new AtomicInteger(0);
 
 		SlowIterator(Iterator<ResourcePersistentId> theWrap, int theDelay) {
 			myWrap = theWrap;
