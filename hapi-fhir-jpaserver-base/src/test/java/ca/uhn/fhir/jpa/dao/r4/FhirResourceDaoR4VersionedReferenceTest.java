@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Encounter;
@@ -467,7 +468,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 		Patient patient = new Patient();
 		patient.setId(IdType.newRandomUuid());
-		patient.addName().setFamily("zoop");
+		patient.setDeceased(new BooleanType(true));
 		patient.setActive(false);
 		builder
 			.addTransactionUpdateEntry(patient)
@@ -489,7 +490,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		assertEquals("1", observationId.getVersionIdPart());
 
 		// Make sure we're not introducing any extra DB operations
-		assertEquals(5, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(4, myCaptureQueriesListener.logSelectQueries().size());
 
 		// Read back and verify that reference is now versioned
 		observation = myObservationDao.read(observationId);
