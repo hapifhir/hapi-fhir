@@ -4808,6 +4808,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	@Disabled("Not useful with the search coordinator thread pool removed")
 	public void testSearchWithCountNotSet() {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(200);
@@ -4876,6 +4877,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	@Disabled("Not useful with the search coordinator thread pool removed")
 	public void testSearchWithCountSearchResultsUpTo5() {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(200);
