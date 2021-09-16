@@ -33,16 +33,42 @@ public class InMemoryTerminologyServerValidationSupportTest {
 	private DefaultProfileValidationSupport myDefaultSupport;
 	private ValidationSupportChain myChain;
 	private PrePopulatedValidationSupport myPrePopulated;
+	private CommonCodeSystemsTerminologyService myCommonCodeSystemsTermSvc;
 
 	@BeforeEach
 	public void before() {
 		mySvc = new InMemoryTerminologyServerValidationSupport(myCtx);
 		myDefaultSupport = new DefaultProfileValidationSupport(myCtx);
 		myPrePopulated = new PrePopulatedValidationSupport(myCtx);
-		myChain = new ValidationSupportChain(mySvc, myPrePopulated, myDefaultSupport);
+		myCommonCodeSystemsTermSvc = new CommonCodeSystemsTerminologyService(myCtx);
+		myChain = new ValidationSupportChain(mySvc, myPrePopulated, myDefaultSupport, myCommonCodeSystemsTermSvc);
 
 		// Force load
 		myDefaultSupport.fetchCodeSystem("http://foo");
+	}
+
+	@Test
+	public void testValidateCodeWithInferredSystem_CommonCodeSystemsCs_BuiltInVs() {
+
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		ConceptValidationOptions options = new ConceptValidationOptions().setInferSystem(true);
+		IValidationSupport.CodeValidationResult outcome;
+
+		String valueSetUrl = "http://hl7.org/fhir/ValueSet/mimetypes";
+
+		// ValidateCode
+		outcome = myChain.validateCode(valCtx, options, null, "txt", null, valueSetUrl);
+		assertTrue(outcome.isOk());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/mimetypes", outcome.getMessage());
+		assertEquals("txt", outcome.getCode());
+
+		// ValidateCodeInValueSet
+		IBaseResource valueSet = myChain.fetchValueSet(valueSetUrl);
+		assertNotNull(valueSet);
+		outcome = myChain.validateCodeInValueSet(valCtx, options, null, "txt", null, valueSet);
+		assertTrue(outcome.isOk());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/mimetypes", outcome.getMessage());
+		assertEquals("txt", outcome.getCode());
 	}
 
 	@Test

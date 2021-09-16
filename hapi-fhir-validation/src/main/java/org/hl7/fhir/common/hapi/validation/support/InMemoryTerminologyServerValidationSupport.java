@@ -60,10 +60,13 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 	@Override
 	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
+		return expandValueSet(theValidationSupportContext, theExpansionOptions, theValueSetToExpand, null, null);
+	}
 
+	private ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand, String theWantSystemAndVersion, String theWantCode) {
 		org.hl7.fhir.r5.model.ValueSet expansionR5;
 		try {
-			expansionR5 = expandValueSetToCanonical(theValidationSupportContext, theValueSetToExpand, null, null);
+			expansionR5 = expandValueSetToCanonical(theValidationSupportContext, theValueSetToExpand, theWantSystemAndVersion, theWantCode);
 		} catch (ExpansionCouldNotBeCompletedInternallyException e) {
 			return new ValueSetExpansionOutcome(e.getMessage());
 		}
@@ -118,7 +121,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				break;
 			}
 			case R5: {
-				expansionR5 = expandValueSetR5(theValidationSupportContext, (org.hl7.fhir.r5.model.ValueSet) theValueSetToExpand);
+				expansionR5 = expandValueSetR5(theValidationSupportContext, (org.hl7.fhir.r5.model.ValueSet) theValueSetToExpand, theWantSystemUrlAndVersion, theWantCode);
 				break;
 			}
 			case DSTU2_1:
@@ -221,7 +224,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 		}
 
-		ValueSetExpansionOutcome valueSetExpansionOutcome = expandValueSet(theValidationSupportContext, null, vs);
+		ValueSetExpansionOutcome valueSetExpansionOutcome = expandValueSet(theValidationSupportContext, null, vs, theCodeSystem, theCode);
 		if (valueSetExpansionOutcome == null) {
 			return null;
 		}
@@ -635,6 +638,10 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 
 			if (!ableToHandleCode) {
+				if (includeOrExcludeSystemResource == null && failureMessage == null) {
+					failureMessage = "Unable to find CodeSystem: " + loadedCodeSystemUrl;
+				}
+
 				throw new ExpansionCouldNotBeCompletedInternallyException(failureMessage);
 			}
 
