@@ -132,14 +132,14 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	@Override
 	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystemUrlAndVersion, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		org.hl7.fhir.r5.model.ValueSet expansion;
-		String vsUrl = FhirContext.forCached(theValueSet.getStructureFhirVersionEnum()).newTerser().getSinglePrimitiveValueOrNull(theValueSet, "url");
+		String vsUrl = CommonCodeSystemsTerminologyService.getValueSetUrl(theValueSet);
 		try {
 			expansion = expandValueSetToCanonical(theValidationSupportContext, theValueSet, theCodeSystemUrlAndVersion, theCode);
 		} catch (ExpansionCouldNotBeCompletedInternallyException e) {
 			CodeValidationResult codeValidationResult = new CodeValidationResult();
 			codeValidationResult.setSeverityCode("error");
 
-			String msg = "Failed to expand ValueSet '" + vsUrl + "'. Could not validate code " + theCodeSystemUrlAndVersion + "#" + theCode;
+			String msg = "Failed to expand ValueSet '" + vsUrl + "' (in-memory). Could not validate code " + theCodeSystemUrlAndVersion + "#" + theCode;
 			if (e.getMessage() != null) {
 				msg += ". Error was: " + e.getMessage();
 			}
@@ -339,16 +339,28 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			if (codeMatches) {
 				if (theOptions.isInferSystem() || (nextExpansionCode.getSystem().equals(codeSystemUrlToValidate) && (codeSystemVersionToValidate == null || codeSystemVersionToValidate.equals(nextExpansionCode.getSystemVersion())))) {
 					if (!theOptions.isValidateDisplay() || (isBlank(nextExpansionCode.getDisplay()) || isBlank(theDisplayToValidate) || nextExpansionCode.getDisplay().equals(theDisplayToValidate))) {
-						return new CodeValidationResult()
+						String csVersion = codeSystemResourceVersion;
+						if (isNotBlank(nextExpansionCode.getSystemVersion())) {
+							csVersion = nextExpansionCode.getSystemVersion();
+						}
+						CodeValidationResult codeValidationResult = new CodeValidationResult()
 							.setCode(theCodeToValidate)
 							.setDisplay(nextExpansionCode.getDisplay())
 							.setCodeSystemName(codeSystemResourceName)
-							.setCodeSystemVersion(codeSystemResourceVersion);
+							.setCodeSystemVersion(csVersion);
+						if (isNotBlank(theValueSetUrl)) {
+							codeValidationResult.setMessage("Code was validated against in-memory expansion of ValueSet: " + theValueSetUrl);
+						}
+						return codeValidationResult;
 					} else {
+						String message = "Concept Display \"" + theDisplayToValidate + "\" does not match expected \"" + nextExpansionCode.getDisplay() + "\"";
+						if (isNotBlank(theValueSetUrl)) {
+							message += " for in-memory expansion of ValueSet: " + theValueSetUrl;
+						}
 						return new CodeValidationResult()
 							.setSeverity(IssueSeverity.ERROR)
 							.setDisplay(nextExpansionCode.getDisplay())
-							.setMessage("Concept Display \"" + theDisplayToValidate + "\" does not match expected \"" + nextExpansionCode.getDisplay() + "\"")
+							.setMessage(message)
 							.setCodeSystemName(codeSystemResourceName)
 							.setCodeSystemVersion(codeSystemResourceVersion);
 					}
@@ -366,7 +378,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			message = "Unknown code '" + (isNotBlank(theCodeSystemUrlAndVersionToValidate) ? theCodeSystemUrlAndVersionToValidate + "#" : "") + theCodeToValidate + "'";
 		}
 		if (isNotBlank(theValueSetUrl)) {
-			message += " in ValueSet '" + theValueSetUrl + "'";
+			message += " for in-memory expansion of ValueSet '" + theValueSetUrl + "'";
 		}
 
 		return new CodeValidationResult()
@@ -678,6 +690,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 					return (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_40_50.convertResource(valueSet, new BaseAdvisor_40_50(false));
 				};
 			default:
+			case DSTU2_1:
 			case R5:
 				return t -> (org.hl7.fhir.r5.model.ValueSet) theValidationSupportContext.getRootValidationSupport().fetchValueSet(t);
 		}
@@ -714,6 +727,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 					org.hl7.fhir.r4.model.CodeSystem codeSystem = (org.hl7.fhir.r4.model.CodeSystem) theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(t);
 					return (CodeSystem) VersionConvertorFactory_40_50.convertResource(codeSystem, new BaseAdvisor_40_50(false));
 				};
+			case DSTU2_1:
 			case R5:
 			default:
 				return t -> (org.hl7.fhir.r5.model.CodeSystem) theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(t);
@@ -744,6 +758,8 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	public static class ExpansionCouldNotBeCompletedInternallyException extends Exception {
+
+		private static final long serialVersionUID = -2226561628771483085L;
 
 		public ExpansionCouldNotBeCompletedInternallyException(String theMessage) {
 			super(theMessage);

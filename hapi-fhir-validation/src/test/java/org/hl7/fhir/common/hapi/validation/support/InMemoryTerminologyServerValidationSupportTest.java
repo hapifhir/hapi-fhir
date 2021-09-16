@@ -62,13 +62,13 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		IValidationSupport.CodeValidationResult outcome;
 
 		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code1", null, vs);
-		assertNull(outcome.getMessage());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getMessage());
 		assertTrue(outcome.isOk());
 
 		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code99", null, vs);
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://cs#code99' in ValueSet 'http://vs'", outcome.getMessage());
+		assertEquals("Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
 		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
 
 	}
@@ -87,14 +87,10 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		ConceptValidationOptions options = new ConceptValidationOptions();
 		IValidationSupport.CodeValidationResult outcome;
 
-		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code1", null, vs);
-		assertNotNull(outcome);
-		assertFalse(outcome.isOk());
-
 		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code99", null, vs);
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Failed to expand ValueSet 'http://vs'. Could not validate code http://cs#code99. Error was: Unable to expand ValueSet because CodeSystem could not be found: http://cs", outcome.getMessage());
+		assertEquals("Failed to expand ValueSet 'http://vs' (in-memory). Could not validate code http://cs#code99. Error was: Unable to expand ValueSet because CodeSystem could not be found: http://cs", outcome.getMessage());
 		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
 
 	}
@@ -155,6 +151,7 @@ public class InMemoryTerminologyServerValidationSupportTest {
 
 		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
 		ConceptValidationOptions options = new ConceptValidationOptions();
+		options.setValidateDisplay(true);
 
 		String codeSystemUrl;
 		String valueSetUrl;
@@ -164,11 +161,48 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		assertNotNull(expansion.getValueSet());
 		assertEquals(1, ((ValueSet)expansion.getValueSet()).getExpansion().getContains().size());
 
+		// Validate code - good
 		codeSystemUrl = "http://snomed.info/sct";
 		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
 		code = "28571000087109";
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(valCtx, options, codeSystemUrl, code, null, valueSetUrl);
+		String display = null;
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(valCtx, options, codeSystemUrl, code, display, valueSetUrl);
 		assertTrue(outcome.isOk());
+		assertEquals("28571000087109", outcome.getCode());
+		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
+		assertEquals("http://snomed.info/sct/20611000087101/version/20210331", outcome.getCodeSystemVersion());
+
+		// Validate code - good code, bad display
+		codeSystemUrl = "http://snomed.info/sct";
+		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
+		code = "28571000087109";
+		display = "BLAH";
+		outcome = mySvc.validateCode(valCtx, options, codeSystemUrl, code, display, valueSetUrl);
+		assertFalse(outcome.isOk());
+		assertEquals(null, outcome.getCode());
+		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
+		assertEquals("http://snomed.info/sct/20611000087101/version/20210331", outcome.getCodeSystemVersion());
+
+		// Validate code - good code, good display
+		codeSystemUrl = "http://snomed.info/sct";
+		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
+		code = "28571000087109";
+		display = "MODERNA COVID-19 mRNA-1273";
+		outcome = mySvc.validateCode(valCtx, options, codeSystemUrl, code, display, valueSetUrl);
+		assertTrue(outcome.isOk());
+		assertEquals("28571000087109", outcome.getCode());
+		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
+		assertEquals("http://snomed.info/sct/20611000087101/version/20210331", outcome.getCodeSystemVersion());
+
+		// Validate code - bad code
+		codeSystemUrl = "http://snomed.info/sct";
+		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
+		code = "BLAH";
+		outcome = mySvc.validateCode(valCtx, options, codeSystemUrl, code, null, valueSetUrl);
+		assertFalse(outcome.isOk());
+		assertEquals(null, outcome.getCode());
+		assertEquals(null, outcome.getDisplay());
+		assertEquals(null, outcome.getCodeSystemVersion());
 	}
 
 

@@ -10,6 +10,8 @@ import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.IValueSetConceptAccumulator;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -18,6 +20,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import javax.annotation.Nonnull;
@@ -118,5 +121,7 @@ public interface ITermReadSvc extends IValidationSupport {
 	 * Version independent
 	 */
 	CodeValidationResult codeSystemValidateCode(IIdType theCodeSystemId, String theValueSetUrl, String theVersion, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept);
+
+	void invalidatePreCalculatedExpansion(IIdType theValueSetId, RequestDetails theRequestDetails);
 
 }

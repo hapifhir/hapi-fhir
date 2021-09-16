@@ -68,6 +68,7 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
 import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -90,7 +91,6 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.RegexpQuery;
-import org.hibernate.exception.spi.ConversionContext;
 import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
 import org.hibernate.search.backend.lucene.LuceneExtension;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
@@ -119,6 +119,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -255,6 +256,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	private boolean addCodeIfNotAlreadyAdded(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, TermConcept theConcept, boolean theAdd, String theValueSetIncludeVersion) {
 		String codeSystem = theConcept.getCodeSystemVersion().getCodeSystem().getCodeSystemUri();
+		String codeSystemVersion = theConcept.getCodeSystemVersion().getCodeSystemVersionId();
 		String code = theConcept.getCode();
 		String display = theConcept.getDisplay();
 		Long sourceConceptPid = theConcept.getId();
@@ -267,9 +269,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		Collection<TermConceptDesignation> designations = theConcept.getDesignations();
 		if (StringUtils.isNotEmpty(theValueSetIncludeVersion)) {
-			return addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, designations, theAdd, codeSystem + "|" + theValueSetIncludeVersion, code, display, sourceConceptPid, directParentPids);
+			return addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, designations, theAdd, codeSystem + "|" + theValueSetIncludeVersion, code, display, sourceConceptPid, directParentPids, codeSystemVersion);
 		} else {
-			return addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, designations, theAdd, codeSystem, code, display, sourceConceptPid, directParentPids);
+			return addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, designations, theAdd, codeSystem, code, display, sourceConceptPid, directParentPids, codeSystemVersion);
 		}
 	}
 
@@ -277,7 +279,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		if (StringUtils.isNotEmpty(theCodeSystemVersion)) {
 			if (isNoneBlank(theCodeSystem, theCode)) {
 				if (theAdd && theAddedCodes.add(theCodeSystem + "|" + theCode)) {
-					theValueSetCodeAccumulator.includeConceptWithDesignations(theCodeSystem + "|" + theCodeSystemVersion, theCode, theDisplay, null, theSourceConceptPid, theSourceConceptDirectParentPids);
+					theValueSetCodeAccumulator.includeConceptWithDesignations(theCodeSystem + "|" + theCodeSystemVersion, theCode, theDisplay, null, theSourceConceptPid, theSourceConceptDirectParentPids, theCodeSystemVersion);
 				}
 
 				if (!theAdd && theAddedCodes.remove(theCodeSystem + "|" + theCode)) {
@@ -286,7 +288,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			}
 		} else {
 			if (theAdd && theAddedCodes.add(theCodeSystem + "|" + theCode)) {
-				theValueSetCodeAccumulator.includeConceptWithDesignations(theCodeSystem, theCode, theDisplay, null, theSourceConceptPid, theSourceConceptDirectParentPids);
+				theValueSetCodeAccumulator.includeConceptWithDesignations(theCodeSystem, theCode, theDisplay, null, theSourceConceptPid, theSourceConceptDirectParentPids, theCodeSystemVersion);
 			}
 
 			if (!theAdd && theAddedCodes.remove(theCodeSystem + "|" + theCode)) {
@@ -295,10 +297,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
-	private boolean addCodeIfNotAlreadyAdded(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, Collection<TermConceptDesignation> theDesignations, boolean theAdd, String theCodeSystem, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids) {
+	private boolean addCodeIfNotAlreadyAdded(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, Collection<TermConceptDesignation> theDesignations, boolean theAdd, String theCodeSystem, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids, String theSystemVersion) {
 		if (isNoneBlank(theCodeSystem, theCode)) {
 			if (theAdd && theAddedCodes.add(theCodeSystem + "|" + theCode)) {
-				theValueSetCodeAccumulator.includeConceptWithDesignations(theCodeSystem, theCode, theDisplay, theDesignations, theSourceConceptPid, theSourceConceptDirectParentPids);
+				theValueSetCodeAccumulator.includeConceptWithDesignations(theCodeSystem, theCode, theDisplay, theDesignations, theSourceConceptPid, theSourceConceptDirectParentPids, theSystemVersion);
 				return true;
 			}
 
@@ -311,16 +313,17 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return false;
 	}
 
-	private void addConceptsToList(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, String theSystem, List<CodeSystem.ConceptDefinitionComponent> theConcept, boolean theAdd, @Nonnull ExpansionFilter theExpansionFilter) {
-		for (CodeSystem.ConceptDefinitionComponent next : theConcept) {
-			if (isNoneBlank(theSystem, next.getCode())) {
-				if (!theExpansionFilter.hasCode() || theExpansionFilter.getCode().equals(next.getCode())) {
-					addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, theSystem, next.getCode(), next.getDisplay());
-				}
-			}
-			addConceptsToList(theValueSetCodeAccumulator, theAddedCodes, theSystem, next.getConcept(), theAdd, theExpansionFilter);
-		}
-	}
+	// FIXME: remove?
+//	private void addConceptsToList(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, String theSystem, List<CodeSystem.ConceptDefinitionComponent> theConcept, boolean theAdd, @Nonnull ExpansionFilter theExpansionFilter) {
+//		for (CodeSystem.ConceptDefinitionComponent next : theConcept) {
+//			if (isNoneBlank(theSystem, next.getCode())) {
+//				if (!theExpansionFilter.hasCode() || theExpansionFilter.getCode().equals(next.getCode())) {
+//					addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, theSystem, next.getCode(), next.getDisplay());
+//				}
+//			}
+//			addConceptsToList(theValueSetCodeAccumulator, theAddedCodes, theSystem, next.getConcept(), theAdd, theExpansionFilter);
+//		}
+//	}
 
 	private boolean addToSet(Set<TermConcept> theSetToPopulate, TermConcept theConcept) {
 		boolean retVal = theSetToPopulate.add(theConcept);
@@ -350,11 +353,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			TermValueSet existingTermValueSet = optionalExistingTermValueSetById.get();
 
 			ourLog.info("Deleting existing TermValueSet[{}] and its children...", existingTermValueSet.getId());
-			myValueSetConceptDesignationDao.deleteByTermValueSetId(existingTermValueSet.getId());
-			myValueSetConceptDao.deleteByTermValueSetId(existingTermValueSet.getId());
+			deletePreCalculatedValueSetContents(existingTermValueSet);
 			myValueSetDao.deleteById(existingTermValueSet.getId());
 			ourLog.info("Done deleting existing TermValueSet[{}] and its children.", existingTermValueSet.getId());
 		}
+	}
+
+	private void deletePreCalculatedValueSetContents(TermValueSet theValueSet) {
+		myValueSetConceptDesignationDao.deleteByTermValueSetId(theValueSet.getId());
+		myValueSetConceptDao.deleteByTermValueSetId(theValueSet.getId());
 	}
 
 	@Override
@@ -484,9 +491,20 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		/*
 		 * ValueSet is pre-expanded in database so let's use that
 		 */
-		String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "valueSetExpandedUsingPreExpansion");
+		String expansionTimestamp = toHumanReadableExpansionTimestamp(termValueSet);
+		String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "valueSetExpandedUsingPreExpansion", expansionTimestamp);
 		theAccumulator.addMessage(msg);
 		expandConcepts(theAccumulator, termValueSet, theFilter, theAdd, isOracleDialect());
+	}
+
+	@Nonnull
+	private String toHumanReadableExpansionTimestamp(TermValueSet termValueSet) {
+		String expansionTimestamp = "(unknown)";
+		if (termValueSet.getExpansionTimestamp() != null) {
+			String timeElapsed = StopWatch.formatMillis(System.currentTimeMillis() - termValueSet.getExpansionTimestamp().getTime());
+			expansionTimestamp = new InstantType(termValueSet.getExpansionTimestamp()).getValueAsString() + " (" + timeElapsed + " ago)";
+		}
+		return expansionTimestamp;
 	}
 
 	private boolean isOracleDialect() {
@@ -547,6 +565,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			String system = conceptView.getConceptSystemUrl();
 			String code = conceptView.getConceptCode();
 			String display = conceptView.getConceptDisplay();
+			String systemVersion = conceptView.getConceptSystemVersion();
 
 			//-- this is quick solution, may need to revisit
 			if (!applyFilter(display, filterDisplayValue))
@@ -554,7 +573,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 			Long conceptPid = conceptView.getConceptPid();
 			if (!pidToConcept.containsKey(conceptPid)) {
-				FhirVersionIndependentConcept concept = new FhirVersionIndependentConcept(system, code, display);
+				FhirVersionIndependentConcept concept = new FhirVersionIndependentConcept(system, code, display, systemVersion);
 				pidToConcept.put(conceptPid, concept);
 			}
 
@@ -589,6 +608,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			String system = concept.getSystem();
 			String code = concept.getCode();
 			String display = concept.getDisplay();
+			String systemVersion = concept.getSystemVersion();
 
 			if (theAdd) {
 				if (theAccumulator.getCapacityRemaining() != null) {
@@ -599,7 +619,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 				Long sourceConceptPid = pidToSourcePid.get(nextPid);
 				String sourceConceptDirectParentPids = pidToSourceDirectParentPids.get(nextPid);
-				theAccumulator.includeConceptWithDesignations(system, code, display, designations, sourceConceptPid, sourceConceptDirectParentPids);
+				theAccumulator.includeConceptWithDesignations(system, code, display, designations, sourceConceptPid, sourceConceptDirectParentPids, systemVersion);
 			} else {
 				boolean removed = theAccumulator.excludeConcept(system, code);
 				if (removed) {
@@ -794,7 +814,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				}
 
 				Consumer<FhirVersionIndependentConcept> consumer = c -> {
-					addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, system, c.getCode(), c.getDisplay());
+					addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, system, c.getCode(), c.getDisplay(), c.getSystemVersion());
 				};
 
 				try {
@@ -1109,9 +1129,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
-	private void addOrRemoveCode(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, boolean theAdd, String theSystem, String theCode, String theDisplay) {
+	private void addOrRemoveCode(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, boolean theAdd, String theSystem, String theCode, String theDisplay, String theSystemVersion) {
 		if (theAdd && theAddedCodes.add(theSystem + "|" + theCode)) {
-			theValueSetCodeAccumulator.includeConcept(theSystem, theCode, theDisplay, null, null);
+			theValueSetCodeAccumulator.includeConcept(theSystem, theCode, theDisplay, null, null, theSystemVersion);
 		}
 		if (!theAdd && theAddedCodes.remove(theSystem + "|" + theCode)) {
 			theValueSetCodeAccumulator.excludeConcept(theSystem, theCode);
@@ -1231,6 +1251,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		theBooleanClause.must(thePredicateFactory.exists().field(TermConceptPropertyBinder.CONCEPT_FIELD_PROPERTY_PREFIX + "EXTERNAL_COPYRIGHT_NOTICE"));
 	}
 
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	private void handleFilterLoincAncestor2(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
 		switch (theFilter.getOp()) {
 			case EQUAL:
@@ -1264,6 +1285,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	}
 
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	private void handleFilterLoincParentChild(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
 		switch (theFilter.getOp()) {
 			case EQUAL:
@@ -1456,7 +1478,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		Validate.isTrue(theInclude.getFilter().isEmpty(), "Can not expand ValueSet with filters - Hibernate Search is not enabled on this server.");
 		Validate.isTrue(isNotBlank(theSystem), "Can not expand ValueSet without explicit system - Hibernate Search is not enabled on this server.");
 
-
 		if (theInclude.getConcept().isEmpty()) {
 			for (TermConcept next : theVersion.getConcepts()) {
 				addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, theAdd, theSystem, theInclude.getVersion(), next.getCode(), next.getDisplay(), next.getId(), next.getParentPidsAsString());
@@ -1474,9 +1495,30 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Override
+	@Transactional
+	public void invalidatePreCalculatedExpansion(IIdType theValueSetId, RequestDetails theRequestDetails) {
+		IBaseResource valueSet = myDaoRegistry.getResourceDao("ValueSet").read(theValueSetId, theRequestDetails);
+		ValueSet canonicalValueSet = toCanonicalValueSet(valueSet);
+		Optional<TermValueSet> optionalTermValueSet = fetchValueSetEntity(canonicalValueSet);
+		if (!optionalTermValueSet.isPresent()) {
+			return;
+		}
+
+		ourLog.info("Invalidating pre-calculated expansion on ValueSet {} / {}", theValueSetId, canonicalValueSet.getUrl());
+
+		TermValueSet termValueSet = optionalTermValueSet.get();
+
+		deletePreCalculatedValueSetContents(termValueSet);
+
+		termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
+		termValueSet.setExpansionTimestamp(null);
+		myValueSetDao.save(termValueSet);
+	}
+
+
+	@Override
 	public boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet) {
-		ResourcePersistentId valueSetResourcePid = myConceptStorageSvc.getValueSetResourcePid(theValueSet.getIdElement());
-		Optional<TermValueSet> optionalTermValueSet = myValueSetDao.findByResourcePid(valueSetResourcePid.getIdAsLong());
+		Optional<TermValueSet> optionalTermValueSet = fetchValueSetEntity(theValueSet);
 
 		if (!optionalTermValueSet.isPresent()) {
 			ourLog.warn("ValueSet is not present in terminology tables. Will perform in-memory code validation. {}", getValueSetInfo(theValueSet));
@@ -1492,6 +1534,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 
 		return true;
+	}
+
+	private Optional<TermValueSet> fetchValueSetEntity(ValueSet theValueSet) {
+		ResourcePersistentId valueSetResourcePid = myConceptStorageSvc.getValueSetResourcePid(theValueSet.getIdElement());
+		Optional<TermValueSet> optionalTermValueSet = myValueSetDao.findByResourcePid(valueSetResourcePid.getIdAsLong());
+		return optionalTermValueSet;
 	}
 
 	protected IValidationSupport.CodeValidationResult validateCodeIsInPreExpandedValueSet(
@@ -1525,36 +1573,47 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			return null;
 		}
 
+		TermValueSet valueSetEntity = myValueSetDao.findByResourcePid(valueSetResourcePid.getIdAsLong()).orElseThrow(() -> new IllegalStateException());
+		Object timingDescription = toHumanReadableExpansionTimestamp(valueSetEntity);
+		String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "validationPerformedAgainstPreExpansion", timingDescription);
+
 		if (theValidationOptions.isValidateDisplay() && concepts.size() > 0) {
+			String systemVersion = null;
 			for (TermValueSetConcept concept : concepts) {
+				systemVersion = concept.getSystemVersion();
 				if (isBlank(theDisplay) || isBlank(concept.getDisplay()) || theDisplay.equals(concept.getDisplay())) {
 					return new IValidationSupport.CodeValidationResult()
 						.setCode(concept.getCode())
-						.setDisplay(concept.getDisplay());
+						.setDisplay(concept.getDisplay())
+						.setCodeSystemVersion(concept.getSystemVersion())
+						.setMessage(msg);
 				}
 			}
 
-			return createFailureCodeValidationResult(theSystem, theCode, " - Concept Display \"" + theDisplay + "\" does not match expected \"" + concepts.get(0).getDisplay() + "\"").setDisplay(concepts.get(0).getDisplay());
+			return createFailureCodeValidationResult(theSystem, theCode, systemVersion, " - Concept Display \"" + theDisplay + "\" does not match expected \"" + concepts.get(0).getDisplay() + "\". " + msg).setDisplay(concepts.get(0).getDisplay());
 		}
 
 		if (!concepts.isEmpty()) {
 			return new IValidationSupport.CodeValidationResult()
 				.setCode(concepts.get(0).getCode())
-				.setDisplay(concepts.get(0).getDisplay());
+				.setDisplay(concepts.get(0).getDisplay())
+				.setCodeSystemVersion(concepts.get(0).getSystemVersion())
+				.setMessage(msg);
 		}
 
-		return createFailureCodeValidationResult(theSystem, theCode);
+		return createFailureCodeValidationResult(theSystem, theCode, null, "Unknown code " + theSystem + "#" + theCode + ". " + msg);
 	}
 
 	private CodeValidationResult createFailureCodeValidationResult(String theSystem, String theCode) {
 		String append = "";
-		return createFailureCodeValidationResult(theSystem, theCode, append);
+		return createFailureCodeValidationResult(theSystem, theCode, null, append);
 	}
 
-	private CodeValidationResult createFailureCodeValidationResult(String theSystem, String theCode, String theAppend) {
+	private CodeValidationResult createFailureCodeValidationResult(String theSystem, String theCode, String theCodeSystemVersion, String theAppend) {
 		return new CodeValidationResult()
 			.setSeverity(IssueSeverity.ERROR)
-			.setMessage("Unknown code {" + theSystem + "}" + theCode + theAppend);
+			.setCodeSystemVersion(theCodeSystemVersion)
+			.setMessage("Unknown code " + theSystem + "#" + theCode + theAppend);
 	}
 
 	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(ResourcePersistentId theResourcePid, String theSystem, String theCode) {
@@ -1801,6 +1860,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				// We are done with this ValueSet.
 				txTemplate.execute(t -> {
 					valueSetToExpand.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANDED);
+					valueSetToExpand.setExpansionTimestamp(new Date());
 					myValueSetDao.saveAndFlush(valueSetToExpand);
 					return null;
 				});
@@ -2116,7 +2176,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					.setCode(code.getCode())
 					.setDisplay(code.getDisplay());
 			} else {
-				return createFailureCodeValidationResult(theCodeSystem, theCode, " - Concept Display \"" + code.getDisplay() + "\" does not match expected \"" + code.getDisplay() + "\"").setDisplay(code.getDisplay());
+				return createFailureCodeValidationResult(theCodeSystem, theCode, code.getSystemVersion(), " - Concept Display \"" + code.getDisplay() + "\" does not match expected \"" + code.getDisplay() + "\"").setDisplay(code.getDisplay());
 			}
 		}
 
@@ -2132,7 +2192,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			Long pid = IDao.RESOURCE_PID.get((IAnyResource) valueSet);
 			if (pid != null) {
 				if (isValueSetPreExpandedForCodeValidation(valueSet)) {
-					return validateCodeIsInPreExpandedValueSet(theValidationOptions, valueSet, theCodeSystem, theCode, null, null, null);
+					return validateCodeIsInPreExpandedValueSet(theValidationOptions, valueSet, theCodeSystem, theCode, theDisplay, null, null);
 				}
 			}
 		}
@@ -2142,7 +2202,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			retVal = new InMemoryTerminologyServerValidationSupport(myContext).validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, theDisplay, valueSet);
 		} else {
 			String append = " - Unable to locate ValueSet[" + theValueSetUrl + "]";
-			retVal = createFailureCodeValidationResult(theCodeSystem, theCode, append);
+			retVal = createFailureCodeValidationResult(theCodeSystem, theCode, null, append);
 		}
 
 		return retVal;
@@ -2407,7 +2467,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		if (isBlank(theDisplay))
 			return createFailureCodeValidationResult(theCodeSystemUrl, theCode);
 		else
-			return createFailureCodeValidationResult(theCodeSystemUrl, theCode, " - Concept Display : " + theDisplay);
+			return createFailureCodeValidationResult(theCodeSystemUrl, theCode, null, " - Concept Display : " + theDisplay);
 	}
 
 	public static class Job implements HapiJob {

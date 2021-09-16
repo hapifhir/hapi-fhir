@@ -42,7 +42,7 @@ public class ValueSetConceptAccumulatorTest {
 	@Test
 	public void testIncludeConcept() {
 		for (int i = 0; i < 1000; i++) {
-			myAccumulator.includeConcept("sys", "code", "display", null, null);
+			myAccumulator.includeConcept("sys", "code", "display", null, null, null);
 		}
 		verify(myValueSetConceptDao, times(1000)).save(any());
 	}
