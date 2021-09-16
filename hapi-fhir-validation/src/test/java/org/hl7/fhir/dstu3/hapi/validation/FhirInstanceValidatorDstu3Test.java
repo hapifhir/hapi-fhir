@@ -778,7 +778,7 @@ public class FhirInstanceValidatorDstu3Test {
 		Patient resource = loadResource("/dstu3/nl/nl-core-patient-01.json", Patient.class);
 		ValidationResult results = myVal.validateWithResult(resource);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome.toString(), containsString("The Coding provided (urn:oid:2.16.840.1.113883.2.4.4.16.34#6030) is not in the value set http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.1--20171231000000"));
+		assertThat(outcome.toString(), containsString("Could not confirm that the codes provided are in the value set http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.1--20171231000000"));
 	}
 
 	private void loadNL() throws IOException {
@@ -1181,7 +1181,7 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
 		assertEquals(
-			"The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status), and a code is required from this value set) (error message = Unknown code 'notvalidcode')",
+			"The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status), and a code is required from this value set) (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')",
 			output.getMessages().get(0).getMessage());
 	}
 

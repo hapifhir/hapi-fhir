@@ -170,7 +170,7 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		assertTrue(outcome.isOk());
 		assertEquals("28571000087109", outcome.getCode());
 		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("http://snomed.info/sct/20611000087101/version/20210331", outcome.getCodeSystemVersion());
+		assertEquals("0.17", outcome.getCodeSystemVersion());
 
 		// Validate code - good code, bad display
 		codeSystemUrl = "http://snomed.info/sct";
@@ -192,7 +192,7 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		assertTrue(outcome.isOk());
 		assertEquals("28571000087109", outcome.getCode());
 		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("http://snomed.info/sct/20611000087101/version/20210331", outcome.getCodeSystemVersion());
+		assertEquals("0.17", outcome.getCodeSystemVersion());
 
 		// Validate code - bad code
 		codeSystemUrl = "http://snomed.info/sct";
