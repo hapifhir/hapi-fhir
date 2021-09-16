@@ -22,6 +22,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -93,64 +95,55 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	public static final String BASE_LOINC_VS_URL = BASE_LOINC_URL + "/vs/";
 
 	// some ValueSets have a version specified independent of the CS version being uploaded. This one doesn't
-	public static final String VS_NO_VERSIONED_ON_UPLOAD_ID 	= "loinc-rsna-radiology-playbook";
-	public static final String VS_NO_VERSIONED_ON_UPLOAD 		= BASE_LOINC_VS_URL + VS_NO_VERSIONED_ON_UPLOAD_ID;
-	public static final String VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE 		= "17787-3";
-	public static final String VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY 	= "NM Thyroid gland Study report";
+	public static final String VS_NO_VERSIONED_ON_UPLOAD_ID = "loinc-rsna-radiology-playbook";
+	public static final String VS_NO_VERSIONED_ON_UPLOAD = BASE_LOINC_VS_URL + VS_NO_VERSIONED_ON_UPLOAD_ID;
+	public static final String VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE = "17787-3";
+	public static final String VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY = "NM Thyroid gland Study report";
 
 	// some ValueSets have a version specified independent of the CS version being uploaded. This is one of them
-	public static final String VS_VERSIONED_ON_UPLOAD_ID 	= "LL1000-0";
-	public static final String VS_VERSIONED_ON_UPLOAD 		= BASE_LOINC_VS_URL + VS_VERSIONED_ON_UPLOAD_ID;
-	public static final String VS_VERSIONED_ON_UPLOAD_FIRST_CODE 		= "LA13825-7";
-	public static final String VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY 	= "1 slice or 1 dinner roll";
+	public static final String VS_VERSIONED_ON_UPLOAD_ID = "LL1000-0";
+	public static final String VS_VERSIONED_ON_UPLOAD = BASE_LOINC_VS_URL + VS_VERSIONED_ON_UPLOAD_ID;
+	public static final String VS_VERSIONED_ON_UPLOAD_FIRST_CODE = "LA13825-7";
+	public static final String VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY = "1 slice or 1 dinner roll";
 
-	public static final String VS_ANSWER_LIST_VERSION 		= "Beta.1";
+	public static final String VS_ANSWER_LIST_VERSION = "Beta.1";
 	public static final Set<String> possibleVersions = Sets.newHashSet("2.67", "2.68", "2.69");
 
 	@Mock
-	HttpServletResponse mockServletResponse;
+	private HttpServletResponse mockServletResponse;
 
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
-	ServletRequestDetails mockRequestDetails;
+	private ServletRequestDetails mockRequestDetails;
 
-	@Autowired private EntityManager myEntityManager;
-	@Autowired private TermLoaderSvcImpl myTermLoaderSvc;
-	@Autowired private ITermReadSvc myITermReadSvc;
+	@Autowired
+	private EntityManager myEntityManager;
+
+	@Autowired
+	private TermLoaderSvcImpl myTermLoaderSvc;
+
+	@Autowired
+	private ITermReadSvc myITermReadSvc;
 
 	@Autowired
 	@Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT)
-	private IValidationSupport myJpaPersistedResourceValidationSupport;
+		private IValidationSupport myJpaPersistedResourceValidationSupport;
 
 	private ZipCollectionBuilder myFiles;
 	private ServletRequestDetails myRequestDetails = new ServletRequestDetails();
 
 	private Properties uploadProperties;
-	private IFhirResourceDao<ValueSet> dao;
+	private IFhirResourceDao<ValueSet> myValueSetIFhirResourceDao;
 
-
-
-//	@BeforeAll
-//	public static void beforeAll() throws Exception {
-//		// remove DB
-//		Files.deleteIfExists(Paths.get(
-//			"/Users/juan.marchionattosmilecdr.com/projects/hapi-fhir/hapi-fhir-jpaserver-base/testdb_r4_2.mv.db"));
-//	}
 
 	@BeforeEach
 	public void beforeEach() throws Exception {
-//		myTermLoaderSvc = TermLoaderSvcImpl.withoutProxyCheck(myTermDeferredStorageSvc, myTermCodeSystemStorageSvc);
-
-		//		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-
-
 		File file = ResourceUtils.getFile("classpath:loinc-ver/" + LOINC_UPLOAD_PROPERTIES_FILE.getCode());
 		uploadProperties = new Properties();
 		uploadProperties.load(new FileInputStream(file));
 
-		dao = (IFhirResourceDao<ValueSet>) myDaoRegistry.getResourceDao(ValueSet.class);
+		myValueSetIFhirResourceDao = myDaoRegistry.getResourceDao(ValueSet.class);
 
 		when(mockRequestDetails.getServer().getDefaultPageSize()).thenReturn(25);
-
 	}
 
 
@@ -162,9 +155,9 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 		validateValueExpand(currentVersion, theExpectedVersions);
 
-//		validateValueLookup(currentVersion, theExpectedVersions);
-//
-//		validateValidateCode(currentVersion, theExpectedVersions);
+		validateValueLookup(currentVersion, theExpectedVersions);
+
+		validateValidateCode(currentVersion, theExpectedVersions);
 	}
 
 
@@ -187,18 +180,17 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 	private void validateValidateCodeForVersion(String theVersion) {
 		IValidationSupport.CodeValidationResult resultNoVersioned = myCodeSystemDao.validateCode(null,
-			new UriType(BASE_LOINC_URL), null, new CodeType(VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE),
+			new UriType(BASE_LOINC_URL), new StringType(theVersion), new CodeType(VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE),
 			null, null, null, null);
 		assertNotNull(resultNoVersioned);
 		assertEquals(prefixWithVersion(theVersion, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), resultNoVersioned.getDisplay());
 
 		IValidationSupport.CodeValidationResult resultVersioned = myCodeSystemDao.validateCode(null,
-			new UriType(BASE_LOINC_URL), null, new CodeType(VS_VERSIONED_ON_UPLOAD_FIRST_CODE),
+			new UriType(BASE_LOINC_URL), new StringType(theVersion), new CodeType(VS_VERSIONED_ON_UPLOAD_FIRST_CODE),
 			null, null, null, null);
 		assertNotNull(resultVersioned);
 		assertEquals(prefixWithVersion(theVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), resultVersioned.getDisplay());
 	}
-
 
 
 	private void validateValueLookup(String theCurrentVersion, Collection<String> allVersions) {
@@ -236,7 +228,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 
 	private String prefixWithVersion(String version, String suffix) {
-		return (version == null ? "" : "v" + version + " ")  + suffix;
+		return (version == null ? "" : "v" + version + " ") + suffix;
 
 	}
 
@@ -245,16 +237,19 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		ValueSet vs = myValueSetDao.expandByIdentifier(VS_NO_VERSIONED_ON_UPLOAD, null);
 		assertEquals(1, vs.getExpansion().getContains().size());
 
-		// version was added before code display to validate
+		// version was added prefixing code display to validate
 		assertEquals(prefixWithVersion(currentVersion, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY),
 			vs.getExpansion().getContains().iterator().next().getDisplay());
 
+
 		// for CS ver = null, VS ver != null
-		ValueSet vs1 = myValueSetDao.expandByIdentifier(VS_VERSIONED_ON_UPLOAD + "|" + VS_ANSWER_LIST_VERSION, null);
+		ValueSet vs1 = myValueSetDao.expandByIdentifier(
+			VS_VERSIONED_ON_UPLOAD + "|" + VS_ANSWER_LIST_VERSION, null);
 		assertEquals(3, vs1.getExpansion().getContains().size());
 
 		assertEquals(prefixWithVersion(currentVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY),
 			vs1.getExpansion().getContains().iterator().next().getDisplay());
+
 
 		validateExpandedTermConcepts(currentVersion, theAllVersions);
 
@@ -264,34 +259,34 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 
 	private void validateExpandedTermConcepts(String theCurrentVersion, Collection<String> theAllVersions) {
-		@SuppressWarnings("unchecked")
 		TermConcept termConceptNoVerCsvNoVer = (TermConcept) myEntityManager.createQuery(
 			"select tc from TermConcept tc join fetch tc.myCodeSystem tcsv where tc.myCode = '" +
 				VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE + "' and tcsv.myCodeSystemVersionId is null").getSingleResult();
 		assertNotNull(termConceptNoVerCsvNoVer);
-		assertEquals(VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY, termConceptNoVerCsvNoVer.getDisplay());
+		// data should have version because it was loaded with a version
+		assertEquals(prefixWithVersion(theCurrentVersion, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), termConceptNoVerCsvNoVer.getDisplay());
 
-		@SuppressWarnings("unchecked")
 		TermConcept termConceptVerCsvNoVer = (TermConcept) myEntityManager.createQuery(
 			"select tc from TermConcept tc join fetch tc.myCodeSystem tcsv where tc.myCode = '" +
 				VS_VERSIONED_ON_UPLOAD_FIRST_CODE + "' and tcsv.myCodeSystemVersionId is null").getSingleResult();
 		assertNotNull(termConceptVerCsvNoVer);
-		assertEquals(VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY, termConceptVerCsvNoVer.getDisplay());
+		// data should have version because it was loaded with a version
+		assertEquals(prefixWithVersion(theCurrentVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), termConceptVerCsvNoVer.getDisplay());
 
 		if (theCurrentVersion != null) {
-			@SuppressWarnings("unchecked")
 			TermConcept termConceptNoVerCsvVer = (TermConcept) myEntityManager.createQuery(
 				"select tc from TermConcept tc join fetch tc.myCodeSystem tcsv where tc.myCode = '" +
-					VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE + "' and tcsv.myCodeSystemVersionId is null").getSingleResult();
+					VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE + "' and tcsv.myCodeSystemVersionId = '" + theCurrentVersion + "'").getSingleResult();
 			assertNotNull(termConceptNoVerCsvVer);
-			assertEquals(VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY, termConceptNoVerCsvVer.getDisplay());
+			// data should have version because it was loaded with a version
+			assertEquals(prefixWithVersion(theCurrentVersion, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), termConceptNoVerCsvVer.getDisplay());
 
-			@SuppressWarnings("unchecked")
 			TermConcept termConceptVerCsvVer = (TermConcept) myEntityManager.createQuery(
 				"select tc from TermConcept tc join fetch tc.myCodeSystem tcsv where tc.myCode = '" +
-					VS_VERSIONED_ON_UPLOAD_FIRST_CODE + "' and tcsv.myCodeSystemVersionId is null").getSingleResult();
+					VS_VERSIONED_ON_UPLOAD_FIRST_CODE + "' and tcsv.myCodeSystemVersionId = '" + theCurrentVersion + "'").getSingleResult();
 			assertNotNull(termConceptVerCsvVer);
-			assertEquals(VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY, termConceptVerCsvVer.getDisplay());
+			// data should have version because it was loaded with a version
+			assertEquals(prefixWithVersion(theCurrentVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), termConceptVerCsvVer.getDisplay());
 		}
 
 
@@ -300,14 +295,12 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 
 	private void validateExpandedTermConceptsForVersion(String theVersion) {
-		@SuppressWarnings("unchecked")
 		TermConcept termConceptNoVer = (TermConcept) myEntityManager.createQuery(
 			"select tc from TermConcept tc join fetch tc.myCodeSystem tcsv where tc.myCode = '" +
 				VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE + "' and tcsv.myCodeSystemVersionId = '" + theVersion + "'").getSingleResult();
 		assertNotNull(termConceptNoVer);
 		assertEquals(prefixWithVersion(theVersion, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), termConceptNoVer.getDisplay());
 
-		@SuppressWarnings("unchecked")
 		TermConcept termConceptVer = (TermConcept) myEntityManager.createQuery(
 			"select tc from TermConcept tc join fetch tc.myCodeSystem tcsv where tc.myCode = '" +
 				VS_VERSIONED_ON_UPLOAD_FIRST_CODE + "' and tcsv.myCodeSystemVersionId = '" + theVersion + "'").getSingleResult();
@@ -335,7 +328,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		assertEquals(3, vs3.getExpansion().getContains().size());
 
 		// version was added before code display to validate
-		assertEquals(prefixWithVersion( theVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY),
+		assertEquals(prefixWithVersion(theVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY),
 			vs3.getExpansion().getContains().iterator().next().getDisplay());
 	}
 
@@ -345,7 +338,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 		SearchParameterMap paramsNoUploadVer = new SearchParameterMap("url", new UriParam(VS_NO_VERSIONED_ON_UPLOAD));
 		int expectedResultQty = theExpectedIdVersions.size() + 1;  // + 1 because an extra null version (the current) is always present
-		IBundleProvider noUploadVerResult  = dao.search(paramsNoUploadVer, mockRequestDetails, mockServletResponse);
+		IBundleProvider noUploadVerResult = myValueSetIFhirResourceDao.search(paramsNoUploadVer, mockRequestDetails, mockServletResponse);
 		List<IBaseResource> noUploadVerValueSets = noUploadVerResult.getAllResources();
 		assertEquals(expectedResultQty, noUploadVerValueSets.size());
 
@@ -355,12 +348,12 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 		SearchParameterMap paramsUploadVer = new SearchParameterMap("url", new UriParam(VS_VERSIONED_ON_UPLOAD));
 		paramsUploadVer.add("version", new TokenParam(VS_ANSWER_LIST_VERSION));
-		IBundleProvider uploadVerResult  = dao.search(paramsUploadVer, mockRequestDetails, mockServletResponse);
+		IBundleProvider uploadVerResult = myValueSetIFhirResourceDao.search(paramsUploadVer, mockRequestDetails, mockServletResponse);
 		List<IBaseResource> uploadVerValueSets = uploadVerResult.getAllResources();
 		assertEquals(1, uploadVerValueSets.size());
 
 		assertEquals(VS_VERSIONED_ON_UPLOAD_ID, uploadVerValueSets.get(0).getIdElement().getIdPart());
-		assertEquals( VS_ANSWER_LIST_VERSION, ((ValueSet ) uploadVerValueSets.get(0)).getVersion());
+		assertEquals(VS_ANSWER_LIST_VERSION, ((ValueSet) uploadVerValueSets.get(0)).getVersion());
 
 		// now validate each specific uploaded version
 		theExpectedIdVersions.forEach(this::validateValueSetSearchForVersion);
@@ -378,7 +371,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		SearchParameterMap paramsUploadNoVer = new SearchParameterMap("url", new UriParam(VS_NO_VERSIONED_ON_UPLOAD));
 		paramsUploadNoVer.add("version", new TokenParam(theVersion));
 
-		IBundleProvider uploadNoVerResult  = dao.search(paramsUploadNoVer, mockRequestDetails, mockServletResponse);
+		IBundleProvider uploadNoVerResult = myValueSetIFhirResourceDao.search(paramsUploadNoVer, mockRequestDetails, mockServletResponse);
 		List<IBaseResource> uploadNoVerValueSets = uploadNoVerResult.getAllResources();
 		assertEquals(1, uploadNoVerValueSets.size());
 
@@ -392,7 +385,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		SearchParameterMap paramsUploadVer = new SearchParameterMap("url", new UriParam(VS_VERSIONED_ON_UPLOAD));
 		paramsUploadVer.add("version", new TokenParam(VS_ANSWER_LIST_VERSION + "-" + theVersion));
 
-		IBundleProvider uploadVerResult  = dao.search(paramsUploadVer, mockRequestDetails, mockServletResponse);
+		IBundleProvider uploadVerResult = myValueSetIFhirResourceDao.search(paramsUploadVer, mockRequestDetails, mockServletResponse);
 		List<IBaseResource> uploadVerValueSets = uploadVerResult.getAllResources();
 		assertEquals(1, uploadVerValueSets.size());
 
@@ -406,7 +399,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	 * Validates that the collection of unqualified IDs of each element of theValueSets matches the expected
 	 * unqualifiedIds corresponding to the uploaded versions plus one with no version
 	 *
-	 * @param theValueSets the ValueSet collection
+	 * @param theValueSets          the ValueSet collection
 	 * @param theExpectedIdVersions the collection of expected versions
 	 */
 	private void matchUnqualifiedIds(List<IBaseResource> theValueSets, Collection<String> theExpectedIdVersions) {
@@ -418,33 +411,31 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		// plus one entry for null version
 		expectedNoVersionUnqualifiedIds.add(VS_NO_VERSIONED_ON_UPLOAD_ID);
 
-		List <String> resultUnqualifiedIds = theValueSets.stream()
+		List<String> resultUnqualifiedIds = theValueSets.stream()
 			.map(r -> r.getIdElement().getIdPart())
 			.collect(Collectors.toList());
 
 		assertThat(resultUnqualifiedIds, containsInAnyOrder(resultUnqualifiedIds.toArray()));
 
-		List <String> resultVersions = theValueSets.stream()
-			.map(r -> ((ValueSet) r).getVersion())
-			.collect(Collectors.toList());
-
 		Set<String> theExpectedIdVersionsPlusNull = Sets.newHashSet(theExpectedIdVersions);
 		theExpectedIdVersionsPlusNull.add(null);
-		assertThat(theExpectedIdVersionsPlusNull, containsInAnyOrder(resultVersions.toArray()));
+		assertThat(theExpectedIdVersionsPlusNull, containsInAnyOrder(
+			theValueSets.stream().map(r -> ((ValueSet) r).getVersion()).toArray()));
+
 	}
 
 
 	/**
 	 * Validates that:
-	 *   for CodeSystem:
-	 * 	_ current CS has no version
-	 * 	_ current TCS has no version
+	 * for CodeSystem:
+	 * _ current CS has no version
+	 * _ current TCS has no version
 	 * for ValueSet:
-	 * 	_ current TVSs with upload version have upload-version with no version append
-	 * 	_ current TVSs with no upload version have null version
+	 * _ current TVSs with upload version have upload-version with no version append
+	 * _ current TVSs with no upload version have null version
 	 */
-	private void runCommonValidations(String theVersion) {
-	 	// for CodeSystem:
+	private void runCommonValidations(List<String> theAllVersions) {
+		// for CodeSystem:
 
 		// _ current CS is present and has no version
 		CodeSystem codeSystem = myCodeSystemDao.read(new IdType("loinc"));
@@ -452,8 +443,9 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		ourLog.info("CodeSystem:\n" + csString);
 
 		HashSet<String> shouldNotBePresentVersions = new HashSet<>(possibleVersions);
-		shouldNotBePresentVersions.remove(theVersion);
-		shouldNotBePresentVersions.stream().forEach(vv -> assertFalse(csString.contains(vv)));
+		theAllVersions.forEach(shouldNotBePresentVersions::remove);
+		shouldNotBePresentVersions.forEach(vv -> assertFalse(csString.contains(vv),
+			"Found version string: '" + vv + "' in CodeSystem: " + csString));
 
 		// same reading it from term service
 		CodeSystem cs = myITermReadSvc.fetchCanonicalCodeSystemFromCompleteContext(BASE_LOINC_URL);
@@ -469,6 +461,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 		// for ValueSet resource
 		ValueSet vs = (ValueSet) myJpaPersistedResourceValidationSupport.fetchValueSet(VS_NO_VERSIONED_ON_UPLOAD);
+		assertNotNull(vs);
 		assertEquals(VS_NO_VERSIONED_ON_UPLOAD, vs.getUrl());
 		assertNull(vs.getVersion());
 
@@ -489,92 +482,132 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	public void uploadCurrentNoVersion() throws Exception {
 		IIdType csId = uploadLoincCodeSystem(null, true);
 
-		runCommonValidations(null);
+		runCommonValidations(Collections.emptyList());
 
 		//	validate operation for current (no version parameter)
 		validateOperations(null, Collections.emptySet());
+
+		//	tests conditions which were failing after VS expansion (before fix for issue-2995)
+		validateTermConcepts(Lists.newArrayList((String) null));
 	}
 
 
 	@Test()
-	public void uploadCurrentWithVersion() throws Exception {
+	public void uploadWithVersion() throws Exception {
 		String ver = "2.67";
 		IIdType csId = uploadLoincCodeSystem(ver, true);
 
-		runCommonValidations(ver);
+		runCommonValidations(Collections.singletonList(ver));
 
 		//	validate operation for specific version
 		validateOperations(ver, Collections.singleton(ver));
+
+		//	tests conditions which were failing after VS expansion (before fix for issue-2995)
+		validateTermConcepts(Lists.newArrayList(ver, ver));
 	}
 
 
+
 	@Test
-	public void uploadCurrentNoVersionThenNoCurrent() throws Exception {
+	public void uploadNoVersionThenNoCurrent() throws Exception {
 		uploadLoincCodeSystem(null, true);
 
 		String ver = "2.67";
 		uploadLoincCodeSystem(ver, false);
 
-					myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-
-		runCommonValidations(ver);
+//					myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		runCommonValidations(Collections.singletonList(ver));
 
 		//	validate operation for specific version
 		validateOperations(null, Collections.singleton(ver));
+
+		//	tests conditions which were failing after VS expansion (before fix for issue-2995)
+		validateTermConcepts(Lists.newArrayList(null, ver));
 	}
 
 
 	@Test
-	public void uploadFirstCurrentWithVersionThenNoCurrent() throws Exception {
-		String firstVer = "2.67";
-		uploadLoincCodeSystem(firstVer, true);
+	public void uploadWithVersionThenNoCurrent() throws Exception {
+		String currentVer = "2.67";
+		uploadLoincCodeSystem(currentVer, true);
 
-		String secondVer = "2.68";
-		uploadLoincCodeSystem(secondVer, false);
+		String nonCurrentVer = "2.68";
+		uploadLoincCodeSystem(nonCurrentVer, false);
 
-		runCommonValidations(firstVer);
-		runCommonValidations(secondVer);
+			//		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		runCommonValidations(Lists.newArrayList(currentVer, nonCurrentVer));
 
 		//	validate operation for specific version
-		validateOperations(null, Lists.newArrayList(firstVer, secondVer));
+		validateOperations(currentVer, Lists.newArrayList(currentVer, nonCurrentVer));
+
+		//	tests conditions which were failing after VS expansion (before fix for issue-2995)
+		validateTermConcepts(Lists.newArrayList(currentVer, currentVer, nonCurrentVer));
+	}
+
+	/**
+	 * Validates TermConcepts were created in the sequence indicated by the parameters
+	 * and their displays match the expected versions
+	 */
+	private void validateTermConcepts(ArrayList<String> theExpectedVersions) {
+		@SuppressWarnings("unchecked")
+		List<TermConcept> termConceptNoVerList = (List<TermConcept>) myEntityManager.createQuery(
+			"from TermConcept where myCode = '" + VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE + "' order by myId").getResultList();
+		assertEquals(theExpectedVersions.size(), termConceptNoVerList.size());
+		for (int i = 0; i < theExpectedVersions.size(); i++) {
+			assertEquals( prefixWithVersion(theExpectedVersions.get(i), VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY),
+				termConceptNoVerList.get(i).getDisplay(), "TermCode with id: " + i + " display");
+		}
+
+		@SuppressWarnings("unchecked")
+		List<TermConcept> termConceptWithVerList = (List<TermConcept>) myEntityManager.createQuery(
+			"from TermConcept where myCode = '" + VS_VERSIONED_ON_UPLOAD_FIRST_CODE + "' order by myId").getResultList();
+		assertEquals(theExpectedVersions.size(), termConceptWithVerList.size());
+		for (int i = 0; i < theExpectedVersions.size(); i++) {
+			assertEquals( prefixWithVersion(theExpectedVersions.get(i), VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY),
+				termConceptWithVerList.get(i).getDisplay(), "TermCode with id: " + i + " display");
+		}
 	}
 
 
 	@Test
-	public void uploadFirstCurrentNoVersionThenNoCurrentThenCurrent() throws Exception {
+	public void uploadNoVersionThenNoCurrentThenCurrent() throws Exception {
 		uploadLoincCodeSystem(null, true);
 
-		String firstVer = "2.67";
-		uploadLoincCodeSystem(firstVer, false);
+		String nonCurrentVer = "2.67";
+		uploadLoincCodeSystem(nonCurrentVer, false);
 
-		String secondVer = "2.68";
-		uploadLoincCodeSystem(secondVer, true);
+		String currentVer = "2.68";
+		uploadLoincCodeSystem(currentVer, true);
 
-		runCommonValidations(firstVer);
-		runCommonValidations(secondVer);
+		runCommonValidations(Lists.newArrayList(nonCurrentVer, currentVer));
 
 		//	validate operation for specific version
-		validateOperations(secondVer, Lists.newArrayList(firstVer, secondVer));
+		validateOperations(currentVer, Lists.newArrayList(nonCurrentVer, currentVer));
+
+		//	tests conditions which were failing after VS expansion (before fix for issue-2995)
+		validateTermConcepts(Lists.newArrayList(nonCurrentVer, currentVer, currentVer));
 	}
 
 
 	@Test
-	public void uploadFirstCurrentWithVersionThenNoCurrentThenCurrent() throws Exception {
-		String firstVer = "2.67";
-		uploadLoincCodeSystem(firstVer, true);
+	public void uploadWithVersionThenNoCurrentThenCurrent() throws Exception {
+		String firstCurrentVer = "2.67";
+		uploadLoincCodeSystem(firstCurrentVer, true);
 
-		String secondVer = "2.68";
-		uploadLoincCodeSystem(secondVer, false);
+		String noCurrentVer = "2.68";
+		uploadLoincCodeSystem(noCurrentVer, false);
 
-		String thirdVer = "2.68";
-		uploadLoincCodeSystem(thirdVer, true);
+		String lastCurrentVer = "2.69";
+		uploadLoincCodeSystem(lastCurrentVer, true);
 
-		runCommonValidations(firstVer);
-		runCommonValidations(secondVer);
-		runCommonValidations(thirdVer);
+		runCommonValidations(Lists.newArrayList(firstCurrentVer, noCurrentVer, lastCurrentVer));
 
 		//	validate operation for specific version
-		validateOperations(thirdVer, Lists.newArrayList(firstVer, secondVer, thirdVer));
+		validateOperations(lastCurrentVer, Lists.newArrayList(firstCurrentVer, noCurrentVer, lastCurrentVer));
+
+		//	tests conditions which were failing after VS expansion (before fix for issue-2995)
+		validateTermConcepts(Lists.newArrayList(firstCurrentVer, noCurrentVer, lastCurrentVer, lastCurrentVer));
 	}
 
 
@@ -583,10 +616,8 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	private IIdType uploadLoincCodeSystem(String theVersion, boolean theMakeItCurrent) throws Exception {
 		myFiles = new ZipCollectionBuilder();
 
-		if (! theMakeItCurrent) {
-			myRequestDetails.getUserData().put(LOINC_CODESYSTEM_MAKE_CURRENT, false);
-			uploadProperties.put(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), "false");
-		}
+		myRequestDetails.getUserData().put(LOINC_CODESYSTEM_MAKE_CURRENT, theMakeItCurrent);
+		uploadProperties.put(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), Boolean.toString(theMakeItCurrent));
 
 		assertTrue(
 			theVersion == null || theVersion.equals("2.67") || theVersion.equals("2.68") || theVersion.equals("2.69"),
@@ -625,7 +656,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 			case "2.67": return "/loinc-ver/v267/";
 			case "2.68": return "/loinc-ver/v268/";
 			case "2.69": return "/loinc-ver/v269/";
-		};
+		}
 
 		fail("Setup failed. Unexpected version: " + theVersion);
 		return null;
@@ -658,144 +689,11 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		}
 	}
 
-	private void logAllTermValueSets() {
-		List<TermValueSet> vsList = myTermValueSetDao.findAll();
-
-		vsList.forEach(vs -> {
-			ourLog.info("ValueSet:\n" + vs);
-		});
-
-	}
-
-
 	private TermCodeSystemVersion fetchCurrentCodeSystemVersion() {
 		return (TermCodeSystemVersion) myEntityManager.createQuery(
 			"select tcsv from TermCodeSystemVersion tcsv join fetch tcsv.myCodeSystem tcs " +
 				"where tcs.myCurrentVersion = tcsv" ).getSingleResult();
 	}
-
-	private List<TermValueSet> fetchTermValueSets(String url) {
-		return myEntityManager.createQuery("from TermValueSet where url = '" + url + "'").getResultList();
-	}
-
-	private List<ValueSet> fetchValueSets(Collection<Long> ids) {
-//		ResourcePersistentId rscIds = myIdHelperService.resolveResourcePersistentIds(
-//			RequestPartitionId.allPartitions(), "ValueSet", url);
-//
-		return myEntityManager.createQuery("from ResourceTable where myResourceType = 'ValueSet'").getResultList();
-	}
-
-
-
-
-
-//	@Test
-//	public void testValidateCodeIsInPreExpandedValueSet() throws Exception {
-//		myDaoConfig.setPreExpandValueSets(true);
-//
-//		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
-//
-//		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-//		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
-//
-//		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-//		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
-//
-//		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-//
-//		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, null);
-//		assertNull(result);
-//
-//		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "BOGUS", null, null, null);
-//		assertFalse(result.isOk());
-//
-//		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "11378-7", null, null, null);
-//		assertFalse(result.isOk());
-//
-//		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", null, null, null);
-//		assertTrue(result.isOk());
-//		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
-//
-//		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
-//		assertTrue(result.isOk());
-//		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
-//
-//		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
-//		assertTrue(result.isOk());
-//		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
-//
-//		Coding coding = new Coding("http://acme.org", "11378-7", "Systolic blood pressure at First encounter");
-//		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, coding, null);
-//		assertTrue(result.isOk());
-//		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
-//
-//		CodeableConcept codeableConcept = new CodeableConcept();
-//		codeableConcept.addCoding(new Coding("BOGUS", "BOGUS", "BOGUS"));
-//		codeableConcept.addCoding(coding);
-//		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, codeableConcept);
-//		assertTrue(result.isOk());
-//		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
-//	}
-
-
-
-//	@Test
-//	public void testCreateCodeSystemTwoVersions() {
-//		CodeSystem codeSystem = new CodeSystem();
-//		codeSystem.setUrl(CS_URL);
-//		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-//		codeSystem
-//			.addConcept().setCode("A").setDisplay("Code A");
-//		codeSystem
-//			.addConcept().setCode("B").setDisplay("Code A");
-//
-//		codeSystem.setVersion("1");
-//
-//		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
-//
-//		Set<TermConcept> codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "A");
-//		assertThat(toCodes(codes), containsInAnyOrder("A"));
-//
-//		codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "B");
-//		assertThat(toCodes(codes), containsInAnyOrder("B"));
-//
-//		runInTransaction(() -> {
-//			List<TermCodeSystemVersion> termCodeSystemVersions = myTermCodeSystemVersionDao.findAll();
-//			assertEquals(termCodeSystemVersions.size(), 1);
-//			TermCodeSystemVersion termCodeSystemVersion_1 = termCodeSystemVersions.get(0);
-//			assertEquals(termCodeSystemVersion_1.getConcepts().size(), 2);
-//			Set<TermConcept> termConcepts = new HashSet<>(termCodeSystemVersion_1.getConcepts());
-//			assertThat(toCodes(termConcepts), containsInAnyOrder("A", "B"));
-//
-//			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id.getIdPartAsLong());
-//			assertEquals("1", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
-//
-//		});
-//
-//		codeSystem.setVersion("2");
-//		codeSystem
-//			.addConcept().setCode("C").setDisplay("Code C");
-//
-//		IIdType id_v2 = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
-//		codes = myTermSvc.findCodesBelow(id_v2.getIdPartAsLong(), id_v2.getVersionIdPartAsLong(), "C");
-//		assertThat(toCodes(codes), containsInAnyOrder("C"));
-//
-//		runInTransaction(() -> {
-//			List<TermCodeSystemVersion> termCodeSystemVersions_updated = myTermCodeSystemVersionDao.findAll();
-//			assertEquals(termCodeSystemVersions_updated.size(), 2);
-//			TermCodeSystemVersion termCodeSystemVersion_2 = termCodeSystemVersions_updated.get(1);
-//			assertEquals(termCodeSystemVersion_2.getConcepts().size(), 3);
-//			Set<TermConcept> termConcepts_updated = new HashSet<>(termCodeSystemVersion_2.getConcepts());
-//			assertThat(toCodes(termConcepts_updated), containsInAnyOrder("A", "B", "C"));
-//
-//			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id_v2.getIdPartAsLong());
-//			assertEquals("2", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
-//		});
-//	}
-
-
-
-
 
 
 }
