@@ -451,7 +451,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				private Collection<? extends IIdType> myInCompartmentOwners;
 				private Collection<IIdType> myAppliesToInstances;
 				private RuleImplOp myRule;
-				private List<String> myAdditionalSearchParamsForCompartmentTypes = new ArrayList<>();
+				private AdditionalCompartmentSearchParameters myAdditionalSearchParamsForCompartmentTypes = new AdditionalCompartmentSearchParameters();
 
 				/**
 				 * Constructor
@@ -492,11 +492,11 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 				@Override
 				public IAuthRuleBuilderRuleOpClassifierFinished inCompartment(String theCompartmentName, Collection<? extends IIdType> theOwners) {
-					return inCompartmentWithAdditionalSearchParams(theCompartmentName, theOwners, new ArrayList<>());
+					return inCompartmentWithAdditionalSearchParams(theCompartmentName, theOwners, new AdditionalCompartmentSearchParameters());
 				}
 
 				@Override
-				public IAuthRuleBuilderRuleOpClassifierFinished inCompartmentWithAdditionalSearchParams(String theCompartmentName, Collection<? extends IIdType> theOwners, List<String> theAdditionalTypeSearchParamNames) {
+				public IAuthRuleBuilderRuleOpClassifierFinished inCompartmentWithAdditionalSearchParams(String theCompartmentName, Collection<? extends IIdType> theOwners, AdditionalCompartmentSearchParameters theAdditionalTypeSearchParams) {
 					Validate.notBlank(theCompartmentName, "theCompartmentName must not be null");
 					Validate.notNull(theOwners, "theOwners must not be null");
 					Validate.noNullElements(theOwners, "theOwners must not contain any null elements");
@@ -505,18 +505,18 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					}
 					myInCompartmentName = theCompartmentName;
 					myInCompartmentOwners = theOwners;
-					myAdditionalSearchParamsForCompartmentTypes = theAdditionalTypeSearchParamNames;
+					myAdditionalSearchParamsForCompartmentTypes = theAdditionalTypeSearchParams;
 					myClassifierType = ClassifierTypeEnum.IN_COMPARTMENT;
 					return finished();
 				}
 
 				@Override
 				public IAuthRuleBuilderRuleOpClassifierFinished inCompartment(String theCompartmentName, IIdType theOwner) {
-					return inCompartmentWithAdditionalSearchParams(theCompartmentName, theOwner, new ArrayList<>());
+					return inCompartmentWithAdditionalSearchParams(theCompartmentName, theOwner, new AdditionalCompartmentSearchParameters());
 				}
 
 				@Override
-				public IAuthRuleBuilderRuleOpClassifierFinished inCompartmentWithAdditionalSearchParams(String theCompartmentName, IIdType theOwner, List<String> theAdditionalTypeSearchParamNames) {
+				public IAuthRuleBuilderRuleOpClassifierFinished inCompartmentWithAdditionalSearchParams(String theCompartmentName, IIdType theOwner, AdditionalCompartmentSearchParameters theAdditionalTypeSearchParamNames) {
 					Validate.notBlank(theCompartmentName, "theCompartmentName must not be null");
 					Validate.notNull(theOwner, "theOwner must not be null");
 					validateOwner(theOwner);

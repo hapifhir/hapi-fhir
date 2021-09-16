@@ -210,9 +210,10 @@ public class AuthorizationInterceptors {
 		new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				List<String> additionalCompartmentSpNames = Collections.singletonList("device:patient");
+				AdditionalCompartmentSearchParameters additionalSearchParams = new AdditionalCompartmentSearchParameters();
+				additionalSearchParams.addSearchParameters("device", "patient");
 				return new RuleBuilder()
-					.allow().read().allResources().inCompartmentWithAdditionalSearchParams("Patient", new IdType("Patient/123"), additionalCompartmentSpNames)
+					.allow().read().allResources().inCompartmentWithAdditionalSearchParams("Patient", new IdType("Patient/123"), additionalSearchParams)
 					.build();
 			}
 		};

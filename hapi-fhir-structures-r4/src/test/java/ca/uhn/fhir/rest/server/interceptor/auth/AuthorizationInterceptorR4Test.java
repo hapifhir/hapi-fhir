@@ -382,13 +382,14 @@ public class AuthorizationInterceptorR4Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				List<String> bonusPatientCompartmentSearchParams = Collections.singletonList("device:patient");
+				AdditionalCompartmentSearchParameters additionalCompartmentSearchParameters = new AdditionalCompartmentSearchParameters();
+				additionalCompartmentSearchParameters.addSearchParameters("device", "patient");
 				List<IdType> relatedIds = new ArrayList<>();
 				relatedIds.add(new IdType("Patient/123"));
 				relatedIds.add(new IdType("Patient/456"));
 				return new RuleBuilder()
 					.allow().read().allResources()
-					.inCompartmentWithAdditionalSearchParams("Patient", relatedIds, bonusPatientCompartmentSearchParams)
+					.inCompartmentWithAdditionalSearchParams("Patient", relatedIds, additionalCompartmentSearchParameters)
 					.andThen().denyAll()
 					.build();
 			}
