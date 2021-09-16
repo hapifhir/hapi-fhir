@@ -158,6 +158,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -2417,10 +2418,16 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			predicates.add(criteriaBuilder.equal(systemJoin.get("myCodeSystemUri"), theCodeSystemUrl));
 		}
 
+		// for loinc CodeSystem last version is not necessarily the current anymore, so if no version is present
+		// we need to query for the current, which is that which version is null
 		if (isNoneBlank(theCodeSystemVersion)) {
 			predicates.add(criteriaBuilder.equal(systemVersionJoin.get("myCodeSystemVersionId"), theCodeSystemVersion));
 		} else {
-			query.orderBy(criteriaBuilder.desc(root.get("myUpdated")));
+			if (theCodeSystemUrl.toLowerCase(Locale.ROOT).contains("loinc")) {
+				predicates.add(criteriaBuilder.isNull(systemVersionJoin.get("myCodeSystemVersionId")));
+			} else {
+				query.orderBy(criteriaBuilder.desc(root.get("myUpdated")));
+			}
 		}
 
 		Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
