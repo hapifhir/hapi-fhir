@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
@@ -562,9 +563,9 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		String loincCsString = loincXmlHandler.getContents();
 
 		if (isBlank(loincCsString)) {
-			throw new InvalidRequestException("Did not find loinc.xml in the ZIP distribution.");
+			ourLog.warn("Did not find loinc.xml in the ZIP distribution. Using built-in copy");
+			loincCsString = ClasspathUtil.loadResource("/ca/uhn/fhir/jpa/term/loinc/loinc.xml");
 		}
-
 		CodeSystem loincCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, loincCsString);
 		String codeSystemVersionId = theUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
 		if (codeSystemVersionId != null) {
