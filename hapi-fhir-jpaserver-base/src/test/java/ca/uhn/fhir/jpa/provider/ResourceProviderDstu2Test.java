@@ -1627,9 +1627,6 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.execute();
 
 		assertEquals(10, response.getEntry().size());
-		if (ourConnectionPoolSize > 1) {
-			assertEquals(null, response.getTotalElement().getValueAsString(), "Total should be null but was " + response.getTotalElement().getValueAsString() + " in " + sw.toString());
-		}
 		assertThat(response.getLink("next").getUrl(), not(emptyString()));
 
 		// Load page 2
