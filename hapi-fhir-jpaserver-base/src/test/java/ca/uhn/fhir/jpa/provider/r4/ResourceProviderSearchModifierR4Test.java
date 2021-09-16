@@ -7,9 +7,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -197,6 +200,293 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		assertEquals(obsList.get(1).toString(), ids.get(1));
 		assertEquals(obsList.get(4).toString(), ids.get(2));
 		assertEquals(obsList.get(5).toString(), ids.get(3));
+	}
+
+	@Test
+	public void testMultiCodeNote() {
+		String bundleString = "{\n" +
+			"    \"resourceType\": \"Bundle\",\n" +
+			"    \"id\": \"obx-bundle-106-000\",\n" +
+			"    \"type\": \"batch\",\n" +
+			"    \"entry\": [\n" +
+			"        {\n" +
+			"            \"request\": {\n" +
+			"                \"method\": \"POST\",\n" +
+			"                \"url\": \"Observation\"\n" +
+			"            },\n" +
+			"            \"resource\": {\n" +
+			"                \"resourceType\": \"Observation\",\n" +
+			"                \"status\": \"final\",\n" +
+			"                \"identifier\": [\n" +
+			"                    {\n" +
+			"                        \"system\": \"1\",\n" +
+			"                        \"value\": \"9876\"\n" +
+			"                    },\n" +
+			"                    {\n" +
+			"                        \"system\": \"sid-row\",\n" +
+			"                        \"value\": \"106-0\"\n" +
+			"                    }\n" +
+			"                ],\n" +
+			"                \"code\": {\n" +
+			"                    \"text\": \"Total Clinic Charge\",\n" +
+			"                    \"coding\": [\n" +
+			"                        {\n" +
+			"                            \"system\": \"1\",\n" +
+			"                            \"code\": \"9876\",\n" +
+			"                            \"display\": \"Total Clinic Charge\"\n" +
+			"                        },\n" +
+			"                        {\n" +
+			"                            \"system\": \"1.mc\",\n" +
+			"                            \"code\": \"m9876\",\n" +
+			"                            \"display\": \"MC Total Clinic Charge\"\n" +
+			"                        }\n" +
+			"                    ]\n" +
+			"                },\n" +
+			"                \"category\": [\n" +
+			"                    {\n" +
+			"                        \"text\": \"Physician\",\n" +
+			"                        \"coding\": [\n" +
+			"                            {\n" +
+			"                                \"code\": \"PHY\",\n" +
+			"                                \"display\": \"Physician\"\n" +
+			"                            }\n" +
+			"                        ]\n" +
+			"                    }\n" +
+			"                ],\n" +
+			"                \"effectiveDateTime\": \"2141-06-18T21:00:00.000Z\",\n" +
+			"                \"valueQuantity\": {\n" +
+			"                    \"value\": 28\n" +
+			"                },\n" +
+			"                \"meta\": {\n" +
+			"                    \"tag\": [\n" +
+			"                        {\n" +
+			"                            \"system\": \"urn:lf:fhir-tags\",\n" +
+			"                            \"code\": \"multi-codes\"\n" +
+			"                        }\n" +
+			"                    ]\n" +
+			"                }\n" +
+			"            }\n" +
+			"        },\n" +
+			"        {\n" +
+			"            \"request\": {\n" +
+			"                \"method\": \"POST\",\n" +
+			"                \"url\": \"Observation\"\n" +
+			"            },\n" +
+			"            \"resource\": {\n" +
+			"                \"resourceType\": \"Observation\",\n" +
+			"                \"status\": \"final\",\n" +
+			"                \"identifier\": [\n" +
+			"                    {\n" +
+			"                        \"system\": \"1\",\n" +
+			"                        \"value\": \"9876\"\n" +
+			"                    },\n" +
+			"                    {\n" +
+			"                        \"system\": \"sid-row\",\n" +
+			"                        \"value\": \"106-1\"\n" +
+			"                    }\n" +
+			"                ],\n" +
+			"                \"code\": {\n" +
+			"                    \"text\": \"Total Clinic Charge\",\n" +
+			"                    \"coding\": [\n" +
+			"                        {\n" +
+			"                            \"system\": \"1\",\n" +
+			"                            \"code\": \"9876\",\n" +
+			"                            \"display\": \"Total Clinic Charge\"\n" +
+			"                        },\n" +
+			"                        {\n" +
+			"                            \"system\": \"1.mc\",\n" +
+			"                            \"code\": \"m9876\",\n" +
+			"                            \"display\": \"MC Total Clinic Charge\"\n" +
+			"                        }\n" +
+			"                    ]\n" +
+			"                },\n" +
+			"                \"category\": [\n" +
+			"                    {\n" +
+			"                        \"text\": \"Physician\",\n" +
+			"                        \"coding\": [\n" +
+			"                            {\n" +
+			"                                \"code\": \"PHY\",\n" +
+			"                                \"display\": \"Physician\"\n" +
+			"                            }\n" +
+			"                        ]\n" +
+			"                    }\n" +
+			"                ],\n" +
+			"                \"effectiveDateTime\": \"2141-05-15T18:05:00.000Z\",\n" +
+			"                \"valueQuantity\": {\n" +
+			"                    \"value\": 38\n" +
+			"                },\n" +
+			"                \"meta\": {\n" +
+			"                    \"tag\": [\n" +
+			"                        {\n" +
+			"                            \"system\": \"urn:lf:fhir-tags\",\n" +
+			"                            \"code\": \"multi-codes\"\n" +
+			"                        }\n" +
+			"                    ]\n" +
+			"                }\n" +
+			"            }\n" +
+			"        },\n" +
+			"        {\n" +
+			"            \"request\": {\n" +
+			"                \"method\": \"POST\",\n" +
+			"                \"url\": \"Observation\"\n" +
+			"            },\n" +
+			"            \"resource\": {\n" +
+			"                \"resourceType\": \"Observation\",\n" +
+			"                \"status\": \"final\",\n" +
+			"                \"identifier\": [\n" +
+			"                    {\n" +
+			"                        \"system\": \"1\",\n" +
+			"                        \"value\": \"9876\"\n" +
+			"                    },\n" +
+			"                    {\n" +
+			"                        \"system\": \"sid-row\",\n" +
+			"                        \"value\": \"106-2\"\n" +
+			"                    }\n" +
+			"                ],\n" +
+			"                \"code\": {\n" +
+			"                    \"text\": \"Total Clinic Charge\",\n" +
+			"                    \"coding\": [\n" +
+			"                        {\n" +
+			"                            \"system\": \"1\",\n" +
+			"                            \"code\": \"9876\",\n" +
+			"                            \"display\": \"Total Clinic Charge\"\n" +
+			"                        },\n" +
+			"                        {\n" +
+			"                            \"system\": \"1.MC\",\n" +
+			"                            \"code\": \"M2-9876\",\n" +
+			"                            \"display\": \"MC too Total Clinic Charge\"\n" +
+			"                        }\n" +
+			"                    ]\n" +
+			"                },\n" +
+			"                \"category\": [\n" +
+			"                    {\n" +
+			"                        \"text\": \"Physician\",\n" +
+			"                        \"coding\": [\n" +
+			"                            {\n" +
+			"                                \"code\": \"PHY\",\n" +
+			"                                \"display\": \"Physician\"\n" +
+			"                            }\n" +
+			"                        ]\n" +
+			"                    }\n" +
+			"                ],\n" +
+			"                \"effectiveDateTime\": \"2141-01-16T18:05:00.000Z\",\n" +
+			"                \"valueQuantity\": {\n" +
+			"                    \"value\": 33\n" +
+			"                },\n" +
+			"                \"meta\": {\n" +
+			"                    \"tag\": [\n" +
+			"                        {\n" +
+			"                            \"system\": \"urn:lf:fhir-tags\",\n" +
+			"                            \"code\": \"multi-codes\"\n" +
+			"                        }\n" +
+			"                    ]\n" +
+			"                }\n" +
+			"            }\n" +
+			"        },\n" +
+			"        {\n" +
+			"            \"request\": {\n" +
+			"                \"method\": \"POST\",\n" +
+			"                \"url\": \"Observation\"\n" +
+			"            },\n" +
+			"            \"resource\": {\n" +
+			"                \"resourceType\": \"Observation\",\n" +
+			"                \"status\": \"final\",\n" +
+			"                \"identifier\": [\n" +
+			"                    {\n" +
+			"                        \"system\": \"1\",\n" +
+			"                        \"value\": \"12984\"\n" +
+			"                    },\n" +
+			"                    {\n" +
+			"                        \"system\": \"sid-row\",\n" +
+			"                        \"value\": \"106-3\"\n" +
+			"                    }\n" +
+			"                ],\n" +
+			"                \"code\": {\n" +
+			"                    \"text\": \"Oral temp F\",\n" +
+			"                    \"coding\": [\n" +
+			"                        {\n" +
+			"                            \"system\": \"http://loinc.org\",\n" +
+			"                            \"code\": \"8331-1\",\n" +
+			"                            \"display\": \"Oral temp F\"\n" +
+			"                        },\n" +
+			"                        {\n" +
+			"                            \"system\": \"http://loinc.org.mc\",\n" +
+			"                            \"code\": \"m8331-1\",\n" +
+			"                            \"display\": \"MC Oral temp F\"\n" +
+			"                        }\n" +
+			"                    ]\n" +
+			"                },\n" +
+			"                \"category\": [\n" +
+			"                    {\n" +
+			"                        \"text\": \"Vital Signs\",\n" +
+			"                        \"coding\": [\n" +
+			"                            {\n" +
+			"                                \"code\": \"vital-signs\",\n" +
+			"                                \"display\": \"Vital Signs\"\n" +
+			"                            }\n" +
+			"                        ]\n" +
+			"                    }\n" +
+			"                ],\n" +
+			"                \"effectiveDateTime\": \"2141-01-01T07:43:00.000Z\",\n" +
+			"                \"valueQuantity\": {\n" +
+			"                    \"value\": 98.95,\n" +
+			"                    \"system\": \"http://unitsofmeasure.org\",\n" +
+			"                    \"code\": \"[degF]\",\n" +
+			"                    \"unit\": \"F\"\n" +
+			"                },\n" +
+			"                \"referenceRange\": [\n" +
+			"                    {\n" +
+			"                        \"low\": {\n" +
+			"                            \"value\": 97.6,\n" +
+			"                            \"system\": \"http://unitsofmeasure.org\",\n" +
+			"                            \"code\": \"[degF]\",\n" +
+			"                            \"unit\": \"F\"\n" +
+			"                        },\n" +
+			"                        \"high\": {\n" +
+			"                            \"value\": 99,\n" +
+			"                            \"system\": \"http://unitsofmeasure.org\",\n" +
+			"                            \"code\": \"[degF]\",\n" +
+			"                            \"unit\": \"F\"\n" +
+			"                        },\n" +
+			"                        \"text\": \"97.6 - 99\"\n" +
+			"                    }\n" +
+			"                ],\n" +
+			"                \"interpretation\": [\n" +
+			"                    {\n" +
+			"                        \"coding\": [\n" +
+			"                            {\n" +
+			"                                \"system\": \"http://hl7.org/fhir/v2/0078\",\n" +
+			"                                \"code\": \"N\",\n" +
+			"                                \"display\": \"Normal\"\n" +
+			"                            }\n" +
+			"                        ]\n" +
+			"                    }\n" +
+			"                ],\n" +
+			"                \"meta\": {\n" +
+			"                    \"tag\": [\n" +
+			"                        {\n" +
+			"                            \"system\": \"urn:lf:fhir-tags\",\n" +
+			"                            \"code\": \"multi-codes\"\n" +
+			"                        }\n" +
+			"                    ]\n" +
+			"                }\n" +
+			"            }\n" +
+			"        }\n" +
+			"    ]\n" +
+			"}\n";
+		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, bundleString);
+		Bundle transaction = mySystemDao.transaction(new SystemRequestDetails(), bundle);
+		//When
+		Bundle execute = myClient.search().byUrl("Observation?_tag=multi-codes&_elements=code").returnBundle(Bundle.class).execute();
+		//Then
+		assertEquals(execute.getEntry().size(), 4);
+
+
+		//When
+		execute = myClient.search().byUrl("Observation?_tag=multi-codes&code:not=m9876&_elements=code").returnBundle(Bundle.class).execute();
+		//Then
+		assertEquals(execute.getEntry().size(), 2);
+
 	}
 
 
