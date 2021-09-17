@@ -106,7 +106,7 @@ public class JpaStorageServicesTest extends BaseJpaR4Test {
 			mySvc.listResources(mySrd, "Appointment", Collections.singletonList(argument), result);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown GraphQL argument \"test\". Value GraphQL argument for this type are: [_id, _language, actor, appointment_type, based_on, date, identifier, location, part_status, patient, practitioner, reason_code, reason_reference, service_category, service_type, slot, specialty, status, supporting_info]", e.getMessage());
+			assertEquals("Unknown GraphQL argument \"test\". Value GraphQL argument for this type are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, actor, appointment_type, based_on, date, identifier, location, part_status, patient, practitioner, reason_code, reason_reference, service_category, service_type, slot, specialty, status, supporting_info]", e.getMessage());
 		}
 	}
 

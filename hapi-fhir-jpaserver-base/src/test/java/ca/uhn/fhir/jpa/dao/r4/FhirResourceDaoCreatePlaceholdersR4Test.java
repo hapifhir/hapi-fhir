@@ -1,17 +1,22 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Sets;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
@@ -21,6 +26,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -48,12 +54,11 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
 		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new DaoConfig().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
 		myDaoConfig.setBundleTypesAllowedForStorage(new DaoConfig().getBundleTypesAllowedForStorage());
-
+		myModelConfig.setAutoVersionReferenceAtPaths(new ModelConfig().getAutoVersionReferenceAtPaths());
 	}
 
 	@Test
 	public void testCreateWithBadReferenceFails() {
-
 		Observation o = new Observation();
 		o.setStatus(ObservationStatus.FINAL);
 		o.getSubject().setReference("Patient/FOO");
@@ -97,27 +102,23 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		params.add(Task.SP_PART_OF, new ReferenceParam("Task/AAA"));
 		List<String> found = toUnqualifiedVersionlessIdValues(myTaskDao.search(params));
 		assertThat(found, contains(id.getValue()));
-
-
 	}
 
 	@Test
 	public void testUpdateWithBadReferenceFails() {
+		Observation o1 = new Observation();
+		o1.setStatus(ObservationStatus.FINAL);
+		IIdType id = myObservationDao.create(o1, mySrd).getId();
 
 		Observation o = new Observation();
-		o.setStatus(ObservationStatus.FINAL);
-		IIdType id = myObservationDao.create(o, mySrd).getId();
-
-		o = new Observation();
 		o.setId(id);
 		o.setStatus(ObservationStatus.FINAL);
 		o.getSubject().setReference("Patient/FOO");
-		try {
+
+		Exception ex = Assertions.assertThrows(InvalidRequestException.class, () -> {
 			myObservationDao.update(o, mySrd);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), startsWith("Resource Patient/FOO not found, specified in path: Observation.subject"));
-		}
+		});
+		assertThat(ex.getMessage(), startsWith("Resource Patient/FOO not found, specified in path: Observation.subject"));
 	}
 
 	@Test
@@ -450,8 +451,6 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		ourLog.info("\nObservation read after Patient update:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
 		assertEquals(createdObs.getSubject().getReference(), conditionalUpdatePatId.toUnqualifiedVersionless().getValueAsString());
 		assertEquals(placeholderPatId.toUnqualifiedVersionless().getValueAsString(), conditionalUpdatePatId.toUnqualifiedVersionless().getValueAsString());
-
-
 	}
 
 	@Test
@@ -540,7 +539,6 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		AuditEvent createdEvent = myAuditEventDao.read(id);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEvent));
-
 	}
 
 	@Test
@@ -560,11 +558,96 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		IIdType id = myObservationDao.create(obsToCreate, mySrd).getId();
 
 		Observation createdObs = myObservationDao.read(id);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
 		assertEquals("Patient/ABC", createdObs.getSubject().getReference());
+	}
 
+	@Test
+	public void testAutocreatePlaceholderTest() {
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+
+		Observation obs = new Observation();
+		obs.setId("Observation/DEF");
+		Reference patientRef = new Reference("Patient/RED");
+		obs.setSubject(patientRef);
+		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+		builder.addTransactionUpdateEntry(obs);
+
+		mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
+
+		// verify subresource is created
+		Patient returned = myPatientDao.read(patientRef.getReferenceElement());
+		assertNotNull(returned);
 	}
 
 
+	@Test
+	public void testAutocreatePlaceholderWithTargetExistingAlreadyTest() {
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myModelConfig.setAutoVersionReferenceAtPaths("Observation.subject");
+
+		String patientId = "Patient/RED";
+
+		// create
+		Patient patient = new Patient();
+		patient.setIdElement(new IdType(patientId));
+		myPatientDao.update(patient); // use update to use forcedid
+
+		// update
+		patient.setActive(true);
+		myPatientDao.update(patient);
+
+		// observation (with version 2)
+		Observation obs = new Observation();
+		obs.setId("Observation/DEF");
+		Reference patientRef = new Reference(patientId);
+		obs.setSubject(patientRef);
+		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+		builder.addTransactionUpdateEntry(obs);
+
+		Bundle transaction = mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
+
+		Patient returned = myPatientDao.read(patientRef.getReferenceElement());
+		assertNotNull(returned);
+		Assertions.assertTrue(returned.getActive());
+		Assertions.assertEquals(2, returned.getIdElement().getVersionIdPartAsLong());
+
+		Observation retObservation = myObservationDao.read(obs.getIdElement());
+		assertNotNull(retObservation);
+	}
+
+	/**
+	 * This test is the same as above, except it uses the serverid (instead of forcedid)
+	 */
+	@Test
+	public void testAutocreatePlaceholderWithExistingTargetWithServerAssignedIdTest() {
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myModelConfig.setAutoVersionReferenceAtPaths("Observation.subject");
+
+		// create
+		Patient patient = new Patient();
+		patient.setIdElement(new IdType("Patient"));
+		DaoMethodOutcome ret = myPatientDao.create(patient); // use create to use server id
+
+		// update - to update our version
+		patient.setActive(true);
+		myPatientDao.update(patient);
+
+		// observation (with version 2)
+		Observation obs = new Observation();
+		obs.setId("Observation/DEF");
+		Reference patientRef = new Reference("Patient/" + ret.getId().getIdPart());
+		obs.setSubject(patientRef);
+		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+		builder.addTransactionUpdateEntry(obs);
+
+		Bundle transaction = mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
+
+		Patient returned = myPatientDao.read(patientRef.getReferenceElement());
+		assertNotNull(returned);
+		Assertions.assertEquals(2, returned.getIdElement().getVersionIdPartAsLong());
+
+		Observation retObservation = myObservationDao.read(obs.getIdElement());
+		assertNotNull(retObservation);
+	}
 
 }

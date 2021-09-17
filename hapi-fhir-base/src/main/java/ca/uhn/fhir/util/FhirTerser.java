@@ -961,6 +961,7 @@ public class FhirTerser {
 				for (BaseRuntimeChildDefinition nextChild : childDef.getChildrenAndExtension()) {
 
 					List<?> values = nextChild.getAccessor().getValues(theElement);
+
 					if (values != null) {
 						for (Object nextValueObject : values) {
 							IBase nextValue;

@@ -69,7 +69,7 @@ public class PidToIBaseResourceProcessor implements ItemProcessor<List<ResourceP
 		List<IBaseResource> outgoing = new ArrayList<>();
 		sb.loadResourcesByPid(theResourcePersistentId, Collections.emptyList(), outgoing, false, null);
 
-		ourLog.trace("Loaded resources: {}", outgoing.stream().map(t->t.getIdElement().getValue()).collect(Collectors.joining(", ")));
+		ourLog.trace("Loaded resources: {}", outgoing.stream().filter(t -> t != null).map(t -> t.getIdElement().getValue()).collect(Collectors.joining(", ")));
 
 		return outgoing;
 

@@ -1207,7 +1207,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			if (thePerformIndexing || ((ResourceTable) theEntity).getVersion() == 1) {
 
 				newParams = new ResourceIndexedSearchParams();
-
 				mySearchParamWithInlineReferencesExtractor.populateFromResource(newParams, theTransactionDetails, entity, theResource, existingParams, theRequest, thePerformIndexing);
 
 				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);
@@ -1229,12 +1228,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					}
 
 					entity.setUpdated(theTransactionDetails.getTransactionDate());
-					if (theResource instanceof IResource) {
-						entity.setLanguage(((IResource) theResource).getLanguage().getValue());
-					} else {
-						entity.setLanguage(((IAnyResource) theResource).getLanguageElement().getValue());
-					}
-
 					newParams.populateResourceTableSearchParamsPresentFlags(entity);
 					entity.setIndexStatus(INDEX_STATUS_INDEXED);
 				}
