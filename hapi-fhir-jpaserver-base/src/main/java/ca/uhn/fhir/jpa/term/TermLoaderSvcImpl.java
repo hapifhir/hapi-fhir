@@ -723,7 +723,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		retVal.setPublisher("Regenstrief Institute, Inc.");
 		retVal.setDescription("A value set that includes all LOINC codes");
 		retVal.setCopyright("This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/");
-		retVal.getCompose().addInclude().setSystem(ITermLoaderSvc.LOINC_URI);
+		retVal.getCompose().addInclude().setSystem(ITermLoaderSvc.LOINC_URI).setVersion(codeSystemVersionId);
 
 		return retVal;
 	}

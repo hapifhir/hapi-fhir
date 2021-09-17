@@ -1,0 +1,5 @@
+---
+type: change
+jira: SMILE-2927
+title: "During transactions, any resources that were PUT or POSTed with a conditional URL now receive extra validation. There is now a final
+storage step which ensures that the stored resource actually matches the conditional URL."

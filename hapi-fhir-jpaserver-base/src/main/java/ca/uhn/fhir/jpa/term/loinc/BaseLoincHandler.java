@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -74,6 +75,9 @@ public abstract class BaseLoincHandler implements IZipContentsHandlerCsv {
 		if (include == null) {
 			include = theVs.getCompose().addInclude();
 			include.setSystem(theCodeSystemUrl);
+			if (StringUtils.isNotBlank(theVs.getVersion())) {
+				include.setVersion(theVs.getVersion());
+			}
 		}
 
 		boolean found = false;

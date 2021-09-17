@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.entity;
+package ca.uhn.fhir.jpa.mdm.svc;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR JPA Server - Master Data Management
  * %%
  * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
@@ -20,30 +20,20 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-public interface ITermValueSetConceptView {
-	String getConceptSystemUrl();
+import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.mdm.api.MdmLinkJson;
 
-	String getConceptCode();
+/**
+ * Contract for decoupling API dependency from the base / JPA modules.
+ */
+public interface IMdmModelConverterSvc {
 
-	String getConceptDisplay();
+	/**
+	 * Creates JSON representation of the provided MDM link
+	 *
+	 * @param theLink Link to convert
+	 * @return Returns the converted link
+	 */
+	public MdmLinkJson toJson(MdmLink theLink);
 
-	String getConceptSystemVersion();
-
-	Long getSourceConceptPid();
-
-	String getSourceConceptDirectParentPids();
-
-	Long getConceptPid();
-
-	Long getDesignationPid();
-
-	String getDesignationUseSystem();
-
-	String getDesignationUseCode();
-
-	String getDesignationUseDisplay();
-
-	String getDesignationVal();
-
-	String getDesignationLang();
 }

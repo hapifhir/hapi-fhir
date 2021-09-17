@@ -344,7 +344,7 @@ public class FhirInstanceValidatorR5Test {
 
 		ValidationResult output = myVal.validateWithResult(encoded);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(1, errors.size());
+		assertEquals(1, errors.size(), ()->errors.toString());
 		assertEquals("The value '%%%2@()()' is not a valid Base64 value", errors.get(0).getMessage());
 
 	}
@@ -364,7 +364,7 @@ public class FhirInstanceValidatorR5Test {
 
 		ValidationResult output = myVal.validateWithResult(encoded);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(0, errors.size());
+		assertEquals(0, errors.size(), ()->errors.toString());
 
 	}
 

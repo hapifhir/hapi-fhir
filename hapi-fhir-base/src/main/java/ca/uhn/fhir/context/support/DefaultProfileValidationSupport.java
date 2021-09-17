@@ -204,7 +204,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 			}
 
 			if (candidate != null && isNotBlank(version)) {
-				if (!version.equals(myCtx.newTerser().getSinglePrimitiveValueOrNull(candidate, "version"))) {
+				if (!StringUtils.equals(version, myCtx.newTerser().getSinglePrimitiveValueOrNull(candidate, "version"))) {
 					candidate = null;
 				}
 			}

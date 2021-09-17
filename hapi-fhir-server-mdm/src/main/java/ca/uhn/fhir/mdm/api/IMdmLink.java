@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.entity;
+package ca.uhn.fhir.mdm.api;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR - Master Data Management
  * %%
  * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
@@ -20,30 +20,5 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-public interface ITermValueSetConceptView {
-	String getConceptSystemUrl();
-
-	String getConceptCode();
-
-	String getConceptDisplay();
-
-	String getConceptSystemVersion();
-
-	Long getSourceConceptPid();
-
-	String getSourceConceptDirectParentPids();
-
-	Long getConceptPid();
-
-	Long getDesignationPid();
-
-	String getDesignationUseSystem();
-
-	String getDesignationUseCode();
-
-	String getDesignationUseDisplay();
-
-	String getDesignationVal();
-
-	String getDesignationLang();
+public interface IMdmLink {
 }
