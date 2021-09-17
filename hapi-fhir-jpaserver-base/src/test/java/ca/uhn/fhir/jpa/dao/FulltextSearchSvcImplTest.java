@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
-import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
-import org.hl7.fhir.instance.model.api.IBase;
+import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
+import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.jupiter.api.Test;
@@ -11,11 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -33,6 +30,8 @@ class FulltextSearchSvcImplTest {
 	@Mock
 	private ISearchParamExtractor searchParamExtractor;
 
+	SearchParamExtractorService mySearchParamExtractorService = new SearchParamExtractorService();
+
 	@Test
 	void parseSearchParamTextStuff() {
 		//Given
@@ -44,8 +43,10 @@ class FulltextSearchSvcImplTest {
 		Observation obs = new Observation();
 		obs.setCode(codeableConcept);
 
+		ResourceIndexedSearchParams indexedSearchParams = new ResourceIndexedSearchParams();
+
 		//When
-		Map<String, String> stringStringMap = mySvc.extractLuceneIndexData(FhirContext.forR4Cached(), obs).getMap();
+		Map<String, String> stringStringMap = mySvc.extractLuceneIndexData(FhirContext.forR4Cached(), obs, indexedSearchParams).getMap();
 
 		//Then
 		assertThat(stringStringMap.keySet(), hasItem(SP_NAME));

@@ -362,6 +362,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private List<ResourcePersistentId> executeLastNAgainstIndex(Integer theMaximumResults) {
 		validateLastNIsEnabled();
 
+		// wip we can satisfy resources directly if we want.
 		List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults);
 
 		return lastnResourceIds.stream()

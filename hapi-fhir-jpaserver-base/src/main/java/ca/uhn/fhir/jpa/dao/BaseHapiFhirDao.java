@@ -1234,7 +1234,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 
 				if (myFulltextSearchSvc != null && !myFulltextSearchSvc.isDisabled()) {
-					populateFullTextFields(myContext, theResource, entity);
+					populateFullTextFields(myContext, theResource, entity, newParams);
 				}
 
 			} else {
@@ -1695,7 +1695,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 	}
 
-	public void populateFullTextFields(final FhirContext theContext, final IBaseResource theResource, ResourceTable theEntity) {
+	public void populateFullTextFields(final FhirContext theContext, final IBaseResource theResource, ResourceTable theEntity, ResourceIndexedSearchParams theNewParams) {
 		if (theEntity.getDeleted() != null) {
 			theEntity.setNarrativeText(null);
 			theEntity.setContentText(null);
@@ -1703,7 +1703,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			theEntity.setNarrativeText(parseNarrativeTextIntoWords(theResource));
 			theEntity.setContentText(parseContentTextIntoWords(theContext, theResource));
 			if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-				ExtendedLuceneIndexData searchParamTexts = myFulltextSearchSvc.extractLuceneIndexData(theContext, theResource);
+				ExtendedLuceneIndexData searchParamTexts = myFulltextSearchSvc.extractLuceneIndexData(theContext, theResource, theNewParams);
 				theEntity.setSearchParamText(searchParamTexts);
 			}
 		}
