@@ -182,6 +182,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			assertThat("Search by any word", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(observationId)));
 		}
 	}
+
 	@Test
 	public void testResourceCodeTextSearch() {
 		IIdType id1,id2,id3,id4;

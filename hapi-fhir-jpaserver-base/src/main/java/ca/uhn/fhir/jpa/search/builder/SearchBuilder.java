@@ -356,6 +356,15 @@ public class SearchBuilder implements ISearchBuilder {
 			// wipmb to extend to string params.
 			.filter(param -> param instanceof TokenParam/* || param instanceof StringParam*/)
 			.anyMatch(param -> ":text".equals(param.getQueryParameterQualifier()));
+
+
+		requiresHibernateSearchAccess |= myParams.entrySet().stream()
+			//TODO GGG gotta actually just filter on param-type instead of name.
+			.filter(predicate -> predicate.getKey().equalsIgnoreCase("code"))
+			.flatMap(p -> p.getValue().stream())
+			.flatMap(Collection::stream)
+			.anyMatch(p -> p instanceof TokenParam);
+
 		return requiresHibernateSearchAccess;
 	}
 

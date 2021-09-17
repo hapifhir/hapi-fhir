@@ -35,6 +35,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
@@ -114,12 +115,32 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return retVal;
 	}
 
+	private void addTokenSearch(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, List<List<IQueryParameterType>> theTerms, String theFieldName) {
+		if (theTerms == null){
+			return;
+		}
+		for (List<? extends IQueryParameterType> nextAnd: theTerms) {
+			Set<String> terms = extractOrTokenParams(nextAnd);
+			if (terms.size() == 1) {
+				terms.stream().forEach(term -> {
+					b.must(f.match().field(theFieldName).matching(term));
+				});
+			}
+		}
+
+	}
+
+	private Set<String> extractOrTokenParams(List<? extends IQueryParameterType> nextAnd) {
+		return nextAnd.stream().map(param -> param.getValueAsQueryToken(myFhirContext)).collect(Collectors.toSet());
+	}
+
 	private void addTextSearch(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, List<List<IQueryParameterType>> theTerms, String theFieldName) {
 		if (theTerms == null) {
 			return;
 		}
 		for (List<? extends IQueryParameterType> nextAnd : theTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
+			//TODO GGG: MB, did you mean for this to say >= 1?
 			if (terms.size() == 1) {
 				String query = terms.stream()
 					.map(s->"(" + s + ")")
@@ -165,6 +186,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		SearchSession session = Search.session(myEntityManager);
 		List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
 		List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
+		List<List<IQueryParameterType>> remove = theParams.remove("code");
 
 		/*
 		 * We save an elastic document something like this.
@@ -212,6 +234,10 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					 * Handle _text parameter (resource narrative content)
 					 */
 					addTextSearch(f, b, textAndTerms, "myNarrativeText");
+					/*
+					 * Handle arbitrary token parameters
+					 */
+					addTokenSearch(f, b, remove, "sp.code.token.code-system" );
 
 					//DSTU2 doesn't support fhirpath, so fall back to old style lookup.
 					if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
