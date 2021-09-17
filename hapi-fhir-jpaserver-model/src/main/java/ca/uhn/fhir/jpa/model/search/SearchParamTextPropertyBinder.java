@@ -51,7 +51,8 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 	@Override
 	public void bind(PropertyBindingContext thePropertyBindingContext) {
 		// TODO Is it safe to use object identity of the Map to track dirty?
-		thePropertyBindingContext.dependencies().use("mySearchParamTexts");
+		// N.B. GGG I would hazard that it is not, we could potentially use Version of the resource.
+		thePropertyBindingContext.dependencies().use("mySearchParamStrings");
 
 		defineIndexingTemplate(thePropertyBindingContext);
 
@@ -81,13 +82,14 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		// but elastic will actually store all fields in the source document.
 		spfield.objectFieldTemplate("stringIndex", ObjectStructure.FLATTENED).matchingPathGlob("*.string");
 		spfield.fieldTemplate("text", textType).matchingPathGlob("*.string.text");
+		spfield.fieldTemplate("token", textType).matchingPathGlob("*.token.*").multiValued();
+
 		indexSchemaElement
 			.fieldTemplate("SearchParamText", textType)
 			.matchingPathGlob(SEARCH_PARAM_TEXT_PREFIX + "*");
 
 		// last, since the globs are matched in declaration order, and * matches even nested nodes.
-		spfield.objectFieldTemplate("spObject", ObjectStructure.FLATTENED).matchingPathGlob("*");
-
+		spfield.objectFieldTemplate("spObject", ObjectStructure.FLATTENED).matchingPathGlob("*").multiValued();
 	}
 
 	@Override

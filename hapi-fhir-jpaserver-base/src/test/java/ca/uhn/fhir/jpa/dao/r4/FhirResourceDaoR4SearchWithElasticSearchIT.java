@@ -148,6 +148,41 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	}
 
 	@Test
+	public void testResourceCodeTokenSearch() {
+		IIdType observationId;
+
+		String system = "http://loinc.org";
+		String value = "29463-7";
+		String display = "Body weight as measured by me";
+		{
+			Observation obs2 = new Observation();
+			obs2.getCode().setText("Body Weight");
+			obs2.getCode().addCoding().setCode(value).setSystem(system).setDisplay(display);
+			obs2.setStatus(Observation.ObservationStatus.FINAL);
+			obs2.setValue(new Quantity(81));
+			observationId = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+			//ourLog.info("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
+		}
+		{
+			// search just code
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam(null, value));
+			assertThat("Search by any word", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(observationId)));
+		}
+		{
+			// search just system
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam(system, null));
+			assertThat("Search by any word", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(observationId)));
+		}
+		{
+			// search code and system
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam(system, value));
+			assertThat("Search by any word", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(observationId)));
+		}
+	}
+	@Test
 	public void testResourceCodeTextSearch() {
 		IIdType id1,id2,id3,id4;
 
@@ -169,8 +204,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 			//ourLog.info("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
 		}
-
-
 		{
 			// don't look in the narrative when only searching code.
 			Observation obs3 = new Observation();

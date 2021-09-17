@@ -90,16 +90,27 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	}
 
 	public ExtendedLuceneIndexData extractLuceneIndexData(FhirContext theContext, IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
-		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData();
+		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData(myFhirContext);
 
 		// wip mb - add string params to indexing.
 		// wipmb weird - theNewParams seems to have some doubles.
 		RuntimeResourceDefinition resourceDefinition = theContext.getResourceDefinition(theResource);
 		IFhirPath iFhirPath = theContext.newFhirPath();
 
-		resourceDefinition.getSearchParams().stream()
-			.map(sp->new LuceneRuntimeSearchParam(sp, iFhirPath, mySearchParamExtractor))
-			.forEach(lsp -> lsp.extractLuceneIndexData(theResource, retVal));
+		theNewParams.myStringParams.stream()
+				.forEach(param -> {
+					retVal.addStringIndexData(param.getParamName(), param.getValueExact());
+				});
+		//
+		theNewParams.myTokenParams.stream()
+				.forEach(param -> {
+					retVal.addTokenIndexData(param.getParamName(), param.getSystem(), param.getValue());
+				});
+
+		//WIP Below is the old way we were doing this.
+//		resourceDefinition.getSearchParams().stream()
+//			.map(sp->new LuceneRuntimeSearchParam(sp, iFhirPath, mySearchParamExtractor))
+//			.forEach(lsp -> lsp.extractLuceneIndexData(theResource, retVal));
 		return retVal;
 	}
 

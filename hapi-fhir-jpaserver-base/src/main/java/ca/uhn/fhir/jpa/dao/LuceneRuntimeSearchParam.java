@@ -65,7 +65,7 @@ public class LuceneRuntimeSearchParam {
 		}
 		if (StringUtils.isNotBlank(allText)) {
 			// TODO introduce wrapper type to support more than just :text
-			retVal.addIndexData(mySearchParam.getName(), allText);
+			retVal.addStringIndexData(mySearchParam.getName(), allText);
 		}
 	}
 

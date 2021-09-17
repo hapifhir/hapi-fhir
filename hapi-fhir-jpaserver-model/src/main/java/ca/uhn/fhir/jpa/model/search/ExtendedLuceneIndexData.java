@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.model.search;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.hibernate.search.engine.backend.document.DocumentElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,29 +20,51 @@ public class ExtendedLuceneIndexData {
 
 	// wip mb add the Resource - do we already have it as json somewhere?
 	// wip mb this needs to be something bigger.
-	final private Map<String, String> mySearchParamTexts;
+	final private Map<String, String> mySearchParamStrings;
+	private Map<String, TokenParam> mySearchParamTokens;
+	private FhirContext myFhirContext;
 
-	public ExtendedLuceneIndexData() {
-		this.mySearchParamTexts = new HashMap<>();
+	public ExtendedLuceneIndexData(FhirContext theFhirContext) {
+		this.myFhirContext = theFhirContext;
+		this.mySearchParamStrings = new HashMap<>();
+		this.mySearchParamTokens= new HashMap<>();
 	}
 
 	public Map<String, String> getMap() {
-		return Collections.unmodifiableMap(mySearchParamTexts);
+		return Collections.unmodifiableMap(mySearchParamStrings);
 	}
 
 	public void writeIndexElements(DocumentElement theDocument) {
 		DocumentElement searchParamHolder = theDocument.addObject("sp");
 
 		// WIP Use RestSearchParameterTypeEnum to define templates.
-		mySearchParamTexts.forEach((key, value) -> {
+		mySearchParamStrings.forEach((key, value) -> {
 			DocumentElement spNode = searchParamHolder.addObject(key);
 			DocumentElement stringIndexNode = spNode.addObject("string");
 			stringIndexNode.addValue("text", value);
 			ourLog.trace("Adding Search Param Text: {}{} -- {}", SearchParamTextPropertyBinder.SEARCH_PARAM_TEXT_PREFIX, key, value);
 		});
+		//WIP: storing tokens can probably be done better than this.
+		mySearchParamTokens.forEach((key, value) -> {
+			DocumentElement spNode = searchParamHolder.addObject(key);
+			DocumentElement tokenIndexNode = spNode.addObject("token");
+			tokenIndexNode.addValue("code", value.getValue());
+			tokenIndexNode.addValue("system", value.getSystem());
+			//This next one returns as system|value
+			tokenIndexNode.addValue("code-system", value.getValueAsQueryToken(myFhirContext));
+			ourLog.trace("Adding Search Param Token: {}{} -- {}", SearchParamTextPropertyBinder.SEARCH_PARAM_TEXT_PREFIX, key, value);
+		});
 	}
 
-	public void addIndexData(String theSpName, String theText) {
-		mySearchParamTexts.put(theSpName, theText);
+	public void addStringIndexData(String theSpName, String theText) {
+		String value = theText;
+		if (mySearchParamStrings.containsKey(theSpName)) {
+			value = mySearchParamStrings.get(theSpName) + " " + value;
+		}
+		mySearchParamStrings.put(theSpName, value);
+	}
+
+	public void addTokenIndexData(String theSpName, String theSystem,  String theValue) {
+		mySearchParamTokens.put(theSpName, new TokenParam(theSystem, theValue));
 	}
 }
