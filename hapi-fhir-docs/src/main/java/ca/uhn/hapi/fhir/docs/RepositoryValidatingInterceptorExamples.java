@@ -121,8 +121,10 @@ public class RepositoryValidatingInterceptorExamples {
 			.forResourcesOfType("Patient")
 			.requireValidationToDeclaredProfiles()
 
-			// Configure the validator to never reject extensions
-			.allowAnyExtensions()
+			// Configure the validator to reject unknown extensions
+			// by default, all extensions are accepted and to undo this rejection
+			// call allowAnyExtensions()
+			.allowKnownExtensionsOnly()
 
 			// Configure the validator to not perform terminology validation
 			.disableTerminologyChecks()
