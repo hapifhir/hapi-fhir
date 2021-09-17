@@ -343,7 +343,7 @@ public class OpenApiInterceptor {
 		String page = extractPageName(theRequestDetails, PAGE_SYSTEM);
 		context.setVariable("PAGE", page);
 
-		populateOIDCVariables(context);
+		populateOIDCVariables(theRequestDetails, context);
 
 		String outcome = myTemplateEngine.process("index.html", context);
 
@@ -351,8 +351,8 @@ public class OpenApiInterceptor {
 		theResponse.getWriter().close();
 	}
 
-	protected void populateOIDCVariables(WebContext context) {
-		context.setVariable("OAUTH2_REDIRECT_URL_PROPERTY", "");
+	protected void populateOIDCVariables(ServletRequestDetails theRequestDetails, WebContext theContext) {
+		theContext.setVariable("OAUTH2_REDIRECT_URL_PROPERTY", "");
 	}
 
 	private String extractPageName(ServletRequestDetails theRequestDetails, String theDefault) {
