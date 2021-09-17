@@ -20,7 +20,12 @@ package ca.uhn.fhir.mdm.model;
  * #L%
  */
 
+import ca.uhn.fhir.mdm.api.IMdmLink;
+import ca.uhn.fhir.mdm.api.MdmLinkEvent;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MdmTransactionContext {
 
@@ -44,6 +49,8 @@ public class MdmTransactionContext {
 	private OperationType myRestOperation;
 
 	private String myResourceType;
+
+	private List<IMdmLink> myMdmLinkEvents = new ArrayList<>();
 
 	public TransactionLogMessages getTransactionLogMessages() {
 		return myTransactionLogMessages;
@@ -91,5 +98,18 @@ public class MdmTransactionContext {
 
 	public void setResourceType(String myResourceType) {
 		this.myResourceType = myResourceType;
+	}
+
+	public List<IMdmLink> getMdmLinks() {
+		return myMdmLinkEvents;
+	}
+
+	public MdmTransactionContext addMdmLink(IMdmLink theMdmLinkEvent) {
+		getMdmLinks().add(theMdmLinkEvent);
+		return this;
+	}
+
+	public void setMdmLinks(List<IMdmLink> theMdmLinkEvents) {
+		myMdmLinkEvents = theMdmLinkEvents;
 	}
 }

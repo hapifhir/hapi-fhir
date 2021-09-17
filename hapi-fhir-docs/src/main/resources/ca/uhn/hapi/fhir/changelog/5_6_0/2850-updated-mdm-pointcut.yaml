@@ -1,0 +1,4 @@
+---
+type: add
+issue: 2850
+title: "Updated handling of MDM_AFTER_PERSISTED_RESOURCE_CHECKED pointcut to include additional MDM related info."
