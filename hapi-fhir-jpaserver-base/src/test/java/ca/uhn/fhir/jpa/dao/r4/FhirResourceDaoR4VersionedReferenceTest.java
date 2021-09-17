@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Encounter;
@@ -467,7 +468,8 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 		Patient patient = new Patient();
 		patient.setId(IdType.newRandomUuid());
-		patient.setActive(true);
+		patient.setDeceased(new BooleanType(true));
+		patient.setActive(false);
 		builder
 			.addTransactionUpdateEntry(patient)
 			.conditional("Patient?active=false");

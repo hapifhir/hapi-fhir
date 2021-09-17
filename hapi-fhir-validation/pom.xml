@@ -261,6 +261,13 @@
             <scope>test</scope>
         </dependency>
 
+		<dependency>
+			<artifactId>commons-lang</artifactId>
+			<groupId>commons-lang</groupId>
+			<version>2.5</version>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- Dependencies for Schematron -->
 		<dependency>
 			<groupId>com.helger</groupId>
