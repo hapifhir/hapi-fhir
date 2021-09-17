@@ -132,7 +132,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	@Override
 	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystemUrlAndVersion, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		org.hl7.fhir.r5.model.ValueSet expansion;
-		String vsUrl = myCtx.newTerser().getSinglePrimitiveValueOrNull(theValueSet, "url");
+		String vsUrl = FhirContext.forCached(theValueSet.getStructureFhirVersionEnum()).newTerser().getSinglePrimitiveValueOrNull(theValueSet, "url");
 		try {
 			expansion = expandValueSetToCanonical(theValidationSupportContext, theValueSet, theCodeSystemUrlAndVersion, theCode);
 		} catch (ExpansionCouldNotBeCompletedInternallyException e) {
