@@ -53,6 +53,8 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 	private MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired
 	private IdHelperService myIdHelperService;
+	@Autowired
+	private IMdmModelConverterSvc myMdmModelConverterSvc;
 
 	@Override
 	@Transactional
@@ -69,7 +71,8 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 		validateRequestIsLegal(theGoldenResource, theSourceResource, matchResultEnum, theLinkSource);
 
 		myMdmResourceDaoSvc.upsertGoldenResource(theGoldenResource, theMdmTransactionContext.getResourceType());
-		createOrUpdateLinkEntity(theGoldenResource, theSourceResource, theMatchOutcome, theLinkSource, theMdmTransactionContext);
+		MdmLink link = createOrUpdateLinkEntity(theGoldenResource, theSourceResource, theMatchOutcome, theLinkSource, theMdmTransactionContext);
+		theMdmTransactionContext.addMdmLink(link);
 	}
 
 	private boolean goldenResourceLinkedAsNoMatch(IAnyResource theGoldenResource, IAnyResource theSourceResource) {
@@ -87,6 +90,7 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 			MdmLink mdmLink = optionalMdmLink.get();
 			log(theMdmTransactionContext, "Deleting MdmLink [" + theGoldenResource.getIdElement().toVersionless() + " -> " + theSourceResource.getIdElement().toVersionless() + "] with result: " + mdmLink.getMatchResult());
 			myMdmLinkDaoSvc.deleteLink(mdmLink);
+			theMdmTransactionContext.addMdmLink(mdmLink);
 		}
 	}
 
@@ -129,8 +133,8 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 		}
 	}
 
-	private void createOrUpdateLinkEntity(IBaseResource theGoldenResource, IBaseResource theSourceResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext) {
-		myMdmLinkDaoSvc.createOrUpdateLinkEntity(theGoldenResource, theSourceResource, theMatchOutcome, theLinkSource, theMdmTransactionContext);
+	private MdmLink createOrUpdateLinkEntity(IBaseResource theGoldenResource, IBaseResource theSourceResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext) {
+		return myMdmLinkDaoSvc.createOrUpdateLinkEntity(theGoldenResource, theSourceResource, theMatchOutcome, theLinkSource, theMdmTransactionContext);
 	}
 
 	private void log(MdmTransactionContext theMdmTransactionContext, String theMessage) {

@@ -120,6 +120,7 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IZipCo
 				.getCompose()
 				.getIncludeFirstRep()
 				.setSystem(ITermLoaderSvc.LOINC_URI)
+				.setVersion(codeSystemVersionId)
 				.addConcept()
 				.setCode(loincNumber)
 				.setDisplay(longCommonName);
