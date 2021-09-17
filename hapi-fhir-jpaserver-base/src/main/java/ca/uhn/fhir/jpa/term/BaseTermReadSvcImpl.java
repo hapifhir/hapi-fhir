@@ -313,18 +313,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return false;
 	}
 
-	// FIXME: remove?
-//	private void addConceptsToList(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, String theSystem, List<CodeSystem.ConceptDefinitionComponent> theConcept, boolean theAdd, @Nonnull ExpansionFilter theExpansionFilter) {
-//		for (CodeSystem.ConceptDefinitionComponent next : theConcept) {
-//			if (isNoneBlank(theSystem, next.getCode())) {
-//				if (!theExpansionFilter.hasCode() || theExpansionFilter.getCode().equals(next.getCode())) {
-//					addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, theSystem, next.getCode(), next.getDisplay());
-//				}
-//			}
-//			addConceptsToList(theValueSetCodeAccumulator, theAddedCodes, theSystem, next.getConcept(), theAdd, theExpansionFilter);
-//		}
-//	}
-
 	private boolean addToSet(Set<TermConcept> theSetToPopulate, TermConcept theConcept) {
 		boolean retVal = theSetToPopulate.add(theConcept);
 		if (retVal) {
@@ -826,80 +814,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				} finally {
 					ConversionContext40_50.INSTANCE.close("ValueSet");
 				}
-
-				// FIXME: remove
-//				// No CodeSystem matching the URL found in the database.
-//				CodeSystem codeSystemFromContext = fetchCanonicalCodeSystemFromCompleteContext(system);
-//				if (codeSystemFromContext == null) {
-//
-//					// This is a last ditch effort.. We don't have a CodeSystem resource for the desired CS, and we don't have
-//					// anything at all in the database that matches it. So let's try asking the validation support context
-//					// just in case there is a registered service that knows how to handle this. This can happen, for example,
-//					// if someone creates a valueset that includes UCUM codes, since we don't have a CodeSystem resource for those
-//					// but CommonCodeSystemsTerminologyService can validate individual codes.
-//					List<FhirVersionIndependentConcept> includedConcepts = null;
-//					if (theExpansionFilter.hasCode()) {
-//						includedConcepts = new ArrayList<>();
-//						includedConcepts.add(theExpansionFilter.toFhirVersionIndependentConcept());
-//					} else if (!theIncludeOrExclude.getConcept().isEmpty()) {
-//						includedConcepts = theIncludeOrExclude
-//							.getConcept()
-//							.stream()
-//							.map(t -> new FhirVersionIndependentConcept(theIncludeOrExclude.getSystem(), t.getCode()))
-//							.collect(Collectors.toList());
-//					}
-//
-//					if (includedConcepts != null) {
-//						int foundCount = 0;
-//						for (FhirVersionIndependentConcept next : includedConcepts) {
-//							String nextSystem = next.getSystem();
-//							if (nextSystem == null) {
-//								nextSystem = system;
-//							}
-//
-//							LookupCodeResult lookup = myValidationSupport.lookupCode(new ValidationSupportContext(provideValidationSupport()), nextSystem, next.getCode());
-//							if (lookup != null && lookup.isFound()) {
-//								addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, nextSystem, next.getCode(), lookup.getCodeDisplay());
-//								foundCount++;
-//							}
-//						}
-//
-//						if (foundCount == includedConcepts.size()) {
-//							return false;
-//							// ELSE, we'll continue below and throw an exception
-//						}
-//					}
-//
-//					String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionRefersToUnknownCs", system);
-//					if (provideExpansionOptions(theExpansionOptions).isFailOnMissingCodeSystem()) {
-//						throw new PreconditionFailedException(msg);
-//					} else {
-//						ourLog.warn(msg);
-//						theValueSetCodeAccumulator.addMessage(msg);
-//						return false;
-//					}
-//
-//				}
-//
-//				if (!theIncludeOrExclude.getConcept().isEmpty()) {
-//					for (ValueSet.ConceptReferenceComponent next : theIncludeOrExclude.getConcept()) {
-//						String nextCode = next.getCode();
-//						if (!theExpansionFilter.hasCode() || theExpansionFilter.getCode().equals(nextCode)) {
-//							if (isNoneBlank(system, nextCode) && !theAddedCodes.contains(system + "|" + nextCode)) {
-//
-//								CodeSystem.ConceptDefinitionComponent code = findCode(codeSystemFromContext.getConcept(), nextCode);
-//								if (code != null) {
-//									String display = code.getDisplay();
-//									addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, system, nextCode, display);
-//								}
-//
-//							}
-//						}
-//					}
-//				} else {
-//					List<CodeSystem.ConceptDefinitionComponent> concept = codeSystemFromContext.getConcept();
-//					addConceptsToList(theValueSetCodeAccumulator, theAddedCodes, system, concept, theAdd, theExpansionFilter);
-//				}
 
 				return false;
 			}
