@@ -176,8 +176,9 @@
 		</dependency>
 		<dependency>
 			<artifactId>commons-lang</artifactId>
-			<groupId>commons-lang</groupId>	
-			<version>2.5</version>			
+			<groupId>commons-lang</groupId>
+			<version>2.5</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.json-lib</groupId>

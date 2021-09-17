@@ -82,7 +82,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.orm.jpa.JpaDialect;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -111,7 +110,6 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -123,7 +121,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	public static final Integer INTEGER_0 = 0;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCoordinatorSvcImpl.class);
 	private final ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<>();
-	private final ExecutorService myExecutor;
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
@@ -162,8 +159,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	 * Constructor
 	 */
 	@Autowired
-	public SearchCoordinatorSvcImpl(ThreadPoolTaskExecutor searchCoordinatorThreadFactory) {
-		myExecutor = searchCoordinatorThreadFactory.getThreadPoolExecutor();
+	public SearchCoordinatorSvcImpl() {
+		super();
+	}
+
+	@VisibleForTesting
+	Set<String> getActiveSearchIds() {
+		return myIdToSearchTask.keySet();
 	}
 
 	@VisibleForTesting
@@ -274,7 +276,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequestDetails, resourceType, params, null);
 					SearchContinuationTask task = new SearchContinuationTask(search, resourceDao, params, resourceType, theRequestDetails, requestPartitionId);
 					myIdToSearchTask.put(search.getUuid(), task);
-					myExecutor.submit(task);
+					task.call();
 				}
 			}
 
@@ -406,7 +408,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		SearchTask task = new SearchTask(theSearch, theCallingDao, theParams, theResourceType, theRequestDetails, theRequestPartitionId);
 		myIdToSearchTask.put(theSearch.getUuid(), task);
-		myExecutor.submit(task);
+		task.call();
 
 		PersistedJpaSearchFirstPageBundleProvider retVal = myPersistedJpaBundleProviderFactory.newInstanceFirstPage(theRequestDetails, theSearch, task, theSb);
 
