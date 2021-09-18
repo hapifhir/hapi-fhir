@@ -237,6 +237,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					/*
 					 * Handle arbitrary token parameters
 					 */
+					//TODO GGG build this dynamically. Do we even need _anything_ taht isn't code-system? i feel like every token search will match code-system,
+					//and storing code AND system separately is an actual waste
 					addTokenSearch(f, b, remove, "sp.code.token.code-system" );
 
 					//DSTU2 doesn't support fhirpath, so fall back to old style lookup.
