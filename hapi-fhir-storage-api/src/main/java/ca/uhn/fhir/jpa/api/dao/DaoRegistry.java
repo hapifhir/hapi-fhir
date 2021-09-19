@@ -81,6 +81,7 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
 		myAppCtx = theApplicationContext;
 	}
+
 	public IFhirSystemDao getSystemDao() {
 		IFhirSystemDao retVal = mySystemDao;
 		if (retVal == null) {

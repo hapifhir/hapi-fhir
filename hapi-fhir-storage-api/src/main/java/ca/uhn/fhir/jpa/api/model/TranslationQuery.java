@@ -84,7 +84,7 @@ public class TranslationQuery {
 	public void setConceptMapVersion(StringType theConceptMapVersion) {
 		myConceptMapVersion = theConceptMapVersion;
 	}
-	
+
 	public boolean hasSource() {
 		return mySource != null && mySource.hasValue();
 	}

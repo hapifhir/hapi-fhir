@@ -118,7 +118,7 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-jpaserver-api</artifactId>
+			<artifactId>hapi-fhir-storage-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

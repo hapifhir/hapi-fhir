@@ -85,13 +85,13 @@ public class DaoMethodOutcome extends MethodOutcome {
 		return this;
 	}
 
+	public ResourcePersistentId getPersistentId() {
+		return myResourcePersistentId;
+	}
+
 	public DaoMethodOutcome setPersistentId(ResourcePersistentId theResourcePersistentId) {
 		myResourcePersistentId = theResourcePersistentId;
 		return this;
-	}
-
-	public ResourcePersistentId getPersistentId() {
-		return myResourcePersistentId;
 	}
 
 }

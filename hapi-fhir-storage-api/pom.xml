@@ -9,7 +9,7 @@
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
-	<artifactId>hapi-fhir-jpaserver-api</artifactId>
+	<artifactId>hapi-fhir-storage-api</artifactId>
 	<packaging>jar</packaging>
 
 	<name>HAPI FHIR JPA API</name>
@@ -56,6 +56,7 @@
 			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<!-- FIXME KHS remove jpa stuff from here -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-model</artifactId>

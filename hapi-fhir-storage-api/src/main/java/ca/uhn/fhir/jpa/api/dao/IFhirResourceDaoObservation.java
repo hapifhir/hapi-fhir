@@ -31,9 +31,10 @@ public interface IFhirResourceDaoObservation<T extends IBaseResource> extends IF
 
 	/**
 	 * Returns a BundleProvider which can be used to implement the $lastn operation.
-	 * @param paramMap Parameters supported include Observation.subject, Observation.patient, Observation.code,
-	 *                 Observation.category, and max (the maximum number of Observations to return per specified subjects/patients,
-	 *                 codes, and/or categories.
+	 *
+	 * @param paramMap           Parameters supported include Observation.subject, Observation.patient, Observation.code,
+	 *                           Observation.category, and max (the maximum number of Observations to return per specified subjects/patients,
+	 *                           codes, and/or categories.
 	 * @param theRequestDetails
 	 * @param theServletResponse
 	 * @return

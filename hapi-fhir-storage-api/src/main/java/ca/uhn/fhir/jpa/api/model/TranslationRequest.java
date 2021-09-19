@@ -1,34 +1,14 @@
 package ca.uhn.fhir.jpa.api.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
-/*
- * #%L
- * HAPI FHIR JPA API
- * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TranslationRequest {
 	private CodeableConcept myCodeableConcept;
@@ -85,6 +65,10 @@ public class TranslationRequest {
 		myReverse = theReverse;
 	}
 
+	public void setReverse(boolean theReverse) {
+		myReverse = new BooleanType(theReverse);
+	}
+
 	public boolean getReverseAsBoolean() {
 		if (hasReverse()) {
 			return myReverse.booleanValue();
@@ -101,7 +85,7 @@ public class TranslationRequest {
 		myUrl = theUrl;
 		return this;
 	}
-	
+
 	public StringType getConceptMapVersion() {
 		return myConceptMapVersion;
 	}
@@ -110,7 +94,7 @@ public class TranslationRequest {
 		myConceptMapVersion = theConceptMapVersion;
 		return this;
 	}
-	
+
 	public UriType getSource() {
 		return mySource;
 	}
@@ -154,11 +138,11 @@ public class TranslationRequest {
 			if (this.hasUrl()) {
 				translationQuery.setUrl(this.getUrl());
 			}
-			
+
 			if (this.hasConceptMapVersion()) {
 				translationQuery.setConceptMapVersion(this.getConceptMapVersion());
 			}
-			
+
 			if (this.hasSource()) {
 				translationQuery.setSource(this.getSource());
 			}
@@ -203,9 +187,5 @@ public class TranslationRequest {
 
 	public boolean hasTargetSystem() {
 		return myTargetSystem != null && myTargetSystem.hasValue();
-	}
-
-	public void setReverse(boolean theReverse) {
-		myReverse = new BooleanType(theReverse);
 	}
 }

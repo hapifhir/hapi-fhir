@@ -89,6 +89,14 @@ public class DaoConfig {
 	 * @since 5.5.0
 	 */
 	public static final TagStorageModeEnum DEFAULT_TAG_STORAGE_MODE = TagStorageModeEnum.VERSIONED;
+	public static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
+	/**
+	 * @since 5.6.0
+	 */
+	// Thread Pool size used by batch in bundle
+	public static final int DEFAULT_BUNDLE_BATCH_POOL_SIZE = 20; // 1 for single thread
+	public static final int DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE = 100; // 1 for single thread
+	public static final int DEFAULT_BUNDLE_BATCH_QUEUE_CAPACITY = 200;
 	/**
 	 * Default value for {@link #setMaximumSearchResultCountInTransaction(Integer)}
 	 *
@@ -97,7 +105,6 @@ public class DaoConfig {
 	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
 	private static final Integer DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE = null;
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
-	public static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
 	private static final int DEFAULT_REINDEX_BATCH_SIZE = 800;
 	private static final int DEFAULT_MAXIMUM_DELETE_CONFLICT_COUNT = 60;
 	/**
@@ -111,7 +118,11 @@ public class DaoConfig {
 	 * @since 4.1.0
 	 */
 	private final int myPreExpandValueSetsDefaultOffset = 0;
-
+	/**
+	 * update setter javadoc if default changes
+	 */
+	@Nonnull
+	private final Long myTranslationCachesExpireAfterWriteInMinutes = DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES;
 	/**
 	 * @since 5.5.0
 	 */
@@ -219,17 +230,10 @@ public class DaoConfig {
 	 * @since 5.2.0
 	 */
 	private boolean myUseLegacySearchBuilder = false;
-
 	/**
 	 * @since 5.5.0
 	 */
 	private boolean myReindexEnabled = true;
-
-	/**
-	 * update setter javadoc if default changes
-	 */
-	@Nonnull
-	private final Long myTranslationCachesExpireAfterWriteInMinutes = DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES;
 	/**
 	 * @since 5.4.0
 	 */
@@ -257,20 +261,10 @@ public class DaoConfig {
 	private boolean myMassIngestionMode;
 	private boolean myAccountForDateIndexNulls;
 	private boolean myTriggerSubscriptionsForNonVersioningChanges;
-
 	/**
 	 * @since 5.6.0
 	 */
 	private String myElasicSearchIndexPrefix;
-
-	/**
-	 * @since 5.6.0
-	 */
-	// Thread Pool size used by batch in bundle
-	public static final int DEFAULT_BUNDLE_BATCH_POOL_SIZE = 20; // 1 for single thread
-	public static final int DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE = 100; // 1 for single thread
-	public static final int DEFAULT_BUNDLE_BATCH_QUEUE_CAPACITY = 200;
-
 	private Integer myBundleBatchPoolSize = DEFAULT_BUNDLE_BATCH_POOL_SIZE;
 	private Integer myBundleBatchMaxPoolSize = DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE;
 
@@ -2588,8 +2582,8 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Get the batch transaction thread pool size. 
-	 * 
+	 * Get the batch transaction thread pool size.
+	 *
 	 * @since 5.6.0
 	 */
 	public Integer getBundleBatchPoolSize() {
@@ -2599,32 +2593,32 @@ public class DaoConfig {
 	/**
 	 * Set the batch transaction thread pool size. The default is @see {@link #DEFAULT_BUNDLE_BATCH_POOL_SIZE}
 	 * set pool size to 1 for single thread
-	 * 
+	 *
 	 * @since 5.6.0
 	 */
 	public void setBundleBatchPoolSize(Integer theBundleBatchPoolSize) {
 		this.myBundleBatchPoolSize = theBundleBatchPoolSize;
 	}
-	
+
 	/**
 	 * Get the batch transaction thread max pool size.
 	 * set max pool size to 1 for single thread
-	 * 
+	 *
 	 * @since 5.6.0
 	 */
 	public Integer getBundleBatchMaxPoolSize() {
 		return myBundleBatchMaxPoolSize;
 	}
-	
+
 	/**
 	 * Set the batch transaction thread pool size. The default is @see {@link #DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE}
-	 * 
+	 *
 	 * @since 5.6.0
 	 */
 	public void setBundleBatchMaxPoolSize(Integer theBundleBatchMaxPoolSize) {
 		this.myBundleBatchMaxPoolSize = theBundleBatchMaxPoolSize;
 	}
-	
+
 	public boolean canDeleteExpunge() {
 		return isAllowMultipleDelete() && isExpungeEnabled() && isDeleteExpungeEnabled();
 	}
@@ -2650,7 +2644,6 @@ public class DaoConfig {
 	}
 
 	/**
-	 *
 	 * Sets a prefix for any indexes created when interacting with elasticsearch. This will apply to fulltext search indexes
 	 * and terminology expansion indexes.
 	 *
@@ -2661,7 +2654,6 @@ public class DaoConfig {
 	}
 
 	/**
-	 *
 	 * Sets a prefix for any indexes created when interacting with elasticsearch. This will apply to fulltext search indexes
 	 * and terminology expansion indexes.
 	 *
@@ -2671,7 +2663,7 @@ public class DaoConfig {
 		myElasicSearchIndexPrefix = thePrefix;
 	}
 
-    public enum StoreMetaSourceInformationEnum {
+	public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),
 		SOURCE_URI(true, false),
 		REQUEST_ID(false, true),
