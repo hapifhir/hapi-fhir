@@ -156,6 +156,11 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpa</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>net.ttddyy</groupId>
 			<artifactId>datasource-proxy</artifactId>
 		</dependency>
@@ -330,24 +335,6 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-orm</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>xml-apis</artifactId>
-					<groupId>xml-apis</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-beans</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-jpa</artifactId>
 			<exclusions>
@@ -380,40 +367,6 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-websocket</artifactId>
-		</dependency>
-
-		<!-- Hibernate -->
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-entitymanager</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-java8</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-ehcache</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>net.sf.ehcache</groupId>
-					<artifactId>ehcache-core</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate.validator</groupId>
-			<artifactId>hibernate-validator</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>com.fasterxml</groupId>
-					<artifactId>classmate</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.jboss.logging</groupId>
-					<artifactId>jboss-logging</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>javax.el</groupId>
