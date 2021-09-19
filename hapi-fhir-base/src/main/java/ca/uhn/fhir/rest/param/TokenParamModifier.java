@@ -20,6 +20,8 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.Constants;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,7 +57,7 @@ public enum TokenParamModifier {
 	/** 
 	 * :text
 	 */
-	TEXT(":text"),
+	TEXT(Constants.PARAMQUALIFIER_TOKEN_TEXT),
 
 	/**
 	 * :of-type

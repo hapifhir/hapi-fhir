@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2424
+title: "This issue involves searching for a resource with a DATE parameter that is specified at only 
+  the YEAR level of precision. When searching at a higher level of precision, no results are matched. 
+  This issue is fixed now."

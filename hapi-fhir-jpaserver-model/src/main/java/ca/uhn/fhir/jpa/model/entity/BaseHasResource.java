@@ -34,6 +34,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 

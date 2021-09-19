@@ -94,11 +94,17 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				case STARTS_AFTER:
 				case GREATERTHAN:
 				case GREATERTHAN_OR_EQUALS:
+					if (theDateParam.getPrecision().ordinal() <= TemporalPrecisionEnum.MONTH.ordinal()) {
+						theDateParam.setValueAsString(DateUtils.getCompletedDate(theDateParam.getValueAsString()).getRight());
+					}
 					validateAndSet(theDateParam, null);
 					break;
 				case ENDS_BEFORE:
 				case LESSTHAN:
 				case LESSTHAN_OR_EQUALS:
+					if (theDateParam.getPrecision().ordinal() <= TemporalPrecisionEnum.MONTH.ordinal()) {
+						theDateParam.setValueAsString(DateUtils.getCompletedDate(theDateParam.getValueAsString()).getLeft());
+					}
 					validateAndSet(null, theDateParam);
 					break;
 				default:

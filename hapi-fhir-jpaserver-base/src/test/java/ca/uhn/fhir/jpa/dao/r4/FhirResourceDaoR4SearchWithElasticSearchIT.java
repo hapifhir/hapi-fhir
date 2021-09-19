@@ -1,45 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.stream.Collectors;
-
-import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
-import ca.uhn.fhir.jpa.search.elastic.ElasticsearchHibernatePropertiesBuilder;
-import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
-import org.hamcrest.Matchers;
-import org.hibernate.search.backend.elasticsearch.index.IndexStatus;
-import org.hibernate.search.mapper.orm.schema.management.SchemaManagementStrategyName;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Meta;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Quantity;
-import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.PlatformTransactionManager;
-
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
@@ -55,7 +17,6 @@ import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
@@ -63,8 +24,44 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Narrative;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.PlatformTransactionManager;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
@@ -148,7 +145,124 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("blood"));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
+	}
 
+	@Test
+	public void testResourceCodeTextSearch() {
+		IIdType id1,id2,id3,id4;
+
+		{
+			Observation obs1 = new Observation();
+			obs1.getCode().setText("Weight unique");
+			obs1.setStatus(Observation.ObservationStatus.FINAL);
+			obs1.setValue(new Quantity(123));
+			obs1.getNoteFirstRep().setText("obs1");
+			id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		{
+			Observation obs2 = new Observation();
+			obs2.getCode().setText("Body Weight");
+			obs2.getCode().addCoding().setCode("29463-7").setSystem("http://loinc.org").setDisplay("Body weight as measured by me");
+			obs2.setStatus(Observation.ObservationStatus.FINAL);
+			obs2.setValue(new Quantity(81));
+			id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+			//ourLog.info("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
+		}
+
+
+		{
+			// don't look in the narrative when only searching code.
+			Observation obs3 = new Observation();
+			Narrative narrative = new Narrative();
+			narrative.setDivAsString("<div>Body Weight</div>");
+			obs3.setText(narrative);
+			obs3.setStatus(Observation.ObservationStatus.FINAL);
+			obs3.setValue(new Quantity(81));
+			id3 = myObservationDao.create(obs3, mySrd).getId().toUnqualifiedVersionless();
+			ourLog.trace("id3 is never found {}", id3);
+		}
+
+		//:text should work for identifier types
+		{
+			Observation obs4 = new Observation();
+			Identifier identifier = obs4.addIdentifier();
+			CodeableConcept codeableConcept = new CodeableConcept();
+			codeableConcept.setText("Random Identifier Typetest");
+			identifier.setType(codeableConcept);
+			id4 = myObservationDao.create(obs4, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		{
+			// first word
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("Body").setModifier(TokenParamModifier.TEXT));
+			assertThat("Search by first word", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
+		}
+
+		{
+			// any word
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("weight").setModifier(TokenParamModifier.TEXT));
+			assertThat("Search by any word", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
+		}
+
+		{
+			// doesn't find internal fragment
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("ght").setModifier(TokenParamModifier.TEXT));
+			assertThat("Search doesn't match middle of words", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), Matchers.empty());
+		}
+
+		{
+			// prefix
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("Bod*").setModifier(TokenParamModifier.TEXT));
+			assertThat("Search matches start of word", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
+		}
+
+		{
+			// prefix
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("Bod").setModifier(TokenParamModifier.TEXT));
+			assertThat("Bare prefix does not match", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
+		}
+
+		{
+			// codeable.display
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("measured").setModifier(TokenParamModifier.TEXT));
+			assertThat(":text matches code.display", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
+		}
+
+		{
+			// Identifier Type
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("identifier", new TokenParam("Random").setModifier(TokenParamModifier.TEXT));
+			assertThat(":text matches identifier text", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id4)));
+		}
+
+		{
+			// multiple values means or
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("unique").setModifier(TokenParamModifier.TEXT));
+			map.get("code").get(0).add(new TokenParam("measured").setModifier(TokenParamModifier.TEXT));
+			assertThat("Multiple query values means or in :text", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1,id2)));
+		}
+
+		{
+			// space means AND
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("Body Weight").setModifier(TokenParamModifier.TEXT));
+			assertThat("Multiple terms in value means and for :text", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
+		}
+
+		{
+			// don't apply the n-gram analyzer to the query, just the text.
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("Bodum").setModifier(TokenParamModifier.TEXT));
+			assertThat("search with shared prefix does not match", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), Matchers.empty());
+		}
 	}
 
 	@Test
