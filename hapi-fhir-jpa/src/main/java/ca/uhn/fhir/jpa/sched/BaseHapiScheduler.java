@@ -27,7 +27,15 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.Validate;
-import org.quartz.*;
+import org.quartz.JobDataMap;
+import org.quartz.JobKey;
+import org.quartz.ScheduleBuilder;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SimpleScheduleBuilder;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.TriggerKey;
 import org.quartz.impl.JobDetailImpl;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
@@ -40,8 +48,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-import static org.quartz.impl.StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME;
 
 public abstract class BaseHapiScheduler implements IHapiScheduler {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseHapiScheduler.class);
@@ -96,7 +102,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 
 	protected void setProperties() {
 		addProperty("org.quartz.threadPool.threadCount", "4");
-		myProperties.setProperty(PROP_SCHED_INSTANCE_NAME, myInstanceName + "-" + nextSchedulerId());
+		myProperties.setProperty(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, myInstanceName + "-" + nextSchedulerId());
 		addProperty("org.quartz.threadPool.threadNamePrefix", getThreadPrefix());
 	}
 

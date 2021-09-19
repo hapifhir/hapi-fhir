@@ -20,8 +20,7 @@ package ca.uhn.fhir.jpa.sched;
  * #L%
  */
 
-import org.hl7.fhir.r5.model.InstantType;
-import org.hl7.fhir.utilities.DateTimeUtil;
+import org.hl7.fhir.r4.model.InstantType;
 import org.quartz.JobKey;
 import org.quartz.spi.TriggerFiredBundle;
 import org.slf4j.Logger;

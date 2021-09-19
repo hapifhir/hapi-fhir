@@ -24,7 +24,7 @@ import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.Queues;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
-import org.hl7.fhir.dstu3.model.InstantType;
+import org.hl7.fhir.r4.model.InstantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
