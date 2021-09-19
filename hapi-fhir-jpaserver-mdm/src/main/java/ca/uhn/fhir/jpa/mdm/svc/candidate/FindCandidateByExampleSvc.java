@@ -21,13 +21,13 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;

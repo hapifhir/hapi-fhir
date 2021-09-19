@@ -28,6 +28,11 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-storage-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-commons</artifactId>
 			<version>${spring_data_version}</version>

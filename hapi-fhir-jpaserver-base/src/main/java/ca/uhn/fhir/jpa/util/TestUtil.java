@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.collect.ImmutableSet;
@@ -347,16 +346,12 @@ public class TestUtil {
 		}
 	}
 
-	public static void sleepAtLeast(long theMillis) {
-		HapiTransactionService.sleepAtLeast(theMillis, true);
-	}
-
 	public static InstantType getTimestamp(IBaseResource resource) {
 		return new InstantType(new Date(resource.getMeta().getLastUpdated().getTime()));
 	}
 
 	public static void sleepOneClick() {
-		sleepAtLeast(1);
+		ca.uhn.fhir.util.TestUtil.sleepAtLeast(1);
 	}
 
 

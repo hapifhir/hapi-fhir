@@ -152,7 +152,7 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-jpaserver-batch</artifactId>
+			<artifactId>hapi-fhir-batch</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

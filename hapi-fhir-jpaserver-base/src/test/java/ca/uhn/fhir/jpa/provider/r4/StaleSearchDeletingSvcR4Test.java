@@ -26,7 +26,7 @@ import org.springframework.test.util.AopTestUtils;
 import java.util.Date;
 import java.util.UUID;
 
-import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
+import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.containsString;

@@ -2341,7 +2341,7 @@
 									<fileset dir="hapi-fhir-jpaserver-mdm/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-jpaserver-batch">
-									<fileset dir="hapi-fhir-jpaserver-batch/target/site/apidocs"/>
+									<fileset dir="hapi-fhir-batch/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-client">
 									<fileset dir="hapi-fhir-client/target/site/apidocs"/>
@@ -2781,7 +2781,7 @@
 				<module>hapi-fhir-jpaserver-searchparam</module>
 				<module>hapi-fhir-jpaserver-subscription</module>
 				<module>hapi-fhir-jaxrsserver-base</module>
-				<module>hapi-fhir-jpaserver-batch</module>
+				<module>hapi-fhir-batch</module>
 				<module>hapi-fhir-jpaserver-base</module>
 				<module>hapi-fhir-sql-migrate</module>
 				<module>hapi-fhir-jpaserver-mdm</module>
