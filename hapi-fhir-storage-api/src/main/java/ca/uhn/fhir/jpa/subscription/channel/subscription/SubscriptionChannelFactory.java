@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.svc.ISubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
@@ -31,7 +30,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import org.apache.commons.lang3.Validate;
 
-public class SubscriptionChannelFactory implements ISubscriptionChannelFactory {
+public class SubscriptionChannelFactory {
 	private final IChannelFactory myChannelFactory;
 
 	/**
