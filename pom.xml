@@ -6,7 +6,10 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>5.6.0-PRE5-SNAPSHOT</version>
+	<version>5.6.0-PRE6-SNAPSHOT</version>
+	<modules>
+		<module>hapi-fhir-storage</module>
+	</modules>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -972,7 +975,7 @@
 			<dependency>
 				<groupId>com.sun.activation</groupId>
 				<artifactId>javax.activation</artifactId>
-				<version>1.2.0</version>
+				<version>${activation_api_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.sun.activation</groupId>
@@ -1545,6 +1548,24 @@
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-core</artifactId>
 				<version>${hibernate_version}</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>xml-apis</artifactId>
+						<groupId>xml-apis</groupId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.activation</groupId>
+						<artifactId>activation</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.activation</groupId>
+						<artifactId>javax.activation-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.xml.bind</groupId>
+						<artifactId>jaxb-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
@@ -2762,7 +2783,7 @@
 				<module>hapi-fhir-jaxrsserver-base</module>
 				<module>hapi-fhir-jpaserver-batch</module>
 				<module>hapi-fhir-jpaserver-base</module>
-				<module>hapi-fhir-jpaserver-migrate</module>
+				<module>hapi-fhir-sql-migrate</module>
 				<module>hapi-fhir-jpaserver-mdm</module>
 				<module>hapi-fhir-testpage-overlay</module>
 				<module>hapi-fhir-jpaserver-uhnfhirtest</module>
