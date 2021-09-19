@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.config;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.query.criteria.LiteralHandlingMode;
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.orm.hibernate5.SpringBeanContainer;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
