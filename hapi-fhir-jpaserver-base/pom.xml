@@ -160,10 +160,6 @@
 			<artifactId>hapi-fhir-jpa</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>net.ttddyy</groupId>
-			<artifactId>datasource-proxy</artifactId>
-		</dependency>
 
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
@@ -424,10 +420,6 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-collections4</artifactId>
 		</dependency>
 
 		<dependency>

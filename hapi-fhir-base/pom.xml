@@ -117,6 +117,11 @@
 			<optional>true</optional>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+		</dependency>
+
 		<!-- @Nonnull annotation -->
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
