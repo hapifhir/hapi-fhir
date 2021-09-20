@@ -14,6 +14,9 @@
 	<packaging>jar</packaging>
 
 	<name>HAPI FHIR JPA Server - Batch Task Processor</name>
+	<description>Default implementation of batch job submitter along with constants used by the different hapi-fhir batch
+		jobs.
+	</description>
 
 	<dependencies>
 		<dependency>

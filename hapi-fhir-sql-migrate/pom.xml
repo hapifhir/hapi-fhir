@@ -12,7 +12,8 @@
 	<artifactId>hapi-fhir-sql-migrate</artifactId>
 	<packaging>jar</packaging>
 
-	<name>HAPI FHIR JPA Server - Migration</name>
+	<name>HAPI FHIR Server - SQL Migration</name>
+	<description>Tooling for migrating SQL schemas.</description>
 
 	<dependencies>
 		<dependency>

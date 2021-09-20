@@ -12,7 +12,10 @@
 	<artifactId>hapi-fhir-storage-api</artifactId>
 	<packaging>jar</packaging>
 
-	<name>HAPI FHIR JPA API</name>
+	<name>HAPI FHIR Storage api</name>
+	<description>This project provides services useful for fhir repository storage. Actual repository storage services
+		are not in this project, just the api and helper libraries.
+	</description>
 
 	<dependencies>
 		<dependency>
