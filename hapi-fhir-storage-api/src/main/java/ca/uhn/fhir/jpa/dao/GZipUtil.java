@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao;
 
 /*
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR JPA API
  * %%
  * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%

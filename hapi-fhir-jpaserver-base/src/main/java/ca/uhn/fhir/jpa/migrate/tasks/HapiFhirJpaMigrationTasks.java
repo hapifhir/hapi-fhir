@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.migrate.tasks;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server - Migration
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
