@@ -292,6 +292,33 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testRequireValidation_AdditionalOptions_Reject_UnKnown_Extensions() {
+		List<IRepositoryValidatingRule> rules = newRuleBuilder()
+			.forResourcesOfType("Observation")
+			.requireValidationToDeclaredProfiles()
+			.withBestPracticeWarningLevel("IGNORE")
+			.rejectUnknownExtensions()
+			.disableTerminologyChecks()
+			.errorOnUnknownProfiles()
+			.suppressNoBindingMessage()
+			.suppressWarningForExtensibleValueSetValidation()
+			.build();
+
+		myValInterceptor.setRules(rules);
+
+		Observation obs = new Observation();
+		obs.getCode().addCoding().setSystem("http://foo").setCode("123").setDisplay("help im a bug");
+		obs.setStatus(Observation.ObservationStatus.AMENDED);
+		try {
+			IIdType id = myObservationDao.create(obs).getId();
+			assertEquals("1", id.getVersionIdPart());
+		} catch (PreconditionFailedException e) {
+			// should not happen
+			fail(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+		}
+	}
+
+	@Test
 	public void testRequireValidation_FailNoRejectAndTag() {
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
 			.forResourcesOfType("Observation")
