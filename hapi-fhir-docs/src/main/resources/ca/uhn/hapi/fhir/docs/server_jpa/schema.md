@@ -302,6 +302,14 @@ If the server has been configured with a [Resource Server ID Strategy](/apidocs/
                 Contains the specific version (starting with 1) of the resource that this row corresponds to. 
             </td>        
         </tr>
+        <tr>
+            <td>RESOURCE_TYPE</td>
+            <td></td>
+            <td>String</td>
+            <td>
+                Contains the string specifying the type of the resource (Patient, Observation, etc).
+            </td>
+        </tr>
     </tbody>
 </table>
 
@@ -476,7 +484,7 @@ The following columns are common to **all HFJ_SPIDX_xxx tables**.
         <tr>
             <td>RES_ID</td>
             <td>FK to <a href="#HFJ_RESOURCE">HFJ_RESOURCE</a></td>
-            <td>String</td>
+            <td>Long</td>
             <td></td>
             <td>
                 Contains the PID of the resource being indexed.  

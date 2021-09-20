@@ -32,7 +32,7 @@ import java.util.Set;
  * detect resources that were modified on remote servers in our cluster.
  */
 public class ResourceVersionCache {
-	private final Map<IIdType, String> myVersionMap = new HashMap<>();
+	private final Map<IIdType, Long> myVersionMap = new HashMap<>();
 
 	public void clear() {
 		myVersionMap.clear();
@@ -43,15 +43,15 @@ public class ResourceVersionCache {
 	 * @param theVersion
 	 * @return previous value
 	 */
-	public String put(IIdType theResourceId, String theVersion) {
+	public Long put(IIdType theResourceId, Long theVersion) {
 		return myVersionMap.put(new IdDt(theResourceId).toVersionless(), theVersion);
 	}
 
-	public String getVersionForResourceId(IIdType theResourceId) {
+	public Long getVersionForResourceId(IIdType theResourceId) {
 		return myVersionMap.get(new IdDt(theResourceId));
 	}
 
-	public String removeResourceId(IIdType theResourceId) {
+	public Long removeResourceId(IIdType theResourceId) {
 		return myVersionMap.remove(new IdDt(theResourceId));
 	}
 

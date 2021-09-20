@@ -49,7 +49,7 @@ public class FhirContextDstu3Test {
 	@Test
 	public void testRuntimeSearchParamToString() {
 		String val = ourCtx.getResourceDefinition("Patient").getSearchParam("gender").toString();
-		assertEquals("RuntimeSearchParam[base=[Patient],name=gender,path=Patient.gender,id=<null>,uri=http://hl7.org/fhir/SearchParameter/patient-gender]", val);
+		assertEquals("RuntimeSearchParam[base=[Patient],name=gender,path=Patient.gender,id=<null>,uri=http://hl7.org/fhir/SearchParameter/Patient-gender]", val);
 	}
 
 	@Test

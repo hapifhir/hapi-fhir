@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2901
+jira: SMILE-3004
+title: "Processing transactions with AutoversionAtPaths set should create those resources (if AutoCreatePlaceholders is set) and use latest version as expected"

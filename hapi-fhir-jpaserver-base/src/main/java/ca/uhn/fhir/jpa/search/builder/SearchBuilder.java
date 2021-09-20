@@ -221,10 +221,14 @@ public class SearchBuilder implements ISearchBuilder {
 
 		SearchContainedModeEnum searchContainedMode = theParams.getSearchContainedMode();
 
-		// Handle _id last, since it can typically be tacked onto a different parameter
-		List<String> paramNames = myParams.keySet().stream().filter(t -> !t.equals(IAnyResource.SP_RES_ID)).collect(Collectors.toList());
+		// Handle _id and _tag last, since they can typically be tacked onto a different parameter
+		List<String> paramNames = myParams.keySet().stream().filter(t -> !t.equals(IAnyResource.SP_RES_ID))
+			.filter(t -> !t.equals(Constants.PARAM_TAG)).collect(Collectors.toList());
 		if (myParams.containsKey(IAnyResource.SP_RES_ID)) {
 			paramNames.add(IAnyResource.SP_RES_ID);
+		}
+		if (myParams.containsKey(Constants.PARAM_TAG)) {
+			paramNames.add(Constants.PARAM_TAG);
 		}
 
 		// Handle each parameter
@@ -373,7 +377,7 @@ public class SearchBuilder implements ISearchBuilder {
 		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, sqlBuilderResourceName, mySqlBuilderFactory, myDialectProvider, theCount);
 		QueryStack queryStack3 = new QueryStack(theParams, myDaoConfig, myDaoConfig.getModelConfig(), myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
 
-		if (theParams.keySet().size() > 1 || theParams.getSort() != null || theParams.keySet().contains(Constants.PARAM_HAS)) {
+		if (theParams.keySet().size() > 1 || theParams.getSort() != null || theParams.keySet().contains(Constants.PARAM_HAS) || isPotentiallyContainedReferenceParameterExistsAtRoot(theParams)) {
 			List<RuntimeSearchParam> activeComboParams = mySearchParamRegistry.getActiveComboSearchParams(myResourceName, theParams.keySet());
 			if (activeComboParams.isEmpty()) {
 				sqlBuilder.setNeedResourceTableRoot(true);
@@ -481,6 +485,13 @@ public class SearchBuilder implements ISearchBuilder {
 
 		SearchQueryExecutor executor = mySqlBuilderFactory.newSearchQueryExecutor(generatedSql, myMaxResultsToFetch);
 		return Optional.of(executor);
+	}
+
+	private boolean isPotentiallyContainedReferenceParameterExistsAtRoot(SearchParameterMap theParams) {
+		return myModelConfig.isIndexOnContainedResources() && theParams.values().stream()
+			.flatMap(Collection::stream)
+			.flatMap(Collection::stream)
+			.anyMatch(t -> t instanceof ReferenceParam);
 	}
 
 	private List<Long> normalizeIdListForLastNInClause(List<Long> lastnResourceIds) {

@@ -112,7 +112,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 
 	@Override
 	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
-		String key = "lookupCode " + theSystem + " " + theCode;
+		String key = "lookupCode " + theSystem + " " + theCode + " " + defaultIfBlank(theDisplayLanguage, "NO_LANG");
 		return loadFromCache(myLookupCodeCache, key, t -> super.lookupCode(theValidationSupportContext, theSystem, theCode, theDisplayLanguage));
 	}
 

@@ -20,15 +20,16 @@ package ca.uhn.fhir.jpa.dao.data;
  * #L%
  */
 
-import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.jpa.entity.MdmLink;
-import org.springframework.beans.factory.annotation.Value;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -70,4 +71,6 @@ public interface IMdmLinkDao extends JpaRepository<MdmLink, Long> {
 	@Query("SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid FROM MdmLink ml WHERE ml.myGoldenResourcePid = :goldenPid and ml.myMatchResult = :matchResult")
 	List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(@Param("goldenPid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
+	@Query("SELECT ml.myId FROM MdmLink ml WHERE ml.myMdmSourceType = :resourceName AND ml.myCreated <= :highThreshold ORDER BY ml.myCreated DESC")
+	List<Long> findPidByResourceNameAndThreshold(@Param("resourceName") String theResourceName, @Param("highThreshold") Date theHighThreshold, Pageable thePageable);
 }

@@ -37,6 +37,7 @@ import org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchIndexSettings
 import org.hibernate.search.mapper.orm.schema.management.SchemaManagementStrategyName;
 import org.slf4j.Logger;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Properties;
@@ -49,13 +50,13 @@ import static org.slf4j.LoggerFactory.getLogger;
  * FHIR JPA server. This class also injects a starter template into the ES cluster.
  */
 public class ElasticsearchHibernatePropertiesBuilder {
-   private static final Logger ourLog = getLogger(ElasticsearchHibernatePropertiesBuilder.class);
+	private static final Logger ourLog = getLogger(ElasticsearchHibernatePropertiesBuilder.class);
 
 
-	private IndexStatus myRequiredIndexStatus = IndexStatus.YELLOW.YELLOW;
+	private IndexStatus myRequiredIndexStatus = IndexStatus.YELLOW;
 	private SchemaManagementStrategyName myIndexSchemaManagementStrategy = SchemaManagementStrategyName.CREATE;
 
-	private String myRestUrl;
+	private String myHosts;
 	private String myUsername;
 	private String myPassword;
 	private long myIndexManagementWaitTimeoutMillis = 10000L;
@@ -77,11 +78,8 @@ public class ElasticsearchHibernatePropertiesBuilder {
 
 		// the below properties are used for ElasticSearch integration
 		theProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "elasticsearch");
-
-
 		theProperties.put(BackendSettings.backendKey(ElasticsearchIndexSettings.ANALYSIS_CONFIGURER), HapiElasticsearchAnalysisConfigurer.class.getName());
-
-		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.HOSTS), myRestUrl);
+		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.HOSTS), myHosts);
 		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.PROTOCOL), myProtocol);
 
 		if (StringUtils.isNotBlank(myUsername)) {
@@ -99,8 +97,10 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		theProperties.put(HibernateOrmMapperSettings.AUTOMATIC_INDEXING_SYNCHRONIZATION_STRATEGY, myDebugSyncStrategy);
 		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.LOG_JSON_PRETTY_PRINTING), Boolean.toString(myDebugPrettyPrintJsonLog));
 
-		injectStartupTemplate(myProtocol, myRestUrl, myUsername, myPassword);
+		//This tells elasticsearch to use our custom index naming strategy.
+		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.LAYOUT_STRATEGY), IndexNamePrefixLayoutStrategy.class.getName());
 
+		injectStartupTemplate(myProtocol, myHosts, myUsername, myPassword);
 	}
 
 	public ElasticsearchHibernatePropertiesBuilder setRequiredIndexStatus(IndexStatus theRequiredIndexStatus) {
@@ -108,11 +108,8 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		return this;
 	}
 
-	public ElasticsearchHibernatePropertiesBuilder setRestUrl(String theRestUrl) {
-		if (theRestUrl.contains("://")) {
-			throw new ConfigurationException("Elasticsearch URL cannot include a protocol, that is a separate property. Remove http:// or https:// from this URL.");
-		}
-		myRestUrl = theRestUrl;
+	public ElasticsearchHibernatePropertiesBuilder setHosts(String hosts) {
+		myHosts = hosts;
 		return this;
 	}
 
@@ -147,18 +144,13 @@ public class ElasticsearchHibernatePropertiesBuilder {
 	 * TODO GGG HS: In HS6.1, we should have a native way of performing index settings manipulation at bootstrap time, so this should
 	 * eventually be removed in favour of whatever solution they come up with.
 	 */
-	void injectStartupTemplate(String theProtocol, String theHostAndPort, String theUsername, String thePassword) {
+	void injectStartupTemplate(String theProtocol, String theHosts, @Nullable String theUsername, @Nullable String thePassword) {
 		PutIndexTemplateRequest ngramTemplate = new PutIndexTemplateRequest("ngram-template")
-			.patterns(Arrays.asList("resourcetable-*", "termconcept-*"))
+			.patterns(Arrays.asList("*resourcetable-*", "*termconcept-*"))
 			.settings(Settings.builder().put("index.max_ngram_diff", 50));
 
-		int colonIndex = theHostAndPort.indexOf(":");
-		String host = theHostAndPort.substring(0, colonIndex);
-		Integer port = Integer.valueOf(theHostAndPort.substring(colonIndex + 1));
-		String qualifiedHost = theProtocol + "://" + host;
-
 		try {
-			RestHighLevelClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(qualifiedHost, port, theUsername, thePassword);
+			RestHighLevelClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(theProtocol, theHosts, theUsername, thePassword);
 			ourLog.info("Adding starter template for large ngram diffs");
 			AcknowledgedResponse acknowledgedResponse = elasticsearchHighLevelRestClient.indices().putTemplate(ngramTemplate, RequestOptions.DEFAULT);
 			assert acknowledgedResponse.isAcknowledged();

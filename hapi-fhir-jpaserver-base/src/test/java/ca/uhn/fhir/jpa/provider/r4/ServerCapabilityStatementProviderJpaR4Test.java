@@ -5,6 +5,10 @@ import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.SearchParameter;
@@ -17,8 +21,10 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
@@ -26,10 +32,41 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProviderR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ServerCapabilityStatementProviderJpaR4Test.class);
+
+	@Test
+	public void testBuiltInSearchParameters() {
+		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
+		CapabilityStatement.CapabilityStatementRestResourceComponent resource = cs.getRest().get(0).getResource().get(0);
+		List<String> definitions = resource.getSearchParam()
+			.stream()
+			.filter(t -> isNotBlank(t.getDefinition()))
+			.map(t->t.getDefinition())
+			.sorted()
+			.collect(Collectors.toList());
+		assertThat(definitions.toString(), definitions, Matchers.contains(
+			"http://hl7.org/fhir/SearchParameter/Account-identifier",
+			"http://hl7.org/fhir/SearchParameter/Account-name",
+			"http://hl7.org/fhir/SearchParameter/Account-owner",
+			"http://hl7.org/fhir/SearchParameter/Account-patient",
+			"http://hl7.org/fhir/SearchParameter/Account-period",
+			"http://hl7.org/fhir/SearchParameter/Account-status",
+			"http://hl7.org/fhir/SearchParameter/Account-subject",
+			"http://hl7.org/fhir/SearchParameter/Account-type",
+			"http://hl7.org/fhir/SearchParameter/DomainResource-text",
+			"http://hl7.org/fhir/SearchParameter/Resource-content",
+			"http://hl7.org/fhir/SearchParameter/Resource-id",
+			"http://hl7.org/fhir/SearchParameter/Resource-lastUpdated",
+			"http://hl7.org/fhir/SearchParameter/Resource-profile",
+			"http://hl7.org/fhir/SearchParameter/Resource-security",
+			"http://hl7.org/fhir/SearchParameter/Resource-source",
+			"http://hl7.org/fhir/SearchParameter/Resource-tag"
+		));
+	}
 
 	@Test
 	public void testCorrectResourcesReflected() {
@@ -104,8 +141,8 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 		List<CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent> fooSearchParams = findSearchParams(cs, "Patient", "_lastUpdated");
 		assertEquals(1, fooSearchParams.size());
 		assertEquals("_lastUpdated", fooSearchParams.get(0).getName());
-		assertEquals("http://localhost:" + ourPort + "/fhir/context/SearchParameter/Patient-_lastUpdated", fooSearchParams.get(0).getDefinition());
-		assertEquals("Only return resources which were last updated as specified by the given range", fooSearchParams.get(0).getDocumentation());
+		assertEquals("http://hl7.org/fhir/SearchParameter/Resource-lastUpdated", fooSearchParams.get(0).getDefinition());
+		assertEquals("When the resource version last changed", fooSearchParams.get(0).getDocumentation());
 		assertEquals(Enumerations.SearchParamType.DATE, fooSearchParams.get(0).getType());
 
 	}
@@ -264,6 +301,35 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
 		assertThat(findSearchParams(cs, "Patient", Constants.PARAM_FILTER), hasSize(0));
 	}
+
+
+	@Test
+	public void testBuiltInParametersHaveAppropriateUrl() throws IOException {
+		Bundle allSearchParamBundle = loadResourceFromClasspath(Bundle.class, "org/hl7/fhir/r4/model/sp/search-parameters.json");
+		Set<String> allSearchParamUrls = allSearchParamBundle
+			.getEntry()
+			.stream()
+			.map(t -> (SearchParameter) t.getResource())
+			.map(t -> t.getUrl())
+			.filter(StringUtils::isNotBlank)
+			.collect(Collectors.toSet());
+
+		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
+		for (CapabilityStatement.CapabilityStatementRestResourceComponent nextResource : cs.getRestFirstRep().getResource()) {
+			for (CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent nextSp : nextResource.getSearchParam()) {
+				if (nextSp.getName().equals("_has")) {
+					if (nextSp.getDefinition() == null) {
+						continue;
+					}
+				}
+				if (!allSearchParamUrls.contains(nextSp.getDefinition())) {
+					fail("Invalid search parameter: " + nextSp.getName() + " has definition URL: " + nextSp.getDefinition());
+				}
+			}
+		}
+	}
+
+
 
 	@Nonnull
 	private List<String> findSupportedProfiles(CapabilityStatement theCapabilityStatement, String theResourceType) {
