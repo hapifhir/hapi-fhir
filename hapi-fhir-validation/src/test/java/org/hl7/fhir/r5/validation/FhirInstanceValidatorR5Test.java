@@ -650,8 +650,8 @@ public class FhirInstanceValidatorR5Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(2, res.size(), output.toString());
-		assertEquals("A code with no system has no defined meaning. A system should be provided", output.getMessages().get(1).getMessage());
+		assertEquals(1, res.size(), output.toString());
+		assertEquals("A code with no system has no defined meaning. A system should be provided", res.get(0).getMessage());
 	}
 
 	@Test

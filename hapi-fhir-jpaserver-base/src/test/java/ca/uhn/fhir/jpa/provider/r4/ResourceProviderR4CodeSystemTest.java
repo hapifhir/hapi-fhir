@@ -482,7 +482,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		assertEquals("Unknown code {http://acme.org}8452-5-a", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+		assertEquals("Unknown code http://acme.org#8452-5-a", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 
 	}
 
@@ -518,7 +518,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		assertEquals("Unknown code {http://acme.org}8452-5 - Concept Display : Old Systolic blood pressure.inspiration - expiration", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+		assertEquals("Unknown code http://acme.org#8452-5 - Concept Display : Old Systolic blood pressure.inspiration - expiration", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 	}
 
 	@Test
@@ -675,7 +675,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		assertEquals("Unknown code {http://acme.org}8452-5-a", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+		assertEquals("Unknown code http://acme.org#8452-5-a", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 
 	}
 
@@ -755,7 +755,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		assertEquals("Unknown code {http://acme.org}8452-5-a", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+		assertEquals("Unknown code http://acme.org#8452-5-a", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 	}
 
 	@Test

@@ -38,6 +38,6 @@ public class DefaultProfileValidationSupportTest {
 		assertNotNull(cs);
 
 		cs = (CodeSystem) mySvc.fetchCodeSystem("http://terminology.hl7.org/CodeSystem/v2-0291|999");
-		assertNull(cs);
+		assertNotNull(cs);
 	}
 }

@@ -1284,8 +1284,11 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		assertEquals("result", respParam.getParameter().get(0).getName());
 		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue());
 
-		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals("Male", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("message", respParam.getParameter().get(1).getName());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/administrative-gender", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+
+		assertEquals("display", respParam.getParameter().get(2).getName());
+		assertEquals("Male", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 	}
 
 	@Test

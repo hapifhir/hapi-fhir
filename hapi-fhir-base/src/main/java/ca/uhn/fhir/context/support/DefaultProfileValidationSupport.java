@@ -203,7 +203,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 				candidate = valueSets.get(system);
 			}
 
-			if (candidate != null && isNotBlank(version)) {
+			if (candidate != null && isNotBlank(version) && !system.startsWith("http://hl7.org") && !system.startsWith("http://terminology.hl7.org")) {
 				if (!StringUtils.equals(version, myCtx.newTerser().getSinglePrimitiveValueOrNull(candidate, "version"))) {
 					candidate = null;
 				}

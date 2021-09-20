@@ -100,6 +100,42 @@ public class InMemoryTerminologyServerValidationSupportTest {
 	}
 
 	@Test
+	public void testValidateCode_UnknownCodeSystem_EnumeratedValueSet_MultipleIncludes() {
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs
+			.getCompose()
+			.addInclude()
+			.setSystem("http://cs")
+			.addFilter()
+			.setProperty("parent")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("blah");
+		vs
+			.getCompose()
+			.addInclude()
+			.setSystem("http://cs")
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code1")))
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code2")));
+		myPrePopulated.addValueSet(vs);
+
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		ConceptValidationOptions options = new ConceptValidationOptions();
+		IValidationSupport.CodeValidationResult outcome;
+
+		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code1", null, vs);
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getMessage());
+		assertTrue(outcome.isOk());
+
+		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code99", null, vs);
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertEquals("Failed to expand ValueSet 'http://vs' (in-memory). Could not validate code http://cs#code99. Error was: Unable to expand ValueSet because CodeSystem could not be found: http://cs", outcome.getMessage());
+		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
+
+	}
+
+	@Test
 	public void testValidateCode_UnknownCodeSystem_NonEnumeratedValueSet() {
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://vs");
@@ -207,7 +243,7 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		assertFalse(outcome.isOk());
 		assertEquals(null, outcome.getCode());
 		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("http://snomed.info/sct/20611000087101/version/20210331", outcome.getCodeSystemVersion());
+		assertEquals("0.17", outcome.getCodeSystemVersion());
 
 		// Validate code - good code, good display
 		codeSystemUrl = "http://snomed.info/sct";

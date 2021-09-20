@@ -810,6 +810,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent includeOrExclude = ValueSet40_50.convertConceptSetComponent(theIncludeOrExclude);
 					new InMemoryTerminologyServerValidationSupport(myContext).expandValueSetIncludeOrExclude(new ValidationSupportContext(provideValidationSupport()), consumer, includeOrExclude);
 				} catch (InMemoryTerminologyServerValidationSupport.ExpansionCouldNotBeCompletedInternallyException e) {
+					if (!theExpansionOptions.isFailOnMissingCodeSystem() && e.getFailureType() == InMemoryTerminologyServerValidationSupport.FailureType.UNKNOWN_CODE_SYSTEM) {
+						return false;
+					}
 					throw new InternalErrorException(e);
 				} finally {
 					ConversionContext40_50.INSTANCE.close("ValueSet");
@@ -1515,7 +1518,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				.setMessage(msg);
 		}
 
-		return createFailureCodeValidationResult(theSystem, theCode, null, "Unknown code " + theSystem + "#" + theCode + ". " + msg);
+		return createFailureCodeValidationResult(theSystem, theCode, null, " - Unknown code " + theSystem + "#" + theCode + ". " + msg);
 	}
 
 	private CodeValidationResult createFailureCodeValidationResult(String theSystem, String theCode) {
@@ -1527,7 +1530,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return new CodeValidationResult()
 			.setSeverity(IssueSeverity.ERROR)
 			.setCodeSystemVersion(theCodeSystemVersion)
-			.setMessage("Unknown code " + theSystem + "#" + theCode + theAppend);
+			.setMessage("Unable to validate code " + theSystem + "#" + theCode + theAppend);
 	}
 
 	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(ResourcePersistentId theResourcePid, String theSystem, String theCode) {

@@ -341,11 +341,11 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 			if (codeMatches) {
 				if (theOptions.isInferSystem() || (nextExpansionCode.getSystem().equals(codeSystemUrlToValidate) && (codeSystemVersionToValidate == null || codeSystemVersionToValidate.equals(nextExpansionCode.getSystemVersion())))) {
+					String csVersion = codeSystemResourceVersion;
+					if (isNotBlank(nextExpansionCode.getSystemVersion())) {
+						csVersion = nextExpansionCode.getSystemVersion();
+					}
 					if (!theOptions.isValidateDisplay() || (isBlank(nextExpansionCode.getDisplay()) || isBlank(theDisplayToValidate) || nextExpansionCode.getDisplay().equals(theDisplayToValidate))) {
-						String csVersion = codeSystemResourceVersion;
-						if (isNotBlank(nextExpansionCode.getSystemVersion())) {
-							csVersion = nextExpansionCode.getSystemVersion();
-						}
 						CodeValidationResult codeValidationResult = new CodeValidationResult()
 							.setCode(theCodeToValidate)
 							.setDisplay(nextExpansionCode.getDisplay())
@@ -365,7 +365,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 							.setDisplay(nextExpansionCode.getDisplay())
 							.setMessage(message)
 							.setCodeSystemName(codeSystemResourceName)
-							.setCodeSystemVersion(codeSystemResourceVersion);
+							.setCodeSystemVersion(csVersion);
 					}
 				}
 			}
@@ -515,12 +515,32 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 
 	private void expandValueSetR5IncludeOrExcludes(ValidationSupportContext theValidationSupportContext, Consumer<FhirVersionIndependentConcept> theConsumer, List<org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent> theComposeList, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode) throws ExpansionCouldNotBeCompletedInternallyException {
+		ExpansionCouldNotBeCompletedInternallyException caughtException = null;
 		for (org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent nextInclude : theComposeList) {
-			expandValueSetR5IncludeOrExclude(theValidationSupportContext, theConsumer, theWantSystemUrlAndVersion, theWantCode, nextInclude);
+			try {
+				boolean outcome = expandValueSetR5IncludeOrExclude(theValidationSupportContext, theConsumer, theWantSystemUrlAndVersion, theWantCode, nextInclude);
+				if (isNotBlank(theWantCode)) {
+					if (outcome) {
+						return;
+					}
+				}
+			} catch (ExpansionCouldNotBeCompletedInternallyException e) {
+				if (isBlank(theWantCode)) {
+					throw e;
+				} else {
+					caughtException = e;
+				}
+			}
+		}
+		if (caughtException != null) {
+			throw caughtException;
 		}
 	}
 
-	private void expandValueSetR5IncludeOrExclude(ValidationSupportContext theValidationSupportContext, Consumer<FhirVersionIndependentConcept> theConsumer, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode, org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent theInclude) throws ExpansionCouldNotBeCompletedInternallyException {
+	/**
+	 * Returns <code>true</code> if at least one code was addded
+	 */
+	private boolean expandValueSetR5IncludeOrExclude(ValidationSupportContext theValidationSupportContext, Consumer<FhirVersionIndependentConcept> theConsumer, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode, org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent theInclude) throws ExpansionCouldNotBeCompletedInternallyException {
 		String wantSystemUrl = null;
 		String wantSystemVersion = null;
 		if (theWantSystemUrlAndVersion != null) {
@@ -539,17 +559,17 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		List<FhirVersionIndependentConcept> nextCodeList = new ArrayList<>();
 		String includeOrExcludeConceptSystemUrl = theInclude.getSystem();
 		String includeOrExcludeConceptSystemVersion = theInclude.getVersion();
+		CodeSystem includeOrExcludeSystemResource = null;
 		if (isNotBlank(includeOrExcludeConceptSystemUrl)) {
 
 			if (wantSystemUrl != null && !wantSystemUrl.equals(includeOrExcludeConceptSystemUrl)) {
-				return;
+				return false;
 			}
 
 			if (wantSystemVersion != null && !wantSystemVersion.equals(includeOrExcludeConceptSystemVersion)) {
-				return;
+				return false;
 			}
 
-			CodeSystem includeOrExcludeSystemResource;
 			String loadedCodeSystemUrl;
 			if (includeOrExcludeConceptSystemVersion != null) {
 				loadedCodeSystemUrl = includeOrExcludeConceptSystemUrl + "|" + includeOrExcludeConceptSystemVersion;
@@ -570,6 +590,8 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 			boolean ableToHandleCode = false;
 			String failureMessage = null;
+			FailureType failureType = FailureType.OTHER;
+
 			if (includeOrExcludeSystemResource == null || includeOrExcludeSystemResource.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 
 				if (theWantCode != null) {
@@ -639,10 +661,14 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 			if (!ableToHandleCode) {
 				if (includeOrExcludeSystemResource == null && failureMessage == null) {
-					failureMessage = "Unable to find CodeSystem: " + loadedCodeSystemUrl;
+					failureMessage = getFailureMessageForMissingOrUnusableCodeSystem(includeOrExcludeSystemResource, loadedCodeSystemUrl);
 				}
 
-				throw new ExpansionCouldNotBeCompletedInternallyException(failureMessage);
+				if (includeOrExcludeSystemResource == null) {
+					failureType = FailureType.UNKNOWN_CODE_SYSTEM;
+				}
+
+				throw new ExpansionCouldNotBeCompletedInternallyException(failureMessage, failureType);
 			}
 
 			if (includeOrExcludeSystemResource != null && includeOrExcludeSystemResource.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
@@ -656,7 +682,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			if (vs != null) {
 				org.hl7.fhir.r5.model.ValueSet subExpansion = expandValueSetR5(theValidationSupportContext, vs, theWantSystemUrlAndVersion, theWantCode);
 				if (subExpansion == null) {
-					throw new ExpansionCouldNotBeCompletedInternallyException("Failed to expand ValueSet: " + nextValueSetInclude.getValueAsString());
+					throw new ExpansionCouldNotBeCompletedInternallyException("Failed to expand ValueSet: " + nextValueSetInclude.getValueAsString(), FailureType.OTHER);
 				}
 				for (org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent next : subExpansion.getExpansion().getContains()) {
 					nextCodeList.add(new FhirVersionIndependentConcept(next.getSystem(), next.getCode(), next.getDisplay(), next.getVersion()));
@@ -664,9 +690,26 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 		}
 
+		boolean retVal = false;
+
 		for (FhirVersionIndependentConcept next : nextCodeList) {
+			if (includeOrExcludeSystemResource != null && isNotBlank(theWantCode)) {
+				boolean matches;
+				if (includeOrExcludeSystemResource.getCaseSensitive()) {
+					matches = theWantCode.equals(next.getCode());
+				} else {
+					matches = theWantCode.equalsIgnoreCase(next.getCode());
+				}
+				if (!matches) {
+					continue;
+				}
+			}
+
 			theConsumer.accept(next);
+			retVal = true;
 		}
+
+		return retVal;
 	}
 
 	private Function<String, org.hl7.fhir.r5.model.ValueSet> newValueSetLoader(ValidationSupportContext theValidationSupportContext) {
@@ -764,12 +807,26 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		}
 	}
 
+
+	public enum FailureType {
+
+		UNKNOWN_CODE_SYSTEM,
+		OTHER
+
+	}
+
 	public static class ExpansionCouldNotBeCompletedInternallyException extends Exception {
 
 		private static final long serialVersionUID = -2226561628771483085L;
+		private final FailureType myFailureType;
 
-		public ExpansionCouldNotBeCompletedInternallyException(String theMessage) {
+		public ExpansionCouldNotBeCompletedInternallyException(String theMessage, FailureType theFailureType) {
 			super(theMessage);
+			myFailureType = theFailureType;
+		}
+
+		public FailureType getFailureType() {
+			return myFailureType;
 		}
 	}
 

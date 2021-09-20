@@ -153,7 +153,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		encoded = encode(oo);
 		ourLog.info(encoded);
 		assertEquals(1, oo.getIssue().size(), encoded);
-		assertEquals("The code provided (http://cs#code99) is not in the value set http://vs, and a code from this value set is required: Unknown code system: http://cs", oo.getIssueFirstRep().getDiagnostics(), encoded);
+		assertEquals("The code provided (http://cs#code99) is not in the value set http://vs, and a code from this value set is required: Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'", oo.getIssueFirstRep().getDiagnostics(), encoded);
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssueFirstRep().getSeverity(), encoded);
 
 	}
@@ -193,9 +193,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		oo = validateAndReturnOutcome(obs);
 		encoded = encode(oo);
 		ourLog.info(encoded);
-		assertEquals(1, oo.getIssue().size(), encoded);
-		assertEquals("Error Unknown code system: http://cs validating Coding", oo.getIssueFirstRep().getDiagnostics(), encoded);
-		assertEquals(OperationOutcome.IssueSeverity.WARNING, oo.getIssueFirstRep().getSeverity(), encoded);
+		assertEquals("No issues detected during validation", oo.getIssueFirstRep().getDiagnostics(), encoded);
 
 	}
 
@@ -462,7 +460,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
 		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("FOO");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals("Unknown code 'http://terminology.hl7.org/CodeSystem/observation-category#FOO'", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
+		assertEquals("Unknown code 'http://terminology.hl7.org/CodeSystem/observation-category#FOO' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-category'", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
 		// Make sure we're caching the validations as opposed to hitting the DB every time
 		myCaptureQueriesListener.clear();
@@ -788,7 +786,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getCode().getCodingFirstRep().setDisplay("Some Code");
 		outcome = (OperationOutcome) myObservationDao.validate(obs, null, null, null, ValidationModeEnum.CREATE, "http://example.com/structuredefinition", mySrd).getOperationOutcome();
 		ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		assertEquals("Unknown code in fragment CodeSystem 'http://example.com/codesystem#foo-foo'", outcome.getIssueFirstRep().getDiagnostics());
+		assertEquals("Unknown code in fragment CodeSystem 'http://example.com/codesystem#foo-foo' for in-memory expansion of ValueSet 'http://example.com/valueset'", outcome.getIssueFirstRep().getDiagnostics());
 		assertEquals(OperationOutcome.IssueSeverity.WARNING, outcome.getIssueFirstRep().getSeverity());
 
 		// Correct codesystem, Code in codesystem
@@ -897,7 +895,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
 		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("FOO");
 		oo = validateAndReturnOutcome(obs);
-		assertEquals("Unknown code 'http://terminology.hl7.org/CodeSystem/observation-category#FOO'", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
+		assertEquals("Unknown code 'http://terminology.hl7.org/CodeSystem/observation-category#FOO' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-category'", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
 	}
 
@@ -1504,7 +1502,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 				OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
 				String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 				ourLog.info("Outcome:\n{}", encoded);
-				assertThat(encoded, containsString("Unknown code {urn:oid:2.16.840.1.113883.6.238}2106-3AAA"));
+				assertThat(encoded, containsString("Unknown code urn:oid:2.16.840.1.113883.6.238#2106-3AAA"));
 			}
 		}
 		{
@@ -1715,7 +1713,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://fooVs"), null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 
 		assertFalse(result.isOk());
-		assertEquals("Unknown code {http://loinc.org}10013-1 - Unable to locate ValueSet[http://fooVs]", result.getMessage());
+		assertEquals("Unknown code http://loinc.org#10013-1 - Unable to locate ValueSet[http://fooVs]", result.getMessage());
 	}
 
 
