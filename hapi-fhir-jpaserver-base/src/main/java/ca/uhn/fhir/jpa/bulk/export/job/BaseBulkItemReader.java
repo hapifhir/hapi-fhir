@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
@@ -57,7 +58,7 @@ public abstract class BaseBulkItemReader implements ItemReader<List<ResourcePers
 
 	@Value("#{stepExecutionContext['resourceType']}")
 	protected String myResourceType;
-	@Value("#{jobExecutionContext['" + BulkExportJobConfig.JOB_UUID_PARAMETER + "']}")
+	@Value("#{jobExecutionContext['" + BatchConstants.JOB_UUID_PARAMETER + "']}")
 	protected String myJobUUID;
 	@Value("#{jobParameters['" + BulkExportJobConfig.READ_CHUNK_PARAMETER + "']}")
 	protected Long myReadChunkSize;

@@ -5,7 +5,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
@@ -44,7 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.BULK_IMPORT_JOB_NAME;
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.BULK_IMPORT_JOB_NAME;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -212,7 +212,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 	}
 
 	protected List<JobExecution> awaitAllBulkImportJobCompletion() {
-		return myBatchJobHelper.awaitAllBulkJobCompletions(BatchJobsConfig.BULK_IMPORT_JOB_NAME);
+		return myBatchJobHelper.awaitAllBulkJobCompletions(BatchConstants.BULK_IMPORT_JOB_NAME);
 	}
 
 	@Interceptor
