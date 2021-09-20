@@ -2354,10 +2354,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			predicates.add(criteriaBuilder.equal(root.get("myCode"), theCode));
 		}
 
-		if (isNotBlank(theDisplay)) {
-			predicates.add(criteriaBuilder.equal(root.get("myDisplay"), theDisplay));
-		}
-
 		if (isNoneBlank(theCodeSystemUrl)) {
 			predicates.add(criteriaBuilder.equal(systemJoin.get("myCodeSystemUri"), theCodeSystemUrl));
 		}
@@ -2378,13 +2374,16 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		if (!resultsList.isEmpty()) {
 			TermConcept concept = resultsList.get(0);
+
+			if (isNotBlank(theDisplay) && !theDisplay.equals(concept.getDisplay())) {
+				String message = "Concept Display \"" + theDisplay + "\" does not match expected \"" + concept.getDisplay() + "\" for CodeSystem: " + theCodeSystemUrl;
+				return createFailureCodeValidationResult(theCodeSystemUrl, theCode, theCodeSystemVersion, message);
+			}
+
 			return new CodeValidationResult().setCode(concept.getCode()).setDisplay(concept.getDisplay());
 		}
 
-		if (isBlank(theDisplay))
-			return createFailureCodeValidationResult(theCodeSystemUrl, theCode);
-		else
-			return createFailureCodeValidationResult(theCodeSystemUrl, theCode, null, " - Concept Display : " + theDisplay);
+		return createFailureCodeValidationResult(theCodeSystemUrl, theCode, theCodeSystemVersion, " - Code is not found in CodeSystem: " + theCodeSystemUrl);
 	}
 
 	public static class Job implements HapiJob {
