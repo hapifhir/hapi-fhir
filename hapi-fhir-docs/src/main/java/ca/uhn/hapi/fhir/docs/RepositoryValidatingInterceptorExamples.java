@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import org.springframework.context.ApplicationContext;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 @SuppressWarnings("unused")
@@ -124,7 +123,7 @@ public class RepositoryValidatingInterceptorExamples {
 			// Configure the validator to reject unknown extensions
 			// by default, all extensions are accepted and to undo this rejection
 			// call allowAnyExtensions()
-			.allowKnownExtensionsOnly()
+			.rejectUnknownExtensions()
 
 			// Configure the validator to not perform terminology validation
 			.disableTerminologyChecks()

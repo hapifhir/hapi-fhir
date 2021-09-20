@@ -292,12 +292,12 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testRequireValidation_AdditionalOptions_Allow_Known_Extensions_Only() {
+	public void testRequireValidation_AdditionalOptions_Reject_UnKnown_Extensions() {
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
 			.forResourcesOfType("Observation")
 			.requireValidationToDeclaredProfiles()
 			.withBestPracticeWarningLevel("IGNORE")
-			.allowKnownExtensionsOnly()
+			.rejectUnknownExtensions()
 			.disableTerminologyChecks()
 			.errorOnUnknownProfiles()
 			.suppressNoBindingMessage()
