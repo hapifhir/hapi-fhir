@@ -109,8 +109,10 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	public IBaseResource fetchCodeSystem(String theSystem) {
 		if (myTermReadSvc.isLoincNotGenericUnversionedCodeSystem(theSystem)) {
 			Optional<IBaseResource> currentCSOpt = getCodeSystemCurrentVersion(new UriType(theSystem));
-			return currentCSOpt.orElseThrow(() -> new ResourceNotFoundException(
-				"Couldn't find current version CodeSystem for url: " + theSystem));
+			if (! currentCSOpt.isPresent()) {
+				ourLog.info("Couldn't find current version of CodeSystem: " + theSystem);
+			}
+			return currentCSOpt.orElse(null);
 		}
 
 		return fetchResource(myCodeSystemType, theSystem);
@@ -125,7 +127,16 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 		IFhirResourceDao<? extends IBaseResource> valueSetResourceDao = myDaoRegistry.getResourceDao(myCodeSystemType);
 		String forcedId = "loinc";
-		IBaseResource codeSystem = valueSetResourceDao.read(new IdDt("CodeSystem", forcedId));
+
+		// try/catch ignores exception because we need code to fall back to other options
+		IBaseResource codeSystem;
+		try {
+			codeSystem = valueSetResourceDao.read(new IdDt("CodeSystem", forcedId));
+
+		} catch (Exception theE) {
+			return Optional.empty();
+		}
+
 		return Optional.ofNullable(codeSystem);
 	}
 

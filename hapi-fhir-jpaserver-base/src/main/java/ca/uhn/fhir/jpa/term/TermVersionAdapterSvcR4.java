@@ -33,6 +33,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
+import java.security.InvalidParameterException;
+
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class TermVersionAdapterSvcR4 extends BaseTermVersionAdapterSvcImpl implements ITermVersionAdapterSvc {
@@ -63,6 +65,9 @@ public class TermVersionAdapterSvcR4 extends BaseTermVersionAdapterSvcImpl imple
 	public IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
 		validateCodeSystemForStorage(theCodeSystemResource);
 		if (isBlank(theCodeSystemResource.getIdElement().getIdPart())) {
+			if (theCodeSystemResource.getUrl().contains("loinc")) {
+				throw new InvalidParameterException("LOINC CodeSystem must have an 'ID' element");
+			}
 			String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
 			return myCodeSystemResourceDao.update(theCodeSystemResource, matchUrl, theRequestDetails).getId();
 		} else {

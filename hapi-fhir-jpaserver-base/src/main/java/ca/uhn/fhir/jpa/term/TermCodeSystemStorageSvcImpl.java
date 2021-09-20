@@ -86,6 +86,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
@@ -139,6 +140,9 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			CodeSystem codeSystemResource = new CodeSystem();
 			codeSystemResource.setUrl(theSystem);
 			codeSystemResource.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+			if (isBlank(codeSystemResource.getIdElement().getIdPart()) && theSystem.contains("loinc")) {
+				codeSystemResource.setId("loinc");
+			}
 			myTerminologyVersionAdapterSvc.createOrUpdateCodeSystem(codeSystemResource);
 
 			cs = myCodeSystemDao.findByCodeSystemUri(theSystem);

@@ -501,7 +501,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		cs.setUrl("http://loinc.org");
 		cs.addConcept().setCode("123-4").setDisplay("Code 123 4");
-		myCodeSystemDao.create(cs);
+		cs.setId("loinc");
+		myCodeSystemDao.update(cs);
 
 		Group group = new Group();
 		group.setId("ABC");
@@ -567,8 +568,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		CodeSystem cs = new CodeSystem();
 		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		cs.setUrl("http://loinc.org");
-		cs.addConcept().setCode("123-4").setDisplay("Code 123 4");
-		myCodeSystemDao.create(cs);
+		cs.addConcept().setCode("123-4").setDisplay("Code 123 4").setId("loinc");
+		myCodeSystemDao.update(cs);
 
 		Group group = new Group();
 		group.setId("ABC");
@@ -628,14 +629,15 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");
-		vs.getCompose().addInclude().setSystem("http://loinc.org");
+		vs.getCompose().addInclude().setSystem("http://loinc.org").setId("loinc");
 		myValueSetDao.create(vs);
 
 		CodeSystem cs = new CodeSystem();
 		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		cs.setUrl("http://loinc.org");
 		cs.addConcept().setCode("123-4").setDisplay("Code 123 4");
-		myCodeSystemDao.create(cs);
+		cs.setId("loinc");
+		myCodeSystemDao.update(cs);
 
 		Group group = new Group();
 		group.setId("ABC");
@@ -936,6 +938,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			// Valid code
 			obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 			obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
+			obs.getCode().getCodingFirstRep().setId("loinc");
 			oo = validateAndReturnOutcome(obs);
 			assertEquals("No issues detected during validation", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
