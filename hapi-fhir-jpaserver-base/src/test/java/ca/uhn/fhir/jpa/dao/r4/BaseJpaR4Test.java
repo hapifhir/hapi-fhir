@@ -51,7 +51,6 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
-import ca.uhn.fhir.jpa.dao.data.ITermValueSetDaoTestUtil;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -472,8 +471,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
 	@Autowired
-	protected ITermValueSetDaoTestUtil myTermValueSetDaoTestUtil;
-	@Autowired
 	protected ITermValueSetConceptDao myTermValueSetConceptDao;
 	@Autowired
 	protected ITermValueSetConceptDesignationDao myTermValueSetConceptDesignationDao;
@@ -836,7 +833,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	public List<String> getExpandedConceptsByValueSetUrl(String theValuesetUrl) {
 		return runInTransaction(() -> {
-			List<TermValueSet> valueSets = myTermValueSetDaoTestUtil.findTermValueSetByUrl(Pageable.unpaged(), theValuesetUrl);
+			List<TermValueSet> valueSets = myTermValueSetDao.findTermValueSetByUrl(Pageable.unpaged(), theValuesetUrl);
 			assertEquals(1, valueSets.size());
 			TermValueSet valueSet = valueSets.get(0);
 			List<TermValueSetConcept> concepts = valueSet.getConcepts();
