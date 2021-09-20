@@ -158,6 +158,8 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		validateValueLookup(currentVersion, theExpectedVersions);
 
 		validateValidateCode(currentVersion, theExpectedVersions);
+
+		// nothing to test for subsumes operation as it works only for concepts which share CodeSystem and  version
 	}
 
 
