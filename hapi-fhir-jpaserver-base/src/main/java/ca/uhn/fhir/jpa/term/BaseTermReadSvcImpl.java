@@ -28,6 +28,7 @@ import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
@@ -54,6 +55,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptPropertyTypeEnum;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
+import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -139,6 +141,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
@@ -2552,4 +2555,23 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		return theReqLang.equalsIgnoreCase(theStoredLang);
     }
+
+
+	@Override
+	public Optional<IBaseResource> readByForcedId(String theForcedId) {
+		@SuppressWarnings("unchecked")
+		List<ResourceTable> resultList = (List<ResourceTable>) myEntityManager.createQuery(
+			"select f.myResource from ForcedId f " +
+				"where f.myResourceType = 'CodeSystem' and f.myForcedId = '" + theForcedId + "'").getResultList();
+		if (resultList.isEmpty())  return Optional.empty();
+
+		if (resultList.size() > 1)  throw new NonUniqueResultException(
+			"More than one CodeSystem is pointed by forcedId: " + theForcedId + ". Was constraint "
+				+ ForcedId.IDX_FORCEDID_TYPE_FID + " removed?");
+
+		IFhirResourceDao<CodeSystem> csDao = myDaoRegistry.getResourceDao("CodeSystem");
+		IBaseResource cs = csDao.toResource(resultList.get(0), false);
+		return Optional.of(cs );
+	}
+
 }

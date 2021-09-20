@@ -125,19 +125,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	private Optional<IBaseResource> getCodeSystemCurrentVersion(UriType theUrl) {
 		if (! theUrl.getValueAsString().contains("loinc"))  return Optional.empty();
 
-		IFhirResourceDao<? extends IBaseResource> valueSetResourceDao = myDaoRegistry.getResourceDao(myCodeSystemType);
-		String forcedId = "loinc";
-
-		// try/catch ignores exception because we need code to fall back to other options
-		IBaseResource codeSystem;
-		try {
-			codeSystem = valueSetResourceDao.read(new IdDt("CodeSystem", forcedId));
-
-		} catch (Exception theE) {
-			return Optional.empty();
-		}
-
-		return Optional.ofNullable(codeSystem);
+		return myTermReadSvc.readByForcedId("loinc");
 	}
 
 

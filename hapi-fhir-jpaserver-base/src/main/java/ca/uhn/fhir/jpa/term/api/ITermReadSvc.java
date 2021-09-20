@@ -136,4 +136,6 @@ public interface ITermReadSvc extends IValidationSupport {
 	 */
 	boolean isLoincNotGenericUnversionedValueSet(String theUrl);
 
+	Optional<IBaseResource> readByForcedId(String theForcedId);
+
 }
