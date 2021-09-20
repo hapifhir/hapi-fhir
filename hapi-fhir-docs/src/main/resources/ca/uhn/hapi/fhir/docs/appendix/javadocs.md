@@ -9,7 +9,7 @@ See the [Modules Page](/docs/getting_started/modules.html) for more information 
 * [Model API (R5)](/apidocs/hapi-fhir-structures-r5/) - hapi-fhir-structures-r5
 * [Client API](/apidocs/hapi-fhir-client/) - hapi-fhir-client
 * [Plain Server API](/apidocs/hapi-fhir-server/) - hapi-fhir-server
-* [JPA Server - API](/apidocs/hapi-fhir-jpaserver-api/) - hapi-fhir-jpaserver-api
+* [JPA Server - API](/apidocs/hapi-fhir-storage-api/) - hapi-fhir-storage-api
 * [JPA Server - Model](/apidocs/hapi-fhir-jpaserver-model/) - hapi-fhir-jpaserver-model
 * [JPA Server - Base](/apidocs/hapi-fhir-jpaserver-base/) - hapi-fhir-jpaserver-base
 * [Version Converter API](/apidocs/hapi-fhir-converter/) - hapi-fhir-converter
