@@ -568,7 +568,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		CodeSystem cs = new CodeSystem();
 		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		cs.setUrl("http://loinc.org");
-		cs.addConcept().setCode("123-4").setDisplay("Code 123 4").setId("loinc");
+		cs.addConcept().setCode("123-4").setDisplay("Code 123 4");
+		cs.setId("loinc");
 		myCodeSystemDao.update(cs);
 
 		Group group = new Group();
@@ -629,7 +630,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");
-		vs.getCompose().addInclude().setSystem("http://loinc.org").setId("loinc");
+		vs.getCompose().addInclude().setSystem("http://loinc.org");
 		myValueSetDao.create(vs);
 
 		CodeSystem cs = new CodeSystem();
@@ -938,7 +939,6 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			// Valid code
 			obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 			obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
-			obs.getCode().getCodingFirstRep().setId("loinc");
 			oo = validateAndReturnOutcome(obs);
 			assertEquals("No issues detected during validation", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
@@ -1713,7 +1713,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		cs.setUrl(ITermLoaderSvc.LOINC_URI);
 		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		cs.addConcept().setCode("10013-1");
-		myCodeSystemDao.create(cs);
+		cs.setId("loinc");
+		myCodeSystemDao.update(cs);
 
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://fooVs"), null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 
