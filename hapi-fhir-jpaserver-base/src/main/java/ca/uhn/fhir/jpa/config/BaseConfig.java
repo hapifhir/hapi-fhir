@@ -16,6 +16,8 @@ import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.config.NonPersistedBatchConfigurer;
 import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
+import ca.uhn.fhir.jpa.batch.mdm.MdmBatchJobSubmitterFactoryImpl;
+import ca.uhn.fhir.jpa.batch.mdm.MdmClearJobSubmitterImpl;
 import ca.uhn.fhir.jpa.batch.reader.BatchResourceSearcher;
 import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
@@ -35,7 +37,6 @@ import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
-import ca.uhn.fhir.jpa.dao.expunge.DeleteExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
@@ -121,6 +122,7 @@ import ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.DatabaseSearchResultCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
+import ca.uhn.fhir.jpa.search.elastic.IndexNamePrefixLayoutStrategy;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexer;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
@@ -136,6 +138,8 @@ import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.validation.JpaResourceLoader;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
+import ca.uhn.fhir.mdm.api.IMdmBatchJobSubmitterFactory;
+import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.IReindexJobSubmitter;
@@ -152,6 +156,7 @@ import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -285,8 +290,8 @@ public abstract class BaseConfig {
 	 * bean, but it provides a partially completed entity manager
 	 * factory with HAPI FHIR customizations
 	 */
-	protected LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-		LocalContainerEntityManagerFactoryBean retVal = new HapiFhirLocalContainerEntityManagerFactoryBean();
+	protected LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory myConfigurableListableBeanFactory) {
+		LocalContainerEntityManagerFactoryBean retVal = new HapiFhirLocalContainerEntityManagerFactoryBean(myConfigurableListableBeanFactory);
 		configureEntityManagerFactory(retVal, fhirContext());
 		return retVal;
 	}
@@ -373,17 +378,6 @@ public abstract class BaseConfig {
 	@Bean
 	public ITermConceptMappingSvc termConceptMappingSvc() {
 		return new TermConceptMappingSvcImpl();
-	}
-
-	@Bean
-	public ThreadPoolTaskExecutor searchCoordinatorThreadFactory() {
-		final ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
-		threadPoolTaskExecutor.setThreadNamePrefix("search_coord_");
-		threadPoolTaskExecutor.setCorePoolSize(searchCoordCorePoolSize);
-		threadPoolTaskExecutor.setMaxPoolSize(searchCoordMaxPoolSize);
-		threadPoolTaskExecutor.setQueueCapacity(searchCoordQueueCapacity);
-		threadPoolTaskExecutor.initialize();
-		return threadPoolTaskExecutor;
 	}
 
 	@Bean
@@ -515,8 +509,18 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public MdmLinkExpandSvc myMdmLinkExpandSvc() {
+	public MdmLinkExpandSvc mdmLinkExpandSvc() {
 		return new MdmLinkExpandSvc();
+	}
+
+	@Bean
+	IMdmBatchJobSubmitterFactory mdmBatchJobSubmitterFactory() {
+		return new MdmBatchJobSubmitterFactoryImpl();
+	}
+
+	@Bean
+	IMdmClearJobSubmitter mdmClearJobSubmitter() {
+		return new MdmClearJobSubmitterImpl();
 	}
 
 	@Bean
@@ -836,8 +840,8 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public ISearchCoordinatorSvc searchCoordinatorSvc(ThreadPoolTaskExecutor searchCoordinatorThreadFactory) {
-		return new SearchCoordinatorSvcImpl(searchCoordinatorThreadFactory);
+	public ISearchCoordinatorSvc searchCoordinatorSvc() {
+		return new SearchCoordinatorSvcImpl();
 	}
 
 	@Bean
@@ -892,11 +896,6 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public DeleteExpungeService deleteExpungeService() {
-		return new DeleteExpungeService();
-	}
-
-	@Bean
 	public ResourceTableFKProvider resourceTableFKProvider() {
 		return new ResourceTableFKProvider();
 	}
@@ -909,6 +908,11 @@ public abstract class BaseConfig {
 	@Bean
 	public PredicateBuilderFactory predicateBuilderFactory(ApplicationContext theApplicationContext) {
 		return new PredicateBuilderFactory(theApplicationContext);
+	}
+
+	@Bean
+	public IndexNamePrefixLayoutStrategy indexLayoutStrategy() {
+		return new IndexNamePrefixLayoutStrategy();
 	}
 
 	@Bean

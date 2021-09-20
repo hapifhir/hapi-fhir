@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.stresstest;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
@@ -14,6 +13,7 @@ import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheFactory;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
+import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -45,6 +46,7 @@ import com.google.common.collect.Lists;
 import org.hamcrest.Matchers;
 import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.junit.jupiter.api.AfterEach;
@@ -107,7 +109,7 @@ import static org.mockito.Mockito.when;
 public class GiantTransactionPerfTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(GiantTransactionPerfTest.class);
-	private final FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R4);
+	private final FhirContext myCtx = FhirContext.forR4Cached();
 	private FhirSystemDaoR4 mySystemDao;
 	private IInterceptorBroadcaster myInterceptorSvc;
 	private TransactionProcessor myTransactionProcessor;
@@ -216,6 +218,7 @@ public class GiantTransactionPerfTest {
 
 		mySearchParamRegistry = new SearchParamRegistryImpl();
 		mySearchParamRegistry.setResourceChangeListenerRegistry(myResourceChangeListenerRegistry);
+		mySearchParamRegistry.setSearchParameterCanonicalizerForUnitTest(new SearchParameterCanonicalizer(myCtx));
 		mySearchParamRegistry.setFhirContext(myCtx);
 		mySearchParamRegistry.setModelConfig(myDaoConfig.getModelConfig());
 		mySearchParamRegistry.registerListener();
@@ -323,9 +326,14 @@ public class GiantTransactionPerfTest {
 
 		@Nonnull
 		@Override
-		public ResourceVersionMap getVersionMap(String theResourceName, SearchParameterMap theSearchParamMap) {
+		public ResourceVersionMap getVersionMap(RequestPartitionId theRequestPartitionId, String theResourceName, SearchParameterMap theSearchParamMap) {
 			myGetVersionMap++;
 			return ResourceVersionMap.fromResources(Lists.newArrayList());
+		}
+
+		@Override
+		public ResourcePersistentIdMap getLatestVersionIdsForResourceIds(RequestPartitionId thePartition, List<IIdType> theIds) {
+			return null;
 		}
 	}
 

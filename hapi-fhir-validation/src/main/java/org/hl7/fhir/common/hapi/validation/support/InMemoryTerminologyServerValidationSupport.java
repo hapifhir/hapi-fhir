@@ -370,7 +370,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	@Nullable
 	private org.hl7.fhir.r5.model.ValueSet expandValueSetDstu2(ValidationSupportContext theValidationSupportContext, ca.uhn.fhir.model.dstu2.resource.ValueSet theInput, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode) {
 		IParser parserRi = FhirContext.forCached(FhirVersionEnum.DSTU2_HL7ORG).newJsonParser();
-		IParser parserHapi = FhirContext.forCached(FhirVersionEnum.DSTU2).newJsonParser();
+		IParser parserHapi = FhirContext.forDstu2Cached().newJsonParser();
 
 		Function<String, CodeSystem> codeSystemLoader = t -> {
 			ca.uhn.fhir.model.dstu2.resource.ValueSet codeSystem = theInput;
@@ -408,9 +408,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 		if (cs != null) {
 			IPrimitiveType<?> content = getFhirContext().newTerser().getSingleValueOrNull(cs, "content", IPrimitiveType.class);
-			if (!"not-present".equals(content.getValueAsString())) {
-				return true;
-			}
+			return !"not-present".equals(content.getValueAsString());
 		}
 
 		return false;

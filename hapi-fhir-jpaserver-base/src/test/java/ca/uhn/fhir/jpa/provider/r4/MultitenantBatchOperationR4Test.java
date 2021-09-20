@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DecimalType;
@@ -99,8 +100,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		assertEquals("Patient", interceptor.resourceDefs.get(0).getName());
 		myInterceptorRegistry.unregisterInterceptor(interceptor);
 
-		DecimalType jobIdPrimitive = (DecimalType) response.getParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID);
-		Long jobId = jobIdPrimitive.getValue().longValue();
+		Long jobId = BatchHelperR4.jobIdFromParameters(response);
 
 		assertEquals(1, myBatchJobHelper.getReadCount(jobId));
 		assertEquals(1, myBatchJobHelper.getWriteCount(jobId));

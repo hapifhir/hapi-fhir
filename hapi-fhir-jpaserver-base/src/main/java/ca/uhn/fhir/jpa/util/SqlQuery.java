@@ -126,5 +126,8 @@ public class SqlQuery {
 
 	}
 
-
+	@Override
+	public String toString() {
+		return getSql(true, true);
+	}
 }

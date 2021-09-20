@@ -295,7 +295,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 	}
 
-
 	@Test
 	public void testSearchWithContainsLowerCase() {
 		myDaoConfig.setAllowContainsSearches(true);
@@ -331,6 +330,37 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
 		assertThat(ids, containsInAnyOrder(pt1id));
 
+	}
+
+	@Test
+	public void testSearchWithPercentSign() {
+		myDaoConfig.setAllowContainsSearches(true);
+
+		Patient pt1 = new Patient();
+		pt1.addName().setFamily("Smith%");
+		String pt1id = myPatientDao.create(pt1).getId().toUnqualifiedVersionless().getValue();
+
+		Bundle output = myClient
+			.search()
+			.forResource("Patient")
+			.where(Patient.NAME.contains().value("Smith%"))
+			.returnBundle(Bundle.class)
+			.execute();
+		List<String> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
+		assertThat(ids, containsInAnyOrder(pt1id));
+
+		Patient pt2 = new Patient();
+		pt2.addName().setFamily("Sm%ith");
+		String pt2id = myPatientDao.create(pt2).getId().toUnqualifiedVersionless().getValue();
+
+		output = myClient
+			.search()
+			.forResource("Patient")
+			.where(Patient.NAME.contains().value("Sm%ith"))
+			.returnBundle(Bundle.class)
+			.execute();
+		ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
+		assertThat(ids, containsInAnyOrder(pt2id));
 	}
 
 	@Test
@@ -4778,6 +4808,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	@Disabled("Not useful with the search coordinator thread pool removed")
 	public void testSearchWithCountNotSet() {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(200);
@@ -4846,6 +4877,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	@Disabled("Not useful with the search coordinator thread pool removed")
 	public void testSearchWithCountSearchResultsUpTo5() {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(200);

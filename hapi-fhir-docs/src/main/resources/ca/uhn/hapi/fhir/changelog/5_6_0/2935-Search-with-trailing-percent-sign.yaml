@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2935
+jira: SMILE-3022
+title: "No resource returned when search with percent sign. Problem is now fixed"

@@ -262,6 +262,13 @@ public class OpenApiInterceptor {
 				return true;
 			}
 
+			if (resourcePath.endsWith(".html")) {
+				theResponse.setContentType(Constants.CT_HTML);
+				theResponse.setStatus(200);
+				IOUtils.copy(resource, theResponse.getOutputStream());
+				theResponse.getOutputStream().close();
+				return true;
+			}
 		}
 		return false;
 	}
@@ -336,10 +343,16 @@ public class OpenApiInterceptor {
 		String page = extractPageName(theRequestDetails, PAGE_SYSTEM);
 		context.setVariable("PAGE", page);
 
+		populateOIDCVariables(theRequestDetails, context);
+
 		String outcome = myTemplateEngine.process("index.html", context);
 
 		theResponse.getWriter().write(outcome);
 		theResponse.getWriter().close();
+	}
+
+	protected void populateOIDCVariables(ServletRequestDetails theRequestDetails, WebContext theContext) {
+		theContext.setVariable("OAUTH2_REDIRECT_URL_PROPERTY", "");
 	}
 
 	private String extractPageName(ServletRequestDetails theRequestDetails, String theDefault) {
@@ -354,7 +367,7 @@ public class OpenApiInterceptor {
 		return page;
 	}
 
-	private OpenAPI generateOpenApi(ServletRequestDetails theRequestDetails) {
+	protected OpenAPI generateOpenApi(ServletRequestDetails theRequestDetails) {
 		String page = extractPageName(theRequestDetails, null);
 
 		CapabilityStatement cs = getCapabilityStatement(theRequestDetails);

@@ -721,6 +721,4 @@ public abstract class BaseJpaTest extends BaseTest {
 		}
 		Thread.sleep(500);
 	}
-
-
 }
