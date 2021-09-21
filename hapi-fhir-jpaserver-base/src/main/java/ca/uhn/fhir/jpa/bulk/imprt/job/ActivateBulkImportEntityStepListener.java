@@ -20,10 +20,9 @@ package ca.uhn.fhir.jpa.bulk.imprt.job;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
-import org.elasticsearch.client.enrich.ExecutePolicyResponse;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
@@ -39,7 +38,7 @@ public class ActivateBulkImportEntityStepListener implements StepExecutionListen
 
 	@Override
 	public void beforeStep(StepExecution theStepExecution) {
-		String jobUuid = theStepExecution.getJobExecution().getJobParameters().getString(BulkExportJobConfig.JOB_UUID_PARAMETER);
+		String jobUuid = theStepExecution.getJobExecution().getJobParameters().getString(BatchConstants.JOB_UUID_PARAMETER);
 		if (jobUuid != null) {
 			myBulkImportDaoSvc.setJobToStatus(jobUuid, BulkImportJobStatusEnum.RUNNING);
 		}

@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.delete.job;
 
-import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.CommonBatchJobConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterUtil;
 import ca.uhn.fhir.jpa.batch.reader.CronologicalBatchAllResourcePidReader;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
@@ -37,10 +37,10 @@ public class ReindexJobTest extends BaseJpaR4Test {
 	@Autowired
 	private IBatchJobSubmitter myBatchJobSubmitter;
 	@Autowired
-	@Qualifier(BatchJobsConfig.REINDEX_JOB_NAME)
+	@Qualifier(BatchConstants.REINDEX_JOB_NAME)
 	private Job myReindexJob;
 	@Autowired
-	@Qualifier(BatchJobsConfig.REINDEX_EVERYTHING_JOB_NAME)
+	@Qualifier(BatchConstants.REINDEX_EVERYTHING_JOB_NAME)
 	private Job myReindexEverythingJob;
 	@Autowired
 	private BatchJobHelper myBatchJobHelper;
