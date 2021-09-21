@@ -28,6 +28,7 @@ import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
@@ -35,7 +36,9 @@ import javax.persistence.Table;
 
 //@formatter:off
 @Entity
-@Table(name = "HFJ_SEARCH_INCLUDE")
+@Table(name = "HFJ_SEARCH_INCLUDE", indexes = {
+	@Index(name = "IDX_SEARCH_INCLUDE_SEARCH_PID", columnList = "SEARCH_PID")
+})
 //@formatter:on
 public class SearchInclude implements Serializable {
 
