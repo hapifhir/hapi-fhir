@@ -347,28 +347,6 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 	}
 
 
-	@Test
-	public void testLanguageComparatorEq() {
-
-		Patient p = new Patient();
-		p.setLanguage("en");
-		p.addName().setFamily("Smith").addGiven("John");
-		p.setBirthDateElement(new DateType("1955-01-01"));
-		p.setActive(true);
-		String id1 = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
-
-		SearchParameterMap map;
-		List<String> found;
-
-		map = new SearchParameterMap();
-		map.setLoadSynchronous(true);
-		map.add(Constants.PARAM_FILTER, new StringParam("_language eq en"));
-		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1));
-
-	}
-
-
 
 	@Test
 	public void testStringComparatorCo() {
@@ -1254,7 +1232,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.search(map);
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _language, _lastUpdated, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertEquals("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
 	}
 

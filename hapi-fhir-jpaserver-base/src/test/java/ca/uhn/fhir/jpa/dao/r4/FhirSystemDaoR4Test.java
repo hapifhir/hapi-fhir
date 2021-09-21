@@ -51,7 +51,9 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.EpisodeOfCare;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Meta;
@@ -83,6 +85,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -96,7 +99,9 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
@@ -1161,6 +1166,78 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		validate(outcome);
 	}
 
+	@Test
+	public void testConditionalUpdate_forObservationWithNonExistentPatientSubject_shouldCreateLinkedResources() {
+		Bundle transactionBundle = new Bundle().setType(BundleType.TRANSACTION);
+
+		// Patient
+		HumanName patientName = new HumanName().setFamily("TEST_LAST_NAME").addGiven("TEST_FIRST_NAME");
+		Identifier patientIdentifier = new Identifier().setSystem("http://example.com/mrns").setValue("U1234567890");
+		Patient patient = new Patient()
+			.setName(Arrays.asList(patientName))
+			.setIdentifier(Arrays.asList(patientIdentifier));
+		patient.setId(IdType.newRandomUuid());
+
+		transactionBundle
+			.addEntry()
+			.setFullUrl(patient.getId())
+			.setResource(patient)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.PUT)
+			.setUrl("/Patient?identifier=" + patientIdentifier.getSystem() + "|" + patientIdentifier.getValue());
+
+		// Observation
+		Observation observation = new Observation();
+		observation.setId(IdType.newRandomUuid());
+		observation.getSubject().setReference(patient.getIdElement().toUnqualifiedVersionless().toString());
+
+		transactionBundle
+			.addEntry()
+			.setFullUrl(observation.getId())
+			.setResource(observation)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.PUT)
+			.setUrl("/Observation?subject=" + patient.getIdElement().toUnqualifiedVersionless().toString());
+
+		ourLog.info("Patient TEMP UUID: {}", patient.getId());
+		String s = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(transactionBundle);
+		System.out.println(s);
+		Bundle outcome= mySystemDao.transaction(null, transactionBundle);
+		String patientLocation = outcome.getEntry().get(0).getResponse().getLocation();
+		assertThat(patientLocation, matchesPattern("Patient/[a-z0-9-]+/_history/1"));
+		String observationLocation = outcome.getEntry().get(1).getResponse().getLocation();
+		assertThat(observationLocation, matchesPattern("Observation/[a-z0-9-]+/_history/1"));
+	}
+
+	@Test
+	public void testConditionalUrlWhichDoesNotMatchResource() {
+		Bundle transactionBundle = new Bundle().setType(BundleType.TRANSACTION);
+
+		String storedIdentifierValue = "woop";
+		String conditionalUrlIdentifierValue = "zoop";
+		// Patient
+		HumanName patientName = new HumanName().setFamily("TEST_LAST_NAME").addGiven("TEST_FIRST_NAME");
+		Identifier patientIdentifier = new Identifier().setSystem("http://example.com/mrns").setValue(storedIdentifierValue);
+		Patient patient = new Patient()
+			.setName(Arrays.asList(patientName))
+			.setIdentifier(Arrays.asList(patientIdentifier));
+		patient.setId(IdType.newRandomUuid());
+
+		transactionBundle
+			.addEntry()
+			.setFullUrl(patient.getId())
+			.setResource(patient)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.PUT)
+			.setUrl("/Patient?identifier=" + patientIdentifier.getSystem() + "|" + conditionalUrlIdentifierValue);
+
+		try {
+			mySystemDao.transaction(null, transactionBundle);
+			fail();
+		}  catch (PreconditionFailedException e) {
+			assertThat(e.getMessage(), is(equalTo("Invalid conditional URL \"Patient?identifier=http://example.com/mrns|" + conditionalUrlIdentifierValue +"\". The given resource is not matched by this URL.")));
+		}
+	}
 
 	@Test
 	public void testTransactionCreateInlineMatchUrlWithOneMatch() {
@@ -1194,6 +1271,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals("1", o.getIdElement().getVersionIdPart());
 
 	}
+
 
 	@Test
 	public void testTransactionUpdateTwoResourcesWithSameId() {

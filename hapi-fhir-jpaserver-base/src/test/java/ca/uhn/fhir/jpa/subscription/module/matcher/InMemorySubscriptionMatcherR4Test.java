@@ -339,18 +339,6 @@ public class InMemorySubscriptionMatcherR4Test {
 	}
 
 	@Test
-	public void testLanguageNotSupported() {
-		Patient patient = new Patient();
-		patient.getLanguageElement().setValue("en_CA");
-		patient.addIdentifier().setSystem("urn:system").setValue("001");
-		patient.addName().setFamily("testSearchLanguageParam").addGiven("Joe");
-		SearchParameterMap params;
-		params = new SearchParameterMap();
-		params.add(IAnyResource.SP_RES_LANGUAGE, new StringParam("en_CA"));
-		assertUnsupported(patient, params);
-	}
-
-	@Test
 	public void testLocationPositionNotSupported() {
 		Location loc = new Location();
 		double latitude = CoordCalculatorTest.LATITUDE_UHN;

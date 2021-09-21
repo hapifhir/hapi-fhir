@@ -8,7 +8,9 @@ import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -26,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -65,6 +68,12 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	public void testCreatePractitioner() throws InterruptedException {
 		myMdmHelper.createWithLatch(buildPractitionerWithNameAndId("somename", "some_id"));
 		assertLinkCount(1);
+	}
+
+	private MdmLink getLinkByTargetId(IBaseResource theResource) {
+		MdmLink example = new MdmLink();
+		example.setSourcePid(theResource.getIdElement().getIdPartAsLong());
+		return myMdmLinkDao.findAll(Example.of(example)).get(0);
 	}
 
 	@Test

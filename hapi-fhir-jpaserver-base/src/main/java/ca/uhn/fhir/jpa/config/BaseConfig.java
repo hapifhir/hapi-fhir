@@ -381,17 +381,6 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public ThreadPoolTaskExecutor searchCoordinatorThreadFactory() {
-		final ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
-		threadPoolTaskExecutor.setThreadNamePrefix("search_coord_");
-		threadPoolTaskExecutor.setCorePoolSize(searchCoordCorePoolSize);
-		threadPoolTaskExecutor.setMaxPoolSize(searchCoordMaxPoolSize);
-		threadPoolTaskExecutor.setQueueCapacity(searchCoordQueueCapacity);
-		threadPoolTaskExecutor.initialize();
-		return threadPoolTaskExecutor;
-	}
-
-	@Bean
 	public TaskScheduler taskScheduler() {
 		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
 		retVal.setConcurrentExecutor(scheduledExecutorService().getObject());
@@ -851,8 +840,8 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public ISearchCoordinatorSvc searchCoordinatorSvc(ThreadPoolTaskExecutor searchCoordinatorThreadFactory) {
-		return new SearchCoordinatorSvcImpl(searchCoordinatorThreadFactory);
+	public ISearchCoordinatorSvc searchCoordinatorSvc() {
+		return new SearchCoordinatorSvcImpl();
 	}
 
 	@Bean

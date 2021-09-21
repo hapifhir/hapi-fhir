@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -43,7 +42,7 @@ public class SearchQueryBuilderTest {
 
 	@BeforeEach
 	public void before() {
-		myFhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+		myFhirContext = FhirContext.forR4Cached();
 		myModelConfig = new ModelConfig();
 		myPartitionSettings = new PartitionSettings();
 		myRequestPartitionId = RequestPartitionId.allPartitions();

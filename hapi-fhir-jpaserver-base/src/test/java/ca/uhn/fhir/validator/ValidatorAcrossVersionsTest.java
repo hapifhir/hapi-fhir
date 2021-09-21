@@ -1,19 +1,16 @@
 package ca.uhn.fhir.validator;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
-import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Test;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * This test doesn't really belong to JPA, but it needs to be in a project with both DSTU2 and HL7ORG_DSTU2 present, so here will do.
@@ -23,7 +20,7 @@ public class ValidatorAcrossVersionsTest {
 
 	@Test
 	public void testWrongContextVersion() {
-		FhirContext ctxDstu2 = FhirContext.forCached(FhirVersionEnum.DSTU2);
+		FhirContext ctxDstu2 = FhirContext.forDstu2Cached();
 		try {
 			ctxDstu2.getResourceDefinition(org.hl7.fhir.dstu3.model.Patient.class);
 			fail();
@@ -37,7 +34,7 @@ public class ValidatorAcrossVersionsTest {
 	@Test
 	public void testValidateProfileOnDstu2Resource() {
 
-		FhirContext ctxDstu2 = FhirContext.forCached(FhirVersionEnum.DSTU2);
+		FhirContext ctxDstu2 = FhirContext.forDstu2Cached();
 		FhirValidator val = ctxDstu2.newValidator();
 		val.setValidateAgainstStandardSchema(false);
 		val.setValidateAgainstStandardSchematron(false);
