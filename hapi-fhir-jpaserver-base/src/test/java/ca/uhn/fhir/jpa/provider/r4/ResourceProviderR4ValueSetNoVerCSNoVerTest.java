@@ -120,7 +120,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 	private void loadAndPersistValueSet() throws IOException {
 		ValueSet valueSet = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 		valueSet.setId("ValueSet/vs");
-		persistValueSet(valueSet, HttpVerb.POST);
+		persistValueSet(valueSet, HttpVerb.PUT);
 	}
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
@@ -1388,7 +1388,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.named(ProviderConstants.OPERATION_INVALIDATE_EXPANSION)
 			.withNoParameters(Parameters.class)
 			.execute();
-		assertEquals("A", outcome.getParameter("message").primitiveValue());
+		assertEquals("ValueSet with URL \"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2\" precaluclated expansion with 24 concept(s) has been invalidated", outcome.getParameter("message").primitiveValue());
 
 		assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndNullVersion("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2").orElseThrow(()->new IllegalStateException()).getExpansionStatus()));
 
@@ -1398,18 +1398,22 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.named(ProviderConstants.OPERATION_INVALIDATE_EXPANSION)
 			.withNoParameters(Parameters.class)
 			.execute();
-		assertEquals("A", outcome.getParameter("message").primitiveValue());
+		assertEquals("ValueSet with URL \"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2\" already has status: NOT_EXPANDED", outcome.getParameter("message").primitiveValue());
 	}
 
 	@Test
 	public void testInvalidatePrecalculatedExpansion_NonExistent() {
-		Parameters outcome = myClient
-			.operation()
-			.onInstance("ValueSet/FOO")
-			.named(ProviderConstants.OPERATION_INVALIDATE_EXPANSION)
-			.withNoParameters(Parameters.class)
-			.execute();
-		assertEquals("A", outcome.getParameter("message").primitiveValue());
+		try {
+			myClient
+				.operation()
+				.onInstance("ValueSet/FOO")
+				.named(ProviderConstants.OPERATION_INVALIDATE_EXPANSION)
+				.withNoParameters(Parameters.class)
+				.execute();
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals("HTTP 404 Not Found: Resource ValueSet/FOO is not known", e.getMessage());
+		}
 	}
 
 	@Test
