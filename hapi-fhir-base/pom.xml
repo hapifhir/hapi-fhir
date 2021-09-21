@@ -18,6 +18,9 @@
 
 	<dependencies>
 
+		<!-- IMPORTANT NOTE: This pom is used by multiple platforms (including Android) so please avoid adding any new
+		 dependencies here. -->
+
 		<!-- JSON -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
@@ -115,11 +118,6 @@
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<optional>true</optional>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-collections4</artifactId>
 		</dependency>
 
 		<!-- @Nonnull annotation -->
