@@ -1,4 +1,4 @@
 ---
 type: fix
 issue: 3012
-title: "Fixes some recent database schema migration failures on MS SQLServer."
+title: "Fixes migration of VARBINARY columns on MS SQLServer."
