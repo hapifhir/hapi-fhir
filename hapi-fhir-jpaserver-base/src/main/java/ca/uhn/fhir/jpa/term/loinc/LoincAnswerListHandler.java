@@ -104,6 +104,7 @@ public class LoincAnswerListHandler extends BaseLoincHandler {
 				.getCompose()
 				.getIncludeFirstRep()
 				.setSystem(ITermLoaderSvc.LOINC_URI)
+				.setVersion(codeSystemVersionId)
 				.addConcept()
 				.setCode(answerString)
 				.setDisplay(displayText);

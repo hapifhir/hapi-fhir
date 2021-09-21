@@ -6,7 +6,6 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.config.dstu3.BaseDstu3Config;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
@@ -29,6 +28,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import com.google.common.collect.Lists;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,7 +57,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
+import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -126,7 +126,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		myCurrentSearch = null;
 
-		mySvc = new SearchCoordinatorSvcImpl(new BaseDstu3Config().searchCoordinatorThreadFactory());
+		mySvc = new SearchCoordinatorSvcImpl();
 		mySvc.setEntityManagerForUnitTest(myEntityManager);
 		mySvc.setTransactionManagerForUnitTest(myTxManager);
 		mySvc.setContextForUnitTest(ourCtx);
@@ -174,12 +174,8 @@ public class SearchCoordinatorSvcImplTest {
 		IResultIterator iter = new FailAfterNIterator(new SlowIterator(pids.iterator(), 2), 300);
 		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
-		assertNotNull(result.getUuid());
-		assertEquals(null, result.size());
-
 		try {
-			result.getResources(0, 100000);
+			mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), containsString("FAILED"));
 			assertThat(e.getMessage(), containsString("at ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImplTest"));
@@ -220,7 +216,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
 		assertNotNull(result.getUuid());
-		assertEquals(null, result.size());
+		assertEquals(790, result.size());
 
 		List<IBaseResource> resources = result.getResources(0, 100000);
 		assertEquals(790, resources.size());
@@ -297,7 +293,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
 		assertNotNull(result.getUuid());
-		assertEquals(null, result.size());
+		assertEquals(790, result.size());
 
 		List<IBaseResource> resources;
 
@@ -337,16 +333,19 @@ public class SearchCoordinatorSvcImplTest {
 		SlowIterator iter = new SlowIterator(pids.iterator(), 500);
 		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
-		assertNotNull(result.getUuid());
+		ourLog.info("Registering the first search");
+		new Thread(() -> mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions())).start();
+		await().until(()->iter.getCountReturned(), Matchers.greaterThan(0));
 
+		String searchId = mySvc.getActiveSearchIds().iterator().next();
 		CountDownLatch completionLatch = new CountDownLatch(1);
 		Runnable taskStarter = () -> {
 			try {
+				assertNotNull(searchId);
 				ourLog.info("About to pull the first resource");
-				List<IBaseResource> resources = result.getResources(0, 1);
+				List<ResourcePersistentId> resources = mySvc.getResources(searchId, 0, 1, null);
 				ourLog.info("Done pulling the first resource");
-		assertEquals(1, resources.size());
+				assertEquals(1, resources.size());
 			} finally {
 				completionLatch.countDown();
 			}
@@ -360,10 +359,9 @@ public class SearchCoordinatorSvcImplTest {
 		ourLog.info("Done cancelling all searches");
 
 		try {
-			result.getResources(10, 20);
-		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), containsString("Abort has been requested"));
-			assertThat(e.getMessage(), containsString("at ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl"));
+			mySvc.getResources(searchId, 0, 1, null);
+		} catch (ResourceGoneException e) {
+			// good
 		}
 
 		completionLatch.await(10, TimeUnit.SECONDS);
@@ -391,7 +389,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
 		assertNotNull(result.getUuid());
-		assertEquals(null, result.size());
+		assertEquals(790, result.size());
 
 		ArgumentCaptor<Search> searchCaptor = ArgumentCaptor.forClass(Search.class);
 		verify(mySearchCacheSvc, atLeast(1)).save(searchCaptor.capture());
@@ -402,22 +400,10 @@ public class SearchCoordinatorSvcImplTest {
 		PersistedJpaBundleProvider provider;
 
 		resources = result.getResources(0, 10);
-		assertNull(result.size());
+		assertEquals(790, result.size());
 		assertEquals(10, resources.size());
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("19", resources.get(9).getIdElement().getValueAsString());
-
-		when(mySearchCacheSvc.fetchByUuid(eq(result.getUuid()))).thenReturn(Optional.of(search));
-
-		/*
-		 * Now call from a new bundle provider. This simulates a separate HTTP
-		 * client request coming in.
-		 */
-		provider = newPersistedJpaBundleProvider(result.getUuid());
-		resources = provider.getResources(10, 20);
-		assertEquals(10, resources.size());
-		assertEquals("20", resources.get(0).getIdElement().getValueAsString());
-		assertEquals("29", resources.get(9).getIdElement().getValueAsString());
 
 		myExpectedNumberOfSearchBuildersCreated = 4;
 	}

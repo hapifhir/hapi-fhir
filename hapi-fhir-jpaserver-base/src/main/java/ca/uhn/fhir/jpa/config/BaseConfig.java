@@ -11,9 +11,9 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.batch.BatchConstants;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.config.NonPersistedBatchConfigurer;
 import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
 import ca.uhn.fhir.jpa.batch.mdm.MdmBatchJobSubmitterFactoryImpl;
@@ -378,17 +378,6 @@ public abstract class BaseConfig {
 	@Bean
 	public ITermConceptMappingSvc termConceptMappingSvc() {
 		return new TermConceptMappingSvcImpl();
-	}
-
-	@Bean
-	public ThreadPoolTaskExecutor searchCoordinatorThreadFactory() {
-		final ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
-		threadPoolTaskExecutor.setThreadNamePrefix("search_coord_");
-		threadPoolTaskExecutor.setCorePoolSize(searchCoordCorePoolSize);
-		threadPoolTaskExecutor.setMaxPoolSize(searchCoordMaxPoolSize);
-		threadPoolTaskExecutor.setQueueCapacity(searchCoordQueueCapacity);
-		threadPoolTaskExecutor.initialize();
-		return threadPoolTaskExecutor;
 	}
 
 	@Bean
@@ -851,8 +840,8 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public ISearchCoordinatorSvc searchCoordinatorSvc(ThreadPoolTaskExecutor searchCoordinatorThreadFactory) {
-		return new SearchCoordinatorSvcImpl(searchCoordinatorThreadFactory);
+	public ISearchCoordinatorSvc searchCoordinatorSvc() {
+		return new SearchCoordinatorSvcImpl();
 	}
 
 	@Bean

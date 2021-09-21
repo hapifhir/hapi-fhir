@@ -179,9 +179,12 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(400000);
 
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+			connectionManager.setMaxTotal(10);
+			connectionManager.setDefaultMaxPerRoute(10);
 			HttpClientBuilder builder = HttpClientBuilder.create();
 			builder.setConnectionManager(connectionManager);
 			builder.setMaxConnPerRoute(99);
+
 			ourHttpClient = builder.build();
 
 			ourServer = server;
