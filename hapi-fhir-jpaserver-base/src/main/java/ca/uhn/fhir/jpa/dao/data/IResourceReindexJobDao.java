@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +31,8 @@ import java.util.Optional;
  * #L%
  */
 
-public interface IResourceReindexJobDao extends JpaRepository<ResourceReindexJobEntity, Long>, IHapiFhirJpaRepository {
+@Deprecated
+public interface IResourceReindexJobDao extends JpaRepository<ResourceReindexJobEntity, Long> {
 
 	@Modifying
 	@Query("UPDATE ResourceReindexJobEntity j SET j.myDeleted = true WHERE j.myResourceType = :type")

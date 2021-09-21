@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2786
+title: "Add 'loinc.codesystem.make.current' property to upload-terminology command to allow loading LOINC version
+   without becoming current."

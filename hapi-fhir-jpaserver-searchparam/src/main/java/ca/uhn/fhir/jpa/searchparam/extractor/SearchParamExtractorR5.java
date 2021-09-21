@@ -78,7 +78,7 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 	}
 
 	@Override
-	protected IValueExtractor getPathValueExtractor(IBaseResource theResource, String nextPath) {
+	public IValueExtractor getPathValueExtractor(IBaseResource theResource, String nextPath) {
 		return () -> myFhirPathEngine.evaluate((Base) theResource, nextPath);
 	}
 

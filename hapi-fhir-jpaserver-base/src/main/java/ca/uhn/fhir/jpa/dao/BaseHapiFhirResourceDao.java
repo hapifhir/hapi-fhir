@@ -47,10 +47,10 @@ import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.patch.FhirPatch;
 import ca.uhn.fhir.jpa.patch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.patch.XmlPatchUtils;
-import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -136,9 +136,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -228,7 +231,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		if (isNotBlank(theResource.getIdElement().getIdPart())) {
 			if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
-				String message = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedId", theResource.getIdElement().getIdPart());
+				String message = getMessageSanitized("failedToCreateWithClientAssignedId", theResource.getIdElement().getIdPart());
 				throw new InvalidRequestException(message, createErrorOperationOutcome(message, "processing"));
 			} else {
 				// As of DSTU3, ID and version in the body should be ignored for a create/update
@@ -307,21 +310,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				createForcedIdIfNeeded(entity, theResource.getIdElement(), true);
 				serverAssignedId = true;
 			} else {
-				switch (getConfig().getResourceClientIdStrategy()) {
-					case NOT_ALLOWED:
-						throw new ResourceNotFoundException(
-							getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedIdNotAllowed", theResource.getIdElement().getIdPart()));
-					case ALPHANUMERIC:
-						if (theResource.getIdElement().isIdPartValidLong()) {
-							throw new InvalidRequestException(
-								getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getIdElement().getIdPart()));
-						}
-						createForcedIdIfNeeded(entity, theResource.getIdElement(), false);
-						break;
-					case ANY:
-						createForcedIdIfNeeded(entity, theResource.getIdElement(), true);
-						break;
-				}
+				validateResourceIdCreation(theResource, theRequest);
+				boolean createForPureNumericIds = getConfig().getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC;
+				createForcedIdIfNeeded(entity, theResource.getIdElement(), createForPureNumericIds);
 				serverAssignedId = false;
 			}
 		} else {
@@ -407,6 +398,32 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		ourLog.debug(msg);
 		return outcome;
+	}
+
+	void validateResourceIdCreation(T theResource, RequestDetails theRequest) {
+		DaoConfig.ClientIdStrategyEnum strategy = getConfig().getResourceClientIdStrategy();
+
+		if (strategy == DaoConfig.ClientIdStrategyEnum.NOT_ALLOWED) {
+			if (!isSystemRequest(theRequest)) {
+				throw new ResourceNotFoundException(
+					getMessageSanitized("failedToCreateWithClientAssignedIdNotAllowed", theResource.getIdElement().getIdPart()));
+			}
+		}
+
+		if (strategy == DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC) {
+			if (theResource.getIdElement().isIdPartValidLong()) {
+				throw new InvalidRequestException(
+					getMessageSanitized("failedToCreateWithClientAssignedNumericId", theResource.getIdElement().getIdPart()));
+			}
+		}
+	}
+
+	protected String getMessageSanitized(String theKey, String theIdPart) {
+		return getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, theKey, theIdPart);
+	}
+
+	private boolean isSystemRequest(RequestDetails theRequest) {
+		return theRequest instanceof SystemRequestDetails;
 	}
 
 	private IInstanceValidatorModule getInstanceValidator() {
@@ -557,7 +574,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		SearchParameterMap paramMap = resourceSearch.getSearchParameterMap();
 		paramMap.setLoadSynchronous(true);
 
-		Set<ResourcePersistentId> resourceIds = myMatchResourceUrlService.search(paramMap, myResourceType, theRequest);
+		Set<ResourcePersistentId> resourceIds = myMatchResourceUrlService.search(paramMap, myResourceType, theRequest, null);
 
 		if (resourceIds.size() > 1) {
 			if (!getConfig().isAllowMultipleDelete()) {
@@ -575,7 +592,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		List<String> urlsToDeleteExpunge = Collections.singletonList(theUrl);
 		try {
-			JobExecution jobExecution = myDeleteExpungeJobSubmitter.submitJob(getConfig().getExpungeBatchSize(), theRequest, urlsToDeleteExpunge);
+			JobExecution jobExecution = myDeleteExpungeJobSubmitter.submitJob(getConfig().getExpungeBatchSize(), urlsToDeleteExpunge, theRequest);
 			return new DeleteMethodOutcome(createInfoOperationOutcome("Delete job submitted with id " + jobExecution.getId()));
 		} catch (JobParametersInvalidException e) {
 			throw new InvalidRequestException("Invalid Delete Expunge Request: " + e.getMessage(), e);
@@ -634,7 +651,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		IBaseOperationOutcome oo;
 		if (deletedResources.isEmpty()) {
 			oo = OperationOutcomeUtil.newInstance(getContext());
-			String message = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "unableToDeleteNotFound", theUrl);
+			String message = getMessageSanitized("unableToDeleteNotFound", theUrl);
 			String severity = "warning";
 			String code = "not-found";
 			OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
@@ -873,7 +890,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 		IRestfulServerDefaults server = theRequestDetails.getServer();
 		IPagingProvider pagingProvider = server.getPagingProvider();
-		return pagingProvider instanceof DatabaseBackedPagingProvider;
+		return pagingProvider != null;
 	}
 
 	protected void markResourcesMatchingExpressionAsNeedingReindexing(Boolean theCurrentlyReindexing, String theExpression) {
@@ -1394,7 +1411,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		translateSearchParams(theParams);
+		translateListSearchParams(theParams);
 
 		notifySearchInterceptors(theParams, theRequest);
 
@@ -1403,7 +1420,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			cacheControlDirective.parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL));
 		}
 
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequest, getResourceName(), theParams);
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequest, getResourceName(), theParams, null);
 		IBundleProvider retVal = mySearchCoordinatorSvc.registerSearch(this, theParams, getResourceName(), cacheControlDirective, theRequest, requestPartitionId);
 
 		if (retVal instanceof PersistedJpaBundleProvider) {
@@ -1419,7 +1436,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
-	private void translateSearchParams(SearchParameterMap theParams) {
+	private void translateListSearchParams(SearchParameterMap theParams) {
 		Iterator<String> keyIterator = theParams.keySet().iterator();
 
 		// Translate _list=42 to _has=List:item:_id=42
@@ -1478,7 +1495,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest) {
+	public Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest, @Nullable IBaseResource theConditionalOperationTargetOrNull) {
 		TransactionDetails transactionDetails = new TransactionDetails();
 
 		return myTransactionService.execute(theRequest, transactionDetails, tx -> {
@@ -1494,9 +1511,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			HashSet<ResourcePersistentId> retVal = new HashSet<>();
 
 			String uuid = UUID.randomUUID().toString();
-			SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
+			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequest, getResourceName(), theParams, theConditionalOperationTargetOrNull);
 
-			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequest, getResourceName(), theParams);
+			SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
 			try (IResultIterator iter = builder.createQuery(theParams, searchRuntimeDetails, theRequest, requestPartitionId)) {
 				while (iter.hasNext()) {
 					retVal.add(iter.next());
@@ -1604,7 +1621,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		IIdType resourceId;
 		if (isNotBlank(theMatchUrl)) {
-			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theMatchUrl, myResourceType, theTransactionDetails, theRequest);
+			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theMatchUrl, myResourceType, theTransactionDetails, theRequest, theResource);
 			if (match.size() > 1) {
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "UPDATE", theMatchUrl, match.size());
 				throw new PreconditionFailedException(msg);

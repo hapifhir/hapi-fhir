@@ -44,8 +44,8 @@ public interface IRequestPartitionHelperSvc {
 	}
 
 	@Nonnull
-	default RequestPartitionId determineReadPartitionForRequestForSearchType(RequestDetails theRequest, String theResourceType, SearchParameterMap theParams) {
-		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forSearchType(theResourceType, theParams);
+	default RequestPartitionId determineReadPartitionForRequestForSearchType(RequestDetails theRequest, String theResourceType, SearchParameterMap theParams, IBaseResource theConditionalOperationTargetOrNull) {
+		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forSearchType(theResourceType, theParams, theConditionalOperationTargetOrNull);
 		return determineReadPartitionForRequest(theRequest, theResourceType, details);
 	}
 

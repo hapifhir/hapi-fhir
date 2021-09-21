@@ -25,15 +25,13 @@ import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,9 +45,12 @@ public class MdmLinkExpandSvc {
 	@Autowired
 	private IdHelperService myIdHelperService;
 
+	public MdmLinkExpandSvc() {
+	}
+
 	/**
-	 *  Given a source resource, perform MDM expansion and return all the resource IDs of all resources that are
-	 *  MDM-Matched to this resource.
+	 * Given a source resource, perform MDM expansion and return all the resource IDs of all resources that are
+	 * MDM-Matched to this resource.
 	 *
 	 * @param theResource The resource to MDM-Expand
 	 * @return A set of strings representing the FHIR IDs of the expanded resources.
@@ -82,14 +83,50 @@ public class MdmLinkExpandSvc {
 	public Set<String> expandMdmBySourceResourcePid(Long theSourceResourcePid) {
 		ourLog.debug("About to expand source resource with PID {}", theSourceResourcePid);
 		List<IMdmLinkDao.MdmPidTuple> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsBySourcePidAndMatchResult(theSourceResourcePid, MdmMatchResultEnum.MATCH);
+		return flattenPidTuplesToSet(theSourceResourcePid, goldenPidSourcePidTuples);
+	}
+
+	/**
+	 *  Given a PID of a golden resource, perform MDM expansion and return all the resource IDs of all resources that are
+	 *  MDM-Matched to this golden resource.
+	 *
+	 * @param theGoldenResourcePid The PID of the golden resource to MDM-Expand.
+	 * @return A set of strings representing the FHIR ids of the expanded resources.
+	 */
+	public Set<String> expandMdmByGoldenResourceId(Long theGoldenResourcePid) {
+		ourLog.debug("About to expand golden resource with PID {}", theGoldenResourcePid);
+		List<IMdmLinkDao.MdmPidTuple> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(theGoldenResourcePid, MdmMatchResultEnum.MATCH);
+		return flattenPidTuplesToSet(theGoldenResourcePid, goldenPidSourcePidTuples);
+	}
+
+
+	/**
+	 *  Given a resource ID of a golden resource, perform MDM expansion and return all the resource IDs of all resources that are
+	 *  MDM-Matched to this golden resource.
+	 *
+	 * @param theGoldenResourcePid The resource ID of the golden resource to MDM-Expand.
+	 * @return A set of strings representing the FHIR ids of the expanded resources.
+	 */
+	public Set<String> expandMdmByGoldenResourcePid(Long theGoldenResourcePid) {
+		ourLog.debug("About to expand golden resource with PID {}", theGoldenResourcePid);
+		List<IMdmLinkDao.MdmPidTuple> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(theGoldenResourcePid, MdmMatchResultEnum.MATCH);
+		return flattenPidTuplesToSet(theGoldenResourcePid, goldenPidSourcePidTuples);
+	}
+	public Set<String> expandMdmByGoldenResourceId(IdDt theId) {
+		ourLog.debug("About to expand golden resource with golden resource id {}", theId);
+		Long pidOrThrowException = myIdHelperService.getPidOrThrowException(theId);
+		return expandMdmByGoldenResourcePid(pidOrThrowException);
+	}
+
+	@Nonnull
+	private Set<String> flattenPidTuplesToSet(Long initialPid, List<IMdmLinkDao.MdmPidTuple> goldenPidSourcePidTuples) {
 		Set<Long> flattenedPids = new HashSet<>();
 		goldenPidSourcePidTuples.forEach(tuple -> {
 			flattenedPids.add(tuple.getSourcePid());
 			flattenedPids.add(tuple.getGoldenPid());
 		});
 		Set<String> resourceIds = myIdHelperService.translatePidsToFhirResourceIds(flattenedPids);
-		ourLog.debug("Pid {} has been expanded to [{}]", theSourceResourcePid, String.join(",", resourceIds));
+		ourLog.debug("Pid {} has been expanded to [{}]", initialPid, String.join(",", resourceIds));
 		return resourceIds;
 	}
-
 }

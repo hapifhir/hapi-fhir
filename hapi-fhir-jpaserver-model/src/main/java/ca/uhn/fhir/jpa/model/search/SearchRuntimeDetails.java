@@ -38,6 +38,7 @@ public class SearchRuntimeDetails {
 	private String myQueryString;
 	private SearchStatusEnum mySearchStatus;
 	private int myFoundIndexMatchesCount;
+
 	public SearchRuntimeDetails(RequestDetails theRequestDetails, String theSearchUuid) {
 		myRequestDetails = theRequestDetails;
 		mySearchUuid = theSearchUuid;

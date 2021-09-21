@@ -21,7 +21,10 @@ package ca.uhn.fhir.interceptor.model;
  */
 
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import javax.annotation.Nullable;
 
 public class ReadPartitionIdRequestDetails {
 
@@ -29,12 +32,19 @@ public class ReadPartitionIdRequestDetails {
 	private final RestOperationTypeEnum myRestOperationType;
 	private final IIdType myReadResourceId;
 	private final Object mySearchParams;
+	private final IBaseResource myConditionalTargetOrNull;
 
-	public ReadPartitionIdRequestDetails(String theResourceType, RestOperationTypeEnum theRestOperationType, IIdType theReadResourceId, Object theSearchParams) {
+	public ReadPartitionIdRequestDetails(String theResourceType, RestOperationTypeEnum theRestOperationType, IIdType theReadResourceId, Object theSearchParams, @Nullable IBaseResource theConditionalTargetOrNull) {
 		myResourceType = theResourceType;
 		myRestOperationType = theRestOperationType;
 		myReadResourceId = theReadResourceId;
 		mySearchParams = theSearchParams;
+		myConditionalTargetOrNull = theConditionalTargetOrNull;
+	}
+
+	public static ReadPartitionIdRequestDetails forRead(String theResourceType, IIdType theId, boolean theIsVread) {
+		RestOperationTypeEnum op = theIsVread ? RestOperationTypeEnum.VREAD : RestOperationTypeEnum.READ;
+		return new ReadPartitionIdRequestDetails(theResourceType, op, theId.withResourceType(theResourceType), null, null);
 	}
 
 	public String getResourceType() {
@@ -53,13 +63,12 @@ public class ReadPartitionIdRequestDetails {
 		return mySearchParams;
 	}
 
-	public static ReadPartitionIdRequestDetails forRead(String theResourceType, IIdType theId, boolean theIsVread) {
-		RestOperationTypeEnum op = theIsVread ? RestOperationTypeEnum.VREAD : RestOperationTypeEnum.READ;
-		return new ReadPartitionIdRequestDetails(theResourceType, op, theId.withResourceType(theResourceType), null);
+	public IBaseResource getConditionalTargetOrNull() {
+		return myConditionalTargetOrNull;
 	}
 
-	public static ReadPartitionIdRequestDetails forSearchType(String theResourceType, Object theParams) {
-		return new ReadPartitionIdRequestDetails(theResourceType, RestOperationTypeEnum.SEARCH_TYPE, null, theParams);
+	public static ReadPartitionIdRequestDetails forSearchType(String theResourceType, Object theParams, IBaseResource theConditionalOperationTargetOrNull) {
+		return new ReadPartitionIdRequestDetails(theResourceType, RestOperationTypeEnum.SEARCH_TYPE, null, theParams, theConditionalOperationTargetOrNull);
 	}
 
 	public static ReadPartitionIdRequestDetails forHistory(String theResourceType, IIdType theIdType) {
@@ -71,6 +80,6 @@ public class ReadPartitionIdRequestDetails {
 		} else {
 			restOperationTypeEnum = RestOperationTypeEnum.HISTORY_SYSTEM;
 		}
-		return new ReadPartitionIdRequestDetails(theResourceType, restOperationTypeEnum, theIdType, null);
+		return new ReadPartitionIdRequestDetails(theResourceType, restOperationTypeEnum, theIdType, null, null);
 	}
 }

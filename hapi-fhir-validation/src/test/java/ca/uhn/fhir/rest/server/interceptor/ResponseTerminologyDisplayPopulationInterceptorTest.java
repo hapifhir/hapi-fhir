@@ -141,8 +141,13 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest {
 		}
 
 		@Override
-		public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
+		public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
 			return null;
+		}
+		
+		@Override
+		public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
+			return lookupCode(theValidationSupportContext, theSystem, theCode, null);
 		}
 	}
 

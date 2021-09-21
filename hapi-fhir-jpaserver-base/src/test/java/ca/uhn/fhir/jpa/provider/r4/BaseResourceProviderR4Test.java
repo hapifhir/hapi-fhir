@@ -1,5 +1,35 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.context.ContextLoader;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.servlet.DispatcherServlet;
+
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
@@ -24,36 +54,8 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.provider.DeleteExpungeProvider;
+import ca.uhn.fhir.rest.server.provider.ReindexProvider;
 import ca.uhn.fhir.test.utilities.JettyUtil;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.context.ContextLoader;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
-import org.springframework.web.context.support.GenericWebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.servlet.DispatcherServlet;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
@@ -77,6 +79,8 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected IPartitionDao myPartitionDao;
 	@Autowired
 	private DeleteExpungeProvider myDeleteExpungeProvider;
+	@Autowired
+	private ReindexProvider myReindexProvider;
 
 	ResourceCountCache myResourceCountsCache;
 	private TerminologyUploaderProvider myTerminologyUploaderProvider;
@@ -109,7 +113,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProvider.class);
 			myDaoRegistry = myAppCtx.getBean(DaoRegistry.class);
 
-			ourRestServer.registerProviders(mySystemProvider, myTerminologyUploaderProvider, myDeleteExpungeProvider);
+			ourRestServer.registerProviders(mySystemProvider, myTerminologyUploaderProvider, myDeleteExpungeProvider, myReindexProvider);
 			ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
 			ourRestServer.registerProvider(myAppCtx.getBean(DiffProvider.class));
 

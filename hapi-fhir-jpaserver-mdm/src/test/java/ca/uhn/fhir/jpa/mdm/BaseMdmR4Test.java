@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.mdm;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -32,9 +34,19 @@ import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.BasePagingProvider;
+import ca.uhn.fhir.rest.server.ETagSupportEnum;
+import ca.uhn.fhir.rest.server.ElementsSupportEnum;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
+import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matcher;
@@ -49,11 +61,15 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
+import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -73,19 +89,21 @@ import static org.slf4j.LoggerFactory.getLogger;
 abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 
+	private static final Logger ourLog = getLogger(BaseMdmR4Test.class);
+
 	public static final String NAME_GIVEN_JANE = "Jane";
 	public static final String NAME_GIVEN_PAUL = "Paul";
 	public static final String TEST_NAME_FAMILY = "Doe";
 	protected static final String TEST_ID_SYSTEM = "http://a.tv/";
 	protected static final String JANE_ID = "ID.JANE.123";
 	protected static final String PAUL_ID = "ID.PAUL.456";
-	protected static final String FRANK_ID = "ID.FRANK.789";
-	protected static final String DUMMY_ORG_ID = "Organization/mfr";
-	private static final Logger ourLog = getLogger(BaseMdmR4Test.class);
 	private static final ContactPoint TEST_TELECOM = new ContactPoint()
 		.setSystem(ContactPoint.ContactPointSystem.PHONE)
 		.setValue("555-555-5555");
 	private static final String NAME_GIVEN_FRANK = "Frank";
+	protected static final String FRANK_ID = "ID.FRANK.789";
+	protected static final String DUMMY_ORG_ID = "Organization/mfr";
+
 	@Autowired
 	protected FhirContext myFhirContext;
 	@Autowired
@@ -112,11 +130,13 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	protected MdmMatchLinkSvc myMdmMatchLinkSvc;
 	@Autowired
 	protected EIDHelper myEIDHelper;
-	protected ServletRequestDetails myRequestDetails;
 	@Autowired
 	SearchParamRegistryImpl mySearchParamRegistry;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
+	protected ServletRequestDetails myRequestDetails;
+
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
@@ -151,7 +171,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	protected Patient createGoldenPatient(Patient thePatient) {
 		return createPatient(thePatient, true, false);
 	}
-
+	
 	@Nonnull
 	protected Patient createRedirectedGoldenPatient(Patient thePatient) {
 		return createPatient(thePatient, true, true);
@@ -310,7 +330,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		String resourceType = theBaseResource.getIdElement().getResourceType();
 		IFhirResourceDao relevantDao = myDaoRegistry.getResourceDao(resourceType);
 
-		Optional<MdmLink> matchedLinkForTargetPid = runInTransaction(() -> myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(theBaseResource)));
+		Optional<MdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(theBaseResource));
 		if (matchedLinkForTargetPid.isPresent()) {
 			Long goldenResourcePid = matchedLinkForTargetPid.get().getGoldenResourcePid();
 			return (IAnyResource) relevantDao.readByPid(new ResourcePersistentId(goldenResourcePid));
@@ -449,8 +469,8 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		MdmLink mdmLink = myMdmLinkDaoSvc.newMdmLink();
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		mdmLink.setMatchResult(MdmMatchResultEnum.MATCH);
-		mdmLink.setGoldenResourcePid(runInTransaction(()->myIdHelperService.getPidOrNull(sourcePatient)));
-		mdmLink.setSourcePid(runInTransaction(()->myIdHelperService.getPidOrNull(patient)));
+		mdmLink.setGoldenResourcePid(myIdHelperService.getPidOrNull(sourcePatient));
+		mdmLink.setSourcePid(myIdHelperService.getPidOrNull(patient));
 		return mdmLink;
 	}
 
@@ -478,7 +498,6 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	protected void assertLinksMatchedByEid(Boolean... theExpectedValues) {
 		assertFields(MdmLink::getEidMatch, theExpectedValues);
 	}
-
 	public SearchParameterMap buildGoldenResourceSearchParameterMap() {
 		SearchParameterMap spMap = new SearchParameterMap();
 		spMap.setLoadSynchronous(true);
@@ -495,7 +514,6 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	}
 
 
-	protected void print(String message, IBaseResource... theResource) {
 		if (StringUtils.isNotEmpty(message)) {
 			ourLog.info(message);
 		}
@@ -505,9 +523,10 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		}
 	}
 
-	protected void print(IBaseResource... theResource) {
+	protected void print(IBaseResource ... theResource) {
 		print(null, theResource);
 	}
+
 
 
 	protected void printResources(String theResourceType) {

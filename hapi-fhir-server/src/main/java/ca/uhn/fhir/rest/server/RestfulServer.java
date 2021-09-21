@@ -124,7 +124,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * with this key. The value will be a Java {@link Date} with the time that request processing began.
 	 */
 	public static final String REQUEST_START_TIME = RestfulServer.class.getName() + "REQUEST_START_TIME";
-
 	/**
 	 * Default setting for {@link #setETagSupport(ETagSupportEnum) ETag Support}: {@link ETagSupportEnum#ENABLED}
 	 */
@@ -194,6 +193,13 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	public RestfulServer(FhirContext theCtx, IInterceptorService theInterceptorService) {
 		myFhirContext = theCtx;
 		setInterceptorService(theInterceptorService);
+	}
+
+	/**
+	 * @since 5.5.0
+	 */
+	protected ConformanceMethodBinding getServerConformanceMethod() {
+		return myServerConformanceMethod;
 	}
 
 	private void addContentLocationHeaders(RequestDetails theRequest, HttpServletResponse servletResponse, MethodOutcome response, String resourceName) {
@@ -348,14 +354,14 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		myResourceNameToBinding
 			.values()
 			.stream()
-			.flatMap(t->t.getMethodBindings().stream())
-			.forEach(t->t.close());
+			.flatMap(t -> t.getMethodBindings().stream())
+			.forEach(t -> t.close());
 		myGlobalBinding
 			.getMethodBindings()
-			.forEach(t->t.close());
+			.forEach(t -> t.close());
 		myServerBinding
 			.getMethodBindings()
-			.forEach(t->t.close());
+			.forEach(t -> t.close());
 
 	}
 
@@ -2033,7 +2039,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		String message = theFhirContext.getLocalizer().getMessage(RestfulServer.class, "unknownMethod", theRequestType.name(), requestPath, requestDetails.getParameters().keySet());
 
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(theFhirContext);
-		OperationOutcomeUtil.addIssue(theFhirContext, oo, "error", message, null,  "not-supported");
+		OperationOutcomeUtil.addIssue(theFhirContext, oo, "error", message, null, "not-supported");
 
 		throw new InvalidRequestException(message, oo);
 	}

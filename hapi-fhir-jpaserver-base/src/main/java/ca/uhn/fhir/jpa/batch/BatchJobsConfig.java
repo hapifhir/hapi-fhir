@@ -20,9 +20,12 @@ package ca.uhn.fhir.jpa.batch;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.batch.mdm.job.MdmClearJobConfig;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imprt.job.BulkImportJobConfig;
 import ca.uhn.fhir.jpa.delete.job.DeleteExpungeJobConfig;
+import ca.uhn.fhir.jpa.reindex.job.ReindexEverythingJobConfig;
+import ca.uhn.fhir.jpa.reindex.job.ReindexJobConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -36,7 +39,10 @@ import java.util.Set;
 	CommonBatchJobConfig.class,
 	BulkExportJobConfig.class,
 	BulkImportJobConfig.class,
-	DeleteExpungeJobConfig.class
+	DeleteExpungeJobConfig.class,
+	ReindexJobConfig.class,
+	ReindexEverythingJobConfig.class,
+	MdmClearJobConfig.class
 })
 public class BatchJobsConfig {
 
@@ -79,4 +85,20 @@ public class BatchJobsConfig {
 	 * Delete Expunge
 	 */
 	public static final String DELETE_EXPUNGE_JOB_NAME = "deleteExpungeJob";
+
+	/**
+	 * Reindex
+	 */
+	public static final String REINDEX_JOB_NAME = "reindexJob";
+
+	/**
+	 * Reindex Everything
+	 */
+	public static final String REINDEX_EVERYTHING_JOB_NAME = "reindexEverythingJob";
+
+	/**
+	 * MDM Clear
+	 */
+	public static final String MDM_CLEAR_JOB_NAME = "mdmClearJob";
+
 }

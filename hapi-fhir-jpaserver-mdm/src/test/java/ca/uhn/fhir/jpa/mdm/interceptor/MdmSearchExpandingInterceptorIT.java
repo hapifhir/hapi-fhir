@@ -2,14 +2,18 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import org.elasticsearch.common.collect.Set;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
@@ -20,6 +24,8 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
+
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -72,6 +78,19 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		//Once MDM Expansion is allowed, this should now return 4 resourecs.
 		myDaoConfig.setAllowMdmExpansion(true);
 		search = myObservationDao.search(searchParameterMap);
+		assertThat(search.size(), is(equalTo(4)));
+		List<MdmLink> all = myMdmLinkDao.findAll();
+		Long goldenPid = all.get(0).getGoldenResourcePid();
+		IIdType goldenId = myIdHelperService.translatePidIdToForcedId(myFhirContext, "Patient", new ResourcePersistentId(goldenPid));
+		//Verify that expansion by the golden resource id resolves down to everything its links have.
+
+		SearchParameterMap goldenSpMap = new SearchParameterMap();
+		goldenSpMap.setLoadSynchronous(true);
+		ReferenceOrListParam goldenReferenceOrListParam = new ReferenceOrListParam();
+		goldenReferenceOrListParam.addOr(new ReferenceParam(goldenId).setMdmExpand(true));
+		goldenSpMap.add(Observation.SP_SUBJECT, goldenReferenceOrListParam);
+
+		search = myObservationDao.search(goldenSpMap);
 		assertThat(search.size(), is(equalTo(4)));
 	}
 

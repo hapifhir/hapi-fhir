@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.provider;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
@@ -39,6 +41,24 @@ public class SearchParameterMapTest {
 		ourLog.info(queryString);
 		assertEquals("?birthdate=ge2001&birthdate=lt2002&name=bouvier,simpson&name=homer,jay&name:exact=ZZZ%3F", queryString);
 		assertEquals("?birthdate=ge2001&birthdate=lt2002&name=bouvier,simpson&name=homer,jay&name:exact=ZZZ?", UrlUtil.unescape(queryString));
+	}
+
+	@Test
+	public void testContainedParameterIsIncludedInNormalizedString() {
+		SearchParameterMap map = new SearchParameterMap();
+		map.add("name", new StringParam("Smith"));
+		map.setSearchContainedMode(SearchContainedModeEnum.TRUE);
+		String containedQueryString = map.toNormalizedQueryString(ourCtx);
+
+		SearchParameterMap uncontainedMap = new SearchParameterMap();
+		uncontainedMap.add("name", new StringParam("Smith"));
+		uncontainedMap.setSearchContainedMode(SearchContainedModeEnum.FALSE);
+		String uncontainedQueryString = uncontainedMap.toNormalizedQueryString(ourCtx);
+
+		ourLog.info(containedQueryString);
+		ourLog.info(uncontainedQueryString);
+		assertNotEquals(containedQueryString, uncontainedQueryString);
+
 	}
 
 	@Test

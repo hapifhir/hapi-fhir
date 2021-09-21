@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboTokensNonUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
@@ -34,7 +35,6 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
-import ca.uhn.fhir.jpa.stresstest.GiantTransactionPerfTest;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
@@ -109,6 +109,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @TestPropertySource(properties = {
@@ -160,6 +161,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
 	@Autowired
 	protected IResourceIndexedSearchParamDateDao myResourceIndexedSearchParamDateDao;
+	@Autowired
+	protected IResourceIndexedComboTokensNonUniqueDao myResourceIndexedComboTokensNonUniqueDao;
 	@Autowired
 	private IdHelperService myIdHelperService;
 	@Autowired
@@ -237,8 +240,9 @@ public abstract class BaseJpaTest extends BaseTest {
 		when(mySrd.getInterceptorBroadcaster()).thenReturn(mySrdInterceptorService);
 		when(mySrd.getUserData()).thenReturn(new HashMap<>());
 		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(new ArrayList<>());
-		when(mySrd.getServer().getDefaultPageSize()).thenReturn(null);
-		when(mySrd.getServer().getMaximumPageSize()).thenReturn(null);
+		// TODO enforce strict mocking everywhere
+		lenient().when(mySrd.getServer().getDefaultPageSize()).thenReturn(null);
+		lenient().when(mySrd.getServer().getMaximumPageSize()).thenReturn(null);
 	}
 
 	protected CountDownLatch registerLatchHookInterceptor(int theCount, Pointcut theLatchPointcut) {
@@ -303,6 +307,12 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void logAllDateIndexes() {
 		runInTransaction(() -> {
 			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected void logAllNonUniqueIndexes() {
+		runInTransaction(() -> {
+			ourLog.info("Non unique indexes:\n * {}", myResourceIndexedComboTokensNonUniqueDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 	}
 
@@ -692,26 +702,6 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	}
 
-	public static void waitForSize(int theTarget, Callable<Number> theCallable) throws Exception {
-		waitForSize(theTarget, 10000, theCallable);
-	}
-
-	@SuppressWarnings("BusyWait")
-	public static void waitForSize(int theTarget, int theTimeout, Callable<Number> theCallable) throws Exception {
-		StopWatch sw = new StopWatch();
-		while (theCallable.call().intValue() != theTarget && sw.getMillis() < theTimeout) {
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException theE) {
-				throw new Error(theE);
-			}
-		}
-		if (sw.getMillis() >= theTimeout) {
-			fail("Size " + theCallable.call() + " is != target " + theTarget);
-		}
-		Thread.sleep(500);
-	}
-
 	public static void waitForSize(int theTarget, Callable<Number> theCallable, Callable<String> theFailureMessage) throws Exception {
 		waitForSize(theTarget, 10000, theCallable, theFailureMessage);
 	}
@@ -731,6 +721,4 @@ public abstract class BaseJpaTest extends BaseTest {
 		}
 		Thread.sleep(500);
 	}
-
-
 }

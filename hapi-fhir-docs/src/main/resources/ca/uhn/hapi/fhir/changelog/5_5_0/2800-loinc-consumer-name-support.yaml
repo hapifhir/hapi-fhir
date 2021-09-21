@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2800
+title: "Allowed the optional inclusion of the LOINC Consumer Names archive in addition to 
+  the main LOINC distribution. If it is supplied, the consumer names CSV file will be scanned, 
+  and all consumer names will be added to uploaded Concepts as additional designations"
