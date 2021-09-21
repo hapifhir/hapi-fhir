@@ -1502,7 +1502,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 				OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
 				String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 				ourLog.info("Outcome:\n{}", encoded);
-				assertThat(encoded, containsString("Unknown code urn:oid:2.16.840.1.113883.6.238#2106-3AAA"));
+				assertThat(encoded, containsString("Unable to validate code urn:oid:2.16.840.1.113883.6.238#2106-3AAA"));
 			}
 		}
 		{
@@ -1713,7 +1713,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://fooVs"), null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 
 		assertFalse(result.isOk());
-		assertEquals("Unknown code http://loinc.org#10013-1 - Unable to locate ValueSet[http://fooVs]", result.getMessage());
+		assertEquals("Unable to validate code http://loinc.org#10013-1 - Unable to locate ValueSet[http://fooVs]", result.getMessage());
 	}
 
 

@@ -1521,11 +1521,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return createFailureCodeValidationResult(theSystem, theCode, null, " - Unknown code " + theSystem + "#" + theCode + ". " + msg);
 	}
 
-	private CodeValidationResult createFailureCodeValidationResult(String theSystem, String theCode) {
-		String append = "";
-		return createFailureCodeValidationResult(theSystem, theCode, null, append);
-	}
-
 	private CodeValidationResult createFailureCodeValidationResult(String theSystem, String theCode, String theCodeSystemVersion, String theAppend) {
 		return new CodeValidationResult()
 			.setSeverity(IssueSeverity.ERROR)
@@ -2097,7 +2092,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			}
 		}
 
-		return createFailureCodeValidationResult(theCodeSystem, theCode);
+		return createFailureCodeValidationResult(theCodeSystem, theCode, null, " - Code can not be found in CodeSystem");
 	}
 
 	IValidationSupport.CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theValidationOptions, String theValueSetUrl, String theCodeSystem, String theCode, String theDisplay) {
