@@ -84,6 +84,8 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -379,11 +381,12 @@ public class AuthorizationInterceptorR4Test {
 
 	@Test
 	public void testCustomCompartmentSpsOnMultipleInstances() throws Exception {
+		//Given
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				AdditionalCompartmentSearchParameters additionalCompartmentSearchParameters = new AdditionalCompartmentSearchParameters();
-				additionalCompartmentSearchParameters.addSearchParameters("device", "patient");
+				additionalCompartmentSearchParameters.addSearchParameters("Device:patient");
 				List<IdType> relatedIds = new ArrayList<>();
 				relatedIds.add(new IdType("Patient/123"));
 				relatedIds.add(new IdType("Patient/456"));
@@ -399,8 +402,6 @@ public class AuthorizationInterceptorR4Test {
 		HttpResponse status;
 
 		Patient patient;
-
-
 		patient = new Patient();
 		patient.setId("Patient/123");
 		Device d = new Device();
@@ -408,12 +409,89 @@ public class AuthorizationInterceptorR4Test {
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(d);
+
+		//When
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Device/124456");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		//Then
 		assertTrue(ourHitMethod);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 	}
+
+	@Test
+	public void testCustomSearchParamsDontOverPermit() throws Exception {
+		//Given
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				AdditionalCompartmentSearchParameters additionalCompartmentSearchParameters = new AdditionalCompartmentSearchParameters();
+				additionalCompartmentSearchParameters.addSearchParameters("Encounter:patient");
+				List<IdType> relatedIds = new ArrayList<>();
+				relatedIds.add(new IdType("Patient/123"));
+				return new RuleBuilder()
+					.allow().read().allResources()
+					.inCompartmentWithAdditionalSearchParams("Patient", relatedIds, additionalCompartmentSearchParameters)
+					.andThen().denyAll()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+
+		Patient patient;
+		patient = new Patient();
+		patient.setId("Patient/123");
+		Device d = new Device();
+		d.getPatient().setResource(patient);
+
+		ourHitMethod = false;
+		ourReturn = Collections.singletonList(d);
+
+		//When
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Device/124456");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+
+		//then
+		assertFalse(ourHitMethod);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+	}
+
+	@Test
+	public void testRuleBuilderAdditionalSearchParamsInvalidValues() {
+		//Too many colons
+		try {
+			AdditionalCompartmentSearchParameters additionalCompartmentSearchParameters = new AdditionalCompartmentSearchParameters();
+			additionalCompartmentSearchParameters.addSearchParameters("too:many:colons");
+			new RuleBuilder()
+				.allow().read().allResources()
+				.inCompartmentWithAdditionalSearchParams("Patient", new IdType("Patient/123"), additionalCompartmentSearchParameters)
+				.andThen().denyAll()
+				.build();
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertThat(e.getMessage(), is(equalTo("too:many:colons is not a valid search parameter. Search parameters must be in the form resourcetype:parametercode, e.g. 'Device:patient'")));
+		}
+
+
+		//No colons
+		try {
+			AdditionalCompartmentSearchParameters additionalCompartmentSearchParameters = new AdditionalCompartmentSearchParameters();
+			additionalCompartmentSearchParameters.addSearchParameters("no-colons");
+			new RuleBuilder()
+				.allow().read().allResources()
+				.inCompartmentWithAdditionalSearchParams("Patient", new IdType("Patient/123"), additionalCompartmentSearchParameters)
+				.andThen().denyAll()
+				.build();
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertThat(e.getMessage(), is(equalTo("no-colons is not a valid search parameter. Search parameters must be in the form resourcetype:parametercode, e.g. 'Device:patient'")));
+		}
+	}
+
 	@Test
 	public void testAllowByCompartmentUsingUnqualifiedIds() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {

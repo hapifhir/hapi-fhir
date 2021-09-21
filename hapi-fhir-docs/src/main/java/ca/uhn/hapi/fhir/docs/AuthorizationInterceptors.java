@@ -211,7 +211,7 @@ public class AuthorizationInterceptors {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				AdditionalCompartmentSearchParameters additionalSearchParams = new AdditionalCompartmentSearchParameters();
-				additionalSearchParams.addSearchParameters("device", "patient");
+				additionalSearchParams.addSearchParameters("device:patient", "device:subject");
 				return new RuleBuilder()
 					.allow().read().allResources().inCompartmentWithAdditionalSearchParams("Patient", new IdType("Patient/123"), additionalSearchParams)
 					.build();
