@@ -48,6 +48,7 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -738,7 +739,9 @@ public class FhirTerser {
 
 		//If passed an additional set of searchparameter names, add them for comparison purposes.
 		if (theAdditionalCompartmentParamNames != null) {
-			List<RuntimeSearchParam> additionalParams = theAdditionalCompartmentParamNames.stream().map(paramName -> sourceDef.getSearchParam(paramName)).collect(Collectors.toList());
+			List<RuntimeSearchParam> additionalParams = theAdditionalCompartmentParamNames.stream().map(sourceDef::getSearchParam)
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList());
 			if (params == null || params.isEmpty()) {
 				params = additionalParams;
 			} else {

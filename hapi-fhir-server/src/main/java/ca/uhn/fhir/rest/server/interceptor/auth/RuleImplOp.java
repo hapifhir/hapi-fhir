@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -382,7 +383,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					List<RuntimeSearchParam> params = sourceDef.getSearchParamsForCompartmentName(compartmentOwnerResourceType);
 
 					Set<String> additionalParamNames = myAdditionalCompartmentSearchParamMap.getSearchParamNamesForResourceType(sourceDef.getName());
-					List<RuntimeSearchParam> additionalParams = additionalParamNames.stream().map(sourceDef::getSearchParam).collect(Collectors.toList());
+					List<RuntimeSearchParam> additionalParams = additionalParamNames.stream().map(sourceDef::getSearchParam).filter(Objects::nonNull).collect(Collectors.toList());
 					if (params == null || params.isEmpty()) {
 						params = additionalParams;
 					} else {
