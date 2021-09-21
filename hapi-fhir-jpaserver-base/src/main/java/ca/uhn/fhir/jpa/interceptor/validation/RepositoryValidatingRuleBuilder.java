@@ -306,6 +306,15 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 			}
 
 			/**
+			 * Configure the validator to reject unknown extensions
+			 */
+			@Nonnull
+			public FinalizedRequireValidationRule rejectUnknownExtensions() {
+				myRule.getValidator().setAnyExtensionsAllowed(false);
+				return this;
+			}
+
+			/**
 			 * Configure the validator to not perform terminology validation
 			 */
 			@Nonnull

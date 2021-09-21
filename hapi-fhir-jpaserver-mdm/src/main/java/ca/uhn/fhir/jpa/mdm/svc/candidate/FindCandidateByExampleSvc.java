@@ -54,9 +54,9 @@ public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 	private IMdmMatchFinderSvc myMdmMatchFinderSvc;
 
 	/**
-	 * Attempt to find matching Golden Resources by resolving them from similar Matching target resources, where target resource
-	 * can be either Patient or Practitioner. Runs MDM logic over the existing target resources, then finds their
-	 * entries in the MdmLink table, and returns all the matches found therein.
+	 * Attempt to find matching Golden Resources by resolving them from similar Matching target resources. Runs MDM logic
+	 * over the existing target resources, then finds their entries in the MdmLink table, and returns all the matches
+	 * found therein.
 	 *
 	 * @param theTarget the {@link IBaseResource} which we want to find candidate Golden Resources for.
 	 * @return an Optional list of {@link MatchedGoldenResourceCandidate} indicating matches.
@@ -69,8 +69,8 @@ public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 
 		List<MatchedTarget> matchedCandidates = myMdmMatchFinderSvc.getMatchedTargets(myFhirContext.getResourceType(theTarget), theTarget);
 
-		//Convert all possible match targets to their equivalent Golden Resources by looking up in the MdmLink table,
-		//while ensuring that the matches aren't in our NO_MATCH list.
+		// Convert all possible match targets to their equivalent Golden Resources by looking up in the MdmLink table,
+		// while ensuring that the matches aren't in our NO_MATCH list.
 		// The data flow is as follows ->
 		// MatchedTargetCandidate -> Golden Resource -> MdmLink -> MatchedGoldenResourceCandidate
 		matchedCandidates = matchedCandidates.stream().filter(mc -> mc.isMatch() || mc.isPossibleMatch()).collect(Collectors.toList());
