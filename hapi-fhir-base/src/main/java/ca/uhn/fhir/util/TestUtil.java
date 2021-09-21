@@ -192,4 +192,26 @@ public class TestUtil {
 		return stripReturns(theString).replace(" ", "");
 	}
 
+	public static void sleepAtLeast(long theMillis) {
+		sleepAtLeast(theMillis, true);
+	}
+
+
+	@SuppressWarnings("BusyWait")
+	public static void sleepAtLeast(long theMillis, boolean theLogProgress) {
+		long start = System.currentTimeMillis();
+		while (System.currentTimeMillis() <= start + theMillis) {
+			try {
+				long timeSinceStarted = System.currentTimeMillis() - start;
+				long timeToSleep = Math.max(0, theMillis - timeSinceStarted);
+				if (theLogProgress) {
+					ourLog.info("Sleeping for {}ms", timeToSleep);
+				}
+				Thread.sleep(timeToSleep);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				ourLog.error("Interrupted", e);
+			}
+		}
+	}
 }

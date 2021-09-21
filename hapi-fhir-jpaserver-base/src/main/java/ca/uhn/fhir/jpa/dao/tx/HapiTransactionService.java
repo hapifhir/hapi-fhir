@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.util.TestUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.slf4j.Logger;
@@ -118,7 +119,7 @@ public class HapiTransactionService {
 					theTransactionDetails.clearUserData(BaseHapiFhirDao.XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
 					double sleepAmount = (250.0d * i) * Math.random();
 					long sleepAmountLong = (long) sleepAmount;
-					sleepAtLeast(sleepAmountLong, false);
+					TestUtil.sleepAtLeast(sleepAmountLong, false);
 
 					ourLog.info("About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.", sleepAmountLong);
 					continue;
@@ -162,24 +163,6 @@ public class HapiTransactionService {
 
 		public MyException(Throwable theThrowable) {
 			super(theThrowable);
-		}
-	}
-
-	@SuppressWarnings("BusyWait")
-	public static void sleepAtLeast(long theMillis, boolean theLogProgress) {
-		long start = System.currentTimeMillis();
-		while (System.currentTimeMillis() <= start + theMillis) {
-			try {
-				long timeSinceStarted = System.currentTimeMillis() - start;
-				long timeToSleep = Math.max(0, theMillis - timeSinceStarted);
-				if (theLogProgress) {
-					ourLog.info("Sleeping for {}ms", timeToSleep);
-				}
-				Thread.sleep(timeToSleep);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				ourLog.error("Interrupted", e);
-			}
 		}
 	}
 }
