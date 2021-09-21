@@ -148,6 +148,11 @@ public class Builder {
 				super.addTask(theTask);
 			}
 		}
+
+		public BuilderAddTableByColumns failureAllowed() {
+			myTask.setFailureAllowed(true);
+			return this;
+		}
 	}
 
 	public static class BuilderWithTableName implements BaseMigrationTasks.IAcceptsTasks {

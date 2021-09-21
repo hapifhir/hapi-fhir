@@ -254,6 +254,13 @@ public class JdbcUtils {
 								return new ColumnType(ColumnTypeEnum.DATE_TIMESTAMP, length);
 							case Types.BLOB:
 								return new ColumnType(ColumnTypeEnum.BLOB, length);
+							case Types.VARBINARY:
+								if (theConnectionProperties.getDriverType().equals(DriverTypeEnum.MSSQL_2012)) {
+									// MS SQLServer seems to be mapping BLOB to VARBINARY under the covers, so we need to reverse that mapping
+									return new ColumnType(ColumnTypeEnum.BLOB, length);
+								} else {
+									throw new IllegalArgumentException("Don't know how to handle datatype " + dataType + " for column " + theColumnName + " on table " + theTableName);
+								}
 							case Types.CLOB:
 								return new ColumnType(ColumnTypeEnum.CLOB, length);
 							case Types.DOUBLE:
