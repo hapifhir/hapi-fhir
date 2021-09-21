@@ -513,6 +513,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	}
 
 
+	protected void print(String message, IBaseResource ... theResource) {
 		if (StringUtils.isNotEmpty(message)) {
 			ourLog.info(message);
 		}
@@ -526,15 +527,6 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		print(null, theResource);
 	}
 
-
-
-	protected void printResources(String theResourceType) {
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResourceType);
-		IBundleProvider search = dao.search(new SearchParameterMap());
-		search.getResources(0, search.size()).forEach(r -> {
-			print(r);
-		});
-	}
 
 
 	protected void printLinks() {

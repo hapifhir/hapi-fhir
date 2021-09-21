@@ -197,6 +197,28 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testSearchInExistingTransaction() {
+		createPatient(withBirthdate("2021-01-01"));
+
+		// Search in a new transaction
+		IBundleProvider outcome = runInTransaction(() -> {
+			return myPatientDao.search(new SearchParameterMap().add(Patient.SP_BIRTHDATE, new DateParam("lt2022")));
+		});
+		assertEquals(1, outcome.sizeOrThrowNpe());
+		assertEquals(1, outcome.getResources(0, 999).size());
+
+		// Search and fetch in a new transaction
+		runInTransaction(() -> {
+			IBundleProvider outcome2 = myPatientDao.search(new SearchParameterMap().add(Patient.SP_BIRTHDATE, new DateParam("lt2022")));
+			assertEquals(1, outcome2.sizeOrThrowNpe());
+			assertEquals(1, outcome2.getResources(0, 999).size());
+		});
+
+	}
+
+
+
+	@Test
 	public void testCanonicalReference() {
 		StructureDefinition sd = new StructureDefinition();
 		sd.getSnapshot().addElement().getBinding().setValueSet("http://foo");
