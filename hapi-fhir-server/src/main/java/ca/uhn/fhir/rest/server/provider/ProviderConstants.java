@@ -152,6 +152,11 @@ public class ProviderConstants {
 	public static final String OPERATION_REINDEX = "$reindex";
 
 	/**
+	 * Operation name for the $invalidate-expansion operation
+	 */
+	public static final String OPERATION_INVALIDATE_EXPANSION = "$invalidate-expansion";
+
+	/**
 	 * url of resources to delete for the $delete-expunge operation
 	 */
 	public static final String OPERATION_REINDEX_PARAM_URL = "url";

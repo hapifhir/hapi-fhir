@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
@@ -1371,6 +1372,44 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 
+	}
+
+	@Test
+	public void testInvalidatePrecalculatedExpansion() throws IOException {
+		loadAndPersistCodeSystemAndValueSet();
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndNullVersion("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2").orElseThrow(()->new IllegalStateException()).getExpansionStatus()));
+
+		Parameters outcome = myClient
+			.operation()
+			.onInstance("ValueSet/vs")
+			.named(ProviderConstants.OPERATION_INVALIDATE_EXPANSION)
+			.withNoParameters(Parameters.class)
+			.execute();
+		assertEquals("A", outcome.getParameter("message").primitiveValue());
+
+		assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndNullVersion("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2").orElseThrow(()->new IllegalStateException()).getExpansionStatus()));
+
+		outcome = myClient
+			.operation()
+			.onInstance("ValueSet/vs")
+			.named(ProviderConstants.OPERATION_INVALIDATE_EXPANSION)
+			.withNoParameters(Parameters.class)
+			.execute();
+		assertEquals("A", outcome.getParameter("message").primitiveValue());
+	}
+
+	@Test
+	public void testInvalidatePrecalculatedExpansion_NonExistent() {
+		Parameters outcome = myClient
+			.operation()
+			.onInstance("ValueSet/FOO")
+			.named(ProviderConstants.OPERATION_INVALIDATE_EXPANSION)
+			.withNoParameters(Parameters.class)
+			.execute();
+		assertEquals("A", outcome.getParameter("message").primitiveValue());
 	}
 
 	@Test

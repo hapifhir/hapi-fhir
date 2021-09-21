@@ -1413,23 +1413,29 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	@Override
 	@Transactional
-	public void invalidatePreCalculatedExpansion(IIdType theValueSetId, RequestDetails theRequestDetails) {
+	public String invalidatePreCalculatedExpansion(IIdType theValueSetId, RequestDetails theRequestDetails) {
 		IBaseResource valueSet = myDaoRegistry.getResourceDao("ValueSet").read(theValueSetId, theRequestDetails);
 		ValueSet canonicalValueSet = toCanonicalValueSet(valueSet);
 		Optional<TermValueSet> optionalTermValueSet = fetchValueSetEntity(canonicalValueSet);
 		if (!optionalTermValueSet.isPresent()) {
-			return;
+			return myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "valueSetNotFoundInTerminologyDatabase", theValueSetId);
 		}
 
 		ourLog.info("Invalidating pre-calculated expansion on ValueSet {} / {}", theValueSetId, canonicalValueSet.getUrl());
 
 		TermValueSet termValueSet = optionalTermValueSet.get();
+		if (termValueSet.getExpansionStatus() == TermValueSetPreExpansionStatusEnum.NOT_EXPANDED) {
+			return myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "valueSetCantInvalidateNotYetPrecalculated", termValueSet.getUrl(), termValueSet.getExpansionStatus());
+		}
+
+		Long totalConcepts = termValueSet.getTotalConcepts();
 
 		deletePreCalculatedValueSetContents(termValueSet);
 
 		termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
 		termValueSet.setExpansionTimestamp(null);
 		myValueSetDao.save(termValueSet);
+		return myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "valueSetPreExpansionInvalidated", termValueSet.getUrl(), totalConcepts);
 	}
 
 
