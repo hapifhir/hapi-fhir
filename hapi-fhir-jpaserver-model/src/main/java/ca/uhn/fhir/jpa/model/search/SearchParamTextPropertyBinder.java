@@ -77,9 +77,16 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 				.analyzer("exactAnalyzer") // default max-length is 256.  Is that enough for code system uris?
 				.projectable(Projectable.NO);
 
+
+		// the old style.
+		// wipmb move _text and _contains into sp with backwards compat in the query path.
+		indexSchemaElement
+			.fieldTemplate("SearchParamText", textType)
+			.matchingPathGlob(SEARCH_PARAM_TEXT_PREFIX + "*");
+
+		// this is a bit ugly.  We need to enforce order and dependency or the object matches will be too big.
 		IndexSchemaObjectField spfield = indexSchemaElement.objectField("sp", ObjectStructure.FLATTENED);
 		IndexObjectFieldReference sp = spfield.toReference();
-
 
 		// Note: the lucene/elastic independent api is hurting a bit here.
 		// For lucene, we need a separate field for each analyzer.  So we'll add string (for :exact), and text (for :text).
@@ -87,7 +94,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		// But for elastic, I'd rather have a single field defined, with multi-field sub-fields.  The index cost is the same,
 		// but elastic will actually store all fields in the source document.
 		spfield.objectFieldTemplate("stringIndex", ObjectStructure.FLATTENED).matchingPathGlob("*.string");
-		spfield.fieldTemplate("text", textType).matchingPathGlob("*.string.text");
+		spfield.fieldTemplate("string-text", textType).matchingPathGlob("*.string.text");
 
 		// token
 		// Ideally, we'd store a single code-system string and use a custom tokenizer to
@@ -95,13 +102,10 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		// But the standard tokenizers aren't that flexible.  As second best, it would be nice to use elastic multi-fields
 		// to apply three different tokenziers to a single value.
 		// Instead, just be simple and expand into three full fields
+		spfield.objectFieldTemplate("tokenIndex", ObjectStructure.FLATTENED).matchingPathGlob("*.token");
 		spfield.fieldTemplate("token-code", tokenType).matchingPathGlob("*.token.code").multiValued();
 		spfield.fieldTemplate("token-code-system", tokenType).matchingPathGlob("*.token.code-system").multiValued();
 		spfield.fieldTemplate("token-system", tokenType).matchingPathGlob("*.token.system").multiValued();
-
-		indexSchemaElement
-			.fieldTemplate("SearchParamText", textType)
-			.matchingPathGlob(SEARCH_PARAM_TEXT_PREFIX + "*");
 
 		// last, since the globs are matched in declaration order, and * matches even nested nodes.
 		spfield.objectFieldTemplate("spObject", ObjectStructure.FLATTENED).matchingPathGlob("*")
