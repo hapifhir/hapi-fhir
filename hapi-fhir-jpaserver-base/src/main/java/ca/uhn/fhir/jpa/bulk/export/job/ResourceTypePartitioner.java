@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportDaoSvc;
 import org.slf4j.Logger;
 import org.springframework.batch.core.partition.support.Partitioner;
@@ -60,7 +61,7 @@ public class ResourceTypePartitioner implements Partitioner {
 
 				// The worker step needs to know which parent job it is processing for, and which collection entity it will be
 				// attaching its results to.
-				context.putString(BulkExportJobConfig.JOB_UUID_PARAMETER, myJobUUID);
+				context.putString(BatchConstants.JOB_UUID_PARAMETER, myJobUUID);
 				context.putLong("bulkExportCollectionEntityId", collectionEntityId);
 
 				// Name the partition based on the resource type

@@ -20,18 +20,14 @@ package ca.uhn.fhir.jpa.reindex.job;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterValidator;
 import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
 import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
-import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
-import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,7 +35,7 @@ import org.springframework.context.annotation.Lazy;
 
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.REINDEX_JOB_NAME;
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.REINDEX_JOB_NAME;
 
 /**
  * Spring batch Job configuration file. Contains all necessary plumbing to run a
