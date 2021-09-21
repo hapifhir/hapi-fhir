@@ -526,6 +526,11 @@ public class Builder {
 				super.addTask(theTask);
 			}
 		}
+
+		public BuilderAddTableByColumns failureAllowed() {
+			myTask.setFailureAllowed(true);
+			return this;
+		}
 	}
 
 }

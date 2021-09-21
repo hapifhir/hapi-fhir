@@ -220,6 +220,14 @@ public class TestUtil {
 
 		}
 
+		for (Class<?> innerClass : theClazz.getDeclaredClasses()) {
+			Embeddable embeddable = innerClass.getAnnotation(Embeddable.class);
+			if (embeddable != null) {
+				scanClassOrSuperclass(theNames, innerClass, false, columnNameToLength);
+			}
+
+		}
+
 		if (theClazz.getSuperclass().equals(Object.class)) {
 			return;
 		}
