@@ -71,6 +71,12 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 				// wip mb where do we do unicode normalization?  Java-side, or in the analyzer?
 				.analyzer("standardAnalyzer")
 				.projectable(Projectable.NO);
+
+		StringIndexFieldTypeOptionsStep<?> tokenType =
+			indexFieldTypeFactory.asString()
+				.analyzer("exactAnalyzer") // default max-length is 256.  Is that enough for code system uris?
+				.projectable(Projectable.NO);
+
 		IndexSchemaObjectField spfield = indexSchemaElement.objectField("sp", ObjectStructure.FLATTENED);
 		IndexObjectFieldReference sp = spfield.toReference();
 
@@ -82,14 +88,24 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		// but elastic will actually store all fields in the source document.
 		spfield.objectFieldTemplate("stringIndex", ObjectStructure.FLATTENED).matchingPathGlob("*.string");
 		spfield.fieldTemplate("text", textType).matchingPathGlob("*.string.text");
-		spfield.fieldTemplate("token", textType).matchingPathGlob("*.token.*").multiValued();
+
+		// token
+		// Ideally, we'd store a single code-system string and use a custom tokenizer to
+		// generate "system|" "|code" and "system|code" tokens to support all three.
+		// But the standard tokenizers aren't that flexible.  As second best, it would be nice to use elastic multi-fields
+		// to apply three different tokenziers to a single value.
+		// Instead, just be simple and expand into three full fields
+		spfield.fieldTemplate("token-code", tokenType).matchingPathGlob("*.token.code").multiValued();
+		spfield.fieldTemplate("token-code-system", tokenType).matchingPathGlob("*.token.code-system").multiValued();
+		spfield.fieldTemplate("token-system", tokenType).matchingPathGlob("*.token.system").multiValued();
 
 		indexSchemaElement
 			.fieldTemplate("SearchParamText", textType)
 			.matchingPathGlob(SEARCH_PARAM_TEXT_PREFIX + "*");
 
 		// last, since the globs are matched in declaration order, and * matches even nested nodes.
-		spfield.objectFieldTemplate("spObject", ObjectStructure.FLATTENED).matchingPathGlob("*").multiValued();
+		spfield.objectFieldTemplate("spObject", ObjectStructure.FLATTENED).matchingPathGlob("*")
+			.multiValued(); // wipmb we can remove this when we memoize the node during index construction.
 	}
 
 	@Override

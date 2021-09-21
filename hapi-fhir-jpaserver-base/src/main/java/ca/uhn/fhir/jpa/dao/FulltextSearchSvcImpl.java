@@ -28,6 +28,7 @@ import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
+import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -35,7 +36,6 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
@@ -44,6 +44,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.search.engine.search.common.BooleanOperator;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
+import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
@@ -95,9 +96,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 		// wip mb - add string params to indexing.
 		// wipmb weird - theNewParams seems to have some doubles.
-		RuntimeResourceDefinition resourceDefinition = theContext.getResourceDefinition(theResource);
-		IFhirPath iFhirPath = theContext.newFhirPath();
-
+		// wipmb introduce a new intermediate form
 		theNewParams.myStringParams.stream()
 				.forEach(param -> {
 					retVal.addStringIndexData(param.getParamName(), param.getValueExact());
@@ -108,30 +107,56 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					retVal.addTokenIndexData(param.getParamName(), param.getSystem(), param.getValue());
 				});
 
-		//WIP Below is the old way we were doing this.
-//		resourceDefinition.getSearchParams().stream()
-//			.map(sp->new LuceneRuntimeSearchParam(sp, iFhirPath, mySearchParamExtractor))
-//			.forEach(lsp -> lsp.extractLuceneIndexData(theResource, retVal));
 		return retVal;
 	}
 
-	private void addTokenSearch(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, List<List<IQueryParameterType>> theTerms, String theFieldName) {
+	// wipmb token query
+	private void addTokenSearch(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, List<List<IQueryParameterType>> theTerms, String theSearchParamName) {
 		if (theTerms == null){
 			return;
 		}
 		for (List<? extends IQueryParameterType> nextAnd: theTerms) {
-			Set<String> terms = extractOrTokenParams(nextAnd);
-			if (terms.size() == 1) {
-				terms.stream().forEach(term -> {
-					b.must(f.match().field(theFieldName).matching(term));
-				});
-			}
+			String indexFieldPrefix = "sp." + theSearchParamName + ".token";
+
+			List<? extends PredicateFinalStep> clauses = theTerms.stream().map(term -> {
+				// wip can this be untrue?
+				TokenParam token = (TokenParam) term;
+				if (StringUtils.isBlank(token.getSystem())) {
+					// bare value
+					return f.match().field(indexFieldPrefix + ".code").matching(token.getValue());
+				} else if (StringUtils.isBlank(token.getValue())) {
+					// system without value
+					return f.match().field(indexFieldPrefix + ".system").matching(token.getSystem());
+				} else {
+					// system + value
+					return f.match().field(indexFieldPrefix + ".code-system").matching(token.getValueAsQueryToken(myFhirContext));
+				}
+			}).collect(Collectors.toList());
+
+			PredicateFinalStep finalClause = orPredicateOrSingle(f, clauses);
+			b.must(finalClause);
 		}
 
 	}
 
-	private Set<String> extractOrTokenParams(List<? extends IQueryParameterType> nextAnd) {
-		return nextAnd.stream().map(param -> param.getValueAsQueryToken(myFhirContext)).collect(Collectors.toSet());
+	/**
+	 * Provide an OR wrapper around a list of predicates.
+	 * Returns the sole predicate if it solo, or wrap as a bool/should for OR semantics.
+	 *
+	 * @param thePredicateFactory
+	 * @param theOrList a list containing at least 1 predicate
+	 * @return a predicate providing or-sematics over the list.
+	 */
+	private PredicateFinalStep orPredicateOrSingle(SearchPredicateFactory thePredicateFactory, List<? extends PredicateFinalStep> theOrList) {
+		PredicateFinalStep finalClause;
+		if (theOrList.size() == 1) {
+			finalClause = theOrList.get(0);
+		} else {
+			BooleanPredicateClausesStep<?> orClause = thePredicateFactory.bool();
+			theOrList.forEach(orClause::should);
+			finalClause = orClause;
+		}
+		return finalClause;
 	}
 
 	private void addTextSearch(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, List<List<IQueryParameterType>> theTerms, String theFieldName) {
@@ -140,7 +165,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		}
 		for (List<? extends IQueryParameterType> nextAnd : theTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
-			//TODO GGG: MB, did you mean for this to say >= 1?
+			//fixme GGG: MB, did you mean for this to say >= 1?
 			if (terms.size() == 1) {
 				String query = terms.stream()
 					.map(s->"(" + s + ")")
@@ -149,7 +174,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					.field(theFieldName)
 					.boost(4.0f)
 					.matching(query)
-					.analyzer("standardAnalyzer")
+					.analyzer(HapiLuceneAnalysisConfigurer.STANDARD_ANALYZER)
 					.defaultOperator(BooleanOperator.AND)); // term value may contain multiple tokens.  Require all of them to be present.
 			} else if (terms.size() > 1) {
 				String joinedTerms = StringUtils.join(terms, ' ');
@@ -186,7 +211,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		SearchSession session = Search.session(myEntityManager);
 		List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
 		List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
-		List<List<IQueryParameterType>> remove = theParams.remove("code");
 
 		/*
 		 * We save an elastic document something like this.
@@ -239,7 +263,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					 */
 					//TODO GGG build this dynamically. Do we even need _anything_ taht isn't code-system? i feel like every token search will match code-system,
 					//and storing code AND system separately is an actual waste
-					addTokenSearch(f, b, remove, "sp.code.token.code-system" );
+//					List<List<IQueryParameterType>> remove = theParams.remove("code");
+//					addTokenSearch(f, b, remove, "sp.code.token.code-system" );
 
 					//DSTU2 doesn't support fhirpath, so fall back to old style lookup.
 					if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
@@ -250,10 +275,15 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 							RuntimeSearchParam activeParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, nextParam);
 							switch (activeParam.getParamType()) {
 								case TOKEN:
-									List<List<IQueryParameterType>> andOrTerms = theParams.removeByNameAndQualifier(nextParam, TokenParamModifier.TEXT);
-									if (andOrTerms != null && !andOrTerms.isEmpty()) {
-										addTextSearch(f, b, andOrTerms, "sp." + nextParam + ".string.text");
+									List<List<IQueryParameterType>> codeTextAndOrTerms = theParams.removeByNameAndQualifier(nextParam, TokenParamModifier.TEXT);
+									if (codeTextAndOrTerms != null && !codeTextAndOrTerms.isEmpty()) {
+										addTextSearch(f, b, codeTextAndOrTerms, "sp." + nextParam + ".string.text");
 									}
+									List<List<IQueryParameterType>> codeUnmodifiedAndOrTerms = theParams.removeByNameAndQualifier(nextParam, TokenParamModifier.TEXT);
+									if (codeUnmodifiedAndOrTerms != null && !codeUnmodifiedAndOrTerms.isEmpty()) {
+										addTokenSearch(f, b, codeUnmodifiedAndOrTerms, nextParam);
+									}
+
 									break;
 								default:
 									// we only support token :text for now.

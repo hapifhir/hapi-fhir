@@ -41,6 +41,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class HapiLuceneAnalysisConfigurer implements LuceneAnalysisConfigurer {
 
+	public static final String STANDARD_ANALYZER = "standardAnalyzer";
+
 	@Override
 	public void configure(LuceneAnalysisConfigurationContext theLuceneCtx) {
 		theLuceneCtx.analyzer("autocompleteEdgeAnalyzer").custom()
@@ -73,7 +75,7 @@ public class HapiLuceneAnalysisConfigurer implements LuceneAnalysisConfigurer {
 			.param("minGramSize", "3")
 			.param("maxGramSize", "20");
 
-		theLuceneCtx.analyzer("standardAnalyzer").custom()
+		theLuceneCtx.analyzer(STANDARD_ANALYZER).custom()
 			.tokenizer(StandardTokenizerFactory.class)
 			.tokenFilter(LowerCaseFilterFactory.class);
 

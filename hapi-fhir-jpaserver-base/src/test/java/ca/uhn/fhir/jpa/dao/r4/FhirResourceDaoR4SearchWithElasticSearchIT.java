@@ -149,37 +149,53 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 	@Test
 	public void testResourceCodeTokenSearch() {
-		IIdType observationId;
+		IIdType id1, id2, id2b;
 
+		// wipmb
 		String system = "http://loinc.org";
-		String value = "29463-7";
-		String display = "Body weight as measured by me";
+		{
+			Observation obs1 = new Observation();
+			obs1.getCode().setText("Systolic Blood Pressure");
+			obs1.getCode().addCoding().setCode("obs1").setSystem(system).setDisplay("Systolic Blood Pressure");
+			obs1.setStatus(Observation.ObservationStatus.FINAL);
+			obs1.setValue(new Quantity(123));
+			obs1.getNoteFirstRep().setText("obs1");
+			id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+		}
 		{
 			Observation obs2 = new Observation();
 			obs2.getCode().setText("Body Weight");
-			obs2.getCode().addCoding().setCode(value).setSystem(system).setDisplay(display);
+			obs2.getCode().addCoding().setCode("obs2").setSystem(system).setDisplay("Body weight as measured by me");
 			obs2.setStatus(Observation.ObservationStatus.FINAL);
 			obs2.setValue(new Quantity(81));
-			observationId = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+			id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+			//ourLog.info("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
+		}
+		{
+			Observation obs2b = new Observation();
+			obs2b.getCode().addCoding().setCode("obs2").setSystem("http://example.com").setDisplay("A trick system");
+			obs2b.setStatus(Observation.ObservationStatus.FINAL);
+			obs2b.setValue(new Quantity(81));
+			id2b = myObservationDao.create(obs2b, mySrd).getId().toUnqualifiedVersionless();
 			//ourLog.info("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
 		}
 		{
 			// search just code
 			SearchParameterMap map = new SearchParameterMap();
-			map.add("code", new TokenParam(null, value));
-			assertThat("Search by any word", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(observationId)));
+			map.add("code", new TokenParam(null, "obs2"));
+			assertThat("Search by code", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2, id2b)));
 		}
 		{
 			// search just system
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam(system, null));
-			assertThat("Search by any word", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(observationId)));
+			assertThat("Search by system", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1,id2)));
 		}
 		{
 			// search code and system
 			SearchParameterMap map = new SearchParameterMap();
-			map.add("code", new TokenParam(system, value));
-			assertThat("Search by any word", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(observationId)));
+			map.add("code", new TokenParam(system, "obs2"));
+			assertThat("Search by system and code", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
 		}
 	}
 
