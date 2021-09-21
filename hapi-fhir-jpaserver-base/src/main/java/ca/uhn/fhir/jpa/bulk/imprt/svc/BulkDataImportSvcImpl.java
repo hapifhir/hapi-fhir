@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.bulk.imprt.svc;
  */
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
@@ -79,7 +79,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	@Autowired
 	private IBatchJobSubmitter myJobSubmitter;
 	@Autowired
-	@Qualifier(BatchJobsConfig.BULK_IMPORT_JOB_NAME)
+	@Qualifier(BatchConstants.BULK_IMPORT_JOB_NAME)
 	private org.springframework.batch.core.Job myBulkImportJob;
 	@Autowired
 	private DaoConfig myDaoConfig;
@@ -271,7 +271,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		ValidateUtil.isTrueOrThrowInvalidRequest(batchSize > 0, "Batch size must be positive");
 
 		JobParametersBuilder parameters = new JobParametersBuilder()
-			.addString(BulkExportJobConfig.JOB_UUID_PARAMETER, jobId)
+			.addString(BatchConstants.JOB_UUID_PARAMETER, jobId)
 			.addLong(BulkImportJobConfig.JOB_PARAM_COMMIT_INTERVAL, (long) batchSize);
 
 		if (isNotBlank(theBulkExportJobEntity.getJobDescription())) {

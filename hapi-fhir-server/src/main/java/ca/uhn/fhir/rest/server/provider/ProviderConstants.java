@@ -170,4 +170,13 @@ public class ProviderConstants {
 	 * The Spring Batch job id of the delete expunge job created by a $delete-expunge operation
 	 */
 	public static final String OPERATION_REINDEX_RESPONSE_JOB_ID = "jobId";
+
+	@Deprecated
+	public static final String MARK_ALL_RESOURCES_FOR_REINDEXING = "$mark-all-resources-for-reindexing";
+	/**
+	 * @see ProviderConstants#OPERATION_REINDEX
+	 * @deprecated
+	 */
+	@Deprecated
+	public static final String PERFORM_REINDEXING_PASS = "$perform-reindexing-pass";
 }

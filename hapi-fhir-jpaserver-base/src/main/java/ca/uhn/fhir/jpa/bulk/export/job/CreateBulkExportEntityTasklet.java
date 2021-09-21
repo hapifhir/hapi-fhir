@@ -20,10 +20,11 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -42,18 +43,27 @@ public class CreateBulkExportEntityTasklet implements Tasklet {
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
 
+	public static void addUUIDToJobContext(ChunkContext theChunkContext, String theJobUUID) {
+		theChunkContext
+			.getStepContext()
+			.getStepExecution()
+			.getJobExecution()
+			.getExecutionContext()
+			.putString(BatchConstants.JOB_UUID_PARAMETER, theJobUUID);
+	}
+
 	@Override
 	public RepeatStatus execute(StepContribution theStepContribution, ChunkContext theChunkContext) throws Exception {
 		Map<String, Object> jobParameters = theChunkContext.getStepContext().getJobParameters();
 
 		//We can leave early if they provided us with an existing job.
-		if (jobParameters.containsKey(BulkExportJobConfig.JOB_UUID_PARAMETER)) {
-			addUUIDToJobContext(theChunkContext, (String)jobParameters.get(BulkExportJobConfig.JOB_UUID_PARAMETER));
+		if (jobParameters.containsKey(BatchConstants.JOB_UUID_PARAMETER)) {
+			addUUIDToJobContext(theChunkContext, (String) jobParameters.get(BatchConstants.JOB_UUID_PARAMETER));
 			return RepeatStatus.FINISHED;
 		} else {
-			String resourceTypes = (String)jobParameters.get("resourceTypes");
-			Date since = (Date)jobParameters.get("since");
-			String filters = (String)jobParameters.get("filters");
+			String resourceTypes = (String) jobParameters.get("resourceTypes");
+			Date since = (Date) jobParameters.get("since");
+			String filters = (String) jobParameters.get("filters");
 			Set<String> filterSet;
 			if (StringUtils.isBlank(filters)) {
 				filterSet = null;
@@ -85,14 +95,5 @@ public class CreateBulkExportEntityTasklet implements Tasklet {
 			addUUIDToJobContext(theChunkContext, jobInfo.getJobId());
 			return RepeatStatus.FINISHED;
 		}
-	}
-
-	public static void addUUIDToJobContext(ChunkContext theChunkContext, String theJobUUID) {
-		theChunkContext
-			.getStepContext()
-			.getStepExecution()
-			.getJobExecution()
-			.getExecutionContext()
-			.putString(BulkExportJobConfig.JOB_UUID_PARAMETER, theJobUUID);
 	}
 }
