@@ -55,7 +55,7 @@ public class ReindexProvider {
 		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_PARAM_EVERYTHING, typeName = "boolean", min = 0, max = 1) IPrimitiveType<Boolean> theEverything,
 		RequestDetails theRequestDetails
 	) {
-		Boolean everything = theEverything != null && theEverything.getValue();
+		boolean everything = theEverything != null && theEverything.getValue();
 		@Nullable Integer batchSize = myMultiUrlProcessor.getBatchSize(theBatchSize);
 		if (everything) {
 			return processEverything(batchSize, theRequestDetails);
@@ -70,9 +70,9 @@ public class ReindexProvider {
 	private IBaseParameters processEverything(Integer theBatchSize, RequestDetails theRequestDetails) {
 		try {
 			JobExecution jobExecution = myReindexJobSubmitter.submitEverythingJob(theBatchSize, theRequestDetails);
-			IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
-			ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, jobExecution.getJobId());
-			return retval;
+			IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
+			ParametersUtil.addParameterToParametersLong(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, jobExecution.getJobId());
+			return retVal;
 		} catch (JobParametersInvalidException e) {
 			throw new InvalidRequestException("Invalid job parameters: " + e.getMessage(), e);
 		}

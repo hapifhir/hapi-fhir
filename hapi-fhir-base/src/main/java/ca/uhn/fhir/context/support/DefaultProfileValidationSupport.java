@@ -224,8 +224,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 			url = URL_PREFIX_STRUCTURE_DEFINITION_BASE + url;
 		}
 		Map<String, IBaseResource> structureDefinitionMap = provideStructureDefinitionMap();
-		IBaseResource retVal = structureDefinitionMap.get(url);
-		return retVal;
+		return structureDefinitionMap.get(url);
 	}
 
 	@Override

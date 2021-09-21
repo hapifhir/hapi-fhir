@@ -693,7 +693,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		boolean retVal = false;
 
 		for (FhirVersionIndependentConcept next : nextCodeList) {
-			if (includeOrExcludeSystemResource != null && isNotBlank(theWantCode)) {
+			if (includeOrExcludeSystemResource != null && theWantCode != null) {
 				boolean matches;
 				if (includeOrExcludeSystemResource.getCaseSensitive()) {
 					matches = theWantCode.equals(next.getCode());
