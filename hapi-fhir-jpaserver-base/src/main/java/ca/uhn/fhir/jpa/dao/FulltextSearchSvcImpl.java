@@ -122,6 +122,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					switch (modifier) {
 						case Constants.PARAMQUALIFIER_TOKEN_TEXT:
 						case Constants.PARAMQUALIFIER_STRING_EXACT:
+						case Constants.PARAMQUALIFIER_STRING_CONTAINS:
 							// we support string:text, string:exact
 							return true;
 						default:
@@ -184,6 +185,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 								List<List<IQueryParameterType>> stringExactAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_STRING_EXACT);
 								builder.addStringExactSearch(nextParam, stringExactAndOrTerms);
 
+								List<List<IQueryParameterType>> stringContainsAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_STRING_CONTAINS);
+								builder.addStringContainsSearch(nextParam, stringContainsAndOrTerms);
 								// wip mb add string norm and exact
 								break;
 

@@ -336,7 +336,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	@Test
 	public void testStringSearch() {
 		// wipmb string search test
-		IIdType id1, id2, id3, id4;
+		IIdType id1, id2, id3, id4, id5;
+		myDaoConfig.setAllowContainsSearches(true);
 
 		{
 			Observation obs1 = new Observation();
@@ -345,15 +346,15 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
 		}
 		{
-			Observation obs1 = new Observation();
-			obs1.setStatus(Observation.ObservationStatus.FINAL);
-			obs1.setValue(new StringType("green"));
-			id2 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+			Observation obs2 = new Observation();
+			obs2.setStatus(Observation.ObservationStatus.FINAL);
+			obs2.setValue(new StringType("green"));
+			id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 		}
 		{
 			Observation obs3 = new Observation();
 			obs3.setStatus(Observation.ObservationStatus.FINAL);
-			obs3.setValue(new StringType("bluegreen"));
+			obs3.setValue(new StringType("bluegreenish"));
 			id3 = myObservationDao.create(obs3, mySrd).getId().toUnqualifiedVersionless();
 		}
 		{
@@ -362,19 +363,34 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			obs4.setValue(new StringType("blüe"));
 			id4 = myObservationDao.create(obs4, mySrd).getId().toUnqualifiedVersionless();
 		}
+		{
+			// upper case
+			Observation obs5 = new Observation();
+			obs5.setStatus(Observation.ObservationStatus.FINAL);
+			obs5.setValue(new StringType("Blue"));
+			id5 = myObservationDao.create(obs5, mySrd).getId().toUnqualifiedVersionless();
+		}
 
 		{
-			// default search matches prefix
+			// default search matches prefix, ascii-normalized, case-insensitive
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("value-string", new StringParam("blu"));
-			assertObservationSearchMatches("default search matches normalized prefix", map, id1, id3, id4);
+			assertObservationSearchMatches("default search matches normalized prefix", map, id1, id3, id4, id5);
 		}
 		{
-			// default search matches prefix
+			// exact search
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("value-string", new StringParam("blue").setExact(true));
 			assertObservationSearchMatches("exact search only matches exact string", map, id1);
 		}
+		{
+			// contains matches anywhere
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("value-string", new StringParam("green").setContains(true));
+			assertObservationSearchMatches("contains search matches anywhere", map, id2, id3);
+		}
+
+		// wipmb add some more tests for string:text
 
 	}
 

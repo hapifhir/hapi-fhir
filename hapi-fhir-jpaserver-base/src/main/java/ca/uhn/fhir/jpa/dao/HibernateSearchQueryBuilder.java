@@ -128,7 +128,7 @@ public class HibernateSearchQueryBuilder {
 				fieldName = "myNarrativeText";
 				break;
 			default:
-				fieldName = "sp." + theSearchParamName + ".string.text";
+				fieldName = "sp." + theSearchParamName + ".string.norm";
 				break;
 		}
 
@@ -161,12 +161,30 @@ public class HibernateSearchQueryBuilder {
 
 		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
-			ourLog.info("string exact search {}", terms);
+			ourLog.trace("string exact search {}", terms);
 			List<? extends PredicateFinalStep> orTerms = terms.stream().map(s -> {
 					return myPredicateFactory
 						.match()
 						.field(fieldPath)
 						.matching(s);
+				})
+				.collect(Collectors.toList());
+			// an or-collector would be nice.
+
+			myRootClause.must(orPredicateOrSingle(orTerms));
+		}
+	}
+
+	public void addStringContainsSearch(String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
+		String fieldPath = "sp." + theSearchParamName + ".string.norm";
+		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
+			Set<String> terms = extractOrStringParams(nextAnd);
+			ourLog.trace("string contains search {}", terms);
+			List<? extends PredicateFinalStep> orTerms = terms.stream().map(s -> {
+					return myPredicateFactory
+						.wildcard()
+						.field(fieldPath)
+						.matching("*" + s + "*");
 				})
 				.collect(Collectors.toList());
 			// an or-collector would be nice.
