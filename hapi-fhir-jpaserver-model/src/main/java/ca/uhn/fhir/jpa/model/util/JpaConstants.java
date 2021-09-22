@@ -201,12 +201,6 @@ public class JpaConstants {
 	public static final String PARAM_DELETE_EXPUNGE = "_expunge";
 
 	/**
-	 * Parameter for delete to indicate the resource should be cascading delete
-	 */
-
-	public static final String PARAM_DELETE_CASCADE = "_cascade";
-
-	/**
 	 * URL for extension on a SearchParameter indicating that text values should not be indexed
 	 */
 	public static final String EXTENSION_EXT_SYSTEMDEFINED = JpaConstants.class.getName() + "_EXTENSION_EXT_SYSTEMDEFINED";

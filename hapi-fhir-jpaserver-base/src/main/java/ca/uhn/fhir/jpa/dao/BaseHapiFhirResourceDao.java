@@ -92,6 +92,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ObjectUtil;
@@ -586,7 +587,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new MethodNotAllowedException("_expunge is not enabled on this server: " + getConfig().cannotDeleteExpungeReason());
 		}
 
-		if (theUrl.contains(JpaConstants.PARAM_DELETE_CASCADE) || theRequest.getHeader("X-Cascade").equals("delete")) {
+		if (theUrl.contains(Constants.PARAMETER_CASCADE_DELETE) || theRequest.getHeader(Constants.HEADER_CASCADE).equals(Constants.CASCADE_DELETE)) {
 			throw new NotImplementedOperationException("_expunge cannot be used with _cascade");
 		}
 
