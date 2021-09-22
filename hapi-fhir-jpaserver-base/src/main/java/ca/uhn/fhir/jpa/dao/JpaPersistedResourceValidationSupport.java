@@ -125,7 +125,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	private Optional<IBaseResource> getCodeSystemCurrentVersion(UriType theUrl) {
 		if (! theUrl.getValueAsString().contains("loinc"))  return Optional.empty();
 
-		return myTermReadSvc.readByForcedId("loinc");
+		return myTermReadSvc.readCodeSystemByForcedId("loinc");
 	}
 
 

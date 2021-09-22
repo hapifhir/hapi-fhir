@@ -2558,7 +2558,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 
 	@Override
-	public Optional<IBaseResource> readByForcedId(String theForcedId) {
+	public Optional<IBaseResource> readCodeSystemByForcedId(String theForcedId) {
 		@SuppressWarnings("unchecked")
 		List<ResourceTable> resultList = (List<ResourceTable>) myEntityManager.createQuery(
 			"select f.myResource from ForcedId f " +
