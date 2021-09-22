@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.elastic;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import org.hibernate.search.backend.elasticsearch.analysis.ElasticsearchAnalysisConfigurationContext;
 import org.hibernate.search.backend.elasticsearch.analysis.ElasticsearchAnalysisConfigurer;
 
@@ -70,7 +71,7 @@ public class HapiElasticsearchAnalysisConfigurer implements ElasticsearchAnalysi
 			.param("max_gram", "20");
 
 
-		theConfigCtx.analyzer("standardAnalyzer").custom()
+		theConfigCtx.analyzer(HapiLuceneAnalysisConfigurer.STANDARD_ANALYZER).custom()
 			.tokenizer("standard")
 			.tokenFilters("lowercase");
 

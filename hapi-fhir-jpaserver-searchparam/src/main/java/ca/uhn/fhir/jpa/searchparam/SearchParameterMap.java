@@ -632,7 +632,7 @@ public class SearchParameterMap implements Serializable {
 	 * @return an And/Or List of Query Parameters matching the name with no modifier.
 	 */
 	public List<List<IQueryParameterType>> removeByNameUnmodified(String theName) {
-		return this.removeByNameAndModifier(theName, (String) null);
+		return this.removeByNameAndModifier(theName, "");
 	}
 
 	/**
@@ -645,6 +645,7 @@ public class SearchParameterMap implements Serializable {
 	 * @return an And/Or List of Query Parameters matching the qualifier.
 	 */
 	public List<List<IQueryParameterType>> removeByNameAndModifier(String theName, String theModifier) {
+		theModifier = StringUtils.defaultString(theModifier, "");
 
 		List<List<IQueryParameterType>> remainderParameters = new ArrayList<>();
 		List<List<IQueryParameterType>> matchingParameters = new ArrayList<>();
@@ -653,7 +654,9 @@ public class SearchParameterMap implements Serializable {
 		List<List<IQueryParameterType>> andList = mySearchParameterMap.remove(theName);
 		if (andList != null) {
 			for (List<IQueryParameterType> orList : andList) {
-				if (!orList.isEmpty() && StringUtils.equals(theModifier, orList.get(0).getQueryParameterQualifier())) {
+				if (!orList.isEmpty() &&
+					StringUtils.defaultString(orList.get(0).getQueryParameterQualifier(), "")
+							.equals(theModifier)) {
 					matchingParameters.add(orList);
 				} else {
 					remainderParameters.add(orList);

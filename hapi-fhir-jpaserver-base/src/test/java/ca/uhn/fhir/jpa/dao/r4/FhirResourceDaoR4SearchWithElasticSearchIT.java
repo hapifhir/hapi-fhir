@@ -149,7 +149,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 	@Test
 	public void testResourceCodeTokenSearch() {
-		IIdType id1, id2, id2b;
+		IIdType id1, id2, id2b, id3;
 
 		// wipmb
 		String system = "http://loinc.org";
@@ -180,6 +180,15 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			//ourLog.info("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
 		}
 		{
+			Observation obs3 = new Observation();
+			obs3.getCode().addCoding().setCode("obs3").setSystem("http://example.com").setDisplay("A trick system");
+			obs3.getCode().addCoding().setCode("obs3-multiple-code").setSystem("http://example.com").setDisplay("A trick system");
+			obs3.setStatus(Observation.ObservationStatus.FINAL);
+			obs3.setValue(new Quantity(81));
+			id3 = myObservationDao.create(obs3, mySrd).getId().toUnqualifiedVersionless();
+			//ourLog.info("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
+		}
+		{
 			// search just code
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam(null, "obs2"));
@@ -196,6 +205,12 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam(system, "obs2"));
 			assertThat("Search by system and code", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
+		}
+		{
+			// Multiple codes indexed
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("http://example.com", "obs3-multiple-code"));
+			assertThat("Search for one code", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id3)));
 		}
 	}
 

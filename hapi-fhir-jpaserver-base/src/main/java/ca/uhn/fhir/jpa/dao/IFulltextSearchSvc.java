@@ -33,6 +33,14 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 public interface IFulltextSearchSvc {
 
 
+	/**
+	 * Search the Lucene/Elastic index for pids using params supported in theParams,
+	 * consuming entries from theParams when used to query.
+	 *
+	 * @param theResourceName the resource name to restrict the query.
+	 * @param theParams the full query - modified to return only params unused by the index.
+	 * @return the pid list for the matchign resources.
+	 */
 	List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams);
 
 	List<ResourcePersistentId> everything(String theResourceName, SearchParameterMap theParams, RequestDetails theRequest);
@@ -40,4 +48,6 @@ public interface IFulltextSearchSvc {
 	boolean isDisabled();
 
 	ExtendedLuceneIndexData extractLuceneIndexData(FhirContext theContext, IBaseResource theResource, ResourceIndexedSearchParams theNewParams);
+
+    boolean supportsSomeOf(SearchParameterMap myParams);
 }

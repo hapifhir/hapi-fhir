@@ -21,12 +21,10 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
-import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -40,10 +38,6 @@ import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.search.engine.search.common.BooleanOperator;
-import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
-import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
-import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -53,13 +47,11 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -106,138 +98,35 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return retVal;
 	}
 
-	// wipmb token query
-	private void addTokenSearch(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, List<List<IQueryParameterType>> theTerms, String theSearchParamName) {
-		if (theTerms == null){
-			return;
-		}
-		for (List<? extends IQueryParameterType> nextAnd: theTerms) {
-			String indexFieldPrefix = "sp." + theSearchParamName + ".token";
+	@Override
+	public boolean supportsSomeOf(SearchParameterMap myParams) {
+		// keep this in sync with the guts of doSearch
+		boolean requiresHibernateSearchAccess = myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN();
 
-			List<? extends PredicateFinalStep> clauses = nextAnd.stream().map(orTerm -> {
-				// wip can this be untrue?
-				TokenParam token = (TokenParam) orTerm;
-				if (StringUtils.isBlank(token.getSystem())) {
-					// bare value
-					return f.match().field(indexFieldPrefix + ".code").matching(token.getValue());
-				} else if (StringUtils.isBlank(token.getValue())) {
-					// system without value
-					return f.match().field(indexFieldPrefix + ".system").matching(token.getSystem());
+		requiresHibernateSearchAccess |= myParams.entrySet().stream()
+			.flatMap(andList -> andList.getValue().stream())
+			.flatMap(Collection::stream)
+			// wipmb to extend to string params.
+			.anyMatch(param -> {
+				if (param instanceof TokenParam) {
+					// we support plain token and token:text
+					return Constants.PARAMQUALIFIER_TOKEN_TEXT.equals(param.getQueryParameterQualifier()) ||
+						StringUtils.isBlank(param.getQueryParameterQualifier());
+				} else if (param instanceof StringParam) {
+					// we support string:text
+					return Constants.PARAMQUALIFIER_TOKEN_TEXT.equals(param.getQueryParameterQualifier());
 				} else {
-					// system + value
-					return f.match().field(indexFieldPrefix + ".code-system").matching(token.getValueAsQueryToken(myFhirContext));
+					return false;
 				}
-			}).collect(Collectors.toList());
+			});
 
-			PredicateFinalStep finalClause = orPredicateOrSingle(f, clauses);
-			b.must(finalClause);
-		}
-
+		return requiresHibernateSearchAccess;
 	}
 
-	/**
-	 * Provide an OR wrapper around a list of predicates.
-	 * Returns the sole predicate if it solo, or wrap as a bool/should for OR semantics.
-	 *
-	 * @param thePredicateFactory
-	 * @param theOrList a list containing at least 1 predicate
-	 * @return a predicate providing or-sematics over the list.
-	 */
-	private PredicateFinalStep orPredicateOrSingle(SearchPredicateFactory thePredicateFactory, List<? extends PredicateFinalStep> theOrList) {
-		PredicateFinalStep finalClause;
-		if (theOrList.size() == 1) {
-			finalClause = theOrList.get(0);
-		} else {
-			BooleanPredicateClausesStep<?> orClause = thePredicateFactory.bool();
-			theOrList.forEach(orClause::should);
-			finalClause = orClause;
-		}
-		return finalClause;
-	}
-
-	private void addTextSearch(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, List<List<IQueryParameterType>> theTerms, String theFieldName) {
-		if (theTerms == null) {
-			return;
-		}
-		for (List<? extends IQueryParameterType> nextAnd : theTerms) {
-			Set<String> terms = extractOrStringParams(nextAnd);
-			//fixme GGG: MB, did you mean for this to say >= 1?
-			if (terms.size() == 1) {
-				String query = terms.stream()
-					.map(s->"(" + s + ")")
-					.collect(Collectors.joining(" OR "));
-				b.must(f.simpleQueryString()
-					.field(theFieldName)
-					.boost(4.0f)
-					.matching(query)
-					.analyzer(HapiLuceneAnalysisConfigurer.STANDARD_ANALYZER)
-					.defaultOperator(BooleanOperator.AND)); // term value may contain multiple tokens.  Require all of them to be present.
-			} else if (terms.size() > 1) {
-				String joinedTerms = StringUtils.join(terms, ' ');
-				b.must(f.match().field(theFieldName).matching(joinedTerms));
-			} else {
-				ourLog.debug("No Terms found in query parameter {}", nextAnd);
-			}
-		}
-	}
-
-	@Nonnull
-	private Set<String> extractOrStringParams(List<? extends IQueryParameterType> nextAnd) {
-		Set<String> terms = new HashSet<>();
-		for (IQueryParameterType nextOr : nextAnd) {
-			String nextValueTrimmed;
-			if (nextOr instanceof StringParam) {
-				StringParam nextOrString = (StringParam) nextOr;
-				nextValueTrimmed = StringUtils.defaultString(nextOrString.getValue()).trim();
-			} else if (nextOr instanceof TokenParam) {
-				TokenParam nextOrToken = (TokenParam) nextOr;
-				nextValueTrimmed = nextOrToken.getValue();
-			} else {
-				throw new IllegalArgumentException("Unsupported full-text param type: " + nextOr.getClass());
-			}
-			if (isNotBlank(nextValueTrimmed)) {
-				terms.add(nextValueTrimmed);
-			}
-		}
-		return terms;
-	}
 
 	private List<ResourcePersistentId> doSearch(String theResourceName, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
-
+		// keep this in sync with supportsSomeOf();
 		SearchSession session = Search.session(myEntityManager);
-		List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
-		List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
-
-		/*
-		 * We save an elastic document something like this.
-		 *
-		 * {
-		 *   "myId": 1
-		 *   "myNarrativeText" : 'adsasdjkaldjalkdjalkdjalkdjs",
-		 *   // should be indexed, not stored
-		 *     "text-code" : "Our observation Glucose Moles volume in Blood"
-		 *     "text-clinicalCode" : "Our observation Glucose Moles volume in Blood"
-		 *     "text-identifier" : ""
-		 *     "text-component-value-concept": " a a s d d  g v",
-		 *     _index: {
-		 *
-		 *     }
-		 *   resource: {
-		 *   	type: "Observation"
-		 *   	"code": {
-		 *     "coding": [
-		 *       {
-		 *         "system": "http://loinc.org",
-		 *         "code": "15074-8",
-		 *         "display": "Glucose [Moles/volume] in Blood"
-		 *       }
-		 *     ],
-		 *     "text", "Our observation"
-		 *   },
-		 *   }
-		 * }
-		 */
-
 
 		List<Long> longPids = session.search(ResourceTable.class)
 			//Selects are replacements for projection and convert more cleanly than the old implementation.
@@ -246,40 +135,46 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			)
 			.where(
 				f -> f.bool(b -> {
+					HibernateSearchQueryBuilder builder = new HibernateSearchQueryBuilder(myFhirContext, b, f);
+
 					/*
 					 * Handle _content parameter (resource body content)
 					 */
-					addTextSearch(f, b, contentAndTerms, "myContentText");
+					List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
+					builder.addStringTextSearch(Constants.PARAM_CONTENT, contentAndTerms);
 					/*
 					 * Handle _text parameter (resource narrative content)
 					 */
-					addTextSearch(f, b, textAndTerms, "myNarrativeText");
+					List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
+					builder.addStringTextSearch(Constants.PARAM_TEXT, textAndTerms);
+
 					/*
-					 * Handle arbitrary token parameters
+					 * Handle other supported parameters
 					 */
+					// wip mb the query guts
 
-					//DSTU2 doesn't support fhirpath, so fall back to old style lookup.
-					if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-						// wip mb the query guts
-						// copy the keys to avoid concurrent modification error
-						Iterable<String> keys = Lists.newArrayList(theParams.keySet());
-						for(String nextParam: keys) {
-							RuntimeSearchParam activeParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, nextParam);
-							switch (activeParam.getParamType()) {
-								case TOKEN:
-									List<List<IQueryParameterType>> tokenTextAndOrTerms = theParams.removeByNameAndModifier(nextParam, TokenParamModifier.TEXT);
-									if (tokenTextAndOrTerms != null && !tokenTextAndOrTerms.isEmpty()) {
-										addTextSearch(f, b, tokenTextAndOrTerms, "sp." + nextParam + ".string.text");
-									}
-									List<List<IQueryParameterType>> tokenUnmodifiedAndOrTerms = theParams.removeByNameUnmodified(nextParam);
-									if (tokenUnmodifiedAndOrTerms != null && !tokenUnmodifiedAndOrTerms.isEmpty()) {
-										addTokenSearch(f, b, tokenUnmodifiedAndOrTerms, nextParam);
-									}
+					// copy the keys to avoid concurrent modification error
+					for(String nextParam: Lists.newArrayList(theParams.keySet())) {
+						RuntimeSearchParam activeParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, nextParam);
+						switch (activeParam.getParamType()) {
+							case TOKEN:
+								List<List<IQueryParameterType>> tokenTextAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
+								builder.addStringTextSearch(nextParam, tokenTextAndOrTerms);
 
-									break;
-								default:
-									// we only support token :text for now.
-							}
+								List<List<IQueryParameterType>> tokenUnmodifiedAndOrTerms = theParams.removeByNameUnmodified(nextParam);
+								builder.addTokenUnmodifiedSearch(nextParam, tokenUnmodifiedAndOrTerms);
+
+								break;
+							case STRING:
+								List<List<IQueryParameterType>> stringTextAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
+								builder.addStringTextSearch(nextParam, stringTextAndOrTerms);
+
+								// wip mb add string norm and exact
+								break;
+
+								// wip mb add the rest.
+							default:
+								// ignore unsupported param types/modifiers.  They will be processed up in SearchBuilder.
 						}
 					}
 

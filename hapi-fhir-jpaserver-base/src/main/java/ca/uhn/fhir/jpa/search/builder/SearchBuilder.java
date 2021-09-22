@@ -82,6 +82,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
@@ -92,6 +93,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.Condition;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -348,24 +350,8 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private boolean requiresHibernateSearchAccess() {
-		boolean requiresHibernateSearchAccess = myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN();
-
-		requiresHibernateSearchAccess |= myParams.entrySet().stream()
-			.flatMap(andList -> andList.getValue().stream())
-			.flatMap(Collection::stream)
-			// wipmb to extend to string params.
-			.filter(param -> param instanceof TokenParam/* || param instanceof StringParam*/)
-			.anyMatch(param -> ":text".equals(param.getQueryParameterQualifier()));
-
-
-		requiresHibernateSearchAccess |= myParams.entrySet().stream()
-			//TODO GGG gotta actually just filter on param-type instead of name.
-			.filter(predicate -> predicate.getKey().equalsIgnoreCase("code"))
-			.flatMap(p -> p.getValue().stream())
-			.flatMap(Collection::stream)
-			.anyMatch(p -> p instanceof TokenParam);
-
-		return requiresHibernateSearchAccess;
+		// fixme mb this should be in sync with the guts of FulltextSearchSvcImpl.doSearch();
+		return (myFulltextSearchSvc !=null ) && myFulltextSearchSvc.supportsSomeOf(myParams);
 	}
 
 	private List<ResourcePersistentId> executeLastNAgainstIndex(Integer theMaximumResults) {
@@ -380,6 +366,7 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 
+	// wip mb rename
 	private List<ResourcePersistentId> executeFullTextSearchAgainstIndex(RequestDetails theRequest) {
 		validateFullTextSearchIsEnabled();
 

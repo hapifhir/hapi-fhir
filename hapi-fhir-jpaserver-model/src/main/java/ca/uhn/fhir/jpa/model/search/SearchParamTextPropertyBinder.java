@@ -69,6 +69,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		StringIndexFieldTypeOptionsStep<?> textType =
 			indexFieldTypeFactory.asString()
 				// wip mb where do we do unicode normalization?  Java-side, or in the analyzer?
+				// wip mb can we share these constants with HapiElasticsearchAnalysisConfigurer and HapiLuceneAnalysisConfigurer
 				.analyzer("standardAnalyzer")
 				.projectable(Projectable.NO);
 
@@ -102,6 +103,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		// But the standard tokenizers aren't that flexible.  As second best, it would be nice to use elastic multi-fields
 		// to apply three different tokenziers to a single value.
 		// Instead, just be simple and expand into three full fields
+		// wip mb try token_filter - pattern_capture. to generate code and system partial values.
 		spfield.objectFieldTemplate("tokenIndex", ObjectStructure.FLATTENED).matchingPathGlob("*.token");
 		spfield.fieldTemplate("token-code", tokenType).matchingPathGlob("*.token.code").multiValued();
 		spfield.fieldTemplate("token-code-system", tokenType).matchingPathGlob("*.token.code-system").multiValued();
