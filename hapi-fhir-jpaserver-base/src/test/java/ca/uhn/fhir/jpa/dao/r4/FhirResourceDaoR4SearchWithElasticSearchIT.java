@@ -23,6 +23,9 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.param.DateOrListParam;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
@@ -41,6 +44,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -382,6 +386,16 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("value-string", new StringParam("blue").setExact(true));
 			assertObservationSearchMatches("exact search only matches exact string", map, id1);
+		}
+		{
+			// or matches both
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("value-string",
+				new StringOrListParam()
+					.addOr(new StringParam("blue").setExact(true))
+					.addOr(new StringParam("green").setExact(true)));
+
+			assertObservationSearchMatches("contains search matches anywhere", map, id1, id2);
 		}
 		{
 			// contains matches anywhere

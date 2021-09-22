@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 
 public class HibernateSearchIndexWriter {
 	private static final Logger ourLog = LoggerFactory.getLogger(HibernateSearchIndexWriter.class);
+	public static final String IDX_STRING_NORMALIZED = "norm";
+	public static final String IDX_STRING_EXACT = "exact";
 	final HibernateSearchElementCache myNodeCache;
 	final FhirContext myFhirContext;
 
@@ -27,13 +29,15 @@ public class HibernateSearchIndexWriter {
 
 	public void writeStringIndex(String theSearchParam, String theValue) {
 		DocumentElement stringIndexNode = getSearchParamIndexNode(theSearchParam, "string");
-		stringIndexNode.addValue("text", theValue);
-		stringIndexNode.addValue("exact", theValue);
+		stringIndexNode.addValue(IDX_STRING_NORMALIZED, theValue);
+		stringIndexNode.addValue(IDX_STRING_EXACT, theValue);
 		ourLog.trace("Adding Search Param Text: {} -- {}", theSearchParam, theValue);
 	}
 
 	public void writeTokenIndex(String theSearchParam, TokenParam theValue) {
 		DocumentElement tokenIndexNode = getSearchParamIndexNode(theSearchParam, "token");
+		// wip can we instead add formatted versions to the same field and simplify the query?
+		// or use a token_filter to generate all three off a single value?
 		tokenIndexNode.addValue("code", theValue.getValue());
 		tokenIndexNode.addValue("system", theValue.getSystem());
 		//This next one returns as system|value

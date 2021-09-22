@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +30,8 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class HibernateSearchQueryBuilder {
@@ -128,7 +132,7 @@ public class HibernateSearchQueryBuilder {
 				fieldName = "myNarrativeText";
 				break;
 			default:
-				fieldName = "sp." + theSearchParamName + ".string.norm";
+				fieldName = "sp." + theSearchParamName + ".string." + IDX_STRING_NORMALIZED;
 				break;
 		}
 
@@ -157,7 +161,7 @@ public class HibernateSearchQueryBuilder {
 	}
 
 	public void addStringExactSearch(String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
-		String fieldPath = "sp." + theSearchParamName + ".string.exact";
+		String fieldPath = "sp." + theSearchParamName + ".string." + IDX_STRING_EXACT;
 
 		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
@@ -187,7 +191,6 @@ public class HibernateSearchQueryBuilder {
 						.matching("*" + s + "*");
 				})
 				.collect(Collectors.toList());
-			// an or-collector would be nice.
 
 			myRootClause.must(orPredicateOrSingle(orTerms));
 		}

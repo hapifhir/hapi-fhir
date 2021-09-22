@@ -35,6 +35,9 @@ import org.hibernate.search.mapper.pojo.bridge.runtime.PropertyBridgeWriteContex
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
+
 /**
  * Allows hibernate search to index
  *
@@ -94,9 +97,10 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		// They aren't marked stored, so there's no space cost beyond the index for each.
 		// But for elastic, I'd rather have a single field defined, with multi-field sub-fields.  The index cost is the same,
 		// but elastic will actually store all fields in the source document.
-		spfield.objectFieldTemplate("stringIndex", ObjectStructure.FLATTENED).matchingPathGlob("*.string");
-		spfield.fieldTemplate("string-norm", standardAnalyzer).matchingPathGlob("*.string.norm").multiValued();
-		spfield.fieldTemplate("string-exact", exactAnalyzer).matchingPathGlob("*.string.exact").multiValued();
+		String stringPathGlob = "*.string";
+		spfield.objectFieldTemplate("stringIndex", ObjectStructure.FLATTENED).matchingPathGlob(stringPathGlob);
+		spfield.fieldTemplate("string-norm", standardAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_NORMALIZED).multiValued();
+		spfield.fieldTemplate("string-exact", exactAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_EXACT).multiValued();
 
 		// token
 		// Ideally, we'd store a single code-system string and use a custom tokenizer to
