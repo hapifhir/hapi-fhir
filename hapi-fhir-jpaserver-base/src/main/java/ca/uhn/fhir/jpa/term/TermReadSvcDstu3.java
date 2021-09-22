@@ -65,7 +65,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
 			valueSetToExpandR4 = toCanonicalValueSet(theValueSetToExpand);
 			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(theExpansionOptions, valueSetToExpandR4);
-			return new ValueSetExpansionOutcome(VersionConvertorFactory_30_40.convertResource(expandedR4, new BaseAdvisor_30_40(false)), null);
+			return new ValueSetExpansionOutcome(VersionConvertorFactory_30_40.convertResource(expandedR4, new BaseAdvisor_30_40(false)));
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}

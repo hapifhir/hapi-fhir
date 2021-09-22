@@ -4,7 +4,9 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.util.ValueSetTestUtil;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -233,12 +236,9 @@ public class FhirResourceDaoR4ValueSetMultiVersionTest extends BaseJpaR4Test {
 		include.setVersion("1");
 		include.addConcept().setCode("A");
 
-		try {
-			myValueSetDao.expand(vs, null);
-			fail();
-		} catch (PreconditionFailedException e) {
-			assertEquals("Unknown CodeSystem URI \"http://example.com/my_code_systemAA\" referenced from ValueSet", e.getMessage());
-		}
+		ValueSet expansion = myValueSetDao.expand(vs, null);
+		assertThat(ValueSetTestUtil.toCodes(expansion), Matchers.contains("A"));
+
 	}
 
 

@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.config.TestR4WithLuceneDisabledConfig;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
+import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.parser.IParser;
@@ -189,6 +190,8 @@ public class ResourceProviderR4ValueSetLuceneDisabledTest  extends BaseJpaTest {
 			ourRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
 			ourPagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
+
+			ourRestServer.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
 
 			Server server = new Server(0);
 

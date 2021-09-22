@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -116,6 +117,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourRestServer.registerProviders(mySystemProvider, myTerminologyUploaderProvider, myDeleteExpungeProvider, myReindexProvider);
 			ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
 			ourRestServer.registerProvider(myAppCtx.getBean(DiffProvider.class));
+			ourRestServer.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
 
 			ourPagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
 

@@ -66,13 +66,13 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	}
 
 	@Override
-	public void includeConcept(String theSystem, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids) {
-		saveConcept(theSystem, theCode, theDisplay, theSourceConceptPid, theSourceConceptDirectParentPids);
+	public void includeConcept(String theSystem, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids, String theSystemVersion) {
+		saveConcept(theSystem, theCode, theDisplay, theSourceConceptPid, theSourceConceptDirectParentPids, theSystemVersion);
 	}
 
 	@Override
-	public void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations, Long theSourceConceptPid, String theSourceConceptDirectParentPids) {
-		TermValueSetConcept concept = saveConcept(theSystem, theCode, theDisplay, theSourceConceptPid, theSourceConceptDirectParentPids);
+	public void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations, Long theSourceConceptPid, String theSourceConceptDirectParentPids, String theSystemVersion) {
+		TermValueSetConcept concept = saveConcept(theSystem, theCode, theDisplay, theSourceConceptPid, theSourceConceptDirectParentPids, theSystemVersion);
 		if (theDesignations != null) {
 			for (TermConceptDesignation designation : theDesignations) {
 				saveConceptDesignation(concept, designation);
@@ -117,7 +117,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		return false;
 	}
 
-	private TermValueSetConcept saveConcept(String theSystem, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids) {
+	private TermValueSetConcept saveConcept(String theSystem, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids, String theSystemVersion) {
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystem, "ValueSet contains a concept with no system value");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theCode, "ValueSet contains a concept with no code value");
 
@@ -135,6 +135,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		if (isNotBlank(theDisplay)) {
 			concept.setDisplay(theDisplay);
 		}
+		concept.setSystemVersion(theSystemVersion);
 
 		concept.setSourceConceptPid(theSourceConceptPid);
 		concept.setSourceConceptDirectParentPids(theSourceConceptDirectParentPids);

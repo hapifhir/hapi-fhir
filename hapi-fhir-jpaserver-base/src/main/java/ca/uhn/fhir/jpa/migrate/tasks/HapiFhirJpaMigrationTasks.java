@@ -128,6 +128,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_RESOURCE")
 			.dropIndex("20210908.1", "IDX_RES_LANG");
 
+		version.onTable("TRM_VALUESET")
+			.addColumn("20210915.1", "EXPANDED_AT")
+			.nullable()
+			.type(ColumnTypeEnum.DATE_TIMESTAMP);
 	}
 
 	private void init540() {

@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 /*
  * #%L
- * HAPI FHIR JPA API
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%

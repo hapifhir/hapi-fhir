@@ -49,6 +49,7 @@ import java.sql.SQLException;
 		"       vsc.SYSTEM_URL                  AS CONCEPT_SYSTEM_URL, " +
 		"       vsc.CODEVAL                     AS CONCEPT_CODEVAL, " +
 		"       vsc.DISPLAY                     AS CONCEPT_DISPLAY, " +
+		"       vsc.SYSTEM_VER                  AS SYSTEM_VER, " +
 		"       vsc.SOURCE_PID                  AS SOURCE_PID, " +
 		"       vsc.SOURCE_DIRECT_PARENT_PIDS   AS SOURCE_DIRECT_PARENT_PIDS, " +
 		"       vscd.PID                        AS DESIGNATION_PID, " +
@@ -84,6 +85,9 @@ public class TermValueSetConceptView implements Serializable, ITermValueSetConce
 
 	@Column(name = "CONCEPT_DISPLAY", length = TermConcept.MAX_DESC_LENGTH)
 	private String myConceptDisplay;
+
+	@Column(name="SYSTEM_VER", length = TermCodeSystemVersion.MAX_VERSION_LENGTH)
+	private String myConceptSystemVersion;
 
 	@Column(name = "DESIGNATION_PID")
 	private Long myDesignationPid;
@@ -176,4 +180,10 @@ public class TermValueSetConceptView implements Serializable, ITermValueSetConce
 	public String getDesignationVal() {
 		return myDesignationVal;
 	}
+
+	@Override
+	public String getConceptSystemVersion() {
+		return myConceptSystemVersion;
+	}
+
 }

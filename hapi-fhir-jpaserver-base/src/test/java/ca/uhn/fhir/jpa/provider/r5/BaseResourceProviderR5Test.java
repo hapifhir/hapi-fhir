@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
@@ -107,6 +108,8 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProvider.class);
 			myDaoRegistry = myAppCtx.getBean(DaoRegistry.class);
 			ourRestServer.registerProviders(mySystemProvider, myTerminologyUploaderProvider);
+
+			ourRestServer.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
 
 			ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
 			IValidationSupport validationSupport = myAppCtx.getBean(IValidationSupport.class);

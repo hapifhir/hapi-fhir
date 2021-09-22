@@ -37,19 +37,21 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 	@Nullable
 	@Override
 	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+		if (!myAllowNonExistentCodeSystem) {
+			return null;
+		}
+		if (theCodeSystem == null) {
+			return null;
+		}
 		IBaseResource codeSystem = theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystem);
 		if (codeSystem != null) {
 			return null;
 		}
 
-		String message = "Unknown code system: " + theCodeSystem;
-		if (!myAllowNonExistentCodeSystem) {
-			return new CodeValidationResult()
-				.setSeverity(IssueSeverity.ERROR)
-				.setMessage(message);
-		}
-
-		throw new TerminologyServiceException(message);
+		return new CodeValidationResult()
+			.setCode(theCode)
+			.setSeverity(IssueSeverity.INFORMATION)
+			.setMessage("Code " + theCodeSystem + "#" + theCode + " was not checked because the CodeSystem is not available");
 	}
 
 	public void setAllowNonExistentCodeSystem(boolean theAllowNonExistentCodeSystem) {

@@ -482,7 +482,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		assertEquals("Unknown code {http://acme.org}8452-5-a", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+		assertEquals("Unable to validate code http://acme.org#8452-5-a - Code is not found in CodeSystem: http://acme.org", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 
 	}
 
@@ -518,7 +518,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		assertEquals("Unknown code {http://acme.org}8452-5 - Concept Display : Old Systolic blood pressure.inspiration - expiration", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+		assertEquals("Unable to validate code http://acme.org#8452-5Concept Display \"Old Systolic blood pressure.inspiration - expiration\" does not match expected \"Systolic blood pressure.inspiration - expiration\" for CodeSystem: http://acme.org", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 	}
 
 	@Test
@@ -675,7 +675,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		assertEquals("Unknown code {http://acme.org}8452-5-a", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+		assertEquals("Unable to validate code http://acme.org#8452-5-a - Code is not found in CodeSystem: http://acme.org", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 
 	}
 
@@ -755,7 +755,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		assertEquals("Unknown code {http://acme.org}8452-5-a", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+		assertEquals("Unable to validate code http://acme.org#8452-5-a - Code is not found in CodeSystem: http://acme.org", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 	}
 
 	@Test

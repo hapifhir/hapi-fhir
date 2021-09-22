@@ -586,8 +586,8 @@ public interface IValidationSupport {
 		private final IBaseResource myValueSet;
 		private final String myError;
 
-		public ValueSetExpansionOutcome(IBaseResource theValueSet, String theError) {
-			myValueSet = theValueSet;
+		public ValueSetExpansionOutcome(String theError) {
+			myValueSet = null;
 			myError = theError;
 		}
 

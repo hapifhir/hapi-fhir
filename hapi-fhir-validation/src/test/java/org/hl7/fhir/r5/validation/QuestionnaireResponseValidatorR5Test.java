@@ -67,7 +67,7 @@ public class QuestionnaireResponseValidatorR5Test {
 	private static final String CODE_ICC_SCHOOLTYPE_PT = "PT";
 	private static final String ID_VS_SCHOOLTYPE = "ValueSet/schooltype";
 	private static final String SYSTEMURI_ICC_SCHOOLTYPE = "http://ehealthinnovation/icc/ns/schooltype";
-	private static FhirContext ourCtx = FhirContext.forR5();
+	private static final FhirContext ourCtx = FhirContext.forR5Cached();
 	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
 	private FhirInstanceValidator myInstanceVal;
 	private FhirValidator myVal;
@@ -184,7 +184,7 @@ public class QuestionnaireResponseValidatorR5Test {
 			ValidationResult errors = myVal.validateWithResult(qa);
 
 			ourLog.info(errors.toString());
-			assertThat("index[" + i + "]: " + errors.toString(), errors.getMessages(), empty());
+			assertThat("index[" + i + "]: " + errors, errors.getMessages(), empty());
 		}
 	}
 
@@ -715,7 +715,6 @@ public class QuestionnaireResponseValidatorR5Test {
 	public static void afterClassClearContext() {
 		myDefaultValidationSupport.flush();
 		myDefaultValidationSupport = null;
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 

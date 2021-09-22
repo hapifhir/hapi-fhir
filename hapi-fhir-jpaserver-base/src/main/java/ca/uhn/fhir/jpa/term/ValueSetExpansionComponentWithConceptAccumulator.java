@@ -94,7 +94,7 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	}
 
 	@Override
-	public void includeConcept(String theSystem, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids) {
+	public void includeConcept(String theSystem, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids, String theCodeSystemVersion) {
 		if (mySkipCountRemaining > 0) {
 			mySkipCountRemaining--;
 			return;
@@ -106,10 +106,11 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 		setSystemAndVersion(theSystem, contains);
 		contains.setCode(theCode);
 		contains.setDisplay(theDisplay);
+		contains.setVersion(theCodeSystemVersion);
 	}
 
 	@Override
-	public void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations, Long theSourceConceptPid, String theSourceConceptDirectParentPids) {
+	public void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations, Long theSourceConceptPid, String theSourceConceptDirectParentPids, String theCodeSystemVersion) {
 		if (mySkipCountRemaining > 0) {
 			mySkipCountRemaining--;
 			return;
@@ -129,6 +130,11 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 		setSystemAndVersion(theSystem, contains);
 		contains.setCode(theCode);
 		contains.setDisplay(theDisplay);
+
+		if (isNotBlank(theCodeSystemVersion)) {
+			contains.setVersion(theCodeSystemVersion);
+		}
+
 		if (theDesignations != null) {
 			for (TermConceptDesignation termConceptDesignation : theDesignations) {
 				contains

@@ -551,23 +551,6 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testExpandWithNoResultsInLocalValueSet2() {
-		createLocalCsAndVs();
-
-		ValueSet vs = new ValueSet();
-		ConceptSetComponent include = vs.getCompose().addInclude();
-		include.setSystem(URL_MY_CODE_SYSTEM + "AA");
-		include.addConcept().setCode("A");
-
-		try {
-			myValueSetDao.expand(vs, null);
-			fail();
-		} catch (PreconditionFailedException e) {
-			assertEquals("Unknown CodeSystem URI \"http://example.com/my_code_systemAA\" referenced from ValueSet", e.getMessage());
-		}
-	}
-
-	@Test
 	public void testExpandWithSystemAndCodesInExternalValueSet() {
 		createExternalCsAndLocalVs();
 

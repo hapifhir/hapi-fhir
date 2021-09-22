@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import org.apache.commons.compress.utils.Sets;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -14,10 +15,13 @@ import org.hl7.fhir.r4.model.ValueSet;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -75,22 +79,39 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	 * </p>
 	 */
 	public void addCodeSystem(IBaseResource theCodeSystem) {
-		String url = processResourceAndReturnUrl(theCodeSystem, "CodeSystem");
-		addToMap(theCodeSystem, myCodeSystems, url);
+		Set<String> urls = processResourceAndReturnUrls(theCodeSystem, "CodeSystem");
+		addToMap(theCodeSystem, myCodeSystems, urls);
 	}
 
-	private String processResourceAndReturnUrl(IBaseResource theCodeSystem, String theResourceName) {
-		Validate.notNull(theCodeSystem, "the" + theResourceName + " must not be null");
-		RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(theCodeSystem);
+	private Set<String> processResourceAndReturnUrls(IBaseResource theResource, String theResourceName) {
+		Validate.notNull(theResource, "the" + theResourceName + " must not be null");
+		RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(theResource);
 		String actualResourceName = resourceDef.getName();
 		Validate.isTrue(actualResourceName.equals(theResourceName), "the" + theResourceName + " must be a " + theResourceName + " - Got: " + actualResourceName);
 
-		Optional<IBase> urlValue = resourceDef.getChildByName("url").getAccessor().getFirstValueOrNull(theCodeSystem);
+		Optional<IBase> urlValue = resourceDef.getChildByName("url").getAccessor().getFirstValueOrNull(theResource);
 		String url = urlValue.map(t -> (((IPrimitiveType<?>) t).getValueAsString())).orElse(null);
 
 		Validate.notNull(url, "the" + theResourceName + ".getUrl() must not return null");
 		Validate.notBlank(url, "the" + theResourceName + ".getUrl() must return a value");
-		return url;
+
+		String urlWithoutVersion;
+		int pipeIdx = url.indexOf('|');
+		if (pipeIdx != -1) {
+			urlWithoutVersion = url.substring(0, pipeIdx);
+		} else {
+			urlWithoutVersion = url;
+		}
+
+		HashSet<String> retVal = Sets.newHashSet(url, urlWithoutVersion);
+
+		Optional<IBase> versionValue = resourceDef.getChildByName("version").getAccessor().getFirstValueOrNull(theResource);
+		String version = versionValue.map(t -> (((IPrimitiveType<?>) t).getValueAsString())).orElse(null);
+		if (isNotBlank(version)) {
+			retVal.add(urlWithoutVersion + "|" + version);
+		}
+
+		return retVal;
 	}
 
 	/**
@@ -108,23 +129,24 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	 * </p>
 	 */
 	public void addStructureDefinition(IBaseResource theStructureDefinition) {
-		String url = processResourceAndReturnUrl(theStructureDefinition, "StructureDefinition");
+		Set<String> url = processResourceAndReturnUrls(theStructureDefinition, "StructureDefinition");
 		addToMap(theStructureDefinition, myStructureDefinitions, url);
 	}
 
-	private <T extends IBaseResource> void addToMap(T theResource, Map<String, T> theMap, String theUrl) {
-		if (isNotBlank(theUrl)) {
-			theMap.put(theUrl, theResource);
+	private <T extends IBaseResource> void addToMap(T theResource, Map<String, T> theMap, Collection<String> theUrls) {
+		for (String urls : theUrls) {
+			if (isNotBlank(urls)) {
+				theMap.put(urls, theResource);
 
-			int lastSlashIdx = theUrl.lastIndexOf('/');
-			if (lastSlashIdx != -1) {
-				theMap.put(theUrl.substring(lastSlashIdx + 1), theResource);
-				int previousSlashIdx = theUrl.lastIndexOf('/', lastSlashIdx - 1);
-				if (previousSlashIdx != -1) {
-					theMap.put(theUrl.substring(previousSlashIdx + 1), theResource);
+				int lastSlashIdx = urls.lastIndexOf('/');
+				if (lastSlashIdx != -1) {
+					theMap.put(urls.substring(lastSlashIdx + 1), theResource);
+					int previousSlashIdx = urls.lastIndexOf('/', lastSlashIdx - 1);
+					if (previousSlashIdx != -1) {
+						theMap.put(urls.substring(previousSlashIdx + 1), theResource);
+					}
 				}
 			}
-
 		}
 	}
 
@@ -143,8 +165,8 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	 * </p>
 	 */
 	public void addValueSet(IBaseResource theValueSet) {
-		String url = processResourceAndReturnUrl(theValueSet, "ValueSet");
-		addToMap(theValueSet, myValueSets, url);
+		Set<String> urls = processResourceAndReturnUrls(theValueSet, "ValueSet");
+		addToMap(theValueSet, myValueSets, urls);
 	}
 
 
