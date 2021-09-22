@@ -94,7 +94,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		// But for elastic, I'd rather have a single field defined, with multi-field sub-fields.  The index cost is the same,
 		// but elastic will actually store all fields in the source document.
 		spfield.objectFieldTemplate("stringIndex", ObjectStructure.FLATTENED).matchingPathGlob("*.string");
-		spfield.fieldTemplate("string-text", textType).matchingPathGlob("*.string.text");
+		spfield.fieldTemplate("string-text", textType).matchingPathGlob("*.string.text").multiValued();
 
 		// token
 		// Ideally, we'd store a single code-system string and use a custom tokenizer to

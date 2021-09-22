@@ -96,12 +96,10 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 		// wip mb - add string params to indexing.
 		// wipmb weird - theNewParams seems to have some doubles.
-		// wipmb introduce a new intermediate form
 		theNewParams.myStringParams.stream()
 				.forEach(param -> {
 					retVal.addStringIndexData(param.getParamName(), param.getValueExact());
 				});
-		//
 		theNewParams.myTokenParams.stream()
 				.forEach(param -> {
 					retVal.addTokenIndexData(param.getParamName(), param.getSystem(), param.getValue());
