@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -41,6 +42,7 @@ import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -192,25 +194,25 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			// search just code
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam(null, "obs2"));
-			assertThat("Search by code", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2, id2b)));
+			assertObservationSearchMatches("Search by code", map, id2, id2b);
 		}
 		{
 			// search just system
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam(system, null));
-			assertThat("Search by system", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1,id2)));
+			assertObservationSearchMatches("Search by system", map, id1, id2);
 		}
 		{
 			// search code and system
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam(system, "obs2"));
-			assertThat("Search by system and code", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
+			assertObservationSearchMatches("Search by system and code", map, id2);
 		}
 		{
 			// Multiple codes indexed
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam("http://example.com", "obs3-multiple-code"));
-			assertThat("Search for one code", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id3)));
+			assertObservationSearchMatches("Search for one code", map, id3);
 		}
 	}
 
@@ -262,14 +264,14 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			// first word
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam("Body").setModifier(TokenParamModifier.TEXT));
-			assertThat("Search by first word", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
+			assertObservationSearchMatches("Search by first word", map, id2);
 		}
 
 		{
 			// any word
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam("weight").setModifier(TokenParamModifier.TEXT));
-			assertThat("Search by any word", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
+			assertObservationSearchMatches("Search by any word", map, id1, id2);
 		}
 
 		{
@@ -283,7 +285,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			// prefix
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam("Bod*").setModifier(TokenParamModifier.TEXT));
-			assertThat("Search matches start of word", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
+			assertObservationSearchMatches("Search matches start of word", map, id2);
 		}
 
 		{
@@ -297,14 +299,14 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			// codeable.display
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam("measured").setModifier(TokenParamModifier.TEXT));
-			assertThat(":text matches code.display", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
+			assertObservationSearchMatches(":text matches code.display", map, id2);
 		}
 
 		{
 			// Identifier Type
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("identifier", new TokenParam("Random").setModifier(TokenParamModifier.TEXT));
-			assertThat(":text matches identifier text", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id4)));
+			assertObservationSearchMatches(":text matches identifier text", map, id4);
 		}
 
 		{
@@ -312,22 +314,74 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam("unique").setModifier(TokenParamModifier.TEXT));
 			map.get("code").get(0).add(new TokenParam("measured").setModifier(TokenParamModifier.TEXT));
-			assertThat("Multiple query values means or in :text", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1,id2)));
+			assertObservationSearchMatches("Multiple query values means or in :text", map, id1, id2);
 		}
 
 		{
 			// space means AND
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam("Body Weight").setModifier(TokenParamModifier.TEXT));
-			assertThat("Multiple terms in value means and for :text", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id2)));
+			assertObservationSearchMatches("Multiple terms in value means and for :text", map, id2);
 		}
 
 		{
 			// don't apply the n-gram analyzer to the query, just the text.
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam("Bodum").setModifier(TokenParamModifier.TEXT));
-			assertThat("search with shared prefix does not match", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), Matchers.empty());
+			assertObservationSearchMatchesNothing("search with shared prefix does not match", map);
 		}
+	}
+
+
+	@Test
+	public void testStringSearch() {
+		IIdType id1, id2, id3, id4;
+
+		{
+			Observation obs1 = new Observation();
+			obs1.setStatus(Observation.ObservationStatus.FINAL);
+			obs1.setValue(new StringType("blue"));
+			id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Observation obs1 = new Observation();
+			obs1.setStatus(Observation.ObservationStatus.FINAL);
+			obs1.setValue(new StringType("green"));
+			id2 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Observation obs3 = new Observation();
+			obs3.setStatus(Observation.ObservationStatus.FINAL);
+			obs3.setValue(new StringType("bluegreen"));
+			id3 = myObservationDao.create(obs3, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Observation obs4 = new Observation();
+			obs4.setStatus(Observation.ObservationStatus.FINAL);
+			obs4.setValue(new StringType("blüe"));
+			id4 = myObservationDao.create(obs4, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		{
+			// default search matches prefix
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("value-string", new StringParam("blu"));
+			assertObservationSearchMatches("default search matches normalized prefix", map, id1, id3, id4);
+		}
+		{
+			// default search matches prefix
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("value-string", new StringParam("blue").setExact(true));
+			assertObservationSearchMatches("exact search only matches exact string", map, id1);
+		}
+
+	}
+
+	private void assertObservationSearchMatchesNothing(String message, SearchParameterMap map) {
+		assertObservationSearchMatches(message,map);
+	}
+	private void assertObservationSearchMatches(String message, SearchParameterMap map, IIdType  ...iIdTypes) {
+		assertThat(message, toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(iIdTypes)));
 	}
 
 	@Test
