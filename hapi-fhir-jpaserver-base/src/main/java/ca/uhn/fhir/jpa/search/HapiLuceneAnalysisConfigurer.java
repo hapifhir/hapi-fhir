@@ -42,6 +42,7 @@ import org.springframework.stereotype.Component;
 public class HapiLuceneAnalysisConfigurer implements LuceneAnalysisConfigurer {
 
 	public static final String STANDARD_ANALYZER = "standardAnalyzer";
+	public static final String EXACT_ANALYZER = "exactAnalyzer";
 
 	@Override
 	public void configure(LuceneAnalysisConfigurationContext theLuceneCtx) {
@@ -79,7 +80,7 @@ public class HapiLuceneAnalysisConfigurer implements LuceneAnalysisConfigurer {
 			.tokenizer(StandardTokenizerFactory.class)
 			.tokenFilter(LowerCaseFilterFactory.class);
 
-		theLuceneCtx.analyzer("exactAnalyzer").custom()
+		theLuceneCtx.analyzer(EXACT_ANALYZER).custom()
 			.tokenizer(KeywordTokenizerFactory.class);
 
 		theLuceneCtx.analyzer("conceptParentPidsAnalyzer").custom()

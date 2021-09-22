@@ -16,10 +16,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -106,14 +113,14 @@ public class HibernateSearchQueryBuilder {
 
 	}
 
-	public void addStringTextSearch(String nextParam, List<List<IQueryParameterType>> tokenTextAndOrTerms) {
-		if (CollectionUtils.isEmpty(tokenTextAndOrTerms)) {
+	public void addStringTextSearch(String theSearchParamName, List<List<IQueryParameterType>> stringAndOrTerms) {
+		if (CollectionUtils.isEmpty(stringAndOrTerms)) {
 			return;
 		}
 		String fieldName;
 		// we store some as legacy direct-mapped hibernate search fields
 		// wip mb maybe start indexing to sp._text.string.text too?
-		switch (nextParam) {
+		switch (theSearchParamName) {
 			case Constants.PARAM_CONTENT:
 				fieldName = "myContentText";
 				break;
@@ -121,13 +128,14 @@ public class HibernateSearchQueryBuilder {
 				fieldName = "myNarrativeText";
 				break;
 			default:
-				fieldName = "sp." + nextParam + ".string.text";
+				fieldName = "sp." + theSearchParamName + ".string.text";
 				break;
 		}
 
-		for (List<? extends IQueryParameterType> nextAnd : tokenTextAndOrTerms) {
+		for (List<? extends IQueryParameterType> nextAnd : stringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
 			//fixme GGG: MB, did you mean for this to say >= 1?
+			// fixme mb - this is very confused.  Need some tests to figure out multiple and/or logic
 			if (terms.size() == 1) {
 				String query = terms.stream()
 					.map(s -> "(" + s + ")")
@@ -145,6 +153,25 @@ public class HibernateSearchQueryBuilder {
 			} else {
 				ourLog.debug("No Terms found in query parameter {}", nextAnd);
 			}
+		}
+	}
+
+	public void addStringExactSearch(String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
+		String fieldPath = "sp." + theSearchParamName + ".string.exact";
+
+		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
+			Set<String> terms = extractOrStringParams(nextAnd);
+			ourLog.info("string exact search {}", terms);
+			List<? extends PredicateFinalStep> orTerms = terms.stream().map(s -> {
+					return myPredicateFactory
+						.match()
+						.field(fieldPath)
+						.matching(s);
+				})
+				.collect(Collectors.toList());
+			// an or-collector would be nice.
+
+			myRootClause.must(orPredicateOrSingle(orTerms));
 		}
 	}
 }

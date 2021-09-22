@@ -28,6 +28,7 @@ public class HibernateSearchIndexWriter {
 	public void writeStringIndex(String theSearchParam, String theValue) {
 		DocumentElement stringIndexNode = getSearchParamIndexNode(theSearchParam, "string");
 		stringIndexNode.addValue("text", theValue);
+		stringIndexNode.addValue("exact", theValue);
 		ourLog.trace("Adding Search Param Text: {} -- {}", theSearchParam, theValue);
 	}
 

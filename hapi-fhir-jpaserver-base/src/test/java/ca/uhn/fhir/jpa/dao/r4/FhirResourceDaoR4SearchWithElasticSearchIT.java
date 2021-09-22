@@ -153,7 +153,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	public void testResourceCodeTokenSearch() {
 		IIdType id1, id2, id2b, id3;
 
-		// wipmb
 		String system = "http://loinc.org";
 		{
 			Observation obs1 = new Observation();
@@ -218,6 +217,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 	@Test
 	public void testResourceCodeTextSearch() {
+		// wipmb text search test
 		IIdType id1,id2,id3,id4;
 
 		{
@@ -335,6 +335,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 	@Test
 	public void testStringSearch() {
+		// wipmb string search test
 		IIdType id1, id2, id3, id4;
 
 		{

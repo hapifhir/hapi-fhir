@@ -66,14 +66,14 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		//create them adhoc. https://docs.jboss.org/hibernate/search/6.0/reference/en-US/html_single/#mapper-orm-bridge-index-field-dsl-dynamic
 		//I _think_ im doing the right thing here by indicating that everything matching this template uses this analyzer.
 		IndexFieldTypeFactory indexFieldTypeFactory = thePropertyBindingContext.typeFactory();
-		StringIndexFieldTypeOptionsStep<?> textType =
+		StringIndexFieldTypeOptionsStep<?> standardAnalyzer =
 			indexFieldTypeFactory.asString()
 				// wip mb where do we do unicode normalization?  Java-side, or in the analyzer?
 				// wip mb can we share these constants with HapiElasticsearchAnalysisConfigurer and HapiLuceneAnalysisConfigurer
 				.analyzer("standardAnalyzer")
 				.projectable(Projectable.NO);
 
-		StringIndexFieldTypeOptionsStep<?> tokenType =
+		StringIndexFieldTypeOptionsStep<?> exactAnalyzer =
 			indexFieldTypeFactory.asString()
 				.analyzer("exactAnalyzer") // default max-length is 256.  Is that enough for code system uris?
 				.projectable(Projectable.NO);
@@ -82,7 +82,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		// the old style.
 		// wipmb move _text and _contains into sp with backwards compat in the query path.
 		indexSchemaElement
-			.fieldTemplate("SearchParamText", textType)
+			.fieldTemplate("SearchParamText", standardAnalyzer)
 			.matchingPathGlob(SEARCH_PARAM_TEXT_PREFIX + "*");
 
 		// this is a bit ugly.  We need to enforce order and dependency or the object matches will be too big.
@@ -95,7 +95,8 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		// But for elastic, I'd rather have a single field defined, with multi-field sub-fields.  The index cost is the same,
 		// but elastic will actually store all fields in the source document.
 		spfield.objectFieldTemplate("stringIndex", ObjectStructure.FLATTENED).matchingPathGlob("*.string");
-		spfield.fieldTemplate("string-text", textType).matchingPathGlob("*.string.text").multiValued();
+		spfield.fieldTemplate("string-text", standardAnalyzer).matchingPathGlob("*.string.text").multiValued();
+		spfield.fieldTemplate("string-exact", exactAnalyzer).matchingPathGlob("*.string.exact").multiValued();
 
 		// token
 		// Ideally, we'd store a single code-system string and use a custom tokenizer to
@@ -105,9 +106,9 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		// Instead, just be simple and expand into three full fields
 		// wip mb try token_filter - pattern_capture. to generate code and system partial values.
 		spfield.objectFieldTemplate("tokenIndex", ObjectStructure.FLATTENED).matchingPathGlob("*.token");
-		spfield.fieldTemplate("token-code", tokenType).matchingPathGlob("*.token.code").multiValued();
-		spfield.fieldTemplate("token-code-system", tokenType).matchingPathGlob("*.token.code-system").multiValued();
-		spfield.fieldTemplate("token-system", tokenType).matchingPathGlob("*.token.system").multiValued();
+		spfield.fieldTemplate("token-code", exactAnalyzer).matchingPathGlob("*.token.code").multiValued();
+		spfield.fieldTemplate("token-code-system", exactAnalyzer).matchingPathGlob("*.token.code-system").multiValued();
+		spfield.fieldTemplate("token-system", exactAnalyzer).matchingPathGlob("*.token.system").multiValued();
 
 		// last, since the globs are matched in declaration order, and * matches even nested nodes.
 		spfield.objectFieldTemplate("spObject", ObjectStructure.FLATTENED).matchingPathGlob("*")

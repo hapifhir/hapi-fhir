@@ -108,13 +108,25 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			.flatMap(Collection::stream)
 			// wipmb to extend to string params.
 			.anyMatch(param -> {
+				String modifier = StringUtils.defaultString(param.getQueryParameterQualifier(), "");
 				if (param instanceof TokenParam) {
-					// we support plain token and token:text
-					return Constants.PARAMQUALIFIER_TOKEN_TEXT.equals(param.getQueryParameterQualifier()) ||
-						StringUtils.isBlank(param.getQueryParameterQualifier());
+					switch (modifier) {
+						case Constants.PARAMQUALIFIER_TOKEN_TEXT:
+						case "":
+							// we support plain token and token:text
+							return true;
+						default:
+							return false;
+					}
 				} else if (param instanceof StringParam) {
-					// we support string:text
-					return Constants.PARAMQUALIFIER_TOKEN_TEXT.equals(param.getQueryParameterQualifier());
+					switch (modifier) {
+						case Constants.PARAMQUALIFIER_TOKEN_TEXT:
+						case Constants.PARAMQUALIFIER_STRING_EXACT:
+							// we support string:text, string:exact
+							return true;
+						default:
+							return false;
+					}
 				} else {
 					return false;
 				}
@@ -168,6 +180,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 							case STRING:
 								List<List<IQueryParameterType>> stringTextAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
 								builder.addStringTextSearch(nextParam, stringTextAndOrTerms);
+
+								List<List<IQueryParameterType>> stringExactAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_STRING_EXACT);
+								builder.addStringExactSearch(nextParam, stringExactAndOrTerms);
 
 								// wip mb add string norm and exact
 								break;
