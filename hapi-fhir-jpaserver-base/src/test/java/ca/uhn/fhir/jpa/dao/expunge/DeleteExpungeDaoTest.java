@@ -67,10 +67,11 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 
 		// Try to delete _cascade and _expunge on the organization
 		BaseServerResponseException e = assertThrows(BaseServerResponseException.class, () -> {myOrganizationDao
-			.deleteByUrl("Organization?" + "_cascade=true&" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);});
+			.deleteByUrl("Organization?" + "_cascade=delete&" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);});
 
 		// Get not implemented HTTP 501 error
 		assertEquals(Constants.STATUS_HTTP_501_NOT_IMPLEMENTED, e.getStatusCode());
+		assertEquals("_expunge cannot be used with _cascade", e.getMessage());
 	}
 
 	@Test
