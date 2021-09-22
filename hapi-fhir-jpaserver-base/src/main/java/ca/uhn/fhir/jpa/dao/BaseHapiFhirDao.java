@@ -78,7 +78,6 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -184,7 +183,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	public static final String NS_JPA_PROFILE = "https://github.com/hapifhir/hapi-fhir/ns/jpa/profile";
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseHapiFhirDao.class);
 	private static final Map<FhirVersionEnum, FhirContext> ourRetrievalContexts = new HashMap<>();
-	private static final String PROCESSING_SUB_REQUEST = "BaseHapiFhirDao.processingSubRequest";
 	private static boolean ourValidationDisabledForUnitTest;
 	private static boolean ourDisableIncrementOnUpdateForUnitTest = false;
 
@@ -502,19 +500,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	public boolean isLogicalReference(IIdType theId) {
 		return LogicalReferenceHelper.isLogicalReference(myConfig.getModelConfig(), theId);
-	}
-
-	public void notifyInterceptors(RestOperationTypeEnum theOperationType, ActionRequestDetails theRequestDetails) {
-		if (theRequestDetails.getId() != null && theRequestDetails.getId().hasResourceType() && isNotBlank(theRequestDetails.getResourceType())) {
-			if (theRequestDetails.getId().getResourceType().equals(theRequestDetails.getResourceType()) == false) {
-				throw new InternalErrorException(
-					"Inconsistent server state - Resource types don't match: " + theRequestDetails.getId().getResourceType() + " / " + theRequestDetails.getResourceType());
-			}
-		}
-
-		if (theRequestDetails.getUserData().get(PROCESSING_SUB_REQUEST) == Boolean.TRUE) {
-			theRequestDetails.notifyIncomingRequestPreHandled(theOperationType);
-		}
 	}
 
 	/**
@@ -1676,18 +1661,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 		}
 		return retVal.toString();
-	}
-
-	public static void clearRequestAsProcessingSubRequest(RequestDetails theRequestDetails) {
-		if (theRequestDetails != null) {
-			theRequestDetails.getUserData().remove(PROCESSING_SUB_REQUEST);
-		}
-	}
-
-	public static void markRequestAsProcessingSubRequest(RequestDetails theRequestDetails) {
-		if (theRequestDetails != null) {
-			theRequestDetails.getUserData().put(PROCESSING_SUB_REQUEST, Boolean.TRUE);
-		}
 	}
 
 	public static void populateFullTextFields(final FhirContext theContext, final IBaseResource theResource, ResourceTable theEntity) {

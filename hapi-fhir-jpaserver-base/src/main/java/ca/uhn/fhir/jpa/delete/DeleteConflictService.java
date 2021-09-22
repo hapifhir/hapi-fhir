@@ -64,37 +64,6 @@ public class DeleteConflictService {
 	@Autowired
 	private FhirContext myFhirContext;
 
-	public static void validateDeleteConflictsEmptyOrThrowException(FhirContext theFhirContext, DeleteConflictList theDeleteConflicts) {
-		IBaseOperationOutcome oo = null;
-		String firstMsg = null;
-
-		for (DeleteConflict next : theDeleteConflicts) {
-
-			if (theDeleteConflicts.isResourceIdToIgnoreConflict(next.getTargetId())) {
-				continue;
-			}
-
-			String msg = "Unable to delete " +
-				next.getTargetId().toUnqualifiedVersionless().getValue() +
-				" because at least one resource has a reference to this resource. First reference found was resource " +
-				next.getSourceId().toUnqualifiedVersionless().getValue() +
-				" in path " +
-				next.getSourcePath();
-
-			if (firstMsg == null) {
-				firstMsg = msg;
-				oo = OperationOutcomeUtil.newInstance(theFhirContext);
-			}
-			OperationOutcomeUtil.addIssue(theFhirContext, oo, BaseStorageDao.OO_SEVERITY_ERROR, msg, null, "processing");
-		}
-
-		if (firstMsg == null) {
-			return;
-		}
-
-		throw new ResourceVersionConflictException(firstMsg, oo);
-	}
-
 	private DeleteConflictOutcome findAndHandleConflicts(RequestDetails theRequest, DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, int theMinQueryResultCount, TransactionDetails theTransactionDetails) {
 		List<ResourceLink> resultList = myDeleteConflictFinderService.findConflicts(theEntity, theMinQueryResultCount);
 		if (resultList.isEmpty()) {

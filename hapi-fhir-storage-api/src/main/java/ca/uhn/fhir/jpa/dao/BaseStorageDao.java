@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -47,10 +48,12 @@ import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.QualifierDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -87,6 +90,7 @@ public abstract class BaseStorageDao {
 	public static final String OO_SEVERITY_ERROR = "error";
 	public static final String OO_SEVERITY_INFO = "information";
 	public static final String OO_SEVERITY_WARN = "warning";
+	private static final String PROCESSING_SUB_REQUEST = "BaseStorageDao.processingSubRequest";
 
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
@@ -449,4 +453,28 @@ public abstract class BaseStorageDao {
 		return references.keySet();
 	}
 
+	public static void clearRequestAsProcessingSubRequest(RequestDetails theRequestDetails) {
+		if (theRequestDetails != null) {
+			theRequestDetails.getUserData().remove(PROCESSING_SUB_REQUEST);
+		}
+	}
+
+	public static void markRequestAsProcessingSubRequest(RequestDetails theRequestDetails) {
+		if (theRequestDetails != null) {
+			theRequestDetails.getUserData().put(PROCESSING_SUB_REQUEST, Boolean.TRUE);
+		}
+	}
+
+	public void notifyInterceptors(RestOperationTypeEnum theOperationType, IServerInterceptor.ActionRequestDetails theRequestDetails) {
+		if (theRequestDetails.getId() != null && theRequestDetails.getId().hasResourceType() && isNotBlank(theRequestDetails.getResourceType())) {
+			if (theRequestDetails.getId().getResourceType().equals(theRequestDetails.getResourceType()) == false) {
+				throw new InternalErrorException(
+					"Inconsistent server state - Resource types don't match: " + theRequestDetails.getId().getResourceType() + " / " + theRequestDetails.getResourceType());
+			}
+		}
+
+		if (theRequestDetails.getUserData().get(PROCESSING_SUB_REQUEST) == Boolean.TRUE) {
+			theRequestDetails.notifyIncomingRequestPreHandled(theOperationType);
+		}
+	}
 }

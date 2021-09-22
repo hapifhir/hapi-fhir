@@ -39,7 +39,7 @@ import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
-import ca.uhn.fhir.jpa.delete.DeleteConflictService;
+import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -139,8 +139,8 @@ public abstract class BaseTransactionProcessor {
 
 	public static final String URN_PREFIX = "urn:";
 	public static final Pattern UNQUALIFIED_MATCH_URL_START = Pattern.compile("^[a-zA-Z0-9_]+=");
-	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessor.class);
-	private BaseHapiFhirDao myDao;
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseTransactionProcessor.class);
+	private BaseStorageDao myDao;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 	@Autowired
@@ -350,16 +350,16 @@ public abstract class BaseTransactionProcessor {
 		return defaultString(theId.getValue()).startsWith(URN_PREFIX);
 	}
 
-	public void setDao(BaseHapiFhirDao theDao) {
+	public void setDao(BaseStorageDao theDao) {
 		myDao = theDao;
 	}
 
 	private IBaseBundle processTransactionAsSubRequest(RequestDetails theRequestDetails, IBaseBundle theRequest, String theActionName, boolean theNestedMode) {
-		BaseHapiFhirDao.markRequestAsProcessingSubRequest(theRequestDetails);
+		BaseStorageDao.markRequestAsProcessingSubRequest(theRequestDetails);
 		try {
 			return processTransaction(theRequestDetails, theRequest, theActionName, theNestedMode);
 		} finally {
-			BaseHapiFhirDao.clearRequestAsProcessingSubRequest(theRequestDetails);
+			BaseStorageDao.clearRequestAsProcessingSubRequest(theRequestDetails);
 		}
 	}
 
@@ -463,7 +463,7 @@ public abstract class BaseTransactionProcessor {
 			IBase nextReqEntry = requestEntries.get(i);
 			String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
 			if (verb == null || !isValidVerb(verb)) {
-				throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionEntryHasInvalidVerb", verb, i));
+				throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseStorageDao.class, "transactionEntryHasInvalidVerb", verb, i));
 			}
 		}
 
@@ -840,12 +840,12 @@ public abstract class BaseTransactionProcessor {
 			 */
 			if (isPlaceholder(nextResourceId)) {
 				if (!theAllIds.add(nextResourceId)) {
-					throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextResourceId));
+					throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseStorageDao.class, "transactionContainsMultipleWithDuplicateId", nextResourceId));
 				}
 			} else if (nextResourceId.hasResourceType() && nextResourceId.hasIdPart()) {
 				IIdType nextId = nextResourceId.toUnqualifiedVersionless();
 				if (!theAllIds.add(nextId)) {
-					throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextId));
+					throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseStorageDao.class, "transactionContainsMultipleWithDuplicateId", nextId));
 				}
 			}
 
@@ -1034,7 +1034,7 @@ public abstract class BaseTransactionProcessor {
 							contentType = binary.getContentType();
 							patchType = PatchTypeEnum.forContentTypeOrThrowInvalidRequestException(myContext, contentType);
 							if (patchType == PatchTypeEnum.FHIR_PATCH_JSON || patchType == PatchTypeEnum.FHIR_PATCH_XML) {
-								String msg = myContext.getLocalizer().getMessage(TransactionProcessor.class, "fhirPatchShouldNotUseBinaryResource");
+								String msg = myContext.getLocalizer().getMessage(BaseTransactionProcessor.class, "fhirPatchShouldNotUseBinaryResource");
 								throw new InvalidRequestException(msg);
 							}
 						} else if (res instanceof IBaseParameters) {
@@ -1044,7 +1044,7 @@ public abstract class BaseTransactionProcessor {
 
 						if (patchBodyParameters == null) {
 							if (isBlank(patchBody)) {
-								String msg = myContext.getLocalizer().getMessage(TransactionProcessor.class, "missingPatchBody");
+								String msg = myContext.getLocalizer().getMessage(BaseTransactionProcessor.class, "missingPatchBody");
 								throw new InvalidRequestException(msg);
 							}
 						}
@@ -1233,7 +1233,7 @@ public abstract class BaseTransactionProcessor {
 				}
 			}
 		}
-		DeleteConflictService.validateDeleteConflictsEmptyOrThrowException(myContext, theDeleteConflicts);
+		DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(myContext, theDeleteConflicts);
 	}
 
 	/**
@@ -1527,7 +1527,7 @@ public abstract class BaseTransactionProcessor {
 
 	private void validateResourcePresent(IBaseResource theResource, Integer theOrder, String theVerb) {
 		if (theResource == null) {
-			String msg = myContext.getLocalizer().getMessage(TransactionProcessor.class, "missingMandatoryResource", theVerb, theOrder);
+			String msg = myContext.getLocalizer().getMessage(BaseTransactionProcessor.class, "missingMandatoryResource", theVerb, theOrder);
 			throw new InvalidRequestException(msg);
 		}
 	}
@@ -1568,7 +1568,7 @@ public abstract class BaseTransactionProcessor {
 	private String extractTransactionUrlOrThrowException(IBase nextEntry, String verb) {
 		String url = myVersionAdapter.getEntryRequestUrl(nextEntry);
 		if (isBlank(url)) {
-			throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionMissingUrl", verb));
+			throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseStorageDao.class, "transactionMissingUrl", verb));
 		}
 		return url;
 	}
@@ -1578,7 +1578,7 @@ public abstract class BaseTransactionProcessor {
 		try {
 			resType = myContext.getResourceDefinition(theParts.getResourceType());
 		} catch (DataFormatException e) {
-			String msg = myContext.getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theVerb, theUrl);
+			String msg = myContext.getLocalizer().getMessage(BaseStorageDao.class, "transactionInvalidUrl", theVerb, theUrl);
 			throw new InvalidRequestException(msg);
 		}
 		IFhirResourceDao<? extends IBaseResource> dao = null;
@@ -1586,14 +1586,9 @@ public abstract class BaseTransactionProcessor {
 			dao = myDaoRegistry.getResourceDao(resType.getImplementingClass());
 		}
 		if (dao == null) {
-			String msg = myContext.getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theVerb, theUrl);
+			String msg = myContext.getLocalizer().getMessage(BaseStorageDao.class, "transactionInvalidUrl", theVerb, theUrl);
 			throw new InvalidRequestException(msg);
 		}
-
-		// if (theParts.getResourceId() == null && theParts.getParams() == null) {
-		// String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theVerb, theUrl);
-		// throw new InvalidRequestException(msg);
-		// }
 
 		return dao;
 	}

@@ -36,7 +36,7 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
-import ca.uhn.fhir.jpa.delete.DeleteConflictService;
+import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -447,7 +447,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			DaoMethodOutcome retVal = delete(theId, deleteConflicts, theRequestDetails, transactionDetails);
 
-			DeleteConflictService.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
+			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
 
 			ourLog.debug("Processed delete on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
 			return retVal;
@@ -546,7 +546,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myTransactionService.execute(theRequest, transactionDetails, tx -> {
 			DeleteConflictList deleteConflicts = new DeleteConflictList();
 			DeleteMethodOutcome outcome = deleteByUrl(theUrl, deleteConflicts, theRequest);
-			DeleteConflictService.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
+			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
 			return outcome;
 		});
 	}
@@ -1757,7 +1757,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (getConfig().isEnforceReferentialIntegrityOnDelete()) {
 				myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, true, theRequest, new TransactionDetails());
 			}
-			DeleteConflictService.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
+			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
 
 			IBaseOperationOutcome oo = createInfoOperationOutcome("Ok to delete");
 			return new MethodOutcome(new IdDt(theId.getValue()), oo);
