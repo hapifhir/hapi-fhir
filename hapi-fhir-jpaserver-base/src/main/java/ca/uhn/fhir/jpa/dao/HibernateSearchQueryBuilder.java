@@ -138,8 +138,8 @@ public class HibernateSearchQueryBuilder {
 
 		for (List<? extends IQueryParameterType> nextAnd : stringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
-			//fixme GGG: MB, did you mean for this to say >= 1?
-			// fixme mb - this is very confused.  Need some tests to figure out multiple and/or logic
+			// wip GGG: MB, did you mean for this to say >= 1?
+			// wip mb - this is very confused.  Need some tests to figure out multiple and/or logic
 			if (terms.size() == 1) {
 				String query = terms.stream()
 					.map(s -> "(" + s + ")")

@@ -350,7 +350,6 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private boolean requiresHibernateSearchAccess() {
-		// fixme mb this should be in sync with the guts of FulltextSearchSvcImpl.doSearch();
 		return (myFulltextSearchSvc !=null ) && myFulltextSearchSvc.supportsSomeOf(myParams);
 	}
 

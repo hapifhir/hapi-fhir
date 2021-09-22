@@ -20,7 +20,7 @@ class FulltextSearchSvcImplTest {
 
 	@Test
 	void parseSearchParamTextStuff() {
-		// fixme mb what's left here to test?
+		// wip mb what's left here to test?
 
 	}
 }
