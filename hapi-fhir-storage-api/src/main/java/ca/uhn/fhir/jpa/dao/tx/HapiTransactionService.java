@@ -24,7 +24,6 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoFailureUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -49,6 +48,10 @@ import javax.annotation.PostConstruct;
 public class HapiTransactionService {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiTransactionService.class);
+
+	public static final String XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS = HapiTransactionService.class.getName() + "_RESOLVED_TAG_DEFINITIONS";
+	public static final String XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS = HapiTransactionService.class.getName() + "_EXISTING_SEARCH_PARAMS";
+
 	@Autowired
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
@@ -112,11 +115,11 @@ public class HapiTransactionService {
 				}
 
 				if (i < maxRetries) {
-					theTransactionDetails.getRollbackUndoActions().forEach(t->t.run());
+					theTransactionDetails.getRollbackUndoActions().forEach(t -> t.run());
 					theTransactionDetails.clearRollbackUndoActions();
 					theTransactionDetails.clearResolvedItems();
-					theTransactionDetails.clearUserData(BaseHapiFhirDao.XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
-					theTransactionDetails.clearUserData(BaseHapiFhirDao.XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
+					theTransactionDetails.clearUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
+					theTransactionDetails.clearUserData(XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
 					double sleepAmount = (250.0d * i) * Math.random();
 					long sleepAmountLong = (long) sleepAmount;
 					TestUtil.sleepAtLeast(sleepAmountLong, false);

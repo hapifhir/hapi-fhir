@@ -47,6 +47,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 
+	public static final String REPOSITORY_VALIDATING_RULE_BUILDER = "repositoryValidatingRuleBuilder";
 	private final List<IRepositoryValidatingRule> myRules = new ArrayList<>();
 
 	@Autowired

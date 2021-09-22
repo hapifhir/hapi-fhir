@@ -40,7 +40,7 @@ class RuleRequireProfileDeclaration extends BaseTypedRule {
 
 	@Nonnull
 	@Override
-	public RuleEvaluation evaluate(RequestDetails theRequestDetails, @Nonnull IBaseResource theResource) {
+	public IRepositoryValidatingRule.RuleEvaluation evaluate(RequestDetails theRequestDetails, @Nonnull IBaseResource theResource) {
 		Optional<String> matchingProfile = theResource
 			.getMeta()
 			.getProfile()
@@ -49,10 +49,10 @@ class RuleRequireProfileDeclaration extends BaseTypedRule {
 			.filter(t -> myProfileOptions.contains(t))
 			.findFirst();
 		if (matchingProfile.isPresent()) {
-			return RuleEvaluation.forSuccess(this);
+			return IRepositoryValidatingRule.RuleEvaluation.forSuccess(this);
 		}
 		String msg = getFhirContext().getLocalizer().getMessage(RuleRequireProfileDeclaration.class, "noMatchingProfile", getResourceType(), myProfileOptions);
-		return RuleEvaluation.forFailure(this, msg);
+		return IRepositoryValidatingRule.RuleEvaluation.forFailure(this, msg);
 	}
 
 

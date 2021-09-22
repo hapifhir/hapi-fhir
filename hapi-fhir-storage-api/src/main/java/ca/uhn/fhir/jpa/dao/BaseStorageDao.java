@@ -80,12 +80,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.OO_SEVERITY_ERROR;
-import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.OO_SEVERITY_INFO;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseStorageDao {
+	public static final String OO_SEVERITY_ERROR = "error";
+	public static final String OO_SEVERITY_INFO = "information";
+	public static final String OO_SEVERITY_WARN = "warning";
+
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
@@ -140,7 +142,7 @@ public abstract class BaseStorageDao {
 	private void verifyResourceTypeIsAppropriateForDao(IBaseResource theResource) {
 		String type = getContext().getResourceType(theResource);
 		if (getResourceName() != null && !getResourceName().equals(type)) {
-			throw new InvalidRequestException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "incorrectResourceType", type, getResourceName()));
+			throw new InvalidRequestException(getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "incorrectResourceType", type, getResourceName()));
 		}
 	}
 
@@ -150,7 +152,7 @@ public abstract class BaseStorageDao {
 	private void verifyResourceIdIsValid(IBaseResource theResource) {
 		if (theResource.getIdElement().hasIdPart()) {
 			if (!theResource.getIdElement().isIdPartValid()) {
-				throw new InvalidRequestException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "failedToCreateWithInvalidId", theResource.getIdElement().getIdPart()));
+				throw new InvalidRequestException(getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "failedToCreateWithInvalidId", theResource.getIdElement().getIdPart()));
 			}
 		}
 	}
@@ -406,7 +408,7 @@ public abstract class BaseStorageDao {
 			RuntimeSearchParam param = searchParams.get(qualifiedParamName.getParamName());
 			if (param == null) {
 				Collection<String> validNames = mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName());
-				String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSearchParameter", qualifiedParamName.getParamName(), getResourceName(), validNames);
+				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidSearchParameter", qualifiedParamName.getParamName(), getResourceName(), validNames);
 				throw new InvalidRequestException(msg);
 			}
 
