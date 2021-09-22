@@ -39,9 +39,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.UriType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +60,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	@Operation(name = JpaConstants.OPERATION_EXPAND, idempotent = true, typeName = "ValueSet")
 	public IBaseResource expand(
 		HttpServletRequest theServletRequest,
-		@IdParam(optional = true) IdType theId,
+		@IdParam(optional = true) IIdType theId,
 		@OperationParam(name = "valueSet", min = 0, max = 1) IBaseResource theValueSet,
 		@OperationParam(name = "url", min = 0, max = 1, typeName = "uri") IPrimitiveType<String> theUrl,
 		@OperationParam(name = "valueSetVersion", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theValueSetVersion,
@@ -113,15 +110,16 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		return (IFhirResourceDaoValueSet<IBaseResource, ICompositeType, ICompositeType>) myDaoRegistry.getResourceDao("ValueSet");
 	}
 
+	@SuppressWarnings("unchecked")
 	@Operation(name = JpaConstants.OPERATION_VALIDATE_CODE, idempotent = true, typeName = "ValueSet", returnParameters = {
 		@OperationParam(name = "result", typeName = "boolean", min = 1),
 		@OperationParam(name = "message", typeName = "string"),
 		@OperationParam(name = "display", typeName = "string")
 	})
-	public Parameters validateCode(
+	public IBaseParameters validateCode(
 		HttpServletRequest theServletRequest,
-		@IdParam(optional = true) IdType theId,
-		@OperationParam(name = "url", min = 0, max = 1, typeName = "uri") UriType theValueSetUrl,
+		@IdParam(optional = true) IIdType theId,
+		@OperationParam(name = "url", min = 0, max = 1, typeName = "uri") IPrimitiveType<String> theValueSetUrl,
 		@OperationParam(name = "valueSetVersion", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theValueSetVersion,
 		@OperationParam(name = "code", min = 0, max = 1) IPrimitiveType<String> theCode,
 		@OperationParam(name = "system", min = 0, max = 1, typeName = "uri") IPrimitiveType<String> theSystem,
@@ -135,20 +133,22 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoValueSet<IBaseResource, ICompositeType, ICompositeType> dao = getDao();
-			UriType valueSetIdentifier;
+			IPrimitiveType<String> valueSetIdentifier;
 			if (theValueSetVersion != null) {
-				valueSetIdentifier = new UriType(theValueSetUrl.getValue() + "|" + theValueSetVersion);
+				valueSetIdentifier = (IPrimitiveType<String>) getContext().getElementDefinition("uri").newInstance();
+				valueSetIdentifier.setValue(theValueSetUrl.getValue() + "|" + theValueSetVersion);
 			} else {
 				valueSetIdentifier = theValueSetUrl;
 			}
 			IPrimitiveType<String> codeSystemIdentifier;
 			if (theSystemVersion != null) {
-				codeSystemIdentifier = new UriType(theSystem.getValue() + "|" + theSystemVersion);
+				codeSystemIdentifier = (IPrimitiveType<String>) getContext().getElementDefinition("uri").newInstance();
+				codeSystemIdentifier.setValue(theSystem.getValue() + "|" + theSystemVersion);
 			} else {
 				codeSystemIdentifier = theSystem;
 			}
 			IValidationSupport.CodeValidationResult result = dao.validateCode(valueSetIdentifier, theId, theCode, codeSystemIdentifier, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
-			return (Parameters) BaseJpaResourceProviderValueSetDstu2.toValidateCodeResult(getContext(), result);
+			return BaseJpaResourceProviderValueSetDstu2.toValidateCodeResult(getContext(), result);
 		} finally {
 			endRequest(theServletRequest);
 		}

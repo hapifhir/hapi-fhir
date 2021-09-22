@@ -449,6 +449,32 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertThat(lastSelectQuery, containsString(" like '%display value 9%'"));
 	}
 
+	@Test
+	public void testExpandNonPersistedValueSet() {
+
+		// Expand
+		ValueSet expansion = myTermSvc.expandValueSet(new ValueSetExpansionOptions(), "http://hl7.org/fhir/ValueSet/administrative-gender");
+		assertThat(ValueSetTestUtil.toCodes(expansion), containsInAnyOrder("male", "female", "other", "unknown"));
+		assertEquals("ValueSet with URL \"ValueSet.url[http://hl7.org/fhir/ValueSet/administrative-gender]\" was expanded using an in-memory expansion", ValueSetTestUtil.extractExpansionMessage(expansion));
+
+		// Validate Code - Good
+		String codeSystemUrl = "http://hl7.org/fhir/administrative-gender";
+		String valueSetUrl = "http://hl7.org/fhir/ValueSet/administrative-gender";
+		String code = "male";
+		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
+		assertTrue(outcome.isOk());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/administrative-gender", outcome.getMessage());
+
+		// Validate Code - Bad
+		code = "AAA";
+		outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
+		assertFalse(outcome.isOk());
+		assertEquals("Unknown code 'http://hl7.org/fhir/administrative-gender#AAA' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/administrative-gender'", outcome.getMessage());
+		assertEquals("error", outcome.getSeverityCode());
+
+	}
+
+
 	@SuppressWarnings("SpellCheckingInspection")
 	@Test
 	public void testExpandTermValueSetAndChildren() throws Exception {
