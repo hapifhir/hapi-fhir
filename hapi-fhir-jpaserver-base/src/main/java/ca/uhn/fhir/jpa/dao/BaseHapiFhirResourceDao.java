@@ -586,7 +586,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new MethodNotAllowedException("_expunge is not enabled on this server: " + getConfig().cannotDeleteExpungeReason());
 		}
 
-		if (theUrl.contains(Constants.PARAMETER_CASCADE_DELETE) || theRequest.getHeader(Constants.HEADER_CASCADE).equals(Constants.CASCADE_DELETE)) {
+		if (theUrl.contains(Constants.PARAMETER_CASCADE_DELETE) || (theRequest.getHeader(Constants.HEADER_CASCADE) != null && theRequest.getHeader(Constants.HEADER_CASCADE).equals(Constants.CASCADE_DELETE))) {
 			throw new InvalidRequestException("_expunge cannot be used with _cascade");
 		}
 
