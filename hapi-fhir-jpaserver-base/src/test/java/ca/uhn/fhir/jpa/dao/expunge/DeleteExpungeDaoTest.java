@@ -55,7 +55,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testDeleteCascadeExpungeReturns501() {
+	public void testDeleteCascadeExpungeReturns400() {
 		// Create new organization
 		Organization organization = new Organization();
 		organization.setName("FOO");
@@ -69,8 +69,8 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		BaseServerResponseException e = assertThrows(BaseServerResponseException.class, () -> {myOrganizationDao
 			.deleteByUrl("Organization?" + "_cascade=delete&" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);});
 
-		// Get not implemented HTTP 501 error
-		assertEquals(Constants.STATUS_HTTP_501_NOT_IMPLEMENTED, e.getStatusCode());
+		// Get not implemented HTTP 400 error
+		assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, e.getStatusCode());
 		assertEquals("_expunge cannot be used with _cascade", e.getMessage());
 	}
 
