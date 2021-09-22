@@ -22,9 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
@@ -95,7 +93,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData(myFhirContext);
 
 		// wip mb - add string params to indexing.
-		// wipmb weird - theNewParams seems to have some doubles.
+		// wipmb weird - theNewParams seem to have some doubles.
 		theNewParams.myStringParams.stream()
 				.forEach(param -> {
 					retVal.addStringIndexData(param.getParamName(), param.getValueExact());
@@ -116,9 +114,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		for (List<? extends IQueryParameterType> nextAnd: theTerms) {
 			String indexFieldPrefix = "sp." + theSearchParamName + ".token";
 
-			List<? extends PredicateFinalStep> clauses = theTerms.stream().map(term -> {
+			List<? extends PredicateFinalStep> clauses = nextAnd.stream().map(orTerm -> {
 				// wip can this be untrue?
-				TokenParam token = (TokenParam) term;
+				TokenParam token = (TokenParam) orTerm;
 				if (StringUtils.isBlank(token.getSystem())) {
 					// bare value
 					return f.match().field(indexFieldPrefix + ".code").matching(token.getValue());
@@ -259,10 +257,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					/*
 					 * Handle arbitrary token parameters
 					 */
-					//TODO GGG build this dynamically. Do we even need _anything_ taht isn't code-system? i feel like every token search will match code-system,
-					//and storing code AND system separately is an actual waste
-//					List<List<IQueryParameterType>> remove = theParams.remove("code");
-//					addTokenSearch(f, b, remove, "sp.code.token.code-system" );
 
 					//DSTU2 doesn't support fhirpath, so fall back to old style lookup.
 					if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
@@ -273,13 +267,13 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 							RuntimeSearchParam activeParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, nextParam);
 							switch (activeParam.getParamType()) {
 								case TOKEN:
-									List<List<IQueryParameterType>> codeTextAndOrTerms = theParams.removeByNameAndQualifier(nextParam, TokenParamModifier.TEXT);
-									if (codeTextAndOrTerms != null && !codeTextAndOrTerms.isEmpty()) {
-										addTextSearch(f, b, codeTextAndOrTerms, "sp." + nextParam + ".string.text");
+									List<List<IQueryParameterType>> tokenTextAndOrTerms = theParams.removeByNameAndModifier(nextParam, TokenParamModifier.TEXT);
+									if (tokenTextAndOrTerms != null && !tokenTextAndOrTerms.isEmpty()) {
+										addTextSearch(f, b, tokenTextAndOrTerms, "sp." + nextParam + ".string.text");
 									}
-									List<List<IQueryParameterType>> codeUnmodifiedAndOrTerms = theParams.removeByNameAndQualifier(nextParam, TokenParamModifier.TEXT);
-									if (codeUnmodifiedAndOrTerms != null && !codeUnmodifiedAndOrTerms.isEmpty()) {
-										addTokenSearch(f, b, codeUnmodifiedAndOrTerms, nextParam);
+									List<List<IQueryParameterType>> tokenUnmodifiedAndOrTerms = theParams.removeByNameUnmodified(nextParam);
+									if (tokenUnmodifiedAndOrTerms != null && !tokenUnmodifiedAndOrTerms.isEmpty()) {
+										addTokenSearch(f, b, tokenUnmodifiedAndOrTerms, nextParam);
 									}
 
 									break;
