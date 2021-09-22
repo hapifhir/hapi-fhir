@@ -84,6 +84,8 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -378,6 +380,160 @@ public class AuthorizationInterceptorR4Test {
 	}
 
 	@Test
+	public void testCustomCompartmentSpsOnMultipleInstances() throws Exception {
+		//Given
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				AdditionalCompartmentSearchParameters additionalCompartmentSearchParameters = new AdditionalCompartmentSearchParameters();
+				additionalCompartmentSearchParameters.addSearchParameters("Device:patient");
+				List<IdType> relatedIds = new ArrayList<>();
+				relatedIds.add(new IdType("Patient/123"));
+				relatedIds.add(new IdType("Patient/456"));
+				return new RuleBuilder()
+					.allow().read().allResources()
+					.inCompartmentWithAdditionalSearchParams("Patient", relatedIds, additionalCompartmentSearchParameters)
+					.andThen().denyAll()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+
+		Patient patient;
+		patient = new Patient();
+		patient.setId("Patient/123");
+		Device d = new Device();
+		d.getPatient().setResource(patient);
+
+		ourHitMethod = false;
+		ourReturn = Collections.singletonList(d);
+
+		//When
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Device/124456");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+
+		//Then
+		assertTrue(ourHitMethod);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+	}
+
+	@Test
+	public void testCustomSearchParamsDontOverPermit() throws Exception {
+		//Given
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				AdditionalCompartmentSearchParameters additionalCompartmentSearchParameters = new AdditionalCompartmentSearchParameters();
+				additionalCompartmentSearchParameters.addSearchParameters("Encounter:patient");
+				List<IdType> relatedIds = new ArrayList<>();
+				relatedIds.add(new IdType("Patient/123"));
+				return new RuleBuilder()
+					.allow().read().allResources()
+					.inCompartmentWithAdditionalSearchParams("Patient", relatedIds, additionalCompartmentSearchParameters)
+					.andThen().denyAll()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+
+		Patient patient;
+		patient = new Patient();
+		patient.setId("Patient/123");
+		Device d = new Device();
+		d.getPatient().setResource(patient);
+
+		ourHitMethod = false;
+		ourReturn = Collections.singletonList(d);
+
+		//When
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Device/124456");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+
+		//then
+		assertFalse(ourHitMethod);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+	}
+
+
+	@Test
+	public void testNonsenseParametersThrowAtRuntime() throws Exception {
+		//Given
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				AdditionalCompartmentSearchParameters additionalCompartmentSearchParameters = new AdditionalCompartmentSearchParameters();
+				additionalCompartmentSearchParameters.addSearchParameters("device:garbage");
+				List<IdType> relatedIds = new ArrayList<>();
+				relatedIds.add(new IdType("Patient/123"));
+				return new RuleBuilder()
+					.allow().read().allResources()
+					.inCompartmentWithAdditionalSearchParams("Patient", relatedIds, additionalCompartmentSearchParameters)
+					.andThen().denyAll()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+
+		Patient patient;
+		patient = new Patient();
+		patient.setId("Patient/123");
+		Device d = new Device();
+		d.getPatient().setResource(patient);
+
+		ourHitMethod = false;
+		ourReturn = Collections.singletonList(d);
+
+		//When
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Device/124456");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+
+		//then
+		assertFalse(ourHitMethod);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+	}
+
+	@Test
+	public void testRuleBuilderAdditionalSearchParamsInvalidValues() {
+		//Too many colons
+		try {
+			AdditionalCompartmentSearchParameters additionalCompartmentSearchParameters = new AdditionalCompartmentSearchParameters();
+			additionalCompartmentSearchParameters.addSearchParameters("too:many:colons");
+			new RuleBuilder()
+				.allow().read().allResources()
+				.inCompartmentWithAdditionalSearchParams("Patient", new IdType("Patient/123"), additionalCompartmentSearchParameters)
+				.andThen().denyAll()
+				.build();
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertThat(e.getMessage(), is(equalTo("too:many:colons is not a valid search parameter. Search parameters must be in the form resourcetype:parametercode, e.g. 'Device:patient'")));
+		}
+
+
+		//No colons
+		try {
+			AdditionalCompartmentSearchParameters additionalCompartmentSearchParameters = new AdditionalCompartmentSearchParameters();
+			additionalCompartmentSearchParameters.addSearchParameters("no-colons");
+			new RuleBuilder()
+				.allow().read().allResources()
+				.inCompartmentWithAdditionalSearchParams("Patient", new IdType("Patient/123"), additionalCompartmentSearchParameters)
+				.andThen().denyAll()
+				.build();
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertThat(e.getMessage(), is(equalTo("no-colons is not a valid search parameter. Search parameters must be in the form resourcetype:parametercode, e.g. 'Device:patient'")));
+		}
+	}
+
+	@Test
 	public void testAllowByCompartmentUsingUnqualifiedIds() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -437,6 +593,13 @@ public class AuthorizationInterceptorR4Test {
 		extractResponseAndClose(status);
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
+
+
+		patient = new Patient();
+		patient.setId("Patient/123");
+		carePlan = new CarePlan();
+		carePlan.setStatus(CarePlan.CarePlanStatus.ACTIVE);
+		carePlan.getSubject().setResource(patient);
 	}
 
 	/**
@@ -3619,6 +3782,30 @@ public class AuthorizationInterceptorR4Test {
 		}
 	}
 
+	public static class DummyDeviceResourceProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Device.class;
+		}
+
+		@Read(version = true)
+		public Device read(@IdParam IdType theId) {
+			ourHitMethod = true;
+			if (ourReturn.isEmpty()) {
+				throw new ResourceNotFoundException(theId);
+			}
+			return (Device) ourReturn.get(0);
+		}
+		@Search()
+		public List<Resource> search(
+			@OptionalParam(name = "patient") ReferenceParam thePatient
+		) {
+			ourHitMethod = true;
+			return ourReturn;
+		}
+	}
+
 	@SuppressWarnings("unused")
 	public static class DummyObservationResourceProvider implements IResourceProvider {
 
@@ -3953,12 +4140,13 @@ public class AuthorizationInterceptorR4Test {
 		DummyEncounterResourceProvider encProv = new DummyEncounterResourceProvider();
 		DummyCarePlanResourceProvider cpProv = new DummyCarePlanResourceProvider();
 		DummyDiagnosticReportResourceProvider drProv = new DummyDiagnosticReportResourceProvider();
+		DummyDeviceResourceProvider devProv = new DummyDeviceResourceProvider();
 		PlainProvider plainProvider = new PlainProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
 		ourServlet.setFhirContext(ourCtx);
-		ourServlet.registerProviders(patProvider, obsProv, encProv, cpProv, orgProv, drProv);
+		ourServlet.registerProviders(patProvider, obsProv, encProv, cpProv, orgProv, drProv, devProv);
 		ourServlet.registerProvider(new DummyServiceRequestResourceProvider());
 		ourServlet.registerProvider(new DummyConsentResourceProvider());
 		ourServlet.setPlainProviders(plainProvider);
