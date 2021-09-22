@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
 			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -11,16 +9,25 @@
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
-	<artifactId>hapi-fhir-server-mdm</artifactId>
-	<packaging>bundle</packaging>
+	<artifactId>hapi-fhir-storage</artifactId>
+	<packaging>jar</packaging>
 
-	<name>HAPI FHIR - Master Data Management</name>
+	<name>HAPI FHIR Storage api</name>
+	<description>This project provides services useful for fhir repository storage. Actual repository storage services
+		are not in this project, just the api and helper libraries.
+	</description>
 
 	<dependencies>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -29,13 +36,8 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-storage</artifactId>
+			<artifactId>hapi-fhir-structures-dstu2</artifactId>
 			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-commons</artifactId>
-			<version>${spring_data_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -53,48 +55,72 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.fhir</groupId>
-			<artifactId>ucum</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>junit</groupId>
-					<artifactId>junit</artifactId>
-				</exclusion>
-			</exclusions>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<!-- FIXME KHS remove jpa stuff from here -->
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-model</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-searchparam</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.search</groupId>
+			<artifactId>hibernate-search-mapper-orm</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.search</groupId>
+			<artifactId>hibernate-search-backend-elasticsearch</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>info.debatty</groupId>
-			<artifactId>java-string-similarity</artifactId>
-			<version>1.2.1</version>
-		</dependency>
+		<!-- Spring -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
-			<version>${spring_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
-			<version>${spring_version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>xml-apis</artifactId>
+					<groupId>xml-apis</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jscience</groupId>
+			<artifactId>jscience</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
+		</dependency>
+
+		<!-- Java -->
 		<dependency>
 			<groupId>javax.annotation</groupId>
 			<artifactId>javax.annotation-api</artifactId>
 		</dependency>
+
 		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
-		<!-- test -->
+
+		<!-- test dependencies -->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
@@ -105,20 +131,8 @@
 			<artifactId>spring-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-test</artifactId>
-			<version>${spring_boot_version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.github.ben-manes.caffeine</groupId>
-			<artifactId>caffeine</artifactId>
-			<scope>test</scope>
-		</dependency>
 
 	</dependencies>
-
 	<build>
 		<pluginManagement>
 			<plugins>
@@ -144,17 +158,6 @@
 					</execution>
 				</executions>
 			</plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <_nouses>true</_nouses>
-                        <_removeheaders>Built-By, Include-Resource, Private-Package, Require-Capability</_removeheaders>
-                    </instructions>
-                </configuration>
-            </plugin>
 		</plugins>
 	</build>
 </project>
