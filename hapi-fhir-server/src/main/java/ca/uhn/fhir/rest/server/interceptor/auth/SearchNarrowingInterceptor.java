@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -164,15 +165,13 @@ public class SearchNarrowingInterceptor {
 
 					/*
 					 * If none of the values that were requested by the client overlap at all
-					 * with the values that the user is allowed to see, we'll just add the permitted
-					 * list as a new list. Ultimately this scenario actually means that the client
-					 * shouldn't get *any* results back, and adding a new AND parameter (that doesn't
-					 * overlap at all with the others) is one way of ensuring that.
+					 * with the values that the user is allowed to see, the client shouldn't
+					 * get *any* results back. We return an error code indicating that the
+					 * caller is forbidden from accessing the resources they requested.
 					 */
 					if (!restrictedExistingList) {
-						String[] newValues = Arrays.copyOf(existingValues, existingValues.length + 1);
-						newValues[existingValues.length] = ParameterUtil.escapeAndJoinOrList(nextAllowedValues);
-						newParameters.put(nextParamName, newValues);
+						theResponse.setStatus(Constants.STATUS_HTTP_403_FORBIDDEN);
+						return false;
 					}
 				}
 

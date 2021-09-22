@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
@@ -17,6 +18,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.eclipse.jetty.server.Server;
@@ -44,6 +46,7 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class SearchNarrowingInterceptorTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchNarrowingInterceptorTest.class);
@@ -226,19 +229,20 @@ public class SearchNarrowingInterceptorTest {
 
 		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
-		ourClient
-			.search()
-			.forResource("Observation")
-			.where(Observation.PATIENT.hasAnyOfIds("Patient/111", "Patient/777"))
-			.and(Observation.PATIENT.hasAnyOfIds("Patient/111", "Patient/888"))
-			.execute();
+		try {
+			ourClient
+				.search()
+				.forResource("Observation")
+				.where(Observation.PATIENT.hasAnyOfIds("Patient/111", "Patient/777"))
+				.and(Observation.PATIENT.hasAnyOfIds("Patient/111", "Patient/888"))
+				.execute();
 
-		assertEquals("Observation.search", ourLastHitMethod);
-		assertNull(ourLastIdParam);
-		assertNull(ourLastCodeParam);
-		assertNull(ourLastSubjectParam);
-		assertNull(ourLastPerformerParam);
-		assertThat(toStrings(ourLastPatientParam), Matchers.contains("Patient/111,Patient/777", "Patient/111,Patient/888", "Patient/123,Patient/456"));
+			fail("Expected a 403 error");
+		} catch (ForbiddenOperationException e) {
+			assertEquals(Constants.STATUS_HTTP_403_FORBIDDEN, e.getStatusCode());
+		}
+
+		assertNull(ourLastHitMethod);
 	}
 
 	private List<String> toStrings(BaseAndListParam<? extends IQueryParameterOr<?>> theParams) {
