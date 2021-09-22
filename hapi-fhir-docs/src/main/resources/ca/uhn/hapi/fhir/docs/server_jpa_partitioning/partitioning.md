@@ -53,9 +53,12 @@ In a partitioned repository, it is important to understand that only a single po
 
 This fact can have security implications:
 
-* A client might be blocked from creating `Patient/ABC` in the partition they have access to because this ID is already in use in another partition.
+* A client might be blocked from creating `Patient/ABC` in the partition they have access to because this ID is already
+  in use in another partition.
 
-* In a server using the default configuration of SEQUENTIAL_NUMERIC [Server ID Strategy](/hapi-fhir/apidocs/hapi-fhir-jpaserver-api/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setResourceServerIdStrategy(ca.uhn.fhir.jpa.api.config.DaoConfig.IdStrategyEnum)) a client may be able to infer the IDs of resources in other partitions based on the ID they were assigned.
+* In a server using the default configuration of
+  SEQUENTIAL_NUMERIC [Server ID Strategy](/hapi-fhir/apidocs/hapi-fhir-storage-api/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setResourceServerIdStrategy(ca.uhn.fhir.jpa.api.config.DaoConfig.IdStrategyEnum))
+  a client may be able to infer the IDs of resources in other partitions based on the ID they were assigned.
 
 These considerations can be addressed by using UUID Server ID Strategy, and disallowing client-assigned IDs.  
 

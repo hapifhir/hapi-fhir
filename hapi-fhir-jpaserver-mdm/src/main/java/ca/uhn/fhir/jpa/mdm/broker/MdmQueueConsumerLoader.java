@@ -1,11 +1,11 @@
 package ca.uhn.fhir.jpa.mdm.broker;
 
-import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.log.Logs;
 import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

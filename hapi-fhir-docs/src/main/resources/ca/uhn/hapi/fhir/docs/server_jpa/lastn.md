@@ -24,19 +24,22 @@ The grouping of Observation resources by `Observation.code` means that the `$las
 
 # Deployment and Configuration
 
-The `$lastn` operation is disabled by default. The operation can be enabled by setting the DaoConfig#setLastNEnabled property (see [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-jpaserver-api/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setLastNEnabled(boolean))).
+The `$lastn` operation is disabled by default. The operation can be enabled by setting the DaoConfig#setLastNEnabled
+property (
+see [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-storage-api/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setLastNEnabled(boolean)))
+.
 
-In addition, the Elasticsearch client service, `ElasticsearchSvcImpl` will need to be instantiated with parameters specifying how to connect to the Elasticsearch server, for e.g.:
+In addition, the Elasticsearch client service, `ElasticsearchSvcImpl` will need to be instantiated with parameters
+specifying how to connect to the Elasticsearch server, for e.g.:
 
 ```java
   @Bean()
   public ElasticsearchSvcImpl elasticsearchSvc() {
-     String elasticsearchHost = "localhost";
-     String elasticsearchUserId = "elastic";
+     String elasticsearchHost = "localhost:9200";
+     String elasticsearchUsername = "elastic";
      String elasticsearchPassword = "changeme";
-     int elasticsearchPort = 9301;
 
-     return new ElasticsearchSvcImpl(elasticsearchHost, elasticsearchPort, elasticsearchUserId, elasticsearchPassword);
+     return new ElasticsearchSvcImpl(elasticsearchHost, elasticsearchUsername, elasticsearchPassword);
   }
 ```
 

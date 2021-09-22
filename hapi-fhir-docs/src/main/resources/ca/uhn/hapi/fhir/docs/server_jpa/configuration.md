@@ -54,9 +54,15 @@ In some cases, you may have references which are <i>Logical References</i>,
 which means that they act as an identifier and not necessarily as a literal
 web address.
 
-A common use for logical references is in references to conformance resources, such as ValueSets, StructureDefinitions, etc. For example, you might refer to the ValueSet `http://hl7.org/fhir/ValueSet/quantity-comparator` from your own resources. In this case, you are not necessarily telling the server that this is a real address that it should resolve, but rather that this is an identifier for a ValueSet where `ValueSet.url` has the given URI/URL.
+A common use for logical references is in references to conformance resources, such as ValueSets, StructureDefinitions,
+etc. For example, you might refer to the ValueSet `http://hl7.org/fhir/ValueSet/quantity-comparator` from your own
+resources. In this case, you are not necessarily telling the server that this is a real address that it should resolve,
+but rather that this is an identifier for a ValueSet where `ValueSet.url` has the given URI/URL.
 
-HAPI can be configured to treat certain URI/URL patterns as logical by using the DaoConfig#setTreatReferencesAsLogical property (see [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-jpaserver-api/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setTreatReferencesAsLogical(java.util.Set))).
+HAPI can be configured to treat certain URI/URL patterns as logical by using the DaoConfig#setTreatReferencesAsLogical
+property (
+see [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-storage-api/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setTreatReferencesAsLogical(java.util.Set)))
+.
 
 For example:
 
@@ -131,5 +137,5 @@ X-Retry-On-Version-Conflict: retry; max-retries=100
 
 Delete with expunge submits a job to delete and expunge the requested resources. This is done in batches. If the DELETE
 ?_expunge=true syntax is used to trigger the delete expunge, then the batch size will be determined by the value
-of [Expunge Batch Size](/apidocs/hapi-fhir-jpaserver-api/ca/uhn/fhir/jpa/api/config/DaoConfig.html#getExpungeBatchSize())
+of [Expunge Batch Size](/apidocs/hapi-fhir-storage-api/ca/uhn/fhir/jpa/api/config/DaoConfig.html#getExpungeBatchSize())
 property.

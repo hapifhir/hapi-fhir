@@ -1,11 +1,10 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.rp.r4.BinaryResourceProvider;
@@ -161,7 +160,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			servletHolder.setServlet(restServer);
 			proxyHandler.addServlet(servletHolder, "/fhir/context/*");
 
-			ourCtx = FhirContext.forCached(FhirVersionEnum.R4);
+			ourCtx = FhirContext.forR4Cached();
 			restServer.setFhirContext(ourCtx);
 
 			ourServer.setHandler(proxyHandler);
@@ -816,7 +815,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			.execute();
 
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		myBatchJobHelper.awaitAllBulkJobCompletions(BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME);
+		myBatchJobHelper.awaitAllBulkJobCompletions(BatchConstants.DELETE_EXPUNGE_JOB_NAME);
 
 		Long jobId = BatchHelperR4.jobIdFromParameters(response);
 

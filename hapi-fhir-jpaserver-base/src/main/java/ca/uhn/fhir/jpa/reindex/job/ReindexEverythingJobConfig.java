@@ -35,7 +35,7 @@ import org.springframework.context.annotation.Lazy;
 
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.REINDEX_EVERYTHING_JOB_NAME;
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.REINDEX_EVERYTHING_JOB_NAME;
 
 /**
  * Spring batch Job configuration file. Contains all necessary plumbing to run a

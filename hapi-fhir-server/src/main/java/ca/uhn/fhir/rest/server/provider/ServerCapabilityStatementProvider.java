@@ -411,15 +411,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 					}
 
 					String spUri = next.getUri();
-					if (isBlank(spUri) && servletRequest != null) {
-						String id;
-						if (next.getId() != null) {
-							id = next.getId().toUnqualifiedVersionless().getValue();
-						} else {
-							id = resourceName + "-" + next.getName();
-						}
-						spUri = configuration.getServerAddressStrategy().determineServerBase(servletRequest.getServletContext(), servletRequest) + "/" + id;
-					}
+					
 					if (isNotBlank(spUri)) {
 						terser.addElement(searchParam, "definition", spUri);
 					}

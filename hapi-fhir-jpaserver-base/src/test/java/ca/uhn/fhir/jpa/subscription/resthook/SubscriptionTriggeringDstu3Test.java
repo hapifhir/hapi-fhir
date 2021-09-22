@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -64,12 +63,12 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
-	private static List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
-	private static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
-	private static List<Patient> ourCreatedPatients = Lists.newArrayList();
-	private static List<Patient> ourUpdatedPatients = Lists.newArrayList();
-	private static List<String> ourContentTypes = new ArrayList<>();
-	private List<IIdType> mySubscriptionIds = new ArrayList<>();
+	private static final List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
+	private static final List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
+	private static final List<Patient> ourCreatedPatients = Lists.newArrayList();
+	private static final List<Patient> ourUpdatedPatients = Lists.newArrayList();
+	private static final List<String> ourContentTypes = new ArrayList<>();
+	private final List<IIdType> mySubscriptionIds = new ArrayList<>();
 
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
@@ -555,7 +554,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 	@BeforeAll
 	public static void startListenerServer() throws Exception {
-		ourListenerRestServer = new RestfulServer(FhirContext.forCached(FhirVersionEnum.DSTU3));
+		ourListenerRestServer = new RestfulServer(FhirContext.forDstu3Cached());
 
 		ObservationListener obsListener = new ObservationListener();
 		PatientListener ptListener = new PatientListener();

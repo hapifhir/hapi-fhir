@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.bulk.imprt.job;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
 import ca.uhn.fhir.jpa.bulk.imprt.model.ParsedBulkImportRecord;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
@@ -39,7 +39,7 @@ import java.util.List;
 public class BulkImportFileWriter implements ItemWriter<ParsedBulkImportRecord> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportFileWriter.class);
-	@Value("#{stepExecutionContext['" + BulkExportJobConfig.JOB_UUID_PARAMETER + "']}")
+	@Value("#{stepExecutionContext['" + BatchConstants.JOB_UUID_PARAMETER + "']}")
 	private String myJobUuid;
 	@Value("#{stepExecutionContext['" + BulkImportPartitioner.FILE_INDEX + "']}")
 	private int myFileIndex;

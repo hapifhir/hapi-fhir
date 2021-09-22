@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.search.lastn;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.search.lastn.config.TestElasticsearchContainerHelper;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
@@ -61,14 +60,14 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 	private static ObjectMapper ourMapperNonPrettyPrint;
 	private static boolean indexLoaded = false;
 	private final Map<String, Map<String, List<Date>>> createdPatientObservationMap = new HashMap<>();
-	private final FhirContext myFhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+	private final FhirContext myFhirContext = FhirContext.forR4Cached();
 	private ElasticsearchSvcImpl elasticsearchSvc;
 
 	@BeforeEach
 	public void before() throws IOException {
 		PartitionSettings partitionSettings = new PartitionSettings();
 		partitionSettings.setPartitioningEnabled(false);
-		elasticsearchSvc = new ElasticsearchSvcImpl(partitionSettings, elasticsearchContainer.getHost(), elasticsearchContainer.getMappedPort(9200), "", "");
+		elasticsearchSvc = new ElasticsearchSvcImpl(partitionSettings, elasticsearchContainer.getHost() + ":" + elasticsearchContainer.getMappedPort(9200), null, null);
 
 		if (!indexLoaded) {
 			createMultiplePatientsAndObservations();

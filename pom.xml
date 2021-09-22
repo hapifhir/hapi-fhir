@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>5.6.0-PRE4-SNAPSHOT</version>
+	<version>5.6.0-PRE6-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -737,6 +737,12 @@
 			<id>rbhman</id>
 			<name>Bruno Hedman</name>
 		</developer>
+
+		<developer>
+			<id>bratwurtz</id>
+			<name>Dušan Marković</name>
+			<organization>Better</organization>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -966,7 +972,7 @@
 			<dependency>
 				<groupId>com.sun.activation</groupId>
 				<artifactId>javax.activation</artifactId>
-				<version>1.2.0</version>
+				<version>${activation_api_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.sun.activation</groupId>
@@ -1539,6 +1545,24 @@
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-core</artifactId>
 				<version>${hibernate_version}</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>xml-apis</artifactId>
+						<groupId>xml-apis</groupId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.activation</groupId>
+						<artifactId>activation</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.activation</groupId>
+						<artifactId>javax.activation-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.xml.bind</groupId>
+						<artifactId>jaxb-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
@@ -2314,7 +2338,7 @@
 									<fileset dir="hapi-fhir-jpaserver-mdm/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-jpaserver-batch">
-									<fileset dir="hapi-fhir-jpaserver-batch/target/site/apidocs"/>
+									<fileset dir="hapi-fhir-batch/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-client">
 									<fileset dir="hapi-fhir-client/target/site/apidocs"/>
@@ -2748,15 +2772,16 @@
 				<module>hapi-fhir-validation-resources-r4</module>
 				<module>hapi-fhir-structures-r5</module>
 				<module>hapi-fhir-validation-resources-r5</module>
-				<module>hapi-fhir-jpaserver-api</module>
+				<module>hapi-fhir-jpa</module>
+				<module>hapi-fhir-storage-api</module>
 				<module>hapi-fhir-jpaserver-cql</module>
 				<module>hapi-fhir-jpaserver-model</module>
 				<module>hapi-fhir-jpaserver-searchparam</module>
 				<module>hapi-fhir-jpaserver-subscription</module>
 				<module>hapi-fhir-jaxrsserver-base</module>
-				<module>hapi-fhir-jpaserver-batch</module>
+				<module>hapi-fhir-batch</module>
 				<module>hapi-fhir-jpaserver-base</module>
-				<module>hapi-fhir-jpaserver-migrate</module>
+				<module>hapi-fhir-sql-migrate</module>
 				<module>hapi-fhir-jpaserver-mdm</module>
 				<module>hapi-fhir-testpage-overlay</module>
 				<module>hapi-fhir-jpaserver-uhnfhirtest</module>
