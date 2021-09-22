@@ -1105,7 +1105,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A", "AA", "AB", "AAA"));
 		assertEquals(15, myCaptureQueriesListener.getSelectQueries().size());
-		assertEquals(null, expansion.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
+		assertEquals("ValueSet with URL \"Unidentified ValueSet\" was expanded using an in-memory expansion", expansion.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
 
 		// Hierarchical
 		myCaptureQueriesListener.clear();
