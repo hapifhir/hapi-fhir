@@ -6,8 +6,10 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.bulk.imprt.svc.BulkDataImportR4Test;
 import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticSearch;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -25,6 +27,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -40,12 +43,14 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
@@ -62,6 +67,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -104,6 +110,12 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myObservationDaoR4")
 	private IFhirResourceDao<Observation> myObservationDao;
+	@Autowired
+	@Qualifier("myPatientDaoR4")
+	private IFhirResourceDao<Patient> myPatientDao;
+	@Autowired
+	@Qualifier("myEncounterDaoR4")
+	private IFhirResourceDao<Encounter> myEncounterDao;
 	@Autowired
 	@Qualifier("mySystemDaoR4")
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
@@ -167,6 +179,67 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
 	}
 
+	@Test
+	public void testResourceReferenceSearch() {
+		IIdType patId, encId, obsId;
+
+		{
+			Patient patient = new Patient();
+			DaoMethodOutcome outcome = myPatientDao.create(patient, mySrd);
+			patId = outcome.getId();
+		}
+		{
+			Encounter encounter = new Encounter();
+			encounter.addIdentifier().setSystem("foo").setValue("bar");
+			DaoMethodOutcome outcome = myEncounterDao.create(encounter);
+			encId = outcome.getId();
+		}
+		{
+			Observation obs2 = new Observation();
+			obs2.getCode().setText("Body Weight");
+			obs2.getCode().addCoding().setCode("obs2").setSystem("Some System").setDisplay("Body weight as measured by me");
+			obs2.setStatus(Observation.ObservationStatus.FINAL);
+			obs2.setValue(new Quantity(81));
+			obs2.setSubject(new Reference(patId.toString()));
+			obs2.setEncounter(new Reference(encId.toString()));
+			obsId = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+			//ourLog.info("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
+		}
+		{
+			//Search by chain
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("encounter", new ReferenceParam("foo|bar").setChain("identifier"));
+			assertObservationSearchMatches("Search by encounter reference", map, obsId);
+
+		}
+
+		{
+			// search by encounter
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("encounter", new ReferenceParam(encId));
+			assertObservationSearchMatches("Search by encounter reference", map, obsId);
+		}
+		{
+			// search by subject
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("subject", new ReferenceParam(patId));
+			assertObservationSearchMatches("Search by subject reference", map, obsId);
+		}
+		{
+			// search by patient
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("patient", new ReferenceParam(patId));
+			assertObservationSearchMatches("Search by patient reference", map, obsId);
+		}
+		{
+			// search by patient and encounter
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("subject", new ReferenceParam(patId));
+			map.add("encounter", new ReferenceParam(encId));
+			assertObservationSearchMatches("Search by encounter&&subject reference", map, obsId);
+		}
+
+	}
 	@Test
 	public void testResourceCodeTokenSearch() {
 		IIdType id1, id2, id2b, id3;

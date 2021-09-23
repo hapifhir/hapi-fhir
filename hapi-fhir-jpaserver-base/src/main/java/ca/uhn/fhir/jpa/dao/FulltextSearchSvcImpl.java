@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -36,7 +37,6 @@ import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
@@ -53,8 +53,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
-import java.util.function.BiFunction;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -90,16 +91,38 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 		// wip mb - add string params to indexing.
 		// wipmb weird - theNewParams seem to have some doubles.
-		theNewParams.myStringParams.stream()
-				.forEach(param -> {
-					retVal.addStringIndexData(param.getParamName(), param.getValueExact());
-				});
-		theNewParams.myTokenParams.stream()
-				.forEach(param -> {
-					retVal.addTokenIndexData(param.getParamName(), param.getSystem(), param.getValue());
-				});
+		theNewParams.myStringParams
+				.forEach(param -> retVal.addStringIndexData(param.getParamName(), param.getValueExact()));
+		theNewParams.myTokenParams
+				.forEach(param -> retVal.addTokenIndexData(param.getParamName(), param.getSystem(), param.getValue()));
+		if (!theNewParams.myLinks.isEmpty()) {
+			Map<String, ResourceLink> spNameToLinkMap = buildSpNameToLinkMap(theResource, theNewParams);
 
+			spNameToLinkMap.entrySet()
+					.forEach(entry -> {
+						ResourceLink resourceLink = entry.getValue();
+						String qualifiedTargetResourceId = resourceLink.getTargetResourceType() + "/" + resourceLink.getTargetResourceId();
+						retVal.addResourceLinkIndexData(entry.getKey(), qualifiedTargetResourceId);
+					});
+
+		}
 		return retVal;
+	}
+
+	private Map<String, ResourceLink> buildSpNameToLinkMap(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
+		String resourceType = myFhirContext.getResourceType(theResource);
+		Map<String, RuntimeSearchParam> paramNameToRuntimeParam = theNewParams.getPopulatedResourceLinkParameters().stream()
+			.collect(Collectors.toMap((paramName) -> paramName, (paramName) -> mySearchParamRegistry.getActiveSearchParam(resourceType, paramName)));
+
+		Map<String, ResourceLink> paramNameToIndexedLink = new HashMap<>();
+		for ( Map.Entry<String, RuntimeSearchParam> entry :paramNameToRuntimeParam.entrySet()) {
+			ResourceLink link = theNewParams.myLinks.stream().filter(resourceLink ->
+				entry.getValue().getPathsSplit().stream()
+					.anyMatch(path -> path.equalsIgnoreCase(resourceLink.getSourcePath())))
+				.findFirst().orElse(null);
+			paramNameToIndexedLink.put(entry.getKey(), link);
+		}
+		return paramNameToIndexedLink;
 	}
 
 	@Override
@@ -137,8 +160,17 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					// wip next up
 					return false;
 				} else if (param instanceof ReferenceParam) {
-					// wip next up
-					return false;
+					//We cannot search by chain.
+					if (((ReferenceParam) param).getChain() != null) {
+						return false;
+					}
+					switch (modifier) {
+						case	EMPTY_MODIFIER:
+							return true;
+						case Constants.PARAMQUALIFIER_MDM:
+						default:
+							return false;
+					}
 				} else {
 					return false;
 				}
@@ -212,7 +244,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 								break;
 
 							case REFERENCE:
-								// wip for gary
+								List<List<IQueryParameterType>> referenceAndOrTerms = theParams.removeByNameUnmodified(nextParam);
+								builder.addReferenceUnchainedSearch(nextParam, referenceAndOrTerms);
 								break;
 
 								// wip mb add the rest.

@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.apache.commons.collections4.CollectionUtils;
@@ -59,6 +60,12 @@ public class HibernateSearchQueryBuilder {
 			} else if (nextOr instanceof TokenParam) {
 				TokenParam nextOrToken = (TokenParam) nextOr;
 				nextValueTrimmed = nextOrToken.getValue();
+			} else if (nextOr instanceof ReferenceParam){
+				ReferenceParam referenceParam = (ReferenceParam) nextOr;
+				nextValueTrimmed = referenceParam.getValue();
+				if (nextValueTrimmed.contains("/_history")) {
+					nextValueTrimmed = nextValueTrimmed.substring(0, nextValueTrimmed.indexOf("/_history"));
+				}
 			} else {
 				throw new IllegalArgumentException("Unsupported full-text param type: " + nextOr.getClass());
 			}
@@ -210,5 +217,20 @@ public class HibernateSearchQueryBuilder {
 				.collect(Collectors.toList());
 
 			myRootClause.must(orPredicateOrSingle(orTerms));
-		}	}
+		}
+	}
+
+    public void addReferenceUnchainedSearch(String theSearchParamName, List<List<IQueryParameterType>> theReferenceAndOrTerms) {
+		 String fieldPath = "sp." + theSearchParamName + ".reference.value";
+		 for (List<? extends IQueryParameterType> nextAnd : theReferenceAndOrTerms) {
+			 Set<String> terms = extractOrStringParams(nextAnd);
+			 ourLog.trace("reference unchained search {}", terms);
+
+			 List<? extends PredicateFinalStep> orTerms = terms.stream()
+				 .map(s -> myPredicateFactory.match().field(fieldPath).matching(s))
+				 .collect(Collectors.toList());
+
+			 myRootClause.must(orPredicateOrSingle(orTerms));
+		 }
+	 }
 }
