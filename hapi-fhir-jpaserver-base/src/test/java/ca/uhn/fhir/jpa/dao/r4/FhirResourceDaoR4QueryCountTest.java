@@ -22,8 +22,10 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
@@ -48,7 +50,6 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -892,6 +893,49 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+
+	}
+
+	@Test
+	public void testTransactionWithMultipleInlineMatchUrls() {
+		myDaoConfig.setDeleteEnabled(false);
+		myDaoConfig.setMassIngestionMode(true);
+		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+
+		Location loc = new Location();
+		loc.setId("LOC");
+		loc.addIdentifier().setSystem("http://foo").setValue("123");
+		myLocationDao.update(loc, mySrd);
+
+		BundleBuilder bb = new BundleBuilder(myFhirCtx);
+		for (int i = 0; i < 5; i++) {
+			Encounter enc = new Encounter();
+			enc.addLocation().setLocation(new Reference("Location?identifier=http://foo|123"));
+			bb.addTransactionCreateEntry(enc);
+		}
+		Bundle input = (Bundle) bb.getBundle();
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(6, runInTransaction(() -> myResourceTableDao.count()));
+
+		// Second identical pass
+
+		bb = new BundleBuilder(myFhirCtx);
+		for (int i = 0; i < 5; i++) {
+			Encounter enc = new Encounter();
+			enc.addLocation().setLocation(new Reference("Location?identifier=http://foo|123"));
+			bb.addTransactionCreateEntry(enc);
+		}
+		input = (Bundle) bb.getBundle();
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(6, runInTransaction(() -> myResourceTableDao.count()));
 
 	}
 

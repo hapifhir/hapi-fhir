@@ -53,6 +53,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.text.StringTokenizer;
 import org.fhir.ucum.Pair;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -94,7 +95,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	public static final Set<String> COORDS_INDEX_PATHS;
 	private static final Pattern SPLIT = Pattern.compile("\\||( or )");
-	private static final Pattern SPLIT_R4 = Pattern.compile("\\s+\\|");
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSearchParamExtractor.class);
 
 	static {
@@ -1549,7 +1549,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Nonnull
 	public static String[] splitPathsR4(@Nonnull String thePaths) {
-		return SPLIT_R4.split(thePaths);
+		StringTokenizer tok = new StringTokenizer(thePaths, '|');
+		tok.setIgnoredChar(' ');
+		return tok.getTokenArray();
 	}
 
 	public static boolean tokenTextIndexingEnabledForSearchParam(ModelConfig theModelConfig, RuntimeSearchParam theSearchParam) {
