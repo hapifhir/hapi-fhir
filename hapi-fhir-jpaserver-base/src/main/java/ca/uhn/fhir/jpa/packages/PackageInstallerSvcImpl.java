@@ -54,6 +54,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Base64BinaryType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
@@ -65,6 +66,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -157,20 +159,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		if (enabled) {
 			try {
 
-				boolean exists = new TransactionTemplate(myTxManager).execute(tx -> {
-					Optional<NpmPackageVersionEntity> existing = myPackageVersionDao.findByPackageIdAndVersion(theInstallationSpec.getName(), theInstallationSpec.getVersion());
-					return existing.isPresent();
-				});
-				if (exists) {
-					ourLog.info("Package {}#{} is already installed", theInstallationSpec.getName(), theInstallationSpec.getVersion());
-				}
-
 				NpmPackage npmPackage = myPackageCacheManager.installPackage(theInstallationSpec);
-				if (npmPackage == null) {
-					throw new IOException("Package not found");
-				}
-
-				retVal.getMessage().addAll(JpaPackageCache.getProcessingMessages(npmPackage));
+				validateAndInstallPkg(npmPackage, theInstallationSpec, retVal);
 
 				if (theInstallationSpec.isFetchDependencies()) {
 					fetchAndInstallDependencies(npmPackage, theInstallationSpec, retVal);
@@ -185,6 +175,43 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 			} catch (IOException e) {
 				throw new ImplementationGuideInstallationException("Could not load NPM package " + theInstallationSpec.getName() + "#" + theInstallationSpec.getVersion(), e);
+			}
+		}
+
+		return retVal;
+	}
+
+	/**
+	 * Loads and installs an IG from a B64 String
+	 * <p>
+	 * Installs the IG by persisting instances of the following types of resources:
+	 * <p>
+	 * - NamingSystem, CodeSystem, ValueSet, StructureDefinition (with snapshots),
+	 * ConceptMap, SearchParameter, Subscription
+	 * <p>
+	 * Creates the resources if non-existent, updates them otherwise.
+	 *
+	 * @param theInstallationSpec The details about what should be installed
+	 */
+	@Override
+	public PackageInstallOutcomeJson installByPackage(Base64BinaryType packageFile) {
+		PackageInstallOutcomeJson retVal = new PackageInstallOutcomeJson();
+		if (enabled) {
+			try {
+				byte[] decodedB64Package = packageFile.getValue();
+				ByteArrayInputStream packageStream = new ByteArrayInputStream(decodedB64Package);
+
+				NpmPackage npmPackage = NpmPackage.fromPackage(packageStream);
+				PackageInstallationSpec theInstallationSpec = new PackageInstallationSpec();
+				theInstallationSpec.setName(npmPackage.name());
+				theInstallationSpec.setVersion((npmPackage.version()));
+				theInstallationSpec.setFetchDependencies(false);
+				theInstallationSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+
+				validateAndInstallPkg(npmPackage, theInstallationSpec, retVal);
+
+			} catch (IOException e) {
+				throw new ImplementationGuideInstallationException("Could not load NPM package ", e);
 			}
 		}
 
@@ -495,6 +522,25 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		BaseRuntimeElementCompositeDefinition<?> currentDef = (BaseRuntimeElementCompositeDefinition<?>) def;
 		BaseRuntimeChildDefinition nextDef = currentDef.getChildByName("url");
 		return nextDef != null;
+	}
+
+	private void validateAndInstallPkg(NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson retVal) throws IOException {
+		boolean exists = new TransactionTemplate(myTxManager).execute(tx -> {
+			Optional<NpmPackageVersionEntity> existing = myPackageVersionDao.findByPackageIdAndVersion(theInstallationSpec.getName(), theInstallationSpec.getVersion());
+			return existing.isPresent();
+		});
+		if (exists) {
+			ourLog.info("Package {}#{} is already installed", theInstallationSpec.getName(), theInstallationSpec.getVersion());
+			throw new ImplementationGuideInstallationException("NPM package already installed");
+		}
+
+		install(npmPackage, theInstallationSpec, new PackageInstallOutcomeJson());
+
+		if (npmPackage == null) {
+			throw new IOException("Package not found");
+		}
+
+		retVal.getMessage().addAll(JpaPackageCache.getProcessingMessages(npmPackage));
 	}
 
 	@VisibleForTesting
