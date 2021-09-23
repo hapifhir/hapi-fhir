@@ -128,6 +128,21 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_RESOURCE")
 			.dropIndex("20210908.1", "IDX_RES_LANG");
 
+		/*
+		 * Replace CLOB columns with BLOB columns
+		 */
+
+		// TRM_VALUESET_CONCEPT.SOURCE_DIRECT_PARENT_PIDS
+		version.onTable("TRM_VALUESET_CONCEPT")
+			.migrateClobToBlob("20210922.2", "SOURCE_DIRECT_PARENT_PIDS");
+
+		// TRM_CONCEPT.PARENT_PIDS
+		version.onTable("TRM_CONCEPT")
+			.migrateClobToBlob("20210922.4", "PARENT_PIDS");
+
+		// HFJ_SEARCH.SEARCH_QUERY_STRING
+		version.onTable("HFJ_SEARCH")
+			.migrateClobToBlob("20210922.5", "SEARCH_QUERY_STRING");
 	}
 
 	private void init540() {

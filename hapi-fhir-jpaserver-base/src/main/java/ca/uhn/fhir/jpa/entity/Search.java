@@ -117,13 +117,12 @@ public class Search implements ICachedSearchDetails, Serializable {
 	private Long myResourceId;
 	@Column(name = "RESOURCE_TYPE", length = 200, nullable = true)
 	private String myResourceType;
-	/**
-	 * Note that this field may have the request partition IDs prepended to it
-	 */
+
 	@Lob()
 	@Basic(fetch = FetchType.LAZY)
 	@Column(name = "SEARCH_QUERY_STRING", nullable = true, updatable = false, length = MAX_SEARCH_QUERY_STRING)
 	private String mySearchQueryString;
+
 	@Column(name = "SEARCH_QUERY_STRING_HASH", nullable = true, updatable = false)
 	private Integer mySearchQueryStringHash;
 	@Enumerated(EnumType.ORDINAL)
@@ -320,12 +319,11 @@ public class Search implements ICachedSearchDetails, Serializable {
 			// We want this field to always have a wide distribution of values in order
 			// to avoid optimizers avoiding using it if it has lots of nulls, so in the
 			// case of null, just put a value that will never be hit
-			mySearchQueryString = UUID.randomUUID().toString();
-		} else {
-			mySearchQueryString = searchQueryString;
+			searchQueryString = UUID.randomUUID().toString();
 		}
 
-		mySearchQueryStringHash = mySearchQueryString.hashCode();
+		mySearchQueryString = searchQueryString;
+		mySearchQueryStringHash = searchQueryString.hashCode();
 	}
 
 	public SearchTypeEnum getSearchType() {

@@ -117,12 +117,14 @@ public class TermValueSetConceptView implements Serializable, ITermValueSetConce
 
 	@Override
 	public String getSourceConceptDirectParentPids() {
-		if (mySourceConceptDirectParentPids != null) {
-			try (Reader characterStream = mySourceConceptDirectParentPids.getCharacterStream()) {
-				return IOUtils.toString(characterStream);
-			} catch (IOException | SQLException e) {
-				throw new InternalErrorException(e);
+		try {
+			if (mySourceConceptDirectParentPids != null) {
+				try (Reader characterStream = mySourceConceptDirectParentPids.getCharacterStream()) {
+					return IOUtils.toString(characterStream);
+				}
 			}
+		} catch (IOException | SQLException e) {
+			throw new InternalErrorException(e);
 		}
 		return null;
 	}
