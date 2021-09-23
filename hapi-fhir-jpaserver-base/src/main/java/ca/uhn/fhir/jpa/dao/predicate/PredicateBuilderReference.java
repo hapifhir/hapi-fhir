@@ -34,7 +34,6 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
@@ -347,7 +346,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		}
 
 		if (!foundChainMatch) {
-			throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "invalidParameterChain", theParamName + '.' + theReferenceParam.getChain()));
+			throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidParameterChain", theParamName + '.' + theReferenceParam.getChain()));
 		}
 
 		if (candidateTargetTypes.size() > 1) {

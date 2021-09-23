@@ -414,7 +414,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	protected String getMessageSanitized(String theKey, String theIdPart) {
-		return getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, theKey, theIdPart);
+		return getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, theKey, theIdPart);
 	}
 
 	private boolean isSystemRequest(RequestDetails theRequest) {
@@ -668,7 +668,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	private void validateDeleteEnabled() {
 		if (!getConfig().isDeleteEnabled()) {
-			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "deleteBlockedBecauseDisabled");
+			String msg = getContext().getLocalizer().getMessage(BaseStorageDao.class, "deleteBlockedBecauseDisabled");
 			throw new PreconditionFailedException(msg);
 		}
 	}
@@ -1262,7 +1262,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		if (theId.hasVersionIdPart()) {
 			if (theId.isVersionIdPartValidLong() == false) {
-				throw new ResourceNotFoundException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidVersion", theId.getVersionIdPart(), theId.toUnqualifiedVersionless()));
+				throw new ResourceNotFoundException(getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidVersion", theId.getVersionIdPart(), theId.toUnqualifiedVersionless()));
 			}
 			if (entity.getVersion() != theId.getVersionIdPartAsLong()) {
 				entity = null;
@@ -1278,7 +1278,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				try {
 					entity = q.getSingleResult();
 				} catch (NoResultException e) {
-					throw new ResourceNotFoundException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidVersion", theId.getVersionIdPart(), theId.toUnqualifiedVersionless()));
+					throw new ResourceNotFoundException(getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidVersion", theId.getVersionIdPart(), theId.toUnqualifiedVersionless()));
 				}
 			}
 		}
@@ -1588,7 +1588,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 		if (!theResource.getIdElement().hasIdPart() && isBlank(theMatchUrl)) {
 			String type = myFhirContext.getResourceType(theResource);
-			String msg = myFhirContext.getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "updateWithNoId", type);
+			String msg = myFhirContext.getLocalizer().getMessage(BaseStorageDao.class, "updateWithNoId", type);
 			throw new InvalidRequestException(msg);
 		}
 

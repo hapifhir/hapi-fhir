@@ -20,7 +20,11 @@ package ca.uhn.fhir.jpa.search.builder;
  * #L%
  */
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.ComboSearchParamType;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -31,7 +35,7 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
@@ -67,7 +71,11 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -99,11 +107,26 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
-import java.util.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * The SearchBuilder is responsible for actually forming the SQL query that handles
@@ -526,7 +549,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
 			if (param == null) {
-				String msg = myContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSortParameter", theSort.getParamName(), getResourceName(), mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName()));
+				String msg = myContext.getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidSortParameter", theSort.getParamName(), getResourceName(), mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName()));
 				throw new InvalidRequestException(msg);
 			}
 
