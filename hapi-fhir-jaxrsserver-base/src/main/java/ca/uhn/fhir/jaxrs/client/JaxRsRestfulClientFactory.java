@@ -62,8 +62,8 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 
 	public synchronized Client getNativeClientClient() {
 		if (myNativeClient == null) {
-			ClientBuilder builder = ClientBuilder.newBuilder();
-			myNativeClient = builder.build();
+			Client client = ClientBuilder.newClient();
+			myNativeClient = client;
 		}
 
     if (registeredComponents != null && !registeredComponents.isEmpty()) {
