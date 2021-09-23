@@ -86,6 +86,7 @@ import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -136,12 +137,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -586,6 +584,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private DeleteMethodOutcome deleteExpunge(String theUrl, RequestDetails theRequest) {
 		if (!getConfig().canDeleteExpunge()) {
 			throw new MethodNotAllowedException("_expunge is not enabled on this server: " + getConfig().cannotDeleteExpungeReason());
+		}
+
+		if (theUrl.contains(Constants.PARAMETER_CASCADE_DELETE) || (theRequest.getHeader(Constants.HEADER_CASCADE) != null && theRequest.getHeader(Constants.HEADER_CASCADE).equals(Constants.CASCADE_DELETE))) {
+			throw new InvalidRequestException("_expunge cannot be used with _cascade");
 		}
 
 		List<String> urlsToDeleteExpunge = Collections.singletonList(theUrl);
