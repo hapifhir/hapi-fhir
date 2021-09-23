@@ -20,13 +20,10 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
-import ca.uhn.fhir.jpa.model.entity.ClobMigrated;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 import org.apache.commons.io.IOUtils;
@@ -58,7 +55,6 @@ import java.io.InputStream;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -76,9 +72,6 @@ public class TestUtil {
 	public static final int MAX_COL_LENGTH = 2000;
 	private static final int MAX_LENGTH = 30;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestUtil.class);
-	private static final Set<Class<?>> ourAllowedLobTypes = Sets.newHashSet(
-		Blob.class, byte[].class
-	);
 	private static Set<String> ourReservedWords;
 
 	/**
@@ -335,20 +328,6 @@ public class TestUtil {
 			assertEquals(gen.generator(), sg.name());
 			assertEquals(gen.generator(), sg.sequenceName());
 		}
-
-		Lob lob = theAnnotatedElement.getAnnotation(Lob.class);
-		if (lob != null) {
-			Validate.isTrue(theAnnotatedElement instanceof Field);
-			Field field = (Field) theAnnotatedElement;
-			Class<?> fieldType = field.getType();
-			if (!ourAllowedLobTypes.contains(fieldType)) {
-				ClobMigrated migrated = theAnnotatedElement.getAnnotation(ClobMigrated.class);
-				if (migrated == null) {
-					throw new IllegalArgumentException("Field is declared as a @Lob but is not one of allowable types " + ourAllowedLobTypes + ": " + field);
-				}
-			}
-		}
-
 
 	}
 

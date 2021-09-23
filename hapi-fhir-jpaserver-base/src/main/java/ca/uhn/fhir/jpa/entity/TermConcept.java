@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
-import ca.uhn.fhir.jpa.model.entity.ClobMigrated;
 import ca.uhn.fhir.jpa.search.DeferConceptIndexingRoutingBinder;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.Validate;
@@ -44,7 +43,6 @@ import javax.annotation.Nonnull;
 import javax.persistence.Index;
 import javax.persistence.*;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -112,21 +110,8 @@ public class TermConcept implements Serializable {
 
 	@Lob
 	@Column(name = "PARENT_PIDS", nullable = true)
-	@ClobMigrated(migratedInVersion = "5.6.0", migratedToColumn = "myParentPidsBlob")
-	private String myParentPids;
-
-	@Lob
-	@Column(name = "PARENT_PIDSB", nullable = true)
-	private byte[] myParentPidsBlob;
-
-	/**
-	 * This field contains a copy of what is in {@link #myParentPidsBlob} so that
-	 * hibernate search can see it as a string
-	 */
-	// FIXME: make transient for RDBMS but not for Search
-	// FIXME: also test this on Postgres and Oracle
 	@FullTextField(name = "myParentPids", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "conceptParentPidsAnalyzer")
-	private String myParentPidsString;
+	private String myParentPids;
 
 	@OneToMany(cascade = {}, fetch = FetchType.LAZY, mappedBy = "myChild")
 	private List<TermConceptParentChildLink> myParents;
@@ -301,9 +286,6 @@ public class TermConcept implements Serializable {
 	}
 
 	public String getParentPidsAsString() {
-		if (myParentPidsBlob != null) {
-			return new String(myParentPidsBlob, StandardCharsets.UTF_8);
-		}
 		return myParentPids;
 	}
 
@@ -384,16 +366,13 @@ public class TermConcept implements Serializable {
 	@PreUpdate
 	@PrePersist
 	public void prePersist() {
-		if (myParentPidsBlob == null) {
+		if (myParentPids == null) {
 			Set<Long> parentPids = new HashSet<>();
 			TermConcept entity = this;
 			parentPids(entity, parentPids);
 			entity.setParentPids(parentPids);
 
 			ourLog.trace("Code {}/{} has parents {}", entity.getId(), entity.getCode(), entity.getParentPidsAsString());
-		}
-		if (myParentPidsString == null) {
-			myParentPidsString = getParentPidsAsString();
 		}
 	}
 
@@ -414,12 +393,7 @@ public class TermConcept implements Serializable {
 	}
 
 	public TermConcept setParentPids(String theParentPids) {
-		myParentPids = null;
-		myParentPidsBlob = null;
-		if (theParentPids != null) {
-			myParentPidsBlob = theParentPids.getBytes(StandardCharsets.UTF_8);
-		}
-		myParentPidsString = theParentPids;
+		myParentPids = theParentPids;
 		return this;
 	}
 

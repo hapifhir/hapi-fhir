@@ -134,24 +134,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// TRM_VALUESET_CONCEPT.SOURCE_DIRECT_PARENT_PIDS
 		version.onTable("TRM_VALUESET_CONCEPT")
-			.addColumn("20210922.1", "SOURCE_DIRECT_PARENT_PIDSB")
-			.nullable()
-			.type(ColumnTypeEnum.BLOB);
-		version.onTable("TRM_VALUESET_CONCEPT")
-			.migrateClobToBlob("20210922.2", "PID", "SOURCE_DIRECT_PARENT_PIDS", "SOURCE_DIRECT_PARENT_PIDSB");
+			.migrateClobToBlob("20210922.2", "SOURCE_DIRECT_PARENT_PIDS");
 
 		// TRM_CONCEPT.PARENT_PIDS
 		version.onTable("TRM_CONCEPT")
-			.addColumn("20210922.3", "PARENT_PIDSB")
-			.nullable()
-			.type(ColumnTypeEnum.BLOB);
-		version.onTable("TRM_CONCEPT")
-			.migrateClobToBlob("20210922.4", "PID", "PARENT_PIDS", "PARENT_PIDSB");
+			.migrateClobToBlob("20210922.4", "PARENT_PIDS");
 
 		// HFJ_SEARCH.SEARCH_QUERY_STRING
-		// Note that we won't migrate values here since these are short lived anyhow
 		version.onTable("HFJ_SEARCH")
-			.migrateClobToBlob("20210922.5", "PID", "SEARCH_QUERY_STRING", "SEARCH_QUERY_STRINGB");
+			.migrateClobToBlob("20210922.5", "SEARCH_QUERY_STRING");
 	}
 
 	private void init540() {

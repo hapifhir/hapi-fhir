@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.entity.ClobMigrated;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -44,7 +43,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,12 +91,7 @@ public class TermValueSetConcept implements Serializable {
 
 	@Lob
 	@Column(name = "SOURCE_DIRECT_PARENT_PIDS", nullable = true)
-	@ClobMigrated(migratedInVersion = "5.6.0", migratedToColumn = "mySourceConceptDirectParentPidsBlob")
 	private String mySourceConceptDirectParentPids;
-
-	@Lob
-	@Column(name = "SOURCE_DIRECT_PARENT_PIDSB", nullable = true)
-	private byte[] mySourceConceptDirectParentPidsBlob;
 
 	@Column(name = "SYSTEM_URL", nullable = false, length = TermCodeSystem.MAX_URL_LENGTH)
 	private String mySystem;
@@ -271,10 +264,6 @@ public class TermValueSetConcept implements Serializable {
 	}
 
 	public void setSourceConceptDirectParentPids(String theSourceConceptDirectParentPids) {
-		mySourceConceptDirectParentPids = null;
-		mySourceConceptDirectParentPidsBlob = null;
-		if (theSourceConceptDirectParentPids != null) {
-			mySourceConceptDirectParentPidsBlob = theSourceConceptDirectParentPids.getBytes(StandardCharsets.UTF_8);
-		}
+		mySourceConceptDirectParentPids = theSourceConceptDirectParentPids;
 	}
 }

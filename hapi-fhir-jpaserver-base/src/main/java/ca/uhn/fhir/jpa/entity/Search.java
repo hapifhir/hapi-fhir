@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.entity.ClobMigrated;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -35,7 +34,6 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -123,16 +121,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Lob()
 	@Basic(fetch = FetchType.LAZY)
 	@Column(name = "SEARCH_QUERY_STRING", nullable = true, updatable = false, length = MAX_SEARCH_QUERY_STRING)
-	@ClobMigrated(migratedInVersion = "5.6.0", migratedToColumn = "mySearchQueryStringBlob")
 	private String mySearchQueryString;
-
-	/**
-	 * Note that this field may have the request partition IDs prepended to it
-	 */
-	@Lob()
-	@Basic(fetch = FetchType.LAZY)
-	@Column(name = "SEARCH_QUERY_STRINGB", nullable = true, updatable = false, length = MAX_SEARCH_QUERY_STRING)
-	private byte[] mySearchQueryStringBlob;
 
 	@Column(name = "SEARCH_QUERY_STRING_HASH", nullable = true, updatable = false)
 	private Integer mySearchQueryStringHash;
@@ -318,9 +307,6 @@ public class Search implements ICachedSearchDetails, Serializable {
 	 * Note that this field may have the request partition IDs prepended to it
 	 */
 	public String getSearchQueryString() {
-		if (mySearchQueryStringBlob != null) {
-			return new String(mySearchQueryStringBlob, StandardCharsets.UTF_8);
-		}
 		return mySearchQueryString;
 	}
 
@@ -336,8 +322,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 			searchQueryString = UUID.randomUUID().toString();
 		}
 
-		mySearchQueryString = null;
-		mySearchQueryStringBlob = searchQueryString.getBytes(StandardCharsets.UTF_8);
+		mySearchQueryString = searchQueryString;
 		mySearchQueryStringHash = searchQueryString.hashCode();
 	}
 

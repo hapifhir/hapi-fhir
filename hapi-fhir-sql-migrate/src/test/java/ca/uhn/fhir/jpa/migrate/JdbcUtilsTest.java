@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -19,6 +21,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class JdbcUtilsTest {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(JdbcUtilsTest.class);
 	@Mock
 	DataSource myDataSource;
 	@Mock
@@ -27,7 +30,6 @@ public class JdbcUtilsTest {
 	DatabaseMetaData myDatabaseMetaData;
 	@Mock
 	ResultSet myResultSet;
-
 
 	@Test
 	public void testGetColumnType_verifyTypeMappings() throws SQLException {
@@ -61,7 +63,9 @@ public class JdbcUtilsTest {
 		when(myDataSource.getConnection()).thenReturn(myConnection);
 		DriverTypeEnum.ConnectionProperties myConnectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(myDataSource);
 		JdbcUtils.ColumnType testColumnType = JdbcUtils.getColumnType(myConnectionProperties, "TEST_TABLE", "TEST_COLUMN");
+		ourLog.info("Column type: {}", testColumnType);
 
 		assertEquals(theExpectedColumnType, testColumnType.getColumnTypeEnum());
 	}
+
 }

@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.entity.ClobMigrated;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.annotations.Immutable;
@@ -31,11 +30,8 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Reader;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.SQLException;
 
@@ -55,7 +51,6 @@ import java.sql.SQLException;
 		"       vsc.DISPLAY                     AS CONCEPT_DISPLAY, " +
 		"       vsc.SOURCE_PID                  AS SOURCE_PID, " +
 		"       vsc.SOURCE_DIRECT_PARENT_PIDS   AS SOURCE_DIRECT_PARENT_PIDS, " +
-		"       vsc.SOURCE_DIRECT_PARENT_PIDSB  AS SOURCE_DIRECT_PARENT_PIDSB, " +
 		"       vscd.PID                        AS DESIGNATION_PID, " +
 		"       vscd.LANG                       AS DESIGNATION_LANG, " +
 		"       vscd.USE_SYSTEM                 AS DESIGNATION_USE_SYSTEM, " +
@@ -113,12 +108,7 @@ public class TermValueSetConceptViewOracle implements Serializable, ITermValueSe
 
 	@Lob
 	@Column(name = "SOURCE_DIRECT_PARENT_PIDS", nullable = true)
-	@ClobMigrated(migratedInVersion = "5.6.0", migratedToColumn = "mySourceConceptDirectParentPidsBlob")
 	private Clob mySourceConceptDirectParentPids;
-
-	@Lob
-	@Column(name = "SOURCE_DIRECT_PARENT_PIDSB", nullable = true)
-	private Blob mySourceConceptDirectParentPidsBlob;
 
 	@Override
 	public Long getConceptPid() {
@@ -148,11 +138,6 @@ public class TermValueSetConceptViewOracle implements Serializable, ITermValueSe
 	@Override
 	public String getSourceConceptDirectParentPids() {
 		try {
-			if (mySourceConceptDirectParentPidsBlob != null) {
-				try (InputStream characterStream = mySourceConceptDirectParentPidsBlob.getBinaryStream()) {
-					return IOUtils.toString(characterStream, StandardCharsets.UTF_8);
-				}
-			}
 			if (mySourceConceptDirectParentPids != null) {
 				try (Reader characterStream = mySourceConceptDirectParentPids.getCharacterStream()) {
 					return IOUtils.toString(characterStream);
