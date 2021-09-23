@@ -115,8 +115,9 @@ public class ApacheProxyAddressStrategy extends IncomingRequestAddressStrategy {
 		LOG.debug("request header: {}", headers);
 
 		String host = protocol(headers) + "://" + forwardedHost;
-		String hostWithOptionalPort = port(headers).map(p -> (host + ":" + p))
-				.orElse(host);
+		String hostWithOptionalPort = port(headers).map(p ->
+				host.contains(":" + p) ? host : (host + ":" + p))
+			.orElse(host);
 
 		String path = forwardedPrefix
 				.orElseGet(() -> pathFrom(originalServerBase));
