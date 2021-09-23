@@ -110,6 +110,21 @@ public class NDJsonParserTest {
                              ()->{toNDJson(p);});
         }
 
+        @Test
+        public void testOnlyDecodesBundles() {
+                BundleBuilder myBuilder = new BundleBuilder(ourCtx);
+
+                Patient p = new Patient();
+                p.setId("Patient/P1");
+                myBuilder.addCollectionEntry(p);
+                IBaseResource myBundle = myBuilder.getBundle();
+                String myBundleJson = toNDJson(myBundle);
+                IParser parser = ourCtx.newNDJsonParser();
+                assertThrows(
+                        DataFormatException.class,
+                        ()->{parser.parseResource(Patient.class, myBundleJson);});
+        }
+
         @BeforeAll
         public static void beforeClass() {
                 ourCtx = FhirContext.forR4();
