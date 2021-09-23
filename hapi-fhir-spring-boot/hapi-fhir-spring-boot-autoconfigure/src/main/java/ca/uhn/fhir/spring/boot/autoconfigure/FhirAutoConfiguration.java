@@ -160,7 +160,7 @@ public class FhirAutoConfiguration {
 			setResourceProviders(this.resourceProviders);
 			setPagingProvider(this.pagingProvider);
 
-			setServerAddressStrategy(new HardcodedServerAddressStrategy(this.properties.getServer().getPath()));
+			setServerAddressStrategy(new HardcodedServerAddressStrategy(this.properties.getServer().getUrl()));
 
 			customize();
 		}
