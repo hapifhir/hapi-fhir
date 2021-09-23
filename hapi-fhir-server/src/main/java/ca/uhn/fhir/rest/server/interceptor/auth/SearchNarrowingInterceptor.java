@@ -285,21 +285,20 @@ public class SearchNarrowingInterceptor {
 					searchParamName = primarySearchParamName;
 				} else {
 					// If the primary search parameter itself isn't in use, check to see whether any of its synonyms are.
-					List<RuntimeSearchParam> synonyms = findSynonyms(searchParams, primarySearchParam.get());
-					Optional<RuntimeSearchParam> synonymInUse = synonyms
+					Optional<RuntimeSearchParam> synonymInUse = findSynonyms(searchParams, primarySearchParam.get())
 						.stream()
 						.filter(t -> queryParameters.contains(t.getName()))
 						.findFirst();
 					if (synonymInUse.isPresent()) {
-						// if so, use one of those
+						// if a synonym is in use, use it
 						searchParamName = synonymInUse.get().getName();
 					} else {
-						// if not, i.e., the original query is not filtering on this field at all, use the primary
+						// if not, i.e., the original query is not filtering on this field at all, use the primary search param
 						searchParamName = primarySearchParamName;
 					}
 				}
 			} else {
-				// Otherwise, fall back to whatever is available
+				// Otherwise, fall back to whatever search parameter is available
 				searchParamName = searchParams.get(0).getName();
 			}
 
