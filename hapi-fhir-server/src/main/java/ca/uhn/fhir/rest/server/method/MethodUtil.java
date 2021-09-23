@@ -90,6 +90,15 @@ public class MethodUtil {
 				if (Collection.class.isAssignableFrom(parameterType)) {
 					innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
 					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
+					if(parameterType == null && theMethod.getDeclaringClass().isSynthetic()) {
+						try {
+							theMethod = theMethod.getDeclaringClass().getSuperclass().getMethod(theMethod.getName(), parameterTypes);
+							parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
+						} catch (NoSuchMethodException e) {
+							throw new ConfigurationException("A method with name '" + theMethod.getName() + "' does not exist for super class '"
+								+ theMethod.getDeclaringClass().getSuperclass() + "'");
+						}
+					}
 					declaredParameterType = parameterType;
 				}
 				if (Collection.class.isAssignableFrom(parameterType)) {
