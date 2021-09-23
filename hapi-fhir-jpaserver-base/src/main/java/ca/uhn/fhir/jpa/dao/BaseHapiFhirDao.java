@@ -1233,6 +1233,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					entity.setIndexStatus(INDEX_STATUS_INDEXED);
 				}
 
+				// wip mb does myFulltextSearchSvc have Spring transaction advice?
 				if (myFulltextSearchSvc != null && !myFulltextSearchSvc.isDisabled()) {
 					populateFullTextFields(myContext, theResource, entity, newParams);
 				}
@@ -1702,10 +1703,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		} else {
 			theEntity.setNarrativeText(parseNarrativeTextIntoWords(theResource));
 			theEntity.setContentText(parseContentTextIntoWords(theContext, theResource));
-			if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-				ExtendedLuceneIndexData searchParamTexts = myFulltextSearchSvc.extractLuceneIndexData(theContext, theResource, theNewParams);
-				theEntity.setSearchParamText(searchParamTexts);
-			}
+			ExtendedLuceneIndexData searchParamTexts = myFulltextSearchSvc.extractLuceneIndexData(theContext, theResource, theNewParams);
+			theEntity.setSearchParamText(searchParamTexts);
 		}
 	}
 
