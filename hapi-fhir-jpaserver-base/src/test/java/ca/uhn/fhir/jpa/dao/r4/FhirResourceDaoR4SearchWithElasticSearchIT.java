@@ -48,6 +48,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -111,6 +113,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	private IBulkDataExportSvc myBulkDataExportSvc;
 	@Autowired
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+	private boolean myContainsSettings;
 
 	@BeforeEach
 	public void beforePurgeDatabase() {
@@ -125,6 +128,17 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	@Override
 	protected PlatformTransactionManager getTxManager() {
 		return myTxManager;
+	}
+
+	@BeforeEach
+	public void enableContains() {
+		myContainsSettings = myDaoConfig.isAllowContainsSearches();
+		myDaoConfig.setAllowContainsSearches(true);
+	}
+
+	@AfterEach
+	public void restoreContains() {
+		myDaoConfig.setAllowContainsSearches(myContainsSettings);
 	}
 
 	@Test
@@ -341,7 +355,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	public void testStringSearch() {
 		// wipmb string search test
 		IIdType id1, id2, id3, id4, id5;
-		myDaoConfig.setAllowContainsSearches(true);
 
 		{
 			Observation obs1 = new Observation();

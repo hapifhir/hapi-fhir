@@ -195,4 +195,20 @@ public class HibernateSearchQueryBuilder {
 			myRootClause.must(orPredicateOrSingle(orTerms));
 		}
 	}
+
+	public void addStringUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
+		String fieldPath = "sp." + theSearchParamName + ".string.norm";
+		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
+			Set<String> terms = extractOrStringParams(nextAnd);
+			ourLog.trace("string unmodified search {}", terms);
+			List<? extends PredicateFinalStep> orTerms = terms.stream().map(s -> {
+					return myPredicateFactory
+						.wildcard()
+						.field(fieldPath)
+						.matching(s + "*");
+				})
+				.collect(Collectors.toList());
+
+			myRootClause.must(orPredicateOrSingle(orTerms));
+		}	}
 }

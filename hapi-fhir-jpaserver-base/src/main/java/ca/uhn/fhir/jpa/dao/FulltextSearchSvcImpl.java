@@ -52,12 +52,14 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FulltextSearchSvcImpl.class);
+	public static final String EMPTY_MODIFIER = "";
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
@@ -108,7 +110,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			.flatMap(Collection::stream)
 			// wipmb to extend to string params.
 			.anyMatch(param -> {
-				String modifier = StringUtils.defaultString(param.getQueryParameterQualifier(), "");
+				String modifier = StringUtils.defaultString(param.getQueryParameterQualifier(), EMPTY_MODIFIER);
 				if (param instanceof TokenParam) {
 					switch (modifier) {
 						case Constants.PARAMQUALIFIER_TOKEN_TEXT:
@@ -120,10 +122,11 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					}
 				} else if (param instanceof StringParam) {
 					switch (modifier) {
+						// we support string:text, string:contains, string:exact, and unmodified string.
 						case Constants.PARAMQUALIFIER_TOKEN_TEXT:
 						case Constants.PARAMQUALIFIER_STRING_EXACT:
 						case Constants.PARAMQUALIFIER_STRING_CONTAINS:
-							// we support string:text, string:exact
+						case EMPTY_MODIFIER:
 							return true;
 						default:
 							return false;
@@ -187,7 +190,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 								List<List<IQueryParameterType>> stringContainsAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_STRING_CONTAINS);
 								builder.addStringContainsSearch(nextParam, stringContainsAndOrTerms);
-								// wip mb add string norm and exact
+
+								List<List<IQueryParameterType>> stringAndOrTerms = theParams.removeByNameUnmodified(nextParam);
+								builder.addStringUnmodifiedSearch(nextParam, stringAndOrTerms);
 								break;
 
 								// wip mb add the rest.

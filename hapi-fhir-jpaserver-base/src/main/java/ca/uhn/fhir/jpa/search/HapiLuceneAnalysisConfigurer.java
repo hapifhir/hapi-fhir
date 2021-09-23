@@ -24,6 +24,7 @@ import org.apache.lucene.analysis.core.KeywordTokenizerFactory;
 import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
 import org.apache.lucene.analysis.core.StopFilterFactory;
 import org.apache.lucene.analysis.core.WhitespaceTokenizerFactory;
+import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilterFactory;
 import org.apache.lucene.analysis.miscellaneous.WordDelimiterFilterFactory;
 import org.apache.lucene.analysis.ngram.EdgeNGramFilterFactory;
 import org.apache.lucene.analysis.ngram.NGramFilterFactory;
@@ -41,6 +42,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class HapiLuceneAnalysisConfigurer implements LuceneAnalysisConfigurer {
 
+	// wip mb make these visible somewhere
 	public static final String STANDARD_ANALYZER = "standardAnalyzer";
 	public static final String EXACT_ANALYZER = "exactAnalyzer";
 
@@ -76,9 +78,11 @@ public class HapiLuceneAnalysisConfigurer implements LuceneAnalysisConfigurer {
 			.param("minGramSize", "3")
 			.param("maxGramSize", "20");
 
+		// wip mb fold accents to ascii?
 		theLuceneCtx.analyzer(STANDARD_ANALYZER).custom()
 			.tokenizer(StandardTokenizerFactory.class)
-			.tokenFilter(LowerCaseFilterFactory.class);
+			.tokenFilter(LowerCaseFilterFactory.class)
+			.tokenFilter(ASCIIFoldingFilterFactory.class);
 
 		theLuceneCtx.analyzer(EXACT_ANALYZER).custom()
 			.tokenizer(KeywordTokenizerFactory.class);
