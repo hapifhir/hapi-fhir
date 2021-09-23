@@ -86,6 +86,19 @@ public class NDJsonParserTest {
                 assertTrue(fhirResourcesEqual(myBundle, responseBundle));
         }
 
+        @Test
+        public void testHasNewlinesEncodeDecode() {
+                BundleBuilder myBuilder = new BundleBuilder(ourCtx);
+
+                Patient p = new Patient();
+                p.setId("Patient/P1");
+                p.addAddress().setText("1 Place Street\r\nOn Earth");
+                myBuilder.addCollectionEntry(p);
+                IBaseResource myBundle = myBuilder.getBundle();
+                IBaseResource responseBundle = fromNDJson(toNDJson(myBundle));
+
+                assertTrue(fhirResourcesEqual(myBundle, responseBundle));
+        }
 
         @BeforeAll
         public static void beforeClass() {
