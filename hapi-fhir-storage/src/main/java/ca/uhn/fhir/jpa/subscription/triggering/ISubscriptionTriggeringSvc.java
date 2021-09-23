@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.subscription.triggering;
 
 /*-
  * #%L
- * HAPI FHIR Subscription Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
