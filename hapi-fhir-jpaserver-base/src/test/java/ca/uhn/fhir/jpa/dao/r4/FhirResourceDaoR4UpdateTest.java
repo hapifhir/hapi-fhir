@@ -168,7 +168,6 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 		outcome = myPatientDao.search(SearchParameterMap.newSynchronous());
 		assertEquals(1, outcome.sizeOrThrowNpe());
-
 	}
 
 	@Test

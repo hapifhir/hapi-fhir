@@ -6,6 +6,8 @@ variables:
   #MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
   MAVEN_OPTS: ''
 
+  disable.coverage.autogenerate: 'true'
+
 trigger:
 - master
 
@@ -13,7 +15,10 @@ pool:
   vmImage: 'ubuntu-latest'
 
 jobs:
-  - job: Build
+  - job: Test
+    strategy:
+      parallel: 5
+    displayName: Run Tests
     timeoutInMinutes: 360
     container: maven:3-openjdk-15
     steps:
@@ -24,45 +29,112 @@ jobs:
            releaseType: stable
       - task: Cache@2
         inputs:
-          key: 'maven | "$(Agent.OS)" | ./pom.xml'
+          key: 'maven | "$(Agent.OS)" | ./pom.xml | "4"'
           path: $(MAVEN_CACHE_FOLDER)
       - task: Bash@3
+        displayName: Create Directories
         inputs:
           targetType: 'inline'
-          script: mkdir -p $(MAVEN_CACHE_FOLDER); pwd; ls -al $(MAVEN_CACHE_FOLDER)
+          script: mkdir -p $(MAVEN_CACHE_FOLDER); pwd; ls -al $(MAVEN_CACHE_FOLDER); mkdir $(Build.ArtifactStagingDirectory)/jacoco-output; mkdir $(Build.ArtifactStagingDirectory)/test-output;
+      - task: Bash@3
+        displayName: Generate Test Exclusions
+        inputs:
+           targetType: 'filePath'
+           filePath: 'generate_test_exclusions.sh'
       - task: Maven@3
         env:
           JAVA_HOME_11_X64: /usr/java/openjdk-15
         inputs:
           goals: 'clean install'
           # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
-          options: '-P ALLMODULES,JACOCO,CI,ERRORPRONE -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
+          options: "-P ALLMODULES,JACOCO,CI,ERRORPRONE -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -Dsurefire.excludesFile=$(testExclusionFile) -Dfailsafe.excludesFile=$(itExclusionFile)"
           # These are JVM options (and don't show up in the build logs)
           mavenOptions: '-Xmx1024m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
           jdkVersionOption: 1.11
+#      - script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
+#        displayName: 'codecov'
+
+      # Copy test results into a sane location
       - task: CopyFiles@2
         condition: always()
+        displayName: Move Test Outputs
         inputs:
-          sourceFolder: '$(System.DefaultWorkingDirectory)/'
-          contents: '**/target/*output.txt'
-          targetFolder: '$(Build.ArtifactStagingDirectory)'
+           sourceFolder: '$(System.DefaultWorkingDirectory)/'
+           contents: |
+              **/surefire-reports/**
+              **/failsafe-reports/**
+           targetFolder: '$(Build.ArtifactStagingDirectory)/test-output'
+
+       # Copy Jacoco results into a sane location
+      - task: CopyFiles@2
+        condition: always()
+        displayName: Move JaCoCo Outputs
+        inputs:
+           sourceFolder: '$(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/'
+           contents: |
+              **
+           targetFolder: '$(Build.ArtifactStagingDirectory)/jacoco-output'
+
+      # Publish artifact containing test results.
       - task: PublishPipelineArtifact@1
-        displayName: 'Publish Full Test Output'
+        displayName: 'Store Test Output'
         condition: always()
         inputs:
-          targetPath: '$(Build.ArtifactStagingDirectory)/'
-          artifactName: 'full_logs.zip'
-      - script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
-        displayName: 'codecov'
-      - task: PublishTestResults@2
+           targetPath: '$(Build.ArtifactStagingDirectory)/test-output'
+           artifactName: 'logs-$(Agent.id)'
+
+       # Publish artifact containing test results.
+      - task: PublishPipelineArtifact@1
+        displayName: 'Store Jacoco Output'
+        condition: always()
         inputs:
-          testResultsFormat: 'JUnit'
-          testResultsFiles: '**/TEST-*.xml'
+           targetPath: '$(Build.ArtifactStagingDirectory)/jacoco-output'
+           artifactName: 'jacoco-$(Agent.id)'
+
+   # Amalgamate the test results, and report them.
+  - job: Report
+    dependsOn: Test
+    condition: always()
+    displayName: Report Results
+    steps:
+      - task: UseDotNet@2
+        displayName: Setup Dotnet Core
+        inputs:
+          packageType: 'sdk'
+          version: '2.x'
+      - task: DownloadPipelineArtifact@2
+        displayName: Download Artifacts
+      - script: mkdir jacoco-combined
+      - script: mkdir coveragereport
+      - task: Bash@3
+        displayName: PWD
+        inputs:
+           targetType: 'inline'
+           script: pwd; ls -al $(Pipeline.Workspace)
+#      - task: CopyFiles@2
+#        condition: always()
+#        displayName: Move JaCoCo Outputs
+#        inputs:
+#           sourceFolder: '$(Pipeline.Workspace)'
+#           contents: |
+#              jacoco-*/**
+#           flattenFolders: true
+#           targetFolder: '$(Pipeline.Workspace)/jacoco-combined'
+      -  task: reportgenerator@4
+         displayName: Generate Reports
+         inputs:
+            reports: "$(Pipeline.Workspace)/**/jacoco.xml" # REQUIRED # The coverage reports that should be parsed (separated by semicolon). Globbing is supported.
+            targetdir: '$(Pipeline.Workspace)/coveragereport' # REQUIRED # The directory where the generated report should be saved.
+            reporttypes: 'HtmlInline_AzurePipelines;Xml;Cobertura' # The output formats and scope (separated by semicolon) Values: Badges, Clover, Cobertura, CsvSummary, Html, HtmlChart, HtmlInline, HtmlInline_AzurePipelines, HtmlInline_AzurePipelines_Dark, HtmlSummary, JsonSummary, Latex, LatexSummary, lcov, MHtml, PngChart, SonarQube, TeamCitySummary, TextSummary, Xml, XmlSummary
+            verbosity: 'Verbose' # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
+      - script: ls -al $(Pipeline.Workspace)/coveragereport
+      - script: bash <(curl https://codecov.io/bash) -t $(CC_TOKEN)
+        displayName: 'codecov'
       - task: PublishCodeCoverageResults@1
         inputs:
-          codeCoverageTool: 'JaCoCo'
-          summaryFileLocation: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/jacoco.xml
-          reportDirectory: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/
+          codeCoverageTool: 'Cobertura'
+          summaryFileLocation: $(Pipeline.Workspace)/coveragereport/Cobertura.xml
+          reportDirectory: $(Pipeline.Workspace)/coveragereport
           failIfCoverageEmpty: false
 
 # Potential Additional Maven3 Options:
