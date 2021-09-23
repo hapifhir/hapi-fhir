@@ -28,6 +28,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Nonnull;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -232,6 +234,39 @@ public class PartitionManagementProviderTest {
 		}
 		verify(myPartitionConfigSvc, times(0)).createPartition(any());
 	}
+
+	@Test
+	public void testListPartitions() {
+		PartitionEntity partition1 = new PartitionEntity();
+		partition1.setId(1);
+		partition1.setName("PARTITION-1");
+		partition1.setDescription("a description1");
+		when(myPartitionConfigSvc.getPartitionById(eq(1))).thenReturn(partition1);
+
+		PartitionEntity partition2 = new PartitionEntity();
+		partition1.setId(2);
+		partition1.setName("PARTITION-2");
+		partition1.setDescription("a description2");
+		when(myPartitionConfigSvc.getPartitionById(eq(2))).thenReturn(partition2);
+
+		List<Parameters> response = (List<Parameters>) myClient
+			.operation()
+			.onServer()
+			.named(ProviderConstants.PARTITION_MANAGEMENT_LIST_PARTITIONS)
+			.withNoParameters(Parameters.class)
+			.encodedXml()
+			.execute();
+
+		System.out.println(response);
+//		ourLog.info("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response.get(0)));
+//		verify(myPartitionConfigSvc, times(1)).getPartitionById(any());
+//		verifyNoMoreInteractions(myPartitionConfigSvc);
+//
+//		assertEquals(1, ((IntegerType) response.get(0).getParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID)).getValue().intValue());
+//		assertEquals("PARTITION-1", ((StringType) response.get(0).getParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME)).getValue());
+//		assertEquals("a description1", ((StringType) response.get(0).getParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC)).getValue());
+	}
+
 
 	@Configuration
 	public static class MyConfig {

@@ -33,6 +33,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl.validatePartitionIdSupplied;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.instance.model.api.IPrimitiveType.toValueOrNull;
@@ -43,6 +46,8 @@ import static org.hl7.fhir.instance.model.api.IPrimitiveType.toValueOrNull;
  *    <li><code>partition-management-create-partition</code></li>
  *    <li><code>partition-management-update-partition</code></li>
  *    <li><code>partition-management-delete-partition</code></li>
+ *    <li><code>partition-management-read-partition</code></li>
+ *    <li><code>partition-management-list-partitions</code></li>
  * </ul>
  */
 public class PartitionManagementProvider {
@@ -142,12 +147,34 @@ public class PartitionManagementProvider {
 		return retVal;
 	}
 
+	/**
+	 * Add Partition:
+	 * <code>
+	 * $partition-management-read-partition
+	 * </code>
+	 */
+	@Operation(name = ProviderConstants.PARTITION_MANAGEMENT_LIST_PARTITIONS, idempotent = true)
+	public List<IBaseParameters> listPartitions(
+		@ResourceParam IBaseParameters theRequest
+	) {
+		List<PartitionEntity> output = myPartitionLookupSvc.listPartitions();
+		return prepareOutputList(output);
+	}
+
 	private IBaseParameters prepareOutput(PartitionEntity theOutput) {
 		IBaseParameters retVal = ParametersUtil.newInstance(myCtx);
 		ParametersUtil.addParameterToParametersInteger(myCtx, retVal, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, theOutput.getId());
 		ParametersUtil.addParameterToParametersCode(myCtx, retVal, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, theOutput.getName());
 		if (isNotBlank(theOutput.getDescription())) {
 			ParametersUtil.addParameterToParametersString(myCtx, retVal, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, theOutput.getDescription());
+		}
+		return retVal;
+	}
+
+	private List<IBaseParameters> prepareOutputList(List<PartitionEntity> theOutput) {
+		List<IBaseParameters> retVal = new ArrayList<IBaseParameters>();
+		for (PartitionEntity partitionEntity : theOutput) {
+			retVal.add(prepareOutput(partitionEntity));
 		}
 		return retVal;
 	}
