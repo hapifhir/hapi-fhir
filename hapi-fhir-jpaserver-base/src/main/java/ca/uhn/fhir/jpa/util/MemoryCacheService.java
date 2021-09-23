@@ -73,20 +73,17 @@ public class MemoryCacheService {
 				case PID_TO_FORCED_ID:
 				case FORCED_ID_TO_PID:
 				case MATCH_URL:
+				case RESOURCE_LOOKUP:
+				case HISTORY_COUNT:
+				case TAG_DEFINITION:
+				case RESOURCE_CONDITIONAL_CREATE_VERSION:
+				default:
 					timeoutSeconds = SECONDS.convert(1, MINUTES);
 					maximumSize = 10000;
 					if (myDaoConfig.isMassIngestionMode()) {
 						timeoutSeconds = SECONDS.convert(50, MINUTES);
 						maximumSize = 100000;
 					}
-					break;
-				case HISTORY_COUNT:
-				case TAG_DEFINITION:
-				case RESOURCE_LOOKUP:
-				case RESOURCE_CONDITIONAL_CREATE_VERSION:
-				default:
-					timeoutSeconds = SECONDS.convert(1, MINUTES);
-					maximumSize = 10000;
 					break;
 			}
 
