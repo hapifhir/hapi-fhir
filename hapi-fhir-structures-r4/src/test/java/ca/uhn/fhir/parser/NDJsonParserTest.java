@@ -1,5 +1,7 @@
 package ca.uhn.fhir.parser;
 
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -98,6 +100,14 @@ public class NDJsonParserTest {
                 IBaseResource responseBundle = fromNDJson(toNDJson(myBundle));
 
                 assertTrue(fhirResourcesEqual(myBundle, responseBundle));
+        }
+
+        @Test
+        public void testOnlyEncodesBundles() {
+                Patient p = new Patient();
+                p.setId("Patient/P1");
+                assertThrows(IllegalArgumentException.class,
+                             ()->{toNDJson(p);});
         }
 
         @BeforeAll
