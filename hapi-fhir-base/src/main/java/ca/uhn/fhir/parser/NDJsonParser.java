@@ -94,6 +94,7 @@ public class NDJsonParser extends BaseParser {
                 try {
                         // Now we go through line-by-line parsing the JSON and then stuffing it into a bundle.
                         BundleBuilder myBuilder = new BundleBuilder(myFhirContext);
+                        myBuilder.setType("collection");
                         BufferedReader myBufferedReader = new BufferedReader(theReader);
                         String jsonString = myBufferedReader.readLine();
                         while (jsonString != null) {

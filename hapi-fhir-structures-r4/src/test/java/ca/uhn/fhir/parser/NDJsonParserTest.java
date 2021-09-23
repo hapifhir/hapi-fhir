@@ -56,6 +56,18 @@ public class NDJsonParserTest {
                 assertTrue(fhirResourcesEqual(myBundle, responseBundle));
         }
 
+        @Test
+        public void testEmptyBundleEncodeDecode() {
+                BundleBuilder myBuilder = new BundleBuilder(ourCtx);
+
+                myBuilder.setType("collection");
+                IBaseResource myBundle = myBuilder.getBundle();
+                IBaseResource responseBundle = fromNDJson(toNDJson(myBundle));
+
+                assertTrue(fhirResourcesEqual(myBundle, responseBundle));
+        }
+
+
         @BeforeAll
         public static void beforeClass() {
                 ourCtx = FhirContext.forR4();
