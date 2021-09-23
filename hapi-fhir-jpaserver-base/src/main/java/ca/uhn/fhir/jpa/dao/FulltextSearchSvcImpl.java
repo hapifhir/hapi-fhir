@@ -180,6 +180,10 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					// copy the keys to avoid concurrent modification error
 					for(String nextParam: Lists.newArrayList(theParams.keySet())) {
 						RuntimeSearchParam activeParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, nextParam);
+						if (activeParam == null) {
+							// ignore magic params like
+							continue;
+						}
 						switch (activeParam.getParamType()) {
 							case TOKEN:
 								List<List<IQueryParameterType>> tokenTextAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
