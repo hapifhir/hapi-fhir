@@ -42,6 +42,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -406,7 +407,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.addFilter()
 			.setProperty("copyright")
 			.setOp(ValueSet.FilterOperator.EQUAL)
-			.setValue("loinc");
+			.setValue(LOINC_LOW);
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("47239-9"));
@@ -478,7 +479,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.addFilter()
 			.setProperty("copyright")
 			.setOp(ValueSet.FilterOperator.EQUAL)
-			.setValue("loinc");
+			.setValue(LOINC_LOW);
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));

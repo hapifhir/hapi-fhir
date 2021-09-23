@@ -33,6 +33,7 @@ public enum LoincUploadPropertiesEnum {
 	 */
 
 	LOINC_UPLOAD_PROPERTIES_FILE("loincupload.properties"),
+	LOINC_XML_FILE("loinc.xml"),
 
 	/*
 	 * MANDATORY
