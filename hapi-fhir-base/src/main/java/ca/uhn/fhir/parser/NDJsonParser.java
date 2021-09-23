@@ -79,7 +79,14 @@ public class NDJsonParser extends BaseParser {
                 List<IBaseResource> theBundleResources = BundleUtil.toListOfResources(myFhirContext, (IBaseBundle) theResource);
 
                 // Now we write each one in turn.
+                // Use newline only as a line separator, not at the end of the file.
+                boolean isFirstResource = true;
                 for (IBaseResource theBundleEntryResource : theBundleResources) {
+                        if (!(isFirstResource)) {
+                                theWriter.write("\n");
+                        }
+                        isFirstResource = false;
+
                         myJsonParser.encodeResourceToWriter(theBundleEntryResource, theWriter);
                 }
 	}
@@ -99,7 +106,8 @@ public class NDJsonParser extends BaseParser {
                         String jsonString = myBufferedReader.readLine();
                         while (jsonString != null) {
                                 // And add it to a collection in a Bundle.
-                                myBuilder.addCollectionEntry(myJsonParser.parseResource(jsonString));
+                                // The string must be trimmed, as per the NDJson spec 3.2
+                                myBuilder.addCollectionEntry(myJsonParser.parseResource(jsonString.trim()));
                                 // Try to read another line.
                                 jsonString = myBufferedReader.readLine();
                         }

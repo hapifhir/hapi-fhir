@@ -15,7 +15,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.TestUtil;
 
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 
 public class NDJsonParserTest {
@@ -61,6 +60,26 @@ public class NDJsonParserTest {
                 BundleBuilder myBuilder = new BundleBuilder(ourCtx);
 
                 myBuilder.setType("collection");
+                IBaseResource myBundle = myBuilder.getBundle();
+                IBaseResource responseBundle = fromNDJson(toNDJson(myBundle));
+
+                assertTrue(fhirResourcesEqual(myBundle, responseBundle));
+        }
+
+        @Test
+        public void testThreePatientEncodeDecode() {
+                BundleBuilder myBuilder = new BundleBuilder(ourCtx);
+
+                Patient p = new Patient();
+                p.setId("Patient/P1");
+                myBuilder.addCollectionEntry(p);
+                p = new Patient();
+                p.setId("Patient/P2");
+                myBuilder.addCollectionEntry(p);
+                p = new Patient();
+                p.setId("Patient/P3");
+                myBuilder.addCollectionEntry(p);
+
                 IBaseResource myBundle = myBuilder.getBundle();
                 IBaseResource responseBundle = fromNDJson(toNDJson(myBundle));
 
