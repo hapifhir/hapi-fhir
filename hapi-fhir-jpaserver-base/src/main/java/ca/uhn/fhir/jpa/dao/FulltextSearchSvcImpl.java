@@ -32,6 +32,8 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
@@ -131,6 +133,12 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 						default:
 							return false;
 					}
+				} else if (param instanceof QuantityParam) {
+					// wip next up
+					return false;
+				} else if (param instanceof ReferenceParam) {
+					// wip next up
+					return false;
 				} else {
 					return false;
 				}
@@ -193,6 +201,14 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 								List<List<IQueryParameterType>> stringAndOrTerms = theParams.removeByNameUnmodified(nextParam);
 								builder.addStringUnmodifiedSearch(nextParam, stringAndOrTerms);
+								break;
+
+							case QUANTITY:
+								// wip next up
+								break;
+
+							case REFERENCE:
+								// wip for gary
 								break;
 
 								// wip mb add the rest.
