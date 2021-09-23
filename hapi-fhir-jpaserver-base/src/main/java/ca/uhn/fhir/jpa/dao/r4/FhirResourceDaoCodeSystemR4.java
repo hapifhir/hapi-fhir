@@ -56,6 +56,7 @@ import java.util.Set;
 import static ca.uhn.fhir.jpa.dao.FhirResourceDaoValueSetDstu2.toStringOrNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 
 public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSystem> implements IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> {
 
@@ -181,7 +182,7 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 	public DaoMethodOutcome create(CodeSystem theResource, String theIfNoneExist, boolean thePerformIndexing,
 											 @Nonnull TransactionDetails theTransactionDetails, RequestDetails theRequestDetails) {
 		// loinc CodeSystem must have an ID
-		if (isNotBlank(theResource.getUrl()) && theResource.getUrl().contains("loinc")
+		if (isNotBlank(theResource.getUrl()) && theResource.getUrl().contains(LOINC_LOW)
 			&& isBlank(theResource.getIdElement().getIdPart())) {
 			throw new InvalidParameterException("'loinc' CodeSystem must have an ID");
 		}

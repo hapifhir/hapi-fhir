@@ -124,18 +124,6 @@ public interface ITermReadSvc extends IValidationSupport {
 	/**
 	 * Version independent
 	 */
-	boolean mustReturnEmptyValueSet(String theUrl);
-
-	/**
-	 * Version independent
-	 */
-	boolean isLoincNotGenericUnversionedCodeSystem(String theSystem);
-
-	/**
-	 * Version independent
-	 */
-	boolean isLoincNotGenericUnversionedValueSet(String theUrl);
-
 	Optional<IBaseResource> readCodeSystemByForcedId(String theForcedId);
 
 }

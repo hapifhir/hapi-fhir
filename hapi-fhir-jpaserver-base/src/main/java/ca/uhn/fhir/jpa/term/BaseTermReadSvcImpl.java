@@ -173,8 +173,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport.LOINC_GENERIC_VALUESET_URL;
-import static ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport.LOINC_GENERIC_VALUESET_URL_PLUS_SLASH;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -183,6 +181,8 @@ import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.lowerCase;
 import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_VALUESET_URL_PLUS_SLASH;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 
 public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	public static final int DEFAULT_FETCH_SIZE = 250;
@@ -2342,14 +2342,14 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 
 	/**
-	 * When the search is for no-version loinc system it uses the forcedId to obtain the current
+	 * When the search is for unversioned loinc system it uses the forcedId to obtain the current
 	 * version, as it is not necessarily the last  one anymore.
 	 * For other cases it keeps on considering the last uploaded as the current
 	 */
 	@Override
 	public Optional<TermValueSet> findCurrentTermValueSet(String theUrl) {
-		if (isLoincNotGenericUnversionedValueSet(theUrl)) {
-			if (mustReturnEmptyValueSet(theUrl))   return Optional.empty();
+		if (TermReadSvcUtil.isLoincNotGenericUnversionedValueSet(theUrl)) {
+			if (TermReadSvcUtil.mustReturnEmptyValueSet(theUrl))   return Optional.empty();
 
 			String forcedId = theUrl.substring(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH.length());
 			if (StringUtils.isBlank(forcedId))  return Optional.empty();
@@ -2360,38 +2360,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		List<TermValueSet> termValueSetList = myTermValueSetDao.findTermValueSetByUrl(Pageable.ofSize(1), theUrl);
 		if (termValueSetList.isEmpty()) return Optional.empty();
 		return Optional.of(termValueSetList.get(0));
-	}
-
-
-	@Override
-	public boolean mustReturnEmptyValueSet(String theUrl) {
-		if (! theUrl.startsWith(LOINC_GENERIC_VALUESET_URL))   return true;
-
-		if (! theUrl.startsWith(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH)) {
-			throw new InternalErrorException("Don't know how to extract ForcedId from url: " + theUrl);
-		}
-
-		String forcedId = theUrl.substring(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH.length());
-		return StringUtils.isBlank(forcedId);
-	}
-
-
-	@Override
-	public boolean isLoincNotGenericUnversionedValueSet(String theUrl) {
-		boolean isLoincCodeSystem = StringUtils.containsIgnoreCase(theUrl, "loinc");
-		boolean isNoVersion = ! theUrl.contains("|");
-		boolean isNotLoincGenericValueSet = ! theUrl.equals(LOINC_GENERIC_VALUESET_URL);
-
-		return isLoincCodeSystem && isNoVersion && isNotLoincGenericValueSet;
-	}
-
-
-	@Override
-	public boolean isLoincNotGenericUnversionedCodeSystem(String theUrl) {
-		boolean isLoincCodeSystem = StringUtils.containsIgnoreCase(theUrl, "loinc");
-		boolean isNoVersion = ! theUrl.contains("|");
-
-		return isLoincCodeSystem && isNoVersion;
 	}
 
 
@@ -2426,7 +2394,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		if (isNoneBlank(theCodeSystemVersion)) {
 			predicates.add(criteriaBuilder.equal(systemVersionJoin.get("myCodeSystemVersionId"), theCodeSystemVersion));
 		} else {
-			if (theCodeSystemUrl.toLowerCase(Locale.ROOT).contains("loinc")) {
+			if (theCodeSystemUrl.toLowerCase(Locale.ROOT).contains(LOINC_LOW)) {
 				predicates.add(criteriaBuilder.isNull(systemVersionJoin.get("myCodeSystemVersionId")));
 			} else {
 				query.orderBy(criteriaBuilder.desc(root.get("myUpdated")));

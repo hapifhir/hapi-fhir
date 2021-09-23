@@ -88,6 +88,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 
 public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(TermCodeSystemStorageSvcImpl.class);
@@ -140,8 +141,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			CodeSystem codeSystemResource = new CodeSystem();
 			codeSystemResource.setUrl(theSystem);
 			codeSystemResource.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-			if (isBlank(codeSystemResource.getIdElement().getIdPart()) && theSystem.contains("loinc")) {
-				codeSystemResource.setId("loinc");
+			if (isBlank(codeSystemResource.getIdElement().getIdPart()) && theSystem.contains(LOINC_LOW)) {
+				codeSystemResource.setId(LOINC_LOW);
 			}
 			myTerminologyVersionAdapterSvc.createOrUpdateCodeSystem(codeSystemResource);
 

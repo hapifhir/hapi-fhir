@@ -34,12 +34,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.function.Function;
 
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -47,7 +49,6 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class JpaPersistedResourceValidationSupportTest {
@@ -59,7 +60,7 @@ class JpaPersistedResourceValidationSupportTest {
 	@Mock private Cache<String, IBaseResource> myLoadCache;
 	@Mock private IFhirResourceDao<ValueSet> myValueSetResourceDao;
 
-
+	@InjectMocks
 	private IValidationSupport testedClass =
 		new JpaPersistedResourceValidationSupport(theFhirContext);
 
@@ -69,10 +70,6 @@ class JpaPersistedResourceValidationSupportTest {
 
 	@BeforeEach
 	public void setup() {
-		ReflectionTestUtils.setField(testedClass, "myTermReadSvc", myTermReadSvc);
-		ReflectionTestUtils.setField(testedClass, "myDaoRegistry", myDaoRegistry);
-		ReflectionTestUtils.setField(testedClass, "myLoadCache", myLoadCache);
-		ReflectionTestUtils.setField(testedClass, "myCodeSystemType", myCodeSystemType);
 		ReflectionTestUtils.setField(testedClass, "myValueSetType", myValueSetType);
 	}
 
@@ -82,22 +79,18 @@ class JpaPersistedResourceValidationSupportTest {
 
 		@Test
 		void fetchCodeSystemMustUseForcedId() {
-			when(myTermReadSvc.isLoincNotGenericUnversionedCodeSystem(anyString())).thenReturn(true);
-
 			testedClass.fetchCodeSystem("string-containing-loinc");
 
-			verify(myTermReadSvc, times(1)).readCodeSystemByForcedId("loinc");
+			verify(myTermReadSvc, times(1)).readCodeSystemByForcedId(LOINC_LOW);
 			verify(myLoadCache, never()).get(anyString(), isA(Function.class));
 		}
 
 
 		@Test
 		void fetchCodeSystemMustNotUseForcedId() {
-			when(myTermReadSvc.isLoincNotGenericUnversionedCodeSystem(anyString())).thenReturn(false);
-
 			testedClass.fetchCodeSystem("string-not-containing-l-o-i-n-c");
 
-			verify(myTermReadSvc, never()).readCodeSystemByForcedId("loinc");
+			verify(myTermReadSvc, never()).readCodeSystemByForcedId(LOINC_LOW);
 			verify(myLoadCache, times(1)).get(anyString(), isA(Function.class));
 		}
 
@@ -109,21 +102,17 @@ class JpaPersistedResourceValidationSupportTest {
 
 		@Test
 		void fetchValueSetMustUseForcedId() {
-			when(myTermReadSvc.isLoincNotGenericUnversionedValueSet(anyString())).thenReturn(true);
-			when(myDaoRegistry.getResourceDao(ValueSet.class)).thenReturn(myValueSetResourceDao);
-
+			final String valueSetId = "string-containing-loinc";
 			ResourceNotFoundException thrown = assertThrows(
 				ResourceNotFoundException.class,
-				() -> testedClass.fetchValueSet("string-containing-loinc"));
+				() -> testedClass.fetchValueSet(valueSetId));
 
-			assertTrue(thrown.getMessage().contains("Couldn't find current version ValueSet for url"));
+			assertTrue(thrown.getMessage().contains("Unable to find current version of ValueSet for url: " + valueSetId));
 		}
 
 
 		@Test
 		void fetchValueSetMustNotUseForcedId() {
-			when(myTermReadSvc.isLoincNotGenericUnversionedValueSet(anyString())).thenReturn(false);
-
 			testedClass.fetchValueSet("string-not-containing-l-o-i-n-c");
 
 			verify(myLoadCache, times(1)).get(anyString(), isA(Function.class));

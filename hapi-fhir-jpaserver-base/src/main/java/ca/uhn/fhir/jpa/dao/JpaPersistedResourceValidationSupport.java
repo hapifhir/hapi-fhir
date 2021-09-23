@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.term.TermReadSvcUtil;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -62,6 +63,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_VALUESET_URL_PLUS_SLASH;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 
 /**
  * This class is a {@link IValidationSupport Validation support} module that loads
@@ -72,10 +75,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class JpaPersistedResourceValidationSupport implements IValidationSupport {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaPersistedResourceValidationSupport.class);
-
-	public static final String LOINC_GENERIC_CODE_SYSTEM_URL = "http://loinc.org";
-	public static final String LOINC_GENERIC_VALUESET_URL = LOINC_GENERIC_CODE_SYSTEM_URL + "/vs";
-	public static final String LOINC_GENERIC_VALUESET_URL_PLUS_SLASH = LOINC_GENERIC_VALUESET_URL + "/";
 
 	private final FhirContext myFhirContext;
 	private final IBaseResource myNoMatch;
@@ -107,7 +106,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
-		if (myTermReadSvc.isLoincNotGenericUnversionedCodeSystem(theSystem)) {
+		if (TermReadSvcUtil.isLoincNotGenericUnversionedCodeSystem(theSystem)) {
 			Optional<IBaseResource> currentCSOpt = getCodeSystemCurrentVersion(new UriType(theSystem));
 			if (! currentCSOpt.isPresent()) {
 				ourLog.info("Couldn't find current version of CodeSystem: " + theSystem);
@@ -123,18 +122,18 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	 * version is always pointed by the ForcedId for the no-versioned CS
 	 */
 	private Optional<IBaseResource> getCodeSystemCurrentVersion(UriType theUrl) {
-		if (! theUrl.getValueAsString().contains("loinc"))  return Optional.empty();
+		if (! theUrl.getValueAsString().contains(LOINC_LOW))  return Optional.empty();
 
-		return myTermReadSvc.readCodeSystemByForcedId("loinc");
+		return myTermReadSvc.readCodeSystemByForcedId(LOINC_LOW);
 	}
 
 
 	@Override
 	public IBaseResource fetchValueSet(String theSystem) {
-		if (myTermReadSvc.isLoincNotGenericUnversionedValueSet(theSystem)) {
+		if (TermReadSvcUtil.isLoincNotGenericUnversionedValueSet(theSystem)) {
 			Optional<IBaseResource> currentVSOpt = getValueSetCurrentVersion(new UriType(theSystem));
 			return currentVSOpt.orElseThrow(() -> new ResourceNotFoundException(
-				"Couldn't find current version ValueSet for url: " + theSystem));
+				"Unable to find current version of ValueSet for url: " + theSystem));
 		}
 
 		return fetchResource(myValueSetType, theSystem);
@@ -145,7 +144,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	 * version is always pointed by the ForcedId for the no-versioned VS
 	 */
 	private Optional<IBaseResource> getValueSetCurrentVersion(UriType theUrl) {
-		if (myTermReadSvc.mustReturnEmptyValueSet(theUrl.getValueAsString()))   return Optional.empty();
+		if (TermReadSvcUtil.mustReturnEmptyValueSet(theUrl.getValueAsString()))   return Optional.empty();
 
 		String forcedId = theUrl.getValue().substring(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH.length());
 		if (StringUtils.isBlank(forcedId))  return Optional.empty();

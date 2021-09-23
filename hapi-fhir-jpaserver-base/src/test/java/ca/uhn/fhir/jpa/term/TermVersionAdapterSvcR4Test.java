@@ -33,6 +33,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.security.InvalidParameterException;
 
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
@@ -50,14 +51,14 @@ class TermVersionAdapterSvcR4Test {
 
 	@Test
 	void createOrUpdateCodeSystemMustHaveId() {
-		org.hl7.fhir.r4.model.CodeSystem codeSystem = new CodeSystem();
+		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl("a-loinc-system");
 
 		InvalidParameterException thrown = assertThrows(
 			InvalidParameterException.class,
 			() -> testedClass.createOrUpdateCodeSystem(codeSystem, new ServletRequestDetails()));
 
-		assertTrue(thrown.getMessage().contains("LOINC CodeSystem must have an 'ID' element"));
+		assertTrue(thrown.getMessage().contains("'loinc' CodeSystem must have an 'ID' element"));
 	}
 
 
@@ -65,8 +66,8 @@ class TermVersionAdapterSvcR4Test {
 	void createOrUpdateCodeSystemWithIdNoException() {
 		ReflectionTestUtils.setField(testedClass, "myCodeSystemResourceDao", myCodeSystemResourceDao);
 
-		org.hl7.fhir.r4.model.CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl("a-loinc-system").setId("loinc");
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl("a-loinc-system").setId(LOINC_LOW);
 
 		when(myCodeSystemResourceDao.update(codeSystem, theRequestDetails)).thenReturn(theDaoMethodOutcome);
 

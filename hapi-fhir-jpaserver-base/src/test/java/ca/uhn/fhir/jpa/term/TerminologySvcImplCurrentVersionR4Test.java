@@ -77,6 +77,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -440,7 +441,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		// for CodeSystem:
 
 		// _ current CS is present and has no version
-		CodeSystem codeSystem = myCodeSystemDao.read(new IdType("loinc"));
+		CodeSystem codeSystem = myCodeSystemDao.read(new IdType(LOINC_LOW));
 		String csString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem);
 		ourLog.info("CodeSystem:\n" + csString);
 
