@@ -49,6 +49,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * This interceptor can be used to automatically narrow the scope of searches in order to
@@ -245,21 +246,7 @@ public class SearchNarrowingInterceptor {
 
 				} else if (theAreCompartments) {
 
-					List<RuntimeSearchParam> searchParams = theResDef.getSearchParamsForCompartmentName(compartmentName);
-					if (searchParams.size() > 0) {
-
-						// Resources like Observation have several fields that add the resource to
-						// the compartment. In the case of Observation, it's subject, patient and performer.
-						// For this kind of thing, we'll prefer the one called "patient".
-						RuntimeSearchParam searchParam =
-							searchParams
-								.stream()
-								.filter(t -> t.getName().equalsIgnoreCase(compartmentName))
-								.findFirst()
-								.orElse(searchParams.get(0));
-						searchParamName = searchParam.getName();
-
-					}
+					searchParamName = selectBestSearchParameterForCompartment(theRequestDetails, theResDef, compartmentName);
 				}
 
 				lastCompartmentName = compartmentName;
@@ -271,6 +258,72 @@ public class SearchNarrowingInterceptor {
 				List<String> orValues = theParameterToOrValues.computeIfAbsent(searchParamName, t -> new ArrayList<>());
 				orValues.add(nextCompartment);
 			}
+		}
+	}
+
+	private String selectBestSearchParameterForCompartment(RequestDetails theRequestDetails, RuntimeResourceDefinition theResDef, String compartmentName) {
+		String searchParamName = null;
+
+		Set<String> queryParameters = theRequestDetails.getParameters().keySet();
+
+		List<RuntimeSearchParam> searchParams = theResDef.getSearchParamsForCompartmentName(compartmentName);
+		if (searchParams.size() > 0) {
+
+			// Resources like Observation have several fields that add the resource to
+			// the compartment. In the case of Observation, it's subject, patient and performer.
+			// For this kind of thing, we'll prefer the one that matches the compartment name.
+			Optional<RuntimeSearchParam> primarySearchParam =
+				searchParams
+					.stream()
+					.filter(t -> t.getName().equalsIgnoreCase(compartmentName))
+					.findFirst();
+
+			if (primarySearchParam.isPresent()) {
+				String primarySearchParamName = primarySearchParam.get().getName();
+				// If the primary search parameter is actually in use in the query, use it.
+				if (queryParameters.contains(primarySearchParamName)) {
+					searchParamName = primarySearchParamName;
+				} else {
+					// If the primary search parameter itself isn't in use, check to see whether any of its synonyms are.
+					List<RuntimeSearchParam> synonyms = findSynonyms(searchParams, primarySearchParam.get());
+					Optional<RuntimeSearchParam> synonymInUse = synonyms
+						.stream()
+						.filter(t -> queryParameters.contains(t.getName()))
+						.findFirst();
+					if (synonymInUse.isPresent()) {
+						// if so, use one of those
+						searchParamName = synonymInUse.get().getName();
+					} else {
+						// if not, i.e., the original query is not filtering on this field at all, use the primary
+						searchParamName = primarySearchParamName;
+					}
+				}
+			} else {
+				// Otherwise, fall back to whatever is available
+				searchParamName = searchParams.get(0).getName();
+			}
+
+		}
+		return searchParamName;
+	}
+
+	private List<RuntimeSearchParam> findSynonyms(List<RuntimeSearchParam> searchParams, RuntimeSearchParam primarySearchParam) {
+		// We define two search parameters in a compartment as synonyms if they refer to the same field in the model, ignoring any qualifiers
+
+		String primaryBasePath = getBasePath(primarySearchParam);
+
+		return searchParams
+			.stream()
+			.filter(t -> primaryBasePath.equals(getBasePath(t)))
+			.collect(Collectors.toList());
+	}
+
+	private String getBasePath(RuntimeSearchParam searchParam) {
+		int qualifierIndex = searchParam.getPath().indexOf(".where");
+		if (qualifierIndex == -1) {
+			return searchParam.getPath();
+		} else {
+			return searchParam.getPath().substring(0, qualifierIndex);
 		}
 	}
 
