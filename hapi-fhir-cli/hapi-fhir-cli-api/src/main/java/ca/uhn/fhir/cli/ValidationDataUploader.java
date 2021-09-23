@@ -28,7 +28,6 @@ import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -189,7 +188,11 @@ public class ValidationDataUploader extends BaseCommand {
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
 			ourLog.info("Uploading ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
-			client.update().resource(next).execute();
+			try {
+				client.update().resource(next).execute();
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
+			}
 
 			count++;
 		}
@@ -208,7 +211,11 @@ public class ValidationDataUploader extends BaseCommand {
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
 			ourLog.info("Uploading v3-codesystems ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
-			client.update().resource(next).execute();
+			try {
+				client.update().resource(next).execute();
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
+			}
 
 			count++;
 		}
@@ -226,7 +233,11 @@ public class ValidationDataUploader extends BaseCommand {
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
 			ourLog.info("Uploading v2-tables ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
-			client.update().resource(next).execute();
+			try {
+				client.update().resource(next).execute();
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
+			}
 			count++;
 		}
 
@@ -253,8 +264,8 @@ public class ValidationDataUploader extends BaseCommand {
 			ourLog.info("Uploading StructureDefinition {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
 			try {
 				client.update().resource(next).execute();
-			} catch (Exception e) {
-				ourLog.warn("Failed to upload {} - {}", next.getIdElement().getValue(), e.getMessage());
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
 			}
 			count++;
 		}
@@ -297,8 +308,6 @@ public class ValidationDataUploader extends BaseCommand {
 			try {
 				IIdType id = client.update().resource(next).execute().getId();
 				ourLog.info("  - Got ID: {}", id.getValue());
-			} catch (UnprocessableEntityException e) {
-				ourLog.warn("UnprocessableEntityException: " + e.toString());
 			} catch (BaseServerResponseException e) {
 				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
 			}
@@ -323,8 +332,8 @@ public class ValidationDataUploader extends BaseCommand {
 			ourLog.info("Uploading v3-codesystems ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
 			try {
 				client.update().resource(next).execute();
-			} catch (Exception e) {
-				ourLog.error("Failed to upload: {}", e.toString());
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
 			}
 			count++;
 		}
@@ -346,7 +355,11 @@ public class ValidationDataUploader extends BaseCommand {
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
 			ourLog.info("Uploading v2-tables ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
-			client.update().resource(next).execute();
+			try {
+				client.update().resource(next).execute();
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
+			}
 			count++;
 		}
 
@@ -396,8 +409,8 @@ public class ValidationDataUploader extends BaseCommand {
 			try {
 				IIdType id = client.update().resource(next).execute().getId();
 				ourLog.info("  - Got ID: {}", id.getValue());
-			} catch (UnprocessableEntityException e) {
-				ourLog.warn("UnprocessableEntityException: " + e.toString());
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
 			}
 			count++;
 		}
@@ -417,7 +430,11 @@ public class ValidationDataUploader extends BaseCommand {
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
 			ourLog.info("Uploading v3-codesystems ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
-			client.update().resource(next).execute();
+			try {
+				client.update().resource(next).execute();
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
+			}
 
 			count++;
 		}
@@ -439,7 +456,11 @@ public class ValidationDataUploader extends BaseCommand {
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
 			ourLog.info("Uploading v2-tables ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
-			client.update().resource(next).execute();
+			try {
+				client.update().resource(next).execute();
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
+			}
 			count++;
 		}
 
@@ -500,7 +521,11 @@ public class ValidationDataUploader extends BaseCommand {
 			}
 
 			ourLog.info("Uploading {} StructureDefinition {}/{} : {}", new Object[] {theName, count, total, next.getIdElement().getValue()});
-			client.update().resource(next).execute();
+			try {
+				client.update().resource(next).execute();
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
+			}
 
 			count++;
 		}
