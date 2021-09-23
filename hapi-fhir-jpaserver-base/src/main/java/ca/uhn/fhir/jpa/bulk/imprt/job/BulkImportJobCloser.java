@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.bulk.imprt.job;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
 import org.springframework.batch.core.BatchStatus;
@@ -36,7 +36,7 @@ import org.springframework.beans.factory.annotation.Value;
  */
 public class BulkImportJobCloser implements Tasklet {
 
-	@Value("#{jobParameters['" + BulkExportJobConfig.JOB_UUID_PARAMETER + "']}")
+	@Value("#{jobParameters['" + BatchConstants.JOB_UUID_PARAMETER + "']}")
 	private String myJobUUID;
 
 	@Autowired

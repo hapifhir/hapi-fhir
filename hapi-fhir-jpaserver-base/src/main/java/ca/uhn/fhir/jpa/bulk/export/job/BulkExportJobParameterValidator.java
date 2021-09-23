@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.rest.api.Constants;
@@ -33,8 +34,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Arrays;
 import java.util.Optional;
-
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * This class will prevent a job from running if the UUID does not exist or is invalid.
@@ -59,7 +58,7 @@ public class BulkExportJobParameterValidator implements JobParametersValidator {
 			if (readChunkSize == null || readChunkSize < 1) {
 				errorBuilder.append("There must be a valid number for readChunkSize, which is at least 1. ");
 			}
-			String jobUUID = theJobParameters.getString(BulkExportJobConfig.JOB_UUID_PARAMETER);
+			String jobUUID = theJobParameters.getString(BatchConstants.JOB_UUID_PARAMETER);
 			Optional<BulkExportJobEntity> oJob = myBulkExportJobDao.findByJobId(jobUUID);
 			if (!StringUtils.isBlank(jobUUID) && !oJob.isPresent()) {
 				errorBuilder.append("There is no persisted job that exists with UUID: " + jobUUID + ". ");

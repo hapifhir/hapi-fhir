@@ -20,12 +20,10 @@ package ca.uhn.fhir.jpa.delete.job;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterValidator;
 import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
 import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
 import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -39,7 +37,7 @@ import org.springframework.context.annotation.Lazy;
 
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME;
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.DELETE_EXPUNGE_JOB_NAME;
 
 /**
  * Spring batch Job configuration file. Contains all necessary plumbing to run a

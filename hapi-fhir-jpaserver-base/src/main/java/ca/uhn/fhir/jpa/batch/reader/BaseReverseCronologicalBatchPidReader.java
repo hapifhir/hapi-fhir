@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.batch.CommonBatchJobConfig;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterValidator;
 import ca.uhn.fhir.jpa.batch.job.model.PartitionedUrl;
 import ca.uhn.fhir.jpa.batch.job.model.RequestListJson;
@@ -58,22 +59,17 @@ import java.util.function.Function;
 
 /**
  * This Spring Batch reader takes 4 parameters:
- * {@link #JOB_PARAM_REQUEST_LIST}: A list of URLs to search for along with the partitions those searches should be performed on
- * {@link #JOB_PARAM_BATCH_SIZE}: The number of resources to return with each search.  If ommitted, {@link DaoConfig#getExpungeBatchSize} will be used.
- * {@link #JOB_PARAM_START_TIME}: The latest timestamp of entities to search for
+ * {@link BatchConstants#JOB_PARAM_REQUEST_LIST}: A list of URLs to search for along with the partitions those searches should be performed on
+ * {@link BatchConstants#JOB_PARAM_BATCH_SIZE}: The number of resources to return with each search.  If ommitted, {@link DaoConfig#getExpungeBatchSize} will be used.
+ * {@link BatchConstants#JOB_PARAM_START_TIME}: The latest timestamp of entities to search for
  * <p>
- * The reader will return at most {@link #JOB_PARAM_BATCH_SIZE} pids every time it is called, or null
+ * The reader will return at most {@link BatchConstants#JOB_PARAM_BATCH_SIZE} pids every time it is called, or null
  * once no more matching entities are available.  It returns the resources in reverse chronological order
- * and stores where it's at in the Spring Batch execution context with the key {@link #CURRENT_THRESHOLD_HIGH}
+ * and stores where it's at in the Spring Batch execution context with the key {@link BatchConstants#CURRENT_THRESHOLD_HIGH}
  * appended with "." and the index number of the url list item it has gotten up to.  This is to permit
  * restarting jobs that use this reader so it can pick up where it left off.
  */
 public abstract class BaseReverseCronologicalBatchPidReader implements ItemReader<List<Long>>, ItemStream {
-	public static final String JOB_PARAM_REQUEST_LIST = "url-list";
-	public static final String JOB_PARAM_BATCH_SIZE = "batch-size";
-	public static final String JOB_PARAM_START_TIME = "start-time";
-	public static final String CURRENT_URL_INDEX = "current.url-index";
-	public static final String CURRENT_THRESHOLD_HIGH = "current.threshold-high";
 	private static final Logger ourLog = LoggerFactory.getLogger(ReverseCronologicalBatchResourcePidReader.class);
 	private final BatchDateThresholdUpdater myBatchDateThresholdUpdater = new BatchDateThresholdUpdater();
 	private final Map<Integer, Date> myThresholdHighByUrlIndex = new HashMap<>();
@@ -88,30 +84,30 @@ public abstract class BaseReverseCronologicalBatchPidReader implements ItemReade
 	private Date myStartTime;
 
 	private static String highKey(int theIndex) {
-		return CURRENT_THRESHOLD_HIGH + "." + theIndex;
+		return BatchConstants.CURRENT_THRESHOLD_HIGH + "." + theIndex;
 	}
 
 	@Nonnull
 	public static JobParameters buildJobParameters(String theOperationName, Integer theBatchSize, RequestListJson theRequestListJson) {
 		Map<String, JobParameter> map = new HashMap<>();
 		map.put(MultiUrlJobParameterValidator.JOB_PARAM_OPERATION_NAME, new JobParameter(theOperationName));
-		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_REQUEST_LIST, new JobParameter(theRequestListJson.toJson()));
-		map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_START_TIME, new JobParameter(DateUtils.addMinutes(new Date(), CommonBatchJobConfig.MINUTES_IN_FUTURE_TO_PROCESS_FROM)));
+		map.put(BatchConstants.JOB_PARAM_REQUEST_LIST, new JobParameter(theRequestListJson.toJson()));
+		map.put(BatchConstants.JOB_PARAM_START_TIME, new JobParameter(DateUtils.addMinutes(new Date(), CommonBatchJobConfig.MINUTES_IN_FUTURE_TO_PROCESS_FROM)));
 		if (theBatchSize != null) {
-			map.put(ReverseCronologicalBatchResourcePidReader.JOB_PARAM_BATCH_SIZE, new JobParameter(theBatchSize.longValue()));
+			map.put(BatchConstants.JOB_PARAM_BATCH_SIZE, new JobParameter(theBatchSize.longValue()));
 		}
 		JobParameters parameters = new JobParameters(map);
 		return parameters;
 	}
 
 	@Autowired
-	public void setRequestListJson(@Value("#{jobParameters['" + JOB_PARAM_REQUEST_LIST + "']}") String theRequestListJson) {
+	public void setRequestListJson(@Value("#{jobParameters['" + BatchConstants.JOB_PARAM_REQUEST_LIST + "']}") String theRequestListJson) {
 		RequestListJson requestListJson = RequestListJson.fromJson(theRequestListJson);
 		myPartitionedUrls = requestListJson.getPartitionedUrls();
 	}
 
 	@Autowired
-	public void setStartTime(@Value("#{jobParameters['" + JOB_PARAM_START_TIME + "']}") Date theStartTime) {
+	public void setStartTime(@Value("#{jobParameters['" + BatchConstants.JOB_PARAM_START_TIME + "']}") Date theStartTime) {
 		myStartTime = theStartTime;
 	}
 
@@ -166,8 +162,8 @@ public abstract class BaseReverseCronologicalBatchPidReader implements ItemReade
 
 	@Override
 	public void open(ExecutionContext executionContext) throws ItemStreamException {
-		if (executionContext.containsKey(CURRENT_URL_INDEX)) {
-			myUrlIndex = new Long(executionContext.getLong(CURRENT_URL_INDEX)).intValue();
+		if (executionContext.containsKey(BatchConstants.CURRENT_URL_INDEX)) {
+			myUrlIndex = new Long(executionContext.getLong(BatchConstants.CURRENT_URL_INDEX)).intValue();
 		}
 		for (int index = 0; index < myPartitionedUrls.size(); ++index) {
 			String key = highKey(index);
@@ -181,7 +177,7 @@ public abstract class BaseReverseCronologicalBatchPidReader implements ItemReade
 
 	@Override
 	public void update(ExecutionContext executionContext) throws ItemStreamException {
-		executionContext.putLong(CURRENT_URL_INDEX, myUrlIndex);
+		executionContext.putLong(BatchConstants.CURRENT_URL_INDEX, myUrlIndex);
 		for (int index = 0; index < myPartitionedUrls.size(); ++index) {
 			Date date = myThresholdHighByUrlIndex.get(index);
 			if (date != null) {
@@ -199,7 +195,7 @@ public abstract class BaseReverseCronologicalBatchPidReader implements ItemReade
 	}
 
 	@Autowired
-	public void setBatchSize(@Value("#{jobParameters['" + JOB_PARAM_BATCH_SIZE + "']}") Integer theBatchSize) {
+	public void setBatchSize(@Value("#{jobParameters['" + BatchConstants.JOB_PARAM_BATCH_SIZE + "']}") Integer theBatchSize) {
 		myBatchSize = theBatchSize;
 	}
 
