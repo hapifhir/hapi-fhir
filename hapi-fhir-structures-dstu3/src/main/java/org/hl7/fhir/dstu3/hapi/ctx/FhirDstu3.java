@@ -71,12 +71,13 @@ public class FhirDstu3 implements IFhirVersion {
 
   @Override
   public InputStream getFhirVersionPropertiesFile() {
-    InputStream str = FhirDstu3.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/fhirversion.properties");
+    String path = "org/hl7/fhir/dstu3/model/fhirversion.properties";
+    InputStream str = FhirDstu3.class.getResourceAsStream("/" + path);
     if (str == null) {
-      str = FhirDstu3.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/fhirversion.properties");
+      str = FhirDstu3.class.getResourceAsStream(path);
     }
     if (str == null) {
-      throw new ConfigurationException("Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dstu3/fhirversion.properties");
+      throw new ConfigurationException("Can not find model property file on classpath: " + path);
     }
     return str;
   }
