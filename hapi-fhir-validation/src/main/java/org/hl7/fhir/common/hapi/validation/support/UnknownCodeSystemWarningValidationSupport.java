@@ -37,6 +37,9 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 	@Nullable
 	@Override
 	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+		if (theCodeSystem == null) {
+			return null;
+		}
 		IBaseResource codeSystem = theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystem);
 		if (codeSystem != null) {
 			return null;
