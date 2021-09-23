@@ -20,11 +20,7 @@ package ca.uhn.fhir.jpa.search.builder;
  * #L%
  */
 
-import ca.uhn.fhir.context.ComboSearchParamType;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -51,6 +47,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.search.SearchConstants;
 import ca.uhn.fhir.jpa.search.builder.sql.GeneratedSql;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryExecutor;
@@ -70,11 +67,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
-import ca.uhn.fhir.rest.api.SortOrderEnum;
-import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -106,26 +99,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import javax.persistence.criteria.*;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 /**
  * The SearchBuilder is responsible for actually forming the SQL query that handles
@@ -138,7 +116,8 @@ public class SearchBuilder implements ISearchBuilder {
 	 * for an explanation of why we use the constant 800
 	 */
 	// NB: keep public
-	public static final int MAXIMUM_PAGE_SIZE = 800;
+	@Deprecated
+	public static final int MAXIMUM_PAGE_SIZE = SearchConstants.MAX_PAGE_SIZE;
 	public static final int MAXIMUM_PAGE_SIZE_FOR_TESTING = 50;
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
 	private static final ResourcePersistentId NO_MORE = new ResourcePersistentId(-1L);
