@@ -103,7 +103,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static ca.uhn.fhir.util.TestUtil.randomizeLocale;
+import static ca.uhn.fhir.util.TestUtil.doRandomizeLocaleAndTimezone;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -601,7 +601,7 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	@BeforeAll
 	public static void beforeClassRandomizeLocale() {
-		randomizeLocale();
+		doRandomizeLocaleAndTimezone();
 	}
 
 	@AfterAll
