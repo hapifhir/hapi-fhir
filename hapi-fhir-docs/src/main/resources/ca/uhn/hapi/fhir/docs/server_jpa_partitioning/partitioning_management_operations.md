@@ -231,3 +231,17 @@ The following request body could be used:
 }
 ```
 
+# Listing all Partitions
+
+The `$partition-management-list-partitions` operation can be used to list all existing partitions.
+
+## Example
+
+An HTTP POST to the following URL would be used to invoke this operation:
+
+```url
+http://example.com/DEFAULT/$partition-management-list-partitions
+```
+
+
+

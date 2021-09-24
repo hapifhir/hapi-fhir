@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -173,20 +174,16 @@ public class PartitionManagementProvider {
 	}
 
 	private IBaseParameters prepareOutputList(List<PartitionEntity> theOutput) {
-		if (theOutput != null) {
-			IBaseParameters retVal = ParametersUtil.newInstance(myCtx);
-			for (PartitionEntity partitionEntity : theOutput) {
-				IBase resultPart = ParametersUtil.addParameterToParameters(myCtx, retVal, "partition");
-				ParametersUtil.addPartInteger(myCtx, resultPart, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, partitionEntity.getId());
-				ParametersUtil.addPartCode(myCtx, resultPart, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, partitionEntity.getName());
-				if (isNotBlank(partitionEntity.getDescription())) {
-					ParametersUtil.addPartString(myCtx, resultPart, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, partitionEntity.getDescription());
-				}
+		IBaseParameters retVal = ParametersUtil.newInstance(myCtx);
+		for (PartitionEntity partitionEntity : theOutput) {
+			IBase resultPart = ParametersUtil.addParameterToParameters(myCtx, retVal, "partition");
+			ParametersUtil.addPartInteger(myCtx, resultPart, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, partitionEntity.getId());
+			ParametersUtil.addPartCode(myCtx, resultPart, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, partitionEntity.getName());
+			if (isNotBlank(partitionEntity.getDescription())) {
+				ParametersUtil.addPartString(myCtx, resultPart, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, partitionEntity.getDescription());
 			}
-			return retVal;
-		} else {
-			return null;
 		}
+		return retVal;
 	}
 
 	@Nonnull

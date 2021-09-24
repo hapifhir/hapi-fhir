@@ -257,7 +257,6 @@ public class PartitionManagementProviderTest {
 		partitionList.add(partition2);
 		when(myPartitionConfigSvc.listPartitions()).thenReturn(partitionList);
 
-
 		Parameters response = myClient
 			.operation()
 			.onServer()
@@ -289,7 +288,6 @@ public class PartitionManagementProviderTest {
 		assertThat(part.get(2).getName(), is(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC));
 		assertEquals("a description2", part.get(2).getValue().toString());
 	}
-
 
 	@Configuration
 	public static class MyConfig {
