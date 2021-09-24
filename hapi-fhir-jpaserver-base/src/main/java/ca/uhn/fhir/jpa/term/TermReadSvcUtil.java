@@ -20,24 +20,30 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_VALUESET_URL;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_VALUESET_URL_PLUS_SLASH;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 
 public class TermReadSvcUtil {
+	private static final Logger ourLog = LoggerFactory.getLogger(TermReadSvcUtil.class);
 
-	public static boolean mustReturnEmptyValueSet(String theUrl) {
-		if (! theUrl.startsWith(LOINC_GENERIC_VALUESET_URL))   return true;
+	public static Optional<String> getValueSetId(String theUrl) {
+		if (! theUrl.startsWith(LOINC_GENERIC_VALUESET_URL))   return Optional.empty();
 
 		if (! theUrl.startsWith(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH)) {
-			throw new InternalErrorException("Don't know how to extract ValueSet's ForcedId from url: " + theUrl);
+			ourLog.error("Don't know how to extract ValueSet's ForcedId from url: " + theUrl);
+			return Optional.empty();
 		}
 
 		String forcedId = theUrl.substring(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH.length());
-		return StringUtils.isBlank(forcedId);
+		return isBlank(forcedId) ? Optional.empty() : Optional.of(forcedId);
 	}
 
 

@@ -26,7 +26,6 @@ import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.TermReadSvcR4;
 import ca.uhn.fhir.jpa.term.TermReadSvcUtil;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -96,33 +95,30 @@ class ITermReadSvcTest {
 
 
 	@Nested
-	public class MustReturnEmptyValueSet {
+	public class GetValueSetId {
 
 		@Test
-		void doesntStartWithGenericVSReturnsTrue() {
-			boolean ret = TermReadSvcUtil.mustReturnEmptyValueSet("http://boing.org");
-			assertTrue(ret);
+		void doesntStartWithGenericVSReturnsEmpty() {
+			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId("http://boing.org");
+			assertFalse(vsIdOpt.isPresent());
 		}
 
 		@Test
-		void doesntStartWithGenericVSPlusSlashThrows() {
-			InternalErrorException thrown = assertThrows(
-				InternalErrorException.class,
-				() -> TermReadSvcUtil.mustReturnEmptyValueSet("http://loinc.org/vs-no-slash-after-vs"));
-
-			assertTrue(thrown.getMessage().contains("Don't know how to extract ValueSet's ForcedId from url:"));
+		void doesntStartWithGenericVSPlusSlashReturnsEmpty() {
+			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId("http://loinc.org/vs-no-slash-after-vs");
+			assertFalse(vsIdOpt.isPresent());
 		}
 
 		@Test
-		void blankVsIdReturnsTrue() {
-			boolean ret = TermReadSvcUtil.mustReturnEmptyValueSet("http://loinc.org/vs/");
-			assertTrue(ret);
+		void blankVsIdReturnsEmpty() {
+			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId("http://loinc.org");
+			assertFalse(vsIdOpt.isPresent());
 		}
 
 		@Test
-		void startsWithGenericPlusSlashPlusIdReturnsFalse() {
-			boolean ret = TermReadSvcUtil.mustReturnEmptyValueSet("http://loinc.org/vs/some-vs-id");
-			assertFalse(ret);
+		void startsWithGenericPlusSlashPlusIdReturnsValid() {
+			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId("http://loinc.org/vs/some-vs-id");
+			assertTrue(vsIdOpt.isPresent());
 		}
 
 	}
