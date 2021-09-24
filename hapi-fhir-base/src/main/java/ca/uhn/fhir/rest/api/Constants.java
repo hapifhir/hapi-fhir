@@ -84,6 +84,7 @@ public class Constants {
 	public static final String EXTOP_VALIDATE_RESOURCE = "resource";
 	public static final String FORMAT_HTML = "html";
 	public static final String FORMAT_JSON = "json";
+        public static final String FORMAT_NDJSON = "ndjson";
 	public static final String FORMAT_XML = "xml";
 	public static final String CT_RDF_TURTLE_LEGACY = "text/turtle";
 	public static final String FORMAT_TURTLE = "ttl";
