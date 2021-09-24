@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -150,11 +151,11 @@ public class PartitionManagementProvider {
 	/**
 	 * Add Partition:
 	 * <code>
-	 * $partition-management-read-partition
+	 * $partition-management-list-partitions
 	 * </code>
 	 */
 	@Operation(name = ProviderConstants.PARTITION_MANAGEMENT_LIST_PARTITIONS, idempotent = true)
-	public List<IBaseParameters> listPartitions(
+	public IBaseParameters addPartitions(
 		@ResourceParam IBaseParameters theRequest
 	) {
 		List<PartitionEntity> output = myPartitionLookupSvc.listPartitions();
@@ -171,12 +172,21 @@ public class PartitionManagementProvider {
 		return retVal;
 	}
 
-	private List<IBaseParameters> prepareOutputList(List<PartitionEntity> theOutput) {
-		List<IBaseParameters> retVal = new ArrayList<IBaseParameters>();
-		for (PartitionEntity partitionEntity : theOutput) {
-			retVal.add(prepareOutput(partitionEntity));
+	private IBaseParameters prepareOutputList(List<PartitionEntity> theOutput) {
+		if (theOutput != null) {
+			IBaseParameters retVal = ParametersUtil.newInstance(myCtx);
+			for (PartitionEntity partitionEntity : theOutput) {
+				IBase resultPart = ParametersUtil.addParameterToParameters(myCtx, retVal, "partition");
+				ParametersUtil.addPartInteger(myCtx, resultPart, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, partitionEntity.getId());
+				ParametersUtil.addPartCode(myCtx, resultPart, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, partitionEntity.getName());
+				if (isNotBlank(partitionEntity.getDescription())) {
+					ParametersUtil.addPartString(myCtx, resultPart, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, partitionEntity.getDescription());
+				}
+			}
+			return retVal;
+		} else {
+			return null;
 		}
-		return retVal;
 	}
 
 	@Nonnull

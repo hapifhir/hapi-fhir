@@ -28,8 +28,13 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Nonnull;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -241,30 +246,48 @@ public class PartitionManagementProviderTest {
 		partition1.setId(1);
 		partition1.setName("PARTITION-1");
 		partition1.setDescription("a description1");
-		when(myPartitionConfigSvc.getPartitionById(eq(1))).thenReturn(partition1);
 
 		PartitionEntity partition2 = new PartitionEntity();
-		partition1.setId(2);
-		partition1.setName("PARTITION-2");
-		partition1.setDescription("a description2");
-		when(myPartitionConfigSvc.getPartitionById(eq(2))).thenReturn(partition2);
+		partition2.setId(2);
+		partition2.setName("PARTITION-2");
+		partition2.setDescription("a description2");
 
-		List<Parameters> response = (List<Parameters>) myClient
+		List<PartitionEntity> partitionList = new ArrayList<PartitionEntity>();
+		partitionList.add(partition1);
+		partitionList.add(partition2);
+		when(myPartitionConfigSvc.listPartitions()).thenReturn(partitionList);
+
+
+		Parameters response = myClient
 			.operation()
 			.onServer()
 			.named(ProviderConstants.PARTITION_MANAGEMENT_LIST_PARTITIONS)
 			.withNoParameters(Parameters.class)
+			.useHttpGet()
 			.encodedXml()
 			.execute();
 
-		System.out.println(response);
-//		ourLog.info("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response.get(0)));
-//		verify(myPartitionConfigSvc, times(1)).getPartitionById(any());
-//		verifyNoMoreInteractions(myPartitionConfigSvc);
-//
-//		assertEquals(1, ((IntegerType) response.get(0).getParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID)).getValue().intValue());
-//		assertEquals("PARTITION-1", ((StringType) response.get(0).getParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME)).getValue());
-//		assertEquals("a description1", ((StringType) response.get(0).getParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC)).getValue());
+		ourLog.info("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		verify(myPartitionConfigSvc, times(1)).listPartitions();
+		verifyNoMoreInteractions(myPartitionConfigSvc);
+
+		List<Parameters.ParametersParameterComponent> list = getParametersByName(response, "partition");
+		assertThat(list, hasSize(2));
+		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
+		assertThat(part.get(0).getName(), is(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID));
+		assertEquals(1, ((IntegerType) part.get(0).getValue()).getValue().intValue());
+		assertThat(part.get(1).getName(), is(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME));
+		assertEquals("PARTITION-1", part.get(1).getValue().toString());
+		assertThat(part.get(2).getName(), is(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC));
+		assertEquals("a description1", part.get(2).getValue().toString());
+
+		part = list.get(1).getPart();
+		assertThat(part.get(0).getName(), is(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID));
+		assertEquals(2, ((IntegerType) part.get(0).getValue()).getValue().intValue());
+		assertThat(part.get(1).getName(), is(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME));
+		assertEquals("PARTITION-2", part.get(1).getValue().toString());
+		assertThat(part.get(2).getName(), is(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC));
+		assertEquals("a description2", part.get(2).getValue().toString());
 	}
 
 
@@ -288,4 +311,7 @@ public class PartitionManagementProviderTest {
 		return t -> t.getArgument(0, PartitionEntity.class);
 	}
 
+	private List<Parameters.ParametersParameterComponent> getParametersByName(Parameters theParams, String theName) {
+		return theParams.getParameter().stream().filter(p -> p.getName().equals(theName)).collect(Collectors.toList());
+	}
 }

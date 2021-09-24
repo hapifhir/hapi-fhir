@@ -171,10 +171,8 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	}
 
 	@Override
-	@Transactional
 	public List<PartitionEntity> listPartitions() {
 		List<PartitionEntity> allPartitions =  myPartitionDao.findAll();
-		clearCaches();
 		return allPartitions;
 	}
 
