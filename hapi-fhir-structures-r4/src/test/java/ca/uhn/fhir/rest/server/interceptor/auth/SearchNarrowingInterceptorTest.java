@@ -225,6 +225,26 @@ public class SearchNarrowingInterceptorTest {
 	}
 
 	@Test
+	public void testNarrowObservationsByPatientContext_ClientRequestedSomeOverlap_ShortIds() {
+
+		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
+
+		ourClient
+			.search()
+			.forResource("Observation")
+			.where(Observation.PATIENT.hasAnyOfIds("456", "777"))
+			.and(Observation.PATIENT.hasAnyOfIds("456", "888"))
+			.execute();
+
+		assertEquals("Observation.search", ourLastHitMethod);
+		assertNull(ourLastIdParam);
+		assertNull(ourLastCodeParam);
+		assertNull(ourLastSubjectParam);
+		assertNull(ourLastPerformerParam);
+		assertThat(toStrings(ourLastPatientParam), Matchers.contains("456", "456"));
+	}
+
+	@Test
 	public void testNarrowObservationsByPatientContext_ClientRequestedSomeOverlap_UseSynonym() {
 
 		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");

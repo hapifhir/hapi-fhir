@@ -151,12 +151,19 @@ public class SearchNarrowingInterceptor {
 					 * requested, and the values that the user is allowed to see
 					 */
 					String[] existingValues = newParameters.get(nextParamName);
+					List<String> nextAllowedValueIds = nextAllowedValues
+						.stream()
+						.map(t -> t.lastIndexOf("/") > -1 ? t.substring(t.lastIndexOf("/") + 1) : t)
+						.collect(Collectors.toList());
 					boolean restrictedExistingList = false;
 					for (int i = 0; i < existingValues.length; i++) {
 
 						String nextExistingValue = existingValues[i];
 						List<String> nextRequestedValues = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, nextExistingValue);
-						List<String> nextPermittedValues = ListUtils.intersection(nextRequestedValues, nextAllowedValues);
+						List<String> nextPermittedValues = ListUtils.union(
+							ListUtils.intersection(nextRequestedValues, nextAllowedValues),
+							ListUtils.intersection(nextRequestedValues, nextAllowedValueIds)
+						);
 						if (nextPermittedValues.size() > 0) {
 							restrictedExistingList = true;
 							existingValues[i] = ParameterUtil.escapeAndJoinOrList(nextPermittedValues);
