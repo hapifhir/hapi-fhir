@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -48,6 +49,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * This interceptor can be used to automatically narrow the scope of searches in order to
@@ -149,12 +151,19 @@ public class SearchNarrowingInterceptor {
 					 * requested, and the values that the user is allowed to see
 					 */
 					String[] existingValues = newParameters.get(nextParamName);
+					List<String> nextAllowedValueIds = nextAllowedValues
+						.stream()
+						.map(t -> t.lastIndexOf("/") > -1 ? t.substring(t.lastIndexOf("/") + 1) : t)
+						.collect(Collectors.toList());
 					boolean restrictedExistingList = false;
 					for (int i = 0; i < existingValues.length; i++) {
 
 						String nextExistingValue = existingValues[i];
 						List<String> nextRequestedValues = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, nextExistingValue);
-						List<String> nextPermittedValues = ListUtils.intersection(nextRequestedValues, nextAllowedValues);
+						List<String> nextPermittedValues = ListUtils.union(
+							ListUtils.intersection(nextRequestedValues, nextAllowedValues),
+							ListUtils.intersection(nextRequestedValues, nextAllowedValueIds)
+						);
 						if (nextPermittedValues.size() > 0) {
 							restrictedExistingList = true;
 							existingValues[i] = ParameterUtil.escapeAndJoinOrList(nextPermittedValues);
@@ -164,15 +173,13 @@ public class SearchNarrowingInterceptor {
 
 					/*
 					 * If none of the values that were requested by the client overlap at all
-					 * with the values that the user is allowed to see, we'll just add the permitted
-					 * list as a new list. Ultimately this scenario actually means that the client
-					 * shouldn't get *any* results back, and adding a new AND parameter (that doesn't
-					 * overlap at all with the others) is one way of ensuring that.
+					 * with the values that the user is allowed to see, the client shouldn't
+					 * get *any* results back. We return an error code indicating that the
+					 * caller is forbidden from accessing the resources they requested.
 					 */
 					if (!restrictedExistingList) {
-						String[] newValues = Arrays.copyOf(existingValues, existingValues.length + 1);
-						newValues[existingValues.length] = ParameterUtil.escapeAndJoinOrList(nextAllowedValues);
-						newParameters.put(nextParamName, newValues);
+						theResponse.setStatus(Constants.STATUS_HTTP_403_FORBIDDEN);
+						return false;
 					}
 				}
 
@@ -246,21 +253,7 @@ public class SearchNarrowingInterceptor {
 
 				} else if (theAreCompartments) {
 
-					List<RuntimeSearchParam> searchParams = theResDef.getSearchParamsForCompartmentName(compartmentName);
-					if (searchParams.size() > 0) {
-
-						// Resources like Observation have several fields that add the resource to
-						// the compartment. In the case of Observation, it's subject, patient and performer.
-						// For this kind of thing, we'll prefer the one called "patient".
-						RuntimeSearchParam searchParam =
-							searchParams
-								.stream()
-								.filter(t -> t.getName().equalsIgnoreCase(compartmentName))
-								.findFirst()
-								.orElse(searchParams.get(0));
-						searchParamName = searchParam.getName();
-
-					}
+					searchParamName = selectBestSearchParameterForCompartment(theRequestDetails, theResDef, compartmentName);
 				}
 
 				lastCompartmentName = compartmentName;
@@ -272,6 +265,71 @@ public class SearchNarrowingInterceptor {
 				List<String> orValues = theParameterToOrValues.computeIfAbsent(searchParamName, t -> new ArrayList<>());
 				orValues.add(nextCompartment);
 			}
+		}
+	}
+
+	private String selectBestSearchParameterForCompartment(RequestDetails theRequestDetails, RuntimeResourceDefinition theResDef, String compartmentName) {
+		String searchParamName = null;
+
+		Set<String> queryParameters = theRequestDetails.getParameters().keySet();
+
+		List<RuntimeSearchParam> searchParams = theResDef.getSearchParamsForCompartmentName(compartmentName);
+		if (searchParams.size() > 0) {
+
+			// Resources like Observation have several fields that add the resource to
+			// the compartment. In the case of Observation, it's subject, patient and performer.
+			// For this kind of thing, we'll prefer the one that matches the compartment name.
+			Optional<RuntimeSearchParam> primarySearchParam =
+				searchParams
+					.stream()
+					.filter(t -> t.getName().equalsIgnoreCase(compartmentName))
+					.findFirst();
+
+			if (primarySearchParam.isPresent()) {
+				String primarySearchParamName = primarySearchParam.get().getName();
+				// If the primary search parameter is actually in use in the query, use it.
+				if (queryParameters.contains(primarySearchParamName)) {
+					searchParamName = primarySearchParamName;
+				} else {
+					// If the primary search parameter itself isn't in use, check to see whether any of its synonyms are.
+					Optional<RuntimeSearchParam> synonymInUse = findSynonyms(searchParams, primarySearchParam.get())
+						.stream()
+						.filter(t -> queryParameters.contains(t.getName()))
+						.findFirst();
+					if (synonymInUse.isPresent()) {
+						// if a synonym is in use, use it
+						searchParamName = synonymInUse.get().getName();
+					} else {
+						// if not, i.e., the original query is not filtering on this field at all, use the primary search param
+						searchParamName = primarySearchParamName;
+					}
+				}
+			} else {
+				// Otherwise, fall back to whatever search parameter is available
+				searchParamName = searchParams.get(0).getName();
+			}
+
+		}
+		return searchParamName;
+	}
+
+	private List<RuntimeSearchParam> findSynonyms(List<RuntimeSearchParam> searchParams, RuntimeSearchParam primarySearchParam) {
+		// We define two search parameters in a compartment as synonyms if they refer to the same field in the model, ignoring any qualifiers
+
+		String primaryBasePath = getBasePath(primarySearchParam);
+
+		return searchParams
+			.stream()
+			.filter(t -> primaryBasePath.equals(getBasePath(t)))
+			.collect(Collectors.toList());
+	}
+
+	private String getBasePath(RuntimeSearchParam searchParam) {
+		int qualifierIndex = searchParam.getPath().indexOf(".where");
+		if (qualifierIndex == -1) {
+			return searchParam.getPath();
+		} else {
+			return searchParam.getPath().substring(0, qualifierIndex);
 		}
 	}
 

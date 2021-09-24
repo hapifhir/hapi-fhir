@@ -1,0 +1,8 @@
+---
+type: add
+issue: 3018
+jira: SMILE-782
+title: "Previously, when a search query explicitly includes a search parameter that is for the same resource type but a
+different resource instance from the one(s) specified on the authorized list, the search narrowing interceptor would include
+both search parameters in the final query, resulting in an empty bundle being returned to the caller. Now, such a call
+will result in a 403 Forbidden error, making it more clear why no resources were returned."
