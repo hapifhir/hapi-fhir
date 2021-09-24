@@ -38,7 +38,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import java.util.Date;
 import java.util.List;
 
-public class TransactionProcessorVersionAdapterDstu2 implements TransactionProcessor.ITransactionProcessorVersionAdapter<Bundle, Bundle.Entry> {
+public class TransactionProcessorVersionAdapterDstu2 implements ITransactionProcessorVersionAdapter<Bundle, Bundle.Entry> {
 	@Override
 	public void setResponseStatus(Bundle.Entry theBundleEntry, String theStatus) {
 		theBundleEntry.getResponse().setStatus(theStatus);
