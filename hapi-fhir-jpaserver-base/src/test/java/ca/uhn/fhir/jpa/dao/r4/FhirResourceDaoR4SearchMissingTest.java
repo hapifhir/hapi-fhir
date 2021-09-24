@@ -84,11 +84,13 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		org.setActive(true);
 		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
-		assertThat(mySearchParamPresentDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamDateDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
-		assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
+		runInTransaction(() -> {
+			assertThat(mySearchParamPresentDao.findAll(), empty());
+			assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
+			assertThat(myResourceIndexedSearchParamDateDao.findAll(), empty());
+			assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
+			assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
+		});
 
 	}
 
@@ -101,11 +103,13 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		org.setActive(true);
 		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
-		assertThat(mySearchParamPresentDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamDateDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
-		assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
+		runInTransaction(() -> {
+			assertThat(mySearchParamPresentDao.findAll(), empty());
+			assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
+			assertThat(myResourceIndexedSearchParamDateDao.findAll(), empty());
+			assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
+			assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
+		});
 
 	}
 
@@ -118,11 +122,13 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		org.setActive(true);
 		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
-		assertThat(mySearchParamPresentDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamDateDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
-		assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
+		runInTransaction(() -> {
+			assertThat(mySearchParamPresentDao.findAll(), empty());
+			assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
+			assertThat(myResourceIndexedSearchParamDateDao.findAll(), empty());
+			assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
+			assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
+		});
 
 	}
 

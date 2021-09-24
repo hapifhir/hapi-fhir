@@ -210,7 +210,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		patient.setId(patientId);
 
 		// Updating a Golden Resource Patient who was created via MDM should fail.
-		MdmLink mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(patient)).get();
+		MdmLink mdmLink = runInTransaction(()->myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(patient)).orElseThrow(()->new IllegalStateException()));
 		Long sourcePatientPid = mdmLink.getGoldenResourcePid();
 		Patient goldenResourcePatient = myPatientDao.readByPid(new ResourcePersistentId(sourcePatientPid));
 		goldenResourcePatient.setGender(Enumerations.AdministrativeGender.MALE);
@@ -244,7 +244,11 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		jane = addExternalEID(jane, "some_new_eid");
 
 		MdmHelperR4.OutcomeAndLogMessageWrapper outcomeWrapper = myMdmHelper.updateWithLatch(jane);
+
+
 		IAnyResource patient = getGoldenResourceFromTargetResource(jane);
+
+
 		List<CanonicalEID> externalEids = myEIDHelper.getExternalEid(patient);
 		assertThat(externalEids, hasSize(1));
 		assertThat("some_new_eid", is(equalTo(externalEids.get(0).getValue())));

@@ -28,7 +28,7 @@ import org.springframework.data.repository.query.Param;
  * #L%
  */
 
-public interface INpmPackageVersionResourceDao extends JpaRepository<NpmPackageVersionResourceEntity, Long> {
+public interface INpmPackageVersionResourceDao extends JpaRepository<NpmPackageVersionResourceEntity, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT e FROM NpmPackageVersionResourceEntity e WHERE e.myResourceType = :resourceType AND e.myFhirVersion = :fhirVersion AND e.myPackageVersion.myCurrentVersion = true")
 	Slice<NpmPackageVersionResourceEntity> findCurrentVersionByResourceType(Pageable thePage, @Param("fhirVersion") FhirVersionEnum theFhirVersion, @Param("resourceType") String theResourceType);

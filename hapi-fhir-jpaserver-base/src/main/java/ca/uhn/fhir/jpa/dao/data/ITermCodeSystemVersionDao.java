@@ -29,7 +29,7 @@ import java.util.List;
  * #L%
  */
 
-public interface ITermCodeSystemVersionDao extends JpaRepository<TermCodeSystemVersion, Long> {
+public interface ITermCodeSystemVersionDao extends JpaRepository<TermCodeSystemVersion, Long>, IHapiFhirJpaRepository {
 
 	@Modifying
 	@Query("DELETE FROM TermCodeSystemVersion csv WHERE csv.myCodeSystem = :cs")

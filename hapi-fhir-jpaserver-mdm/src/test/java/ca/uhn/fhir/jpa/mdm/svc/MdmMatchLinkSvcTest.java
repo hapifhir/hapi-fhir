@@ -268,10 +268,12 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		List<MdmLink> possibleDuplicates = myMdmLinkDaoSvc.getPossibleDuplicates();
 		assertThat(possibleDuplicates, hasSize(1));
 
-		List<Long> duplicatePids = Stream.of(patient1, patient2)
+		Patient finalPatient1 = patient1;
+		Patient finalPatient2 = patient2;
+		List<Long> duplicatePids = runInTransaction(()->Stream.of(finalPatient1, finalPatient2)
 			.map(this::getGoldenResourceFromTargetResource)
 			.map(myIdHelperService::getPidOrNull)
-			.collect(Collectors.toList());
+			.collect(Collectors.toList()));
 
 		//The two GoldenResources related to the patients should both show up in the only existing POSSIBLE_DUPLICATE MdmLink.
 		MdmLink mdmLink = possibleDuplicates.get(0);
@@ -360,7 +362,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertThat(incomingJanePatient, is(possibleMatchWith(janePatient, janePatient2)));
 
 		//Ensure there is no successful MATCH links for incomingJanePatient
-		Optional<MdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(incomingJanePatient));
+		Optional<MdmLink> matchedLinkForTargetPid = runInTransaction(()->myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(incomingJanePatient)));
 		assertThat(matchedLinkForTargetPid.isPresent(), is(false));
 
 		logAllLinks();

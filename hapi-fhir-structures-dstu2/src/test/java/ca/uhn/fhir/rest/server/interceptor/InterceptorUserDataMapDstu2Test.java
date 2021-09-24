@@ -28,7 +28,6 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -42,6 +41,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -87,10 +87,10 @@ public class InterceptorUserDataMapDstu2Test {
 	public void testException() throws Exception {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=foo");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(400, status.getStatusLine().getStatusCode());
+		}
 
-		ourLog.info(myMapCheckMethods.toString());
 		await().until(() -> myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "preProcessOutgoingException", "handleException", "processingCompleted"));
 	}
 
@@ -99,13 +99,9 @@ public class InterceptorUserDataMapDstu2Test {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-
-			for (int i = 0; i < 10; i++) {
-				if (!myMapCheckMethods.contains("processingCompletedNormally")) {
-					Thread.sleep(100);
-				}
-			}
-
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.debug(output);
 		}
 
 		await().until(() -> myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "outgoingResponse", "processingCompletedNormally", "processingCompleted"));

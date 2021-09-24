@@ -11,6 +11,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 
 import javax.annotation.Nonnull;
+import javax.transaction.Transactional;
 import java.util.List;
 
 /*
@@ -37,6 +38,7 @@ public interface IFhirResourceDaoCodeSystem<T extends IBaseResource, CD, CC> ext
 
 	List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem, RequestDetails theRequest);
 
+	@Transactional
 	@Nonnull
 	IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CD theCoding, RequestDetails theRequestDetails);
 

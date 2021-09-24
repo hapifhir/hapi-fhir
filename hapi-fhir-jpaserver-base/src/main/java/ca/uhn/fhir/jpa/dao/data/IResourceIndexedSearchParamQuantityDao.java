@@ -27,7 +27,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface IResourceIndexedSearchParamQuantityDao extends JpaRepository<ResourceIndexedSearchParamQuantity, Long> {
+public interface IResourceIndexedSearchParamQuantityDao extends JpaRepository<ResourceIndexedSearchParamQuantity, Long>, IHapiFhirJpaRepository {
 	@Modifying
 	@Query("delete from ResourceIndexedSearchParamQuantity t WHERE t.myResourcePid = :resid")
 	void deleteByResourceId(@Param("resid") Long theResourcePid);

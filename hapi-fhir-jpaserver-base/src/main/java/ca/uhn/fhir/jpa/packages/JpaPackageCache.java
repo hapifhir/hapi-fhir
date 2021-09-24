@@ -124,6 +124,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	private PartitionSettings myPartitionSettings;
 
 	@Override
+	@Transactional
 	public NpmPackage loadPackageFromCacheOnly(String theId, @Nullable String theVersion) {
 		Optional<NpmPackageVersionEntity> packageVersion = loadPackageVersionEntity(theId, theVersion);
 		if (!packageVersion.isPresent() && theVersion.endsWith(".x")) {
@@ -338,7 +339,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 				requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
 			}
 			return (ResourceTable) getBinaryDao().create(theResourceBinary, requestDetails).getEntity();
- 		} else {
+		} else {
 			return (ResourceTable) getBinaryDao().create(theResourceBinary).getEntity();
 		}
 	}
@@ -388,6 +389,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	@Override
+	@Transactional
 	public NpmPackage loadPackage(String thePackageId, String thePackageVersion) throws FHIRException, IOException {
 		NpmPackage cachedPackage = loadPackageFromCacheOnly(thePackageId, thePackageVersion);
 		if (cachedPackage != null) {
@@ -414,6 +416,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	@Override
+	@Transactional(Transactional.TxType.NEVER)
 	public NpmPackage installPackage(PackageInstallationSpec theInstallationSpec) throws IOException {
 		Validate.notBlank(theInstallationSpec.getName(), "thePackageId must not be blank");
 		Validate.notBlank(theInstallationSpec.getVersion(), "thePackageVersion must not be blank");
@@ -429,7 +432,13 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			return addPackageToCache(theInstallationSpec.getName(), theInstallationSpec.getVersion(), new ByteArrayInputStream(theInstallationSpec.getPackageContents()), sourceDescription);
 		}
 
-		return loadPackage(theInstallationSpec.getName(), theInstallationSpec.getVersion());
+		return newTxTemplate().execute(tx -> {
+			try {
+				return loadPackage(theInstallationSpec.getName(), theInstallationSpec.getVersion());
+			} catch (IOException e) {
+				throw new InternalErrorException(e);
+			}
+		});
 	}
 
 	protected byte[] loadPackageUrlContents(String thePackageUrl) {
@@ -660,7 +669,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	public List<IBaseResource> loadPackageAssetsByType(FhirVersionEnum theFhirVersion, String theResourceType) {
 //		List<NpmPackageVersionResourceEntity> outcome = myPackageVersionResourceDao.findAll();
 		Slice<NpmPackageVersionResourceEntity> outcome = myPackageVersionResourceDao.findCurrentVersionByResourceType(PageRequest.of(0, 1000), theFhirVersion, theResourceType);
-		return outcome.stream().map(t->loadPackageEntity(t)).collect(Collectors.toList());
+		return outcome.stream().map(t -> loadPackageEntity(t)).collect(Collectors.toList());
 	}
 
 	private void deleteAndExpungeResourceBinary(IIdType theResourceBinaryId, ExpungeOptions theOptions) {

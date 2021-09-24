@@ -34,6 +34,7 @@ import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.NoSuchJobException;
@@ -42,6 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.batch.config.BatchConstants.BULK_IMPORT_JOB_NAME;
@@ -177,8 +179,14 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 
 		JobInstance jobInstance = myJobExplorer.getLastJobInstance(BULK_IMPORT_JOB_NAME);
 		JobExecution jobExecution = myJobExplorer.getLastJobExecution(jobInstance);
-		String exitDescription = jobExecution.getExitStatus().getExitDescription();
-		assertThat(exitDescription, containsString("File: File With Description"));
+		List<StepExecution> failedExecutions = jobExecution
+			.getStepExecutions()
+			.stream()
+			.filter(t -> t.getExitStatus().getExitCode().equals("FAILED"))
+			.collect(Collectors.toList());
+
+		assertEquals(2, failedExecutions.size());
+		assertThat(failedExecutions.get(1).getStepName(), containsString(":File With Description"));
 
 	}
 

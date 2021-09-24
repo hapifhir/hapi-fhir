@@ -179,14 +179,15 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 	}
 
 	private void createExternalCsAndLocalVs() {
-		String codeSystemUrl = createExternalCs("1");
-		myLocalVs_v1 = createLocalVs(codeSystemUrl, "1");
-		myLocalValueSetId_v1 = persistLocalVs(myLocalVs_v1);
+		runInTransaction(()-> {
+			String codeSystemUrl = createExternalCs("1");
+			myLocalVs_v1 = createLocalVs(codeSystemUrl, "1");
+			myLocalValueSetId_v1 = persistLocalVs(myLocalVs_v1);
 
-		codeSystemUrl = createExternalCs("2");
-		myLocalVs_v2 = createLocalVs(codeSystemUrl, "2");
-		myLocalValueSetId_v2 = persistLocalVs(myLocalVs_v2);
-
+			codeSystemUrl = createExternalCs("2");
+			myLocalVs_v2 = createLocalVs(codeSystemUrl, "2");
+			myLocalValueSetId_v2 = persistLocalVs(myLocalVs_v2);
+		});
 	}
 
 	private ValueSet createLocalVs(String theCodeSystemUrl, String theValueSetVersion) {
@@ -268,8 +269,10 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		loadAndPersistCodeSystemAndValueSet();
 		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
-		assertEquals(2, page.getContent().size());
+		runInTransaction(()->{
+			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+			assertEquals(2, page.getContent().size());
+		});
 
 		// Verify v1 ValueSet
 		Parameters respParam = myClient
@@ -365,8 +368,10 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
-		assertEquals(2, page.getContent().size());
+		runInTransaction(()->{
+			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+			assertEquals(2, page.getContent().size());
+		});
 
 		// Validate ValueSet v1
 		Parameters respParam = myClient
@@ -532,8 +537,10 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
-		assertEquals(2, page.getContent().size());
+		runInTransaction(()->{
+			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+			assertEquals(2, page.getContent().size());
+		});
 
 		// Check expansion of multi-versioned ValueSet with version 1
 		Parameters respParam = myClient

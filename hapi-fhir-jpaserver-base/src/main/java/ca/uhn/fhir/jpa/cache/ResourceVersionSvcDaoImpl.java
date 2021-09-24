@@ -34,6 +34,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -62,6 +63,7 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 
 	@Override
 	@Nonnull
+    @Transactional
 	public ResourceVersionMap getVersionMap(RequestPartitionId theRequestPartitionId, String theResourceName, SearchParameterMap theSearchParamMap) {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceName);
 

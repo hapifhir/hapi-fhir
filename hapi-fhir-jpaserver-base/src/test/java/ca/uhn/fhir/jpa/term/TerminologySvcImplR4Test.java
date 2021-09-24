@@ -130,12 +130,16 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		TermValueSet termValueSet = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
+		TermValueSet termValueSet = runInTransaction(()-> {
+			TermValueSet vs = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
+			Long termValueSetId = vs.getId();
+			assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
+			assertEquals(3, vs.getTotalConceptDesignations().intValue());
+			assertEquals(24, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
+			assertEquals(24, vs.getTotalConcepts().intValue());
+			return vs;
+		});
 		Long termValueSetId = termValueSet.getId();
-		assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
-		assertEquals(3, termValueSet.getTotalConceptDesignations().intValue());
-		assertEquals(24, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
-		assertEquals(24, termValueSet.getTotalConcepts().intValue());
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -167,12 +171,15 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		TermValueSet termValueSet = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
-		Long termValueSetId = termValueSet.getId();
-		assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
-		assertEquals(3, termValueSet.getTotalConceptDesignations().intValue());
-		assertEquals(24, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
-		assertEquals(24, termValueSet.getTotalConcepts().intValue());
+		Long termValueSetId = runInTransaction(()-> {
+			TermValueSet termValueSet = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
+			Long id = termValueSet.getId();
+			assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSetId(id).intValue());
+			assertEquals(3, termValueSet.getTotalConceptDesignations().intValue());
+			assertEquals(24, myTermValueSetConceptDao.countByTermValueSetId(id).intValue());
+			assertEquals(24, termValueSet.getTotalConcepts().intValue());
+			return id;
+		});
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override

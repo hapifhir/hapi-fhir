@@ -27,7 +27,7 @@ import org.springframework.data.repository.query.Param;
  * #L%
  */
 
-public interface ITermConceptDesignationDao extends JpaRepository<TermConceptDesignation, Long> {
+public interface ITermConceptDesignationDao extends JpaRepository<TermConceptDesignation, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT t.myId FROM TermConceptDesignation t WHERE t.myCodeSystemVersion.myId = :csv_pid")
 	Slice<Long> findIdsByCodeSystemVersion(Pageable thePage, @Param("csv_pid") Long thePid);

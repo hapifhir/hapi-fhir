@@ -149,15 +149,17 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 	}
 
 	private void createExternalCsAndLocalVs() {
-		CodeSystem codeSystem = createExternalCs();
-
-		createLocalVs(codeSystem);
+		runInTransaction(()-> {
+			CodeSystem codeSystem = createExternalCs();
+			createLocalVs(codeSystem);
+		});
 	}
 
 	private void createExternalCsAndLocalVsWithUnknownCode() {
-		CodeSystem codeSystem = createExternalCs();
-
-		createLocalVsWithUnknownCode(codeSystem);
+		runInTransaction(()-> {
+			CodeSystem codeSystem = createExternalCs();
+			createLocalVsWithUnknownCode(codeSystem);
+		});
 	}
 
 	private void createLocalVs(CodeSystem codeSystem) {
@@ -223,8 +225,10 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		loadAndPersistCodeSystemAndValueSet();
 		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
-		assertEquals(1, page.getContent().size());
+		runInTransaction(()->{
+			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+			assertEquals(1, page.getContent().size());
+		});
 
 		Parameters respParam = myClient
 			.operation()
@@ -278,8 +282,10 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		loadAndPersistCodeSystemAndValueSet();
 		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
-		assertEquals(1, page.getContent().size());
+		runInTransaction(()->{
+			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+			assertEquals(1, page.getContent().size());
+		});
 
 		Parameters respParam = myClient
 			.operation()
@@ -361,8 +367,10 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		loadAndPersistCodeSystemAndValueSet();
 		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
-		assertEquals(1, page.getContent().size());
+		runInTransaction(()->{
+			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+			assertEquals(1, page.getContent().size());
+		});
 
 		Parameters respParam = myClient
 			.operation()

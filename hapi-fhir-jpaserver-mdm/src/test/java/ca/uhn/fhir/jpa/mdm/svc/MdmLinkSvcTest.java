@@ -81,8 +81,8 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		Patient goldenPatient1 = createGoldenPatient();
 		Patient goldenPatient2 = createGoldenPatient();
 
-		Long goldenPatient1Pid = myIdHelperService.getPidOrNull(goldenPatient1);
-		Long goldenPatient2Pid = myIdHelperService.getPidOrNull(goldenPatient2);
+		Long goldenPatient1Pid = runInTransaction(()->myIdHelperService.getPidOrNull(goldenPatient1));
+		Long goldenPatient2Pid = runInTransaction(()->myIdHelperService.getPidOrNull(goldenPatient2));
 		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient1Pid, goldenPatient2Pid).isPresent());
 		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient2Pid, goldenPatient1Pid).isPresent());
 
@@ -99,8 +99,8 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		Patient goldenPatient1 = createGoldenPatient();
 		Patient goldenPatient2 = createGoldenPatient();
 
-		Long goldenPatient1Pid = myIdHelperService.getPidOrNull(goldenPatient1);
-		Long goldenPatient2Pid = myIdHelperService.getPidOrNull(goldenPatient2);
+		Long goldenPatient1Pid = runInTransaction(()->myIdHelperService.getPidOrNull(goldenPatient1));
+		Long goldenPatient2Pid = runInTransaction(()->myIdHelperService.getPidOrNull(goldenPatient2));
 		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient1Pid, goldenPatient2Pid).isPresent());
 		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient2Pid, goldenPatient1Pid).isPresent());
 

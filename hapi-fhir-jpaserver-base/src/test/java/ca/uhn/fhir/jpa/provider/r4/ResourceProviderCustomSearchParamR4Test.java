@@ -13,11 +13,9 @@ import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.gclient.DateClientParam;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleUtil;
 import org.apache.commons.io.IOUtils;
@@ -222,10 +220,12 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		obs2.setStatus(ObservationStatus.FINAL);
 		IIdType obsId = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 
-		ResourceTable res = myResourceTableDao.findById(patId.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-		assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
-		res = myResourceTableDao.findById(obsId.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-		assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
+		runInTransaction(() -> {
+			ResourceTable res = myResourceTableDao.findById(patId.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
+			res = myResourceTableDao.findById(obsId.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
+		});
 
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.addBase("Patient");
@@ -459,7 +459,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 				.returnBundle(Bundle.class)
 				.execute();
 
-		} catch	(Exception e) {
+		} catch (Exception e) {
 			assertThat(e.getMessage(), is(equalTo("HTTP 400 Bad Request: Invalid date/time format: \"01-01-2020\"")));
 		}
 
@@ -472,7 +472,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 				.returnBundle(Bundle.class)
 				.execute();
 
-		} catch	(Exception e) {
+		} catch (Exception e) {
 			assertThat(e.getMessage(), is(equalTo("HTTP 400 Bad Request: Invalid date/time format: \"01-01-2020\"")));
 		}
 	}
@@ -584,7 +584,6 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
 	}
-
 
 
 }

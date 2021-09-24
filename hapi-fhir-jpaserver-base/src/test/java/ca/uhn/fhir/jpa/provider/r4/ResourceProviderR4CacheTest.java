@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
@@ -74,7 +75,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.cacheControl(new CacheControlDirective().setNoStore(true))
 			.execute();
 		assertEquals(1, results.getEntry().size());
-		assertEquals(0, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
 
 		Patient pt2 = new Patient();
@@ -89,7 +90,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.cacheControl(new CacheControlDirective().setNoStore(true))
 			.execute();
 		assertEquals(2, results.getEntry().size());
-		assertEquals(0, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
 
 	}
@@ -111,7 +112,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.cacheControl(new CacheControlDirective().setNoStore(true).setMaxResults(5))
 			.execute();
 		assertEquals(5, results.getEntry().size());
-		assertEquals(0, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
 
 	}
@@ -142,7 +143,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
 		Bundle results = myClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
 		assertEquals(1, results.getEntry().size());
-		assertEquals(1, mySearchEntityDao.count());
+		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
 
 		Patient pt2 = new Patient();
@@ -157,7 +158,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.cacheControl(new CacheControlDirective().setNoCache(true))
 			.execute();
 		assertEquals(2, results.getEntry().size());
-		assertEquals(2, mySearchEntityDao.count());
+		runInTransaction(() -> assertEquals(2, mySearchEntityDao.count()));
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
 
 	}
@@ -178,7 +179,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		TestUtil.sleepOneClick();
 
 		assertEquals(1, results1.getEntry().size());
-		assertEquals(1, mySearchEntityDao.count());
+		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
 		Date results1Date = TestUtil.getTimestamp(results1).getValue();
 		assertThat(results1Date, greaterThan(beforeFirst));
@@ -191,7 +192,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
 		Bundle results2 = myClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
 		assertEquals(1, results2.getEntry().size());
-		assertEquals(1, mySearchEntityDao.count());
+		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
 		assertEquals("HIT from " + ourServerBase, myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE).get(0));
 		assertEquals(results1.getMeta().getLastUpdated(), results2.getMeta().getLastUpdated());
 		assertEquals(results1.getId(), results2.getId());
@@ -205,7 +206,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
 		p = new Patient();
 		p.addName().setFamily("Foo");
-		String p2Id = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+		myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
 
 		Bundle resp1 = myClient
 			.search()

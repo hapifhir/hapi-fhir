@@ -31,7 +31,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long> {
+public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myResourcePid = :resource_pid")
 	Optional<TermValueSet> findByResourcePid(@Param("resource_pid") Long theResourcePid);

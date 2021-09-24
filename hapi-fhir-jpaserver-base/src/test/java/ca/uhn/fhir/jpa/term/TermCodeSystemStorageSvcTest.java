@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
@@ -30,7 +30,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 			assertEquals(1, myTermCodeSystemVersionDao.count());
 			TermCodeSystem myTermCodeSystem = myTermCodeSystemDao.findByCodeSystemUri(URL_MY_CODE_SYSTEM);
 
-			TermCodeSystemVersion myTermCodeSystemVersion = myTermCodeSystemVersionDao.findByCodeSystemPidVersionIsNull( myTermCodeSystem.getPid());
+			TermCodeSystemVersion myTermCodeSystemVersion = myTermCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(myTermCodeSystem.getPid());
 			assertEquals(myTermCodeSystem.getCurrentVersion().getPid(), myTermCodeSystemVersion.getPid());
 			assertEquals(myTermCodeSystem.getResource().getId(), myTermCodeSystemVersion.getResource().getId());
 		});
@@ -45,14 +45,14 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		CodeSystem duplicateUpload = createCodeSystemWithMoreThan100Concepts();
 		duplicateUpload.setVersion("1");
 
-		testCreatingAndUpdatingCodeSystemEntity(firstUpload, duplicateUpload, 125,"Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\" and CodeSystem.version \"1\", already have one with resource ID: CodeSystem/");
+		testCreatingAndUpdatingCodeSystemEntity(firstUpload, duplicateUpload, 125, "Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\" and CodeSystem.version \"1\", already have one with resource ID: CodeSystem/");
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
 			assertEquals(1, myTermCodeSystemVersionDao.count());
 			TermCodeSystem myTermCodeSystem = myTermCodeSystemDao.findByCodeSystemUri(URL_MY_CODE_SYSTEM);
 
-			TermCodeSystemVersion myTermCodeSystemVersion = myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion( myTermCodeSystem.getPid(), "1");
+			TermCodeSystemVersion myTermCodeSystemVersion = myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(myTermCodeSystem.getPid(), "1");
 			assertEquals(myTermCodeSystem.getCurrentVersion().getPid(), myTermCodeSystemVersion.getPid());
 			assertEquals(myTermCodeSystem.getResource().getId(), myTermCodeSystemVersion.getResource().getId());
 		});
@@ -64,7 +64,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		duplicateUpload = createCodeSystemWithMoreThan100Concepts();
 		duplicateUpload.setVersion("2");
 
-		testCreatingAndUpdatingCodeSystemEntity(firstUpload, duplicateUpload, 251,"Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\" and CodeSystem.version \"2\", already have one with resource ID: CodeSystem/");
+		testCreatingAndUpdatingCodeSystemEntity(firstUpload, duplicateUpload, 251, "Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\" and CodeSystem.version \"2\", already have one with resource ID: CodeSystem/");
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
@@ -103,7 +103,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		theUpload.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("codeB")));
 		// Update the CodeSystem and CodeSystemVersion entities
 		runInTransaction(() -> myTermCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(theUpload, codeSystemResourceEntity));
-		validateCodeSystemUpdates(expectedCnt+1);
+		validateCodeSystemUpdates(expectedCnt + 1);
 
 		// Try duplicating the CodeSystem
 		Long originalResId = codeSystemResourceEntity.getId();
@@ -118,7 +118,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		theUpload.setConcept(new ArrayList<>());
 		theUpload.setContent((CodeSystem.CodeSystemContentMode.NOTPRESENT));
 		runInTransaction(() -> myTermCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(theUpload, codeSystemResourceEntity));
-		validateCodeSystemUpdates(expectedCnt+1);
+		validateCodeSystemUpdates(expectedCnt + 1);
 
 	}
 
@@ -126,7 +126,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		myTerminologyDeferredStorageSvc.setProcessDeferred(true);
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		myTerminologyDeferredStorageSvc.setProcessDeferred(false);
-		assertEquals(theExpectedConceptCount, myTermConceptDao.count());
+		assertEquals(theExpectedConceptCount, runInTransaction(() -> myTermConceptDao.count()));
 
 	}
 

@@ -29,7 +29,7 @@ import org.springframework.data.repository.query.Param;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 
-public interface IResourceTagDao extends JpaRepository<ResourceTag, Long> {
+public interface IResourceTagDao extends JpaRepository<ResourceTag, Long>, IHapiFhirJpaRepository {
 	@Query("" + 
 			   "SELECT t FROM ResourceTag t " + 
 			   "INNER JOIN FETCH t.myTag td " +

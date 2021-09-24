@@ -66,10 +66,10 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 	public void before() {
 		myFromGoldenPatient = createGoldenPatient();
 		IdType fromSourcePatientId = myFromGoldenPatient.getIdElement().toUnqualifiedVersionless();
-		myFromGoldenPatientPid = myIdHelperService.getPidOrThrowException(fromSourcePatientId);
+		myFromGoldenPatientPid = runInTransaction(()->myIdHelperService.getPidOrThrowException(fromSourcePatientId));
 		myToGoldenPatient = createGoldenPatient();
 		IdType toGoldenPatientId = myToGoldenPatient.getIdElement().toUnqualifiedVersionless();
-		myToGoldenPatientPid = myIdHelperService.getPidOrThrowException(toGoldenPatientId);
+		myToGoldenPatientPid = runInTransaction(()->myIdHelperService.getPidOrThrowException(toGoldenPatientId));
 
 		myTargetPatient1 = createPatient();
 		myTargetPatient2 = createPatient();

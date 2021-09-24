@@ -34,8 +34,11 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.partition.PartitionHandler;
 import org.springframework.batch.core.partition.support.TaskExecutorPartitionHandler;
+import org.springframework.batch.core.step.item.KeyGenerator;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.repeat.CompletionPolicy;
+import org.springframework.batch.repeat.RepeatContext;
+import org.springframework.batch.repeat.exception.ExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;

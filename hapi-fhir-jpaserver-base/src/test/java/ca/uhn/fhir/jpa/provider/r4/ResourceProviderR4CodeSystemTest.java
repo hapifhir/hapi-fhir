@@ -12,7 +12,15 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,16 +28,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test {
 
 	private static final String SYSTEM_PARENTCHILD = "http://parentchild";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4CodeSystemTest.class);
-	private Long parentChildCsId;
-
-	private IIdType myCsId;
 	private static final String CS_ACME_URL = "http://acme.org";
+	private Long parentChildCsId;
+	private IIdType myCsId;
 
 	@BeforeEach
 	@Transactional
@@ -49,14 +59,14 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		parentChildCs.addConcept().setCode("ParentB").setDisplay("Parent B");
 
 		DaoMethodOutcome parentChildCsOutcome = myCodeSystemDao.create(parentChildCs);
-		parentChildCsId = ((ResourceTable)parentChildCsOutcome.getEntity()).getId();
+		parentChildCsId = ((ResourceTable) parentChildCsOutcome.getEntity()).getId();
 
 	}
 
 	@Test
 	public void testLookupOnExternalCode() {
 		myCaptureQueriesListener.clear();
-		ResourceProviderR4ValueSetNoVerCSNoVerTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd);
+		runInTransaction(() -> ResourceProviderR4ValueSetNoVerCSNoVerTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd));
 		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
 		Parameters respParam = myClient
@@ -531,7 +541,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.",e.getMessage());
+			assertEquals("HTTP 400 Bad Request: Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.", e.getMessage());
 		}
 	}
 
@@ -561,7 +571,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: No code, coding, or codeableConcept provided to validate.",e.getMessage());
+			assertEquals("HTTP 400 Bad Request: No code, coding, or codeableConcept provided to validate.", e.getMessage());
 		}
 	}
 
@@ -577,7 +587,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $validate-code can only validate (code) OR (coding) OR (codeableConcept)",e.getMessage());
+			assertEquals("HTTP 400 Bad Request: $validate-code can only validate (code) OR (coding) OR (codeableConcept)", e.getMessage());
 		}
 	}
 
@@ -592,7 +602,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Coding.system 'http://url2' does not equal with CodeSystem.url 'http://acme.org'. Unable to validate.",e.getMessage());
+			assertEquals("HTTP 400 Bad Request: Coding.system 'http://url2' does not equal with CodeSystem.url 'http://acme.org'. Unable to validate.", e.getMessage());
 		}
 	}
 
@@ -641,7 +651,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Coding.system 'http://url2' does not equal with CodeSystem.url 'http://acme.org'. Unable to validate.",e.getMessage());
+			assertEquals("HTTP 400 Bad Request: Coding.system 'http://url2' does not equal with CodeSystem.url 'http://acme.org'. Unable to validate.", e.getMessage());
 		}
 	}
 
@@ -772,7 +782,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Coding.system 'http://url2' does not equal with CodeSystem.url 'http://acme.org'. Unable to validate.",e.getMessage());
+			assertEquals("HTTP 400 Bad Request: Coding.system 'http://url2' does not equal with CodeSystem.url 'http://acme.org'. Unable to validate.", e.getMessage());
 		}
 	}
 

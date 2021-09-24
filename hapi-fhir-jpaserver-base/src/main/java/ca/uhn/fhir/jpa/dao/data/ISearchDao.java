@@ -32,7 +32,7 @@ import java.util.Optional;
  * #L%
  */
 
-public interface ISearchDao extends JpaRepository<Search, Long> {
+public interface ISearchDao extends JpaRepository<Search, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT s FROM Search s LEFT OUTER JOIN FETCH s.myIncludes WHERE s.myUuid = :uuid")
 	Optional<Search> findByUuidAndFetchIncludes(@Param("uuid") String theUuid);

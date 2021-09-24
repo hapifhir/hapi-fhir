@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,6 +48,7 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 
 	@Override
 	@Nonnull
+	@Transactional
 	public List<MatchedTarget> getMatchedTargets(String theResourceType, IAnyResource theResource) {
 		Collection<IAnyResource> targetCandidates = myMdmCandidateSearchSvc.findCandidates(theResourceType, theResource);
 

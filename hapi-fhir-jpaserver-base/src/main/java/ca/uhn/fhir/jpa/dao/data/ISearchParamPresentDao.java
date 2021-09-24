@@ -29,7 +29,7 @@ import java.util.List;
  * #L%
  */
 
-public interface ISearchParamPresentDao extends JpaRepository<SearchParamPresent, Long> {
+public interface ISearchParamPresentDao extends JpaRepository<SearchParamPresent, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT s FROM SearchParamPresent s WHERE s.myResource = :res")
 	List<SearchParamPresent> findAllForResource(@Param("res") ResourceTable theResource);
