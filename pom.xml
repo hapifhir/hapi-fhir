@@ -820,7 +820,7 @@
 		<ph_schematron_version>5.6.5</ph_schematron_version>
 		<ph_commons_version>9.5.4</ph_commons_version>
 		<plexus_compiler_api_version>2.8.8</plexus_compiler_api_version>
-		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
+		<servicemix_saxon_version>10.6</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<slf4j_version>1.7.30</slf4j_version>
 		<log4j_to_slf4j_version>2.11.1</log4j_to_slf4j_version>
