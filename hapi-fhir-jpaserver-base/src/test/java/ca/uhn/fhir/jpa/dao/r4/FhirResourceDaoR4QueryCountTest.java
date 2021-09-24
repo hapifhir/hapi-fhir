@@ -901,6 +901,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myDaoConfig.setDeleteEnabled(false);
 		myDaoConfig.setMassIngestionMode(true);
 		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myDaoConfig.setMatchUrlCacheEnabled(true);
 
 		Location loc = new Location();
 		loc.setId("LOC");
@@ -918,7 +919,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(6, runInTransaction(() -> myResourceTableDao.count()));
 
 		// Second identical pass
@@ -934,8 +935,114 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(6, runInTransaction(() -> myResourceTableDao.count()));
+		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(11, runInTransaction(() -> myResourceTableDao.count()));
+
+	}
+
+
+	@Test
+	public void testTransactionWithMultipleForcedIdReferences() {
+		myDaoConfig.setDeleteEnabled(false);
+		myDaoConfig.setMassIngestionMode(true);
+		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myDaoConfig.setMatchUrlCacheEnabled(true);
+
+		Patient pt = new Patient();
+		pt.setId("ABC");
+		pt.setActive(true);
+		myPatientDao.update(pt);
+
+		Location loc = new Location();
+		loc.setId("LOC");
+		loc.addIdentifier().setSystem("http://foo").setValue("123");
+		myLocationDao.update(loc, mySrd);
+
+		myMemoryCacheService.invalidateAllCaches();
+
+		BundleBuilder bb = new BundleBuilder(myFhirCtx);
+		for (int i = 0; i < 5; i++) {
+			Encounter enc = new Encounter();
+			enc.setSubject(new Reference(pt.getId()));
+			enc.addLocation().setLocation(new Reference(loc.getId()));
+			bb.addTransactionCreateEntry(enc);
+		}
+		Bundle input = (Bundle) bb.getBundle();
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(7, runInTransaction(() -> myResourceTableDao.count()));
+
+		// Second identical pass
+
+		bb = new BundleBuilder(myFhirCtx);
+		for (int i = 0; i < 5; i++) {
+			Encounter enc = new Encounter();
+			enc.setSubject(new Reference(pt.getId()));
+			enc.addLocation().setLocation(new Reference(loc.getId()));
+			bb.addTransactionCreateEntry(enc);
+		}
+		input = (Bundle) bb.getBundle();
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(12, runInTransaction(() -> myResourceTableDao.count()));
+
+	}
+
+
+	@Test
+	public void testTransactionWithMultipleNumericIdReferences() {
+		myDaoConfig.setDeleteEnabled(false);
+		myDaoConfig.setMassIngestionMode(true);
+		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myDaoConfig.setMatchUrlCacheEnabled(true);
+
+		Patient pt = new Patient();
+		pt.setActive(true);
+		myPatientDao.create(pt, mySrd);
+
+		Location loc = new Location();
+		loc.addIdentifier().setSystem("http://foo").setValue("123");
+		myLocationDao.create(loc, mySrd);
+
+		myMemoryCacheService.invalidateAllCaches();
+
+		BundleBuilder bb = new BundleBuilder(myFhirCtx);
+		for (int i = 0; i < 5; i++) {
+			Encounter enc = new Encounter();
+			enc.setSubject(new Reference(pt.getId()));
+			enc.addLocation().setLocation(new Reference(loc.getId()));
+			bb.addTransactionCreateEntry(enc);
+		}
+		Bundle input = (Bundle) bb.getBundle();
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(7, runInTransaction(() -> myResourceTableDao.count()));
+
+		// Second identical pass
+
+		bb = new BundleBuilder(myFhirCtx);
+		for (int i = 0; i < 5; i++) {
+			Encounter enc = new Encounter();
+			enc.setSubject(new Reference(pt.getId()));
+			enc.addLocation().setLocation(new Reference(loc.getId()));
+			bb.addTransactionCreateEntry(enc);
+		}
+		input = (Bundle) bb.getBundle();
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(12, runInTransaction(() -> myResourceTableDao.count()));
 
 	}
 
