@@ -350,7 +350,9 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private boolean requiresHibernateSearchAccess() {
-		return (myFulltextSearchSvc !=null ) && myFulltextSearchSvc.supportsSomeOf(myParams);
+		return (myFulltextSearchSvc !=null ) &&
+			!myFulltextSearchSvc.isDisabled() &&
+			myFulltextSearchSvc.supportsSomeOf(myResourceName, myParams);
 	}
 
 	private List<ResourcePersistentId> executeLastNAgainstIndex(Integer theMaximumResults) {

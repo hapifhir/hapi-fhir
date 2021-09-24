@@ -31,7 +31,7 @@ public class HibernateSearchIndexWriter {
 		DocumentElement stringIndexNode = getSearchParamIndexNode(theSearchParam, "string");
 		stringIndexNode.addValue(IDX_STRING_NORMALIZED, theValue);
 		stringIndexNode.addValue(IDX_STRING_EXACT, theValue);
-		ourLog.trace("Adding Search Param Text: {} -- {}", theSearchParam, theValue);
+		ourLog.debug("Adding Search Param Text: {} -- {}", theSearchParam, theValue);
 	}
 
 	public void writeTokenIndex(String theSearchParam, TokenParam theValue) {
@@ -42,6 +42,6 @@ public class HibernateSearchIndexWriter {
 		tokenIndexNode.addValue("system", theValue.getSystem());
 		//This next one returns as system|value
 		tokenIndexNode.addValue("code-system", theValue.getValueAsQueryToken(myFhirContext));
-		ourLog.trace("Adding Search Param Token: {} -- {}", theSearchParam, theValue);
+		ourLog.debug("Adding Search Param Token: {} -- {}", theSearchParam, theValue);
 	}
 }

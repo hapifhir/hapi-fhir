@@ -96,18 +96,28 @@ public class HibernateSearchQueryBuilder {
 		for (List<? extends IQueryParameterType> nextAnd : theAndOrTerms) {
 			String indexFieldPrefix = "sp." + theSearchParamName + ".token";
 
+			ourLog.debug("addTokenUnmodifiedSearch {} {}", theSearchParamName, nextAnd);
 			List<? extends PredicateFinalStep> clauses = nextAnd.stream().map(orTerm -> {
 				// wip can this be untrue?
-				TokenParam token = (TokenParam) orTerm;
-				if (StringUtils.isBlank(token.getSystem())) {
-					// bare value
-					return myPredicateFactory.match().field(indexFieldPrefix + ".code").matching(token.getValue());
-				} else if (StringUtils.isBlank(token.getValue())) {
-					// system without value
-					return myPredicateFactory.match().field(indexFieldPrefix + ".system").matching(token.getSystem());
+				if (orTerm instanceof TokenParam) {
+					TokenParam token = (TokenParam) orTerm;
+					if (StringUtils.isBlank(token.getSystem())) {
+						// bare value
+						return myPredicateFactory.match().field(indexFieldPrefix + ".code").matching(token.getValue());
+					} else if (StringUtils.isBlank(token.getValue())) {
+						// system without value
+						return myPredicateFactory.match().field(indexFieldPrefix + ".system").matching(token.getSystem());
+					} else {
+						// system + value
+						return myPredicateFactory.match().field(indexFieldPrefix + ".code-system").matching(token.getValueAsQueryToken(this.myFhirContext));
+					}
+				} else if (orTerm instanceof StringParam) {
+					// MB I don't quite understand why FhirResourceDaoR4SearchNoFtTest.testSearchByIdParamWrongType() uses String but here we are
+					StringParam string = (StringParam) orTerm;
+					// treat a string as a code with no system (like _id)
+					return myPredicateFactory.match().field(indexFieldPrefix + ".code").matching(string.getValue());
 				} else {
-					// system + value
-					return myPredicateFactory.match().field(indexFieldPrefix + ".code-system").matching(token.getValueAsQueryToken(this.myFhirContext));
+					throw new IllegalArgumentException("Unexected param type for token search-param: " + orTerm.getClass().getName());
 				}
 			}).collect(Collectors.toList());
 
@@ -138,24 +148,21 @@ public class HibernateSearchQueryBuilder {
 
 		for (List<? extends IQueryParameterType> nextAnd : stringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
+			ourLog.debug("addStringTextSearch {}, {}", theSearchParamName, terms);
 			// wip GGG: MB, did you mean for this to say >= 1?
 			// wip mb - this is very confused.  Need some tests to figure out multiple and/or logic
-			if (terms.size() == 1) {
+			if (terms.size() >= 1) {
 				String query = terms.stream()
-					.map(s -> "(" + s + ")")
-					.collect(Collectors.joining(" OR "));
+					.map(s -> "( " + s + " )")
+					.collect(Collectors.joining(" | "));
 				myRootClause.must(myPredicateFactory
 					.simpleQueryString()
 					.field(fieldName)
-					.boost(4.0f)
 					.matching(query)
-					.analyzer(HapiLuceneAnalysisConfigurer.STANDARD_ANALYZER)
+					//.analyzer(HapiLuceneAnalysisConfigurer.STANDARD_ANALYZER)
 					.defaultOperator(BooleanOperator.AND)); // term value may contain multiple tokens.  Require all of them to be present.
-			} else if (terms.size() > 1) {
-				String joinedTerms = StringUtils.join(terms, ' ');
-				myRootClause.must(myPredicateFactory.match().field(fieldName).matching(joinedTerms));
 			} else {
-				ourLog.debug("No Terms found in query parameter {}", nextAnd);
+				ourLog.warn("No Terms found in query parameter {}", nextAnd);
 			}
 		}
 	}
@@ -165,7 +172,7 @@ public class HibernateSearchQueryBuilder {
 
 		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
-			ourLog.trace("string exact search {}", terms);
+			ourLog.debug("addStringExactSearch {} {}", theSearchParamName, terms);
 			List<? extends PredicateFinalStep> orTerms = terms.stream().map(s -> {
 					return myPredicateFactory
 						.match()
@@ -183,7 +190,7 @@ public class HibernateSearchQueryBuilder {
 		String fieldPath = "sp." + theSearchParamName + ".string.norm";
 		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
-			ourLog.trace("string contains search {}", terms);
+			ourLog.debug("addStringContainsSearch {} {}", theSearchParamName, terms);
 			List<? extends PredicateFinalStep> orTerms = terms.stream().map(s -> {
 					return myPredicateFactory
 						.wildcard()
@@ -200,7 +207,7 @@ public class HibernateSearchQueryBuilder {
 		String fieldPath = "sp." + theSearchParamName + ".string.norm";
 		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
-			ourLog.trace("string unmodified search {}", terms);
+			ourLog.debug("addStringUnmodifiedSearch {} {}", theSearchParamName, terms);
 			List<? extends PredicateFinalStep> orTerms = terms.stream().map(s -> {
 					return myPredicateFactory
 						.wildcard()
