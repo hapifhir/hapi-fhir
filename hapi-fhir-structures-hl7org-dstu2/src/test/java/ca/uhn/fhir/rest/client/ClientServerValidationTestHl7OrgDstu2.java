@@ -144,6 +144,6 @@ public class ClientServerValidationTestHl7OrgDstu2 {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 }

@@ -61,6 +61,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class JdbcUtils {
 	private static final Logger ourLog = LoggerFactory.getLogger(JdbcUtils.class);
@@ -86,7 +87,6 @@ public class JdbcUtils {
 					while (indexes.next()) {
 						ourLog.debug("*** Next index: {}", new ColumnMapRowMapper().mapRow(indexes, 0));
 						String indexName = indexes.getString("INDEX_NAME");
-						indexName = indexName.toUpperCase(Locale.US);
 						indexNames.add(indexName);
 					}
 
@@ -94,11 +94,15 @@ public class JdbcUtils {
 					while (indexes.next()) {
 						ourLog.debug("*** Next index: {}", new ColumnMapRowMapper().mapRow(indexes, 0));
 						String indexName = indexes.getString("INDEX_NAME");
-						indexName = indexName.toUpperCase(Locale.US);
 						indexNames.add(indexName);
 					}
 
-					indexNames.removeIf(i -> i == null);
+					indexNames = indexNames
+						.stream()
+						.filter(Objects::nonNull)	// filter out the nulls first
+						.map(s -> s.toUpperCase(Locale.US)) // then convert the non-null entries to upper case
+						.collect(Collectors.toSet());
+
 					return indexNames;
 
 				} catch (SQLException e) {

@@ -1,0 +1,5 @@
+---
+type: change
+issue: 3017
+title: "Removed loinc.xml file from application, which was used as a fallback if not provided when uploading a
+   CodeSystem. it is now required as input for LOINC CodeSystem upload."
