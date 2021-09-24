@@ -81,6 +81,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -499,7 +500,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		cs.setUrl("http://loinc.org");
 		cs.addConcept().setCode("123-4").setDisplay("Code 123 4");
-		myCodeSystemDao.create(cs);
+		cs.setId(LOINC_LOW);
+		myCodeSystemDao.update(cs);
 
 		Group group = new Group();
 		group.setId("ABC");
@@ -566,7 +568,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		cs.setUrl("http://loinc.org");
 		cs.addConcept().setCode("123-4").setDisplay("Code 123 4");
-		myCodeSystemDao.create(cs);
+		cs.setId(LOINC_LOW);
+		myCodeSystemDao.update(cs);
 
 		Group group = new Group();
 		group.setId("ABC");
@@ -633,7 +636,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		cs.setUrl("http://loinc.org");
 		cs.addConcept().setCode("123-4").setDisplay("Code 123 4");
-		myCodeSystemDao.create(cs);
+		cs.setId(LOINC_LOW);
+		myCodeSystemDao.update(cs);
 
 		Group group = new Group();
 		group.setId("ABC");
@@ -1708,7 +1712,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		cs.setUrl(ITermLoaderSvc.LOINC_URI);
 		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		cs.addConcept().setCode("10013-1");
-		myCodeSystemDao.create(cs);
+		cs.setId(LOINC_LOW);
+		myCodeSystemDao.update(cs);
 
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://fooVs"), null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 

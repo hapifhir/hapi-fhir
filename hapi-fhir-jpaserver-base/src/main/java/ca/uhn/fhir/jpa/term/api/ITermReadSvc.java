@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.IValueSetConceptAccumulator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -117,5 +118,15 @@ public interface ITermReadSvc extends IValidationSupport {
 	CodeValidationResult codeSystemValidateCode(IIdType theCodeSystemId, String theValueSetUrl, String theVersion, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept);
 
 	String invalidatePreCalculatedExpansion(IIdType theValueSetId, RequestDetails theRequestDetails);
+
+	/**
+	 * Version independent
+	 */
+	Optional<TermValueSet> findCurrentTermValueSet(String theUrl);
+
+	/**
+	 * Version independent
+	 */
+	Optional<IBaseResource> readCodeSystemByForcedId(String theForcedId);
 
 }

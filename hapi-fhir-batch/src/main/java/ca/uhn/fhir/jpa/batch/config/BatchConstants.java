@@ -54,6 +54,8 @@ public final class BatchConstants {
 	 * MDM Clear
 	 */
 	public static final String MDM_CLEAR_JOB_NAME = "mdmClearJob";
+	public static final String BULK_EXPORT_READ_CHUNK_PARAMETER = "readChunkSize";
+	public static final String BULK_EXPORT_GROUP_ID_PARAMETER = "groupId";
 	/**
 	 * This Set contains the step names across all job types that are appropriate for
 	 * someone to look at the write count for that given step in order to determine the

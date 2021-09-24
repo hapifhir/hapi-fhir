@@ -144,7 +144,7 @@ public class TransactionProcessorTest {
 		}
 
 		@Bean
-		public BaseTransactionProcessor.ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> versionAdapter() {
+		public ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> versionAdapter() {
 			return new TransactionProcessorVersionAdapterR4();
 		}
 

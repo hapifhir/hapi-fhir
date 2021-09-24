@@ -124,6 +124,7 @@ import ca.uhn.fhir.jpa.search.cache.DatabaseSearchResultCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.elastic.IndexNamePrefixLayoutStrategy;
+import ca.uhn.fhir.jpa.search.reindex.BlockPolicy;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexer;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
@@ -218,7 +219,6 @@ public abstract class BaseConfig {
 	public static final String PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER = "PersistedJpaSearchFirstPageBundleProvider";
 	public static final String SEARCH_BUILDER = "SearchBuilder";
 	public static final String HISTORY_BUILDER = "HistoryBuilder";
-	public static final String REPOSITORY_VALIDATING_RULE_BUILDER = "repositoryValidatingRuleBuilder";
 	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
 	@Autowired
 	protected Environment myEnv;
@@ -411,7 +411,7 @@ public abstract class BaseConfig {
 		asyncTaskExecutor.setQueueCapacity(0);
 		asyncTaskExecutor.setAllowCoreThreadTimeOut(true);
 		asyncTaskExecutor.setThreadNamePrefix("JobLauncher-");
-		asyncTaskExecutor.setRejectedExecutionHandler(new ResourceReindexingSvcImpl.BlockPolicy());
+		asyncTaskExecutor.setRejectedExecutionHandler(new BlockPolicy());
 		asyncTaskExecutor.initialize();
 		return asyncTaskExecutor;
 	}
@@ -646,7 +646,7 @@ public abstract class BaseConfig {
 		return new PersistedJpaSearchFirstPageBundleProvider(theSearch, theSearchTask, theSearchBuilder, theRequest);
 	}
 
-	@Bean(name = REPOSITORY_VALIDATING_RULE_BUILDER)
+	@Bean(name = RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER)
 	@Scope("prototype")
 	public RepositoryValidatingRuleBuilder repositoryValidatingRuleBuilder() {
 		return new RepositoryValidatingRuleBuilder();

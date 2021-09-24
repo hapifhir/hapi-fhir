@@ -29,7 +29,7 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-storage-api</artifactId>
+			<artifactId>hapi-fhir-storage</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

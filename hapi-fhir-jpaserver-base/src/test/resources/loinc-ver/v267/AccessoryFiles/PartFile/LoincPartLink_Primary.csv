@@ -1,0 +1,7 @@
+"LoincNumber","LongCommonName"             ,"PartNumber","PartName"                ,"PartCodeSystem"  ,"PartTypeName","LinkTypeName","Property"
+"10013-1"    ,"R' wave amplitude in lead I","LP31101-6" ,"R' wave amplitude.lead I","http://loinc.org","COMPONENT"   ,"Primary"     ,"http://loinc.org/property/COMPONENT"
+"10013-1"    ,"R' wave amplitude in lead I","LP6802-5"  ,"Elpot"                   ,"http://loinc.org","PROPERTY"    ,"Primary"     ,"http://loinc.org/property/PROPERTY"
+"10013-1"    ,"R' wave amplitude in lead I","LP6960-1"  ,"Pt"                      ,"http://loinc.org","TIME"        ,"Primary"     ,"http://loinc.org/property/TIME_ASPCT"
+"10013-1"    ,"R' wave amplitude in lead I","LP7289-4"  ,"Heart"                   ,"http://loinc.org","SYSTEM"      ,"Primary"     ,"http://loinc.org/property/SYSTEM"
+"10013-1"    ,"R' wave amplitude in lead I","LP7753-9"  ,"Qn"                      ,"http://loinc.org","SCALE"       ,"Primary"     ,"http://loinc.org/property/SCALE_TYP"
+"10013-1"    ,"R' wave amplitude in lead I","LP6244-0"  ,"EKG"                     ,"http://loinc.org","METHOD"      ,"Primary"     ,"http://loinc.org/property/METHOD_TYP"

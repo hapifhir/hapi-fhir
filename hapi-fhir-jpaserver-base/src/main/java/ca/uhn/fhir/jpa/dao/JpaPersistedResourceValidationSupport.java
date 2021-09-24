@@ -24,15 +24,21 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.term.TermReadSvcUtil;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -41,6 +47,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,10 +58,13 @@ import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_VALUESET_URL_PLUS_SLASH;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 
 /**
  * This class is a {@link IValidationSupport Validation support} module that loads
@@ -71,6 +81,10 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
+	@Autowired
+	private ITermReadSvc myTermReadSvc;
+
 	private Class<? extends IBaseResource> myCodeSystemType;
 	private Class<? extends IBaseResource> myStructureDefinitionType;
 	private Class<? extends IBaseResource> myValueSetType;
@@ -92,13 +106,54 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
+		if (TermReadSvcUtil.isLoincNotGenericUnversionedCodeSystem(theSystem)) {
+			Optional<IBaseResource> currentCSOpt = getCodeSystemCurrentVersion(new UriType(theSystem));
+			if (! currentCSOpt.isPresent()) {
+				ourLog.info("Couldn't find current version of CodeSystem: " + theSystem);
+			}
+			return currentCSOpt.orElse(null);
+		}
+
 		return fetchResource(myCodeSystemType, theSystem);
 	}
 
+	/**
+	 * Obtains the current version of a CodeSystem using the fact that the current
+	 * version is always pointed by the ForcedId for the no-versioned CS
+	 */
+	private Optional<IBaseResource> getCodeSystemCurrentVersion(UriType theUrl) {
+		if (! theUrl.getValueAsString().contains(LOINC_LOW))  return Optional.empty();
+
+		return myTermReadSvc.readCodeSystemByForcedId(LOINC_LOW);
+	}
+
+
 	@Override
 	public IBaseResource fetchValueSet(String theSystem) {
+		if (TermReadSvcUtil.isLoincNotGenericUnversionedValueSet(theSystem)) {
+			Optional<IBaseResource> currentVSOpt = getValueSetCurrentVersion(new UriType(theSystem));
+			return currentVSOpt.orElseThrow(() -> new ResourceNotFoundException(
+				"Unable to find current version of ValueSet for url: " + theSystem));
+		}
+
 		return fetchResource(myValueSetType, theSystem);
 	}
+
+	/**
+	 * Obtains the current version of a ValueSet using the fact that the current
+	 * version is always pointed by the ForcedId for the no-versioned VS
+	 */
+	private Optional<IBaseResource> getValueSetCurrentVersion(UriType theUrl) {
+		if (TermReadSvcUtil.mustReturnEmptyValueSet(theUrl.getValueAsString()))   return Optional.empty();
+
+		String forcedId = theUrl.getValue().substring(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH.length());
+		if (StringUtils.isBlank(forcedId))  return Optional.empty();
+
+		IFhirResourceDao<? extends IBaseResource> valueSetResourceDao = myDaoRegistry.getResourceDao(myValueSetType);
+		IBaseResource valueSet = valueSetResourceDao.read(new IdDt("ValueSet", forcedId));
+		return Optional.ofNullable(valueSet);
+	}
+
 
 	@Override
 	public IBaseResource fetchStructureDefinition(String theUrl) {
