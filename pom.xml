@@ -1891,7 +1891,7 @@
 			<dependency>
 				<groupId>org.webjars.npm</groupId>
 				<artifactId>popper.js</artifactId>
-				<version>1.16.1</version>
+				<version>1.16.1-lts</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars</groupId>
