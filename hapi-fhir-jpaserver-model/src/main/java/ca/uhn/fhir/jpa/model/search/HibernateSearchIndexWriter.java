@@ -44,4 +44,10 @@ public class HibernateSearchIndexWriter {
 		tokenIndexNode.addValue("code-system", theValue.getValueAsQueryToken(myFhirContext));
 		ourLog.debug("Adding Search Param Token: {} -- {}", theSearchParam, theValue);
 	}
+
+    public void writeReferenceIndex(String theSearchParam, String theValue) {
+		 DocumentElement referenceIndexNode = getSearchParamIndexNode(theSearchParam, "reference");
+		 referenceIndexNode.addValue("value", theValue);
+		 ourLog.trace("Adding Search Param Reference: {} -- {}", theSearchParam, theValue);
+    }
 }

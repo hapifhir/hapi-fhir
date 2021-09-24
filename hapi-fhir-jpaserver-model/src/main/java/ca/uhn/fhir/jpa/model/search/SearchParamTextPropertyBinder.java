@@ -113,6 +113,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		spfield.fieldTemplate("token-code", exactAnalyzer).matchingPathGlob("*.token.code").multiValued();
 		spfield.fieldTemplate("token-code-system", exactAnalyzer).matchingPathGlob("*.token.code-system").multiValued();
 		spfield.fieldTemplate("token-system", exactAnalyzer).matchingPathGlob("*.token.system").multiValued();
+		spfield.fieldTemplate("reference-value", exactAnalyzer).matchingPathGlob("*.reference.value").multiValued();
 
 		// last, since the globs are matched in declaration order, and * matches even nested nodes.
 		spfield.objectFieldTemplate("spObject", ObjectStructure.FLATTENED).matchingPathGlob("*")
