@@ -1,0 +1,4 @@
+---
+type: add
+issue: 2999
+title: "Lucene/Elasticsearch indexing has been extended to string and token parameters."
