@@ -742,7 +742,7 @@ public class FhirContext {
          * @return Returns <code>true</code> if the NDJSON serialization format is supported, based on the
          * available libraries on the classpath.
          *
-         * @since 5.4.0
+         * @since 5.6.0
          */
         public boolean isFormatNDJsonSupported() {
                 Boolean retVal = myFormatNDJsonSupported;
