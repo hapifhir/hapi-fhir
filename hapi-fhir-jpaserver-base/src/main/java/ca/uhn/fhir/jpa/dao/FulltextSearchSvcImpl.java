@@ -26,7 +26,6 @@ import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
@@ -54,7 +53,6 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -68,8 +66,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private EntityManager myEntityManager;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
-	@Autowired
-	private ISearchParamExtractor mySearchParamExtractor;
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired

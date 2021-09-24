@@ -354,7 +354,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	@Test
 	public void testStringSearch() {
 		// wipmb string search test
-		IIdType id1, id2, id3, id4, id5;
+		IIdType id1, id2, id3, id4, id5, id6;
 
 		{
 			Observation obs1 = new Observation();
@@ -387,12 +387,28 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			obs5.setValue(new StringType("Blue"));
 			id5 = myObservationDao.create(obs5, mySrd).getId().toUnqualifiedVersionless();
 		}
+		{
+			Observation obs6 = new Observation();
+			obs6.setStatus(Observation.ObservationStatus.FINAL);
+			obs6.setValue(new StringType("blue green"));
+			id6 = myObservationDao.create(obs6, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+
+
+		// run searches
 
 		{
 			// default search matches prefix, ascii-normalized, case-insensitive
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("value-string", new StringParam("blu"));
 			assertObservationSearchMatches("default search matches normalized prefix", map, id1, id3, id4, id5);
+		}
+		{
+			// normal search matches string with space
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("value-string", new StringParam("blue green").setContains(true));
+			assertObservationSearchMatches("normal search matches string with space", map, id6);
 		}
 		{
 			// exact search
