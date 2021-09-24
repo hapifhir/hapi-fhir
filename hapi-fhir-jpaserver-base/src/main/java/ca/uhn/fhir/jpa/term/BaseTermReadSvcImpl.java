@@ -65,7 +65,6 @@ import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
 import ca.uhn.fhir.jpa.util.LogicUtil;
@@ -179,6 +178,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -1268,7 +1268,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	private boolean isCodeSystemLoinc(String theSystem) {
-		return ITermLoaderSvc.LOINC_URI.equals(theSystem);
+		return LOINC_URI.equals(theSystem);
 	}
 
 	private void handleFilterDisplay(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
@@ -1438,7 +1438,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
 		termValueSet.setExpansionTimestamp(null);
-		myValueSetDao.save(termValueSet);
+		myTermValueSetDao.save(termValueSet);
 		return myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "valueSetPreExpansionInvalidated", termValueSet.getUrl(), totalConcepts);
 	}
 
@@ -1500,7 +1500,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			return null;
 		}
 
-		TermValueSet valueSetEntity = myValueSetDao.findByResourcePid(valueSetResourcePid.getIdAsLong()).orElseThrow(() -> new IllegalStateException());
+		TermValueSet valueSetEntity = myTermValueSetDao.findByResourcePid(valueSetResourcePid.getIdAsLong()).orElseThrow(() -> new IllegalStateException());
 		Object timingDescription = toHumanReadableExpansionTimestamp(valueSetEntity);
 		String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "validationPerformedAgainstPreExpansion", timingDescription);
 
@@ -2350,10 +2350,14 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@Override
 	public Optional<TermValueSet> findCurrentTermValueSet(String theUrl) {
 		if (TermReadSvcUtil.isLoincNotGenericUnversionedValueSet(theUrl)) {
-			if (TermReadSvcUtil.mustReturnEmptyValueSet(theUrl))   return Optional.empty();
+			if (TermReadSvcUtil.mustReturnEmptyValueSet(theUrl)) return Optional.empty();
+
+			if (theUrl.startsWith(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH)) {
+				return Optional.empty();
+			}
 
 			String forcedId = theUrl.substring(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH.length());
-			if (StringUtils.isBlank(forcedId))  return Optional.empty();
+			if (StringUtils.isBlank(forcedId)) return Optional.empty();
 
 			return myTermValueSetDao.findTermValueSetByForcedId(forcedId);
 		}
@@ -2418,6 +2422,23 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 
 		return createFailureCodeValidationResult(theCodeSystemUrl, theCode, theCodeSystemVersion, " - Code is not found in CodeSystem: " + theCodeSystemUrl);
+	}
+
+	@Override
+	public Optional<IBaseResource> readCodeSystemByForcedId(String theForcedId) {
+		@SuppressWarnings("unchecked")
+		List<ResourceTable> resultList = (List<ResourceTable>) myEntityManager.createQuery(
+			"select f.myResource from ForcedId f " +
+				"where f.myResourceType = 'CodeSystem' and f.myForcedId = '" + theForcedId + "'").getResultList();
+		if (resultList.isEmpty()) return Optional.empty();
+
+		if (resultList.size() > 1) throw new NonUniqueResultException(
+			"More than one CodeSystem is pointed by forcedId: " + theForcedId + ". Was constraint "
+				+ ForcedId.IDX_FORCEDID_TYPE_FID + " removed?");
+
+		IFhirResourceDao<CodeSystem> csDao = myDaoRegistry.getResourceDao("CodeSystem");
+		IBaseResource cs = csDao.toResource(resultList.get(0), false);
+		return Optional.of(cs);
 	}
 
 	public static class Job implements HapiJob {
@@ -2516,30 +2537,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return termConcept;
 	}
 
-    static boolean isDisplayLanguageMatch(String theReqLang, String theStoredLang) {
+	static boolean isDisplayLanguageMatch(String theReqLang, String theStoredLang) {
 		// NOTE: return the designation when one of then is not specified.
 		if (theReqLang == null || theStoredLang == null)
 			return true;
 
 		return theReqLang.equalsIgnoreCase(theStoredLang);
-    }
-
-
-	@Override
-	public Optional<IBaseResource> readCodeSystemByForcedId(String theForcedId) {
-		@SuppressWarnings("unchecked")
-		List<ResourceTable> resultList = (List<ResourceTable>) myEntityManager.createQuery(
-			"select f.myResource from ForcedId f " +
-				"where f.myResourceType = 'CodeSystem' and f.myForcedId = '" + theForcedId + "'").getResultList();
-		if (resultList.isEmpty())  return Optional.empty();
-
-		if (resultList.size() > 1)  throw new NonUniqueResultException(
-			"More than one CodeSystem is pointed by forcedId: " + theForcedId + ". Was constraint "
-				+ ForcedId.IDX_FORCEDID_TYPE_FID + " removed?");
-
-		IFhirResourceDao<CodeSystem> csDao = myDaoRegistry.getResourceDao("CodeSystem");
-		IBaseResource cs = csDao.toResource(resultList.get(0), false);
-		return Optional.of(cs );
 	}
 
 }
