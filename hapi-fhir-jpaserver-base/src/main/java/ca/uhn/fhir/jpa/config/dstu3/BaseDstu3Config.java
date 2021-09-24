@@ -6,7 +6,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.BaseConfigDstu3Plus;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.TransactionProcessor;
+import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.dstu3.TransactionProcessorVersionAdapterDstu3;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
@@ -83,7 +83,7 @@ public class BaseDstu3Config extends BaseConfigDstu3Plus {
 	}
 
 	@Bean
-	public TransactionProcessor.ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
+	public ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
 		return new TransactionProcessorVersionAdapterDstu3();
 	}
 
