@@ -794,7 +794,7 @@
 		<jaxb_api_version>2.3.1</jaxb_api_version>
 		<jaxb_core_version>2.3.0.1</jaxb_core_version>
 		<jaxb_runtime_version>3.0.0</jaxb_runtime_version>
-		<jena_version>3.17.0</jena_version>
+		<jena_version>4.2.0</jena_version>
 		<jersey_version>3.0.0</jersey_version>
 		<jetty_version>9.4.43.v20210629</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
