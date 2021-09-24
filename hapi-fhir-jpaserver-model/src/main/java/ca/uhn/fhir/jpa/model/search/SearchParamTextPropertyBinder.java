@@ -35,6 +35,9 @@ import org.hibernate.search.mapper.pojo.bridge.runtime.PropertyBridgeWriteContex
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
+
 /**
  * Allows hibernate search to index
  *
@@ -51,7 +54,8 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 	@Override
 	public void bind(PropertyBindingContext thePropertyBindingContext) {
 		// TODO Is it safe to use object identity of the Map to track dirty?
-		thePropertyBindingContext.dependencies().use("mySearchParamTexts");
+		// N.B. GGG I would hazard that it is not, we could potentially use Version of the resource.
+		thePropertyBindingContext.dependencies().use("mySearchParamStrings");
 
 		defineIndexingTemplate(thePropertyBindingContext);
 
@@ -65,29 +69,55 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		//create them adhoc. https://docs.jboss.org/hibernate/search/6.0/reference/en-US/html_single/#mapper-orm-bridge-index-field-dsl-dynamic
 		//I _think_ im doing the right thing here by indicating that everything matching this template uses this analyzer.
 		IndexFieldTypeFactory indexFieldTypeFactory = thePropertyBindingContext.typeFactory();
-		StringIndexFieldTypeOptionsStep<?> textType =
+		StringIndexFieldTypeOptionsStep<?> standardAnalyzer =
 			indexFieldTypeFactory.asString()
 				// wip mb where do we do unicode normalization?  Java-side, or in the analyzer?
+				// wip mb can we share these constants with HapiElasticsearchAnalysisConfigurer and HapiLuceneAnalysisConfigurer
 				.analyzer("standardAnalyzer")
 				.projectable(Projectable.NO);
+
+		StringIndexFieldTypeOptionsStep<?> exactAnalyzer =
+			indexFieldTypeFactory.asString()
+				.analyzer("exactAnalyzer") // default max-length is 256.  Is that enough for code system uris?
+				.projectable(Projectable.NO);
+
+
+		// the old style.
+		// wipmb move _text and _contains into sp with backwards compat in the query path.
+		indexSchemaElement
+			.fieldTemplate("SearchParamText", standardAnalyzer)
+			.matchingPathGlob(SEARCH_PARAM_TEXT_PREFIX + "*");
+
+		// this is a bit ugly.  We need to enforce order and dependency or the object matches will be too big.
 		IndexSchemaObjectField spfield = indexSchemaElement.objectField("sp", ObjectStructure.FLATTENED);
 		IndexObjectFieldReference sp = spfield.toReference();
-
 
 		// Note: the lucene/elastic independent api is hurting a bit here.
 		// For lucene, we need a separate field for each analyzer.  So we'll add string (for :exact), and text (for :text).
 		// They aren't marked stored, so there's no space cost beyond the index for each.
 		// But for elastic, I'd rather have a single field defined, with multi-field sub-fields.  The index cost is the same,
 		// but elastic will actually store all fields in the source document.
-		spfield.objectFieldTemplate("stringIndex", ObjectStructure.FLATTENED).matchingPathGlob("*.string");
-		spfield.fieldTemplate("text", textType).matchingPathGlob("*.string.text");
-		indexSchemaElement
-			.fieldTemplate("SearchParamText", textType)
-			.matchingPathGlob(SEARCH_PARAM_TEXT_PREFIX + "*");
+		String stringPathGlob = "*.string";
+		spfield.objectFieldTemplate("stringIndex", ObjectStructure.FLATTENED).matchingPathGlob(stringPathGlob);
+		spfield.fieldTemplate("string-norm", standardAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_NORMALIZED).multiValued();
+		spfield.fieldTemplate("string-exact", exactAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_EXACT).multiValued();
+
+		// token
+		// Ideally, we'd store a single code-system string and use a custom tokenizer to
+		// generate "system|" "|code" and "system|code" tokens to support all three.
+		// But the standard tokenizers aren't that flexible.  As second best, it would be nice to use elastic multi-fields
+		// to apply three different tokenziers to a single value.
+		// Instead, just be simple and expand into three full fields
+		// wip mb try token_filter - pattern_capture. to generate code and system partial values.
+		spfield.objectFieldTemplate("tokenIndex", ObjectStructure.FLATTENED).matchingPathGlob("*.token");
+		spfield.fieldTemplate("token-code", exactAnalyzer).matchingPathGlob("*.token.code").multiValued();
+		spfield.fieldTemplate("token-code-system", exactAnalyzer).matchingPathGlob("*.token.code-system").multiValued();
+		spfield.fieldTemplate("token-system", exactAnalyzer).matchingPathGlob("*.token.system").multiValued();
+		spfield.fieldTemplate("reference-value", exactAnalyzer).matchingPathGlob("*.reference.value").multiValued();
 
 		// last, since the globs are matched in declaration order, and * matches even nested nodes.
-		spfield.objectFieldTemplate("spObject", ObjectStructure.FLATTENED).matchingPathGlob("*");
-
+		spfield.objectFieldTemplate("spObject", ObjectStructure.FLATTENED).matchingPathGlob("*")
+			.multiValued(); // wipmb we can remove this when we memoize the node during index construction.
 	}
 
 	@Override

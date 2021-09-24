@@ -11,7 +11,6 @@ import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -38,7 +37,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.rest.api.Constants.PARAMQUALIFIER_TOKEN_TEXT;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -628,14 +626,26 @@ public class SearchParameterMap implements Serializable {
 	}
 
 	/**
-	 * Given a search parameter qualifier (e.g. :text), get and remove all Search Parameters matching this qualifier
+	 * Variant of removeByNameAndModifier for unmodified params.
+	 *
+	 * @param theName
+	 * @return an And/Or List of Query Parameters matching the name with no modifier.
+	 */
+	public List<List<IQueryParameterType>> removeByNameUnmodified(String theName) {
+		return this.removeByNameAndModifier(theName, "");
+	}
+
+	/**
+	 * Given a search parameter name and modifier (e.g. :text),
+	 * get and remove all Search Parameters matching this name and modifier
 	 *
 	 * @param theName the query parameter key
-	 * @param theQualifier the qualifier you want to remove.
+	 * @param theModifier the qualifier you want to remove - nullable for unmodified params.
 	 *
-	 * @return an And List or Query Parameters matching the qualifier.
+	 * @return an And/Or List of Query Parameters matching the qualifier.
 	 */
-	public List<List<IQueryParameterType>> removeByNameAndQualifier(String theName, @Nonnull String theQualifier) {
+	public List<List<IQueryParameterType>> removeByNameAndModifier(String theName, String theModifier) {
+		theModifier = StringUtils.defaultString(theModifier, "");
 
 		List<List<IQueryParameterType>> remainderParameters = new ArrayList<>();
 		List<List<IQueryParameterType>> matchingParameters = new ArrayList<>();
@@ -644,7 +654,9 @@ public class SearchParameterMap implements Serializable {
 		List<List<IQueryParameterType>> andList = mySearchParameterMap.remove(theName);
 		if (andList != null) {
 			for (List<IQueryParameterType> orList : andList) {
-				if (!orList.isEmpty() && theQualifier.equals(orList.get(0).getQueryParameterQualifier())) {
+				if (!orList.isEmpty() &&
+					StringUtils.defaultString(orList.get(0).getQueryParameterQualifier(), "")
+							.equals(theModifier)) {
 					matchingParameters.add(orList);
 				} else {
 					remainderParameters.add(orList);
@@ -660,8 +672,8 @@ public class SearchParameterMap implements Serializable {
 
 	}
 
-	public List<List<IQueryParameterType>> removeByNameAndQualifier(String theName, @Nonnull TokenParamModifier theModifier) {
-		return removeByNameAndQualifier(theName, theModifier.getValue());
+	public List<List<IQueryParameterType>> removeByNameAndModifier(String theName, @Nonnull TokenParamModifier theModifier) {
+		return removeByNameAndModifier(theName, theModifier.getValue());
 	}
 
 	/**
@@ -685,7 +697,7 @@ public class SearchParameterMap implements Serializable {
 		Map<String, List<List<IQueryParameterType>>> retVal = new HashMap<>();
 		Set<String> parameterNames = mySearchParameterMap.keySet();
 		for (String parameterName : parameterNames) {
-			List<List<IQueryParameterType>> paramsWithQualifier = removeByNameAndQualifier(parameterName, theQualifier);
+			List<List<IQueryParameterType>> paramsWithQualifier = removeByNameAndModifier(parameterName, theQualifier);
 			retVal.put(parameterName, paramsWithQualifier);
 		}
 

@@ -38,7 +38,7 @@ class SearchParameterMapTest {
 	}
 
 	@Test
-	public void testRemoveByQualifier() {
+	public void testRemoveByModifier() {
 		SearchParameterMap map = new SearchParameterMap();
 
 		TokenOrListParam qualifiedTokenParam = new TokenOrListParam()
@@ -49,7 +49,7 @@ class SearchParameterMapTest {
 
 		map.add("code", qualifiedTokenParam);
 		map.add("code", unqualifiedTokenParam);
-		List<List<IQueryParameterType>> andList = map.removeByNameAndQualifier("code", TEXT);
+		List<List<IQueryParameterType>> andList = map.removeByNameAndModifier("code", TEXT);
 		assertThat(andList, hasSize(1));
 		List<IQueryParameterType> orList = andList.get(0);
 		assertThat(orList, hasSize(2));
@@ -61,6 +61,27 @@ class SearchParameterMapTest {
 	}
 
 	@Test
+	public void testRemoveByNullModifier() {
+		SearchParameterMap map = new SearchParameterMap();
+
+		TokenOrListParam unqualifiedTokenParam = new TokenOrListParam()
+			.addOr(new TokenParam("http://example.com", "123"))
+			.addOr(new TokenParam("http://example.com", "345"));
+
+		TokenParam qualifiedTokenParam = new TokenParam("weight-text").setModifier(TEXT);
+
+		map.add("code", unqualifiedTokenParam);
+		map.add("code", qualifiedTokenParam);
+		List<List<IQueryParameterType>> andList = map.removeByNameAndModifier("code", (String) null);
+		assertThat(andList, hasSize(1));
+		List<IQueryParameterType> orList = andList.get(0);
+		assertThat(orList, hasSize(2));
+
+		List<List<IQueryParameterType>> qualifiedAnds = map.get("code");
+		assertThat(qualifiedAnds, hasSize(1));
+	}
+
+	@Test
 	public void testRemoveByQualifierRemovesAll() {
 		SearchParameterMap map = new SearchParameterMap();
 
@@ -69,7 +90,7 @@ class SearchParameterMapTest {
 			.addOr(new TokenParam("weight-text-2").setModifier(TEXT));
 
 		map.add("code", qualifiedTokenParam);
-		List<List<IQueryParameterType>> andList = map.removeByNameAndQualifier("code", TEXT);
+		List<List<IQueryParameterType>> andList = map.removeByNameAndModifier("code", TEXT);
 		assertThat(andList, hasSize(1));
 		List<IQueryParameterType> orList = andList.get(0);
 		assertThat(orList, hasSize(2));
