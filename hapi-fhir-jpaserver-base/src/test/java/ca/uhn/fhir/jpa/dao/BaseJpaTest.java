@@ -63,7 +63,9 @@ import org.hibernate.SessionFactory;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
 import org.hibernate.search.engine.cfg.BackendSettings;
+import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
+import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -90,6 +92,7 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -185,9 +188,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
 	private IForcedIdDao myForcedIdDao;
-	@Autowired
+	@Autowired(required = false)
 	protected IFulltextSearchSvc myFulltestSearchSvc;
-
 
 	@AfterEach
 	public void afterPerformCleanup() {
@@ -257,6 +259,16 @@ public abstract class BaseJpaTest extends BaseTest {
 		CountDownLatch deliveryLatch = new CountDownLatch(theCount);
 		myInterceptorRegistry.registerAnonymousInterceptor(theLatchPointcut, Integer.MAX_VALUE, (thePointcut, t) -> deliveryLatch.countDown());
 		return deliveryLatch;
+	}
+
+	protected void purgeHibernateSearch(EntityManager theEntityManager) {
+		runInTransaction(() -> {
+			if (myFulltestSearchSvc != null && !myFulltestSearchSvc.isDisabled()) {
+				SearchSession searchSession = Search.session(theEntityManager);
+				searchSession.workspace(ResourceTable.class).purge();
+				searchSession.indexingPlan().execute();
+			}
+		});
 	}
 
 	protected abstract FhirContext getContext();

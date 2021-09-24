@@ -550,13 +550,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@BeforeEach
 	public void beforeFlushFT() {
-		runInTransaction(() -> {
-			if (!myFulltestSearchSvc.isDisabled()) {
-				SearchSession searchSession = Search.session(myEntityManager);
-				searchSession.workspace(ResourceTable.class).purge();
-				searchSession.indexingPlan().execute();
-			}
-		});
+		purgeHibernateSearch(this.myEntityManager);
 
 		myDaoConfig.setSchedulingDisabled(true);
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
