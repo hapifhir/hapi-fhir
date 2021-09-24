@@ -20,13 +20,12 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import org.slf4j.Logger;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.JobParametersValidator;
 
-
-import static ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class GroupIdPresentValidator implements JobParametersValidator {
@@ -35,10 +34,10 @@ public class GroupIdPresentValidator implements JobParametersValidator {
 	@Override
 	public void validate(JobParameters theJobParameters) throws JobParametersInvalidException {
 
-		if (theJobParameters == null || theJobParameters.getString(GROUP_ID_PARAMETER) == null) {
-			throw new JobParametersInvalidException("Group Bulk Export jobs must have a " + GROUP_ID_PARAMETER + " attribute");
+		if (theJobParameters == null || theJobParameters.getString(BatchConstants.BULK_EXPORT_GROUP_ID_PARAMETER) == null) {
+			throw new JobParametersInvalidException("Group Bulk Export jobs must have a " + BatchConstants.BULK_EXPORT_GROUP_ID_PARAMETER + " attribute");
 		} else {
-			ourLog.debug("detected we are running in group mode with group id [{}]", theJobParameters.getString(GROUP_ID_PARAMETER));
+			ourLog.debug("detected we are running in group mode with group id [{}]", theJobParameters.getString(BatchConstants.BULK_EXPORT_GROUP_ID_PARAMETER));
 		}
 	}
 }
