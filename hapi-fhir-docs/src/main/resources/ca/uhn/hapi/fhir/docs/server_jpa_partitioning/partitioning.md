@@ -57,7 +57,7 @@ This fact can have security implications:
   in use in another partition.
 
 * In a server using the default configuration of
-  SEQUENTIAL_NUMERIC [Server ID Strategy](/hapi-fhir/apidocs/hapi-fhir-storage-api/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setResourceServerIdStrategy(ca.uhn.fhir.jpa.api.config.DaoConfig.IdStrategyEnum))
+  SEQUENTIAL_NUMERIC [Server ID Strategy](/hapi-fhir/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setResourceServerIdStrategy(ca.uhn.fhir.jpa.api.config.DaoConfig.IdStrategyEnum))
   a client may be able to infer the IDs of resources in other partitions based on the ID they were assigned.
 
 These considerations can be addressed by using UUID Server ID Strategy, and disallowing client-assigned IDs.  

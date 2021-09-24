@@ -601,7 +601,7 @@ This operation takes two optional Parameters.
             <td>0..1</td>
             <td>
                 The number of links that should be deleted at a time.  If ommitted, then the batch size will be determined by the value
-of [Expunge Batch Size](/apidocs/hapi-fhir-storage-api/ca/uhn/fhir/jpa/api/config/DaoConfig.html#getExpungeBatchSize())
+of [Expunge Batch Size](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/DaoConfig.html#getExpungeBatchSize())
 property.
             </td>
         </tr>
