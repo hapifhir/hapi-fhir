@@ -13,10 +13,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class ZipCollectionBuilder {
+
+	public static final String ZIP_ENTRY_PREFIX = "SnomedCT_Release_INT_20160131_Full/Terminology/";
+
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ZipCollectionBuilder.class);
 	private final ArrayList<ITermLoaderSvc.FileDescriptor> myFiles;
@@ -58,7 +62,7 @@ public class ZipCollectionBuilder {
 		bos = new ByteArrayOutputStream();
 		ZipOutputStream zos = new ZipOutputStream(bos);
 		ourLog.info("Adding {} to test zip", theClasspathFileName);
-		zos.putNextEntry(new ZipEntry("SnomedCT_Release_INT_20160131_Full/Terminology/" + theOutputFilename));
+		zos.putNextEntry(new ZipEntry(ZIP_ENTRY_PREFIX + theOutputFilename));
 		zos.write(readFile(theClasspathPrefix, theClasspathFileName));
 		zos.closeEntry();
 		zos.close();
@@ -74,6 +78,36 @@ public class ZipCollectionBuilder {
 				return new ByteArrayInputStream(bos.toByteArray());
 			}
 		});
+	}
+
+	public void addPropertiesZip(Properties properties, String theOutputFilename) throws IOException {
+
+		ByteArrayOutputStream bos;
+		bos = new ByteArrayOutputStream();
+		ZipOutputStream zos = new ZipOutputStream(bos);
+		ourLog.info("Adding properties to test zip");
+		zos.putNextEntry(new ZipEntry(ZIP_ENTRY_PREFIX + theOutputFilename));
+		zos.write(getPropertiesBytes(properties));
+		zos.closeEntry();
+		zos.close();
+		ourLog.info("ZIP file has {} bytes", bos.toByteArray().length);
+		myFiles.add(new ITermLoaderSvc.FileDescriptor() {
+			@Override
+			public String getFilename() {
+				return "AAA.zip";
+			}
+
+			@Override
+			public InputStream getInputStream() {
+				return new ByteArrayInputStream(bos.toByteArray());
+			}
+		});
+	}
+
+	private byte[] getPropertiesBytes(Properties theProperties) throws IOException {
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		theProperties.store(byteArrayOutputStream, "");
+		return byteArrayOutputStream.toByteArray();
 	}
 
 	private byte[] readFile(String theClasspathPrefix, String theClasspathFileName) throws IOException {
