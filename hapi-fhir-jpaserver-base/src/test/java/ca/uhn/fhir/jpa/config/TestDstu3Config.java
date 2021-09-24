@@ -28,10 +28,12 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.jpa.dao.BaseJpaTest.buildHeapLuceneHibernateSearchProperties;
+import static ca.uhn.fhir.jpa.dao.BaseJpaTest.buildHibernateSearchProperties;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
@@ -157,14 +159,9 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", H2Dialect.class.getName());
 
-		boolean enableLucene = myEnv.getProperty(BaseJpaTest.CONFIG_ENABLE_LUCENE, Boolean.TYPE, true);
-		if (enableLucene) {
-			ourLog.warn("Hibernate Search is enabled");
-			extraProperties.putAll(buildHeapLuceneHibernateSearchProperties());
-		} {
-			ourLog.warn("Hibernate Search is disabled");
-			extraProperties.put("hibernate.search.enabled", "false");
-		}
+		boolean enableLucene = myEnv.getProperty(BaseJpaTest.CONFIG_ENABLE_LUCENE, Boolean.TYPE, BaseJpaTest.CONFIG_ENABLE_LUCENE_DEFAULT_VALUE);
+		Map<String, String> hibernateSearchProperties = BaseJpaTest.buildHibernateSearchProperties(enableLucene);
+		extraProperties.putAll(hibernateSearchProperties);
 
 		return extraProperties;
 	}
