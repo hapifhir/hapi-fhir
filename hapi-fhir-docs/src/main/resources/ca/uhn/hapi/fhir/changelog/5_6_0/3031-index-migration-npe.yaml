@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3031
+jira: SMILE-3178
+title: "Fixes a bug that was causing a null pointer exception to be thrown during database migrations that add or drop indexes."
