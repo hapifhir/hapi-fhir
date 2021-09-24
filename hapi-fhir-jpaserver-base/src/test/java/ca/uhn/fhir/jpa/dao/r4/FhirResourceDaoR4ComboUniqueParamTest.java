@@ -350,6 +350,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Test
 	public void testDoubleMatchingOnAnd_Search() {
+		myDaoConfig.setAdvancedLuceneIndexing(false);
 		createUniqueIndexPatientIdentifier();
 
 		Patient pt = new Patient();
@@ -993,6 +994,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Test
 	public void testSearchSynchronousUsingUniqueComposite() {
+		myDaoConfig.setAdvancedLuceneIndexing(false);
 		createUniqueBirthdateAndGenderSps();
 
 		Patient pt1 = new Patient();
@@ -1131,6 +1133,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Test
 	public void testUniqueValuesAreIndexed_Reference_UsingModifierSyntax() {
+		myDaoConfig.setAdvancedLuceneIndexing(false);
 		createUniqueNameAndManagingOrganizationSps();
 		List<ResourceIndexedComboStringUnique> uniques;
 
@@ -1471,6 +1474,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Test
 	public void testReplaceOneWithAnother() {
+		myDaoConfig.setAdvancedLuceneIndexing(false);
 		createUniqueBirthdateAndGenderSps();
 
 		Patient pt1 = new Patient();

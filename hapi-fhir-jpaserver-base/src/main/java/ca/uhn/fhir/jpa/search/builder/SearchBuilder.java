@@ -350,9 +350,21 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private boolean requiresHibernateSearchAccess() {
-		return (myFulltextSearchSvc !=null ) &&
+		boolean result = (myFulltextSearchSvc != null) &&
 			!myFulltextSearchSvc.isDisabled() &&
 			myFulltextSearchSvc.supportsSomeOf(myParams);
+
+		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
+			if (myFulltextSearchSvc == null || myFulltextSearchSvc.isDisabled()) {
+				if (myParams.containsKey(Constants.PARAM_TEXT)) {
+					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+				} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
+					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+				}
+			}
+		}
+
+		return result;
 	}
 
 	private List<ResourcePersistentId> executeLastNAgainstIndex(Integer theMaximumResults) {

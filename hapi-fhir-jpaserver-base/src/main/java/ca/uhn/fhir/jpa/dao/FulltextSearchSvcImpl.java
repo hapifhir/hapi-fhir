@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -38,6 +39,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
@@ -55,6 +57,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -72,6 +75,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private FhirContext myFhirContext;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	private DaoConfig myDaoConfig;
 
 
 	private Boolean ourDisabled;
@@ -122,12 +127,21 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return paramNameToIndexedLink;
 	}
 
+	// wip mb what else should we block?
+	static final Set<String> blockList = Sets.newHashSet("_id", "_tag", "_meta");
+
 	@Override
 	public boolean supportsSomeOf(SearchParameterMap myParams) {
 		// keep this in sync with the guts of doSearch
 		boolean requiresHibernateSearchAccess = myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN();
 
-		requiresHibernateSearchAccess |= myParams.entrySet().stream()
+		// wip mb need a DaoConfig flag to turn the rest of this off.
+		// wip mb need to turn this off for partitions to start.
+
+		requiresHibernateSearchAccess |=
+			myDaoConfig.isAdvancedLuceneIndexing() &&
+			myParams.entrySet().stream()
+			.filter(e -> !blockList.contains(e.getKey()))
 			.flatMap(andList -> andList.getValue().stream())
 			.flatMap(Collection::stream)
 			// wipmb to extend to string params.
@@ -201,65 +215,71 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
 					builder.addStringTextSearch(Constants.PARAM_TEXT, textAndTerms);
 
+					if (theReferencingPid != null) {
+						b.must(f.match().field("myResourceLinksField").matching(theReferencingPid.toString()));
+					}
+
+					if (isNotBlank(theResourceName)) {
+						b.must(f.match().field("myResourceType").matching(theResourceName));
+					}
+
 					/*
 					 * Handle other supported parameters
 					 */
 					// wip mb the query guts
 
-					// copy the keys to avoid concurrent modification error
-					for(String nextParam: Lists.newArrayList(theParams.keySet())) {
-						RuntimeSearchParam activeParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, nextParam);
-						if (activeParam == null) {
-							// ignore magic params like
-							continue;
-						}
-						switch (activeParam.getParamType()) {
-							case TOKEN:
-								List<List<IQueryParameterType>> tokenTextAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
-								builder.addStringTextSearch(nextParam, tokenTextAndOrTerms);
+					if (myDaoConfig.isAdvancedLuceneIndexing()) {
+						// copy the keys to avoid concurrent modification error
+						for(String nextParam: Lists.newArrayList(theParams.keySet())) {
+							if (blockList.contains(nextParam)) {
+								continue;
+							}
+							RuntimeSearchParam activeParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, nextParam);
+							if (activeParam == null) {
+								// ignore magic params like
+								continue;
+							}
+							switch (activeParam.getParamType()) {
+								case TOKEN:
+									List<List<IQueryParameterType>> tokenTextAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
+									builder.addStringTextSearch(nextParam, tokenTextAndOrTerms);
 
-								List<List<IQueryParameterType>> tokenUnmodifiedAndOrTerms = theParams.removeByNameUnmodified(nextParam);
-								builder.addTokenUnmodifiedSearch(nextParam, tokenUnmodifiedAndOrTerms);
+									List<List<IQueryParameterType>> tokenUnmodifiedAndOrTerms = theParams.removeByNameUnmodified(nextParam);
+									builder.addTokenUnmodifiedSearch(nextParam, tokenUnmodifiedAndOrTerms);
 
-								break;
-							case STRING:
-								List<List<IQueryParameterType>> stringTextAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
-								builder.addStringTextSearch(nextParam, stringTextAndOrTerms);
+									break;
+								case STRING:
+									List<List<IQueryParameterType>> stringTextAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
+									builder.addStringTextSearch(nextParam, stringTextAndOrTerms);
 
-								List<List<IQueryParameterType>> stringExactAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_STRING_EXACT);
-								builder.addStringExactSearch(nextParam, stringExactAndOrTerms);
+									List<List<IQueryParameterType>> stringExactAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_STRING_EXACT);
+									builder.addStringExactSearch(nextParam, stringExactAndOrTerms);
 
-								List<List<IQueryParameterType>> stringContainsAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_STRING_CONTAINS);
-								builder.addStringContainsSearch(nextParam, stringContainsAndOrTerms);
+									List<List<IQueryParameterType>> stringContainsAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_STRING_CONTAINS);
+									builder.addStringContainsSearch(nextParam, stringContainsAndOrTerms);
 
-								List<List<IQueryParameterType>> stringAndOrTerms = theParams.removeByNameUnmodified(nextParam);
-								builder.addStringUnmodifiedSearch(nextParam, stringAndOrTerms);
-								break;
+									List<List<IQueryParameterType>> stringAndOrTerms = theParams.removeByNameUnmodified(nextParam);
+									builder.addStringUnmodifiedSearch(nextParam, stringAndOrTerms);
+									break;
 
-							case QUANTITY:
-								// wip next up
-								break;
+								case QUANTITY:
+									// wip next up
+									break;
 
-							case REFERENCE:
-								List<List<IQueryParameterType>> referenceAndOrTerms = theParams.removeByNameUnmodified(nextParam);
-								builder.addReferenceUnchainedSearch(nextParam, referenceAndOrTerms);
-								break;
+								case REFERENCE:
+									List<List<IQueryParameterType>> referenceAndOrTerms = theParams.removeByNameUnmodified(nextParam);
+									builder.addReferenceUnchainedSearch(nextParam, referenceAndOrTerms);
+									break;
 
 								// wip mb add the rest.
-							default:
-								// ignore unsupported param types/modifiers.  They will be processed up in SearchBuilder.
+								default:
+									// ignore unsupported param types/modifiers.  They will be processed up in SearchBuilder.
+							}
 						}
-					}
 
-					if (theReferencingPid != null) {
-						b.must(f.match().field("myResourceLinksField").matching(theReferencingPid.toString()));
 					}
-
 					//DROP EARLY HERE IF BOOL IS EMPTY?
 
-					if (isNotBlank(theResourceName)) {
-						b.must(f.match().field("myResourceType").matching(theResourceName));
-					}
 				})
 			).fetchAllHits();
 

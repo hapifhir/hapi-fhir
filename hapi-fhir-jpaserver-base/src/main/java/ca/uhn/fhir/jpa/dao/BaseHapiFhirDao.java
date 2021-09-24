@@ -1703,8 +1703,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		} else {
 			theEntity.setNarrativeText(parseNarrativeTextIntoWords(theResource));
 			theEntity.setContentText(parseContentTextIntoWords(theContext, theResource));
-			ExtendedLuceneIndexData searchParamTexts = myFulltextSearchSvc.extractLuceneIndexData(theContext, theResource, theNewParams);
-			theEntity.setSearchParamText(searchParamTexts);
+			if (myDaoConfig.isAdvancedLuceneIndexing()) {
+				ExtendedLuceneIndexData searchParamTexts = myFulltextSearchSvc.extractLuceneIndexData(theContext, theResource, theNewParams);
+				theEntity.setSearchParamText(searchParamTexts);
+			}
 		}
 	}
 

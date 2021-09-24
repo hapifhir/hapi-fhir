@@ -32,7 +32,9 @@ public class HibernateSearchElementCache {
 		DocumentElement result = myCache.get(key);
 		if (result == null) {
 			DocumentElement parent = getNode(thePath.subList(0, thePath.size() - 1));
-			result = parent.addObject(thePath.get(thePath.size() - 1));
+			String lastSegment = thePath.get(thePath.size() - 1);
+			assert (lastSegment.indexOf('.') == -1);
+			result = parent.addObject(lastSegment);
 			myCache.put(key, result);
 		}
 		ourLog.trace("getNode {}: {}", key, result);
