@@ -25,13 +25,18 @@ import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl.validatePartitionIdSupplied;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -43,6 +48,8 @@ import static org.hl7.fhir.instance.model.api.IPrimitiveType.toValueOrNull;
  *    <li><code>partition-management-create-partition</code></li>
  *    <li><code>partition-management-update-partition</code></li>
  *    <li><code>partition-management-delete-partition</code></li>
+ *    <li><code>partition-management-read-partition</code></li>
+ *    <li><code>partition-management-list-partitions</code></li>
  * </ul>
  */
 public class PartitionManagementProvider {
@@ -142,12 +149,39 @@ public class PartitionManagementProvider {
 		return retVal;
 	}
 
+	/**
+	 * Add Partition:
+	 * <code>
+	 * $partition-management-list-partitions
+	 * </code>
+	 */
+	@Operation(name = ProviderConstants.PARTITION_MANAGEMENT_LIST_PARTITIONS, idempotent = true)
+	public IBaseParameters addPartitions(
+		@ResourceParam IBaseParameters theRequest
+	) {
+		List<PartitionEntity> output = myPartitionLookupSvc.listPartitions();
+		return prepareOutputList(output);
+	}
+
 	private IBaseParameters prepareOutput(PartitionEntity theOutput) {
 		IBaseParameters retVal = ParametersUtil.newInstance(myCtx);
 		ParametersUtil.addParameterToParametersInteger(myCtx, retVal, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, theOutput.getId());
 		ParametersUtil.addParameterToParametersCode(myCtx, retVal, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, theOutput.getName());
 		if (isNotBlank(theOutput.getDescription())) {
 			ParametersUtil.addParameterToParametersString(myCtx, retVal, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, theOutput.getDescription());
+		}
+		return retVal;
+	}
+
+	private IBaseParameters prepareOutputList(List<PartitionEntity> theOutput) {
+		IBaseParameters retVal = ParametersUtil.newInstance(myCtx);
+		for (PartitionEntity partitionEntity : theOutput) {
+			IBase resultPart = ParametersUtil.addParameterToParameters(myCtx, retVal, "partition");
+			ParametersUtil.addPartInteger(myCtx, resultPart, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, partitionEntity.getId());
+			ParametersUtil.addPartCode(myCtx, resultPart, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, partitionEntity.getName());
+			if (isNotBlank(partitionEntity.getDescription())) {
+				ParametersUtil.addPartString(myCtx, resultPart, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, partitionEntity.getDescription());
+			}
 		}
 		return retVal;
 	}

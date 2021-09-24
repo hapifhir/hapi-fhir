@@ -1,0 +1,4 @@
+---
+type: add
+issue: 3020
+title: "Added documentation for `$partition-management-read-partition`. Added `$partition-management-list-partitions` operation and documentation."

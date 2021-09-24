@@ -44,6 +44,11 @@ public class ProviderConstants {
 	 */
 	public static final String PARTITION_MANAGEMENT_READ_PARTITION = "$partition-management-read-partition";
 
+	/**
+	 * Operation name: list partitions
+	 */
+	public static final String PARTITION_MANAGEMENT_LIST_PARTITIONS = "$partition-management-list-partitions";
+
 	public static final String PARTITION_MANAGEMENT_PARTITION_ID = "id";
 	public static final String PARTITION_MANAGEMENT_PARTITION_NAME = "name";
 	public static final String PARTITION_MANAGEMENT_PARTITION_DESC = "description";
