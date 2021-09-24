@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
@@ -30,6 +31,7 @@ import java.sql.Connection;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import static ca.uhn.fhir.jpa.dao.BaseJpaTest.buildHeapLuceneHibernateSearchProperties;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
@@ -155,11 +157,14 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", H2Dialect.class.getName());
 
-		extraProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
-		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
-		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-heap");
-		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
-		extraProperties.put(HibernateOrmMapperSettings.ENABLED, "true");
+		boolean enableLucene = myEnv.getProperty(BaseJpaTest.CONFIG_ENABLE_LUCENE, Boolean.TYPE, true);
+		if (enableLucene) {
+			ourLog.warn("Hibernate Search is enabled");
+			extraProperties.putAll(buildHeapLuceneHibernateSearchProperties());
+		} {
+			ourLog.warn("Hibernate Search is disabled");
+			extraProperties.put("hibernate.search.enabled", "false");
+		}
 
 		return extraProperties;
 	}

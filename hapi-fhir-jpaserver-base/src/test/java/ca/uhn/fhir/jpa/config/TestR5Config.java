@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
+import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
@@ -154,7 +155,14 @@ public class TestR5Config extends BaseJavaConfigR5 {
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", H2Dialect.class.getName());
 
-		extraProperties.putAll(buildHeapLuceneHibernateSearchProperties());
+		boolean enableLucene = myEnv.getProperty(BaseJpaTest.CONFIG_ENABLE_LUCENE, Boolean.TYPE, false);
+		if (enableLucene) {
+			ourLog.warn("Hibernate Search is enabled");
+			extraProperties.putAll(buildHeapLuceneHibernateSearchProperties());
+		} {
+			ourLog.warn("Hibernate Search is disabled");
+			extraProperties.put("hibernate.search.enabled", "false");
+		}
 
 		return extraProperties;
 	}

@@ -118,6 +118,8 @@ import static org.mockito.Mockito.when;
 	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_TRUE
 })
 public abstract class BaseJpaTest extends BaseTest {
+	public static final String CONFIG_ENABLE_LUCENE="hapi_test.enable_lucene";
+	public static final String CONFIG_ENABLE_LUCENE_FALSE = CONFIG_ENABLE_LUCENE + "=false";
 
 	protected static final String CM_URL = "http://example.com/my_concept_map";
 	protected static final String CS_URL = "http://example.com/my_code_system";
@@ -180,6 +182,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
 	private IForcedIdDao myForcedIdDao;
+	@Autowired
+	protected IFulltextSearchSvc myFulltestSearchSvc;
 
 	@AfterEach
 	public void afterPerformCleanup() {

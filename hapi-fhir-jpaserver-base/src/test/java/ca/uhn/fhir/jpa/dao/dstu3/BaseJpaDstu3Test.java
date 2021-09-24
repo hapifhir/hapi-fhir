@@ -386,12 +386,14 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
 	@BeforeEach
 	public void beforeFlushFT() {
-		runInTransaction(() -> {
-			SearchSession searchSession = Search.session(myEntityManager);
-			searchSession.workspace(ResourceTable.class).purge();
-//			searchSession.workspace(ResourceIndexedSearchParamString.class).purge();
-			searchSession.indexingPlan().execute();
-		});
+		if (!myFulltestSearchSvc.isDisabled()) {
+			runInTransaction(() -> {
+				SearchSession searchSession = Search.session(myEntityManager);
+				searchSession.workspace(ResourceTable.class).purge();
+//				searchSession.workspace(ResourceIndexedSearchParamString.class).purge();
+				searchSession.indexingPlan().execute();
+			});
+		}
 
 		myDaoConfig.setSchedulingDisabled(true);
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);

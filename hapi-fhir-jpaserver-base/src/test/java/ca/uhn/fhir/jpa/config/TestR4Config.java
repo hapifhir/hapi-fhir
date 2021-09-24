@@ -1,11 +1,11 @@
 package ca.uhn.fhir.jpa.config;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
+import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -57,7 +57,6 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 
 	private Exception myLastStackTrace;
-
 
 	@Override
 	@Bean
@@ -164,7 +163,14 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", H2Dialect.class.getName());
 
-		extraProperties.putAll(buildHeapLuceneHibernateSearchProperties());
+		boolean enableLucene = myEnv.getProperty(BaseJpaTest.CONFIG_ENABLE_LUCENE, Boolean.TYPE, false);
+		if (enableLucene) {
+			ourLog.warn("Hibernate Search is enabled");
+			extraProperties.putAll(buildHeapLuceneHibernateSearchProperties());
+		} {
+			ourLog.warn("Hibernate Search is disabled");
+			extraProperties.put("hibernate.search.enabled", "false");
+		}
 
 		return extraProperties;
 	}
