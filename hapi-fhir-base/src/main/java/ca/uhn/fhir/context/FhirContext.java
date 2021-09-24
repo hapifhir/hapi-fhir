@@ -830,6 +830,13 @@ public class FhirContext {
          * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed
          * without incurring any performance penalty
          * </p>
+         * <p>
+         * The NDJsonParser provided here is expected to translate between legal NDJson and FHIR Bundles.
+         * In particular, it is able to encode the resources in a FHIR Bundle to NDJson, as well as decode
+         * NDJson into a FHIR "collection"-type Bundle populated with the resources described in the NDJson.
+         * It will throw an exception in the event where it is asked to encode to anything other than a FHIR Bundle
+         * or where it is asked to decode into anything other than a FHIR Bundle.
+         * </p>
          */
         public IParser newNDJsonParser() {
                 return new NDJsonParser(this, myParserErrorHandler);
