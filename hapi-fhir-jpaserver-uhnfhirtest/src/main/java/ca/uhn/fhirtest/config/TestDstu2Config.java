@@ -43,6 +43,7 @@ import java.util.concurrent.TimeUnit;
 @Import(CommonConfig.class)
 @EnableTransactionManagement()
 public class TestDstu2Config extends BaseJavaConfigDstu2 {
+	// fixme - is this used in NoFt tests?
 
 	public static final String FHIR_LUCENE_LOCATION_DSTU2 = "${fhir.lucene.location.dstu2}";
 
