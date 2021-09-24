@@ -20,16 +20,6 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.HapiLocalizer;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
@@ -53,57 +43,59 @@ public class TestUtil {
 	 * static fields seems to solve this.
 	 */
 	public static void clearAllStaticFieldsForUnitTest() {
-		HapiLocalizer.setOurFailOnMissingMessage(true);
 
-		Class<?> theType;
-		try {
-			throw new Exception();
-		} catch (Exception e) {
-			StackTraceElement[] st = e.getStackTrace();
-			StackTraceElement elem = st[1];
-			String clazzName = elem.getClassName();
-			try {
-				theType = Class.forName(clazzName);
-			} catch (ClassNotFoundException e1) {
-				throw new Error(e);
-			}
-		}
-
-		for (Field next : Arrays.asList(theType.getDeclaredFields())) {
-			if (Modifier.isStatic(next.getModifiers())) {
-				if (!Modifier.isFinal(next.getModifiers()) && !next.getType().isPrimitive()) {
-					ourLog.info("Clearing value of field: {}", next.toString());
-					try {
-						next.setAccessible(true);
-						next.set(theType, null);
-					} catch (Exception e) {
-						throw new Error(e);
-					}
-				}
-				if (Modifier.isFinal(next.getModifiers())) {
-					if (next.getType().equals(FhirContext.class)) {
-						throw new Error("Test has final field of type FhirContext: " + next);
-					}
-				}
-			}
-
-		}
-
-		randomizeLocale();
-
-		/*
-		 * If we're running a CI build, set all loggers to TRACE level to ensure coverage
-		 * on trace blocks
-		 */
-		try {
-			if ("true".equals(System.getProperty("ci"))) {
-				for (Logger next : ((LoggerContext) LoggerFactory.getILoggerFactory()).getLoggerList()) {
-					next.setLevel(Level.TRACE);
-				}
-			}
-		} catch (NoClassDefFoundError e) {
-			// ignore
-		}
+//
+//		HapiLocalizer.setOurFailOnMissingMessage(true);
+//
+//		Class<?> theType;
+//		try {
+//			throw new Exception();
+//		} catch (Exception e) {
+//			StackTraceElement[] st = e.getStackTrace();
+//			StackTraceElement elem = st[1];
+//			String clazzName = elem.getClassName();
+//			try {
+//				theType = Class.forName(clazzName);
+//			} catch (ClassNotFoundException e1) {
+//				throw new Error(e);
+//			}
+//		}
+//
+//		for (Field next : Arrays.asList(theType.getDeclaredFields())) {
+//			if (Modifier.isStatic(next.getModifiers())) {
+//				if (!Modifier.isFinal(next.getModifiers()) && !next.getType().isPrimitive()) {
+//					ourLog.info("Clearing value of field: {}", next.toString());
+//					try {
+//						next.setAccessible(true);
+//						next.set(theType, null);
+//					} catch (Exception e) {
+//						throw new Error(e);
+//					}
+//				}
+//				if (Modifier.isFinal(next.getModifiers())) {
+//					if (next.getType().equals(FhirContext.class)) {
+//						throw new Error("Test has final field of type FhirContext: " + next);
+//					}
+//				}
+//			}
+//
+//		}
+//
+//		randomizeLocale();
+//
+//		/*
+//		 * If we're running a CI build, set all loggers to TRACE level to ensure coverage
+//		 * on trace blocks
+//		 */
+//		try {
+//			if ("true".equals(System.getProperty("ci"))) {
+//				for (Logger next : ((LoggerContext) LoggerFactory.getILoggerFactory()).getLoggerList()) {
+//					next.setLevel(Level.TRACE);
+//				}
+//			}
+//		} catch (NoClassDefFoundError e) {
+//			// ignore
+//		}
 	}
 
 	/**
