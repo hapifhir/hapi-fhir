@@ -123,6 +123,7 @@ import ca.uhn.fhir.jpa.search.cache.DatabaseSearchResultCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.elastic.IndexNamePrefixLayoutStrategy;
+import ca.uhn.fhir.jpa.search.reindex.BlockPolicy;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexer;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
@@ -403,7 +404,7 @@ public abstract class BaseConfig {
 		asyncTaskExecutor.setQueueCapacity(0);
 		asyncTaskExecutor.setAllowCoreThreadTimeOut(true);
 		asyncTaskExecutor.setThreadNamePrefix("JobLauncher-");
-		asyncTaskExecutor.setRejectedExecutionHandler(new ResourceReindexingSvcImpl.BlockPolicy());
+		asyncTaskExecutor.setRejectedExecutionHandler(new BlockPolicy());
 		asyncTaskExecutor.initialize();
 		return asyncTaskExecutor;
 	}
