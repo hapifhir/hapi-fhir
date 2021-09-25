@@ -226,12 +226,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 
 	@BeforeEach
 	public void beforeFlushFT() {
-		runInTransaction(() -> {
-			SearchSession searchSession  = Search.session(myEntityManager);
-			searchSession.workspace(ResourceTable.class).purge();
-//			searchSession.workspace(ResourceIndexedSearchParamString.class).purge();
-			searchSession.indexingPlan().execute();
-		});
+		purgeHibernateSearch(myEntityManager);
 
 		myDaoConfig.setSchedulingDisabled(true);
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);

@@ -25,7 +25,6 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -69,12 +68,14 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_TOP2000
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -711,6 +712,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	}
 
 	private static void addBaseLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles, Boolean theIncludeTop2000) throws IOException{
+		theFiles.addFileZip("/loinc/", LOINC_XML_FILE.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_GROUP_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_GROUP_TERMS_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PARENT_GROUP_FILE_DEFAULT.getCode());
@@ -930,7 +932,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			testProps.put(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), "false");
 			doReturn(mockFileDescriptors).when(testedSvc).getLoadedFileDescriptors(mockFileDescriptorList);
 
-			InvalidRequestException thrown = Assertions.assertThrows(InvalidRequestException.class,
+			InvalidRequestException thrown = assertThrows(InvalidRequestException.class,
 				() -> testedSvc.loadLoinc(mockFileDescriptorList, mySrd) );
 
 			assertEquals("'" + LOINC_CODESYSTEM_VERSION.getCode() + "' property is required when '" +

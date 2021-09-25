@@ -40,7 +40,7 @@ class ExtendedOrganizationResourceTest {
       @Throws(Exception::class)
       fun afterClassClearContext() {
          JettyUtil.closeServer(jettyServer)
-         TestUtil.clearAllStaticFieldsForUnitTest()
+         TestUtil.randomizeLocaleAndTimezone()
       }
 
       @JvmStatic

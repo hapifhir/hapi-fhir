@@ -24,8 +24,8 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
 import ca.uhn.fhir.jpa.batch.job.model.RequestListJson;
 import ca.uhn.fhir.jpa.batch.mdm.job.ReverseCronologicalBatchMdmLinkPidReader;
@@ -55,7 +55,7 @@ public class MdmClearJobSubmitterImpl implements IMdmClearJobSubmitter {
 	@Autowired
 	private IBatchJobSubmitter myBatchJobSubmitter;
 	@Autowired
-	@Qualifier(BatchJobsConfig.MDM_CLEAR_JOB_NAME)
+	@Qualifier(BatchConstants.MDM_CLEAR_JOB_NAME)
 	private Job myMdmClearJob;
 
 	@Override

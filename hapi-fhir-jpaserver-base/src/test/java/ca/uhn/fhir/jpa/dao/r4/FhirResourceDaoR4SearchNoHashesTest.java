@@ -1451,9 +1451,9 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			id1b = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		TestUtil.sleepAtLeast(1100);
+		ca.uhn.fhir.util.TestUtil.sleepAtLeast(1100);
 		DateTimeType beforeR2 = new DateTimeType(new Date(), TemporalPrecisionEnum.MILLI);
-		TestUtil.sleepAtLeast(1100);
+		ca.uhn.fhir.util.TestUtil.sleepAtLeast(1100);
 
 		IIdType id2;
 		{

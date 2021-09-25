@@ -30,7 +30,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -69,6 +71,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	private Collection<IIdType> myAppliesToInstances;
 	private boolean myAppliesToDeleteCascade;
 	private boolean myAppliesToDeleteExpunge;
+	private AdditionalCompartmentSearchParameters myAdditionalCompartmentSearchParamMap;
 
 	/**
 	 * Constructor
@@ -337,7 +340,12 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 		for (IIdType next : myClassifierCompartmentOwners) {
 			if (target.resource != null) {
-				if (t.isSourceInCompartmentForTarget(myClassifierCompartmentName, target.resource, next)) {
+
+				Set<String> additionalSearchParamNames = null;
+				if (myAdditionalCompartmentSearchParamMap != null) {
+					additionalSearchParamNames = myAdditionalCompartmentSearchParamMap.getSearchParamNamesForResourceType(ctx.getResourceType(target.resource));
+				}
+				if (t.isSourceInCompartmentForTarget(myClassifierCompartmentName, target.resource, next, additionalSearchParamNames)) {
 					foundMatch = true;
 					break;
 				}
@@ -371,7 +379,17 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				RuntimeResourceDefinition sourceDef = theRequestDetails.getFhirContext().getResourceDefinition(target.resourceType);
 				String compartmentOwnerResourceType = next.getResourceType();
 				if (!StringUtils.equals(target.resourceType, compartmentOwnerResourceType)) {
+
 					List<RuntimeSearchParam> params = sourceDef.getSearchParamsForCompartmentName(compartmentOwnerResourceType);
+
+					Set<String> additionalParamNames = myAdditionalCompartmentSearchParamMap.getSearchParamNamesForResourceType(sourceDef.getName());
+					List<RuntimeSearchParam> additionalParams = additionalParamNames.stream().map(sourceDef::getSearchParam).filter(Objects::nonNull).collect(Collectors.toList());
+					if (params == null || params.isEmpty()) {
+						params = additionalParams;
+					} else {
+						params.addAll(additionalParams);
+					}
+
 					if (!params.isEmpty()) {
 
 						/*
@@ -680,5 +698,9 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				// no more cases
 				return false;
 		}
+	}
+
+	public void setAdditionalSearchParamsForCompartmentTypes(AdditionalCompartmentSearchParameters theAdditionalParameters) {
+		myAdditionalCompartmentSearchParamMap = theAdditionalParameters;
 	}
 }
