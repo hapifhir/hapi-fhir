@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkDataExportSvcImpl;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
+import ca.uhn.fhir.jpa.bulk.imprt.provider.BulkDataImportProvider;
 import ca.uhn.fhir.jpa.bulk.imprt.svc.BulkDataImportSvcImpl;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
@@ -586,6 +587,12 @@ public abstract class BaseConfig {
 	public IBulkDataImportSvc bulkDataImportSvc() {
 		return new BulkDataImportSvcImpl();
 	}
+
+        @Bean
+        @Lazy
+        public BulkDataImportProvider bulkDataImportProvider() {
+                return new BulkDataImportProvider();
+        }
 
 	@Bean
 	public PersistedJpaBundleProviderFactory persistedJpaBundleProviderFactory() {
