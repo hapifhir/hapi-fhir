@@ -15,14 +15,21 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.BundleBuilder;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.MedicationKnowledge;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -47,6 +54,7 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = TransactionProcessorTest.MyConfig.class)
 public class TransactionProcessorTest {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessorTest.class);
 	@Autowired
 	private TransactionProcessor myTransactionProcessor;
 	@MockBean
@@ -75,9 +83,9 @@ public class TransactionProcessorTest {
 	private IResourceVersionSvc myResourceVersionSvc;
 	@MockBean
 	private SearchParamMatcher mySearchParamMatcher;
-
 	@MockBean(answer = Answers.RETURNS_DEEP_STUBS)
 	private SessionImpl mySession;
+	private FhirContext myFhirCtx = FhirContext.forR4Cached();
 
 	@BeforeEach
 	public void before() {
@@ -89,6 +97,31 @@ public class TransactionProcessorTest {
 		myTransactionProcessor.setEntityManagerForUnitTest(myEntityManager);
 
 		when(myEntityManager.unwrap(eq(Session.class))).thenReturn(mySession);
+	}
+
+
+
+	@Test
+	public void testTransactionWithPlaceholderIds() {
+
+
+		BundleBuilder bb = new BundleBuilder(myFhirCtx);
+		for (int i = 0; i < 100; i++) {
+			Patient pt = new Patient();
+			pt.setId(IdType.newRandomUuid());
+			pt.addIdentifier().setSystem("http://foo").setValue("val" + i);
+			bb.addTransactionCreateEntry(pt);
+
+			Observation obs = new Observation();
+			obs.setId(IdType.newRandomUuid());
+			obs.setSubject(new Reference(pt.getId()));
+			bb.addTransactionCreateEntry(obs);
+		}
+		Bundle bundle = (Bundle) bb.getBundle();
+
+		Bundle outcome = myTransactionProcessor.transaction(null, bundle, false);
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 	}
 
 	@Test
