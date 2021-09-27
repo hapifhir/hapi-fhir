@@ -129,7 +129,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		for (Bundle bundle :bundles) {
 			tpe.execute(() -> myClient.transaction().withBundle(bundle).execute());
 		}
-		tpe.shutdown();;
+		tpe.shutdown();
 		tpe.awaitTermination(100, TimeUnit.SECONDS);
 	}
 
