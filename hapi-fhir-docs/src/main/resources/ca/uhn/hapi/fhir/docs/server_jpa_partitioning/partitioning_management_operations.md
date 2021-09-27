@@ -243,5 +243,35 @@ An HTTP POST to the following URL would be used to invoke this operation:
 http://example.com/DEFAULT/$partition-management-list-partitions
 ```
 
-
+This operation returns a `Parameters` resource that looks like the following:
+```json
+{
+    "resourceType": "Parameters",
+    "parameter": [ {
+       "name": "partition",
+       "part": [ {
+          "name": "id",
+          "valueInteger": 1
+        }, {
+          "name": "name",
+          "valueCode": "PARTITION-1"
+        }, {
+          "name": "description",
+          "valueString": "a description1"
+        } ]
+      }, {
+       "name": "partition",
+       "part": [ {
+          "name": "id",
+          "valueInteger": 2
+       }, {
+          "name": "name",
+          "valueCode": "PARTITION-2"
+       }, {
+          "name": "description",
+          "valueString": "a description2"
+       } ]
+    } ]
+}
+```
 
