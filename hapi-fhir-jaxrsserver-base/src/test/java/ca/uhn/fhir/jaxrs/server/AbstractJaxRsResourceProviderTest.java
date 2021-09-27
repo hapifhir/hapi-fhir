@@ -90,7 +90,7 @@ public class AbstractJaxRsResourceProviderTest {
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
         JettyUtil.closeServer(jettyServer);
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	private Patient createPatient(long id) {

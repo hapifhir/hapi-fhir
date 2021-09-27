@@ -38,7 +38,6 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -63,7 +62,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_VALUESET_URL_PLUS_SLASH;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 
 /**
@@ -144,13 +142,11 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	 * version is always pointed by the ForcedId for the no-versioned VS
 	 */
 	private Optional<IBaseResource> getValueSetCurrentVersion(UriType theUrl) {
-		if (TermReadSvcUtil.mustReturnEmptyValueSet(theUrl.getValueAsString()))   return Optional.empty();
-
-		String forcedId = theUrl.getValue().substring(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH.length());
-		if (StringUtils.isBlank(forcedId))  return Optional.empty();
+		Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId(theUrl.getValueAsString());
+		if (! vsIdOpt.isPresent())  return Optional.empty();
 
 		IFhirResourceDao<? extends IBaseResource> valueSetResourceDao = myDaoRegistry.getResourceDao(myValueSetType);
-		IBaseResource valueSet = valueSetResourceDao.read(new IdDt("ValueSet", forcedId));
+		IBaseResource valueSet = valueSetResourceDao.read(new IdDt("ValueSet", vsIdOpt.get()));
 		return Optional.ofNullable(valueSet);
 	}
 
