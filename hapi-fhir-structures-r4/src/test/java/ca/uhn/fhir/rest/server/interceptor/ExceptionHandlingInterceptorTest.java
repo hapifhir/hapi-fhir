@@ -98,7 +98,7 @@ public class ExceptionHandlingInterceptorTest {
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 	@BeforeAll
 	public static void beforeClass() throws Exception {
