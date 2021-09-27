@@ -98,8 +98,41 @@ public class BulkDataImportProviderTest {
 
                 HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_IMPORT +
                         "?" + JpaConstants.PARAM_IMPORT_JOB_DESCRIPTION + "=" + UrlUtil.escapeUrlParam("My Import Job") +
-                        "&" + JpaConstants.PARAM_IMPORT_PROCESSING_MODE + "=" + UrlUtil.escapeUrlParam(JobFileRowProcessingModeEnum.FHIR_TRANSACTION.toString()) +
                         "&" + JpaConstants.PARAM_IMPORT_BATCH_SIZE + "=" + UrlUtil.escapeUrlParam("100"));
+
+                post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+                post.setEntity(
+                    EntityBuilder.create()
+                    .setContentType(ContentType.create(Constants.CT_FHIR_NDJSON))
+                    .setText("{\"resourceType\":\"Patient\",\"id\":\"P1\"}\n" +
+                             "{\"resourceType\":\"Patient\",\"id\":\"P2\"}\n")
+                    .build());
+
+                ourLog.info("Request: {}", post);
+                try (CloseableHttpResponse response = myClient.execute(post)) {
+                        ourLog.info("Response: {}", EntityUtils.toString(response.getEntity()));
+                        assertEquals(202, response.getStatusLine().getStatusCode());
+                        assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
+                        assertEquals("http://localhost:" + myPort + "/$import-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+                }
+
+                verify(myBulkDataImportSvc, times(1)).createNewJob(myBulkImportJobJsonCaptor.capture(), any());
+                BulkImportJobJson options = myBulkImportJobJsonCaptor.getValue();
+                assertEquals(1, options.getFileCount());
+                assertEquals(100, options.getBatchSize());
+                assertEquals(JobFileRowProcessingModeEnum.FHIR_TRANSACTION, options.getProcessingMode());
+                assertEquals("My Import Job", options.getJobDescription());
+        }
+
+        @Test
+        public void testSuccessfulInitiateBulkRequest_Post_AllParameters() throws IOException {
+                when(myBulkDataImportSvc.createNewJob(any(), any())).thenReturn(A_JOB_ID);
+
+                HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_IMPORT +
+                        "?" + JpaConstants.PARAM_IMPORT_JOB_DESCRIPTION + "=" + UrlUtil.escapeUrlParam("My Import Job") +
+                        "&" + JpaConstants.PARAM_IMPORT_PROCESSING_MODE + "=" + UrlUtil.escapeUrlParam(JobFileRowProcessingModeEnum.FHIR_TRANSACTION.toString()) +
+                        "&" + JpaConstants.PARAM_IMPORT_BATCH_SIZE + "=" + UrlUtil.escapeUrlParam("100") +
+                        "&" + JpaConstants.PARAM_IMPORT_FILE_COUNT + "=" + UrlUtil.escapeUrlParam("1"));
 
                 post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
                 post.setEntity(
