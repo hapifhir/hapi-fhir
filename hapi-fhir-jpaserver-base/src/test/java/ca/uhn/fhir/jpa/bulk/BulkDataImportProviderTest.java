@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.provider.BulkDataImportProvider;
+import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -29,6 +30,7 @@ import org.hl7.fhir.r4.model.StringType;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +43,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -62,6 +66,8 @@ public class BulkDataImportProviderTest {
 	private CloseableHttpClient myClient;
 	@Captor
 	private ArgumentCaptor<BulkImportJobJson> myBulkImportJobJsonCaptor;
+        @Captor
+        private ArgumentCaptor<List<BulkImportJobFileJson>> myBulkImportJobFileJsonCaptor;
 
 	@AfterEach
 	public void after() throws Exception {
@@ -104,8 +110,8 @@ public class BulkDataImportProviderTest {
                 post.setEntity(
                     EntityBuilder.create()
                     .setContentType(ContentType.create(Constants.CT_FHIR_NDJSON))
-                    .setText("{\"resourceType\":\"Patient\",\"id\":\"P1\"}\n" +
-                             "{\"resourceType\":\"Patient\",\"id\":\"P2\"}\n")
+                    .setText("{\"resourceType\":\"Patient\",\"id\":\"Pat1\"}\n" +
+                             "{\"resourceType\":\"Patient\",\"id\":\"Pat2\"}\n")
                     .build());
 
                 ourLog.info("Request: {}", post);
@@ -116,12 +122,15 @@ public class BulkDataImportProviderTest {
                         assertEquals("http://localhost:" + myPort + "/$import-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
                 }
 
-                verify(myBulkDataImportSvc, times(1)).createNewJob(myBulkImportJobJsonCaptor.capture(), any());
+                verify(myBulkDataImportSvc, times(1)).createNewJob(myBulkImportJobJsonCaptor.capture(), myBulkImportJobFileJsonCaptor.capture());
                 BulkImportJobJson options = myBulkImportJobJsonCaptor.getValue();
                 assertEquals(1, options.getFileCount());
                 assertEquals(100, options.getBatchSize());
                 assertEquals(JobFileRowProcessingModeEnum.FHIR_TRANSACTION, options.getProcessingMode());
                 assertEquals("My Import Job", options.getJobDescription());
+                List<BulkImportJobFileJson> jobs = myBulkImportJobFileJsonCaptor.getValue();
+                assertEquals(1, jobs.size());
+                assertThat(jobs.get(0).getContents(), containsString("Pat1"));
         }
 
         @Test
@@ -138,8 +147,8 @@ public class BulkDataImportProviderTest {
                 post.setEntity(
                     EntityBuilder.create()
                     .setContentType(ContentType.create(Constants.CT_FHIR_NDJSON))
-                    .setText("{\"resourceType\":\"Patient\",\"id\":\"P1\"}\n" +
-                             "{\"resourceType\":\"Patient\",\"id\":\"P2\"}\n")
+                    .setText("{\"resourceType\":\"Patient\",\"id\":\"Pat1\"}\n" +
+                             "{\"resourceType\":\"Patient\",\"id\":\"Pat2\"}\n")
                     .build());
 
                 ourLog.info("Request: {}", post);
@@ -150,11 +159,14 @@ public class BulkDataImportProviderTest {
                         assertEquals("http://localhost:" + myPort + "/$import-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
                 }
 
-                verify(myBulkDataImportSvc, times(1)).createNewJob(myBulkImportJobJsonCaptor.capture(), any());
+                verify(myBulkDataImportSvc, times(1)).createNewJob(myBulkImportJobJsonCaptor.capture(), myBulkImportJobFileJsonCaptor.capture());
                 BulkImportJobJson options = myBulkImportJobJsonCaptor.getValue();
                 assertEquals(1, options.getFileCount());
                 assertEquals(100, options.getBatchSize());
                 assertEquals(JobFileRowProcessingModeEnum.FHIR_TRANSACTION, options.getProcessingMode());
                 assertEquals("My Import Job", options.getJobDescription());
+                List<BulkImportJobFileJson> jobs = myBulkImportJobFileJsonCaptor.getValue();
+                assertEquals(1, jobs.size());
+                assertThat(jobs.get(0).getContents(), containsString("Pat1"));
         }
 }

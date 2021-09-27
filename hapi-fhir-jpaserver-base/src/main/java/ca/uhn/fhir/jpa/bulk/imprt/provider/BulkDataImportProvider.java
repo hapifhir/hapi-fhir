@@ -117,7 +117,7 @@ public class BulkDataImportProvider {
 
                 // We validate the NDJson by parsing it and then re-writing it.
                 // In the future, we could add a parameter to skip validation if desired.
-                String fileNDJson = myParser.encodeResourceToString(myParser.parseResource(theRequestDetails.getInputStream()));  // getInputStream
+                theJobFile.setContents(myParser.encodeResourceToString(myParser.parseResource(theRequestDetails.getInputStream())));
 
                 theInitialFiles.add(theJobFile);
 
