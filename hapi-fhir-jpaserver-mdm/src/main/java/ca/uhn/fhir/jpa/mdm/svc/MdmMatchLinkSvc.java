@@ -99,6 +99,7 @@ public class MdmMatchLinkSvc {
 			handleMdmWithSingleCandidate(theResource, firstMatch, theMdmTransactionContext);
 		} else {
 			log(theMdmTransactionContext, "MDM received multiple match candidates, that were linked to different Golden Resources. Setting POSSIBLE_DUPLICATES and POSSIBLE_MATCHES.");
+
 			//Set them all as POSSIBLE_MATCH
 			List<IAnyResource> goldenResources = new ArrayList<>();
 			for (MatchedGoldenResourceCandidate matchedGoldenResourceCandidate : theCandidateList.getCandidates()) {
@@ -112,6 +113,7 @@ public class MdmMatchLinkSvc {
 
 			//Set all GoldenResources as POSSIBLE_DUPLICATE of the last GoldenResource.
 			IAnyResource firstGoldenResource = goldenResources.get(0);
+
 			goldenResources.subList(1, goldenResources.size())
 				.forEach(possibleDuplicateGoldenResource -> {
 					MdmMatchOutcome outcome = MdmMatchOutcome.POSSIBLE_DUPLICATE;
@@ -138,6 +140,7 @@ public class MdmMatchLinkSvc {
 		if (myGoldenResourceHelper.isPotentialDuplicate(goldenResource, theTargetResource)) {
 			log(theMdmTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
 			IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(theTargetResource, theMdmTransactionContext);
+
 			myMdmLinkSvc.updateLink(newGoldenResource, theTargetResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 			myMdmLinkSvc.updateLink(newGoldenResource, goldenResource, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 		} else {
@@ -145,6 +148,7 @@ public class MdmMatchLinkSvc {
 				myGoldenResourceHelper.handleExternalEidAddition(goldenResource, theTargetResource, theMdmTransactionContext);
 				myEidUpdateService.applySurvivorshipRulesAndSaveGoldenResource(theTargetResource, goldenResource, theMdmTransactionContext);
 			}
+
 			myMdmLinkSvc.updateLink(goldenResource, theTargetResource, theGoldenResourceCandidate.getMatchResult(), MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 		}
 	}

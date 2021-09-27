@@ -7,6 +7,7 @@ import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -27,6 +28,8 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
@@ -227,5 +230,37 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		assertEquals(1, resp2.getEntry().size());
 	}
 
+	@Test
+	public void testParamWithNoValueIsConsideredForCacheResults(){
+		// Given: We populate the cache by searching
+		myClient
+			.search()
+			.byUrl("Procedure")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		// When: We search Procedure?patient=
+		BaseServerResponseException exception = assertThrows(BaseServerResponseException.class, () -> {myClient
+			.search()
+			.byUrl("Procedure?patient=")
+			.returnBundle(Bundle.class)
+			.execute();});
+
+		// Then: We do not get a cache hit
+		assertNotEquals(Constants.STATUS_HTTP_200_OK, exception.getStatusCode());
+	}
+
+	@Test
+	public void testReturn400ForParameterWithNoValue(){
+		// When: We search Procedure?patient=
+		BaseServerResponseException exception = assertThrows(BaseServerResponseException.class, () -> {myClient
+			.search()
+			.byUrl("Procedure?patient=")
+			.returnBundle(Bundle.class)
+			.execute();});
+
+		// Then: We get a HTTP 400 Bad Request
+		assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, exception.getStatusCode());
+	}
 
 }

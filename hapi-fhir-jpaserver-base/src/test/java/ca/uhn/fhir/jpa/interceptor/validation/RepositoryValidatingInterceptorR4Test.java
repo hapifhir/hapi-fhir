@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.interceptor.validation;
 
-import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -292,6 +291,33 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testRequireValidation_AdditionalOptions_Reject_UnKnown_Extensions() {
+		List<IRepositoryValidatingRule> rules = newRuleBuilder()
+			.forResourcesOfType("Observation")
+			.requireValidationToDeclaredProfiles()
+			.withBestPracticeWarningLevel("IGNORE")
+			.rejectUnknownExtensions()
+			.disableTerminologyChecks()
+			.errorOnUnknownProfiles()
+			.suppressNoBindingMessage()
+			.suppressWarningForExtensibleValueSetValidation()
+			.build();
+
+		myValInterceptor.setRules(rules);
+
+		Observation obs = new Observation();
+		obs.getCode().addCoding().setSystem("http://foo").setCode("123").setDisplay("help im a bug");
+		obs.setStatus(Observation.ObservationStatus.AMENDED);
+		try {
+			IIdType id = myObservationDao.create(obs).getId();
+			assertEquals("1", id.getVersionIdPart());
+		} catch (PreconditionFailedException e) {
+			// should not happen
+			fail(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+		}
+	}
+
+	@Test
 	public void testRequireValidation_FailNoRejectAndTag() {
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
 			.forResourcesOfType("Observation")
@@ -361,7 +387,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 
 
 	private RepositoryValidatingRuleBuilder newRuleBuilder() {
-		return myApplicationContext.getBean(BaseConfig.REPOSITORY_VALIDATING_RULE_BUILDER, RepositoryValidatingRuleBuilder.class);
+		return myApplicationContext.getBean(RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER, RepositoryValidatingRuleBuilder.class);
 	}
 
 }

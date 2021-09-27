@@ -1,0 +1,6 @@
+---
+type: change
+issue: 2991
+title: "This PR eliminates the search coordinator threadpool, and executes searches synchronously on the HTTP client 
+   thread. The idea of using a separate pool was supposed to help improve server scalability, but ultimately created
+   false bottlenecks and reduced the utility of monitoring infrastructure so it has been eliminated."

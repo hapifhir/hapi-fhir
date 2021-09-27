@@ -49,7 +49,7 @@ public class MessageClientDstu2Test {
 
     @AfterAll
     public static void afterClassClearContext() {
-        TestUtil.clearAllStaticFieldsForUnitTest();
+        TestUtil.randomizeLocaleAndTimezone();
     }
 
     @BeforeEach

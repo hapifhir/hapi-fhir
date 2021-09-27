@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
+import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
@@ -72,6 +73,8 @@ public class TransactionProcessorTest {
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@MockBean
 	private IResourceVersionSvc myResourceVersionSvc;
+	@MockBean
+	private SearchParamMatcher mySearchParamMatcher;
 
 	@MockBean(answer = Answers.RETURNS_DEEP_STUBS)
 	private SessionImpl mySession;
@@ -141,7 +144,7 @@ public class TransactionProcessorTest {
 		}
 
 		@Bean
-		public BaseTransactionProcessor.ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> versionAdapter() {
+		public ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> versionAdapter() {
 			return new TransactionProcessorVersionAdapterR4();
 		}
 

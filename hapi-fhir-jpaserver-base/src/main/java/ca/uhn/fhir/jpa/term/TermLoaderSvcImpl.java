@@ -40,7 +40,6 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
@@ -68,6 +67,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.Reader;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -417,7 +417,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	Properties getProperties(LoadedFileDescriptors theDescriptors, String thePropertiesFile) {
 		Properties retVal = new Properties();
 
-		try (InputStream propertyStream = TermLoaderSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/loinc/loincupload.properties")) {
+		try (InputStream propertyStream = ca.uhn.fhir.jpa.term.TermLoaderSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/loinc/loincupload.properties")) {
 			retVal.load(propertyStream);
 		} catch (IOException e) {
 			throw new InternalErrorException("Failed to process loinc.properties", e);
@@ -558,15 +558,19 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		final List<LoincLinguisticVariantsHandler.LinguisticVariant> linguisticVariants = new ArrayList<>();
 
-		LoincXmlFileZipContentsHandler loincXmlHandler = new LoincXmlFileZipContentsHandler();
+		LoincXmlFileZipContentsHandler loincXmlHandler = getLoincXmlFileZipContentsHandler();
 		iterateOverZipFile(theDescriptors, "loinc.xml", false, false, loincXmlHandler);
 		String loincCsString = loincXmlHandler.getContents();
-
 		if (isBlank(loincCsString)) {
-			ourLog.warn("Did not find loinc.xml in the ZIP distribution. Using built-in copy");
-			loincCsString = ClasspathUtil.loadResource("/ca/uhn/fhir/jpa/term/loinc/loinc.xml");
+			throw new InvalidRequestException("Did not find loinc.xml in the ZIP distribution.");
 		}
+
 		CodeSystem loincCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, loincCsString);
+		if (isNotBlank(loincCs.getVersion())) {
+			throw new InvalidRequestException("'loinc.xml' file must not have a version defined. To define a version use '" +
+				LOINC_CODESYSTEM_VERSION.getCode() + "' property of 'loincupload.properties' file");
+		}
+
 		String codeSystemVersionId = theUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
 		if (codeSystemVersionId != null) {
 			loincCs.setVersion(codeSystemVersionId);
@@ -703,6 +707,12 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		return new UploadStatistics(conceptCount, target);
 	}
 
+	@VisibleForTesting
+	protected LoincXmlFileZipContentsHandler getLoincXmlFileZipContentsHandler() {
+		return new LoincXmlFileZipContentsHandler();
+	}
+
+
 	private ValueSet getValueSetLoincAll(Properties theUploadProperties) {
 		ValueSet retVal = new ValueSet();
 
@@ -723,7 +733,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		retVal.setPublisher("Regenstrief Institute, Inc.");
 		retVal.setDescription("A value set that includes all LOINC codes");
 		retVal.setCopyright("This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/");
-		retVal.getCompose().addInclude().setSystem(ITermLoaderSvc.LOINC_URI);
+		retVal.getCompose().addInclude().setSystem(ITermLoaderSvc.LOINC_URI).setVersion(codeSystemVersionId);
 
 		return retVal;
 	}

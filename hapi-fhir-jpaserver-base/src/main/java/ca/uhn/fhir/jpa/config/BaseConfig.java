@@ -11,9 +11,9 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.batch.BatchConstants;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.config.NonPersistedBatchConfigurer;
 import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
 import ca.uhn.fhir.jpa.batch.mdm.MdmBatchJobSubmitterFactoryImpl;
@@ -123,6 +123,7 @@ import ca.uhn.fhir.jpa.search.cache.DatabaseSearchResultCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.elastic.IndexNamePrefixLayoutStrategy;
+import ca.uhn.fhir.jpa.search.reindex.BlockPolicy;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexer;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
@@ -217,7 +218,6 @@ public abstract class BaseConfig {
 	public static final String PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER = "PersistedJpaSearchFirstPageBundleProvider";
 	public static final String SEARCH_BUILDER = "SearchBuilder";
 	public static final String HISTORY_BUILDER = "HistoryBuilder";
-	public static final String REPOSITORY_VALIDATING_RULE_BUILDER = "repositoryValidatingRuleBuilder";
 	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
 	@Autowired
 	protected Environment myEnv;
@@ -381,17 +381,6 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public ThreadPoolTaskExecutor searchCoordinatorThreadFactory() {
-		final ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
-		threadPoolTaskExecutor.setThreadNamePrefix("search_coord_");
-		threadPoolTaskExecutor.setCorePoolSize(searchCoordCorePoolSize);
-		threadPoolTaskExecutor.setMaxPoolSize(searchCoordMaxPoolSize);
-		threadPoolTaskExecutor.setQueueCapacity(searchCoordQueueCapacity);
-		threadPoolTaskExecutor.initialize();
-		return threadPoolTaskExecutor;
-	}
-
-	@Bean
 	public TaskScheduler taskScheduler() {
 		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
 		retVal.setConcurrentExecutor(scheduledExecutorService().getObject());
@@ -415,7 +404,7 @@ public abstract class BaseConfig {
 		asyncTaskExecutor.setQueueCapacity(0);
 		asyncTaskExecutor.setAllowCoreThreadTimeOut(true);
 		asyncTaskExecutor.setThreadNamePrefix("JobLauncher-");
-		asyncTaskExecutor.setRejectedExecutionHandler(new ResourceReindexingSvcImpl.BlockPolicy());
+		asyncTaskExecutor.setRejectedExecutionHandler(new BlockPolicy());
 		asyncTaskExecutor.initialize();
 		return asyncTaskExecutor;
 	}
@@ -650,7 +639,7 @@ public abstract class BaseConfig {
 		return new PersistedJpaSearchFirstPageBundleProvider(theSearch, theSearchTask, theSearchBuilder, theRequest);
 	}
 
-	@Bean(name = REPOSITORY_VALIDATING_RULE_BUILDER)
+	@Bean(name = RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER)
 	@Scope("prototype")
 	public RepositoryValidatingRuleBuilder repositoryValidatingRuleBuilder() {
 		return new RepositoryValidatingRuleBuilder();
@@ -851,8 +840,8 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public ISearchCoordinatorSvc searchCoordinatorSvc(ThreadPoolTaskExecutor searchCoordinatorThreadFactory) {
-		return new SearchCoordinatorSvcImpl(searchCoordinatorThreadFactory);
+	public ISearchCoordinatorSvc searchCoordinatorSvc() {
+		return new SearchCoordinatorSvcImpl();
 	}
 
 	@Bean
