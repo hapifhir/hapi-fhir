@@ -235,6 +235,15 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		return job.toJson();
 	}
 
+        @Override
+        public JobInfo getJobStatus(String theJobId) {
+                BulkImportJobEntity theJob = findJobByJobId(theJobId);
+                return new JobInfo()
+                        .setStatus(theJob.getStatus())
+                        .setStatusMessage(theJob.getStatusMessage())
+                        .setStatusTime(theJob.getStatusTime());
+        }
+
 	@Transactional
 	@Override
 	public BulkImportJobFileJson fetchFile(String theJobId, int theFileIndex) {
@@ -307,6 +316,4 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 			myTarget.activateNextReadyJob();
 		}
 	}
-
-
 }
