@@ -100,30 +100,6 @@ public class TransactionProcessorTest {
 	}
 
 
-
-	@Test
-	public void testTransactionWithPlaceholderIds() {
-
-
-		BundleBuilder bb = new BundleBuilder(myFhirCtx);
-		for (int i = 0; i < 100; i++) {
-			Patient pt = new Patient();
-			pt.setId(IdType.newRandomUuid());
-			pt.addIdentifier().setSystem("http://foo").setValue("val" + i);
-			bb.addTransactionCreateEntry(pt);
-
-			Observation obs = new Observation();
-			obs.setId(IdType.newRandomUuid());
-			obs.setSubject(new Reference(pt.getId()));
-			bb.addTransactionCreateEntry(obs);
-		}
-		Bundle bundle = (Bundle) bb.getBundle();
-
-		Bundle outcome = myTransactionProcessor.transaction(null, bundle, false);
-
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-	}
-
 	@Test
 	public void testTransactionWithDisabledResourceType() {
 
