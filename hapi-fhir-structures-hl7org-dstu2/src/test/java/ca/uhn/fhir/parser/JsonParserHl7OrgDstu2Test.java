@@ -11,25 +11,48 @@ import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
-import org.hl7.fhir.dstu2.model.*;
+import org.hl7.fhir.dstu2.model.Address;
 import org.hl7.fhir.dstu2.model.Address.AddressUse;
 import org.hl7.fhir.dstu2.model.Address.AddressUseEnumFactory;
+import org.hl7.fhir.dstu2.model.Binary;
+import org.hl7.fhir.dstu2.model.Bundle;
 import org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu2.model.CodeableConcept;
+import org.hl7.fhir.dstu2.model.Conformance;
 import org.hl7.fhir.dstu2.model.Conformance.UnknownContentCode;
+import org.hl7.fhir.dstu2.model.DateTimeType;
+import org.hl7.fhir.dstu2.model.DateType;
+import org.hl7.fhir.dstu2.model.DecimalType;
+import org.hl7.fhir.dstu2.model.DiagnosticReport;
+import org.hl7.fhir.dstu2.model.EnumFactory;
+import org.hl7.fhir.dstu2.model.Enumeration;
+import org.hl7.fhir.dstu2.model.Extension;
+import org.hl7.fhir.dstu2.model.HumanName;
 import org.hl7.fhir.dstu2.model.Identifier.IdentifierUse;
+import org.hl7.fhir.dstu2.model.InstantType;
+import org.hl7.fhir.dstu2.model.List_;
 import org.hl7.fhir.dstu2.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.dstu2.model.Observation;
+import org.hl7.fhir.dstu2.model.Organization;
+import org.hl7.fhir.dstu2.model.Patient;
 import org.hl7.fhir.dstu2.model.Patient.ContactComponent;
+import org.hl7.fhir.dstu2.model.PrimitiveType;
+import org.hl7.fhir.dstu2.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu2.model.QuestionnaireResponse.QuestionAnswerComponent;
+import org.hl7.fhir.dstu2.model.Reference;
+import org.hl7.fhir.dstu2.model.Specimen;
+import org.hl7.fhir.dstu2.model.StringType;
+import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu2.model.ValueSet.ValueSetCodeSystemComponent;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -61,7 +84,7 @@ public class JsonParserHl7OrgDstu2Test {
 
   @AfterAll
   public static void afterClassClearContext() {
-    TestUtil.clearAllStaticFieldsForUnitTest();
+    TestUtil.randomizeLocaleAndTimezone();
   }
   
 	@Test
