@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.bulk;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
+import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.imprt.provider.BulkDataImportProvider;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
@@ -13,6 +14,8 @@ import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import com.google.common.base.Charsets;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.client.entity.EntityBuilder;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -25,6 +28,7 @@ import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.StringType;
 
@@ -47,6 +51,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -168,5 +173,114 @@ public class BulkDataImportProviderTest {
                 List<BulkImportJobFileJson> jobs = myBulkImportJobFileJsonCaptor.getValue();
                 assertEquals(1, jobs.size());
                 assertThat(jobs.get(0).getContents(), containsString("Pat1"));
+        }
+
+	@Test
+	public void testPollForStatus_STAGING() throws IOException {
+
+		IBulkDataImportSvc.JobInfo jobInfo = new IBulkDataImportSvc.JobInfo()
+			.setStatus(BulkImportJobStatusEnum.STAGING)
+			.setStatusTime(InstantType.now().getValue());
+		when(myBulkDataImportSvc.getJobStatus(eq(A_JOB_ID))).thenReturn(jobInfo);
+
+		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
+			JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
+		HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		try (CloseableHttpResponse response = myClient.execute(get)) {
+			ourLog.info("Response: {}", response.toString());
+
+			assertEquals(202, response.getStatusLine().getStatusCode());
+			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
+			assertEquals("120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
+			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue(), containsString("Status set to STAGING at 20"));
+		}
+	}
+
+        @Test
+        public void testPollForStatus_READY() throws IOException {
+
+                IBulkDataImportSvc.JobInfo jobInfo = new IBulkDataImportSvc.JobInfo()
+                        .setStatus(BulkImportJobStatusEnum.READY)
+                        .setStatusTime(InstantType.now().getValue());
+                when(myBulkDataImportSvc.getJobStatus(eq(A_JOB_ID))).thenReturn(jobInfo);
+
+                String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
+                        JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
+                HttpGet get = new HttpGet(url);
+                get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+                try (CloseableHttpResponse response = myClient.execute(get)) {
+                        ourLog.info("Response: {}", response.toString());
+
+                        assertEquals(202, response.getStatusLine().getStatusCode());
+                        assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
+                        assertEquals("120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
+                        assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue(), containsString("Status set to READY at 20"));
+                }
+        }
+
+        @Test
+        public void testPollForStatus_RUNNING() throws IOException {
+
+                IBulkDataImportSvc.JobInfo jobInfo = new IBulkDataImportSvc.JobInfo()
+                        .setStatus(BulkImportJobStatusEnum.RUNNING)
+                        .setStatusTime(InstantType.now().getValue());
+                when(myBulkDataImportSvc.getJobStatus(eq(A_JOB_ID))).thenReturn(jobInfo);
+
+                String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
+                        JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
+                HttpGet get = new HttpGet(url);
+                get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+                try (CloseableHttpResponse response = myClient.execute(get)) {
+                        ourLog.info("Response: {}", response.toString());
+
+                        assertEquals(202, response.getStatusLine().getStatusCode());
+                        assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
+                        assertEquals("120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
+                        assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue(), containsString("Status set to RUNNING at 20"));
+                }
+        }
+
+        @Test
+        public void testPollForStatus_COMPLETE() throws IOException {
+                IBulkDataImportSvc.JobInfo jobInfo = new IBulkDataImportSvc.JobInfo()
+                        .setStatus(BulkImportJobStatusEnum.COMPLETE)
+                        .setStatusTime(InstantType.now().getValue());
+                when(myBulkDataImportSvc.getJobStatus(eq(A_JOB_ID))).thenReturn(jobInfo);
+
+                String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
+                        JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
+                HttpGet get = new HttpGet(url);
+                get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+                try (CloseableHttpResponse response = myClient.execute(get)) {
+                        ourLog.info("Response: {}", response.toString());
+
+                        assertEquals(200, response.getStatusLine().getStatusCode());
+                        assertEquals("OK", response.getStatusLine().getReasonPhrase());
+                        assertThat(response.getEntity().getContentType().getValue(), containsString(Constants.CT_FHIR_JSON));
+                }
+        }
+
+        @Test
+        public void testPollForStatus_ERROR() throws IOException {
+                IBulkDataImportSvc.JobInfo jobInfo = new IBulkDataImportSvc.JobInfo()
+                        .setStatus(BulkImportJobStatusEnum.ERROR)
+                        .setStatusMessage("It failed.")
+                        .setStatusTime(InstantType.now().getValue());
+                when(myBulkDataImportSvc.getJobStatus(eq(A_JOB_ID))).thenReturn(jobInfo);
+
+                String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
+                        JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
+                HttpGet get = new HttpGet(url);
+                get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+                try (CloseableHttpResponse response = myClient.execute(get)) {
+                        ourLog.info("Response: {}", response.toString());
+
+                        assertEquals(500, response.getStatusLine().getStatusCode());
+                        assertEquals("Server Error", response.getStatusLine().getReasonPhrase());
+                        String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+                        ourLog.info("Response content: {}", responseContent);
+                        assertThat(responseContent, containsString("\"diagnostics\": \"It failed.\""));
+                }
         }
 }
