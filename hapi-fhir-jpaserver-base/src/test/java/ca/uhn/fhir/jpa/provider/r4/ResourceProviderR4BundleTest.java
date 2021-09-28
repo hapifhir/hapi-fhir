@@ -118,10 +118,8 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testHighConcurrencyWorks() throws IOException, InterruptedException {
-		myDaoConfig.setBundleBatchPoolSize(20);
-		myDaoConfig.setBundleBatchMaxPoolSize(100);
 		List<Bundle> bundles = new ArrayList<>();
-		for (int i =0 ; i < 20; i ++) {
+		for (int i =0 ; i < 10; i ++) {
 			bundles.add(myFhirCtx.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/r4/identical-tags-batch.json"), Charsets.UTF_8)));
 		}
 
