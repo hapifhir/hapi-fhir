@@ -19,10 +19,10 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.mockito.invocation.InvocationOnMock;
@@ -43,7 +43,7 @@ public class ClientWithCustomTypeDstu3Test {
 
   @AfterAll
   public static void afterClassClearContext() {
-    TestUtil.clearAllStaticFieldsForUnitTest();
+    TestUtil.randomizeLocaleAndTimezone();
   }
 
   @BeforeEach

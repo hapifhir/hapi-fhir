@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.interceptor.validation;
 
-import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -388,7 +387,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 
 
 	private RepositoryValidatingRuleBuilder newRuleBuilder() {
-		return myApplicationContext.getBean(BaseConfig.REPOSITORY_VALIDATING_RULE_BUILDER, RepositoryValidatingRuleBuilder.class);
+		return myApplicationContext.getBean(RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER, RepositoryValidatingRuleBuilder.class);
 	}
 
 }

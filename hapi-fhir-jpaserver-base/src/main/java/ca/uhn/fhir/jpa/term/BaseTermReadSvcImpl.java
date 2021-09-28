@@ -28,6 +28,7 @@ import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
@@ -54,6 +55,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptPropertyTypeEnum;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
+import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -123,6 +125,7 @@ import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -138,6 +141,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
@@ -157,6 +161,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -176,6 +181,7 @@ import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.lowerCase;
 import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 
 public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	public static final int DEFAULT_FETCH_SIZE = 250;
@@ -196,7 +202,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@Autowired
 	protected ITermConceptDesignationDao myConceptDesignationDao;
 	@Autowired
-	protected ITermValueSetDao myValueSetDao;
+	protected ITermValueSetDao myTermValueSetDao;
 	@Autowired
 	protected ITermValueSetConceptDao myValueSetConceptDao;
 	@Autowired
@@ -339,7 +345,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	public void deleteValueSetForResource(ResourceTable theResourceTable) {
 		// Get existing entity so it can be deleted.
-		Optional<TermValueSet> optionalExistingTermValueSetById = myValueSetDao.findByResourcePid(theResourceTable.getId());
+		Optional<TermValueSet> optionalExistingTermValueSetById = myTermValueSetDao.findByResourcePid(theResourceTable.getId());
 
 		if (optionalExistingTermValueSetById.isPresent()) {
 			TermValueSet existingTermValueSet = optionalExistingTermValueSetById.get();
@@ -347,7 +353,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			ourLog.info("Deleting existing TermValueSet[{}] and its children...", existingTermValueSet.getId());
 			myValueSetConceptDesignationDao.deleteByTermValueSetId(existingTermValueSet.getId());
 			myValueSetConceptDao.deleteByTermValueSetId(existingTermValueSet.getId());
-			myValueSetDao.deleteById(existingTermValueSet.getId());
+			myTermValueSetDao.deleteById(existingTermValueSet.getId());
 			ourLog.info("Done deleting existing TermValueSet[{}] and its children.", existingTermValueSet.getId());
 		}
 	}
@@ -443,14 +449,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		Optional<TermValueSet> optionalTermValueSet;
 		if (theValueSetToExpand.hasUrl()) {
 			if (theValueSetToExpand.hasVersion()) {
-				optionalTermValueSet = myValueSetDao.findTermValueSetByUrlAndVersion(theValueSetToExpand.getUrl(), theValueSetToExpand.getVersion());
+				optionalTermValueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(theValueSetToExpand.getUrl(), theValueSetToExpand.getVersion());
 			} else {
-				List<TermValueSet> termValueSets = myValueSetDao.findTermValueSetByUrl(PageRequest.of(0, 1), theValueSetToExpand.getUrl());
-				if (termValueSets.size() > 0) {
-					optionalTermValueSet = Optional.of(termValueSets.get(0));
-				} else {
-					optionalTermValueSet = Optional.empty();
-				}
+				optionalTermValueSet = findCurrentTermValueSet(theValueSetToExpand.getUrl());
 			}
 		} else {
 			optionalTermValueSet = Optional.empty();
@@ -1455,7 +1456,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@Override
 	public boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet) {
 		ResourcePersistentId valueSetResourcePid = myConceptStorageSvc.getValueSetResourcePid(theValueSet.getIdElement());
-		Optional<TermValueSet> optionalTermValueSet = myValueSetDao.findByResourcePid(valueSetResourcePid.getIdAsLong());
+		Optional<TermValueSet> optionalTermValueSet = myTermValueSetDao.findByResourcePid(valueSetResourcePid.getIdAsLong());
 
 		if (!optionalTermValueSet.isPresent()) {
 			ourLog.warn("ValueSet is not present in terminology tables. Will perform in-memory code validation. {}", getValueSetInfo(theValueSet));
@@ -1760,7 +1761,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 				TermValueSet termValueSet = optionalTermValueSet.get();
 				termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS);
-				return myValueSetDao.saveAndFlush(termValueSet);
+				return myTermValueSetDao.saveAndFlush(termValueSet);
 			});
 			if (valueSetToExpand == null) {
 				return;
@@ -1769,18 +1770,18 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			// We have a ValueSet to pre-expand.
 			try {
 				ValueSet valueSet = txTemplate.execute(t -> {
-					TermValueSet refreshedValueSetToExpand = myValueSetDao.findById(valueSetToExpand.getId()).orElseThrow(() -> new IllegalStateException("Unknown VS ID: " + valueSetToExpand.getId()));
+					TermValueSet refreshedValueSetToExpand = myTermValueSetDao.findById(valueSetToExpand.getId()).orElseThrow(() -> new IllegalStateException("Unknown VS ID: " + valueSetToExpand.getId()));
 					return getValueSetFromResourceTable(refreshedValueSetToExpand.getResource());
 				});
 				assert valueSet != null;
 
-				ValueSetConceptAccumulator accumulator = new ValueSetConceptAccumulator(valueSetToExpand, myValueSetDao, myValueSetConceptDao, myValueSetConceptDesignationDao);
+				ValueSetConceptAccumulator accumulator = new ValueSetConceptAccumulator(valueSetToExpand, myTermValueSetDao, myValueSetConceptDao, myValueSetConceptDesignationDao);
 				expandValueSet(null, valueSet, accumulator);
 
 				// We are done with this ValueSet.
 				txTemplate.execute(t -> {
 					valueSetToExpand.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANDED);
-					myValueSetDao.saveAndFlush(valueSetToExpand);
+					myTermValueSetDao.saveAndFlush(valueSetToExpand);
 					return null;
 				});
 
@@ -1790,7 +1791,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				ourLog.error("Failed to pre-expand ValueSet: " + e.getMessage(), e);
 				txTemplate.execute(t -> {
 					valueSetToExpand.setExpansionStatus(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND);
-					myValueSetDao.saveAndFlush(valueSetToExpand);
+					myTermValueSetDao.saveAndFlush(valueSetToExpand);
 					return null;
 				});
 			}
@@ -1873,7 +1874,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	private Optional<TermValueSet> getNextTermValueSetNotExpanded() {
 		Optional<TermValueSet> retVal = Optional.empty();
-		Slice<TermValueSet> page = myValueSetDao.findByExpansionStatus(PageRequest.of(0, 1), TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
+		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 1), TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
 
 		if (!page.getContent().isEmpty()) {
 			retVal = Optional.of(page.getContent().get(0));
@@ -1914,13 +1915,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		String version = termValueSet.getVersion();
 		Optional<TermValueSet> optionalExistingTermValueSetByUrl;
 		if (version != null) {
-			optionalExistingTermValueSetByUrl = myValueSetDao.findTermValueSetByUrlAndVersion(url, version);
+			optionalExistingTermValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion(url, version);
 		} else {
-			optionalExistingTermValueSetByUrl = myValueSetDao.findTermValueSetByUrlAndNullVersion(url);
+			optionalExistingTermValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndNullVersion(url);
 		}
 		if (!optionalExistingTermValueSetByUrl.isPresent()) {
 
-			myValueSetDao.save(termValueSet);
+			myTermValueSetDao.save(termValueSet);
 
 		} else {
 			TermValueSet existingTermValueSet = optionalExistingTermValueSetByUrl.get();
@@ -2037,7 +2038,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		});
 	}
 
-	
+
 	@Nullable
 	private ConceptSubsumptionOutcome testForSubsumption(SearchSession theSearchSession, TermConcept theLeft, TermConcept theRight, ConceptSubsumptionOutcome theOutput) {
 		List<TermConcept> fetch = theSearchSession.search(TermConcept.class)
@@ -2338,6 +2339,32 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return codeSystemValidateCode(codeSystemUrl, theVersion, code, display);
 	}
 
+
+	/**
+	 * When the search is for unversioned loinc system it uses the forcedId to obtain the current
+	 * version, as it is not necessarily the last  one anymore.
+	 * For other cases it keeps on considering the last uploaded as the current
+	 */
+	@Override
+	public Optional<TermValueSet> findCurrentTermValueSet(String theUrl) {
+		if (TermReadSvcUtil.isLoincNotGenericUnversionedValueSet(theUrl)) {
+			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId(theUrl);
+			if (! vsIdOpt.isPresent()) {
+				return Optional.empty();
+			}
+
+			return myTermValueSetDao.findTermValueSetByForcedId(vsIdOpt.get());
+		}
+
+		List<TermValueSet> termValueSetList = myTermValueSetDao.findTermValueSetByUrl(Pageable.ofSize(1), theUrl);
+		if (termValueSetList.isEmpty()) {
+			return Optional.empty();
+		}
+
+		return Optional.of(termValueSetList.get(0));
+	}
+
+
 	@SuppressWarnings("unchecked")
 	private CodeValidationResult codeSystemValidateCode(String theCodeSystemUrl, String theCodeSystemVersion, String theCode, String theDisplay) {
 
@@ -2364,10 +2391,16 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			predicates.add(criteriaBuilder.equal(systemJoin.get("myCodeSystemUri"), theCodeSystemUrl));
 		}
 
+		// for loinc CodeSystem last version is not necessarily the current anymore, so if no version is present
+		// we need to query for the current, which is that which version is null
 		if (isNoneBlank(theCodeSystemVersion)) {
 			predicates.add(criteriaBuilder.equal(systemVersionJoin.get("myCodeSystemVersionId"), theCodeSystemVersion));
 		} else {
-			query.orderBy(criteriaBuilder.desc(root.get("myUpdated")));
+			if (theCodeSystemUrl.toLowerCase(Locale.ROOT).contains(LOINC_LOW)) {
+				predicates.add(criteriaBuilder.isNull(systemVersionJoin.get("myCodeSystemVersionId")));
+			} else {
+				query.orderBy(criteriaBuilder.desc(root.get("myUpdated")));
+			}
 		}
 
 		Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
@@ -2489,7 +2522,26 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		// NOTE: return the designation when one of then is not specified.
 		if (theReqLang == null || theStoredLang == null)
 			return true;
-		
+
 		return theReqLang.equalsIgnoreCase(theStoredLang);
     }
+
+
+	@Override
+	public Optional<IBaseResource> readCodeSystemByForcedId(String theForcedId) {
+		@SuppressWarnings("unchecked")
+		List<ResourceTable> resultList = (List<ResourceTable>) myEntityManager.createQuery(
+			"select f.myResource from ForcedId f " +
+				"where f.myResourceType = 'CodeSystem' and f.myForcedId = '" + theForcedId + "'").getResultList();
+		if (resultList.isEmpty())  return Optional.empty();
+
+		if (resultList.size() > 1)  throw new NonUniqueResultException(
+			"More than one CodeSystem is pointed by forcedId: " + theForcedId + ". Was constraint "
+				+ ForcedId.IDX_FORCEDID_TYPE_FID + " removed?");
+
+		IFhirResourceDao<CodeSystem> csDao = myDaoRegistry.getResourceDao("CodeSystem");
+		IBaseResource cs = csDao.toResource(resultList.get(0), false);
+		return Optional.of(cs );
+	}
+
 }

@@ -48,8 +48,6 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class MdmMessageHandler implements MessageHandler {
 

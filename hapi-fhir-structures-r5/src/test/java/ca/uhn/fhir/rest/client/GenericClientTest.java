@@ -35,14 +35,26 @@ import org.apache.http.message.BasicStatusLine;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.*;
+import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleType;
 import org.hl7.fhir.r5.model.Bundle.HTTPVerb;
-import org.junit.jupiter.api.Test;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.Encounter;
+import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.InstantType;
+import org.hl7.fhir.r5.model.MessageHeader;
+import org.hl7.fhir.r5.model.Observation;
+import org.hl7.fhir.r5.model.OperationOutcome;
+import org.hl7.fhir.r5.model.Organization;
+import org.hl7.fhir.r5.model.Parameters;
+import org.hl7.fhir.r5.model.Patient;
+import org.hl7.fhir.r5.model.Provenance;
+import org.hl7.fhir.r5.model.StringType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.mockito.invocation.InvocationOnMock;
@@ -1826,7 +1838,7 @@ public class GenericClientTest {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	@BeforeAll

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.batch.job;
  */
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.job.model.PartitionedUrl;
 import ca.uhn.fhir.jpa.batch.job.model.RequestListJson;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -28,8 +29,6 @@ import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.JobParametersValidator;
-
-import static ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader.JOB_PARAM_REQUEST_LIST;
 
 /**
  * This class will prevent a job from running any of the provided URLs are not valid on this server.
@@ -50,7 +49,7 @@ public class MultiUrlJobParameterValidator implements JobParametersValidator {
 			throw new JobParametersInvalidException("This job requires Parameters: [urlList]");
 		}
 
-		RequestListJson requestListJson = RequestListJson.fromJson(theJobParameters.getString(JOB_PARAM_REQUEST_LIST));
+		RequestListJson requestListJson = RequestListJson.fromJson(theJobParameters.getString(BatchConstants.JOB_PARAM_REQUEST_LIST));
 		for (PartitionedUrl partitionedUrl : requestListJson.getPartitionedUrls()) {
 			String url = partitionedUrl.getUrl();
 			try {
@@ -60,7 +59,7 @@ public class MultiUrlJobParameterValidator implements JobParametersValidator {
 					throw new JobParametersInvalidException("The resource type " + resourceName + " is not supported on this server.");
 				}
 			} catch (UnsupportedOperationException e) {
-				throw new JobParametersInvalidException("Failed to parse " + theJobParameters.getString(JOB_PARAM_OPERATION_NAME) + " " + JOB_PARAM_REQUEST_LIST + " item " + url + ": " + e.getMessage());
+				throw new JobParametersInvalidException("Failed to parse " + theJobParameters.getString(JOB_PARAM_OPERATION_NAME) + " " + BatchConstants.JOB_PARAM_REQUEST_LIST + " item " + url + ": " + e.getMessage());
 			}
 		}
 	}

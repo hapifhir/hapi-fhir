@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.bulk.imprt.job;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ public class BulkImportPartitioner implements Partitioner {
 
 	private static final Logger ourLog = getLogger(BulkImportPartitioner.class);
 
-	@Value("#{jobParameters['" + BulkExportJobConfig.JOB_UUID_PARAMETER + "']}")
+	@Value("#{jobParameters['" + BatchConstants.JOB_UUID_PARAMETER + "']}")
 	private String myJobUUID;
 
 	@Autowired
@@ -61,7 +61,7 @@ public class BulkImportPartitioner implements Partitioner {
 			String fileDescription = myBulkDataImportSvc.getFileDescription(myJobUUID, i);
 
 			ExecutionContext context = new ExecutionContext();
-			context.putString(BulkExportJobConfig.JOB_UUID_PARAMETER, myJobUUID);
+			context.putString(BatchConstants.JOB_UUID_PARAMETER, myJobUUID);
 			context.putInt(FILE_INDEX, i);
 			context.put(ROW_PROCESSING_MODE, job.getProcessingMode());
 			context.put(JOB_DESCRIPTION, job.getJobDescription());
