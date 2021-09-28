@@ -306,6 +306,46 @@ public class SearchNarrowingInterceptorTest {
 		assertNull(ourLastHitMethod);
 	}
 
+	@Test
+	public void testNarrowObservationsByPatientContext_ClientRequestedBadParameter() {
+
+		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
+
+		try {
+			ourClient
+				.search()
+				.forResource("Observation")
+				.where(Observation.PATIENT.hasAnyOfIds("Patient/"))
+				.execute();
+
+			fail("Expected a 403 error");
+		} catch (ForbiddenOperationException e) {
+			assertEquals(Constants.STATUS_HTTP_403_FORBIDDEN, e.getStatusCode());
+		}
+
+		assertNull(ourLastHitMethod);
+	}
+
+	@Test
+	public void testNarrowObservationsByPatientContext_ClientRequestedBadPermission() {
+
+		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/");
+
+		try {
+			ourClient
+				.search()
+				.forResource("Observation")
+				.where(Observation.PATIENT.hasAnyOfIds("Patient/111", "Patient/777"))
+				.execute();
+
+			fail("Expected a 403 error");
+		} catch (ForbiddenOperationException e) {
+			assertEquals(Constants.STATUS_HTTP_403_FORBIDDEN, e.getStatusCode());
+		}
+
+		assertNull(ourLastHitMethod);
+	}
+
 	private List<String> toStrings(BaseAndListParam<? extends IQueryParameterOr<?>> theParams) {
 		List<? extends IQueryParameterOr<? extends IQueryParameterType>> valuesAsQueryTokens = theParams.getValuesAsQueryTokens();
 
