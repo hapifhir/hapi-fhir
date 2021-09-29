@@ -1202,12 +1202,6 @@
 				<classifier>jdk15-sources</classifier>
 			</dependency>
 			<dependency>
-				<groupId>net.sf.saxon</groupId>
-				<artifactId>Saxon-HE</artifactId>
-				<!-- <version>9.8.0-3</version> -->
-				<version>${servicemix_saxon_version}</version>
-			</dependency>
-			<dependency>
 				<groupId>net.ttddyy</groupId>
 				<artifactId>datasource-proxy</artifactId>
 				<version>1.7</version>

@@ -70,11 +70,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>net.sf.saxon</groupId>
-			<artifactId>Saxon-HE</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
 			<groupId>xpp3</groupId>
 			<artifactId>xpp3</artifactId>
 			<optional>true</optional>
