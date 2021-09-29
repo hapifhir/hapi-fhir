@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
@@ -10,13 +12,18 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
+import ca.uhn.fhir.jpa.rp.r4.PatientResourceProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -29,6 +36,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
+import com.helger.collection.iterate.ArrayEnumeration;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -70,9 +78,12 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -80,12 +91,15 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -4364,5 +4378,72 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	}
 
+	@Autowired
+	private PatientResourceProvider myPatientResourceProvider;
+
+	@Test
+	public void doEverything_withMdmTrue_returnsGoldenResourcesAndLinkedResources_IntegratonTest() {
+		// create goldenpatient
+		Patient golden = new Patient();
+		// create outcomes use the server id
+		// (which is the same as PID)
+		MethodOutcome goldenOutcome = myPatientDao.create(golden);
+		HashMap<String, String[]> queryParams = new HashMap<>();
+		queryParams.put(JpaConstants.PARAM_EXPORT_MDM,
+			new String[] { "true" });
+
+		Long goldenPid = goldenOutcome.getId().getIdPartAsLong();
+
+		// create some other patients
+		// and link them to the golden patient
+		for (int i = 0; i < 3; i++) {
+			// create patient
+			Patient patient = new Patient();
+			patient.addName().setFamily("FAM" + i);
+			DaoMethodOutcome outcome = myPatientDao.create(patient);
+
+			// link patient
+			Long patId = outcome.getId().getIdPartAsLong();
+			linkResourceToGoldenResource(goldenPid, patId);
+		}
+
+		HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
+		Mockito.when(req.getHeaderNames())
+			.thenReturn(new ArrayEnumeration<>());
+		RequestDetails reqDetails = Mockito.mock(RequestDetails.class);
+		Mockito.when(reqDetails.getParameters())
+			.thenReturn(queryParams);
+
+		IBundleProvider bundle = myPatientResourceProvider.patientInstanceEverything(
+			req,
+			new IdType(goldenPid),
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			reqDetails
+		);
+
+		Assertions.assertNotNull(bundle);
+
+	}
+
+	private void linkResourceToGoldenResource(Long theGoldenPid, Long theOtherPid) {
+		MdmLink mdmLink = new MdmLink();
+		mdmLink.setCreated(new Date());
+		mdmLink.setMdmSourceType("Patient");
+		mdmLink.setGoldenResourcePid(theGoldenPid);
+		mdmLink.setSourcePid(theOtherPid);
+		mdmLink.setMatchResult(MdmMatchResultEnum.MATCH);
+		mdmLink.setHadToCreateNewGoldenResource(false);
+		mdmLink.setEidMatch(false);
+		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
+		mdmLink.setUpdated(new Date());
+		mdmLink.setVersion("1");
+		myMdmLinkDao.save(mdmLink);
+	}
 
 }

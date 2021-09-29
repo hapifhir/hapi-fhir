@@ -30,11 +30,16 @@ import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -43,6 +48,11 @@ import java.util.Set;
  */
 @Interceptor
 public class MdmSearchExpandingInterceptor {
+	// A simple interface to turn ids into some form of IQueryParameterTypes
+	private interface Creator<T extends IQueryParameterType> {
+		T create(String id);
+	}
+
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
@@ -54,9 +64,13 @@ public class MdmSearchExpandingInterceptor {
 	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
 	public void hook(SearchParameterMap theSearchParameterMap) {
 		if (myDaoConfig.isAllowMdmExpansion()) {
-			for (List<List<IQueryParameterType>> andList : theSearchParameterMap.values()) {
+			for (Map.Entry<String, List<List<IQueryParameterType>>> set : theSearchParameterMap.entrySet()) {
+				String paramName = set.getKey();
+				List<List<IQueryParameterType>> andList = set.getValue();
 				for (List<IQueryParameterType> orList : andList) {
-					expandAnyReferenceParameters(orList);
+					// here we will know if it's an _id param or not
+					// from theSearchParameterMap.keySet()
+					expandAnyReferenceParameters(paramName, orList);
 				}
 			}
 		}
@@ -65,7 +79,7 @@ public class MdmSearchExpandingInterceptor {
 	/**
 	 * If a Parameter is a reference parameter, and it has been set to expand MDM, perform the expansion.
 	 */
-	private void expandAnyReferenceParameters(List<IQueryParameterType> orList) {
+	private void expandAnyReferenceParameters(String theParamName, List<IQueryParameterType> orList) {
 		List<IQueryParameterType> toRemove = new ArrayList<>();
 		List<IQueryParameterType> toAdd = new ArrayList<>();
 		for (IQueryParameterType iQueryParameterType : orList) {
@@ -85,12 +99,77 @@ public class MdmSearchExpandingInterceptor {
 					if (!expandedResourceIds.isEmpty()) {
 						ourLog.debug("Parameter has been expanded to: {}", String.join(", ", expandedResourceIds));
 						toRemove.add(refParam);
-						expandedResourceIds.stream().map(resourceId -> new ReferenceParam(refParam.getResourceType() + "/" + resourceId)).forEach(toAdd::add);
+						expandedResourceIds.stream()
+							.map(resourceId -> new ReferenceParam(refParam.getResourceType() + "/" + resourceId))
+							.forEach(toAdd::add);
 					}
 				}
 			}
+			else if (theParamName.equalsIgnoreCase("_id")) {
+				expandIdParameter(iQueryParameterType, toAdd, toRemove);
+			}
 		}
+
 		orList.removeAll(toRemove);
 		orList.addAll(toAdd);
+	}
+
+	/**
+	 * Expands out the provided _id parameter into all the various
+	 * ids of linked resources.
+	 * @param theIdParameter
+	 * @param theAddList
+	 * @param theRmoveList
+	 */
+	private void expandIdParameter(IQueryParameterType theIdParameter,
+											 List<IQueryParameterType> theAddList,
+											 List<IQueryParameterType> theRmoveList) {
+		// id parameters can either be StringParam (for $everything operation)
+		// or TokenParam (for searches)
+		// either case, we want to expand it out and grab all related resources
+		IIdType id;
+		Creator<? extends IQueryParameterType> creator;
+		if (theIdParameter instanceof StringParam) {
+			StringParam param = (StringParam) theIdParameter;
+			id = new IdDt(param.getValue());
+			creator = StringParam::new;
+		}
+		else if (theIdParameter instanceof TokenParam) {
+			TokenParam param = (TokenParam) theIdParameter;
+			id = new IdDt(param.getValue());
+			creator = TokenParam::new;
+		}
+		else {
+			creator = null;
+			id = null;
+		}
+
+		if (id == null || creator == null) {
+			// in case the _id paramter type is different from the above
+			ourLog.warn("_id parameter of incorrect type. Expected StringParam or TokenParam, but got {}. No expansion will be done!",
+				theIdParameter.getClass().getSimpleName());
+		}
+		else {
+			ourLog.debug("_id parameter must be expanded out from: {}", id.getValue());
+
+			Set<String> expandedResourceIds = myMdmLinkExpandSvc.expandMdmBySourceResourceId(id);
+
+			if (expandedResourceIds.isEmpty()) {
+				expandedResourceIds = myMdmLinkExpandSvc.expandMdmByGoldenResourceId(id.getIdPartAsLong());
+			}
+
+			//Rebuild
+			if (!expandedResourceIds.isEmpty()) {
+				ourLog.debug("_id parameter has been expanded to: {}", String.join(", ", expandedResourceIds));
+
+				// remove the original
+				theRmoveList.add(theIdParameter);
+
+				// add in all the linked values
+				expandedResourceIds.stream()
+					.map(creator::create)
+					.forEach(theAddList::add);
+			}
+		}
 	}
 }

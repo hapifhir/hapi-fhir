@@ -393,17 +393,38 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		if (myParams.getEverythingMode() != null) {
-			Long targetPid = null;
+			HashSet<Long> targetPids = new HashSet<>();
 			if (myParams.get(IAnyResource.SP_RES_ID) != null) {
-				StringParam idParam = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
-				ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, idParam.getValue());
-				if (myAlsoIncludePids == null) {
-					myAlsoIncludePids = new ArrayList<>(1);
+				// get all the IQueryParameterType objects
+				// for _id -> these should all be StringParam values
+				HashSet<String> ids = new HashSet<>();
+				List<List<IQueryParameterType>> params = myParams.get(IAnyResource.SP_RES_ID);
+				for (List<IQueryParameterType> paramList : params) {
+					for (IQueryParameterType param : paramList) {
+						if (param instanceof StringParam) {
+							// we expect all _id values to be StringParams
+							ids.add(((StringParam) param).getValue());
+						}
+						else {
+							// we do not expect the _id parameter to be a non-string value
+							throw new IllegalArgumentException("_id parameter must be a StringParam");
+						}
+					}
 				}
-				myAlsoIncludePids.add(pid);
-				targetPid = pid.getIdAsLong();
-			} else {
 
+				// fetch our target Pids
+				// this will throw if an id is not found
+				Map<String, ResourcePersistentId> idToPid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId,
+					myResourceName,
+					new ArrayList<>(ids));
+				if (myAlsoIncludePids == null) {
+					myAlsoIncludePids = new ArrayList<>();
+				}
+				for (ResourcePersistentId pid : idToPid.values()) {
+					myAlsoIncludePids.add(pid);
+					targetPids.add(pid.getIdAsLong());
+				}
+			} else {
 				// For Everything queries, we make the query root by the ResourceLink table, since this query
 				// is basically a reverse-include search. For type/Everything (as opposed to instance/Everything)
 				// the one problem with this approach is that it doesn't catch Patients that have absolutely
@@ -419,7 +440,7 @@ public class SearchBuilder implements ISearchBuilder {
 				myAlsoIncludePids.addAll(ResourcePersistentId.fromLongList(output));
 
 			}
-			queryStack3.addPredicateEverythingOperation(myResourceName, targetPid);
+			queryStack3.addPredicateEverythingOperation(myResourceName, targetPids.toArray(new Long[0]));
 
 		} else {
 

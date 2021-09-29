@@ -40,7 +40,10 @@ public class TestJPAConfig {
 
 	@Bean
 	public ModelConfig modelConfig() {
-		return daoConfig().getModelConfig();
+		ModelConfig config = daoConfig().getModelConfig();
+		config.setAllowMdmExpansion(true);
+		//TODO GGG remove this line before merge
+		return config;
 	}
 
 	/*

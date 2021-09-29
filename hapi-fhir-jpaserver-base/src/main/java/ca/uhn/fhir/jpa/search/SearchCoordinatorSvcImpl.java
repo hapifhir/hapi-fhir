@@ -356,7 +356,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		PersistedJpaSearchFirstPageBundleProvider retVal = submitSearch(theCallingDao, theParams, theResourceType, theRequestDetails, searchUuid, sb, queryString, theRequestPartitionId, search);
 		retVal.setCacheStatus(cacheStatus);
 		return retVal;
-
 	}
 
 	@Override

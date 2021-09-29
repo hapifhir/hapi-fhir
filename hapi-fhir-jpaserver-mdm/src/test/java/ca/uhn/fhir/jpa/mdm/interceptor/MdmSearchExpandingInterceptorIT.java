@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -8,23 +9,29 @@ import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import org.elasticsearch.common.collect.Set;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -44,9 +51,21 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 	@Autowired
 	private DaoConfig myDaoConfig;
 
-	@Test
-	public void testReferenceExpansionWorks() throws InterruptedException {
+	/**
+	 * creates a GoldenPatient and a bunch of Observations with
+	 * linked patients.
+	 * Returns a list of stringified ids for the various resources.
+	 *
+	 * Currently, order of returned resources is patientids first,
+	 * observation ids next. But this can be refined as needed.
+	 *
+	 * @return
+	 */
+	private List<String> createAndLinkNewResources() throws InterruptedException {
+		boolean expansion = myDaoConfig.isAllowMdmExpansion();
 		myDaoConfig.setAllowMdmExpansion(false);
+		List<String> createdResourceIds = new ArrayList<>();
+
 		MdmHelperR4.OutcomeAndLogMessageWrapper withLatch = myMdmHelper.createWithLatch(addExternalEID(buildJanePatient(), "123"));
 		MdmHelperR4.OutcomeAndLogMessageWrapper withLatch1 = myMdmHelper.createWithLatch(addExternalEID(buildJanePatient(), "123"));
 		MdmHelperR4.OutcomeAndLogMessageWrapper withLatch2 = myMdmHelper.createWithLatch(addExternalEID(buildJanePatient(), "123"));
@@ -58,12 +77,30 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		String id1 = withLatch1.getDaoMethodOutcome().getId().getIdPart();
 		String id2 = withLatch2.getDaoMethodOutcome().getId().getIdPart();
 		String id3 = withLatch3.getDaoMethodOutcome().getId().getIdPart();
+		createdResourceIds.add(id);
+		createdResourceIds.add(id1);
+		createdResourceIds.add(id2);
+		createdResourceIds.add(id3);
 
 		//Create an Observation for each Patient
-		createObservationWithSubject(id);
-		createObservationWithSubject(id1);
-		createObservationWithSubject(id2);
-		createObservationWithSubject(id3);
+		Observation o1 = createObservationWithSubject(id);
+		Observation o2 = createObservationWithSubject(id1);
+		Observation o3 = createObservationWithSubject(id2);
+		Observation o4 = createObservationWithSubject(id3);
+
+		createdResourceIds.add(o1.getIdElement().getIdPart());
+		createdResourceIds.add(o2.getIdElement().getIdPart());
+		createdResourceIds.add(o3.getIdElement().getIdPart());
+		createdResourceIds.add(o4.getIdElement().getIdPart());
+
+		myDaoConfig.setAllowMdmExpansion(expansion);
+		return createdResourceIds;
+	}
+
+	@Test
+	public void testReferenceExpansionWorks() throws InterruptedException {
+		List<String> ids = createAndLinkNewResources();
+		String id = ids.get(0);
 
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		searchParameterMap.setLoadSynchronous(true);
@@ -95,6 +132,65 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 	}
 
 	@Test
+	public void testMdmExpansionExpands_idParameter() throws InterruptedException {
+		List<String> expectedIds = createAndLinkNewResources();
+		String patientId = expectedIds.get(0);
+
+		myDaoConfig.setAllowMdmExpansion(true);
+
+		SearchParameterMap map = new SearchParameterMap();
+		TokenOrListParam orListParam = new TokenOrListParam();
+		orListParam.add(patientId);
+
+		map.add("_id", orListParam);
+
+		IBundleProvider outcome = myPatientDao.search(map);
+
+		Assertions.assertNotNull(outcome);
+		// we know 5 cause that's how many patients are created
+		Assertions.assertEquals(5, outcome.size());
+		List<String> resourceIds = outcome.getAllResourceIds();
+		// check the patients - first 4 ids
+		for (int i = 0; i < resourceIds.size() - 1; i++) {
+			Assertions.assertTrue(resourceIds.contains(expectedIds.get(i)));
+		}
+	}
+
+	@Test
+	public void testMdmExpansionIsSupportedOnEverythingOperation() throws InterruptedException {
+		List<String> expectedIds = createAndLinkNewResources();
+		String id = expectedIds.get(0);
+
+		HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
+		RequestDetails theDetails = Mockito.mock(RequestDetails.class);
+
+		// test
+		myDaoConfig.setAllowMdmExpansion(true);
+		IFhirResourceDaoPatient<Patient> dao = (IFhirResourceDaoPatient<Patient>) myPatientDao;
+		IBundleProvider outcome = dao.patientInstanceEverything(
+			req,
+			new IdDt(id),
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			theDetails
+		);
+
+		// verify return results
+		// we expect all the linked ids to be returned too
+		Assertions.assertNotNull(outcome);
+		Assertions.assertEquals(9, outcome.size());
+		List<String> returnedIds = outcome.getAllResourceIds();
+		for (String expected : expectedIds) {
+			Assertions.assertTrue(returnedIds.contains(expected));
+		}
+	}
+
+	@Test
 	public void testReferenceExpansionQuietlyFailsOnMissingMdmMatches() {
 		myDaoConfig.setAllowMdmExpansion(true);
 		Patient patient = buildJanePatient();
@@ -116,6 +212,5 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		observation.setCode(new CodeableConcept().setText("Made for Patient/" + thePatientId));
 		DaoMethodOutcome daoMethodOutcome = myObservationDao.create(observation);
 		return (Observation) daoMethodOutcome.getResource();
-
 	}
 }
