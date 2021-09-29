@@ -1246,7 +1246,7 @@ public enum Pointcut implements IPointcut {
 	 * </li>
 	 * </ul>
 	 * <p>
-	 * Hooks should return <code>void</code
+	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
 	STORAGE_PRESEARCH_REGISTERED(void.class,

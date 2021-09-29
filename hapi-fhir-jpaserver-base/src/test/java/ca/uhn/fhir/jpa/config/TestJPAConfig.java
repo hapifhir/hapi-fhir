@@ -3,14 +3,12 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.search.elastic.IndexNamePrefixLayoutStrategy;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
-import org.hibernate.search.backend.elasticsearch.index.layout.IndexLayoutStrategy;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,8 +39,6 @@ public class TestJPAConfig {
 	@Bean
 	public ModelConfig modelConfig() {
 		ModelConfig config = daoConfig().getModelConfig();
-		config.setAllowMdmExpansion(true);
-		//TODO GGG remove this line before merge
 		return config;
 	}
 
