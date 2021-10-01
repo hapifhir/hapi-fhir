@@ -83,8 +83,6 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 	@Qualifier("myObservationDaoR4")
 	protected IFhirResourceDaoObservation<Observation> myObservationDao;
 	@Autowired
-	protected DaoConfig myDaoConfig;
-	@Autowired
 	protected FhirContext myFhirCtx;
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;

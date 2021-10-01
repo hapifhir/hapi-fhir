@@ -148,6 +148,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected ServletRequestDetails mySrd;
 	protected InterceptorService mySrdInterceptorService;
 	@Autowired
+	protected DaoConfig myDaoConfig = new DaoConfig();
+	@Autowired
 	protected DatabaseBackedPagingProvider myDatabaseBackedPagingProvider;
 	@Autowired
 	protected IInterceptorService myInterceptorRegistry;
@@ -209,6 +211,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		if (myFhirInstanceValidator != null) {
 			myFhirInstanceValidator.invalidateCaches();
 		}
+		myDaoConfig.setAdvancedLuceneIndexing(new DaoConfig().isAdvancedLuceneIndexing());
 
 	}
 
