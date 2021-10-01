@@ -44,6 +44,7 @@ public class HapiLuceneAnalysisConfigurer implements LuceneAnalysisConfigurer {
 
 	// wip mb make these visible somewhere
 	public static final String STANDARD_ANALYZER = "standardAnalyzer";
+	public static final String NORM_STRING_ANALYZER = "normStringAnalyzer";
 	public static final String EXACT_ANALYZER = "exactAnalyzer";
 
 	@Override
@@ -80,6 +81,12 @@ public class HapiLuceneAnalysisConfigurer implements LuceneAnalysisConfigurer {
 
 		// wip mb fold accents to ascii?
 		theLuceneCtx.analyzer(STANDARD_ANALYZER).custom()
+			.tokenizer(StandardTokenizerFactory.class)
+			.tokenFilter(LowerCaseFilterFactory.class)
+			.tokenFilter(ASCIIFoldingFilterFactory.class);
+
+		theLuceneCtx.analyzer(NORM_STRING_ANALYZER).custom()
+			// fixme mb THIS SHOULD FAIL - should need KeywordTokenizerFactory - lucene untested!!!
 			.tokenizer(StandardTokenizerFactory.class)
 			.tokenFilter(LowerCaseFilterFactory.class)
 			.tokenFilter(ASCIIFoldingFilterFactory.class);

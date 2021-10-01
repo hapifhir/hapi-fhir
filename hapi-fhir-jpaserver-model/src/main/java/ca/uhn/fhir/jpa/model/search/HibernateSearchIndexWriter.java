@@ -10,6 +10,7 @@ public class HibernateSearchIndexWriter {
 	private static final Logger ourLog = LoggerFactory.getLogger(HibernateSearchIndexWriter.class);
 	public static final String IDX_STRING_NORMALIZED = "norm";
 	public static final String IDX_STRING_EXACT = "exact";
+	public static final String IDX_STRING_TEXT = "text";
 	final HibernateSearchElementCache myNodeCache;
 	final FhirContext myFhirContext;
 
@@ -29,8 +30,10 @@ public class HibernateSearchIndexWriter {
 
 	public void writeStringIndex(String theSearchParam, String theValue) {
 		DocumentElement stringIndexNode = getSearchParamIndexNode(theSearchParam, "string");
-		stringIndexNode.addValue(IDX_STRING_NORMALIZED, theValue);
+
+		stringIndexNode.addValue(IDX_STRING_NORMALIZED, theValue);// for default search
 		stringIndexNode.addValue(IDX_STRING_EXACT, theValue);
+		stringIndexNode.addValue(IDX_STRING_TEXT, theValue);
 		ourLog.debug("Adding Search Param Text: {} -- {}", theSearchParam, theValue);
 	}
 

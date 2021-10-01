@@ -76,6 +76,10 @@ public class HapiElasticsearchAnalysisConfigurer implements ElasticsearchAnalysi
 			.tokenizer("standard")
 			.tokenFilters("lowercase", "asciifolding");
 
+		theConfigCtx.analyzer(HapiLuceneAnalysisConfigurer.NORM_STRING_ANALYZER).custom()
+			.tokenizer("keyword") // We need the whole string to match, including whitespace.
+			.tokenFilters("lowercase", "asciifolding");
+
 		theConfigCtx.analyzer("exactAnalyzer")
 			.custom()
 			.tokenizer("keyword")

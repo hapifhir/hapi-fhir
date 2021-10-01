@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -17,22 +16,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.BinaryOperator;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class HibernateSearchQueryBuilder {
@@ -105,7 +96,6 @@ public class HibernateSearchQueryBuilder {
 
 			ourLog.debug("addTokenUnmodifiedSearch {} {}", theSearchParamName, nextAnd);
 			List<? extends PredicateFinalStep> clauses = nextAnd.stream().map(orTerm -> {
-				// wip can this be untrue?
 				if (orTerm instanceof TokenParam) {
 					TokenParam token = (TokenParam) orTerm;
 					if (StringUtils.isBlank(token.getSystem())) {
@@ -149,7 +139,7 @@ public class HibernateSearchQueryBuilder {
 				fieldName = "myNarrativeText";
 				break;
 			default:
-				fieldName = "sp." + theSearchParamName + ".string." + IDX_STRING_NORMALIZED;
+				fieldName = "sp." + theSearchParamName + ".string." + IDX_STRING_TEXT;
 				break;
 		}
 
@@ -166,7 +156,6 @@ public class HibernateSearchQueryBuilder {
 					.simpleQueryString()
 					.field(fieldName)
 					.matching(query)
-					//.analyzer(HapiLuceneAnalysisConfigurer.STANDARD_ANALYZER)
 					.defaultOperator(BooleanOperator.AND)); // term value may contain multiple tokens.  Require all of them to be present.
 			} else {
 				ourLog.warn("No Terms found in query parameter {}", nextAnd);
@@ -180,30 +169,22 @@ public class HibernateSearchQueryBuilder {
 		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
 			ourLog.debug("addStringExactSearch {} {}", theSearchParamName, terms);
-			List<? extends PredicateFinalStep> orTerms = terms.stream().map(s -> {
-					return myPredicateFactory
-						.match()
-						.field(fieldPath)
-						.matching(s);
-				})
+			List<? extends PredicateFinalStep> orTerms = terms.stream()
+				.map(s -> myPredicateFactory.match().field(fieldPath).matching(s))
 				.collect(Collectors.toList());
-			// an or-collector would be nice.
 
 			myRootClause.must(orPredicateOrSingle(orTerms));
 		}
 	}
 
 	public void addStringContainsSearch(String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
-		String fieldPath = "sp." + theSearchParamName + ".string.norm";
+		String fieldPath = "sp." + theSearchParamName + ".string." + IDX_STRING_NORMALIZED;
 		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
 			ourLog.debug("addStringContainsSearch {} {}", theSearchParamName, terms);
-			List<? extends PredicateFinalStep> orTerms = terms.stream().map(s -> {
-					return myPredicateFactory
-						.wildcard()
-						.field(fieldPath)
-						.matching("*" + s + "*");
-				})
+			List<? extends PredicateFinalStep> orTerms = terms.stream()
+				.map(s ->
+					myPredicateFactory.wildcard().field(fieldPath).matching("*" + s + "*"))
 				.collect(Collectors.toList());
 
 			myRootClause.must(orPredicateOrSingle(orTerms));
@@ -211,16 +192,13 @@ public class HibernateSearchQueryBuilder {
 	}
 
 	public void addStringUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
-		String fieldPath = "sp." + theSearchParamName + ".string.norm";
+		String fieldPath = "sp." + theSearchParamName + ".string." + IDX_STRING_NORMALIZED;
 		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
 			ourLog.debug("addStringUnmodifiedSearch {} {}", theSearchParamName, terms);
-			List<? extends PredicateFinalStep> orTerms = terms.stream().map(s -> {
-					return myPredicateFactory
-						.wildcard()
-						.field(fieldPath)
-						.matching(s + "*");
-				})
+			List<? extends PredicateFinalStep> orTerms = terms.stream()
+				.map(s ->
+					myPredicateFactory.wildcard().field(fieldPath).matching(s + "*"))
 				.collect(Collectors.toList());
 
 			myRootClause.must(orPredicateOrSingle(orTerms));

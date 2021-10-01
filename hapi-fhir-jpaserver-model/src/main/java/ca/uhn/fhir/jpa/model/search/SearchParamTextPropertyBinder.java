@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.model.search;
  */
 
 import org.hibernate.search.engine.backend.document.DocumentElement;
-import org.hibernate.search.engine.backend.document.IndexObjectFieldReference;
 import org.hibernate.search.engine.backend.document.model.dsl.IndexSchemaElement;
 import org.hibernate.search.engine.backend.document.model.dsl.IndexSchemaObjectField;
 import org.hibernate.search.engine.backend.types.ObjectStructure;
@@ -37,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
 
 /**
  * Allows hibernate search to index
@@ -81,6 +81,12 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 				.analyzer("exactAnalyzer") // default max-length is 256.  Is that enough for code system uris?
 				.projectable(Projectable.NO);
 
+		StringIndexFieldTypeOptionsStep<?> normStringAnalyzer =
+			indexFieldTypeFactory.asString()
+				.analyzer("normStringAnalyzer")
+				.projectable(Projectable.NO);
+
+
 
 		// the old style.
 		// wipmb move _text and _contains into sp with backwards compat in the query path.
@@ -90,17 +96,22 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 
 		// this is a bit ugly.  We need to enforce order and dependency or the object matches will be too big.
 		IndexSchemaObjectField spfield = indexSchemaElement.objectField("sp", ObjectStructure.FLATTENED);
-		IndexObjectFieldReference sp = spfield.toReference();
+		spfield.toReference();
 
 		// Note: the lucene/elastic independent api is hurting a bit here.
 		// For lucene, we need a separate field for each analyzer.  So we'll add string (for :exact), and text (for :text).
 		// They aren't marked stored, so there's no space cost beyond the index for each.
 		// But for elastic, I'd rather have a single field defined, with multi-field sub-fields.  The index cost is the same,
 		// but elastic will actually store all fields in the source document.
+		// Something like this.  But we'll need two index writers (lucene vs hibernate).
+//		ElasticsearchNativeIndexFieldTypeMappingStep nativeStep = indexFieldTypeFactory.extension(ElasticsearchExtension.get()).asNative();
+//		nativeStep.mapping()
+		// So triplicate the storage for now. :-(
 		String stringPathGlob = "*.string";
 		spfield.objectFieldTemplate("stringIndex", ObjectStructure.FLATTENED).matchingPathGlob(stringPathGlob);
-		spfield.fieldTemplate("string-norm", standardAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_NORMALIZED).multiValued();
+		spfield.fieldTemplate("string-norm", normStringAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_NORMALIZED).multiValued();
 		spfield.fieldTemplate("string-exact", exactAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_EXACT).multiValued();
+		spfield.fieldTemplate("string-text", standardAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_TEXT).multiValued();
 
 		// token
 		// Ideally, we'd store a single code-system string and use a custom tokenizer to
