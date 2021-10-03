@@ -75,6 +75,7 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 	@Test
 	public void testSearchesExecuteConcurrently() {
 		if (TestR4Config.getMaxThreads() == 1) {
+			ourLog.info("Skipping this test because the test thread pool only has one max connection");
 			return;
 		}
 

@@ -1,0 +1,8 @@
+---
+type: add
+issue: 2994
+title: "When performing ValueSet expansions and ValueSet-based code validations, the HAPI FHIR terminology service will allow
+   ValueSets to be expanded if they contain an enumeration of codes, even if the corresponding CodeSystem resource can not
+   be found. Response messages have also been improved to give better insight into whether a precalculated expansion
+   was used. In addition, a new operation called `$invalidate-expansion` has been added that allows for manual invalidation
+   of previously calculated ValueSet expansions."

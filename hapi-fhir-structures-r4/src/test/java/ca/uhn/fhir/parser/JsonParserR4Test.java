@@ -2,6 +2,7 @@ package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
@@ -43,9 +44,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -269,6 +276,50 @@ public class JsonParserR4Test extends BaseTest {
 		assertEquals(-1, idx);
 
 	}
+
+	/**
+	 * Make sure we can perform parallel parse/encodes against the same
+	 * FhirContext instance when deferred model scanning is enabled without
+	 * running into threading issues.
+	 */
+	@Test
+	public void testEncodeAndDecodeMultithreadedWithDeferredModelScanning() throws IOException, ExecutionException, InterruptedException {
+		String input = loadResource("/multi-thread-parsing-issue-bundle.json");
+
+		ExecutorService executor = Executors.newFixedThreadPool(10);
+		for (int pass = 0; pass < 10; pass++) {
+			ourLog.info("Starting pass: {}", pass);
+
+			FhirContext parseCtx = FhirContext.forR4();
+			parseCtx.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
+			List<Future<Bundle>> bundleFutures = new ArrayList<>();
+			for (int readIdx = 0; readIdx < 10; readIdx++) {
+				bundleFutures.add(executor.submit(()->parseCtx.newJsonParser().parseResource(Bundle.class, input)));
+			}
+
+			List<Bundle> parsedBundles = new ArrayList<>();
+			for (Future<Bundle> nextFuture : bundleFutures) {
+				Bundle nextBundle = nextFuture.get();
+				parsedBundles.add(nextBundle);
+			}
+
+			FhirContext encodeCtx = FhirContext.forR4();
+			encodeCtx.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
+			List<Future<String>> encodeFutures = new ArrayList<>();
+			for (Bundle nextBundle : parsedBundles) {
+				encodeFutures.add(executor.submit(()->encodeCtx.newJsonParser().encodeResourceToString(nextBundle)));
+			}
+
+			List<String> outputs = new ArrayList<>();
+			for (Future<String> nextFuture : encodeFutures) {
+				outputs.add(nextFuture.get());
+			}
+
+			assertEquals(outputs.get(0), outputs.get(1));
+		}
+	}
+
+
 
 	@Test
 	public void testEncodeAndParseUnicodeCharacterInNarrative() {

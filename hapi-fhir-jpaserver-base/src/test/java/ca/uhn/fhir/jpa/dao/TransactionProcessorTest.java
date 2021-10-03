@@ -91,6 +91,7 @@ public class TransactionProcessorTest {
 		when(myEntityManager.unwrap(eq(Session.class))).thenReturn(mySession);
 	}
 
+
 	@Test
 	public void testTransactionWithDisabledResourceType() {
 
