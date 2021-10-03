@@ -2168,15 +2168,6 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 
 	@Test
-	public void testTransactionWithNullPayload() {
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
-		IBaseBundle bundle = null;
-		client.transaction().withBundle(bundle).execute();
-	}
-
-
-
-	@Test
 	public void testUpdateById() throws Exception {
 		IParser p = ourCtx.newXmlParser();
 
