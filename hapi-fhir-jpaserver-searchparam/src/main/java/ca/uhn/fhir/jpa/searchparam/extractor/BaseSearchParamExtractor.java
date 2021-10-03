@@ -1550,12 +1550,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@Nonnull
 	public static String[] splitPathsR4(@Nonnull String thePaths) {
 		StringTokenizer tok = new StringTokenizer(thePaths, " |");
-		StringMatcher trimmerMatcher = new StringMatcher() {
-			@Override
-			public int isMatch(char[] buffer, int start, int bufferStart, int bufferEnd) {
-				return buffer[start] <= 32 ? 1 : 0;
-			}
-		};
+		StringMatcher trimmerMatcher = (buffer, start, bufferStart, bufferEnd) -> (buffer[start] <= 32) ? 1 : 0;
 		tok.setTrimmerMatcher(trimmerMatcher);
 		return tok.getTokenArray();
 	}
