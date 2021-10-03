@@ -28,9 +28,27 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.ColumnDefault;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.left;
@@ -41,13 +59,11 @@ import static org.apache.commons.lang3.StringUtils.length;
 })
 @Entity()
 public class TermValueSet implements Serializable {
-	private static final long serialVersionUID = 1L;
-
 	public static final int MAX_EXPANSION_STATUS_LENGTH = 50;
 	public static final int MAX_NAME_LENGTH = 200;
 	public static final int MAX_URL_LENGTH = 200;
 	public static final int MAX_VER_LENGTH = 200;
-
+	private static final long serialVersionUID = 1L;
 	@Id()
 	@SequenceGenerator(name = "SEQ_VALUESET_PID", sequenceName = "SEQ_VALUESET_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_VALUESET_PID")
@@ -85,6 +101,10 @@ public class TermValueSet implements Serializable {
 	@Column(name = "EXPANSION_STATUS", nullable = false, length = MAX_EXPANSION_STATUS_LENGTH)
 	private TermValueSetPreExpansionStatusEnum myExpansionStatus;
 
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "EXPANDED_AT", nullable = true)
+	private Date myExpansionTimestamp;
+
 	@Transient
 	private transient Integer myHashCode;
 
@@ -93,6 +113,14 @@ public class TermValueSet implements Serializable {
 		myExpansionStatus = TermValueSetPreExpansionStatusEnum.NOT_EXPANDED;
 		myTotalConcepts = 0L;
 		myTotalConceptDesignations = 0L;
+	}
+
+	public Date getExpansionTimestamp() {
+		return myExpansionTimestamp;
+	}
+
+	public void setExpansionTimestamp(Date theExpansionTimestamp) {
+		myExpansionTimestamp = theExpansionTimestamp;
 	}
 
 	public Long getId() {

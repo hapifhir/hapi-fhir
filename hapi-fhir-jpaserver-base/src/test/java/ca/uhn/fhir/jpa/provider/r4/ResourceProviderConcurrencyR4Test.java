@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.io.IOUtils;
@@ -73,6 +74,11 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 	 */
 	@Test
 	public void testSearchesExecuteConcurrently() {
+		if (TestR4Config.getMaxThreads() == 1) {
+			ourLog.info("Skipping this test because the test thread pool only has one max connection");
+			return;
+		}
+
 		createPatient(withFamily("FAMILY1"));
 		createPatient(withFamily("FAMILY2"));
 		createPatient(withFamily("FAMILY3"));
