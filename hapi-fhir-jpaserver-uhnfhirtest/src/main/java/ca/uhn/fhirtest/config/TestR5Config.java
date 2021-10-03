@@ -2,6 +2,7 @@ package ca.uhn.fhirtest.config;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigR5;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
@@ -147,7 +148,7 @@ public class TestR5Config extends BaseJavaConfigR5 {
 		if (CommonConfig.isLocalTestMode()) {
 			extraProperties.put("hibernate.dialect", DerbyTenSevenHapiFhirDialect.class.getName());
 		} else {
-			extraProperties.put("hibernate.dialect", PostgreSQL94Dialect.class.getName());
+			extraProperties.put("hibernate.dialect", HapiFhirPostgres94Dialect.class.getName());
 		}
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");

@@ -581,7 +581,7 @@
 						<param>sqlserver2012</param>
 					</dialects>
 					<customDialects>
-						<customDialect>ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres91Dialect</customDialect>
+						<customDialect>ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect</customDialect>
 					</customDialects>
 					<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database</outputDirectory>
 					<packages>
