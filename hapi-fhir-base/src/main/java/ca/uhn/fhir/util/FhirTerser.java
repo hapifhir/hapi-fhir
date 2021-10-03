@@ -989,10 +989,6 @@ public class FhirTerser {
 			case COMPOSITE_DATATYPE: {
 				BaseRuntimeElementCompositeDefinition<?> childDef = (BaseRuntimeElementCompositeDefinition<?>) def;
 				List<BaseRuntimeChildDefinition> childrenAndExtensionDefs = childDef.getChildrenAndExtension();
-				// FIXME: remove
-				if (childrenAndExtensionDefs == null) {
-					childDef.getChildrenAndExtension();
-				}
 				for (BaseRuntimeChildDefinition nextChild : childrenAndExtensionDefs) {
 
 					List<?> values = nextChild.getAccessor().getValues(theElement);
