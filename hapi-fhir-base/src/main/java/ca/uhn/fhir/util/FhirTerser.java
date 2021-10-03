@@ -988,7 +988,12 @@ public class FhirTerser {
 			case RESOURCE_BLOCK:
 			case COMPOSITE_DATATYPE: {
 				BaseRuntimeElementCompositeDefinition<?> childDef = (BaseRuntimeElementCompositeDefinition<?>) def;
-				for (BaseRuntimeChildDefinition nextChild : childDef.getChildrenAndExtension()) {
+				List<BaseRuntimeChildDefinition> childrenAndExtensionDefs = childDef.getChildrenAndExtension();
+				// FIXME: remove
+				if (childrenAndExtensionDefs == null) {
+					childDef.getChildrenAndExtension();
+				}
+				for (BaseRuntimeChildDefinition nextChild : childrenAndExtensionDefs) {
 
 					List<?> values = nextChild.getAccessor().getValues(theElement);
 
