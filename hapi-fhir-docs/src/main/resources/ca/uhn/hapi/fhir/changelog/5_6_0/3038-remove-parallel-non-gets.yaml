@@ -1,0 +1,4 @@
+---
+type: fix
+title: "Fixed a bug in processing large batch requests containing many modifying entries. PUT/POST/DELETE operations now occur sequentially,
+instead of in parallel."

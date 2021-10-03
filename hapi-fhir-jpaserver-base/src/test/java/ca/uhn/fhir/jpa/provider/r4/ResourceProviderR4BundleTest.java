@@ -5,9 +5,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
+import com.google.common.base.Charsets;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -109,6 +115,22 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		}
 
 	}
+
+	@Test
+	public void testHighConcurrencyWorks() throws IOException, InterruptedException {
+		List<Bundle> bundles = new ArrayList<>();
+		for (int i =0 ; i < 10; i ++) {
+			bundles.add(myFhirCtx.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/r4/identical-tags-batch.json"), Charsets.UTF_8)));
+		}
+
+		ExecutorService tpe = Executors.newFixedThreadPool(4);
+		for (Bundle bundle :bundles) {
+			tpe.execute(() -> myClient.transaction().withBundle(bundle).execute());
+		}
+		tpe.shutdown();
+		tpe.awaitTermination(100, TimeUnit.SECONDS);
+	}
+
 
 	@Test
 	public void testBundleBatchWithSingleThread() {

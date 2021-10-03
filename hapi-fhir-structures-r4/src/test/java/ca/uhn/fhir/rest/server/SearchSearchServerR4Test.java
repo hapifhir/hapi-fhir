@@ -44,10 +44,10 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -491,7 +491,7 @@ public class SearchSearchServerR4Test {
   @AfterAll
   public static void afterClassClearContext() throws Exception {
     JettyUtil.closeServer(ourServer);
-    TestUtil.clearAllStaticFieldsForUnitTest();
+    TestUtil.randomizeLocaleAndTimezone();
   }
 
   @BeforeAll
