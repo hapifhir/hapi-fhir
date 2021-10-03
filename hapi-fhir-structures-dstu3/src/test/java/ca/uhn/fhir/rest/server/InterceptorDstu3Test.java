@@ -58,6 +58,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.either;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -228,7 +230,7 @@ public class InterceptorDstu3Test {
 		httpPost.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 		try {
-			assertEquals(201, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode(), either(equalTo(200)).or(equalTo(201)));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
