@@ -15,7 +15,7 @@ public class XhtmlNodeTest {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	private static FhirContext ourCtx = FhirContext.forDstu3();

@@ -14,19 +14,19 @@ public class DefaultProfileValidationSupportTest {
 
 	private static FhirContext ourCtx = FhirContext.forR4Cached();
 	private DefaultProfileValidationSupport mySvc = new DefaultProfileValidationSupport(ourCtx);
-
+	
 	@Test
 	public void testGetStructureDefinitionsWithRelativeUrls() {
 		assertNotNull(mySvc.fetchStructureDefinition("http://hl7.org/fhir/StructureDefinition/Extension"));
 		assertNotNull(mySvc.fetchStructureDefinition("StructureDefinition/Extension"));
 		assertNotNull(mySvc.fetchStructureDefinition("Extension"));
-
+		
 		assertNull(mySvc.fetchStructureDefinition("http://hl7.org/fhir/StructureDefinition/Extension2"));
 		assertNull(mySvc.fetchStructureDefinition("StructureDefinition/Extension2"));
 		assertNull(mySvc.fetchStructureDefinition("Extension2"));
 
 	}
-
+	
 	@Test
 	public void testLoadCodeSystemWithVersion() {
 		CodeSystem cs = (CodeSystem) mySvc.fetchCodeSystem("http://terminology.hl7.org/CodeSystem/v2-0291");
