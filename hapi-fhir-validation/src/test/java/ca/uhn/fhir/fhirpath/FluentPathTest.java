@@ -74,7 +74,7 @@ public class FluentPathTest {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 }

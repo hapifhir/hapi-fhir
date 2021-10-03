@@ -12,10 +12,14 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,4 +72,44 @@ public class JdbcUtilsTest {
 		assertEquals(theExpectedColumnType, testColumnType.getColumnTypeEnum());
 	}
 
+	@Test
+	public void testGetIndexNames_verifyNullHandling() throws SQLException {
+
+		// setup
+		ResultSet mockTableResultSet = mock(ResultSet.class);
+		when(mockTableResultSet.next()).thenReturn(true, false);
+		when(mockTableResultSet.getString("TABLE_NAME")).thenReturn("TEST_TABLE");
+		when(mockTableResultSet.getString("TABLE_TYPE")).thenReturn("USER TABLE");
+
+		ResultSetMetaData mockResultSetMetaData = mock(ResultSetMetaData.class);
+		when(mockResultSetMetaData.getColumnCount()).thenReturn(0);
+
+		ResultSet mockIndicesResultSet = mock(ResultSet.class);
+		when(mockIndicesResultSet.next()).thenReturn(true, true, true, false);
+		when(mockIndicesResultSet.getString("INDEX_NAME")).thenReturn("IDX_1", null, "idx_2");
+		when(mockIndicesResultSet.getMetaData()).thenReturn(mockResultSetMetaData);
+
+		ResultSet mockUniqueIndicesResultSet = mock(ResultSet.class);
+		when(mockUniqueIndicesResultSet.next()).thenReturn(true, true, false);
+		when(mockUniqueIndicesResultSet.getString("INDEX_NAME")).thenReturn(null, "Idx_3");
+		when(mockUniqueIndicesResultSet.getMetaData()).thenReturn(mockResultSetMetaData);
+
+		when(myDatabaseMetaData.getTables("Catalog", "Schema", null, null)).thenReturn(mockTableResultSet);
+		when(myDatabaseMetaData.getIndexInfo("Catalog", "Schema", "TEST_TABLE", false, true)).thenReturn(mockIndicesResultSet);
+		when(myDatabaseMetaData.getIndexInfo("Catalog", "Schema", "TEST_TABLE", true, true)).thenReturn(mockUniqueIndicesResultSet);
+		when(myConnection.getMetaData()).thenReturn(myDatabaseMetaData);
+		when(myConnection.getCatalog()).thenReturn("Catalog");
+		when(myConnection.getSchema()).thenReturn("Schema");
+		when(myDataSource.getConnection()).thenReturn(myConnection);
+		DriverTypeEnum.ConnectionProperties myConnectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(myDataSource);
+
+		//execute
+		Set<String> indexNames = JdbcUtils.getIndexNames(myConnectionProperties, "TEST_TABLE");
+
+		// verify
+		assertEquals(3, indexNames.size());
+		assertTrue(indexNames.contains("IDX_1"));
+		assertTrue(indexNames.contains("IDX_2"));
+		assertTrue(indexNames.contains("IDX_3"));
+	}
 }

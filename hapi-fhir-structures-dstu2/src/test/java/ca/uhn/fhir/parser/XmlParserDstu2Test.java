@@ -9,12 +9,48 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
-import ca.uhn.fhir.model.dstu2.composite.*;
+import ca.uhn.fhir.model.dstu2.composite.AnnotationDt;
+import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
+import ca.uhn.fhir.model.dstu2.composite.ContainedDt;
+import ca.uhn.fhir.model.dstu2.composite.DurationDt;
+import ca.uhn.fhir.model.dstu2.composite.ElementDefinitionDt;
 import ca.uhn.fhir.model.dstu2.composite.ElementDefinitionDt.Binding;
-import ca.uhn.fhir.model.dstu2.resource.*;
+import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu2.composite.SimpleQuantityDt;
+import ca.uhn.fhir.model.dstu2.resource.AllergyIntolerance;
+import ca.uhn.fhir.model.dstu2.resource.Binary;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Link;
-import ca.uhn.fhir.model.dstu2.valueset.*;
+import ca.uhn.fhir.model.dstu2.resource.Composition;
+import ca.uhn.fhir.model.dstu2.resource.Condition;
+import ca.uhn.fhir.model.dstu2.resource.DataElement;
+import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu2.resource.Encounter;
+import ca.uhn.fhir.model.dstu2.resource.Medication;
+import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
+import ca.uhn.fhir.model.dstu2.resource.MedicationStatement;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.Organization;
+import ca.uhn.fhir.model.dstu2.resource.Parameters;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Practitioner;
+import ca.uhn.fhir.model.dstu2.valueset.AddressUseEnum;
+import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
+import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
+import ca.uhn.fhir.model.dstu2.valueset.DiagnosticReportStatusEnum;
+import ca.uhn.fhir.model.dstu2.valueset.DocumentReferenceStatusEnum;
+import ca.uhn.fhir.model.dstu2.valueset.IdentifierTypeCodesEnum;
+import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu2.valueset.MaritalStatusCodesEnum;
+import ca.uhn.fhir.model.dstu2.valueset.NameUseEnum;
+import ca.uhn.fhir.model.dstu2.valueset.ObservationRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -2924,7 +2960,7 @@ public class XmlParserDstu2Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	public static void main(String[] args) {

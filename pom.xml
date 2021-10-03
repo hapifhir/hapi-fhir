@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>5.6.0-PRE6-SNAPSHOT</version>
+	<version>5.6.0-PRE7-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -2773,7 +2773,7 @@
 				<module>hapi-fhir-structures-r5</module>
 				<module>hapi-fhir-validation-resources-r5</module>
 				<module>hapi-fhir-jpa</module>
-				<module>hapi-fhir-storage-api</module>
+				<module>hapi-fhir-storage</module>
 				<module>hapi-fhir-jpaserver-cql</module>
 				<module>hapi-fhir-jpaserver-model</module>
 				<module>hapi-fhir-jpaserver-searchparam</module>

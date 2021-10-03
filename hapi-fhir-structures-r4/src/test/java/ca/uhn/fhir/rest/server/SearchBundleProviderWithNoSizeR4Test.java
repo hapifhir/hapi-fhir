@@ -20,10 +20,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -144,7 +144,7 @@ public class SearchBundleProviderWithNoSizeR4Test {
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	@BeforeAll

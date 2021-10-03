@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderToken;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
@@ -109,11 +109,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -443,7 +441,7 @@ public class QueryStack {
 				RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, paramName);
 				if (searchParam == null) {
 					Collection<String> validNames = mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(theResourceName);
-					String msg = myFhirContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSearchParameter", paramName, theResourceName, validNames);
+					String msg = myFhirContext.getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidSearchParameter", paramName, theResourceName, validNames);
 					throw new InvalidRequestException(msg);
 				}
 				RestSearchParameterTypeEnum typeEnum = searchParam.getParamType();
@@ -1204,7 +1202,7 @@ public class QueryStack {
 					}
 
 				} else {
-					String msg = myFhirContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSearchParameter", theParamName, theResourceName, mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(theResourceName));
+					String msg = myFhirContext.getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidSearchParameter", theParamName, theResourceName, mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(theResourceName));
 					throw new InvalidRequestException(msg);
 				}
 			}
