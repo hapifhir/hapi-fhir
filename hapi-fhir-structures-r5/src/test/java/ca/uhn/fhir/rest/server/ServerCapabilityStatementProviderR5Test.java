@@ -819,7 +819,7 @@ public class ServerCapabilityStatementProviderR5Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	@SuppressWarnings("unused")
