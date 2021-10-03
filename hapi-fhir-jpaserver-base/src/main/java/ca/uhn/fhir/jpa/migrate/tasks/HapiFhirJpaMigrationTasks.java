@@ -134,15 +134,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// TRM_VALUESET_CONCEPT.SOURCE_DIRECT_PARENT_PIDS
 		version.onTable("TRM_VALUESET_CONCEPT")
-			.migrateClobToBlob("20210922.2", "SOURCE_DIRECT_PARENT_PIDS");
+			.migratePostgresTextClobToBinaryClob("20211003.1", "SOURCE_DIRECT_PARENT_PIDS");
 
 		// TRM_CONCEPT.PARENT_PIDS
 		version.onTable("TRM_CONCEPT")
-			.migrateClobToBlob("20210922.4", "PARENT_PIDS");
+			.migratePostgresTextClobToBinaryClob("20211003.2", "PARENT_PIDS");
 
 		// HFJ_SEARCH.SEARCH_QUERY_STRING
 		version.onTable("HFJ_SEARCH")
-			.migrateClobToBlob("20210922.5", "SEARCH_QUERY_STRING");
+			.migratePostgresTextClobToBinaryClob("20211003.3", "SEARCH_QUERY_STRING");
 	}
 
 	private void init540() {

@@ -249,7 +249,7 @@ public class Builder {
 			addTask(task);
 		}
 
-		public void migrateClobToBlob(String theVersion, String theColumnName) {
+		public void migratePostgresTextClobToBinaryClob(String theVersion, String theColumnName) {
 			MigratePostgresTextClobToBinaryClobTask task = new MigratePostgresTextClobToBinaryClobTask(myRelease, theVersion);
 			task.setTableName(getTableName());
 			task.setColumnName(theColumnName);
