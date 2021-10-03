@@ -181,7 +181,6 @@ import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.lowerCase;
 import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
-import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_VALUESET_URL_PLUS_SLASH;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 
 public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
@@ -2349,16 +2348,19 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@Override
 	public Optional<TermValueSet> findCurrentTermValueSet(String theUrl) {
 		if (TermReadSvcUtil.isLoincNotGenericUnversionedValueSet(theUrl)) {
-			if (TermReadSvcUtil.mustReturnEmptyValueSet(theUrl))   return Optional.empty();
+			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId(theUrl);
+			if (! vsIdOpt.isPresent()) {
+				return Optional.empty();
+			}
 
-			String forcedId = theUrl.substring(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH.length());
-			if (StringUtils.isBlank(forcedId))  return Optional.empty();
-
-			return myTermValueSetDao.findTermValueSetByForcedId(forcedId);
+			return myTermValueSetDao.findTermValueSetByForcedId(vsIdOpt.get());
 		}
 
 		List<TermValueSet> termValueSetList = myTermValueSetDao.findTermValueSetByUrl(Pageable.ofSize(1), theUrl);
-		if (termValueSetList.isEmpty()) return Optional.empty();
+		if (termValueSetList.isEmpty()) {
+			return Optional.empty();
+		}
+
 		return Optional.of(termValueSetList.get(0));
 	}
 
