@@ -75,6 +75,15 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	public void testCreateWithNonLocalReferenceWorksWithIncludes() {
 
 		myModelConfig.setTreatBaseUrlsAsLocal(Collections.singleton("https://hapi.fhir.org/baseR4/"));
+//		Questionnaire questionnaire = new Questionnaire();
+//		questionnaire.setId("my-questionnaire");
+//		Questionnaire.QuestionnaireItemComponent qic = new Questionnaire.QuestionnaireItemComponent();
+//		qic.setLinkId("1");
+//		qic.setRequired(false);
+//		questionnaire.getItem().add(qic);
+//		myQuestionnaireDao.update(questionnaire);
+//		QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
+
 
 		String q = "{\n" +
 			"  \"resourceType\": \"Questionnaire\",\n" +
