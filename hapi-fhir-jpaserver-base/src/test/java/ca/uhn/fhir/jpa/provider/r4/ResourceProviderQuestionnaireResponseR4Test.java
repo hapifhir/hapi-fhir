@@ -38,10 +38,6 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderQuestionnaireResponseR4Test.class);
 	private static RequestValidatingInterceptor ourValidatingInterceptor;
 
-
-	@Autowired
-	MatchUrlService myMatchUrlService;
-
 	@AfterAll
 	public static void afterClassClearContext() {
 		ourRestServer.unregisterInterceptor(ourValidatingInterceptor);
@@ -67,11 +63,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		ourRestServer.getInterceptorService().registerInterceptor(ourValidatingInterceptor);
 	}
 
-	
-
-
 	@Test
-
 	public void testCreateWithNonLocalReferenceWorksWithIncludes() {
 		String baseUrl = "https://hapi.fhir.org/baseR4/";
 

@@ -189,8 +189,6 @@ public class SearchBuilder implements ISearchBuilder {
 	private HibernatePropertiesProvider myDialectProvider;
 	@Autowired
 	private ModelConfig myModelConfig;
-	@Autowired
-	private IResourceLinkDao myResourceLinkDao;
 
 	private boolean hasNextIteratorQuery = false;
 

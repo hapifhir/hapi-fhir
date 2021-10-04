@@ -1256,12 +1256,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				case "canonical":
 					String typeName = toTypeName(theValue);
 					IPrimitiveType<?> valuePrimitive = (IPrimitiveType<?>) theValue;
-//					for (String baseUrl: myModelConfig.getTreatBaseUrlsAsLocal()) {
-//						if (valuePrimitive.getValueAsString().startsWith(baseUrl)) {
-//							String stripped = valuePrimitive.getValueAsString().substring(baseUrl.length() + 1);
-//							valuePrimitive.setValueAsString(stripped);
-//						}
-//					}
 					IBaseReference fakeReference = (IBaseReference) myContext.getElementDefinition("Reference").newInstance();
 					fakeReference.setReference(valuePrimitive.getValueAsString());
 
@@ -1276,15 +1270,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 						 * based on that.
 						 */
 						IIdType parsed = fakeReference.getReferenceElement();
-						if (parsed.hasIdPart() && parsed.hasResourceType() && isOrCanBeTreatedAsLocal(parsed)) {
-							if (myModelConfig.getTreatBaseUrlsAsLocal().contains(parsed.getBaseUrl())) {
-
-							}
+						if (parsed.hasIdPart() && parsed.hasResourceType() && !parsed.isAbsolute()) {
 							myPathAndRef = new PathAndRef(theSearchParam.getName(), thePath, fakeReference, false);
 							theParams.add(myPathAndRef);
 							break;
 						}
-						//GetTreatBaseUrlsAsLocal Doesnt actually apply here, and it should.
 
 						if (parsed.isAbsolute()) {
 							myPathAndRef = new PathAndRef(theSearchParam.getName(), thePath, fakeReference, true);
