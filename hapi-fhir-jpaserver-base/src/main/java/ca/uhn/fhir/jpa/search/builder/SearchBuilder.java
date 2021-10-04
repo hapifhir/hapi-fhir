@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
@@ -188,6 +189,8 @@ public class SearchBuilder implements ISearchBuilder {
 	private HibernatePropertiesProvider myDialectProvider;
 	@Autowired
 	private ModelConfig myModelConfig;
+	@Autowired
+	private IResourceLinkDao myResourceLinkDao;
 
 	private boolean hasNextIteratorQuery = false;
 

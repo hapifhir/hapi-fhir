@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.Collections;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.entity.Search;
@@ -72,6 +73,8 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	@Test
 
 	public void testCreateWithNonLocalReferenceWorksWithIncludes() {
+
+		myModelConfig.setTreatBaseUrlsAsLocal(Collections.singleton("https://hapi.fhir.org/baseR4/"));
 
 		String q = "{\n" +
 			"  \"resourceType\": \"Questionnaire\",\n" +

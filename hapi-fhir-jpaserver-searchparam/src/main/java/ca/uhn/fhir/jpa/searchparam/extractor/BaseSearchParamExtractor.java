@@ -88,6 +88,7 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.strip;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
@@ -1255,6 +1256,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				case "canonical":
 					String typeName = toTypeName(theValue);
 					IPrimitiveType<?> valuePrimitive = (IPrimitiveType<?>) theValue;
+					for (String baseUrl: myModelConfig.getTreatBaseUrlsAsLocal()) {
+						if (valuePrimitive.getValueAsString().startsWith(baseUrl)) {
+							String stripped = valuePrimitive.getValueAsString().substring(baseUrl.length() + 1);
+							valuePrimitive.setValueAsString(stripped);
+						}
+					}
 					IBaseReference fakeReference = (IBaseReference) myContext.getElementDefinition("Reference").newInstance();
 					fakeReference.setReference(valuePrimitive.getValueAsString());
 
@@ -1269,11 +1276,15 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 						 * based on that.
 						 */
 						IIdType parsed = fakeReference.getReferenceElement();
-						if (parsed.hasIdPart() && parsed.hasResourceType() && !parsed.isAbsolute()) {
+						if (parsed.hasIdPart() && parsed.hasResourceType() && isOrCanBeTreatedAsLocal(parsed)) {
+							if (myModelConfig.getTreatBaseUrlsAsLocal().contains(parsed.getBaseUrl())) {
+
+							}
 							myPathAndRef = new PathAndRef(theSearchParam.getName(), thePath, fakeReference, false);
 							theParams.add(myPathAndRef);
 							break;
 						}
+						//GetTreatBaseUrlsAsLocal Doesnt actually apply here, and it should.
 
 						if (parsed.isAbsolute()) {
 							myPathAndRef = new PathAndRef(theSearchParam.getName(), thePath, fakeReference, true);
@@ -1310,6 +1321,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					addUnexpectedDatatypeWarning(theParams, theSearchParam, theValue);
 					break;
 			}
+		}
+
+		private boolean isOrCanBeTreatedAsLocal(IIdType theId) {
+			boolean acceptableAsLocalReference = !theId.isAbsolute() ||  myModelConfig.getTreatBaseUrlsAsLocal().contains(theId.getBaseUrl());
+			return acceptableAsLocalReference;
 		}
 
 		public PathAndRef get(IBase theValue, String thePath) {
