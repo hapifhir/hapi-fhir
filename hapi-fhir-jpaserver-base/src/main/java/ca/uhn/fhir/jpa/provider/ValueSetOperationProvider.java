@@ -57,6 +57,18 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	@Autowired
 	private ITermReadSvc myTermReadSvc;
 
+	public void setDaoConfig(DaoConfig theDaoConfig) {
+		myDaoConfig = theDaoConfig;
+	}
+
+	public void setDaoRegistry(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
+	}
+
+	public void setTermReadSvc(ITermReadSvc theTermReadSvc) {
+		myTermReadSvc = theTermReadSvc;
+	}
+
 	@Operation(name = JpaConstants.OPERATION_EXPAND, idempotent = true, typeName = "ValueSet")
 	public IBaseResource expand(
 		HttpServletRequest theServletRequest,
