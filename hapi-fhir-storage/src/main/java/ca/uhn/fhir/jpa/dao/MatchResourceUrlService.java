@@ -32,9 +32,12 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -42,12 +45,19 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class MatchResourceUrlService {
@@ -99,7 +109,14 @@ public class MatchResourceUrlService {
 		}
 		paramMap.setLoadSynchronousUpTo(2);
 
-		Set<ResourcePersistentId> retVal = search(paramMap, theResourceType, theRequest, theConditionalOperationTargetOrNull);
+		Set<ResourcePersistentId> retVal;
+		try {
+			retVal = search(paramMap, theResourceType, theRequest, theConditionalOperationTargetOrNull);
+		} catch (ForbiddenOperationException e) {
+			// If the search matches a resource that the user does not have authorization for,
+			// we want to treat it the same as if the search matched no resources, in order not to leak information.
+			retVal = new HashSet<>();
+		}
 
 		if (retVal.size() == 1) {
 			ResourcePersistentId pid = retVal.iterator().next();
@@ -142,6 +159,27 @@ public class MatchResourceUrlService {
 		}
 
 		Set<ResourcePersistentId> retVal = dao.searchForIds(theParamMap, theRequest, theConditionalOperationTargetOrNull);
+
+		// Interceptor broadcast: STORAGE_PRESHOW_RESOURCES
+		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, myInterceptorBroadcaster, theRequest)) {
+			Map<IBaseResource, ResourcePersistentId> resourceToPidMap = new HashMap<>();
+			for (ResourcePersistentId pid : retVal) {
+				resourceToPidMap.put(dao.readByPid(pid), pid);
+			}
+
+			SimplePreResourceShowDetails accessDetails = new SimplePreResourceShowDetails(resourceToPidMap.keySet());
+			HookParams params = new HookParams()
+				.add(IPreResourceShowDetails.class, accessDetails)
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+
+			retVal = accessDetails.toList()
+				.stream()
+				.map(resourceToPidMap::get)
+				.filter(Objects::nonNull)
+				.collect(Collectors.toSet());
+		}
 
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
 		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {
