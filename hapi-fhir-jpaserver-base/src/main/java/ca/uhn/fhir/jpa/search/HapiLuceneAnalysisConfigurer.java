@@ -79,15 +79,13 @@ public class HapiLuceneAnalysisConfigurer implements LuceneAnalysisConfigurer {
 			.param("minGramSize", "3")
 			.param("maxGramSize", "20");
 
-		// wip mb fold accents to ascii?
 		theLuceneCtx.analyzer(STANDARD_ANALYZER).custom()
 			.tokenizer(StandardTokenizerFactory.class)
 			.tokenFilter(LowerCaseFilterFactory.class)
 			.tokenFilter(ASCIIFoldingFilterFactory.class);
 
 		theLuceneCtx.analyzer(NORM_STRING_ANALYZER).custom()
-			// wip mb THIS SHOULD FAIL - should need KeywordTokenizerFactory - lucene untested!!!
-			.tokenizer(StandardTokenizerFactory.class)
+			.tokenizer(KeywordTokenizerFactory.class)
 			.tokenFilter(LowerCaseFilterFactory.class)
 			.tokenFilter(ASCIIFoldingFilterFactory.class);
 

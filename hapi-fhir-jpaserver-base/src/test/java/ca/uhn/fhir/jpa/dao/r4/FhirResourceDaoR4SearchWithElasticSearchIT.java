@@ -499,7 +499,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		{
 			// contains matches anywhere
 			SearchParameterMap map = new SearchParameterMap();
-			map.add("value-string", new StringParam("green").setContains(true));
+			map.add("value-string", new StringParam("reen").setContains(true));
 			assertObservationSearchMatches("contains search matches anywhere", map, id2, id3, id6);
 		}
 

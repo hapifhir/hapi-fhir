@@ -211,7 +211,10 @@ public abstract class BaseJpaTest extends BaseTest {
 		if (myFhirInstanceValidator != null) {
 			myFhirInstanceValidator.invalidateCaches();
 		}
-		myDaoConfig.setAdvancedLuceneIndexing(new DaoConfig().isAdvancedLuceneIndexing());
+		DaoConfig defaultConfig = new DaoConfig();
+		myDaoConfig.setAdvancedLuceneIndexing(defaultConfig.isAdvancedLuceneIndexing());
+		myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
+
 
 	}
 
@@ -628,6 +631,7 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	public static Map<String, String> buildHeapLuceneHibernateSearchProperties() {
 		Map<String, String> props = new HashMap<>();
+		ourLog.warn("Hibernate Search: using lucene - local-heap");
 		props.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
 		props.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
 		props.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-heap");
