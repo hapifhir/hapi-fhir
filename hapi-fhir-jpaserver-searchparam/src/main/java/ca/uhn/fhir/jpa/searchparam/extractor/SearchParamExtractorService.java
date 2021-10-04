@@ -331,7 +331,6 @@ public class SearchParamExtractorService {
 		}
 
 		if (isNotBlank(baseUrl)) {
-			//FIXME GGG this is teeeeechnically where we are allowing this.
 			if (!myModelConfig.getTreatBaseUrlsAsLocal().contains(baseUrl) && !myModelConfig.isAllowExternalReferences()) {
 				String msg = myContext.getLocalizer().getMessage(BaseSearchParamExtractor.class, "externalReferenceNotAllowed", nextId.getValue());
 				throw new InvalidRequestException(msg);

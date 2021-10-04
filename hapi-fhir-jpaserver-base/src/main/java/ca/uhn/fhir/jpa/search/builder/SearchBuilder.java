@@ -790,7 +790,6 @@ public class SearchBuilder implements ISearchBuilder {
 		if (theIncludes == null || theIncludes.isEmpty()) {
 			return new HashSet<>();
 		}
-		//FIXME GGG at this point `theIncludes` is populated
 		String searchPidFieldName = theReverseMode ? "myTargetResourcePid" : "mySourceResourcePid";
 		String findPidFieldName = theReverseMode ? "mySourceResourcePid" : "myTargetResourcePid";
 		String findVersionFieldName = null;
