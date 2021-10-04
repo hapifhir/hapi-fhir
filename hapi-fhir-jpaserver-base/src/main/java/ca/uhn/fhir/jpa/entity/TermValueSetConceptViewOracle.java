@@ -146,14 +146,12 @@ public class TermValueSetConceptViewOracle implements Serializable, ITermValueSe
 
 	@Override
 	public String getSourceConceptDirectParentPids() {
-		try {
-			if (mySourceConceptDirectParentPids != null) {
-				try (Reader characterStream = mySourceConceptDirectParentPids.getCharacterStream()) {
-					return IOUtils.toString(characterStream);
-				}
+		if (mySourceConceptDirectParentPids != null) {
+			try (Reader characterStream = mySourceConceptDirectParentPids.getCharacterStream()) {
+				return IOUtils.toString(characterStream);
+			} catch (IOException | SQLException e) {
+				throw new InternalErrorException(e);
 			}
-		} catch (IOException | SQLException e) {
-			throw new InternalErrorException(e);
 		}
 		return null;
 	}
