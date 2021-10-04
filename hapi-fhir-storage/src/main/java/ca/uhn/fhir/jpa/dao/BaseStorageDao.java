@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -62,11 +63,13 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import com.google.common.annotations.VisibleForTesting;
+import org.fhir.ucum.Canonical;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,8 +79,10 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -171,7 +176,10 @@ public abstract class BaseStorageDao {
 
 		verifyBundleTypeIsAppropriateForStorage(theResource);
 
-		replaceAbsoluteReferencesWithRelative(theResource);
+		if(!getConfig().getTreatBaseUrlsAsLocal().isEmpty()) {
+			replaceAbsoluteReferencesWithRelative(theResource);
+			replaceAbsoluteUrisWithRelative(theResource);
+		}
 
 		performAutoVersioning(theResource, thePerformIndexing);
 
@@ -217,7 +225,6 @@ public abstract class BaseStorageDao {
 	 * Replace absolute references with relative ones if configured to do so
 	 */
 	private void replaceAbsoluteReferencesWithRelative(IBaseResource theResource) {
-		if (getConfig().getTreatBaseUrlsAsLocal().isEmpty() == false) {
 			FhirTerser t = getContext().newTerser();
 			List<ResourceReferenceInfo> refs = t.getAllResourceReferences(theResource);
 			for (ResourceReferenceInfo nextRef : refs) {
@@ -229,7 +236,26 @@ public abstract class BaseStorageDao {
 					}
 				}
 			}
-		}
+	}
+
+	/**
+	 * Replace Canonical URI's with local references, if we find that the canonical should be treated as local.
+	 */
+	private void replaceAbsoluteUrisWithRelative(IBaseResource theResource) {
+			FhirTerser t = getContext().newTerser();
+			List<CanonicalType> canonicals = t.getAllPopulatedChildElementsOfType(theResource, CanonicalType.class);
+
+			//Try to offset the N^2 by maintaining a visited list.
+			Set<CanonicalType> visited = new HashSet<>();
+
+			for (String baseUrl : myModelConfig.getTreatBaseUrlsAsLocal()) {
+				for (CanonicalType canonical : canonicals) {
+					if (!visited.contains(canonical) && canonical.getValue().startsWith(baseUrl)) {
+						canonical.setValue(canonical.getValue().substring(baseUrl.length() + 1));
+						visited.add(canonical);
+					}
+				}
+			}
 	}
 
 	/**

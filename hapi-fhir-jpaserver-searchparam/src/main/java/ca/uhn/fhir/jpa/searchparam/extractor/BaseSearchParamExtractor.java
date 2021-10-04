@@ -1256,12 +1256,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				case "canonical":
 					String typeName = toTypeName(theValue);
 					IPrimitiveType<?> valuePrimitive = (IPrimitiveType<?>) theValue;
-					for (String baseUrl: myModelConfig.getTreatBaseUrlsAsLocal()) {
-						if (valuePrimitive.getValueAsString().startsWith(baseUrl)) {
-							String stripped = valuePrimitive.getValueAsString().substring(baseUrl.length() + 1);
-							valuePrimitive.setValueAsString(stripped);
-						}
-					}
+//					for (String baseUrl: myModelConfig.getTreatBaseUrlsAsLocal()) {
+//						if (valuePrimitive.getValueAsString().startsWith(baseUrl)) {
+//							String stripped = valuePrimitive.getValueAsString().substring(baseUrl.length() + 1);
+//							valuePrimitive.setValueAsString(stripped);
+//						}
+//					}
 					IBaseReference fakeReference = (IBaseReference) myContext.getElementDefinition("Reference").newInstance();
 					fakeReference.setReference(valuePrimitive.getValueAsString());
 
