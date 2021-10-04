@@ -53,6 +53,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 
 import javax.annotation.Nonnull;
@@ -177,6 +178,17 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		return myMdmControllerSvc.updateLink(theGoldenResourceId.getValueAsString(), theResourceId.getValue(),
 			theMatchResult.getValue(), createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.UPDATE_LINK,
 				getResourceType(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId))
+		);
+	}
+
+	@Operation(name = ProviderConstants.MDM_CREATE_LINK)
+	public IBaseResource createLink(@OperationParam(name = ProviderConstants.MDM_CREATE_LINK_GOLDEN_RESOURCE_ID, min = 1, max = 1) IPrimitiveType<String> theGoldenResourceId,
+											  @OperationParam(name = ProviderConstants.MDM_CREATE_LINK_RESOURCE_ID, min = 1, max = 1) IPrimitiveType<String> theResourceId,
+											  ServletRequestDetails theRequestDetails) {
+		validateCreateLinkParameters(theGoldenResourceId, theResourceId);
+		return myMdmControllerSvc.createLink(theGoldenResourceId.getValueAsString(), theResourceId.getValue(),
+			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.CREATE_LINK,
+				getResourceType(ProviderConstants.MDM_CREATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId))
 		);
 	}
 

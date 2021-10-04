@@ -396,6 +396,66 @@ Any supported MDM type can be used. The following request body shows how to upda
 
 The operation returns the updated Golden Resource. For the query above `Patient` resource will be returned.  Note that this is the only way to modify MDM-managed Golden Resources.
 
+## Create Link
+
+Use the `$mdm-create-link` operation to create a GoldenRecord-to-SourceRecord mdm link without the need for any matching data within the two resources. This operation takes the following parameters:
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Cardinality</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>goldenResourceId</td>
+            <td>String</td>
+            <td>1..1</td>
+            <td>
+                The id of the Golden Resource.
+            </td>
+        </tr>
+        <tr>
+            <td>resourceId</td>
+            <td>String</td>
+            <td>1..1</td>
+            <td>
+                The id of the target resource.
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+MDM link create in this way will automatically have their `linkSource` set to `MANUAL` and `matchResult` set to `MATCH`.
+
+### Example
+
+Use an HTTP POST to the following URL to invoke this operation:
+
+```url
+http://example.com/$mdm-create-link
+```
+
+Any supported MDM type can be used. The following request body shows how to update link on the Patient resource type:
+
+```json
+{
+  "resourceType": "Parameters",
+  "parameter": [ {
+    "name": "goldenResourceId",
+    "valueString": "Patient/123"
+  }, {
+    "name": "resourceId",
+    "valueString": "Patient/456"
+  } ]
+}
+```
+
+The operation returns the Golden Resource. For the query above `Patient` resource will be returned.
+
 ## Merge Golden Resources
 
 The `$mdm-merge-golden-resources` operation can be used to merge one Golden Resource with another. When doing this, you will need to decide which resource to merge from and which one to merge to. 

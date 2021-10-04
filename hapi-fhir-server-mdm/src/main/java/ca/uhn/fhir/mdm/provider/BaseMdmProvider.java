@@ -81,6 +81,10 @@ public abstract class BaseMdmProvider {
 		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theResourceId);
 	}
 
+	protected void validateCreateLinkParameters(IPrimitiveType<String> theGoldenResourceId, IPrimitiveType<String> theResourceId) {
+		validateNotNull(ProviderConstants.MDM_CREATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
+		validateNotNull(ProviderConstants.MDM_CREATE_LINK_RESOURCE_ID, theResourceId);
+	}
 
 	protected MdmTransactionContext createMdmContext(RequestDetails theRequestDetails, MdmTransactionContext.OperationType theOperationType, String theResourceType) {
 		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromTransactionGuid(theRequestDetails.getTransactionGuid());
