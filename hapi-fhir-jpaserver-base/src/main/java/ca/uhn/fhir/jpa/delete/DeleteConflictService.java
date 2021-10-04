@@ -27,16 +27,16 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -63,35 +63,6 @@ public class DeleteConflictService {
 	DaoConfig myDaoConfig;
 	@Autowired
 	private FhirContext myFhirContext;
-
-	public int validateOkToDelete(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
-
-		// We want the list of resources that are marked to be the same list even as we
-		// drill into conflict resolution stacks.. this allows us to not get caught by
-		// circular references
-		DeleteConflictList newConflicts = new DeleteConflictList(theDeleteConflicts);
-
-		// In most cases, there will be no hooks, and so we only need to check if there is at least FIRST_QUERY_RESULT_COUNT conflict and populate that.
-		// Only in the case where there is a hook do we need to go back and collect larger batches of conflicts for processing.
-
-		DeleteConflictOutcome outcome = findAndHandleConflicts(theRequest, newConflicts, theEntity, theForValidate, FIRST_QUERY_RESULT_COUNT, theTransactionDetails);
-
-		int retryCount = 0;
-		while (outcome != null) {
-			int shouldRetryCount = Math.min(outcome.getShouldRetryCount(), MAX_RETRY_ATTEMPTS);
-			if (!(retryCount < shouldRetryCount)) break;
-			newConflicts = new DeleteConflictList(newConflicts);
-			outcome = findAndHandleConflicts(theRequest, newConflicts, theEntity, theForValidate, myDaoConfig.getMaximumDeleteConflictQueryCount(), theTransactionDetails);
-			++retryCount;
-		}
-		theDeleteConflicts.addAll(newConflicts);
-		if (retryCount >= MAX_RETRY_ATTEMPTS && !theDeleteConflicts.isEmpty()) {
-			IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
-			OperationOutcomeUtil.addIssue(myFhirContext, oo, BaseHapiFhirDao.OO_SEVERITY_ERROR, MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, null, "processing");
-			throw new ResourceVersionConflictException(MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, oo);
-		}
-		return retryCount;
-	}
 
 	private DeleteConflictOutcome findAndHandleConflicts(RequestDetails theRequest, DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, int theMinQueryResultCount, TransactionDetails theTransactionDetails) {
 		List<ResourceLink> resultList = myDeleteConflictFinderService.findConflicts(theEntity, theMinQueryResultCount);
@@ -139,35 +110,33 @@ public class DeleteConflictService {
 		}
 	}
 
-	public static void validateDeleteConflictsEmptyOrThrowException(FhirContext theFhirContext, DeleteConflictList theDeleteConflicts) {
-		IBaseOperationOutcome oo = null;
-		String firstMsg = null;
+	public int validateOkToDelete(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 
-		for (DeleteConflict next : theDeleteConflicts) {
+		// We want the list of resources that are marked to be the same list even as we
+		// drill into conflict resolution stacks.. this allows us to not get caught by
+		// circular references
+		DeleteConflictList newConflicts = new DeleteConflictList(theDeleteConflicts);
 
-			if (theDeleteConflicts.isResourceIdToIgnoreConflict(next.getTargetId())) {
-				continue;
-			}
+		// In most cases, there will be no hooks, and so we only need to check if there is at least FIRST_QUERY_RESULT_COUNT conflict and populate that.
+		// Only in the case where there is a hook do we need to go back and collect larger batches of conflicts for processing.
 
-			String msg = "Unable to delete " +
-				next.getTargetId().toUnqualifiedVersionless().getValue() +
-				" because at least one resource has a reference to this resource. First reference found was resource " +
-				next.getSourceId().toUnqualifiedVersionless().getValue() +
-				" in path " +
-				next.getSourcePath();
+		DeleteConflictOutcome outcome = findAndHandleConflicts(theRequest, newConflicts, theEntity, theForValidate, FIRST_QUERY_RESULT_COUNT, theTransactionDetails);
 
-			if (firstMsg == null) {
-				firstMsg = msg;
-				oo = OperationOutcomeUtil.newInstance(theFhirContext);
-			}
-			OperationOutcomeUtil.addIssue(theFhirContext, oo, BaseHapiFhirDao.OO_SEVERITY_ERROR, msg, null, "processing");
+		int retryCount = 0;
+		while (outcome != null) {
+			int shouldRetryCount = Math.min(outcome.getShouldRetryCount(), MAX_RETRY_ATTEMPTS);
+			if (!(retryCount < shouldRetryCount)) break;
+			newConflicts = new DeleteConflictList(newConflicts);
+			outcome = findAndHandleConflicts(theRequest, newConflicts, theEntity, theForValidate, myDaoConfig.getMaximumDeleteConflictQueryCount(), theTransactionDetails);
+			++retryCount;
 		}
-
-		if (firstMsg == null) {
-			return;
+		theDeleteConflicts.addAll(newConflicts);
+		if (retryCount >= MAX_RETRY_ATTEMPTS && !theDeleteConflicts.isEmpty()) {
+			IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
+			OperationOutcomeUtil.addIssue(myFhirContext, oo, BaseStorageDao.OO_SEVERITY_ERROR, MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, null, "processing");
+			throw new ResourceVersionConflictException(MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, oo);
 		}
-
-		throw new ResourceVersionConflictException(firstMsg, oo);
+		return retryCount;
 	}
 
 	@VisibleForTesting

@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3012
+title: "Fixes migration of VARBINARY columns on MS SQLServer."

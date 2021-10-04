@@ -25,7 +25,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.AopTestUtils;
 
-import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
+import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;

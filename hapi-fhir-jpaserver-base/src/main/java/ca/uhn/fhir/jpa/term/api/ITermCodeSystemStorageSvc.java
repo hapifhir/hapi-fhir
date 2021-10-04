@@ -40,7 +40,16 @@ import java.util.List;
  */
 public interface ITermCodeSystemStorageSvc {
 
-	static final String MAKE_LOADING_VERSION_CURRENT = "make.loading.version.current";
+	String MAKE_LOADING_VERSION_CURRENT = "make.loading.version.current";
+
+
+	/**
+	 * Defaults to true when parameter is null or entry is not present in requestDetails.myUserData
+	 */
+	static boolean isMakeVersionCurrent(RequestDetails theRequestDetails) {
+		return theRequestDetails == null ||
+			(boolean) theRequestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
+	}
 
 	void deleteCodeSystem(TermCodeSystem theCodeSystem);
 

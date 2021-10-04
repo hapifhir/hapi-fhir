@@ -1,12 +1,32 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
+import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.provider.DiffProvider;
+import ca.uhn.fhir.jpa.provider.GraphQLProvider;
+import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
+import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
+import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
+import ca.uhn.fhir.jpa.util.ResourceCountCache;
+import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
+import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhir.rest.server.provider.DeleteExpungeProvider;
+import ca.uhn.fhir.rest.server.provider.ReindexProvider;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -30,32 +50,12 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.DispatcherServlet;
 
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
-import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
-import ca.uhn.fhir.jpa.provider.DiffProvider;
-import ca.uhn.fhir.jpa.provider.GraphQLProvider;
-import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
-import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
-import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
-import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
-import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
-import ca.uhn.fhir.rest.server.provider.DeleteExpungeProvider;
-import ca.uhn.fhir.rest.server.provider.ReindexProvider;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
@@ -116,6 +116,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourRestServer.registerProviders(mySystemProvider, myTerminologyUploaderProvider, myDeleteExpungeProvider, myReindexProvider);
 			ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
 			ourRestServer.registerProvider(myAppCtx.getBean(DiffProvider.class));
+			ourRestServer.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
 
 			ourPagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
 

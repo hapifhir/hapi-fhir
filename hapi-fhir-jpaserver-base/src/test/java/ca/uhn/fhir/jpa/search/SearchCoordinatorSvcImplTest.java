@@ -57,7 +57,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
+import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;

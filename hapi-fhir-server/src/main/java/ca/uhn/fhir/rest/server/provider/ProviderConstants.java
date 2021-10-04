@@ -44,6 +44,11 @@ public class ProviderConstants {
 	 */
 	public static final String PARTITION_MANAGEMENT_READ_PARTITION = "$partition-management-read-partition";
 
+	/**
+	 * Operation name: list partitions
+	 */
+	public static final String PARTITION_MANAGEMENT_LIST_PARTITIONS = "$partition-management-list-partitions";
+
 	public static final String PARTITION_MANAGEMENT_PARTITION_ID = "id";
 	public static final String PARTITION_MANAGEMENT_PARTITION_NAME = "name";
 	public static final String PARTITION_MANAGEMENT_PARTITION_DESC = "description";
@@ -152,6 +157,11 @@ public class ProviderConstants {
 	public static final String OPERATION_REINDEX = "$reindex";
 
 	/**
+	 * Operation name for the $invalidate-expansion operation
+	 */
+	public static final String OPERATION_INVALIDATE_EXPANSION = "$invalidate-expansion";
+
+	/**
 	 * url of resources to delete for the $delete-expunge operation
 	 */
 	public static final String OPERATION_REINDEX_PARAM_URL = "url";
@@ -170,4 +180,13 @@ public class ProviderConstants {
 	 * The Spring Batch job id of the delete expunge job created by a $delete-expunge operation
 	 */
 	public static final String OPERATION_REINDEX_RESPONSE_JOB_ID = "jobId";
+
+	@Deprecated
+	public static final String MARK_ALL_RESOURCES_FOR_REINDEXING = "$mark-all-resources-for-reindexing";
+	/**
+	 * @see ProviderConstants#OPERATION_REINDEX
+	 * @deprecated
+	 */
+	@Deprecated
+	public static final String PERFORM_REINDEXING_PASS = "$perform-reindexing-pass";
 }
