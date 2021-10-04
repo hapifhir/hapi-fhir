@@ -1443,6 +1443,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 
 	@Override
+	@Transactional
 	public boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet) {
 		Optional<TermValueSet> optionalTermValueSet = fetchValueSetEntity(theValueSet);
 
