@@ -86,7 +86,7 @@ public class HapiLuceneAnalysisConfigurer implements LuceneAnalysisConfigurer {
 			.tokenFilter(ASCIIFoldingFilterFactory.class);
 
 		theLuceneCtx.analyzer(NORM_STRING_ANALYZER).custom()
-			// fixme mb THIS SHOULD FAIL - should need KeywordTokenizerFactory - lucene untested!!!
+			// wip mb THIS SHOULD FAIL - should need KeywordTokenizerFactory - lucene untested!!!
 			.tokenizer(StandardTokenizerFactory.class)
 			.tokenFilter(LowerCaseFilterFactory.class)
 			.tokenFilter(ASCIIFoldingFilterFactory.class);
