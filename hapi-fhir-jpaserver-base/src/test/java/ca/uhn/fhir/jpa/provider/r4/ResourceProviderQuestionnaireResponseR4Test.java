@@ -1,16 +1,25 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.jena.base.Sys;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
@@ -21,11 +30,16 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderQuestionnaireResponseR4Test.class);
 	private static RequestValidatingInterceptor ourValidatingInterceptor;
+
+
+	@Autowired
+	MatchUrlService myMatchUrlService;
 
 	@AfterAll
 	public static void afterClassClearContext() {
@@ -53,7 +67,115 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	}
 
 	
-	
+
+
+	@Test
+
+	public void testCreateWithNonLocalReferenceWorksWithIncludes() {
+
+		String q = "{\n" +
+			"  \"resourceType\": \"Questionnaire\",\n" +
+			"  \"id\": \"xl-54127-6-hapi\",\n" +
+			"  \"url\": \"https://hapi.fhir.org/baseR4/Questionnaire/xl-54127-6-hapi\",\n" +
+			"  \"meta\": {\n" +
+			"    \"versionId\": \"1\",\n" +
+			"    \"lastUpdated\": \"2021-07-11T05:23:45.000-04:00\",\n" +
+			"    \"source\": \"#se9YJtmM96g7kGYo\",\n" +
+			"    \"profile\": [ \"http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire|2.7\" ],\n" +
+			"    \"tag\": [ {\n" +
+			"      \"code\": \"lformsVersion: 25.0.0\"\n" +
+			"    } ]\n" +
+			"  },\n" +
+			"  \"extension\": [ {\n" +
+			"    \"url\": \"http://hl7.org/fhir/StructureDefinition/questionnaire-launchContext\",\n" +
+			"    \"extension\": [ {\n" +
+			"      \"url\": \"name\",\n" +
+			"      \"valueId\": \"patient\"\n" +
+			"    }, {\n" +
+			"      \"url\": \"type\",\n" +
+			"      \"valueCode\": \"Patient\"\n" +
+			"    }, {\n" +
+			"      \"url\": \"descripton\",\n" +
+			"      \"valueString\": \"For filling in patient information as the subject for the form\"\n" +
+			"    } ]\n" +
+			"  } ],\n" +
+			"  \"identifier\": [ {\n" +
+			"    \"system\": \"http://loinc.org\",\n" +
+			"    \"value\": \"54127-6\"\n" +
+			"  } ],\n" +
+			"  \"name\": \"US Surgeon General family health portrait\",\n" +
+			"  \"title\": \"US Surgeon General family health portrait\",\n" +
+			"  \"status\": \"draft\",\n" +
+			"  \"subjectType\": [ \"Patient\", \"Person\" ],\n" +
+			"  \"date\": \"2018-11-05T16:54:56-05:00\",\n" +
+			"  \"code\": [ {\n" +
+			"    \"system\": \"http://loinc.org\",\n" +
+			"    \"code\": \"54127-6\",\n" +
+			"    \"display\": \"US Surgeon General family health portrait\"\n" +
+			"  } ],\n" +
+			"  \"item\": [ {\n" +
+			"    \"linkId\": \"/54126-8\",\n" +
+			"    \"code\": [ {\n" +
+			"      \"system\": \"http://loinc.org\",\n" +
+			"      \"code\": \"54126-8\",\n" +
+			"      \"display\": \"My health history\"\n" +
+			"    } ],\n" +
+			"    \"text\": \"My health history\",\n" +
+			"    \"type\": \"group\",\n" +
+			"    \"required\": false\n" +
+			"  } ]\n" +
+			"}\n";
+
+		String qr = "{\n" +
+			"  \"resourceType\": \"QuestionnaireResponse\",\n" +
+			"  \"id\": \"xl-5770809-hapi\",\n" +
+			"  \"meta\": {\n" +
+			"    \"versionId\": \"1\",\n" +
+			"    \"lastUpdated\": \"2021-07-15T14:26:27.000-04:00\",\n" +
+			"    \"source\": \"#5w9ykUMceXVLTyAa\",\n" +
+			"    \"profile\": [ \"http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaireresponse|2.7\" ],\n" +
+			"    \"tag\": [ {\n" +
+			"      \"code\": \"lformsVersion: 29.1.0\"\n" +
+			"    } ]\n" +
+			"  },\n" +
+//			"  \"questionnaire\": \"Questionnaire/xl-54127-6-hapi\",\n" +
+			"  \"questionnaire\": \"https://hapi.fhir.org/baseR4/Questionnaire/xl-54127-6-hapi\",\n" +
+			"  \"status\": \"completed\",\n" +
+			"  \"authored\": \"2021-07-15T18:26:27.707Z\",\n" +
+			"  \"item\": [ {\n" +
+			"    \"linkId\": \"/54126-8\",\n" +
+			"    \"text\": \"My health history\",\n" +
+			"    \"item\": [ {\n" +
+			"      \"linkId\": \"/54126-8/54125-0\",\n" +
+			"      \"text\": \"Name\",\n" +
+			"      \"answer\": [ {\n" +
+			"        \"valueString\": \"TAMBRA AGARWAL\"\n" +
+			"      } ]\n" +
+			"    }, {\n" +
+			"      \"linkId\": \"/54126-8/21112-8\",\n" +
+			"      \"text\": \"Birth Date\",\n" +
+			"      \"answer\": [ {\n" +
+			"        \"valueDate\": \"2094-01-01\"\n" +
+			"      } ]\n" +
+			"    } ]\n" +
+			"  } ]\n" +
+			"}\n";
+
+		Questionnaire questionnaire = myFhirCtx.newJsonParser().parseResource(Questionnaire.class, q);
+		QuestionnaireResponse questionnaireResponse = myFhirCtx.newJsonParser().parseResource(QuestionnaireResponse.class, qr);
+
+		myQuestionnaireDao.update(questionnaire);
+		myQuestionnaireResponseDao.update(questionnaireResponse);
+		RuntimeResourceDefinition questionnaireResponse1 = myFhirCtx.getResourceDefinition("QuestionnaireResponse");
+
+		SearchParameterMap spMap = new SearchParameterMap();
+		spMap.setLoadSynchronous(true);
+		spMap.addInclude(QuestionnaireResponse.INCLUDE_QUESTIONNAIRE);
+		spMap.add("_id", new TokenParam("xl-5770809-hapi"));
+		IBundleProvider search = myQuestionnaireResponseDao.search(spMap);
+		assertThat(search.size(), is(equalTo(2)));
+	}
+
 	@SuppressWarnings("unused")
 	@Test
 	public void testCreateWithLocalReference() {
