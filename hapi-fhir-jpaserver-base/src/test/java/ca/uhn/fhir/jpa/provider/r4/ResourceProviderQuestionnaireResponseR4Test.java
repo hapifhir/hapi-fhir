@@ -73,117 +73,23 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	@Test
 
 	public void testCreateWithNonLocalReferenceWorksWithIncludes() {
+		String baseUrl = "https://hapi.fhir.org/baseR4/";
 
-		myModelConfig.setTreatBaseUrlsAsLocal(Collections.singleton("https://hapi.fhir.org/baseR4/"));
-//		Questionnaire questionnaire = new Questionnaire();
-//		questionnaire.setId("my-questionnaire");
-//		Questionnaire.QuestionnaireItemComponent qic = new Questionnaire.QuestionnaireItemComponent();
-//		qic.setLinkId("1");
-//		qic.setRequired(false);
-//		questionnaire.getItem().add(qic);
-//		myQuestionnaireDao.update(questionnaire);
-//		QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
+		myModelConfig.setTreatBaseUrlsAsLocal(Collections.singleton(baseUrl));
+		Questionnaire questionnaire = new Questionnaire();
+		questionnaire.setId("my-questionnaire");
 
-
-		String q = "{\n" +
-			"  \"resourceType\": \"Questionnaire\",\n" +
-			"  \"id\": \"xl-54127-6-hapi\",\n" +
-			"  \"url\": \"https://hapi.fhir.org/baseR4/Questionnaire/xl-54127-6-hapi\",\n" +
-			"  \"meta\": {\n" +
-			"    \"versionId\": \"1\",\n" +
-			"    \"lastUpdated\": \"2021-07-11T05:23:45.000-04:00\",\n" +
-			"    \"source\": \"#se9YJtmM96g7kGYo\",\n" +
-			"    \"profile\": [ \"http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire|2.7\" ],\n" +
-			"    \"tag\": [ {\n" +
-			"      \"code\": \"lformsVersion: 25.0.0\"\n" +
-			"    } ]\n" +
-			"  },\n" +
-			"  \"extension\": [ {\n" +
-			"    \"url\": \"http://hl7.org/fhir/StructureDefinition/questionnaire-launchContext\",\n" +
-			"    \"extension\": [ {\n" +
-			"      \"url\": \"name\",\n" +
-			"      \"valueId\": \"patient\"\n" +
-			"    }, {\n" +
-			"      \"url\": \"type\",\n" +
-			"      \"valueCode\": \"Patient\"\n" +
-			"    }, {\n" +
-			"      \"url\": \"descripton\",\n" +
-			"      \"valueString\": \"For filling in patient information as the subject for the form\"\n" +
-			"    } ]\n" +
-			"  } ],\n" +
-			"  \"identifier\": [ {\n" +
-			"    \"system\": \"http://loinc.org\",\n" +
-			"    \"value\": \"54127-6\"\n" +
-			"  } ],\n" +
-			"  \"name\": \"US Surgeon General family health portrait\",\n" +
-			"  \"title\": \"US Surgeon General family health portrait\",\n" +
-			"  \"status\": \"draft\",\n" +
-			"  \"subjectType\": [ \"Patient\", \"Person\" ],\n" +
-			"  \"date\": \"2018-11-05T16:54:56-05:00\",\n" +
-			"  \"code\": [ {\n" +
-			"    \"system\": \"http://loinc.org\",\n" +
-			"    \"code\": \"54127-6\",\n" +
-			"    \"display\": \"US Surgeon General family health portrait\"\n" +
-			"  } ],\n" +
-			"  \"item\": [ {\n" +
-			"    \"linkId\": \"/54126-8\",\n" +
-			"    \"code\": [ {\n" +
-			"      \"system\": \"http://loinc.org\",\n" +
-			"      \"code\": \"54126-8\",\n" +
-			"      \"display\": \"My health history\"\n" +
-			"    } ],\n" +
-			"    \"text\": \"My health history\",\n" +
-			"    \"type\": \"group\",\n" +
-			"    \"required\": false\n" +
-			"  } ]\n" +
-			"}\n";
-
-		String qr = "{\n" +
-			"  \"resourceType\": \"QuestionnaireResponse\",\n" +
-			"  \"id\": \"xl-5770809-hapi\",\n" +
-			"  \"meta\": {\n" +
-			"    \"versionId\": \"1\",\n" +
-			"    \"lastUpdated\": \"2021-07-15T14:26:27.000-04:00\",\n" +
-			"    \"source\": \"#5w9ykUMceXVLTyAa\",\n" +
-			"    \"profile\": [ \"http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaireresponse|2.7\" ],\n" +
-			"    \"tag\": [ {\n" +
-			"      \"code\": \"lformsVersion: 29.1.0\"\n" +
-			"    } ]\n" +
-			"  },\n" +
-//			"  \"questionnaire\": \"Questionnaire/xl-54127-6-hapi\",\n" +
-			"  \"questionnaire\": \"https://hapi.fhir.org/baseR4/Questionnaire/xl-54127-6-hapi\",\n" +
-			"  \"status\": \"completed\",\n" +
-			"  \"authored\": \"2021-07-15T18:26:27.707Z\",\n" +
-			"  \"item\": [ {\n" +
-			"    \"linkId\": \"/54126-8\",\n" +
-			"    \"text\": \"My health history\",\n" +
-			"    \"item\": [ {\n" +
-			"      \"linkId\": \"/54126-8/54125-0\",\n" +
-			"      \"text\": \"Name\",\n" +
-			"      \"answer\": [ {\n" +
-			"        \"valueString\": \"TAMBRA AGARWAL\"\n" +
-			"      } ]\n" +
-			"    }, {\n" +
-			"      \"linkId\": \"/54126-8/21112-8\",\n" +
-			"      \"text\": \"Birth Date\",\n" +
-			"      \"answer\": [ {\n" +
-			"        \"valueDate\": \"2094-01-01\"\n" +
-			"      } ]\n" +
-			"    } ]\n" +
-			"  } ]\n" +
-			"}\n";
-
-		Questionnaire questionnaire = myFhirCtx.newJsonParser().parseResource(Questionnaire.class, q);
-		QuestionnaireResponse questionnaireResponse = myFhirCtx.newJsonParser().parseResource(QuestionnaireResponse.class, qr);
+		QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
+		questionnaireResponse.setQuestionnaire(baseUrl + "Questionnaire/my-questionnaire");
+		questionnaireResponse.setId("my-questionnaire-response");
 
 		myQuestionnaireDao.update(questionnaire);
 		myQuestionnaireResponseDao.update(questionnaireResponse);
-		RuntimeResourceDefinition questionnaireResponse1 = myFhirCtx.getResourceDefinition("QuestionnaireResponse");
 
 		SearchParameterMap spMap = new SearchParameterMap();
 		spMap.setLoadSynchronous(true);
 		spMap.addInclude(QuestionnaireResponse.INCLUDE_QUESTIONNAIRE);
-		spMap.add("_id", new TokenParam("xl-5770809-hapi"));
+		spMap.add("_id", new TokenParam("my-questionnaire-response"));
 		IBundleProvider search = myQuestionnaireResponseDao.search(spMap);
 		assertThat(search.size(), is(equalTo(2)));
 	}
