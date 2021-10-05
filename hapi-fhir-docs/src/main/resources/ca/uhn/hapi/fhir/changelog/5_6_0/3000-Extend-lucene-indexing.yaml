@@ -1,4 +1,4 @@
 ---
 type: add
 issue: 2999
-title: "Lucene/Elasticsearch indexing has been extended to string and token parameters."
+title: "Lucene/Elasticsearch indexing has been extended to string and token parameters. This can be controlled by the new `setAdvancedLuceneIndexing()` property of DaoConfig."
