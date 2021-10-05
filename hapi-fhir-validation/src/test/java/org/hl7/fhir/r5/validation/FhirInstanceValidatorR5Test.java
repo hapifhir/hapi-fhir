@@ -363,7 +363,7 @@ public class FhirInstanceValidatorR5Test {
 
 		ValidationResult output = myVal.validateWithResult(encoded);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(1, errors.size());
+		assertEquals(1, errors.size(), ()->errors.toString());
 		assertEquals("The value '%%%2@()()' is not a valid Base64 value", errors.get(0).getMessage());
 
 	}
@@ -383,7 +383,7 @@ public class FhirInstanceValidatorR5Test {
 
 		ValidationResult output = myVal.validateWithResult(encoded);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(0, errors.size());
+		assertEquals(0, errors.size(), ()->errors.toString());
 
 	}
 
@@ -669,8 +669,8 @@ public class FhirInstanceValidatorR5Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(2, res.size(), output.toString());
-		assertEquals("A code with no system has no defined meaning. A system should be provided", output.getMessages().get(1).getMessage());
+		assertEquals(1, res.size(), output.toString());
+		assertEquals("A code with no system has no defined meaning. A system should be provided", res.get(0).getMessage());
 	}
 
 	@Test

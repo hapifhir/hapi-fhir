@@ -245,8 +245,8 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		myTerminologyDeferredStorageSvc.saveDeferred();
 
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1-9999999999"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
-
-		assertNull(result);
+		assertFalse(result.isOk());
+		assertEquals("Failed to expand ValueSet 'http://loinc.org/vs' (in-memory). Could not validate code http://loinc.org#10013-1-9999999999. Error was: Unable to expand ValueSet because CodeSystem could not be found: http://loinc.org|1.0.0", result.getMessage());
 	}
 
 	private Set<String> toExpandedCodes(ValueSet theExpanded) {

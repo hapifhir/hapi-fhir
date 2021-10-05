@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.server.provider.DeleteExpungeProvider;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import com.google.common.base.Charsets;
@@ -574,6 +575,31 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			assertEquals("Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
 			assertEquals("processing", oo.getIssue().get(0).getCode().toCode());
 		}
+	}
+
+	@Test
+	@Disabled("Stress test only")
+	public void testTransactionWithPlaceholderIds() {
+
+
+		for (int pass = 0; pass < 10000; pass++) {
+			BundleBuilder bb = new BundleBuilder(myFhirCtx);
+			for (int i = 0; i < 100; i++) {
+				Patient pt = new Patient();
+				pt.setId(org.hl7.fhir.dstu3.model.IdType.newRandomUuid());
+				pt.addIdentifier().setSystem("http://foo").setValue("val" + i);
+				bb.addTransactionCreateEntry(pt);
+
+				Observation obs = new Observation();
+				obs.setId(org.hl7.fhir.dstu3.model.IdType.newRandomUuid());
+				obs.setSubject(new Reference(pt.getId()));
+				bb.addTransactionCreateEntry(obs);
+			}
+			Bundle bundle = (Bundle) bb.getBundle();
+			ourLog.info("Starting pass {}", pass);
+			mySystemDao.transaction(null, bundle);
+		}
+
 	}
 
 	@Test
