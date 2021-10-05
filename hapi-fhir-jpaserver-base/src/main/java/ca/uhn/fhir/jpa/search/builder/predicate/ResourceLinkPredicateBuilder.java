@@ -624,12 +624,13 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 
 	@Nonnull
 	public Condition createEverythingPredicate(String theResourceName, Long... theTargetPids) {
-		// we only want to return an InCondition if there's multiple targetPIDs.
-		// otherwise, default behaviour should be to return the BinaryCondition
-		if (theTargetPids != null && theTargetPids.length > 1) {
+		if (theTargetPids != null && theTargetPids.length >= 1) {
+			// if resource ids are provided, we'll create the predicate
+			// with ids in or equal to this value
 			return toEqualToOrInPredicate(myColumnTargetResourceId,
 				generatePlaceholders(Arrays.stream(theTargetPids).map(Object::toString).collect(Collectors.toList())));
 		} else {
+			// ... otherwise we look for resource types
 			return BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theResourceName));
 		}
 	}

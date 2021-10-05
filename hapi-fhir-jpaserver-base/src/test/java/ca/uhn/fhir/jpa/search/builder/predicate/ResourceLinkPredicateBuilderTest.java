@@ -41,11 +41,11 @@ public class ResourceLinkPredicateBuilderTest {
 	}
 
 	@Test
-	public void createEverythingPredicate_withSinglePid_returnsBinaryCondition() {
+	public void createEverythingPredicate_withSinglePid_returnsInCondition() {
 		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient",
 			1l);
 
-		Assertions.assertTrue(condition instanceof BinaryCondition);
+		Assertions.assertTrue(condition instanceof InCondition);
 	}
 
 	@Test
