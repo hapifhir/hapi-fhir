@@ -114,7 +114,7 @@ public class HibernateSearchQueryBuilder {
 					// treat a string as a code with no system (like _id)
 					return myPredicateFactory.match().field(indexFieldPrefix + ".code").matching(string.getValue());
 				} else {
-					throw new IllegalArgumentException("Unexected param type for token search-param: " + orTerm.getClass().getName());
+					throw new IllegalArgumentException("Unexpected param type for token search-param: " + orTerm.getClass().getName());
 				}
 			}).collect(Collectors.toList());
 
