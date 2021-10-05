@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.provider;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -28,9 +29,11 @@ import ca.uhn.fhir.rest.api.server.storage.IReindexJobSubmitter;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
@@ -55,7 +58,7 @@ public class ReindexProvider {
 		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_PARAM_EVERYTHING, typeName = "boolean", min = 0, max = 1) IPrimitiveType<Boolean> theEverything,
 		RequestDetails theRequestDetails
 	) {
-		Boolean everything = theEverything != null && theEverything.getValue();
+		boolean everything = theEverything != null && theEverything.getValue();
 		@Nullable Integer batchSize = myMultiUrlProcessor.getBatchSize(theBatchSize);
 		if (everything) {
 			return processEverything(batchSize, theRequestDetails);
@@ -70,9 +73,9 @@ public class ReindexProvider {
 	private IBaseParameters processEverything(Integer theBatchSize, RequestDetails theRequestDetails) {
 		try {
 			JobExecution jobExecution = myReindexJobSubmitter.submitEverythingJob(theBatchSize, theRequestDetails);
-			IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
-			ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, jobExecution.getJobId());
-			return retval;
+			IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
+			ParametersUtil.addParameterToParametersLong(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, jobExecution.getJobId());
+			return retVal;
 		} catch (JobParametersInvalidException e) {
 			throw new InvalidRequestException("Invalid job parameters: " + e.getMessage(), e);
 		}
