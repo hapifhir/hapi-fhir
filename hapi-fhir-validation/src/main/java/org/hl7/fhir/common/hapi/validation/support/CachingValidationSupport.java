@@ -91,6 +91,21 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	}
 
 	@Override
+	public IBaseResource fetchCodeSystem(String theSystem) {
+		return loadFromCache(myCache, "fetchCodeSystem " + theSystem, t -> super.fetchCodeSystem(theSystem));
+	}
+
+	@Override
+	public IBaseResource fetchValueSet(String theUri) {
+		return loadFromCache(myCache, "fetchValueSet " + theUri, t -> super.fetchValueSet(theUri));
+	}
+
+	@Override
+	public IBaseResource fetchStructureDefinition(String theUrl) {
+		return loadFromCache(myCache, "fetchStructureDefinition " + theUrl, t -> super.fetchStructureDefinition(theUrl));
+	}
+
+	@Override
 	public <T extends IBaseResource> T fetchResource(@Nullable Class<T> theClass, String theUri) {
 		return loadFromCache(myCache, "fetchResource " + theClass + " " + theUri,
 			t -> super.fetchResource(theClass, theUri));

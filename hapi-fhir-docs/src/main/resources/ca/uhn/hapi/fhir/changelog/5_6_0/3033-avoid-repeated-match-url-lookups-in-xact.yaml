@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 3033
+title: "When performing a FHIR transaction using the JPA server where the transaction contains many
+  identical inline match URLs (as is the case with recent versions of Synthea), HAPI FHIR will now 
+  avoid repeateed identical lookups while processing the transaction."

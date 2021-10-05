@@ -24,7 +24,7 @@ public class ElementWithExtensionR4Test {
 
     @AfterAll
     public static void afterClassClearContext() {
-        TestUtil.clearAllStaticFieldsForUnitTest();
+        TestUtil.randomizeLocaleAndTimezone();
     }
 
     @Test

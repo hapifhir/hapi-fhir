@@ -21,9 +21,9 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
@@ -155,7 +155,7 @@ public class TransactionClientTest {
 
   @AfterAll
   public static void afterClassClearContext() {
-    TestUtil.clearAllStaticFieldsForUnitTest();
+    TestUtil.randomizeLocaleAndTimezone();
   }
 
 }
