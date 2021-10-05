@@ -827,7 +827,7 @@ public class BaseDateTimeDtDstu2Test {
 	@AfterAll
 	public static void afterClassClearContext() {
 		Locale.setDefault(ourDefaultLocale);
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	@BeforeAll

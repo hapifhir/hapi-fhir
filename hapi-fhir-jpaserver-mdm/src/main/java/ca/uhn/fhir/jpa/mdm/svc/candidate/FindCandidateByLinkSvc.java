@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  * #L%
  */
 
-import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;

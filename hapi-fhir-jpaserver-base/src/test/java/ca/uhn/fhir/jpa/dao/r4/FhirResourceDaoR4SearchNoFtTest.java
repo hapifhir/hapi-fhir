@@ -802,7 +802,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		List<IIdType> actual = toUnqualifiedVersionlessIds(resp);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual, containsInAnyOrder(orgId, medId, patId, moId, patId2));
-		assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(7, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 
 		// Specific patient ID with linked stuff
 		request = mock(HttpServletRequest.class);
@@ -1531,16 +1531,16 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		int size;
 		SearchParameterMap params = new SearchParameterMap();
-//		params.setLoadSynchronous(true);
-//		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(id1));
-//
-//		params = new SearchParameterMap();
-//		params.add("_id", new StringParam(id1));
-//		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(id1));
-//
-//		params = new SearchParameterMap();
-//		params.add("_id", new StringParam("9999999999999999"));
-//		assertEquals(0, toList(myPatientDao.search(params)).size());
+		params.setLoadSynchronous(true);
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(id1));
+
+		params = new SearchParameterMap();
+		params.add("_id", new StringParam(id1));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(id1));
+
+		params = new SearchParameterMap();
+		params.add("_id", new StringParam("9999999999999999"));
+		assertEquals(0, toList(myPatientDao.search(params)).size());
 
 		myCaptureQueriesListener.clear();
 		params = new SearchParameterMap();

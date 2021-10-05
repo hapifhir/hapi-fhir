@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor.validation;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -23,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -118,7 +116,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 	public void testRepositoryValidation() {
 		createPatient(withActiveTrue(), withId("A"));
 
-		List<IRepositoryValidatingRule> rules = myApplicationContext.getBean(BaseConfig.REPOSITORY_VALIDATING_RULE_BUILDER, RepositoryValidatingRuleBuilder.class)
+		List<IRepositoryValidatingRule> rules = myApplicationContext.getBean(RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER, RepositoryValidatingRuleBuilder.class)
 			.forResourcesOfType("Encounter")
 			.requireValidationToDeclaredProfiles().withBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Ignore)
 			.build();

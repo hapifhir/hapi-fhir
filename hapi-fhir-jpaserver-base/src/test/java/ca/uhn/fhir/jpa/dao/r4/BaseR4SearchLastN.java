@@ -591,7 +591,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 }

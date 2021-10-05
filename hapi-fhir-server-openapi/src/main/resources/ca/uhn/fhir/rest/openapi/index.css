@@ -18,7 +18,7 @@ body
     background: #fafafa;
 }
 
-.scheme-container, .information-container
+.information-container
 {
     display: none
 }

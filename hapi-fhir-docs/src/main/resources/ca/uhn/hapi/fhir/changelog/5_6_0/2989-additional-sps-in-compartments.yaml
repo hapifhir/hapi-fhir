@@ -1,0 +1,5 @@
+---
+type: add
+jira: SMILE-1118
+title: "Add new RuleBuilder options which allow you to specify additional resources and search parameters which match a given compartment. More explanations of
+the enhancements can be found in [the documentation](/hapi-fhir/docs/security/authorization_interceptor.html#advanced-compartment-authorization)."

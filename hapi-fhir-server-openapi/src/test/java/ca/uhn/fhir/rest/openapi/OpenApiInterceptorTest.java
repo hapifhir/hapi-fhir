@@ -213,6 +213,17 @@ public class OpenApiInterceptorTest {
 		assertEquals(null, url);
 	}
 
+	@Test
+	public void testStandardRedirectScriptIsAccessible() throws IOException {
+		myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
+		myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
+
+		HttpGet get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/oauth2-redirect.html");
+		try (CloseableHttpResponse response = myClient.execute(get)) {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+		}
+	}
+
 	private String fetchSwaggerUi(String url) throws IOException {
 		String resp;
 		HttpGet get = new HttpGet(url);
