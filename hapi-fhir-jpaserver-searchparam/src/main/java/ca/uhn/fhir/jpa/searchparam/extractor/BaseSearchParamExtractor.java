@@ -89,6 +89,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.strip;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
@@ -1310,6 +1311,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					addUnexpectedDatatypeWarning(theParams, theSearchParam, theValue);
 					break;
 			}
+		}
+
+		private boolean isOrCanBeTreatedAsLocal(IIdType theId) {
+			boolean acceptableAsLocalReference = !theId.isAbsolute() ||  myModelConfig.getTreatBaseUrlsAsLocal().contains(theId.getBaseUrl());
+			return acceptableAsLocalReference;
 		}
 
 		public PathAndRef get(IBase theValue, String thePath) {
