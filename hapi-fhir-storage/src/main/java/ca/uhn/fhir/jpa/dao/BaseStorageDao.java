@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -238,16 +239,20 @@ public abstract class BaseStorageDao {
 	 * Replace Canonical URI's with local references, if we find that the canonical should be treated as local.
 	 */
 	private void replaceAbsoluteUrisWithRelative(IBaseResource theResource, FhirTerser theTerser) {
-		Class<? extends IPrimitiveType<String>> canonicalType = (Class<? extends IPrimitiveType<String>>) myFhirContext.getElementDefinition("canonical").getImplementingClass();
-		List<? extends IPrimitiveType<String>> canonicals = theTerser.getAllPopulatedChildElementsOfType(theResource, canonicalType);
 
-		//Try to offset the N^2 by maintaining a visited list.
-		Set<IPrimitiveType<String>> visited = new HashSet<>();
-		for (String baseUrl : myModelConfig.getTreatBaseUrlsAsLocal()) {
-			for (IPrimitiveType<String> canonical : canonicals) {
-				if (!visited.contains(canonical) && canonical.getValue().startsWith(baseUrl)) {
-					canonical.setValue(canonical.getValue().substring(baseUrl.length() + 1));
-					visited.add(canonical);
+		BaseRuntimeElementDefinition<?> canonicalElementDefinition = myFhirContext.getElementDefinition("canonical");
+		if (canonicalElementDefinition != null) {
+			Class<? extends IPrimitiveType<String>> canonicalType = (Class<? extends IPrimitiveType<String>>) canonicalElementDefinition.getImplementingClass();
+			List<? extends IPrimitiveType<String>> canonicals = theTerser.getAllPopulatedChildElementsOfType(theResource, canonicalType);
+
+			//Try to offset the N^2 by maintaining a visited list.
+			Set<IPrimitiveType<String>> visited = new HashSet<>();
+			for (String baseUrl : myModelConfig.getTreatBaseUrlsAsLocal()) {
+				for (IPrimitiveType<String> canonical : canonicals) {
+					if (!visited.contains(canonical) && canonical.getValue().startsWith(baseUrl)) {
+						canonical.setValue(canonical.getValue().substring(baseUrl.length() + 1));
+						visited.add(canonical);
+					}
 				}
 			}
 		}
