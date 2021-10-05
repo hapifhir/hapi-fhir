@@ -619,10 +619,10 @@ public abstract class BaseJpaTest extends BaseTest {
 	public static Map<String, String> buildHibernateSearchProperties(boolean enableLucene) {
 		Map<String, String> hibernateSearchProperties;
 		if (enableLucene) {
-			ourLog.warn("Hibernate Search is enabled");
+			ourLog.info("Hibernate Search is enabled");
 			hibernateSearchProperties = buildHeapLuceneHibernateSearchProperties();
 		} else {
-			ourLog.warn("Hibernate Search is disabled");
+			ourLog.info("Hibernate Search is disabled");
 			hibernateSearchProperties = new HashMap<>();
 			hibernateSearchProperties.put("hibernate.search.enabled", "false");
 		}

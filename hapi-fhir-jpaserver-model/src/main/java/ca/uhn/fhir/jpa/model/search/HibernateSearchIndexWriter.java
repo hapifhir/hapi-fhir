@@ -20,7 +20,7 @@ public class HibernateSearchIndexWriter {
 	}
 
 	public DocumentElement getSearchParamIndexNode(String theSearchParamName, String theIndexType) {
-		return myNodeCache.getNode("sp", theSearchParamName, theIndexType);
+		return myNodeCache.getObjectElement("sp", theSearchParamName, theIndexType);
 
 	}
 

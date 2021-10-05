@@ -1,14 +1,10 @@
 package ca.uhn.fhir.jpa.model.search;
 
 import org.hamcrest.Matchers;
-import org.hibernate.search.backend.elasticsearch.document.impl.ElasticsearchDocumentObjectBuilder;
 import org.hibernate.search.engine.backend.document.DocumentElement;
 import org.hibernate.search.engine.backend.document.IndexFieldReference;
 import org.hibernate.search.engine.backend.document.IndexObjectFieldReference;
 import org.junit.jupiter.api.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -57,27 +53,27 @@ class HibernateSearchElementCacheTest {
 
 	@Test
 	public void emptyPathReturnsRoot() {
-		assertThat(mySvc.getNode(), Matchers.sameInstance(myRoot));
+		assertThat(mySvc.getObjectElement(), Matchers.sameInstance(myRoot));
 	}
 
 	@Test
 	public void simpleChildIsRemembered() {
-		DocumentElement child = mySvc.getNode("child");
+		DocumentElement child = mySvc.getObjectElement("child");
 
-		assertThat(mySvc.getNode("child"), Matchers.sameInstance(child));
+		assertThat(mySvc.getObjectElement("child"), Matchers.sameInstance(child));
 	}
 
 	@Test
 	public void deeperPathRemembered() {
-		DocumentElement child = mySvc.getNode("child",  "grandchild");
+		DocumentElement child = mySvc.getObjectElement("child",  "grandchild");
 
-		assertThat(mySvc.getNode("child", "grandchild"), Matchers.sameInstance(child));
+		assertThat(mySvc.getObjectElement("child", "grandchild"), Matchers.sameInstance(child));
 	}
 
 	@Test
 	public void grandchildParentIsChild() {
-		DocumentElement child = mySvc.getNode("child");
-		TestDocumentElement grandChild = (TestDocumentElement) mySvc.getNode("child", "grandchild");
+		DocumentElement child = mySvc.getObjectElement("child");
+		TestDocumentElement grandChild = (TestDocumentElement) mySvc.getObjectElement("child", "grandchild");
 		assertThat(grandChild.myParent, Matchers.sameInstance(child));
 	}
 

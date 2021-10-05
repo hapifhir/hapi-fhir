@@ -127,8 +127,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		spfield.fieldTemplate("reference-value", exactAnalyzer).matchingPathGlob("*.reference.value").multiValued();
 
 		// last, since the globs are matched in declaration order, and * matches even nested nodes.
-		spfield.objectFieldTemplate("spObject", ObjectStructure.FLATTENED).matchingPathGlob("*")
-			.multiValued(); // wipmb we can remove this when we memoize the node during index construction.
+		spfield.objectFieldTemplate("spObject", ObjectStructure.FLATTENED).matchingPathGlob("*");
 	}
 
 	@Override

@@ -53,6 +53,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -127,71 +128,72 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return paramNameToIndexedLink;
 	}
 
-	// wip mb what else should we block?
-	static final Set<String> blockList = Sets.newHashSet("_id", "_tag", "_meta");
+	/**
+	 * These params have complicated semantics, or are best resolved at the JPA layer for now.
+	 */
+	static final Set<String> ourUnsafeSearchParmeters = Sets.newHashSet("_id", "_tag", "_meta");
 
 	@Override
 	public boolean supportsSomeOf(SearchParameterMap myParams) {
 		// keep this in sync with the guts of doSearch
 		boolean requiresHibernateSearchAccess = myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN();
 
-		// wip mb need a DaoConfig flag to turn the rest of this off.
 		// wip mb need to turn this off for partitions to start.
 
 		requiresHibernateSearchAccess |=
 			myDaoConfig.isAdvancedLuceneIndexing() &&
 			myParams.entrySet().stream()
-			.filter(e -> !blockList.contains(e.getKey()))
+			.filter(e -> !ourUnsafeSearchParmeters.contains(e.getKey()))
 			.flatMap(andList -> andList.getValue().stream())
 			.flatMap(Collection::stream)
-			// wipmb to extend to string params.
-			.anyMatch(param -> {
-				String modifier = StringUtils.defaultString(param.getQueryParameterQualifier(), EMPTY_MODIFIER);
-				if (param instanceof TokenParam) {
-					switch (modifier) {
-						case Constants.PARAMQUALIFIER_TOKEN_TEXT:
-						case "":
-							// we support plain token and token:text
-							return true;
-						default:
-							return false;
-					}
-				} else if (param instanceof StringParam) {
-					switch (modifier) {
-						// we support string:text, string:contains, string:exact, and unmodified string.
-						case Constants.PARAMQUALIFIER_TOKEN_TEXT:
-						case Constants.PARAMQUALIFIER_STRING_EXACT:
-						case Constants.PARAMQUALIFIER_STRING_CONTAINS:
-						case EMPTY_MODIFIER:
-							return true;
-						default:
-							return false;
-					}
-				} else if (param instanceof QuantityParam) {
-					// wip next up
-					return false;
-				} else if (param instanceof ReferenceParam) {
-					//We cannot search by chain.
-					if (((ReferenceParam) param).getChain() != null) {
-						return false;
-					}
-					switch (modifier) {
-						case	EMPTY_MODIFIER:
-							return true;
-						case Constants.PARAMQUALIFIER_MDM:
-						default:
-							return false;
-					}
-				} else {
-					return false;
-				}
-			});
+			.anyMatch(this::isParamSupported);
 
 		return requiresHibernateSearchAccess;
 	}
 
+	private boolean isParamSupported(IQueryParameterType param) {
+		String modifier = StringUtils.defaultString(param.getQueryParameterQualifier(), EMPTY_MODIFIER);
+		if (param instanceof TokenParam) {
+			switch (modifier) {
+				case Constants.PARAMQUALIFIER_TOKEN_TEXT:
+				case "":
+					// we support plain token and token:text
+					return true;
+				default:
+					return false;
+			}
+		} else if (param instanceof StringParam) {
+			switch (modifier) {
+				// we support string:text, string:contains, string:exact, and unmodified string.
+				case Constants.PARAMQUALIFIER_TOKEN_TEXT:
+				case Constants.PARAMQUALIFIER_STRING_EXACT:
+				case Constants.PARAMQUALIFIER_STRING_CONTAINS:
+				case EMPTY_MODIFIER:
+					return true;
+				default:
+					return false;
+			}
+		} else if (param instanceof QuantityParam) {
+			return false;
+		} else if (param instanceof ReferenceParam) {
+			//We cannot search by chain.
+			if (((ReferenceParam) param).getChain() != null) {
+				return false;
+			}
+			switch (modifier) {
+				case	EMPTY_MODIFIER:
+					return true;
+				case Constants.PARAMQUALIFIER_MDM:
+				default:
+					return false;
+			}
+		} else {
+			return false;
+		}
+	}
 
-	private List<ResourcePersistentId> doSearch(String theResourceName, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
+
+	private List<ResourcePersistentId> doSearch(String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 		// keep this in sync with supportsSomeOf();
 		SearchSession session = Search.session(myEntityManager);
 
@@ -219,22 +221,21 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 						b.must(f.match().field("myResourceLinksField").matching(theReferencingPid.toString()));
 					}
 
-					if (isNotBlank(theResourceName)) {
-						b.must(f.match().field("myResourceType").matching(theResourceName));
+					if (isNotBlank(theResourceType)) {
+						b.must(f.match().field("myResourceType").matching(theResourceType));
 					}
 
 					/*
 					 * Handle other supported parameters
 					 */
-					// wip mb the query guts
-
 					if (myDaoConfig.isAdvancedLuceneIndexing()) {
 						// copy the keys to avoid concurrent modification error
-						for(String nextParam: Lists.newArrayList(theParams.keySet())) {
-							if (blockList.contains(nextParam)) {
+						ArrayList<String> paramNames = Lists.newArrayList(theParams.keySet());
+						for(String nextParam: paramNames) {
+							if (ourUnsafeSearchParmeters.contains(nextParam)) {
 								continue;
 							}
-							RuntimeSearchParam activeParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, nextParam);
+							RuntimeSearchParam activeParam = mySearchParamRegistry.getActiveSearchParam(theResourceType, nextParam);
 							if (activeParam == null) {
 								// ignore magic params like
 								continue;
@@ -263,7 +264,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 									break;
 
 								case QUANTITY:
-									// wip next up
 									break;
 
 								case REFERENCE:
@@ -271,7 +271,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 									builder.addReferenceUnchainedSearch(nextParam, referenceAndOrTerms);
 									break;
 
-								// wip mb add the rest.
 								default:
 									// ignore unsupported param types/modifiers.  They will be processed up in SearchBuilder.
 							}
