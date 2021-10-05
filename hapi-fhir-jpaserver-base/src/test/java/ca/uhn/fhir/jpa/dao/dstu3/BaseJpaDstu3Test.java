@@ -186,8 +186,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("myConditionDaoDstu3")
 	protected IFhirResourceDao<Condition> myConditionDao;
 	@Autowired
-	protected DaoConfig myDaoConfig;
-	@Autowired
 	protected ModelConfig myModelConfig;
 	@Autowired
 	@Qualifier("myDeviceDaoDstu3")
@@ -386,12 +384,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
 	@BeforeEach
 	public void beforeFlushFT() {
-		runInTransaction(() -> {
-			SearchSession searchSession = Search.session(myEntityManager);
-			searchSession.workspace(ResourceTable.class).purge();
-//			searchSession.workspace(ResourceIndexedSearchParamString.class).purge();
-			searchSession.indexingPlan().execute();
-		});
+		purgeHibernateSearch(myEntityManager);
 
 		myDaoConfig.setSchedulingDisabled(true);
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);

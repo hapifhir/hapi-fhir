@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.elastic;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import org.hibernate.search.backend.elasticsearch.analysis.ElasticsearchAnalysisConfigurationContext;
 import org.hibernate.search.backend.elasticsearch.analysis.ElasticsearchAnalysisConfigurer;
 
@@ -70,13 +71,19 @@ public class HapiElasticsearchAnalysisConfigurer implements ElasticsearchAnalysi
 			.param("max_gram", "20");
 
 
-		theConfigCtx.analyzer("standardAnalyzer").custom()
+		// wip mb fold accents to ascii?  This doesn't quite match the JPA normalizer which leaves 'ø' as 'ø' instead of 'o'
+		theConfigCtx.analyzer(HapiLuceneAnalysisConfigurer.STANDARD_ANALYZER).custom()
 			.tokenizer("standard")
-			.tokenFilters("lowercase");
+			.tokenFilters("lowercase", "asciifolding");
+
+		theConfigCtx.analyzer(HapiLuceneAnalysisConfigurer.NORM_STRING_ANALYZER).custom()
+			.tokenizer("keyword") // We need the whole string to match, including whitespace.
+			.tokenFilters("lowercase", "asciifolding");
 
 		theConfigCtx.analyzer("exactAnalyzer")
 			.custom()
-			.tokenizer("keyword");
+			.tokenizer("keyword")
+			.tokenFilters("unique");
 
 		theConfigCtx.analyzer("conceptParentPidsAnalyzer").custom()
 			.tokenizer("whitespace");

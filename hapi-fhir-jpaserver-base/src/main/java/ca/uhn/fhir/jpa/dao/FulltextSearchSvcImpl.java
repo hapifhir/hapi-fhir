@@ -21,28 +21,26 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
+import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.search.engine.search.common.BooleanOperator;
-import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
-import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -52,12 +50,14 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -65,6 +65,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FulltextSearchSvcImpl.class);
+	public static final String EMPTY_MODIFIER = "";
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
@@ -72,11 +73,11 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 	@Autowired
-	private ISearchParamExtractor mySearchParamExtractor;
-	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	private DaoConfig myDaoConfig;
 
 
 	private Boolean ourDisabled;
@@ -88,100 +89,113 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		super();
 	}
 
-	public ExtendedLuceneIndexData extractLuceneIndexData(FhirContext theContext, IBaseResource theResource) {
-		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData();
+	public ExtendedLuceneIndexData extractLuceneIndexData(FhirContext theContext, IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
+		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData(myFhirContext);
 
-		RuntimeResourceDefinition resourceDefinition = theContext.getResourceDefinition(theResource);
-		IFhirPath iFhirPath = theContext.newFhirPath();
+		// wip mb - add string params to indexing.
+		// wipmb weird - theNewParams seem to have some doubles.
+		theNewParams.myStringParams
+				.forEach(param -> retVal.addStringIndexData(param.getParamName(), param.getValueExact()));
+		theNewParams.myTokenParams
+				.forEach(param -> retVal.addTokenIndexData(param.getParamName(), param.getSystem(), param.getValue()));
+		if (!theNewParams.myLinks.isEmpty()) {
+			Map<String, ResourceLink> spNameToLinkMap = buildSpNameToLinkMap(theResource, theNewParams);
 
-		resourceDefinition.getSearchParams().stream()
-			.map(sp->new LuceneRuntimeSearchParam(sp, iFhirPath, mySearchParamExtractor))
-			.forEach(lsp -> lsp.extractLuceneIndexData(theResource, retVal));
+			spNameToLinkMap.entrySet()
+					.forEach(entry -> {
+						ResourceLink resourceLink = entry.getValue();
+						String qualifiedTargetResourceId = resourceLink.getTargetResourceType() + "/" + resourceLink.getTargetResourceId();
+						retVal.addResourceLinkIndexData(entry.getKey(), qualifiedTargetResourceId);
+					});
+
+		}
 		return retVal;
 	}
 
-	private void addTextSearch(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, List<List<IQueryParameterType>> theTerms, String theFieldName) {
-		if (theTerms == null) {
-			return;
+	private Map<String, ResourceLink> buildSpNameToLinkMap(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
+		String resourceType = myFhirContext.getResourceType(theResource);
+		Map<String, RuntimeSearchParam> paramNameToRuntimeParam = theNewParams.getPopulatedResourceLinkParameters().stream()
+			.collect(Collectors.toMap((paramName) -> paramName, (paramName) -> mySearchParamRegistry.getActiveSearchParam(resourceType, paramName)));
+
+		Map<String, ResourceLink> paramNameToIndexedLink = new HashMap<>();
+		for ( Map.Entry<String, RuntimeSearchParam> entry :paramNameToRuntimeParam.entrySet()) {
+			ResourceLink link = theNewParams.myLinks.stream().filter(resourceLink ->
+				entry.getValue().getPathsSplit().stream()
+					.anyMatch(path -> path.equalsIgnoreCase(resourceLink.getSourcePath())))
+				.findFirst().orElse(null);
+			paramNameToIndexedLink.put(entry.getKey(), link);
 		}
-		for (List<? extends IQueryParameterType> nextAnd : theTerms) {
-			Set<String> terms = extractOrStringParams(nextAnd);
-			if (terms.size() == 1) {
-				String query = terms.stream()
-					.map(s->"(" + s + ")")
-					.collect(Collectors.joining(" OR "));
-				b.must(f.simpleQueryString()
-					.field(theFieldName)
-					.boost(4.0f)
-					.matching(query)
-					.analyzer("standardAnalyzer")
-					.defaultOperator(BooleanOperator.AND)); // term value may contain multiple tokens.  Require all of them to be present.
-			} else if (terms.size() > 1) {
-				String joinedTerms = StringUtils.join(terms, ' ');
-				b.must(f.match().field(theFieldName).matching(joinedTerms));
-			} else {
-				ourLog.debug("No Terms found in query parameter {}", nextAnd);
+		return paramNameToIndexedLink;
+	}
+
+	/**
+	 * These params have complicated semantics, or are best resolved at the JPA layer for now.
+	 */
+	static final Set<String> ourUnsafeSearchParmeters = Sets.newHashSet("_id", "_tag", "_meta");
+
+	@Override
+	public boolean supportsSomeOf(SearchParameterMap myParams) {
+		// keep this in sync with the guts of doSearch
+		boolean requiresHibernateSearchAccess = myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN();
+
+		// wip mb need to turn this off for partitions to start.
+
+		requiresHibernateSearchAccess |=
+			myDaoConfig.isAdvancedLuceneIndexing() &&
+			myParams.entrySet().stream()
+			.filter(e -> !ourUnsafeSearchParmeters.contains(e.getKey()))
+			.flatMap(andList -> andList.getValue().stream())
+			.flatMap(Collection::stream)
+			.anyMatch(this::isParamSupported);
+
+		return requiresHibernateSearchAccess;
+	}
+
+	private boolean isParamSupported(IQueryParameterType param) {
+		String modifier = StringUtils.defaultString(param.getQueryParameterQualifier(), EMPTY_MODIFIER);
+		if (param instanceof TokenParam) {
+			switch (modifier) {
+				case Constants.PARAMQUALIFIER_TOKEN_TEXT:
+				case "":
+					// we support plain token and token:text
+					return true;
+				default:
+					return false;
 			}
+		} else if (param instanceof StringParam) {
+			switch (modifier) {
+				// we support string:text, string:contains, string:exact, and unmodified string.
+				case Constants.PARAMQUALIFIER_TOKEN_TEXT:
+				case Constants.PARAMQUALIFIER_STRING_EXACT:
+				case Constants.PARAMQUALIFIER_STRING_CONTAINS:
+				case EMPTY_MODIFIER:
+					return true;
+				default:
+					return false;
+			}
+		} else if (param instanceof QuantityParam) {
+			return false;
+		} else if (param instanceof ReferenceParam) {
+			//We cannot search by chain.
+			if (((ReferenceParam) param).getChain() != null) {
+				return false;
+			}
+			switch (modifier) {
+				case	EMPTY_MODIFIER:
+					return true;
+				case Constants.PARAMQUALIFIER_MDM:
+				default:
+					return false;
+			}
+		} else {
+			return false;
 		}
 	}
 
-	@Nonnull
-	private Set<String> extractOrStringParams(List<? extends IQueryParameterType> nextAnd) {
-		Set<String> terms = new HashSet<>();
-		for (IQueryParameterType nextOr : nextAnd) {
-			String nextValueTrimmed;
-			if (nextOr instanceof StringParam) {
-				StringParam nextOrString = (StringParam) nextOr;
-				nextValueTrimmed = StringUtils.defaultString(nextOrString.getValue()).trim();
-			} else if (nextOr instanceof TokenParam) {
-				TokenParam nextOrToken = (TokenParam) nextOr;
-				nextValueTrimmed = nextOrToken.getValue();
-			} else {
-				throw new IllegalArgumentException("Unsupported full-text param type: " + nextOr.getClass());
-			}
-			if (isNotBlank(nextValueTrimmed)) {
-				terms.add(nextValueTrimmed);
-			}
-		}
-		return terms;
-	}
 
-	private List<ResourcePersistentId> doSearch(String theResourceName, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
-
+	private List<ResourcePersistentId> doSearch(String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
+		// keep this in sync with supportsSomeOf();
 		SearchSession session = Search.session(myEntityManager);
-		List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
-		List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
-
-		/*
-		 * We save an elastic document something like this.
-		 *
-		 * {
-		 *   "myId": 1
-		 *   "myNarrativeText" : 'adsasdjkaldjalkdjalkdjalkdjs",
-		 *   // should be indexed, not stored
-		 *     "text-code" : "Our observation Glucose Moles volume in Blood"
-		 *     "text-clinicalCode" : "Our observation Glucose Moles volume in Blood"
-		 *     "text-identifier" : ""
-		 *     "text-component-value-concept": " a a s d d  g v",
-		 *     _index: {
-		 *
-		 *     }
-		 *   resource: {
-		 *   	type: "Observation"
-		 *   	"code": {
-		 *     "coding": [
-		 *       {
-		 *         "system": "http://loinc.org",
-		 *         "code": "15074-8",
-		 *         "display": "Glucose [Moles/volume] in Blood"
-		 *       }
-		 *     ],
-		 *     "text", "Our observation"
-		 *   },
-		 *   }
-		 * }
-		 */
-
 
 		List<Long> longPids = session.search(ResourceTable.class)
 			//Selects are replacements for projection and convert more cleanly than the old implementation.
@@ -190,44 +204,81 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			)
 			.where(
 				f -> f.bool(b -> {
+					HibernateSearchQueryBuilder builder = new HibernateSearchQueryBuilder(myFhirContext, b, f);
+
 					/*
 					 * Handle _content parameter (resource body content)
 					 */
-					addTextSearch(f, b, contentAndTerms, "myContentText");
+					List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
+					builder.addStringTextSearch(Constants.PARAM_CONTENT, contentAndTerms);
 					/*
 					 * Handle _text parameter (resource narrative content)
 					 */
-					addTextSearch(f, b, textAndTerms, "myNarrativeText");
-
-					//DSTU2 doesn't support fhirpath, so fall back to old style lookup.
-					if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-						// wip mb the query guts
-						// copy the keys to avoid concurrent modification error
-						Iterable<String> keys = Lists.newArrayList(theParams.keySet());
-						for(String nextParam: keys) {
-							RuntimeSearchParam activeParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, nextParam);
-							switch (activeParam.getParamType()) {
-								case TOKEN:
-									List<List<IQueryParameterType>> andOrTerms = theParams.removeByNameAndQualifier(nextParam, TokenParamModifier.TEXT);
-									if (andOrTerms != null && !andOrTerms.isEmpty()) {
-										addTextSearch(f, b, andOrTerms, "sp." + nextParam + ".string.text");
-									}
-									break;
-								default:
-									// we only support token :text for now.
-							}
-						}
-					}
+					List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
+					builder.addStringTextSearch(Constants.PARAM_TEXT, textAndTerms);
 
 					if (theReferencingPid != null) {
 						b.must(f.match().field("myResourceLinksField").matching(theReferencingPid.toString()));
 					}
 
+					if (isNotBlank(theResourceType)) {
+						b.must(f.match().field("myResourceType").matching(theResourceType));
+					}
+
+					/*
+					 * Handle other supported parameters
+					 */
+					if (myDaoConfig.isAdvancedLuceneIndexing()) {
+						// copy the keys to avoid concurrent modification error
+						ArrayList<String> paramNames = Lists.newArrayList(theParams.keySet());
+						for(String nextParam: paramNames) {
+							if (ourUnsafeSearchParmeters.contains(nextParam)) {
+								continue;
+							}
+							RuntimeSearchParam activeParam = mySearchParamRegistry.getActiveSearchParam(theResourceType, nextParam);
+							if (activeParam == null) {
+								// ignore magic params like
+								continue;
+							}
+							switch (activeParam.getParamType()) {
+								case TOKEN:
+									List<List<IQueryParameterType>> tokenTextAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
+									builder.addStringTextSearch(nextParam, tokenTextAndOrTerms);
+
+									List<List<IQueryParameterType>> tokenUnmodifiedAndOrTerms = theParams.removeByNameUnmodified(nextParam);
+									builder.addTokenUnmodifiedSearch(nextParam, tokenUnmodifiedAndOrTerms);
+
+									break;
+								case STRING:
+									List<List<IQueryParameterType>> stringTextAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
+									builder.addStringTextSearch(nextParam, stringTextAndOrTerms);
+
+									List<List<IQueryParameterType>> stringExactAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_STRING_EXACT);
+									builder.addStringExactSearch(nextParam, stringExactAndOrTerms);
+
+									List<List<IQueryParameterType>> stringContainsAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_STRING_CONTAINS);
+									builder.addStringContainsSearch(nextParam, stringContainsAndOrTerms);
+
+									List<List<IQueryParameterType>> stringAndOrTerms = theParams.removeByNameUnmodified(nextParam);
+									builder.addStringUnmodifiedSearch(nextParam, stringAndOrTerms);
+									break;
+
+								case QUANTITY:
+									break;
+
+								case REFERENCE:
+									List<List<IQueryParameterType>> referenceAndOrTerms = theParams.removeByNameUnmodified(nextParam);
+									builder.addReferenceUnchainedSearch(nextParam, referenceAndOrTerms);
+									break;
+
+								default:
+									// ignore unsupported param types/modifiers.  They will be processed up in SearchBuilder.
+							}
+						}
+
+					}
 					//DROP EARLY HERE IF BOOL IS EMPTY?
 
-					if (isNotBlank(theResourceName)) {
-						b.must(f.match().field("myResourceType").matching(theResourceName));
-					}
 				})
 			).fetchAllHits();
 

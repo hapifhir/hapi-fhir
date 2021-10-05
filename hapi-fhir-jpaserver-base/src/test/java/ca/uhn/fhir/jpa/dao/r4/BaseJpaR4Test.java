@@ -291,8 +291,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Qualifier("myEpisodeOfCareDaoR4")
 	protected IFhirResourceDao<EpisodeOfCare> myEpisodeOfCareDao;
 	@Autowired
-	protected DaoConfig myDaoConfig;
-	@Autowired
 	protected PartitionSettings myPartitionSettings;
 	@Autowired
 	protected ModelConfig myModelConfig;
@@ -550,11 +548,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@BeforeEach
 	public void beforeFlushFT() {
-		runInTransaction(() -> {
-			SearchSession searchSession = Search.session(myEntityManager);
-			searchSession.workspace(ResourceTable.class).purge();
-			searchSession.indexingPlan().execute();
-		});
+		purgeHibernateSearch(this.myEntityManager);
 
 		myDaoConfig.setSchedulingDisabled(true);
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
