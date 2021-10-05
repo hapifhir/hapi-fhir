@@ -119,23 +119,26 @@ public class MdmSearchExpandingInterceptor {
 	 * ids of linked resources.
 	 * @param theIdParameter
 	 * @param theAddList
-	 * @param theRmoveList
+	 * @param theRemoveList
 	 */
 	private void expandIdParameter(IQueryParameterType theIdParameter,
 											 List<IQueryParameterType> theAddList,
-											 List<IQueryParameterType> theRmoveList) {
+											 List<IQueryParameterType> theRemoveList) {
 		// id parameters can either be StringParam (for $everything operation)
 		// or TokenParam (for searches)
 		// either case, we want to expand it out and grab all related resources
 		IIdType id;
 		Creator<? extends IQueryParameterType> creator;
+		boolean mdmExpand = false;
 		if (theIdParameter instanceof StringParam) {
 			StringParam param = (StringParam) theIdParameter;
+			mdmExpand = param.isMdmExpand();
 			id = new IdDt(param.getValue());
 			creator = StringParam::new;
 		}
 		else if (theIdParameter instanceof TokenParam) {
 			TokenParam param = (TokenParam) theIdParameter;
+			mdmExpand = param.isMdmExpand();
 			id = new IdDt(param.getValue());
 			creator = TokenParam::new;
 		}
@@ -149,7 +152,7 @@ public class MdmSearchExpandingInterceptor {
 			ourLog.warn("_id parameter of incorrect type. Expected StringParam or TokenParam, but got {}. No expansion will be done!",
 				theIdParameter.getClass().getSimpleName());
 		}
-		else {
+		else if (mdmExpand) {
 			ourLog.debug("_id parameter must be expanded out from: {}", id.getValue());
 
 			Set<String> expandedResourceIds = myMdmLinkExpandSvc.expandMdmBySourceResourceId(id);
@@ -163,7 +166,7 @@ public class MdmSearchExpandingInterceptor {
 				ourLog.debug("_id parameter has been expanded to: {}", String.join(", ", expandedResourceIds));
 
 				// remove the original
-				theRmoveList.add(theIdParameter);
+				theRemoveList.add(theIdParameter);
 
 				// add in all the linked values
 				expandedResourceIds.stream()
@@ -171,5 +174,6 @@ public class MdmSearchExpandingInterceptor {
 					.forEach(theAddList::add);
 			}
 		}
+		// else - no expansion required
 	}
 }
