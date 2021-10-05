@@ -1,16 +1,26 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.Collections;
 
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.jena.base.Sys;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
@@ -21,6 +31,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourceProviderR4Test {
 
@@ -52,8 +63,29 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		ourRestServer.getInterceptorService().registerInterceptor(ourValidatingInterceptor);
 	}
 
-	
-	
+	@Test
+	public void testCreateWithNonLocalReferenceWorksWithIncludes() {
+		String baseUrl = "https://hapi.fhir.org/baseR4/";
+
+		myModelConfig.setTreatBaseUrlsAsLocal(Collections.singleton(baseUrl));
+		Questionnaire questionnaire = new Questionnaire();
+		questionnaire.setId("my-questionnaire");
+
+		QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
+		questionnaireResponse.setQuestionnaire(baseUrl + "Questionnaire/my-questionnaire");
+		questionnaireResponse.setId("my-questionnaire-response");
+
+		myQuestionnaireDao.update(questionnaire);
+		myQuestionnaireResponseDao.update(questionnaireResponse);
+
+		SearchParameterMap spMap = new SearchParameterMap();
+		spMap.setLoadSynchronous(true);
+		spMap.addInclude(QuestionnaireResponse.INCLUDE_QUESTIONNAIRE);
+		spMap.add("_id", new TokenParam("my-questionnaire-response"));
+		IBundleProvider search = myQuestionnaireResponseDao.search(spMap);
+		assertThat(search.size(), is(equalTo(2)));
+	}
+
 	@SuppressWarnings("unused")
 	@Test
 	public void testCreateWithLocalReference() {

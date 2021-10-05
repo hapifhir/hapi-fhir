@@ -964,7 +964,9 @@ public class FhirTerser {
 
 		BaseRuntimeElementDefinition<?> def = theDefinition;
 		if (def.getChildType() == ChildTypeEnum.CONTAINED_RESOURCE_LIST) {
-			def = myContext.getElementDefinition(theElement.getClass());
+			Class<? extends IBase> clazz = theElement.getClass();
+			def = myContext.getElementDefinition(clazz);
+			Validate.notNull(def, "Unable to find element definition for class: %s", clazz);
 		}
 
 		if (theElement instanceof IBaseReference) {
@@ -988,7 +990,8 @@ public class FhirTerser {
 			case RESOURCE_BLOCK:
 			case COMPOSITE_DATATYPE: {
 				BaseRuntimeElementCompositeDefinition<?> childDef = (BaseRuntimeElementCompositeDefinition<?>) def;
-				for (BaseRuntimeChildDefinition nextChild : childDef.getChildrenAndExtension()) {
+				List<BaseRuntimeChildDefinition> childrenAndExtensionDefs = childDef.getChildrenAndExtension();
+				for (BaseRuntimeChildDefinition nextChild : childrenAndExtensionDefs) {
 
 					List<?> values = nextChild.getAccessor().getValues(theElement);
 
@@ -1008,10 +1011,12 @@ public class FhirTerser {
 								continue;
 							}
 							BaseRuntimeElementDefinition<?> childElementDef;
-							childElementDef = nextChild.getChildElementDefinitionByDatatype(nextValue.getClass());
+							Class<? extends IBase> clazz = nextValue.getClass();
+							childElementDef = nextChild.getChildElementDefinitionByDatatype(clazz);
 
 							if (childElementDef == null) {
-								childElementDef = myContext.getElementDefinition(nextValue.getClass());
+								childElementDef = myContext.getElementDefinition(clazz);
+								Validate.notNull(childElementDef, "Unable to find element definition for class: %s", clazz);
 							}
 
 							if (nextChild instanceof RuntimeChildDirectResource) {

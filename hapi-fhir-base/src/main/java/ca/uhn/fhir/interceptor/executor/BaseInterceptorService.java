@@ -402,7 +402,9 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 	 * Only call this when assertions are enabled, it's expensive
 	 */
 	boolean haveAppropriateParams(POINTCUT thePointcut, HookParams theParams) {
-		Validate.isTrue(theParams.getParamsForType().values().size() == thePointcut.getParameterTypes().size(), "Wrong number of params for pointcut %s - Wanted %s but found %s", thePointcut.name(), toErrorString(thePointcut.getParameterTypes()), theParams.getParamsForType().values().stream().map(t -> t != null ? t.getClass().getSimpleName() : "null").sorted().collect(Collectors.toList()));
+		if (theParams.getParamsForType().values().size() != thePointcut.getParameterTypes().size()) {
+			throw new IllegalArgumentException(String.format("Wrong number of params for pointcut %s - Wanted %s but found %s", thePointcut.name(), toErrorString(thePointcut.getParameterTypes()), theParams.getParamsForType().values().stream().map(t -> t != null ? t.getClass().getSimpleName() : "null").sorted().collect(Collectors.toList())));
+		}
 
 		List<String> wantedTypes = new ArrayList<>(thePointcut.getParameterTypes());
 

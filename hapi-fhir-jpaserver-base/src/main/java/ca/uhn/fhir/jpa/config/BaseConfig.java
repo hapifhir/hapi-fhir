@@ -85,6 +85,7 @@ import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.reindex.ReindexJobSubmitterImpl;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
 import ca.uhn.fhir.jpa.sched.HapiSchedulerServiceImpl;
@@ -316,6 +317,12 @@ public abstract class BaseConfig {
 	@Lazy
 	public SubscriptionTriggeringProvider subscriptionTriggeringProvider() {
 		return new SubscriptionTriggeringProvider();
+	}
+
+	@Bean
+	@Lazy
+	public ValueSetOperationProvider valueSetOperationProvider() {
+		return new ValueSetOperationProvider();
 	}
 
 	@Bean
