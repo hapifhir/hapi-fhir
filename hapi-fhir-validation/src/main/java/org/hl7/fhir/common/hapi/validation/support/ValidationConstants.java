@@ -23,6 +23,7 @@ package org.hl7.fhir.common.hapi.validation.support;
 public class ValidationConstants {
 
 	public static final String LOINC_LOW = "loinc";
+	public static final String LOINC_ALL_VALUESET_ID = "loinc-all";
 	public static final String LOINC_GENERIC_CODE_SYSTEM_URL = "http://loinc.org";
 	public static final String LOINC_GENERIC_VALUESET_URL = LOINC_GENERIC_CODE_SYSTEM_URL + "/vs";
 	public static final String LOINC_GENERIC_VALUESET_URL_PLUS_SLASH = LOINC_GENERIC_VALUESET_URL + "/";
