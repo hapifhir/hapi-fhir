@@ -97,6 +97,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -1479,6 +1480,63 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals("Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithAuthorizationDenied\" - No resources match this search", e.getMessage());
+		}
+
+	}
+
+	@Test
+	public void testTransactionCreateInlineMatchUrlWithAuthorizationDeniedAndCacheEnabled() {
+		// setup
+		String patientId = UUID.randomUUID().toString();
+		Bundle request1 = new Bundle();
+		Bundle request2 = new Bundle();
+
+		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myDaoConfig.setMatchUrlCacheEnabled(true);
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(patientId);
+		p.setId("Patient/" + patientId);
+		IIdType id = myPatientDao.update(p, mySrd).getId();
+		ourLog.info("Created patient, got it: {}", id);
+
+		Observation o1 = new Observation();
+		o1.getCode().setText("Some Observation");
+		o1.getSubject().setReference("Patient?identifier=urn%3Asystem%7C" + patientId);
+		request1.addEntry().setResource(o1).getRequest().setMethod(HTTPVerb.POST);
+
+		Observation o2 = new Observation();
+		o2.getCode().setText("Another Observation");
+		o2.getSubject().setReference("Patient?identifier=urn%3Asystem%7C" + patientId);
+		request2.addEntry().setResource(o2).getRequest().setMethod(HTTPVerb.POST);
+
+		// execute the first request before setting up the security rules, to populate the cache
+		mySystemDao.transaction(mySrd, request1);
+
+		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.TRANSACTION);
+		when(mySrd.getFhirContext().getResourceType(any(Observation.class))).thenReturn("Observation");
+
+		myInterceptorRegistry.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.ALLOW) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").create().resourcesOfType(Observation.class).withAnyId().andThen()
+					.allow("Rule 2").read().resourcesOfType(Patient.class).inCompartment("Patient", new IdType("Patient/this-is-not-the-id-you-are-looking-for")).andThen()
+					.denyAll()
+					.build();
+			}
+		});
+
+		try {
+			// execute
+
+			// the second attempt to access the resource should fail even though the first one succeeded
+			mySystemDao.transaction(mySrd, request2);
+
+			// verify
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals("Invalid match URL \"Patient?identifier=urn%3Asystem%7C" + patientId + "\" - No resources match this search", e.getMessage());
 		}
 
 	}

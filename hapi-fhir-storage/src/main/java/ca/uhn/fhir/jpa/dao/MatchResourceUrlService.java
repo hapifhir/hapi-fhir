@@ -61,6 +61,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class MatchResourceUrlService {
+
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MatchResourceUrlService.class);
+
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
@@ -85,37 +88,68 @@ public class MatchResourceUrlService {
 	 * Note that this will only return a maximum of 2 results!!
 	 */
 	public <R extends IBaseResource> Set<ResourcePersistentId> processMatchUrl(String theMatchUrl, Class<R> theResourceType, TransactionDetails theTransactionDetails, RequestDetails theRequest, IBaseResource theConditionalOperationTargetOrNull) {
+		Set<ResourcePersistentId> retVal = null;
+
 		String resourceType = myContext.getResourceType(theResourceType);
 		String matchUrl = massageForStorage(resourceType, theMatchUrl);
 
 		ResourcePersistentId resolvedInTransaction = theTransactionDetails.getResolvedMatchUrls().get(matchUrl);
 		if (resolvedInTransaction != null) {
 			if (resolvedInTransaction == TransactionDetails.NOT_FOUND) {
-				return Collections.emptySet();
+				retVal = Collections.emptySet();
 			} else {
-				return Collections.singleton(resolvedInTransaction);
+				retVal = Collections.singleton(resolvedInTransaction);
 			}
 		}
 
-		ResourcePersistentId resolvedInCache = processMatchUrlUsingCacheOnly(resourceType, matchUrl);
-		if (resolvedInCache != null) {
-			return Collections.singleton(resolvedInCache);
+		if (retVal == null) {
+			ResourcePersistentId resolvedInCache = processMatchUrlUsingCacheOnly(resourceType, matchUrl);
+			if (resolvedInCache != null) {
+				retVal = Collections.singleton(resolvedInCache);
+			}
 		}
 
-		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceType);
-		SearchParameterMap paramMap = myMatchUrlService.translateMatchUrl(matchUrl, resourceDef);
-		if (paramMap.isEmpty() && paramMap.getLastUpdated() == null) {
-			throw new InvalidRequestException("Invalid match URL[" + matchUrl + "] - URL has no search parameters");
-		}
-		paramMap.setLoadSynchronousUpTo(2);
+		if (retVal == null) {
+			RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceType);
+			SearchParameterMap paramMap = myMatchUrlService.translateMatchUrl(matchUrl, resourceDef);
+			if (paramMap.isEmpty() && paramMap.getLastUpdated() == null) {
+				throw new InvalidRequestException("Invalid match URL[" + matchUrl + "] - URL has no search parameters");
+			}
+			paramMap.setLoadSynchronousUpTo(2);
 
-		Set<ResourcePersistentId> retVal;
-		try {
 			retVal = search(paramMap, theResourceType, theRequest, theConditionalOperationTargetOrNull);
-		} catch (ForbiddenOperationException e) {
-			// If the search matches a resource that the user does not have authorization for,
-			// we want to treat it the same as if the search matched no resources, in order not to leak information.
-			retVal = new HashSet<>();
+		}
+
+		// Interceptor broadcast: STORAGE_PRESHOW_RESOURCES
+		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, myInterceptorBroadcaster, theRequest)) {
+			Map<IBaseResource, ResourcePersistentId> resourceToPidMap = new HashMap<>();
+
+			IFhirResourceDao<R> dao = getResourceDao(theResourceType);
+
+			for (ResourcePersistentId pid : retVal) {
+				resourceToPidMap.put(dao.readByPid(pid), pid);
+			}
+
+			SimplePreResourceShowDetails accessDetails = new SimplePreResourceShowDetails(resourceToPidMap.keySet());
+			HookParams params = new HookParams()
+				.add(IPreResourceShowDetails.class, accessDetails)
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest);
+
+			try {
+				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+
+				retVal = accessDetails.toList()
+					.stream()
+					.map(resourceToPidMap::get)
+					.filter(Objects::nonNull)
+					.collect(Collectors.toSet());
+			} catch (ForbiddenOperationException e) {
+				// If the search matches a resource that the user does not have authorization for,
+				// we want to treat it the same as if the search matched no resources, in order not to leak information.
+				ourLog.warn("Inline match URL [" + matchUrl + "] specified a resource the user is not authorized to access.", e);
+				retVal = new HashSet<>();
+			}
 		}
 
 		if (retVal.size() == 1) {
@@ -127,6 +161,14 @@ public class MatchResourceUrlService {
 		}
 
 		return retVal;
+	}
+
+	private <R extends IBaseResource> IFhirResourceDao<R> getResourceDao(Class<R> theResourceType) {
+		IFhirResourceDao<R> dao = myDaoRegistry.getResourceDao(theResourceType);
+		if (dao == null) {
+			throw new InternalErrorException("No DAO for resource type: " + theResourceType.getName());
+		}
+		return dao;
 	}
 
 	private String massageForStorage(String theResourceType, String theMatchUrl) {
@@ -153,33 +195,9 @@ public class MatchResourceUrlService {
 
 	public <R extends IBaseResource> Set<ResourcePersistentId> search(SearchParameterMap theParamMap, Class<R> theResourceType, RequestDetails theRequest, @Nullable IBaseResource theConditionalOperationTargetOrNull) {
 		StopWatch sw = new StopWatch();
-		IFhirResourceDao<R> dao = myDaoRegistry.getResourceDao(theResourceType);
-		if (dao == null) {
-			throw new InternalErrorException("No DAO for resource type: " + theResourceType.getName());
-		}
+		IFhirResourceDao<R> dao = getResourceDao(theResourceType);
 
 		Set<ResourcePersistentId> retVal = dao.searchForIds(theParamMap, theRequest, theConditionalOperationTargetOrNull);
-
-		// Interceptor broadcast: STORAGE_PRESHOW_RESOURCES
-		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, myInterceptorBroadcaster, theRequest)) {
-			Map<IBaseResource, ResourcePersistentId> resourceToPidMap = new HashMap<>();
-			for (ResourcePersistentId pid : retVal) {
-				resourceToPidMap.put(dao.readByPid(pid), pid);
-			}
-
-			SimplePreResourceShowDetails accessDetails = new SimplePreResourceShowDetails(resourceToPidMap.keySet());
-			HookParams params = new HookParams()
-				.add(IPreResourceShowDetails.class, accessDetails)
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
-
-			retVal = accessDetails.toList()
-				.stream()
-				.map(resourceToPidMap::get)
-				.filter(Objects::nonNull)
-				.collect(Collectors.toSet());
-		}
 
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
 		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {
