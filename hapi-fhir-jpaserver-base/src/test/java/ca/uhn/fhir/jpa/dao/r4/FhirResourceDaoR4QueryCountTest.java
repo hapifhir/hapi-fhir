@@ -8,10 +8,13 @@ import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQuery;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -936,6 +939,53 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		mySystemDao.transaction(mySrd, input);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(11, runInTransaction(() -> myResourceTableDao.count()));
+
+	}
+
+	@Test
+	public void testTransactionWithMultipleInlineMatchUrlsWithAuthentication() {
+		myDaoConfig.setDeleteEnabled(false);
+		myDaoConfig.setMassIngestionMode(true);
+		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myDaoConfig.setMatchUrlCacheEnabled(true);
+
+		Location loc = new Location();
+		loc.setId("LOC");
+		loc.addIdentifier().setSystem("http://foo").setValue("123");
+		myLocationDao.update(loc, mySrd);
+
+		BundleBuilder bb = new BundleBuilder(myFhirCtx);
+		for (int i = 0; i < 5; i++) {
+			Encounter enc = new Encounter();
+			enc.addLocation().setLocation(new Reference("Location?identifier=http://foo|123"));
+			bb.addTransactionCreateEntry(enc);
+		}
+		Bundle input = (Bundle) bb.getBundle();
+
+		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.TRANSACTION);
+		myInterceptorRegistry.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.ALLOW));
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(6, runInTransaction(() -> myResourceTableDao.count()));
+
+		// Second identical pass
+
+		bb = new BundleBuilder(myFhirCtx);
+		for (int i = 0; i < 5; i++) {
+			Encounter enc = new Encounter();
+			enc.addLocation().setLocation(new Reference("Location?identifier=http://foo|123"));
+			bb.addTransactionCreateEntry(enc);
+		}
+		input = (Bundle) bb.getBundle();
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(11, runInTransaction(() -> myResourceTableDao.count()));
 
 	}

@@ -95,18 +95,17 @@ public class MatchResourceUrlService {
 
 		ResourcePersistentId resolvedInTransaction = theTransactionDetails.getResolvedMatchUrls().get(matchUrl);
 		if (resolvedInTransaction != null) {
+			// If the resource has previously been looked up within the transaction, there's no need to re-authorize it.
 			if (resolvedInTransaction == TransactionDetails.NOT_FOUND) {
-				retVal = Collections.emptySet();
+				return Collections.emptySet();
 			} else {
-				retVal = Collections.singleton(resolvedInTransaction);
+				return Collections.singleton(resolvedInTransaction);
 			}
 		}
 
-		if (retVal == null) {
-			ResourcePersistentId resolvedInCache = processMatchUrlUsingCacheOnly(resourceType, matchUrl);
-			if (resolvedInCache != null) {
-				retVal = Collections.singleton(resolvedInCache);
-			}
+		ResourcePersistentId resolvedInCache = processMatchUrlUsingCacheOnly(resourceType, matchUrl);
+		if (resolvedInCache != null) {
+			retVal = Collections.singleton(resolvedInCache);
 		}
 
 		if (retVal == null) {
