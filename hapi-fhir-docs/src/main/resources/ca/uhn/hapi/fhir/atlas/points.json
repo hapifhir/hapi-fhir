@@ -392,6 +392,17 @@
 			"lat": 52.01804,
 			"lon": 4.354307,
 			"added": "2021-07-15"
+		},
+		{
+			"title": "Columna Cura",
+			"description": "The electronic care record that ensures efficient documentation and optimal task management of community care services.",
+			"company": "Systematic",
+			"contactName": "Columna Cura",
+			"link": "https://systematic.com/en-gb/industries/healthcare/community-care/columna-cura",
+			"city": "Aarhus, Denmark",
+			"lat": 56.15195,
+			"lon": 10.17705,
+			"added": "2021-10-06"
 		}
 	]
 }
