@@ -99,4 +99,12 @@ public class MessageHelper {
 	public String getMessageForPresentLink(String theGoldenRecord, String theSourceResource) {
 		return "Link already exists between " + theGoldenRecord + " and " + theSourceResource + ". Use $mdm-update-link instead.";
 	}
+
+	public String getMessageForMultipleGoldenRecords(IAnyResource theSourceResource) {
+		return getMessageForMultipleGoldenRecords(theSourceResource.getIdElement().toVersionless().toString());
+	}
+
+	public String getMessageForMultipleGoldenRecords(String theSourceResource) {
+		return theSourceResource + " already has matched golden resource. Use $mdm-query-links to see more details.";
+	}
 }

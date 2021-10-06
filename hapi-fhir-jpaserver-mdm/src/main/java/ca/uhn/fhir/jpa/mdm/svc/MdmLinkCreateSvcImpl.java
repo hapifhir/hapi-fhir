@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -37,7 +39,7 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc  {
 
 	@Transactional
 	@Override
-	public IAnyResource createLink(IAnyResource theGoldenResource, IAnyResource theSourceResource, MdmTransactionContext theMdmContext) {
+	public IAnyResource createLink(IAnyResource theGoldenResource, IAnyResource theSourceResource, MdmMatchResultEnum theMatchResult, MdmTransactionContext theMdmContext) {
 		String sourceType = myFhirContext.getResourceType(theSourceResource);
 
 		validateCreateLinkRequest(theGoldenResource, theSourceResource, sourceType);
@@ -46,15 +48,25 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc  {
 		Long targetId = myIdHelperService.getPidOrThrowException(theSourceResource);
 
 		Optional<MdmLink> optionalMdmLink = myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourceId, targetId);
-		if (!optionalMdmLink.isPresent()) {
-			MdmLink mdmLink = myMdmLinkDaoSvc.getOrCreateMdmLinkByGoldenResourcePidAndSourceResourcePid(goldenResourceId, targetId);
-			mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
-			mdmLink.setMatchResult(MdmMatchResultEnum.MATCH);
-			ourLog.info("Manually creating a " + theGoldenResource.getIdElement().toVersionless() + " to " + theSourceResource.getIdElement().toVersionless() + " mdm link.");
-			myMdmLinkDaoSvc.save(mdmLink);
-		} else {
+		if (optionalMdmLink.isPresent()) {
 			throw new InvalidRequestException(myMessageHelper.getMessageForPresentLink(theGoldenResource, theSourceResource));
 		}
+
+		List<MdmLink> mdmLinks = myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(targetId, MdmMatchResultEnum.MATCH);
+		if (mdmLinks.size() > 0 && theMatchResult == MdmMatchResultEnum.MATCH) {
+			throw new InvalidRequestException(myMessageHelper.getMessageForMultipleGoldenRecords(theSourceResource));
+		}
+
+		MdmLink mdmLink = myMdmLinkDaoSvc.getOrCreateMdmLinkByGoldenResourcePidAndSourceResourcePid(goldenResourceId, targetId);
+		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
+		if (theMatchResult == null) {
+			mdmLink.setMatchResult(MdmMatchResultEnum.MATCH);
+		} else {
+			mdmLink.setMatchResult(theMatchResult);
+		}
+		ourLog.info("Manually creating a " + theGoldenResource.getIdElement().toVersionless() + " to " + theSourceResource.getIdElement().toVersionless() + " mdm link.");
+		myMdmLinkDaoSvc.save(mdmLink);
+
 		return theGoldenResource;
 	}
 

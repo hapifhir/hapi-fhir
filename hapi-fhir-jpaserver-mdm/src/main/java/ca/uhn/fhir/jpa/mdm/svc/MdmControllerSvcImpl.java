@@ -110,13 +110,14 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	}
 
 	@Override
-	public IAnyResource createLink(String theGoldenResourceId, String theSourceResourceId, MdmTransactionContext theMdmTransactionContext) {
+	public IAnyResource createLink(String theGoldenResourceId, String theSourceResourceId, @Nullable String theMatchResult, MdmTransactionContext theMdmTransactionContext) {
+		MdmMatchResultEnum matchResult = MdmControllerUtil.extractMatchResultOrNull(theMatchResult);
 		IAnyResource goldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_CREATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
 		IAnyResource source = myMdmControllerHelper.getLatestSourceFromIdOrThrowException(ProviderConstants.MDM_CREATE_LINK_RESOURCE_ID, theSourceResourceId);
 		myMdmControllerHelper.validateSameVersion(goldenResource, theGoldenResourceId);
 		myMdmControllerHelper.validateSameVersion(source, theSourceResourceId);
 
-		return myIMdmLinkCreateSvc.createLink(goldenResource, source, theMdmTransactionContext);
+		return myIMdmLinkCreateSvc.createLink(goldenResource, source, matchResult, theMdmTransactionContext);
 	}
 
 	@Override

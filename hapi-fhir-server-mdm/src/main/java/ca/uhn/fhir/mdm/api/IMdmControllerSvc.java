@@ -44,7 +44,7 @@ public interface IMdmControllerSvc {
 
 	IAnyResource updateLink(String theGoldenResourceId, String theSourceResourceId, String theMatchResult, MdmTransactionContext theMdmTransactionContext);
 
-	IAnyResource createLink(String theGoldenResourceId, String theSourceResourceId, MdmTransactionContext theMdmTransactionContext);
+	IAnyResource createLink(String theGoldenResourceId, String theSourceResourceId, @Nullable String theMatchResult, MdmTransactionContext theMdmTransactionContext);
 
 	IBaseParameters submitMdmClearJob(List<String> theUrls, IPrimitiveType<BigDecimal> theBatchSize, ServletRequestDetails theRequestDetails);
 }

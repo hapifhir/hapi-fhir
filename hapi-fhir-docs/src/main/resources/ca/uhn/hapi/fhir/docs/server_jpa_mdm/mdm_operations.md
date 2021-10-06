@@ -426,10 +426,19 @@ Use the `$mdm-create-link` operation to create an MDM link from a Golden Resourc
                 The id of the target resource.
             </td>
         </tr>
+         <tr>
+            <td>matchResult</td>
+            <td>String</td>
+            <td>0..1</td>
+            <td>
+                Optional matchResult. If omitted, it  automatically set the default to MATCH, otherwise the value should be
+MATCH, POSSIBLE_MATCH or NO_MATCH.
+            </td>
+        </tr>
     </tbody>
 </table>
 
-MDM links created in this way will automatically have their `linkSource` set to `MANUAL` and `matchResult` set to `MATCH`.
+MDM links created in this way will automatically have their `linkSource` set to `MANUAL`.
 
 ### Example
 
@@ -450,11 +459,14 @@ Any supported MDM type can be used. The following request body shows how to upda
   }, {
     "name": "resourceId",
     "valueString": "Patient/456"
+  }, {
+     "name": "matchResult",
+     "valueString": "MATCH"
   } ]
 }
 ```
 
-The operation returns the Golden Resource. For the query above, `Patient/123` will be returned.
+The operation returns the Golden Resource. For the query above, `Patient` will be returned.
 
 ## Merge Golden Resources
 
