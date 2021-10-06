@@ -398,7 +398,7 @@ The operation returns the updated Golden Resource. For the query above `Patient`
 
 ## Create Link
 
-Use the `$mdm-create-link` operation to create a GoldenRecord-to-SourceRecord mdm link without the need for any matching data within the two resources. This operation takes the following parameters:
+Use the `$mdm-create-link` operation to create an MDM link from a Golden Resource to a Target Resource without the need for any pre-existing matching data within the two resources. This operation takes the following parameters:
 
 <table class="table table-striped table-condensed">
     <thead>
