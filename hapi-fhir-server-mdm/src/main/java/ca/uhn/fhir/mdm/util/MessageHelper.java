@@ -90,4 +90,13 @@ public class MessageHelper {
 	public String getMessageForNoLink(String theGoldenRecord, String theSourceResource) {
 		return "No link exists between " + theGoldenRecord + " and " + theSourceResource;
 	}
+
+	public String getMessageForPresentLink(IAnyResource theGoldenRecord, IAnyResource theSourceResource) {
+		return getMessageForPresentLink(theGoldenRecord.getIdElement().toVersionless().toString(),
+			theSourceResource.getIdElement().toVersionless().toString());
+	}
+
+	public String getMessageForPresentLink(String theGoldenRecord, String theSourceResource) {
+		return "Link already exists between " + theGoldenRecord + " and " + theSourceResource + ". Use $mdm-update-link instead.";
+	}
 }

@@ -52,6 +52,8 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc  {
 			mdmLink.setMatchResult(MdmMatchResultEnum.MATCH);
 			ourLog.info("Manually creating a " + theGoldenResource.getIdElement().toVersionless() + " to " + theSourceResource.getIdElement().toVersionless() + " mdm link.");
 			myMdmLinkDaoSvc.save(mdmLink);
+		} else {
+			throw new InvalidRequestException(myMessageHelper.getMessageForPresentLink(theGoldenResource, theSourceResource));
 		}
 		return theGoldenResource;
 	}
