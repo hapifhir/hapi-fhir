@@ -429,7 +429,7 @@ Use the `$mdm-create-link` operation to create an MDM link from a Golden Resourc
     </tbody>
 </table>
 
-MDM link create in this way will automatically have their `linkSource` set to `MANUAL` and `matchResult` set to `MATCH`.
+MDM links created in this way will automatically have their `linkSource` set to `MANUAL` and `matchResult` set to `MATCH`.
 
 ### Example
 
