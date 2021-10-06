@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -84,6 +85,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -818,6 +820,20 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			assertEquals("None of the codings provided are in the value set http://example.com/valueset (http://example.com/valueset), and a coding from this value set is required) (codes = http://example.com/foo-foo#some-code)", outcome.getIssueFirstRep().getDiagnostics());
 			assertEquals(OperationOutcome.IssueSeverity.ERROR, outcome.getIssueFirstRep().getSeverity());
 		}
+	}
+
+	@Test
+	public void testIsCodeSystemSupported() {
+		ValidationSupportContext ctx = new ValidationSupportContext(myValidationSupport);
+
+		boolean outcome = myValidationSupport.isCodeSystemSupported(ctx, "http://terminology.hl7.org/CodeSystem/v2-0203-FOO");
+		assertFalse(outcome);
+
+		outcome = myValidationSupport.isCodeSystemSupported(ctx, "http://terminology.hl7.org/CodeSystem/v2-0203");
+		assertTrue(outcome);
+
+		outcome = myValidationSupport.isCodeSystemSupported(ctx, "http://terminology.hl7.org/CodeSystem/v2-0203-BLAH");
+		assertFalse(outcome);
 	}
 
 	/**
