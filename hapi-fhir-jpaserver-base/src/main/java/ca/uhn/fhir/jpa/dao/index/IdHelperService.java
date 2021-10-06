@@ -123,15 +123,15 @@ public class IdHelperService {
 	@Nonnull
 	public IResourceLookup resolveResourceIdentity(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId) throws ResourceNotFoundException {
 		IdDt id = new IdDt(theResourceType, theResourceId);
-		Map<String, IResourceLookup> matches = translateForcedIdToPids(theRequestPartitionId,
+		Map<String, List<IResourceLookup>> matches = translateForcedIdToPids(theRequestPartitionId,
 			Collections.singletonList(id));
 
 		// We only pass 1 input in so only 0..1 will come back
-		if (matches.isEmpty()) {
+		if (matches.isEmpty() || !matches.containsKey(theResourceId)) {
 			throw new ResourceNotFoundException(id);
 		}
 
-		if (matches.size() > 1) {
+		if (matches.size() > 1 || matches.get(theResourceId).size() > 1) {
 			/*
 			 *  This means that:
 			 *  1. There are two resources with the exact same resource type and forced id
@@ -141,7 +141,7 @@ public class IdHelperService {
 			throw new PreconditionFailedException(msg);
 		}
 
-		return matches.get(theResourceId);
+		return matches.get(theResourceId).get(0);
 	}
 
 	/**
@@ -369,14 +369,14 @@ public class IdHelperService {
 		return typeToIds;
 	}
 
-	private Map<String, IResourceLookup> translateForcedIdToPids(@Nonnull RequestPartitionId theRequestPartitionId, Collection<IIdType> theId) {
+	private Map<String, List<IResourceLookup>> translateForcedIdToPids(@Nonnull RequestPartitionId theRequestPartitionId, Collection<IIdType> theId) {
 		theId.forEach(id -> Validate.isTrue(id.hasIdPart()));
 
 		if (theId.isEmpty()) {
 			return new HashMap<>();
 		}
 
-		Map<String, IResourceLookup> retVal = new HashMap<>();
+		Map<String, List<IResourceLookup>> retVal = new HashMap<>();
 		RequestPartitionId requestPartitionId = replaceDefault(theRequestPartitionId);
 
 		if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
@@ -403,7 +403,10 @@ public class IdHelperService {
 					IResourceLookup cachedLookup = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey);
 					if (cachedLookup != null) {
 						forcedIdIterator.remove();
-						retVal.put(nextForcedId, cachedLookup);
+						if (!retVal.containsKey(nextForcedId)) {
+							retVal.put(nextForcedId, new ArrayList<>());
+						}
+						retVal.get(nextForcedId).add(cachedLookup);
 					}
 				}
 			}
@@ -430,7 +433,10 @@ public class IdHelperService {
 					String forcedId = (String) next[2];
 					Date deletedAt = (Date) next[3];
 					ResourceLookup lookup = new ResourceLookup(resourceType, resourcePid, deletedAt);
-					retVal.put(forcedId, lookup);
+					if (!retVal.containsKey(forcedId)) {
+						retVal.put(forcedId, new ArrayList<>());
+					}
+					retVal.get(forcedId).add(lookup);
 
 					if (!myDaoConfig.isDeleteEnabled()) {
 						String key = resourceType + "/" + forcedId;
@@ -458,7 +464,7 @@ public class IdHelperService {
 		return theRequestPartitionId;
 	}
 
-	private void resolvePids(@Nonnull RequestPartitionId theRequestPartitionId, List<Long> thePidsToResolve, Map<String, IResourceLookup> theTargets) {
+	private void resolvePids(@Nonnull RequestPartitionId theRequestPartitionId, List<Long> thePidsToResolve, Map<String, List<IResourceLookup>> theTargets) {
 		if (!myDaoConfig.isDeleteEnabled()) {
 			for (Iterator<Long> forcedIdIterator = thePidsToResolve.iterator(); forcedIdIterator.hasNext(); ) {
 				Long nextPid = forcedIdIterator.next();
@@ -466,7 +472,10 @@ public class IdHelperService {
 				IResourceLookup cachedLookup = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey);
 				if (cachedLookup != null) {
 					forcedIdIterator.remove();
-					theTargets.put(nextKey, cachedLookup);
+					if (!theTargets.containsKey(nextKey)) {
+						theTargets.put(nextKey, new ArrayList<>());
+					}
+					theTargets.get(nextKey).add(cachedLookup);
 				}
 			}
 		}
@@ -488,7 +497,11 @@ public class IdHelperService {
 				.stream()
 				.map(t -> new ResourceLookup((String) t[0], (Long) t[1], (Date) t[2]))
 				.forEach(t -> {
-					theTargets.put(t.getResourceId().toString(), t);
+					String id = t.getResourceId().toString();
+					if (!theTargets.containsKey(id)) {
+						theTargets.put(id, new ArrayList<>());
+					}
+					theTargets.get(id).add(t);
 					if (!myDaoConfig.isDeleteEnabled()) {
 						String nextKey = Long.toString(t.getResourceId());
 						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey, t);
