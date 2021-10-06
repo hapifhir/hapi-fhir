@@ -101,9 +101,12 @@ public class MatchResourceUrlService {
 
 		Set<ResourcePersistentId> retVal = search(paramMap, theResourceType, theRequest, theConditionalOperationTargetOrNull);
 
-		if (myDaoConfig.isMatchUrlCacheEnabled() && retVal.size() == 1) {
+		if (retVal.size() == 1) {
 			ResourcePersistentId pid = retVal.iterator().next();
-			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, pid);
+			theTransactionDetails.addResolvedMatchUrl(matchUrl, pid);
+			if (myDaoConfig.isMatchUrlCacheEnabled()) {
+				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, pid);
+			}
 		}
 
 		return retVal;

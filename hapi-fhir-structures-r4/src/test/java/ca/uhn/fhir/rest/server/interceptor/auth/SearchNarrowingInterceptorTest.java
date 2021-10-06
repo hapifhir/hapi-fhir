@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
@@ -17,6 +18,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.eclipse.jetty.server.Server;
@@ -44,6 +46,7 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class SearchNarrowingInterceptorTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchNarrowingInterceptorTest.class);
@@ -222,15 +225,15 @@ public class SearchNarrowingInterceptorTest {
 	}
 
 	@Test
-	public void testNarrowObservationsByPatientContext_ClientRequestedNoOverlap() {
+	public void testNarrowObservationsByPatientContext_ClientRequestedSomeOverlap_ShortIds() {
 
 		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
 		ourClient
 			.search()
 			.forResource("Observation")
-			.where(Observation.PATIENT.hasAnyOfIds("Patient/111", "Patient/777"))
-			.and(Observation.PATIENT.hasAnyOfIds("Patient/111", "Patient/888"))
+			.where(Observation.PATIENT.hasAnyOfIds("456", "777"))
+			.and(Observation.PATIENT.hasAnyOfIds("456", "888"))
 			.execute();
 
 		assertEquals("Observation.search", ourLastHitMethod);
@@ -238,7 +241,109 @@ public class SearchNarrowingInterceptorTest {
 		assertNull(ourLastCodeParam);
 		assertNull(ourLastSubjectParam);
 		assertNull(ourLastPerformerParam);
-		assertThat(toStrings(ourLastPatientParam), Matchers.contains("Patient/111,Patient/777", "Patient/111,Patient/888", "Patient/123,Patient/456"));
+		assertThat(toStrings(ourLastPatientParam), Matchers.contains("456", "456"));
+	}
+
+	@Test
+	public void testNarrowObservationsByPatientContext_ClientRequestedSomeOverlap_UseSynonym() {
+
+		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
+
+		ourClient
+			.search()
+			.forResource("Observation")
+			.where(Observation.SUBJECT.hasAnyOfIds("Patient/456", "Patient/777"))
+			.and(Observation.SUBJECT.hasAnyOfIds("Patient/456", "Patient/888"))
+			.execute();
+
+		assertEquals("Observation.search", ourLastHitMethod);
+		assertNull(ourLastIdParam);
+		assertNull(ourLastCodeParam);
+		assertThat(toStrings(ourLastSubjectParam), Matchers.contains("Patient/456", "Patient/456"));
+		assertNull(ourLastPerformerParam);
+		assertNull(ourLastPatientParam);
+	}
+
+	@Test
+	public void testNarrowObservationsByPatientContext_ClientRequestedNoOverlap() {
+
+		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
+
+		try {
+			ourClient
+				.search()
+				.forResource("Observation")
+				.where(Observation.PATIENT.hasAnyOfIds("Patient/111", "Patient/777"))
+				.and(Observation.PATIENT.hasAnyOfIds("Patient/111", "Patient/888"))
+				.execute();
+
+			fail("Expected a 403 error");
+		} catch (ForbiddenOperationException e) {
+			assertEquals(Constants.STATUS_HTTP_403_FORBIDDEN, e.getStatusCode());
+		}
+
+		assertNull(ourLastHitMethod);
+	}
+
+	@Test
+	public void testNarrowObservationsByPatientContext_ClientRequestedNoOverlap_UseSynonym() {
+
+		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
+
+		try {
+			ourClient
+				.search()
+				.forResource("Observation")
+				.where(Observation.SUBJECT.hasAnyOfIds("Patient/111", "Patient/777"))
+				.and(Observation.SUBJECT.hasAnyOfIds("Patient/111", "Patient/888"))
+				.execute();
+
+			fail("Expected a 403 error");
+		} catch (ForbiddenOperationException e) {
+			assertEquals(Constants.STATUS_HTTP_403_FORBIDDEN, e.getStatusCode());
+		}
+
+		assertNull(ourLastHitMethod);
+	}
+
+	@Test
+	public void testNarrowObservationsByPatientContext_ClientRequestedBadParameter() {
+
+		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
+
+		try {
+			ourClient
+				.search()
+				.forResource("Observation")
+				.where(Observation.PATIENT.hasAnyOfIds("Patient/"))
+				.execute();
+
+			fail("Expected a 403 error");
+		} catch (ForbiddenOperationException e) {
+			assertEquals(Constants.STATUS_HTTP_403_FORBIDDEN, e.getStatusCode());
+		}
+
+		assertNull(ourLastHitMethod);
+	}
+
+	@Test
+	public void testNarrowObservationsByPatientContext_ClientRequestedBadPermission() {
+
+		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/");
+
+		try {
+			ourClient
+				.search()
+				.forResource("Observation")
+				.where(Observation.PATIENT.hasAnyOfIds("Patient/111", "Patient/777"))
+				.execute();
+
+			fail("Expected a 403 error");
+		} catch (ForbiddenOperationException e) {
+			assertEquals(Constants.STATUS_HTTP_403_FORBIDDEN, e.getStatusCode());
+		}
+
+		assertNull(ourLastHitMethod);
 	}
 
 	private List<String> toStrings(BaseAndListParam<? extends IQueryParameterOr<?>> theParams) {

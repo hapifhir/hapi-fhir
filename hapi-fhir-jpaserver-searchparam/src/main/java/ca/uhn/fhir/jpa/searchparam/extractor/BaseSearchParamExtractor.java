@@ -53,6 +53,8 @@ import com.google.common.collect.Sets;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.text.StringTokenizer;
+import org.apache.commons.text.matcher.StringMatcher;
 import org.fhir.ucum.Pair;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -85,16 +87,15 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.strip;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
 
 	public static final Set<String> COORDS_INDEX_PATHS;
 	private static final Pattern SPLIT = Pattern.compile("\\||( or )");
-	private static final Pattern SPLIT_R4 = Pattern.compile("\\s+\\|");
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSearchParamExtractor.class);
 
 	static {
@@ -974,7 +975,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			.filter(param -> param.getParamType() != theSearchParamType)
 			.map(RuntimeSearchParam::getPath)
 			.filter(Objects::nonNull)
-			.anyMatch(path-> path.contains("resolve"));
+			.anyMatch(path -> path.contains("resolve"));
 	}
 
 	/**
@@ -989,7 +990,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private void cleanUpContainedResourceReferences(IBaseResource theResource, RestSearchParameterTypeEnum theSearchParamType, Collection<RuntimeSearchParam> searchParams) {
 		boolean havePathWithResolveExpression =
 			myModelConfig.isIndexOnContainedResources()
-			|| anySearchParameterUsesResolve(searchParams, theSearchParamType);
+				|| anySearchParameterUsesResolve(searchParams, theSearchParamType);
 
 		if (havePathWithResolveExpression) {
 			//TODO GGG/JA: At this point, if the Task.basedOn.reference.resource does _not_ have an ID, we will attempt to contain it internally. Wild
@@ -1312,6 +1313,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 		}
 
+		private boolean isOrCanBeTreatedAsLocal(IIdType theId) {
+			boolean acceptableAsLocalReference = !theId.isAbsolute() ||  myModelConfig.getTreatBaseUrlsAsLocal().contains(theId.getBaseUrl());
+			return acceptableAsLocalReference;
+		}
+
 		public PathAndRef get(IBase theValue, String thePath) {
 			extract(new SearchParamSet<>(),
 				new RuntimeSearchParam(null, null, "Reference", null, null, null, null, null, null, null),
@@ -1549,8 +1555,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Nonnull
 	public static String[] splitPathsR4(@Nonnull String thePaths) {
-		return SPLIT_R4.split(thePaths);
+		StringTokenizer tok = new StringTokenizer(thePaths, " |");
+		StringMatcher trimmerMatcher = (buffer, start, bufferStart, bufferEnd) -> (buffer[start] <= 32) ? 1 : 0;
+		tok.setTrimmerMatcher(trimmerMatcher);
+		return tok.getTokenArray();
 	}
+
 
 	public static boolean tokenTextIndexingEnabledForSearchParam(ModelConfig theModelConfig, RuntimeSearchParam theSearchParam) {
 		Optional<Boolean> noSuppressForSearchParam = theSearchParam.getExtensions(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING).stream()
