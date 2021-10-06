@@ -454,7 +454,7 @@ Any supported MDM type can be used. The following request body shows how to upda
 }
 ```
 
-The operation returns the Golden Resource. For the query above `Patient` resource will be returned.
+The operation returns the Golden Resource. For the query above, `Patient/123` will be returned.
 
 ## Merge Golden Resources
 
