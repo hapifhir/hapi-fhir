@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import net.bytebuddy.build.ToStringPlugin;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -101,6 +102,11 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 	}
 
+
+	@Test
+	public void testFilterLastNBYCodeSystemWorks() {
+		
+	}
 	@Test
 	public void testSingleObservationQuery() throws IOException {
 
