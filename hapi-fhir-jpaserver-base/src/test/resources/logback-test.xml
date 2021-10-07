@@ -63,6 +63,12 @@
 	<logger name="org.hibernate.search.elasticsearch.request" additivity="false" level="trace">
 		<appender-ref ref="STDOUT" />
 	</logger>
+	<logger name="org.elasticsearch.client" additivity="false" level="trace">
+		<appender-ref ref="STDOUT"/>
+	</logger>
+	<logger name="tracer" additivity="false" level="trace">
+		<appender-ref ref="STDOUT" />
+	</logger>
 
 	<logger name="org.springframework.test.context.cache" additivity="false" level="debug">
 		<appender-ref ref="STDOUT" />

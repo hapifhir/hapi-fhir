@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.r4.model.Observation;
@@ -10,12 +11,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -26,6 +31,18 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 	@AfterEach
 	public void resetMaximumPageSize() {
 		SearchBuilder.setMaxPageSize50ForTest(false);
+	}
+
+	@Test
+	public void testFilterLastNBYCodeSystemWorks() throws IOException {
+
+		SearchParameterMap spMap = new SearchParameterMap();
+		spMap.add(Observation.SP_CODE, new TokenParam(codeSystem, null));
+		spMap.setLastNMax(1);
+
+		IBundleProvider iBundleProvider = myObservationDao.observationsLastN(spMap, mockSrd(), null);
+		assertThat(iBundleProvider.size(), is(equalTo(1)));
+
 	}
 
 	@Test

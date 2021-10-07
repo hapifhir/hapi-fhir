@@ -209,6 +209,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 				}
 				SearchRequest myLastNRequest = buildObservationsSearchRequest(subject, theSearchParameterMap, theFhirContext,
 					createObservationSubjectAggregationBuilder(getMaxParameter(theSearchParameterMap), topHitsInclude));
+				myLastNRequest.toString();
 				try {
 					SearchResponse lastnResponse = executeSearchRequest(myLastNRequest);
 					searchResults.addAll(buildObservationList(lastnResponse, setValue, theSearchParameterMap, theFhirContext,
