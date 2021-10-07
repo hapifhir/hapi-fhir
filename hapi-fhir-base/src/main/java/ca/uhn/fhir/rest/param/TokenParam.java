@@ -40,6 +40,8 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 	private String mySystem;
 	private String myValue;
 
+	private Boolean myMdmExpand;
+
 	/**
 	 * Constructor
 	 */
@@ -97,6 +99,15 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 	 */
 	public TokenParam(String theCode) {
 		this(null, theCode);
+	}
+
+	public boolean isMdmExpand() {
+		return myMdmExpand != null && myMdmExpand;
+	}
+
+	public TokenParam setMdmExpand(boolean theMdmExpand) {
+		myMdmExpand = theMdmExpand;
+		return this;
 	}
 
 	@Override

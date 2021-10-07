@@ -67,7 +67,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.Reader;
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -134,6 +133,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERS
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 
 /*
  * #%L
@@ -719,10 +719,9 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		String codeSystemVersionId = theUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
 		String valueSetId;
 		if (codeSystemVersionId != null) {
-			valueSetId = "loinc-all" + "-" + codeSystemVersionId;
+			valueSetId = LOINC_ALL_VALUESET_ID + "-" + codeSystemVersionId;
 		} else {
-			valueSetId = "loinc-all";
-			codeSystemVersionId = "1.0.0";
+			valueSetId = LOINC_ALL_VALUESET_ID;
 		}
 		retVal.setId(valueSetId);
 		retVal.setUrl("http://loinc.org/vs");
