@@ -92,8 +92,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		Validate.notBlank(theCode, "theCode must be provided");
 
 		IGenericClient client = provideClient();
-		FhirVersionEnum fhirVersion = super.getFhirContext().getVersion().getVersion();
-		String displayString = null;
+		FhirVersionEnum fhirVersion = client.getFhirContext().getVersion().getVersion();
 
 		switch (fhirVersion) {
 			case DSTU3:
