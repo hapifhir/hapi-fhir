@@ -1,6 +1,7 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -9,10 +10,13 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.dstu3.model.Property;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r5.model.DataType;
+import org.thymeleaf.util.StringUtils;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -78,6 +82,104 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		List<IBaseResource> resultsList = BundleUtil.toListOfResources(myCtx, results);
 		if (resultsList.size() > 0) {
 			return resultsList.get(0);
+		}
+
+		return null;
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
+		Validate.notBlank(theCode, "theCode must be provided");
+
+		IGenericClient client = provideClient();
+		FhirVersionEnum fhirVersion = super.getFhirContext().getVersion().getVersion();
+		String displayString = null;
+
+		switch (fhirVersion) {
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.Parameters paramsDSTU3 = new org.hl7.fhir.dstu3.model.Parameters();
+				paramsDSTU3.addParameter().setName("code").setValue(new org.hl7.fhir.dstu3.model.StringType(theCode));
+				if (!StringUtils.isEmpty(theSystem)) {
+					paramsDSTU3.addParameter().setName("system").setValue(new org.hl7.fhir.dstu3.model.UriType(theSystem));
+				}
+				if (!StringUtils.isEmpty(theDisplayLanguage)) {
+					paramsDSTU3.addParameter().setName("language").setValue(new org.hl7.fhir.dstu3.model.StringType(theDisplayLanguage));
+				}
+				org.hl7.fhir.dstu3.model.Parameters outcomeDSTU3 = client
+					.operation()
+					.onType(org.hl7.fhir.dstu3.model.CodeSystem.class)
+					.named("$lookup")
+					.withParameters(paramsDSTU3)
+					.execute();
+				if (outcomeDSTU3 != null && !outcomeDSTU3.isEmpty()) {
+					LookupCodeResult result = new LookupCodeResult();
+					result.setSearchedForCode(theCode);
+					result.setSearchedForSystem(theSystem);
+					result.setFound(true);
+					org.hl7.fhir.dstu3.model.Property display = outcomeDSTU3.getNamedProperty("display");
+					if (display != null && !StringUtils.isEmpty(display.toString())) {
+						result.setCodeDisplay(display.toString());
+					}
+					return result;
+				}
+				break;
+			case R4:
+				org.hl7.fhir.r4.model.Parameters paramsR4 = new org.hl7.fhir.r4.model.Parameters();
+				paramsR4.addParameter().setName("code").setValue(new org.hl7.fhir.r4.model.StringType(theCode));
+				if (!StringUtils.isEmpty(theSystem)) {
+					paramsR4.addParameter().setName("system").setValue(new org.hl7.fhir.r4.model.UriType(theSystem));
+				}
+				if (!StringUtils.isEmpty(theDisplayLanguage)) {
+					paramsR4.addParameter().setName("language").setValue(new org.hl7.fhir.r4.model.StringType(theDisplayLanguage));
+				}
+				org.hl7.fhir.r4.model.Parameters outcomeR4 = client
+					.operation()
+					.onType(CodeSystem.class)
+					.named("$lookup")
+					.withParameters(paramsR4)
+					.execute();
+				if (outcomeR4 != null && !outcomeR4.isEmpty()) {
+					LookupCodeResult result = new LookupCodeResult();
+					result.setSearchedForCode(theCode);
+					result.setSearchedForSystem(theSystem);
+					result.setFound(true);
+					org.hl7.fhir.r4.model.Type display = outcomeR4.getParameter("display");
+					if (display != null && !StringUtils.isEmpty(display.toString())) {
+						result.setCodeDisplay(display.toString());
+					}
+					return result;
+				}
+				break;
+			case R5:
+				org.hl7.fhir.r5.model.Parameters paramsR5 = new org.hl7.fhir.r5.model.Parameters();
+				paramsR5.addParameter().setName("code").setValue(new org.hl7.fhir.r5.model.StringType(theCode));
+				if (!StringUtils.isEmpty(theSystem)) {
+					paramsR5.addParameter().setName("system").setValue(new org.hl7.fhir.r5.model.UriType(theSystem));
+				}
+				if (!StringUtils.isEmpty(theDisplayLanguage)) {
+					paramsR5.addParameter().setName("language").setValue(new org.hl7.fhir.r5.model.StringType(theDisplayLanguage));
+				}
+				org.hl7.fhir.r5.model.Parameters outcomeR5 = client
+					.operation()
+					.onType(CodeSystem.class)
+					.named("$lookup")
+					.withParameters(paramsR5)
+					.execute();
+				if (outcomeR5 != null && !outcomeR5.isEmpty()) {
+					LookupCodeResult result = new LookupCodeResult();
+					result.setSearchedForCode(theCode);
+					result.setSearchedForSystem(theSystem);
+					result.setFound(true);
+					DataType display = outcomeR5.getParameter("display");
+					if (display != null && !StringUtils.isEmpty(display.toString())) {
+						result.setCodeDisplay(display.toString());
+					}
+					return result;
+				}
+				break;
+			default:
+				throw new UnsupportedOperationException("Unsupported FHIR version '" + fhirVersion.getFhirVersionString() +
+					"'. Only DSTU3, R4 and R5 are supported.");
 		}
 
 		return null;
