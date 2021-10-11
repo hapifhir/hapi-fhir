@@ -41,6 +41,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.Collections;
 
 public class FhirResourceDaoPatientR4 extends BaseHapiFhirResourceDao<Patient>implements IFhirResourceDaoPatient<Patient> {
@@ -48,7 +49,15 @@ public class FhirResourceDaoPatientR4 extends BaseHapiFhirResourceDao<Patient>im
 	@Autowired
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 
-	private IBundleProvider doEverythingOperation(IIdType theId, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, RequestDetails theRequest) {
+	private IBundleProvider doEverythingOperation(IIdType theId,
+																 IPrimitiveType<Integer> theCount,
+																 IPrimitiveType<Integer> theOffset,
+																 DateRangeParam theLastUpdated,
+																 SortSpec theSort,
+																 StringAndListParam theContent,
+																 StringAndListParam theNarrative,
+																 StringAndListParam theFilter,
+																 RequestDetails theRequest) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		if (theCount != null) {
 			paramMap.setCount(theCount.getValue());
@@ -67,7 +76,14 @@ public class FhirResourceDaoPatientR4 extends BaseHapiFhirResourceDao<Patient>im
 		paramMap.setSort(theSort);
 		paramMap.setLastUpdated(theLastUpdated);
 		if (theId != null) {
-			paramMap.add("_id", new StringParam(theId.getIdPart()));
+			StringParam idParam = new StringParam(theId.getIdPart());
+			if (theRequest.getParameters().containsKey("_mdm")) {
+				String[] paramVal = theRequest.getParameters().get("_mdm");
+				if (Arrays.asList(paramVal).contains("true")) {
+					idParam.setMdmExpand(true);
+				}
+			}
+			paramMap.add("_id", idParam);
 		}
 
 		if (!isPagingProviderDatabaseBacked(theRequest)) {
@@ -75,7 +91,12 @@ public class FhirResourceDaoPatientR4 extends BaseHapiFhirResourceDao<Patient>im
 		}
 
 		RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequest, getResourceName(), paramMap, null);
-		return mySearchCoordinatorSvc.registerSearch(this, paramMap, getResourceName(), new CacheControlDirective().parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL)), theRequest, requestPartitionId);
+		return mySearchCoordinatorSvc.registerSearch(this,
+			paramMap,
+			getResourceName(),
+			new CacheControlDirective().parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL)),
+			theRequest,
+			requestPartitionId);
 	}
 
 	@Override

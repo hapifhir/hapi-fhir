@@ -38,6 +38,8 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.data.domain.Page;
 
+import javax.annotation.Nullable;
+
 
 public abstract class BaseMdmProvider {
 
@@ -81,6 +83,22 @@ public abstract class BaseMdmProvider {
 		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theResourceId);
 	}
 
+	protected void validateCreateLinkParameters(IPrimitiveType<String> theGoldenResourceId, IPrimitiveType<String> theResourceId, @Nullable IPrimitiveType<String> theMatchResult) {
+		validateNotNull(ProviderConstants.MDM_CREATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
+		validateNotNull(ProviderConstants.MDM_CREATE_LINK_RESOURCE_ID, theResourceId);
+		if (theMatchResult != null) {
+			MdmMatchResultEnum matchResult = MdmMatchResultEnum.valueOf(theMatchResult.getValue());
+			switch (matchResult) {
+				case NO_MATCH:
+				case POSSIBLE_MATCH:
+				case MATCH:
+					break;
+				default:
+					throw new InvalidRequestException(ProviderConstants.MDM_CREATE_LINK + " illegal " + ProviderConstants.MDM_CREATE_LINK_MATCH_RESULT +
+						" value '" + matchResult + "'.  Must be " + MdmMatchResultEnum.NO_MATCH + ", " + MdmMatchResultEnum.MATCH + " or " + MdmMatchResultEnum.POSSIBLE_MATCH);
+			}
+		}
+	}
 
 	protected MdmTransactionContext createMdmContext(RequestDetails theRequestDetails, MdmTransactionContext.OperationType theOperationType, String theResourceType) {
 		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromTransactionGuid(theRequestDetails.getTransactionGuid());

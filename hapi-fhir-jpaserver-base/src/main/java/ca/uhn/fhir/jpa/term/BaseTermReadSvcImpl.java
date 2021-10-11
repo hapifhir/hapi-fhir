@@ -2353,7 +2353,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	 */
 	@Override
 	public Optional<TermValueSet> findCurrentTermValueSet(String theUrl) {
-		if (TermReadSvcUtil.isLoincNotGenericUnversionedValueSet(theUrl)) {
+		if (TermReadSvcUtil.isLoincUnversionedValueSet(theUrl)) {
 			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId(theUrl);
 			if (! vsIdOpt.isPresent()) {
 				return Optional.empty();
