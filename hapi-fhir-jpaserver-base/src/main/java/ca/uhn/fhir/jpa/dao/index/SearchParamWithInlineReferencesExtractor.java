@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -315,6 +316,12 @@ public class SearchParamWithInlineReferencesExtractor {
 		myContext = theContext;
 	}
 
+
+	@Autowired
+	private MemoryCacheService myMemoryCacheService;
+
+
+
 	/**
 	 * Handle references within the resource that are match URLs, for example references like "Patient?identifier=foo". These match URLs are resolved and replaced with the ID of the
 	 * matching resource.
@@ -350,15 +357,19 @@ public class SearchParamWithInlineReferencesExtractor {
 					throw new InvalidRequestException(msg);
 				}
 				Class<? extends IBaseResource> matchResourceType = matchResourceDef.getImplementingClass();
+
 				//Attempt to find the target reference before creating a placeholder
 				Set<ResourcePersistentId> matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType, theTransactionDetails, theRequest);
 
 				ResourcePersistentId match;
 				if (matches.isEmpty()) {
 
-					Optional<ResourceTable> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null, theRequest);
+					Optional<ResourceTable> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null, theRequest, theTransactionDetails);
 					if (placeholderOpt.isPresent()) {
 						match = new ResourcePersistentId(placeholderOpt.get().getResourceId());
+						match.setAssociatedResourceId(placeholderOpt.get().getIdType(myContext));
+						theTransactionDetails.addResolvedMatchUrl(nextIdText, match);
+						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, nextIdText, match);
 					} else {
 						String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlNoMatches", nextId.getValue());
 						throw new ResourceNotFoundException(msg);
@@ -373,6 +384,7 @@ public class SearchParamWithInlineReferencesExtractor {
 
 				IIdType newId = myIdHelperService.translatePidIdToForcedId(myContext, resourceTypeString, match);
 				ourLog.debug("Replacing inline match URL[{}] with ID[{}}", nextId.getValue(), newId);
+
 				nextRef.setReference(newId.getValue());
 			}
 		}

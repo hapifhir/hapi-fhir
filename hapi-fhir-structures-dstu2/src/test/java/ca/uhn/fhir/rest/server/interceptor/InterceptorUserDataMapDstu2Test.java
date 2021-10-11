@@ -28,7 +28,6 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -90,10 +89,10 @@ public class InterceptorUserDataMapDstu2Test {
 	public void testException() throws Exception {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=foo");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(400, status.getStatusLine().getStatusCode());
+		}
 
-		ourLog.info(myMapCheckMethods.toString());
 		await().until(() -> myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "preProcessOutgoingException", "handleException", "processingCompleted"));
 	}
 
@@ -106,8 +105,8 @@ public class InterceptorUserDataMapDstu2Test {
 
 			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(response, containsString("\"id\":\"1\""));
-			await().until(() -> myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "outgoingResponse", "processingCompletedNormally", "processingCompleted"));
-		}
+		await().until(() -> myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "outgoingResponse", "processingCompletedNormally", "processingCompleted"));
+	}
 
 	}
 

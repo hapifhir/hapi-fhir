@@ -968,10 +968,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				// Create an initial search in the DB and give it an ID
 				saveSearch();
 
-				assert !TransactionSynchronizationManager.isActualTransactionActive();
-
 				TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
-				txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+				txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 
 				if (myCustomIsolationSupported) {
 					txTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
