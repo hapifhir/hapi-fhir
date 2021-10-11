@@ -3288,8 +3288,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			assertThat(e.getMessage(), containsString("Resource type 'Practicioner' is not valid for this path"));
 		}
 
-		assertThat(myResourceTableDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
+		runInTransaction(()->assertThat(myResourceTableDao.findAll(), empty()));
+		runInTransaction(()->assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty()));
 
 	}
 

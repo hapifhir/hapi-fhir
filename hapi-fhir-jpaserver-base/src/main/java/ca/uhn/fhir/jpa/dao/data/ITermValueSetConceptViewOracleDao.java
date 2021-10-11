@@ -28,7 +28,7 @@ import org.springframework.data.repository.query.Param;
 import java.io.Serializable;
 import java.util.List;
 
-public interface ITermValueSetConceptViewOracleDao extends JpaRepository<TermValueSetConceptViewOracle, Long> {
+public interface ITermValueSetConceptViewOracleDao extends JpaRepository<TermValueSetConceptViewOracle, Long>, IHapiFhirJpaRepository {
 		@Query("SELECT v FROM TermValueSetConceptViewOracle v WHERE v.myConceptValueSetPid = :pid AND v.myConceptOrder >= :from AND v.myConceptOrder < :to ORDER BY v.myConceptOrder")
 		List<TermValueSetConceptViewOracle> findByTermValueSetId(@Param("from") int theFrom, @Param("to") int theTo, @Param("pid") Long theValueSetId);
 
