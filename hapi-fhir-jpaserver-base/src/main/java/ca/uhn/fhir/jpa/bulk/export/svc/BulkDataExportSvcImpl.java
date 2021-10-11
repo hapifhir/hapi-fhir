@@ -311,7 +311,6 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	@Transactional
 	@Override
 	public JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions, Boolean useCache, RequestDetails theRequestDetails) {
-
 		String outputFormat = Constants.CT_FHIR_NDJSON;
 		if (isNotBlank(theBulkDataExportOptions.getOutputFormat())) {
 			outputFormat = theBulkDataExportOptions.getOutputFormat();
@@ -359,10 +358,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_MDM).append("=").append(theBulkDataExportOptions.isExpandMdm());
 		}
 
-
-
 		String request = requestBuilder.toString();
-
 
 		//If we are using the cache, then attempt to retrieve a matching job based on the Request String, otherwise just make a new one.
 		if (useCache) {

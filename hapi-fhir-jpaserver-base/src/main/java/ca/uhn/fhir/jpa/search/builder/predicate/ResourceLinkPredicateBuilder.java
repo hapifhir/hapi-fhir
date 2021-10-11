@@ -80,6 +80,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
@@ -622,10 +623,14 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 	}
 
 	@Nonnull
-	public Condition createEverythingPredicate(String theResourceName, Long theTargetPid) {
-		if (theTargetPid != null) {
-			return BinaryCondition.equalTo(myColumnTargetResourceId, generatePlaceholder(theTargetPid));
+	public Condition createEverythingPredicate(String theResourceName, Long... theTargetPids) {
+		if (theTargetPids != null && theTargetPids.length >= 1) {
+			// if resource ids are provided, we'll create the predicate
+			// with ids in or equal to this value
+			return toEqualToOrInPredicate(myColumnTargetResourceId,
+				generatePlaceholders(Arrays.stream(theTargetPids).map(Object::toString).collect(Collectors.toList())));
 		} else {
+			// ... otherwise we look for resource types
 			return BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theResourceName));
 		}
 	}
