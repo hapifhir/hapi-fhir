@@ -336,7 +336,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ResourcePersistentId persistentId = new ResourcePersistentId(updatedEntity.getResourceId());
 		theTransactionDetails.addResolvedResourceId(id, persistentId);
 		if (entity.getForcedId() != null) {
-			myIdHelperService.addResolvedPidToForcedId(persistentId, theRequestPartitionId, updatedEntity.getResourceType(), updatedEntity.getForcedId().getForcedId());
+			myIdHelperService.addResolvedPidToForcedId(persistentId, theRequestPartitionId, updatedEntity.getResourceType(), updatedEntity.getForcedId().getForcedId(), updatedEntity.getDeleted());
 		}
 
 		theResource.setId(entity.getIdDt());
@@ -355,9 +355,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
+		ResourcePersistentId resourcePersistentId = new ResourcePersistentId(entity.getResourceId());
+		resourcePersistentId.setAssociatedResourceId(entity.getIdType(myFhirContext));
+
+		theTransactionDetails.addResolvedResourceId(resourcePersistentId.getAssociatedResourceId(), resourcePersistentId);
+
+		// Pre-cache the match URL
 		if (theIfNoneExist != null) {
-			// Pre-cache the match URL
-			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theIfNoneExist, new ResourcePersistentId(entity.getResourceId()));
+			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theIfNoneExist, resourcePersistentId);
 		}
 
 		// Update the version/last updated in the resource so that interceptors get
@@ -390,7 +395,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (updatedEntity.getForcedId() != null) {
 			forcedId = updatedEntity.getForcedId().getForcedId();
 		}
-		myIdHelperService.addResolvedPidToForcedId(persistentId, theRequestPartitionId, getResourceName(), forcedId);
+		myIdHelperService.addResolvedPidToForcedId(persistentId, theRequestPartitionId, getResourceName(), forcedId, null);
 
 		ourLog.debug(msg);
 		return outcome;
