@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
+import org.apache.commons.lang3.Functions;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -339,6 +340,10 @@ public class IdHelperService {
 	 */
 	@Nonnull
 	public IIdType translatePidIdToForcedId(FhirContext theCtx, String theResourceType, ResourcePersistentId theId) {
+		if (theId.getAssociatedResourceId() != null) {
+			return theId.getAssociatedResourceId();
+		}
+
 		IIdType retVal = theCtx.getVersion().newIdType();
 
 		Optional<String> forcedId = translatePidIdToForcedIdWithCache(theId);
@@ -630,7 +635,7 @@ public class IdHelperService {
 	/**
 	 * Pre-cache a PID-to-Resource-ID mapping for later retrieval by {@link #translatePidsToForcedIds(Set)} and related methods
 	 */
-	public void addResolvedPidToForcedId(ResourcePersistentId theResourcePersistentId, @Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, @Nullable String theForcedId) {
+	public void addResolvedPidToForcedId(ResourcePersistentId theResourcePersistentId, @Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, @Nullable String theForcedId, @Nullable Date theDeletedAt) {
 		if (theForcedId != null) {
 			if (theResourcePersistentId.getAssociatedResourceId() == null) {
 				populateAssociatedResourceId(theResourceType, theForcedId, theResourcePersistentId);
@@ -642,6 +647,13 @@ public class IdHelperService {
 		} else {
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theResourcePersistentId.getIdAsLong(), Optional.empty());
 		}
+
+		if (!myDaoConfig.isDeleteEnabled()) {
+			ResourceLookup lookup = new ResourceLookup(theResourceType, theResourcePersistentId.getIdAsLong(), theDeletedAt);
+			String nextKey = theResourcePersistentId.toString();
+			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey, lookup);
+		}
+
 	}
 
 	@VisibleForTesting

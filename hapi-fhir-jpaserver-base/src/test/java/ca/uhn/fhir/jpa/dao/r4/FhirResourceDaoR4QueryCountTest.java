@@ -38,17 +38,23 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.StringTokenizer;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -68,6 +74,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myModelConfig.setRespectVersionsForSearchIncludes(new ModelConfig().isRespectVersionsForSearchIncludes());
 		myFhirCtx.getParserOptions().setStripVersionsFromReferences(true);
 		myDaoConfig.setTagStorageMode(new DaoConfig().getTagStorageMode());
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
+		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new DaoConfig().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
 	}
 
 	@Override
@@ -783,6 +791,121 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 	@Test
+	public void testTransactionWithMultipleCreates() {
+		myDaoConfig.setMassIngestionMode(true);
+		myDaoConfig.setMatchUrlCacheEnabled(true);
+		myDaoConfig.setDeleteEnabled(false);
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+
+		// First pass
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, createTransactionWithCreatesAndOneMatchUrl());
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		// 1 lookup for the match URL only
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		runInTransaction(()->assertEquals(4, myResourceTableDao.count()));
+
+		// Run it again - This time even the match URL should be cached
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, createTransactionWithCreatesAndOneMatchUrl());
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		runInTransaction(()->assertEquals(7, myResourceTableDao.count()));
+
+		// Once more for good measure
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, createTransactionWithCreatesAndOneMatchUrl());
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		runInTransaction(()->assertEquals(10, myResourceTableDao.count()));
+
+	}
+
+	@Nonnull
+	private Bundle createTransactionWithCreatesAndOneMatchUrl() {
+			BundleBuilder bb = new BundleBuilder(myFhirCtx);
+
+			Patient p = new Patient();
+			p.setId(IdType.newRandomUuid());
+			p.setActive(true);
+			bb.addTransactionCreateEntry(p);
+
+			Encounter enc = new Encounter();
+			enc.setSubject(new Reference(p.getId()));
+			enc.addParticipant().setIndividual(new Reference("Practitioner?identifier=foo|bar"));
+			bb.addTransactionCreateEntry(enc);
+
+			enc = new Encounter();
+			enc.setSubject(new Reference(p.getId()));
+			enc.addParticipant().setIndividual(new Reference("Practitioner?identifier=foo|bar"));
+			bb.addTransactionCreateEntry(enc);
+
+		return (Bundle) bb.getBundle();
+	}
+
+	@Test
+	public void testTransactionWithMultipleCreates_PreExistingMatchUrl() {
+		myDaoConfig.setMassIngestionMode(true);
+		myDaoConfig.setMatchUrlCacheEnabled(true);
+		myDaoConfig.setDeleteEnabled(false);
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+
+		Practitioner pract = new Practitioner();
+		pract.addIdentifier().setSystem("foo").setValue("bar");
+		myPractitionerDao.create(pract);
+
+		// First pass
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, createTransactionWithCreatesAndOneMatchUrl());
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		// 1 lookup for the match URL only
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		runInTransaction(()->assertEquals(4, myResourceTableDao.count()));
+
+		// Run it again - This time even the match URL should be cached
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, createTransactionWithCreatesAndOneMatchUrl());
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		runInTransaction(()->assertEquals(7, myResourceTableDao.count()));
+
+		// Once more for good measure
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, createTransactionWithCreatesAndOneMatchUrl());
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		runInTransaction(()->assertEquals(10, myResourceTableDao.count()));
+
+	}
+
+
+	@Test
 	public void testTransactionWithTwoCreates() {
 
 		BundleBuilder bb = new BundleBuilder(myFhirCtx);
@@ -1194,7 +1317,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, bundleCreator.get());
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(3, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
@@ -1744,7 +1867,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		// Lookup the two existing IDs to make sure they are legit
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
