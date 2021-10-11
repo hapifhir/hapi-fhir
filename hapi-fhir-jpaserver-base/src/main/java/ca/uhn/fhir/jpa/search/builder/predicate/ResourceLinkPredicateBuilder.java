@@ -34,7 +34,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderReference;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
@@ -60,6 +60,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.SpecialParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -79,6 +80,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
@@ -338,6 +340,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		boolean foundChainMatch = false;
 		List<String> candidateTargetTypes = new ArrayList<>();
 		List<Condition> orPredicates = new ArrayList<>();
+		boolean paramInverted = false;
 		QueryStack childQueryFactory = myQueryStack.newChildQueryFactoryWithFullBuilderReuse();
 
 		String chain = theReferenceParam.getChain();
@@ -386,12 +389,19 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 				if (chainValue == null) {
 					continue;
 				}
+
+				// For the token param, if it's a :not modifier, need switch OR to AND
+				if (!paramInverted && chainValue instanceof TokenParam) {
+					if (((TokenParam) chainValue).getModifier() == TokenParamModifier.NOT) {
+						paramInverted = true;
+					}
+				}
 				foundChainMatch = true;
 				orValues.add(chainValue);
 			}
 
 			if (!foundChainMatch) {
-				throw new InvalidRequestException(getFhirContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "invalidParameterChain", theParamName + '.' + theReferenceParam.getChain()));
+				throw new InvalidRequestException(getFhirContext().getLocalizer().getMessage(BaseStorageDao.class, "invalidParameterChain", theParamName + '.' + theReferenceParam.getChain()));
 			}
 
 			candidateTargetTypes.add(nextType);
@@ -405,17 +415,24 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		}
 
 		if (candidateTargetTypes.isEmpty()) {
-			throw new InvalidRequestException(getFhirContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "invalidParameterChain", theParamName + '.' + theReferenceParam.getChain()));
+			throw new InvalidRequestException(getFhirContext().getLocalizer().getMessage(BaseStorageDao.class, "invalidParameterChain", theParamName + '.' + theReferenceParam.getChain()));
 		}
 
 		if (candidateTargetTypes.size() > 1) {
 			warnAboutPerformanceOnUnqualifiedResources(theParamName, theRequest, candidateTargetTypes);
 		}
 
-		Condition multiTypeOrPredicate = toOrPredicate(orPredicates);
+		// If :not modifier for a token, switch OR with AND in the multi-type case
+		Condition multiTypePredicate;
+		if (paramInverted) {
+			multiTypePredicate = toAndPredicate(orPredicates);
+		} else {
+			multiTypePredicate = toOrPredicate(orPredicates);
+		}
+		
 		List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName);
 		Condition pathPredicate = createPredicateSourcePaths(pathsToMatch);
-		return toAndPredicate(pathPredicate, multiTypeOrPredicate);
+		return toAndPredicate(pathPredicate, multiTypePredicate);
 	}
 
 	@Nonnull
@@ -606,10 +623,14 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 	}
 
 	@Nonnull
-	public Condition createEverythingPredicate(String theResourceName, Long theTargetPid) {
-		if (theTargetPid != null) {
-			return BinaryCondition.equalTo(myColumnTargetResourceId, generatePlaceholder(theTargetPid));
+	public Condition createEverythingPredicate(String theResourceName, Long... theTargetPids) {
+		if (theTargetPids != null && theTargetPids.length >= 1) {
+			// if resource ids are provided, we'll create the predicate
+			// with ids in or equal to this value
+			return toEqualToOrInPredicate(myColumnTargetResourceId,
+				generatePlaceholders(Arrays.stream(theTargetPids).map(Object::toString).collect(Collectors.toList())));
 		} else {
+			// ... otherwise we look for resource types
 			return BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theResourceName));
 		}
 	}

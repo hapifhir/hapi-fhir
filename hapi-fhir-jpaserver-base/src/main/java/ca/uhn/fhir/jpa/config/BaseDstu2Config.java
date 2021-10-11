@@ -6,10 +6,9 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport;
-import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.TransactionProcessorVersionAdapterDstu2;
-import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.term.TermReadSvcDstu2;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
@@ -97,7 +96,7 @@ public class BaseDstu2Config extends BaseConfig {
 	}
 
 	@Bean
-	public TransactionProcessor.ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
+	public ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
 		return new TransactionProcessorVersionAdapterDstu2();
 	}
 

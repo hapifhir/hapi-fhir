@@ -35,10 +35,11 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
@@ -51,6 +52,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.search.SearchConstants;
 import ca.uhn.fhir.jpa.search.builder.sql.GeneratedSql;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryExecutor;
@@ -138,7 +140,8 @@ public class SearchBuilder implements ISearchBuilder {
 	 * for an explanation of why we use the constant 800
 	 */
 	// NB: keep public
-	public static final int MAXIMUM_PAGE_SIZE = 800;
+	@Deprecated
+	public static final int MAXIMUM_PAGE_SIZE = SearchConstants.MAX_PAGE_SIZE;
 	public static final int MAXIMUM_PAGE_SIZE_FOR_TESTING = 50;
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
 	private static final ResourcePersistentId NO_MORE = new ResourcePersistentId(-1L);
@@ -220,9 +223,18 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		SearchContainedModeEnum searchContainedMode = theParams.getSearchContainedMode();
-		
+
+		// Handle _id and _tag last, since they can typically be tacked onto a different parameter
+		List<String> paramNames = myParams.keySet().stream().filter(t -> !t.equals(IAnyResource.SP_RES_ID))
+			.filter(t -> !t.equals(Constants.PARAM_TAG)).collect(Collectors.toList());
+		if (myParams.containsKey(IAnyResource.SP_RES_ID)) {
+			paramNames.add(IAnyResource.SP_RES_ID);
+		}
+		if (myParams.containsKey(Constants.PARAM_TAG)) {
+			paramNames.add(Constants.PARAM_TAG);
+		}
+
 		// Handle each parameter
-		List<String> paramNames = new ArrayList<>(myParams.keySet());
 		for (String nextParamName : paramNames) {
 			if (myParams.isLastN() && LastNParameterHelper.isLastNParameter(nextParamName, myContext)) {
 				// Skip parameters for Subject, Patient, Code and Category for LastN as these will be filtered by Elasticsearch
@@ -303,7 +315,7 @@ public class SearchBuilder implements ISearchBuilder {
 		 */
 		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN()) {
 			if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
-				if (myFulltextSearchSvc == null) {
+				if (myFulltextSearchSvc == null || myFulltextSearchSvc.isDisabled()) {
 					if (myParams.containsKey(Constants.PARAM_TEXT)) {
 						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
 					} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
@@ -363,6 +375,44 @@ public class SearchBuilder implements ISearchBuilder {
 		query.ifPresent(t -> theQueries.add(t));
 	}
 
+	/**
+	 * Combs through the params for any _id parameters and extracts the PIDs for them
+	 * @param theTargetPids
+	 */
+	private void extractTargetPidsFromIdParams(HashSet<Long> theTargetPids) {
+		// get all the IQueryParameterType objects
+		// for _id -> these should all be StringParam values
+		HashSet<String> ids = new HashSet<>();
+		List<List<IQueryParameterType>> params = myParams.get(IAnyResource.SP_RES_ID);
+		for (List<IQueryParameterType> paramList : params) {
+			for (IQueryParameterType param : paramList) {
+				if (param instanceof StringParam) {
+					// we expect all _id values to be StringParams
+					ids.add(((StringParam) param).getValue());
+				}
+				else {
+					// we do not expect the _id parameter to be a non-string value
+					throw new IllegalArgumentException("_id parameter must be a StringParam");
+				}
+			}
+		}
+
+		// fetch our target Pids
+		// this will throw if an id is not found
+		Map<String, ResourcePersistentId> idToPid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId,
+			myResourceName,
+			new ArrayList<>(ids));
+		if (myAlsoIncludePids == null) {
+			myAlsoIncludePids = new ArrayList<>();
+		}
+
+		// add the pids to targetPids
+		for (ResourcePersistentId pid : idToPid.values()) {
+			myAlsoIncludePids.add(pid);
+			theTargetPids.add(pid.getIdAsLong());
+		}
+	}
+
 	private Optional<SearchQueryExecutor> createChunkedQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCount, RequestDetails theRequest, List<Long> thePidList) {
 		String sqlBuilderResourceName = myParams.getEverythingMode() == null ? myResourceName : null;
 		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, sqlBuilderResourceName, mySqlBuilderFactory, myDialectProvider, theCount);
@@ -382,17 +432,10 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		if (myParams.getEverythingMode() != null) {
-			Long targetPid = null;
+			HashSet<Long> targetPids = new HashSet<>();
 			if (myParams.get(IAnyResource.SP_RES_ID) != null) {
-				StringParam idParam = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
-				ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, idParam.getValue());
-				if (myAlsoIncludePids == null) {
-					myAlsoIncludePids = new ArrayList<>(1);
-				}
-				myAlsoIncludePids.add(pid);
-				targetPid = pid.getIdAsLong();
+				extractTargetPidsFromIdParams(targetPids);
 			} else {
-
 				// For Everything queries, we make the query root by the ResourceLink table, since this query
 				// is basically a reverse-include search. For type/Everything (as opposed to instance/Everything)
 				// the one problem with this approach is that it doesn't catch Patients that have absolutely
@@ -408,10 +451,9 @@ public class SearchBuilder implements ISearchBuilder {
 				myAlsoIncludePids.addAll(ResourcePersistentId.fromLongList(output));
 
 			}
-			queryStack3.addPredicateEverythingOperation(myResourceName, targetPid);
 
+			queryStack3.addPredicateEverythingOperation(myResourceName, targetPids.toArray(new Long[0]));
 		} else {
-
 			/*
 			 * If we're doing a filter, always use the resource table as the root - This avoids the possibility of
 			 * specific filters with ORs as their root from working around the natural resource type / deletion
@@ -426,7 +468,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 			// Normal search
 			searchForIdsWithAndOr(sqlBuilder, queryStack3, myParams, theRequest);
-
 		}
 
 		// If we haven't added any predicates yet, we're doing a search for all resources. Make sure we add the
@@ -451,8 +492,9 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		//-- exclude the pids already in the previous iterator
-		if (hasNextIteratorQuery)
+		if (hasNextIteratorQuery) {
 			sqlBuilder.excludeResourceIdsPredicate(myPidSet);
+		}
 
 		/*
 		 * Sort
@@ -538,7 +580,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
 			if (param == null) {
-				String msg = myContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSortParameter", theSort.getParamName(), getResourceName(), mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName()));
+				String msg = myContext.getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidSortParameter", theSort.getParamName(), getResourceName(), mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName()));
 				throw new InvalidRequestException(msg);
 			}
 
@@ -864,7 +906,7 @@ public class SearchBuilder implements ISearchBuilder {
 								resourceLink = (Long) ((Object[]) nextRow)[0];
 								version = (Long) ((Object[]) nextRow)[1];
 							} else {
-								resourceLink = (Long)nextRow;
+								resourceLink = (Long) nextRow;
 							}
 
 							pidsToInclude.add(new ResourcePersistentId(resourceLink, version));
@@ -933,8 +975,8 @@ public class SearchBuilder implements ISearchBuilder {
 								if (resourceLink != null) {
 									ResourcePersistentId persistentId;
 									if (findVersionFieldName != null) {
-										persistentId = new ResourcePersistentId(((Object[])resourceLink)[0]);
-										persistentId.setVersion((Long) ((Object[])resourceLink)[1]);
+										persistentId = new ResourcePersistentId(((Object[]) resourceLink)[0]);
+										persistentId.setVersion((Long) ((Object[]) resourceLink)[1]);
 									} else {
 										persistentId = new ResourcePersistentId(resourceLink);
 									}
@@ -984,7 +1026,7 @@ public class SearchBuilder implements ISearchBuilder {
 					.add(IPreResourceAccessDetails.class, accessDetails)
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 
 				for (int i = includedPidList.size() - 1; i >= 0; i--) {
 					if (accessDetails.isDontReturnResourceAtIndex(i)) {

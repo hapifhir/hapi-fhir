@@ -45,9 +45,12 @@ public class MdmLinkExpandSvc {
 	@Autowired
 	private IdHelperService myIdHelperService;
 
+	public MdmLinkExpandSvc() {
+	}
+
 	/**
-	 *  Given a source resource, perform MDM expansion and return all the resource IDs of all resources that are
-	 *  MDM-Matched to this resource.
+	 * Given a source resource, perform MDM expansion and return all the resource IDs of all resources that are
+	 * MDM-Matched to this resource.
 	 *
 	 * @param theResource The resource to MDM-Expand
 	 * @return A set of strings representing the FHIR IDs of the expanded resources.
@@ -109,6 +112,7 @@ public class MdmLinkExpandSvc {
 		List<IMdmLinkDao.MdmPidTuple> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(theGoldenResourcePid, MdmMatchResultEnum.MATCH);
 		return flattenPidTuplesToSet(theGoldenResourcePid, goldenPidSourcePidTuples);
 	}
+
 	public Set<String> expandMdmByGoldenResourceId(IdDt theId) {
 		ourLog.debug("About to expand golden resource with golden resource id {}", theId);
 		Long pidOrThrowException = myIdHelperService.getPidOrThrowException(theId);

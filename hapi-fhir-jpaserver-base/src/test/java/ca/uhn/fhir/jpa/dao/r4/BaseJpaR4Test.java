@@ -103,6 +103,7 @@ import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.BodyStructure;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CarePlan;
@@ -371,6 +372,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Qualifier("myBinaryDaoR4")
 	protected IFhirResourceDao<Binary> myBinaryDao;
 	@Autowired
+	@Qualifier("myBodyStructureDaoR4")
+	protected IFhirResourceDao<BodyStructure> myBodyStructureDao;
+	@Autowired
 	@Qualifier("myDocumentReferenceDaoR4")
 	protected IFhirResourceDao<DocumentReference> myDocumentReferenceDao;
 	@Autowired
@@ -459,7 +463,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
 	@Autowired
-	@Qualifier("myJpaValidationSupportChain")
 	protected IValidationSupport myValidationSupport;
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
@@ -546,11 +549,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@BeforeEach
 	public void beforeFlushFT() {
-		runInTransaction(() -> {
-			SearchSession searchSession = Search.session(myEntityManager);
-			searchSession.workspace(ResourceTable.class).purge();
-			searchSession.indexingPlan().execute();
-		});
+		purgeHibernateSearch(this.myEntityManager);
 
 		myDaoConfig.setSchedulingDisabled(true);
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());

@@ -33,6 +33,7 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 
 		// Set up search parameters that will return 75 Observations.
 		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
 		ReferenceParam subjectParam1 = new ReferenceParam("Patient", "", patient0Id.getValue());
 		ReferenceParam subjectParam2 = new ReferenceParam("Patient", "", patient1Id.getValue());
 		ReferenceParam subjectParam3 = new ReferenceParam("Patient", "", patient2Id.getValue());

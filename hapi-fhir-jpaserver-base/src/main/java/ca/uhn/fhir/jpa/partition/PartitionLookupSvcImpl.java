@@ -42,6 +42,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
@@ -167,6 +168,12 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		myPartitionDao.delete(partition.get());
 
 		clearCaches();
+	}
+
+	@Override
+	public List<PartitionEntity> listPartitions() {
+		List<PartitionEntity> allPartitions =  myPartitionDao.findAll();
+		return allPartitions;
 	}
 
 	private void validatePartitionNameDoesntAlreadyExist(String theName) {

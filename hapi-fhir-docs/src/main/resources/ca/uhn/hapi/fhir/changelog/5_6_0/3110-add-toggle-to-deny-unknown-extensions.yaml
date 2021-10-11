@@ -1,0 +1,4 @@
+---
+type: add
+issue: 3110
+title: "Added a functionality to deny unknown extensions."

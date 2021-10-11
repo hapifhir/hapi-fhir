@@ -224,9 +224,8 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		/*
 		 * this does nothing, but BaseRuntimeElementCompositeDefinition
 		 * overrides this method to provide functionality because that class
-		 * defers the dealing process
+		 * defers the sealing process
 		 */
-
 	}
 
 	public BaseRuntimeChildDefinition getChildByName(String theChildName) {

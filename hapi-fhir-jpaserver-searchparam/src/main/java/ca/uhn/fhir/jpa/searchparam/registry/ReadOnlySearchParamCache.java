@@ -21,10 +21,17 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.ClasspathUtil;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.tuple.Pair;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,22 +80,42 @@ public class ReadOnlySearchParamCache {
 		return myUrlToParam.get(theUrl);
 	}
 
-	public static ReadOnlySearchParamCache fromFhirContext(FhirContext theFhirContext) {
-		ReadOnlySearchParamCache retval = new ReadOnlySearchParamCache();
+	public static ReadOnlySearchParamCache fromFhirContext(FhirContext theFhirContext, SearchParameterCanonicalizer theCanonicalizer) {
+		assert theCanonicalizer != null;
+
+		ReadOnlySearchParamCache retVal = new ReadOnlySearchParamCache();
 
 		Set<String> resourceNames = theFhirContext.getResourceTypes();
+
+		if (theFhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
+			IBaseBundle allSearchParameterBundle = (IBaseBundle) theFhirContext.newJsonParser().parseResource(ClasspathUtil.loadResourceAsStream("org/hl7/fhir/r4/model/sp/search-parameters.json"));
+			for (IBaseResource next : BundleUtil.toListOfResources(theFhirContext, allSearchParameterBundle)) {
+				RuntimeSearchParam nextCanonical = theCanonicalizer.canonicalizeSearchParameter(next);
+				if (nextCanonical != null) {
+					Collection<String> base = nextCanonical.getBase();
+					if (base.contains("Resource") || base.contains("DomainResource")) {
+						base = resourceNames;
+					}
+
+					for (String nextBase : base) {
+						Map<String, RuntimeSearchParam> nameToParam = retVal.myResourceNameToSpNameToSp.computeIfAbsent(nextBase, t -> new HashMap<>());
+						String nextName = nextCanonical.getName();
+						nameToParam.putIfAbsent(nextName, nextCanonical);
+					}
+				}
+			}
+		}
 
 		for (String resourceName : resourceNames) {
 			RuntimeResourceDefinition nextResDef = theFhirContext.getResourceDefinition(resourceName);
 			String nextResourceName = nextResDef.getName();
-			HashMap<String, RuntimeSearchParam> nameToParam = new HashMap<>();
-			retval.myResourceNameToSpNameToSp.put(nextResourceName, nameToParam);
 
+			Map<String, RuntimeSearchParam> nameToParam = retVal.myResourceNameToSpNameToSp.computeIfAbsent(nextResourceName, t-> new HashMap<>());
 			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
-				nameToParam.put(nextSp.getName(), nextSp);
+				nameToParam.putIfAbsent(nextSp.getName(), nextSp);
 			}
 		}
-		return retval;
+		return retVal;
 	}
 
 	public static ReadOnlySearchParamCache fromRuntimeSearchParamCache(RuntimeSearchParamCache theRuntimeSearchParamCache) {

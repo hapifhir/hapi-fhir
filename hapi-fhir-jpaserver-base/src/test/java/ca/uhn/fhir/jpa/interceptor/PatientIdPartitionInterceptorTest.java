@@ -343,8 +343,8 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 			.stream()
 			.collect(MultimapCollector.toMultimap(t -> new IdType(t.getResponse().getLocation()).toUnqualifiedVersionless().getResourceType(), t -> new IdType(t.getResponse().getLocation()).toUnqualifiedVersionless().getValue()));
 
+		logAllResources();
 		Multimap<String, Integer> resourcesByType = runInTransaction(() -> {
-			logAllResources();
 			return myResourceTableDao.findAll().stream().collect(MultimapCollector.toMultimap(t -> t.getResourceType(), t -> t.getPartitionId().getPartitionId()));
 		});
 
@@ -378,8 +378,8 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 
 		String patientId = resourceIds.get("Patient").get(0);
 
+		logAllResources();
 		Multimap<String, Integer> resourcesByType = runInTransaction(() -> {
-			logAllResources();
 			return myResourceTableDao.findAll().stream().collect(MultimapCollector.toMultimap(t -> t.getResourceType(), t -> t.getPartitionId().getPartitionId()));
 		});
 
@@ -426,8 +426,8 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 
 		String patientId = resourceIds.get("Patient").get(0);
 
+		logAllResources();
 		Multimap<String, Integer> resourcesByType = runInTransaction(() -> {
-			logAllResources();
 			return myResourceTableDao.findAll().stream().collect(MultimapCollector.toMultimap(t -> t.getResourceType(), t -> t.getPartitionId().getPartitionId()));
 		});
 

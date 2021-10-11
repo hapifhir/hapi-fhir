@@ -5,6 +5,7 @@ import ca.uhn.fhir.cql.common.helper.PartitionHelper;
 import ca.uhn.fhir.cql.common.provider.CqlProviderTestBase;
 import ca.uhn.fhir.cql.config.CqlR4Config;
 import ca.uhn.fhir.cql.config.TestCqlConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
@@ -13,6 +14,9 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.test.utilities.RequestDetailsHelper;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Meta;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
@@ -45,7 +49,19 @@ public class BaseCqlR4Test extends BaseJpaR4Test implements CqlProviderTestBase 
 	protected
 	FhirContext myFhirContext;
 	@Autowired
-	IFhirSystemDao mySystemDao;
+	IFhirSystemDao<Bundle, Meta> mySystemDao;
+	@Autowired
+	DaoConfig myDaoConfig;
+
+	@BeforeEach
+	public void beforeEach() {
+		myDaoConfig.setMaximumExpansionSize(5000);
+	}
+
+	@AfterEach
+	public void afterEach() {
+		myDaoConfig.setMaximumExpansionSize(new DaoConfig().getMaximumExpansionSize());
+	}
 
 	protected int loadDataFromDirectory(String theDirectoryName) throws IOException {
 		int count = 0;

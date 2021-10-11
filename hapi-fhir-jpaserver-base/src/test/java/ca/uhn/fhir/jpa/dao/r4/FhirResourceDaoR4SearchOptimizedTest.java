@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -15,20 +16,35 @@ import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.BodyStructure;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -797,6 +813,298 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals(1, StringUtils.countMatches(selectQuery, "SELECT"));
 	}
 
+	/**
+	 * Make sure that if we're performing a query where the resource type is implicitly known,
+	 * we don't include a selector for the resource type
+	 *
+	 * This test is for queries with _id where the ID is a forced ID
+	 */
+	@Test
+	public void testSearchOnIdAndReference_SearchById() {
+
+		Patient p = new Patient();
+		p.setId("B");
+		myPatientDao.update(p);
+
+		Observation obs = new Observation();
+		obs.setId("A");
+		obs.setSubject(new Reference("Patient/B"));
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		myObservationDao.update(obs);
+
+		Observation obs2 = new Observation();
+		obs2.setSubject(new Reference("Patient/B"));
+		obs2.setStatus(Observation.ObservationStatus.FINAL);
+		String obs2id = myObservationDao.create(obs2).getId().getIdPart();
+		assertThat(obs2id, matchesPattern("^[0-9]+$"));
+
+		// Search by ID where all IDs are forced IDs
+		{
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.add("_id", new TokenParam("A"));
+			map.add("subject", new ReferenceParam("Patient/B"));
+			map.add("status", new TokenParam("final"));
+			myCaptureQueriesListener.clear();
+			IBundleProvider outcome = myObservationDao.search(map, new SystemRequestDetails());
+			assertEquals(1, outcome.getResources(0, 999).size());
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "forcedid0_.resource_type='observation'"), selectQuery);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "forcedid0_.forced_id in ('a')"), selectQuery);
+
+			selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "select t1.res_id from hfj_resource t1"), selectQuery);
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t1.res_type = 'observation'"), selectQuery);
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t1.res_deleted_at is null"), selectQuery);
+		}
+
+		// Search by ID where at least one ID is a numeric ID
+		{
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.add("_id", new TokenOrListParam(null, "A", obs2id));
+			myCaptureQueriesListener.clear();
+			IBundleProvider outcome = myObservationDao.search(map, new SystemRequestDetails());
+			assertEquals(2, outcome.size());
+			assertEquals(2, outcome.getResources(0, 999).size());
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "select t0.res_id from hfj_resource t0"), selectQuery);
+			// Because we included a non-forced ID, we need to verify the type
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_type = 'observation'"), selectQuery);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_deleted_at is null"), selectQuery);
+		}
+
+		// Delete the resource - The searches should generate similar SQL now, but
+		// not actually return the result
+		myObservationDao.delete(new IdType("Observation/A"));
+		myObservationDao.delete(new IdType("Observation/" + obs2id));
+
+		// Search by ID where all IDs are forced IDs
+		{
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.add("_id", new TokenParam("A"));
+			myCaptureQueriesListener.clear();
+			IBundleProvider outcome = myObservationDao.search(map, new SystemRequestDetails());
+			assertEquals(0, outcome.size());
+			assertEquals(0, outcome.getResources(0, 999).size());
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "forcedid0_.resource_type='observation'"), selectQuery);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "forcedid0_.forced_id in ('a')"), selectQuery);
+
+			selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "select t0.res_id from hfj_resource t0"), selectQuery);
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_type = 'observation'"), selectQuery);
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_deleted_at is null"), selectQuery);
+		}
+
+		// Search by ID where at least one ID is a numeric ID
+		{
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.add("_id", new TokenOrListParam(null, "A", obs2id));
+			myCaptureQueriesListener.clear();
+			IBundleProvider outcome = myObservationDao.search(map, new SystemRequestDetails());
+			assertEquals(0, outcome.size());
+			assertEquals(0, outcome.getResources(0, 999).size());
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "select t0.res_id from hfj_resource t0"), selectQuery);
+			// Because we included a non-forced ID, we need to verify the type
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_type = 'observation'"), selectQuery);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_deleted_at is null"), selectQuery);
+		}
+
+	}
+
+	/**
+	 * Make sure that if we're performing a query where the ONLY param is _lastUpdated,
+	 * we include a selector for the resource type
+	 */
+	@Test
+	public void testSearchByLastUpdatedOnly() {
+		Patient p = new Patient();
+		p.setId("B");
+		myPatientDao.update(p);
+
+		Observation obs = new Observation();
+		obs.setId("A");
+		obs.setSubject(new Reference("Patient/B"));
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		myObservationDao.update(obs);
+
+		// Search using only a _lastUpdated param
+		{
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.setLastUpdated(new DateRangeParam("ge2021-01-01", null));
+			myCaptureQueriesListener.clear();
+			IBundleProvider outcome = myObservationDao.search(map, new SystemRequestDetails());
+			assertEquals(1, outcome.getResources(0, 999).size());
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "select t0.res_id from hfj_resource t0"), selectQuery);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_type = 'observation'"), selectQuery);
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_deleted_at is null"), selectQuery);
+		}
+	}
+
+	@Test
+	public void testSearchOnUnderscoreParams_AvoidHFJResourceJoins() {
+		// This Issue: https://github.com/hapifhir/hapi-fhir/issues/2942
+		// See this PR for a similar type of Fix: https://github.com/hapifhir/hapi-fhir/pull/2909
+		// SearchParam - focalAccess
+		SearchParameter searchParameter1 = new SearchParameter();
+		searchParameter1.addBase("BodySite").addBase("Procedure");
+		searchParameter1.setCode("focalAccess");
+		searchParameter1.setType(Enumerations.SearchParamType.REFERENCE);
+		searchParameter1.setExpression("Procedure.extension('Procedure#focalAccess')");
+		searchParameter1.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+		searchParameter1.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		IIdType sp1Id = mySearchParameterDao.create(searchParameter1).getId().toUnqualifiedVersionless();
+		// SearchParam - focalAccess
+		SearchParameter searchParameter2 = new SearchParameter();
+		searchParameter2.addBase("Provenance");
+		searchParameter2.setCode("activity");
+		searchParameter2.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter2.setExpression("Provenance.extension('Provenance#activity')");
+		searchParameter2.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+		searchParameter2.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		IIdType sp2Id = mySearchParameterDao.create(searchParameter2).getId().toUnqualifiedVersionless();
+		mySearchParamRegistry.forceRefresh();
+
+		BodyStructure bs = new BodyStructure();
+		bs.setDescription("BodyStructure in R4 replaced BodySite from DSTU4");
+		IIdType bsId = myBodyStructureDao.create(bs, mySrd).getId().toUnqualifiedVersionless();
+
+		Patient patient = new Patient();
+		patient.setId("P1");
+		patient.setActive(true);
+		patient.addName().setFamily("FamilyName");
+		Extension extParent = patient
+			.addExtension()
+			.setUrl("http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity");
+		extParent
+			.addExtension()
+			.setUrl("ombCategory")
+			.setValue(new CodeableConcept().addCoding(new Coding().setSystem("urn:oid:2.16.840.1.113883.5.50")
+			.setCode("2186-5")
+			.setDisplay("Not Hispanic or Latino")));
+		extParent
+			.addExtension()
+			.setUrl("text")
+			.setValue(new StringType("Not Hispanic or Latino"));
+		myPatientDao.update(patient);
+		CodeableConcept categoryCodeableConcept1 = new CodeableConcept().addCoding(new Coding().setSystem("acc_proccat_fkc")
+			.setCode("CANN")
+			.setDisplay("Cannulation"));
+		Procedure procedure = new Procedure();
+		procedure.setSubject(new Reference("Patient/P1"));
+		procedure.setStatus(Procedure.ProcedureStatus.COMPLETED);
+		procedure.setCategory(categoryCodeableConcept1);
+		Extension extProcedure = procedure
+			.addExtension()
+			.setUrl("Procedure#focalAccess")
+			.setValue(new UriType("BodyStructure/" + bsId.getIdPartAsLong()));
+		procedure.getMeta()
+			.addTag("acc_procext_fkc", "1STCANN2NDL", "First Successful Cannulation with 2 Needles");
+		IIdType procedureId = myProcedureDao.create(procedure).getId().toUnqualifiedVersionless();
+
+		Device device = new Device();
+		device.setManufacturer("Acme");
+		IIdType deviceId = myDeviceDao.create(device).getId().toUnqualifiedVersionless();
+
+		Provenance provenance = new Provenance();
+		provenance.setActivity(new CodeableConcept().addCoding(new Coding().setSystem("http://hl7.org/fhir/v3/DocumentCompletion").setCode("PA")));
+		provenance.addAgent().setWho(new Reference(deviceId));
+		IIdType provenanceId = myProvenanceDao.create(provenance).getId().toUnqualifiedVersionless();
+
+		logAllResources();
+		logAllResourceTags();
+		logAllResourceVersions();
+
+		// Search example 1:
+		// http://FHIR_SERVER/fhir_request/Procedure
+		// ?status%3Anot=entered-in-error&subject=B
+		// &category=CANN&focalAccess=BodySite%2F3530342921&_tag=TagValue
+		// NOTE: This gets sorted once so the order is different once it gets executed!
+		{
+			// IMPORTANT: Keep the query param order exactly as shown below!
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			// _tag, category, status, subject, focalAccess
+			map.add("_tag", new TokenParam("TagValue"));
+			map.add("category", new TokenParam("CANN"));
+			map.add("status", new TokenParam("entered-in-error").setModifier(TokenParamModifier.NOT));
+			map.add("subject", new ReferenceParam("Patient/P1"));
+			map.add("focalAccess", new ReferenceParam("BodyStructure/" + bsId.getIdPart()));
+			myCaptureQueriesListener.clear();
+			IBundleProvider outcome = myProcedureDao.search(map, new SystemRequestDetails());
+			ourLog.info("Search returned {} resources.", outcome.getResources(0, 999).size());
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+			// Check for a particular WHERE CLAUSE in the generated SQL to make sure we are verifying the correct query
+			assertEquals(2, StringUtils.countMatches(selectQuery.toLowerCase(), " join hfj_res_link "), selectQuery);
+
+			// Ensure that we do NOT see a couple of particular WHERE clauses
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_type = 'procedure'"), selectQuery);
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null"), selectQuery);
+		}
+
+		// Search example 2:
+		// http://FHIR_SERVER/fhir_request/Procedure
+		// ?status%3Anot=entered-in-error&category=CANN&focalAccess=3692871435
+		// &_tag=1STCANN1NDL%2C1STCANN2NDL&outcome=SUCCESS&_count=1&_requestTrace=True
+		// NOTE: This gets sorted once so the order is different once it gets executed!
+		{
+			// IMPORTANT: Keep the query param order exactly as shown below!
+			// NOTE: The "outcome" SearchParameter is not being used below, but it doesn't affect the test.
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			// _tag, category, status, focalAccess
+			map.add("_tag", new TokenParam("TagValue"));
+			map.add("category", new TokenParam("CANN"));
+			map.add("status", new TokenParam("entered-in-error").setModifier(TokenParamModifier.NOT));
+			map.add("focalAccess", new ReferenceParam("BodyStructure/" + bsId.getIdPart()));
+			myCaptureQueriesListener.clear();
+			IBundleProvider outcome = myProcedureDao.search(map, new SystemRequestDetails());
+			ourLog.info("Search returned {} resources.", outcome.getResources(0, 999).size());
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+			// Check for a particular WHERE CLAUSE in the generated SQL to make sure we are verifying the correct query
+			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), " join hfj_res_link "), selectQuery);
+
+			// Ensure that we do NOT see a couple of particular WHERE clauses
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_type = 'procedure'"), selectQuery);
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null"), selectQuery);
+		}
+
+		// Search example 3:
+		// http://FHIR_SERVER/fhir_request/Provenance
+		// ?agent=Acme&activity=PA&_lastUpdated=ge2021-01-01&_requestTrace=True
+		// NOTE: This gets sorted once so the order is different once it gets executed!
+		{
+			// IMPORTANT: Keep the query param order exactly as shown below!
+			// NOTE: The "outcome" SearchParameter is not being used below, but it doesn't affect the test.
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.add("agent", new ReferenceParam("Device/" + deviceId.getIdPart()));
+			map.add("activity", new TokenParam("PA"));
+			DateRangeParam dateRangeParam = new DateRangeParam("ge2021-01-01", null);
+			map.setLastUpdated(dateRangeParam);
+			myCaptureQueriesListener.clear();
+			IBundleProvider outcome = myProvenanceDao.search(map, new SystemRequestDetails());
+			ourLog.info("Search returned {} resources.", outcome.getResources(0, 999).size());
+			//assertEquals(1, outcome.getResources(0, 999).size());
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+			// Ensure that we do NOT see a couple of particular WHERE clauses
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_type = 'provenance'"), selectQuery);
+			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null"), selectQuery);
+		}
+	}
+
 	@AfterEach
 	public void afterResetDao() {
 		myDaoConfig.setResourceMetaCountHardLimit(new DaoConfig().getResourceMetaCountHardLimit());
@@ -869,9 +1177,9 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
-		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(9, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 	}

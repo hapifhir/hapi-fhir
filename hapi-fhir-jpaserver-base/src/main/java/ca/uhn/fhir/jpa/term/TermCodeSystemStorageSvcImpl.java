@@ -86,7 +86,9 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 
 public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(TermCodeSystemStorageSvcImpl.class);
@@ -139,6 +141,9 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			CodeSystem codeSystemResource = new CodeSystem();
 			codeSystemResource.setUrl(theSystem);
 			codeSystemResource.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+			if (isBlank(codeSystemResource.getIdElement().getIdPart()) && theSystem.contains(LOINC_LOW)) {
+				codeSystemResource.setId(LOINC_LOW);
+			}
 			myTerminologyVersionAdapterSvc.createOrUpdateCodeSystem(codeSystemResource);
 
 			cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
@@ -470,33 +475,23 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			codeSystemToStore = myCodeSystemVersionDao.saveAndFlush(codeSystemToStore);
 		}
 
-		// defaults to true
-		boolean isMakeVersionCurrent = theRequestDetails == null ||
-			(boolean) theRequestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
+		boolean isMakeVersionCurrent = ITermCodeSystemStorageSvc.isMakeVersionCurrent(theRequestDetails);
 		if (isMakeVersionCurrent) {
-			makeCodeSystemCurrentVersion(codeSystem, codeSystemToStore, conceptsToSave, totalCodeCount);
+			codeSystem.setCurrentVersion(codeSystemToStore);
+			if (codeSystem.getPid() == null) {
+				codeSystem = myCodeSystemDao.saveAndFlush(codeSystem);
+			}
 		}
 
-	}
-
-
-	private void makeCodeSystemCurrentVersion(TermCodeSystem theCodeSystem, TermCodeSystemVersion theCodeSystemToStore,
-			Collection<TermConcept> theConceptsToSave, int theTotalCodeCount) {
-
-		theCodeSystem.setCurrentVersion(theCodeSystemToStore);
-		if (theCodeSystem.getPid() == null) {
-			theCodeSystem = myCodeSystemDao.saveAndFlush(theCodeSystem);
+		ourLog.debug("Setting CodeSystemVersion[{}] on {} concepts...", codeSystem.getPid(), totalCodeCount);
+		for (TermConcept next : conceptsToSave) {
+			populateVersion(next, codeSystemToStore);
 		}
 
-		ourLog.debug("Setting CodeSystemVersion[{}] on {} concepts...", theCodeSystem.getPid(), theTotalCodeCount);
-		for (TermConcept next : theConceptsToSave) {
-			populateVersion(next, theCodeSystemToStore);
-		}
-
-		ourLog.debug("Saving {} concepts...", theTotalCodeCount);
+		ourLog.debug("Saving {} concepts...", totalCodeCount);
 		IdentityHashMap<TermConcept, Object> conceptsStack2 = new IdentityHashMap<>();
-		for (TermConcept next : theConceptsToSave) {
-			persistChildren(next, theCodeSystemToStore, conceptsStack2, theTotalCodeCount);
+		for (TermConcept next : conceptsToSave) {
+			persistChildren(next, codeSystemToStore, conceptsStack2, totalCodeCount);
 		}
 
 		ourLog.debug("Done saving concepts, flushing to database");

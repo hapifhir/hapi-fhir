@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -45,7 +46,7 @@
     window.onload = function() {
         // Begin Swagger UI call region
         const ui = SwaggerUIBundle({
-            url: "[[@{/api-docs(page=${PAGE})}]]",
+            url: "[[${OPENAPI_DOCS} + '?page=' + ${PAGE}]]",
             dom_id: '#swagger-ui',
             deepLinking: true,
             presets: [
@@ -55,7 +56,8 @@
             plugins: [
                 // SwaggerUIBundle.plugins.DownloadUrl
             ],
-            // layout: "StandaloneLayout"
+            // layout: "StandaloneLayout",
+            oauth2RedirectUrl: "[[${OAUTH2_REDIRECT_URL_PROPERTY}]]"
         });
         // End Swagger UI call region
 

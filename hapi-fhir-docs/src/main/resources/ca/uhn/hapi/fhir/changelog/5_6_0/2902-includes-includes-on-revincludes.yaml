@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2902
+jira: SMILE-3000
+title: "Fixed a bug wherein includes were not being included on revincludes."

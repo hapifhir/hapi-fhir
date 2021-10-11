@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -105,7 +106,6 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -133,6 +133,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -175,9 +176,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @SuppressWarnings({"unchecked", "Duplicates"})
+@TestPropertySource(properties = {
+	BaseJpaTest.CONFIG_ENABLE_LUCENE_FALSE
+	})
 public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchNoFtTest.class);
-
 	@Autowired
 	MatchUrlService myMatchUrlService;
 
@@ -782,7 +785,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		List<IIdType> actual = toUnqualifiedVersionlessIds(resp);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual, containsInAnyOrder(orgId, medId, patId, moId, patId2));
-		assertEquals(5, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(7, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 
 		// Specific patient ID with linked stuff
 		request = mock(HttpServletRequest.class);
@@ -1507,6 +1510,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			id2 = myOrganizationDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
 		}
 
+		int size;
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(id1));
@@ -1519,9 +1523,13 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		params.add("_id", new StringParam("9999999999999999"));
 		assertEquals(0, toList(myPatientDao.search(params)).size());
 
+		myCaptureQueriesListener.clear();
 		params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
 		params.add("_id", new StringParam(id2));
-		assertEquals(0, toList(myPatientDao.search(params)).size());
+		size = toList(myPatientDao.search(params)).size();
+		myCaptureQueriesListener.logAllQueries();
+		assertEquals(0, size);
 
 	}
 
@@ -1628,8 +1636,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertEquals(1, countMatches(sqlQuery, "res_id = '123'"), sqlQuery);
 			assertEquals(1, countMatches(sqlQuery, "join"), sqlQuery);
 			assertEquals(1, countMatches(sqlQuery, "hash_sys_and_value"), sqlQuery);
-			assertEquals(1, countMatches(sqlQuery, "res_type = 'diagnosticreport"), sqlQuery); // could be 0
-			assertEquals(1, countMatches(sqlQuery, "res_deleted_at"), sqlQuery); // could be 0
+			assertEquals(0, countMatches(sqlQuery, "res_type = 'diagnosticreport"), sqlQuery); // could be 0
+			assertEquals(0, countMatches(sqlQuery, "res_deleted_at"), sqlQuery); // could be 0
 		}
 	}
 
@@ -2460,14 +2468,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
-		params.add("_language", new StringParam("TEST"));
-		myCaptureQueriesListener.clear();
-		result = toList(myPatientDao.search(params));
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-		assertEquals(1, result.size());
-
-		params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
 		params.add(Patient.SP_IDENTIFIER, new TokenParam("TEST", "TEST"));
 		assertEquals(1, toList(myPatientDao.search(params)).size());
 
@@ -2481,11 +2481,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
 		params.add("_id", new StringParam("TEST"));
-		assertEquals(0, toList(myPatientDao.search(params)).size());
-
-		params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add("_language", new StringParam("TEST"));
 		assertEquals(0, toList(myPatientDao.search(params)).size());
 
 		params = new SearchParameterMap();
@@ -2510,148 +2505,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		}
 	}
 
-	@Test
-	public void testSearchLanguageParam() {
-		IIdType id1;
-		{
-			Patient patient = new Patient();
-			patient.getLanguageElement().setValue("en_CA");
-			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			patient.addName().setFamily("testSearchLanguageParam").addGiven("Joe");
-			id1 = myPatientDao.create(patient, mySrd).getId();
-		}
-		IIdType id2;
-		{
-			Patient patient = new Patient();
-			patient.getLanguageElement().setValue("en_US");
-			patient.addIdentifier().setSystem("urn:system").setValue("002");
-			patient.addName().setFamily("testSearchLanguageParam").addGiven("John");
-			id2 = myPatientDao.create(patient, mySrd).getId();
-		}
-		SearchParameterMap params;
-		{
-			params = new SearchParameterMap();
-			params.setLoadSynchronous(true);
-
-			params.add(IAnyResource.SP_RES_LANGUAGE, new StringParam("en_CA"));
-			myCaptureQueriesListener.clear();
-			List<IBaseResource> patients = toList(myPatientDao.search(params));
-			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-			assertEquals(1, patients.size());
-			assertEquals(id1.toUnqualifiedVersionless(), patients.get(0).getIdElement().toUnqualifiedVersionless());
-		}
-		{
-			params = new SearchParameterMap();
-			params.setLoadSynchronous(true);
-
-			params.add(IAnyResource.SP_RES_LANGUAGE, new StringParam("en_US"));
-			List<Patient> patients = toList(myPatientDao.search(params));
-			assertEquals(1, patients.size());
-			assertEquals(id2.toUnqualifiedVersionless(), patients.get(0).getIdElement().toUnqualifiedVersionless());
-		}
-		{
-			params = new SearchParameterMap();
-			params.setLoadSynchronous(true);
-
-			params.add(IAnyResource.SP_RES_LANGUAGE, new StringParam("en_GB"));
-			List<Patient> patients = toList(myPatientDao.search(params));
-			assertEquals(0, patients.size());
-		}
-	}
-
-	@Test
-	public void testSearchLanguageParamAndOr() {
-		IIdType id1;
-		{
-			Patient patient = new Patient();
-			patient.getLanguageElement().setValue("en_CA");
-			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			patient.addName().setFamily("testSearchLanguageParam").addGiven("Joe");
-			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
-
-		TestUtil.sleepOneClick();
-
-		Date betweenTime = new Date();
-
-		TestUtil.sleepOneClick();
-
-		IIdType id2;
-		{
-			Patient patient = new Patient();
-			patient.getLanguageElement().setValue("en_US");
-			patient.addIdentifier().setSystem("urn:system").setValue("002");
-			patient.addName().setFamily("testSearchLanguageParam").addGiven("John");
-			id2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.add(IAnyResource.SP_RES_LANGUAGE, new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("en_US")));
-			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1, id2));
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.add(IAnyResource.SP_RES_LANGUAGE, new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("en_US")));
-			params.setLastUpdated(new DateRangeParam(betweenTime, null));
-			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id2));
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.add(IAnyResource.SP_RES_LANGUAGE, new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("ZZZZ")));
-			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1));
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			StringAndListParam and = new StringAndListParam();
-			and.addAnd(new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("ZZZZ")));
-			and.addAnd(new StringOrListParam().addOr(new StringParam("en_CA")));
-			params.add(IAnyResource.SP_RES_LANGUAGE, and);
-			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1));
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			StringAndListParam and = new StringAndListParam();
-			and.addAnd(new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("ZZZZ")));
-			and.addAnd(new StringOrListParam().addOr(new StringParam("ZZZZZ")));
-			params.add(IAnyResource.SP_RES_LANGUAGE, and);
-			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), empty());
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			StringAndListParam and = new StringAndListParam();
-			and.addAnd(new StringOrListParam().addOr(new StringParam("ZZZZZ")));
-			and.addAnd(new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("ZZZZ")));
-			params.add(IAnyResource.SP_RES_LANGUAGE, and);
-			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), empty());
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			StringAndListParam and = new StringAndListParam();
-			and.addAnd(new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("ZZZZ")));
-			and.addAnd(new StringOrListParam().addOr(new StringParam("")).addOr(new StringParam(null)));
-			params.add(IAnyResource.SP_RES_LANGUAGE, and);
-			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1));
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.add("_id", new StringParam(id1.getIdPart()));
-			StringAndListParam and = new StringAndListParam();
-			and.addAnd(new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("ZZZZ")));
-			and.addAnd(new StringOrListParam().addOr(new StringParam("")).addOr(new StringParam(null)));
-			params.add(IAnyResource.SP_RES_LANGUAGE, and);
-			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1));
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			StringAndListParam and = new StringAndListParam();
-			and.addAnd(new StringOrListParam().addOr(new StringParam("en_CA")).addOr(new StringParam("ZZZZ")));
-			and.addAnd(new StringOrListParam().addOr(new StringParam("")).addOr(new StringParam(null)));
-			params.add(IAnyResource.SP_RES_LANGUAGE, and);
-			params.add("_id", new StringParam(id1.getIdPart()));
-			assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(params)), containsInAnyOrder(id1));
-		}
-
-	}
 
 	@Test
 	public void testSearchLastUpdatedParam() {
@@ -4130,12 +3983,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Disabled
 	public void testSearchUnknownContentParam() {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Constants.PARAM_CONTENT, new StringParam("fulltext"));
 		try {
-			myPatientDao.search(params);
+			myPatientDao.search(params).getAllResources();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Fulltext search is not enabled on this service, can not process parameter: _content", e.getMessage());
@@ -4143,12 +3995,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Disabled
 	public void testSearchUnknownTextParam() {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Constants.PARAM_TEXT, new StringParam("fulltext"));
 		try {
-			myPatientDao.search(params);
+			myPatientDao.search(params).getAllResources();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Fulltext search is not enabled on this service, can not process parameter: _text", e.getMessage());
@@ -5328,7 +5179,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		createObservationWithEffective("YES21", "2011-01-02T00:00:00+09:00");
 		createObservationWithEffective("YES22", "2011-01-02T00:00:00+10:00");
 		createObservationWithEffective("YES23", "2011-01-02T00:00:00+11:00");
-
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);

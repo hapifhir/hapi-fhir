@@ -7,7 +7,7 @@ import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.delete.job.ReindexTestHelper;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DecimalType;
@@ -90,7 +91,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 			.execute();
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		myBatchJobHelper.awaitAllBulkJobCompletions(BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME);
+		myBatchJobHelper.awaitAllBulkJobCompletions(BatchConstants.DELETE_EXPUNGE_JOB_NAME);
 		assertThat(interceptor.requestPartitionIds, hasSize(1));
 		RequestPartitionId partitionId = interceptor.requestPartitionIds.get(0);
 		assertEquals(TENANT_B_ID, partitionId.getFirstPartitionIdOrNull());
@@ -99,8 +100,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		assertEquals("Patient", interceptor.resourceDefs.get(0).getName());
 		myInterceptorRegistry.unregisterInterceptor(interceptor);
 
-		DecimalType jobIdPrimitive = (DecimalType) response.getParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID);
-		Long jobId = jobIdPrimitive.getValue().longValue();
+		Long jobId = BatchHelperR4.jobIdFromParameters(response);
 
 		assertEquals(1, myBatchJobHelper.getReadCount(jobId));
 		assertEquals(1, myBatchJobHelper.getWriteCount(jobId));

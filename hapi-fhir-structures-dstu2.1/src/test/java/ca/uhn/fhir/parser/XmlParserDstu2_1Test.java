@@ -15,17 +15,48 @@ import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.dstu2016may.model.Address.AddressUse;
-import org.hl7.fhir.dstu2016may.model.*;
+import org.hl7.fhir.dstu2016may.model.Appointment;
+import org.hl7.fhir.dstu2016may.model.AuditEvent;
+import org.hl7.fhir.dstu2016may.model.Binary;
+import org.hl7.fhir.dstu2016may.model.Bundle;
 import org.hl7.fhir.dstu2016may.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu2016may.model.Bundle.BundleType;
+import org.hl7.fhir.dstu2016may.model.CodeType;
+import org.hl7.fhir.dstu2016may.model.CodeableConcept;
+import org.hl7.fhir.dstu2016may.model.Coding;
+import org.hl7.fhir.dstu2016may.model.Condition;
 import org.hl7.fhir.dstu2016may.model.ContactPoint.ContactPointSystem;
+import org.hl7.fhir.dstu2016may.model.DateTimeType;
+import org.hl7.fhir.dstu2016may.model.DateType;
+import org.hl7.fhir.dstu2016may.model.DiagnosticReport;
 import org.hl7.fhir.dstu2016may.model.DiagnosticReport.DiagnosticReportStatus;
+import org.hl7.fhir.dstu2016may.model.DocumentManifest;
+import org.hl7.fhir.dstu2016may.model.Duration;
+import org.hl7.fhir.dstu2016may.model.Encounter;
 import org.hl7.fhir.dstu2016may.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu2016may.model.Enumerations.DocumentReferenceStatus;
+import org.hl7.fhir.dstu2016may.model.Extension;
+import org.hl7.fhir.dstu2016may.model.HumanName;
 import org.hl7.fhir.dstu2016may.model.HumanName.NameUse;
+import org.hl7.fhir.dstu2016may.model.IdType;
+import org.hl7.fhir.dstu2016may.model.Identifier;
 import org.hl7.fhir.dstu2016may.model.Identifier.IdentifierUse;
+import org.hl7.fhir.dstu2016may.model.InstantType;
+import org.hl7.fhir.dstu2016may.model.Location;
+import org.hl7.fhir.dstu2016may.model.Medication;
+import org.hl7.fhir.dstu2016may.model.MedicationOrder;
+import org.hl7.fhir.dstu2016may.model.Observation;
 import org.hl7.fhir.dstu2016may.model.Observation.ObservationRelationshipType;
 import org.hl7.fhir.dstu2016may.model.Observation.ObservationStatus;
+import org.hl7.fhir.dstu2016may.model.Organization;
+import org.hl7.fhir.dstu2016may.model.Patient;
+import org.hl7.fhir.dstu2016may.model.PrimitiveType;
+import org.hl7.fhir.dstu2016may.model.Quantity;
+import org.hl7.fhir.dstu2016may.model.Reference;
+import org.hl7.fhir.dstu2016may.model.Resource;
+import org.hl7.fhir.dstu2016may.model.SampledData;
+import org.hl7.fhir.dstu2016may.model.SimpleQuantity;
+import org.hl7.fhir.dstu2016may.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterAll;
@@ -2577,7 +2608,7 @@ public class XmlParserDstu2_1Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	public static void compareXml(String content, String reEncoded) {

@@ -369,7 +369,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		assertEquals("http://foo", outcome.getUrl());
 		assertEquals(CodeSystem.CodeSystemContentMode.NOTPRESENT, outcome.getContent());
 
-		IValidationSupport.LookupCodeResult lookup = myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "CBC");
+		IValidationSupport.LookupCodeResult lookup = myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "CBC", null);
 		assertEquals("Complete Blood Count", lookup.getCodeDisplay());
 	}
 
@@ -433,7 +433,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 		UploadStatistics outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 		assertEquals(2, outcome.getUpdatedConceptCount());
-		assertEquals("CODEA0", myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "codea").getCodeDisplay());
+		assertEquals("CODEA0", myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "codea", null).getCodeDisplay());
 
 		// Add codes again with different display
 		delta = new CustomTerminologySet();
@@ -441,12 +441,12 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("codeb", "CODEB1");
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 		assertEquals(2, outcome.getUpdatedConceptCount());
-		assertEquals("CODEA1", myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "codea").getCodeDisplay());
+		assertEquals("CODEA1", myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "codea", null).getCodeDisplay());
 
 		// Add codes again with no changes
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 		assertEquals(2, outcome.getUpdatedConceptCount());
-		assertEquals("CODEA1", myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "codea").getCodeDisplay());
+		assertEquals("CODEA1", myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "codea", null).getCodeDisplay());
 	}
 
 	@Test
@@ -483,7 +483,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			.setCode("useless_sct_code")
 			.setValue(new Coding("http://snomed.info", "1234567", "Choked on large meal (finding)"));
 
-		IValidationSupport.LookupCodeResult result = myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo/cs", "lunch");
+		IValidationSupport.LookupCodeResult result = myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo/cs", "lunch", null);
 		assertEquals(true, result.isFound());
 		assertEquals("lunch", result.getSearchedForCode());
 		assertEquals("http://foo/cs", result.getSearchedForSystem());

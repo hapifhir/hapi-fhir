@@ -6,8 +6,8 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobParametersBuilder;
 import ca.uhn.fhir.jpa.bulk.export.job.GroupBulkExportJobParametersBuilder;
@@ -102,15 +102,15 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	private BatchJobHelper myBatchJobHelper;
 
 	@Autowired
-	@Qualifier(BatchJobsConfig.BULK_EXPORT_JOB_NAME)
+	@Qualifier(BatchConstants.BULK_EXPORT_JOB_NAME)
 	private Job myBulkJob;
 
 	@Autowired
-	@Qualifier(BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME)
+	@Qualifier(BatchConstants.GROUP_BULK_EXPORT_JOB_NAME)
 	private Job myGroupBulkJob;
 
 	@Autowired
-	@Qualifier(BatchJobsConfig.PATIENT_BULK_EXPORT_JOB_NAME)
+	@Qualifier(BatchConstants.PATIENT_BULK_EXPORT_JOB_NAME)
 	private Job myPatientBulkJob;
 
 	private IIdType myPatientGroupId;
@@ -328,10 +328,11 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 	private void awaitAllBulkJobCompletions() {
 		myBatchJobHelper.awaitAllBulkJobCompletions(
-			BatchJobsConfig.BULK_EXPORT_JOB_NAME,
-			BatchJobsConfig.PATIENT_BULK_EXPORT_JOB_NAME,
-			BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME,
-			BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME
+			BatchConstants.BULK_EXPORT_JOB_NAME,
+			BatchConstants.PATIENT_BULK_EXPORT_JOB_NAME,
+			BatchConstants.GROUP_BULK_EXPORT_JOB_NAME,
+			BatchConstants.DELETE_EXPUNGE_JOB_NAME,
+			BatchConstants.MDM_CLEAR_JOB_NAME
 		);
 	}
 

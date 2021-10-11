@@ -30,9 +30,8 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
-import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
@@ -49,6 +48,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -114,15 +114,15 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	private IBatchJobSubmitter myJobSubmitter;
 
 	@Autowired
-	@Qualifier(BatchJobsConfig.BULK_EXPORT_JOB_NAME)
+	@Qualifier(BatchConstants.BULK_EXPORT_JOB_NAME)
 	private org.springframework.batch.core.Job myBulkExportJob;
 
 	@Autowired
-	@Qualifier(BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME)
+	@Qualifier(BatchConstants.GROUP_BULK_EXPORT_JOB_NAME)
 	private org.springframework.batch.core.Job myGroupBulkExportJob;
 
 	@Autowired
-	@Qualifier(BatchJobsConfig.PATIENT_BULK_EXPORT_JOB_NAME)
+	@Qualifier(BatchConstants.PATIENT_BULK_EXPORT_JOB_NAME)
 	private org.springframework.batch.core.Job myPatientBulkExportJob;
 
 	private Set<String> myCompartmentResources;
@@ -243,7 +243,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	private void processJob(BulkExportJobEntity theBulkExportJobEntity) {
 		String theJobUuid = theBulkExportJobEntity.getJobId();
 		JobParametersBuilder parameters = new JobParametersBuilder()
-			.addString(BulkExportJobConfig.JOB_UUID_PARAMETER, theJobUuid)
+			.addString(BatchConstants.JOB_UUID_PARAMETER, theJobUuid)
 			.addLong(BulkExportJobConfig.READ_CHUNK_PARAMETER, READ_CHUNK_SIZE);
 
 		ourLog.info("Submitting bulk export job {} to job scheduler", theJobUuid);
@@ -311,7 +311,6 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	@Transactional
 	@Override
 	public JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions, Boolean useCache, RequestDetails theRequestDetails) {
-
 		String outputFormat = Constants.CT_FHIR_NDJSON;
 		if (isNotBlank(theBulkDataExportOptions.getOutputFormat())) {
 			outputFormat = theBulkDataExportOptions.getOutputFormat();
@@ -359,10 +358,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_MDM).append("=").append(theBulkDataExportOptions.isExpandMdm());
 		}
 
-
-
 		String request = requestBuilder.toString();
-
 
 		//If we are using the cache, then attempt to retrieve a matching job based on the Request String, otherwise just make a new one.
 		if (useCache) {

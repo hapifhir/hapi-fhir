@@ -32,9 +32,11 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DeleteExpungeProvider extends BaseMultiUrlProcessor {
+public class DeleteExpungeProvider {
+	private final MultiUrlProcessor myMultiUrlProcessor;
+
 	public DeleteExpungeProvider(FhirContext theFhirContext, IDeleteExpungeJobSubmitter theDeleteExpungeJobSubmitter) {
-		super(theFhirContext, theDeleteExpungeJobSubmitter);
+		myMultiUrlProcessor = new MultiUrlProcessor(theFhirContext, theDeleteExpungeJobSubmitter);
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_DELETE_EXPUNGE, idempotent = false)
@@ -44,6 +46,7 @@ public class DeleteExpungeProvider extends BaseMultiUrlProcessor {
 		RequestDetails theRequestDetails
 	) {
 		List<String> urls = theUrlsToDeleteExpunge.stream().map(IPrimitiveType::getValue).collect(Collectors.toList());
-		return super.processUrls(urls, getBatchSize(theBatchSize), theRequestDetails);
+		Integer batchSize = myMultiUrlProcessor.getBatchSize(theBatchSize);
+		return myMultiUrlProcessor.processUrls(urls, batchSize, theRequestDetails);
 	}
 }
