@@ -51,7 +51,9 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -98,13 +100,14 @@ public class InterceptorUserDataMapDstu2Test {
 	public void testRead() throws Exception {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			String output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.debug(output);
-		}
 
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+
+			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertThat(response, containsString("\"id\":\"1\""));
 		await().until(() -> myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "outgoingResponse", "processingCompletedNormally", "processingCompleted"));
+	}
+
 	}
 
 	private void updateMapUsing(Map<Object, Object> theUserData, String theMethod) {
