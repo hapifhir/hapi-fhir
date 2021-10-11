@@ -111,6 +111,12 @@ public class IdHelperService {
 	private EntityManager myEntityManager;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+	private boolean myDontCheckActiveTransactionForUnitTest;
+
+	@VisibleForTesting
+	void setDontCheckActiveTransactionForUnitTest(boolean theDontCheckActiveTransactionForUnitTest) {
+		myDontCheckActiveTransactionForUnitTest = theDontCheckActiveTransactionForUnitTest;
+	}
 
 	public void delete(ForcedId forcedId) {
 		myForcedIdDao.deleteByPid(forcedId.getId());
@@ -124,7 +130,7 @@ public class IdHelperService {
 	 */
 	@Nonnull
 	public IResourceLookup resolveResourceIdentity(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId) throws ResourceNotFoundException {
-		assert TransactionSynchronizationManager.isSynchronizationActive();
+		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
 
 		IdDt id = new IdDt(theResourceType, theResourceId);
 		Map<String, List<IResourceLookup>> matches = translateForcedIdToPids(theRequestPartitionId,
@@ -157,7 +163,7 @@ public class IdHelperService {
 	public Map<String, ResourcePersistentId> resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId,
 																								 String theResourceType,
 																								 List<String> theIds) {
-		assert TransactionSynchronizationManager.isSynchronizationActive();
+		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
 		Validate.notNull(theIds, "theIds cannot be null");
 		Validate.isTrue(!theIds.isEmpty(), "theIds must not be empty");
 
@@ -234,7 +240,7 @@ public class IdHelperService {
 	 */
 	@Nonnull
 	public List<ResourcePersistentId> resolveResourcePersistentIdsWithCache(RequestPartitionId theRequestPartitionId, List<IIdType> theIds) {
-		assert TransactionSynchronizationManager.isSynchronizationActive();
+		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
 
 		for (IIdType id : theIds) {
 			if (!id.hasIdPart()) {
@@ -517,7 +523,7 @@ public class IdHelperService {
 	 * @return A Set of strings representing the FHIR IDs of the pids.
 	 */
 	public Set<String> translatePidsToFhirResourceIds(Set<Long> thePids) {
-		assert TransactionSynchronizationManager.isSynchronizationActive();
+		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
 
 		Map<Long, Optional<String>> pidToForcedIdMap = translatePidsToForcedIds(thePids);
 
@@ -531,7 +537,7 @@ public class IdHelperService {
 	}
 
 	public Map<Long, Optional<String>> translatePidsToForcedIds(Set<Long> thePids) {
-		assert TransactionSynchronizationManager.isSynchronizationActive();
+		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
 
 		Map<Long, Optional<String>> retVal = new HashMap<>(myMemoryCacheService.getAllPresent(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, thePids));
 
@@ -570,7 +576,7 @@ public class IdHelperService {
 	@Deprecated
 	@Nullable
 	public Long getPidOrNull(IBaseResource theResource) {
-		assert TransactionSynchronizationManager.isSynchronizationActive();
+		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
 
 		IAnyResource anyResource = (IAnyResource) theResource;
 		Long retVal = (Long) anyResource.getUserData(RESOURCE_PID);
@@ -592,7 +598,7 @@ public class IdHelperService {
 	@Deprecated
 	@Nonnull
 	public Long getPidOrThrowException(IIdType theId) {
-		assert TransactionSynchronizationManager.isSynchronizationActive();
+		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
 
 		List<IIdType> ids = Collections.singletonList(theId);
 		List<ResourcePersistentId> resourcePersistentIds = this.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), ids);
@@ -606,7 +612,7 @@ public class IdHelperService {
 	@Deprecated
 	@Nonnull
 	public List<Long> getPidsOrThrowException(List<IIdType> theIds) {
-		assert TransactionSynchronizationManager.isSynchronizationActive();
+		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
 
 		List<ResourcePersistentId> resourcePersistentIds = this.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), theIds);
 		return resourcePersistentIds.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
