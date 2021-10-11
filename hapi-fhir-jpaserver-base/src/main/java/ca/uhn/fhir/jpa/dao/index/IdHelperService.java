@@ -46,8 +46,6 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -97,9 +95,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 @Service
 public class IdHelperService {
-	private static final String RESOURCE_PID = "RESOURCE_PID";
-	private static final Logger ourLog = LoggerFactory.getLogger(IdHelperService.class);
 	public static final Predicate[] EMPTY_PREDICATE_ARRAY = new Predicate[0];
+	private static final String RESOURCE_PID = "RESOURCE_PID";
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired
@@ -110,6 +107,10 @@ public class IdHelperService {
 	private FhirContext myFhirCtx;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	private EntityManager myEntityManager;
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	public void delete(ForcedId forcedId) {
 		myForcedIdDao.deleteByPid(forcedId.getId());
@@ -151,18 +152,13 @@ public class IdHelperService {
 	 * Returns a mapping of Id -> ResourcePersistentId.
 	 * If any resource is not found, it will throw ResourceNotFound exception
 	 * (and no map will be returned)
-	 *
-	 * @param theRequestPartitionId
-	 * @param theResourceType
-	 * @param theIds
-	 * @return
 	 */
 	@Nonnull
 	public Map<String, ResourcePersistentId> resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId,
-																						String theResourceType,
-																						List<String> theIds) {
+																								 String theResourceType,
+																								 List<String> theIds) {
 		assert TransactionSynchronizationManager.isSynchronizationActive();
-        Validate.notNull(theIds, "theIds cannot be null");
+		Validate.notNull(theIds, "theIds cannot be null");
 		Validate.isTrue(!theIds.isEmpty(), "theIds must not be empty");
 
 		Map<String, ResourcePersistentId> retVals = new HashMap<>();
@@ -173,15 +169,13 @@ public class IdHelperService {
 				// is already a PID
 				retVal = new ResourcePersistentId(Long.parseLong(id));
 				retVals.put(id, retVal);
-			}
-			else {
+			} else {
 				// is a forced id
 				// we must resolve!
 				if (myDaoConfig.isDeleteEnabled()) {
 					retVal = new ResourcePersistentId(resolveResourceIdentity(theRequestPartitionId, theResourceType, id).getResourceId());
 					retVals.put(id, retVal);
-				}
-				else {
+				} else {
 					// fetch from cache... adding to cache if not available
 					String key = toForcedIdToPidKey(theRequestPartitionId, theResourceType, id);
 					retVal = myMemoryCacheService.getThenPutAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, t -> {
@@ -220,7 +214,7 @@ public class IdHelperService {
 	 * Returns true if the given resource ID should be stored in a forced ID. Under default config
 	 * (meaning client ID strategy is {@link ca.uhn.fhir.jpa.api.config.DaoConfig.ClientIdStrategyEnum#ALPHANUMERIC})
 	 * this will return true if the ID has any non-digit characters.
-	 *
+	 * <p>
 	 * In {@link ca.uhn.fhir.jpa.api.config.DaoConfig.ClientIdStrategyEnum#ANY} mode it will always return true.
 	 */
 	public boolean idRequiresForcedId(String theId) {
@@ -231,12 +225,6 @@ public class IdHelperService {
 	private String toForcedIdToPidKey(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId) {
 		return RequestPartitionId.stringifyForKey(theRequestPartitionId) + "/" + theResourceType + "/" + theId;
 	}
-
-	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	private EntityManager myEntityManager;
-
-	@Autowired
-	private PartitionSettings myPartitionSettings;
 
 	/**
 	 * Given a collection of resource IDs (resource type + id), resolves the internal persistent IDs.

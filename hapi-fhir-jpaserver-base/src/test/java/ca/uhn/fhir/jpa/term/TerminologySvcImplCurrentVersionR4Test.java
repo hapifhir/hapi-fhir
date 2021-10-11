@@ -658,33 +658,6 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	 * Validates TermConcepts were created in the sequence indicated by the parameters
 	 * and their displays match the expected versions
 	 */
-	private void validateTermConceptsLoincAllVs(ArrayList<String> theExpectedVersions) {
-		@SuppressWarnings("unchecked")
-		List<TermConcept> termConceptNoVerList = (List<TermConcept>) myEntityManager.createQuery(
-			"from TermConcept where myCode = '" + VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE + "' order by myId").getResultList();
-		assertEquals(theExpectedVersions.size(), termConceptNoVerList.size());
-		for (int i = 0; i < theExpectedVersions.size(); i++) {
-			assertEquals( prefixWithVersion(theExpectedVersions.get(i), VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY),
-				termConceptNoVerList.get(i).getDisplay(), "TermCode with id: " + i + " display");
-		}
-
-		@SuppressWarnings("unchecked")
-		List<TermConcept> termConceptWithVerList = (List<TermConcept>) myEntityManager.createQuery(
-			"from TermConcept where myCode = '" + VS_VERSIONED_ON_UPLOAD_FIRST_CODE + "' order by myId").getResultList();
-		assertEquals(theExpectedVersions.size(), termConceptWithVerList.size());
-		for (int i = 0; i < theExpectedVersions.size(); i++) {
-			assertEquals( prefixWithVersion(theExpectedVersions.get(i), VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY),
-				termConceptWithVerList.get(i).getDisplay(), "TermCode with id: " + i + " display");
-		}
-	}
-
-
-
-
-	/**
-	 * Validates TermConcepts were created in the sequence indicated by the parameters
-	 * and their displays match the expected versions
-	 */
 	private void validateTermConcepts(ArrayList<String> theExpectedVersions) {
 		runInTransaction(() -> {
 		@SuppressWarnings("unchecked")
