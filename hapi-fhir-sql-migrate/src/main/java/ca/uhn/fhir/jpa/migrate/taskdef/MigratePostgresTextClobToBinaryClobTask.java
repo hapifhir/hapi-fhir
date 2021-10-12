@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
+import java.util.Locale;
 
 public class MigratePostgresTextClobToBinaryClobTask extends BaseTableColumnTask {
 	private static final Logger ourLog = LoggerFactory.getLogger(MigratePostgresTextClobToBinaryClobTask.class);
@@ -49,18 +50,22 @@ public class MigratePostgresTextClobToBinaryClobTask extends BaseTableColumnTask
 			return;
 		}
 
-		JdbcUtils.ColumnType columnType = JdbcUtils.getColumnType(getConnectionProperties(), getTableName(), getColumnName());
+		String tableName = getTableName();
+		String columnName = getColumnName();
+		JdbcUtils.ColumnType columnType = JdbcUtils.getColumnType(getConnectionProperties(), tableName, columnName);
 		if (columnType.getColumnTypeEnum() == ColumnTypeEnum.LONG) {
-			ourLog.info("Table {} column {} is already of type LONG, no migration needed", getTableName(), getColumnName());
+			ourLog.info("Table {} column {} is already of type LONG, no migration needed", tableName, columnName);
 			return;
 		}
 
-		String tempColumnName = getColumnName() + "_m";
+		String tempColumnName = columnName + "_m".toLowerCase();
+		tableName = tableName.toLowerCase();
+		columnName = columnName.toLowerCase();
 
-		executeSql(getTableName(), "alter table ? add column ? oid", getTableName(), tempColumnName);
-		executeSql(getTableName(), "update ? set ? = cast(? as oid) where ? is not null", getTableName(), tempColumnName, getColumnName(), getColumnName());
-		executeSql(getTableName(), "alter table ? drop column ?", getTableName(), getColumnName());
-		executeSql(getTableName(), "alter table ? rename column ? to ?", getTableName(), tempColumnName, getColumnName());
+		executeSql(tableName, "alter table " + tableName + " add column " + tempColumnName + " oid");
+		executeSql(tableName, "update " + tableName + " set " + tempColumnName + " = cast(" + columnName + " as oid) where " + columnName + " is not null");
+		executeSql(tableName, "alter table " + tableName + " drop column " + columnName);
+		executeSql(tableName, "alter table " + tableName + " rename column " + tempColumnName + " to " + columnName);
 
 	}
 }
