@@ -20,12 +20,18 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.channel.models.ReceivingChannelParameters;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
+import ca.uhn.fhir.util.StringUtil;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import org.apache.commons.codec.binary.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +66,18 @@ public class SubscriptionChannelRegistry {
 			return;
 		}
 
-		IChannelReceiver channelReceiver = newReceivingChannel(channelName);
+		ChannelRetryConfiguration retryConfigParameters = theActiveSubscription.getRetryConfigurationParameters();
+		if (retryConfigParameters != null
+				&& retryConfigParameters.getDeadLetterQueueName() != null
+				&& !retryConfigParameters.getDeadLetterQueueName().trim().equals("")) {
+			// create a dlq
+			String name = retryConfigParameters.getDeadLetterQueueName();
+			createDeadLetterQueue(name);
+		}
+		ReceivingChannelParameters parameters = new ReceivingChannelParameters(channelName);
+		parameters.setRetryConfiguration(retryConfigParameters);
+
+		IChannelReceiver channelReceiver = newReceivingChannel(parameters);
 		Optional<MessageHandler> deliveryHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(theActiveSubscription.getChannelType());
 
 		SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = new SubscriptionChannelWithHandlers(channelName, channelReceiver);
@@ -71,8 +88,26 @@ public class SubscriptionChannelRegistry {
 		myChannelNameToSender.put(channelName, sendingChannel);
 	}
 
+	private void createDeadLetterQueue(String theDlqName) {
+		ReceivingChannelParameters dlqParams = new ReceivingChannelParameters(theDlqName);
+		IChannelReceiver dlq = newReceivingChannel(dlqParams);
+
+		SubscriptionChannelWithHandlers dlqWithHandlers = new SubscriptionChannelWithHandlers(theDlqName, dlq);
+		Optional<MessageHandler> dlqHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(CanonicalSubscriptionChannelType.MESSAGE);
+
+		dlqHandler.ifPresent(dlqWithHandlers::addHandler);
+		myDeliveryReceiverChannels.put(theDlqName, dlqWithHandlers);
+	}
+
 	protected IChannelReceiver newReceivingChannel(String theChannelName) {
-		return mySubscriptionDeliveryChannelFactory.newDeliveryReceivingChannel(theChannelName, null);
+		return newReceivingChannel(new ReceivingChannelParameters(theChannelName));
+	}
+
+	protected IChannelReceiver newReceivingChannel(ReceivingChannelParameters theParameters) {
+		ChannelConsumerSettings settings = new ChannelConsumerSettings();
+		settings.setRetryConfiguration(theParameters.getRetryConfiguration());
+		return mySubscriptionDeliveryChannelFactory.newDeliveryReceivingChannel(theParameters.getChannelName(),
+			settings);
 	}
 
 	protected IChannelProducer newSendingChannel(String theChannelName) {
@@ -83,6 +118,14 @@ public class SubscriptionChannelRegistry {
 		String channelName = theActiveSubscription.getChannelName();
 		ourLog.info("Removing subscription {} from channel {}", theActiveSubscription.getId(), channelName);
 		boolean removed = myActiveSubscriptionByChannelName.remove(channelName, theActiveSubscription.getId());
+		ChannelRetryConfiguration retryConfig = theActiveSubscription.getRetryConfigurationParameters();
+
+		// if there are listening DLQs, we'll close them too
+		if (removed && retryConfig != null
+				&& retryConfig.hasDeadLetterQueue()) {
+			myDeliveryReceiverChannels.closeAndRemove(retryConfig.getDeadLetterQueueName());
+		}
+
 		if (!removed) {
 			ourLog.warn("Failed to remove subscription {} from channel {}", theActiveSubscription.getId(), channelName);
 		}

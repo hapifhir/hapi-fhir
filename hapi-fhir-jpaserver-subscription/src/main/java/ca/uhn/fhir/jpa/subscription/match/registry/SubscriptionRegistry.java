@@ -26,7 +26,12 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.ISubscriptionDeliveryChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
+import ca.uhn.fhir.util.HapiExtensions;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.IntegerType;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
@@ -35,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PreDestroy;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -80,6 +86,61 @@ public class SubscriptionRegistry {
 		return activeSubscription.map(ActiveSubscription::getSubscription);
 	}
 
+	private ChannelRetryConfiguration getRetryConfigurationFromSubscriptionExtensions(String theChannelName, IBaseResource theSubscription) {
+		ChannelRetryConfiguration configuration = null;
+		if (theSubscription instanceof org.hl7.fhir.dstu3.model.Subscription) {
+			org.hl7.fhir.dstu3.model.Subscription sub = (org.hl7.fhir.dstu3.model.Subscription) theSubscription;
+			Optional<Extension> retryExtensionOp = sub.getExtension().stream().map(e -> {
+				if (e.getUrl().equalsIgnoreCase(HapiExtensions.EXT_RETRY_POLICY)) {
+					return e;
+				}
+				return null;
+			}).findFirst();
+
+			if (retryExtensionOp.isPresent()) {
+				Extension retryExtension = retryExtensionOp.get();
+				int retryCount = -1;
+				String dlq = null;
+				for (Extension extension : retryExtension.getExtension()) {
+					if (extension.getUrl().equalsIgnoreCase(HapiExtensions.SUB_EXTENSION_RETRY_COUNT)) {
+						IntegerType integerType = (IntegerType) extension.getValue();
+						retryCount = integerType.getValue();
+					}
+					else if (extension.getUrl().equalsIgnoreCase(HapiExtensions.SUB_EXTENSION_DEAD_LETTER_QUEUE)) {
+						StringType stringType = (StringType) extension.getValue();
+						dlq = stringType.getValue();
+					}
+
+					if (retryCount >= 0 && dlq != null) {
+						break;
+					}
+				}
+
+				// a retry rate of 0 we'll allow.
+				// means it'll never retry
+				if (retryCount >= 0) {
+					configuration = new ChannelRetryConfiguration();
+					configuration.setRetryCount(retryCount);
+					if (dlq != null && !dlq.trim().equals("")) {
+						// dlq name will be
+						// <channel name>-<name provided in extension>
+						// this should ensure/enforce uniqueness and
+						// easy to find from actual subscription
+						String dlqName = theChannelName + "-"
+							+ dlq;
+						configuration.setDeadLetterQueueName(dlqName);
+					}
+				}
+				else {
+					ourLog.warn("Invalid retry configuration extensions. No retry configuration will be used.");
+				}
+			}
+		}
+
+		return configuration;
+	}
+
+
 	private void registerSubscription(IIdType theId, IBaseResource theSubscription) {
 		Validate.notNull(theId);
 		String subscriptionId = theId.getIdPart();
@@ -90,7 +151,12 @@ public class SubscriptionRegistry {
 
 		String channelName = mySubscriptionDeliveryChannelNamer.nameFromSubscription(canonicalized);
 
+		// get the actual retry configuration
+		ChannelRetryConfiguration configuration = getRetryConfigurationFromSubscriptionExtensions(channelName, theSubscription);
+
 		ActiveSubscription activeSubscription = new ActiveSubscription(canonicalized, channelName);
+		activeSubscription.setRetryConfiguration(configuration);
+
 		mySubscriptionChannelRegistry.add(activeSubscription);
 		myActiveSubscriptionCache.put(subscriptionId, activeSubscription);
 
@@ -100,7 +166,6 @@ public class SubscriptionRegistry {
 		HookParams params = new HookParams()
 			.add(CanonicalSubscription.class, canonicalized);
 		myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, params);
-
 	}
 
 	public void unregisterSubscriptionIfRegistered(String theSubscriptionId) {
@@ -114,7 +179,6 @@ public class SubscriptionRegistry {
 			// Interceptor call: SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_UNREGISTERED
 			HookParams params = new HookParams();
 			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_UNREGISTERED, params);
-
 		}
 	}
 

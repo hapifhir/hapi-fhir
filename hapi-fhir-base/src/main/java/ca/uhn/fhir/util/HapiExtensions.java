@@ -123,6 +123,28 @@ public class HapiExtensions {
 	public static final String EXT_OP_PARAMETER_EXAMPLE_VALUE = "http://hapifhir.io/fhir/StructureDefinition/op-parameter-example-value";
 
 	/**
+	 * This extension provides a way for subscribers to provide a
+	 * retry policy on subscriptions.
+	 * Such an extension should provide sub extensions specifying
+	 * a "retry-count" and a "dlq" (dead letter queue where failed
+	 * messages are dropped).
+	 */
+	public static final String EXT_RETRY_POLICY = "http://hapifhir.io/fhir/StructureDefinition/retry-policy";
+
+	/**
+	 * Required subextension of retry-policy. Provides the retry-count
+	 * as an int value
+	 */
+	public static final String SUB_EXTENSION_RETRY_COUNT = "retry-count";
+
+	/**
+	 * Optional subextension of retry-policy. Provides the dlq to use
+	 * if delivery fails more than retry-count.
+	 * If not provided, failed messages are simply dropped.
+	 */
+	public static final String SUB_EXTENSION_DEAD_LETTER_QUEUE = "dlq";
+
+	/**
 	 * Non instantiable
 	 */
 	private HapiExtensions() {
