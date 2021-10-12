@@ -2,24 +2,21 @@ package ca.uhn.fhirtest.config;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigR4;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
-import ca.uhn.fhir.rest.client.interceptor.ThreadLocalCapturingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.apache.commons.lang3.time.DateUtils;
-import org.hibernate.dialect.PostgreSQL94Dialect;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
 import org.hibernate.search.engine.cfg.BackendSettings;
-import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -147,7 +144,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		if (CommonConfig.isLocalTestMode()) {
 			extraProperties.put("hibernate.dialect", DerbyTenSevenHapiFhirDialect.class.getName());
 		} else {
-			extraProperties.put("hibernate.dialect", PostgreSQL94Dialect.class.getName());
+			extraProperties.put("hibernate.dialect", HapiFhirPostgres94Dialect.class.getName());
 		}
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");

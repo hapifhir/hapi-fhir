@@ -264,10 +264,10 @@ public class TestUtil {
 			assertNotADuplicateName(columnName, null);
 			ForeignKey fk = joinColumn.foreignKey();
 			if (theIsSuperClass) {
-				Validate.isTrue(isBlank(fk.name()), "Foreign key on " + theAnnotatedElement.toString() + " has a name() and should not as it is a superclass");
+				Validate.isTrue(isBlank(fk.name()), "Foreign key on " + theAnnotatedElement + " has a name() and should not as it is a superclass");
 			} else {
 				Validate.notNull(fk);
-				Validate.isTrue(isNotBlank(fk.name()), "Foreign key on " + theAnnotatedElement.toString() + " has no name()");
+				Validate.isTrue(isNotBlank(fk.name()), "Foreign key on " + theAnnotatedElement + " has no name()");
 				Validate.isTrue(fk.name().startsWith("FK_"));
 				assertNotADuplicateName(fk.name(), theNames);
 			}
@@ -279,7 +279,7 @@ public class TestUtil {
 			validateColumnName(columnName, theAnnotatedElement);
 
 			assertNotADuplicateName(columnName, null);
-			Validate.isTrue(column.unique() == false, "Should not use unique attribute on column (use named @UniqueConstraint instead) on " + theAnnotatedElement.toString());
+			Validate.isTrue(column.unique() == false, "Should not use unique attribute on column (use named @UniqueConstraint instead) on " + theAnnotatedElement);
 
 			boolean hasLob = theAnnotatedElement.getAnnotation(Lob.class) != null;
 			Field field = (Field) theAnnotatedElement;

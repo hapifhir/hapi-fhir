@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 3061
+title: "When ingesting Synthea data (or simnilarly structured transaction bundles) into a JPA server, a redundant
+  resource ID lookup has been optimized out. This should particularly speed up larger sized transactions."

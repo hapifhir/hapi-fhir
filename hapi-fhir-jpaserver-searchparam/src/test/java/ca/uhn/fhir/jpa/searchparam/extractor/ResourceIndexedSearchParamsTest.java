@@ -80,7 +80,6 @@ public class ResourceIndexedSearchParamsTest {
 		return retVal;
 	}
 
-
 	@Test
 	public void testExtractCompositeStringUniquesValueChains() {
 		List<List<String>> partsChoices;

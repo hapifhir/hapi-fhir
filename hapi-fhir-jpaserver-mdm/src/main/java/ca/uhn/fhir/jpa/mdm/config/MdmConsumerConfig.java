@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.mdm.svc.GoldenResourceMergerSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.IMdmModelConverterSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmControllerSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmEidUpdateService;
+import ca.uhn.fhir.jpa.mdm.svc.MdmLinkCreateSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmLinkQuerySvcImplSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmLinkSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmLinkUpdaterSvcImpl;
@@ -55,6 +56,7 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmBatchJobSubmitterFactory;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
+import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
@@ -232,6 +234,12 @@ public class MdmConsumerConfig {
 	IMdmLinkUpdaterSvc mdmLinkUpdaterSvc() {
 		return new MdmLinkUpdaterSvcImpl();
 	}
+
+	@Bean
+	IMdmLinkCreateSvc mdmLinkCreateSvc() {
+		return new MdmLinkCreateSvcImpl();
+	}
+
 
 	@Bean
 	MdmLoader mdmLoader() {

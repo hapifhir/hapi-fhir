@@ -1232,9 +1232,10 @@ public class QueryStack {
 	}
 
 
-	public void addPredicateEverythingOperation(String theResourceName, Long theTargetPid) {
+	// expand out the pids
+	public void addPredicateEverythingOperation(String theResourceName, Long... theTargetPids) {
 		ResourceLinkPredicateBuilder table = mySqlBuilder.addReferencePredicateBuilder(this, null);
-		Condition predicate = table.createEverythingPredicate(theResourceName, theTargetPid);
+		Condition predicate = table.createEverythingPredicate(theResourceName, theTargetPids);
 		mySqlBuilder.addPredicate(predicate);
 	}
 
