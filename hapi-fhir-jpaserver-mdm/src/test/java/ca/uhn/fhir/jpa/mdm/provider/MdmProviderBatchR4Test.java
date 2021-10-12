@@ -39,6 +39,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 	IInterceptorService myInterceptorService;
 	PointcutLatch afterMdmLatch = new PointcutLatch(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED);
 
+	@Override
 	@BeforeEach
 	public void before() {
 		super.before();

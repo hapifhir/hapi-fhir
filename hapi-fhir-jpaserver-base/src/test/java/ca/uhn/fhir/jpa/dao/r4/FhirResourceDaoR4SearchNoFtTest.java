@@ -201,6 +201,28 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testSearchInExistingTransaction() {
+		createPatient(withBirthdate("2021-01-01"));
+
+		// Search in a new transaction
+		IBundleProvider outcome = runInTransaction(() -> {
+			return myPatientDao.search(new SearchParameterMap().add(Patient.SP_BIRTHDATE, new DateParam("lt2022")));
+		});
+		assertEquals(1, outcome.sizeOrThrowNpe());
+		assertEquals(1, outcome.getResources(0, 999).size());
+
+		// Search and fetch in a new transaction
+		runInTransaction(() -> {
+			IBundleProvider outcome2 = myPatientDao.search(new SearchParameterMap().add(Patient.SP_BIRTHDATE, new DateParam("lt2022")));
+			assertEquals(1, outcome2.sizeOrThrowNpe());
+			assertEquals(1, outcome2.getResources(0, 999).size());
+		});
+
+	}
+
+
+
+	@Test
 	public void testCanonicalReference() {
 		StructureDefinition sd = new StructureDefinition();
 		sd.getSnapshot().addElement().getBinding().setValueSet("http://foo");
@@ -5079,7 +5101,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		p.addName().setFamily("A1");
 		myPatientDao.create(p);
 
-		assertEquals(0, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
 
 		SearchParameterMap map = new SearchParameterMap();
 		StringOrListParam or = new StringOrListParam();
@@ -5090,7 +5112,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map.add(Patient.SP_NAME, or);
 		IBundleProvider results = myPatientDao.search(map);
 		assertEquals(1, results.getResources(0, 10).size());
-		assertEquals(1, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(1, mySearchEntityDao.count()));
 
 		map = new SearchParameterMap();
 		or = new StringOrListParam();
@@ -5103,7 +5125,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		results = myPatientDao.search(map);
 		assertEquals(1, results.getResources(0, 10).size());
 		// We expect a new one because we don't cache the search URL for very long search URLs
-		assertEquals(2, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(2, mySearchEntityDao.count()));
 	}
 
 	@Test
@@ -5296,7 +5318,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		p.addName().setFamily("A1");
 		myPatientDao.create(p);
 
-		assertEquals(0, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
 
 		SearchParameterMap map = new SearchParameterMap();
 		StringOrListParam or = new StringOrListParam();
@@ -5307,7 +5329,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map.add(Patient.SP_NAME, or);
 		IBundleProvider results = myPatientDao.search(map);
 		assertEquals(1, results.getResources(0, 10).size());
-		assertEquals(1, mySearchEntityDao.count());
+		assertEquals(1, runInTransaction(()->mySearchEntityDao.count()));
 
 		map = new SearchParameterMap();
 		or = new StringOrListParam();
@@ -5318,7 +5340,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map.add(Patient.SP_NAME, or);
 		results = myPatientDao.search(map);
 		assertEquals(1, results.getResources(0, 10).size());
-		assertEquals(1, mySearchEntityDao.count());
+		assertEquals(1, runInTransaction(()->mySearchEntityDao.count()));
 
 	}
 

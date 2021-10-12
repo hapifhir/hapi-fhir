@@ -28,7 +28,7 @@ import org.springframework.data.repository.query.Param;
 
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 
-public interface IResourceSearchViewDao extends JpaRepository<ResourceSearchView, Long> {
+public interface IResourceSearchViewDao extends JpaRepository<ResourceSearchView, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT v FROM ResourceSearchView v WHERE v.myResourceId in (:pids)")
 	Collection<ResourceSearchView> findByResourceIds(@Param("pids") Collection<Long> pids);
