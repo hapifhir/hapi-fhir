@@ -28,7 +28,7 @@ import org.springframework.data.repository.query.Param;
  * #L%
  */
 
-public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryTable, Long> {
+public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryTable, Long>, IHapiFhirJpaRepository {
 
 
 	@Query("SELECT t FROM ResourceHistoryTable t LEFT OUTER JOIN FETCH t.myProvenance WHERE t.myResourceId = :id AND t.myResourceVersion = :version")

@@ -32,7 +32,7 @@ import java.util.Optional;
  * #L%
  */
 
-public interface ITermConceptDao extends JpaRepository<TermConcept, Long> {
+public interface ITermConceptDao extends JpaRepository<TermConcept, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT COUNT(t) FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
 	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);

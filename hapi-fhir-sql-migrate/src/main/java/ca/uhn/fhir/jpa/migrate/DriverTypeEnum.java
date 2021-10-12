@@ -94,7 +94,7 @@ public enum DriverTypeEnum {
 				retval = "mysql57.sql";
 				break;
 			case POSTGRES_9_4:
-				retval = "postgresql92.sql";
+				retval = "hapifhirpostgres94.sql";
 				break;
 			case ORACLE_12C:
 				retval = "oracle12c.sql";

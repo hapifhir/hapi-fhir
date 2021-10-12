@@ -267,6 +267,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 
 	private void validateExpandedTermConcepts(String theCurrentVersion, Collection<String> theAllVersions) {
+		runInTransaction(() -> {
 		TermConcept termConceptNoVerCsvNoVer = (TermConcept) myEntityManager.createQuery(
 			"select tc from TermConcept tc join fetch tc.myCodeSystem tcsv where tc.myCode = '" +
 				VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE + "' and tcsv.myCodeSystemVersionId is null").getSingleResult();
@@ -297,8 +298,9 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 			assertEquals(prefixWithVersion(theCurrentVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), termConceptVerCsvVer.getDisplay());
 		}
 
-
 		theAllVersions.forEach(this::validateExpandedTermConceptsForVersion);
+
+		});
 	}
 
 
@@ -474,15 +476,19 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		assertNull(vs.getVersion());
 
 		// current TermVSs with no upload version have null version
-		Optional<TermValueSet> noUploadCurrentVsOpt = myITermReadSvc.findCurrentTermValueSet(VS_NO_VERSIONED_ON_UPLOAD);
+		Optional<TermValueSet> noUploadCurrentVsOpt = getCurrentTermValueSet(VS_NO_VERSIONED_ON_UPLOAD);
 		assertTrue(noUploadCurrentVsOpt.isPresent());
 		assertNull(noUploadCurrentVsOpt.get().getVersion());
 
 		// current VSs with upload version have upload-version with no version append
-		Optional<TermValueSet> uploadCurrentVsOpt = myITermReadSvc.findCurrentTermValueSet(VS_VERSIONED_ON_UPLOAD);
+		Optional<TermValueSet> uploadCurrentVsOpt = getCurrentTermValueSet(VS_VERSIONED_ON_UPLOAD);
 		assertTrue(uploadCurrentVsOpt.isPresent());
 		assertEquals(VS_ANSWER_LIST_VERSION, uploadCurrentVsOpt.get().getVersion());
 
+	}
+
+	private Optional<TermValueSet> getCurrentTermValueSet(String theTheVsNoVersionedOnUpload) {
+		return runInTransaction(() -> myITermReadSvc.findCurrentTermValueSet(theTheVsNoVersionedOnUpload));
 	}
 
 
@@ -513,7 +519,6 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		//	tests conditions which were failing after VS expansion (before fix for issue-2995)
 		validateTermConcepts(Lists.newArrayList(ver, ver));
 	}
-
 
 
 	@Test
@@ -653,34 +658,8 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	 * Validates TermConcepts were created in the sequence indicated by the parameters
 	 * and their displays match the expected versions
 	 */
-	private void validateTermConceptsLoincAllVs(ArrayList<String> theExpectedVersions) {
-		@SuppressWarnings("unchecked")
-		List<TermConcept> termConceptNoVerList = (List<TermConcept>) myEntityManager.createQuery(
-			"from TermConcept where myCode = '" + VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE + "' order by myId").getResultList();
-		assertEquals(theExpectedVersions.size(), termConceptNoVerList.size());
-		for (int i = 0; i < theExpectedVersions.size(); i++) {
-			assertEquals( prefixWithVersion(theExpectedVersions.get(i), VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY),
-				termConceptNoVerList.get(i).getDisplay(), "TermCode with id: " + i + " display");
-		}
-
-		@SuppressWarnings("unchecked")
-		List<TermConcept> termConceptWithVerList = (List<TermConcept>) myEntityManager.createQuery(
-			"from TermConcept where myCode = '" + VS_VERSIONED_ON_UPLOAD_FIRST_CODE + "' order by myId").getResultList();
-		assertEquals(theExpectedVersions.size(), termConceptWithVerList.size());
-		for (int i = 0; i < theExpectedVersions.size(); i++) {
-			assertEquals( prefixWithVersion(theExpectedVersions.get(i), VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY),
-				termConceptWithVerList.get(i).getDisplay(), "TermCode with id: " + i + " display");
-		}
-	}
-
-
-
-
-	/**
-	 * Validates TermConcepts were created in the sequence indicated by the parameters
-	 * and their displays match the expected versions
-	 */
 	private void validateTermConcepts(ArrayList<String> theExpectedVersions) {
+		runInTransaction(() -> {
 		@SuppressWarnings("unchecked")
 		List<TermConcept> termConceptNoVerList = (List<TermConcept>) myEntityManager.createQuery(
 			"from TermConcept where myCode = '" + VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE + "' order by myId").getResultList();
@@ -698,6 +677,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 			assertEquals( prefixWithVersion(theExpectedVersions.get(i), VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY),
 				termConceptWithVerList.get(i).getDisplay(), "TermCode with id: " + i + " display");
 		}
+		});
 	}
 
 
@@ -742,8 +722,6 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	}
 
 
-
-
 	private IIdType uploadLoincCodeSystem(String theVersion, boolean theMakeItCurrent) throws Exception {
 		myFiles = new ZipCollectionBuilder();
 
@@ -784,15 +762,23 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		if (StringUtils.isBlank(theVersion))   return theClassPathPrefix;
 
 		switch(theVersion) {
-			case "2.67": return "/loinc-ver/v267/";
-			case "2.68": return "/loinc-ver/v268/";
-			case "2.69": return "/loinc-ver/v269/";
+			case "2.67":
+				return "/loinc-ver/v267/";
+			case "2.68":
+				return "/loinc-ver/v268/";
+			case "2.69":
+				return "/loinc-ver/v269/";
 		}
 
 		fail("Setup failed. Unexpected version: " + theVersion);
 		return null;
 	}
 
+	private TermCodeSystemVersion fetchCurrentCodeSystemVersion() {
+		return runInTransaction(() -> (TermCodeSystemVersion) myEntityManager.createQuery(
+			"select tcsv from TermCodeSystemVersion tcsv join fetch tcsv.myCodeSystem tcs " +
+				"where tcs.myCurrentVersion = tcsv").getSingleResult());
+	}
 
 	private static void addBaseLoincMandatoryFilesToZip(
 		ZipCollectionBuilder theFiles, Boolean theIncludeTop2000, String theClassPathPrefix) throws IOException {
@@ -818,12 +804,6 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 			theFiles.addFileZip(theClassPathPrefix, LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode());
 			theFiles.addFileZip(theClassPathPrefix, LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode());
 		}
-	}
-
-	private TermCodeSystemVersion fetchCurrentCodeSystemVersion() {
-		return (TermCodeSystemVersion) myEntityManager.createQuery(
-			"select tcsv from TermCodeSystemVersion tcsv join fetch tcsv.myCodeSystem tcs " +
-				"where tcs.myCurrentVersion = tcsv" ).getSingleResult();
 	}
 
 
