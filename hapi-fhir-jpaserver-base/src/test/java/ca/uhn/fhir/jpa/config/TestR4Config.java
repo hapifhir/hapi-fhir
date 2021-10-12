@@ -80,9 +80,9 @@ public class TestR4Config extends BaseJavaConfigR4 {
 				try {
 					retVal = new ConnectionWrapper(super.getConnection());
 				} catch (Exception e) {
-					ourLog.error("Exceeded maximum wait for connection", e);
+					ourLog.error("Exceeded maximum wait for connection (" + ourMaxThreads + " max)", e);
 					logGetConnectionStackTrace();
-					fail("Exceeded maximum wait for connection: " + e.toString());
+					fail("Exceeded maximum wait for connection (" + ourMaxThreads + " max): " + e);
 					retVal = null;
 				}
 
