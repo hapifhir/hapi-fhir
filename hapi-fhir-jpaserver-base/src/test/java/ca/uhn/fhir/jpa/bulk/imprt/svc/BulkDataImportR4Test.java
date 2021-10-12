@@ -26,7 +26,10 @@ import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +37,7 @@ import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.NoSuchJobException;
@@ -42,6 +46,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.batch.config.BatchConstants.BULK_IMPORT_JOB_NAME;
@@ -56,6 +61,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuilder {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataImportR4Test.class);
@@ -78,6 +84,49 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof MyFailAfterThreeCreatesInterceptor);
 	}
 
+	@Order(-1)
+	@Test
+	public void testFlow_ErrorDuringWrite() {
+		myInterceptorRegistry.registerInterceptor(new MyFailAfterThreeCreatesInterceptor());
+
+		int transactionsPerFile = 10;
+		int fileCount = 10;
+		List<BulkImportJobFileJson> files = createInputFiles(transactionsPerFile, fileCount);
+
+		BulkImportJobJson job = new BulkImportJobJson();
+		job.setProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
+		job.setJobDescription("This is the job description");
+		job.setBatchSize(3);
+		String jobId = mySvc.createNewJob(job, files);
+		mySvc.markJobAsReadyForActivation(jobId);
+
+		boolean activateJobOutcome = mySvc.activateNextReadyJob();
+		assertTrue(activateJobOutcome);
+
+		String[] jobNames = new String[]{BULK_IMPORT_JOB_NAME};
+		assert jobNames.length > 0;
+
+		await().until(() -> runInTransaction(() -> {
+			JobInstance jobInstance = myJobExplorer.getLastJobInstance(BULK_IMPORT_JOB_NAME);
+			JobExecution jobExecution = myJobExplorer.getLastJobExecution(jobInstance);
+			ourLog.info("Exit status: {}", jobExecution.getExitStatus());
+			return jobExecution.getExitStatus().getExitCode().equals(ExitStatus.FAILED.getExitCode());
+		}));
+
+		JobInstance jobInstance = myJobExplorer.getLastJobInstance(BULK_IMPORT_JOB_NAME);
+		JobExecution jobExecution = myJobExplorer.getLastJobExecution(jobInstance);
+		List<StepExecution> failedExecutions = jobExecution
+			.getStepExecutions()
+			.stream()
+			.filter(t -> t.getExitStatus().getExitCode().equals("FAILED"))
+			.collect(Collectors.toList());
+
+		assertEquals(2, failedExecutions.size());
+		assertThat(failedExecutions.get(1).getStepName(), containsString(":File With Description"));
+
+	}
+
+	@Order(0)
 	@Test
 	public void testFlow_TransactionRows() {
 		int transactionsPerFile = 10;
@@ -110,6 +159,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 		assertEquals(transactionsPerFile * fileCount, searchResults.sizeOrThrowNpe());
 	}
 
+	@Order(1)
 	@Test
 	public void testFlow_WithTenantNamesInInput() {
 		int transactionsPerFile = 5;
@@ -147,41 +197,6 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 		));
 	}
 
-	@Test
-	public void testFlow_ErrorDuringWrite() {
-		myInterceptorRegistry.registerInterceptor(new MyFailAfterThreeCreatesInterceptor());
-
-		int transactionsPerFile = 10;
-		int fileCount = 10;
-		List<BulkImportJobFileJson> files = createInputFiles(transactionsPerFile, fileCount);
-
-		BulkImportJobJson job = new BulkImportJobJson();
-		job.setProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
-		job.setJobDescription("This is the job description");
-		job.setBatchSize(3);
-		String jobId = mySvc.createNewJob(job, files);
-		mySvc.markJobAsReadyForActivation(jobId);
-
-		boolean activateJobOutcome = mySvc.activateNextReadyJob();
-		assertTrue(activateJobOutcome);
-
-		String[] jobNames = new String[]{BULK_IMPORT_JOB_NAME};
-		assert jobNames.length > 0;
-
-		await().until(() -> runInTransaction(() -> {
-			JobInstance jobInstance = myJobExplorer.getLastJobInstance(BULK_IMPORT_JOB_NAME);
-			JobExecution jobExecution = myJobExplorer.getLastJobExecution(jobInstance);
-			ourLog.info("Exit status: {}", jobExecution.getExitStatus());
-			return jobExecution.getExitStatus().getExitCode().equals(ExitStatus.FAILED.getExitCode());
-		}));
-
-		JobInstance jobInstance = myJobExplorer.getLastJobInstance(BULK_IMPORT_JOB_NAME);
-		JobExecution jobExecution = myJobExplorer.getLastJobExecution(jobInstance);
-		String exitDescription = jobExecution.getExitStatus().getExitDescription();
-		assertThat(exitDescription, containsString("File: File With Description"));
-
-	}
-
 	@Nonnull
 	private List<BulkImportJobFileJson> createInputFiles(int transactionsPerFile, int fileCount) {
 		List<BulkImportJobFileJson> files = new ArrayList<>();
@@ -205,6 +220,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 		return files;
 	}
 
+	@Order(3)
 	@Test
 	public void testJobsAreRegisteredWithJobRegistry() throws NoSuchJobException {
 		Job job = myJobRegistry.getJob(BULK_IMPORT_JOB_NAME);

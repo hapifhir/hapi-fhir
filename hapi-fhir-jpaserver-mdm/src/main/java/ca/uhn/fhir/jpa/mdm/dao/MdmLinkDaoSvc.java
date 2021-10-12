@@ -129,6 +129,7 @@ public class MdmLinkDaoSvc {
 	 * @param theSourcePid The Pid of the source you wish to find the matching link for.
 	 * @return the {@link MdmLink} that contains the Match information for the source.
 	 */
+	@Transactional
 	public Optional<MdmLink> getMatchedLinkForSourcePid(Long theSourcePid) {
 		MdmLink exampleLink = myMdmLinkFactory.newMdmLink();
 		exampleLink.setSourcePid(theSourcePid);
@@ -187,6 +188,7 @@ public class MdmLinkDaoSvc {
 		return myMdmLinkDao.findAll(example);
 	}
 
+	@Transactional
 	public Optional<MdmLink> findMdmLinkBySource(IBaseResource theSourceResource) {
 		@Nullable Long pid = myIdHelperService.getPidOrNull(theSourceResource);
 		if (pid == null) {
@@ -214,6 +216,7 @@ public class MdmLinkDaoSvc {
 	 * @param theGoldenResource The {@link IBaseResource} Golden Resource who's links you would like to retrieve.
 	 * @return A list of all {@link MdmLink} entities in which theGoldenResource is the source Golden Resource
 	 */
+	@Transactional
 	public List<MdmLink> findMdmLinksByGoldenResource(IBaseResource theGoldenResource) {
 		Long pid = myIdHelperService.getPidOrNull(theGoldenResource);
 		if (pid == null) {
@@ -256,6 +259,7 @@ public class MdmLinkDaoSvc {
 	 * @param theSourceResource the source resource to find links for.
 	 * @return all links for the source.
 	 */
+	@Transactional
 	public List<MdmLink> findMdmLinksBySourceResource(IBaseResource theSourceResource) {
 		Long pid = myIdHelperService.getPidOrNull(theSourceResource);
 		if (pid == null) {

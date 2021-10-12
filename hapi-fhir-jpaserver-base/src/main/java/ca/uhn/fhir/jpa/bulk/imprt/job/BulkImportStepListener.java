@@ -69,10 +69,15 @@ public class BulkImportStepListener implements StepExecutionListener, RetryListe
 				message.append("Error: ").append(nextErrorMessage).append("\n");
 			}
 
+			theStepExecution.addFailureException(new RuntimeException(message.toString()));
+
 			myBulkDataImportSvc.setJobToStatus(jobUuid, BulkImportJobStatusEnum.ERROR, message.toString());
 
+			ExitStatus exitStatus = ExitStatus.FAILED.addExitDescription(message.toString());
+			theStepExecution.setExitStatus(exitStatus);
+
 			// Replace the built-in error message with a better one
-			return ExitStatus.FAILED.addExitDescription(message.toString());
+			return exitStatus;
 		}
 
 		return theStepExecution.getExitStatus();

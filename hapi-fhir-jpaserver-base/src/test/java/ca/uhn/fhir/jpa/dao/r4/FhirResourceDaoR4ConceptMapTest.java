@@ -1212,12 +1212,12 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 	@Test
 	public void testConceptMapFindTermConceptMapByUrl() {
-
-		Pageable page = PageRequest.of(0, 1);
-		List<TermConceptMap> theExpConceptMapList = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, CM_URL);
-		assertEquals(1, theExpConceptMapList.size());
-		assertEquals(CM_URL, theExpConceptMapList.get(0).getUrl());
-
+		runInTransaction(()-> {
+			Pageable page = PageRequest.of(0, 1);
+			List<TermConceptMap> theExpConceptMapList = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, CM_URL);
+			assertEquals(1, theExpConceptMapList.size());
+			assertEquals(CM_URL, theExpConceptMapList.get(0).getUrl());
+		});
 	}
 
 	@Test
@@ -1233,24 +1233,26 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 		myConceptMapDao.create(theConceptMap1);
 		myConceptMapDao.create(theConceptMap2);
 
-		Optional<TermConceptMap> theExpConceptMapV1 = myTermConceptMapDao.findTermConceptMapByUrlAndVersion(theUrl, "v1");
-		Optional<TermConceptMap> theExpConceptMapV2 = myTermConceptMapDao.findTermConceptMapByUrlAndVersion(theUrl, "v2");
+		runInTransaction(()-> {
+			Optional<TermConceptMap> theExpConceptMapV1 = myTermConceptMapDao.findTermConceptMapByUrlAndVersion(theUrl, "v1");
+			Optional<TermConceptMap> theExpConceptMapV2 = myTermConceptMapDao.findTermConceptMapByUrlAndVersion(theUrl, "v2");
 
-		assertTrue(theExpConceptMapV1.isPresent());
-		assertEquals(theUrl, theExpConceptMapV1.get().getUrl());
-		assertEquals("v1", theExpConceptMapV1.get().getVersion());
+			assertTrue(theExpConceptMapV1.isPresent());
+			assertEquals(theUrl, theExpConceptMapV1.get().getUrl());
+			assertEquals("v1", theExpConceptMapV1.get().getVersion());
 
-		assertTrue(theExpConceptMapV2.isPresent());
-		assertEquals(theUrl, theExpConceptMapV2.get().getUrl());
-		assertEquals("v2", theExpConceptMapV2.get().getVersion());
+			assertTrue(theExpConceptMapV2.isPresent());
+			assertEquals(theUrl, theExpConceptMapV2.get().getUrl());
+			assertEquals("v2", theExpConceptMapV2.get().getVersion());
 
-		// should return the latest one which is v2
-		Pageable page = PageRequest.of(0, 1);
-		List<TermConceptMap> theExpSecondOne = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, theUrl);
+			// should return the latest one which is v2
+			Pageable page = PageRequest.of(0, 1);
+			List<TermConceptMap> theExpSecondOne = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, theUrl);
 
-		assertEquals(1, theExpSecondOne.size());
-		assertEquals(theUrl, theExpSecondOne.get(0).getUrl());
-		assertEquals("v2", theExpSecondOne.get(0).getVersion());
+			assertEquals(1, theExpSecondOne.size());
+			assertEquals(theUrl, theExpSecondOne.get(0).getUrl());
+			assertEquals("v2", theExpSecondOne.get(0).getVersion());
+		});
 	}
 
 	@Test
@@ -1266,18 +1268,20 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 		myConceptMapDao.create(theConceptMap1);
 		myConceptMapDao.create(theConceptMap2);
 
-		Optional<TermConceptMap> theExpConceptMapV1 = myTermConceptMapDao.findTermConceptMapByUrlAndVersion(theUrl, "v1");
+		runInTransaction(()-> {
+			Optional<TermConceptMap> theExpConceptMapV1 = myTermConceptMapDao.findTermConceptMapByUrlAndVersion(theUrl, "v1");
 
-		assertTrue(theExpConceptMapV1.isPresent());
-		assertEquals(theUrl, theExpConceptMapV1.get().getUrl());
-		assertEquals("v1", theExpConceptMapV1.get().getVersion());
+			assertTrue(theExpConceptMapV1.isPresent());
+			assertEquals(theUrl, theExpConceptMapV1.get().getUrl());
+			assertEquals("v1", theExpConceptMapV1.get().getVersion());
 
-		// should return the latest one which is v2
-		Pageable page = PageRequest.of(0, 1);
-		List<TermConceptMap> theExpSecondOne = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, theUrl);
+			// should return the latest one which is v2
+			Pageable page = PageRequest.of(0, 1);
+			List<TermConceptMap> theExpSecondOne = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, theUrl);
 
-		assertEquals(1, theExpSecondOne.size());
-		assertEquals(theUrl, theExpSecondOne.get(0).getUrl());
-		assertNull(theExpSecondOne.get(0).getVersion());
+			assertEquals(1, theExpSecondOne.size());
+			assertEquals(theUrl, theExpSecondOne.get(0).getUrl());
+			assertNull(theExpSecondOne.get(0).getVersion());
+		});
 	}
 }

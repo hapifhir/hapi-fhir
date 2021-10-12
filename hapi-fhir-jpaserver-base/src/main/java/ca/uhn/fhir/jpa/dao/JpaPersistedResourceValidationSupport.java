@@ -88,7 +88,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	private Class<? extends IBaseResource> myValueSetType;
 	private Class<? extends IBaseResource> myQuestionnaireType;
 	private Class<? extends IBaseResource> myImplementationGuideType;
-	private Cache<String, IBaseResource> myLoadCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
+	private Cache<String, IBaseResource> myLoadCache = Caffeine.newBuilder().maximumSize(1000).expireAfterWrite(1, TimeUnit.MINUTES).build();
 
 	/**
 	 * Constructor
@@ -104,7 +104,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
-		if (TermReadSvcUtil.isLoincNotGenericUnversionedCodeSystem(theSystem)) {
+		if (TermReadSvcUtil.isLoincUnversionedCodeSystem(theSystem)) {
 			Optional<IBaseResource> currentCSOpt = getCodeSystemCurrentVersion(new UriType(theSystem));
 			if (! currentCSOpt.isPresent()) {
 				ourLog.info("Couldn't find current version of CodeSystem: " + theSystem);
@@ -128,7 +128,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 	@Override
 	public IBaseResource fetchValueSet(String theSystem) {
-		if (TermReadSvcUtil.isLoincNotGenericUnversionedValueSet(theSystem)) {
+		if (TermReadSvcUtil.isLoincUnversionedValueSet(theSystem)) {
 			Optional<IBaseResource> currentVSOpt = getValueSetCurrentVersion(new UriType(theSystem));
 			return currentVSOpt.orElseThrow(() -> new ResourceNotFoundException(
 				"Unable to find current version of ValueSet for url: " + theSystem));
