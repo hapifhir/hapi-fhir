@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
@@ -374,6 +375,44 @@ public class SearchBuilder implements ISearchBuilder {
 		query.ifPresent(t -> theQueries.add(t));
 	}
 
+	/**
+	 * Combs through the params for any _id parameters and extracts the PIDs for them
+	 * @param theTargetPids
+	 */
+	private void extractTargetPidsFromIdParams(HashSet<Long> theTargetPids) {
+		// get all the IQueryParameterType objects
+		// for _id -> these should all be StringParam values
+		HashSet<String> ids = new HashSet<>();
+		List<List<IQueryParameterType>> params = myParams.get(IAnyResource.SP_RES_ID);
+		for (List<IQueryParameterType> paramList : params) {
+			for (IQueryParameterType param : paramList) {
+				if (param instanceof StringParam) {
+					// we expect all _id values to be StringParams
+					ids.add(((StringParam) param).getValue());
+				}
+				else {
+					// we do not expect the _id parameter to be a non-string value
+					throw new IllegalArgumentException("_id parameter must be a StringParam");
+				}
+			}
+		}
+
+		// fetch our target Pids
+		// this will throw if an id is not found
+		Map<String, ResourcePersistentId> idToPid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId,
+			myResourceName,
+			new ArrayList<>(ids));
+		if (myAlsoIncludePids == null) {
+			myAlsoIncludePids = new ArrayList<>();
+		}
+
+		// add the pids to targetPids
+		for (ResourcePersistentId pid : idToPid.values()) {
+			myAlsoIncludePids.add(pid);
+			theTargetPids.add(pid.getIdAsLong());
+		}
+	}
+
 	private Optional<SearchQueryExecutor> createChunkedQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCount, RequestDetails theRequest, List<Long> thePidList) {
 		String sqlBuilderResourceName = myParams.getEverythingMode() == null ? myResourceName : null;
 		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, sqlBuilderResourceName, mySqlBuilderFactory, myDialectProvider, theCount);
@@ -393,17 +432,10 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		if (myParams.getEverythingMode() != null) {
-			Long targetPid = null;
+			HashSet<Long> targetPids = new HashSet<>();
 			if (myParams.get(IAnyResource.SP_RES_ID) != null) {
-				StringParam idParam = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
-				ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, idParam.getValue());
-				if (myAlsoIncludePids == null) {
-					myAlsoIncludePids = new ArrayList<>(1);
-				}
-				myAlsoIncludePids.add(pid);
-				targetPid = pid.getIdAsLong();
+				extractTargetPidsFromIdParams(targetPids);
 			} else {
-
 				// For Everything queries, we make the query root by the ResourceLink table, since this query
 				// is basically a reverse-include search. For type/Everything (as opposed to instance/Everything)
 				// the one problem with this approach is that it doesn't catch Patients that have absolutely
@@ -419,10 +451,9 @@ public class SearchBuilder implements ISearchBuilder {
 				myAlsoIncludePids.addAll(ResourcePersistentId.fromLongList(output));
 
 			}
-			queryStack3.addPredicateEverythingOperation(myResourceName, targetPid);
 
+			queryStack3.addPredicateEverythingOperation(myResourceName, targetPids.toArray(new Long[0]));
 		} else {
-
 			/*
 			 * If we're doing a filter, always use the resource table as the root - This avoids the possibility of
 			 * specific filters with ORs as their root from working around the natural resource type / deletion
@@ -437,7 +468,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 			// Normal search
 			searchForIdsWithAndOr(sqlBuilder, queryStack3, myParams, theRequest);
-
 		}
 
 		// If we haven't added any predicates yet, we're doing a search for all resources. Make sure we add the
@@ -462,8 +492,9 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		//-- exclude the pids already in the previous iterator
-		if (hasNextIteratorQuery)
+		if (hasNextIteratorQuery) {
 			sqlBuilder.excludeResourceIdsPredicate(myPidSet);
+		}
 
 		/*
 		 * Sort

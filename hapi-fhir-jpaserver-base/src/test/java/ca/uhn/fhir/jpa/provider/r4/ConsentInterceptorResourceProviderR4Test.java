@@ -24,7 +24,6 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.IOUtils;
@@ -556,7 +555,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("2"))).execute();
 		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.FEMALE).addName(new HumanName().setFamily("3"))).execute();
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertEquals(3, myResourceTableDao.count());
 		});
 
@@ -568,7 +567,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		assertNull(response.getTotalElement().getValue());
 
 		StopWatch sw = new StopWatch();
-		while(true) {
+		while (true) {
 			SearchStatusEnum status = runInTransaction(() -> {
 				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException());
 				return search.getStatus();
@@ -631,7 +630,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		await()
 			.until(
-				()->mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException()).getStatus(),
+				() -> runInTransaction(() -> mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException()).getStatus()),
 				equalTo(SearchStatusEnum.FINISHED)
 			);
 

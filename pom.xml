@@ -6,10 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>5.6.0-PRE7-SNAPSHOT</version>
-	<modules>
-		<module>hapi-fhir-jpa</module>
-	</modules>
+	<version>5.6.0-PRE8-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -755,101 +752,103 @@
 		</license>
 	</licenses>
 
-	<properties>
+    <properties>
 
-		<fhir_core_version>5.4.10</fhir_core_version>
-		<ucum_version>1.0.3</ucum_version>
+        <fhir_core_version>5.4.10</fhir_core_version>
+        <ucum_version>1.0.3</ucum_version>
 
-		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
+        <surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 
-		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
-		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
+        <!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
+        <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
 
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<!-- For site-deploy -->
-		<siteMainDirectory>${user.home}/sites/hapi-fhir</siteMainDirectory>
-		<scmPubCheckoutDirectory>${user.home}/sites/scm/hapi-fhir</scmPubCheckoutDirectory>
+        <!-- For site-deploy -->
+        <siteMainDirectory>${user.home}/sites/hapi-fhir</siteMainDirectory>
+        <scmPubCheckoutDirectory>${user.home}/sites/scm/hapi-fhir</scmPubCheckoutDirectory>
 
-		<!-- Dependency Versions -->
-		<activation_api_version>1.2.0</activation_api_version>
-		<apache_karaf_version>4.2.5</apache_karaf_version>
-		<aries_spifly_version>1.2</aries_spifly_version>
-		<caffeine_version>2.9.1</caffeine_version>
-		<commons_codec_version>1.15</commons_codec_version>
-		<commons_compress_version>1.21</commons_compress_version>
-		<commons_text_version>1.9</commons_text_version>
-		<commons_io_version>2.8.0</commons_io_version>
-		<commons_lang3_version>3.12.0</commons_lang3_version>
-		<com_jamesmurty_utils_version>1.2</com_jamesmurty_utils_version>
-		<cql_version>1.5.0</cql_version>
-		<derby_version>10.14.2.0</derby_version>
-		<!--<derby_version>10.15.1.3</derby_version>-->
-		<error_prone_core_version>2.5.1</error_prone_core_version>
-		<mockito_version>3.9.0</mockito_version>
-		<nullaway_version>0.7.9</nullaway_version>
-		<guava_version>30.1.1-jre</guava_version>
-		<gson_version>2.8.6</gson_version>
-		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
-		<jaxb_api_version>2.3.1</jaxb_api_version>
-		<jaxb_core_version>2.3.0.1</jaxb_core_version>
-		<jaxb_runtime_version>3.0.0</jaxb_runtime_version>
-		<jena_version>3.17.0</jena_version>
-		<jersey_version>3.0.0</jersey_version>
-		<jetty_version>9.4.43.v20210629</jetty_version>
-		<jsr305_version>3.0.2</jsr305_version>
-		<junit_version>5.7.1</junit_version>
-		<flexmark_version>0.50.40</flexmark_version>
-		<flyway_version>6.5.4</flyway_version>
-		<hibernate_version>5.4.30.Final</hibernate_version>
-		<hibernate_search_version>6.0.3.Final</hibernate_search_version>
-		<!-- Update lucene version when you update hibernate-search version -->
-		<lucene_version>8.7.0</lucene_version>
-		<hamcrest_version>2.2</hamcrest_version>
-		<hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
-		<httpcore_version>4.4.13</httpcore_version>
-		<httpclient_version>4.5.13</httpclient_version>
-		<jackson_version>2.12.3</jackson_version>
-		<jackson_databind_version>${jackson_version}</jackson_databind_version>
-		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
-		<maven_license_plugin_version>1.8</maven_license_plugin_version>
-		<okhttp_version>3.8.1</okhttp_version>
-		<poi_version>4.1.2</poi_version>
-		<poi_ooxml_schemas_version>1.4</poi_ooxml_schemas_version>
-		<resteasy_version>4.0.0.Beta3</resteasy_version>
-		<ph_schematron_version>5.6.5</ph_schematron_version>
-		<ph_commons_version>9.5.4</ph_commons_version>
-		<plexus_compiler_api_version>2.8.8</plexus_compiler_api_version>
-		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
-		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
-		<slf4j_version>1.7.30</slf4j_version>
-		<log4j_to_slf4j_version>2.11.1</log4j_to_slf4j_version>
-		<spring_version>5.3.7</spring_version>
-		<spring_data_version>2.5.0</spring_data_version>
-		<spring_batch_version>4.3.3</spring_batch_version>
-		<spring_boot_version>2.5.0</spring_boot_version>
-		<spring_retry_version>1.2.2.RELEASE</spring_retry_version>
+        <!-- Dependency Versions -->
+        <activation_api_version>1.2.0</activation_api_version>
+        <apache_karaf_version>4.2.5</apache_karaf_version>
+        <aries_spifly_version>1.2</aries_spifly_version>
+        <caffeine_version>2.9.1</caffeine_version>
+        <commons_codec_version>1.15</commons_codec_version>
+        <commons_compress_version>1.21</commons_compress_version>
+        <commons_text_version>1.9</commons_text_version>
+        <commons_io_version>2.8.0</commons_io_version>
+        <commons_lang3_version>3.12.0</commons_lang3_version>
+        <com_jamesmurty_utils_version>1.2</com_jamesmurty_utils_version>
+        <cql_version>1.5.0</cql_version>
+        <derby_version>10.14.2.0</derby_version>
+        <!--<derby_version>10.15.1.3</derby_version>-->
+        <error_prone_core_version>2.5.1</error_prone_core_version>
+        <mockito_version>3.9.0</mockito_version>
+        <nullaway_version>0.7.9</nullaway_version>
+        <guava_version>30.1.1-jre</guava_version>
+        <gson_version>2.8.6</gson_version>
+        <jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
+        <jaxb_api_version>2.3.1</jaxb_api_version>
+        <jaxb_core_version>2.3.0.1</jaxb_core_version>
+        <jaxb_runtime_version>3.0.0</jaxb_runtime_version>
+        <jena_version>3.17.0</jena_version>
+        <jersey_version>3.0.0</jersey_version>
+        <jetty_version>9.4.43.v20210629</jetty_version>
+        <jsr305_version>3.0.2</jsr305_version>
+        <junit_version>5.7.1</junit_version>
+        <flexmark_version>0.50.40</flexmark_version>
+        <flyway_version>6.5.4</flyway_version>
+        <hibernate_version>5.4.30.Final</hibernate_version>
+        <hibernate_search_version>6.0.3.Final</hibernate_search_version>
+        <!-- Update lucene version when you update hibernate-search version -->
+        <lucene_version>8.7.0</lucene_version>
+        <hamcrest_version>2.2</hamcrest_version>
+        <hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
+        <httpcore_version>4.4.13</httpcore_version>
+        <httpclient_version>4.5.13</httpclient_version>
+        <jackson_version>2.12.3</jackson_version>
+        <jackson_databind_version>${jackson_version}</jackson_databind_version>
+        <maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
+        <maven_license_plugin_version>1.8</maven_license_plugin_version>
+        <okhttp_version>3.8.1</okhttp_version>
+        <poi_version>4.1.2</poi_version>
+        <poi_ooxml_schemas_version>1.4</poi_ooxml_schemas_version>
+        <resteasy_version>4.0.0.Beta3</resteasy_version>
+        <ph_schematron_version>5.6.5</ph_schematron_version>
+        <ph_commons_version>9.5.4</ph_commons_version>
+        <plexus_compiler_api_version>2.8.8</plexus_compiler_api_version>
+        <servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
+        <servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
+        <slf4j_version>1.7.30</slf4j_version>
+        <log4j_to_slf4j_version>2.11.1</log4j_to_slf4j_version>
+        <spring_version>5.3.7</spring_version>
+        <spring_data_version>2.5.0</spring_data_version>
+        <spring_batch_version>4.3.3</spring_batch_version>
+        <spring_boot_version>2.5.0</spring_boot_version>
+        <spring_retry_version>1.2.2.RELEASE</spring_retry_version>
 
-		<stax2_api_version>3.1.4</stax2_api_version>
-		<testcontainers_version>1.15.3</testcontainers_version>
-		<thymeleaf-version>3.0.12.RELEASE</thymeleaf-version>
-		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
+        <stax2_api_version>3.1.4</stax2_api_version>
+        <testcontainers_version>1.15.3</testcontainers_version>
+        <thymeleaf-version>3.0.12.RELEASE</thymeleaf-version>
+        <woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 
-		<!-- We are aiming to still work on a very old version of SLF4j even though we depend on the newest, just to be nice to users of the API. This version is tested in the hapi-fhir-cobertura. -->
-		<slf4j_target_version>1.6.0</slf4j_target_version>
+        <!-- We are aiming to still work on a very old version of SLF4j even though we depend on the newest, just to be nice to users of the API. This version is tested in the hapi-fhir-cobertura. -->
+        <slf4j_target_version>1.6.0</slf4j_target_version>
 
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 
-		<elastic_apm_version>1.13.0</elastic_apm_version>
-		<!-- CQL Support -->
-		<cql-engine.version>1.5.1</cql-engine.version>
-		<cql-evaluator.version>1.2.0</cql-evaluator.version>
-		<cqframework.version>1.5.2</cqframework.version>
+        <elastic_apm_version>1.13.0</elastic_apm_version>
+        <!-- CQL Support -->
+        <cql-engine.version>1.5.1</cql-engine.version>
+        <cql-evaluator.version>1.2.0</cql-evaluator.version>
+        <cqframework.version>1.5.2</cqframework.version>
 
-		<!-- Site properties -->
-		<fontawesomeVersion>5.4.1</fontawesomeVersion>
-	</properties>
+        <!-- Site properties -->
+        <fontawesomeVersion>5.4.1</fontawesomeVersion>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
 
 	<dependencyManagement>
 		<dependencies>
@@ -1698,7 +1697,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.2.20</version>
+				<version>42.2.24</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
@@ -2769,6 +2768,7 @@
 				<module>hapi-fhir-validation-resources-r4</module>
 				<module>hapi-fhir-structures-r5</module>
 				<module>hapi-fhir-validation-resources-r5</module>
+				<module>hapi-fhir-jpa</module>
 				<module>hapi-fhir-storage</module>
 				<module>hapi-fhir-jpaserver-cql</module>
 				<module>hapi-fhir-jpaserver-model</module>

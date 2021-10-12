@@ -66,23 +66,27 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PersistObservationIndexedSearchParamLastNR4IT {
 
-	@Autowired
-	private ElasticsearchSvcImpl elasticsearchSvc;
-
-	@Autowired
-	private IFhirSystemDao<Bundle, Meta> myDao;
-
+	private final String SINGLE_SUBJECT_ID = "4567";
+	private final String SINGLE_OBSERVATION_PID = "123";
+	private final Date SINGLE_EFFECTIVEDTM = new Date();
+	private final String SINGLE_OBSERVATION_CODE_TEXT = "Test Codeable Concept Field for Code";
+	private final String CATEGORYFIRSTCODINGSYSTEM = "http://mycodes.org/fhir/observation-category";
+	private final String FIRSTCATEGORYFIRSTCODINGCODE = "test-heart-rate";
+	private final String CODEFIRSTCODINGSYSTEM = "http://mycodes.org/fhir/observation-code";
+	private final String CODEFIRSTCODINGCODE = "test-code";
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
-
-	@Autowired
-	ObservationLastNIndexPersistSvc testObservationPersist;
-
 	@Autowired
 	protected FhirContext myFhirCtx;
-
+	@Autowired
+	ObservationLastNIndexPersistSvc testObservationPersist;
+	@Autowired
+	private ElasticsearchSvcImpl elasticsearchSvc;
+	@Autowired
+	private IFhirSystemDao<Bundle, Meta> myDao;
 	@Autowired
 	private DaoConfig myDaoConfig;
+	private ReferenceAndListParam multiSubjectParams = null;
 
 	@BeforeEach
 	public void before() throws IOException {
@@ -99,20 +103,6 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 	public void afterDisableLastN() {
 		myDaoConfig.setLastNEnabled(new DaoConfig().isLastNEnabled());
 	}
-
-
-	private final String SINGLE_SUBJECT_ID = "4567";
-	private final String SINGLE_OBSERVATION_PID = "123";
-	private final Date SINGLE_EFFECTIVEDTM = new Date();
-	private final String SINGLE_OBSERVATION_CODE_TEXT = "Test Codeable Concept Field for Code";
-
-	private final String CATEGORYFIRSTCODINGSYSTEM = "http://mycodes.org/fhir/observation-category";
-	private final String FIRSTCATEGORYFIRSTCODINGCODE = "test-heart-rate";
-
-	private final String CODEFIRSTCODINGSYSTEM = "http://mycodes.org/fhir/observation-code";
-	private final String CODEFIRSTCODINGCODE = "test-code";
-
-	private ReferenceAndListParam multiSubjectParams = null;
 
 	@Order(3)
 	@Test
@@ -467,7 +457,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 		// execute Observation ID search - Composite Aggregation
 		searchParameterMap.setLastNMax(1);
-		List<String>  observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap,myFhirCtx, 200);
+		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, myFhirCtx, 200);
 
 		assertEquals(20, observationIdsOnly.size());
 

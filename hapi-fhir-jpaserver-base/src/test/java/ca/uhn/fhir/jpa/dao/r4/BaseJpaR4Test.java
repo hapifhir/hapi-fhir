@@ -463,7 +463,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
 	@Autowired
-	@Qualifier("myJpaValidationSupportChain")
 	protected IValidationSupport myValidationSupport;
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
@@ -558,7 +557,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@AfterEach
 	public void afterPurgeDatabase() {
-		myMdmLinkDao.deleteAll();
+		runInTransaction(()->{
+			myMdmLinkDao.deleteAll();
+		});
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
 	}
 

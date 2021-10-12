@@ -3,6 +3,7 @@ package ca.uhn.fhirtest.config;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
@@ -148,7 +149,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		if (CommonConfig.isLocalTestMode()) {
 			extraProperties.put("hibernate.dialect", DerbyTenSevenHapiFhirDialect.class.getName());
 		} else {
-			extraProperties.put("hibernate.dialect", PostgreSQL94Dialect.class.getName());
+			extraProperties.put("hibernate.dialect", HapiFhirPostgres94Dialect.class.getName());
 		}
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");

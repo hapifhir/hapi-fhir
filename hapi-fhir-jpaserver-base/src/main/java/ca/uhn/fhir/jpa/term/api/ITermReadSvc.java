@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.IValueSetConceptAccumulator;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -19,6 +20,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -102,6 +104,7 @@ public interface ITermReadSvc extends IValidationSupport {
 	/**
 	 * Version independent
 	 */
+	@Transactional()
 	CodeValidationResult validateCodeIsInPreExpandedValueSet(ConceptValidationOptions theOptions, IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept);
 
 	boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet);
@@ -115,6 +118,8 @@ public interface ITermReadSvc extends IValidationSupport {
 	 * Version independent
 	 */
 	CodeValidationResult codeSystemValidateCode(IIdType theCodeSystemId, String theValueSetUrl, String theVersion, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept);
+
+	String invalidatePreCalculatedExpansion(IIdType theValueSetId, RequestDetails theRequestDetails);
 
 	/**
 	 * Version independent

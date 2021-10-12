@@ -125,51 +125,51 @@ class ITermReadSvcTest {
 
 
 	@Nested
-	public class IsLoincNotGenericUnversionedCodeSystem {
+	public class IsLoincUnversionedCodeSystem {
 
 		@Test
 		void doesntContainLoincReturnsFalse() {
-			boolean ret = TermReadSvcUtil.isLoincNotGenericUnversionedCodeSystem("http://boing.org");
+			boolean ret = TermReadSvcUtil.isLoincUnversionedCodeSystem("http://boing.org");
 			assertFalse(ret);
 		}
 
 		@Test
 		void hasVersionReturnsFalse() {
-			boolean ret = TermReadSvcUtil.isLoincNotGenericUnversionedCodeSystem("http://boing.org|v2.68");
+			boolean ret = TermReadSvcUtil.isLoincUnversionedCodeSystem("http://boing.org|v2.68");
 			assertFalse(ret);
 		}
 
 		@Test
 		void containsLoincAndNoVersionReturnsTrue() {
-			boolean ret = TermReadSvcUtil.isLoincNotGenericUnversionedCodeSystem("http://anything-plus-loinc.org");
+			boolean ret = TermReadSvcUtil.isLoincUnversionedCodeSystem("http://anything-plus-loinc.org");
 			assertTrue(ret);
 		}
 	}
 
 	@Nested
-	public class IsLoincNotGenericUnversionedValueSet {
+	public class IsLoincUnversionedValueSet {
 
 		@Test
 		void notLoincReturnsFalse() {
-			boolean ret = TermReadSvcUtil.isLoincNotGenericUnversionedValueSet("http://anything-but-loin-c.org");
+			boolean ret = TermReadSvcUtil.isLoincUnversionedValueSet("http://anything-but-loin-c.org");
 			assertFalse(ret);
 		}
 
 		@Test
 		void isLoincAndHasVersionReturnsFalse() {
-			boolean ret = TermReadSvcUtil.isLoincNotGenericUnversionedValueSet("http://loinc.org|v2.67");
+			boolean ret = TermReadSvcUtil.isLoincUnversionedValueSet("http://loinc.org|v2.67");
 			assertFalse(ret);
 		}
 
 		@Test
-		void isLoincNoVersionButEqualsGenericValueSetUrlReturnsFalse() {
-			boolean ret = TermReadSvcUtil.isLoincNotGenericUnversionedValueSet("http://loinc.org/vs");
-			assertFalse(ret);
+		void isLoincNoVersionButEqualsLoincAllReturnsTrue() {
+			boolean ret = TermReadSvcUtil.isLoincUnversionedValueSet("http://loinc.org/vs");
+			assertTrue(ret);
 		}
 
 		@Test
 		void isLoincNoVersionStartsWithGenericValueSetPlusSlashPlusIdReturnsTrue() {
-			boolean ret = TermReadSvcUtil.isLoincNotGenericUnversionedValueSet("http://loinc.org/vs/vs-id");
+			boolean ret = TermReadSvcUtil.isLoincUnversionedValueSet("http://loinc.org/vs/vs-id");
 			assertTrue(ret);
 		}
 
