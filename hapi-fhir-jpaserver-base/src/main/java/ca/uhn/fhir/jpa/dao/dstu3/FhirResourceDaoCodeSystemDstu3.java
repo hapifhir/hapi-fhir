@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
@@ -54,6 +55,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import static ca.uhn.fhir.jpa.dao.FhirResourceDaoValueSetDstu2.toStringOrNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Transactional
@@ -172,7 +174,9 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 	@Override
 	public CodeValidationResult validateCode(IIdType theCodeSystemId, IPrimitiveType<String> theCodeSystemUrl, IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode,
 														  IPrimitiveType<String> theDisplay, Coding theCoding, CodeableConcept theCodeableConcept, RequestDetails theRequestDetails) {
-		throw new UnsupportedOperationException();
+		return myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport),
+			new ConceptValidationOptions().setValidateDisplay(true).setInferSystem(true), toStringOrNull(theCodeSystemUrl),
+			toStringOrNull(theCode), toStringOrNull(theDisplay), null);
 	}
 
 }

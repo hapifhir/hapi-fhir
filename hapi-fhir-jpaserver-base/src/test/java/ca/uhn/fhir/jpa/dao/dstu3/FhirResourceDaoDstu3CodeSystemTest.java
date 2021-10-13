@@ -1,27 +1,34 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
+
 	@AfterAll
 	public static void afterClassClearContext() {
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 
-	
 	@Test
 	public void testIndexContained() throws Exception {
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(true);
@@ -30,13 +37,11 @@ public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
 		CodeSystem cs = myFhirCtx.newJsonParser().parseResource(CodeSystem.class, input);
 		myCodeSystemDao.create(cs, mySrd);
 
-
 		myResourceReindexingSvc.markAllResourcesForReindexing();
 		int outcome= myResourceReindexingSvc.forceReindexingPass();
 		assertNotEquals(-1, outcome); // -1 means there was a failure
 		
 		myTerminologyDeferredStorageSvc.saveDeferred();
-		
 	}
 
 	@Test
@@ -89,20 +94,46 @@ public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
 		runInTransaction(()->{
 			assertEquals(0L, myConceptDao.count());
 		});
-
 	}
 
 	@Test
-	public void testValidateCodeForCodeSystemOperationNotSupported() {
-		try {
-			myCodeSystemDao.validateCode(null, null, null, null, null, null, null, null);
-			fail();
-		} catch (UnsupportedOperationException theE) {
-			assertNotNull(theE);
-		}
+	public void testCallValidateCodeReturnsNonNull() {
+		// Create the code system
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.addConcept().setCode("A");
+		IIdType id = myCodeSystemDao.create(cs, mySrd).getId().toUnqualifiedVersionless();
+		runInTransaction(()->{
+			assertEquals(1, myConceptDao.count());
+		});
 
+		// Validate a Code 
+		IValidationSupport.CodeValidationResult result =
+			myCodeSystemDao.validateCode(id, new StringDt("http://foo"), null, new CodeDt("A"), null, null, null, null);
+		assertNotNull(result);
 	}
 
+	@Test
+	public void testValidateCodeForNullCodeAndCodeSystem_ThrowsException() {
+		Assertions.assertThrows(Exception.class, () -> {
+			myCodeSystemDao.validateCode(null, null, null, null, null, null, null, null);
+		});
+	}
 
+	@Test
+	public void testValidateCodeForNullCode_ThrowsException() {
+		Assertions.assertThrows(Exception.class, () -> {
+			myCodeSystemDao.validateCode(null, new StringDt("http://foo.com/CodeSystem/1"), null, null, null, null, null, null);
+		});
+	}
+
+	@Test
+	public void testValidateCodeForNullCodeSystem_ThrowsException() {
+		Assertions.assertThrows(Exception.class, () -> {
+			myCodeSystemDao.validateCode(new IdDt("CodeSystem/1"), null, null, null, null, null, null, null);
+		});
+	}
 
 }

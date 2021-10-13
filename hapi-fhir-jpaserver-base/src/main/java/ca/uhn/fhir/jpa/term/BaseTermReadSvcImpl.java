@@ -1609,6 +1609,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	@Nullable
 	private TermCodeSystemVersion getCurrentCodeSystemVersion(String theCodeSystemIdentifier) {
+		if (theCodeSystemIdentifier == null) {
+			return null;
+		}
 		String version = getVersionFromIdentifier(theCodeSystemIdentifier);
 		TermCodeSystemVersion retVal = myCodeSystemCurrentVersionCache.get(theCodeSystemIdentifier, t -> myTxTemplate.execute(tx -> {
 			TermCodeSystemVersion csv = null;
@@ -2086,9 +2089,18 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			return validateCodeInValueSet(theValidationSupportContext, theOptions, theValueSetUrl, theCodeSystem, theCode, theDisplay);
 		}
 
+		if (isEmpty(theCode)) {
+			throw new IllegalArgumentException("theCode must be provided");
+		}
+		if (isEmpty(theCodeSystem)) {
+			throw new IllegalArgumentException("theCodeSystem must be provided");
+		}
+
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		Optional<FhirVersionIndependentConcept> codeOpt = txTemplate.execute(t -> findCode(theCodeSystem, theCode).map(c -> new FhirVersionIndependentConcept(theCodeSystem, c.getCode())));
+		Optional<FhirVersionIndependentConcept> codeOpt = txTemplate.execute(
+			t -> findCode(theCodeSystem, theCode).filter(Objects::nonNull).map(
+				c -> new FhirVersionIndependentConcept(theCodeSystem, c.getCode())));
 
 		if (codeOpt != null && codeOpt.isPresent()) {
 			FhirVersionIndependentConcept code = codeOpt.get();

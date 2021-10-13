@@ -3,6 +3,7 @@ package org.hl7.fhir.common.hapi.validation.support;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -22,9 +23,11 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.Mock;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -33,6 +36,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class RemoteTerminologyServiceValidationSupportTest {
 
@@ -45,6 +49,9 @@ public class RemoteTerminologyServiceValidationSupportTest {
 
 	@RegisterExtension
 	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx);
+
+	@Mock
+	ValidationSupportContext myValidationSupportContext;
 
 	private MyValueSetProvider myValueSetProvider;
 	private RemoteTerminologyServiceValidationSupport mySvc;
@@ -196,6 +203,14 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		boolean outcome = mySvc.isCodeSystemSupported(null, "http://loinc.org");
 		assertEquals(true, outcome);
 		assertEquals("http://loinc.org", myCodeSystemProvider.myLastUrlParam.getValue());
+	}
+
+	@Test
+	public void testLookupCode_BlankCode_ThrowsException() {
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(myValidationSupportContext, CODE_SYSTEM,
+				"", null);
+		});
 	}
 
 	private void createNextCodeSystemReturnParameters(boolean theResult, String theDisplay, String theMessage) {

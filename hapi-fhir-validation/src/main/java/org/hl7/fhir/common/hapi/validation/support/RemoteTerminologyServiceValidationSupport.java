@@ -10,12 +10,11 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.dstu3.model.Property;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r5.model.DataType;
 import org.thymeleaf.util.StringUtils;
 
 import javax.annotation.Nonnull;
@@ -109,17 +108,10 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 					.onType(org.hl7.fhir.dstu3.model.CodeSystem.class)
 					.named("$lookup")
 					.withParameters(paramsDSTU3)
+					.useHttpGet()
 					.execute();
 				if (outcomeDSTU3 != null && !outcomeDSTU3.isEmpty()) {
-					LookupCodeResult result = new LookupCodeResult();
-					result.setSearchedForCode(theCode);
-					result.setSearchedForSystem(theSystem);
-					result.setFound(true);
-					org.hl7.fhir.dstu3.model.Property display = outcomeDSTU3.getNamedProperty("display");
-					if (display != null && !StringUtils.isEmpty(display.toString())) {
-						result.setCodeDisplay(display.toString());
-					}
-					return result;
+					return generateLookupCodeResultDSTU3(theCode, theSystem, outcomeDSTU3);
 				}
 				break;
 			case R4:
@@ -136,52 +128,136 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 					.onType(CodeSystem.class)
 					.named("$lookup")
 					.withParameters(paramsR4)
+					.useHttpGet()
 					.execute();
 				if (outcomeR4 != null && !outcomeR4.isEmpty()) {
-					LookupCodeResult result = new LookupCodeResult();
-					result.setSearchedForCode(theCode);
-					result.setSearchedForSystem(theSystem);
-					result.setFound(true);
-					org.hl7.fhir.r4.model.Type display = outcomeR4.getParameter("display");
-					if (display != null && !StringUtils.isEmpty(display.toString())) {
-						result.setCodeDisplay(display.toString());
-					}
-					return result;
-				}
-				break;
-			case R5:
-				org.hl7.fhir.r5.model.Parameters paramsR5 = new org.hl7.fhir.r5.model.Parameters();
-				paramsR5.addParameter().setName("code").setValue(new org.hl7.fhir.r5.model.StringType(theCode));
-				if (!StringUtils.isEmpty(theSystem)) {
-					paramsR5.addParameter().setName("system").setValue(new org.hl7.fhir.r5.model.UriType(theSystem));
-				}
-				if (!StringUtils.isEmpty(theDisplayLanguage)) {
-					paramsR5.addParameter().setName("language").setValue(new org.hl7.fhir.r5.model.StringType(theDisplayLanguage));
-				}
-				org.hl7.fhir.r5.model.Parameters outcomeR5 = client
-					.operation()
-					.onType(CodeSystem.class)
-					.named("$lookup")
-					.withParameters(paramsR5)
-					.execute();
-				if (outcomeR5 != null && !outcomeR5.isEmpty()) {
-					LookupCodeResult result = new LookupCodeResult();
-					result.setSearchedForCode(theCode);
-					result.setSearchedForSystem(theSystem);
-					result.setFound(true);
-					DataType display = outcomeR5.getParameter("display");
-					if (display != null && !StringUtils.isEmpty(display.toString())) {
-						result.setCodeDisplay(display.toString());
-					}
-					return result;
+					return generateLookupCodeResultR4(theCode, theSystem, outcomeR4);
 				}
 				break;
 			default:
 				throw new UnsupportedOperationException("Unsupported FHIR version '" + fhirVersion.getFhirVersionString() +
-					"'. Only DSTU3, R4 and R5 are supported.");
+					"'. Only DSTU3 and R4 are supported.");
 		}
 
 		return null;
+	}
+
+	private LookupCodeResult generateLookupCodeResultDSTU3(String theCode, String theSystem, org.hl7.fhir.dstu3.model.Parameters outcomeDSTU3) {
+		// NOTE: I wanted to put all of this logic into the IValidationSupport Class, but it would've required adding
+		//       several new dependencies on version-specific libraries and that is explicitly forbidden (see comment in POM).
+		LookupCodeResult result = new LookupCodeResult();
+		result.setSearchedForCode(theCode);
+		result.setSearchedForSystem(theSystem);
+		result.setFound(true);
+		for (org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent parameterComponent : outcomeDSTU3.getParameter()) {
+			switch (parameterComponent.getName()) {
+				case "property":
+					org.hl7.fhir.dstu3.model.Property part = parameterComponent.getChildByName("part");
+					// The assumption here is that we may only have 2 elements in this part, and if so, these 2 will be saved
+					if (part != null && part.hasValues() && part.getValues().size() >= 2) {
+						String key = ((org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) part.getValues().get(0)).getValue().toString();
+						String value = ((org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) part.getValues().get(1)).getValue().toString();
+						if (!StringUtils.isEmpty(key) && !StringUtils.isEmpty(value)) {
+							result.getProperties().add(new StringConceptProperty(key, value));
+						}
+					}
+					break;
+				case "designation":
+					ConceptDesignation conceptDesignation = new ConceptDesignation();
+					for (org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent designationComponent : parameterComponent.getPart()) {
+						switch(designationComponent.getName()) {
+							case "language":
+								conceptDesignation.setLanguage(designationComponent.getValue().toString());
+								break;
+							case "use":
+								org.hl7.fhir.dstu3.model.Coding coding = (org.hl7.fhir.dstu3.model.Coding)designationComponent.getValue();
+								if (coding != null) {
+									conceptDesignation.setUseSystem(coding.getSystem());
+									conceptDesignation.setUseCode(coding.getCode());
+									conceptDesignation.setUseDisplay(coding.getDisplay());
+								}
+								break;
+							case "value":
+								conceptDesignation.setValue(((designationComponent.getValue() == null)?null:designationComponent.getValue().toString()));
+								break;
+						}
+					}
+					result.getDesignations().add(conceptDesignation);
+					break;
+				case "name":
+					result.setCodeSystemDisplayName(((parameterComponent.getValue() == null)?null:parameterComponent.getValue().toString()));
+					break;
+				case "version":
+					result.setCodeSystemVersion(((parameterComponent.getValue() == null)?null:parameterComponent.getValue().toString()));
+					break;
+				case "display":
+					result.setCodeDisplay(((parameterComponent.getValue() == null)?null:parameterComponent.getValue().toString()));
+					break;
+				case "abstract":
+					result.setCodeIsAbstract(((parameterComponent.getValue() == null)?false:Boolean.parseBoolean(parameterComponent.getValue().toString())));
+					break;
+			}
+		}
+		return result;
+	}
+
+	private LookupCodeResult generateLookupCodeResultR4(String theCode, String theSystem, org.hl7.fhir.r4.model.Parameters outcomeR4) {
+		// NOTE: I wanted to put all of this logic into the IValidationSupport Class, but it would've required adding
+		//       several new dependencies on version-specific libraries and that is explicitly forbidden (see comment in POM).
+		LookupCodeResult result = new LookupCodeResult();
+		result.setSearchedForCode(theCode);
+		result.setSearchedForSystem(theSystem);
+		result.setFound(true);
+		for (org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent parameterComponent : outcomeR4.getParameter()) {
+			switch (parameterComponent.getName()) {
+				case "property":
+					org.hl7.fhir.r4.model.Property part = parameterComponent.getChildByName("part");
+					// The assumption here is that we may only have 2 elements in this part, and if so, these 2 will be saved
+					if (part != null && part.hasValues() && part.getValues().size() >= 2) {
+						String key = ((org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent) part.getValues().get(0)).getValue().toString();
+						String value = ((org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent) part.getValues().get(1)).getValue().toString();
+						if (!StringUtils.isEmpty(key) && !StringUtils.isEmpty(value)) {
+							result.getProperties().add(new StringConceptProperty(key, value));
+						}
+					}
+					break;
+				case "designation":
+					ConceptDesignation conceptDesignation = new ConceptDesignation();
+					for (org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent designationComponent : parameterComponent.getPart()) {
+						switch(designationComponent.getName()) {
+							case "language":
+								conceptDesignation.setLanguage(designationComponent.getValue().toString());
+								break;
+							case "use":
+								org.hl7.fhir.r4.model.Coding coding = (org.hl7.fhir.r4.model.Coding)designationComponent.getValue();
+								if (coding != null) {
+									conceptDesignation.setUseSystem(coding.getSystem());
+									conceptDesignation.setUseCode(coding.getCode());
+									conceptDesignation.setUseDisplay(coding.getDisplay());
+								}
+								break;
+							case "value":
+								conceptDesignation.setValue(((designationComponent.getValue() == null)?null:designationComponent.getValue().toString()));
+								break;
+						}
+					}
+					result.getDesignations().add(conceptDesignation);
+					break;
+				case "name":
+					result.setCodeSystemDisplayName(((parameterComponent.getValue() == null)?null:parameterComponent.getValue().toString()));
+					break;
+				case "version":
+					result.setCodeSystemVersion(((parameterComponent.getValue() == null)?null:parameterComponent.getValue().toString()));
+					break;
+				case "display":
+					result.setCodeDisplay(((parameterComponent.getValue() == null)?null:parameterComponent.getValue().toString()));
+					break;
+				case "abstract":
+					result.setCodeIsAbstract(((parameterComponent.getValue() == null)?false:Boolean.parseBoolean(parameterComponent.getValue().toString())));
+					break;
+			}
+		}
+		return result;
 	}
 
 	@Override

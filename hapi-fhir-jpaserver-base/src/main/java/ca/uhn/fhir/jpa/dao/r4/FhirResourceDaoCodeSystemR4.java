@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.r4;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
@@ -173,10 +174,10 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 			IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode, IPrimitiveType<String> theDisplay,
 			Coding theCoding, CodeableConcept theCodeableConcept, RequestDetails theRequestDetails) {
 
-		return myTerminologySvc.codeSystemValidateCode(theCodeSystemId, toStringOrNull(theCodeSystemUrl), toStringOrNull(theVersion), toStringOrNull(theCode), toStringOrNull(theDisplay), theCoding, theCodeableConcept);
-
+		return myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport),
+			new ConceptValidationOptions().setValidateDisplay(true).setInferSystem(true), toStringOrNull(theCodeSystemUrl),
+			toStringOrNull(theCode), toStringOrNull(theDisplay), null);
 	}
-
 
 	@Override
 	public DaoMethodOutcome create(CodeSystem theResource, String theIfNoneExist, boolean thePerformIndexing,
