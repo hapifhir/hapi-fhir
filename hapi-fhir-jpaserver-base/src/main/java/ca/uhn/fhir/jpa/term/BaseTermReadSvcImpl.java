@@ -1443,6 +1443,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 
 	@Override
+	@Transactional
 	public boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet) {
 		Optional<TermValueSet> optionalTermValueSet = fetchValueSetEntity(theValueSet);
 
@@ -1471,6 +1472,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	protected IValidationSupport.CodeValidationResult validateCodeIsInPreExpandedValueSet(
 		ConceptValidationOptions theValidationOptions,
 		ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Coding theCoding, CodeableConcept theCodeableConcept) {
+		assert TransactionSynchronizationManager.isSynchronizationActive();
 
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet.hasId(), "ValueSet.id is required");
 		ResourcePersistentId valueSetResourcePid = myConceptStorageSvc.getValueSetResourcePid(theValueSet.getIdElement());
@@ -1538,6 +1540,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(ResourcePersistentId theResourcePid, String theSystem, String theCode) {
+		assert TransactionSynchronizationManager.isSynchronizationActive();
+
 		List<TermValueSetConcept> retVal = new ArrayList<>();
 		Optional<TermValueSetConcept> optionalTermValueSetConcept;
 		int versionIndex = theSystem.indexOf("|");
@@ -1803,6 +1807,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Override
+	@Transactional
 	public CodeValidationResult validateCode(ConceptValidationOptions theOptions, IIdType theValueSetId, String theValueSetIdentifier, String theCodeSystemIdentifierToValidate, String theCodeToValidate, String theDisplayToValidate, IBaseDatatype theCodingToValidate, IBaseDatatype theCodeableConceptToValidate) {
 
 		CodeableConcept codeableConcept = toCanonicalCodeableConcept(theCodeableConceptToValidate);

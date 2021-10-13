@@ -29,7 +29,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface ITermValueSetConceptDao extends JpaRepository<TermValueSetConcept, Long> {
+public interface ITermValueSetConceptDao extends JpaRepository<TermValueSetConcept, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT COUNT(*) FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid")
 	Integer countByTermValueSetId(@Param("pid") Long theValueSetId);

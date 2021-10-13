@@ -203,7 +203,7 @@ import java.util.Date;
 
 
 @Configuration
-@EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
+@EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data", enableDefaultTransactions=true)
 @Import({
 		  SearchParamConfig.class, BatchJobsConfig.class
 })

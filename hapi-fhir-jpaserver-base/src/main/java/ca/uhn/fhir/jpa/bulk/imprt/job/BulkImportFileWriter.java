@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 
@@ -51,6 +52,7 @@ public class BulkImportFileWriter implements ItemWriter<ParsedBulkImportRecord> 
 	@SuppressWarnings({"SwitchStatementWithTooFewBranches", "rawtypes", "unchecked"})
 	@Override
 	public void write(List<? extends ParsedBulkImportRecord> theItemLists) throws Exception {
+		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		String offsets = "unknown";
 		if (theItemLists.size() > 0) {

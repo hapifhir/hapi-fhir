@@ -29,7 +29,7 @@ import java.util.Optional;
  * #L%
  */
 
-public interface IBulkImportJobFileDao extends JpaRepository<BulkImportJobFileEntity, Long> {
+public interface IBulkImportJobFileDao extends JpaRepository<BulkImportJobFileEntity, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT f FROM BulkImportJobFileEntity f WHERE f.myJob.myJobId = :jobId ORDER BY f.myFileSequence ASC")
 	List<BulkImportJobFileEntity> findAllForJob(@Param("jobId") String theJobId);

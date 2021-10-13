@@ -33,7 +33,7 @@ import java.util.Date;
 import java.util.List;
 
 @Repository
-public interface IMdmLinkDao extends JpaRepository<MdmLink, Long> {
+public interface IMdmLinkDao extends JpaRepository<MdmLink, Long>, IHapiFhirJpaRepository {
 	@Modifying
 	@Query("DELETE FROM MdmLink f WHERE myGoldenResourcePid = :pid OR mySourcePid = :pid")
 	int deleteWithAnyReferenceToPid(@Param("pid") Long thePid);

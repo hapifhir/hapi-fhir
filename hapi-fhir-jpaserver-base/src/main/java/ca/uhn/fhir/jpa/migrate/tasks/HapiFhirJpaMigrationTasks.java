@@ -132,6 +132,22 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addColumn("20210915.1", "EXPANDED_AT")
 			.nullable()
 			.type(ColumnTypeEnum.DATE_TIMESTAMP);
+        
+		/*
+		 * Replace CLOB columns with BLOB columns
+		 */
+
+		// TRM_VALUESET_CONCEPT.SOURCE_DIRECT_PARENT_PIDS
+		version.onTable("TRM_VALUESET_CONCEPT")
+			.migratePostgresTextClobToBinaryClob("20211003.1", "SOURCE_DIRECT_PARENT_PIDS");
+
+		// TRM_CONCEPT.PARENT_PIDS
+		version.onTable("TRM_CONCEPT")
+			.migratePostgresTextClobToBinaryClob("20211003.2", "PARENT_PIDS");
+
+		// HFJ_SEARCH.SEARCH_QUERY_STRING
+		version.onTable("HFJ_SEARCH")
+			.migratePostgresTextClobToBinaryClob("20211003.3", "SEARCH_QUERY_STRING");
 	}
 
 	private void init540() {
