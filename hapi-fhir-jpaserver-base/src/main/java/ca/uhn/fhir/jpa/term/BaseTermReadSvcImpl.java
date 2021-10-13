@@ -2089,11 +2089,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			return validateCodeInValueSet(theValidationSupportContext, theOptions, theValueSetUrl, theCodeSystem, theCode, theDisplay);
 		}
 
-		if (isEmpty(theCode)) {
-			throw new IllegalArgumentException("theCode must be provided");
-		}
-		if (isEmpty(theCodeSystem)) {
-			throw new IllegalArgumentException("theCodeSystem must be provided");
+		if (isEmpty(theCode) && isEmpty(theCodeSystem)) {
+			throw new IllegalArgumentException("Either theCode or theCodeSystem must be provided");
 		}
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
