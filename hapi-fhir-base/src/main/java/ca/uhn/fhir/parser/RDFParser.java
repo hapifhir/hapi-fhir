@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.rdf.RDFUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
+import org.apache.jena.irix.IRIs;
 import org.apache.jena.irix.SetupJenaIRI;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.Lang;
@@ -177,7 +178,7 @@ public class RDFParser extends BaseParser {
 				parentResource = rdfModel.getResource(null);
 			} else {
 
-				String resourceUri = SetupJenaIRI.iriFactory_RDFXML().construct(uriBase + resource.getIdElement().toUnqualified().toString()).toString();
+				String resourceUri = IRIs.resolve(uriBase, resource.getIdElement().toUnqualified().toString()).toString();
 				parentResource = rdfModel.getResource(resourceUri);
 			}
 			// If the resource already exists and has statements, return that existing resource.
