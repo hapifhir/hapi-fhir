@@ -47,6 +47,10 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
+
+import javax.annotation.PostConstruct;
 
 @Service
 public class MdmMessageHandler implements MessageHandler {
@@ -67,6 +71,14 @@ public class MdmMessageHandler implements MessageHandler {
 	private IMdmSettings myMdmSettings;
 	@Autowired
 	private IMdmModelConverterSvc myModelConverter;
+	@Autowired
+	private PlatformTransactionManager myTransactionManager;
+	private TransactionTemplate myTxTemplate;
+
+	@PostConstruct
+	public void start() {
+		myTxTemplate = new TransactionTemplate(myTransactionManager);
+	}
 
 	@Override
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
@@ -80,7 +92,7 @@ public class MdmMessageHandler implements MessageHandler {
 		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
 		try {
 			if (myMdmResourceFilteringSvc.shouldBeProcessed(getResourceFromPayload(msg))) {
-				matchMdmAndUpdateLinks(msg);
+				myTxTemplate.executeWithoutResult(tx -> matchMdmAndUpdateLinks(msg));
 			}
 		} catch (TooManyCandidatesException e) {
 			ourLog.error(e.getMessage(), e);
