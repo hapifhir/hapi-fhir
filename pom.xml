@@ -743,6 +743,11 @@
 			<name>Dušan Marković</name>
 			<organization>Better</organization>
 		</developer>
+		<developers>
+			<id>jingtang10</id>
+			<name>Jing Tang</name>
+			<organization>Google</organization>
+		</developers>
 	</developers>
 
 	<licenses>
