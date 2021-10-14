@@ -128,6 +128,10 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 		@OperationParam(name = Constants.PARAM_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED)
 			List<StringType> theFilter,
 
+		@Description(shortDefinition = "Filter the resources to return based on the patient ids provided.")
+		@OperationParam(name = Constants.PARAM_ID, min = 0, max = OperationParam.MAX_UNLIMITED)
+			List<StringType> theId,
+
 		@Sort
 			SortSpec theSortSpec,
 
@@ -136,11 +140,29 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theCount, theOffset, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), theRequestDetails);
+			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theCount, theOffset, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), theRequestDetails, toFlattenedPatientIdStringParamList(theId));
 		} finally {
 			endRequest(theServletRequest);
 		}
 
+	}
+
+	/**
+	 * Given a list of string types, return only the ID portions of any parameters passed in.
+	 */
+	private StringOrListParam toFlattenedPatientIdStringParamList(List<StringType> theId) {
+		StringOrListParam retVal = new StringOrListParam();
+		if (theId != null) {
+			for (StringType next: theId) {
+				if (isNotBlank(next.getValue())) {
+					String[] split = next.getValue().split(",");
+					for (String paramValue : split) {
+						retVal.addOr(new StringParam(paramValue.replace("Patient/", "")));
+					}
+				}
+			}
+		}
+		return retVal.getValuesAsQueryTokens().isEmpty() ? null: retVal;
 	}
 
 	private StringAndListParam toStringAndList(List<StringType> theNarrative) {

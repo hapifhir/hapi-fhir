@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -43,13 +44,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class FhirResourceDaoPatientR4 extends BaseHapiFhirResourceDao<Patient>implements IFhirResourceDaoPatient<Patient> {
 
 	@Autowired
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 
-	private IBundleProvider doEverythingOperation(IIdType theId,
+	private IBundleProvider doEverythingOperation(StringOrListParam theIds,
 																 IPrimitiveType<Integer> theCount,
 																 IPrimitiveType<Integer> theOffset,
 																 DateRangeParam theLastUpdated,
@@ -72,18 +75,18 @@ public class FhirResourceDaoPatientR4 extends BaseHapiFhirResourceDao<Patient>im
 			paramMap.add(Constants.PARAM_TEXT, theNarrative);
 		}
 		paramMap.setIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
-		paramMap.setEverythingMode(theId != null ? EverythingModeEnum.PATIENT_INSTANCE : EverythingModeEnum.PATIENT_TYPE);
+		paramMap.setEverythingMode(theIds != null && theIds.getValuesAsQueryTokens().size() == 1 ? EverythingModeEnum.PATIENT_INSTANCE : EverythingModeEnum.PATIENT_TYPE);
 		paramMap.setSort(theSort);
 		paramMap.setLastUpdated(theLastUpdated);
-		if (theId != null) {
-			StringParam idParam = new StringParam(theId.getIdPart());
+
+		if (theIds != null) {
 			if (theRequest.getParameters().containsKey("_mdm")) {
 				String[] paramVal = theRequest.getParameters().get("_mdm");
 				if (Arrays.asList(paramVal).contains("true")) {
-					idParam.setMdmExpand(true);
+					theIds.getValuesAsQueryTokens().stream().forEach(param -> param.setMdmExpand(true));
 				}
 			}
-			paramMap.add("_id", idParam);
+			paramMap.add("_id", theIds);
 		}
 
 		if (!isPagingProviderDatabaseBacked(theRequest)) {
@@ -101,12 +104,13 @@ public class FhirResourceDaoPatientR4 extends BaseHapiFhirResourceDao<Patient>im
 
 	@Override
 	public IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, RequestDetails theRequestDetails) {
-		return doEverythingOperation(theId, theCount, theOffset, theLastUpdated, theSort, theContent, theNarrative, theFilter, theRequestDetails);
+		StringOrListParam id = new StringOrListParam().add(new StringParam(theId.getIdPart()));
+		return doEverythingOperation(id, theCount, theOffset, theLastUpdated, theSort, theContent, theNarrative, theFilter, theRequestDetails);
 	}
 
 	@Override
-	public IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, RequestDetails theRequestDetails) {
-		return doEverythingOperation(null, theCount, theOffset, theLastUpdated, theSort, theContent, theNarrative, theFilter, theRequestDetails);
+	public IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, RequestDetails theRequestDetails, StringOrListParam theId) {
+		return doEverythingOperation(theId, theCount, theOffset, theLastUpdated, theSort, theContent, theNarrative, theFilter, theRequestDetails);
 	}
 
 }

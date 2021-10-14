@@ -152,6 +152,7 @@ public class Constants {
 	public static final String OPENSEARCH_NS_OLDER = "http://purl.org/atompub/tombstones/1.0";
 	public static final String PARAM_ASYNC = "async"; //Used in messaging
 	public static final String PARAM_AT = "_at";
+	public static final String PARAM_ID= "_id";
 	/**
 	 * Used in paging links
 	 */
