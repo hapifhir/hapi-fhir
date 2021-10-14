@@ -49,7 +49,7 @@ public class FhirResourceDaoPatientR5 extends BaseHapiFhirResourceDao<Patient> i
 	@Autowired
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 
-	private IBundleProvider doEverythingOperation(IIdType theId, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, RequestDetails theRequest) {
+	private IBundleProvider doEverythingOperation(StringOrListParam theId, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, RequestDetails theRequest) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		if (theCount != null) {
 			paramMap.setCount(theCount.getValue());
@@ -68,7 +68,7 @@ public class FhirResourceDaoPatientR5 extends BaseHapiFhirResourceDao<Patient> i
 		paramMap.setSort(theSort);
 		paramMap.setLastUpdated(theLastUpdated);
 		if (theId != null) {
-			paramMap.add("_id", new StringParam(theId.getIdPart()));
+			paramMap.add("_id", theId);
 		}
 
 		if (!isPagingProviderDatabaseBacked(theRequest)) {
@@ -81,18 +81,12 @@ public class FhirResourceDaoPatientR5 extends BaseHapiFhirResourceDao<Patient> i
 
 	@Override
 	public IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, RequestDetails theRequestDetails) {
+		StringOrListParam id = new StringOrListParam().add(new StringParam(theId.getIdPart()));
+		return doEverythingOperation(id, theCount, theOffset, theLastUpdated, theSort, theContent, theNarrative, theRequestDetails);
+	}
+
+	@Override
+	public IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, RequestDetails theRequestDetails, StringOrListParam theId) {
 		return doEverythingOperation(theId, theCount, theOffset, theLastUpdated, theSort, theContent, theNarrative, theRequestDetails);
 	}
-
-	@Override
-	public IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, RequestDetails theRequestDetails) {
-		return doEverythingOperation(null, theCount, theOffset, theLastUpdated, theSort, theContent, theNarrative, theRequestDetails);
-	}
-
-	@Override
-	public IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSortSpec, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, RequestDetails theRequestDetails, StringOrListParam theId) {
-		//FIXME GGG
-		return null;
-	}
-
 }

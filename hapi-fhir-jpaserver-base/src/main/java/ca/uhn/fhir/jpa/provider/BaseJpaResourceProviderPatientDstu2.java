@@ -18,6 +18,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import org.hl7.fhir.dstu3.model.StringType;
 
 import java.util.List;
 
@@ -126,6 +127,10 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 				@OperationParam(name = Constants.PARAM_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED)
 					List<StringDt> theFilter,
 
+				@Description(shortDefinition = "Filter the resources to return based on the patient ids provided.")
+				@OperationParam(name = Constants.PARAM_ID, min = 0, max = OperationParam.MAX_UNLIMITED)
+					List<StringDt> theId,
+
 				@Sort
 				SortSpec theSortSpec, 
 				
@@ -134,11 +139,29 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theCount, theOffset, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), theRequestDetails);
+			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theCount, theOffset, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), theRequestDetails, toFlattenedPatientIdStringParamList(theId));
 		} finally {
 			endRequest(theServletRequest);
 		}
 
+	}
+
+	/**
+	 * Given a list of string types, return only the ID portions of any parameters passed in.
+	 */
+	private StringOrListParam toFlattenedPatientIdStringParamList(List<StringDt> theId) {
+		StringOrListParam retVal = new StringOrListParam();
+		if (theId != null) {
+			for (StringDt next: theId) {
+				if (isNotBlank(next.getValue())) {
+					String[] split = next.getValue().split(",");
+					for (String paramValue : split) {
+						retVal.addOr(new StringParam(paramValue.replace("Patient/", "")));
+					}
+				}
+			}
+		}
+		return retVal.getValuesAsQueryTokens().isEmpty() ? null: retVal;
 	}
 
 	private StringAndListParam toStringAndList(List<StringDt> theNarrative) {

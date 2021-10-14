@@ -120,7 +120,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		IIdType moId = myMedicationOrderDao.create(mo, mySrd).getId().toUnqualifiedVersionless();
 
 		HttpServletRequest request = mock(HttpServletRequest.class);
-		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null,  null, null, null, null, mySrd);
+		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null,  null, null, null, null, mySrd, null);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(orgId, medId, patId, moId, patId2));
 
 		request = mock(HttpServletRequest.class);
