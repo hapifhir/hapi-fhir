@@ -90,14 +90,6 @@
 			<optional>true</optional>
 		</dependency>
 
-		<!--
-		<dependency>
-			<groupId>net.sf.saxon</groupId>
-			<artifactId>Saxon-HE</artifactId>
-			<version>9.6.0-4</version>
-		</dependency>
-		-->
-
 		<!-- Testing -->
 		<dependency>
 			<groupId>org.xmlunit</groupId>
