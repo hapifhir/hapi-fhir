@@ -15,11 +15,13 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.thymeleaf.util.StringUtils;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -52,20 +54,28 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	@Override
 	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 
-		if (theOptions != null) {
-			if (theOptions.isInferSystem()) {
-				return null;
+		IBaseResource valueSet = theValueSet;
+
+		// some external validators require the system when the code is passed
+		// so let's try to get it from the VS if is is not present
+		String codeSystem = theCodeSystem;
+		if (isNotBlank(theCode) && isBlank(codeSystem)) {
+			ValueSet vs = (ValueSet) theValueSet;
+			if ( vs.getCompose() != null && vs.getCompose().getInclude() != null && vs.getCompose().getInclude().size() > 0) {
+				codeSystem = vs.getCompose().getInclude().iterator().next().getSystem();
 			}
 		}
 
-		IBaseResource valueSet = theValueSet;
+	 	// Remote terminology services shouldn't be used to validate codes with an implied system
+		if (isBlank(codeSystem)) { return null; }
+
 		String valueSetUrl = DefaultProfileValidationSupport.getConformanceResourceUrl(myCtx, valueSet);
 		if (isNotBlank(valueSetUrl)) {
 			valueSet = null;
 		} else {
 			valueSetUrl = null;
 		}
-		return invokeRemoteValidateCode(theCodeSystem, theCode, theDisplay, valueSetUrl, valueSet);
+		return invokeRemoteValidateCode(codeSystem, theCode, theDisplay, valueSetUrl, valueSet);
 	}
 
 	@Override
