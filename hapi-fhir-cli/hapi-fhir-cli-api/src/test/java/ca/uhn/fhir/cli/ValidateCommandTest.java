@@ -12,13 +12,25 @@ public class ValidateCommandTest {
 	}
 	
 	@Test
-	public void testValidateLocalProfile() {
+	public void testValidateLocalProfileDstu3() {
 		String resourcePath = ValidateCommandTest.class.getResource("/patient-uslab-example1.xml").getFile();
 		ourLog.info(resourcePath);
 		
 		App.main(new String[] {
 			"validate",
 			"-v", "dstu3",
+			"-p",
+			"-n", resourcePath});
+	}
+
+	@Test
+	public void testValidateLocalProfileR4() {
+		String resourcePath = ValidateCommandTest.class.getResource("/patient-uslab-example1.xml").getFile();
+		ourLog.info(resourcePath);
+
+		App.main(new String[] {
+			"validate",
+			"-v", "R4",
 			"-p",
 			"-n", resourcePath});
 	}
