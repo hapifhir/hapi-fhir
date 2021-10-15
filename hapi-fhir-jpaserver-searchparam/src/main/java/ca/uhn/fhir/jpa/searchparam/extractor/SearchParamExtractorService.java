@@ -440,7 +440,7 @@ public class SearchParamExtractorService {
 			// 3.4 added reference name as a prefix for the contained resource if any
 			// e.g. for Observation.subject contained reference
 			// the SP_NAME = subject.family
-			currParams.updateSpnamePrefixForLinksOnContainedResource(theResource.fhirType(), spNamePrefix);
+			currParams.updateSpnamePrefixForLinksOnContainedResource(nextPathAndRef.getPath());
 
 			// 3.5 merge to the mainParams
 			// NOTE: the spname prefix is different

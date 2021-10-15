@@ -114,7 +114,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			List<ResourceLink> allLinks = myResourceLinkDao.findAll();
 			Optional<ResourceLink> link = allLinks
 				.stream()
-				.filter(t -> "Encounter.reason-reference.subject".equals(t.getSourcePath()))
+				.filter(t -> "Encounter.reasonReference.subject".equals(t.getSourcePath()))
 				.findFirst();
 			assertTrue(link.isPresent());
 			assertEquals("Patient", link.get().getTargetResourceType());

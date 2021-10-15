@@ -252,9 +252,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		String url = "/Observation?subject.organization.name=HealthCo";
 
 		// execute
-		myCaptureQueriesListener.clear();
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
-		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -406,6 +404,52 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// execute
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+
+		// validate
+		assertEquals(1L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
+	@Test
+	public void testShouldResolveAFourLinkChainWithAContainedResourceInTheMiddle() throws Exception {
+
+		// setup
+		IIdType oid1;
+
+		{
+			myCaptureQueriesListener.clear();
+
+			Organization org = new Organization();
+			org.setId(IdType.newRandomUuid());
+			org.setName("HealthCo");
+			myOrganizationDao.create(org, mySrd);
+
+			Organization partOfOrg = new Organization();
+			partOfOrg.setId("org");
+			partOfOrg.getPartOf().setReference(org.getId());
+
+			Patient p = new Patient();
+			p.setId(IdType.newRandomUuid());
+			p.addName().setFamily("Smith").addGiven("John");
+			p.getContained().add(partOfOrg);
+			p.getManagingOrganization().setReference("#org");
+			myPatientDao.create(p, mySrd);
+
+			Observation obs = new Observation();
+			obs.getCode().setText("Observation 1");
+			obs.getSubject().setReference(p.getId());
+
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			myCaptureQueriesListener.logInsertQueries();
+		}
+
+		String url = "/Observation?subject.organization.partof.name=HealthCo";
+
+		// execute
+		myCaptureQueriesListener.clear();
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
 		assertEquals(1L, oids.size());
