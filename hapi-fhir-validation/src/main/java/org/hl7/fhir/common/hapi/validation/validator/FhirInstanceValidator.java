@@ -277,7 +277,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 		@Override
 		public List<Base> resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
-			return null;
+			return Collections.emptyList();
 		}
 
 		@Override
