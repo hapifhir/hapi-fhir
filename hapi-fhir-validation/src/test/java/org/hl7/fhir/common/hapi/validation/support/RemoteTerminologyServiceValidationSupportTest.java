@@ -13,21 +13,17 @@ import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -42,15 +38,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RemoteTerminologyServiceValidationSupportTest {
 
@@ -168,7 +161,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	 * Remote terminology services shouldn't be used to validate codes with an implied system
 	 */
 	@Test
-	public void testValidateCodeInValueSet_InferSystem_codeSystemNotPresent() {
+	public void testValidateCodeInValueSet_InferSystem() {
 		createNextValueSetReturnParameters(true, DISPLAY, null);
 
 		ValueSet valueSet = new ValueSet();

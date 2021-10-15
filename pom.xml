@@ -743,6 +743,11 @@
 			<name>Dušan Marković</name>
 			<organization>Better</organization>
 		</developer>
+		<developer>
+			<id>jingtang10</id>
+			<name>Jing Tang</name>
+			<organization>Google</organization>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -828,7 +833,7 @@
         <spring_retry_version>1.2.2.RELEASE</spring_retry_version>
 
         <stax2_api_version>3.1.4</stax2_api_version>
-        <testcontainers_version>1.15.3</testcontainers_version>
+        <testcontainers_version>1.16.0</testcontainers_version>
         <thymeleaf-version>3.0.12.RELEASE</thymeleaf-version>
         <woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 
@@ -1199,12 +1204,6 @@
 				<artifactId>json-lib</artifactId>
 				<version>2.4</version>
 				<classifier>jdk15-sources</classifier>
-			</dependency>
-			<dependency>
-				<groupId>net.sf.saxon</groupId>
-				<artifactId>Saxon-HE</artifactId>
-				<!-- <version>9.8.0-3</version> -->
-				<version>${servicemix_saxon_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.ttddyy</groupId>
