@@ -1743,7 +1743,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		int newSize = client.search().forResource(DocumentManifest.class).returnBundle(Bundle.class).execute().getEntry().size();
 
 		assertEquals(1, newSize - initialSize);
-
 	}
 
 	/**
