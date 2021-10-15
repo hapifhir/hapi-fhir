@@ -174,6 +174,10 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 			IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode, IPrimitiveType<String> theDisplay,
 			Coding theCoding, CodeableConcept theCodeableConcept, RequestDetails theRequestDetails) {
 
+		// Original Code which works with locally-validated CodeSystems
+		// return myTerminologySvc.codeSystemValidateCode(theCodeSystemId, toStringOrNull(theCodeSystemUrl), toStringOrNull(theVersion), toStringOrNull(theCode), toStringOrNull(theDisplay), theCoding, theCodeableConcept);
+
+		// NEW Code which works when configured to use a Remote Terminology Server BUT causes several Unit Tests to FAIL
 		return myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport),
 			new ConceptValidationOptions().setValidateDisplay(true).setInferSystem(true), toStringOrNull(theCodeSystemUrl),
 			toStringOrNull(theCode), toStringOrNull(theDisplay), null);
