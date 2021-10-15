@@ -1,6 +1,5 @@
 package ca.uhn.fhir.validation;
 
-import net.sf.saxon.lib.Validation;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 

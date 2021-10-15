@@ -86,11 +86,6 @@
 			<optional>true</optional>
 		</dependency>
 
-		<dependency>
-			<groupId>net.sf.saxon</groupId>
-			<artifactId>Saxon-HE</artifactId>
-		</dependency>
-
 		<!--
 		Gson is needed for some utility classes in org.hl7.fhir.convertors, so
 		this is necessary for the JavaDocs to build
