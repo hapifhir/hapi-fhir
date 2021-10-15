@@ -73,6 +73,7 @@ import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +82,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
@@ -440,15 +443,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		final List<Class<? extends IBaseResource>> resourceTypes;
 		if (!theReferenceParam.hasResourceType()) {
 
-			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
-			resourceTypes = new ArrayList<>();
-
-			if (param.hasTargets()) {
-				Set<String> targetTypes = param.getTargets();
-				for (String next : targetTypes) {
-					resourceTypes.add(getFhirContext().getResourceDefinition(next).getImplementingClass());
-				}
-			}
+			resourceTypes = determineResourceTypes(Collections.singleton(theResourceName), theParamName);
 
 			if (resourceTypes.isEmpty()) {
 				RuntimeSearchParam searchParamByName = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
@@ -513,25 +508,87 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			.collect(Collectors.toList());
 	}
 
-	public List<String> createResourceLinkPaths(String theResourceName, String theParamName) {
-		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
-		List<String> path = param.getPathsSplit();
+	@NotNull
+	private List<Class<? extends IBaseResource>> determineResourceTypes(Set<String> theResourceNames, String theParamNameChain) {
+		int linkIndex = theParamNameChain.indexOf('.');
+		if (linkIndex == -1) {
+			Set<Class<? extends IBaseResource>> resourceTypes = new HashSet<>();
+			for (String resourceName : theResourceNames) {
+				RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(resourceName, theParamNameChain);
 
-		/*
-		 * SearchParameters can declare paths on multiple resource
-		 * types. Here we only want the ones that actually apply.
-		 */
-		path = new ArrayList<>(path);
-
-		ListIterator<String> iter = path.listIterator();
-		while (iter.hasNext()) {
-			String nextPath = trim(iter.next());
-			if (!nextPath.contains(theResourceName + ".")) {
-				iter.remove();
+				if (param != null && param.hasTargets()) {
+					Set<String> targetTypes = param.getTargets();
+					for (String next : targetTypes) {
+						resourceTypes.add(getFhirContext().getResourceDefinition(next).getImplementingClass());
+					}
+				}
 			}
-		}
+			return new ArrayList<>(resourceTypes);
+		} else {
+			String paramNameHead = theParamNameChain.substring(0, linkIndex);
+			String paramNameTail = theParamNameChain.substring(linkIndex+1);
+			Set<String> targetResourceTypeNames = new HashSet<>();
+			for (String resourceName : theResourceNames) {
+				RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(resourceName, paramNameHead);
 
-		return path;
+				if (param != null && param.hasTargets()) {
+					targetResourceTypeNames.addAll(param.getTargets());
+				}
+			}
+			return determineResourceTypes(targetResourceTypeNames, paramNameTail);
+		}
+	}
+
+	public List<String> createResourceLinkPaths(String theResourceName, String theParamName) {
+		int linkIndex = theParamName.indexOf('.');
+		if (linkIndex == -1) {
+			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
+			if (param == null) {
+				// This can happen during recursion, if not all the possible target types of one link in the chain support the next link
+				return new ArrayList<>();
+			}
+			List<String> path = param.getPathsSplit();
+
+			/*
+			 * SearchParameters can declare paths on multiple resource
+			 * types. Here we only want the ones that actually apply.
+			 */
+			path = new ArrayList<>(path);
+
+			ListIterator<String> iter = path.listIterator();
+			while (iter.hasNext()) {
+				String nextPath = trim(iter.next());
+				if (!nextPath.contains(theResourceName + ".")) {
+					iter.remove();
+				}
+			}
+
+			return path;
+		} else {
+			String paramNameHead = theParamName.substring(0, linkIndex);
+			String paramNameTail = theParamName.substring(linkIndex + 1);
+
+			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, paramNameHead);
+			Set<String> tailPaths = param.getTargets().stream()
+				.map(t -> createResourceLinkPaths(t, paramNameTail))
+				.flatMap(Collection::stream)
+				.map(t -> t.substring(t.indexOf('.')+1))
+				.collect(Collectors.toSet());
+
+			List<String> path = param.getPathsSplit();
+
+			/*
+			 * SearchParameters can declare paths on multiple resource
+			 * types. Here we only want the ones that actually apply.
+			 * Then append all the tail paths to each of the applicable head paths
+			 */
+			return path.stream()
+				.map(String::trim)
+				.filter(t -> t.contains(theResourceName + "."))
+				.map(head -> tailPaths.stream().map(tail -> head + "." + tail).collect(Collectors.toSet()))
+				.flatMap(Collection::stream)
+				.collect(Collectors.toList());
+		}
 	}
 
 

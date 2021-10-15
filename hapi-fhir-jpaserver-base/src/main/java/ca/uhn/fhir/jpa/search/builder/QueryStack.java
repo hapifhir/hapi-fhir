@@ -93,6 +93,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.apache.commons.collections4.bidimap.UnmodifiableBidiMap;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
@@ -667,9 +668,6 @@ public class QueryStack {
 															RequestDetails theRequest,
 															RequestPartitionId theRequestPartitionId) {
 
-		// This just to ensure the chain has been split correctly
-		assert theParamName.contains(".") == false;
-
 		if ((theOperation != null) &&
 			(theOperation != SearchFilterParser.CompareOperation.eq) &&
 			(theOperation != SearchFilterParser.CompareOperation.ne)) {
@@ -695,12 +693,14 @@ public class QueryStack {
 
 		String targetChain = null;
 		String targetParamName = null;
+		String targetChainTail = null;
 		String targetQualifier = null;
 		String targetValue = null;
 
 		RuntimeSearchParam targetParamDefinition = null;
 
 		ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
+		List<IQueryParameterType> trimmedParameters = Lists.newArrayList();
 		IQueryParameterType qp = null;
 
 		for (int orIdx = 0; orIdx < theList.size(); orIdx++) {
@@ -715,6 +715,14 @@ public class QueryStack {
 				targetChain = referenceParam.getChain();
 				targetParamName = targetChain;
 				targetValue = nextOr.getValueAsQueryToken(myFhirContext);
+
+				int linkIndex = targetChain.indexOf('.');
+				if (linkIndex != -1) {
+					targetParamName = targetChain.substring(0, linkIndex);
+					trimmedParameters.add(new ReferenceParam(targetChain.substring(linkIndex+1), referenceParam.getValue()));
+				} else {
+					trimmedParameters.add(new ReferenceParam(referenceParam.getValue()));
+				}
 
 				int qualifierIndex = targetChain.indexOf(':');
 				if (qualifierIndex != -1) {
@@ -736,6 +744,10 @@ public class QueryStack {
 					throw new InvalidRequestException("Unknown search parameter name: " + theSearchParam.getName() + '.' + targetParamName + ".");
 				}
 
+				if (RestSearchParameterTypeEnum.REFERENCE.equals(targetParamDefinition.getParamType())) {
+					continue;
+				}
+
 				qp = toParameterType(targetParamDefinition);
 				qp.setValueAsQueryToken(myFhirContext, targetParamName, targetQualifier, targetValue);
 				orValues.add(qp);
@@ -744,6 +756,11 @@ public class QueryStack {
 
 		if (targetParamDefinition == null) {
 			throw new InvalidRequestException("Unknown search parameter name: " + theSearchParam.getName() + ".");
+		}
+
+		if (!RestSearchParameterTypeEnum.REFERENCE.equals(targetParamDefinition.getParamType()) &&
+			StringUtils.isNotBlank(targetChainTail)) {
+			throw new InvalidRequestException("Search parameter chain " + theSearchParam.getName() + " has elements following a non-reference element.");
 		}
 
 		// 3. create the query
@@ -778,8 +795,11 @@ public class QueryStack {
 				containedCondition = createPredicateUri(theSourceJoinColumn, theResourceName, spnamePrefix, targetParamDefinition,
 					orValues, theOperation, theRequest, theRequestPartitionId);
 				break;
-			case HAS:
 			case REFERENCE:
+				String chainedParamName = theParamName + "." + targetParamName;
+				containedCondition = createPredicateReference(theSourceJoinColumn, theResourceName, chainedParamName, trimmedParameters, theOperation, theRequest, theRequestPartitionId);
+				break;
+			case HAS:
 			case SPECIAL:
 			default:
 				throw new InvalidRequestException(
@@ -1122,7 +1142,7 @@ public class QueryStack {
 							//   For now, leave the incorrect implementation alone, just in case someone is relying on it,
 							//   until the complete fix is available.
 							andPredicates.add(createPredicateReferenceForContainedResource(null, theResourceName, theParamName, nextParamDef, nextAnd, null, theRequest, theRequestPartitionId));
-						} else if (isEligibleForContainedResourceSearch(nextAnd)) {
+						} else if (myModelConfig.isIndexOnContainedResources()) {
 							// TODO for now, restrict contained reference traversal to the last reference in the chain
 							//   We don't seem to be indexing the outbound references of a contained resource, so we can't
 							//   include them in search chains.
@@ -1209,14 +1229,6 @@ public class QueryStack {
 		}
 
 		return toAndPredicate(andPredicates);
-	}
-
-	private boolean isEligibleForContainedResourceSearch(List<? extends IQueryParameterType> nextAnd) {
-		return myModelConfig.isIndexOnContainedResources() &&
-			nextAnd.stream()
-				.filter(t -> t instanceof ReferenceParam)
-				.map(t -> (ReferenceParam) t)
-				.noneMatch(t -> t.getChain().contains("."));
 	}
 
 	public void addPredicateCompositeUnique(String theIndexString, RequestPartitionId theRequestPartitionId) {
