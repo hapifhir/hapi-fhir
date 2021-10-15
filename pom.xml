@@ -833,7 +833,7 @@
         <spring_retry_version>1.2.2.RELEASE</spring_retry_version>
 
         <stax2_api_version>3.1.4</stax2_api_version>
-        <testcontainers_version>1.15.3</testcontainers_version>
+        <testcontainers_version>1.16.0</testcontainers_version>
         <thymeleaf-version>3.0.12.RELEASE</thymeleaf-version>
         <woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 
