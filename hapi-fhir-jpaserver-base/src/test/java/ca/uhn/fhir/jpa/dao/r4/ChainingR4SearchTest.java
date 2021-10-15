@@ -15,7 +15,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -117,6 +116,43 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testShouldResolveATwoLinkChainToAContainedReference() throws Exception {
+		// Adding support for this case in SMILE-3151
+
+		// setup
+		IIdType oid1;
+		IIdType orgId;
+
+		{
+			Organization org = new Organization();
+			org.setId(IdType.newRandomUuid());
+			org.setName("HealthCo");
+			orgId = myOrganizationDao.create(org, mySrd).getId();
+
+			Patient p = new Patient();
+			p.setId("pat");
+			p.addName().setFamily("Smith").addGiven("John");
+			p.getManagingOrganization().setReference(org.getId());
+
+			Observation obs = new Observation();
+			obs.getContained().add(p);
+			obs.getCode().setText("Observation 1");
+			obs.getSubject().setReference("#pat");
+
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		String url = "/Observation?subject.organization=" + orgId.getValueAsString();
+
+		// execute
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+
+		// validate
+		assertEquals(1L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
+	@Test
 	public void testShouldResolveAThreeLinkChainWhereAllResourcesStandAlone() throws Exception {
 
 		// setup
@@ -189,7 +225,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 	@Test
 	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheBeginningOfTheChain() throws Exception {
-		// We do not currently support this case - we may not be indexing the references of contained resources
+		// Adding support for this case in SMILE-3151
 
 		// setup
 		IIdType oid1;
