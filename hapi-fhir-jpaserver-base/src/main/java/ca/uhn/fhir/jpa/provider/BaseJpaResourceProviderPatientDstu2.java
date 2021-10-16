@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -20,7 +21,6 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.hl7.fhir.dstu2.model.IdType;
 
 import java.util.List;
 
@@ -131,7 +131,7 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 
 				@Description(shortDefinition = "Filter the resources to return based on the patient ids provided.")
 				@OperationParam(name = Constants.PARAM_ID, min = 0, max = OperationParam.MAX_UNLIMITED)
-					List<IdType> theId,
+					List<IdDt> theId,
 
 				@Sort
 				SortSpec theSortSpec, 
@@ -151,10 +151,10 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 	/**
 	 * Given a list of string types, return only the ID portions of any parameters passed in.
 	 */
-	private TokenOrListParam toFlattenedPatientIdTokenParamList(List<IdType> theId) {
+	private TokenOrListParam toFlattenedPatientIdTokenParamList(List<IdDt> theId) {
 		TokenOrListParam retVal = new TokenOrListParam();
 		if (theId != null) {
-			for (IdType next: theId) {
+			for (IdDt next: theId) {
 				if (isNotBlank(next.getValue())) {
 					retVal.addOr(new TokenParam(next.getIdPart()));
 				}
