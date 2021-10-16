@@ -390,11 +390,9 @@ public class SearchBuilder implements ISearchBuilder {
 				if (param instanceof StringParam) {
 					// we expect all _id values to be StringParams
 					ids.add(((StringParam) param).getValue());
-				}
-				if (param instanceof TokenParam) {
+				} else if (param instanceof TokenParam) {
 					ids.add(((TokenParam)param).getValue());
-				}
-				else {
+				} else {
 					// we do not expect the _id parameter to be a non-string value
 					throw new IllegalArgumentException("_id parameter must be a StringParam or TokenParam");
 				}
