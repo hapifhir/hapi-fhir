@@ -396,7 +396,7 @@ public class SearchBuilder implements ISearchBuilder {
 				}
 				else {
 					// we do not expect the _id parameter to be a non-string value
-					throw new IllegalArgumentException("_id parameter must be a StringParam");
+					throw new IllegalArgumentException("_id parameter must be a StringParam or TokenParam");
 				}
 			}
 		}
