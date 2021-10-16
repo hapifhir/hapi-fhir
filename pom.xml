@@ -759,7 +759,7 @@
 
     <properties>
 
-        <fhir_core_version>5.5.4</fhir_core_version>
+        <fhir_core_version>5.5.7</fhir_core_version>
         <ucum_version>1.0.3</ucum_version>
 
         <surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -2067,7 +2067,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-plugin-plugin</artifactId>
-					<version>3.6.0</version>
+					<version>3.6.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
