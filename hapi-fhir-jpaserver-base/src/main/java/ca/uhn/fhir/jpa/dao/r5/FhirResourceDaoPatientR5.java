@@ -39,6 +39,7 @@ import org.hl7.fhir.r5.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.Collections;
 
 public class FhirResourceDaoPatientR5 extends BaseHapiFhirResourceDao<Patient> implements IFhirResourceDaoPatient<Patient> {
@@ -65,6 +66,12 @@ public class FhirResourceDaoPatientR5 extends BaseHapiFhirResourceDao<Patient> i
 		paramMap.setSort(theSort);
 		paramMap.setLastUpdated(theLastUpdated);
 		if (theId != null) {
+			if (theRequest.getParameters().containsKey("_mdm")) {
+				String[] paramVal = theRequest.getParameters().get("_mdm");
+				if (Arrays.asList(paramVal).contains("true")) {
+					theId.getValuesAsQueryTokens().stream().forEach(param -> param.setMdmExpand(true));
+				}
+			}
 			paramMap.add("_id", theId);
 		}
 

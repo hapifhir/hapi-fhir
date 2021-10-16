@@ -73,7 +73,6 @@ public class FhirResourceDaoPatientR4 extends BaseHapiFhirResourceDao<Patient>im
 		paramMap.setEverythingMode(theIds != null && theIds.getValuesAsQueryTokens().size() == 1 ? EverythingModeEnum.PATIENT_INSTANCE : EverythingModeEnum.PATIENT_TYPE);
 		paramMap.setSort(theSort);
 		paramMap.setLastUpdated(theLastUpdated);
-
 		if (theIds != null) {
 			if (theRequest.getParameters().containsKey("_mdm")) {
 				String[] paramVal = theRequest.getParameters().get("_mdm");
