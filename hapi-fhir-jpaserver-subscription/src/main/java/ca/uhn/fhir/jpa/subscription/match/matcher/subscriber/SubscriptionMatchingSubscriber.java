@@ -232,9 +232,16 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			criteriaResource = criteriaResource.substring(0, criteriaResource.indexOf("?"));
 		}
 
-		if (resourceType != null && !criteriaResource.equals(resourceType)) {
-			ourLog.trace("Skipping subscription search for {} because it does not match the criteria {}", resourceType, criteriaString);
-			return false;
+		if (resourceType != null) {
+			if (criteriaResource.equals("[*]") && !resourceType.equals("Subscription")) {
+				ourLog.trace("Subscription has '*' resourceType criteria: {}", criteriaString);
+				return true;
+			}
+
+			if (!criteriaResource.equals(resourceType)) {
+				ourLog.trace("Skipping subscription search for {} because it does not match the criteria {}", resourceType, criteriaString);
+				return false;
+			}
 		}
 
 		return true;

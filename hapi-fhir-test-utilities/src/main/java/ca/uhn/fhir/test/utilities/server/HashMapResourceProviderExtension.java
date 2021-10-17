@@ -29,6 +29,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 public class HashMapResourceProviderExtension<T extends IBaseResource> extends HashMapResourceProvider<T> implements BeforeEachCallback, AfterEachCallback {
 
 	private final RestfulServerExtension myRestfulServerExtension;
+	private boolean myClearBetweenTests = true;
 
 	/**
 	 * Constructor
@@ -48,7 +49,16 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 
 	@Override
 	public void beforeEach(ExtensionContext context) throws Exception {
-		clear();
+		if (myClearBetweenTests) {
+			clear();
+		}
 		myRestfulServerExtension.getRestfulServer().registerProvider(HashMapResourceProviderExtension.this);
 	}
+
+	public HashMapResourceProviderExtension<T> dontClearBetweenTests() {
+		myClearBetweenTests = false;
+		return this;
+	}
+
+
 }

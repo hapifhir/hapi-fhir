@@ -77,4 +77,32 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 		assertEquals(0, ourContentTypes.size());
 	}
+
+
+	@Test
+	public void testCriteriaStarOnly() throws InterruptedException {
+		String payload = "application/fhir+xml";
+
+		String code = "1000000050";
+		String criteria1 = "[*]";
+		String criteria2 = "[*]?";
+		String criteria3 = "Observation?code=FOO"; // won't match
+
+		sendSubscription(criteria1, payload, ourListenerServerBase);
+		sendSubscription(criteria2, payload, ourListenerServerBase);
+		sendSubscription(criteria3, payload, ourListenerServerBase);
+
+		assertEquals(3, mySubscriptionRegistry.size());
+
+		ourObservationListener.setExpectedCount(2);
+		sendObservation(code, "SNOMED-CT");
+		ourObservationListener.awaitExpected();
+
+
+
+		assertEquals(2, ourContentTypes.size());
+		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
+	}
+
+
 }
