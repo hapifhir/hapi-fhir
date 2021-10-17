@@ -158,13 +158,13 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 		if (theId != null) {
 			for (IdType next: theId) {
 				if (isNotBlank(next.getValue())) {
-					String[] split = next.getIdPart().split(",");
-					Arrays.stream(split).forEach(id -> {
-						retVal.addOr(new TokenParam(id));
+					String[] split = next.getValueAsString().split(",");
+					Arrays.stream(split).map(IdType::new).forEach(id -> {
+						retVal.addOr(new TokenParam(id.getIdPart()));
 					});
-					}
 				}
 			}
+		}
 		return retVal.getValuesAsQueryTokens().isEmpty() ? null: retVal;
 	}
 

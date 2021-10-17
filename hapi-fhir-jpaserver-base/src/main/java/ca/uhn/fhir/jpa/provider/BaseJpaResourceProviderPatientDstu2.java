@@ -21,7 +21,9 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.hl7.fhir.r4.model.IdType;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -153,11 +155,12 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 	 */
 	private TokenOrListParam toFlattenedPatientIdTokenParamList(List<IdDt> theId) {
 		TokenOrListParam retVal = new TokenOrListParam();
-		if (theId != null) {
-			for (IdDt next: theId) {
-				if (isNotBlank(next.getValue())) {
-					retVal.addOr(new TokenParam(next.getIdPart()));
-				}
+		for (IdDt next: theId) {
+			if (isNotBlank(next.getValue())) {
+				String[] split = next.getValueAsString().split(",");
+				Arrays.stream(split).map(IdDt::new).forEach(id -> {
+					retVal.addOr(new TokenParam(id.getIdPart()));
+				});
 			}
 		}
 		return retVal.getValuesAsQueryTokens().isEmpty() ? null: retVal;

@@ -23,6 +23,7 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -155,10 +156,13 @@ public class BaseJpaResourceProviderPatientDstu3 extends JpaResourceProviderDstu
 		if (theId != null) {
 			for (IdType next: theId) {
 				if (isNotBlank(next.getValue())) {
-						retVal.addOr(new TokenParam(next.getIdPart()));
-					}
+					String[] split = next.getValueAsString().split(",");
+					Arrays.stream(split).map(IdType::new).forEach(id -> {
+						retVal.addOr(new TokenParam(id.getIdPart()));
+					});
 				}
 			}
+		}
 		return retVal.getValuesAsQueryTokens().isEmpty() ? null: retVal;
 	}
 
