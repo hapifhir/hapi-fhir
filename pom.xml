@@ -748,6 +748,10 @@
 			<name>Jing Tang</name>
 			<organization>Google</organization>
 		</developer>
+		<developer>
+			<id>theGOTOguy</id>
+			<name>Ben Li-Sauerwine</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -759,7 +763,7 @@
 
     <properties>
 
-        <fhir_core_version>5.5.4</fhir_core_version>
+        <fhir_core_version>5.5.7</fhir_core_version>
         <ucum_version>1.0.3</ucum_version>
 
         <surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>

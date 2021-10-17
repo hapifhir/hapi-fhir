@@ -94,6 +94,13 @@
 					<dependencySourceIncludes>
 						<include>ca.uhn.hapi.fhir:org.hl7.fhir.dstu3</include>
 					</dependencySourceIncludes>
+					<additionalDependencies>
+						<dependency>
+							<groupId>com.squareup.okhttp3</groupId>
+							<artifactId>okhttp</artifactId>
+							<version>${okhttp_version}</version>
+						</dependency>
+					</additionalDependencies>
 				</configuration>
 			</plugin>
 		</plugins>
