@@ -748,6 +748,10 @@
 			<name>Jing Tang</name>
 			<organization>Google</organization>
 		</developer>
+		<developer>
+			<id>theGOTOguy</id>
+			<name>Ben Li-Sauerwine</name>
+		</developer>
 	</developers>
 
 	<licenses>
