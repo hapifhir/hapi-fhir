@@ -155,12 +155,14 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 	 */
 	private TokenOrListParam toFlattenedPatientIdTokenParamList(List<IdDt> theId) {
 		TokenOrListParam retVal = new TokenOrListParam();
-		for (IdDt next: theId) {
-			if (isNotBlank(next.getValue())) {
-				String[] split = next.getValueAsString().split(",");
-				Arrays.stream(split).map(IdDt::new).forEach(id -> {
-					retVal.addOr(new TokenParam(id.getIdPart()));
-				});
+		if (theId != null) {
+			for (IdDt next : theId) {
+				if (isNotBlank(next.getValue())) {
+					String[] split = next.getValueAsString().split(",");
+					Arrays.stream(split).map(IdDt::new).forEach(id -> {
+						retVal.addOr(new TokenParam(id.getIdPart()));
+					});
+				}
 			}
 		}
 		return retVal.getValuesAsQueryTokens().isEmpty() ? null: retVal;
