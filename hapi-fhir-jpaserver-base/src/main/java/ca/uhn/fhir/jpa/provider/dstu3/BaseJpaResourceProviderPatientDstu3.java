@@ -16,11 +16,14 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -128,20 +131,41 @@ public class BaseJpaResourceProviderPatientDstu3 extends JpaResourceProviderDstu
 		@OperationParam(name = Constants.PARAM_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED)
 			List<StringType> theFilter,
 
+		@Description(shortDefinition = "Filter the resources to return based on the patient ids provided.")
+		@OperationParam(name = Constants.PARAM_ID, min = 0, max = OperationParam.MAX_UNLIMITED)
+			List<IdType> theId,
+
 		@Sort
 			SortSpec theSortSpec,
 
 		RequestDetails theRequestDetails
 	) {
-
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theCount, theOffset, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), theRequestDetails);
+			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theCount, theOffset, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), theRequestDetails, toFlattenedPatientIdTokenParamList(theId));
 		} finally {
 			endRequest(theServletRequest);
 		}
-
 	}
+
+	/**
+	 * Given a list of string types, return only the ID portions of any parameters passed in.
+	 */
+	private TokenOrListParam toFlattenedPatientIdTokenParamList(List<IdType> theId) {
+		TokenOrListParam retVal = new TokenOrListParam();
+		if (theId != null) {
+			for (IdType next: theId) {
+				if (isNotBlank(next.getValue())) {
+					String[] split = next.getValueAsString().split(",");
+					Arrays.stream(split).map(IdType::new).forEach(id -> {
+						retVal.addOr(new TokenParam(id.getIdPart()));
+					});
+				}
+			}
+		}
+		return retVal.getValuesAsQueryTokens().isEmpty() ? null: retVal;
+	}
+
 
 	private StringAndListParam toStringAndList(List<StringType> theNarrative) {
 		StringAndListParam retVal = new StringAndListParam();
