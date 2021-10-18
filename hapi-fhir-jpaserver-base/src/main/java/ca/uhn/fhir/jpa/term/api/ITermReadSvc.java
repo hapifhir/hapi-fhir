@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -103,6 +104,7 @@ public interface ITermReadSvc extends IValidationSupport {
 	/**
 	 * Version independent
 	 */
+	@Transactional()
 	CodeValidationResult validateCodeIsInPreExpandedValueSet(ConceptValidationOptions theOptions, IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept);
 
 	boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet);

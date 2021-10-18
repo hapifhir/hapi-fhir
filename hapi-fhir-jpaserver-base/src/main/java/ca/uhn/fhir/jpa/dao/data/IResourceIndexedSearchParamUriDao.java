@@ -29,7 +29,7 @@ import org.springframework.data.repository.query.Param;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 
-public interface IResourceIndexedSearchParamUriDao extends JpaRepository<ResourceIndexedSearchParamUri, Long> {
+public interface IResourceIndexedSearchParamUriDao extends JpaRepository<ResourceIndexedSearchParamUri, Long>, IHapiFhirJpaRepository {
 	
 	@Query("SELECT DISTINCT p.myUri FROM ResourceIndexedSearchParamUri p WHERE p.myResourceType = :resource_type AND p.myParamName = :param_name")
 	public Collection<String> findAllByResourceTypeAndParamName(@Param("resource_type") String theResourceType, @Param("param_name") String theParamName);

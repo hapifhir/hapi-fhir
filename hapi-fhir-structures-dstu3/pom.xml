@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>5.6.0-PRE7-SNAPSHOT</version>
+		<version>5.6.0-PRE9-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -94,12 +94,23 @@
 					<dependencySourceIncludes>
 						<include>ca.uhn.hapi.fhir:org.hl7.fhir.dstu3</include>
 					</dependencySourceIncludes>
+					<additionalDependencies>
+						<dependency>
+							<groupId>com.squareup.okhttp3</groupId>
+							<artifactId>okhttp</artifactId>
+							<version>${okhttp_version}</version>
+						</dependency>
+					</additionalDependencies>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>

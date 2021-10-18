@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.DropIndexTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropTableTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ExecuteRawSqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.MigratePostgresTextClobToBinaryClobTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ModifyColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.NopTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameColumnTask;
@@ -245,6 +246,13 @@ public class Builder {
 			task.setConstraintName(theFkName);
 			task.setTableName(getTableName());
 			task.setParentTableName(theParentTableName);
+			addTask(task);
+		}
+
+		public void migratePostgresTextClobToBinaryClob(String theVersion, String theColumnName) {
+			MigratePostgresTextClobToBinaryClobTask task = new MigratePostgresTextClobToBinaryClobTask(myRelease, theVersion);
+			task.setTableName(getTableName());
+			task.setColumnName(theColumnName);
 			addTask(task);
 		}
 

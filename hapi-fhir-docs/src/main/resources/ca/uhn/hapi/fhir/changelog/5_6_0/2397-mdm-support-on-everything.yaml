@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2397
+title: "Added mdm support on $everything operation for patients by adding _mdm=true query parameter.
+   Eg: /Patient/123/$everything?_mdm=true."

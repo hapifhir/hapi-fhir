@@ -31,6 +31,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -68,6 +69,7 @@ public class MdmCandidateSearchSvc {
 	 *
 	 * @return the list of candidate {@link IBaseResource} which could be matches to theResource
 	 */
+	@Transactional
 	public Collection<IAnyResource> findCandidates(String theResourceType, IAnyResource theResource) {
 		Map<Long, IAnyResource> matchedPidsToResources = new HashMap<>();
 		List<MdmFilterSearchParamJson> filterSearchParams = myMdmSettings.getMdmRules().getCandidateFilterSearchParams();
