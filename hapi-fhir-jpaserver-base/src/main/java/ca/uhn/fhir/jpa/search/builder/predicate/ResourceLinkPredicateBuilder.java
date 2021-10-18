@@ -162,7 +162,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		}
 	}
 
-	public Condition createPredicate(RequestDetails theRequest, String theResourceType, String theParamName, List<? extends IQueryParameterType> theReferenceOrParamList, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicate(RequestDetails theRequest, String theResourceType, String theParamName, List<String> theQualifiers, List<? extends IQueryParameterType> theReferenceOrParamList, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 
 		List<IIdType> targetIds = new ArrayList<>();
 		List<String> targetQualifiedUrls = new ArrayList<>();
@@ -198,7 +198,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 					 * Handle chained search, e.g. Patient?organization.name=Kwik-e-mart
 					 */
 
-					return addPredicateReferenceWithChain(theResourceType, theParamName, theReferenceOrParamList, ref, theRequest, theRequestPartitionId);
+					return addPredicateReferenceWithChain(theResourceType, theParamName, theQualifiers, theReferenceOrParamList, ref, theRequest, theRequestPartitionId);
 
 				}
 
@@ -214,7 +214,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			}
 		}
 
-		List<String> pathsToMatch = createResourceLinkPaths(theResourceType, theParamName);
+		List<String> pathsToMatch = createResourceLinkPaths(theResourceType, theParamName, theQualifiers);
 		boolean inverse;
 		if ((theOperation == null) || (theOperation == SearchFilterParser.CompareOperation.eq)) {
 			inverse = false;
@@ -269,8 +269,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		return toEqualToOrInPredicate(myColumnSrcPath, generatePlaceholders(thePathsToMatch));
 	}
 
-	public Condition createPredicateSourcePaths(String theResourceName, String theParamName) {
-		List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName);
+	public Condition createPredicateSourcePaths(String theResourceName, String theParamName, List<String> theQualifiers) {
+		List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName, theQualifiers);
 		return createPredicateSourcePaths(pathsToMatch);
 	}
 
@@ -304,7 +304,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 	 * This is for handling queries like the following: /Observation?device.identifier=urn:system|foo in which we use a chain
 	 * on the device.
 	 */
-	private Condition addPredicateReferenceWithChain(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, ReferenceParam theReferenceParam, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+	private Condition addPredicateReferenceWithChain(String theResourceName, String theParamName, List<String> theQualifiers, List<? extends IQueryParameterType> theList, ReferenceParam theReferenceParam, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 
 		/*
 		 * Which resource types can the given chained parameter actually link to? This might be a list
@@ -321,7 +321,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		 */
 		if (Constants.PARAM_TYPE.equals(theReferenceParam.getChain())) {
 
-			List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName);
+			List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName, theQualifiers);
 			Condition typeCondition = createPredicateSourcePaths(pathsToMatch);
 
 			String typeValue = theReferenceParam.getValue();
@@ -433,7 +433,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			multiTypePredicate = toOrPredicate(orPredicates);
 		}
 		
-		List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName);
+		List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName, theQualifiers);
 		Condition pathPredicate = createPredicateSourcePaths(pathsToMatch);
 		return toAndPredicate(pathPredicate, multiTypePredicate);
 	}
@@ -539,9 +539,10 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		}
 	}
 
-	public List<String> createResourceLinkPaths(String theResourceName, String theParamName) {
+	public List<String> createResourceLinkPaths(String theResourceName, String theParamName, List<String> theParamQualifiers) {
 		int linkIndex = theParamName.indexOf('.');
 		if (linkIndex == -1) {
+
 			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
 			if (param == null) {
 				// This can happen during recursion, if not all the possible target types of one link in the chain support the next link
@@ -567,10 +568,12 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		} else {
 			String paramNameHead = theParamName.substring(0, linkIndex);
 			String paramNameTail = theParamName.substring(linkIndex + 1);
+			String qualifier = theParamQualifiers.get(0);
 
 			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, paramNameHead);
 			Set<String> tailPaths = param.getTargets().stream()
-				.map(t -> createResourceLinkPaths(t, paramNameTail))
+				.filter(t -> isBlank(qualifier) || qualifier.equals(t))
+				.map(t -> createResourceLinkPaths(t, paramNameTail, theParamQualifiers.subList(1, theParamQualifiers.size())))
 				.flatMap(Collection::stream)
 				.map(t -> t.substring(t.indexOf('.')+1))
 				.collect(Collectors.toSet());
