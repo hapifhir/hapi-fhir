@@ -40,7 +40,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 
-public abstract class BaseBulkItemReader extends AbstractBaseBulkItemReader {
+public abstract class BaseJpaBulkItemReader extends BaseBulkItemReader {
 	@Value("#{jobExecutionContext['" + BatchConstants.JOB_UUID_PARAMETER + "']}")
 	protected String myJobUUID;
 	@Autowired

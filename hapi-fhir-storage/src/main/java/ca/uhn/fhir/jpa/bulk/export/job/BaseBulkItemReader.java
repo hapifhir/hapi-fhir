@@ -40,7 +40,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class AbstractBaseBulkItemReader implements ItemReader<List<ResourcePersistentId>> {
+public abstract class BaseBulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	@Value("#{stepExecutionContext['resourceType']}")

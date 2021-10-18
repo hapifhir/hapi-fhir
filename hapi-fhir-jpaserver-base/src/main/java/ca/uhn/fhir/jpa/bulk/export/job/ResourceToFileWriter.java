@@ -32,7 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.PostConstruct;
 import java.util.Optional;
 
-public class ResourceToFileWriter extends AbstractResourceToFileWriter {
+public class ResourceToFileWriter extends BaseResourceToFileWriter {
 	@Autowired
 	private BulkExportDaoSvc myBulkExportDaoSvc;
 

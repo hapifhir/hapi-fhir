@@ -64,7 +64,7 @@ import java.util.stream.Collectors;
  * 3. Optionally further expand that into all MDM-matched Patients (including golden resources)
  * 4. Then perform normal bulk export, filtered so that only results that refer to members are returned.
  */
-public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReader<List<ResourcePersistentId>> {
+public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final int QUERY_CHUNK_SIZE = 100;
 

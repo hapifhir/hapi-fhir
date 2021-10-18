@@ -42,7 +42,7 @@ import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class AbstractResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
+public abstract class BaseResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 	protected static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	protected FhirContext myFhirContext;
@@ -61,7 +61,7 @@ public abstract class AbstractResourceToFileWriter implements ItemWriter<List<IB
 	private final OutputStreamWriter myWriter;
 	private final IParser myParser;
 
-	protected AbstractResourceToFileWriter(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
+	protected BaseResourceToFileWriter(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
 		myParser = myFhirContext.newJsonParser().setPrettyPrint(false);
