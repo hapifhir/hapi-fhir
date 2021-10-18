@@ -1,0 +1,6 @@
+---
+type: add
+issue: 3088
+jira: SMILE-3151
+title: "Previously, chained searches were not able to traverse reference fields within contained resources.
+This enhancement adds the ability to traverse the reference fields of contained resources when those fields refer to discrete resources."

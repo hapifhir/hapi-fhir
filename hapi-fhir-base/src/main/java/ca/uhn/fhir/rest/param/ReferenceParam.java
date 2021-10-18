@@ -227,10 +227,6 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 		return theCtx.getResourceDefinition(getResourceType()).getImplementingClass();
 	}
 
-	public void setResourceType(String theResourceType) {
-		myResourceType = theResourceType;
-	}
-
 	public String getValue() {
 		return myValue;
 	}
