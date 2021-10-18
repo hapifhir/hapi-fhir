@@ -101,63 +101,16 @@ public class SubscriptionRegistry {
 				}
 
 				if (configuration.hasDeadLetterQueuePrefix()
-					&& configuration.getRetryCount() != null) {
+						&& configuration.getRetryCount() != null) {
 					break;
 				}
 			}
 		}
 
+		// retry count is required for any retry policy
 		if (configuration.getRetryCount() == null || configuration.getRetryCount() < 0) {
 			configuration = null;
 		}
-//		if (theSubscription instanceof org.hl7.fhir.dstu3.model.Subscription) {
-//			org.hl7.fhir.dstu3.model.Subscription sub = (org.hl7.fhir.dstu3.model.Subscription) theSubscription;
-//			Optional<Extension> retryExtensionOp = sub.getExtension().stream().map(e -> {
-//				if (e.getUrl().equalsIgnoreCase(HapiExtensions.EXT_RETRY_POLICY)) {
-//					return e;
-//				}
-//				return null;
-//			}).findFirst();
-//
-//			if (retryExtensionOp.isPresent()) {
-//				Extension retryExtension = retryExtensionOp.get();
-//				int retryCount = -1;
-//				String dlq = null;
-//				for (Extension extension : retryExtension.getExtension()) {
-//					if (extension.getUrl().equalsIgnoreCase(HapiExtensions.SUB_EXTENSION_RETRY_COUNT)) {
-//						IntegerType integerType = (IntegerType) extension.getValue();
-//						retryCount = integerType.getValue();
-//					}
-//					else if (extension.getUrl().equalsIgnoreCase(HapiExtensions.SUB_EXTENSION_DLQ_PREFIX)) {
-//						StringType stringType = (StringType) extension.getValue();
-//						dlq = stringType.getValue();
-//					}
-//
-//					if (retryCount >= 0 && dlq != null) {
-//						break;
-//					}
-//				}
-//
-//				// a retry rate of 0 we'll allow.
-//				// means it'll never retry
-//				if (retryCount >= 0) {
-//					configuration = new ChannelRetryConfiguration();
-//					configuration.setRetryCount(retryCount);
-//					if (dlq != null && !dlq.trim().equals("")) {
-//						// dlq name will be
-//						// <channel name>-<name provided in extension>
-//						// this should ensure/enforce uniqueness and
-//						// easy to find from actual subscription
-//						String dlqName = theChannelName + "-"
-//							+ dlq;
-//						configuration.setDeadLetterQueuePrefix(dlqName);
-//					}
-//				}
-//				else {
-//					ourLog.warn("Invalid retry configuration extensions. No retry configuration will be used.");
-//				}
-//			}
-//		}
 
 		return configuration;
 	}
