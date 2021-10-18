@@ -163,41 +163,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 		validateValueLookup(currentVersion, theExpectedVersions);
 
-		validateValidateCode(currentVersion, theExpectedVersions);
-
 		// nothing to test for subsumes operation as it works only for concepts which share CodeSystem and  version
-	}
-
-
-	private void validateValidateCode(String theCurrentVersion, Collection<String> allVersions) {
-		IValidationSupport.CodeValidationResult resultNoVersioned = myCodeSystemDao.validateCode(null,
-			new UriType(BASE_LOINC_URL), null, new CodeType(VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE),
-			null, null, null, null);
-		assertNotNull(resultNoVersioned);
-		assertEquals(prefixWithVersion(theCurrentVersion, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), resultNoVersioned.getDisplay());
-
-		IValidationSupport.CodeValidationResult resultVersioned = myCodeSystemDao.validateCode(null,
-			new UriType(BASE_LOINC_URL), null, new CodeType(VS_VERSIONED_ON_UPLOAD_FIRST_CODE),
-			null, null, null, null);
-		assertNotNull(resultVersioned);
-		assertEquals(prefixWithVersion(theCurrentVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), resultVersioned.getDisplay());
-
-		allVersions.forEach(this::validateValidateCodeForVersion);
-	}
-
-
-	private void validateValidateCodeForVersion(String theVersion) {
-		IValidationSupport.CodeValidationResult resultNoVersioned = myCodeSystemDao.validateCode(null,
-			new UriType(BASE_LOINC_URL), new StringType(theVersion), new CodeType(VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE),
-			null, null, null, null);
-		assertNotNull(resultNoVersioned);
-		assertEquals(prefixWithVersion(theVersion, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), resultNoVersioned.getDisplay());
-
-		IValidationSupport.CodeValidationResult resultVersioned = myCodeSystemDao.validateCode(null,
-			new UriType(BASE_LOINC_URL), new StringType(theVersion), new CodeType(VS_VERSIONED_ON_UPLOAD_FIRST_CODE),
-			null, null, null, null);
-		assertNotNull(resultVersioned);
-		assertEquals(prefixWithVersion(theVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), resultVersioned.getDisplay());
 	}
 
 
@@ -625,25 +591,6 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		String expectedDisplay = prefixWithVersion(version, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY);
 		assertEquals(expectedDisplay, vsContainsDisplay.get());
 	}
-
-
-	private void validateValidateCodeLoincAllVS(String theCurrentVersion, Collection<String> allVersions) {
-		IValidationSupport.CodeValidationResult resultNoVersioned = myCodeSystemDao.validateCode(null,
-			new UriType(BASE_LOINC_URL), null, new CodeType(VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE),
-			null, null, null, null);
-		assertNotNull(resultNoVersioned);
-		assertEquals(prefixWithVersion(theCurrentVersion, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), resultNoVersioned.getDisplay());
-
-		IValidationSupport.CodeValidationResult resultVersioned = myCodeSystemDao.validateCode(null,
-			new UriType(BASE_LOINC_URL), null, new CodeType(VS_VERSIONED_ON_UPLOAD_FIRST_CODE),
-			null, null, null, null);
-		assertNotNull(resultVersioned);
-		assertEquals(prefixWithVersion(theCurrentVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), resultVersioned.getDisplay());
-
-		allVersions.forEach(this::validateValidateCodeForVersion);
-	}
-
-
 
 	private void validateValueExpandLoincAllVsForVersion(String theVersion) {
 		ValueSet vs = myValueSetDao.expandByIdentifier(LOINC_ALL_VS_URL + "|" + theVersion, null);

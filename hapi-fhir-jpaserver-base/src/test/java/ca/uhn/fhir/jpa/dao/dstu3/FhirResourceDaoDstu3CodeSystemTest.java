@@ -95,45 +95,4 @@ public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
 			assertEquals(0L, myConceptDao.count());
 		});
 	}
-
-	@Test
-	public void testCallValidateCodeReturnsNonNull() {
-		// Create the code system
-		CodeSystem cs = new CodeSystem();
-		cs.setUrl("http://foo");
-		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		cs.addConcept().setCode("A");
-		IIdType id = myCodeSystemDao.create(cs, mySrd).getId().toUnqualifiedVersionless();
-		runInTransaction(()->{
-			assertEquals(1, myConceptDao.count());
-		});
-
-		// Validate a Code 
-		IValidationSupport.CodeValidationResult result =
-			myCodeSystemDao.validateCode(id, new StringDt("http://foo"), null, new CodeDt("A"), null, null, null, null);
-		assertNotNull(result);
-	}
-
-	@Test
-	public void testValidateCodeForNullCodeAndCodeSystem_ThrowsException() {
-		Assertions.assertThrows(Exception.class, () -> {
-			myCodeSystemDao.validateCode(null, null, null, null, null, null, null, null);
-		});
-	}
-
-	@Test
-	public void testValidateCodeForNullCode_ThrowsException() {
-		Assertions.assertThrows(Exception.class, () -> {
-			myCodeSystemDao.validateCode(null, new StringDt("http://foo.com/CodeSystem/1"), null, null, null, null, null, null);
-		});
-	}
-
-	@Test
-	public void testValidateCodeForNullCodeSystem_ThrowsException() {
-		Assertions.assertThrows(Exception.class, () -> {
-			myCodeSystemDao.validateCode(new IdDt("CodeSystem/1"), null, null, null, null, null, null, null);
-		});
-	}
-
 }

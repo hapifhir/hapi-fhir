@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -167,20 +168,6 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 		}
 
 		return retVal;
-	}
-
-	@Override
-	public CodeValidationResult validateCode(IIdType theCodeSystemId, IPrimitiveType<String> theCodeSystemUrl,
-			IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode, IPrimitiveType<String> theDisplay,
-			Coding theCoding, CodeableConcept theCodeableConcept, RequestDetails theRequestDetails) {
-
-		// Original Code which works with locally-validated CodeSystems
-		// return myTerminologySvc.codeSystemValidateCode(theCodeSystemId, toStringOrNull(theCodeSystemUrl), toStringOrNull(theVersion), toStringOrNull(theCode), toStringOrNull(theDisplay), theCoding, theCodeableConcept);
-
-		// NEW Code which works when configured to use a Remote Terminology Server BUT causes several Unit Tests to FAIL
-		return myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport),
-			new ConceptValidationOptions().setValidateDisplay(true).setInferSystem(true), toStringOrNull(theCodeSystemUrl),
-			toStringOrNull(theCode), toStringOrNull(theDisplay), null);
 	}
 
 	@Override

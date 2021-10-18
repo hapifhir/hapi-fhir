@@ -170,13 +170,4 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 
 		return retVal;
 	}
-
-	@Override
-	public CodeValidationResult validateCode(IIdType theCodeSystemId, IPrimitiveType<String> theCodeSystemUrl, IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode,
-														  IPrimitiveType<String> theDisplay, Coding theCoding, CodeableConcept theCodeableConcept, RequestDetails theRequestDetails) {
-		return myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport),
-			new ConceptValidationOptions().setValidateDisplay(true).setInferSystem(true), toStringOrNull(theCodeSystemUrl),
-			toStringOrNull(theCode), toStringOrNull(theDisplay), null);
-	}
-
 }

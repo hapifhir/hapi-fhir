@@ -177,39 +177,6 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 
 	}
 
-	@Test
-	public void testCallValidateCodeReturnsNonNull() throws Exception {
-		String input = IOUtils.toString(getClass().getResource("/r4/codesystem_complete.json"), StandardCharsets.UTF_8);
-		CodeSystem cs = myFhirCtx.newJsonParser().parseResource(CodeSystem.class, input);
-		IIdType id = myCodeSystemDao.create(cs, mySrd).getId().toUnqualifiedVersionless();
-
-		// Validate a Code
-		IValidationSupport.CodeValidationResult result =
-			myCodeSystemDao.validateCode(id, new StringDt("xvalue://dedalus.eu/mci/CodeSystem/AddressUse"), null, new CodeDt("work"), new StringDt("Work"), null, null, null);
-		assertNotNull(result);
-	}
-
-	@Test
-	public void testValidateCodeForNullCodeAndCodeSystem_ThrowsException() {
-		Assertions.assertThrows(Exception.class, () -> {
-			myCodeSystemDao.validateCode(null, null, null, null, null, null, null, null);
-		});
-	}
-
-	@Test
-	public void testValidateCodeForNullCode_ThrowsException() {
-		Assertions.assertThrows(Exception.class, () -> {
-			myCodeSystemDao.validateCode(null, new StringDt("http://foo.com/CodeSystem/1"), null, null, null, null, null, null);
-		});
-	}
-
-	@Test
-	public void testValidateCodeForNullCodeSystem_ThrowsException() {
-		Assertions.assertThrows(Exception.class, () -> {
-			myCodeSystemDao.validateCode(new IdDt("CodeSystem/1"), null, null, null, null, null, null, null);
-		});
-	}
-
 	private IIdType createLargeCodeSystem(String theVersion) {
 		CodeSystem cs = new CodeSystem();
 		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);

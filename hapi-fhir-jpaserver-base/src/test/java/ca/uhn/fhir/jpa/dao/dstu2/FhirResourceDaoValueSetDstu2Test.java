@@ -232,16 +232,4 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 
 		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
 	}
-
-	@Test
-	public void testValidateCodeForCodeSystemOperationNotSupported() {
-		try {
-			((IFhirResourceDaoCodeSystem) myValueSetDao).validateCode(null, null, null, null, null, null, null, null);
-			fail();
-		} catch (UnsupportedOperationException theE) {
-			assertNotNull(theE);
-		}
-
-	}
-
 }

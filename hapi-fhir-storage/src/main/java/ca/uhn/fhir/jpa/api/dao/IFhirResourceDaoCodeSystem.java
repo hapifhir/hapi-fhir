@@ -47,8 +47,6 @@ public interface IFhirResourceDaoCodeSystem<T extends IBaseResource, CD, CC> ext
 
 	SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, CD theCodingA, CD theCodingB, RequestDetails theRequestDetails);
 
-	IValidationSupport.CodeValidationResult validateCode(IIdType theCodeSystemId, IPrimitiveType<String> theCodeSystemUrl, IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode, IPrimitiveType<String> theDisplay, CD theCoding, CC theCodeableConcept, RequestDetails theRequestDetails);
-
 	class SubsumesResult {
 
 		private final ConceptSubsumptionOutcome myOutcome;
@@ -72,6 +70,4 @@ public interface IFhirResourceDaoCodeSystem<T extends IBaseResource, CD, CC> ext
 			return retVal;
 		}
 	}
-
-
 }

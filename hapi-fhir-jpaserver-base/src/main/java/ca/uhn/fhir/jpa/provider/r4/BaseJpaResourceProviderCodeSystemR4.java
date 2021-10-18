@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProviderValueSetDstu2;
@@ -17,6 +19,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -42,6 +45,9 @@ import java.util.List;
  */
 
 public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<CodeSystem> {
+
+	@Autowired
+	IValidationSupport myValidationSupport;
 
 	/**
 	 * $lookup operation
@@ -135,9 +141,12 @@ public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<C
 
 		startRequest(theServletRequest);
 		try {
-			IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
-				
-			IValidationSupport.CodeValidationResult result = dao.validateCode(theId, theCodeSystemUrl, theVersion, theCode, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
+			String codeSystemUrl = (theCodeSystemUrl != null && theCodeSystemUrl.hasValue()) ? theCodeSystemUrl.asStringValue() : null;
+			String code = (theCode != null && theCode.hasValue()) ? theCode.asStringValue() : null;
+			String display = (theDisplay != null && theDisplay.hasValue()) ? theDisplay.asStringValue() : null;
+			IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(
+				new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(),
+				codeSystemUrl, code, display, null);
 			return (Parameters) BaseJpaResourceProviderValueSetDstu2.toValidateCodeResult(getContext(), result);
 		} finally {
 			endRequest(theServletRequest);
