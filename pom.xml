@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>5.6.0-PRE8-SNAPSHOT</version>
+	<version>5.6.0-PRE9-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -748,6 +748,10 @@
 			<name>Jing Tang</name>
 			<organization>Google</organization>
 		</developer>
+		<developer>
+			<id>theGOTOguy</id>
+			<name>Ben Li-Sauerwine</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -759,7 +763,7 @@
 
     <properties>
 
-        <fhir_core_version>5.4.10</fhir_core_version>
+        <fhir_core_version>5.5.7</fhir_core_version>
         <ucum_version>1.0.3</ucum_version>
 
         <surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -797,7 +801,7 @@
         <jaxb_core_version>2.3.0.1</jaxb_core_version>
         <jaxb_runtime_version>3.0.0</jaxb_runtime_version>
         <jena_version>4.2.0</jena_version>
-        <jersey_version>3.0.0</jersey_version>
+        <jersey_version>3.0.3</jersey_version>
         <jetty_version>9.4.43.v20210629</jetty_version>
         <jsr305_version>3.0.2</jsr305_version>
         <junit_version>5.7.1</junit_version>
@@ -2067,7 +2071,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-plugin-plugin</artifactId>
-					<version>3.6.0</version>
+					<version>3.6.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -2281,7 +2285,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.0.0-M2</version>
+				<version>3.0.0</version>
 				<executions>
 					<execution>
 						<id>enforce-maven</id>
