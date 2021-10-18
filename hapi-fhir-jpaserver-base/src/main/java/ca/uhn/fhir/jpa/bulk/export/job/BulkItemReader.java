@@ -24,14 +24,18 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.util.UrlUtil;
 import org.slf4j.Logger;
 
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -45,7 +49,6 @@ public class BulkItemReader extends BaseBulkItemReader {
 	protected Iterator<ResourcePersistentId> getResourcePidIterator() {
 		ourLog.info("Bulk export assembling export of type {} for job {}", myResourceType, myJobUUID);
 		Set<ResourcePersistentId> myReadPids = new HashSet<>();
-
 
 		List<SearchParameterMap> map = createSearchParameterMapsForResourceType();
 		ISearchBuilder sb = getSearchBuilderForLocalResourceType();
