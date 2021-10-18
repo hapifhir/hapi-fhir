@@ -377,7 +377,7 @@ public class SearchParamExtractorService {
 			 * if the reference is invalid
 			 */
 			myResourceLinkResolver.validateTypeOrThrowException(type);
-			resourceLink = resolveTargetAndCreateResourceLinkOrReturnNull(theRequestPartitionId, theEntity, transactionDate, theRuntimeSearchParam, path, thePathAndRef, nextId, typeString, type, nextReference, theRequest);
+			resourceLink = resolveTargetAndCreateResourceLinkOrReturnNull(theRequestPartitionId, theEntity, transactionDate, theRuntimeSearchParam, path, thePathAndRef, nextId, typeString, type, nextReference, theRequest, theTransactionDetails);
 			if (resourceLink == null) {
 				return;
 			} else {
@@ -402,7 +402,17 @@ public class SearchParamExtractorService {
 		theParams.myLinks.add(resourceLink);
 	}
 
-	private ResourceLink resolveTargetAndCreateResourceLinkOrReturnNull(@Nonnull RequestPartitionId theRequestPartitionId, ResourceTable theEntity, Date theUpdateTime, RuntimeSearchParam nextSpDef, String theNextPathsUnsplit, PathAndRef nextPathAndRef, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest) {
+	private ResourceLink resolveTargetAndCreateResourceLinkOrReturnNull(@Nonnull RequestPartitionId theRequestPartitionId, ResourceTable theEntity, Date theUpdateTime, RuntimeSearchParam nextSpDef, String theNextPathsUnsplit, PathAndRef nextPathAndRef, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+
+		ResourcePersistentId resolvedResourceId = theTransactionDetails.getResolvedResourceId(theNextId);
+		if (resolvedResourceId != null) {
+			String targetResourceType = theNextId.getResourceType();
+			Long targetResourcePid = resolvedResourceId.getIdAsLong();
+			String targetResourceIdPart = theNextId.getIdPart();
+			Long targetVersion = theNextId.getVersionIdPartAsLong();
+			return ResourceLink.forLocalReference(nextPathAndRef.getPath(), theEntity, targetResourceType, targetResourcePid, targetResourceIdPart, theUpdateTime, targetVersion);
+		}
+
 		/*
 		 * We keep a cache of resolved target resources. This is good since for some resource types, there
 		 * are multiple search parameters that map to the same element path within a resource (e.g.
@@ -415,7 +425,7 @@ public class SearchParamExtractorService {
 			targetRequestPartitionId = RequestPartitionId.allPartitions();
 		}
 
-		IResourceLookup targetResource = myResourceLinkResolver.findTargetResource(targetRequestPartitionId, nextSpDef, theNextPathsUnsplit, theNextId, theTypeString, theType, theReference, theRequest);
+		IResourceLookup targetResource = myResourceLinkResolver.findTargetResource(targetRequestPartitionId, nextSpDef, theNextPathsUnsplit, theNextId, theTypeString, theType, theReference, theRequest, theTransactionDetails);
 
 		if (targetResource == null) {
 			return null;

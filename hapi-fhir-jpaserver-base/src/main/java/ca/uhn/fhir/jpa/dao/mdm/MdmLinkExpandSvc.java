@@ -112,6 +112,7 @@ public class MdmLinkExpandSvc {
 		List<IMdmLinkDao.MdmPidTuple> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(theGoldenResourcePid, MdmMatchResultEnum.MATCH);
 		return flattenPidTuplesToSet(theGoldenResourcePid, goldenPidSourcePidTuples);
 	}
+
 	public Set<String> expandMdmByGoldenResourceId(IdDt theId) {
 		ourLog.debug("About to expand golden resource with golden resource id {}", theId);
 		Long pidOrThrowException = myIdHelperService.getPidOrThrowException(theId);

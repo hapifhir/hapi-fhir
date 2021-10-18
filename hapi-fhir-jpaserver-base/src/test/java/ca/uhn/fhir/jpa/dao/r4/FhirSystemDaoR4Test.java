@@ -10,7 +10,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -3289,8 +3288,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			assertThat(e.getMessage(), containsString("Resource type 'Practicioner' is not valid for this path"));
 		}
 
-		assertThat(myResourceTableDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
+		runInTransaction(()->assertThat(myResourceTableDao.findAll(), empty()));
+		runInTransaction(()->assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty()));
 
 	}
 
@@ -4361,8 +4360,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		id = myAllergyIntoleranceDao.read(ai.getIdElement().toUnqualifiedVersionless()).getIdElement();
 		assertEquals("3", id.getVersionIdPart());
-
 	}
-
 
 }

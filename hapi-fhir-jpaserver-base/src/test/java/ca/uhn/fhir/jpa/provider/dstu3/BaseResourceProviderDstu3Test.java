@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
@@ -96,6 +97,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			ourRestServer.registerProvider(subscriptionTriggeringProvider);
 
 			ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
+			ourRestServer.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
 
 			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(ourRestServer, mySystemDao, myDaoConfig, ourSearchParamRegistry);
 			confProvider.setImplementationDescription("THIS IS THE DESC");

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -67,6 +68,7 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
@@ -77,6 +79,7 @@ import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -170,7 +173,11 @@ public abstract class BaseStorageDao {
 
 		verifyBundleTypeIsAppropriateForStorage(theResource);
 
-		replaceAbsoluteReferencesWithRelative(theResource);
+		if(!getConfig().getTreatBaseUrlsAsLocal().isEmpty()) {
+			FhirTerser terser = myFhirContext.newTerser();
+			replaceAbsoluteReferencesWithRelative(theResource, terser);
+			replaceAbsoluteUrisWithRelative(theResource, terser);
+		}
 
 		performAutoVersioning(theResource, thePerformIndexing);
 
@@ -215,16 +222,34 @@ public abstract class BaseStorageDao {
 	/**
 	 * Replace absolute references with relative ones if configured to do so
 	 */
-	private void replaceAbsoluteReferencesWithRelative(IBaseResource theResource) {
-		if (getConfig().getTreatBaseUrlsAsLocal().isEmpty() == false) {
-			FhirTerser t = getContext().newTerser();
-			List<ResourceReferenceInfo> refs = t.getAllResourceReferences(theResource);
+	private void replaceAbsoluteReferencesWithRelative(IBaseResource theResource, FhirTerser theTerser) {
+			List<ResourceReferenceInfo> refs = theTerser.getAllResourceReferences(theResource);
 			for (ResourceReferenceInfo nextRef : refs) {
 				IIdType refId = nextRef.getResourceReference().getReferenceElement();
 				if (refId != null && refId.hasBaseUrl()) {
 					if (getConfig().getTreatBaseUrlsAsLocal().contains(refId.getBaseUrl())) {
 						IIdType newRefId = refId.toUnqualified();
 						nextRef.getResourceReference().setReference(newRefId.getValue());
+					}
+				}
+			}
+	}
+
+	/**
+	 * Replace Canonical URI's with local references, if we find that the canonical should be treated as local.
+	 */
+	private void replaceAbsoluteUrisWithRelative(IBaseResource theResource, FhirTerser theTerser) {
+
+		BaseRuntimeElementDefinition<?> canonicalElementDefinition = myFhirContext.getElementDefinition("canonical");
+		if (canonicalElementDefinition != null) {
+			Class<? extends IPrimitiveType<String>> canonicalType = (Class<? extends IPrimitiveType<String>>) canonicalElementDefinition.getImplementingClass();
+			List<? extends IPrimitiveType<String>> canonicals = theTerser.getAllPopulatedChildElementsOfType(theResource, canonicalType);
+
+			//TODO GGG this is pretty inefficient if there are many baseUrls, and many canonicals. Consider improving.
+			for (String baseUrl : myModelConfig.getTreatBaseUrlsAsLocal()) {
+				for (IPrimitiveType<String> canonical : canonicals) {
+					if (canonical.getValue().startsWith(baseUrl)) {
+						canonical.setValue(canonical.getValue().substring(baseUrl.length() + 1));
 					}
 				}
 			}

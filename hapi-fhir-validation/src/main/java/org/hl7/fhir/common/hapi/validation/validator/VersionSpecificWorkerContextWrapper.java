@@ -247,7 +247,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Nonnull
-	private ValidationResult convertValidationResult(@Nullable IValidationSupport.CodeValidationResult theResult) {
+	private ValidationResult convertValidationResult(String theSystem, @Nullable IValidationSupport.CodeValidationResult theResult) {
 		ValidationResult retVal = null;
 		if (theResult != null) {
 			String code = theResult.getCode();
@@ -255,7 +255,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			String issueSeverity = theResult.getSeverityCode();
 			String message = theResult.getMessage();
 			if (isNotBlank(code)) {
-				retVal = new ValidationResult(new org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent()
+				retVal = new ValidationResult(theSystem, new org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent()
 					.setCode(code)
 					.setDisplay(display));
 			} else if (isNotBlank(issueSeverity)) {
@@ -589,7 +589,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		} else {
 			result = myValidationSupportContext.getRootValidationSupport().validateCode(myValidationSupportContext, theValidationOptions, theSystem, theCode, theDisplay, null);
 		}
-		return convertValidationResult(result);
+		return convertValidationResult(theSystem, result);
 	}
 
 	@Override

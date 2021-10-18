@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2799
+title: "Certain ValueSet validation/expansion operations failed with a 'no transaction' error on
+   Postgresql. This has been corrected. Thanks to @tyfoni-systematic for reporting!"

@@ -189,7 +189,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			severity = IssueSeverity.fromCode(result.getSeverityCode());
 		}
 		ConceptDefinitionComponent definition = new ConceptDefinitionComponent().setCode(result.getCode());
-		return new ValidationResult(severity, result.getMessage(), definition);
+		return new ValidationResult(severity, result.getMessage(), theSystem, definition);
 	}
 
 	@Override
@@ -206,7 +206,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
 			definition.setCode(theCode);
 			definition.setDisplay(outcome.getDisplay());
-			return new ValidationResult(definition);
+			return new ValidationResult(theSystem, definition);
 		}
 
 		return new ValidationResult(IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" + Constants.codeSystemWithDefaultDescription(theSystem) + "]");

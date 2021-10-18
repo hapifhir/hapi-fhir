@@ -1,0 +1,5 @@
+---
+type: change
+issue: 3063
+title: "The Saxon-HE library has been removed as a mandatory dependency from the converter library. Thanks
+  to Jing Tang for the contribution!"

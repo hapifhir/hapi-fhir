@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
@@ -119,7 +120,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 	private void loadAndPersistValueSet() throws IOException {
 		ValueSet valueSet = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 		valueSet.setId("ValueSet/vs");
-		persistValueSet(valueSet, HttpVerb.POST);
+		persistValueSet(valueSet, HttpVerb.PUT);
 	}
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
@@ -155,15 +156,17 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 	}
 
 	private void createExternalCsAndLocalVs() {
-		CodeSystem codeSystem = createExternalCs();
-
-		createLocalVs(codeSystem);
+		runInTransaction(() -> {
+			CodeSystem codeSystem = createExternalCs();
+			createLocalVs(codeSystem);
+		});
 	}
 
 	private void createExternalCsAndLocalVsWithUnknownCode() {
-		CodeSystem codeSystem = createExternalCs();
-
-		createLocalVsWithUnknownCode(codeSystem);
+		runInTransaction(() -> {
+			CodeSystem codeSystem = createExternalCs();
+			createLocalVsWithUnknownCode(codeSystem);
+		});
 	}
 
 	private void createLocalCs() {
@@ -256,8 +259,10 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		loadAndPersistCodeSystemAndValueSet();
 		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
-		assertEquals(1, page.getContent().size());
+		runInTransaction(()->{
+			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+			assertEquals(1, page.getContent().size());
+		});
 
 		Parameters respParam = myClient
 			.operation()
@@ -311,8 +316,10 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		loadAndPersistCodeSystemAndValueSet();
 		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
-		assertEquals(1, page.getContent().size());
+		runInTransaction(() -> {
+			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+			assertEquals(1, page.getContent().size());
+		});
 
 		Parameters respParam = myClient
 			.operation()
@@ -320,7 +327,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.named("expand")
 			.withParameter(Parameters.class, "filter", new StringType("blood"))
 			.execute();
-				
+
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -337,8 +344,10 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		loadAndPersistCodeSystemAndValueSet();
 		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
-		assertEquals(1, page.getContent().size());
+		runInTransaction(() -> {
+			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+			assertEquals(1, page.getContent().size());
+		});
 
 		Parameters respParam = myClient
 			.operation()
@@ -346,7 +355,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.named("expand")
 			.withParameter(Parameters.class, "filter", new StringType("blo"))
 			.execute();
-				
+
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -354,7 +363,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
 		assertThat(resp, not(containsString("\"Foo Code\"")));
 	}
-	
+
 	@Test
 	public void testExpandByIdWithFilterWithPreExpansionWithoutPrefixValue() throws Exception {
 		myDaoConfig.setPreExpandValueSets(true);
@@ -362,7 +371,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		loadAndPersistCodeSystemAndValueSet();
 		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+		Slice<TermValueSet> page = runInTransaction(() -> myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED));
 		assertEquals(1, page.getContent().size());
 
 		Parameters respParam = myClient
@@ -371,7 +380,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.named("expand")
 			.withParameter(Parameters.class, "filter", new StringType("lood"))
 			.execute();
-				
+
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -379,8 +388,8 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		assertThat(resp, not(containsString("<display value=\"Systolic blood pressure at First encounter\"/>")));
 		assertThat(resp, not(containsString("\"Foo Code\"")));
 	}
-	
-	
+
+
 	@Test
 	public void testExpandByUrl() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
@@ -445,9 +454,11 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 		loadAndPersistCodeSystemAndValueSet();
 		await().until(() -> clearDeferredStorageQueue());
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
-		assertEquals(1, page.getContent().size());
+		runInTransaction(()->{
+			myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+			assertEquals(1, page.getContent().size());
+		});
 
 		Parameters respParam = myClient
 			.operation()
@@ -798,7 +809,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 	 */
 	@Test
 	public void testInvalidFilter() throws Exception {
-		String string = IOUtils.toString(getClass().getResourceAsStream("/bug_516_invalid_expansion.json"), StandardCharsets.UTF_8);
+		String string = loadResource("/bug_516_invalid_expansion.json");
 		HttpPost post = new HttpPost(ourServerBase + "/ValueSet/%24expand");
 		post.setEntity(new StringEntity(string, ContentType.parse(ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW)));
 
@@ -1079,7 +1090,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A"));
 		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains()), containsInAnyOrder("AA", "AB"));
-		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t->t.getCode().equals("AA")).findFirst().orElseThrow(()->new IllegalArgumentException()).getContains()), containsInAnyOrder("AAA"));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t -> t.getCode().equals("AA")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getContains()), containsInAnyOrder("AAA"));
 		assertEquals(16, myCaptureQueriesListener.getSelectQueries().size());
 
 	}
@@ -1104,7 +1115,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A", "AA", "AB", "AAA"));
 		assertEquals(15, myCaptureQueriesListener.getSelectQueries().size());
-		assertEquals(null, expansion.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
+		assertEquals("ValueSet with URL \"Unidentified ValueSet\" was expanded using an in-memory expansion", expansion.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
 
 		// Hierarchical
 		myCaptureQueriesListener.clear();
@@ -1119,7 +1130,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A"));
 		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains()), containsInAnyOrder("AA", "AB"));
-		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t->t.getCode().equals("AA")).findFirst().orElseThrow(()->new IllegalArgumentException()).getContains()), containsInAnyOrder("AAA"));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t -> t.getCode().equals("AA")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getContains()), containsInAnyOrder("AAA"));
 		assertEquals(14, myCaptureQueriesListener.getSelectQueries().size());
 
 	}
@@ -1156,7 +1167,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A", "AA", "AB", "AAA"));
 		assertEquals(3, myCaptureQueriesListener.getSelectQueries().size());
-		assertEquals("ValueSet was expanded using a pre-calculated expansion", expansion.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
+		assertThat(expansion.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE), containsString("ValueSet was expanded using an expansion that was pre-calculated"));
 
 		// Hierarchical
 		myCaptureQueriesListener.clear();
@@ -1171,7 +1182,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertThat(toDirectCodes(expansion.getExpansion().getContains()), containsInAnyOrder("A"));
 		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains()), containsInAnyOrder("AA", "AB"));
-		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t->t.getCode().equals("AA")).findFirst().orElseThrow(()->new IllegalArgumentException()).getContains()), containsInAnyOrder("AAA"));
+		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t -> t.getCode().equals("AA")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getContains()), containsInAnyOrder("AAA"));
 		assertEquals(3, myCaptureQueriesListener.getSelectQueries().size());
 
 	}
@@ -1284,8 +1295,11 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		assertEquals("result", respParam.getParameter().get(0).getName());
 		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue());
 
-		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals("Male", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("message", respParam.getParameter().get(1).getName());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/administrative-gender", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+
+		assertEquals("display", respParam.getParameter().get(2).getName());
+		assertEquals("Male", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 	}
 
 	@Test
@@ -1371,6 +1385,48 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 	}
 
 	@Test
+	public void testInvalidatePrecalculatedExpansion() throws IOException {
+		loadAndPersistCodeSystemAndValueSet();
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndNullVersion("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2").orElseThrow(()->new IllegalStateException()).getExpansionStatus()));
+
+		Parameters outcome = myClient
+			.operation()
+			.onInstance("ValueSet/vs")
+			.named(ProviderConstants.OPERATION_INVALIDATE_EXPANSION)
+			.withNoParameters(Parameters.class)
+			.execute();
+		assertEquals("ValueSet with URL \"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2\" precaluclated expansion with 24 concept(s) has been invalidated", outcome.getParameter("message").primitiveValue());
+
+		assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndNullVersion("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2").orElseThrow(()->new IllegalStateException()).getExpansionStatus()));
+
+		outcome = myClient
+			.operation()
+			.onInstance("ValueSet/vs")
+			.named(ProviderConstants.OPERATION_INVALIDATE_EXPANSION)
+			.withNoParameters(Parameters.class)
+			.execute();
+		assertEquals("ValueSet with URL \"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2\" already has status: NOT_EXPANDED", outcome.getParameter("message").primitiveValue());
+	}
+
+	@Test
+	public void testInvalidatePrecalculatedExpansion_NonExistent() {
+		try {
+			myClient
+				.operation()
+				.onInstance("ValueSet/FOO")
+				.named(ProviderConstants.OPERATION_INVALIDATE_EXPANSION)
+				.withNoParameters(Parameters.class)
+				.execute();
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals("HTTP 404 Not Found: Resource ValueSet/FOO is not known", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testExpandByValueSetWithFilterContainsPrefixValue() throws IOException {
 		loadAndPersistCodeSystem();
 
@@ -1389,7 +1445,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder("<code value=\"11378-7\"/>", "<display value=\"Systolic blood pressure at First encounter\"/>"));
 	}
-	
+
 	@Test
 	public void testExpandByValueSetWithFilterContainsNoPrefixValue() throws IOException {
 		loadAndPersistCodeSystem();
@@ -1407,10 +1463,10 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		
-		assertThat(resp, not(stringContainsInOrder("<code value=\"11378-7\"/>","<display value=\"Systolic blood pressure at First encounter\"/>")));
+
+		assertThat(resp, not(stringContainsInOrder("<code value=\"11378-7\"/>", "<display value=\"Systolic blood pressure at First encounter\"/>")));
 	}
-	
+
 	@Test
 	public void testExpandByValueSetWithFilterNotContainsAnyValue() throws IOException {
 		loadAndPersistCodeSystem();
@@ -1428,10 +1484,10 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		
-		assertThat(resp, not(stringContainsInOrder("<code value=\"11378-7\"/>","<display value=\"Systolic blood pressure at First encounter\"/>")));
+
+		assertThat(resp, not(stringContainsInOrder("<code value=\"11378-7\"/>", "<display value=\"Systolic blood pressure at First encounter\"/>")));
 	}
-	
+
 	@Test
 	public void testExpandByUrlWithFilter() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
@@ -1474,7 +1530,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 	private boolean clearDeferredStorageQueue() {
 
-		if(!myTerminologyDeferredStorageSvc.isStorageQueueEmpty()) {
+		if (!myTerminologyDeferredStorageSvc.isStorageQueueEmpty()) {
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
 			return false;
 		} else {
