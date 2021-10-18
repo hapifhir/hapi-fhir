@@ -3,15 +3,21 @@ package org.hl7.fhir.common.hapi.validation.support;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.parser.IJsonLikeParser;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.client.api.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.util.ParametersUtil;
+import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -23,10 +29,12 @@ import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,6 +43,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class RemoteTerminologyServiceValidationSupportTest {
 
@@ -64,7 +73,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 
 		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
 		mySvc.setBaseUrl(baseUrl);
-		mySvc.addClientInterceptor(new LoggingInterceptor(false));
+		mySvc.addClientInterceptor(new LoggingInterceptor(true));
 	}
 
 	@AfterEach
@@ -152,7 +161,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	 * Remote terminology services shouldn't be used to validate codes with an implied system
 	 */
 	@Test
-	public void testValidateCodeInValueSet_InferSystem_codeSystemNotPresent() {
+	public void testValidateCodeInValueSet_InferSystem() {
 		createNextValueSetReturnParameters(true, DISPLAY, null);
 
 		ValueSet valueSet = new ValueSet();
@@ -166,22 +175,158 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	 * Remote terminology services can be used to validate codes when code system is present,
 	 * even when inferSystem is true
 	 */
-	@Test
-	public void testValidateCodeInValueSet_InferSystem_codeSystemIsPresent() {
-		createNextValueSetReturnParameters(true, DISPLAY, null);
+	@Nested
+	public class ExtractCodeSystemFromValueSet {
 
-		ValueSet valueSet = new ValueSet();
-		valueSet.setUrl(VALUE_SET_URL);
-		String systemUrl = "http://hl7.org/fhir/ValueSet/administrative-gender";
-		valueSet.setCompose(new ValueSet.ValueSetComposeComponent().setInclude(
-			Collections.singletonList(new ValueSet.ConceptSetComponent().setSystem(systemUrl)) ));
+		@Test
+		public void testUniqueComposeInclude() {
+			createNextValueSetReturnParameters(true, DISPLAY, null);
 
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null,
-			new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
+			ValueSet valueSet = new ValueSet();
+			valueSet.setUrl(VALUE_SET_URL);
+			String systemUrl = "http://hl7.org/fhir/ValueSet/administrative-gender";
+			valueSet.setCompose(new ValueSet.ValueSetComposeComponent().setInclude(
+				Collections.singletonList(new ValueSet.ConceptSetComponent().setSystem(systemUrl)) ));
 
-		// validate service doesn't do early return (as when no code system is present)
-		assertNotNull(outcome);
+			IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null,
+				new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
+
+			// validate service doesn't do early return (as when no code system is present)
+			assertNotNull(outcome);
+		}
+
+
+		@Nested
+		public class MultiComposeIncludeValueSet {
+
+			@Test
+			public void SystemNotPresentReturnsNull() {
+				createNextValueSetReturnParameters(true, DISPLAY, null);
+
+				ValueSet valueSet = new ValueSet();
+				valueSet.setUrl(VALUE_SET_URL);
+				valueSet.setCompose(new ValueSet.ValueSetComposeComponent().setInclude(
+					Lists.newArrayList(new ValueSet.ConceptSetComponent(), new ValueSet.ConceptSetComponent()) ));
+
+				IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null,
+					new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
+
+				assertNull(outcome);
+			}
+
+
+			@Test
+			public void SystemPresentCodeNotPresentReturnsNull() {
+				createNextValueSetReturnParameters(true, DISPLAY, null);
+
+				ValueSet valueSet = new ValueSet();
+				valueSet.setUrl(VALUE_SET_URL);
+				String systemUrl = "http://hl7.org/fhir/ValueSet/administrative-gender";
+				String systemUrl2 = "http://hl7.org/fhir/ValueSet/other-valueset";
+				valueSet.setCompose(new ValueSet.ValueSetComposeComponent().setInclude(
+					Lists.newArrayList(
+						new ValueSet.ConceptSetComponent().setSystem(systemUrl),
+						new ValueSet.ConceptSetComponent().setSystem(systemUrl2)) ));
+
+				IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null,
+					new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
+
+				assertNull(outcome);
+			}
+
+
+			@Test
+			public void SystemPresentCodePresentValidatesOKNoVersioned() {
+				createNextValueSetReturnParameters(true, DISPLAY, null);
+
+				ValueSet valueSet = new ValueSet();
+				valueSet.setUrl(VALUE_SET_URL);
+				String systemUrl = "http://hl7.org/fhir/ValueSet/administrative-gender";
+				String systemUrl2 = "http://hl7.org/fhir/ValueSet/other-valueset";
+				valueSet.setCompose(new ValueSet.ValueSetComposeComponent().setInclude(
+					Lists.newArrayList(
+						new ValueSet.ConceptSetComponent().setSystem(systemUrl),
+						new ValueSet.ConceptSetComponent().setSystem(systemUrl2).setConcept(
+							Lists.newArrayList(
+								new ValueSet.ConceptReferenceComponent().setCode("not-the-code"),
+								new ValueSet.ConceptReferenceComponent().setCode(CODE) )
+						)) ));
+
+				TestClientInterceptor requestInterceptor = new TestClientInterceptor();
+				mySvc.addClientInterceptor(requestInterceptor);
+
+				IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null,
+					new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
+
+				assertNotNull(outcome);
+				assertEquals(systemUrl2, requestInterceptor.getCapturedSystemParameter());
+			}
+
+
+			@Test
+			public void SystemPresentCodePresentValidatesOKVersioned() {
+				createNextValueSetReturnParameters(true, DISPLAY, null);
+
+				ValueSet valueSet = new ValueSet();
+				valueSet.setUrl(VALUE_SET_URL);
+				String systemUrl = "http://hl7.org/fhir/ValueSet/administrative-gender";
+				String systemVersion = "3.0.2";
+				String systemUrl2 = "http://hl7.org/fhir/ValueSet/other-valueset";
+				String system2Version = "4.0.1";
+				valueSet.setCompose(new ValueSet.ValueSetComposeComponent().setInclude(
+					Lists.newArrayList(
+						new ValueSet.ConceptSetComponent().setSystem(systemUrl).setVersion(systemVersion),
+						new ValueSet.ConceptSetComponent().setSystem(systemUrl2).setVersion(system2Version).setConcept(
+							Lists.newArrayList(
+								new ValueSet.ConceptReferenceComponent().setCode("not-the-code"),
+								new ValueSet.ConceptReferenceComponent().setCode(CODE) )
+						)) ));
+
+				TestClientInterceptor requestInterceptor = new TestClientInterceptor();
+				mySvc.addClientInterceptor(requestInterceptor);
+
+				IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null,
+					new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
+
+				assertNotNull(outcome);
+				assertEquals(systemUrl2 + "|" + system2Version, requestInterceptor.getCapturedSystemParameter());
+			}
+
+
+		}
+
+		/**
+		 * Captures the system parameter of the request
+		 */
+		private class TestClientInterceptor implements IClientInterceptor {
+
+			private String capturedSystemParameter;
+
+			@Override
+			public void interceptRequest(IHttpRequest theRequest) {
+				try {
+					String content = theRequest.getRequestBodyFromStream();
+					if (content != null) {
+						IJsonLikeParser parser = (IJsonLikeParser) ourCtx.newJsonParser();
+						Parameters params = parser.parseResource(Parameters.class, content);
+						List<String> systemValues = ParametersUtil.getNamedParameterValuesAsString(
+							ourCtx, params, "system");
+						assertEquals(1, systemValues.size());
+						capturedSystemParameter = systemValues.get(0);
+					}
+				} catch (IOException theE) {
+					theE.printStackTrace();
+				}
+			}
+
+			@Override
+			public void interceptResponse(IHttpResponse theResponse) throws IOException { }
+
+			public String getCapturedSystemParameter() { return capturedSystemParameter; }
+		}
 	}
+
+
 
 	@Test
 	public void testIsValueSetSupported_False() {
