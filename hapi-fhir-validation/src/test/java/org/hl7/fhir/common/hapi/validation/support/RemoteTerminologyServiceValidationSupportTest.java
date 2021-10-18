@@ -176,7 +176,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	 * even when inferSystem is true
 	 */
 	@Nested
-	public class ExtractCodeSystemFormValueSet {
+	public class ExtractCodeSystemFromValueSet {
 
 		@Test
 		public void testUniqueComposeInclude() {
