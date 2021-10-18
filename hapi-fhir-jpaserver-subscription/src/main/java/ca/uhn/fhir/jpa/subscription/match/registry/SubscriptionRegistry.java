@@ -31,9 +31,6 @@ import ca.uhn.fhir.util.HapiExtensions;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,27 +82,33 @@ public class SubscriptionRegistry {
 		return activeSubscription.map(ActiveSubscription::getSubscription);
 	}
 
-	private ChannelRetryConfiguration getRetryConfigurationFromSubscriptionExtensions(String theChannelName, IBaseResource theSubscription) {
+	/**
+	 * Extracts the retry configuration settings from the CanonicalSubscription object.
+	 *
+	 * NB: if no retry-count is specified, dlq will be ignored (specified or not).
+	 *
+	 * Returns the configuration, or null, if no retry (or a bad retry value)
+	 * is specified.
+	 *
+	 * @param theSubscription
+	 * @return
+	 */
+	private ChannelRetryConfiguration getRetryConfigurationFromSubscriptionExtensions(CanonicalSubscription theSubscription) {
 		ChannelRetryConfiguration configuration = new ChannelRetryConfiguration();
-		if (theSubscription instanceof Subscription) {
-			Subscription sub = (Subscription) theSubscription;
-			Subscription.SubscriptionChannelComponent channel = sub.getChannel();
-			for (Extension ex : channel.getExtension()) {
-				if (ex.getUrl().equals(HapiExtensions.EX_RETRY_COUNT)) {
-					IntegerType intVal = (IntegerType) ex.getValue();
-					configuration.setRetryCount(intVal.getValue());
-				}
-				else if (ex.getUrl().equals(HapiExtensions.EX_DLQ_PREFIX)) {
-					StringType v = (StringType) ex.getValue();
-					configuration.setDeadLetterQueuePrefix(v.getValue());
-				}
 
-				if (configuration.hasDeadLetterQueuePrefix()
-						&& configuration.getRetryCount() != null) {
-					break;
-				}
+		List<String> retryCount = theSubscription.getChannelExtensions(HapiExtensions.EX_RETRY_COUNT);
+		if (retryCount.size() == 1) {
+			String val = retryCount.get(0);
+			configuration.setRetryCount(Integer.parseInt(val));
+
+			List<String> dlqPrefix = theSubscription.getChannelExtensions(HapiExtensions.EX_DLQ_PREFIX);
+			if (dlqPrefix.size() == 1) {
+				String dlqPref = dlqPrefix.get(0);
+				configuration.setDeadLetterQueuePrefix(dlqPref);
 			}
+			// else - 0 or more than 1 dlqs are not possible
 		}
+		// else - 0 or more than 1 means no retry policy at all
 
 		// retry count is required for any retry policy
 		if (configuration.getRetryCount() == null || configuration.getRetryCount() < 0) {
@@ -115,23 +118,21 @@ public class SubscriptionRegistry {
 		return configuration;
 	}
 
-
-	private void registerSubscription(IIdType theId, IBaseResource theSubscription) {
+	private void registerSubscription(IIdType theId, CanonicalSubscription theCanonicalSubscription) {
 		Validate.notNull(theId);
 		String subscriptionId = theId.getIdPart();
 		Validate.notBlank(subscriptionId);
-		Validate.notNull(theSubscription);
+		Validate.notNull(theCanonicalSubscription);
 
-		CanonicalSubscription canonicalized = mySubscriptionCanonicalizer.canonicalize(theSubscription);
-
-		String channelName = mySubscriptionDeliveryChannelNamer.nameFromSubscription(canonicalized);
+		String channelName = mySubscriptionDeliveryChannelNamer.nameFromSubscription(theCanonicalSubscription);
 
 		// get the actual retry configuration
-		ChannelRetryConfiguration configuration = getRetryConfigurationFromSubscriptionExtensions(channelName, theSubscription);
+		ChannelRetryConfiguration configuration = getRetryConfigurationFromSubscriptionExtensions(theCanonicalSubscription);
 
-		ActiveSubscription activeSubscription = new ActiveSubscription(canonicalized, channelName);
+		ActiveSubscription activeSubscription = new ActiveSubscription(theCanonicalSubscription, channelName);
 		activeSubscription.setRetryConfiguration(configuration);
 
+		// add to our registries
 		mySubscriptionChannelRegistry.add(activeSubscription);
 		myActiveSubscriptionCache.put(subscriptionId, activeSubscription);
 
@@ -139,7 +140,7 @@ public class SubscriptionRegistry {
 
 		// Interceptor call: SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED
 		HookParams params = new HookParams()
-			.add(CanonicalSubscription.class, canonicalized);
+			.add(CanonicalSubscription.class, theCanonicalSubscription);
 		myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, params);
 	}
 
@@ -174,6 +175,7 @@ public class SubscriptionRegistry {
 	}
 
 	public synchronized boolean registerSubscriptionUnlessAlreadyRegistered(IBaseResource theSubscription) {
+		Validate.notNull(theSubscription);
 		Optional<CanonicalSubscription> existingSubscription = hasSubscription(theSubscription.getIdElement());
 		CanonicalSubscription newSubscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
 
@@ -191,7 +193,7 @@ public class SubscriptionRegistry {
 			unregisterSubscriptionIfRegistered(theSubscription.getIdElement().getIdPart());
 		}
 		if (Subscription.SubscriptionStatus.ACTIVE.equals(newSubscription.getStatus())) {
-			registerSubscription(theSubscription.getIdElement(), theSubscription);
+			registerSubscription(theSubscription.getIdElement(), newSubscription);
 			return true;
 		} else {
 			return false;
