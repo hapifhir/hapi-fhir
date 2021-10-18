@@ -1621,8 +1621,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		assertThat(ids.toString(), containsString("Patient/"));
 		assertThat(ids.toString(), containsString("Condition/"));
-
 	}
+
 
 	@Test
 	public void testEverythingPatientOperation() {

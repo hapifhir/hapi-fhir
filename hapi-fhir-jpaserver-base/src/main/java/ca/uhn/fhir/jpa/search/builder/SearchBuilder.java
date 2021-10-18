@@ -83,6 +83,7 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
@@ -389,10 +390,11 @@ public class SearchBuilder implements ISearchBuilder {
 				if (param instanceof StringParam) {
 					// we expect all _id values to be StringParams
 					ids.add(((StringParam) param).getValue());
-				}
-				else {
+				} else if (param instanceof TokenParam) {
+					ids.add(((TokenParam)param).getValue());
+				} else {
 					// we do not expect the _id parameter to be a non-string value
-					throw new IllegalArgumentException("_id parameter must be a StringParam");
+					throw new IllegalArgumentException("_id parameter must be a StringParam or TokenParam");
 				}
 			}
 		}

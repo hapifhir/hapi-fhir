@@ -28,11 +28,13 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class RemoteTerminologyServiceValidationSupportTest {
 
@@ -147,10 +149,10 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	}
 
 	/**
-	 * Remote terminology services shouldn't be used to validatre codes with an implied system
+	 * Remote terminology services shouldn't be used to validate codes with an implied system
 	 */
 	@Test
-	public void testValidateCodeInValueSet_InferSystem() {
+	public void testValidateCodeInValueSet_InferSystem_codeSystemNotPresent() {
 		createNextValueSetReturnParameters(true, DISPLAY, null);
 
 		ValueSet valueSet = new ValueSet();
@@ -158,6 +160,27 @@ public class RemoteTerminologyServiceValidationSupportTest {
 
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null, new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
 		assertEquals(null, outcome);
+	}
+
+	/**
+	 * Remote terminology services can be used to validate codes when code system is present,
+	 * even when inferSystem is true
+	 */
+	@Test
+	public void testValidateCodeInValueSet_InferSystem_codeSystemIsPresent() {
+		createNextValueSetReturnParameters(true, DISPLAY, null);
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(VALUE_SET_URL);
+		String systemUrl = "http://hl7.org/fhir/ValueSet/administrative-gender";
+		valueSet.setCompose(new ValueSet.ValueSetComposeComponent().setInclude(
+			Collections.singletonList(new ValueSet.ConceptSetComponent().setSystem(systemUrl)) ));
+
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null,
+			new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
+
+		// validate service doesn't do early return (as when no code system is present)
+		assertNotNull(outcome);
 	}
 
 	@Test
