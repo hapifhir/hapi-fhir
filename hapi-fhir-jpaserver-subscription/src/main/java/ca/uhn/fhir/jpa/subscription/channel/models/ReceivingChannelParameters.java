@@ -1,24 +1,15 @@
 package ca.uhn.fhir.jpa.subscription.channel.models;
 
-import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
+public class ReceivingChannelParameters extends BaseChannelParameters {
 
-public class ReceivingChannelParameters {
-	private final String myChannelName;
-	private ChannelRetryConfiguration myRetryConfiguration;
-
+	/**
+	 * Constructor
+	 *
+	 * Receiving channels are channels that receive data from topics/queues
+	 *
+	 * @param theChannelName
+	 */
 	public ReceivingChannelParameters(String theChannelName) {
-		myChannelName = theChannelName;
-	}
-
-	public String getChannelName() {
-		return myChannelName;
-	}
-
-	public void setRetryConfiguration(ChannelRetryConfiguration theConfiguration) {
-		myRetryConfiguration = theConfiguration;
-	}
-
-	public ChannelRetryConfiguration getRetryConfiguration() {
-		return myRetryConfiguration;
+		super(theChannelName);
 	}
 }

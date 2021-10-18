@@ -8,13 +8,20 @@ public class ChannelRetryConfiguration {
 
 	/**
 	 * If a retry count is specified,
-	 * a dead letter queue can be specified.
+	 * a dead letter queue prefix can be specified.
 	 * Messages that fail delivery > myRetryCount will
-	 * be put onto this queue. If not specified, they are simply lost.
+	 * be put onto a dlq using this prefix.
 	 *
-	 * If retry count is not provided, dlq is ignored
+	 * While called a 'prefix', whether it is used
+	 * as such is up to implementation of message queues.
+	 * ActiveMQ will use this as a prefix.
+	 * Kafka will use this as a prefix. //todo - check
+	 *
+	 * If no dlq prefix is specified, they are simply lost.
+	 *
+	 * If retry count is not provided, dlq prefix is ignored
 	 */
-	private String myDeadLetterQueueName;
+	private String myDeadLetterQueuePrefix;
 
 	public void setRetryCount(int theRetryCount) {
 		myRetryCount = theRetryCount;
@@ -24,16 +31,16 @@ public class ChannelRetryConfiguration {
 		return myRetryCount;
 	}
 
-	public void setDeadLetterQueueName(String theDlqName) {
-		myDeadLetterQueueName = theDlqName;
+	public void setDeadLetterQueuePrefix(String theDlqName) {
+		myDeadLetterQueuePrefix = theDlqName;
 	}
 
-	public String getDeadLetterQueueName() {
-		return myDeadLetterQueueName;
+	public String getDeadLetterQueuePrefix() {
+		return myDeadLetterQueuePrefix;
 	}
 
-	public boolean hasDeadLetterQueue() {
-		return myDeadLetterQueueName != null
-			&& !myDeadLetterQueueName.trim().equals("");
+	public boolean hasDeadLetterQueuePrefix() {
+		return myDeadLetterQueuePrefix != null
+			&& !myDeadLetterQueuePrefix.trim().equals("");
 	}
 }

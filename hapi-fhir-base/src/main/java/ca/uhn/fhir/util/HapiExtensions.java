@@ -129,20 +129,25 @@ public class HapiExtensions {
 	 * a "retry-count" and a "dlq" (dead letter queue where failed
 	 * messages are dropped).
 	 */
-	public static final String EXT_RETRY_POLICY = "http://hapifhir.io/fhir/StructureDefinition/retry-policy";
+//	public static final String EXT_RETRY_POLICY = "http://hapifhir.io/fhir/StructureDefinition/retry-policy";
+
+	public static final String EX_RETRY_COUNT = "http://hapifhir.io/fhir/StructureDefinition/retry-count";
+
+	public static final String EX_DLQ_PREFIX = "http://hapifhir.io/fhir/StructureDefinition/dlq-prefix";
 
 	/**
 	 * Required subextension of retry-policy. Provides the retry-count
 	 * as an int value
 	 */
-	public static final String SUB_EXTENSION_RETRY_COUNT = "retry-count";
+//	public static final String SUB_EXTENSION_RETRY_COUNT = "retry-count";
 
 	/**
-	 * Optional subextension of retry-policy. Provides the dlq to use
-	 * if delivery fails more than retry-count.
-	 * If not provided, failed messages are simply dropped.
+	 * Optional subextension of retry-policy.
+	 * If provided, this value will be used to
+	 * prefix any DeadLetterQueues used for failure (in ActiveMQ && kafka)
+	 * If not provided, failed deliveries will be dropped.
 	 */
-	public static final String SUB_EXTENSION_DEAD_LETTER_QUEUE = "dlq";
+//	public static final String SUB_EXTENSION_DLQ_PREFIX = "dlq-prefix";
 
 	/**
 	 * Non instantiable

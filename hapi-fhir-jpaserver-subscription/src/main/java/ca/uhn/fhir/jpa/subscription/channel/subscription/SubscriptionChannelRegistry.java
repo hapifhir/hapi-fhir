@@ -21,17 +21,17 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
  */
 
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
+import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.channel.models.ProducingChannelParameters;
 import ca.uhn.fhir.jpa.subscription.channel.models.ReceivingChannelParameters;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
-import ca.uhn.fhir.util.StringUtil;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-import org.apache.commons.codec.binary.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,37 +66,24 @@ public class SubscriptionChannelRegistry {
 			return;
 		}
 
-		ChannelRetryConfiguration retryConfigParameters = theActiveSubscription.getRetryConfigurationParameters();
-		if (retryConfigParameters != null
-				&& retryConfigParameters.getDeadLetterQueueName() != null
-				&& !retryConfigParameters.getDeadLetterQueueName().trim().equals("")) {
-			// create a dlq
-			String name = retryConfigParameters.getDeadLetterQueueName();
-			createDeadLetterQueue(name);
-		}
-		ReceivingChannelParameters parameters = new ReceivingChannelParameters(channelName);
-		parameters.setRetryConfiguration(retryConfigParameters);
-
-		IChannelReceiver channelReceiver = newReceivingChannel(parameters);
+		// the receiving channel
+		ReceivingChannelParameters receivingParameters = new ReceivingChannelParameters(channelName);
+		IChannelReceiver channelReceiver = newReceivingChannel(receivingParameters);
 		Optional<MessageHandler> deliveryHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(theActiveSubscription.getChannelType());
 
 		SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = new SubscriptionChannelWithHandlers(channelName, channelReceiver);
 		deliveryHandler.ifPresent(subscriptionChannelWithHandlers::addHandler);
 		myDeliveryReceiverChannels.put(channelName, subscriptionChannelWithHandlers);
 
-		IChannelProducer sendingChannel = newSendingChannel(channelName);
+		// create the producing channel.
+		// this is the channel that will send the messages out
+		// to subscribers
+		ChannelRetryConfiguration retryConfigParameters = theActiveSubscription.getRetryConfigurationParameters();
+		ProducingChannelParameters producingChannelParameters = new ProducingChannelParameters(channelName);
+		producingChannelParameters.setRetryConfiguration(retryConfigParameters);
+
+		IChannelProducer sendingChannel = newSendingChannel(producingChannelParameters);
 		myChannelNameToSender.put(channelName, sendingChannel);
-	}
-
-	private void createDeadLetterQueue(String theDlqName) {
-		ReceivingChannelParameters dlqParams = new ReceivingChannelParameters(theDlqName);
-		IChannelReceiver dlq = newReceivingChannel(dlqParams);
-
-		SubscriptionChannelWithHandlers dlqWithHandlers = new SubscriptionChannelWithHandlers(theDlqName, dlq);
-		Optional<MessageHandler> dlqHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(CanonicalSubscriptionChannelType.MESSAGE);
-
-		dlqHandler.ifPresent(dlqWithHandlers::addHandler);
-		myDeliveryReceiverChannels.put(theDlqName, dlqWithHandlers);
 	}
 
 	protected IChannelReceiver newReceivingChannel(String theChannelName) {
@@ -105,13 +92,15 @@ public class SubscriptionChannelRegistry {
 
 	protected IChannelReceiver newReceivingChannel(ReceivingChannelParameters theParameters) {
 		ChannelConsumerSettings settings = new ChannelConsumerSettings();
-		settings.setRetryConfiguration(theParameters.getRetryConfiguration());
 		return mySubscriptionDeliveryChannelFactory.newDeliveryReceivingChannel(theParameters.getChannelName(),
 			settings);
 	}
 
-	protected IChannelProducer newSendingChannel(String theChannelName) {
-		return mySubscriptionDeliveryChannelFactory.newDeliverySendingChannel(theChannelName, null);
+	protected IChannelProducer newSendingChannel(ProducingChannelParameters theParameters) {
+		ChannelProducerSettings settings = new ChannelProducerSettings();
+		settings.setRetryConfiguration(theParameters.getRetryConfiguration());
+		return mySubscriptionDeliveryChannelFactory.newDeliverySendingChannel(theParameters.getChannelName(),
+			settings);
 	}
 
 	public synchronized void remove(ActiveSubscription theActiveSubscription) {
@@ -122,8 +111,8 @@ public class SubscriptionChannelRegistry {
 
 		// if there are listening DLQs, we'll close them too
 		if (removed && retryConfig != null
-				&& retryConfig.hasDeadLetterQueue()) {
-			myDeliveryReceiverChannels.closeAndRemove(retryConfig.getDeadLetterQueueName());
+				&& retryConfig.hasDeadLetterQueuePrefix()) {
+			myDeliveryReceiverChannels.closeAndRemove(retryConfig.getDeadLetterQueuePrefix());
 		}
 
 		if (!removed) {

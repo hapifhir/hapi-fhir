@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>5.6.0-PRE7-SNAPSHOT</version>
+	<version>5.6.0-PRE9-SNAPSHOT</version>
 	<modules>
 		<module>hapi-fhir-jpa</module>
 	</modules>

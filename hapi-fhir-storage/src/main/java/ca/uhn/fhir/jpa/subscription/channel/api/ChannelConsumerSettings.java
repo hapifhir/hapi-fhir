@@ -20,28 +20,16 @@ package ca.uhn.fhir.jpa.subscription.channel.api;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
-
 public class ChannelConsumerSettings extends BaseChannelSettings {
 	public static final Integer DEFAULT_CHANNEL_CONSUMERS = 2;
 
 	private Integer myConcurrentConsumers = DEFAULT_CHANNEL_CONSUMERS;
-
-	private ChannelRetryConfiguration myRetryConfigurationParameters;
 
 	/**
 	 * Constructor
 	 */
 	public ChannelConsumerSettings() {
 		super();
-	}
-
-	public void setRetryConfiguration(ChannelRetryConfiguration theParams) {
-		myRetryConfigurationParameters = theParams;
-	}
-
-	public ChannelRetryConfiguration getRetryConfigurationParameters() {
-		return myRetryConfigurationParameters;
 	}
 
 	public Integer getConcurrentConsumers() {
