@@ -109,12 +109,6 @@ public class SubscriptionChannelRegistry {
 		boolean removed = myActiveSubscriptionByChannelName.remove(channelName, theActiveSubscription.getId());
 		ChannelRetryConfiguration retryConfig = theActiveSubscription.getRetryConfigurationParameters();
 
-		// if there are listening DLQs, we'll close them too
-		if (removed && retryConfig != null
-				&& retryConfig.hasDeadLetterQueuePrefix()) {
-			myDeliveryReceiverChannels.closeAndRemove(retryConfig.getDeadLetterQueuePrefix());
-		}
-
 		if (!removed) {
 			ourLog.warn("Failed to remove subscription {} from channel {}", theActiveSubscription.getId(), channelName);
 		}
