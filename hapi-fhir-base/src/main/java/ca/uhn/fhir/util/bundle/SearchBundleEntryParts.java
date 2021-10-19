@@ -21,7 +21,6 @@ package ca.uhn.fhir.util.bundle;
  */
 
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class SearchBundleEntryParts {
@@ -38,7 +37,6 @@ public class SearchBundleEntryParts {
 			mySearchMode = BundleEntrySearchModeEnum.INCLUDE;
 		}
 	}
-
 
 	public String getFullUrl() {
 		return myFullUrl;
