@@ -53,7 +53,12 @@ public enum EncodingEnum {
 		}
 	},
 
-	;
+        NDJSON(Constants.CT_FHIR_NDJSON, Constants.CT_FHIR_NDJSON, Constants.FORMAT_NDJSON) {
+		@Override
+		public IParser newParser(FhirContext theContext) {
+			return theContext.newNDJsonParser();
+		}
+	};
 
 	/**
 	 * "json"
@@ -71,6 +76,11 @@ public enum EncodingEnum {
 	 */
 	public static final String XML_PLAIN_STRING = "xml";
 
+        /**
+         * "ndjson"
+         */
+        public static final String NDJSON_PLAIN_STRING = "ndjson";
+	
 	private static Map<String, EncodingEnum> ourContentTypeToEncoding;
 	private static Map<String, EncodingEnum> ourContentTypeToEncodingLegacy;
 	private static Map<String, EncodingEnum> ourContentTypeToEncodingStrict;
@@ -104,7 +114,9 @@ public enum EncodingEnum {
 		ourContentTypeToEncoding.put("application/xml", XML);
 		ourContentTypeToEncoding.put("application/fhir+turtle", RDF);
 		ourContentTypeToEncoding.put("application/x-turtle", RDF);
+                ourContentTypeToEncoding.put("application/ndjson", NDJSON);
 		ourContentTypeToEncoding.put("text/json", JSON);
+		ourContentTypeToEncoding.put("text/ndjson", NDJSON);
 		ourContentTypeToEncoding.put("text/xml", XML);
 		ourContentTypeToEncoding.put("text/turtle", RDF);
 
@@ -114,6 +126,7 @@ public enum EncodingEnum {
 		ourContentTypeToEncoding.put(JSON_PLAIN_STRING, JSON);
 		ourContentTypeToEncoding.put(XML_PLAIN_STRING, XML);
 		ourContentTypeToEncoding.put(RDF_PLAIN_STRING, RDF);
+		ourContentTypeToEncoding.put(NDJSON_PLAIN_STRING, NDJSON);
 		ourContentTypeToEncoding.put(Constants.FORMAT_TURTLE, RDF);
 
 		ourContentTypeToEncodingLegacy = Collections.unmodifiableMap(ourContentTypeToEncodingLegacy);

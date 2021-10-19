@@ -45,7 +45,7 @@ import java.util.List;
  * 1. Determine the resourcetype
  * 2. Search for anything that has `patient-compartment-search-param:missing=false`
  */
-public class PatientBulkItemReader extends BaseBulkItemReader implements ItemReader<List<ResourcePersistentId>> {
+public class PatientBulkItemReader extends BaseJpaBulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 	@Autowired
 	private DaoConfig myDaoConfig;
 
