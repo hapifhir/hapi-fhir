@@ -73,7 +73,6 @@ import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -508,7 +507,6 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			.collect(Collectors.toList());
 	}
 
-	@NotNull
 	private List<Class<? extends IBaseResource>> determineResourceTypes(Set<String> theResourceNames, String theParamNameChain) {
 		int linkIndex = theParamNameChain.indexOf('.');
 		if (linkIndex == -1) {
@@ -559,7 +557,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			ListIterator<String> iter = path.listIterator();
 			while (iter.hasNext()) {
 				String nextPath = trim(iter.next());
-				if (!nextPath.contains(theResourceName + ".")) {
+				if (!nextPath.startsWith(theResourceName + ".")) {
 					iter.remove();
 				}
 			}
@@ -587,7 +585,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			 */
 			return path.stream()
 				.map(String::trim)
-				.filter(t -> t.contains(theResourceName + "."))
+				.filter(t -> t.startsWith(theResourceName + "."))
 				.map(head -> tailPaths.stream().map(tail -> head + "." + tail).collect(Collectors.toSet()))
 				.flatMap(Collection::stream)
 				.collect(Collectors.toList());
