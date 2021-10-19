@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
@@ -15,7 +16,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -117,6 +117,43 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testShouldResolveATwoLinkChainToAContainedReference() throws Exception {
+		// Adding support for this case in SMILE-3151
+
+		// setup
+		IIdType oid1;
+		IIdType orgId;
+
+		{
+			Organization org = new Organization();
+			org.setId(IdType.newRandomUuid());
+			org.setName("HealthCo");
+			orgId = myOrganizationDao.create(org, mySrd).getId();
+
+			Patient p = new Patient();
+			p.setId("pat");
+			p.addName().setFamily("Smith").addGiven("John");
+			p.getManagingOrganization().setReference(org.getId());
+
+			Observation obs = new Observation();
+			obs.getContained().add(p);
+			obs.getCode().setText("Observation 1");
+			obs.getSubject().setReference("#pat");
+
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		String url = "/Observation?subject.organization=" + orgId.getValueAsString();
+
+		// execute
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+
+		// validate
+		assertEquals(1L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
+	@Test
 	public void testShouldResolveAThreeLinkChainWhereAllResourcesStandAlone() throws Exception {
 
 		// setup
@@ -188,9 +225,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Disabled
 	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheBeginningOfTheChain() throws Exception {
-		// We do not currently support this case - we may not be indexing the references of contained resources
+		// Adding support for this case in SMILE-3151
 
 		// setup
 		IIdType oid1;
@@ -242,11 +278,21 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			p.getManagingOrganization().setReference(org.getId());
 			myPatientDao.create(p, mySrd);
 
-			Observation obs = new Observation();
-			obs.getCode().setText("Observation 1");
-			obs.getSubject().setReference(p.getId());
+			Device d = new Device();
+			d.setId(IdType.newRandomUuid());
+			d.getOwner().setReference(org.getId());
+			myDeviceDao.create(d, mySrd);
 
-			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+			Observation obs1 = new Observation();
+			obs1.getCode().setText("Observation 1");
+			obs1.getSubject().setReference(p.getId());
+
+			Observation obs2 = new Observation();
+			obs2.getCode().setText("Observation 2");
+			obs2.getSubject().setReference(d.getId());
+
+			oid1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+			myObservationDao.create(obs2, mySrd);
 		}
 
 		String url = "/Observation?subject:Patient.organization:Organization.name=HealthCo";
@@ -278,17 +324,81 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			p.getManagingOrganization().setReference("#org");
 			myPatientDao.create(p, mySrd);
 
+			Organization org2 = new Organization();
+			org2.setId("org");
+			org2.setName("HealthCo");
+
+			Device d = new Device();
+			d.setId(IdType.newRandomUuid());
+			d.getContained().add(org2);
+			d.getOwner().setReference("#org");
+			myDeviceDao.create(d, mySrd);
+
 			Observation obs = new Observation();
 			obs.getCode().setText("Observation 1");
 			obs.getSubject().setReference(p.getId());
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			Observation obs2 = new Observation();
+			obs2.getCode().setText("Observation 2");
+			obs2.getSubject().setReference(d.getId());
+			myObservationDao.create(obs2, mySrd);
 		}
 
 		String url = "/Observation?subject:Patient.organization:Organization.name=HealthCo";
 
 		// execute
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+
+		// validate
+		assertEquals(1L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
+	@Test
+	public void testShouldResolveAThreeLinkChainWithQualifiersWithAContainedResourceAtTheBeginning() throws Exception {
+		// Adding support for this case in SMILE-3151
+
+		// setup
+		IIdType oid1;
+
+		{
+			Organization org = new Organization();
+			org.setId(IdType.newRandomUuid());
+			org.setName("HealthCo");
+			myOrganizationDao.create(org, mySrd);
+
+			Patient p = new Patient();
+			p.setId("pat");
+			p.addName().setFamily("Smith").addGiven("John");
+			p.getManagingOrganization().setReference(org.getId());
+
+			Observation obs = new Observation();
+			obs.getContained().add(p);
+			obs.getCode().setText("Observation 1");
+			obs.getSubject().setReference("#pat");
+
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			Device d = new Device();
+			d.setId("dev");
+			d.getOwner().setReference(org.getId());
+
+			Observation obs2 = new Observation();
+			obs2.getContained().add(d);
+			obs2.getCode().setText("Observation 2");
+			obs2.getSubject().setReference("#dev");
+
+			myObservationDao.create(obs2, mySrd);
+		}
+
+		String url = "/Observation?subject:Patient.organization:Organization.name=HealthCo";
+
+		// execute
+		myCaptureQueriesListener.clear();
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -369,6 +479,52 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// execute
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+
+		// validate
+		assertEquals(1L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
+	@Test
+	public void testShouldResolveAFourLinkChainWithAContainedResourceInTheMiddle() throws Exception {
+
+		// setup
+		IIdType oid1;
+
+		{
+			myCaptureQueriesListener.clear();
+
+			Organization org = new Organization();
+			org.setId(IdType.newRandomUuid());
+			org.setName("HealthCo");
+			myOrganizationDao.create(org, mySrd);
+
+			Organization partOfOrg = new Organization();
+			partOfOrg.setId("org");
+			partOfOrg.getPartOf().setReference(org.getId());
+
+			Patient p = new Patient();
+			p.setId(IdType.newRandomUuid());
+			p.addName().setFamily("Smith").addGiven("John");
+			p.getContained().add(partOfOrg);
+			p.getManagingOrganization().setReference("#org");
+			myPatientDao.create(p, mySrd);
+
+			Observation obs = new Observation();
+			obs.getCode().setText("Observation 1");
+			obs.getSubject().setReference(p.getId());
+
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			myCaptureQueriesListener.logInsertQueries();
+		}
+
+		String url = "/Observation?subject.organization.partof.name=HealthCo";
+
+		// execute
+		myCaptureQueriesListener.clear();
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
 		assertEquals(1L, oids.size());

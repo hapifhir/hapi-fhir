@@ -72,6 +72,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FIL
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -414,10 +415,10 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertNull(vs.getVersion());
 
 		// All LOINC codes
-		assertTrue(valueSets.containsKey("loinc-all"));
-		vs = valueSets.get("loinc-all");
+		assertTrue(valueSets.containsKey(LOINC_ALL_VALUESET_ID));
+		vs = valueSets.get(LOINC_ALL_VALUESET_ID);
 		assertEquals("http://loinc.org/vs", vs.getUrl());
-		assertEquals("1.0.0", vs.getVersion());
+		assertNull(vs.getVersion());
 		assertEquals("All LOINC codes", vs.getName());
 		assertEquals(Enumerations.PublicationStatus.ACTIVE, vs.getStatus());
 		assertTrue(vs.hasDate());
@@ -428,7 +429,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertTrue(vs.getCompose().hasInclude());
 		assertEquals(1, vs.getCompose().getInclude().size());
 		assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
-		assertEquals("1.0.0", vs.getVersion());
+		assertNull(vs.getVersion());
 
 		// IEEE Medical Device Codes
 		conceptMap = conceptMaps.get(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_ID);
@@ -520,8 +521,6 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		for (ValueSet loincVS : loincVS_resources) {
 			if (loincVS.getId().startsWith("LL1000-0") || loincVS.getId().startsWith("LL1001-8") || loincVS.getId().startsWith("LL1892-0")) {
 				assertEquals("Beta.1", loincVS.getVersion());
-			} else if (loincVS.getId().equals("loinc-all")) {
-				assertEquals("1.0.0", loincVS.getVersion());
 			} else {
 				assertNull(loincVS.getVersion());
 			}
@@ -573,8 +572,6 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		for (ValueSet loincVS : loincVS_resources) {
 			if (loincVS.getId().startsWith("LL1000-0") || loincVS.getId().startsWith("LL1001-8") || loincVS.getId().startsWith("LL1892-0")) {
 				assertEquals("Beta.1", loincVS.getVersion());
-			} else if (loincVS.getId().equals("loinc-all")) {
-				assertEquals("1.0.0", loincVS.getVersion());
 			} else {
 				assertNull(loincVS.getVersion());
 			}
@@ -626,8 +623,6 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		for (ValueSet loincVS : loincVS_resources) {
 			if (loincVS.getId().startsWith("LL1000-0") || loincVS.getId().startsWith("LL1001-8") || loincVS.getId().startsWith("LL1892-0")) {
 				assertEquals("Beta.1", loincVS.getVersion());
-			} else if (loincVS.getId().equals("loinc-all")) {
-				assertEquals("1.0.0", loincVS.getVersion());
 			} else {
 				assertNull(loincVS.getVersion());
 			}

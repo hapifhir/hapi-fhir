@@ -31,7 +31,7 @@ import java.util.List;
  * #L%
  */
 
-public interface ISearchResultDao extends JpaRepository<SearchResult, Long> {
+public interface ISearchResultDao extends JpaRepository<SearchResult, Long>, IHapiFhirJpaRepository {
 	
 	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search ORDER BY r.myOrder ASC")
 	Slice<Long> findWithSearchPid(@Param("search") Long theSearchPid, Pageable thePage);

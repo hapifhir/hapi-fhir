@@ -84,6 +84,7 @@ public class Constants {
 	public static final String EXTOP_VALIDATE_RESOURCE = "resource";
 	public static final String FORMAT_HTML = "html";
 	public static final String FORMAT_JSON = "json";
+        public static final String FORMAT_NDJSON = "ndjson";
 	public static final String FORMAT_XML = "xml";
 	public static final String CT_RDF_TURTLE_LEGACY = "text/turtle";
 	public static final String FORMAT_TURTLE = "ttl";
@@ -152,6 +153,7 @@ public class Constants {
 	public static final String OPENSEARCH_NS_OLDER = "http://purl.org/atompub/tombstones/1.0";
 	public static final String PARAM_ASYNC = "async"; //Used in messaging
 	public static final String PARAM_AT = "_at";
+	public static final String PARAM_ID= "_id";
 	/**
 	 * Used in paging links
 	 */

@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_VALUESET_URL;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_VALUESET_URL_PLUS_SLASH;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
@@ -38,6 +39,11 @@ public class TermReadSvcUtil {
 		if (! theUrl.startsWith(LOINC_GENERIC_VALUESET_URL))   return Optional.empty();
 
 		if (! theUrl.startsWith(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH)) {
+			if (theUrl.equals(LOINC_GENERIC_VALUESET_URL)) {
+				// the request is for the loinc all valueset which when loading was given the name: 'loinc-all'
+				return Optional.of(LOINC_ALL_VALUESET_ID);
+			}
+
 			ourLog.error("Don't know how to extract ValueSet's ForcedId from url: " + theUrl);
 			return Optional.empty();
 		}
@@ -47,16 +53,15 @@ public class TermReadSvcUtil {
 	}
 
 
-	public static boolean isLoincNotGenericUnversionedValueSet(String theUrl) {
+	public static boolean isLoincUnversionedValueSet(String theUrl) {
 		boolean isLoincCodeSystem = StringUtils.containsIgnoreCase(theUrl, LOINC_LOW);
 		boolean isNoVersion = ! theUrl.contains("|");
-		boolean isNotLoincGenericValueSet = ! theUrl.equals(LOINC_GENERIC_VALUESET_URL);
 
-		return isLoincCodeSystem && isNoVersion && isNotLoincGenericValueSet;
+		return isLoincCodeSystem && isNoVersion;
 	}
 
 
-	public static boolean isLoincNotGenericUnversionedCodeSystem(String theUrl) {
+	public static boolean isLoincUnversionedCodeSystem(String theUrl) {
 		boolean isLoincCodeSystem = StringUtils.containsIgnoreCase(theUrl, LOINC_LOW);
 		boolean isNoVersion = ! theUrl.contains("|");
 

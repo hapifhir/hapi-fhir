@@ -29,7 +29,7 @@ import java.util.List;
  * #L%
  */
 
-public interface ITermValueSetConceptViewDao extends JpaRepository<TermValueSetConceptView, Long> {
+public interface ITermValueSetConceptViewDao extends JpaRepository<TermValueSetConceptView, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT v FROM TermValueSetConceptView v WHERE v.myConceptValueSetPid = :pid AND v.myConceptOrder >= :from AND v.myConceptOrder < :to ORDER BY v.myConceptOrder")
 	List<TermValueSetConceptView> findByTermValueSetId(@Param("from") int theFrom, @Param("to") int theTo, @Param("pid") Long theValueSetId);

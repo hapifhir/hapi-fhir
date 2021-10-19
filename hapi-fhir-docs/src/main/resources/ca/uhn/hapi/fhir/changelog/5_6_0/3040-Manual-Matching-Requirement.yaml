@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3020
+jira: SMILE-3192
+title: "Added `$mdm-create-link` operation and documentation."

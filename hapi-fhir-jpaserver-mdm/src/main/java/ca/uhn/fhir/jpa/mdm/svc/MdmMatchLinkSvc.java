@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,6 +68,7 @@ public class MdmMatchLinkSvc {
 	 * @param theMdmTransactionContext
 	 * @return an {@link TransactionLogMessages} which contains all informational messages related to MDM processing of this resource.
 	 */
+	@Transactional
 	public MdmTransactionContext updateMdmLinksForMdmSource(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
 		if (MdmResourceUtil.isMdmAllowed(theResource)) {
 			return doMdmUpdate(theResource, theMdmTransactionContext);

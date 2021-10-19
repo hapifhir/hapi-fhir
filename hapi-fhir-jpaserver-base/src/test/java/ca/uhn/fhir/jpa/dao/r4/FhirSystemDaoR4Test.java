@@ -10,13 +10,14 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -27,6 +28,10 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
+import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
+import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.io.IOUtils;
@@ -44,6 +49,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.Condition;
@@ -91,6 +97,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -113,6 +120,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
@@ -1386,6 +1395,149 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertThat(respEntry.getResponse().getLocation(), containsString("Observation/"));
 		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
 		assertEquals("1", respEntry.getResponse().getEtag());
+
+	}
+
+	@Test
+	public void testTransactionCreateInlineMatchUrlWithAuthorizationAllowed() {
+		// setup
+		String methodName = "testTransactionCreateInlineMatchUrlWithAuthorizationAllowed";
+		Bundle request = new Bundle();
+
+		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.setId("Patient/" + methodName);
+		IIdType id = myPatientDao.update(p, mySrd).getId();
+		ourLog.info("Created patient, got it: {}", id);
+
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setReference("Patient?identifier=urn%3Asystem%7C" + methodName);
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
+
+		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.TRANSACTION);
+
+		myInterceptorRegistry.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.ALLOW));
+
+		// execute
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+
+		// validate
+		assertEquals(1, resp.getEntry().size());
+
+		BundleEntryComponent respEntry = resp.getEntry().get(0);
+		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
+		assertThat(respEntry.getResponse().getLocation(), containsString("Observation/"));
+		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
+		assertEquals("1", respEntry.getResponse().getEtag());
+
+		o = myObservationDao.read(new IdType(respEntry.getResponse().getLocationElement()), mySrd);
+		assertEquals(id.toVersionless().getValue(), o.getSubject().getReference());
+		assertEquals("1", o.getIdElement().getVersionIdPart());
+
+	}
+
+	@Test
+	public void testTransactionCreateInlineMatchUrlWithAuthorizationDenied() {
+		// setup
+		String methodName = "testTransactionCreateInlineMatchUrlWithAuthorizationDenied";
+		Bundle request = new Bundle();
+
+		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.setId("Patient/" + methodName);
+		IIdType id = myPatientDao.update(p, mySrd).getId();
+		ourLog.info("Created patient, got it: {}", id);
+
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setReference("Patient?identifier=urn%3Asystem%7C" + methodName);
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
+
+		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.TRANSACTION);
+		when(mySrd.getFhirContext().getResourceType(any(Observation.class))).thenReturn("Observation");
+
+		myInterceptorRegistry.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.ALLOW) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").create().resourcesOfType(Observation.class).withAnyId().andThen()
+					.allow("Rule 2").read().resourcesOfType(Patient.class).inCompartment("Patient", new IdType("Patient/this-is-not-the-id-you-are-looking-for")).andThen()
+					.denyAll()
+					.build();
+			}
+		});
+
+		try {
+			// execute
+			mySystemDao.transaction(mySrd, request);
+
+			// verify
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals("Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithAuthorizationDenied\" - No resources match this search", e.getMessage());
+		}
+
+	}
+
+	@Test
+	public void testTransactionCreateInlineMatchUrlWithAuthorizationDeniedAndCacheEnabled() {
+		// setup
+		String patientId = UUID.randomUUID().toString();
+		Bundle request1 = new Bundle();
+		Bundle request2 = new Bundle();
+
+		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myDaoConfig.setMatchUrlCacheEnabled(true);
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(patientId);
+		p.setId("Patient/" + patientId);
+		IIdType id = myPatientDao.update(p, mySrd).getId();
+		ourLog.info("Created patient, got it: {}", id);
+
+		Observation o1 = new Observation();
+		o1.getCode().setText("Some Observation");
+		o1.getSubject().setReference("Patient?identifier=urn%3Asystem%7C" + patientId);
+		request1.addEntry().setResource(o1).getRequest().setMethod(HTTPVerb.POST);
+
+		Observation o2 = new Observation();
+		o2.getCode().setText("Another Observation");
+		o2.getSubject().setReference("Patient?identifier=urn%3Asystem%7C" + patientId);
+		request2.addEntry().setResource(o2).getRequest().setMethod(HTTPVerb.POST);
+
+		// execute the first request before setting up the security rules, to populate the cache
+		mySystemDao.transaction(mySrd, request1);
+
+		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.TRANSACTION);
+		when(mySrd.getFhirContext().getResourceType(any(Observation.class))).thenReturn("Observation");
+
+		myInterceptorRegistry.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.ALLOW) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").create().resourcesOfType(Observation.class).withAnyId().andThen()
+					.allow("Rule 2").read().resourcesOfType(Patient.class).inCompartment("Patient", new IdType("Patient/this-is-not-the-id-you-are-looking-for")).andThen()
+					.denyAll()
+					.build();
+			}
+		});
+
+		try {
+			// execute
+
+			// the second attempt to access the resource should fail even though the first one succeeded
+			mySystemDao.transaction(mySrd, request2);
+
+			// verify
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals("Invalid match URL \"Patient?identifier=urn%3Asystem%7C" + patientId + "\" - No resources match this search", e.getMessage());
+		}
 
 	}
 
@@ -3289,8 +3441,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			assertThat(e.getMessage(), containsString("Resource type 'Practicioner' is not valid for this path"));
 		}
 
-		assertThat(myResourceTableDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
+		runInTransaction(()->assertThat(myResourceTableDao.findAll(), empty()));
+		runInTransaction(()->assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty()));
 
 	}
 
@@ -4361,8 +4513,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		id = myAllergyIntoleranceDao.read(ai.getIdElement().toUnqualifiedVersionless()).getIdElement();
 		assertEquals("3", id.getVersionIdPart());
-
 	}
-
 
 }
