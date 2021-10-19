@@ -341,7 +341,6 @@ public class BundleUtilTest {
 
 		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, bundleString);
 
-
 		//When
 		List<SearchBundleEntryParts> searchBundleEntryParts = BundleUtil.getSearchBundleEntryParts(ourCtx, bundle);
 
@@ -353,8 +352,6 @@ public class BundleUtilTest {
 		assertThat(searchBundleEntryParts.get(1).getSearchMode(), is(equalTo(BundleEntrySearchModeEnum.INCLUDE)));
 		assertThat(searchBundleEntryParts.get(1).getFullUrl(), is(containsString("Condition/")));
 		assertThat(searchBundleEntryParts.get(1).getResource(), is(notNullValue()));
-
-
 	}
 
 	@Test
