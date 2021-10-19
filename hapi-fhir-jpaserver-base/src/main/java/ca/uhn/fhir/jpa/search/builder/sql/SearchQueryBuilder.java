@@ -47,6 +47,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 
+import com.healthmarketscience.common.util.AppendableExt;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -60,6 +61,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbJoin;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.SQLServerDialect;
@@ -79,6 +81,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 
 public class SearchQueryBuilder {
 
@@ -565,11 +568,21 @@ public class SearchQueryBuilder {
 		return ComboCondition.and(conditions.toArray(new Condition[0]));
 	}
 
-
 	public void addResourceIdsPredicate(List<Long> thePidList) {
+		assertNotNull(thePidList);
 		DbColumn resourceIdColumn = getOrCreateFirstPredicateBuilder().getResourceIdColumn();
-		InCondition predicate = new InCondition(resourceIdColumn, generatePlaceholders(thePidList));
-		addPredicate(predicate);
+		List<List<Long>> partitions = ListUtils.partition(thePidList, 1000);
+		if (partitions.size() > 1) {
+			ComboCondition comboConditionOR = new ComboCondition(ComboCondition.Op.OR);
+			for (List<Long> partition : partitions) {
+				InCondition predicate = new InCondition(resourceIdColumn, generatePlaceholders(partition));
+				comboConditionOR.addCondition(predicate);
+			}
+			addPredicate(comboConditionOR);
+		} else {
+			InCondition predicate = new InCondition(resourceIdColumn, generatePlaceholders(thePidList));
+			addPredicate(predicate);
+		}
 	}
 
 	public void excludeResourceIdsPredicate(Set<ResourcePersistentId> theExsitinghPidSetToExclude) {
