@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
@@ -67,6 +68,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 		myModelConfig.setIndexOnContainedResources(new ModelConfig().isIndexOnContainedResources());
+		myModelConfig.setIndexOnContainedResourcesRecursively(new ModelConfig().isIndexOnContainedResourcesRecursively());
 	}
 
 
@@ -119,6 +121,89 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			assertTrue(link.isPresent());
 			assertEquals("Patient", link.get().getTargetResourceType());
 			assertEquals("A", link.get().getTargetResourceId());
+		});
+	}
+
+
+	@Test
+	public void testCreateLinkCreatesAppropriatePaths_ContainedResourceRecursive() {
+		myModelConfig.setIndexOnContainedResources(true);
+		myModelConfig.setIndexOnContainedResourcesRecursively(true);
+
+		Patient p = new Patient();
+		p.setId("pat");
+		p.setActive(true);
+		p.getNameFirstRep().setFamily("Smith");
+
+		Observation containedObs = new Observation();
+		containedObs.setId("#obs");
+		containedObs.setSubject(new Reference("#pat"));
+
+		Encounter enc = new Encounter();
+		enc.getContained().add(containedObs);
+		enc.getContained().add(p);
+		enc.addReasonReference(new Reference("#obs"));
+		myEncounterDao.create(enc, mySrd);
+
+		runInTransaction(() ->{
+			List<ResourceIndexedSearchParamString> allParams = myResourceIndexedSearchParamStringDao.findAll();
+			Optional<ResourceIndexedSearchParamString> link = allParams
+				.stream()
+				.filter(t -> "reason-reference.subject.family".equals(t.getParamName()))
+				.findFirst();
+			assertTrue(link.isPresent());
+			assertEquals("Smith", link.get().getValueExact());
+		});
+	}
+
+
+	@Test
+	public void testCreateLinkCreatesAppropriatePaths_ContainedResourceRecursive_DoesNotLoop() {
+		myModelConfig.setIndexOnContainedResources(true);
+		myModelConfig.setIndexOnContainedResourcesRecursively(true);
+
+		Organization org1 = new Organization();
+		org1.setId("org1");
+		org1.setName("EscherCorp");
+		org1.setPartOf(new Reference("#org2"));
+
+		Organization org2 = new Organization();
+		org2.setId("org2");
+		org2.setName("M.C.Escher Unlimited");
+		org2.setPartOf(new Reference("#org1"));
+
+		Observation containedObs = new Observation();
+		containedObs.setId("#obs");
+		containedObs.addPerformer(new Reference("#org1"));
+
+		Encounter enc = new Encounter();
+		enc.getContained().add(containedObs);
+		enc.getContained().add(org1);
+		enc.getContained().add(org2);
+		enc.addReasonReference(new Reference("#obs"));
+		myEncounterDao.create(enc, mySrd);
+
+		runInTransaction(() ->{
+			List<ResourceIndexedSearchParamString> allParams = myResourceIndexedSearchParamStringDao.findAll();
+			Optional<ResourceIndexedSearchParamString> firstOrg = allParams
+				.stream()
+				.filter(t -> "reason-reference.performer.name".equals(t.getParamName()))
+				.findFirst();
+			assertTrue(firstOrg.isPresent());
+			assertEquals("EscherCorp", firstOrg.get().getValueExact());
+
+			Optional<ResourceIndexedSearchParamString> secondOrg = allParams
+				.stream()
+				.filter(t -> "reason-reference.performer.partof.name".equals(t.getParamName()))
+				.findFirst();
+			assertTrue(secondOrg.isPresent());
+			assertEquals("M.C.Escher Unlimited", secondOrg.get().getValueExact());
+
+			Optional<ResourceIndexedSearchParamString> thirdOrg = allParams
+				.stream()
+				.filter(t -> "reason-reference.performer.partof.partof.name".equals(t.getParamName()))
+				.findFirst();
+			assertFalse(thirdOrg.isPresent());
 		});
 	}
 
