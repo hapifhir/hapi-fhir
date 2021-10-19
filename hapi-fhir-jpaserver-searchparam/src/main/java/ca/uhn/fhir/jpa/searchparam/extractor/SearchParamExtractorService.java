@@ -114,6 +114,10 @@ public class SearchParamExtractorService {
 		// Reference search parameters
 		extractResourceLinks(theRequestPartitionId, theParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference, theRequestDetails);
 
+		if (myModelConfig.isIndexOnContainedResources()) {
+			extractResourceLinksForContainedResources(theRequestPartitionId, theParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference, theRequestDetails);
+		}
+
 		theParams.setUpdatedTime(theTransactionDetails.getTransactionDate());
 	}
 
@@ -377,7 +381,7 @@ public class SearchParamExtractorService {
 			 * if the reference is invalid
 			 */
 			myResourceLinkResolver.validateTypeOrThrowException(type);
-			resourceLink = resolveTargetAndCreateResourceLinkOrReturnNull(theRequestPartitionId, theEntity, transactionDate, theRuntimeSearchParam, path, thePathAndRef, nextId, typeString, type, nextReference, theRequest);
+			resourceLink = resolveTargetAndCreateResourceLinkOrReturnNull(theRequestPartitionId, theEntity, transactionDate, theRuntimeSearchParam, path, thePathAndRef, nextId, typeString, type, nextReference, theRequest, theTransactionDetails);
 			if (resourceLink == null) {
 				return;
 			} else {
@@ -402,7 +406,59 @@ public class SearchParamExtractorService {
 		theParams.myLinks.add(resourceLink);
 	}
 
-	private ResourceLink resolveTargetAndCreateResourceLinkOrReturnNull(@Nonnull RequestPartitionId theRequestPartitionId, ResourceTable theEntity, Date theUpdateTime, RuntimeSearchParam nextSpDef, String theNextPathsUnsplit, PathAndRef nextPathAndRef, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest) {
+	private void extractResourceLinksForContainedResources(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference, RequestDetails theRequest) {
+
+		FhirTerser terser = myContext.newTerser();
+
+		// 1. get all contained resources
+		Collection<IBaseResource> containedResources = terser.getAllEmbeddedResources(theResource, false);
+
+		// 2. Find referenced search parameters
+		ISearchParamExtractor.SearchParamSet<PathAndRef> referencedSearchParamSet = mySearchParamExtractor.extractResourceLinks(theResource, true);
+
+		String spNamePrefix = null;
+		ResourceIndexedSearchParams currParams;
+		// 3. for each referenced search parameter, create an index
+		for (PathAndRef nextPathAndRef : referencedSearchParamSet) {
+
+			// 3.1 get the search parameter name as spname prefix
+			spNamePrefix = nextPathAndRef.getSearchParamName();
+
+			if (spNamePrefix == null || nextPathAndRef.getRef() == null)
+				continue;
+
+			// 3.2 find the contained resource
+			IBaseResource containedResource = findContainedResource(containedResources, nextPathAndRef.getRef());
+			if (containedResource == null)
+				continue;
+
+			currParams = new ResourceIndexedSearchParams();
+
+			// 3.3 create indexes for the current contained resource
+			extractResourceLinks(theRequestPartitionId, currParams, theEntity, containedResource, theTransactionDetails, theFailOnInvalidReference, theRequest);
+
+			// 3.4 added reference name as a prefix for the contained resource if any
+			// e.g. for Observation.subject contained reference
+			// the SP_NAME = subject.family
+			currParams.updateSpnamePrefixForLinksOnContainedResource(nextPathAndRef.getPath());
+
+			// 3.5 merge to the mainParams
+			// NOTE: the spname prefix is different
+			theParams.getResourceLinks().addAll(currParams.getResourceLinks());
+		}
+	}
+
+	private ResourceLink resolveTargetAndCreateResourceLinkOrReturnNull(@Nonnull RequestPartitionId theRequestPartitionId, ResourceTable theEntity, Date theUpdateTime, RuntimeSearchParam nextSpDef, String theNextPathsUnsplit, PathAndRef nextPathAndRef, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+
+		ResourcePersistentId resolvedResourceId = theTransactionDetails.getResolvedResourceId(theNextId);
+		if (resolvedResourceId != null) {
+			String targetResourceType = theNextId.getResourceType();
+			Long targetResourcePid = resolvedResourceId.getIdAsLong();
+			String targetResourceIdPart = theNextId.getIdPart();
+			Long targetVersion = theNextId.getVersionIdPartAsLong();
+			return ResourceLink.forLocalReference(nextPathAndRef.getPath(), theEntity, targetResourceType, targetResourcePid, targetResourceIdPart, theUpdateTime, targetVersion);
+		}
+
 		/*
 		 * We keep a cache of resolved target resources. This is good since for some resource types, there
 		 * are multiple search parameters that map to the same element path within a resource (e.g.
