@@ -1,9 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.channel.models;
 
-import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
-
 public class ProducingChannelParameters extends BaseChannelParameters {
-	private ChannelRetryConfiguration myRetryConfiguration;
 
 	/**
 	 * Constructor
@@ -16,11 +13,4 @@ public class ProducingChannelParameters extends BaseChannelParameters {
 		super(theChannelName);
 	}
 
-	public void setRetryConfiguration(ChannelRetryConfiguration theConfiguration) {
-		myRetryConfiguration = theConfiguration;
-	}
-
-	public ChannelRetryConfiguration getRetryConfiguration() {
-		return myRetryConfiguration;
-	}
 }

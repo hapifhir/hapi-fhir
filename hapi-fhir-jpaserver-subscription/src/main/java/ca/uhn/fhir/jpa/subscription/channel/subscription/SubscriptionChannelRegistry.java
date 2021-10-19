@@ -66,8 +66,15 @@ public class SubscriptionChannelRegistry {
 			return;
 		}
 
+		// we get the retry configurations from the cannonicalized subscriber
+		// these will be provided to both the producer and receiver channel
+		ChannelRetryConfiguration retryConfigParameters = theActiveSubscription.getRetryConfigurationParameters();
+
 		// the receiving channel
+		// this sends to the hook/resthook/whatever
 		ReceivingChannelParameters receivingParameters = new ReceivingChannelParameters(channelName);
+		receivingParameters.setRetryConfiguration(retryConfigParameters);
+
 		IChannelReceiver channelReceiver = newReceivingChannel(receivingParameters);
 		Optional<MessageHandler> deliveryHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(theActiveSubscription.getChannelType());
 
@@ -78,10 +85,10 @@ public class SubscriptionChannelRegistry {
 		// create the producing channel.
 		// this is the channel that will send the messages out
 		// to subscribers
-		ChannelRetryConfiguration retryConfigParameters = theActiveSubscription.getRetryConfigurationParameters();
 		ProducingChannelParameters producingChannelParameters = new ProducingChannelParameters(channelName);
 		producingChannelParameters.setRetryConfiguration(retryConfigParameters);
 
+		// this absorbs from the subscription matching service
 		IChannelProducer sendingChannel = newSendingChannel(producingChannelParameters);
 		myChannelNameToSender.put(channelName, sendingChannel);
 	}
