@@ -557,7 +557,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			ListIterator<String> iter = path.listIterator();
 			while (iter.hasNext()) {
 				String nextPath = trim(iter.next());
-				if (!nextPath.startsWith(theResourceName + ".")) {
+				if (!nextPath.contains(theResourceName + ".")) {
 					iter.remove();
 				}
 			}
