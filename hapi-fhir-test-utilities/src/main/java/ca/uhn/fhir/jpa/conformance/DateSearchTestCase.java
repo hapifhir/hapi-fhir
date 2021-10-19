@@ -21,7 +21,7 @@ public class DateSearchTestCase {
 	final String myQueryValue;
 	final boolean expectedResult;
 	final String myFileName;
-	private final int myLineNumber;
+	final int myLineNumber;
 
 	public DateSearchTestCase(String myResourceValue, String myQueryValue, boolean expectedResult, String theFileName, int theLineNumber) {
 		this.myResourceValue = myResourceValue;
@@ -40,9 +40,15 @@ public class DateSearchTestCase {
 		String csv = "DateSearchTestCase.csv";
 		InputStream resource = DateSearchTestCase.class.getResourceAsStream(csv);
 		assert resource != null;
-		ourCases = parseCsvCases(new InputStreamReader(resource, StandardCharsets.UTF_8), csv);
+		InputStreamReader inputStreamReader = new InputStreamReader(resource, StandardCharsets.UTF_8);
+		ourCases = parseCsvCases(inputStreamReader, csv);
 		// wipmb merge these once we have the nih-fixes.
 		//ourCases.addAll(yearPrecisionDateSearchCases());
+		try {
+			inputStreamReader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	static List<DateSearchTestCase> parseCsvCases(Reader theSource, String theFileName) {
@@ -77,7 +83,7 @@ public class DateSearchTestCase {
 	 * <p>
 	 * The csv has rows with: Matching prefixes, Query Date, Resource Date
 	 * E.g. "eq ge le,2020, 2020"
-	 * This helper expands that one line into test for all of eq, ge, gt, le, lt, and ne,
+	 * This helper expands that one line into test for all of: eq, ge, gt, le, lt, and ne,
 	 * expecting the listed prefixes to match, and the unlisted ones to not match.
 	 *
 	 * @return the individual test case arguments for testDateSearchMatching()
