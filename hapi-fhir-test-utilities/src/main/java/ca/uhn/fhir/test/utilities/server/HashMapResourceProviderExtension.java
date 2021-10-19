@@ -20,15 +20,20 @@ package ca.uhn.fhir.test.utilities.server;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
+import java.util.function.Consumer;
+
 public class HashMapResourceProviderExtension<T extends IBaseResource> extends HashMapResourceProvider<T> implements BeforeEachCallback, AfterEachCallback {
 
 	private final RestfulServerExtension myRestfulServerExtension;
+	private Consumer<T> myUpdateResourceCallback;
 
 	/**
 	 * Constructor
@@ -50,5 +55,18 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 	public void beforeEach(ExtensionContext context) throws Exception {
 		clear();
 		myRestfulServerExtension.getRestfulServer().registerProvider(HashMapResourceProviderExtension.this);
+	}
+
+	@Override
+	public synchronized MethodOutcome update(T theResource, String theConditional, RequestDetails theRequestDetails) {
+		if (myUpdateResourceCallback != null) {
+			myUpdateResourceCallback.accept(theResource);
+		}
+		return super.update(theResource, theConditional, theRequestDetails);
+	}
+
+	public HashMapResourceProviderExtension<T> setUpdateResourceCallback(Consumer<T> theUpdateResourceCallback) {
+		myUpdateResourceCallback = theUpdateResourceCallback;
+		return this;
 	}
 }
