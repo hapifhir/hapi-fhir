@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -126,6 +127,10 @@ public class SubscriptionValidatingInterceptor {
 	public void validateQuery(String theQuery, String theFieldName) {
 		if (isBlank(theQuery)) {
 			throw new UnprocessableEntityException(theFieldName + " must be populated");
+		}
+
+		if (theQuery.equals(Constants.SUBSCRIPTION_STAR_CRITERIA)) {
+			return;
 		}
 
 		int sep = theQuery.indexOf('?');

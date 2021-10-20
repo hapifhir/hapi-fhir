@@ -98,8 +98,6 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		sendObservation(code, "SNOMED-CT");
 		ourObservationListener.awaitExpected();
 
-
-
 		assertEquals(2, ourContentTypes.size());
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}

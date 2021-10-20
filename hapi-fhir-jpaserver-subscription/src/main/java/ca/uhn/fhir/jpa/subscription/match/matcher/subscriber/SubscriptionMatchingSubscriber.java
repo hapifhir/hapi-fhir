@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -233,7 +234,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		}
 
 		if (resourceType != null) {
-			if (criteriaResource.equals("[*]") && !resourceType.equals("Subscription")) {
+			if (criteriaResource.equals(Constants.SUBSCRIPTION_STAR_CRITERIA) && !resourceType.equals("Subscription")) {
 				ourLog.trace("Subscription has '*' resourceType criteria: {}", criteriaString);
 				return true;
 			}

@@ -1,62 +1,54 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
-import ca.uhn.fhir.rest.annotation.Create;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.annotation.Transaction;
-import ca.uhn.fhir.rest.annotation.TransactionParam;
-import ca.uhn.fhir.rest.annotation.Update;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.test.utilities.server.TransactionCapturingProviderExtension;
 import ca.uhn.fhir.util.BundleUtil;
-import com.google.common.collect.Lists;
 import net.ttddyy.dsproxy.QueryCount;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
 
 public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSubscriptionsR4Test.class);
 	protected static int ourListenerPort;
-	protected static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
-	protected static List<String> ourHeaders = Collections.synchronizedList(new ArrayList<>());
-	protected static List<Bundle> ourTransactions = Collections.synchronizedList(Lists.newArrayList());
-	protected static List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
-	protected static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
-	private static Server ourListenerServer;
-	private static SingleQueryCountHolder ourCountHolder;
-	private static String ourListenerServerBase;
+
+	@Order(0)
+	@RegisterExtension
+	protected static RestfulServerExtension ourRestfulServer = new RestfulServerExtension(FhirContext.forR4Cached());
+	@Order(1)
+	@RegisterExtension
+	protected static HashMapResourceProviderExtension<Patient> ourPatientProvider = new HashMapResourceProviderExtension<>(ourRestfulServer, Patient.class);
+	@Order(1)
+	@RegisterExtension
+	protected static HashMapResourceProviderExtension<Observation> ourObservationProvider = new HashMapResourceProviderExtension<>(ourRestfulServer, Observation.class);
+	@Order(1)
+	@RegisterExtension
+	protected static TransactionCapturingProviderExtension<Bundle> ourTransactionProvider = new TransactionCapturingProviderExtension<>(ourRestfulServer, Bundle.class);
+	protected static SingleQueryCountHolder ourCountHolder;
 	@Autowired
 	protected SubscriptionTestUtil mySubscriptionTestUtil;
 	@Autowired
@@ -92,12 +84,6 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 
 	@BeforeEach
 	public void beforeReset() throws Exception {
-		ourCreatedObservations.clear();
-		ourUpdatedObservations.clear();
-		ourTransactions.clear();
-		ourContentTypes.clear();
-		ourHeaders.clear();
-
 		// Delete all Subscriptions
 		if (myClient != null) {
 			Bundle allSubscriptions = myClient.search().forResource(Subscription.class).returnBundle(Bundle.class).execute();
@@ -137,7 +123,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		Subscription.SubscriptionChannelComponent channel = subscription.getChannel();
 		channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		channel.setPayload(thePayload);
-		channel.setEndpoint(ourListenerServerBase);
+		channel.setEndpoint(ourRestfulServer.getBaseUrl());
 		return subscription;
 	}
 
@@ -170,56 +156,6 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	}
 
 
-	public static class ObservationResourceProvider implements IResourceProvider {
-
-		@Create
-		public MethodOutcome create(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
-			ourLog.info("Received Listener Create");
-			ourContentTypes.add(theRequest.getHeader(ca.uhn.fhir.rest.api.Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
-			ourCreatedObservations.add(theObservation);
-			extractHeaders(theRequest);
-			return new MethodOutcome(new IdType("Observation/1"), true);
-		}
-
-		private void extractHeaders(HttpServletRequest theRequest) {
-			java.util.Enumeration<String> headerNamesEnum = theRequest.getHeaderNames();
-			while (headerNamesEnum.hasMoreElements()) {
-				String nextName = headerNamesEnum.nextElement();
-				Enumeration<String> valueEnum = theRequest.getHeaders(nextName);
-				while (valueEnum.hasMoreElements()) {
-					String nextValue = valueEnum.nextElement();
-					ourHeaders.add(nextName + ": " + nextValue);
-				}
-			}
-		}
-
-		@Override
-		public Class<? extends IBaseResource> getResourceType() {
-			return Observation.class;
-		}
-
-		@Update
-		public MethodOutcome update(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
-			ourLog.info("Received Listener Update");
-			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
-			ourUpdatedObservations.add(theObservation);
-			extractHeaders(theRequest);
-			return new MethodOutcome(new IdType("Observation/1"), false);
-		}
-
-	}
-
-	public static class PlainProvider {
-
-		@Transaction
-		public Bundle transaction(@TransactionParam Bundle theInput) {
-			ourLog.info("Received transaction update");
-			ourTransactions.add(theInput);
-			return theInput;
-		}
-
-	}
-
 	@AfterAll
 	public static void reportTotalSelects() {
 		ourLog.info("Total database select queries: {}", getQueryCount().getSelect());
@@ -227,33 +163,6 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 
 	private static QueryCount getQueryCount() {
 		return ourCountHolder.getQueryCountMap().get("");
-	}
-
-	@BeforeAll
-	public static void startListenerServer() throws Exception {
-		RestfulServer ourListenerRestServer = new RestfulServer(FhirContext.forR4());
-
-		ourListenerRestServer.registerProvider(new ObservationResourceProvider());
-		ourListenerRestServer.registerProvider(new PlainProvider());
-
-		ourListenerServer = new Server(0);
-
-		ServletContextHandler proxyHandler = new ServletContextHandler();
-		proxyHandler.setContextPath("/");
-
-		ServletHolder servletHolder = new ServletHolder();
-		servletHolder.setServlet(ourListenerRestServer);
-		proxyHandler.addServlet(servletHolder, "/fhir/context/*");
-
-		ourListenerServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourListenerServer);
-		ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
-		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
-	}
-
-	@AfterAll
-	public static void stopListenerServer() throws Exception {
-		JettyUtil.closeServer(ourListenerServer);
 	}
 
 }

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
 
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
+import ca.uhn.fhir.rest.api.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class SubscriptionStrategyEvaluator {
@@ -37,6 +38,9 @@ public class SubscriptionStrategyEvaluator {
 	}
 
 	public SubscriptionMatchingStrategy determineStrategy(String theCriteria) {
+		if (Constants.SUBSCRIPTION_STAR_CRITERIA.equals(theCriteria)) {
+			return SubscriptionMatchingStrategy.IN_MEMORY;
+		}
 		InMemoryMatchResult result = myInMemoryResourceMatcher.canBeEvaluatedInMemory(theCriteria);
 		if (result.supported()) {
 			return SubscriptionMatchingStrategy.IN_MEMORY;
