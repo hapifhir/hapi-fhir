@@ -797,6 +797,10 @@ public class QueryStack {
 			case REFERENCE:
 				String chainedParamName = theParamName + "." + targetParamName;
 				containedCondition = createPredicateReference(theSourceJoinColumn, theResourceName, chainedParamName, qualifiers, trimmedParameters, theOperation, theRequest, theRequestPartitionId);
+				if (myModelConfig.isIndexOnContainedResourcesRecursively()) {
+					containedCondition = toOrPredicate(containedCondition,
+						createPredicateReferenceForContainedResource(theSourceJoinColumn, theResourceName, chainedParamName, theSearchParam, trimmedParameters, theOperation, theRequest, theRequestPartitionId));
+				}
 				break;
 			case HAS:
 			case SPECIAL:
