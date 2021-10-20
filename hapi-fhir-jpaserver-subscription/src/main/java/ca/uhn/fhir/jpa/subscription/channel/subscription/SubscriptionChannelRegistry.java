@@ -95,6 +95,7 @@ public class SubscriptionChannelRegistry {
 		// create the producing channel.
 		// this is the channel that will send the messages out
 		// to subscribers
+		// DO not want retry here
 		ProducingChannelParameters producingChannelParameters = new ProducingChannelParameters(channelName);
 		producingChannelParameters.setRetryConfiguration(retryConfigParameters);
 
