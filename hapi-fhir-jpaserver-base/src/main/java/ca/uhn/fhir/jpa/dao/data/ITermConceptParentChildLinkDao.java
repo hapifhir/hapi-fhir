@@ -29,7 +29,7 @@ import java.util.Collection;
  * #L%
  */
 
-public interface ITermConceptParentChildLinkDao extends JpaRepository<TermConceptParentChildLink, Long> {
+public interface ITermConceptParentChildLinkDao extends JpaRepository<TermConceptParentChildLink, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT COUNT(t) FROM TermConceptParentChildLink t WHERE t.myCodeSystem.myId = :cs_pid")
 	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);

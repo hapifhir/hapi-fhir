@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,6 +40,11 @@ public class IdHelperServiceTest {
 
 	@InjectMocks
 	private IdHelperService myHelperService;
+
+	@BeforeEach
+	public void beforeEach() {
+		myHelperService.setDontCheckActiveTransactionForUnitTest(true);
+	}
 
 	@Test
 	public void resolveResourcePersistentIds_withValidPids_returnsMap() {

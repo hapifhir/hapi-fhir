@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.bulk.export.job;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
@@ -22,23 +22,11 @@ package ca.uhn.fhir.jpa.bulk.export.job;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.log.Logs;
-import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
-import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
-import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.util.SearchParameterUtil;
-import ca.uhn.fhir.util.UrlUtil;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,10 +35,9 @@ import org.springframework.beans.factory.annotation.Value;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public abstract class BaseBulkItemReader implements ItemReader<List<ResourcePersistentId>> {
@@ -58,57 +45,36 @@ public abstract class BaseBulkItemReader implements ItemReader<List<ResourcePers
 
 	@Value("#{stepExecutionContext['resourceType']}")
 	protected String myResourceType;
-	@Value("#{jobExecutionContext['" + BatchConstants.JOB_UUID_PARAMETER + "']}")
-	protected String myJobUUID;
-	@Value("#{jobParameters['" + BulkExportJobConfig.READ_CHUNK_PARAMETER + "']}")
+	@Value("#{jobParameters['readChunkSize']}")
 	protected Long myReadChunkSize;
-	@Autowired
-	protected DaoRegistry myDaoRegistry;
 	@Autowired
 	protected FhirContext myContext;
 	@Autowired
-	protected SearchBuilderFactory mySearchBuilderFactory;
-	@Autowired
-	private IBulkExportJobDao myBulkExportJobDao;
-	@Autowired
 	private MatchUrlService myMatchUrlService;
 
-	private ISearchBuilder mySearchBuilder;
-	private BulkExportJobEntity myJobEntity;
+	private Iterator<ResourcePersistentId> myPidIterator;
 	private RuntimeResourceDefinition myResourceDefinition;
 
-	private Iterator<ResourcePersistentId> myPidIterator;
-	private RuntimeSearchParam myPatientSearchParam;
-
 	/**
-	 * Get and cache an ISearchBuilder for the given resource type this partition is responsible for.
-	 */
-	protected ISearchBuilder getSearchBuilderForLocalResourceType() {
-		if (mySearchBuilder == null) {
-			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(myResourceType);
-			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResourceType);
-			Class<? extends IBaseResource> nextTypeClass = def.getImplementingClass();
-			mySearchBuilder = mySearchBuilderFactory.newSearchBuilder(dao, myResourceType, nextTypeClass);
-		}
-		return mySearchBuilder;
-	}
-
-	/**
-	 * Generate the list of pids of all resources of the given myResourceType, which reference any group member of the given myGroupId.
+	 * Generate the list of PIDs of all resources of the given myResourceType, which reference any group member of the given myGroupId.
 	 * Store them in a member iterator.
 	 */
-	protected void loadResourcePids() {
-		//Initialize an array to hold the pids of the target resources to be exported.
+	protected void loadResourcePIDs() {
+		//Initialize an array to hold the PIDs of the target resources to be exported.
 		myPidIterator = getResourcePidIterator();
 	}
 
 	protected abstract Iterator<ResourcePersistentId> getResourcePidIterator();
 
+	protected abstract String[] getTypeFilterList();
+
+	protected abstract Date getSinceDate();
+
+	protected abstract String getLogInfoForRead();
+
 	protected List<SearchParameterMap> createSearchParameterMapsForResourceType() {
-		BulkExportJobEntity jobEntity = getJobEntity();
 		RuntimeResourceDefinition theDef = getResourceDefinition();
-		Map<String, String[]> requestUrl = UrlUtil.parseQueryStrings(jobEntity.getRequest());
-		String[] typeFilters = requestUrl.get(JpaConstants.PARAM_EXPORT_TYPE_FILTER);
+		String[] typeFilters = getTypeFilterList();
 		List<SearchParameterMap> spMaps = null;
 		if (typeFilters != null) {
 			spMaps = Arrays.stream(typeFilters)
@@ -129,8 +95,8 @@ public abstract class BaseBulkItemReader implements ItemReader<List<ResourcePers
 
 	private void enhanceSearchParameterMapWithCommonParameters(SearchParameterMap map) {
 		map.setLoadSynchronous(true);
-		if (getJobEntity().getSince() != null) {
-			map.setLastUpdated(new DateRangeParam(getJobEntity().getSince(), null));
+		if (getSinceDate() != null) {
+			map.setLastUpdated(new DateRangeParam(getSinceDate(), null));
 		}
 	}
 
@@ -147,26 +113,12 @@ public abstract class BaseBulkItemReader implements ItemReader<List<ResourcePers
 		return myResourceDefinition;
 	}
 
-	protected BulkExportJobEntity getJobEntity() {
-		if (myJobEntity == null) {
-			Optional<BulkExportJobEntity> jobOpt = myBulkExportJobDao.findByJobId(myJobUUID);
-			if (jobOpt.isPresent()) {
-				myJobEntity = jobOpt.get();
-			} else {
-				String errorMessage = String.format("Job with UUID %s does not exist!", myJobUUID);
-				throw new IllegalStateException(errorMessage);
-			}
-		}
-		return myJobEntity;
-	}
-
 	@Override
 	public List<ResourcePersistentId> read() {
-
-		ourLog.info("Bulk export starting generation for batch export job: [{}] with resourceType [{}] and UUID [{}]", getJobEntity(), myResourceType, myJobUUID);
+		ourLog.info(getLogInfoForRead());
 
 		if (myPidIterator == null) {
-			loadResourcePids();
+			loadResourcePIDs();
 		}
 
 		int count = 0;
@@ -177,18 +129,5 @@ public abstract class BaseBulkItemReader implements ItemReader<List<ResourcePers
 		}
 
 		return outgoing.size() == 0 ? null : outgoing;
-
-	}
-
-	protected RuntimeSearchParam getPatientSearchParamForCurrentResourceType() {
-		if (myPatientSearchParam == null) {
-			Optional<RuntimeSearchParam> onlyPatientSearchParamForResourceType = SearchParameterUtil.getOnlyPatientSearchParamForResourceType(myContext, myResourceType);
-			if (onlyPatientSearchParamForResourceType.isPresent()) {
-				myPatientSearchParam = onlyPatientSearchParamForResourceType.get();
-			} else {
-
-			}
-		}
-		return myPatientSearchParam;
 	}
 }

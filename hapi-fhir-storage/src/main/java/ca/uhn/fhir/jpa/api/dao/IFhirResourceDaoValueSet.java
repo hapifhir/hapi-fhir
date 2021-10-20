@@ -26,13 +26,17 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface IFhirResourceDaoValueSet<T extends IBaseResource, CD, CC> extends IFhirResourceDao<T> {
 
+	@Transactional
 	T expand(IIdType theId, ValueSetExpansionOptions theOptions, RequestDetails theRequestDetails);
 
+	@Transactional
 	T expand(T theSource, ValueSetExpansionOptions theOptions);
 
+	@Transactional
 	T expandByIdentifier(String theUri, ValueSetExpansionOptions theOptions);
 
 	void purgeCaches();

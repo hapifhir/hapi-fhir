@@ -160,6 +160,6 @@
 
 	<properties>
 		<!--<kotlin.compiler.incremental>true</kotlin.compiler.incremental>-->
-		<kotlin.version>1.5.0</kotlin.version>
+		<kotlin.version>1.5.31</kotlin.version>
 	</properties>
 </project>

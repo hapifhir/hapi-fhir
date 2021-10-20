@@ -82,9 +82,9 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 		Patient newJane = buildJanePatient();
 
 		createActivePatient();
-		assertEquals(1, myMdmCandidateSearchSvc.findCandidates("Patient", newJane).size());
+		assertEquals(1, runInTransaction(()->myMdmCandidateSearchSvc.findCandidates("Patient", newJane).size()));
 		createActivePatient();
-		assertEquals(2, myMdmCandidateSearchSvc.findCandidates("Patient", newJane).size());
+		assertEquals(2, runInTransaction(()->myMdmCandidateSearchSvc.findCandidates("Patient", newJane).size()));
 
 		try {
 			createActivePatient();

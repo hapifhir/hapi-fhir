@@ -40,11 +40,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>net.sf.saxon</groupId>
-			<artifactId>Saxon-HE</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
 		</dependency>
@@ -196,12 +191,6 @@
 			<groupId>com.helger</groupId>
 			<artifactId>ph-schematron</artifactId>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>Saxon-HE</artifactId>
-					<groupId>net.sf.saxon</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.helger</groupId>
@@ -575,12 +564,14 @@
 					<dialects>
 						<param>h2</param>
 						<param>derby_10_7</param>
-						<param>postgresql92</param>
 						<param>mysql57</param>
 						<param>mariadb</param>
 						<param>oracle12c</param>
 						<param>sqlserver2012</param>
 					</dialects>
+					<customDialects>
+						<customDialect>ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect</customDialect>
+					</customDialects>
 					<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database</outputDirectory>
 					<packages>
 						<param>ca.uhn.fhir.jpa.entity</param>
@@ -604,6 +595,11 @@
 						<groupId>org.glassfish.jaxb</groupId>
 						<artifactId>jaxb-runtime</artifactId>
 						<version>${jaxb_runtime_version}</version>
+					</dependency>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-jpaserver-model</artifactId>
+						<version>${project.version}</version>
 					</dependency>
 				</dependencies>
 			</plugin>
