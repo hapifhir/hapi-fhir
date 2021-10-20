@@ -10,12 +10,14 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -108,6 +110,50 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		}
 
 		String url = "/Observation?subject.name=Smith";
+
+		// execute
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+
+		// validate
+		assertEquals(1L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
+	@Test
+	@Disabled
+	public void testShouldResolveATwoLinkChainWithQualifiersWithAContainedResource() throws Exception {
+		// TODO: This test fails because of a known limitation in qualified searches over contained resources.
+		//       Type information for intermediate resources in the chain is not being retained in the indexes.
+		// setup
+		IIdType oid1;
+
+		{
+			Patient p = new Patient();
+			p.setId("pat");
+			p.addName().setFamily("Smith").addGiven("John");
+
+			Observation obs = new Observation();
+			obs.getContained().add(p);
+			obs.getCode().setText("Observation 1");
+			obs.setValue(new StringType("Test"));
+			obs.getSubject().setReference("#pat");
+
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			Location loc = new Location();
+			loc.setId("loc");
+			loc.setName("Smith");
+
+			Observation obs2 = new Observation();
+			obs2.getContained().add(loc);
+			obs2.getCode().setText("Observation 2");
+			obs2.setValue(new StringType("Test"));
+			obs2.getSubject().setReference("#loc");
+
+			myObservationDao.create(obs2, mySrd);
+		}
+
+		String url = "/Observation?subject:Patient.name=Smith";
 
 		// execute
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
@@ -427,6 +473,117 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			Observation obs2 = new Observation();
 			obs2.getContained().add(d);
+			obs2.getCode().setText("Observation 2");
+			obs2.getSubject().setReference("#dev");
+
+			myObservationDao.create(obs2, mySrd);
+		}
+
+		String url = "/Observation?subject:Patient.organization:Organization.name=HealthCo";
+
+		// execute
+		myCaptureQueriesListener.clear();
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		myCaptureQueriesListener.logSelectQueries();
+
+		// validate
+		assertEquals(1L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
+	@Test
+	@Disabled
+	public void testShouldResolveAThreeLinkChainWithQualifiersWithAContainedResourceAtTheBeginning_NotDistinctSourcePaths() throws Exception {
+		// TODO: This test fails because of a known limitation in qualified searches over contained resources.
+		//       Type information for intermediate resources in the chain is not being retained in the indexes.
+
+		// Adding support for this case in SMILE-3151
+
+		// setup
+		IIdType oid1;
+
+		{
+			Organization org = new Organization();
+			org.setId(IdType.newRandomUuid());
+			org.setName("HealthCo");
+			myOrganizationDao.create(org, mySrd);
+
+			Patient p = new Patient();
+			p.setId("pat");
+			p.addName().setFamily("Smith").addGiven("John");
+			p.getManagingOrganization().setReference(org.getId());
+
+			Observation obs = new Observation();
+			obs.getContained().add(p);
+			obs.getCode().setText("Observation 1");
+			obs.getSubject().setReference("#pat");
+
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			Location loc = new Location();
+			loc.setId("loc");
+			loc.getManagingOrganization().setReference(org.getId());
+
+			Observation obs2 = new Observation();
+			obs2.getContained().add(loc);
+			obs2.getCode().setText("Observation 2");
+			obs2.getSubject().setReference("#loc");
+
+			myObservationDao.create(obs2, mySrd);
+		}
+
+		String url = "/Observation?subject:Patient.organization:Organization.name=HealthCo";
+
+		// execute
+		myCaptureQueriesListener.clear();
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		myCaptureQueriesListener.logSelectQueries();
+
+		// validate
+		assertEquals(1L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
+	@Test
+	@Disabled
+	public void testShouldResolveAThreeLinkChainWithQualifiersWithAllContainedResources() throws Exception {
+		// TODO: This test fails because of a known limitation in qualified searches over contained resources.
+		//       Type information for intermediate resources in the chain is not being retained in the indexes.
+
+		// setup
+		myModelConfig.setIndexOnContainedResourcesRecursively(true);
+
+		IIdType oid1;
+
+		{
+			Organization org = new Organization();
+			org.setId("org");
+			org.setName("HealthCo");
+
+			Patient p = new Patient();
+			p.setId("pat");
+			p.addName().setFamily("Smith").addGiven("John");
+			p.getManagingOrganization().setReference("#org");
+
+			Observation obs = new Observation();
+			obs.getContained().add(p);
+			obs.getContained().add(org);
+			obs.getCode().setText("Observation 1");
+			obs.getSubject().setReference("#pat");
+
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			Organization org2 = new Organization();
+			org2.setId("org");
+			org2.setName("HealthCo");
+
+			Device d = new Device();
+			d.setId("dev");
+			d.getOwner().setReference("#org");
+
+			Observation obs2 = new Observation();
+			obs2.getContained().add(d);
+			obs2.getContained().add(org2);
 			obs2.getCode().setText("Observation 2");
 			obs2.getSubject().setReference("#dev");
 
