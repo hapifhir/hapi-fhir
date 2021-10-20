@@ -1,13 +1,9 @@
 package ca.uhn.fhir.jpa.subscription.module.cache;
 
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
-import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,22 +28,6 @@ public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
 		Assertions.assertTrue(isRegistered);
 
 		assertRegistrySize(1, 1);
-	}
-
-	@Test
-	@Disabled("This test requires R4 fhircontext to be hooked up")
-	public void registerSubscriptionUnlessAlreadyRegistered_withRetryExtensionIncludingDLQ_creates1Subscription2Channels() {
-
-		// create retry extension
-		Extension retryExtension = new Extension();
-		retryExtension.setUrl(HapiExtensions.EX_RETRY_COUNT);
-		retryExtension.setValue(new IntegerType(2));
-		Extension dlq = new Extension();
-		dlq.setUrl(HapiExtensions.EX_DLQ_PREFIX);
-		dlq.setValue(new StringType("dlq"));
-
-
-		testSubscriptionAddingWithExtension(retryExtension, dlq);
 	}
 
 	@Test

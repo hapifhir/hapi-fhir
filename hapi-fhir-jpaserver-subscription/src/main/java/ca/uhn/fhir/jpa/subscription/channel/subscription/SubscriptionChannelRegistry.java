@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.subscription.channel.models.ProducingChannelParameters;
 import ca.uhn.fhir.jpa.subscription.channel.models.ReceivingChannelParameters;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
-import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
@@ -70,8 +69,19 @@ public class SubscriptionChannelRegistry {
 		// these will be provided to both the producer and receiver channel
 		ChannelRetryConfiguration retryConfigParameters = theActiveSubscription.getRetryConfigurationParameters();
 
+		/*
+		 * When we create a subscription, we create both
+		 * a producing/sending channel and
+		 * a receiving channel.
+		 *
+		 * Matched subscriptions are sent to the Sending channel
+		 * and the sending channel sends to receiving channel.
+		 * Receiving channel will send it out to
+		 * the subscriber hook.
+		 */
+
 		// the receiving channel
-		// this sends to the hook/resthook/whatever
+		// this sends to the hook (resthook/message/email/whatever)
 		ReceivingChannelParameters receivingParameters = new ReceivingChannelParameters(channelName);
 		receivingParameters.setRetryConfiguration(retryConfigParameters);
 
@@ -93,12 +103,9 @@ public class SubscriptionChannelRegistry {
 		myChannelNameToSender.put(channelName, sendingChannel);
 	}
 
-	protected IChannelReceiver newReceivingChannel(String theChannelName) {
-		return newReceivingChannel(new ReceivingChannelParameters(theChannelName));
-	}
-
 	protected IChannelReceiver newReceivingChannel(ReceivingChannelParameters theParameters) {
 		ChannelConsumerSettings settings = new ChannelConsumerSettings();
+		settings.setRetryConfiguration(theParameters.getRetryConfiguration());
 		return mySubscriptionDeliveryChannelFactory.newDeliveryReceivingChannel(theParameters.getChannelName(),
 			settings);
 	}
