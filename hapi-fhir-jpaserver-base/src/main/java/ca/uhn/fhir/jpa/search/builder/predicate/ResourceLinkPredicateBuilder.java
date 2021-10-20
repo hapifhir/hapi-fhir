@@ -571,6 +571,10 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			String qualifier = theParamQualifiers.get(0);
 
 			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, paramNameHead);
+			if (param == null) {
+				// This can happen during recursion, if not all the possible target types of one link in the chain support the next link
+				return new ArrayList<>();
+			}
 			Set<String> tailPaths = param.getTargets().stream()
 				.filter(t -> isBlank(qualifier) || qualifier.equals(t))
 				.map(t -> createResourceLinkPaths(t, paramNameTail, theParamQualifiers.subList(1, theParamQualifiers.size())))

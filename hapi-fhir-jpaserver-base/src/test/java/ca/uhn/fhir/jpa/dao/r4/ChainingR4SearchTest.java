@@ -526,6 +526,47 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testShouldResolveAFourLinkChainWhereTheLastTwoReferencesAreContained() throws Exception {
+
+		// setup
+		myModelConfig.setIndexOnContainedResourcesRecursively(true);
+		IIdType oid1;
+
+		{
+			Organization org = new Organization();
+			org.setId("parent");
+			org.setName("HealthCo");
+
+			Organization partOfOrg = new Organization();
+			partOfOrg.setId("child");
+			partOfOrg.getPartOf().setReference("#parent");
+
+			Patient p = new Patient();
+			p.getContained().add(org);
+			p.getContained().add(partOfOrg);
+			p.setId(IdType.newRandomUuid());
+			p.addName().setFamily("Smith").addGiven("John");
+			p.getManagingOrganization().setReference("#child");
+			myPatientDao.create(p, mySrd);
+
+			Observation obs = new Observation();
+			obs.getCode().setText("Observation 1");
+			obs.getSubject().setReference(p.getId());
+
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		String url = "/Observation?subject.organization.partof.name=HealthCo";
+
+		// execute
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+
+		// validate
+		assertEquals(1L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
+	@Test
 	public void testShouldResolveAFourLinkChainWithAContainedResourceInTheMiddle() throws Exception {
 
 		// setup
@@ -565,6 +606,47 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
 		myCaptureQueriesListener.logSelectQueries();
+
+		// validate
+		assertEquals(1L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
+	@Test
+	public void testShouldResolveAFourLinkChainWhereAllReferencesAreContained() throws Exception {
+
+		// setup
+		myModelConfig.setIndexOnContainedResourcesRecursively(true);
+		IIdType oid1;
+
+		{
+			Organization org = new Organization();
+			org.setId("parent");
+			org.setName("HealthCo");
+
+			Organization partOfOrg = new Organization();
+			partOfOrg.setId("child");
+			partOfOrg.getPartOf().setReference("#parent");
+
+			Patient p = new Patient();
+			p.setId("pat");
+			p.addName().setFamily("Smith").addGiven("John");
+			p.getManagingOrganization().setReference("#child");
+
+			Observation obs = new Observation();
+			obs.getContained().add(org);
+			obs.getContained().add(partOfOrg);
+			obs.getContained().add(p);
+			obs.getCode().setText("Observation 1");
+			obs.getSubject().setReference("#pat");
+
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		String url = "/Observation?subject.organization.partof.name=HealthCo";
+
+		// execute
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
 
 		// validate
 		assertEquals(1L, oids.size());

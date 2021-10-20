@@ -688,6 +688,13 @@ public class QueryStack {
 																					  String theResourceName, String theParamName, RuntimeSearchParam theSearchParam,
 																					  List<? extends IQueryParameterType> theList, SearchFilterParser.CompareOperation theOperation,
 																					  RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+		return createPredicateReferenceForContainedResource(theSourceJoinColumn, theResourceName, theParamName, new ArrayList<>(), theSearchParam, theList, theOperation, theRequest, theRequestPartitionId);
+	}
+
+	public Condition createPredicateReferenceForContainedResource(@Nullable DbColumn theSourceJoinColumn,
+																					  String theResourceName, String theParamName, List<String> theQualifiers, RuntimeSearchParam theSearchParam,
+																					  List<? extends IQueryParameterType> theList, SearchFilterParser.CompareOperation theOperation,
+																					  RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 
 		String spnamePrefix = theParamName;
 
@@ -760,7 +767,7 @@ public class QueryStack {
 			throw new InvalidRequestException("Unknown search parameter name: " + theSearchParam.getName() + ".");
 		}
 
-		List<String> qualifiers= Collections.singletonList(headQualifier);
+		theQualifiers.add(headQualifier);
 
 		// 3. create the query
 		Condition containedCondition = null;
@@ -796,10 +803,10 @@ public class QueryStack {
 				break;
 			case REFERENCE:
 				String chainedParamName = theParamName + "." + targetParamName;
-				containedCondition = createPredicateReference(theSourceJoinColumn, theResourceName, chainedParamName, qualifiers, trimmedParameters, theOperation, theRequest, theRequestPartitionId);
+				containedCondition = createPredicateReference(theSourceJoinColumn, theResourceName, chainedParamName, theQualifiers, trimmedParameters, theOperation, theRequest, theRequestPartitionId);
 				if (myModelConfig.isIndexOnContainedResourcesRecursively()) {
 					containedCondition = toOrPredicate(containedCondition,
-						createPredicateReferenceForContainedResource(theSourceJoinColumn, theResourceName, chainedParamName, theSearchParam, trimmedParameters, theOperation, theRequest, theRequestPartitionId));
+						createPredicateReferenceForContainedResource(theSourceJoinColumn, theResourceName, chainedParamName, theQualifiers, theSearchParam, trimmedParameters, theOperation, theRequest, theRequestPartitionId));
 				}
 				break;
 			case HAS:
