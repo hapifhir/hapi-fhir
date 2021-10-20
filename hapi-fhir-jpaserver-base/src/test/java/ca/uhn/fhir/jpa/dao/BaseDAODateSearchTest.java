@@ -11,7 +11,6 @@ import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Observation;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -59,12 +58,6 @@ public abstract class BaseDAODateSearchTest {
 		String message = "Expected " + theQuery + " to " + (theExpectedMatch ? "" : "not ") + "match " + theResourceDate +
 			" (" + theFileName + ":" + theLineNumber + ")";
 		assertEquals(theExpectedMatch, matched, message);
-	}
-
-	@AfterEach
-	public void cleanObservations() {
-		ourLog.info("Delete Observation {}", myObservationId);
-		doInTransaction(s -> getObservationDao().delete(myObservationId));
 	}
 
 	// we need these from the test container
