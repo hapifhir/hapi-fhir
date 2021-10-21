@@ -685,13 +685,6 @@ public class QueryStack {
 	}
 
 	public Condition createPredicateReferenceForContainedResource(@Nullable DbColumn theSourceJoinColumn,
-																					  String theResourceName, String theParamName, RuntimeSearchParam theSearchParam,
-																					  List<? extends IQueryParameterType> theList, SearchFilterParser.CompareOperation theOperation,
-																					  RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
-		return createPredicateReferenceForContainedResource(theSourceJoinColumn, theResourceName, theParamName, new ArrayList<>(), theSearchParam, theList, theOperation, theRequest, theRequestPartitionId);
-	}
-
-	public Condition createPredicateReferenceForContainedResource(@Nullable DbColumn theSourceJoinColumn,
 																					  String theResourceName, String theParamName, List<String> theQualifiers, RuntimeSearchParam theSearchParam,
 																					  List<? extends IQueryParameterType> theList, SearchFilterParser.CompareOperation theOperation,
 																					  RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
@@ -1151,11 +1144,11 @@ public class QueryStack {
 							//   See SMILE-2898 for details.
 							//   For now, leave the incorrect implementation alone, just in case someone is relying on it,
 							//   until the complete fix is available.
-							andPredicates.add(createPredicateReferenceForContainedResource(null, theResourceName, theParamName, nextParamDef, nextAnd, null, theRequest, theRequestPartitionId));
+							andPredicates.add(createPredicateReferenceForContainedResource(null, theResourceName, theParamName, new ArrayList<>(), nextParamDef, nextAnd, null, theRequest, theRequestPartitionId));
 						} else if (isEligibleForContainedResourceSearch(nextAnd)) {
 							andPredicates.add(toOrPredicate(
 								createPredicateReference(theSourceJoinColumn, theResourceName, theParamName, new ArrayList<>(), nextAnd, null, theRequest, theRequestPartitionId),
-								createPredicateReferenceForContainedResource(theSourceJoinColumn, theResourceName, theParamName, nextParamDef, nextAnd, null, theRequest, theRequestPartitionId)
+								createPredicateReferenceForContainedResource(theSourceJoinColumn, theResourceName, theParamName, new ArrayList<>(), nextParamDef, nextAnd, null, theRequest, theRequestPartitionId)
 							));
 						} else {
 							andPredicates.add(createPredicateReference(theSourceJoinColumn, theResourceName, theParamName, new ArrayList<>(), nextAnd, null, theRequest, theRequestPartitionId));
