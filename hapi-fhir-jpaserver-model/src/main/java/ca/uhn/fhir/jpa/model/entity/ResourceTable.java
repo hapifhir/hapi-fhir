@@ -124,7 +124,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Transient
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	@PropertyBinding(binder = @PropertyBinderRef(type = SearchParamTextPropertyBinder.class))
-	private ExtendedLuceneIndexData mySearchParamTexts;
+	private ExtendedLuceneIndexData myLuceneIndexData;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
@@ -756,7 +756,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		return myCreatedByMatchUrl;
 	}
 
-	public void setSearchParamText(ExtendedLuceneIndexData theSearchParamTexts) {
-		mySearchParamTexts = theSearchParamTexts;
+	public void setLuceneIndexData(ExtendedLuceneIndexData theLuceneIndexData) {
+		myLuceneIndexData = theLuceneIndexData;
 	}
 }

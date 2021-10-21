@@ -42,7 +42,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class HapiLuceneAnalysisConfigurer implements LuceneAnalysisConfigurer {
 
-	// wip mb make these visible somewhere
 	public static final String STANDARD_ANALYZER = "standardAnalyzer";
 	public static final String NORM_STRING_ANALYZER = "normStringAnalyzer";
 	public static final String EXACT_ANALYZER = "exactAnalyzer";

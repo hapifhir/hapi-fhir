@@ -129,9 +129,9 @@ public class HibernateSearchQueryBuilder {
 			return;
 		}
 		String fieldName;
-		// we store some as legacy direct-mapped hibernate search fields
-		// wip mb maybe start indexing to sp._text.string.text too?
 		switch (theSearchParamName) {
+			// _content and _text were here first, and don't obey our mapping.
+			// Leave them as-is for backwards compatibility.
 			case Constants.PARAM_CONTENT:
 				fieldName = "myContentText";
 				break;
@@ -146,8 +146,6 @@ public class HibernateSearchQueryBuilder {
 		for (List<? extends IQueryParameterType> nextAnd : stringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
 			ourLog.debug("addStringTextSearch {}, {}", theSearchParamName, terms);
-			// wip GGG: MB, did you mean for this to say >= 1?
-			// wip mb - this is very confused.  Need some tests to figure out multiple and/or logic
 			if (terms.size() >= 1) {
 				String query = terms.stream()
 					.map(s -> "( " + s + " )")

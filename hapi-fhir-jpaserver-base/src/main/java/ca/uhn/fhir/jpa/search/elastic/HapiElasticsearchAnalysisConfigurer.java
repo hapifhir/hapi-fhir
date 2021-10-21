@@ -71,7 +71,6 @@ public class HapiElasticsearchAnalysisConfigurer implements ElasticsearchAnalysi
 			.param("max_gram", "20");
 
 
-		// wip mb fold accents to ascii?  This doesn't quite match the JPA normalizer which leaves 'ø' as 'ø' instead of 'o'
 		theConfigCtx.analyzer(HapiLuceneAnalysisConfigurer.STANDARD_ANALYZER).custom()
 			.tokenizer("standard")
 			.tokenFilters("lowercase", "asciifolding");

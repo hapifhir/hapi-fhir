@@ -92,20 +92,20 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	public ExtendedLuceneIndexData extractLuceneIndexData(FhirContext theContext, IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
 		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData(myFhirContext);
 
-		// wip mb - add string params to indexing.
-		// wipmb weird - theNewParams seem to have some doubles.
-		theNewParams.myStringParams
-				.forEach(param -> retVal.addStringIndexData(param.getParamName(), param.getValueExact()));
-		theNewParams.myTokenParams
-				.forEach(param -> retVal.addTokenIndexData(param.getParamName(), param.getSystem(), param.getValue()));
+		theNewParams.myStringParams.forEach(nextParam ->
+			retVal.addStringIndexData(nextParam.getParamName(), nextParam.getValueExact()));
+
+		theNewParams.myTokenParams.forEach(nextParam ->
+			retVal.addTokenIndexData(nextParam.getParamName(), nextParam.getSystem(), nextParam.getValue()));
+
 		if (!theNewParams.myLinks.isEmpty()) {
 			Map<String, ResourceLink> spNameToLinkMap = buildSpNameToLinkMap(theResource, theNewParams);
 
 			spNameToLinkMap.entrySet()
-					.forEach(entry -> {
-						ResourceLink resourceLink = entry.getValue();
+					.forEach(nextEntry -> {
+						ResourceLink resourceLink = nextEntry.getValue();
 						String qualifiedTargetResourceId = resourceLink.getTargetResourceType() + "/" + resourceLink.getTargetResourceId();
-						retVal.addResourceLinkIndexData(entry.getKey(), qualifiedTargetResourceId);
+						retVal.addResourceLinkIndexData(nextEntry.getKey(), qualifiedTargetResourceId);
 					});
 
 		}
@@ -114,8 +114,12 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	private Map<String, ResourceLink> buildSpNameToLinkMap(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
 		String resourceType = myFhirContext.getResourceType(theResource);
-		Map<String, RuntimeSearchParam> paramNameToRuntimeParam = theNewParams.getPopulatedResourceLinkParameters().stream()
-			.collect(Collectors.toMap((paramName) -> paramName, (paramName) -> mySearchParamRegistry.getActiveSearchParam(resourceType, paramName)));
+
+		Map<String, RuntimeSearchParam> paramNameToRuntimeParam =
+			theNewParams.getPopulatedResourceLinkParameters().stream()
+				.collect(Collectors.toMap(
+					(theParam) -> theParam,
+					(theParam) -> mySearchParamRegistry.getActiveSearchParam(resourceType, theParam)));
 
 		Map<String, ResourceLink> paramNameToIndexedLink = new HashMap<>();
 		for ( Map.Entry<String, RuntimeSearchParam> entry :paramNameToRuntimeParam.entrySet()) {
@@ -138,15 +142,14 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		// keep this in sync with the guts of doSearch
 		boolean requiresHibernateSearchAccess = myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN();
 
-		// wip mb need to turn this off for partitions to start.
-
 		requiresHibernateSearchAccess |=
 			myDaoConfig.isAdvancedLuceneIndexing() &&
-			myParams.entrySet().stream()
-			.filter(e -> !ourUnsafeSearchParmeters.contains(e.getKey()))
-			.flatMap(andList -> andList.getValue().stream())
-			.flatMap(Collection::stream)
-			.anyMatch(this::isParamSupported);
+				myParams.entrySet().stream()
+					.filter(e -> !ourUnsafeSearchParmeters.contains(e.getKey()))
+					// each and clause may have a different modifier, so split down to the ORs
+					.flatMap(andList -> andList.getValue().stream())
+					.flatMap(Collection::stream)
+					.anyMatch(this::isParamSupported);
 
 		return requiresHibernateSearchAccess;
 	}
@@ -237,7 +240,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 							}
 							RuntimeSearchParam activeParam = mySearchParamRegistry.getActiveSearchParam(theResourceType, nextParam);
 							if (activeParam == null) {
-								// ignore magic params like
+								// ignore magic params handled in JPA
 								continue;
 							}
 							switch (activeParam.getParamType()) {

@@ -71,8 +71,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		IndexFieldTypeFactory indexFieldTypeFactory = thePropertyBindingContext.typeFactory();
 		StringIndexFieldTypeOptionsStep<?> standardAnalyzer =
 			indexFieldTypeFactory.asString()
-				// wip mb where do we do unicode normalization?  Java-side, or in the analyzer?
-				// wip mb can we share these constants with HapiElasticsearchAnalysisConfigurer and HapiLuceneAnalysisConfigurer
+				// TODO mb Once Ken finishes extracting a common base, we can share these constants with HapiElasticsearchAnalysisConfigurer and HapiLuceneAnalysisConfigurer
 				.analyzer("standardAnalyzer")
 				.projectable(Projectable.NO);
 
@@ -88,46 +87,47 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 
 
 
-		// the old style.
-		// wipmb move _text and _contains into sp with backwards compat in the query path.
+		// the old style for _text and _contains
 		indexSchemaElement
 			.fieldTemplate("SearchParamText", standardAnalyzer)
 			.matchingPathGlob(SEARCH_PARAM_TEXT_PREFIX + "*");
 
-		// this is a bit ugly.  We need to enforce order and dependency or the object matches will be too big.
-		IndexSchemaObjectField spfield = indexSchemaElement.objectField("sp", ObjectStructure.FLATTENED);
-		spfield.toReference();
+		// The following section is a bit ugly.  We need to enforce order and dependency or the object matches will be too big.
+		{
+			IndexSchemaObjectField spfield = indexSchemaElement.objectField("sp", ObjectStructure.FLATTENED);
+			spfield.toReference();
 
-		// Note: the lucene/elastic independent api is hurting a bit here.
-		// For lucene, we need a separate field for each analyzer.  So we'll add string (for :exact), and text (for :text).
-		// They aren't marked stored, so there's no space cost beyond the index for each.
-		// But for elastic, I'd rather have a single field defined, with multi-field sub-fields.  The index cost is the same,
-		// but elastic will actually store all fields in the source document.
-		// Something like this.  But we'll need two index writers (lucene vs hibernate).
-//		ElasticsearchNativeIndexFieldTypeMappingStep nativeStep = indexFieldTypeFactory.extension(ElasticsearchExtension.get()).asNative();
-//		nativeStep.mapping()
-		// So triplicate the storage for now. :-(
-		String stringPathGlob = "*.string";
-		spfield.objectFieldTemplate("stringIndex", ObjectStructure.FLATTENED).matchingPathGlob(stringPathGlob);
-		spfield.fieldTemplate("string-norm", normStringAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_NORMALIZED).multiValued();
-		spfield.fieldTemplate("string-exact", exactAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_EXACT).multiValued();
-		spfield.fieldTemplate("string-text", standardAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_TEXT).multiValued();
+			// TODO MB: the lucene/elastic independent api is hurting a bit here.
+			// For lucene, we need a separate field for each analyzer.  So we'll add string (for :exact), and text (for :text).
+			// They aren't marked stored, so there's no space cost beyond the index for each.
+			// But for elastic, I'd rather have a single field defined, with multi-field sub-fields.  The index cost is the same,
+			// but elastic will actually store all fields in the source document.
+			// Something like this.  But we'll need two index writers (lucene vs hibernate).
+//			ElasticsearchNativeIndexFieldTypeMappingStep nativeStep = indexFieldTypeFactory.extension(ElasticsearchExtension.get()).asNative();
+//			nativeStep.mapping()
 
-		// token
-		// Ideally, we'd store a single code-system string and use a custom tokenizer to
-		// generate "system|" "|code" and "system|code" tokens to support all three.
-		// But the standard tokenizers aren't that flexible.  As second best, it would be nice to use elastic multi-fields
-		// to apply three different tokenziers to a single value.
-		// Instead, just be simple and expand into three full fields
-		// wip mb try token_filter - pattern_capture. to generate code and system partial values.
-		spfield.objectFieldTemplate("tokenIndex", ObjectStructure.FLATTENED).matchingPathGlob("*.token");
-		spfield.fieldTemplate("token-code", exactAnalyzer).matchingPathGlob("*.token.code").multiValued();
-		spfield.fieldTemplate("token-code-system", exactAnalyzer).matchingPathGlob("*.token.code-system").multiValued();
-		spfield.fieldTemplate("token-system", exactAnalyzer).matchingPathGlob("*.token.system").multiValued();
-		spfield.fieldTemplate("reference-value", exactAnalyzer).matchingPathGlob("*.reference.value").multiValued();
+			// So triplicate the storage for now. :-(
+			String stringPathGlob = "*.string";
+			spfield.objectFieldTemplate("stringIndex", ObjectStructure.FLATTENED).matchingPathGlob(stringPathGlob);
+			spfield.fieldTemplate("string-norm", normStringAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_NORMALIZED).multiValued();
+			spfield.fieldTemplate("string-exact", exactAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_EXACT).multiValued();
+			spfield.fieldTemplate("string-text", standardAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_TEXT).multiValued();
 
-		// last, since the globs are matched in declaration order, and * matches even nested nodes.
-		spfield.objectFieldTemplate("spObject", ObjectStructure.FLATTENED).matchingPathGlob("*");
+			// token
+			// Ideally, we'd store a single code-system string and use a custom tokenizer to
+			// generate "system|" "|code" and "system|code" tokens to support all three.
+			// But the standard tokenizers aren't that flexible.  As second best, it would be nice to use elastic multi-fields
+			// to apply three different tokenizers to a single value.
+			// Instead, just be simple and expand into three full fields for now
+			spfield.objectFieldTemplate("tokenIndex", ObjectStructure.FLATTENED).matchingPathGlob("*.token");
+			spfield.fieldTemplate("token-code", exactAnalyzer).matchingPathGlob("*.token.code").multiValued();
+			spfield.fieldTemplate("token-code-system", exactAnalyzer).matchingPathGlob("*.token.code-system").multiValued();
+			spfield.fieldTemplate("token-system", exactAnalyzer).matchingPathGlob("*.token.system").multiValued();
+			spfield.fieldTemplate("reference-value", exactAnalyzer).matchingPathGlob("*.reference.value").multiValued();
+
+			// last, since the globs are matched in declaration order, and * matches even nested nodes.
+			spfield.objectFieldTemplate("spObject", ObjectStructure.FLATTENED).matchingPathGlob("*");
+		}
 	}
 
 	@Override

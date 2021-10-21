@@ -274,7 +274,7 @@ public class DaoConfig {
 	 * queried within Hibernate Search.
 	 *
 	 * @since 5.6.0
-	 * wip mb test more with this true
+	 * TODO mb test more with this true
 	 */
 	private boolean myAdvancedLuceneIndexing = false;
 

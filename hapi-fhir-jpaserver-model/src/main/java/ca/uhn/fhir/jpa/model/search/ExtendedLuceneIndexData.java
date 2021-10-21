@@ -22,8 +22,6 @@ public class ExtendedLuceneIndexData {
 	final SetMultimap<String, TokenParam> mySearchParamTokens = HashMultimap.create();
 	final SetMultimap<String, String> mySearchParamLinks = HashMultimap.create();
 
-	// wip mb add the Resource - do we already have it as json somewhere?
-
 	public ExtendedLuceneIndexData(FhirContext theFhirContext) {
 		this.myFhirContext = theFhirContext;
 	}
@@ -31,7 +29,7 @@ public class ExtendedLuceneIndexData {
 	public void writeIndexElements(DocumentElement theDocument) {
 		HibernateSearchIndexWriter indexWriter = HibernateSearchIndexWriter.forRoot(myFhirContext, theDocument);
 
-		// WIP Use RestSearchParameterTypeEnum to define templates.
+		// TODO MB Use RestSearchParameterTypeEnum to define templates.
 		mySearchParamStrings.forEach(indexWriter::writeStringIndex);
 		mySearchParamTokens.forEach(indexWriter::writeTokenIndex);
 		mySearchParamLinks.forEach(indexWriter::writeReferenceIndex);

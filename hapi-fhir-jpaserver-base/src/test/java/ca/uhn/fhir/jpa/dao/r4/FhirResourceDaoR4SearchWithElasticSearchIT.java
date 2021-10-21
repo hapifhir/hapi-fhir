@@ -303,7 +303,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 	@Test
 	public void testResourceCodeTextSearch() {
-		// wipmb text search test
 		IIdType id1,id2,id3,id4;
 
 		{
@@ -421,7 +420,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 	@Test
 	public void testStringSearch() {
-		// wipmb string search test
 		IIdType id1, id2, id3, id4, id5, id6;
 
 		{
@@ -473,9 +471,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			assertObservationSearchMatches("default search matches normalized prefix", map, id1, id3, id4, id5, id6);
 		}
 		{
-			// fixme mb extract this into a @nested class and run over lucene too.
 			// normal search matches string with space
-			// wip mb this is busted - need a new index or a better tokenizer.
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("value-string", new StringParam("blue gre"));
 			assertObservationSearchMatches("normal search matches string with space", map, id6);
@@ -502,9 +498,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			map.add("value-string", new StringParam("reen").setContains(true));
 			assertObservationSearchMatches("contains search matches anywhere", map, id2, id3, id6);
 		}
-
-		// wipmb add some more tests for string:text
-
 	}
 
 	private void assertObservationSearchMatchesNothing(String message, SearchParameterMap map) {

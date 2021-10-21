@@ -39,7 +39,6 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
@@ -84,7 +83,6 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
@@ -95,7 +93,6 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.Condition;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -317,7 +314,7 @@ public class SearchBuilder implements ISearchBuilder {
 			if (myParams.isLastN()) {
 				pids = executeLastNAgainstIndex(theMaximumResults);
 			} else {
-				pids = executeFullTextSearchAgainstIndex(theRequest);
+				pids = queryLuceneForPIDs(theRequest);
 			}
 
 			if (theSearchRuntimeDetails != null) {
@@ -369,7 +366,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private List<ResourcePersistentId> executeLastNAgainstIndex(Integer theMaximumResults) {
 		validateLastNIsEnabled();
 
-		// wip we can satisfy resources directly if we want.
+		// TODO MB we can satisfy resources directly if we put the resources in elastic.
 		List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults);
 
 		return lastnResourceIds.stream()
@@ -377,9 +374,7 @@ public class SearchBuilder implements ISearchBuilder {
 			.collect(Collectors.toList());
 	}
 
-
-	// wip mb rename
-	private List<ResourcePersistentId> executeFullTextSearchAgainstIndex(RequestDetails theRequest) {
+	private List<ResourcePersistentId> queryLuceneForPIDs(RequestDetails theRequest) {
 		validateFullTextSearchIsEnabled();
 
 		List<ResourcePersistentId> pids;

@@ -39,8 +39,7 @@ public class HibernateSearchIndexWriter {
 
 	public void writeTokenIndex(String theSearchParam, TokenParam theValue) {
 		DocumentElement tokenIndexNode = getSearchParamIndexNode(theSearchParam, "token");
-		// wip can we instead add formatted versions to the same field and simplify the query?
-		// or use a token_filter to generate all three off a single value?
+		// TODO mb we can use a token_filter with pattern_capture to generate all three off a single value.  Do this next, after merge.
 		tokenIndexNode.addValue("code", theValue.getValue());
 		tokenIndexNode.addValue("system", theValue.getSystem());
 		//This next one returns as system|value
