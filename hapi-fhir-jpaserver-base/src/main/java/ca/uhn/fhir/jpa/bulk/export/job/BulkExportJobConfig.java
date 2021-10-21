@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.processor.GoldenResourceAnnotatingProcessor;
 import ca.uhn.fhir.jpa.batch.processor.PidToIBaseResourceProcessor;
@@ -57,6 +59,12 @@ public class BulkExportJobConfig {
 	public static final String RESOURCE_TYPES_PARAMETER = "resourceTypes";
 	public static final int CHUNK_SIZE = 100;
 	public static final String JOB_DESCRIPTION = "jobDescription";
+
+	@Autowired
+	private FhirContext myFhirContext;
+
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	@Autowired
 	private StepBuilderFactory myStepBuilderFactory;
@@ -265,7 +273,7 @@ public class BulkExportJobConfig {
 	@Bean
 	@StepScope
 	public ResourceToFileWriter resourceToFileWriter() {
-		return new ResourceToFileWriter();
+		return new ResourceToFileWriter(myFhirContext, myDaoRegistry);
 	}
 
 }

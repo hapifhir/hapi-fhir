@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmBatchJobSubmitterFactory;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
+import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
@@ -65,6 +66,8 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	@Autowired
 	IMdmLinkUpdaterSvc myIMdmLinkUpdaterSvc;
 	@Autowired
+	IMdmLinkCreateSvc myIMdmLinkCreateSvc;
+	@Autowired
 	IMdmBatchJobSubmitterFactory myMdmBatchJobSubmitterFactory;
 
 	public MdmControllerSvcImpl() {
@@ -104,6 +107,17 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		myMdmControllerHelper.validateSameVersion(source, theSourceResourceId);
 
 		return myIMdmLinkUpdaterSvc.updateLink(goldenResource, source, matchResult, theMdmTransactionContext);
+	}
+
+	@Override
+	public IAnyResource createLink(String theGoldenResourceId, String theSourceResourceId, @Nullable String theMatchResult, MdmTransactionContext theMdmTransactionContext) {
+		MdmMatchResultEnum matchResult = MdmControllerUtil.extractMatchResultOrNull(theMatchResult);
+		IAnyResource goldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_CREATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
+		IAnyResource source = myMdmControllerHelper.getLatestSourceFromIdOrThrowException(ProviderConstants.MDM_CREATE_LINK_RESOURCE_ID, theSourceResourceId);
+		myMdmControllerHelper.validateSameVersion(goldenResource, theGoldenResourceId);
+		myMdmControllerHelper.validateSameVersion(source, theSourceResourceId);
+
+		return myIMdmLinkCreateSvc.createLink(goldenResource, source, matchResult, theMdmTransactionContext);
 	}
 
 	@Override

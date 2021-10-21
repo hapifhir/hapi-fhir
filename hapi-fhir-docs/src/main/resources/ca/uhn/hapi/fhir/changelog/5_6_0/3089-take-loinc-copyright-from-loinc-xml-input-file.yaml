@@ -1,0 +1,4 @@
+---
+type: add
+issue: 3089
+title: "LOINC copyright notice is now taken from CodeSystem.copyright entry from loinc.xml input file."

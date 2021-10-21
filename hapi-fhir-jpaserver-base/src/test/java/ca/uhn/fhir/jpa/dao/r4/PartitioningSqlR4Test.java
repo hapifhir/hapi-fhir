@@ -1789,7 +1789,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Date param
 
-		ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		runInTransaction(() -> {
+			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
 		addReadPartition(1);
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();

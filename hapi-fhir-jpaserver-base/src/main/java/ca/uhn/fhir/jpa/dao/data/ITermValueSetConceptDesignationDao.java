@@ -26,7 +26,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface ITermValueSetConceptDesignationDao extends JpaRepository<TermValueSetConceptDesignation, Long> {
+public interface ITermValueSetConceptDesignationDao extends JpaRepository<TermValueSetConceptDesignation, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT COUNT(vscd) FROM TermValueSetConceptDesignation vscd WHERE vscd.myValueSetPid = :pid")
 	Integer countByTermValueSetId(@Param("pid") Long theValueSetId);

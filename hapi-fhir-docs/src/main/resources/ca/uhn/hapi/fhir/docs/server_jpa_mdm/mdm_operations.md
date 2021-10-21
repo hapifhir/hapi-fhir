@@ -396,6 +396,78 @@ Any supported MDM type can be used. The following request body shows how to upda
 
 The operation returns the updated Golden Resource. For the query above `Patient` resource will be returned.  Note that this is the only way to modify MDM-managed Golden Resources.
 
+## Create Link
+
+Use the `$mdm-create-link` operation to create an MDM link from a Golden Resource to a Target Resource without the need for any pre-existing matching data within the two resources. This operation takes the following parameters:
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Cardinality</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>goldenResourceId</td>
+            <td>String</td>
+            <td>1..1</td>
+            <td>
+                The id of the Golden Resource.
+            </td>
+        </tr>
+        <tr>
+            <td>resourceId</td>
+            <td>String</td>
+            <td>1..1</td>
+            <td>
+                The id of the target resource.
+            </td>
+        </tr>
+         <tr>
+            <td>matchResult</td>
+            <td>String</td>
+            <td>0..1</td>
+            <td>
+                Optional matchResult. If omitted, it  automatically set the default to MATCH, otherwise the value should be
+MATCH, POSSIBLE_MATCH or NO_MATCH.
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+MDM links created in this way will automatically have their `linkSource` set to `MANUAL`.
+
+### Example
+
+Use an HTTP POST to the following URL to invoke this operation:
+
+```url
+http://example.com/$mdm-create-link
+```
+
+Any supported MDM type can be used. The following request body shows how to update link on the Patient resource type:
+
+```json
+{
+  "resourceType": "Parameters",
+  "parameter": [ {
+    "name": "goldenResourceId",
+    "valueString": "Patient/123"
+  }, {
+    "name": "resourceId",
+    "valueString": "Patient/456"
+  }, {
+     "name": "matchResult",
+     "valueString": "MATCH"
+  } ]
+}
+```
+
+The operation returns the Golden Resource. For the query above, `Patient` will be returned.
+
 ## Merge Golden Resources
 
 The `$mdm-merge-golden-resources` operation can be used to merge one Golden Resource with another. When doing this, you will need to decide which resource to merge from and which one to merge to. 
@@ -470,7 +542,7 @@ This operation returns the merged Golden Resource (`toGoldenResourceId`).
 
 ## Querying the Patient Resource
 
-When MDM is enabled, the [$match operation](http://hl7.org/fhir/patient-operation-match.html) will be enabled on the JPA Server for Patient and Practitioner resources.
+When MDM is enabled, the [$match operation](http://hl7.org/fhir/patient-operation-match.html) will be enabled on the JPA Server for Patient resources.
 
 This operation allows a Patient or Practitioner resource to be submitted to the endpoint, and the system will attempt to find and return any Patient resources that match it according to the matching rules. The response includes a search score field that is calculated by averaging the number of matched rules against total rules checked for the Patient resource. Appropriate match grade extension is also included. 
 
@@ -557,6 +629,10 @@ Content-Type: application/fhir+json; charset=UTF-8
                 "resourceType":"Orgaization",
                 "name": "McMaster Family Practice"
             }
+        },
+        {
+            "name":"resourceType",
+            "valueString": "Orgaization"
         }
     ]
 }

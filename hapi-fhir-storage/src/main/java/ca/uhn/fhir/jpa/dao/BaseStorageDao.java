@@ -245,13 +245,11 @@ public abstract class BaseStorageDao {
 			Class<? extends IPrimitiveType<String>> canonicalType = (Class<? extends IPrimitiveType<String>>) canonicalElementDefinition.getImplementingClass();
 			List<? extends IPrimitiveType<String>> canonicals = theTerser.getAllPopulatedChildElementsOfType(theResource, canonicalType);
 
-			//Try to offset the N^2 by maintaining a visited list.
-			Set<IPrimitiveType<String>> visited = new HashSet<>();
+			//TODO GGG this is pretty inefficient if there are many baseUrls, and many canonicals. Consider improving.
 			for (String baseUrl : myModelConfig.getTreatBaseUrlsAsLocal()) {
 				for (IPrimitiveType<String> canonical : canonicals) {
-					if (!visited.contains(canonical) && canonical.getValue().startsWith(baseUrl)) {
+					if (canonical.getValue().startsWith(baseUrl)) {
 						canonical.setValue(canonical.getValue().substring(baseUrl.length() + 1));
-						visited.add(canonical);
 					}
 				}
 			}

@@ -67,7 +67,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.Reader;
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -134,6 +133,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERS
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 
 /*
  * #%L
@@ -609,7 +609,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_HIERARCHY_FILE.getCode(), LOINC_HIERARCHY_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Answer lists (ValueSets of potential answers/values for LOINC "questions")
-		handler = new LoincAnswerListHandler(codeSystemVersion, code2concept, valueSets, conceptMaps, theUploadProperties);
+		handler = new LoincAnswerListHandler(codeSystemVersion, code2concept, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_ANSWERLIST_FILE.getCode(), LOINC_ANSWERLIST_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Answer list links (connects LOINC observation codes to answer list codes)
@@ -620,23 +620,23 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		// Note that this should come before the "Part Related Code Mapping"
 		// file because there are some duplicate mappings between these
 		// two files, and the RSNA Playbook file has more metadata
-		handler = new LoincRsnaPlaybookHandler(code2concept, valueSets, conceptMaps, theUploadProperties);
+		handler = new LoincRsnaPlaybookHandler(code2concept, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_RSNA_PLAYBOOK_FILE.getCode(), LOINC_RSNA_PLAYBOOK_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Part related code mapping
-		handler = new LoincPartRelatedCodeMappingHandler(code2concept, valueSets, conceptMaps, theUploadProperties);
+		handler = new LoincPartRelatedCodeMappingHandler(code2concept, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_PART_RELATED_CODE_MAPPING_FILE.getCode(), LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Document ontology
-		handler = new LoincDocumentOntologyHandler(code2concept, propertyNamesToTypes, valueSets, conceptMaps, theUploadProperties);
+		handler = new LoincDocumentOntologyHandler(code2concept, propertyNamesToTypes, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_DOCUMENT_ONTOLOGY_FILE.getCode(), LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Top 2000 codes - US
-		handler = new LoincTop2000LabResultsUsHandler(code2concept, valueSets, conceptMaps, theUploadProperties);
+		handler = new LoincTop2000LabResultsUsHandler(code2concept, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
 		iterateOverZipFileCsvOptional(theDescriptors, theUploadProperties.getProperty(LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE.getCode(), LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Top 2000 codes - SI
-		handler = new LoincTop2000LabResultsSiHandler(code2concept, valueSets, conceptMaps, theUploadProperties);
+		handler = new LoincTop2000LabResultsSiHandler(code2concept, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
 		iterateOverZipFileCsvOptional(theDescriptors, theUploadProperties.getProperty(LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE.getCode(), LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Universal lab order ValueSet
@@ -644,7 +644,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE.getCode(), LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// IEEE medical device codes
-		handler = new LoincIeeeMedicalDeviceCodeHandler(code2concept, valueSets, conceptMaps, theUploadProperties);
+		handler = new LoincIeeeMedicalDeviceCodeHandler(code2concept, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE.getCode(), LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Imaging document codes
@@ -652,7 +652,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_IMAGING_DOCUMENT_CODES_FILE.getCode(), LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Group
-		handler = new LoincGroupFileHandler(code2concept, valueSets, conceptMaps, theUploadProperties);
+		handler = new LoincGroupFileHandler(code2concept, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_GROUP_FILE.getCode(), LOINC_GROUP_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Group terms
@@ -688,7 +688,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			IOUtils.closeQuietly(theDescriptors);
 		}
 
-		valueSets.add(getValueSetLoincAll(theUploadProperties));
+		valueSets.add(getValueSetLoincAll(theUploadProperties, loincCs.getCopyright()));
 
 		for (Entry<String, TermConcept> next : code2concept.entrySet()) {
 			TermConcept nextConcept = next.getValue();
@@ -713,16 +713,15 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	}
 
 
-	private ValueSet getValueSetLoincAll(Properties theUploadProperties) {
+	private ValueSet getValueSetLoincAll(Properties theUploadProperties, String theCopyrightStatement) {
 		ValueSet retVal = new ValueSet();
 
 		String codeSystemVersionId = theUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
 		String valueSetId;
 		if (codeSystemVersionId != null) {
-			valueSetId = "loinc-all" + "-" + codeSystemVersionId;
+			valueSetId = LOINC_ALL_VALUESET_ID + "-" + codeSystemVersionId;
 		} else {
-			valueSetId = "loinc-all";
-			codeSystemVersionId = "1.0.0";
+			valueSetId = LOINC_ALL_VALUESET_ID;
 		}
 		retVal.setId(valueSetId);
 		retVal.setUrl("http://loinc.org/vs");
@@ -732,7 +731,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		retVal.setDate(new Date());
 		retVal.setPublisher("Regenstrief Institute, Inc.");
 		retVal.setDescription("A value set that includes all LOINC codes");
-		retVal.setCopyright("This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/");
+		retVal.setCopyright(theCopyrightStatement);
 		retVal.getCompose().addInclude().setSystem(ITermLoaderSvc.LOINC_URI).setVersion(codeSystemVersionId);
 
 		return retVal;

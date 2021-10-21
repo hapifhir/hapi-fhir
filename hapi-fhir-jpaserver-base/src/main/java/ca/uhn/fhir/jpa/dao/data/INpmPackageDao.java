@@ -27,7 +27,7 @@ import java.util.Optional;
  * #L%
  */
 
-public interface INpmPackageDao extends JpaRepository<NpmPackageEntity, Long> {
+public interface INpmPackageDao extends JpaRepository<NpmPackageEntity, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT p FROM NpmPackageEntity p WHERE p.myPackageId = :id")
 	Optional<NpmPackageEntity> findByPackageId(@Param("id") String thePackageId);

@@ -274,9 +274,10 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 
 	public static class NullEvaluationContext implements FHIRPathEngine.IEvaluationContext {
+
 		@Override
-		public Base resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
-			return null;
+		public List<Base> resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
+			return Collections.emptyList();
 		}
 
 		@Override
