@@ -542,7 +542,7 @@ This operation returns the merged Golden Resource (`toGoldenResourceId`).
 
 ## Querying the Patient Resource
 
-When MDM is enabled, the [$match operation](http://hl7.org/fhir/patient-operation-match.html) will be enabled on the JPA Server for Patient and Practitioner resources.
+When MDM is enabled, the [$match operation](http://hl7.org/fhir/patient-operation-match.html) will be enabled on the JPA Server for Patient resources.
 
 This operation allows a Patient or Practitioner resource to be submitted to the endpoint, and the system will attempt to find and return any Patient resources that match it according to the matching rules. The response includes a search score field that is calculated by averaging the number of matched rules against total rules checked for the Patient resource. Appropriate match grade extension is also included. 
 
@@ -629,6 +629,10 @@ Content-Type: application/fhir+json; charset=UTF-8
                 "resourceType":"Orgaization",
                 "name": "McMaster Family Practice"
             }
+        },
+        {
+            "name":"resourceType",
+            "valueString": "Orgaization"
         }
     ]
 }

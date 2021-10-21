@@ -508,7 +508,6 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			.collect(Collectors.toList());
 	}
 
-	@NotNull
 	private List<Class<? extends IBaseResource>> determineResourceTypes(Set<String> theResourceNames, String theParamNameChain) {
 		int linkIndex = theParamNameChain.indexOf('.');
 		if (linkIndex == -1) {
@@ -591,7 +590,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			 */
 			return path.stream()
 				.map(String::trim)
-				.filter(t -> t.contains(theResourceName + "."))
+				.filter(t -> t.startsWith(theResourceName + "."))
 				.map(head -> tailPaths.stream().map(tail -> head + "." + tail).collect(Collectors.toSet()))
 				.flatMap(Collection::stream)
 				.collect(Collectors.toList());

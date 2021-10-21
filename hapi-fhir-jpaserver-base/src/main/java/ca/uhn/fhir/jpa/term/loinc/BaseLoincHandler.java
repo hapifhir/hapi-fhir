@@ -40,7 +40,6 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 public abstract class BaseLoincHandler implements IZipContentsHandlerCsv {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseLoincHandler.class);
-	public static final String LOINC_COPYRIGHT_STATEMENT = "This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/";
 
 	/**
 	 * This is <b>NOT</b> the LOINC CodeSystem URI! It is just
@@ -54,14 +53,22 @@ public abstract class BaseLoincHandler implements IZipContentsHandlerCsv {
 	private final Map<String, ValueSet> myIdToValueSet = new HashMap<>();
 	private final Map<String, TermConcept> myCode2Concept;
 	protected final Properties myUploadProperties;
+	protected String myLoincCopyrightStatement;
 
-	BaseLoincHandler(Map<String, TermConcept> theCode2Concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
+	BaseLoincHandler(Map<String, TermConcept> theCode2Concept, List<ValueSet> theValueSets,
+			List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
+		this(theCode2Concept, theValueSets, theConceptMaps, theUploadProperties, null);
+	}
+
+	BaseLoincHandler(Map<String, TermConcept> theCode2Concept, List<ValueSet> theValueSets,
+			List<ConceptMap> theConceptMaps, Properties theUploadProperties, String theCopyrightStatement) {
 		myValueSets = theValueSets;
 		myValueSets.forEach(t -> myIdToValueSet.put(t.getId(), t));
 		myCode2Concept = theCode2Concept;
 		myConceptMaps = theConceptMaps;
 		myConceptMaps.forEach(t -> myIdToConceptMaps.put(t.getId(), t));
 		myUploadProperties = theUploadProperties;
+		myLoincCopyrightStatement = theCopyrightStatement;
 	}
 
 	void addCodeAsIncludeToValueSet(ValueSet theVs, String theCodeSystemUrl, String theCode, String theDisplayName) {
@@ -105,7 +112,7 @@ public abstract class BaseLoincHandler implements IZipContentsHandlerCsv {
 	}
 
 
-	void addConceptMapEntry(ConceptMapping theMapping, String theCopyright) {
+	void addConceptMapEntry(ConceptMapping theMapping, String theExternalCopyright) {
 		if (isBlank(theMapping.getSourceCode())) {
 			return;
 		}
@@ -126,11 +133,14 @@ public abstract class BaseLoincHandler implements IZipContentsHandlerCsv {
 				.addTelecom()
 				.setSystem(ContactPoint.ContactPointSystem.URL)
 				.setValue(LOINC_WEBSITE_URL);
-			String copyright = theCopyright;
+
+			String copyright = theExternalCopyright;
 			if (!copyright.contains("LOINC")) {
-				copyright = LOINC_COPYRIGHT_STATEMENT + ". " + copyright;
+				copyright = myLoincCopyrightStatement +
+					(myLoincCopyrightStatement.endsWith(".") ? " " : ". ") + copyright;
 			}
 			conceptMap.setCopyright(copyright);
+
 			myIdToConceptMaps.put(theMapping.getConceptMapId(), conceptMap);
 			myConceptMaps.add(conceptMap);
 		} else {
@@ -218,7 +228,7 @@ public abstract class BaseLoincHandler implements IZipContentsHandlerCsv {
 				.addTelecom()
 				.setSystem(ContactPoint.ContactPointSystem.URL)
 				.setValue(LOINC_WEBSITE_URL);
-			vs.setCopyright(LOINC_COPYRIGHT_STATEMENT);
+			vs.setCopyright(myLoincCopyrightStatement);
 			myIdToValueSet.put(theValueSetId, vs);
 			myValueSets.add(vs);
 		} else {

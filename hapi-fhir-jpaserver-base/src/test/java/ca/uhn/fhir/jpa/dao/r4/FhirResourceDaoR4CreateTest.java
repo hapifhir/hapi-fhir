@@ -124,7 +124,6 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		});
 	}
 
-
 	@Test
 	public void testCreateLinkCreatesAppropriatePaths_ContainedResourceRecursive() {
 		myModelConfig.setIndexOnContainedResources(true);
@@ -206,7 +205,6 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			assertFalse(thirdOrg.isPresent());
 		});
 	}
-
 
 	@Test
 	public void testConditionalCreateWithPlusInUrl() {
