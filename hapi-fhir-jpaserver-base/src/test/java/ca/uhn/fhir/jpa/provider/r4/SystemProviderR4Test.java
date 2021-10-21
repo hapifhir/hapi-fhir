@@ -1,11 +1,10 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.rp.r4.BinaryResourceProvider;
@@ -36,6 +35,7 @@ import ca.uhn.fhir.rest.server.provider.DeleteExpungeProvider;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import com.google.common.base.Charsets;
@@ -55,6 +55,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
@@ -160,7 +161,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			servletHolder.setServlet(restServer);
 			proxyHandler.addServlet(servletHolder, "/fhir/context/*");
 
-			ourCtx = FhirContext.forCached(FhirVersionEnum.R4);
+			ourCtx = FhirContext.forR4Cached();
 			restServer.setFhirContext(ourCtx);
 
 			ourServer.setHandler(proxyHandler);
@@ -577,6 +578,31 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	@Disabled("Stress test only")
+	public void testTransactionWithPlaceholderIds() {
+
+
+		for (int pass = 0; pass < 10000; pass++) {
+			BundleBuilder bb = new BundleBuilder(myFhirCtx);
+			for (int i = 0; i < 100; i++) {
+				Patient pt = new Patient();
+				pt.setId(org.hl7.fhir.dstu3.model.IdType.newRandomUuid());
+				pt.addIdentifier().setSystem("http://foo").setValue("val" + i);
+				bb.addTransactionCreateEntry(pt);
+
+				Observation obs = new Observation();
+				obs.setId(org.hl7.fhir.dstu3.model.IdType.newRandomUuid());
+				obs.setSubject(new Reference(pt.getId()));
+				bb.addTransactionCreateEntry(obs);
+			}
+			Bundle bundle = (Bundle) bb.getBundle();
+			ourLog.info("Starting pass {}", pass);
+			mySystemDao.transaction(null, bundle);
+		}
+
+	}
+
+	@Test
 	public void testTransactionFromBundle6() throws Exception {
 		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/simone_bundle3.xml");
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
@@ -815,10 +841,9 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			.execute();
 
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		myBatchJobHelper.awaitAllBulkJobCompletions(BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME);
+		myBatchJobHelper.awaitAllBulkJobCompletions(BatchConstants.DELETE_EXPUNGE_JOB_NAME);
 
-		DecimalType jobIdPrimitive = (DecimalType) response.getParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID);
-		Long jobId = jobIdPrimitive.getValue().longValue();
+		Long jobId = BatchHelperR4.jobIdFromParameters(response);
 
 		// validate
 

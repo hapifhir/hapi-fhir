@@ -2,9 +2,11 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -22,12 +24,14 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SampledData;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
@@ -40,6 +44,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -61,7 +66,62 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
 		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+		myModelConfig.setIndexOnContainedResources(new ModelConfig().isIndexOnContainedResources());
 	}
+
+
+	@Test
+	public void testCreateLinkCreatesAppropriatePaths() {
+		Patient p = new Patient();
+		p.setId("Patient/A");
+		p.setActive(true);
+		myPatientDao.update(p, mySrd);
+
+		Observation obs = new Observation();
+		obs.setSubject(new Reference("Patient/A"));
+		myObservationDao.create(obs, mySrd);
+
+		runInTransaction(() ->{
+			List<ResourceLink> allLinks = myResourceLinkDao.findAll();
+			List<String> paths = allLinks
+				.stream()
+				.map(ResourceLink::getSourcePath)
+				.sorted()
+				.collect(Collectors.toList());
+			assertThat(paths.toString(), paths, contains("Observation.subject", "Observation.subject.where(resolve() is Patient)"));
+		});
+	}
+
+	@Test
+	public void testCreateLinkCreatesAppropriatePaths_ContainedResource() {
+		myModelConfig.setIndexOnContainedResources(true);
+
+		Patient p = new Patient();
+		p.setId("Patient/A");
+		p.setActive(true);
+		myPatientDao.update(p, mySrd);
+
+		Observation containedObs = new Observation();
+		containedObs.setId("#cont");
+		containedObs.setSubject(new Reference("Patient/A"));
+
+		Encounter enc = new Encounter();
+		enc.getContained().add(containedObs);
+		enc.addReasonReference(new Reference("#cont"));
+		myEncounterDao.create(enc, mySrd);
+
+		runInTransaction(() ->{
+			List<ResourceLink> allLinks = myResourceLinkDao.findAll();
+			Optional<ResourceLink> link = allLinks
+				.stream()
+				.filter(t -> "Encounter.reasonReference.subject".equals(t.getSourcePath()))
+				.findFirst();
+			assertTrue(link.isPresent());
+			assertEquals("Patient", link.get().getTargetResourceType());
+			assertEquals("A", link.get().getTargetResourceId());
+		});
+	}
+
 
 	@Test
 	public void testConditionalCreateWithPlusInUrl() {
@@ -219,7 +279,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		// Read it back
 		p = myPatientDao.read(new IdType("Patient/" + firstClientAssignedId));
-		assertEquals(true, p.getActive());
+		assertTrue(p.getActive());
 
 		// Now create a client assigned numeric ID
 		p = new Patient();
@@ -272,7 +332,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		// Read it back
 		p = myPatientDao.read(id0.toUnqualifiedVersionless());
-		assertEquals(true, p.getActive());
+		assertTrue(p.getActive());
 
 		// Pick an ID that was already used as an internal PID
 		Long newId = runInTransaction(() -> myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromNewest(

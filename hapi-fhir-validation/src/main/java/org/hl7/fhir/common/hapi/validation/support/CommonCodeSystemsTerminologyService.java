@@ -211,7 +211,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 
 	@Override
-	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
 
 		Map<String, String> map;
 		switch (theSystem) {
@@ -257,69 +257,100 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		Map<String, String> languagesMap = myLanguagesLanugageMap;
 		Map<String, String> regionsMap = myLanguagesRegionMap;
 		if (languagesMap == null || regionsMap == null) {
+			initializeBcp47LanguageMap();
+		}
 
-			ourLog.info("Loading BCP47 Language Registry");
+		int langRegionSeparatorIndex = StringUtils.indexOfAny(theCode, '-', '_');
+		boolean hasRegionAndCodeSegments = langRegionSeparatorIndex > 0;
+		String language;
+		String region;
 
-			String input = ClasspathUtil.loadResource("org/hl7/fhir/common/hapi/validation/support/registry.json");
-			ArrayNode map;
-			try {
-				map = (ArrayNode) new ObjectMapper().readTree(input);
-			} catch (JsonProcessingException e) {
-				throw new ConfigurationException(e);
+		if (hasRegionAndCodeSegments) {
+			language = myLanguagesLanugageMap.get(theCode.substring(0, langRegionSeparatorIndex));
+			region = myLanguagesRegionMap.get(theCode.substring(langRegionSeparatorIndex + 1));
+
+			if (language == null || region == null) {
+				//In case the user provides both a language and a region, they must both be valid for the lookup to succeed.
+				ourLog.warn("Couldn't find a valid bcp47 language-region combination from code: {}", theCode);
+				return buildNotFoundLookupCodeResult(theCode);
+			} else {
+				return buildLookupResultForLanguageAndRegion(theCode, language, region);
 			}
-
-			languagesMap = new HashMap<>();
-			regionsMap = new HashMap<>();
-
-			for (int i = 0; i < map.size(); i++) {
-				ObjectNode next = (ObjectNode) map.get(i);
-				String type = next.get("Type").asText();
-				if ("language".equals(type)) {
-					String language = next.get("Subtag").asText();
-					ArrayNode descriptions = (ArrayNode) next.get("Description");
-					String description = null;
-					if (descriptions.size() > 0) {
-						description = descriptions.get(0).asText();
-					}
-					languagesMap.put(language, description);
-				}
-				if ("region".equals(type)) {
-					String region = next.get("Subtag").asText();
-					ArrayNode descriptions = (ArrayNode) next.get("Description");
-					String description = null;
-					if (descriptions.size() > 0) {
-						description = descriptions.get(0).asText();
-					}
-					regionsMap.put(region, description);
-				}
-
+		} else {
+			//In case user has only provided a language, we build the lookup from only that.
+			language = myLanguagesLanugageMap.get(theCode);
+			if (language == null) {
+				ourLog.warn("Couldn't find a valid bcp47 language from code: {}", theCode);
+				return buildNotFoundLookupCodeResult(theCode);
+			} else {
+				return buildLookupResultForLanguage(theCode, language);
 			}
+		}
+	}
+	private LookupCodeResult buildLookupResultForLanguageAndRegion(@Nonnull String theOriginalCode, @Nonnull String theLanguage, @Nonnull String theRegion) {
+		LookupCodeResult lookupCodeResult = buildNotFoundLookupCodeResult(theOriginalCode);
+		lookupCodeResult.setCodeDisplay(theLanguage + " " + theRegion);
+		lookupCodeResult.setFound(true);
+		return lookupCodeResult;
+	}
+	private LookupCodeResult buildLookupResultForLanguage(@Nonnull String theOriginalCode, @Nonnull String theLanguage) {
+		LookupCodeResult lookupCodeResult = buildNotFoundLookupCodeResult(theOriginalCode);
+		lookupCodeResult.setCodeDisplay(theLanguage);
+		lookupCodeResult.setFound(true);
+		return lookupCodeResult;
+	}
 
-			ourLog.info("Have {} languages and {} regions", languagesMap.size(), regionsMap.size());
+	private LookupCodeResult buildNotFoundLookupCodeResult(@Nonnull String theOriginalCode) {
+		LookupCodeResult lookupCodeResult = new LookupCodeResult();
+		lookupCodeResult.setFound(false);
+		lookupCodeResult.setSearchedForSystem(LANGUAGES_CODESYSTEM_URL);
+		lookupCodeResult.setSearchedForCode(theOriginalCode);
+		return lookupCodeResult;
+	}
 
-			myLanguagesLanugageMap = languagesMap;
-			myLanguagesRegionMap = regionsMap;
+	private void initializeBcp47LanguageMap() {
+		Map<String, String> regionsMap;
+		Map<String, String> languagesMap;
+		ourLog.info("Loading BCP47 Language Registry");
+
+		String input = ClasspathUtil.loadResource("org/hl7/fhir/common/hapi/validation/support/registry.json");
+		ArrayNode map;
+		try {
+			map = (ArrayNode) new ObjectMapper().readTree(input);
+		} catch (JsonProcessingException e) {
+			throw new ConfigurationException(e);
 		}
 
-		int idx = StringUtils.indexOfAny(theCode, '-', '_');
-		String language = null;
-		String region = null;
-		if (idx > 0) {
-			language = languagesMap.get(theCode.substring(0, idx));
-			region = regionsMap.get(theCode.substring(idx + 1));
+		languagesMap = new HashMap<>();
+		regionsMap = new HashMap<>();
+
+		for (int i = 0; i < map.size(); i++) {
+			ObjectNode next = (ObjectNode) map.get(i);
+			String type = next.get("Type").asText();
+			if ("language".equals(type)) {
+				String language = next.get("Subtag").asText();
+				ArrayNode descriptions = (ArrayNode) next.get("Description");
+				String description = null;
+				if (descriptions.size() > 0) {
+					description = descriptions.get(0).asText();
+				}
+				languagesMap.put(language, description);
+			}
+			if ("region".equals(type)) {
+				String region = next.get("Subtag").asText();
+				ArrayNode descriptions = (ArrayNode) next.get("Description");
+				String description = null;
+				if (descriptions.size() > 0) {
+					description = descriptions.get(0).asText();
+				}
+				regionsMap.put(region, description);
+			}
 		}
 
-		LookupCodeResult retVal = new LookupCodeResult();
-		retVal.setSearchedForCode(theCode);
-		retVal.setSearchedForSystem(LANGUAGES_CODESYSTEM_URL);
+		ourLog.info("Have {} languages and {} regions", languagesMap.size(), regionsMap.size());
 
-		if (language != null && region != null) {
-			String display = language + " " + region;
-			retVal.setFound(true);
-			retVal.setCodeDisplay(display);
-		}
-
-		return retVal;
+		myLanguagesLanugageMap = languagesMap;
+		myLanguagesRegionMap = regionsMap;
 	}
 
 	@Nonnull

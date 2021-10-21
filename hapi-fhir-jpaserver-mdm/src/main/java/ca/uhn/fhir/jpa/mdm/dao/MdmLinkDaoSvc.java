@@ -40,13 +40,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class MdmLinkDaoSvc {
 
@@ -132,6 +129,7 @@ public class MdmLinkDaoSvc {
 	 * @param theSourcePid The Pid of the source you wish to find the matching link for.
 	 * @return the {@link MdmLink} that contains the Match information for the source.
 	 */
+	@Transactional
 	public Optional<MdmLink> getMatchedLinkForSourcePid(Long theSourcePid) {
 		MdmLink exampleLink = myMdmLinkFactory.newMdmLink();
 		exampleLink.setSourcePid(theSourcePid);
@@ -190,6 +188,7 @@ public class MdmLinkDaoSvc {
 		return myMdmLinkDao.findAll(example);
 	}
 
+	@Transactional
 	public Optional<MdmLink> findMdmLinkBySource(IBaseResource theSourceResource) {
 		@Nullable Long pid = myIdHelperService.getPidOrNull(theSourceResource);
 		if (pid == null) {
@@ -217,6 +216,7 @@ public class MdmLinkDaoSvc {
 	 * @param theGoldenResource The {@link IBaseResource} Golden Resource who's links you would like to retrieve.
 	 * @return A list of all {@link MdmLink} entities in which theGoldenResource is the source Golden Resource
 	 */
+	@Transactional
 	public List<MdmLink> findMdmLinksByGoldenResource(IBaseResource theGoldenResource) {
 		Long pid = myIdHelperService.getPidOrNull(theGoldenResource);
 		if (pid == null) {
@@ -225,46 +225,6 @@ public class MdmLinkDaoSvc {
 		MdmLink exampleLink = myMdmLinkFactory.newMdmLink().setGoldenResourcePid(pid);
 		Example<MdmLink> example = Example.of(exampleLink);
 		return myMdmLinkDao.findAll(example);
-	}
-
-	/**
-	 * Delete all {@link MdmLink} entities, and return all resource PIDs from the source of the relationship.
-	 *
-	 * @return A list of Long representing the related Golden Resource Pids.
-	 */
-	@Transactional
-	public List<Long> deleteAllMdmLinksAndReturnGoldenResourcePids() {
-		List<MdmLink> all = myMdmLinkDao.findAll();
-		return deleteMdmLinksAndReturnGoldenResourcePids(all);
-	}
-
-	private List<Long> deleteMdmLinksAndReturnGoldenResourcePids(List<MdmLink> theLinks) {
-		Set<Long> goldenResources = theLinks.stream().map(MdmLink::getGoldenResourcePid).collect(Collectors.toSet());
-		//TODO GGG this is probably invalid... we are essentially looking for GOLDEN -> GOLDEN links, which are either POSSIBLE_DUPLICATE
-		//and REDIRECT
-		goldenResources.addAll(theLinks.stream()
-			.filter(link -> link.getMatchResult().equals(MdmMatchResultEnum.REDIRECT)
-				|| link.getMatchResult().equals(MdmMatchResultEnum.POSSIBLE_DUPLICATE))
-			.map(MdmLink::getSourcePid).collect(Collectors.toSet()));
-		ourLog.info("Deleting {} MDM link records...", theLinks.size());
-		myMdmLinkDao.deleteAll(theLinks);
-		ourLog.info("{} MDM link records deleted", theLinks.size());
-		return new ArrayList<>(goldenResources);
-	}
-
-	/**
-	 * Given a valid {@link String}, delete all {@link MdmLink} entities for that type, and get the Pids
-	 * for the Golden Resources which were the sources of the links.
-	 *
-	 * @param theSourceType the type of relationship you would like to delete.
-	 * @return A list of longs representing the Pids of the Golden Resources resources used as the sources of the relationships that were deleted.
-	 */
-	public List<Long> deleteAllMdmLinksOfTypeAndReturnGoldenResourcePids(String theSourceType) {
-		MdmLink link = new MdmLink();
-		link.setMdmSourceType(theSourceType);
-		Example<MdmLink> exampleLink = Example.of(link);
-		List<MdmLink> allOfType = myMdmLinkDao.findAll(exampleLink);
-		return deleteMdmLinksAndReturnGoldenResourcePids(allOfType);
 	}
 
 	/**
@@ -299,6 +259,7 @@ public class MdmLinkDaoSvc {
 	 * @param theSourceResource the source resource to find links for.
 	 * @return all links for the source.
 	 */
+	@Transactional
 	public List<MdmLink> findMdmLinksBySourceResource(IBaseResource theSourceResource) {
 		Long pid = myIdHelperService.getPidOrNull(theSourceResource);
 		if (pid == null) {

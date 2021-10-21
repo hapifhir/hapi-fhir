@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
@@ -115,6 +116,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourRestServer.registerProviders(mySystemProvider, myTerminologyUploaderProvider, myDeleteExpungeProvider, myReindexProvider);
 			ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
 			ourRestServer.registerProvider(myAppCtx.getBean(DiffProvider.class));
+			ourRestServer.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
 
 			ourPagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
 
@@ -178,9 +180,12 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(400000);
 
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+			connectionManager.setMaxTotal(10);
+			connectionManager.setDefaultMaxPerRoute(10);
 			HttpClientBuilder builder = HttpClientBuilder.create();
 			builder.setConnectionManager(connectionManager);
 			builder.setMaxConnPerRoute(99);
+
 			ourHttpClient = builder.build();
 
 			ourServer = server;

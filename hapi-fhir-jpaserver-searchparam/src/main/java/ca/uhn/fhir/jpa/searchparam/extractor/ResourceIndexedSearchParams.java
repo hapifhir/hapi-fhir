@@ -158,6 +158,21 @@ public final class ResourceIndexedSearchParams {
 		updateSpnamePrefixForIndexedOnContainedResource(myCoordsParams, theSpnamePrefix);
 	}
 	
+	public void updateSpnamePrefixForLinksOnContainedResource(String theSpNamePrefix) {
+		for (ResourceLink param : myLinks) {
+			// The resource link already has the resource type of the contained resource at the head of the path.
+			// We need to replace this with the name of the containing type, and extend the search path.
+			int index = param.getSourcePath().indexOf('.');
+			if (index > -1) {
+				param.setSourcePath(theSpNamePrefix + param.getSourcePath().substring(index));
+			} else {
+				// Can this ever happen?
+				param.setSourcePath(theSpNamePrefix + "." + param.getSourcePath());
+			}
+			param.calculateHashes(); // re-calculateHashes
+		}
+	}
+
 	void setUpdatedTime(Date theUpdateTime) {
 		setUpdatedTime(myStringParams, theUpdateTime);
 		setUpdatedTime(myNumberParams, theUpdateTime);
@@ -225,7 +240,7 @@ public final class ResourceIndexedSearchParams {
 				resourceParams = myDateParams;
 				break;
 			case REFERENCE:
-				return matchResourceLinks(theModelConfig, theResourceName, theParamName, value, theParamDef.getPath());
+				return matchResourceLinks(theModelConfig, theResourceName, theParamName, value, theParamDef.getPathsSplitForResourceType(theResourceName));
 			case COMPOSITE:
 			case HAS:
 			case SPECIAL:
@@ -254,6 +269,15 @@ public final class ResourceIndexedSearchParams {
 	@Deprecated
 	public boolean matchResourceLinks(String theResourceName, String theParamName, IQueryParameterType theParam, String theParamPath) {
 		return matchResourceLinks(new ModelConfig(), theResourceName, theParamName, theParam, theParamPath);
+	}
+
+	public boolean matchResourceLinks(ModelConfig theModelConfig, String theResourceName, String theParamName, IQueryParameterType theParam, List<String> theParamPaths) {
+		for (String nextPath : theParamPaths) {
+			if (matchResourceLinks(theModelConfig, theResourceName, theParamName, theParam, nextPath)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	// KHS This needs to be public as libraries outside of hapi call it directly
@@ -331,6 +355,10 @@ public final class ResourceIndexedSearchParams {
                                                                                      Collection<RT> paramCollection) {
 		for (Map.Entry<String, RuntimeSearchParam> nextEntry : activeSearchParams) {
 			String nextParamName = nextEntry.getKey();
+			if (nextParamName == null || nextParamName.startsWith("_")) {
+				continue;
+			}
+
 			if (nextEntry.getValue().getParamType() == type) {
 				boolean haveParam = false;
 				for (BaseResourceIndexedSearchParam nextParam : paramCollection) {

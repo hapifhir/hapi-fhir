@@ -278,11 +278,6 @@
           "documentation": "The logical resource id associated with the resource (must be supported by all servers)"
         },
         {
-          "name": "_language",
-          "type": "token",
-          "documentation": "The language of the resource"
-        },
-        {
           "name": "subject",
           "type": "reference",
           "documentation": "The identity of a subject to list alerts for",

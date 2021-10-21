@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.batch;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.batch.mdm.job.MdmClearJobConfig;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imprt.job.BulkImportJobConfig;
 import ca.uhn.fhir.jpa.delete.job.DeleteExpungeJobConfig;
@@ -27,10 +28,6 @@ import ca.uhn.fhir.jpa.reindex.job.ReindexEverythingJobConfig;
 import ca.uhn.fhir.jpa.reindex.job.ReindexJobConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 @Configuration
 //When you define a new batch job, add it here.
@@ -40,58 +37,8 @@ import java.util.Set;
 	BulkImportJobConfig.class,
 	DeleteExpungeJobConfig.class,
 	ReindexJobConfig.class,
-	ReindexEverythingJobConfig.class
+	ReindexEverythingJobConfig.class,
+	MdmClearJobConfig.class
 })
 public class BatchJobsConfig {
-
-	/*
-	 * Bulk Export
-	 */
-
-	public static final String BULK_EXPORT_JOB_NAME = "bulkExportJob";
-	public static final String GROUP_BULK_EXPORT_JOB_NAME = "groupBulkExportJob";
-	public static final String PATIENT_BULK_EXPORT_JOB_NAME = "patientBulkExportJob";
-	public static final String BULK_EXPORT_GENERATE_RESOURCE_FILES_STEP = "bulkExportGenerateResourceFilesStep";
-
-	/*
-	 * Bulk Import
-	 */
-
-	public static final String BULK_IMPORT_JOB_NAME = "bulkImportJob";
-	public static final String BULK_IMPORT_PROCESSING_STEP = "bulkImportProcessingStep";
-
-	/**
-	 * This Set contains the step names across all job types that are appropriate for
-	 * someone to look at the write count for that given step in order to determine the
-	 * number of processed records.
-	 *
-	 * This is provided since a job might have multiple steps that the same data passes
-	 * through, so you can't just sum up the total of all of them.
-	 *
-	 * For any given batch job type, there should only be one step name in this set
-	 */
-	public static final Set<String> RECORD_PROCESSING_STEP_NAMES;
-
-	static {
-		HashSet<String> recordProcessingStepNames = new HashSet<>();
-		recordProcessingStepNames.add(BULK_IMPORT_PROCESSING_STEP);
-		recordProcessingStepNames.add(BULK_EXPORT_GENERATE_RESOURCE_FILES_STEP);
-		RECORD_PROCESSING_STEP_NAMES = Collections.unmodifiableSet(recordProcessingStepNames);
-	}
-
-	/**
-	 * Delete Expunge
-	 */
-	public static final String DELETE_EXPUNGE_JOB_NAME = "deleteExpungeJob";
-
-	/**
-	 * Reindex
-	 */
-	public static final String REINDEX_JOB_NAME = "reindexJob";
-
-	/**
-	 * Reindex Everything
-	 */
-	public static final String REINDEX_EVERYTHING_JOB_NAME = "reindexEverythingJob";
-
 }

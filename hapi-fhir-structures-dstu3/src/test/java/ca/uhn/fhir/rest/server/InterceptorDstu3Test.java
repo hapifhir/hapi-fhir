@@ -43,21 +43,24 @@ import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.either;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -124,6 +127,7 @@ public class InterceptorDstu3Test {
 			post.setEntity(new StringEntity(input, ContentType.create("application/fhir+json", Constants.CHARSET_UTF8)));
 			try (CloseableHttpResponse status = ourClient.execute(post)) {
 				assertEquals(200, status.getStatusLine().getStatusCode());
+				IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			}
 		} finally {
 			ourServlet.unregisterInterceptor(interceptor);
@@ -193,8 +197,9 @@ public class InterceptorDstu3Test {
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
 		httpPost.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-		HttpResponse status = ourClient.execute(httpPost);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
+			IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		}
 
 		InOrder order = inOrder(myInterceptor1, myInterceptor2);
 		order.verify(myInterceptor1, times(1)).incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
@@ -226,11 +231,9 @@ public class InterceptorDstu3Test {
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-		HttpResponse status = ourClient.execute(httpPost);
-		try {
-			assertEquals(201, status.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
+		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
+			IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertThat(status.getStatusLine().getStatusCode(), either(equalTo(200)).or(equalTo(201)));
 		}
 	}
 
@@ -250,11 +253,9 @@ public class InterceptorDstu3Test {
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-		HttpResponse status = ourClient.execute(httpPost);
-		try {
+		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 			assertEquals(201, status.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
+			IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		}
 
 		InOrder order = inOrder(myInterceptor1);
@@ -288,8 +289,9 @@ public class InterceptorDstu3Test {
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
 		httpPost.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-		HttpResponse status = ourClient.execute(httpPost);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
+			IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		}
 
 		InOrder order = inOrder(myInterceptor1);
 		order.verify(myInterceptor1, times(1)).incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
@@ -352,7 +354,7 @@ public class InterceptorDstu3Test {
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	@BeforeAll

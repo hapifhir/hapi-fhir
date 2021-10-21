@@ -6,11 +6,11 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -18,7 +18,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -37,11 +36,10 @@ import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.FilterOperator;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetComposeComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -85,41 +83,43 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+		return runInTransaction(() -> {
+			ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
 
-		TermCodeSystemVersion cs = new TermCodeSystemVersion();
-		cs.setResource(table);
+			TermCodeSystemVersion cs = new TermCodeSystemVersion();
+			cs.setResource(table);
 
-		TermConcept parentA = new TermConcept(cs, "ParentA").setDisplay("Parent A");
-		cs.getConcepts().add(parentA);
+			TermConcept parentA = new TermConcept(cs, "ParentA").setDisplay("Parent A");
+			cs.getConcepts().add(parentA);
 
-		TermConcept childAA = new TermConcept(cs, "childAA").setDisplay("Child AA");
-		parentA.addChild(childAA, RelationshipTypeEnum.ISA);
+			TermConcept childAA = new TermConcept(cs, "childAA").setDisplay("Child AA");
+			parentA.addChild(childAA, RelationshipTypeEnum.ISA);
 
-		TermConcept childAAA = new TermConcept(cs, "childAAA").setDisplay("Child AAA");
-		childAA.addChild(childAAA, RelationshipTypeEnum.ISA);
+			TermConcept childAAA = new TermConcept(cs, "childAAA").setDisplay("Child AAA");
+			childAA.addChild(childAAA, RelationshipTypeEnum.ISA);
 
-		TermConcept childAAB = new TermConcept(cs, "childAAB").setDisplay("Child AAB");
-		childAA.addChild(childAAB, RelationshipTypeEnum.ISA);
+			TermConcept childAAB = new TermConcept(cs, "childAAB").setDisplay("Child AAB");
+			childAA.addChild(childAAB, RelationshipTypeEnum.ISA);
 
-		TermConcept childAB = new TermConcept(cs, "childAB").setDisplay("Child AB");
-		parentA.addChild(childAB, RelationshipTypeEnum.ISA);
+			TermConcept childAB = new TermConcept(cs, "childAB").setDisplay("Child AB");
+			parentA.addChild(childAB, RelationshipTypeEnum.ISA);
 
-		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
-		cs.getConcepts().add(parentB);
+			TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
+			cs.getConcepts().add(parentB);
 
-		TermConcept childBA = new TermConcept(cs, "childBA").setDisplay("Child BA");
-		childBA.addChild(childAAB, RelationshipTypeEnum.ISA);
-		parentB.addChild(childBA, RelationshipTypeEnum.ISA);
+			TermConcept childBA = new TermConcept(cs, "childBA").setDisplay("Child BA");
+			childBA.addChild(childAAB, RelationshipTypeEnum.ISA);
+			parentB.addChild(childBA, RelationshipTypeEnum.ISA);
 
-		TermConcept parentC = new TermConcept(cs, "ParentC").setDisplay("Parent C");
-		cs.getConcepts().add(parentC);
+			TermConcept parentC = new TermConcept(cs, "ParentC").setDisplay("Parent C");
+			cs.getConcepts().add(parentC);
 
-		TermConcept childCA = new TermConcept(cs, "childCA").setDisplay("Child CA");
-		parentC.addChild(childCA, RelationshipTypeEnum.ISA);
+			TermConcept childCA = new TermConcept(cs, "childCA").setDisplay("Child CA");
+			parentC.addChild(childCA, RelationshipTypeEnum.ISA);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
-		return codeSystem;
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+			return codeSystem;
+		});
 	}
 
 	private void createExternalCsAndLocalVs() {
@@ -135,28 +135,30 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+		return runInTransaction(() -> {
+			ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
 
-		TermCodeSystemVersion cs = new TermCodeSystemVersion();
-		cs.setResource(table);
+			TermCodeSystemVersion cs = new TermCodeSystemVersion();
+			cs.setResource(table);
 
-		TermConcept hello = new TermConcept(cs, "hello").setDisplay("Hello");
-		cs.getConcepts().add(hello);
+			TermConcept hello = new TermConcept(cs, "hello").setDisplay("Hello");
+			cs.getConcepts().add(hello);
 
-		TermConcept goodbye = new TermConcept(cs, "goodbye").setDisplay("Goodbye");
-		cs.getConcepts().add(goodbye);
+			TermConcept goodbye = new TermConcept(cs, "goodbye").setDisplay("Goodbye");
+			cs.getConcepts().add(goodbye);
 
-		TermConcept dogs = new TermConcept(cs, "dogs").setDisplay("Dogs");
-		cs.getConcepts().add(dogs);
+			TermConcept dogs = new TermConcept(cs, "dogs").setDisplay("Dogs");
+			cs.getConcepts().add(dogs);
 
-		TermConcept labrador = new TermConcept(cs, "labrador").setDisplay("Labrador");
-		dogs.addChild(labrador, RelationshipTypeEnum.ISA);
+			TermConcept labrador = new TermConcept(cs, "labrador").setDisplay("Labrador");
+			dogs.addChild(labrador, RelationshipTypeEnum.ISA);
 
-		TermConcept beagle = new TermConcept(cs, "beagle").setDisplay("Beagle");
-		dogs.addChild(beagle, RelationshipTypeEnum.ISA);
+			TermConcept beagle = new TermConcept(cs, "beagle").setDisplay("Beagle");
+			dogs.addChild(beagle, RelationshipTypeEnum.ISA);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
-		return codeSystem;
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+			return codeSystem;
+		});
 	}
 
 	private void createExternalCsLarge() {
@@ -166,7 +168,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+		ResourceTable table = runInTransaction(()->myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new));
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
@@ -331,6 +333,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			assertEquals("Invalid filter, must have fields populated: property op value", e.getMessage());
 		}
 	}
+
 	@Test
 	public void testExpandWithIncludeConceptHaveCodeAndDisplay() {
 		CodeSystem codeSystem = createExternalCsDogs();
@@ -351,7 +354,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		assertEquals(2, result.getExpansion().getTotal());
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("hello", "goodbye"));
-		for (ValueSetExpansionContainsComponent vsConcept : result.getExpansion().getContains()){
+		for (ValueSetExpansionContainsComponent vsConcept : result.getExpansion().getContains()) {
 			assertTrue(vsConcept.getDisplay().contains("VS"));
 		}
 
@@ -528,7 +531,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+		ResourceTable table = runInTransaction(()->myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new));
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
@@ -549,7 +552,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		concept = new TermConcept(cs, "LA9999-7");
 		cs.getConcepts().add(concept);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION" , cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 		ValueSet valueSet = new ValueSet();
 		valueSet.setUrl(URL_MY_VALUE_SET);
@@ -653,23 +656,6 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			assertEquals("Unable to find code 'ZZZZ' in code system http://example.com/my_code_system", e.getMessage());
 		}
 
-	}
-
-	@Test
-	public void testExpandWithNoResultsInLocalValueSet2() {
-		createLocalCsAndVs();
-
-		ValueSet vs = new ValueSet();
-		ConceptSetComponent include = vs.getCompose().addInclude();
-		include.setSystem(URL_MY_CODE_SYSTEM + "AA");
-		include.addConcept().setCode("A");
-
-		try {
-			myValueSetDao.expand(vs, null);
-			fail();
-		} catch (PreconditionFailedException e) {
-			assertEquals("Unknown CodeSystem URI \"http://example.com/my_code_systemAA\" referenced from ValueSet", e.getMessage());
-		}
 	}
 
 	// TODO: get this working
@@ -871,13 +857,13 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+		ResourceTable table = runInTransaction(()->myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new));
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
 		TermConcept parentA = new TermConcept(cs, "ParentA").setDisplay("Parent A");
 		cs.getConcepts().add(parentA);
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), "http://snomed.info/sct", "Snomed CT", "SYSTEM VERSION" , cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), "http://snomed.info/sct", "Snomed CT", "SYSTEM VERSION", cs, table);
 
 		StringType code = new StringType("ParentA");
 		StringType system = new StringType("http://snomed.info/sct");

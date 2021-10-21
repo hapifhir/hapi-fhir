@@ -36,7 +36,7 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
-import ca.uhn.fhir.jpa.delete.DeleteConflictService;
+import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -51,7 +51,6 @@ import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.patch.FhirPatch;
 import ca.uhn.fhir.jpa.patch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.patch.XmlPatchUtils;
-import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -87,6 +86,7 @@ import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -169,7 +169,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
 	@Autowired
-	private HapiTransactionService myTransactionService;
+	protected HapiTransactionService myTransactionService;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired
@@ -221,9 +221,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	/**
 	 * Called for FHIR create (POST) operations
 	 */
-	private DaoMethodOutcome doCreateForPost(T theResource, String theIfNoneExist, boolean thePerformIndexing, TransactionDetails theTransactionDetails, RequestDetails theRequestDetails) {
+	protected DaoMethodOutcome doCreateForPost(T theResource, String theIfNoneExist, boolean thePerformIndexing, TransactionDetails theTransactionDetails, RequestDetails theRequestDetails) {
 		if (theResource == null) {
-			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "missingBody");
+			String msg = getContext().getLocalizer().getMessage(BaseStorageDao.class, "missingBody");
 			throw new InvalidRequestException(msg);
 		}
 
@@ -271,10 +271,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				ResourcePersistentId pid = match.iterator().next();
 
 				Supplier<LazyDaoMethodOutcome.EntityAndResource> entitySupplier = () -> {
-					ResourceTable foundEntity = myEntityManager.find(ResourceTable.class, pid.getId());
-					IBaseResource resource = toResource(foundEntity, false);
-					theResource.setId(resource.getIdElement().getValue());
-					return new LazyDaoMethodOutcome.EntityAndResource(foundEntity, resource);
+					return myTxTemplate.execute(tx -> {
+						ResourceTable foundEntity = myEntityManager.find(ResourceTable.class, pid.getId());
+						IBaseResource resource = toResource(foundEntity, false);
+						theResource.setId(resource.getIdElement().getValue());
+						return new LazyDaoMethodOutcome.EntityAndResource(foundEntity, resource);
+					});
 				};
 
 				Supplier<IIdType> idSupplier = () -> {
@@ -336,7 +338,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ResourcePersistentId persistentId = new ResourcePersistentId(updatedEntity.getResourceId());
 		theTransactionDetails.addResolvedResourceId(id, persistentId);
 		if (entity.getForcedId() != null) {
-			myIdHelperService.addResolvedPidToForcedId(persistentId, theRequestPartitionId, updatedEntity.getResourceType(), updatedEntity.getForcedId().getForcedId());
+			myIdHelperService.addResolvedPidToForcedId(persistentId, theRequestPartitionId, updatedEntity.getResourceType(), updatedEntity.getForcedId().getForcedId(), updatedEntity.getDeleted());
 		}
 
 		theResource.setId(entity.getIdDt());
@@ -355,9 +357,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
+		ResourcePersistentId resourcePersistentId = new ResourcePersistentId(entity.getResourceId());
+		resourcePersistentId.setAssociatedResourceId(entity.getIdType(myFhirContext));
+
+		theTransactionDetails.addResolvedResourceId(resourcePersistentId.getAssociatedResourceId(), resourcePersistentId);
+
+		// Pre-cache the match URL
 		if (theIfNoneExist != null) {
-			// Pre-cache the match URL
-			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theIfNoneExist, new ResourcePersistentId(entity.getResourceId()));
+			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theIfNoneExist, resourcePersistentId);
 		}
 
 		// Update the version/last updated in the resource so that interceptors get
@@ -383,14 +390,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			outcome.setId(theResource.getIdElement());
 		}
 
-		String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "successfulCreate", outcome.getId(), w.getMillisAndRestart());
+		String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreate", outcome.getId(), w.getMillisAndRestart());
 		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
 
 		String forcedId = null;
 		if (updatedEntity.getForcedId() != null) {
 			forcedId = updatedEntity.getForcedId().getForcedId();
 		}
-		myIdHelperService.addResolvedPidToForcedId(persistentId, theRequestPartitionId, getResourceName(), forcedId);
+		myIdHelperService.addResolvedPidToForcedId(persistentId, theRequestPartitionId, getResourceName(), forcedId, null);
 
 		ourLog.debug(msg);
 		return outcome;
@@ -415,7 +422,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	protected String getMessageSanitized(String theKey, String theIdPart) {
-		return getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, theKey, theIdPart);
+		return getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, theKey, theIdPart);
 	}
 
 	private boolean isSystemRequest(RequestDetails theRequest) {
@@ -448,7 +455,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			DaoMethodOutcome retVal = delete(theId, deleteConflicts, theRequestDetails, transactionDetails);
 
-			DeleteConflictService.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
+			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
 
 			ourLog.debug("Processed delete on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
 			return retVal;
@@ -475,7 +482,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			outcome.setId(id);
 
 			IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
-			String message = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulDeletes", 1, 0);
+			String message = getContext().getLocalizer().getMessage(BaseStorageDao.class, "successfulDeletes", 1, 0);
 			String severity = "information";
 			String code = "informational";
 			OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
@@ -524,7 +531,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		DaoMethodOutcome outcome = toMethodOutcome(theRequestDetails, savedEntity, resourceToDelete).setCreated(true);
 
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
-		String message = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulDeletes", 1, w.getMillis());
+		String message = getContext().getLocalizer().getMessage(BaseStorageDao.class, "successfulDeletes", 1, w.getMillis());
 		String severity = "information";
 		String code = "informational";
 		OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
@@ -547,7 +554,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myTransactionService.execute(theRequest, transactionDetails, tx -> {
 			DeleteConflictList deleteConflicts = new DeleteConflictList();
 			DeleteMethodOutcome outcome = deleteByUrl(theUrl, deleteConflicts, theRequest);
-			DeleteConflictService.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
+			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
 			return outcome;
 		});
 	}
@@ -584,6 +591,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private DeleteMethodOutcome deleteExpunge(String theUrl, RequestDetails theRequest) {
 		if (!getConfig().canDeleteExpunge()) {
 			throw new MethodNotAllowedException("_expunge is not enabled on this server: " + getConfig().cannotDeleteExpungeReason());
+		}
+
+		if (theUrl.contains(Constants.PARAMETER_CASCADE_DELETE) || (theRequest.getHeader(Constants.HEADER_CASCADE) != null && theRequest.getHeader(Constants.HEADER_CASCADE).equals(Constants.CASCADE_DELETE))) {
+			throw new InvalidRequestException("_expunge cannot be used with _cascade");
 		}
 
 		List<String> urlsToDeleteExpunge = Collections.singletonList(theUrl);
@@ -653,7 +664,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
 		} else {
 			oo = OperationOutcomeUtil.newInstance(getContext());
-			String message = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulDeletes", deletedResources.size(), w.getMillis());
+			String message = getContext().getLocalizer().getMessage(BaseStorageDao.class, "successfulDeletes", deletedResources.size(), w.getMillis());
 			String severity = "information";
 			String code = "informational";
 			OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
@@ -669,7 +680,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	private void validateDeleteEnabled() {
 		if (!getConfig().isDeleteEnabled()) {
-			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "deleteBlockedBecauseDisabled");
+			String msg = getContext().getLocalizer().getMessage(BaseStorageDao.class, "deleteBlockedBecauseDisabled");
 			throw new PreconditionFailedException(msg);
 		}
 	}
@@ -1263,7 +1274,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		if (theId.hasVersionIdPart()) {
 			if (theId.isVersionIdPartValidLong() == false) {
-				throw new ResourceNotFoundException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidVersion", theId.getVersionIdPart(), theId.toUnqualifiedVersionless()));
+				throw new ResourceNotFoundException(getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidVersion", theId.getVersionIdPart(), theId.toUnqualifiedVersionless()));
 			}
 			if (entity.getVersion() != theId.getVersionIdPartAsLong()) {
 				entity = null;
@@ -1279,7 +1290,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				try {
 					entity = q.getSingleResult();
 				} catch (NoResultException e) {
-					throw new ResourceNotFoundException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidVersion", theId.getVersionIdPart(), theId.toUnqualifiedVersionless()));
+					throw new ResourceNotFoundException(getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidVersion", theId.getVersionIdPart(), theId.toUnqualifiedVersionless()));
 				}
 			}
 		}
@@ -1407,7 +1418,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		translateSearchParams(theParams);
+		translateListSearchParams(theParams);
 
 		notifySearchInterceptors(theParams, theRequest);
 
@@ -1432,7 +1443,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
-	private void translateSearchParams(SearchParameterMap theParams) {
+	private void translateListSearchParams(SearchParameterMap theParams) {
 		Iterator<String> keyIterator = theParams.keySet().iterator();
 
 		// Translate _list=42 to _has=List:item:_id=42
@@ -1584,12 +1595,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequest, @Nonnull TransactionDetails theTransactionDetails) {
 		if (theResource == null) {
-			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "missingBody");
+			String msg = getContext().getLocalizer().getMessage(BaseStorageDao.class, "missingBody");
 			throw new InvalidRequestException(msg);
 		}
 		if (!theResource.getIdElement().hasIdPart() && isBlank(theMatchUrl)) {
 			String type = myFhirContext.getResourceType(theResource);
-			String msg = myFhirContext.getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "updateWithNoId", type);
+			String msg = myFhirContext.getLocalizer().getMessage(BaseStorageDao.class, "updateWithNoId", type);
 			throw new InvalidRequestException(msg);
 		}
 
@@ -1729,7 +1740,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			outcome.setId(id);
 		}
 
-		String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "successfulUpdate", outcome.getId(), w.getMillisAndRestart());
+		String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdate", outcome.getId(), w.getMillisAndRestart());
 		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
 
 		ourLog.debug(msg);
@@ -1758,7 +1769,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (getConfig().isEnforceReferentialIntegrityOnDelete()) {
 				myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, true, theRequest, new TransactionDetails());
 			}
-			DeleteConflictService.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
+			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
 
 			IBaseOperationOutcome oo = createInfoOperationOutcome("Ok to delete");
 			return new MethodOutcome(new IdDt(theId.getValue()), oo);
@@ -1786,7 +1797,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (resourceToValidateById != null) {
 				result = validator.validateWithResult(resourceToValidateById, options);
 			} else {
-				String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "cantValidateWithNoResource");
+				String msg = getContext().getLocalizer().getMessage(BaseStorageDao.class, "cantValidateWithNoResource");
 				throw new InvalidRequestException(msg);
 			}
 		} else if (isNotBlank(theRawResource)) {

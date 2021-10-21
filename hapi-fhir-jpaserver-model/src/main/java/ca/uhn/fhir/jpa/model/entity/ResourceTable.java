@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.search.ResourceTableRoutingBinder;
@@ -39,6 +40,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ObjectPath;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -55,7 +57,6 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 @Entity
 @Table(name = "HFJ_RESOURCE", uniqueConstraints = {}, indexes = {
 	@Index(name = "IDX_RES_DATE", columnList = "RES_UPDATED"),
-	@Index(name = "IDX_RES_LANG", columnList = "RES_TYPE,RES_LANGUAGE"),
 	@Index(name = "IDX_RES_TYPE", columnList = "RES_TYPE"),
 	@Index(name = "IDX_INDEXSTATUS", columnList = "SP_INDEX_STATUS")
 })
@@ -100,6 +101,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Long myIndexStatus;
 
+	// TODO: Removed in 5.5.0. Drop in a future release.
 	@Column(name = "RES_LANGUAGE", length = MAX_LANGUAGE_LENGTH, nullable = true)
 	@OptimisticLock(excluded = true)
 	private String myLanguage;
@@ -308,17 +310,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	public void setIndexStatus(Long theIndexStatus) {
 		myIndexStatus = theIndexStatus;
-	}
-
-	public String getLanguage() {
-		return myLanguage;
-	}
-
-	public void setLanguage(String theLanguage) {
-		if (defaultString(theLanguage).length() > MAX_LANGUAGE_LENGTH) {
-			throw new UnprocessableEntityException("Language exceeds maximum length of " + MAX_LANGUAGE_LENGTH + " chars: " + theLanguage);
-		}
-		myLanguage = theLanguage;
 	}
 
 	public Collection<ResourceIndexedComboStringUnique> getParamsComboStringUnique() {
@@ -720,17 +711,32 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myForcedId = theForcedId;
 	}
 
+
+
 	@Override
 	public IdDt getIdDt() {
+		IdDt retVal = new IdDt();
+		populateId(retVal);
+		return retVal;
+	}
+
+
+	public IIdType getIdType(FhirContext theContext) {
+		IIdType retVal = theContext.getVersion().newIdType();
+		populateId(retVal);
+		return retVal;
+	}
+
+	private void populateId(IIdType retVal) {
 		if (getTransientForcedId() != null) {
 			// Avoid a join query if possible
-			return new IdDt(getResourceType() + '/' + getTransientForcedId() + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+			retVal.setValue(getResourceType() + '/' + getTransientForcedId() + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		} else if (getForcedId() == null) {
 			Long id = this.getResourceId();
-			return new IdDt(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+			retVal.setValue(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		} else {
 			String forcedId = getForcedId().getForcedId();
-			return new IdDt(getResourceType() + '/' + forcedId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+			retVal.setValue(getResourceType() + '/' + forcedId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		}
 	}
 

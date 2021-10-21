@@ -15,6 +15,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.IParserErrorHandler;
 import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
+import ca.uhn.fhir.parser.NDJsonParser;
 import ca.uhn.fhir.parser.RDFParser;
 import ca.uhn.fhir.parser.XmlParser;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
@@ -124,6 +125,7 @@ public class FhirContext {
 	private volatile Set<String> myResourceNames;
 	private volatile Boolean myFormatXmlSupported;
 	private volatile Boolean myFormatJsonSupported;
+	private volatile Boolean myFormatNDJsonSupported;
 	private volatile Boolean myFormatRdfSupported;
 
 	/**
@@ -223,6 +225,14 @@ public class FhirContext {
 			ourLog.trace("Android mode not detected");
 		}
 
+	}
+
+
+	/**
+	 * @since 5.6.0
+	 */
+	public static FhirContext forDstu2Cached() {
+		return forCached(FhirVersionEnum.DSTU2);
 	}
 
 	/**
@@ -452,6 +462,7 @@ public class FhirContext {
 		if (retVal == null) {
 			retVal = scanResourceType(theResourceType);
 		}
+
 		return retVal;
 	}
 
@@ -727,6 +738,21 @@ public class FhirContext {
 		return retVal;
 	}
 
+        /**
+         * @return Returns <code>true</code> if the NDJSON serialization format is supported, based on the
+         * available libraries on the classpath.
+         *
+         * @since 5.6.0
+         */
+        public boolean isFormatNDJsonSupported() {
+                Boolean retVal = myFormatNDJsonSupported;
+                if (retVal == null) {
+                        retVal = tryToInitParser(() -> newNDJsonParser());
+                        myFormatNDJsonSupported = retVal;
+                }
+                return retVal;
+        }
+
 	/**
 	 * @return Returns <code>true</code> if the RDF serialization format is supported, based on the
 	 * available libraries on the classpath.
@@ -792,6 +818,29 @@ public class FhirContext {
 	public IParser newJsonParser() {
 		return new JsonParser(this, myParserErrorHandler);
 	}
+
+        /**
+         * Create and return a new NDJSON parser.
+         *
+         * <p>
+         * Thread safety: <b>Parsers are not guaranteed to be thread safe</b>. Create a new parser instance for every thread
+         * or every message being parsed/encoded.
+         * </p>
+         * <p>
+         * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed
+         * without incurring any performance penalty
+         * </p>
+         * <p>
+         * The NDJsonParser provided here is expected to translate between legal NDJson and FHIR Bundles.
+         * In particular, it is able to encode the resources in a FHIR Bundle to NDJson, as well as decode
+         * NDJson into a FHIR "collection"-type Bundle populated with the resources described in the NDJson.
+         * It will throw an exception in the event where it is asked to encode to anything other than a FHIR Bundle
+         * or where it is asked to decode into anything other than a FHIR Bundle.
+         * </p>
+         */
+        public IParser newNDJsonParser() {
+                return new NDJsonParser(this, myParserErrorHandler);
+        }
 
 	/**
 	 * Create and return a new RDF parser.

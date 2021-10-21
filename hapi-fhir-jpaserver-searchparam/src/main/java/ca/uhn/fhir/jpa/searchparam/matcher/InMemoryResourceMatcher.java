@@ -156,6 +156,7 @@ public class InMemoryResourceMatcher {
 		String resourceName = theResourceDefinition.getName();
 		RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(resourceName, theParamName);
 		InMemoryMatchResult checkUnsupportedResult = checkUnsupportedPrefixes(theParamName, paramDef, theAndOrParams);
+
 		if (!checkUnsupportedResult.supported()) {
 			return checkUnsupportedResult;
 		}
@@ -164,7 +165,6 @@ public class InMemoryResourceMatcher {
 			case IAnyResource.SP_RES_ID:
 				return InMemoryMatchResult.fromBoolean(matchIdsAndOr(theAndOrParams, theResource));
 
-			case IAnyResource.SP_RES_LANGUAGE:
 			case Constants.PARAM_HAS:
 			case Constants.PARAM_TAG:
 			case Constants.PARAM_PROFILE:

@@ -33,8 +33,11 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.mdm.util.CanonicalIdentifier;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -74,7 +77,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 	private DaoRegistry myDaoRegistry;
 
 	@Override
-	public IResourceLookup findTargetResource(@Nonnull RequestPartitionId theRequestPartitionId, RuntimeSearchParam theSearchParam, String theSourcePath, IIdType theSourceResourceId, String theResourceType, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest) {
+	public IResourceLookup findTargetResource(@Nonnull RequestPartitionId theRequestPartitionId, RuntimeSearchParam theSearchParam, String theSourcePath, IIdType theSourceResourceId, String theResourceType, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		IResourceLookup resolvedResource;
 		String idPart = theSourceResourceId.getIdPart();
 		try {
@@ -82,7 +85,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 			ourLog.trace("Translated {}/{} to resource PID {}", theType, idPart, resolvedResource);
 		} catch (ResourceNotFoundException e) {
 
-			Optional<ResourceTable> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(theType, theReference, idPart, theRequest);
+			Optional<ResourceTable> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(theType, theReference, idPart, theRequest, theTransactionDetails);
 			if (!createdTableOpt.isPresent()) {
 
 				if (myDaoConfig.isEnforceReferentialIntegrityOnWrite() == false) {
@@ -94,7 +97,6 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 				throw new InvalidRequestException("Resource " + resName + "/" + idPart + " not found, specified in path: " + theSourcePath);
 
 			}
-
 			resolvedResource = createdTableOpt.get();
 		}
 
@@ -119,7 +121,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 	/**
 	 * @param theIdToAssignToPlaceholder If specified, the placeholder resource created will be given a specific ID
 	 */
-	public <T extends IBaseResource> Optional<ResourceTable> createPlaceholderTargetIfConfiguredToDoSo(Class<T> theType, IBaseReference theReference, @Nullable String theIdToAssignToPlaceholder, RequestDetails theRequest) {
+	public <T extends IBaseResource> Optional<ResourceTable> createPlaceholderTargetIfConfiguredToDoSo(Class<T> theType, IBaseReference theReference, @Nullable String theIdToAssignToPlaceholder, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		ResourceTable valueOf = null;
 
 		if (myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
@@ -144,6 +146,10 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 			} else {
 				valueOf = ((ResourceTable) placeholderResourceDao.create(newResource, theRequest).getEntity());
 			}
+
+			ResourcePersistentId persistentId = new ResourcePersistentId(valueOf.getResourceId(), 1L);
+			persistentId.setAssociatedResourceId(valueOf.getIdType(myContext));
+			theTransactionDetails.addResolvedResourceId(persistentId.getAssociatedResourceId(), persistentId);
 		}
 
 		return Optional.ofNullable(valueOf);

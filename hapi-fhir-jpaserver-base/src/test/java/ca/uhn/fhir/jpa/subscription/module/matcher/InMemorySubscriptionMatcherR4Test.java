@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription.module.matcher;
 import ca.uhn.fhir.context.FhirContext;
 
 import ca.uhn.fhir.jpa.config.TestR4Config;
+import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -70,6 +71,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
@@ -83,6 +85,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+@TestPropertySource(properties = {
+	BaseJpaTest.CONFIG_ENABLE_LUCENE_FALSE
+})
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4Config.class})
 public class InMemorySubscriptionMatcherR4Test {
@@ -336,18 +341,6 @@ public class InMemorySubscriptionMatcherR4Test {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("_id", new StringParam("testSearchForUnknownAlphanumericId"));
 		assertNotMatched(o1, params);
-	}
-
-	@Test
-	public void testLanguageNotSupported() {
-		Patient patient = new Patient();
-		patient.getLanguageElement().setValue("en_CA");
-		patient.addIdentifier().setSystem("urn:system").setValue("001");
-		patient.addName().setFamily("testSearchLanguageParam").addGiven("Joe");
-		SearchParameterMap params;
-		params = new SearchParameterMap();
-		params.add(IAnyResource.SP_RES_LANGUAGE, new StringParam("en_CA"));
-		assertUnsupported(patient, params);
 	}
 
 	@Test

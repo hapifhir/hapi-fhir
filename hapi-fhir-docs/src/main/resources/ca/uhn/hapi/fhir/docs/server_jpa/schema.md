@@ -240,9 +240,18 @@ The complete raw contents of the resource is stored in the `RES_TEXT` column, us
 
 By default, the **HFJ_RESOURCE.RES_ID** column is used as the resource ID for all server-assigned IDs. For example, if a Patient resource is created in a completely empty database, it will be assigned the ID `Patient/1` by the server and RES_ID will have a value of 1.
 
-However, when client-assigned IDs are used, these may contain text values to allow a client to create an ID such as `Patient/ABC`. When a client-assigned ID is given to a resource, a row is created in the **HFJ_RESOURCE** table. When an **HFJ_FORCED_ID** row exists corresponding to the equivalent **HFJ_RESOURCE** row, the RES_ID value is no longer visible or usable by FHIR clients and it becomes purely an internal ID to the JPA server.
+However, when client-assigned IDs are used, these may contain text values to allow a client to create an ID such
+as `Patient/ABC`. When a client-assigned ID is given to a resource, a row is created in the **HFJ_RESOURCE** table. When
+an **HFJ_FORCED_ID** row exists corresponding to the equivalent **HFJ_RESOURCE** row, the RES_ID value is no longer
+visible or usable by FHIR clients and it becomes purely an internal ID to the JPA server.
 
-If the server has been configured with a [Resource Server ID Strategy](/apidocs/hapi-fhir-jpaserver-api/undefined/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setResourceServerIdStrategy(ca.uhn.fhir.jpa.api.config.DaoConfig.IdStrategyEnum)) of [UUID](/apidocs/hapi-fhir-jpaserver-api/undefined/ca/uhn/fhir/jpa/api/config/DaoConfig.IdStrategyEnum.html#UUID), or the server has been configured with a [Resource Client ID Strategy](/apidocs/hapi-fhir-jpaserver-api/undefined/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setResourceClientIdStrategy(ca.uhn.fhir.jpa.api.config.DaoConfig.ClientIdStrategyEnum)) of [ANY](/apidocs/hapi-fhir-jpaserver-api/undefined/ca/uhn/fhir/jpa/api/config/DaoConfig.ClientIdStrategyEnum.html#ANY) the server will create a Forced ID for all resources (not only resources having textual IDs).
+If the server has been configured with
+a [Resource Server ID Strategy](/apidocs/hapi-fhir-storage/undefined/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setResourceServerIdStrategy(ca.uhn.fhir.jpa.api.config.DaoConfig.IdStrategyEnum))
+of [UUID](/apidocs/hapi-fhir-storage/undefined/ca/uhn/fhir/jpa/api/config/DaoConfig.IdStrategyEnum.html#UUID), or the
+server has been configured with
+a [Resource Client ID Strategy](/apidocs/hapi-fhir-storage/undefined/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setResourceClientIdStrategy(ca.uhn.fhir.jpa.api.config.DaoConfig.ClientIdStrategyEnum))
+of [ANY](/apidocs/hapi-fhir-storage/undefined/ca/uhn/fhir/jpa/api/config/DaoConfig.ClientIdStrategyEnum.html#ANY)
+the server will create a Forced ID for all resources (not only resources having textual IDs).
 
 ## Columns
 
@@ -301,6 +310,14 @@ If the server has been configured with a [Resource Server ID Strategy](/apidocs/
             <td>
                 Contains the specific version (starting with 1) of the resource that this row corresponds to. 
             </td>        
+        </tr>
+        <tr>
+            <td>RESOURCE_TYPE</td>
+            <td></td>
+            <td>String</td>
+            <td>
+                Contains the string specifying the type of the resource (Patient, Observation, etc).
+            </td>
         </tr>
     </tbody>
 </table>
@@ -476,7 +493,7 @@ The following columns are common to **all HFJ_SPIDX_xxx tables**.
         <tr>
             <td>RES_ID</td>
             <td>FK to <a href="#HFJ_RESOURCE">HFJ_RESOURCE</a></td>
-            <td>String</td>
+            <td>Long</td>
             <td></td>
             <td>
                 Contains the PID of the resource being indexed.  

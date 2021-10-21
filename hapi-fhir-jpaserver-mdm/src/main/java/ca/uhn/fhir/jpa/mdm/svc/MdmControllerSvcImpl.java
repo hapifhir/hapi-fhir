@@ -20,8 +20,11 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
+import ca.uhn.fhir.mdm.api.IMdmBatchJobSubmitterFactory;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
+import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
@@ -31,14 +34,20 @@ import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
 import ca.uhn.fhir.mdm.provider.MdmControllerUtil;
+import ca.uhn.fhir.rest.server.provider.MultiUrlProcessor;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
+import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * This class acts as a layer between MdmProviders and MDM services to support a REST API that's not a FHIR Operation API.
@@ -47,6 +56,8 @@ import javax.annotation.Nullable;
 public class MdmControllerSvcImpl implements IMdmControllerSvc {
 
 	@Autowired
+	FhirContext myFhirContext;
+	@Autowired
 	MdmControllerHelper myMdmControllerHelper;
 	@Autowired
 	IGoldenResourceMergerSvc myGoldenResourceMergerSvc;
@@ -54,6 +65,13 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	IMdmLinkQuerySvc myMdmLinkQuerySvc;
 	@Autowired
 	IMdmLinkUpdaterSvc myIMdmLinkUpdaterSvc;
+	@Autowired
+	IMdmLinkCreateSvc myIMdmLinkCreateSvc;
+	@Autowired
+	IMdmBatchJobSubmitterFactory myMdmBatchJobSubmitterFactory;
+
+	public MdmControllerSvcImpl() {
+	}
 
 	@Override
 	public IAnyResource mergeGoldenResources(String theFromGoldenResourceId, String theToGoldenResourceId, IAnyResource theManuallyMergedGoldenResource, MdmTransactionContext theMdmTransactionContext) {
@@ -89,6 +107,23 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		myMdmControllerHelper.validateSameVersion(source, theSourceResourceId);
 
 		return myIMdmLinkUpdaterSvc.updateLink(goldenResource, source, matchResult, theMdmTransactionContext);
+	}
+
+	@Override
+	public IAnyResource createLink(String theGoldenResourceId, String theSourceResourceId, @Nullable String theMatchResult, MdmTransactionContext theMdmTransactionContext) {
+		MdmMatchResultEnum matchResult = MdmControllerUtil.extractMatchResultOrNull(theMatchResult);
+		IAnyResource goldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_CREATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
+		IAnyResource source = myMdmControllerHelper.getLatestSourceFromIdOrThrowException(ProviderConstants.MDM_CREATE_LINK_RESOURCE_ID, theSourceResourceId);
+		myMdmControllerHelper.validateSameVersion(goldenResource, theGoldenResourceId);
+		myMdmControllerHelper.validateSameVersion(source, theSourceResourceId);
+
+		return myIMdmLinkCreateSvc.createLink(goldenResource, source, matchResult, theMdmTransactionContext);
+	}
+
+	@Override
+	public IBaseParameters submitMdmClearJob(List<String> theUrls, IPrimitiveType<BigDecimal> theBatchSize, ServletRequestDetails theRequestDetails) {
+		MultiUrlProcessor multiUrlProcessor = new MultiUrlProcessor(myFhirContext, myMdmBatchJobSubmitterFactory.getClearJobSubmitter());
+		return multiUrlProcessor.processUrls(theUrls, multiUrlProcessor.getBatchSize(theBatchSize), theRequestDetails);
 	}
 
 	@Override

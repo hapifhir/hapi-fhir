@@ -396,6 +396,78 @@ Any supported MDM type can be used. The following request body shows how to upda
 
 The operation returns the updated Golden Resource. For the query above `Patient` resource will be returned.  Note that this is the only way to modify MDM-managed Golden Resources.
 
+## Create Link
+
+Use the `$mdm-create-link` operation to create an MDM link from a Golden Resource to a Target Resource without the need for any pre-existing matching data within the two resources. This operation takes the following parameters:
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Cardinality</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>goldenResourceId</td>
+            <td>String</td>
+            <td>1..1</td>
+            <td>
+                The id of the Golden Resource.
+            </td>
+        </tr>
+        <tr>
+            <td>resourceId</td>
+            <td>String</td>
+            <td>1..1</td>
+            <td>
+                The id of the target resource.
+            </td>
+        </tr>
+         <tr>
+            <td>matchResult</td>
+            <td>String</td>
+            <td>0..1</td>
+            <td>
+                Optional matchResult. If omitted, it  automatically set the default to MATCH, otherwise the value should be
+MATCH, POSSIBLE_MATCH or NO_MATCH.
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+MDM links created in this way will automatically have their `linkSource` set to `MANUAL`.
+
+### Example
+
+Use an HTTP POST to the following URL to invoke this operation:
+
+```url
+http://example.com/$mdm-create-link
+```
+
+Any supported MDM type can be used. The following request body shows how to update link on the Patient resource type:
+
+```json
+{
+  "resourceType": "Parameters",
+  "parameter": [ {
+    "name": "goldenResourceId",
+    "valueString": "Patient/123"
+  }, {
+    "name": "resourceId",
+    "valueString": "Patient/456"
+  }, {
+     "name": "matchResult",
+     "valueString": "MATCH"
+  } ]
+}
+```
+
+The operation returns the Golden Resource. For the query above, `Patient` will be returned.
+
 ## Merge Golden Resources
 
 The `$mdm-merge-golden-resources` operation can be used to merge one Golden Resource with another. When doing this, you will need to decide which resource to merge from and which one to merge to. 
@@ -470,7 +542,7 @@ This operation returns the merged Golden Resource (`toGoldenResourceId`).
 
 ## Querying the Patient Resource
 
-When MDM is enabled, the [$match operation](http://hl7.org/fhir/patient-operation-match.html) will be enabled on the JPA Server for Patient and Practitioner resources.
+When MDM is enabled, the [$match operation](http://hl7.org/fhir/patient-operation-match.html) will be enabled on the JPA Server for Patient resources.
 
 This operation allows a Patient or Practitioner resource to be submitted to the endpoint, and the system will attempt to find and return any Patient resources that match it according to the matching rules. The response includes a search score field that is calculated by averaging the number of matched rules against total rules checked for the Patient resource. Appropriate match grade extension is also included. 
 
@@ -557,6 +629,10 @@ Content-Type: application/fhir+json; charset=UTF-8
                 "resourceType":"Orgaization",
                 "name": "McMaster Family Practice"
             }
+        },
+        {
+            "name":"resourceType",
+            "valueString": "Orgaization"
         }
     ]
 }
@@ -567,11 +643,15 @@ Note that the request goes to the root of the FHIR server, and not the `Organiza
 
 ## Clearing MDM Links
 
-The `$mdm-clear` operation is used to batch-delete MDM links and related Golden Resources from the database. This operation is meant to be used during the rules-tuning phase of the MDM implementation so that you can quickly test your ruleset. It permits the user to reset the state of their MDM system without manual deletion of all related links and Golden Resources.
+The `$mdm-clear` operation is used to batch-delete MDM links and related Golden Resources from the database. This
+operation is intended to be used during the rules-tuning phase of the MDM implementation so that you can quickly test
+your ruleset. It permits the user to reset the state of their MDM system without manual deletion of all related links
+and Golden Resources.
 
-After the operation is complete, all targeted MDM links are removed from the system, and their related Golden Resources are deleted and expunged from the server.
+After the operation is complete, all targeted MDM links are removed from the system, and their related Golden Resources
+are deleted and expunged from the server.
 
-This operation takes a single optional Parameter.
+This operation takes two optional Parameters.
 
 <table class="table table-striped table-condensed">
     <thead>
@@ -584,11 +664,21 @@ This operation takes a single optional Parameter.
     </thead>
     <tbody>
         <tr>
-            <td>sourceType</td>
+            <td>resourceType</td>
             <td>String</td>
+            <td>0..*</td>
+            <td>
+                The Source resource types you would like to clear. If omitted, all resource types will be cleared.
+            </td>
+        </tr>
+        <tr>
+            <td>batchSize</td>
+            <td>Integer</td>
             <td>0..1</td>
             <td>
-                The Source Resource type you would like to clear. If omitted, will operate over all links.
+                The number of links that should be deleted at a time.  If ommitted, then the batch size will be determined by the value
+of [Expunge Batch Size](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/DaoConfig.html#getExpungeBatchSize())
+property.
             </td>
         </tr>
     </tbody>
@@ -598,33 +688,27 @@ This operation takes a single optional Parameter.
 
 Use an HTTP POST to the following URL to invoke this operation:
 
-```url
-http://example.com/$mdm-clear
-```
+```http
+POST /$mdm-clear
+Content-Type: application/fhir+json
 
-The following request body could be used:
-
-```json
 {
   "resourceType": "Parameters",
   "parameter": [ {
-    "name": "sourceType",
+    "name": "resourceType",
     "valueString": "Patient"
+  }, {
+    "name": "resourceType",
+    "valueString": "Practitioner"
+  }, {
+    "name": "batchSize",
+    "valueDecimal": 1000
   } ]
 }
 ```
 
-This operation returns the number of MDM links that were cleared. The following is a sample response:
-
-```json
-{
-  "resourceType": "Parameters",
-  "parameter": [ {
-    "name": "reset",
-    "valueDecimal": 5
-  } ]
-}
-```
+This operation returns the job execution id of the Spring Batch job that will be run to remove all the links and their
+golden resources.
 
 ## Batch-creating MDM Links
 

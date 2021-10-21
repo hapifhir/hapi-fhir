@@ -1,9 +1,11 @@
 package ca.uhn.fhir.util.bundle;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Medication;
@@ -20,9 +22,11 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.DELETE;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.GET;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST;
@@ -267,6 +271,90 @@ public class BundleUtilTest {
 	}
 
 	@Test
+	public void testBundleToSearchBundleEntryParts() {
+		//Given
+		String bundleString = "{\n" +
+			"  \"resourceType\": \"Bundle\",\n" +
+			"  \"id\": \"bd194b7f-ac1e-429a-a206-ee2c470f23b5\",\n" +
+			"  \"meta\": {\n" +
+			"    \"lastUpdated\": \"2021-10-18T16:25:55.330-07:00\"\n" +
+			"  },\n" +
+			"  \"type\": \"searchset\",\n" +
+			"  \"total\": 1,\n" +
+			"  \"link\": [\n" +
+			"    {\n" +
+			"      \"relation\": \"self\",\n" +
+			"      \"url\": \"http://localhost:8000/Patient?_count=1&_id=pata&_revinclude=Condition%3Asubject%3APatient\"\n" +
+			"    }\n" +
+			"  ],\n" +
+			"  \"entry\": [\n" +
+			"    {\n" +
+			"      \"fullUrl\": \"http://localhost:8000/Patient/pata\",\n" +
+			"      \"resource\": {\n" +
+			"        \"resourceType\": \"Patient\",\n" +
+			"        \"id\": \"pata\",\n" +
+			"        \"meta\": {\n" +
+			"          \"versionId\": \"1\",\n" +
+			"          \"lastUpdated\": \"2021-10-18T16:25:48.954-07:00\",\n" +
+			"          \"source\": \"#rnEjIucr8LR6Ze3x\"\n" +
+			"        },\n" +
+			"        \"name\": [\n" +
+			"          {\n" +
+			"            \"family\": \"Simpson\",\n" +
+			"            \"given\": [\n" +
+			"              \"Homer\",\n" +
+			"              \"J\"\n" +
+			"            ]\n" +
+			"          }\n" +
+			"        ]\n" +
+			"      },\n" +
+			"      \"search\": {\n" +
+			"        \"mode\": \"match\"\n" +
+			"      }\n" +
+			"    },\n" +
+			"    {\n" +
+			"      \"fullUrl\": \"http://localhost:8000/Condition/1626\",\n" +
+			"      \"resource\": {\n" +
+			"        \"resourceType\": \"Condition\",\n" +
+			"        \"id\": \"1626\",\n" +
+			"        \"meta\": {\n" +
+			"          \"versionId\": \"1\",\n" +
+			"          \"lastUpdated\": \"2021-10-18T16:25:51.672-07:00\",\n" +
+			"          \"source\": \"#gSOcGAdA3acaaNq1\"\n" +
+			"        },\n" +
+			"        \"identifier\": [\n" +
+			"          {\n" +
+			"            \"system\": \"urn:hssc:musc:conditionid\",\n" +
+			"            \"value\": \"1064115000.1.5\"\n" +
+			"          }\n" +
+			"        ],\n" +
+			"        \"subject\": {\n" +
+			"          \"reference\": \"Patient/pata\"\n" +
+			"        }\n" +
+			"      },\n" +
+			"      \"search\": {\n" +
+			"        \"mode\": \"include\"\n" +
+			"      }\n" +
+			"    }\n" +
+			"  ]\n" +
+			"}";
+
+		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, bundleString);
+
+		//When
+		List<SearchBundleEntryParts> searchBundleEntryParts = BundleUtil.getSearchBundleEntryParts(ourCtx, bundle);
+
+		//Then
+		assertThat(searchBundleEntryParts, hasSize(2));
+		assertThat(searchBundleEntryParts.get(0).getSearchMode(), is(equalTo(BundleEntrySearchModeEnum.MATCH)));
+		assertThat(searchBundleEntryParts.get(0).getFullUrl(), is(containsString("Patient/pata")));
+		assertThat(searchBundleEntryParts.get(0).getResource(), is(notNullValue()));
+		assertThat(searchBundleEntryParts.get(1).getSearchMode(), is(equalTo(BundleEntrySearchModeEnum.INCLUDE)));
+		assertThat(searchBundleEntryParts.get(1).getFullUrl(), is(containsString("Condition/")));
+		assertThat(searchBundleEntryParts.get(1).getResource(), is(notNullValue()));
+	}
+
+	@Test
 	public void testTransactionSorterReturnsDeletesInCorrectProcessingOrder() {
 		Bundle b = new Bundle();
 		Bundle.BundleEntryComponent bundleEntryComponent = b.addEntry();
@@ -325,7 +413,7 @@ public class BundleUtilTest {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 }

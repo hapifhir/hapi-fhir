@@ -6,8 +6,8 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobParametersBuilder;
 import ca.uhn.fhir.jpa.bulk.export.job.GroupBulkExportJobParametersBuilder;
@@ -102,15 +102,15 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	private BatchJobHelper myBatchJobHelper;
 
 	@Autowired
-	@Qualifier(BatchJobsConfig.BULK_EXPORT_JOB_NAME)
+	@Qualifier(BatchConstants.BULK_EXPORT_JOB_NAME)
 	private Job myBulkJob;
 
 	@Autowired
-	@Qualifier(BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME)
+	@Qualifier(BatchConstants.GROUP_BULK_EXPORT_JOB_NAME)
 	private Job myGroupBulkJob;
 
 	@Autowired
-	@Qualifier(BatchJobsConfig.PATIENT_BULK_EXPORT_JOB_NAME)
+	@Qualifier(BatchConstants.PATIENT_BULK_EXPORT_JOB_NAME)
 	private Job myPatientBulkJob;
 
 	private IIdType myPatientGroupId;
@@ -328,10 +328,11 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 	private void awaitAllBulkJobCompletions() {
 		myBatchJobHelper.awaitAllBulkJobCompletions(
-			BatchJobsConfig.BULK_EXPORT_JOB_NAME,
-			BatchJobsConfig.PATIENT_BULK_EXPORT_JOB_NAME,
-			BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME,
-			BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME
+			BatchConstants.BULK_EXPORT_JOB_NAME,
+			BatchConstants.PATIENT_BULK_EXPORT_JOB_NAME,
+			BatchConstants.GROUP_BULK_EXPORT_JOB_NAME,
+			BatchConstants.DELETE_EXPUNGE_JOB_NAME,
+			BatchConstants.MDM_CLEAR_JOB_NAME
 		);
 	}
 
@@ -1213,7 +1214,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		goldenPatient.setId("PAT999");
 		SystemRequestDetails srd = SystemRequestDetails.newSystemRequestAllPartitions();
 		DaoMethodOutcome g1Outcome = myPatientDao.update(goldenPatient, srd);
-		Long goldenPid = myIdHelperService.getPidOrNull(g1Outcome.getResource());
+		Long goldenPid = runInTransaction(() -> myIdHelperService.getPidOrNull(g1Outcome.getResource()));
 
 		//Create our golden records' data.
 		createObservationWithIndex(999, g1Outcome.getId());
@@ -1223,7 +1224,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		for (int i = 0; i < 10; i++) {
 			DaoMethodOutcome patientOutcome = createPatientWithIndex(i);
 			IIdType patId = patientOutcome.getId().toUnqualifiedVersionless();
-			Long sourcePid = myIdHelperService.getPidOrNull(patientOutcome.getResource());
+			Long sourcePid = runInTransaction(() -> myIdHelperService.getPidOrNull(patientOutcome.getResource()));
 
 			//Link the patient to the golden resource
 			linkToGoldenResource(goldenPid, sourcePid);
@@ -1245,14 +1246,14 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		Patient goldenPatient2 = new Patient();
 		goldenPatient2.setId("PAT888");
 		DaoMethodOutcome g2Outcome = myPatientDao.update(goldenPatient2, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
-		Long goldenPid2 = myIdHelperService.getPidOrNull(g2Outcome.getResource());
+		Long goldenPid2 = runInTransaction(() -> myIdHelperService.getPidOrNull(g2Outcome.getResource()));
 
 		//Create some nongroup patients MDM linked to a different golden resource. They shouldnt be included in the query.
 		for (int i = 0; i < 5; i++) {
 			int index = 1000 + i;
 			DaoMethodOutcome patientOutcome = createPatientWithIndex(index);
 			IIdType patId = patientOutcome.getId().toUnqualifiedVersionless();
-			Long sourcePid = myIdHelperService.getPidOrNull(patientOutcome.getResource());
+			Long sourcePid = runInTransaction(() -> myIdHelperService.getPidOrNull(patientOutcome.getResource()));
 			linkToGoldenResource(goldenPid2, sourcePid);
 			createObservationWithIndex(index, patId);
 			createImmunizationWithIndex(index, patId);
@@ -1324,6 +1325,6 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		mdmLink.setUpdated(new Date());
 		mdmLink.setVersion("1");
-		myMdmLinkDao.save(mdmLink);
+		runInTransaction(() -> myMdmLinkDao.save(mdmLink));
 	}
 }

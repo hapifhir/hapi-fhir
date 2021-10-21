@@ -8,7 +8,10 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
@@ -166,4 +169,25 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testListPartitions() {
+		PartitionEntity partition1 = new PartitionEntity();
+		partition1.setId(1);
+		partition1.setName("PARTITION-1");
+		partition1.setDescription("a description1");
+
+		PartitionEntity partition2 = new PartitionEntity();
+		partition2.setId(2);
+		partition2.setName("PARTITION-2");
+		partition2.setDescription("a description2");
+
+		myPartitionConfigSvc.createPartition(partition1);
+		myPartitionConfigSvc.createPartition(partition2);
+
+		List<PartitionEntity> actual = myPartitionConfigSvc.listPartitions();
+
+		assertEquals(2, actual.size());
+		assertTrue(actual.stream().anyMatch(item -> "PARTITION-1".equals(item.getName())));
+		assertTrue(actual.stream().anyMatch(item -> "PARTITION-2".equals(item.getName())));
+	}
 }

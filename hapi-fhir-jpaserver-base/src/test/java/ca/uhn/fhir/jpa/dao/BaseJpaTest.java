@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.config.TestDstu2Config;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboTokensNonUniqueDao;
@@ -62,13 +63,16 @@ import org.hibernate.SessionFactory;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
 import org.hibernate.search.engine.cfg.BackendSettings;
+import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
+import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -88,6 +92,7 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -103,7 +108,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static ca.uhn.fhir.util.TestUtil.randomizeLocale;
+import static ca.uhn.fhir.util.TestUtil.doRandomizeLocaleAndTimezone;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -118,6 +123,9 @@ import static org.mockito.Mockito.when;
 	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_TRUE
 })
 public abstract class BaseJpaTest extends BaseTest {
+	public static final String CONFIG_ENABLE_LUCENE="hapi_test.enable_lucene";
+	public static final String CONFIG_ENABLE_LUCENE_FALSE = CONFIG_ENABLE_LUCENE + "=false";
+	public static final boolean CONFIG_ENABLE_LUCENE_DEFAULT_VALUE = true;
 
 	protected static final String CM_URL = "http://example.com/my_concept_map";
 	protected static final String CS_URL = "http://example.com/my_code_system";
@@ -180,6 +188,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
 	private IForcedIdDao myForcedIdDao;
+	@Autowired(required = false)
+	protected IFulltextSearchSvc myFulltestSearchSvc;
 
 	@AfterEach
 	public void afterPerformCleanup() {
@@ -249,6 +259,16 @@ public abstract class BaseJpaTest extends BaseTest {
 		CountDownLatch deliveryLatch = new CountDownLatch(theCount);
 		myInterceptorRegistry.registerAnonymousInterceptor(theLatchPointcut, Integer.MAX_VALUE, (thePointcut, t) -> deliveryLatch.countDown());
 		return deliveryLatch;
+	}
+
+	protected void purgeHibernateSearch(EntityManager theEntityManager) {
+		runInTransaction(() -> {
+			if (myFulltestSearchSvc != null && !myFulltestSearchSvc.isDisabled()) {
+				SearchSession searchSession = Search.session(theEntityManager);
+				searchSession.workspace(ResourceTable.class).purge();
+				searchSession.indexingPlan().execute();
+			}
+		});
 	}
 
 	protected abstract FhirContext getContext();
@@ -589,7 +609,21 @@ public abstract class BaseJpaTest extends BaseTest {
 		}
 	}
 
-	public static Map<?, ?> buildHeapLuceneHibernateSearchProperties() {
+	@NotNull
+	public static Map<String, String> buildHibernateSearchProperties(boolean enableLucene) {
+		Map<String, String> hibernateSearchProperties;
+		if (enableLucene) {
+			ourLog.warn("Hibernate Search is enabled");
+			hibernateSearchProperties = buildHeapLuceneHibernateSearchProperties();
+		} else {
+			ourLog.warn("Hibernate Search is disabled");
+			hibernateSearchProperties = new HashMap<>();
+			hibernateSearchProperties.put("hibernate.search.enabled", "false");
+		}
+		return hibernateSearchProperties;
+	}
+
+	public static Map<String, String> buildHeapLuceneHibernateSearchProperties() {
 		Map<String, String> props = new HashMap<>();
 		props.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
 		props.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
@@ -601,7 +635,7 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	@BeforeAll
 	public static void beforeClassRandomizeLocale() {
-		randomizeLocale();
+		doRandomizeLocaleAndTimezone();
 	}
 
 	@AfterAll
@@ -721,6 +755,4 @@ public abstract class BaseJpaTest extends BaseTest {
 		}
 		Thread.sleep(500);
 	}
-
-
 }

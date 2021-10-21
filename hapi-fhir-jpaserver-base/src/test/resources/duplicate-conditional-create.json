@@ -1,0 +1,66 @@
+{
+	"resourceType": "Bundle",
+	"type": "transaction",
+	"entry": [
+		{
+			"fullUrl": "urn:uuid:4cd35592-5d4d-462b-8483-e404c023d316",
+			"resource": {
+				"resourceType": "Organization",
+				"identifier": [
+					{
+						"system": "https://fhir.tester.ca/NamingSystem/ca-on-health-care-facility-id",
+						"value": "3972"
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "/Organization",
+				"ifNoneExist": "Organization?identifier=https://fhir.tester.ca/NamingSystem/ca-on-health-care-facility-id|3972"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:02643c1d-94d1-4991-a063-036fa0f57ec2",
+			"resource": {
+				"resourceType": "Organization",
+				"identifier": [
+					{
+						"system": "https://fhir.tester.ca/NamingSystem/ca-on-health-care-facility-id",
+						"value": "3972"
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "/Organization",
+				"ifNoneExist": "Organization?identifier=https://fhir.tester.ca/NamingSystem/ca-on-health-care-facility-id|3972"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:8271e94f-e08b-498e-ad6d-751928c3ff99",
+			"resource": {
+				"resourceType": "ServiceRequest",
+				"identifier": [
+					{
+						"system": "https://fhir-tester.ca/NamingSystem/service-request-id",
+						"value": "1"
+					}
+				],
+				"performer": [
+					{
+						"reference": "urn:uuid:4cd35592-5d4d-462b-8483-e404c023d316",
+						"type": "Organization"
+					},
+					{
+						"reference": "urn:uuid:02643c1d-94d1-4991-a063-036fa0f57ec2",
+						"type": "Organization"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/ServiceRequest?identifier=https://fhir-tester.ca/NamingSystem/service-request-id|1"
+			}
+		}
+	]
+}

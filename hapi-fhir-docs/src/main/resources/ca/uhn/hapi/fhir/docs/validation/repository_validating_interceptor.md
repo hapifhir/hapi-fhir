@@ -38,7 +38,12 @@ This means that:
 
 # Using the Repository Validating Interceptor
 
-Using the repository validating interceptor is as simple as creating a new instance of [RepositoryValidatingInterceptor](/hapi-fhir/apidocs/hapi-fhir-jpaserver-base/ca/uhn/fhir/jpa/interceptor/validation/RepositoryValidatingInterceptor.html) and registering it with the interceptor registry. The only tricky part is initializing your rules, which must be done using a [RepositoryValidatingRuleBuilder](/hapi-fhir/apidocs/hapi-fhir-jpaserver-base/ca/uhn/fhir/jpa/interceptor/validation/RepositoryValidatingRuleBuilder.html).
+Using the repository validating interceptor is as simple as creating a new instance
+of [RepositoryValidatingInterceptor](/hapi-fhir/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/interceptor/validation/RepositoryValidatingInterceptor.html)
+and registering it with the interceptor registry. The only tricky part is initializing your rules, which must be done
+using
+a [RepositoryValidatingRuleBuilder](/hapi-fhir/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/interceptor/validation/RepositoryValidatingRuleBuilder.html)
+.
 
 The rule builder must be obtained from the Spring context, as shown below:
 

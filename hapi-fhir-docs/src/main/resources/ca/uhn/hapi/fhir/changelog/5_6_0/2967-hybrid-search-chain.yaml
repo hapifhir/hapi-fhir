@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 2967
+backport: 5.5.2
+jira: SMILE-2899
+title: "Previously, the system would only traverse references to discrete resources while performing a chained search.
+This fix adds support for traversing references to contained resources as well, with the limitation that the reference
+to the contained resource must be the last reference in the chain."

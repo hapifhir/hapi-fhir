@@ -44,6 +44,11 @@ public class ProviderConstants {
 	 */
 	public static final String PARTITION_MANAGEMENT_READ_PARTITION = "$partition-management-read-partition";
 
+	/**
+	 * Operation name: list partitions
+	 */
+	public static final String PARTITION_MANAGEMENT_LIST_PARTITIONS = "$partition-management-list-partitions";
+
 	public static final String PARTITION_MANAGEMENT_PARTITION_ID = "id";
 	public static final String PARTITION_MANAGEMENT_PARTITION_NAME = "name";
 	public static final String PARTITION_MANAGEMENT_PARTITION_DESC = "description";
@@ -75,6 +80,11 @@ public class ProviderConstants {
 	public static final String MDM_UPDATE_LINK_RESOURCE_ID = "resourceId";
 	public static final String MDM_UPDATE_LINK_MATCH_RESULT = "matchResult";
 
+	public static final String MDM_CREATE_LINK = "$mdm-create-link";
+	public static final String MDM_CREATE_LINK_GOLDEN_RESOURCE_ID = "goldenResourceId";
+	public static final String MDM_CREATE_LINK_RESOURCE_ID = "resourceId";
+	public static final String MDM_CREATE_LINK_MATCH_RESULT = "matchResult";
+
 	public static final String MDM_QUERY_LINKS = "$mdm-query-links";
 	public static final String MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID = "goldenResourceId";
 	public static final String MDM_QUERY_LINKS_RESOURCE_ID = "resourceId";
@@ -84,21 +94,19 @@ public class ProviderConstants {
 	public static final String MDM_DUPLICATE_GOLDEN_RESOURCES = "$mdm-duplicate-golden-resources";
 	public static final String MDM_NOT_DUPLICATE = "$mdm-not-duplicate";
 
-	public static final String MDM_CLEAR = "$mdm-clear";
-	public static final String MDM_CLEAR_SOURCE_TYPE = "sourceType";
+	public static final String OPERATION_MDM_CLEAR = "$mdm-clear";
+	public static final String OPERATION_MDM_CLEAR_RESOURCE_NAME = "resourceType";
+	public static final String OPERATION_MDM_CLEAR_BATCH_SIZE = "batchSize";
 	public static final String OPERATION_MDM_SUBMIT = "$mdm-submit";
-	public static final String MDM_BATCH_RUN_CRITERIA = "criteria" ;
-	public static final String OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT = "submitted" ;
-	public static final String OPERATION_MDM_CLEAR_OUT_PARAM_DELETED_COUNT = "deleted";
+	public static final String MDM_BATCH_RUN_CRITERIA = "criteria";
 	public static final String MDM_BATCH_RUN_RESOURCE_TYPE = "resourceType";
-
 	/**
 	 * CQL Operations
 	 */
 	public static final String CQL_EVALUATE_MEASURE = "$evaluate-measure";
 
 	/**
-	 *  Operation name for the $meta operation
+	 * Operation name for the $meta operation
 	 */
 	public static final String OPERATION_META = "$meta";
 
@@ -146,12 +154,17 @@ public class ProviderConstants {
 	/**
 	 * The Spring Batch job id of the delete expunge job created by a $delete-expunge operation
 	 */
-	public static final String OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID = "jobId";
+	public static final String OPERATION_BATCH_RESPONSE_JOB_ID = "jobId";
 
 	/**
 	 * Operation name for the $delete-expunge operation
 	 */
 	public static final String OPERATION_REINDEX = "$reindex";
+
+	/**
+	 * Operation name for the $invalidate-expansion operation
+	 */
+	public static final String OPERATION_INVALIDATE_EXPANSION = "$invalidate-expansion";
 
 	/**
 	 * url of resources to delete for the $delete-expunge operation
@@ -172,4 +185,13 @@ public class ProviderConstants {
 	 * The Spring Batch job id of the delete expunge job created by a $delete-expunge operation
 	 */
 	public static final String OPERATION_REINDEX_RESPONSE_JOB_ID = "jobId";
+
+	@Deprecated
+	public static final String MARK_ALL_RESOURCES_FOR_REINDEXING = "$mark-all-resources-for-reindexing";
+	/**
+	 * @see ProviderConstants#OPERATION_REINDEX
+	 * @deprecated
+	 */
+	@Deprecated
+	public static final String PERFORM_REINDEXING_PASS = "$perform-reindexing-pass";
 }
