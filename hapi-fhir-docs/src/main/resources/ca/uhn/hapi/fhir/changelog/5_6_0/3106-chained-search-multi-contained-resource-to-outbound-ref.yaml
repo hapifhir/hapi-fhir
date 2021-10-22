@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3106
+jira: SMILE-3151
+title: "Further enhances the features added by issue 3100 to allow chained searches across any combination of discrete and contained references."
