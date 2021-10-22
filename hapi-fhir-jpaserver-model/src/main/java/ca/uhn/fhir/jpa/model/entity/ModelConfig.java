@@ -100,6 +100,7 @@ public class ModelConfig {
 	private Map<String, Set<String>> myTypeToAutoVersionReferenceAtPaths = Collections.emptyMap();
 	private boolean myRespectVersionsForSearchIncludes;
 	private boolean myIndexOnContainedResources = false;
+	private boolean myIndexOnContainedResourcesRecursively = false;
 	private boolean myAllowMdmExpansion = false;
 
 	/**
@@ -785,6 +786,26 @@ public class ModelConfig {
 		myIndexOnContainedResources = theIndexOnContainedResources;
 	}
 	
+	/**
+	 * Should recursive indexing and searching on contained resources be enabled on this server.
+	 * This may have performance impacts, and should be enabled only if it is needed. Default is <code>false</code>.
+	 *
+	 * @since 5.6.0
+	 */
+	public boolean isIndexOnContainedResourcesRecursively() {
+		return myIndexOnContainedResourcesRecursively;
+	}
+
+	/**
+	 * Should indexing and searching on contained resources be enabled on this server.
+	 * This may have performance impacts, and should be enabled only if it is needed. Default is <code>false</code>.
+	 *
+	 * @since 5.6.0
+	 */
+	public void setIndexOnContainedResourcesRecursively(boolean theIndexOnContainedResourcesRecursively) {
+		myIndexOnContainedResourcesRecursively = theIndexOnContainedResourcesRecursively;
+	}
+
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");
 
