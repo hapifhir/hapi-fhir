@@ -806,12 +806,47 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForActivatedSubscriptionCount(1);
 
 		sendObservation(code, "SNOMED-CT");
+		sendPatient();
 
-		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		assertEquals(0, ourObservationProvider.getCountCreate());
+
+		// Should see 1 subscription notification for each type
+		ourObservationProvider.waitForCreateCount(0);
 		ourObservationProvider.waitForUpdateCount(1);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		ourPatientProvider.waitForCreateCount(0);
+		ourPatientProvider.waitForUpdateCount(1);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(1));
+
+	}
+
+
+	@Test
+	public void testRestHookSubscriptionMultiTypeCriteria() throws Exception {
+		String payload = "application/json";
+
+		String code = "1000000050";
+		String criteria1 = "[Observation,Patient]";
+
+		createSubscription(criteria1, payload);
+		waitForActivatedSubscriptionCount(1);
+
+		sendOrganization();
+		sendObservation(code, "SNOMED-CT");
+		sendPatient();
+
+		waitForQueueToDrain();
+
+		// Should see 1 subscription notification for each type
+		ourObservationProvider.waitForCreateCount(0);
+		ourObservationProvider.waitForUpdateCount(1);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		ourPatientProvider.waitForCreateCount(0);
+		ourPatientProvider.waitForUpdateCount(1);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(1));
+		ourOrganizationProvider.waitForCreateCount(0);
+		ourOrganizationProvider.waitForUpdateCount(0);
+
 	}
 
 	@Test

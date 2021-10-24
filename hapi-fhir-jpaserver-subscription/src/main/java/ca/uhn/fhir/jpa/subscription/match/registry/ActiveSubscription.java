@@ -20,39 +20,39 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ActiveSubscription {
-	private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscription.class);
 
-	private CanonicalSubscription mySubscription;
+	private final SubscriptionCriteriaParser.SubscriptionCriteria myCriteria;
 	private final String myChannelName;
 	private final String myId;
+	private CanonicalSubscription mySubscription;
 	private boolean flagForDeletion;
 
 	public ActiveSubscription(CanonicalSubscription theSubscription, String theChannelName) {
 		mySubscription = theSubscription;
 		myChannelName = theChannelName;
 		myId = theSubscription.getIdPart();
+		myCriteria = SubscriptionCriteriaParser.parse(theSubscription.getCriteriaString());
+	}
+
+	public SubscriptionCriteriaParser.SubscriptionCriteria getCriteria() {
+		return myCriteria;
 	}
 
 	public CanonicalSubscription getSubscription() {
 		return mySubscription;
 	}
 
-	public String getChannelName() {
-		return myChannelName;
-	}
-
-	public String getCriteriaString() {
-		return mySubscription.getCriteriaString();
-	}
-
 	public void setSubscription(CanonicalSubscription theCanonicalizedSubscription) {
 		mySubscription = theCanonicalizedSubscription;
+	}
+
+	public String getChannelName() {
+		return myChannelName;
 	}
 
 	public boolean isFlagForDeletion() {

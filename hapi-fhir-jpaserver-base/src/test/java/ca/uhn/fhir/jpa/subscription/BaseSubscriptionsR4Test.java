@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterAll;
@@ -49,6 +50,9 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	@RegisterExtension
 	protected static TransactionCapturingProviderExtension<Bundle> ourTransactionProvider = new TransactionCapturingProviderExtension<>(ourRestfulServer, Bundle.class);
 	protected static SingleQueryCountHolder ourCountHolder;
+	@Order(1)
+	@RegisterExtension
+	protected static HashMapResourceProviderExtension<Organization> ourOrganizationProvider = new HashMapResourceProviderExtension<>(ourRestfulServer, Organization.class);
 	@Autowired
 	protected SubscriptionTestUtil mySubscriptionTestUtil;
 	@Autowired
@@ -155,6 +159,25 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		return observation;
 	}
 
+	protected Patient sendPatient() {
+		Patient patient = new Patient();
+		patient.setActive(true);
+
+		IIdType id = myPatientDao.create(patient).getId();
+		patient.setId(id);
+
+		return patient;
+	}
+
+	protected Organization sendOrganization() {
+		Organization org = new Organization();
+		org.setName("ORG");
+
+		IIdType id = myOrganizationDao.create(org).getId();
+		org.setId(id);
+
+		return org;
+	}
 
 	@AfterAll
 	public static void reportTotalSelects() {
