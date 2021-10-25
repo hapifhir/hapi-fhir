@@ -189,7 +189,7 @@ public class BinaryAccessProvider {
 		}
 
 		if (blobId == null) {
-			byte[] bytes = IOUtils.toByteArray(theRequestDetails.getInputStream());
+			byte[] bytes = theRequestDetails.loadRequestContents();
 			size = bytes.length;
 			target.setData(bytes);
 		} else {
