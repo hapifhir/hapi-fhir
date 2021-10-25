@@ -52,6 +52,7 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
@@ -276,7 +277,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 		 */
 		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN()) {
 			if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
-				if (myFulltextSearchSvc == null) {
+				if (myFulltextSearchSvc == null || myFulltextSearchSvc.isDisabled()) {
 					if (myParams.containsKey(Constants.PARAM_TEXT)) {
 						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
 					} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
@@ -369,8 +370,14 @@ public class LegacySearchBuilder implements ISearchBuilder {
 			From<?, ResourceLink> join = myQueryStack.createJoin(SearchBuilderJoinEnum.REFERENCE, null);
 
 			if (myParams.get(IAnyResource.SP_RES_ID) != null) {
-				StringParam idParam = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
-				ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, idParam.getValue());
+				ResourcePersistentId pid = null;
+				if (myParams.get(IAnyResource.SP_RES_ID) instanceof StringParam) {
+					StringParam idParam = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
+					pid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, idParam.getValue());
+				} else {
+					TokenParam tokenParam = (TokenParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
+					pid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, tokenParam.getValue());
+				}
 				if (myAlsoIncludePids == null) {
 					myAlsoIncludePids = new ArrayList<>(1);
 				}

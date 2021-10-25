@@ -26,7 +26,7 @@ import org.springframework.test.util.AopTestUtils;
 import java.util.Date;
 import java.util.UUID;
 
-import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
+import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.containsString;
@@ -143,11 +143,11 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 		});
 
 		// It should take two passes to delete the search fully
-		assertEquals(1, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(1, mySearchEntityDao.count()));
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
-		assertEquals(1, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(1, mySearchEntityDao.count()));
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
-		assertEquals(0, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
 
 	}
 
@@ -166,10 +166,15 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 		});
 
 		// It should take one pass to delete the search fully
-		assertEquals(1, mySearchEntityDao.count());
-		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
-		assertEquals(0, mySearchEntityDao.count());
+		runInTransaction(()-> {
+			assertEquals(1, mySearchEntityDao.count());
+		});
 
+		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
+
+		runInTransaction(()-> {
+			assertEquals(0, mySearchEntityDao.count());
+		});
 	}
 
 	@Test
@@ -193,15 +198,15 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 		});
 
 		// Should not delete right now
-		assertEquals(1, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(1, mySearchEntityDao.count()));
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
-		assertEquals(1, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(1, mySearchEntityDao.count()));
 
 		sleepAtLeast(1100);
 
 		// Now it's time to delete
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
-		assertEquals(0, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
 
 	}
 

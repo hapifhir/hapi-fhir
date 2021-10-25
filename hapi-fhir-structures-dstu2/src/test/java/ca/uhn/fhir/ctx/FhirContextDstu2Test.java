@@ -132,7 +132,7 @@ public class FhirContextDstu2Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	//Source: https://github.com/junit-team/junit4/wiki/multithreaded-code-and-concurrency

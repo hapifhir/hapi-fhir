@@ -40,8 +40,9 @@ public class LoincAnswerListHandler extends BaseLoincHandler {
 	private final Map<String, TermConcept> myCode2Concept;
 	private final TermCodeSystemVersion myCodeSystemVersion;
 
-	public LoincAnswerListHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
-		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
+	public LoincAnswerListHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept,
+			List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties, String theCopyrightStatement) {
+		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties, theCopyrightStatement);
 		myCodeSystemVersion = theCodeSystemVersion;
 		myCode2Concept = theCode2concept;
 	}

@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -54,7 +55,9 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.util.CollectionUtil;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.ResourceUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -125,13 +128,20 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Timing;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvFileSource;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -139,9 +149,12 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -149,6 +162,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TYPE;
 import static org.apache.commons.lang3.StringUtils.countMatches;
@@ -174,11 +188,18 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @SuppressWarnings({"unchecked", "Duplicates"})
+@TestPropertySource(properties = {
+	BaseJpaTest.CONFIG_ENABLE_LUCENE_FALSE
+	})
 public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchNoFtTest.class);
-
 	@Autowired
 	MatchUrlService myMatchUrlService;
+
+	@BeforeAll
+	public static void beforeAllTest(){
+		System.setProperty("user.timezone", "EST");
+	}
 
 	@AfterEach
 	public void afterResetSearchSize() {
@@ -195,6 +216,28 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myModelConfig.setSuppressStringIndexingInTokens(new ModelConfig().isSuppressStringIndexingInTokens());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
+
+	@Test
+	public void testSearchInExistingTransaction() {
+		createPatient(withBirthdate("2021-01-01"));
+
+		// Search in a new transaction
+		IBundleProvider outcome = runInTransaction(() -> {
+			return myPatientDao.search(new SearchParameterMap().add(Patient.SP_BIRTHDATE, new DateParam("lt2022")));
+		});
+		assertEquals(1, outcome.sizeOrThrowNpe());
+		assertEquals(1, outcome.getResources(0, 999).size());
+
+		// Search and fetch in a new transaction
+		runInTransaction(() -> {
+			IBundleProvider outcome2 = myPatientDao.search(new SearchParameterMap().add(Patient.SP_BIRTHDATE, new DateParam("lt2022")));
+			assertEquals(1, outcome2.sizeOrThrowNpe());
+			assertEquals(1, outcome2.getResources(0, 999).size());
+		});
+
+	}
+
+
 
 	@Test
 	public void testCanonicalReference() {
@@ -777,7 +820,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		myCaptureQueriesListener.clear();
 		myCaptureQueriesListener.setCaptureQueryStackTrace(true);
-		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null, null, null, null, null, mySrd);
+		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null, null, null, null, null, mySrd, null);
 		List<IIdType> actual = toUnqualifiedVersionlessIds(resp);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual, containsInAnyOrder(orgId, medId, patId, moId, patId2));
@@ -1506,20 +1549,18 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			id2 = myOrganizationDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
 		}
 
-		// FIXME: restore
-
 		int size;
 		SearchParameterMap params = new SearchParameterMap();
-//		params.setLoadSynchronous(true);
-//		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(id1));
-//
-//		params = new SearchParameterMap();
-//		params.add("_id", new StringParam(id1));
-//		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(id1));
-//
-//		params = new SearchParameterMap();
-//		params.add("_id", new StringParam("9999999999999999"));
-//		assertEquals(0, toList(myPatientDao.search(params)).size());
+		params.setLoadSynchronous(true);
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(id1));
+
+		params = new SearchParameterMap();
+		params.add("_id", new StringParam(id1));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(id1));
+
+		params = new SearchParameterMap();
+		params.add("_id", new StringParam("9999999999999999"));
+		assertEquals(0, toList(myPatientDao.search(params)).size());
 
 		myCaptureQueriesListener.clear();
 		params = new SearchParameterMap();
@@ -3981,12 +4022,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Disabled
 	public void testSearchUnknownContentParam() {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Constants.PARAM_CONTENT, new StringParam("fulltext"));
 		try {
-			myPatientDao.search(params);
+			myPatientDao.search(params).getAllResources();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Fulltext search is not enabled on this service, can not process parameter: _content", e.getMessage());
@@ -3994,12 +4034,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Disabled
 	public void testSearchUnknownTextParam() {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Constants.PARAM_TEXT, new StringParam("fulltext"));
 		try {
-			myPatientDao.search(params);
+			myPatientDao.search(params).getAllResources();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Fulltext search is not enabled on this service, can not process parameter: _text", e.getMessage());
@@ -5079,7 +5118,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		p.addName().setFamily("A1");
 		myPatientDao.create(p);
 
-		assertEquals(0, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
 
 		SearchParameterMap map = new SearchParameterMap();
 		StringOrListParam or = new StringOrListParam();
@@ -5090,7 +5129,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map.add(Patient.SP_NAME, or);
 		IBundleProvider results = myPatientDao.search(map);
 		assertEquals(1, results.getResources(0, 10).size());
-		assertEquals(1, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(1, mySearchEntityDao.count()));
 
 		map = new SearchParameterMap();
 		or = new StringOrListParam();
@@ -5103,7 +5142,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		results = myPatientDao.search(map);
 		assertEquals(1, results.getResources(0, 10).size());
 		// We expect a new one because we don't cache the search URL for very long search URLs
-		assertEquals(2, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(2, mySearchEntityDao.count()));
 	}
 
 	@Test
@@ -5276,6 +5315,71 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		));
 	}
 
+	/**
+	 * Test for our date search operators.
+	 *
+	 * Be careful - date searching is defined by set relations over intervals, not a simple number comparison.
+	 * See http://hl7.org/fhir/search.html#prefix for details.
+	 *
+	 * TODO - pull this out into a general conformance suite so we can run it against Mongo, and Elastic.
+	 * @param theResourceDate the date to use as Observation effective date
+	 * @param theQuery the query parameter value including prefix (e.g. eq2020-01-01)
+	 * @param theExpectedMatch true if theQuery should match theResourceDate.
+	 */
+	@ParameterizedTest
+	// use @CsvSource to debug individual cases.
+	//@CsvSource("2021-01-01,eq2020,false")
+	@MethodSource("dateSearchCases")
+	@CsvFileSource(resources = "/r4/date-search-test-case.csv", numLinesToSkip = 1)
+	public void testDateSearchMatching(String theResourceDate, String theQuery, Boolean theExpectedMatch) {
+
+		createObservationWithEffective("OBS1", theResourceDate);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Observation.SP_DATE, new DateParam(theQuery));
+		IBundleProvider results = myObservationDao.search(map);
+		List<String> values = toUnqualifiedVersionlessIdValues(results);
+		boolean matched = !values.isEmpty();
+		assertEquals(theExpectedMatch, matched, "Expected " + theQuery + " to " + (theExpectedMatch?"":"not ") +"match " + theResourceDate);
+	}
+
+	/**
+	 * helper for compressed format of date test cases.
+	 *
+	 * The csv has rows with: Matching prefixes, Query Date, Resource Date
+	 * E.g. "eq ge le,2020, 2020"
+	 * This helper expands that one line into test for all of eq, ge, gt, le, lt, and ne,
+	 * expecting the listed prefixes to match, and the unlisted ones to not match.
+	 *
+	 * @return the individual test case arguments for testDateSearchMatching()
+	 */
+	public static List<Arguments> dateSearchCases() throws IOException {
+		Set<String> supportedPrefixes = CollectionUtil.newSet("eq","ge","gt","le","lt","ne");
+
+		List<String> testCaseLines = IOUtils.readLines(FhirResourceDaoR4SearchNoFtTest.class.getResourceAsStream("/r4/date-prefix-test-cases.csv"), StandardCharsets.UTF_8);
+		testCaseLines.remove(0); // first line is csv header.
+
+		// expand these into individual tests for each prefix.
+		List<Arguments> testCases = new ArrayList<>();
+		for (String line: testCaseLines) {
+			// line looks like: "eq ge le,2020, 2020"
+			// Matching prefixes, Query Date, Resource Date
+			String[] fields = line.split(",");
+			String truePrefixes = fields[0].trim();
+			String queryValue = fields[1].trim();
+			String resourceValue = fields[2].trim();
+
+			Set<String> expectedTruePrefixes = Arrays.stream(truePrefixes.split(" +")).map(String::trim).collect(Collectors.toSet());
+
+			for (String prefix: supportedPrefixes) {
+				boolean expectMatch = expectedTruePrefixes.contains(prefix);
+				testCases.add(Arguments.of(resourceValue, prefix + queryValue, expectMatch));
+			}
+		}
+
+		return testCases;
+	}
+
 	private void createObservationWithEffective(String theId, String theEffective) {
 		Observation obs = new Observation();
 		obs.setId(theId);
@@ -5296,7 +5400,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		p.addName().setFamily("A1");
 		myPatientDao.create(p);
 
-		assertEquals(0, mySearchEntityDao.count());
+		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
 
 		SearchParameterMap map = new SearchParameterMap();
 		StringOrListParam or = new StringOrListParam();
@@ -5307,7 +5411,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map.add(Patient.SP_NAME, or);
 		IBundleProvider results = myPatientDao.search(map);
 		assertEquals(1, results.getResources(0, 10).size());
-		assertEquals(1, mySearchEntityDao.count());
+		assertEquals(1, runInTransaction(()->mySearchEntityDao.count()));
 
 		map = new SearchParameterMap();
 		or = new StringOrListParam();
@@ -5318,7 +5422,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map.add(Patient.SP_NAME, or);
 		results = myPatientDao.search(map);
 		assertEquals(1, results.getResources(0, 10).size());
-		assertEquals(1, mySearchEntityDao.count());
+		assertEquals(1, runInTransaction(()->mySearchEntityDao.count()));
 
 	}
 

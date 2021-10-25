@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>5.6.0-PRE5-SNAPSHOT</version>
+		<version>5.6.0-PRE9-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -17,6 +17,9 @@
 	<name>HAPI FHIR - Core Library</name>
 
 	<dependencies>
+
+		<!-- IMPORTANT NOTE: This pom is used by multiple platforms (including Android) so please avoid adding any new
+		 dependencies here. -->
 
 		<!-- JSON -->
 		<dependency>

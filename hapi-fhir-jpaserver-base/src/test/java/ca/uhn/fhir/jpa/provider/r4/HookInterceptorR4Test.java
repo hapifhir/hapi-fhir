@@ -110,8 +110,11 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 			pid.set(resourcePid);
 		});
 		IIdType savedPatientId = myClient.create().resource(new Patient()).execute().getId();
-		Long savedPatientPid = myIdHelperService.resolveResourcePersistentIdsWithCache(null, Collections.singletonList(savedPatientId)).get(0).getIdAsLong();
-		assertEquals(savedPatientPid.longValue(), pid.get());
+
+		runInTransaction(()-> {
+			Long savedPatientPid = myIdHelperService.resolveResourcePersistentIdsWithCache(null, Collections.singletonList(savedPatientId)).get(0).getIdAsLong();
+			assertEquals(savedPatientPid.longValue(), pid.get());
+		});
 	}
 
 	@Test
@@ -124,7 +127,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 			pid.set(resourcePid);
 		});
 		IIdType savedPatientId = myClient.create().resource(new Patient()).execute().getId();
-		Long savedPatientPid = myIdHelperService.resolveResourcePersistentIdsWithCache(null, Collections.singletonList(savedPatientId)).get(0).getIdAsLong();
+		Long savedPatientPid = 		runInTransaction(()->myIdHelperService.resolveResourcePersistentIdsWithCache(null, Collections.singletonList(savedPatientId)).get(0).getIdAsLong());
 
 		myClient.delete().resourceById(savedPatientId).execute();
 		Parameters parameters = new Parameters();
@@ -160,9 +163,11 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		});
 		patient.setActive(true);
 		myClient.update().resource(patient).execute();
-		Long savedPatientPid = myIdHelperService.resolveResourcePersistentIdsWithCache(null, Collections.singletonList(savedPatientId)).get(0).getIdAsLong();
-		assertEquals(savedPatientPid.longValue(), pidOld.get());
-		assertEquals(savedPatientPid.longValue(), pidNew.get());
+		runInTransaction(()-> {
+			Long savedPatientPid = myIdHelperService.resolveResourcePersistentIdsWithCache(null, Collections.singletonList(savedPatientId)).get(0).getIdAsLong();
+			assertEquals(savedPatientPid.longValue(), pidOld.get());
+			assertEquals(savedPatientPid.longValue(), pidNew.get());
+		});
 	}
 
 	@Test

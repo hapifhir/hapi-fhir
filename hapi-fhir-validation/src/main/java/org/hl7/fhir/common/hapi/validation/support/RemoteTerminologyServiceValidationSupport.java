@@ -7,14 +7,20 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.Validate;
+import org.checkerframework.framework.qual.InvisibleQualifier;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +34,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * operation in order to validate codes.
  */
 public class RemoteTerminologyServiceValidationSupport extends BaseValidationSupport implements IValidationSupport {
+	private static final Logger ourLog = LoggerFactory.getLogger(RemoteTerminologyServiceValidationSupport.class);
 
 	private String myBaseUrl;
 	private List<Object> myClientInterceptors = new ArrayList<>();
@@ -49,21 +56,74 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	@Override
 	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 
-		if (theOptions != null) {
-			if (theOptions.isInferSystem()) {
-				return null;
-			}
+		IBaseResource valueSet = theValueSet;
+
+		// some external validators require the system when the code is passed
+		// so let's try to get it from the VS if is is not present
+		String codeSystem = theCodeSystem;
+		if (isNotBlank(theCode) && isBlank(codeSystem)) {
+			codeSystem = extractCodeSystemForCode((ValueSet) theValueSet, theCode);
 		}
 
-		IBaseResource valueSet = theValueSet;
+	 	// Remote terminology services shouldn't be used to validate codes with an implied system
+		if (isBlank(codeSystem)) { return null; }
+
 		String valueSetUrl = DefaultProfileValidationSupport.getConformanceResourceUrl(myCtx, valueSet);
 		if (isNotBlank(valueSetUrl)) {
 			valueSet = null;
 		} else {
 			valueSetUrl = null;
 		}
-		return invokeRemoteValidateCode(theCodeSystem, theCode, theDisplay, valueSetUrl, valueSet);
+		return invokeRemoteValidateCode(codeSystem, theCode, theDisplay, valueSetUrl, valueSet);
 	}
+
+	/**
+	 * Try to obtain the codeSystem of the received code from the received ValueSet
+	 */
+	private String extractCodeSystemForCode(ValueSet theValueSet, String theCode) {
+		if (theValueSet.getCompose() == null || theValueSet.getCompose().getInclude() == null
+					|| theValueSet.getCompose().getInclude().isEmpty()) {
+			return null;
+		}
+
+		if (theValueSet.getCompose().getInclude().size() == 1) {
+			ValueSet.ConceptSetComponent include = theValueSet.getCompose().getInclude().iterator().next();
+			return getVersionedCodeSystem(include);
+		}
+
+		// when component has more than one include, their codeSystem(s) could be different, so we need to make sure
+		// that we are picking up the system for the include to which the code corresponds
+		for (ValueSet.ConceptSetComponent include: theValueSet.getCompose().getInclude()) {
+			if (include.hasSystem()) {
+				for (ValueSet.ConceptReferenceComponent concept : include.getConcept()) {
+					if (concept.hasCodeElement() && concept.getCode().equals(theCode)) {
+						return getVersionedCodeSystem(include);
+					}
+				}
+			}
+		}
+
+		// at this point codeSystem couldn't be extracted for a multi-include ValueSet. Just on case it was
+		// because the format was not well handled, let's allow to watch the VS by an easy logging change
+		try {
+			ourLog.trace("CodeSystem couldn't be extracted for code: {} for ValueSet: {}",
+				theCode, JsonUtil.serialize(theValueSet));
+		} catch (IOException theE) {
+			ourLog.error("IOException trying to serialize ValueSet to json: " + theE);
+		}
+
+		return null;
+	}
+
+
+	private String getVersionedCodeSystem(ValueSet.ConceptSetComponent theComponent) {
+			String codeSystem = theComponent.getSystem();
+			if ( ! codeSystem.contains("|") && theComponent.hasVersion()) {
+				codeSystem += "|" + theComponent.getVersion();
+			}
+			return codeSystem;
+	}
+
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
@@ -126,36 +186,12 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 		IGenericClient client = provideClient();
 
-		IBaseParameters input = ParametersUtil.newInstance(getFhirContext());
+		IBaseParameters input = buildValidateCodeInputParameters(theCodeSystem, theCode, theDisplay, theValueSetUrl, theValueSet);
 
 		String resourceType = "ValueSet";
 		if (theValueSet == null && theValueSetUrl == null) {
 			resourceType = "CodeSystem";
-
-			ParametersUtil.addParameterToParametersUri(getFhirContext(), input, "url", theCodeSystem);
-			ParametersUtil.addParameterToParametersString(getFhirContext(), input, "code", theCode);
-			if (isNotBlank(theDisplay)) {
-				ParametersUtil.addParameterToParametersString(getFhirContext(), input, "display", theDisplay);
-			}
-
-		} else {
-
-			if (isNotBlank(theValueSetUrl)) {
-				ParametersUtil.addParameterToParametersUri(getFhirContext(), input, "url", theValueSetUrl);
-			}
-			ParametersUtil.addParameterToParametersString(getFhirContext(), input, "code", theCode);
-			if (isNotBlank(theCodeSystem)) {
-				ParametersUtil.addParameterToParametersUri(getFhirContext(), input, "system", theCodeSystem);
-			}
-			if (isNotBlank(theDisplay)) {
-				ParametersUtil.addParameterToParametersString(getFhirContext(), input, "display", theDisplay);
-			}
-			if (theValueSet != null) {
-				ParametersUtil.addParameterToParameters(getFhirContext(), input, "valueSet", theValueSet);
-			}
-
 		}
-
 
 		IBaseParameters output = client
 			.operation()
@@ -192,6 +228,35 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		}
 		return retVal;
 	}
+
+	protected IBaseParameters buildValidateCodeInputParameters(String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl, IBaseResource theValueSet) {
+		IBaseParameters params = ParametersUtil.newInstance(getFhirContext());
+
+		if (theValueSet == null && theValueSetUrl == null) {
+			ParametersUtil.addParameterToParametersUri(getFhirContext(), params, "url", theCodeSystem);
+			ParametersUtil.addParameterToParametersString(getFhirContext(), params, "code", theCode);
+			if (isNotBlank(theDisplay)) {
+				ParametersUtil.addParameterToParametersString(getFhirContext(), params, "display", theDisplay);
+			}
+			return params;
+		}
+
+		if (isNotBlank(theValueSetUrl)) {
+			ParametersUtil.addParameterToParametersUri(getFhirContext(), params, "url", theValueSetUrl);
+		}
+		ParametersUtil.addParameterToParametersString(getFhirContext(), params, "code", theCode);
+		if (isNotBlank(theCodeSystem)) {
+			ParametersUtil.addParameterToParametersUri(getFhirContext(), params, "system", theCodeSystem);
+		}
+		if (isNotBlank(theDisplay)) {
+			ParametersUtil.addParameterToParametersString(getFhirContext(), params, "display", theDisplay);
+		}
+		if (theValueSet != null) {
+			ParametersUtil.addParameterToParameters(getFhirContext(), params, "valueSet", theValueSet);
+		}
+		return params;
+	}
+
 
 	/**
 	 * Sets the FHIR Terminology Server base URL

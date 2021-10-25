@@ -89,8 +89,10 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 
 	@Test
 	public void testLookupOnExternalCodeMultiVersion() {
-		ResourceProviderR4ValueSetVerCSVerTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, "1");
-		ResourceProviderR4ValueSetVerCSVerTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, "2");
+		runInTransaction(()->{
+			ResourceProviderR4ValueSetVerCSVerTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, "1");
+			ResourceProviderR4ValueSetVerCSVerTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, "2");
+		});
 
 		// First test with no version specified (should return from last version created)
 		Parameters respParam = myClient

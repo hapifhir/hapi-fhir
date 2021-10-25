@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3016
+title: "A new customized Hibernate dialect is now used for HAPI FHIR JPA on Postgresql Database. This
+  dialect uses the PG `oid` datatype instead of `text` for CLOB columns, avoiding CLOBs being seen as
+  abandoned by the Postgresql VACUUMLO tool."

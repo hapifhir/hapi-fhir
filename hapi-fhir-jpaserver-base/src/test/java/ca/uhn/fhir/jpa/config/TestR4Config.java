@@ -1,11 +1,11 @@
 package ca.uhn.fhir.jpa.config;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
+import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -58,7 +59,6 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 	private Exception myLastStackTrace;
 
-
 	@Override
 	@Bean
 	public IBatchJobSubmitter batchJobSubmitter() {
@@ -80,9 +80,9 @@ public class TestR4Config extends BaseJavaConfigR4 {
 				try {
 					retVal = new ConnectionWrapper(super.getConnection());
 				} catch (Exception e) {
-					ourLog.error("Exceeded maximum wait for connection", e);
+					ourLog.error("Exceeded maximum wait for connection (" + ourMaxThreads + " max)", e);
 					logGetConnectionStackTrace();
-					fail("Exceeded maximum wait for connection: " + e.toString());
+					fail("Exceeded maximum wait for connection (" + ourMaxThreads + " max): " + e);
 					retVal = null;
 				}
 
@@ -127,6 +127,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 //			.logQueryBySlf4j(level)
 			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS, level)
 			.beforeQuery(new BlockLargeNumbersOfParamsListener())
+			.beforeQuery(new MandatoryTransactionListener())
 			.afterQuery(captureQueriesListener())
 			.afterQuery(new CurrentThreadCaptureQueriesListener())
 			.countQuery(singleQueryCountHolder())
@@ -164,7 +165,9 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", H2Dialect.class.getName());
 
-		extraProperties.putAll(buildHeapLuceneHibernateSearchProperties());
+		boolean enableLucene = myEnv.getProperty(BaseJpaTest.CONFIG_ENABLE_LUCENE, Boolean.TYPE, BaseJpaTest.CONFIG_ENABLE_LUCENE_DEFAULT_VALUE);
+		Map<String, String> hibernateSearchProperties = BaseJpaTest.buildHibernateSearchProperties(enableLucene);
+		extraProperties.putAll(hibernateSearchProperties);
 
 		return extraProperties;
 	}

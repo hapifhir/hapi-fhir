@@ -20,7 +20,9 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.processor.GoldenResourceAnnotatingProcessor;
 import ca.uhn.fhir.jpa.batch.processor.PidToIBaseResourceProcessor;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportDaoSvc;
@@ -51,13 +53,18 @@ import java.util.List;
 @Configuration
 public class BulkExportJobConfig {
 
-	public static final String JOB_UUID_PARAMETER = "jobUUID";
 	public static final String READ_CHUNK_PARAMETER = "readChunkSize";
 	public static final String EXPAND_MDM_PARAMETER = "expandMdm";
 	public static final String GROUP_ID_PARAMETER = "groupId";
 	public static final String RESOURCE_TYPES_PARAMETER = "resourceTypes";
 	public static final int CHUNK_SIZE = 100;
 	public static final String JOB_DESCRIPTION = "jobDescription";
+
+	@Autowired
+	private FhirContext myFhirContext;
+
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	@Autowired
 	private StepBuilderFactory myStepBuilderFactory;
@@ -88,7 +95,7 @@ public class BulkExportJobConfig {
 	@Bean
 	@Lazy
 	public Job bulkExportJob() {
-		return myJobBuilderFactory.get(BatchJobsConfig.BULK_EXPORT_JOB_NAME)
+		return myJobBuilderFactory.get(BatchConstants.BULK_EXPORT_JOB_NAME)
 			.validator(bulkExportJobParameterValidator())
 			.start(createBulkExportEntityStep())
 			.next(bulkExportPartitionStep())
@@ -111,7 +118,7 @@ public class BulkExportJobConfig {
 	@Bean
 	@Lazy
 	public Job groupBulkExportJob() {
-		return myJobBuilderFactory.get(BatchJobsConfig.GROUP_BULK_EXPORT_JOB_NAME)
+		return myJobBuilderFactory.get(BatchConstants.GROUP_BULK_EXPORT_JOB_NAME)
 			.validator(groupBulkJobParameterValidator())
 			.validator(bulkExportJobParameterValidator())
 			.start(createBulkExportEntityStep())
@@ -123,7 +130,7 @@ public class BulkExportJobConfig {
 	@Bean
 	@Lazy
 	public Job patientBulkExportJob() {
-		return myJobBuilderFactory.get(BatchJobsConfig.PATIENT_BULK_EXPORT_JOB_NAME)
+		return myJobBuilderFactory.get(BatchConstants.PATIENT_BULK_EXPORT_JOB_NAME)
 			.validator(bulkExportJobParameterValidator())
 			.start(createBulkExportEntityStep())
 			.next(patientPartitionStep())
@@ -169,7 +176,7 @@ public class BulkExportJobConfig {
 
 	@Bean
 	public Step bulkExportGenerateResourceFilesStep() {
-		return myStepBuilderFactory.get(BatchJobsConfig.BULK_EXPORT_GENERATE_RESOURCE_FILES_STEP)
+		return myStepBuilderFactory.get(BatchConstants.BULK_EXPORT_GENERATE_RESOURCE_FILES_STEP)
 			.<List<ResourcePersistentId>, List<IBaseResource>>chunk(CHUNK_SIZE) //1000 resources per generated file, as the reader returns 10 resources at a time.
 			.reader(bulkItemReader())
 			.processor(myPidToIBaseResourceProcessor)
@@ -217,7 +224,7 @@ public class BulkExportJobConfig {
 	@Bean
 	public Step bulkExportPartitionStep() {
 		return myStepBuilderFactory.get("partitionStep")
-			.partitioner(BatchJobsConfig.BULK_EXPORT_GENERATE_RESOURCE_FILES_STEP, bulkExportResourceTypePartitioner())
+			.partitioner(BatchConstants.BULK_EXPORT_GENERATE_RESOURCE_FILES_STEP, bulkExportResourceTypePartitioner())
 			.step(bulkExportGenerateResourceFilesStep())
 			.build();
 	}
@@ -266,7 +273,7 @@ public class BulkExportJobConfig {
 	@Bean
 	@StepScope
 	public ResourceToFileWriter resourceToFileWriter() {
-		return new ResourceToFileWriter();
+		return new ResourceToFileWriter(myFhirContext, myDaoRegistry);
 	}
 
 }

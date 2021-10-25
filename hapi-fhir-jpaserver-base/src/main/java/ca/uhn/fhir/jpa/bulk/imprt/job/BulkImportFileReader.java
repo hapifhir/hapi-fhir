@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.bulk.imprt.job;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.log.Logs;
-import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.ParsedBulkImportRecord;
@@ -42,7 +42,7 @@ public class BulkImportFileReader implements ItemReader<ParsedBulkImportRecord> 
 	private IBulkDataImportSvc myBulkDataImportSvc;
 	@Autowired
 	private FhirContext myFhirContext;
-	@Value("#{stepExecutionContext['" + BulkExportJobConfig.JOB_UUID_PARAMETER + "']}")
+	@Value("#{stepExecutionContext['" + BatchConstants.JOB_UUID_PARAMETER + "']}")
 	private String myJobUuid;
 	@Value("#{stepExecutionContext['" + BulkImportPartitioner.FILE_INDEX + "']}")
 	private int myFileIndex;

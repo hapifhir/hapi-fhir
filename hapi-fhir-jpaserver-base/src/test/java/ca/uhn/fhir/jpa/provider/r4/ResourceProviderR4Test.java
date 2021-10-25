@@ -1,56 +1,49 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
-import static ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.emptyString;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.in;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.math.BigDecimal;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.config.TestR4Config;
+import ca.uhn.fhir.jpa.dao.data.ISearchDao;
+import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
-import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
+import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.client.apache.ResourceEntity;
+import ca.uhn.fhir.rest.client.api.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
+import ca.uhn.fhir.rest.gclient.IGetPageUntyped;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -151,49 +144,52 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.Lists;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.config.TestR4Config;
-import ca.uhn.fhir.jpa.dao.data.ISearchDao;
-import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
-import ca.uhn.fhir.jpa.util.SqlQuery;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
-import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
-import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.client.apache.ResourceEntity;
-import ca.uhn.fhir.rest.client.api.IClientInterceptor;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
-import ca.uhn.fhir.rest.gclient.StringClientParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
-import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
-import ca.uhn.fhir.util.UrlUtil;
+import static ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick;
+import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
@@ -1747,7 +1743,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		int newSize = client.search().forResource(DocumentManifest.class).returnBundle(Bundle.class).execute().getEntry().size();
 
 		assertEquals(1, newSize - initialSize);
-
 	}
 
 	/**
@@ -1818,9 +1813,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		p.getManagingOrganization().setReferenceElement(orgId1);
 		IIdType patientId = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
-		Organization org2 = new Organization();
-		org2.setName(methodName + "1");
-		IIdType orgId2 = myClient.create().resource(org2).execute().getId().toUnqualifiedVersionless();
+		IIdType orgId2 = createOrganization(methodName, "1");
 
 		Device dev = new Device();
 		dev.setManufacturer(methodName);
@@ -1882,9 +1875,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		p.getManagingOrganization().setReferenceElement(orgId1);
 		IIdType patientId = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
-		Organization org2 = new Organization();
-		org2.setName(methodName + "1");
-		IIdType orgId2 = myClient.create().resource(org2).execute().getId().toUnqualifiedVersionless();
+		IIdType orgId2 = createOrganization(methodName, "1");
 
 		Device dev = new Device();
 		dev.setManufacturer(methodName);
@@ -2124,9 +2115,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		p.getManagingOrganization().setReferenceElement(orgId1);
 		IIdType patientId = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
-		Organization org2 = new Organization();
-		org2.setName(methodName + "1");
-		IIdType orgId2 = myClient.create().resource(org2).execute().getId().toUnqualifiedVersionless();
+		IIdType orgId2 = createOrganization(methodName, "1");
 
 		Device dev = new Device();
 		dev.setManufacturer(methodName);
@@ -2154,32 +2143,16 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void testEverythingPatientType() {
 		String methodName = "testEverythingPatientType";
 
-		Organization o1 = new Organization();
-		o1.setName(methodName + "1");
-		IIdType o1Id = myClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();
-		Organization o2 = new Organization();
-		o2.setName(methodName + "2");
-		IIdType o2Id = myClient.create().resource(o2).execute().getId().toUnqualifiedVersionless();
+		IIdType o1Id = createOrganization(methodName, "1");
+		IIdType o2Id = createOrganization(methodName, "2");
 
-		Patient p1 = new Patient();
-		p1.addName().setFamily(methodName + "1");
-		p1.getManagingOrganization().setReferenceElement(o1Id);
-		IIdType p1Id = myClient.create().resource(p1).execute().getId().toUnqualifiedVersionless();
-		Patient p2 = new Patient();
-		p2.addName().setFamily(methodName + "2");
-		p2.getManagingOrganization().setReferenceElement(o2Id);
-		IIdType p2Id = myClient.create().resource(p2).execute().getId().toUnqualifiedVersionless();
+		IIdType p1Id = createPatientWithIndexAtOrganization(methodName, "1" , o1Id);
+		IIdType c1Id = createConditionForPatient(methodName, "1", p1Id);
 
-		Condition c1 = new Condition();
-		c1.getSubject().setReferenceElement(p1Id);
-		IIdType c1Id = myClient.create().resource(c1).execute().getId().toUnqualifiedVersionless();
-		Condition c2 = new Condition();
-		c2.getSubject().setReferenceElement(p2Id);
-		IIdType c2Id = myClient.create().resource(c2).execute().getId().toUnqualifiedVersionless();
+		IIdType p2Id = createPatientWithIndexAtOrganization(methodName, "2", o2Id);
+		IIdType c2Id = createConditionForPatient(methodName, "2", p2Id);
 
-		Condition c3 = new Condition();
-		c3.addIdentifier().setValue(methodName + "3");
-		IIdType c3Id = myClient.create().resource(c3).execute().getId().toUnqualifiedVersionless();
+		IIdType c3Id = createConditionForPatient(methodName, "3", null);
 
 		Parameters output = myClient.operation().onType(Patient.class).named("everything").withNoParameters(Parameters.class).execute();
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
@@ -2189,6 +2162,179 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		assertThat(ids, containsInAnyOrder(o1Id, o2Id, p1Id, p2Id, c1Id, c2Id));
 		assertThat(ids, not(containsInRelativeOrder(c3Id)));
+	}
+
+
+	@Test
+	public void testEverythingPatientTypeWithIdParameter() {
+		String methodName = "testEverythingPatientTypeWithIdParameter";
+
+		//Patient 1 stuff.
+		IIdType o1Id = createOrganization(methodName, "1");
+		IIdType p1Id = createPatientWithIndexAtOrganization(methodName, "1", o1Id);
+		IIdType c1Id = createConditionForPatient(methodName, "1", p1Id);
+
+		//Patient 2 stuff.
+		IIdType o2Id = createOrganization(methodName, "2");
+		IIdType p2Id = createPatientWithIndexAtOrganization(methodName, "2", o2Id);
+		IIdType c2Id = createConditionForPatient(methodName, "2", p2Id);
+
+		//Patient 3 stuff.
+		IIdType o3Id = createOrganization(methodName, "3");
+		IIdType p3Id = createPatientWithIndexAtOrganization(methodName, "3", o3Id);
+		IIdType c3Id = createConditionForPatient(methodName, "3", p3Id);
+
+		//Patient 4 stuff.
+		IIdType o4Id = createOrganization(methodName, "4");
+		IIdType p4Id = createPatientWithIndexAtOrganization(methodName, "4", o4Id);
+		IIdType c4Id = createConditionForPatient(methodName, "4", p4Id);
+
+		//No Patient Stuff
+		IIdType c5Id = createConditionForPatient(methodName, "4", null);
+
+
+		{
+			//Test for only one patient
+			Parameters parameters = new Parameters();
+			parameters.addParameter("_id", p1Id.getIdPart());
+
+			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+			assertEquals(BundleType.SEARCHSET, b.getType());
+			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+
+			assertThat(ids, containsInAnyOrder(o1Id, p1Id, c1Id));
+			assertThat(ids, not((o2Id)));
+			assertThat(ids, not(contains(c2Id)));
+			assertThat(ids, not(contains(p2Id)));
+		}
+
+		{
+			// Test for Patient 1 and 2
+			// e.g. _id=1&_id=2
+			Parameters parameters = new Parameters();
+			parameters.addParameter("_id", p1Id.getIdPart());
+			parameters.addParameter("_id", p2Id.getIdPart());
+
+			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+			assertEquals(BundleType.SEARCHSET, b.getType());
+			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+
+			assertThat(ids, containsInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id));
+		}
+
+		{
+			// Test for both patients using orList
+			// e.g. _id=1,2
+			Parameters parameters = new Parameters();
+			parameters.addParameter("_id", p1Id.getIdPart() + "," + p2Id.getIdPart());
+
+			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+			assertEquals(BundleType.SEARCHSET, b.getType());
+			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+
+			assertThat(ids, containsInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id));
+			assertThat(ids, not(contains(c5Id)));
+		}
+
+		{
+			// Test combining 2 or-listed params
+			// e.g. _id=1,2&_id=3,4
+			Parameters parameters = new Parameters();
+			parameters.addParameter("_id", "Patient/" +p1Id.getIdPart() + "," + p2Id.getIdPart());
+			parameters.addParameter("_id", p3Id.getIdPart() + "," + p4Id.getIdPart());
+			parameters.addParameter(new Parameters.ParametersParameterComponent().setName("_count").setValue(new UnsignedIntType(20)));
+
+			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+			assertEquals(BundleType.SEARCHSET, b.getType());
+			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+
+			assertThat(ids, containsInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id, p3Id, o3Id, c3Id, p4Id, c4Id, o4Id));
+			assertThat(ids, not(contains(c5Id)));
+		}
+
+		{
+			// Test paging works.
+			// There are 12 results, lets make 2 pages of 6.
+			Parameters parameters = new Parameters();
+			parameters.addParameter("_id", "Patient/" +p1Id.getIdPart() + "," + p2Id.getIdPart());
+			parameters.addParameter("_id", p3Id.getIdPart() + "," + p4Id.getIdPart());
+			parameters.addParameter(new Parameters.ParametersParameterComponent().setName("_count").setValue(new UnsignedIntType(6)));
+
+			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			Bundle bundle = (Bundle) output.getParameter().get(0).getResource();
+
+			String next = bundle.getLink("next").getUrl();
+			Bundle nextBundle= myClient.loadPage().byUrl(next).andReturnBundle(Bundle.class).execute();
+			assertEquals(BundleType.SEARCHSET, bundle.getType());
+
+			assertThat(bundle.getEntry(), hasSize(6));
+			assertThat(nextBundle.getEntry(), hasSize(6));
+
+			List<IIdType> firstBundle = toUnqualifiedVersionlessIds(bundle);
+			List<IIdType> secondBundle = toUnqualifiedVersionlessIds(nextBundle);
+			List<IIdType> allresults = new ArrayList<>();
+			allresults.addAll(firstBundle);
+			allresults.addAll(secondBundle);
+
+			assertThat(allresults, containsInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id, p3Id, o3Id, c3Id, p4Id, c4Id, o4Id));
+			assertThat(allresults, not(contains(c5Id)));
+		}
+	}
+
+	@Test
+	public void testEverythingPatientWorksWithForcedId() {
+		String methodName = "testEverythingPatientType";
+
+		//Given
+		IIdType o1Id = createOrganization(methodName, "1");
+		//Patient ABC stuff.
+		Patient patientABC = new Patient();
+		patientABC.setId("abc");
+		patientABC.setManagingOrganization(new Reference(o1Id));
+		IIdType pabcId = myPatientDao.update(patientABC).getId().toUnqualifiedVersionless();
+		IIdType c1Id = createConditionForPatient(methodName, "1", pabcId);
+
+		//Patient DEF stuff.
+		IIdType o2Id = createOrganization(methodName, "2");
+		Patient patientDEF = new Patient();
+		patientDEF.setId("def");
+		patientDEF.setManagingOrganization(new Reference(o2Id));
+		IIdType pdefId= myPatientDao.update(patientDEF).getId().toUnqualifiedVersionless();
+		IIdType c2Id = createConditionForPatient(methodName, "2", pdefId);
+
+		IIdType c3Id = createConditionForPatient(methodName, "2", null);
+
+		{
+			Parameters parameters = new Parameters();
+			parameters.addParameter("_id", "Patient/abc,Patient/def");
+
+			//When
+			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+			//Then
+			assertEquals(BundleType.SEARCHSET, b.getType());
+			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+			assertThat(ids, containsInAnyOrder(o1Id, pabcId, c1Id, pdefId, o2Id, c2Id));
+			assertThat(ids, not(contains(c3Id)));
+		}
+
+
+
+	}
+
+	private IIdType createOrganization(String methodName, String s) {
+		Organization o1 = new Organization();
+		o1.setName(methodName + s);
+		return myClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();
 	}
 
 	// retest
@@ -6463,9 +6609,70 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(2, ids.size());
 	}
 
+	@Test
+	public void testSearchWithLowerBoundDate() throws Exception {
+		
+		// Issue 2424 test case
+		IIdType pid0;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			patient.setBirthDateElement(new DateType("2073"));
+			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+			
+			ourLog.info("Patient: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+			
+			System.out.println("pid0 " + pid0);
+		}
+		
+		String uri = ourServerBase + "/Patient?_total=accurate&birthdate=gt2072";
+
+		List<String> ids;
+		HttpGet get = new HttpGet(uri);
+
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(resp);
+			Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, resp);
+			ids = toUnqualifiedVersionlessIdValues(bundle);
+			ourLog.info("Patient: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		}
+		
+		uri = ourServerBase + "/Patient?_total=accurate&birthdate=gt2072-01-01";
+
+		get = new HttpGet(uri);
+
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(resp);
+			Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, resp);
+			ids = toUnqualifiedVersionlessIdValues(bundle);
+			ourLog.info("Patient: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		}
+	
+	}
 	private String toStr(Date theDate) {
 		return new InstantDt(theDate).getValueAsString();
 	}
 
+
+	public IIdType createPatientWithIndexAtOrganization(String theMethodName, String theIndex, IIdType theOrganizationId) {
+		Patient p1 = new Patient();
+		p1.addName().setFamily(theMethodName + theIndex);
+		p1.getManagingOrganization().setReferenceElement(theOrganizationId);
+		IIdType p1Id = myClient.create().resource(p1).execute().getId().toUnqualifiedVersionless();
+		return p1Id;
+	}
+
+	public IIdType createConditionForPatient(String theMethodName, String theIndex, IIdType thePatientId) {
+		Condition c = new Condition();
+		c.addIdentifier().setValue(theMethodName + theIndex);
+		if (thePatientId != null) {
+			c.getSubject().setReferenceElement(thePatientId);
+		}
+		IIdType cId = myClient.create().resource(c).execute().getId().toUnqualifiedVersionless();
+		return cId;
+	}
 
 }

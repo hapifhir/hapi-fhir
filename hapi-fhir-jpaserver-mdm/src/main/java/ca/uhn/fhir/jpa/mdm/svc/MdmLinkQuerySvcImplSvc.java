@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
+import org.springframework.transaction.annotation.Transactional;
 
 public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 
@@ -50,6 +51,7 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 	IMdmModelConverterSvc myMdmModelConverterSvc;
 
 	@Override
+	@Transactional
 	public Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest) {
 		Example<MdmLink> exampleLink = exampleLinkFromParameters(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource);
 		Page<MdmLink> mdmLinkByExample = myMdmLinkDaoSvc.findMdmLinkByExample(exampleLink, thePageRequest);
@@ -58,6 +60,7 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 	}
 
 	@Override
+	@Transactional
 	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest) {
 		Example<MdmLink> exampleLink = exampleLinkFromParameters(null, null, MdmMatchResultEnum.POSSIBLE_DUPLICATE, null);
 		Page<MdmLink> mdmLinkPage = myMdmLinkDaoSvc.findMdmLinkByExample(exampleLink, thePageRequest);

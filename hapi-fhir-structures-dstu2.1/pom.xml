@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>5.6.0-PRE5-SNAPSHOT</version>
+		<version>5.6.0-PRE9-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -89,14 +89,6 @@
 			<artifactId>gson</artifactId>
 			<optional>true</optional>
 		</dependency>
-
-		<!--
-		<dependency>
-			<groupId>net.sf.saxon</groupId>
-			<artifactId>Saxon-HE</artifactId>
-			<version>9.6.0-4</version>
-		</dependency>
-		-->
 
 		<!-- Testing -->
 		<dependency>

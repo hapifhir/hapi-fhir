@@ -823,20 +823,20 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 		}
 
 		//-- Search by uri
-		String uri = ourServerBase + "/Observation?based-on.instantiates-uri=http://www.hl7.com&_contained=true";
+		String uri = ourServerBase + "/Observation?based-on.instantiates-uri=http://www.hl7.com";
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertEquals(1L, oids.size());
 		assertThat(oids, contains(oid1.getValue()));
 
 		//-- Search by uri more than 1 results
-		uri = ourServerBase + "/Observation?based-on.instantiates-uri=http://www2.hl7.com&_contained=true";
+		uri = ourServerBase + "/Observation?based-on.instantiates-uri=http://www2.hl7.com";
 		oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertEquals(2L, oids.size());
 
 		//-- Search by uri with 'or'
-		uri = ourServerBase + "/Observation?based-on.instantiates-uri=http://www.hl7.com,http://www2.hl7.com&_contained=true";
+		uri = ourServerBase + "/Observation?based-on.instantiates-uri=http://www.hl7.com,http://www2.hl7.com";
 		oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertEquals(3L, oids.size());
