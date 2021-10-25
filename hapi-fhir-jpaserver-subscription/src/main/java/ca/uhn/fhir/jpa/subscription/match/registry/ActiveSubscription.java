@@ -26,17 +26,16 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 
 public class ActiveSubscription {
 
-	private final SubscriptionCriteriaParser.SubscriptionCriteria myCriteria;
+	private SubscriptionCriteriaParser.SubscriptionCriteria myCriteria;
 	private final String myChannelName;
 	private final String myId;
 	private CanonicalSubscription mySubscription;
 	private boolean flagForDeletion;
 
 	public ActiveSubscription(CanonicalSubscription theSubscription, String theChannelName) {
-		mySubscription = theSubscription;
 		myChannelName = theChannelName;
 		myId = theSubscription.getIdPart();
-		myCriteria = SubscriptionCriteriaParser.parse(theSubscription.getCriteriaString());
+		setSubscription(theSubscription);
 	}
 
 	public SubscriptionCriteriaParser.SubscriptionCriteria getCriteria() {
@@ -47,8 +46,9 @@ public class ActiveSubscription {
 		return mySubscription;
 	}
 
-	public void setSubscription(CanonicalSubscription theCanonicalizedSubscription) {
-		mySubscription = theCanonicalizedSubscription;
+	public final void setSubscription(CanonicalSubscription theSubscription) {
+		mySubscription = theSubscription;
+		myCriteria = SubscriptionCriteriaParser.parse(theSubscription.getCriteriaString());
 	}
 
 	public String getChannelName() {

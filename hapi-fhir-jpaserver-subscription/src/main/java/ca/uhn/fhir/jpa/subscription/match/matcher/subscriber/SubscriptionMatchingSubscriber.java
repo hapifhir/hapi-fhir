@@ -238,7 +238,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			case MULTITYPE_EXPRESSION:
 				return criteria.getApplicableResourceTypes().contains(resourceType);
 			case STARTYPE_EXPRESSION:
-				return true;
+				return !resourceType.equals("Subscription");
 		}
 
 	}

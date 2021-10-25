@@ -85,7 +85,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 		String code = "1000000050";
 		String criteria1 = "[*]";
-		String criteria2 = "[*]?";
+		String criteria2 = "[*]";
 		String criteria3 = "Observation?code=FOO"; // won't match
 
 		sendSubscription(criteria1, payload, ourListenerServerBase);
