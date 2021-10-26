@@ -75,12 +75,12 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 
 		byte[] bytes = loadResourceAsByteArray("/packages/erroneous-ig.tar.gz");
 
-		// Unknown base of StructureDefinitions
+		// That patient profile in this NPM package has an invalid base
 		try {
 			igInstaller.install(new PackageInstallationSpec().setName("erroneous-ig").setVersion("1.0.2").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setPackageContents(bytes));
 			fail();
 		} catch (ImplementationGuideInstallationException e) {
-			assertThat(e.getMessage(), containsString("Failure when generating snapshot of StructureDefinition"));
+			assertThat(e.getMessage(), containsString("Could not load NPM package erroneous-ig#1.0.2"));
 		}
 	}
 

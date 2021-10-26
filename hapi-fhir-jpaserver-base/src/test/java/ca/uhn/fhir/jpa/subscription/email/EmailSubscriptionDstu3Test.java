@@ -28,6 +28,7 @@ import javax.mail.internet.MimeMessage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static ca.uhn.fhir.jpa.subscription.resthook.RestHookTestDstu3Test.logAllInterceptors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -83,7 +84,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		myDaoConfig.setEmailFromAddress("123@hapifhir.io");
 	}
 
-	private Subscription createSubscription(String theCriteria, String thePayload) throws InterruptedException {
+	private Subscription createSubscription(String theCriteria, String thePayload, Consumer<Subscription>... theModifiers) throws InterruptedException {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
@@ -94,6 +95,12 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		channel.setPayload(thePayload);
 		channel.setEndpoint("mailto:foo@example.com");
 		subscription.setChannel(channel);
+
+		if (theModifiers != null) {
+			for (Consumer<Subscription> next : theModifiers) {
+				next.accept(subscription);
+			}
+		}
 
 		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
 		subscription.setId(methodOutcome.getId().getIdPart());
@@ -157,30 +164,28 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 	/**
 	 * Tests an email subscription with payload set to JSON. The email sent must include content in the body of the email that is formatted as JSON.
 	 */
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testEmailSubscriptionWithCustom() throws Exception {
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
-		Subscription sub1 = createSubscription(criteria1, payload);
 
-		Subscription subscriptionTemp = ourClient.read(Subscription.class, sub1.getId());
-		assertNotNull(subscriptionTemp);
+		Consumer<Subscription> modifier = subscriptionTemp->{
+			subscriptionTemp.getChannel().addExtension()
+				.setUrl(HapiExtensions.EXT_SUBSCRIPTION_EMAIL_FROM)
+				.setValue(new StringType("mailto:myfrom@from.com"));
+			subscriptionTemp.getChannel().addExtension()
+				.setUrl(HapiExtensions.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
+				.setValue(new StringType("This is a subject"));
+			subscriptionTemp.setIdElement(subscriptionTemp.getIdElement().toUnqualifiedVersionless());
+		};
 
-		subscriptionTemp.getChannel().addExtension()
-			.setUrl(HapiExtensions.EXT_SUBSCRIPTION_EMAIL_FROM)
-			.setValue(new StringType("mailto:myfrom@from.com"));
-		subscriptionTemp.getChannel().addExtension()
-			.setUrl(HapiExtensions.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
-			.setValue(new StringType("This is a subject"));
-		subscriptionTemp.setIdElement(subscriptionTemp.getIdElement().toUnqualifiedVersionless());
+		Subscription sub1 = createSubscription(criteria1, payload, modifier);
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscriptionTemp));
-
-		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
-		mySubscriptionTestUtil.setEmailSender(subscriptionTemp.getIdElement(), new EmailSenderImpl(withMailConfig()));
+		mySubscriptionTestUtil.setEmailSender(sub1.getIdElement(), new EmailSenderImpl(withMailConfig()));
 
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
@@ -213,28 +218,27 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
-		Subscription sub1 = createSubscription(criteria1, payload);
 
-		Subscription subscriptionTemp = ourClient.read(Subscription.class, sub1.getId());
-		assertNotNull(subscriptionTemp);
-		subscriptionTemp.getChannel().addExtension()
-			.setUrl(HapiExtensions.EXT_SUBSCRIPTION_EMAIL_FROM)
-			.setValue(new StringType("myfrom@from.com"));
-		subscriptionTemp.getChannel().addExtension()
-			.setUrl(HapiExtensions.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
-			.setValue(new StringType("This is a subject"));
-		subscriptionTemp.setIdElement(subscriptionTemp.getIdElement().toUnqualifiedVersionless());
+		Consumer<Subscription> modifier = subscriptionTemp ->{
+			subscriptionTemp.getChannel().addExtension()
+				.setUrl(HapiExtensions.EXT_SUBSCRIPTION_EMAIL_FROM)
+				.setValue(new StringType("myfrom@from.com"));
+			subscriptionTemp.getChannel().addExtension()
+				.setUrl(HapiExtensions.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
+				.setValue(new StringType("This is a subject"));
+			subscriptionTemp.setIdElement(subscriptionTemp.getIdElement().toUnqualifiedVersionless());
+		};
 
-		IIdType id = ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute().getId();
-		ourLog.info("Subscription ID is: {}", id.getValue());
+		Subscription sub1 = createSubscription(criteria1, payload, modifier);
 
 		waitForQueueToDrain();
-		mySubscriptionTestUtil.setEmailSender(subscriptionTemp.getIdElement(), new EmailSenderImpl(withMailConfig()));
+		mySubscriptionTestUtil.setEmailSender(sub1.getIdElement(), new EmailSenderImpl(withMailConfig()));
 
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
 
-		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 1));
+		ourLog.info("About to wait for email reception");
+		assertTrue(ourGreenMail.waitForIncomingEmail(10000, 1));
 
 		List<MimeMessage> received = Arrays.asList(ourGreenMail.getReceivedMessages());
 		assertEquals(1, received.size());
@@ -247,11 +251,9 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals("", received.get(0).getContent().toString().trim());
 		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
 
-		ourLog.info("Subscription: {}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(ourClient.history().onInstance(id).andReturnBundle(Bundle.class).execute()));
-
-		Subscription subscription = ourClient.read().resource(Subscription.class).withId(id.toUnqualifiedVersionless()).execute();
+		Subscription subscription = ourClient.read().resource(Subscription.class).withId(sub1.getIdElement().toUnqualifiedVersionless()).execute();
 		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscription.getStatus());
-		assertEquals("3", subscription.getIdElement().getVersionIdPart());
+		assertEquals("2", subscription.getIdElement().getVersionIdPart());
 	}
 
 	private void waitForQueueToDrain() throws InterruptedException {

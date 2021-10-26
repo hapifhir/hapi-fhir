@@ -253,7 +253,7 @@ public class Builder {
 			MigratePostgresTextClobToBinaryClobTask task = new MigratePostgresTextClobToBinaryClobTask(myRelease, theVersion);
 			task.setTableName(getTableName());
 			task.setColumnName(theColumnName);
-
+			addTask(task);
 		}
 
 		public class BuilderAddIndexWithName {

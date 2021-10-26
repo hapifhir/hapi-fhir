@@ -89,8 +89,8 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 	public void testFlow_ErrorDuringWrite() {
 		myInterceptorRegistry.registerInterceptor(new MyFailAfterThreeCreatesInterceptor());
 
-		int transactionsPerFile = 10;
-		int fileCount = 10;
+		int transactionsPerFile = 5;
+		int fileCount = 5;
 		List<BulkImportJobFileJson> files = createInputFiles(transactionsPerFile, fileCount);
 
 		BulkImportJobJson job = new BulkImportJobJson();
