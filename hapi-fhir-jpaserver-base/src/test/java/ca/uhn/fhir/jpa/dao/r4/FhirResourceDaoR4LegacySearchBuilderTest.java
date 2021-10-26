@@ -179,13 +179,15 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void afterResetSearchSize() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
-		myDaoConfig.setFetchSizeDefaultMaximum(new DaoConfig().getFetchSizeDefaultMaximum());
-		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
-		myDaoConfig.setUseLegacySearchBuilder(false);
-		myDaoConfig.setAccountForDateIndexNulls(false);
+		DaoConfig defaultConfig = new DaoConfig();
+		myDaoConfig.setReuseCachedSearchResultsForMillis(defaultConfig.getReuseCachedSearchResultsForMillis());
+		myDaoConfig.setFetchSizeDefaultMaximum(defaultConfig.getFetchSizeDefaultMaximum());
+		myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
+		myDaoConfig.setSearchPreFetchThresholds(defaultConfig.getSearchPreFetchThresholds());
+		myDaoConfig.setIndexMissingFields(defaultConfig.getIndexMissingFields());
+		myDaoConfig.setUseLegacySearchBuilder(defaultConfig.isUseLegacySearchBuilder());
+		myDaoConfig.setAccountForDateIndexNulls(defaultConfig.isAccountForDateIndexNulls());
+		myModelConfig.setUseOrdinalDatesForDayPrecisionSearches(new ModelConfig().getUseOrdinalDatesForDayPrecisionSearches());
 	}
 
 	@BeforeEach
@@ -193,6 +195,7 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 		myModelConfig.setSuppressStringIndexingInTokens(new ModelConfig().isSuppressStringIndexingInTokens());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 		myDaoConfig.setUseLegacySearchBuilder(true);
+		myDaoConfig.getModelConfig().setUseOrdinalDatesForDayPrecisionSearches(true);
 	}
 
 	@Test
@@ -5314,16 +5317,24 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 
 	@Nested
 	public class DateSearchTests extends BaseDAODateSearchTest {
+
+		/**
+		 * legacy builder didn't get the year/month date search fixes, so skip anything wider than a day.
+		 */
+		@Override
+		protected boolean isShouldSkip(String theResourceDate, String theQuery) {
+			// skip anything with just year or month resolution.
+			return (theResourceDate.length()<10 || theQuery.length()<10);
+		}
+
 		@Override
 		protected FhirContext getMyFhirCtx() {
 			return myFhirCtx;
 		}
-
 		@Override
 		protected <T> T doInTransaction(TransactionCallback<T> theCallback) {
 			return new TransactionTemplate(myTxManager).execute(theCallback);
 		}
-
 		@Override
 		protected IFhirResourceDao<Observation> getObservationDao() {
 			return myObservationDao;

@@ -45,9 +45,12 @@ public abstract class BaseDAODateSearchTest {
 	 */
 	@ParameterizedTest
 	// use @CsvSource to debug individual cases.
-	//@CsvSource("2021-01-01,eq2020-01-02,false")
+	//@CsvSource("2019-12-31T08:00:00,eq2020,false,inline,1")
 	@MethodSource("dateSearchCases")
 	public void testDateSearchMatching(String theResourceDate, String theQuery, Boolean theExpectedMatch, String theFileName, int theLineNumber) {
+		if (isShouldSkip(theResourceDate, theQuery)) {
+			return;
+		}
 		// setup
 		createObservationWithEffectiveDate(theResourceDate);
 
@@ -59,6 +62,10 @@ public abstract class BaseDAODateSearchTest {
 				(theExpectedMatch ? "" : "not ") + "match " + theResourceDate +
 			" (" + theFileName + ":" + theLineNumber + ")"; // wrap this in () so tools recognize the line reference.
 		assertEquals(theExpectedMatch, matched, message);
+	}
+
+	protected boolean isShouldSkip(String theResourceDate, String theQuery) {
+		return false;
 	}
 
 	// we need these from the test container
