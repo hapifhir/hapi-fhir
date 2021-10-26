@@ -47,7 +47,6 @@ public abstract class BaseDAODateSearchTest {
 	// use @CsvSource to debug individual cases.
 	//@CsvSource("2021-01-01,eq2020-01-02,false")
 	@MethodSource("dateSearchCases")
-	// wipmb sync up with nih-testing.
 	public void testDateSearchMatching(String theResourceDate, String theQuery, Boolean theExpectedMatch, String theFileName, int theLineNumber) {
 		// setup
 		createObservationWithEffectiveDate(theResourceDate);

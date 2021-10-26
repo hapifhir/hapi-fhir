@@ -10,7 +10,6 @@ import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -18,6 +17,8 @@ import java.util.stream.Collectors;
 
 /**
  * Collection of test cases for date type search.
+ *
+ * Each test case includes a resource value, a query value, the operator to test, and the expected result.
  *
  * @see <a href="https://www.hl7.org/fhir/search.html#date">the spec</a>
  */
@@ -40,6 +41,11 @@ public class DateSearchTestCase {
 		return Arguments.of(myResourceValue, myQueryValue, expectedResult, myFileName, myLineNumber);
 	}
 
+	/**
+	 * We have two sources of test cases:
+	 * - DateSearchTestCase.csv which holds one test case per line
+	 * - DateSearchTestCase-compact.csv which specifies all operators for each value pair
+ 	 */
 	public final static List<DateSearchTestCase> ourCases;
 	static {
 		String csv = "DateSearchTestCase.csv";
@@ -47,40 +53,28 @@ public class DateSearchTestCase {
 		assert resource != null;
 		InputStreamReader inputStreamReader = new InputStreamReader(resource, StandardCharsets.UTF_8);
 		ourCases = parseCsvCases(inputStreamReader, csv);
-		// wipmb merge these once we have the nih-fixes.
-		//ourCases.addAll(yearPrecisionDateSearchCases());
 		try {
-			inputStreamReader.close();
+			resource.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		ourCases.addAll(compactCases());
 	}
 
 	static List<DateSearchTestCase> parseCsvCases(Reader theSource, String theFileName) {
 		LineNumberReader lineNumberReader = new LineNumberReader(theSource);
 		return lineNumberReader.lines()
+			.filter(l->!l.startsWith("#")) // strip comments
 			.map(l -> l.split(","))
-			// todo MB drop precisions wider than a day until we merge with nih-testing
-			.filter(
-				fields ->
-					fields[0].length() >= 10 &&
-					fields[1].length() >= 10 &&
-					!fields[0].startsWith("#"))
 			.map(fields -> new DateSearchTestCase(fields[0].trim(), fields[1].trim(), Boolean.parseBoolean(fields[2].trim()), theFileName, lineNumberReader.getLineNumber()))
 			.collect(Collectors.toList());
 	}
 
-	// wipmb fix for these is on nih-testing branch
-	static final String[] ourYearPrecisionDatePrefixCases = {
-		"Resource Date, Matching prefixes, Query Date",
-		"2020, eq ge le,2020",
-		"2021, gt ge ne,2020",
-		"2020, lt le ne,2021",
-		"2021-01-01, ne gt ge,2020"
-	};
-
-	public static List<Arguments> yearPrecisionDateSearchCases() throws IOException {
-		return expandPrefixCases(Arrays.asList(ourYearPrecisionDatePrefixCases));
+	public static List<DateSearchTestCase> compactCases() {
+		String compactCsv = "DateSearchTestCase-compact.csv";
+		InputStream compactStream = DateSearchTestCase.class.getResourceAsStream(compactCsv);
+		assert compactStream != null;
+		return expandPrefixCases(new InputStreamReader(compactStream, StandardCharsets.UTF_8), compactCsv);
 	}
 
 	/**
@@ -91,30 +85,32 @@ public class DateSearchTestCase {
 	 * This helper expands that one line into test for all of: eq, ge, gt, le, lt, and ne,
 	 * expecting the listed prefixes to match, and the unlisted ones to not match.
 	 *
-	 * @return the individual test case arguments for testDateSearchMatching()
+	 * @return List of test cases
 	 */
 	@Nonnull
-	static List<Arguments> expandPrefixCases(List<String> theTestCaseLines) {
+	static List<DateSearchTestCase> expandPrefixCases(Reader theSource, String theFileName) {
 		Set<String> supportedPrefixes = CollectionUtil.newSet("eq", "ge", "gt", "le", "lt", "ne");
 
 		// expand these into individual tests for each prefix.
-		List<Arguments> testCases = new ArrayList<>();
-		for (String line : theTestCaseLines) {
-			// line looks like: "eq ge le,2020, 2020"
-			// Matching prefixes, Query Date, Resource Date
-			String[] fields = line.split(",");
-			String truePrefixes = fields[0].trim();
-			String queryValue = fields[1].trim();
-			String resourceValue = fields[2].trim();
+		LineNumberReader lineNumberReader = new LineNumberReader(theSource);
+		return lineNumberReader.lines()
+			.filter(l->!l.startsWith("#")) // strip comments
+			.map(l -> l.split(","))
+			.flatMap(fields -> {
+				// line looks like: "eq ge le,2020, 2020"
+				// Matching prefixes, Query Date, Resource Date
+				String resourceValue = fields[0].trim();
+				String truePrefixes = fields[1].trim();
+				String queryValue = fields[2].trim();
+				Set<String> expectedTruePrefixes = Arrays.stream(truePrefixes.split(" +")).map(String::trim).collect(Collectors.toSet());
 
-			Set<String> expectedTruePrefixes = Arrays.stream(truePrefixes.split(" +")).map(String::trim).collect(Collectors.toSet());
-
-			for (String prefix : supportedPrefixes) {
-				boolean expectMatch = expectedTruePrefixes.contains(prefix);
-				testCases.add(Arguments.of(resourceValue, prefix + queryValue, expectMatch));
-			}
-		}
-
-		return testCases;
+				// expand to one test case per supportedPrefixes
+				return supportedPrefixes.stream()
+					.map(prefix -> {
+						boolean expectMatch = expectedTruePrefixes.contains(prefix);
+						return new DateSearchTestCase(resourceValue, prefix + queryValue, expectMatch, theFileName, lineNumberReader.getLineNumber());
+					});
+			})
+			.collect(Collectors.toList());
 	}
 }
