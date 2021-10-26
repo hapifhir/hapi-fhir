@@ -150,6 +150,12 @@
 			<artifactId>hapi-fhir-batch</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-test-utilities</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
