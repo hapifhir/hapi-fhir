@@ -168,7 +168,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		// &_has:PractitionerRole:practitioner:role=SC%20Physician,SC%20Physician%201,SC%20Physician%202,SC%20Physician%203
 		// &_lastUpdated=ge2021-10-23T01:00:00
 		SearchParameterMap map = SearchParameterMap.newSynchronous()
-			.add(Constants.PARAM_COUNT, new StringParam("750"))
+			.setCount(750)
 			.add(Constants.PARAM_ELEMENTS, new StringParam("Practitioner.name,Practitioner.identifier,Practitioner.active"))
 			.add(Constants.PARAM_ELEMENTS + Constants.PARAM_ELEMENTS_EXCLUDE_MODIFIER, new StringParam("*.meta"))
 			.add("_has:PractitionerRole:practitioner:role", new StringParam("Physician"));
