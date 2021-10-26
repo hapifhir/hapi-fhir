@@ -55,8 +55,10 @@ public abstract class BaseDAODateSearchTest {
 		// run the query
 		boolean matched = isSearchMatch(theQuery);
 
-		String message = "Expected " + theQuery + " to " + (theExpectedMatch ? "" : "not ") + "match " + theResourceDate +
-			" (" + theFileName + ":" + theLineNumber + ")";
+		String message =
+			"Expected " + theQuery + " to " +
+				(theExpectedMatch ? "" : "not ") + "match " + theResourceDate +
+			" (" + theFileName + ":" + theLineNumber + ")"; // wrap this in () so tools recognize the line reference.
 		assertEquals(theExpectedMatch, matched, message);
 	}
 

@@ -16,6 +16,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Collection of test cases for date type search.
+ *
+ * @see <a href="https://www.hl7.org/fhir/search.html#date">the spec</a>
+ */
 public class DateSearchTestCase {
 	final String myResourceValue;
 	final String myQueryValue;
