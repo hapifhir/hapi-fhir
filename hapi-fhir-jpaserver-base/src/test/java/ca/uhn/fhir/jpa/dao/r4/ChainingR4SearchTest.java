@@ -770,6 +770,48 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testShouldResolveAFourLinkChainWhereTheFirstTwoReferencesAreContained() throws Exception {
+
+		// setup
+		myModelConfig.setIndexOnContainedResourcesRecursively(true);
+		IIdType oid1;
+
+		{
+			Organization org = new Organization();
+			org.setId(IdType.newRandomUuid());
+			org.setName("HealthCo");
+			myOrganizationDao.create(org, mySrd);
+
+			Organization partOfOrg = new Organization();
+			partOfOrg.setId("child");
+			partOfOrg.getPartOf().setReference(org.getId());
+
+			Patient p = new Patient();
+			p.setId("pat");
+			p.addName().setFamily("Smith").addGiven("John");
+			p.getManagingOrganization().setReference("#child");
+
+			Observation obs = new Observation();
+			obs.getContained().add(org);
+			obs.getContained().add(partOfOrg);
+			obs.getContained().add(p);
+			obs.getCode().setText("Observation 1");
+			obs.getSubject().setReference("#pat");
+
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		String url = "/Observation?subject.organization.partof.name=HealthCo";
+
+		// execute
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+
+		// validate
+		assertEquals(1L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
+	@Test
 	public void testShouldResolveAFourLinkChainWhereAllReferencesAreContained() throws Exception {
 
 		// setup

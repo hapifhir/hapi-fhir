@@ -1139,13 +1139,7 @@ public class QueryStack {
 					break;
 				case REFERENCE:
 					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-						if (theSearchContainedMode.equals(SearchContainedModeEnum.TRUE)) {
-							// TODO: The _contained parameter is not intended to control search chain interpretation like this.
-							//   See SMILE-2898 for details.
-							//   For now, leave the incorrect implementation alone, just in case someone is relying on it,
-							//   until the complete fix is available.
-							andPredicates.add(createPredicateReferenceForContainedResource(null, theResourceName, theParamName, new ArrayList<>(), nextParamDef, nextAnd, null, theRequest, theRequestPartitionId));
-						} else if (isEligibleForContainedResourceSearch(nextAnd)) {
+						if (isEligibleForContainedResourceSearch(nextAnd)) {
 							andPredicates.add(toOrPredicate(
 								createPredicateReference(theSourceJoinColumn, theResourceName, theParamName, new ArrayList<>(), nextAnd, null, theRequest, theRequestPartitionId),
 								createPredicateReferenceForContainedResource(theSourceJoinColumn, theResourceName, theParamName, new ArrayList<>(), nextParamDef, nextAnd, null, theRequest, theRequestPartitionId)
