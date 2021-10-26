@@ -158,6 +158,21 @@ public final class ResourceIndexedSearchParams {
 		updateSpnamePrefixForIndexedOnContainedResource(myCoordsParams, theSpnamePrefix);
 	}
 	
+	public void updateSpnamePrefixForLinksOnContainedResource(String theSpNamePrefix) {
+		for (ResourceLink param : myLinks) {
+			// The resource link already has the resource type of the contained resource at the head of the path.
+			// We need to replace this with the name of the containing type, and extend the search path.
+			int index = param.getSourcePath().indexOf('.');
+			if (index > -1) {
+				param.setSourcePath(theSpNamePrefix + param.getSourcePath().substring(index));
+			} else {
+				// Can this ever happen?
+				param.setSourcePath(theSpNamePrefix + "." + param.getSourcePath());
+			}
+			param.calculateHashes(); // re-calculateHashes
+		}
+	}
+
 	void setUpdatedTime(Date theUpdateTime) {
 		setUpdatedTime(myStringParams, theUpdateTime);
 		setUpdatedTime(myNumberParams, theUpdateTime);
