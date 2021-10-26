@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
@@ -67,6 +68,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 		myModelConfig.setIndexOnContainedResources(new ModelConfig().isIndexOnContainedResources());
+		myModelConfig.setIndexOnContainedResourcesRecursively(new ModelConfig().isIndexOnContainedResourcesRecursively());
 	}
 
 
@@ -122,6 +124,171 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		});
 	}
 
+	@Test
+	public void testCreateLinkCreatesAppropriatePaths_ContainedResourceRecursive() {
+		myModelConfig.setIndexOnContainedResources(true);
+		myModelConfig.setIndexOnContainedResourcesRecursively(true);
+
+		Patient p = new Patient();
+		p.setId("pat");
+		p.setActive(true);
+		p.getNameFirstRep().setFamily("Smith");
+
+		Observation containedObs = new Observation();
+		containedObs.setId("obs");
+		containedObs.setSubject(new Reference("#pat"));
+
+		Encounter enc = new Encounter();
+		enc.getContained().add(containedObs);
+		enc.getContained().add(p);
+		enc.addReasonReference(new Reference("#obs"));
+		myEncounterDao.create(enc, mySrd);
+
+		runInTransaction(() ->{
+			List<ResourceIndexedSearchParamString> allParams = myResourceIndexedSearchParamStringDao.findAll();
+			Optional<ResourceIndexedSearchParamString> link = allParams
+				.stream()
+				.filter(t -> "reason-reference.subject.family".equals(t.getParamName()))
+				.findFirst();
+			assertTrue(link.isPresent());
+			assertEquals("Smith", link.get().getValueExact());
+		});
+	}
+
+
+	@Test
+	public void testCreateLinkCreatesAppropriatePaths_ContainedResourceRecursive_DoesNotLoop() {
+		myModelConfig.setIndexOnContainedResources(true);
+		myModelConfig.setIndexOnContainedResourcesRecursively(true);
+
+		Organization org1 = new Organization();
+		org1.setId("org1");
+		org1.setName("EscherCorp");
+		org1.setPartOf(new Reference("#org2"));
+
+		Organization org2 = new Organization();
+		org2.setId("org2");
+		org2.setName("M.C.Escher Unlimited");
+		org2.setPartOf(new Reference("#org1"));
+
+		Observation containedObs = new Observation();
+		containedObs.setId("obs");
+		containedObs.addPerformer(new Reference("#org1"));
+
+		Encounter enc = new Encounter();
+		enc.getContained().add(containedObs);
+		enc.getContained().add(org1);
+		enc.getContained().add(org2);
+		enc.addReasonReference(new Reference("#obs"));
+		myEncounterDao.create(enc, mySrd);
+
+		runInTransaction(() ->{
+			List<ResourceIndexedSearchParamString> allParams = myResourceIndexedSearchParamStringDao.findAll();
+			Optional<ResourceIndexedSearchParamString> firstOrg = allParams
+				.stream()
+				.filter(t -> "reason-reference.performer.name".equals(t.getParamName()))
+				.findFirst();
+			assertTrue(firstOrg.isPresent());
+			assertEquals("EscherCorp", firstOrg.get().getValueExact());
+
+			Optional<ResourceIndexedSearchParamString> secondOrg = allParams
+				.stream()
+				.filter(t -> "reason-reference.performer.partof.name".equals(t.getParamName()))
+				.findFirst();
+			assertTrue(secondOrg.isPresent());
+			assertEquals("M.C.Escher Unlimited", secondOrg.get().getValueExact());
+
+			Optional<ResourceIndexedSearchParamString> thirdOrg = allParams
+				.stream()
+				.filter(t -> "reason-reference.performer.partof.partof.name".equals(t.getParamName()))
+				.findFirst();
+			assertFalse(thirdOrg.isPresent());
+		});
+	}
+
+	@Test
+	public void testCreateLinkCreatesAppropriatePaths_ContainedResourceRecursive_ToOutboundReference() {
+		myModelConfig.setIndexOnContainedResources(true);
+		myModelConfig.setIndexOnContainedResourcesRecursively(true);
+
+		Organization org = new Organization();
+		org.setId("Organization/ABC");
+		myOrganizationDao.update(org);
+
+		Patient p = new Patient();
+		p.setId("pat");
+		p.setActive(true);
+		p.setManagingOrganization(new Reference("Organization/ABC"));
+
+		Observation containedObs = new Observation();
+		containedObs.setId("#cont");
+		containedObs.setSubject(new Reference("#pat"));
+
+		Encounter enc = new Encounter();
+		enc.getContained().add(p);
+		enc.getContained().add(containedObs);
+		enc.addReasonReference(new Reference("#cont"));
+		myEncounterDao.create(enc, mySrd);
+
+		runInTransaction(() ->{
+			List<ResourceLink> allLinks = myResourceLinkDao.findAll();
+			Optional<ResourceLink> link = allLinks
+				.stream()
+				.filter(t -> "Encounter.reasonReference.subject.managingOrganization".equals(t.getSourcePath()))
+				.findFirst();
+			assertTrue(link.isPresent());
+			assertEquals("Organization", link.get().getTargetResourceType());
+			assertEquals("ABC", link.get().getTargetResourceId());
+		});
+	}
+
+	@Test
+	public void testCreateLinkCreatesAppropriatePaths_ContainedResourceRecursive_ToOutboundReference_NoLoops() {
+		myModelConfig.setIndexOnContainedResources(true);
+		myModelConfig.setIndexOnContainedResourcesRecursively(true);
+
+		Organization org = new Organization();
+		org.setId("Organization/ABC");
+		myOrganizationDao.update(org);
+
+		Patient p = new Patient();
+		p.setId("pat");
+		p.setActive(true);
+		p.setManagingOrganization(new Reference("Organization/ABC"));
+
+		Observation obs1 = new Observation();
+		obs1.setId("obs1");
+		obs1.setSubject(new Reference("#pat"));
+		obs1.addPartOf(new Reference("#obs2"));
+
+		Observation obs2 = new Observation();
+		obs2.setId("obs2");
+		obs2.addPartOf(new Reference("#obs1"));
+
+		Encounter enc = new Encounter();
+		enc.getContained().add(p);
+		enc.getContained().add(obs1);
+		enc.getContained().add(obs2);
+		enc.addReasonReference(new Reference("#obs2"));
+		myEncounterDao.create(enc, mySrd);
+
+		runInTransaction(() ->{
+			List<ResourceLink> allLinks = myResourceLinkDao.findAll();
+			Optional<ResourceLink> link = allLinks
+				.stream()
+				.filter(t -> "Encounter.reasonReference.partOf.subject.managingOrganization".equals(t.getSourcePath()))
+				.findFirst();
+			assertTrue(link.isPresent());
+			assertEquals("Organization", link.get().getTargetResourceType());
+			assertEquals("ABC", link.get().getTargetResourceId());
+
+			Optional<ResourceLink> noLink = allLinks
+				.stream()
+				.filter(t -> "Encounter.reasonReference.partOf.partOf.partOf.subject.managingOrganization".equals(t.getSourcePath()))
+				.findFirst();
+			assertFalse(noLink.isPresent());
+		});
+	}
 
 	@Test
 	public void testConditionalCreateWithPlusInUrl() {

@@ -685,7 +685,7 @@ public class QueryStack {
 	}
 
 	public Condition createPredicateReferenceForContainedResource(@Nullable DbColumn theSourceJoinColumn,
-																					  String theResourceName, String theParamName, RuntimeSearchParam theSearchParam,
+																					  String theResourceName, String theParamName, List<String> theQualifiers, RuntimeSearchParam theSearchParam,
 																					  List<? extends IQueryParameterType> theList, SearchFilterParser.CompareOperation theOperation,
 																					  RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 
@@ -760,7 +760,7 @@ public class QueryStack {
 			throw new InvalidRequestException("Unknown search parameter name: " + theSearchParam.getName() + ".");
 		}
 
-		List<String> qualifiers= Collections.singletonList(headQualifier);
+		theQualifiers.add(headQualifier);
 
 		// 3. create the query
 		Condition containedCondition = null;
@@ -796,7 +796,11 @@ public class QueryStack {
 				break;
 			case REFERENCE:
 				String chainedParamName = theParamName + "." + targetParamName;
-				containedCondition = createPredicateReference(theSourceJoinColumn, theResourceName, chainedParamName, qualifiers, trimmedParameters, theOperation, theRequest, theRequestPartitionId);
+				containedCondition = createPredicateReference(theSourceJoinColumn, theResourceName, chainedParamName, theQualifiers, trimmedParameters, theOperation, theRequest, theRequestPartitionId);
+				if (myModelConfig.isIndexOnContainedResourcesRecursively()) {
+					containedCondition = toOrPredicate(containedCondition,
+						createPredicateReferenceForContainedResource(theSourceJoinColumn, theResourceName, chainedParamName, theQualifiers, theSearchParam, trimmedParameters, theOperation, theRequest, theRequestPartitionId));
+				}
 				break;
 			case HAS:
 			case SPECIAL:
@@ -1135,16 +1139,10 @@ public class QueryStack {
 					break;
 				case REFERENCE:
 					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-						if (theSearchContainedMode.equals(SearchContainedModeEnum.TRUE)) {
-							// TODO: The _contained parameter is not intended to control search chain interpretation like this.
-							//   See SMILE-2898 for details.
-							//   For now, leave the incorrect implementation alone, just in case someone is relying on it,
-							//   until the complete fix is available.
-							andPredicates.add(createPredicateReferenceForContainedResource(null, theResourceName, theParamName, nextParamDef, nextAnd, null, theRequest, theRequestPartitionId));
-						} else if (isEligibleForContainedResourceSearch(nextAnd)) {
+						if (isEligibleForContainedResourceSearch(nextAnd)) {
 							andPredicates.add(toOrPredicate(
 								createPredicateReference(theSourceJoinColumn, theResourceName, theParamName, new ArrayList<>(), nextAnd, null, theRequest, theRequestPartitionId),
-								createPredicateReferenceForContainedResource(theSourceJoinColumn, theResourceName, theParamName, nextParamDef, nextAnd, null, theRequest, theRequestPartitionId)
+								createPredicateReferenceForContainedResource(theSourceJoinColumn, theResourceName, theParamName, new ArrayList<>(), nextParamDef, nextAnd, null, theRequest, theRequestPartitionId)
 							));
 						} else {
 							andPredicates.add(createPredicateReference(theSourceJoinColumn, theResourceName, theParamName, new ArrayList<>(), nextAnd, null, theRequest, theRequestPartitionId));
