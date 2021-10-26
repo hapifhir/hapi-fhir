@@ -14,14 +14,14 @@ public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
 		mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(subscription);
 		assertRegistrySize(1);
 		ActiveSubscription origActiveSubscription = mySubscriptionRegistry.get(SUBSCRIPTION_ID);
-		assertEquals(ORIG_CRITERIA, origActiveSubscription.getCriteriaString());
+		assertEquals(ORIG_CRITERIA, origActiveSubscription.getCriteria().getCriteria());
 
 		subscription.setCriteria(NEW_CRITERIA);
-		assertEquals(ORIG_CRITERIA, origActiveSubscription.getCriteriaString());
+		assertEquals(ORIG_CRITERIA, origActiveSubscription.getCriteria().getCriteria());
 		mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(subscription);
 		assertRegistrySize(1);
 		ActiveSubscription newActiveSubscription = mySubscriptionRegistry.get(SUBSCRIPTION_ID);
-		assertEquals(NEW_CRITERIA, newActiveSubscription.getCriteriaString());
+		assertEquals(NEW_CRITERIA, newActiveSubscription.getCriteria().getCriteria());
 		// The same object
 		assertTrue(newActiveSubscription == origActiveSubscription);
 	}
@@ -34,11 +34,11 @@ public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
 		assertRegistrySize(1);
 
 		ActiveSubscription origActiveSubscription = mySubscriptionRegistry.get(SUBSCRIPTION_ID);
-		assertEquals(ORIG_CRITERIA, origActiveSubscription.getCriteriaString());
+		assertEquals(ORIG_CRITERIA, origActiveSubscription.getCriteria().getCriteria());
 
 		setChannel(subscription, Subscription.SubscriptionChannelType.EMAIL);
 
-		assertEquals(ORIG_CRITERIA, origActiveSubscription.getCriteriaString());
+		assertEquals(ORIG_CRITERIA, origActiveSubscription.getCriteria().getCriteria());
 		mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(subscription);
 		assertRegistrySize(1);
 
