@@ -64,6 +64,7 @@ import javax.annotation.Nonnull;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -114,6 +115,10 @@ public class SearchParamExtractorService {
 		// Reference search parameters
 		extractResourceLinks(theRequestPartitionId, theParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference, theRequestDetails);
 
+		if (myModelConfig.isIndexOnContainedResources()) {
+			extractResourceLinksForContainedResources(theRequestPartitionId, theParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference, theRequestDetails);
+		}
+
 		theParams.setUpdatedTime(theTransactionDetails.getTransactionDate());
 	}
 
@@ -129,41 +134,57 @@ public class SearchParamExtractorService {
 		// 1. get all contained resources
 		Collection<IBaseResource> containedResources = terser.getAllEmbeddedResources(theResource, false);
 
+		extractSearchIndexParametersForContainedResources(theRequestDetails, theParams, theResource, theEntity, containedResources, new HashSet<>());
+	}
+
+	private void extractSearchIndexParametersForContainedResources(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ResourceTable theEntity, Collection<IBaseResource> theContainedResources, Collection<IBaseResource> theAlreadySeenResources) {
 		// 2. Find referenced search parameters
 		ISearchParamExtractor.SearchParamSet<PathAndRef> referencedSearchParamSet = mySearchParamExtractor.extractResourceLinks(theResource, true);
-		
+
 		String spnamePrefix = null;
 		ResourceIndexedSearchParams currParams;
 		// 3. for each referenced search parameter, create an index
 		for (PathAndRef nextPathAndRef : referencedSearchParamSet) {
-			
+
 			// 3.1 get the search parameter name as spname prefix
 			spnamePrefix = nextPathAndRef.getSearchParamName();
-			
+
 			if (spnamePrefix == null || nextPathAndRef.getRef() == null)
 				continue;
-			
+
 			// 3.2 find the contained resource
-			IBaseResource containedResource = findContainedResource(containedResources, nextPathAndRef.getRef());
+			IBaseResource containedResource = findContainedResource(theContainedResources, nextPathAndRef.getRef());
 			if (containedResource == null)
 				continue;
-			
+
+			// 3.2.1 if we've already processed this resource upstream, do not process it again, to prevent infinite loops
+			if (theAlreadySeenResources.contains(containedResource)) {
+				continue;
+			}
+
 			currParams = new ResourceIndexedSearchParams();
-			
+
 			// 3.3 create indexes for the current contained resource
 			extractSearchIndexParameters(theRequestDetails, currParams, containedResource, theEntity);
-			
-			// 3.4 added reference name as a prefix for the contained resource if any
+
+			// 3.4 recurse to process any other contained resources referenced by this one
+			if (myModelConfig.isIndexOnContainedResourcesRecursively()) {
+				HashSet<IBaseResource> nextAlreadySeenResources = new HashSet<>(theAlreadySeenResources);
+				nextAlreadySeenResources.add(containedResource);
+				extractSearchIndexParametersForContainedResources(theRequestDetails, currParams, containedResource, theEntity, theContainedResources, nextAlreadySeenResources);
+			}
+
+			// 3.5 added reference name as a prefix for the contained resource if any
 			// e.g. for Observation.subject contained reference
 			// the SP_NAME = subject.family
 			currParams.updateSpnamePrefixForIndexedOnContainedResource(spnamePrefix);
-			
-			// 3.5 merge to the mainParams
+
+			// 3.6 merge to the mainParams
 			// NOTE: the spname prefix is different
-			mergeParams(currParams, theParams); 
+			mergeParams(currParams, theParams);
 		}
 	}
-	
+
 	private IBaseResource findContainedResource(Collection<IBaseResource> resources, IBaseReference reference) {
 		for (IBaseResource resource : resources) {
 			if (resource.getIdElement().equals(reference.getReferenceElement()))
@@ -400,6 +421,65 @@ public class SearchParamExtractorService {
 		}
 
 		theParams.myLinks.add(resourceLink);
+	}
+
+	private void extractResourceLinksForContainedResources(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference, RequestDetails theRequest) {
+
+		FhirTerser terser = myContext.newTerser();
+
+		// 1. get all contained resources
+		Collection<IBaseResource> containedResources = terser.getAllEmbeddedResources(theResource, false);
+
+		extractResourceLinksForContainedResources(theRequestPartitionId, theParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference, theRequest, containedResources, new HashSet<>());
+	}
+
+	private void extractResourceLinksForContainedResources(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference, RequestDetails theRequest, Collection<IBaseResource> theContainedResources, Collection<IBaseResource> theAlreadySeenResources) {
+
+		// 2. Find referenced search parameters
+		ISearchParamExtractor.SearchParamSet<PathAndRef> referencedSearchParamSet = mySearchParamExtractor.extractResourceLinks(theResource, true);
+
+		String spNamePrefix = null;
+		ResourceIndexedSearchParams currParams;
+		// 3. for each referenced search parameter, create an index
+		for (PathAndRef nextPathAndRef : referencedSearchParamSet) {
+
+			// 3.1 get the search parameter name as spname prefix
+			spNamePrefix = nextPathAndRef.getSearchParamName();
+
+			if (spNamePrefix == null || nextPathAndRef.getRef() == null)
+				continue;
+
+			// 3.2 find the contained resource
+			IBaseResource containedResource = findContainedResource(theContainedResources, nextPathAndRef.getRef());
+			if (containedResource == null)
+				continue;
+
+			// 3.2.1 if we've already processed this resource upstream, do not process it again, to prevent infinite loops
+			if (theAlreadySeenResources.contains(containedResource)) {
+				continue;
+			}
+
+			currParams = new ResourceIndexedSearchParams();
+
+			// 3.3 create indexes for the current contained resource
+			extractResourceLinks(theRequestPartitionId, currParams, theEntity, containedResource, theTransactionDetails, theFailOnInvalidReference, theRequest);
+
+			// 3.4 recurse to process any other contained resources referenced by this one
+			if (myModelConfig.isIndexOnContainedResourcesRecursively()) {
+				HashSet<IBaseResource> nextAlreadySeenResources = new HashSet<>(theAlreadySeenResources);
+				nextAlreadySeenResources.add(containedResource);
+				extractResourceLinksForContainedResources(theRequestPartitionId, currParams, theEntity, containedResource, theTransactionDetails, theFailOnInvalidReference, theRequest, theContainedResources, nextAlreadySeenResources);
+			}
+
+			// 3.4 added reference name as a prefix for the contained resource if any
+			// e.g. for Observation.subject contained reference
+			// the SP_NAME = subject.family
+			currParams.updateSpnamePrefixForLinksOnContainedResource(nextPathAndRef.getPath());
+
+			// 3.5 merge to the mainParams
+			// NOTE: the spname prefix is different
+			theParams.getResourceLinks().addAll(currParams.getResourceLinks());
+		}
 	}
 
 	private ResourceLink resolveTargetAndCreateResourceLinkOrReturnNull(@Nonnull RequestPartitionId theRequestPartitionId, ResourceTable theEntity, Date theUpdateTime, RuntimeSearchParam nextSpDef, String theNextPathsUnsplit, PathAndRef nextPathAndRef, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest, TransactionDetails theTransactionDetails) {

@@ -73,7 +73,8 @@ class BaseLoincHandlerTest {
 			setupCSVParser(recordDataMap);
 
 			BaseLoincHandler loincHandler = new BaseLoincTop2000LabResultsHandler(
-				null, Lists.newArrayList(), null, null, null, Lists.newArrayList(), new Properties());
+				null, Lists.newArrayList(), null, null, null,
+				Lists.newArrayList(), new Properties(), null);
 			BaseLoincHandler spiedLoincHandler = spy(loincHandler);
 
 			when(spiedLoincHandler.getValueSet(any(), any(), any(), any())).thenReturn(myValueSet);
@@ -97,8 +98,8 @@ class BaseLoincHandlerTest {
 			recordDataMap.put("PartName", "test-PartName");
 			setupCSVParser(recordDataMap);
 
-			BaseLoincHandler loincHandler = new LoincDocumentOntologyHandler(
-				Maps.newHashMap(), null, Lists.newArrayList(), Lists.newArrayList(), new Properties());
+			BaseLoincHandler loincHandler = new LoincDocumentOntologyHandler(Maps.newHashMap(), null,
+				Lists.newArrayList(), Lists.newArrayList(), new Properties(), null);
 			BaseLoincHandler spiedLoincHandler = spy(loincHandler);
 
 			when(spiedLoincHandler.getValueSet(any(), any(), any(), any())).thenReturn(myValueSet);
@@ -192,8 +193,8 @@ class BaseLoincHandlerTest {
 			recordDataMap.put("Long Common Name", "test-Long-Common-Names");
 			setupCSVParser(recordDataMap);
 
-			BaseLoincHandler loincHandler = new BaseLoincTop2000LabResultsHandler(
-				Maps.newHashMap(), Lists.newArrayList(), null, null, null, Lists.newArrayList(), new Properties());
+			BaseLoincHandler loincHandler = new BaseLoincTop2000LabResultsHandler(Maps.newHashMap(), Lists.newArrayList(),
+				null, null, null, Lists.newArrayList(), new Properties(), null);
 			BaseLoincHandler spiedLoincHandler = spy(loincHandler);
 
 			when(spiedLoincHandler.getValueSet(any(), any(), any(), any())).thenReturn(myValueSet);
@@ -216,8 +217,8 @@ class BaseLoincHandlerTest {
 			recordDataMap.put("PartName", "test-PartName");
 			setupCSVParser(recordDataMap);
 
-			BaseLoincHandler loincHandler = new LoincDocumentOntologyHandler(
-				Maps.newHashMap(), null, Lists.newArrayList(), Lists.newArrayList(), new Properties());
+			BaseLoincHandler loincHandler = new LoincDocumentOntologyHandler(Maps.newHashMap(), null,
+				Lists.newArrayList(), Lists.newArrayList(), new Properties(), null);
 			BaseLoincHandler spiedLoincHandler = spy(loincHandler);
 
 			when(spiedLoincHandler.getValueSet(any(), any(), any(), any())).thenReturn(myValueSet);
