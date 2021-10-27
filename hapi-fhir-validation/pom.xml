@@ -310,12 +310,12 @@
 			<artifactId>jena-arq</artifactId>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-jpaserver-model</artifactId>
-            <version>5.4.0-PRE8-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
+	  <dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-model</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+	  </dependency>
 
     </dependencies>
 

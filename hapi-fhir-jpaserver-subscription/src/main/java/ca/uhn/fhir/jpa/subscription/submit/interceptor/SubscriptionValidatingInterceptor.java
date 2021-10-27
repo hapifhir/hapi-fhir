@@ -25,9 +25,9 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
+import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
@@ -128,6 +128,25 @@ public class SubscriptionValidatingInterceptor {
 			throw new UnprocessableEntityException(theFieldName + " must be populated");
 		}
 
+		SubscriptionCriteriaParser.SubscriptionCriteria parsedCriteria = SubscriptionCriteriaParser.parse(theQuery);
+		if (parsedCriteria == null) {
+			throw new UnprocessableEntityException(theFieldName + " can not be parsed");
+		}
+
+		if (parsedCriteria.getType() == SubscriptionCriteriaParser.TypeEnum.STARTYPE_EXPRESSION) {
+			return;
+		}
+
+		for (String next : parsedCriteria.getApplicableResourceTypes()) {
+			if (!myDaoRegistry.isResourceTypeSupported(next)) {
+				throw new UnprocessableEntityException(theFieldName + " contains invalid/unsupported resource type: " + next);
+			}
+		}
+
+		if (parsedCriteria.getType() != SubscriptionCriteriaParser.TypeEnum.SEARCH_EXPRESSION) {
+			return;
+		}
+
 		int sep = theQuery.indexOf('?');
 		if (sep <= 1) {
 			throw new UnprocessableEntityException(theFieldName + " must be in the form \"{Resource Type}?[params]\"");
@@ -138,9 +157,6 @@ public class SubscriptionValidatingInterceptor {
 			throw new UnprocessableEntityException(theFieldName + " must be in the form \"{Resource Type}?[params]\"");
 		}
 
-		if (!myDaoRegistry.isResourceTypeSupported(resType)) {
-			throw new UnprocessableEntityException(theFieldName + " contains invalid/unsupported resource type: " + resType);
-		}
 	}
 
 	public void validateMessageSubscriptionEndpoint(String theEndpointUrl) {
