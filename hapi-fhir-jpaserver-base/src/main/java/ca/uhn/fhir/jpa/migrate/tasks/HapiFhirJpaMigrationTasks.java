@@ -75,6 +75,17 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init530();
 		init540(); // 20210218 - 20210520
 		init550(); // 20210520 -
+		init560(); // 20210921 -
+	}
+
+	private void init560() {
+		Builder version = forVersion(VersionEnum.V5_6_0);
+
+		Builder.BuilderWithTableName searchTable = version.onTable("HFJ_SEARCH");
+		searchTable.addIndex("20210921.1", "IDX_SEARCH_DELETED").unique(false).withColumns("SEARCH_DELETED");
+
+		Builder.BuilderWithTableName searchIncludeTable = version.onTable("HFJ_SEARCH_INCLUDE");
+		searchIncludeTable.addIndex("20210921.2", "IDX_SEARCH_INCLUDE_SEARCH_PID").unique(false).withColumns("SEARCH_PID");
 	}
 
 	private void init550() {
