@@ -51,12 +51,10 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 	@Override
 	public InMemoryMatchResult match(CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
 		IIdType id = theMsg.getPayloadId(myCtx);
-		String resourceType = id.getResourceType();
-		String resourceId = id.getIdPart();
 		String criteria = theSubscription.getCriteriaString();
 
-		// run the subscriptions query and look for matches, add the id as part of the criteria to avoid getting matches of previous resources rather than the recent resource
-		criteria += "&_id=" + resourceType + "/" + resourceId;
+		// Run the subscriptions query and look for matches, add the id as part of the criteria to avoid getting matches of previous resources rather than the recent resource
+		criteria += "&_id=" + id.toUnqualifiedVersionless().getValue();
 
 		IBundleProvider results = performSearch(criteria);
 
