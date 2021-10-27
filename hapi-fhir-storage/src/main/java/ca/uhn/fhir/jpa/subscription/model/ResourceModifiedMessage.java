@@ -67,12 +67,9 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("myId", myId)
-			.append("myOperationType", myOperationType)
-			.append("mySubscriptionId", mySubscriptionId)
-//			.append("myPayload", myPayload)
-			.append("myPayloadId", myPayloadId)
-//			.append("myPayloadDecoded", myPayloadDecoded)
+			.append("operationType", myOperationType)
+			.append("subscriptionId", mySubscriptionId)
+			.append("payloadId", myPayloadId)
 			.toString();
 	}
 }

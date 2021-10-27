@@ -50,7 +50,7 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 
 	@Override
 	public InMemoryMatchResult match(CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
-		IIdType id = theMsg.getId(myCtx);
+		IIdType id = theMsg.getPayloadId(myCtx);
 		String resourceType = id.getResourceType();
 		String resourceId = id.getIdPart();
 		String criteria = theSubscription.getCriteriaString();
