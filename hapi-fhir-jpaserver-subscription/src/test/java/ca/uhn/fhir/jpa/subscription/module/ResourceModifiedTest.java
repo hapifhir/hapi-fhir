@@ -43,7 +43,7 @@ public class ResourceModifiedTest {
 		org.setName("testOrgName");
 		org.setId("testOrgId");
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, org, ResourceModifiedMessage.OperationTypeEnum.DELETE);
-		assertEquals(org.getIdElement(), msg.getPayloadId(myFhirContext));
+		assertEquals("Organization/testOrgId", msg.getPayloadId(myFhirContext).getValue());
 		assertEquals(ResourceModifiedMessage.OperationTypeEnum.DELETE, msg.getOperationType());
 		assertNull(msg.getNewPayload(myFhirContext));
 	}

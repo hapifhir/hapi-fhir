@@ -58,6 +58,8 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		setOperationType(theOperationType);
 		if (theOperationType != OperationTypeEnum.DELETE) {
 			setNewPayload(theFhirContext, theResource);
+		} else {
+			setPayloadIdFromPayload(theFhirContext, theResource);
 		}
 	}
 
@@ -74,10 +76,28 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	}
 
 	/**
+	 * @since 5.6.0
+	 */
+	public void setPayloadId(IIdType thePayloadId) {
+		myPayloadId = null;
+		if (thePayloadId != null) {
+			myPayloadId = thePayloadId.getValue();
+		}
+	}
+
+	/**
 	 * @deprecated Use {@link #getPayloadId()} instead. Deprecated in 5.6.0 / 2021-10-27
 	 */
 	public String getId() {
 		return myPayloadId;
+	}
+
+	/**
+	 * @deprecated Use {@link #setPayloadId(IIdType)}. Deprecated in 5.6.0 / 2021-10-27
+	 */
+	@Deprecated
+	public void setId(IIdType theId) {
+		setPayloadId(theId);
 	}
 
 	/**
@@ -123,25 +143,6 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		return "";
 	}
 
-	/**
-	 * @deprecated Use {@link #setPayloadId(IIdType)}. Deprecated in 5.6.0 / 2021-10-27
-	 */
-	@Deprecated
-	public void setId(IIdType theId) {
-		setPayloadId(theId);
-	}
-
-	/**
-	 * @since 5.6.0
-	 */
-	public void setPayloadId(IIdType thePayloadId) {
-		myPayloadId = null;
-		if (thePayloadId != null) {
-			myPayloadId = thePayloadId.getValue();
-		}
-	}
-
-
 	protected void setNewPayload(FhirContext theCtx, IBaseResource thePayload) {
 		/*
 		 * References with placeholders would be invalid by the time we get here, and
@@ -161,6 +162,10 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		 */
 		myPayload = theCtx.newJsonParser().encodeResourceToString(thePayload);
 
+		setPayloadIdFromPayload(theCtx, thePayload);
+	}
+
+	private void setPayloadIdFromPayload(FhirContext theCtx, IBaseResource thePayload) {
 		IIdType payloadIdType = thePayload.getIdElement().toUnqualified();
 		if (!payloadIdType.hasResourceType()) {
 			String resourceType = theCtx.getResourceType(thePayload);
@@ -168,6 +173,14 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		}
 
 		setPayloadId(payloadIdType);
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("operationType", myOperationType)
+			.append("payloadId", myPayloadId)
+			.toString();
 	}
 
 	protected static boolean payloadContainsNoPlaceholderReferences(FhirContext theCtx, IBaseResource theNewPayload) {
@@ -190,14 +203,6 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 			}
 		}
 		return true;
-	}
-
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this)
-			.append("operationType", myOperationType)
-			.append("payloadId", myPayloadId)
-			.toString();
 	}
 }
 
