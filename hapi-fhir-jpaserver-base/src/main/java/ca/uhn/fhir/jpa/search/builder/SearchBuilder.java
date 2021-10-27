@@ -102,6 +102,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Nonnull;
@@ -183,7 +184,7 @@ public class SearchBuilder implements ISearchBuilder {
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 	@Autowired
-	private HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
+	private LocalContainerEntityManagerFactoryBean myEntityManagerFactory;
 	@Autowired
 	private SqlObjectFactory mySqlBuilderFactory;
 	@Autowired
