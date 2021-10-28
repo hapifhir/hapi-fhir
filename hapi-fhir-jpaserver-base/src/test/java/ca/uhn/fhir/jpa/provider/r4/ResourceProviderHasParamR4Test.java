@@ -597,33 +597,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 				
 		assertThat(ids, contains(pid0.getValue()));
 	}
-	
-	@Test
-	public void testMultipleHasParameter_NOT_IN() throws Exception {
-		
-		for (int i=0; i<10; i++) {
-			createPatientWithObs(10);
-		}
 
-		String uri = ourServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180") + "&_has:Observation:subject:date=gt1950" + "&_has:Observation:subject:status=final&_count=4";
-		
-		ourLog.info("uri = " + uri);
-		myCaptureQueriesListener.clear();
-		
-		searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		
-		List<String> queries = myCaptureQueriesListener.getSelectQueries().stream().map(t -> t.getSql(true, false)).collect(Collectors.toList());
-
-		List<String> notInListQueries = new ArrayList<>();
-		for (String query : queries) {
-			ourLog.info("Query: {}", query);
-			if (query.contains("RES_ID NOT IN"))
-				notInListQueries.add(query);
-		}
-		
-		assertNotEquals(0, notInListQueries.size());
-	}
-	
 	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
 		List<String> ids;
 		HttpGet get = new HttpGet(uri);

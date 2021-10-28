@@ -517,6 +517,10 @@ public class SearchQueryBuilder {
 			.collect(Collectors.toList());
 	}
 
+	public int countBindVariables() {
+		return myBindVariableValues.size();
+	}
+
 
 	public void setMatchNothing() {
 		myMatchNothing = true;

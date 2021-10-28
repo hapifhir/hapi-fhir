@@ -39,7 +39,6 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
@@ -179,6 +178,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private int myFetchSize;
 	private Integer myMaxResultsToFetch;
 	private Set<ResourcePersistentId> myPidSet;
+	private boolean myHasNextIteratorQuery = false;
 	private RequestPartitionId myRequestPartitionId;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
@@ -191,7 +191,6 @@ public class SearchBuilder implements ISearchBuilder {
 	@Autowired
 	private ModelConfig myModelConfig;
 
-	private boolean hasNextIteratorQuery = false;
 
 	/**
 	 * Constructor
@@ -494,8 +493,10 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		//-- exclude the pids already in the previous iterator
-		if (hasNextIteratorQuery) {
-			sqlBuilder.excludeResourceIdsPredicate(myPidSet);
+		if (myHasNextIteratorQuery) {
+			if (myPidSet.size() + sqlBuilder.countBindVariables() < 900) {
+				sqlBuilder.excludeResourceIdsPredicate(myPidSet);
+			}
 		}
 
 		/*
@@ -1367,10 +1368,9 @@ public class SearchBuilder implements ISearchBuilder {
 							if (!myResultsIterator.hasNext()) {
 								if (myMaxResultsToFetch != null && (mySkipCount + myNonSkipCount == myMaxResultsToFetch)) {
 									if (mySkipCount > 0 && myNonSkipCount == 0) {
-										myMaxResultsToFetch += 1000;
 
 										StorageProcessingMessage message = new StorageProcessingMessage();
-										String msg = "Pass completed with no matching results. This indicates an inefficient query! Retrying with new max count of " + myMaxResultsToFetch;
+										String msg = "Pass completed with no matching results seeking rows " + myPidSet.size() + "-" + mySkipCount + ". This indicates an inefficient query! Retrying with new max count of " + myMaxResultsToFetch;
 										ourLog.warn(msg);
 										message.setMessage(msg);
 										HookParams params = new HookParams()
@@ -1379,6 +1379,7 @@ public class SearchBuilder implements ISearchBuilder {
 											.add(StorageProcessingMessage.class, message);
 										CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
 
+										myMaxResultsToFetch += 1000;
 										initializeIteratorQuery(myOffset, myMaxResultsToFetch);
 									}
 								}
@@ -1461,10 +1462,10 @@ public class SearchBuilder implements ISearchBuilder {
 			close();
 			if (myQueryList != null && myQueryList.size() > 0) {
 				myResultsIterator = myQueryList.remove(0);
-				hasNextIteratorQuery = true;
+				myHasNextIteratorQuery = true;
 			} else {
 				myResultsIterator = SearchQueryExecutor.emptyExecutor();
-				hasNextIteratorQuery = false;
+				myHasNextIteratorQuery = false;
 			}
 
 		}
