@@ -92,7 +92,7 @@ public class MdmMessageHandler implements MessageHandler {
 	}
 
 	private void matchMdmAndUpdateLinks(ResourceModifiedMessage theMsg) {
-		String resourceType = theMsg.getId(myFhirContext).getResourceType();
+		String resourceType = theMsg.getPayloadId(myFhirContext).getResourceType();
 		validateResourceType(resourceType);
 		MdmTransactionContext mdmContext = createMdmContext(theMsg, resourceType);
 		try {

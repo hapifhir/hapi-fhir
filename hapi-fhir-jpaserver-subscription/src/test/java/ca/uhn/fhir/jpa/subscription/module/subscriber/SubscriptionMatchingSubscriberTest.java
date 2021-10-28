@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
 
 import ca.uhn.fhir.jpa.subscription.module.standalone.BaseBlockingQueueSubscribableChannelDstu3Test;
 import ca.uhn.fhir.rest.api.Constants;
+import org.hl7.fhir.dstu3.model.Observation;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +51,24 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 		ourObservationListener.setExpectedCount(1);
 		sendObservation(code, "SNOMED-CT");
+		ourObservationListener.awaitExpected();
+
+		assertEquals(1, ourContentTypes.size());
+		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
+	}
+
+	@Test
+	public void testRestHookSubscription_NoResourceTypeInPayloadId() throws Exception {
+		sendSubscription("Observation?", "application/fhir+xml", ourListenerServerBase);
+
+		assertEquals(1, mySubscriptionRegistry.size());
+		ourObservationListener.setExpectedCount(1);
+
+		Observation observation = new Observation();
+		observation.setId("OBS");
+		observation.setStatus(Observation.ObservationStatus.CORRECTED);
+		sendResource(observation);
+
 		ourObservationListener.awaitExpected();
 
 		assertEquals(1, ourContentTypes.size());
