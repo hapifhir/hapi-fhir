@@ -1549,6 +1549,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			id2 = myOrganizationDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
 		}
 
+		// TODO: restore
+
 		int size;
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
@@ -3715,7 +3717,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 //		assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"));
 //		assertEquals(searchQuery, 2, StringUtils.countMatches(searchQuery.toUpperCase(), "AND RESOURCETA0_.RES_UPDATED"));
 	}
-
 
 	@Test
 	public void testSearchTokenParam() {

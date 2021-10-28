@@ -291,8 +291,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Qualifier("myEpisodeOfCareDaoR4")
 	protected IFhirResourceDao<EpisodeOfCare> myEpisodeOfCareDao;
 	@Autowired
-	protected DaoConfig myDaoConfig;
-	@Autowired
 	protected PartitionSettings myPartitionSettings;
 	@Autowired
 	protected ModelConfig myModelConfig;

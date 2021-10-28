@@ -268,6 +268,15 @@ public class DaoConfig {
 	private Integer myBundleBatchPoolSize = DEFAULT_BUNDLE_BATCH_POOL_SIZE;
 	private Integer myBundleBatchMaxPoolSize = DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE;
 
+	/**
+	 * Activates the new Lucene/Elasticsearch indexing of search parameters.
+	 * When active, string, token, and reference parameters will be indexed and
+	 * queried within Hibernate Search.
+	 *
+	 * @since 5.6.0
+	 * TODO mb test more with this true
+	 */
+	private boolean myAdvancedLuceneIndexing = false;
 
 	/**
 	 * Constructor
@@ -2685,6 +2694,29 @@ public class DaoConfig {
 			return myStoreRequestId;
 		}
 	}
+
+	/**
+	 * Is lucene/hibernate indexing enabled beyond _contains or _text?
+	 *
+	 * @since 5.6.0
+	 */
+	public boolean isAdvancedLuceneIndexing() {
+		return myAdvancedLuceneIndexing;
+	}
+
+	/**
+	 * Enable/disable lucene/hibernate indexing enabled beyond _contains or _text.
+	 *
+	 * String, token, and reference parameters can be indexed in Lucene.
+	 * This extends token search to support :text searches, as well as supporting
+	 * :contains and :text on string parameters.
+	 *
+	 * @since 5.6.0
+	 */
+	public void setAdvancedLuceneIndexing(boolean theAdvancedLuceneIndexing) {
+		this.myAdvancedLuceneIndexing = theAdvancedLuceneIndexing;
+	}
+
 
 	public enum IndexEnabledEnum {
 		ENABLED,
