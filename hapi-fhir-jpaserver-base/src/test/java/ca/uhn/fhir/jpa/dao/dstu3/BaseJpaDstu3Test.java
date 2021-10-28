@@ -46,6 +46,7 @@ import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -349,6 +350,8 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	private IBulkDataExportSvc myBulkDataExportSvc;
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
+	@Autowired
+	protected MemoryCacheService myMemoryCacheService;
 
 	@AfterEach()
 	public void afterCleanupDao() {
