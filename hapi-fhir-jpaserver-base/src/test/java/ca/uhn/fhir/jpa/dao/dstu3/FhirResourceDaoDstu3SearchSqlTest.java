@@ -61,8 +61,8 @@ public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(false);
 		map.setCount(300);
-		map.add("patient", new ReferenceParam(patientId.toString()));
 		map.add("category", new TokenOrListParam(null, "ACCEVN", "ACCMNTRG", "MIDTX"));
+		map.add("patient", new ReferenceParam(patientId.toString()));
 
 		IBundleProvider outcome = null;
 		String uuid = null;
@@ -79,7 +79,7 @@ public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
 			List<SqlQuery> query = myCaptureQueriesListener
 				.getSelectQueries()
 				.stream()
-				.filter(t -> t.getSql(false, false).toLowerCase(Locale.ROOT).contains("res_id not in"))
+				.filter(t -> t.getSql(false, false).toLowerCase(Locale.ROOT).contains("res_id")) //  not in
 				.collect(Collectors.toList());
 			for (SqlQuery next : query) {
 				String sql = next.getSql(false, false);
