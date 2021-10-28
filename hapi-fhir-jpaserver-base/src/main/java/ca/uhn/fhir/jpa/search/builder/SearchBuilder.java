@@ -310,7 +310,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		List<ResourcePersistentId> pids = new ArrayList<>();
 
-		if (requiresHibernateSearchAccess()) {
+		if (checkUseHibernateSearch()) {
 			if (myParams.isLastN()) {
 				pids = executeLastNAgainstIndex(theMaximumResults);
 			} else {
@@ -345,22 +345,28 @@ public class SearchBuilder implements ISearchBuilder {
 		return queries;
 	}
 
-	private boolean requiresHibernateSearchAccess() {
-		boolean result = (myFulltextSearchSvc != null) &&
-			!myFulltextSearchSvc.isDisabled() &&
-			myFulltextSearchSvc.supportsSomeOf(myParams);
+	/**
+	 * Check to see if query should use Hibernate Search, and error if the query can't continue.
+	 *
+	 * @return true if the query should first be processed by Hibernate Search
+	 * @throws InvalidRequestException if fulltext search is not enabled but the query requires it - _content or _text
+	 */
+	private boolean checkUseHibernateSearch() {
+		boolean fulltextEnabled = (myFulltextSearchSvc != null) && !myFulltextSearchSvc.isDisabled();
 
-		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
-			if (myFulltextSearchSvc == null || myFulltextSearchSvc.isDisabled()) {
-				if (myParams.containsKey(Constants.PARAM_TEXT)) {
-					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
-				} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
-					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
-				}
-			}
+		if (!fulltextEnabled) {
+			failIfUsed(Constants.PARAM_TEXT);
+			failIfUsed(Constants.PARAM_CONTENT);
 		}
 
-		return result;
+		// TODO MB someday we'll want a query planner to figure out if we _should_ use the ft index, not just if we can.
+		return fulltextEnabled && myFulltextSearchSvc.supportsSomeOf(myParams);
+	}
+
+	private void failIfUsed(String theParamName) {
+		if (myParams.containsKey(theParamName)) {
+			throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + theParamName);
+		}
 	}
 
 	private List<ResourcePersistentId> executeLastNAgainstIndex(Integer theMaximumResults) {
