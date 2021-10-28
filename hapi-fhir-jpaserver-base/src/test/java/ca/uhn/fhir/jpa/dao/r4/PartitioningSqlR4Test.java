@@ -7,6 +7,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
@@ -59,11 +60,13 @@ import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.Date;
 import java.util.List;
@@ -92,8 +95,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @SuppressWarnings({"unchecked", "ConstantConditions"})
+
 public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitioningSqlR4Test.class);
+
+	@BeforeEach
+	public void disableAdvanceIndexing() {
+		myDaoConfig.setAdvancedLuceneIndexing(false);
+	}
 
 	@Test
 	public void testCreateSearchParameter_DefaultPartition() {

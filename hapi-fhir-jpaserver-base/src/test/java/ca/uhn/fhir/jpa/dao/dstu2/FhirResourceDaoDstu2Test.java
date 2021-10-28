@@ -2688,6 +2688,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testStringParamWhichIsTooLong() {
+		myDaoConfig.setAdvancedLuceneIndexing(false);
 
 		Organization org = new Organization();
 		String str = "testStringParamLong__lvdaoy843s89tll8gvs89l4s3gelrukveilufyebrew8r87bv4b77feli7fsl4lv3vb7rexloxe7olb48vov4o78ls7bvo7vb48o48l4bb7vbvx";

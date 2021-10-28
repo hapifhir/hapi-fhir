@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -22,6 +23,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -621,6 +623,90 @@ public class SearchParameterMap implements Serializable {
 
 	public List<List<IQueryParameterType>> remove(String theName) {
 		return mySearchParameterMap.remove(theName);
+	}
+
+	/**
+	 * Variant of removeByNameAndModifier for unmodified params.
+	 *
+	 * @param theName
+	 * @return an And/Or List of Query Parameters matching the name with no modifier.
+	 */
+	public List<List<IQueryParameterType>> removeByNameUnmodified(String theName) {
+		return this.removeByNameAndModifier(theName, "");
+	}
+
+	/**
+	 * Given a search parameter name and modifier (e.g. :text),
+	 * get and remove all Search Parameters matching this name and modifier
+	 *
+	 * @param theName the query parameter key
+	 * @param theModifier the qualifier you want to remove - nullable for unmodified params.
+	 *
+	 * @return an And/Or List of Query Parameters matching the qualifier.
+	 */
+	public List<List<IQueryParameterType>> removeByNameAndModifier(String theName, String theModifier) {
+		theModifier = StringUtils.defaultString(theModifier, "");
+
+		List<List<IQueryParameterType>> remainderParameters = new ArrayList<>();
+		List<List<IQueryParameterType>> matchingParameters = new ArrayList<>();
+
+		// pull all of them out, partition by match against the qualifier
+		List<List<IQueryParameterType>> andList = mySearchParameterMap.remove(theName);
+		if (andList != null) {
+			for (List<IQueryParameterType> orList : andList) {
+				if (!orList.isEmpty() &&
+					StringUtils.defaultString(orList.get(0).getQueryParameterQualifier(), "")
+							.equals(theModifier)) {
+					matchingParameters.add(orList);
+				} else {
+					remainderParameters.add(orList);
+				}
+			}
+		}
+
+		// put the unmatched back in.
+		if (!remainderParameters.isEmpty()) {
+			mySearchParameterMap.put(theName, remainderParameters);
+		}
+		return matchingParameters;
+
+	}
+
+	public List<List<IQueryParameterType>> removeByNameAndModifier(String theName, @Nonnull TokenParamModifier theModifier) {
+		return removeByNameAndModifier(theName, theModifier.getValue());
+	}
+
+	/**
+	 * For each search parameter in the map, extract any which have the given qualifier.
+	 * e.g. Take the url: Observation?code:text=abc&code=123&code:text=def&reason:text=somereason
+	 *
+	 * If we call this function with `:text`, it will return a map that looks like:
+	 *
+	 * code -> [[code:text=abc], [code:text=def]]
+	 * reason -> [[reason:text=somereason]]
+	 *
+	 * and the remaining search parameters in the map will be:
+	 *
+	 * code -> [[code=123]]
+	 *
+	 * @param theQualifier
+	 * @return
+	 */
+	public Map<String, List<List<IQueryParameterType>>> removeByQualifier(String theQualifier) {
+
+		Map<String, List<List<IQueryParameterType>>> retVal = new HashMap<>();
+		Set<String> parameterNames = mySearchParameterMap.keySet();
+		for (String parameterName : parameterNames) {
+			List<List<IQueryParameterType>> paramsWithQualifier = removeByNameAndModifier(parameterName, theQualifier);
+			retVal.put(parameterName, paramsWithQualifier);
+		}
+
+		return retVal;
+
+	}
+
+	public Map<String, List<List<IQueryParameterType>>> removeByQualifier(@Nonnull TokenParamModifier theModifier) {
+		return removeByQualifier(theModifier.getValue());
 	}
 
 	public int size() {
