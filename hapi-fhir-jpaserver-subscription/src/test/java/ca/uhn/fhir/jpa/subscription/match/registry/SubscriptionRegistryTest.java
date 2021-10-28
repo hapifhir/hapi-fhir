@@ -9,7 +9,6 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -96,8 +95,9 @@ public class SubscriptionRegistryTest {
 	}
 
 	/**
-	 * Verifies that the channel and returns the ActivieSubscription
-	 * that was registered for further verification.
+	 * Verifies an ActiveSubscription was registered, and passes it back
+	 * for further verification.
+	 * Also verifies that the interceptor was called.
 	 */
 	private ActiveSubscription verifySubscriptionIsRegistered() {
 		ArgumentCaptor<ActiveSubscription> subscriptionArgumentCaptor = ArgumentCaptor.forClass(ActiveSubscription.class);
@@ -158,7 +158,6 @@ public class SubscriptionRegistryTest {
 		// init
 		String channelName = "subscription-test";
 		int retryCount = -1; // invalid retry count -> no retries created
-		String dlqPrefix = "dlq";
 
 		Extension retryExtension = new Extension();
 		retryExtension.setUrl(HapiExtensions.EX_RETRY_COUNT);

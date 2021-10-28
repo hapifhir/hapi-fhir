@@ -85,8 +85,6 @@ public class SubscriptionRegistry {
 	/**
 	 * Extracts the retry configuration settings from the CanonicalSubscription object.
 	 *
-	 * NB: if no retry-count is specified, dlq will be ignored (specified or not).
-	 *
 	 * Returns the configuration, or null, if no retry (or a bad retry value)
 	 * is specified.
 	 *

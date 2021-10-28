@@ -75,9 +75,10 @@ public class SubscriptionChannelRegistry {
 		 * a receiving channel.
 		 *
 		 * Matched subscriptions are sent to the Sending channel
-		 * and the sending channel sends to receiving channel.
+		 * and the sending channel sends to subscription matching service.
+		 *
 		 * Receiving channel will send it out to
-		 * the subscriber hook.
+		 * the subscriber hook (REST, email, etc).
 		 */
 
 		// the receiving channel
@@ -93,13 +94,10 @@ public class SubscriptionChannelRegistry {
 		myDeliveryReceiverChannels.put(channelName, subscriptionChannelWithHandlers);
 
 		// create the producing channel.
-		// this is the channel that will send the messages out
-		// to subscribers
-		// DO not want retry here
+		// channel used for sending to subscription matcher
 		ProducingChannelParameters producingChannelParameters = new ProducingChannelParameters(channelName);
 		producingChannelParameters.setRetryConfiguration(retryConfigParameters);
 
-		// this absorbs from the subscription matching service
 		IChannelProducer sendingChannel = newSendingChannel(producingChannelParameters);
 		myChannelNameToSender.put(channelName, sendingChannel);
 	}

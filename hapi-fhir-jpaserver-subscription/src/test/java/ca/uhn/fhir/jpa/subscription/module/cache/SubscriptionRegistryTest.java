@@ -2,8 +2,6 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
 
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import org.hl7.fhir.dstu3.model.Subscription;
-import org.hl7.fhir.r4.model.Extension;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,24 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
-
-	private void testSubscriptionAddingWithExtension(Extension... theRetryExtensions) {
-		org.hl7.fhir.r4.model.Subscription subscription = createSubscriptionR4();
-
-		// create retry extension
-		org.hl7.fhir.r4.model.Subscription.SubscriptionChannelComponent channel = subscription.getChannel();
-		for (Extension ex : theRetryExtensions) {
-			channel.addExtension(ex);
-		}
-
-		boolean isRegistered = mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(
-			subscription
-		);
-
-		Assertions.assertTrue(isRegistered);
-
-		assertRegistrySize(1, 1);
-	}
 
 	@Test
 	public void updateSubscriptionReusesActiveSubscription() {
