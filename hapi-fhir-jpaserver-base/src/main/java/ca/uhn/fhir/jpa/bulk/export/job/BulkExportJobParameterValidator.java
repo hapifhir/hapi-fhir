@@ -54,7 +54,7 @@ public class BulkExportJobParameterValidator implements JobParametersValidator {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		String errorMessage = txTemplate.execute(tx -> {
 			StringBuilder errorBuilder = new StringBuilder();
-			Long readChunkSize = theJobParameters.getLong(BulkExportJobConfig.READ_CHUNK_PARAMETER);
+			Long readChunkSize = theJobParameters.getLong(BatchConstants.READ_CHUNK_PARAMETER);
 			if (readChunkSize == null || readChunkSize < 1) {
 				errorBuilder.append("There must be a valid number for readChunkSize, which is at least 1. ");
 			}
@@ -68,16 +68,14 @@ public class BulkExportJobParameterValidator implements JobParametersValidator {
 			boolean hasExistingJob = oJob.isPresent();
 			//Check for to-be-created parameters.
 			if (!hasExistingJob) {
-				String resourceTypes = theJobParameters.getString(BulkExportJobConfig.RESOURCE_TYPES_PARAMETER);
+				String resourceTypes = theJobParameters.getString(BatchConstants.JOB_RESOURCE_TYPES_PARAMETER);
 				if (StringUtils.isBlank(resourceTypes)) {
-					errorBuilder.append("You must include [").append(BulkExportJobConfig.RESOURCE_TYPES_PARAMETER).append("] as a Job Parameter");
+					errorBuilder.append("You must include [").append(BatchConstants.JOB_RESOURCE_TYPES_PARAMETER).append("] as a Job Parameter");
 				} else {
 					String[] resourceArray = resourceTypes.split(",");
 					Arrays.stream(resourceArray).filter(resourceType -> resourceType.equalsIgnoreCase("Binary"))
 						.findFirst()
-						.ifPresent(resourceType -> {
-							errorBuilder.append("Bulk export of Binary resources is forbidden");
-						});
+						.ifPresent(resourceType -> errorBuilder.append("Bulk export of Binary resources is forbidden"));
 				}
 
 				String outputFormat = theJobParameters.getString("outputFormat");
