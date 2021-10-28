@@ -190,11 +190,17 @@ public class JdbcUtils {
 							case Types.BLOB:
 								return new ColumnType(ColumnTypeEnum.BLOB, length);
 							case Types.LONGVARBINARY:
+								if (DriverTypeEnum.MYSQL_5_7.equals(theConnectionProperties.getDriverType())) {
+									//See git
+									return new ColumnType(ColumnTypeEnum.BLOB, length);
+								} else {
+									throw new IllegalArgumentException("Don't know how to handle datatype " + dataType + " for column " + theColumnName + " on table " + theTableName);
+								}
 							case Types.VARBINARY:
 								if (DriverTypeEnum.MSSQL_2012.equals(theConnectionProperties.getDriverType())) {
 									// MS SQLServer seems to be mapping BLOB to VARBINARY under the covers, so we need to reverse that mapping
-									//Guess what, it also does 
 									return new ColumnType(ColumnTypeEnum.BLOB, length);
+
 								} else {
 									throw new IllegalArgumentException("Don't know how to handle datatype " + dataType + " for column " + theColumnName + " on table " + theTableName);
 								}
