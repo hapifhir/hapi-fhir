@@ -3,34 +3,26 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
-import com.ctc.wstx.shaded.msv_core.verifier.jarv.Const;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Enumerations;
-import org.hl7.fhir.dstu3.model.Identifier;
-import org.hl7.fhir.dstu3.model.Practitioner;
-import org.hl7.fhir.dstu3.model.PractitionerRole;
-import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoDstu3SearchSqlTest.class);
@@ -53,7 +45,9 @@ public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
 				.addCoding(new Coding("acc_condcat_fkc", "MIDTX", "During Tx")));
 			condition.setCategory(categories);
 			IIdType conditionId = myConditionDao.create(condition).getId().toUnqualifiedVersionless();
-			ourLog.info("Created Condition with ID: " + conditionId);
+			if (i % 500 == 0) {
+				ourLog.info("Created Condition with ID: " + conditionId);
+			}
 		}
 
 		myMemoryCacheService.invalidateAllCaches();
@@ -69,34 +63,34 @@ public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
 		map.setCount(300);
 		map.add("patient", new ReferenceParam(patientId.toString()));
 		map.add("category", new TokenOrListParam(null, "ACCEVN", "ACCMNTRG", "MIDTX"));
-		IBundleProvider outcome = myConditionDao.search(map);
-		String uuid = outcome.getUuid();
-		ourLog.info("** Search returned UUID: {}", uuid);
-		List<String> ids = toUnqualifiedVersionlessIdValues(outcome, 0, 300, true);
-		//assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
-		ourLog.info("Batch 0-300 returned " + ids.size() + " ids.");
 
-		ids = toUnqualifiedVersionlessIdValues(outcome, 300, 600, false);
-		ourLog.info("Batch 300-600 returned " + ids.size() + " ids.");
-		ids = toUnqualifiedVersionlessIdValues(outcome, 600, 900, false);
-		ourLog.info("Batch 600-900 returned " + ids.size() + " ids.");
-		ids = toUnqualifiedVersionlessIdValues(outcome, 900, 1200, false);
-		ourLog.info("Batch 900-1200 returned " + ids.size() + " ids.");
-
-		//List<IBaseResource> resources = outcome.getResources(0, 300);
-		//ourLog.info("Batch 0-300 returned " + resources.size() + " resources.");
-		//resources = outcome.getResources(300, 600);
-		//ourLog.info("Batch 300-600 returned " + resources.size() + " resources.");
-		//resources = outcome.getResources(600, 900);
-		//ourLog.info("Batch 600-900 returned " + resources.size() + " resources.");
-		//resources = outcome.getResources(900, 1200);
-		//ourLog.info("Batch 900-1200 returned " + resources.size() + " resources.");
-
-//		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
-		for (SqlQuery query : myCaptureQueriesListener.getSelectQueriesForCurrentThread()) {
-			ourLog.info("SQL Query:\n" + query.getSql(true, true));
+		IBundleProvider outcome = null;
+		String uuid = null;
+		for (int i = 0; i < 3000; i += 300) {
+			myCaptureQueriesListener.clear();
+			if (outcome == null) {
+				outcome = myConditionDao.search(map);
+				uuid = outcome.getUuid();
+			} else {
+				outcome = myPagingProvider.retrieveResultList(mySrd, uuid);
+			}
+			List<IBaseResource> resources = outcome.getResources(i, i + 300);
+			ourLog.info("Batch {}-{} returned {} resources", i, i+300, resources.size());
+			List<SqlQuery> query = myCaptureQueriesListener
+				.getSelectQueries()
+				.stream()
+				.filter(t -> t.getSql(false, false).toLowerCase(Locale.ROOT).contains("res_id not in"))
+				.collect(Collectors.toList());
+			for (SqlQuery next : query) {
+				String sql = next.getSql(false, false);
+				int numSQLQueryparams = StringUtils.countMatches(sql, "?");
+				ourLog.info("SQL: {}", sql);
+				ourLog.info("SQL has {} params", numSQLQueryparams);
+				assertTrue((numSQLQueryparams <= 1000),
+					"The generated SQL should never have more than 1,000 parameters! " +
+					"The number of parameters is " + numSQLQueryparams + " and the SQL is " + sql);
+			}
 		}
 		ourLog.info("DONE SQL Queries!\n");
-
 	}
 }
