@@ -23,8 +23,8 @@ package ca.uhn.fhir.jpa.batch.processor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.log.Logs;
-import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -57,7 +57,7 @@ public class GoldenResourceAnnotatingProcessor implements ItemProcessor<List<IBa
 	@Autowired
 	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
 
-	@Value("#{jobParameters['" + BulkExportJobConfig.EXPAND_MDM_PARAMETER+ "'] ?: false}")
+	@Value("#{jobParameters['" + BatchConstants.EXPAND_MDM_PARAMETER + "'] ?: false}")
 	private boolean myMdmEnabled;
 
 

@@ -37,7 +37,7 @@ public class ResourceTypePartitioner implements Partitioner {
 	private static final Logger ourLog = getLogger(ResourceTypePartitioner.class);
 
 
-	@Value("#{jobExecutionContext['jobUUID']}")
+	@Value("#{jobExecutionContext['" + BatchConstants.JOB_UUID_PARAMETER+ "']}")
 	private String myJobUUID;
 
 	@Autowired
@@ -57,12 +57,12 @@ public class ResourceTypePartitioner implements Partitioner {
 
 				ExecutionContext context = new ExecutionContext();
 				//The worker step needs to know what resource type it is looking for.
-				context.putString("resourceType", resourceType);
+				context.putString(BatchConstants.JOB_EXECUTION_RESOURCE_TYPE, resourceType);
 
 				// The worker step needs to know which parent job it is processing for, and which collection entity it will be
 				// attaching its results to.
 				context.putString(BatchConstants.JOB_UUID_PARAMETER, myJobUUID);
-				context.putLong("bulkExportCollectionEntityId", collectionEntityId);
+				context.putLong(BatchConstants.JOB_COLLECTION_ENTITY_ID, collectionEntityId);
 
 				// Name the partition based on the resource type
 				partitionContextMap.put(resourceType, context);
