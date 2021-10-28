@@ -31,7 +31,7 @@ public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoDstu3SearchSqlTest.class);
 
 	@Test
-	public void testSearchByPractitionerRole_has() {
+	public void testSearchCondition_ByPatientAndCategories() {
 		//
 		// TODO KBD Try This:
 		// Start with a fork of the actual branch they are using
@@ -58,7 +58,7 @@ public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
 				.addCoding(new Coding("acc_condcat_fkc", "MIDTX", "During Tx")));
 			condition.setCategory(categories);
 			IIdType conditionId = myConditionDao.create(condition).getId().toUnqualifiedVersionless();
-			System.out.println("Created Condition with ID: " + conditionId);
+			ourLog.info("Created Condition with ID: " + conditionId);
 		}
 
 		myMemoryCacheService.invalidateAllCaches();
@@ -76,19 +76,19 @@ public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
 		//map.add("category", new TokenParam("ACCEVN,ACCMNTRG,MIDTX")); // , = %2C
 		IBundleProvider outcome = myConditionDao.search(map);
 		List<IBaseResource> resources = outcome.getResources(0, 300);
-		System.out.println("Batch 0-300 returned " + resources.size() + " resources.");
+		ourLog.info("Batch 0-300 returned " + resources.size() + " resources.");
 		resources = outcome.getResources(300, 600);
-		System.out.println("Batch 300-600 returned " + resources.size() + " resources.");
+		ourLog.info("Batch 300-600 returned " + resources.size() + " resources.");
 		resources = outcome.getResources(600, 900);
-		System.out.println("Batch 600-900 returned " + resources.size() + " resources.");
+		ourLog.info("Batch 600-900 returned " + resources.size() + " resources.");
 		resources = outcome.getResources(900, 1200);
-		System.out.println("Batch 900-1200 returned " + resources.size() + " resources.");
+		ourLog.info("Batch 900-1200 returned " + resources.size() + " resources.");
 
 //		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
 		for (SqlQuery query : myCaptureQueriesListener.getSelectQueriesForCurrentThread()) {
-			System.out.println("SQL Query:\n" + query.getSql(true, true));
+			ourLog.info("SQL Query:\n" + query.getSql(true, true));
 		}
-		System.out.println("DONE SQL Queries!\n");
+		ourLog.info("DONE SQL Queries!\n");
 
 	}
 }
