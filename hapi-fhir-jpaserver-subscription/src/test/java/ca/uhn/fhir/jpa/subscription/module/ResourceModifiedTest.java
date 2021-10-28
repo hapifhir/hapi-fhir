@@ -17,7 +17,7 @@ public class ResourceModifiedTest {
 		org.setName("testOrgName");
 		org.setId("Organization/testOrgId");
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, org, ResourceModifiedMessage.OperationTypeEnum.CREATE);
-		assertEquals(org.getIdElement(), msg.getId(myFhirContext));
+		assertEquals(org.getIdElement(), msg.getPayloadId(myFhirContext));
 		assertEquals(ResourceModifiedMessage.OperationTypeEnum.CREATE, msg.getOperationType());
 		Organization decodedOrg = (Organization) msg.getNewPayload(myFhirContext);
 		assertEquals(org.getId(), decodedOrg.getId());
@@ -30,7 +30,7 @@ public class ResourceModifiedTest {
 		org.setName("testOrgName");
 		org.setId("Organization/testOrgId");
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, org, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
-		assertEquals(org.getIdElement(), msg.getId(myFhirContext));
+		assertEquals(org.getIdElement(), msg.getPayloadId(myFhirContext));
 		assertEquals(ResourceModifiedMessage.OperationTypeEnum.UPDATE, msg.getOperationType());
 		Organization decodedOrg = (Organization) msg.getNewPayload(myFhirContext);
 		assertEquals(org.getId(), decodedOrg.getId());
@@ -43,7 +43,7 @@ public class ResourceModifiedTest {
 		org.setName("testOrgName");
 		org.setId("testOrgId");
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, org, ResourceModifiedMessage.OperationTypeEnum.DELETE);
-		assertEquals(org.getIdElement(), msg.getId(myFhirContext));
+		assertEquals("Organization/testOrgId", msg.getPayloadId(myFhirContext).getValue());
 		assertEquals(ResourceModifiedMessage.OperationTypeEnum.DELETE, msg.getOperationType());
 		assertNull(msg.getNewPayload(myFhirContext));
 	}

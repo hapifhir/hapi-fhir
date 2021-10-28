@@ -313,7 +313,7 @@
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-jpaserver-model</artifactId>
-            <version>5.4.0-PRE10-SNAPSHOT</version>
+            <version>5.4.0-PRE8-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
 

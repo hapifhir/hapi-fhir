@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2754
+title: "Suport for annotation scanning in synthetic types such as weld proxies has been added. Thanks
+   to GitHub user @tarekmamdouh for the pull request!"

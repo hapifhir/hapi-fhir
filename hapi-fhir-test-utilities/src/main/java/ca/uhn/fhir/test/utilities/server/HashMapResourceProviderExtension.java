@@ -34,6 +34,8 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 
 	private final RestfulServerExtension myRestfulServerExtension;
 	private Consumer<T> myUpdateResourceCallback;
+	private boolean myClearBetweenTests = true;
+	private final List<T> myUpdates = new ArrayList<>();
 
 	/**
 	 * Constructor
@@ -52,8 +54,26 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 	}
 
 	@Override
+	public synchronized MethodOutcome update(T theResource, String theConditional, RequestDetails theRequestDetails) {
+		T resourceClone = getFhirContext().newTerser().clone(theResource);
+		myUpdates.add(resourceClone);
+		return super.update(theResource, theConditional, theRequestDetails);
+	}
+
+	@Override
+	public synchronized void clear() {
+		super.clear();
+		if (myUpdates != null) {
+			myUpdates.clear();
+		}
+	}
+
+	@Override
 	public void beforeEach(ExtensionContext context) throws Exception {
-		clear();
+		if (myClearBetweenTests) {
+			clear();
+			clearCounts();
+		}
 		myRestfulServerExtension.getRestfulServer().registerProvider(HashMapResourceProviderExtension.this);
 	}
 
@@ -68,5 +88,25 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 	public HashMapResourceProviderExtension<T> setUpdateResourceCallback(Consumer<T> theUpdateResourceCallback) {
 		myUpdateResourceCallback = theUpdateResourceCallback;
 		return this;
+	}
+
+	public HashMapResourceProviderExtension<T> dontClearBetweenTests() {
+		myClearBetweenTests = false;
+		return this;
+	}
+
+
+	public void waitForUpdateCount(long theCount) {
+		assertThat(theCount, greaterThanOrEqualTo(getCountUpdate()));
+		await().until(()->getCountUpdate(), equalTo(theCount));
+	}
+
+	public void waitForCreateCount(long theCount) {
+		assertThat(theCount, greaterThanOrEqualTo(getCountCreate()));
+		await().until(()->getCountCreate(), equalTo(theCount));
+	}
+
+	public List<T> getResourceUpdates() {
+		return Collections.unmodifiableList(myUpdates);
 	}
 }

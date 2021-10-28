@@ -22,40 +22,39 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
 
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
-import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ActiveSubscription {
-	private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscription.class);
 
-	private CanonicalSubscription mySubscription;
+	private SubscriptionCriteriaParser.SubscriptionCriteria myCriteria;
+
 	private final String myChannelName;
 	private final String myId;
+	private CanonicalSubscription mySubscription;
 	private boolean flagForDeletion;
 
 	private ChannelRetryConfiguration myRetryConfigurationParameters;
 
 	public ActiveSubscription(CanonicalSubscription theSubscription, String theChannelName) {
-		mySubscription = theSubscription;
 		myChannelName = theChannelName;
 		myId = theSubscription.getIdPart();
+		setSubscription(theSubscription);
+	}
+
+	public SubscriptionCriteriaParser.SubscriptionCriteria getCriteria() {
+		return myCriteria;
 	}
 
 	public CanonicalSubscription getSubscription() {
 		return mySubscription;
 	}
 
+	public final void setSubscription(CanonicalSubscription theSubscription) {
+		mySubscription = theSubscription;
+		myCriteria = SubscriptionCriteriaParser.parse(theSubscription.getCriteriaString());
+	}
+
 	public String getChannelName() {
 		return myChannelName;
-	}
-
-	public String getCriteriaString() {
-		return mySubscription.getCriteriaString();
-	}
-
-	public void setSubscription(CanonicalSubscription theCanonicalizedSubscription) {
-		mySubscription = theCanonicalizedSubscription;
 	}
 
 	public boolean isFlagForDeletion() {

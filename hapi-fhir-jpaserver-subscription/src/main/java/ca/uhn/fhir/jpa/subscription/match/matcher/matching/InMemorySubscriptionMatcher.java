@@ -44,7 +44,7 @@ public class InMemorySubscriptionMatcher implements ISubscriptionMatcher {
 			return mySearchParamMatcher.match(theSubscription.getCriteriaString(), theMsg.getNewPayload(myContext), null);
 		} catch (Exception e) {
 			ourLog.error("Failure in in-memory matcher", e);
-			throw new InternalErrorException("Failure performing memory-match for resource ID[" + theMsg.getId(myContext) + "] for subscription ID[" + theSubscription.getIdElementString() + "]: " + e.getMessage(), e);
+			throw new InternalErrorException("Failure performing memory-match for resource ID[" + theMsg.getPayloadId(myContext) + "] for subscription ID[" + theSubscription.getIdElementString() + "]: " + e.getMessage(), e);
 		}
 	}
 
