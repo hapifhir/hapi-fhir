@@ -492,7 +492,22 @@ public class SearchBuilder implements ISearchBuilder {
 			sqlBuilder.addPredicate(lastUpdatedPredicates);
 		}
 
-		//-- exclude the pids already in the previous iterator
+		/*
+		 * Exclude the pids already in the previous iterator. This is an optimization, as opposed
+		 * to something needed to guarantee correct results.
+		 *
+		 * Why do we need it? Suppose for example, a query like:
+		 *    Observation?category=foo,bar,baz
+		 * And suppose you have many resources that have all 3 of these category codes. In this case
+		 * the SQL query will probably return the same PIDs multiple times, and if this happens enough
+		 * we may exhaust the query results without getting enough distinct results back. When that
+		 * happens we re-run the query with a larger limit. Excluding results we already know about
+		 * tries to ensure that we get new unique results.
+		 *
+		 * The challenge with that though is that lots of DBs have an issue with too many
+		 * parameters in one query. So we only do this optimization if there aren't too
+		 * many results.
+		 */
 		if (myHasNextIteratorQuery) {
 			if (myPidSet.size() + sqlBuilder.countBindVariables() < 900) {
 				sqlBuilder.excludeResourceIdsPredicate(myPidSet);
