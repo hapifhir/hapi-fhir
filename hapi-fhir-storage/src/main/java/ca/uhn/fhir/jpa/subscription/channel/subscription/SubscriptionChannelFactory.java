@@ -74,7 +74,9 @@ public class SubscriptionChannelFactory {
 	protected ChannelConsumerSettings newConsumerConfigForDeliveryChannel(ChannelConsumerSettings theOptions) {
 		ChannelConsumerSettings config = new ChannelConsumerSettings();
 		config.setConcurrentConsumers(getDeliveryChannelConcurrentConsumers());
-		config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
+		if (theOptions != null) {
+			config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
+		}
 		return config;
 	}
 
