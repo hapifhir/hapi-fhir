@@ -100,13 +100,6 @@ public class SubscriptionRegistry {
 		if (retryCount.size() == 1) {
 			String val = retryCount.get(0);
 			configuration.setRetryCount(Integer.parseInt(val));
-
-			List<String> dlqPrefix = theSubscription.getChannelExtensions(HapiExtensions.EX_DLQ_PREFIX);
-			if (dlqPrefix.size() == 1) {
-				String dlqPref = dlqPrefix.get(0);
-				configuration.setDeadLetterQueuePrefix(dlqPref);
-			}
-			// else - 0 or more than 1 dlqs are not possible
 		}
 		// else - 0 or more than 1 means no retry policy at all
 

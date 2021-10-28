@@ -28,7 +28,15 @@ import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
+
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 public class HashMapResourceProviderExtension<T extends IBaseResource> extends HashMapResourceProvider<T> implements BeforeEachCallback, AfterEachCallback {
 
@@ -51,13 +59,6 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
 		myRestfulServerExtension.getRestfulServer().unregisterProvider(HashMapResourceProviderExtension.this);
-	}
-
-	@Override
-	public synchronized MethodOutcome update(T theResource, String theConditional, RequestDetails theRequestDetails) {
-		T resourceClone = getFhirContext().newTerser().clone(theResource);
-		myUpdates.add(resourceClone);
-		return super.update(theResource, theConditional, theRequestDetails);
 	}
 
 	@Override

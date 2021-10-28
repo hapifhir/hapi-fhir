@@ -109,39 +109,7 @@ public class SubscriptionRegistryTest {
 	}
 
 	@Test
-	public void registerSubscriptionUnlessAlreadyRegistered_subscriptionWithRetryAndDlqPrefix_createsAsExpected() {
-		// init
-		String channelName = "subscription-test";
-		int retryCount = 2;
-		String dlqPrefix = "dlq";
-
-		Extension retryExtension = new Extension();
-		retryExtension.setUrl(HapiExtensions.EX_RETRY_COUNT);
-		retryExtension.setValue(new IntegerType(retryCount));
-		Extension dlq = new Extension();
-		dlq.setUrl(HapiExtensions.EX_DLQ_PREFIX);
-		dlq.setValue(new StringType(dlqPrefix));
-
-		Subscription subscription = createSubscription(retryExtension, dlq);
-
-		// when
-		mockSubscriptionCanonicalizerAndChannelNamer(subscription, channelName);
-
-		// test
-		boolean registered = mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(subscription);
-
-		// verify
-		Assertions.assertTrue(registered);
-		ActiveSubscription activeSubscription = verifySubscriptionIsRegistered();
-		Assertions.assertNotNull(activeSubscription.getRetryConfigurationParameters());
-		Assertions.assertEquals(channelName, activeSubscription.getChannelName());
-		Assertions.assertEquals(dlqPrefix, activeSubscription.getRetryConfigurationParameters().getDeadLetterQueuePrefix());
-		Assertions.assertEquals(retryCount, activeSubscription.getRetryConfigurationParameters().getRetryCount());
-
-	}
-
-	@Test
-	public void registerSubscriptionUnlessAlreadyRegistered_subscriptionWithRetryAndNoDlqPrefix_createsAsExpected() {
+	public void registerSubscriptionUnlessAlreadyRegistered_subscriptionWithRetry_createsAsExpected() {
 		// init
 		String channelName = "subscription-test";
 		int retryCount = 2;
@@ -156,14 +124,13 @@ public class SubscriptionRegistryTest {
 		mockSubscriptionCanonicalizerAndChannelNamer(subscription, channelName);
 
 		// test
-		boolean created = mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(subscription);
+		boolean registered = mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(subscription);
 
 		// verify
-		Assertions.assertTrue(created);
+		Assertions.assertTrue(registered);
 		ActiveSubscription activeSubscription = verifySubscriptionIsRegistered();
 		Assertions.assertNotNull(activeSubscription.getRetryConfigurationParameters());
 		Assertions.assertEquals(channelName, activeSubscription.getChannelName());
-		Assertions.assertNull(activeSubscription.getRetryConfigurationParameters().getDeadLetterQueuePrefix());
 		Assertions.assertEquals(retryCount, activeSubscription.getRetryConfigurationParameters().getRetryCount());
 	}
 
@@ -196,11 +163,8 @@ public class SubscriptionRegistryTest {
 		Extension retryExtension = new Extension();
 		retryExtension.setUrl(HapiExtensions.EX_RETRY_COUNT);
 		retryExtension.setValue(new IntegerType(retryCount));
-		Extension dlq = new Extension();
-		dlq.setUrl(HapiExtensions.EX_DLQ_PREFIX);
-		dlq.setValue(new StringType(dlqPrefix));
 
-		Subscription subscription = createSubscription(retryExtension, dlq);
+		Subscription subscription = createSubscription(retryExtension);
 
 		// when
 		mockSubscriptionCanonicalizerAndChannelNamer(subscription, channelName);

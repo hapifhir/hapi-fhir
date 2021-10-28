@@ -131,19 +131,6 @@ public class HapiExtensions {
 	public static final String EX_RETRY_COUNT = "http://hapifhir.io/fhir/StructureDefinition/retry-count";
 
 	/**
-	 * Provides the prefix for the dlq to be used when retries have
-	 * failed.
-	 *
-	 * If a delivery fails retry-count + 1 times, the prefix here
-	 * will define the queue to put dead messages.
-	 *
-	 * If not specified, failed messages are dropped.
-	 *
-	 * If retry-count is not provided, this will be ignored
-	 */
-	public static final String EX_DLQ_PREFIX = "http://hapifhir.io/fhir/StructureDefinition/dlq-prefix";
-
-	/**
 	 * Non instantiable
 	 */
 	private HapiExtensions() {

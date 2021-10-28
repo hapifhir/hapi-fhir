@@ -20,8 +20,10 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
 
 public class ActiveSubscription {
 
