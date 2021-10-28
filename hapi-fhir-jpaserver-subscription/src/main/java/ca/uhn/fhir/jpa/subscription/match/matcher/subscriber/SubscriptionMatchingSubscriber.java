@@ -116,7 +116,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	}
 
 	private void doMatchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
-		IIdType resourceId = theMsg.getId(myFhirContext);
+		IIdType resourceId = theMsg.getPayloadId(myFhirContext);
 
 		Collection<ActiveSubscription> subscriptions = mySubscriptionRegistry.getAll();
 
