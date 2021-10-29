@@ -82,6 +82,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init560_20211027();
 	}
 
+	/**
+	 * Mirgation for the batch job parameter size change. Overriding purposes only.
+	 */
 	protected void init560_20211027() {
 		// nothing
 	}
