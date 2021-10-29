@@ -31,7 +31,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -41,7 +40,6 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 public class HashMapResourceProviderExtension<T extends IBaseResource> extends HashMapResourceProvider<T> implements BeforeEachCallback, AfterEachCallback {
 
 	private final RestfulServerExtension myRestfulServerExtension;
-	private Consumer<T> myUpdateResourceCallback;
 	private boolean myClearBetweenTests = true;
 	private final List<T> myUpdates = new ArrayList<>();
 
@@ -78,24 +76,16 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 		myRestfulServerExtension.getRestfulServer().registerProvider(HashMapResourceProviderExtension.this);
 	}
 
-	@Override
 	public synchronized MethodOutcome update(T theResource, String theConditional, RequestDetails theRequestDetails) {
-		if (myUpdateResourceCallback != null) {
-			myUpdateResourceCallback.accept(theResource);
-		}
+		T resourceClone = getFhirContext().newTerser().clone(theResource);
+		myUpdates.add(resourceClone);
 		return super.update(theResource, theConditional, theRequestDetails);
-	}
-
-	public HashMapResourceProviderExtension<T> setUpdateResourceCallback(Consumer<T> theUpdateResourceCallback) {
-		myUpdateResourceCallback = theUpdateResourceCallback;
-		return this;
 	}
 
 	public HashMapResourceProviderExtension<T> dontClearBetweenTests() {
 		myClearBetweenTests = false;
 		return this;
 	}
-
 
 	public void waitForUpdateCount(long theCount) {
 		assertThat(theCount, greaterThanOrEqualTo(getCountUpdate()));
