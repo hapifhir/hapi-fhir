@@ -39,7 +39,6 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
@@ -83,6 +82,7 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
@@ -178,6 +178,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private int myFetchSize;
 	private Integer myMaxResultsToFetch;
 	private Set<ResourcePersistentId> myPidSet;
+	private boolean myHasNextIteratorQuery = false;
 	private RequestPartitionId myRequestPartitionId;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
@@ -190,7 +191,6 @@ public class SearchBuilder implements ISearchBuilder {
 	@Autowired
 	private ModelConfig myModelConfig;
 
-	private boolean hasNextIteratorQuery = false;
 
 	/**
 	 * Constructor
@@ -310,35 +310,13 @@ public class SearchBuilder implements ISearchBuilder {
 
 		List<ResourcePersistentId> pids = new ArrayList<>();
 
-		/*
-		 * Fulltext or lastn search
-		 */
-		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN()) {
-			if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
-				if (myFulltextSearchSvc == null || myFulltextSearchSvc.isDisabled()) {
-					if (myParams.containsKey(Constants.PARAM_TEXT)) {
-						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
-					} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
-						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
-					}
-				}
-
-				if (myParams.getEverythingMode() != null) {
-					pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
-				} else {
-					pids = myFulltextSearchSvc.search(myResourceName, myParams);
-				}
-			} else if (myParams.isLastN()) {
-				if (myIElasticsearchSvc == null) {
-					if (myParams.isLastN()) {
-						throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
-					}
-				}
-				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults);
-				for (String lastnResourceId : lastnResourceIds) {
-					pids.add(myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId));
-				}
+		if (requiresHibernateSearchAccess()) {
+			if (myParams.isLastN()) {
+				pids = executeLastNAgainstIndex(theMaximumResults);
+			} else {
+				pids = queryLuceneForPIDs(theRequest);
 			}
+
 			if (theSearchRuntimeDetails != null) {
 				theSearchRuntimeDetails.setFoundIndexMatchesCount(pids.size());
 				HookParams params = new HookParams()
@@ -367,6 +345,48 @@ public class SearchBuilder implements ISearchBuilder {
 		return queries;
 	}
 
+	private boolean requiresHibernateSearchAccess() {
+		boolean result = (myFulltextSearchSvc != null) &&
+			!myFulltextSearchSvc.isDisabled() &&
+			myFulltextSearchSvc.supportsSomeOf(myParams);
+
+		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
+			if (myFulltextSearchSvc == null || myFulltextSearchSvc.isDisabled()) {
+				if (myParams.containsKey(Constants.PARAM_TEXT)) {
+					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+				} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
+					throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	private List<ResourcePersistentId> executeLastNAgainstIndex(Integer theMaximumResults) {
+		validateLastNIsEnabled();
+
+		// TODO MB we can satisfy resources directly if we put the resources in elastic.
+		List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults);
+
+		return lastnResourceIds.stream()
+			.map(lastnResourceId -> myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId,myResourceName,lastnResourceId))
+			.collect(Collectors.toList());
+	}
+
+	private List<ResourcePersistentId> queryLuceneForPIDs(RequestDetails theRequest) {
+		validateFullTextSearchIsEnabled();
+
+		List<ResourcePersistentId> pids;
+		if (myParams.getEverythingMode() != null) {
+			pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
+		} else {
+			pids = myFulltextSearchSvc.search(myResourceName, myParams);
+		}
+		return pids;
+	}
+
+
 	private void doCreateChunkedQueries(SearchParameterMap theParams, List<Long> thePids, Integer theOffset, SortSpec sort, boolean theCount, RequestDetails theRequest, ArrayList<SearchQueryExecutor> theQueries) {
 		if (thePids.size() < getMaximumPageSize()) {
 			normalizeIdListForLastNInClause(thePids);
@@ -389,10 +409,11 @@ public class SearchBuilder implements ISearchBuilder {
 				if (param instanceof StringParam) {
 					// we expect all _id values to be StringParams
 					ids.add(((StringParam) param).getValue());
-				}
-				else {
+				} else if (param instanceof TokenParam) {
+					ids.add(((TokenParam)param).getValue());
+				} else {
 					// we do not expect the _id parameter to be a non-string value
-					throw new IllegalArgumentException("_id parameter must be a StringParam");
+					throw new IllegalArgumentException("_id parameter must be a StringParam or TokenParam");
 				}
 			}
 		}
@@ -491,9 +512,26 @@ public class SearchBuilder implements ISearchBuilder {
 			sqlBuilder.addPredicate(lastUpdatedPredicates);
 		}
 
-		//-- exclude the pids already in the previous iterator
-		if (hasNextIteratorQuery) {
-			sqlBuilder.excludeResourceIdsPredicate(myPidSet);
+		/*
+		 * Exclude the pids already in the previous iterator. This is an optimization, as opposed
+		 * to something needed to guarantee correct results.
+		 *
+		 * Why do we need it? Suppose for example, a query like:
+		 *    Observation?category=foo,bar,baz
+		 * And suppose you have many resources that have all 3 of these category codes. In this case
+		 * the SQL query will probably return the same PIDs multiple times, and if this happens enough
+		 * we may exhaust the query results without getting enough distinct results back. When that
+		 * happens we re-run the query with a larger limit. Excluding results we already know about
+		 * tries to ensure that we get new unique results.
+		 *
+		 * The challenge with that though is that lots of DBs have an issue with too many
+		 * parameters in one query. So we only do this optimization if there aren't too
+		 * many results.
+		 */
+		if (myHasNextIteratorQuery) {
+			if (myPidSet.size() + sqlBuilder.countBindVariables() < 900) {
+				sqlBuilder.excludeResourceIdsPredicate(myPidSet);
+			}
 		}
 
 		/*
@@ -1365,10 +1403,9 @@ public class SearchBuilder implements ISearchBuilder {
 							if (!myResultsIterator.hasNext()) {
 								if (myMaxResultsToFetch != null && (mySkipCount + myNonSkipCount == myMaxResultsToFetch)) {
 									if (mySkipCount > 0 && myNonSkipCount == 0) {
-										myMaxResultsToFetch += 1000;
 
 										StorageProcessingMessage message = new StorageProcessingMessage();
-										String msg = "Pass completed with no matching results. This indicates an inefficient query! Retrying with new max count of " + myMaxResultsToFetch;
+										String msg = "Pass completed with no matching results seeking rows " + myPidSet.size() + "-" + mySkipCount + ". This indicates an inefficient query! Retrying with new max count of " + myMaxResultsToFetch;
 										ourLog.warn(msg);
 										message.setMessage(msg);
 										HookParams params = new HookParams()
@@ -1377,6 +1414,7 @@ public class SearchBuilder implements ISearchBuilder {
 											.add(StorageProcessingMessage.class, message);
 										CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
 
+										myMaxResultsToFetch += 1000;
 										initializeIteratorQuery(myOffset, myMaxResultsToFetch);
 									}
 								}
@@ -1459,10 +1497,10 @@ public class SearchBuilder implements ISearchBuilder {
 			close();
 			if (myQueryList != null && myQueryList.size() > 0) {
 				myResultsIterator = myQueryList.remove(0);
-				hasNextIteratorQuery = true;
+				myHasNextIteratorQuery = true;
 			} else {
 				myResultsIterator = SearchQueryExecutor.emptyExecutor();
-				hasNextIteratorQuery = false;
+				myHasNextIteratorQuery = false;
 			}
 
 		}
@@ -1563,4 +1601,21 @@ public class SearchBuilder implements ISearchBuilder {
 		return thePredicates.toArray(new Predicate[0]);
 	}
 
+	private void validateLastNIsEnabled() {
+		if (myIElasticsearchSvc == null) {
+			throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
+		}
+	}
+
+	private void validateFullTextSearchIsEnabled() {
+		if (myFulltextSearchSvc == null) {
+			if (myParams.containsKey(Constants.PARAM_TEXT)) {
+				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+			} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
+				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+			} else {
+				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process qualifier :text");
+			}
+		}
+	}
 }

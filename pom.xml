@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>5.6.0-PRE8-SNAPSHOT</version>
+	<version>5.6.0-PRE10-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -743,6 +743,18 @@
 			<name>Dušan Marković</name>
 			<organization>Better</organization>
 		</developer>
+		<developer>
+			<id>jingtang10</id>
+			<name>Jing Tang</name>
+			<organization>Google</organization>
+		</developer>
+		<developer>
+			<id>theGOTOguy</id>
+			<name>Ben Li-Sauerwine</name>
+		</developer>
+		<developer>
+			<id>tarekmamdouh</id>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -754,7 +766,7 @@
 
     <properties>
 
-        <fhir_core_version>5.4.10</fhir_core_version>
+        <fhir_core_version>5.5.7</fhir_core_version>
         <ucum_version>1.0.3</ucum_version>
 
         <surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -792,7 +804,7 @@
         <jaxb_core_version>2.3.0.1</jaxb_core_version>
         <jaxb_runtime_version>3.0.0</jaxb_runtime_version>
         <jena_version>4.2.0</jena_version>
-        <jersey_version>3.0.0</jersey_version>
+        <jersey_version>3.0.3</jersey_version>
         <jetty_version>9.4.43.v20210629</jetty_version>
         <jsr305_version>3.0.2</jsr305_version>
         <junit_version>5.7.1</junit_version>
@@ -828,7 +840,7 @@
         <spring_retry_version>1.2.2.RELEASE</spring_retry_version>
 
         <stax2_api_version>3.1.4</stax2_api_version>
-        <testcontainers_version>1.15.3</testcontainers_version>
+        <testcontainers_version>1.16.0</testcontainers_version>
         <thymeleaf-version>3.0.12.RELEASE</thymeleaf-version>
         <woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 
@@ -838,7 +850,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 
-        <elastic_apm_version>1.13.0</elastic_apm_version>
+        <elastic_apm_version>1.24.0</elastic_apm_version>
         <!-- CQL Support -->
         <cql-engine.version>1.5.1</cql-engine.version>
         <cql-evaluator.version>1.2.0</cql-evaluator.version>
@@ -1201,12 +1213,6 @@
 				<classifier>jdk15-sources</classifier>
 			</dependency>
 			<dependency>
-				<groupId>net.sf.saxon</groupId>
-				<artifactId>Saxon-HE</artifactId>
-				<!-- <version>9.8.0-3</version> -->
-				<version>${servicemix_saxon_version}</version>
-			</dependency>
-			<dependency>
 				<groupId>net.ttddyy</groupId>
 				<artifactId>datasource-proxy</artifactId>
 				<version>1.7</version>
@@ -1330,7 +1336,7 @@
 			<dependency>
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-scm</artifactId>
-				<version>3.0.0</version>
+				<version>3.4.3</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven</groupId>
@@ -2068,7 +2074,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-plugin-plugin</artifactId>
-					<version>3.6.0</version>
+					<version>3.6.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -2282,7 +2288,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.0.0-M2</version>
+				<version>3.0.0</version>
 				<executions>
 					<execution>
 						<id>enforce-maven</id>

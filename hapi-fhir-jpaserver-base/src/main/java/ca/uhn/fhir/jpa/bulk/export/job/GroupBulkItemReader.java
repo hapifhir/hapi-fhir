@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.bulk.export.job;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
@@ -64,13 +65,13 @@ import java.util.stream.Collectors;
  * 3. Optionally further expand that into all MDM-matched Patients (including golden resources)
  * 4. Then perform normal bulk export, filtered so that only results that refer to members are returned.
  */
-public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReader<List<ResourcePersistentId>> {
+public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final int QUERY_CHUNK_SIZE = 100;
 
-	@Value("#{jobParameters['" + BulkExportJobConfig.GROUP_ID_PARAMETER + "']}")
+	@Value("#{jobParameters['" + BatchConstants.GROUP_ID_PARAMETER + "']}")
 	private String myGroupId;
-	@Value("#{jobParameters['" + BulkExportJobConfig.EXPAND_MDM_PARAMETER+ "'] ?: false}")
+	@Value("#{jobParameters['" + BatchConstants.EXPAND_MDM_PARAMETER+ "'] ?: false}")
 	private boolean myMdmEnabled;
 
 	@Autowired

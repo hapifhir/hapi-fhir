@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3047
+jira: SMILE-2903
+title: "Inline match URL searches (e.g. search URLs for conditional creates, conditional updates, etc.) are now subject to the same security and access control checks as other searches."

@@ -116,6 +116,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 	}
 
+
 	@Test
 	public void testHighConcurrencyWorks() throws IOException, InterruptedException {
 		List<Bundle> bundles = new ArrayList<>();
@@ -220,8 +221,10 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		Bundle input = new Bundle();
 		input.setType(BundleType.BATCH);
 
+		//1
 		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(0));
 
+		//2
 		Patient p = new Patient();
 		p.setId("100");
 		p.setGender(AdministrativeGender.MALE);
@@ -229,14 +232,19 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		p.addName().setFamily("Smith");
 		input.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST);
 
-		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(1)); 
+		//3
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(1));
+		//4
 		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(2));
 
+		//5
 		Condition c = new Condition();
 		c.getSubject().setReference(ids.get(0));
 		input.addEntry().setResource(c).getRequest().setMethod(HTTPVerb.POST);
-		
+
+		//6
 		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(3));
+		//7
 		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(4));
 		
 		//ourLog.info("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));

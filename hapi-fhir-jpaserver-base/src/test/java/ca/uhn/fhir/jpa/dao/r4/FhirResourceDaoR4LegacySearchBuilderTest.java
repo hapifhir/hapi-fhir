@@ -1,10 +1,13 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.BaseDAODateSearchTest;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -123,6 +126,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
@@ -175,13 +179,15 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void afterResetSearchSize() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
-		myDaoConfig.setFetchSizeDefaultMaximum(new DaoConfig().getFetchSizeDefaultMaximum());
-		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
-		myDaoConfig.setUseLegacySearchBuilder(false);
-		myDaoConfig.setAccountForDateIndexNulls(false);
+		DaoConfig defaultConfig = new DaoConfig();
+		myDaoConfig.setReuseCachedSearchResultsForMillis(defaultConfig.getReuseCachedSearchResultsForMillis());
+		myDaoConfig.setFetchSizeDefaultMaximum(defaultConfig.getFetchSizeDefaultMaximum());
+		myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
+		myDaoConfig.setSearchPreFetchThresholds(defaultConfig.getSearchPreFetchThresholds());
+		myDaoConfig.setIndexMissingFields(defaultConfig.getIndexMissingFields());
+		myDaoConfig.setUseLegacySearchBuilder(defaultConfig.isUseLegacySearchBuilder());
+		myDaoConfig.setAccountForDateIndexNulls(defaultConfig.isAccountForDateIndexNulls());
+		myModelConfig.setUseOrdinalDatesForDayPrecisionSearches(new ModelConfig().getUseOrdinalDatesForDayPrecisionSearches());
 	}
 
 	@BeforeEach
@@ -189,6 +195,7 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 		myModelConfig.setSuppressStringIndexingInTokens(new ModelConfig().isSuppressStringIndexingInTokens());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 		myDaoConfig.setUseLegacySearchBuilder(true);
+		myDaoConfig.getModelConfig().setUseOrdinalDatesForDayPrecisionSearches(true);
 	}
 
 	@Test
@@ -924,7 +931,7 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		myCaptureQueriesListener.clear();
 		myCaptureQueriesListener.setCaptureQueryStackTrace(true);
-		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null, null, null, null, null, mySrd);
+		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null, null, null, null, null, mySrd, null);
 		List<IIdType> actual = toUnqualifiedVersionlessIds(resp);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual, containsInAnyOrder(orgId, medId, patId, moId, patId2));
@@ -5308,6 +5315,31 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 
 	}
 
+	@Nested
+	public class DateSearchTests extends BaseDAODateSearchTest {
+
+		/**
+		 * legacy builder didn't get the year/month date search fixes, so skip anything wider than a day.
+		 */
+		@Override
+		protected boolean isShouldSkip(String theResourceDate, String theQuery) {
+			// skip anything with just year or month resolution.
+			return (theResourceDate.length()<10 || theQuery.length()<10);
+		}
+
+		@Override
+		protected FhirContext getMyFhirCtx() {
+			return myFhirCtx;
+		}
+		@Override
+		protected <T> T doInTransaction(TransactionCallback<T> theCallback) {
+			return new TransactionTemplate(myTxManager).execute(theCallback);
+		}
+		@Override
+		protected IFhirResourceDao<Observation> getObservationDao() {
+			return myObservationDao;
+		}
+	}
 
 	private String toStringMultiline(List<?> theResults) {
 		StringBuilder b = new StringBuilder();

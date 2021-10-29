@@ -159,7 +159,8 @@ public class ValidateCommand extends BaseCommand {
 
 					break;
 				}
-				case DSTU3: {
+				case DSTU3:
+				case R4: {
 					FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 					val.registerValidatorModule(instanceValidator);
 					ValidationSupportChain validationSupport = new ValidationSupportChain(new DefaultProfileValidationSupport(ctx), new InMemoryTerminologyServerValidationSupport(ctx));

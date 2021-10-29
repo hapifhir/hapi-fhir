@@ -20,20 +20,10 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.util.DateUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
-import org.hl7.fhir.r4.model.DateTimeType;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -47,7 +37,22 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-import java.util.Date;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hl7.fhir.r4.model.DateTimeType;
+
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.util.DateUtils;
 
 @Embeddable
 @Entity
@@ -121,27 +126,60 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		}
 		computeValueHighDateOrdinal(theHighString);
 		computeValueLowDateOrdinal(theLowString);
+		reComputeValueHighDate(theHigh, theHighString);
 		myOriginalValue = theOriginalValue;
 		calculateHashes();
+		
 	}
 
 	private void computeValueHighDateOrdinal(String theHigh) {
 		if (!StringUtils.isBlank(theHigh)) {
-			this.myValueHighDateOrdinal = generateOrdinalDateInteger(theHigh);
+			this.myValueHighDateOrdinal = generateHighOrdinalDateInteger(theHigh);
 		}
 	}
 
-	private int generateOrdinalDateInteger(String theDateString) {
+	private void reComputeValueHighDate(Date theHigh, String theHighString) {
+		if (StringUtils.isBlank(theHighString) || theHigh == null)
+			return;
+		// FT : 2021-09-10 not very comfortable to set the high value to the last second
+		// Timezone? existing data?
+		// if YYYY or YYYY-MM or YYYY-MM-DD add the last second
+		if (theHighString.length() == 4 || theHighString.length() == 7 || theHighString.length() == 10) {
+			
+			String theCompleteDateStr =  DateUtils.getCompletedDate(theHighString).getRight();
+			try {
+				Date complateDate = new SimpleDateFormat("yyyy-MM-dd").parse(theCompleteDateStr);  
+			    this.myValueHigh = DateUtils.getEndOfDay(complateDate);
+			} catch (ParseException e) {
+				// do nothing; 
+			}
+		}
+		
+	}
+	private int generateLowOrdinalDateInteger(String theDateString) {
 		if (theDateString.contains("T")) {
 			theDateString = theDateString.substring(0, theDateString.indexOf("T"));
 		}
+		
+		theDateString = DateUtils.getCompletedDate(theDateString).getLeft();
 		theDateString = theDateString.replace("-", "");
 		return Integer.valueOf(theDateString);
 	}
 
+	private int generateHighOrdinalDateInteger(String theDateString) {
+		
+		if (theDateString.contains("T")) {
+			theDateString = theDateString.substring(0, theDateString.indexOf("T"));
+		}
+		
+		theDateString = DateUtils.getCompletedDate(theDateString).getRight();
+		theDateString = theDateString.replace("-", "");
+		return Integer.valueOf(theDateString);
+	}
+	
 	private void computeValueLowDateOrdinal(String theLow) {
 		if (StringUtils.isNotBlank(theLow)) {
-			this.myValueLowDateOrdinal = generateOrdinalDateInteger(theLow);
+			this.myValueLowDateOrdinal = generateLowOrdinalDateInteger(theLow);
 		}
 	}
 
